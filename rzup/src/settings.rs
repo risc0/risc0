@@ -65,6 +65,14 @@ impl Settings {
     pub(crate) fn set_active_version(&mut self, component: &str, version: &Version) {
         self.active_versions
             .insert(component.to_string(), version.to_string());
+        // if cargo-risczero, also set r0vm and vice-versa
+        if component == "cargo-risczero" {
+            self.active_versions
+                .insert("r0vm".to_string(), version.to_string());
+        } else if component == "r0vm" {
+            self.active_versions
+                .insert("cargo-risczero".to_string(), version.to_string());
+        }
     }
 }
 

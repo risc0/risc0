@@ -21,7 +21,19 @@ pub(crate) trait Component: std::fmt::Debug {
         Box::new(GithubRelease)
     }
 
+    fn is_virtual(&self) -> bool {
+        false
+    }
+
+    fn parent_component(&self) -> Option<&'static str> {
+        None
+    }
+
     fn install(&self, env: &Environment, version: Option<&Version>, force: bool) -> Result<()> {
+        if self.is_virtual() {
+            return Ok(()); // dont direct install virtual-components
+        }
+
         let version = match version {
             Some(v) => v,
             None => &self.distribution().latest_version(env, self.id())?,

@@ -1,4 +1,4 @@
-use crate::components::implementations::{CargoRiscZero, RustToolchain};
+use crate::components::implementations::{CargoRiscZero, R0Vm, RustToolchain};
 use crate::components::Component;
 use crate::env::Environment;
 use crate::error::Result;
@@ -78,6 +78,21 @@ impl ComponentRegistry {
             return Ok(());
         }
 
+        // if virtual component, copy version from parent
+        let versions = if component.is_virtual() {
+            if let Some(parent_id) = component.parent_component() {
+                if let Some(parent_versions) = self.versions.get(parent_id) {
+                    parent_versions.clone()
+                } else {
+                    ComponentVersions::new()
+                }
+            } else {
+                ComponentVersions::new()
+            }
+        } else {
+            versions.clone()
+        };
+
         self.register(component);
         self.versions.insert(component_id, versions.clone());
 
@@ -99,8 +114,11 @@ impl ComponentRegistry {
         self.components.clear();
         self.versions.clear();
 
-        let components: Vec<Box<dyn Component>> =
-            vec![Box::new(RustToolchain), Box::new(CargoRiscZero)];
+        let components: Vec<Box<dyn Component>> = vec![
+            Box::new(RustToolchain),
+            Box::new(CargoRiscZero),
+            Box::new(R0Vm),
+        ];
 
         for component in components {
             let component_id = component.id();
@@ -199,6 +217,7 @@ impl ComponentRegistry {
         match id {
             "rust" => Ok(Box::new(RustToolchain)),
             "cargo-risczero" => Ok(Box::new(CargoRiscZero)),
+            "r0vm" => Ok(Box::new(R0Vm)),
             _ => Err(RzupError::ComponentNotFound(id.to_string())),
         }
     }
@@ -226,9 +245,24 @@ impl ComponentRegistry {
         });
 
         let component = Self::create_component(id)?;
-        let version = match version {
+
+        // if a virtual component install its parent instead
+        let (component_to_install, version_to_install) = if component.is_virtual() {
+            if let Some(parent_id) = component.parent_component() {
+                (Self::create_component(parent_id)?, version)
+            } else {
+                return Err(RzupError::ComponentNotFound(format!(
+                    "Virtual component {} has no parent",
+                    id
+                )));
+            }
+        } else {
+            (component, version)
+        };
+
+        let version = match version_to_install {
             Some(v) => v,
-            None => component.get_latest_version(env)?,
+            None => component_to_install.get_latest_version(env)?,
         };
 
         if !self.needs_installation(id, &version, force) {
@@ -243,7 +277,7 @@ impl ComponentRegistry {
             std::fs::create_dir_all(env.root_dir())?;
         }
 
-        component.install(env, Some(&version), force)?;
+        component_to_install.install(env, Some(&version), force)?;
 
         let versions = self.scan_component_versions(env, id)?;
         let component = Self::create_component(id)?;
