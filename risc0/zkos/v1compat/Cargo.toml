@@ -1,0 +1,20 @@
+[package]
+name = "risc0-zkos-v1compat"
+version = "0.1.0"
+edition = { workspace = true }
+
+[[bin]]
+name = "kernel"
+path = "src/main.rs"
+
+[dependencies]
+
+[build-dependencies]
+risc0-build = { workspace = true }
+
+[package.metadata.release]
+release = false
+
+[package.metadata.risc0]
+text_addr = 0xC0000000
+image_version = 2

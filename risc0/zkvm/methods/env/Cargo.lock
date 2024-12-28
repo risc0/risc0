@@ -725,6 +725,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-rv32im-v2"
+version = "0.1.0"
+dependencies = [
+ "paste",
+ "risc0-binfmt",
+ "risc0-core",
+ "risc0-zkp",
+ "serde",
+ "tracing",
+]
+
+[[package]]
 name = "risc0-core"
 version = "1.3.0-alpha.1"
 dependencies = [
@@ -786,6 +798,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-v2",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkp",

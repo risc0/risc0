@@ -32,6 +32,7 @@ pub use self::{
     addr::{ByteAddr, WordAddr},
     executor::{Executor, ExecutorResult, SimpleSession},
     image::MemoryImage2,
+    segment::Segment,
     syscall::{Syscall, SyscallContext},
 };
 

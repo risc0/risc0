@@ -13,13 +13,14 @@
 // limitations under the License.
 
 use std::cmp::min;
+use std::fmt::Write as _;
 
 use anyhow::{bail, Result};
 
 use super::{
     addr::{ByteAddr, WordAddr},
     platform::*,
-    rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
+    rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
 };
 
 pub trait Risc0Context {
@@ -78,7 +79,7 @@ pub trait Risc0Context {
         // default no-op
     }
 
-    fn trap(&mut self, _cause: TrapCause) {
+    fn trap(&mut self, _cause: Exception) {
         // default no-op
     }
 
@@ -129,19 +130,23 @@ impl<'a> Risc0Machine<'a> {
             HOST_ECALL_READ => self.ecall_read(),
             HOST_ECALL_WRITE => self.ecall_write(),
             HOST_ECALL_POSEIDON2 => self.ecall_poseidon2(),
+            HOST_ECALL_SHA => self.ecall_sha(),
             _ => unimplemented!(),
         }
     }
 
     fn user_ecall(&mut self) -> Result<bool> {
-        let dispatch_idx = self.load_register(REG_A7)?;
-        if dispatch_idx >= SYSCALL_MAX {
-            return self.trap(TrapCause::EnvironmentCallFromUserMode);
-        }
+        // let dispatch_idx = self.load_register(REG_A7)?;
+        // if dispatch_idx >= SYSCALL_MAX {
+        //     return self.trap(TrapCause::InvalidEcallDispatch(dispatch_idx));
+        // }
 
-        let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr() + dispatch_idx)?);
-        if dispatch_addr.is_aligned() || dispatch_addr < KERNEL_START_ADDR {
-            return self.trap(TrapCause::EnvironmentCallFromUserMode);
+        // let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr() + dispatch_idx)?);
+        let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?);
+        // tracing::trace!("user_ecall> idx: {dispatch_idx}, addr: {dispatch_addr:?}");
+        tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
+        if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
+            return self.trap(Exception::UserEnvCall(dispatch_addr));
         }
 
         self.enter_trap(dispatch_addr)?;
@@ -149,6 +154,7 @@ impl<'a> Risc0Machine<'a> {
     }
 
     fn ecall_terminate(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_terminate");
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::Terminate, 0, 0, 0)?;
         let a0 = self.load_memory(USER_REGS_ADDR.waddr() + REG_A0)?;
@@ -160,6 +166,7 @@ impl<'a> Risc0Machine<'a> {
     }
 
     fn ecall_read(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_read");
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostReadSetup, 0, 0, 0)?;
         let mut cur_state = CycleState::HostReadSetup;
@@ -175,6 +182,7 @@ impl<'a> Risc0Machine<'a> {
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
         self.store_register(REG_A0, rlen)?;
+        tracing::trace!("rlen: {rlen}");
         if rlen == 0 {
             self.next_pc();
         }
@@ -197,6 +205,7 @@ impl<'a> Risc0Machine<'a> {
         let mut i = 0;
 
         while rlen > 0 && !ptr.is_aligned() {
+            // tracing::trace!("prefix");
             self.store_u8(ptr, bytes[i])?;
             ptr += 1u32;
             i += 1;
@@ -205,16 +214,19 @@ impl<'a> Risc0Machine<'a> {
 
         while rlen >= MAX_IO_WORDS {
             let words = min(rlen / MAX_IO_WORDS, MAX_IO_WORDS);
+            // tracing::trace!("body: {words}");
             for j in 0..MAX_IO_WORDS {
                 if j < words {
                     let word = u32::from_le_bytes(bytes[i..i + WORD_SIZE].try_into()?);
+                    // tracing::trace!("store: {i}, {j}, {word:#010x} -> {ptr:?}");
                     self.store_memory(ptr.waddr(), word)?;
+                    ptr += WORD_SIZE;
+                    i += WORD_SIZE;
+                    rlen -= WORD_SIZE as u32;
                 } else {
+                    // tracing::trace!("store: {:#010x} -> null", 0);
                     self.store_memory(SAFE_WRITE_ADDR.waddr(), 0)?;
                 }
-                ptr += words;
-                i += words as usize;
-                rlen -= words;
             }
 
             if rlen == 0 {
@@ -228,6 +240,7 @@ impl<'a> Risc0Machine<'a> {
         }
 
         while rlen > 0 && !ptr.is_aligned() {
+            // tracing::trace!("suffix");
             self.store_u8(ptr, bytes[i])?;
             ptr += 1u32;
             i += 1;
@@ -239,6 +252,7 @@ impl<'a> Risc0Machine<'a> {
     }
 
     fn ecall_write(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_write");
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostWrite, 0, 0, 0)?;
         let fd = self.load_register(REG_A0)?;
@@ -261,10 +275,17 @@ impl<'a> Risc0Machine<'a> {
     }
 
     fn ecall_poseidon2(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_poseidon2");
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0)?;
         // Ok(true)
+        Ok(false)
+    }
+
+    fn ecall_sha(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_sha");
+        self.next_pc();
         Ok(false)
     }
 
@@ -302,6 +323,34 @@ impl<'a> Risc0Machine<'a> {
         let word = u32::from_le_bytes(bytes);
         self.store_memory(addr.waddr(), word)
     }
+
+    fn regs_base_addr(&self) -> WordAddr {
+        if self.is_machine_mode() {
+            MACHINE_REGS_ADDR.waddr()
+        } else {
+            USER_REGS_ADDR.waddr()
+        }
+    }
+
+    fn dump_registers(&mut self, is_machine_mode: bool) -> Result<()> {
+        let base_addr = if is_machine_mode {
+            tracing::trace!("machine registers:");
+            MACHINE_REGS_ADDR.waddr()
+        } else {
+            tracing::trace!("user registers:");
+            USER_REGS_ADDR.waddr()
+        };
+        for i in 0..REG_MAX / 4 {
+            let mut str = String::new();
+            for j in 0..4 {
+                let idx = i * 4 + j;
+                let word = self.ctx.peek_u32(base_addr + idx)?;
+                write!(str, "  x{idx}: {word:#010x}")?;
+            }
+            tracing::trace!("  {str}");
+        }
+        Ok(())
+    }
 }
 
 impl<'a> EmuContext for Risc0Machine<'a> {
@@ -323,8 +372,12 @@ impl<'a> EmuContext for Risc0Machine<'a> {
         Ok(true)
     }
 
-    fn trap(&mut self, cause: TrapCause) -> Result<bool> {
+    fn trap(&mut self, cause: Exception) -> Result<bool> {
         self.ctx.trap_rewind();
+        if let Exception::Breakpoint = cause {
+            self.dump_registers(true)?;
+            self.dump_registers(false)?;
+        }
         let dispatch_addr =
             ByteAddr(self.load_memory(TRAP_DISPATCH_ADDR.waddr() + cause.as_u32())?);
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
@@ -353,21 +406,13 @@ impl<'a> EmuContext for Risc0Machine<'a> {
 
     fn load_register(&mut self, idx: usize) -> Result<u32> {
         // tracing::trace!("load_reg: x{idx}");
-        let base = if self.is_machine_mode() {
-            MACHINE_REGS_ADDR.waddr()
-        } else {
-            USER_REGS_ADDR.waddr()
-        };
+        let base = self.regs_base_addr();
         self.ctx.load_register(base, idx)
     }
 
     fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
         // tracing::trace!("store_reg: x{idx} <= {word:#010x}");
-        let mut base = if self.is_machine_mode() {
-            MACHINE_REGS_ADDR.waddr()
-        } else {
-            USER_REGS_ADDR.waddr()
-        };
+        let mut base = self.regs_base_addr();
 
         // To avoid the use of a degree in the circuit, all writes to REG_ZERO
         // are shunted to a memory location that is never read from.

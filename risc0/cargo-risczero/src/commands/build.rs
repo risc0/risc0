@@ -103,8 +103,8 @@ impl BuildCommand {
         let mut cmd = cargo_command(
             subcommand.as_ref(),
             &[
-                "-C",
-                &format!(
+                "-C".to_string(),
+                format!(
                     "link_arg={}",
                     rust_runtime
                         .to_str()

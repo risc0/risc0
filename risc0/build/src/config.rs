@@ -43,11 +43,16 @@ pub(crate) struct GuestMetadata {
     /// Configuration flags to build the guest with.
     #[serde(rename = "rustc-flags")]
     pub(crate) rustc_flags: Option<Vec<String>>,
+
+    /// Optional text address
+    pub(crate) text_addr: Option<u32>,
+
+    pub(crate) image_version: Option<u32>,
 }
 
 impl From<&Package> for GuestMetadata {
-    fn from(value: &Package) -> Self {
-        let Some(obj) = value.metadata.get("risc0") else {
+    fn from(pkg: &Package) -> Self {
+        let Some(obj) = pkg.metadata.get("risc0") else {
             return Default::default();
         };
         serde_json::from_value(obj.clone()).unwrap()
@@ -57,30 +62,10 @@ impl From<&Package> for GuestMetadata {
 /// Extended options defining how to embed a guest package in
 /// [`crate::embed_methods_with_options`].
 #[derive(Default, Clone)]
-pub(crate) struct GuestBuildOptions {
-    /// Features for cargo to build the guest with.
-    pub(crate) features: Vec<String>,
+pub(crate) struct GuestInfo {
+    /// Options specified by build script or library usage.
+    pub(crate) options: GuestOptions,
 
-    /// Use a docker environment for building.
-    pub(crate) use_docker: Option<DockerOptions>,
-
-    /// Configuration flags to build the guest with.
-    pub(crate) rustc_flags: Vec<String>,
-}
-
-impl From<GuestOptions> for GuestBuildOptions {
-    fn from(value: GuestOptions) -> Self {
-        Self {
-            features: value.features,
-            use_docker: value.use_docker,
-            ..Default::default()
-        }
-    }
-}
-
-impl GuestBuildOptions {
-    pub(crate) fn with_metadata(mut self, metadata: GuestMetadata) -> Self {
-        self.rustc_flags = metadata.rustc_flags.unwrap_or_default();
-        self
-    }
+    /// Metadata specified in guest crate `Cargo.toml`.
+    pub(crate) metadata: GuestMetadata,
 }

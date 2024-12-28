@@ -106,10 +106,93 @@ fn basic() {
     let segment = session.segments.first().unwrap().resolve().unwrap();
 
     assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.inner.exit_code, ExitCode::Halted(0));
-    assert_eq!(segment.inner.pre_state.digest(), pre_image_id);
-    assert_ne!(segment.inner.post_state.digest(), pre_image_id);
+    assert_eq!(segment.inner.v1().exit_code, ExitCode::Halted(0));
+    assert_eq!(segment.inner.v1().pre_state.digest(), pre_image_id);
+    assert_ne!(segment.inner.v1().post_state.digest(), pre_image_id);
     assert_eq!(segment.index, 0);
+}
+
+mod v2 {
+    use anyhow::Result;
+    use risc0_binfmt::ExitCode;
+    use risc0_circuit_rv32im_v2::execute::{testutil, MemoryImage2};
+    use risc0_zkvm_methods::HELLO_COMMIT_ELF;
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use test_log::test;
+
+    use crate::{host::server::exec::executor2::Executor2, ExecutorEnv, Session, SimpleSegmentRef};
+
+    // const ZKOS_ELF: &[u8] = include_bytes!(env!("CARGO_BIN_FILE_RISC0_ZKOS_V1COMPAT_zkos"));
+
+    fn execute_image(env: ExecutorEnv, image: MemoryImage2) -> Result<Session> {
+        let mut exec = Executor2::new(env, image).unwrap();
+        exec.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    }
+
+    fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
+        Executor2::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    }
+
+    fn multi_test(spec: MultiTestSpec) {
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+        assert_eq!(session.exit_code, ExitCode::Halted(0));
+    }
+
+    #[test]
+    fn basic() {
+        let program = testutil::basic();
+        let mut image = MemoryImage2::new(program);
+        let pre_image_id = *image.image_id();
+
+        let env = ExecutorEnv::default();
+        let session = execute_image(env, image).unwrap();
+        assert_eq!(session.exit_code, ExitCode::Halted(0));
+        let segment = session.segments.first().unwrap().resolve().unwrap();
+
+        assert_eq!(session.segments.len(), 1);
+        assert_eq!(segment.inner.v2().exit_code, ExitCode::Halted(0));
+        assert_eq!(segment.inner.v2().pre_digest, pre_image_id);
+        assert_ne!(segment.inner.v2().post_digest, pre_image_id);
+        assert_eq!(segment.index, 0);
+    }
+
+    #[test]
+    fn aligned_alloc() {
+        multi_test(MultiTestSpec::AlignedAlloc);
+    }
+
+    #[test]
+    fn alloc_zeroed() {
+        multi_test(MultiTestSpec::AllocZeroed);
+    }
+
+    #[test]
+    fn commit_hello_world() {
+        execute_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+    }
+
+    // // Make sure panics in the callback get propagated correctly.
+    // #[test]
+    // #[should_panic(expected = "I am panicking from here!")]
+    // fn host_syscall_callback_panic() {
+    //     let env = ExecutorEnv::builder()
+    //         .write(&MultiTestSpec::Syscall { count: 5 })
+    //         .unwrap()
+    //         .io_callback(SYS_MULTI_TEST, |_| {
+    //             panic!("I am panicking from here!");
+    //         })
+    //         .build()
+    //         .unwrap();
+    //     let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    //     assert_eq!(session.exit_code, ExitCode::Halted(0));
+    // }
 }
 
 #[test]
@@ -145,13 +228,13 @@ fn system_split() {
         .collect();
 
     assert_eq!(segments.len(), 2);
-    assert_eq!(segments[0].inner.exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].inner.pre_state.digest(), pre_image_id);
-    assert_ne!(segments[0].inner.post_state.digest(), pre_image_id);
-    assert_eq!(segments[1].inner.exit_code, ExitCode::Halted(0));
+    assert_eq!(segments[0].inner.v1().exit_code, ExitCode::SystemSplit);
+    assert_eq!(segments[0].inner.v1().pre_state.digest(), pre_image_id);
+    assert_ne!(segments[0].inner.v1().post_state.digest(), pre_image_id);
+    assert_eq!(segments[1].inner.v1().exit_code, ExitCode::Halted(0));
     assert_eq!(
-        segments[1].inner.pre_state.digest(),
-        segments[0].inner.post_state.digest()
+        segments[1].inner.v1().pre_state.digest(),
+        segments[0].inner.v1().post_state.digest()
     );
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
@@ -1086,6 +1169,7 @@ fn post_state_digest_randomization() {
                 .resolve()
                 .unwrap()
                 .inner
+                .v1()
                 .post_state
                 .digest()
         })
@@ -1125,6 +1209,7 @@ fn post_state_digest_randomization() {
                 .resolve()
                 .unwrap()
                 .inner
+                .v1()
                 .post_state
                 .digest()
         })
