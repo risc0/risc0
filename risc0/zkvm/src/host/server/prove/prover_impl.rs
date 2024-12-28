@@ -23,6 +23,7 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
+        server::session::InnerSegment,
     },
     prove_registered_zkr,
     receipt::{
@@ -196,7 +197,10 @@ impl ProverServer for ProverImpl {
         );
 
         let segment_prover = segment_prover(&self.opts.hashfn)?;
-        let seal = segment_prover.prove_segment(&segment.inner)?;
+        let seal = match &segment.inner {
+            InnerSegment::V1(segment) => segment_prover.prove_segment(segment)?,
+            InnerSegment::V2(_segment) => todo!(),
+        };
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();

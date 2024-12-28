@@ -66,6 +66,7 @@ pub struct MemoryImage2 {
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
     pub pages: BTreeMap<u32, Page>,
+
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
     pub digests: BTreeMap<u32, Digest>,

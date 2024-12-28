@@ -56,6 +56,8 @@ pub struct ExecutorResult {
     pub pre_digest: Digest,
     pub post_digest: Digest,
     pub output_digest: Option<Digest>,
+    pub paging_cycles: u64,
+    pub reserved_cycles: u64,
 }
 
 #[derive(Default)]
@@ -185,6 +187,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             pre_digest: initial_digest,
             post_digest,
             output_digest: self.output_digest,
+            paging_cycles: 0,   // TODO
+            reserved_cycles: 0, // TODO
         })
     }
 
@@ -321,7 +325,7 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
         // let addr = Self::check_guest_addr(addr)?;
         let word = Risc0Context::peek_u32(self, addr.waddr())?;
-        let bytes = word.to_be_bytes();
+        let bytes = word.to_le_bytes();
         Ok(bytes[addr.subaddr() as usize])
     }
 

@@ -88,6 +88,7 @@ pub const HOST_ECALL_TERMINATE: u32 = 0;
 pub const HOST_ECALL_READ: u32 = 1;
 pub const HOST_ECALL_WRITE: u32 = 2;
 pub const HOST_ECALL_POSEIDON2: u32 = 3;
+pub const HOST_ECALL_SHA: u32 = 4;
 
 pub const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 pub const PFLAG_CHECK_OUT: u32 = 0x4000_0000;

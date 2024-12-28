@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Parser;
-use risc0_build::{BuildStatus, GuestOptions};
+use risc0_build::GuestOptions;
 
 /// `cargo risczero build`
 ///
@@ -30,24 +30,20 @@ pub struct BuildGuest {
     pub manifest_path: PathBuf,
 
     /// Feature flags passed to cargo.
-    #[arg(long, value_delimiter = ',')]
+    #[arg(short = 'F', long, value_delimiter = ',')]
     pub features: Vec<String>,
 }
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        build(
-            &self.manifest_path,
-            &GuestOptions {
-                features: self.features.clone(),
-                ..Default::default()
-            },
-        )?;
+        let src_dir = std::env::current_dir().unwrap();
+        let guest_opts = GuestOptions {
+            features: self.features.clone(),
+            ..Default::default()
+        };
+
+        risc0_build::docker_build(&self.manifest_path, &src_dir, &guest_opts)?;
+
         Ok(())
     }
-}
-
-pub(crate) fn build(manifest_path: &Path, guest_options: &GuestOptions) -> Result<BuildStatus> {
-    let src_dir = std::env::current_dir().unwrap();
-    risc0_build::docker_build(manifest_path, &src_dir, guest_options)
 }
