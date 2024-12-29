@@ -107,11 +107,13 @@ ecall_software:
 ecall_sha:
     // prepare a sha ecall
     li a7, HOST_ECALL_SHA
-    lw a0, REG_A0 * WORD_SIZE (t3) // out_state
-    lw a1, REG_A1 * WORD_SIZE (t3) // in_state
+    lw a0, REG_A1 * WORD_SIZE (t3) // in_state
+    lw a1, REG_A0 * WORD_SIZE (t3) // out_state
     lw a2, REG_A2 * WORD_SIZE (t3) // block_ptr1
-    lw a3, REG_A3 * WORD_SIZE (t3) // block_ptr2
-    lw a4, REG_A4 * WORD_SIZE (t3) // count
+    lw a3, REG_A4 * WORD_SIZE (t3) // count
+    // TODO: supply k_addr
+    // TODO: deal with block_ptr2
+    lw a4, REG_A3 * WORD_SIZE (t3) // block_ptr2
     // call the host
     ecall
     // return back to userspace

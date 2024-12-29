@@ -242,8 +242,8 @@ mod tests {
 
     use super::*;
     use crate::{
-        prove::{hal::cpu::CpuCircuitHal, CircuitImpl},
-        zirgen::taps::TAPSET,
+        prove::hal::cpu::CpuCircuitHal,
+        zirgen::{taps::TAPSET, CircuitImpl},
     };
 
     pub struct EvalCheckParams {

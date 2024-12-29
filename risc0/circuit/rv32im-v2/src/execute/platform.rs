@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(unused)]
-
 use num_derive::FromPrimitive;
 
 use super::addr::{ByteAddr, WordAddr};
@@ -88,7 +86,7 @@ pub const HOST_ECALL_TERMINATE: u32 = 0;
 pub const HOST_ECALL_READ: u32 = 1;
 pub const HOST_ECALL_WRITE: u32 = 2;
 pub const HOST_ECALL_POSEIDON2: u32 = 3;
-pub const HOST_ECALL_SHA: u32 = 4;
+pub const HOST_ECALL_SHA2: u32 = 4;
 
 pub const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 pub const PFLAG_CHECK_OUT: u32 = 0x4000_0000;
@@ -116,7 +114,12 @@ pub enum CycleState {
     PoseidonStoreState = 23,
     PoseidonExtRound = 24,
     PoseidonIntRound = 25,
-    Decode = 32,
+    ShaEcall = 32,
+    ShaLoadState = 33,
+    ShaLoadData = 34,
+    ShaMix = 35,
+    ShaStoreState = 36,
+    Decode = 40,
 }
 
 pub const SYSCALL_MAX: u32 = 512;

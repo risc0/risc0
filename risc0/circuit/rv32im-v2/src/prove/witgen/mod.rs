@@ -13,7 +13,6 @@
 // limitations under the License.
 
 pub(crate) mod paged_map;
-pub(crate) mod poseidon2;
 pub(crate) mod preflight;
 #[cfg(test)]
 mod tests;
@@ -26,10 +25,13 @@ use risc0_circuit_rv32im_v2_sys::RawPreflightCycle;
 use risc0_core::scope;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::Elem as _, hal::Hal};
 
-use self::{poseidon2::Poseidon2State, preflight::Back};
+use self::preflight::Back;
 use super::hal::{CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
-    execute::{addr::WordAddr, platform::MERKLE_TREE_END_ADDR, segment::Segment},
+    execute::{
+        addr::WordAddr, platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State,
+        segment::Segment, sha2::Sha2State,
+    },
     zirgen::circuit::{
         CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_CODE, REGCOUNT_DATA,
         REGCOUNT_GLOBAL,
@@ -140,6 +142,14 @@ impl<H: Hal> WitnessGenerator<H> {
                         injector.set(row, col, value);
                     }
                 }
+                Back::Sha2(sha2_state) => {
+                    for (col, value) in zip(Sha2State::fp_offsets(), sha2_state.fp_array()) {
+                        injector.set(row, col, value);
+                    }
+                    for (col, value) in zip(Sha2State::u32_offsets(), sha2_state.u32_array()) {
+                        injector.set_u32_bits(row, col, value);
+                    }
+                }
             }
             injector.set_cycle(row, cycle);
         }
@@ -211,10 +221,12 @@ impl Injector {
         self.offsets.push(idx as u32);
         self.values.push(value.into());
     }
-}
 
-fn node_idx_to_addr(idx: u32) -> WordAddr {
-    MERKLE_TREE_END_ADDR - idx * DIGEST_WORDS as u32
+    fn set_u32_bits(&mut self, row: usize, col: usize, value: u32) {
+        for i in 0..32 {
+            self.set(row, col + i, (value >> i) & 1);
+        }
+    }
 }
 
 fn node_addr_to_idx(addr: WordAddr) -> u32 {

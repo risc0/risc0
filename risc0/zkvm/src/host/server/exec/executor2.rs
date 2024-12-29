@@ -22,12 +22,10 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::Program;
-use risc0_binfmt::SystemState;
+use risc0_binfmt::{Program, SystemState};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_circuit_rv32im_v2::execute::platform::WORD_SIZE;
 use risc0_circuit_rv32im_v2::execute::{
-    ByteAddr as ByteAddr2, Executor, MemoryImage2, Syscall as CircuitSyscall,
+    platform::WORD_SIZE, ByteAddr as ByteAddr2, Executor, MemoryImage2, Syscall as CircuitSyscall,
     SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
 };
 use risc0_core::scope;
@@ -76,19 +74,6 @@ impl<'a> Executor2<'a> {
     /// Construct a new [Executor2] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
-    ///
-    /// # Example
-    /// ```
-    /// use risc0_zkvm::{Executor2, ExecutorEnv, Session};
-    /// use risc0_zkvm_methods::{BENCH_ELF, bench::BenchmarkSpec};
-    ///
-    /// let env = ExecutorEnv::builder()
-    ///     .write(&BenchmarkSpec::SimpleLoop { iters: 1 })
-    ///     .unwrap()
-    ///     .build()
-    ///     .unwrap();
-    /// let mut exec = Executor2::from_elf(env, BENCH_ELF).unwrap();
-    /// ```
     pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let kernel = Program::load_elf(KERNEL_ELF, u32::MAX)?;
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;

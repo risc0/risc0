@@ -23,18 +23,19 @@ use risc0_zkp::core::digest::DIGEST_WORDS;
 use crate::{
     execute::{
         addr::{ByteAddr, WordAddr},
+        node_idx_to_addr,
         pager::PagedMemory,
         platform::*,
+        poseidon2::{self, Checksum, Poseidon2State},
         r0vm::{Risc0Context, Risc0Machine},
         rv32im::{DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
+        sha2::Sha2State,
     },
     zirgen::circuit::ExtVal,
 };
 
-use self::poseidon2::Checksum;
-
-use super::{node_addr_to_idx, node_idx_to_addr, paged_map::PagedMap, poseidon2, Poseidon2State};
+use super::{node_addr_to_idx, paged_map::PagedMap};
 
 #[derive(Clone, Debug, Default)]
 pub(crate) enum Back {
@@ -43,6 +44,8 @@ pub(crate) enum Back {
     Ecall(u32, u32, u32),
     #[debug("Poseidon2")]
     Poseidon2(Poseidon2State),
+    #[debug("Sha2")]
+    Sha2(Sha2State),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -409,17 +412,6 @@ impl<'a> Preflight<'a> {
         // tracing::trace!("add_cycle_special(cur_state: {cur_state}, next_state: {next_state}, major: {major}, minor: {minor})");
         self.add_cycle(next_state, pc, major, minor, paging_idx, back);
     }
-
-    pub(crate) fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State) {
-        self.add_cycle_special(
-            cur_state,
-            p2.next_state,
-            self.pc.0,
-            node_addr_to_idx(WordAddr(p2.buf_out_addr)),
-            Back::Poseidon2(p2.clone()),
-        );
-        self.phys_cycles += 1;
-    }
 }
 
 impl<'a> Risc0Context for Preflight<'a> {
@@ -581,5 +573,27 @@ impl<'a> Risc0Context for Preflight<'a> {
         }
         self.cur_write += 1;
         Ok(self.segment.write_record[self.cur_write])
+    }
+
+    fn on_sha2_cycle(&mut self, cur_state: CycleState, sha2: &Sha2State) {
+        self.add_cycle_special(
+            cur_state,
+            sha2.next_state,
+            self.pc.0,
+            node_addr_to_idx(sha2.state_out_addr),
+            Back::Sha2(sha2.clone()),
+        );
+        self.phys_cycles += 1;
+    }
+
+    fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State) {
+        self.add_cycle_special(
+            cur_state,
+            p2.next_state,
+            self.pc.0,
+            node_addr_to_idx(WordAddr(p2.buf_out_addr)),
+            Back::Poseidon2(p2.clone()),
+        );
+        self.phys_cycles += 1;
     }
 }
