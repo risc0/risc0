@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cmp::min;
-use std::fmt::Write as _;
+use std::{cmp::min, fmt::Write as _};
 
 use anyhow::{bail, Result};
 
 use super::{
     addr::{ByteAddr, WordAddr},
     platform::*,
+    poseidon2::{self, Poseidon2State},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
+    sha2::{self, Sha2State},
 };
 
 pub trait Risc0Context {
@@ -88,6 +89,10 @@ pub trait Risc0Context {
 
     /// For writes, just pass through, record rlen only
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32>;
+
+    fn on_sha2_cycle(&mut self, cur_state: CycleState, sha2: &Sha2State);
+
+    fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 }
 
 pub struct Risc0Machine<'a> {
@@ -130,7 +135,7 @@ impl<'a> Risc0Machine<'a> {
             HOST_ECALL_READ => self.ecall_read(),
             HOST_ECALL_WRITE => self.ecall_write(),
             HOST_ECALL_POSEIDON2 => self.ecall_poseidon2(),
-            HOST_ECALL_SHA => self.ecall_sha(),
+            HOST_ECALL_SHA2 => self.ecall_sha2(),
             _ => unimplemented!(),
         }
     }
@@ -279,13 +284,17 @@ impl<'a> Risc0Machine<'a> {
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0)?;
+        poseidon2::ecall(self.ctx)?;
         // Ok(true)
         Ok(false)
     }
 
-    fn ecall_sha(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_sha");
+    fn ecall_sha2(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_sha2");
         self.next_pc();
+        self.ctx
+            .on_ecall_cycle(CycleState::MachineEcall, CycleState::ShaEcall, 0, 0, 0)?;
+        sha2::ecall(self.ctx)?;
         Ok(false)
     }
 

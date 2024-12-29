@@ -3370,6 +3370,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "serde_json",
+ "stability",
  "tempfile",
 ]
 

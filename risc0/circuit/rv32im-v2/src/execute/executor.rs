@@ -23,9 +23,11 @@ use super::{
     image::MemoryImage2,
     pager::PagedMemory,
     platform::*,
+    poseidon2::Poseidon2State,
     r0vm::{Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
+    sha2::Sha2State,
     syscall::Syscall,
     trace::{TraceCallback, TraceEvent},
     SyscallContext,
@@ -306,6 +308,15 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         let rlen = self.syscall_handler.host_write(self, fd, buf)?;
         self.write_record.push(rlen);
         Ok(rlen)
+    }
+
+    fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
+        self.phys_cycles += 1;
+    }
+
+    fn on_poseidon2_cycle(&mut self, cur_state: CycleState, _p2: &Poseidon2State) {
+        tracing::trace!("on_poseidon2_cycle: {cur_state:?}");
+        self.phys_cycles += 1;
     }
 }
 
