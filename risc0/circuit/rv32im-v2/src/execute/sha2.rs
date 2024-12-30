@@ -87,11 +87,19 @@ impl Sha2State {
 }
 
 pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
-    let state_in_addr = ByteAddr(ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A0)?).waddr();
-    let state_out_addr = ByteAddr(ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A1)?).waddr();
-    let data_addr = ByteAddr(ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A2)?).waddr();
-    let count = ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A3)? & 0xffff;
-    let k_addr = ByteAddr(ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A4)?).waddr();
+    let state_in_addr = ByteAddr(ctx.load_machine_register(REG_A0)?)
+        .check()?
+        .waddr();
+    let state_out_addr = ByteAddr(ctx.load_machine_register(REG_A1)?)
+        .check()?
+        .waddr();
+    let data_addr = ByteAddr(ctx.load_machine_register(REG_A2)?)
+        .check()?
+        .waddr();
+    let count = ctx.load_machine_register(REG_A3)? & 0xffff;
+    let k_addr = ByteAddr(ctx.load_machine_register(REG_A4)?)
+        .check()?
+        .waddr();
     tracing::trace!("sha2: {count} blocks");
 
     let mut sha2 = Sha2State {

@@ -151,6 +151,17 @@ impl PagedMemory {
         }
     }
 
+    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        let cache_idx = self.page_table[page_idx as usize];
+        if cache_idx == INVALID_IDX {
+            // Unloaded, peek into image
+            Ok(self.image.get_page(page_idx)?.0.clone())
+        } else {
+            // Loaded, get from cache
+            Ok(self.page_cache[cache_idx as usize].0.clone())
+        }
+    }
+
     pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
         if addr >= MEMORY_END_ADDR {
             bail!("Invalid load address: {addr:?}");

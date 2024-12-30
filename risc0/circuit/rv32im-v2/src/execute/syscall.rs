@@ -39,7 +39,7 @@ pub trait SyscallContext {
     /// Loads bytes from the given region of memory.
     ///
     /// A region may span multiple pages.
-    fn peek_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         let mut region = Vec::new();
         for i in 0..size {
             region.push(self.peek_u8(addr + i)?);

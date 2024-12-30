@@ -16,7 +16,10 @@ use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
 use risc0_binfmt::ExitCode;
-use risc0_zkp::core::{digest::Digest, log2_ceil};
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_BYTES},
+    log2_ceil,
+};
 
 use super::{
     addr::{ByteAddr, WordAddr},
@@ -35,6 +38,7 @@ use super::{
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
+    user_pc: ByteAddr,
     machine_mode: u32,
     user_cycles: u32,
     phys_cycles: u32,
@@ -82,6 +86,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     ) -> Self {
         Self {
             pc: ByteAddr(0),
+            user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
             phys_cycles: 0,
@@ -229,6 +234,10 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         self.pc = addr;
     }
 
+    fn set_user_pc(&mut self, addr: ByteAddr) {
+        self.user_pc = addr;
+    }
+
     fn get_machine_mode(&self) -> u32 {
         self.machine_mode
     }
@@ -292,9 +301,17 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         self.pager.store(addr, word)
     }
 
-    fn on_terminate(&mut self, a0: u32, _a1: u32) {
+    fn on_terminate(&mut self, a0: u32, _a1: u32) -> Result<()> {
+        let output: Digest = self
+            .peek_region(GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
+            .as_slice()
+            .try_into()?;
+
         self.user_cycles += 1;
         self.exit_code = Some(ExitCode::Halted(a0));
+        self.output_digest = Some(output);
+
+        Ok(())
     }
 
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
@@ -340,12 +357,8 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
         Ok(bytes[addr.subaddr() as usize])
     }
 
-    fn peek_page(&mut self, _page_idx: u32) -> Result<Vec<u8>> {
-        // let addr = self.pager.image.info.get_page_addr(page_idx);
-        // if !is_guest_memory(addr) {
-        //     bail!("{page_idx} is an invalid guest page_idx");
-        // }
-        todo!()
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        self.pager.peek_page(page_idx)
     }
 
     fn get_cycle(&self) -> u64 {
@@ -353,6 +366,7 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     }
 
     fn get_pc(&self) -> u32 {
-        self.pc.0
+        // self.pc.0
+        self.user_pc.0
     }
 }

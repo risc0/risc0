@@ -31,7 +31,7 @@ use risc0_circuit_rv32im_v2::execute::{
 use risc0_core::scope;
 use risc0_zkos_v1compat::KERNEL_ELF;
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM};
+use risc0_zkvm_platform::{align_up, fileno, memory::GUEST_MAX_MEM};
 use tempfile::tempdir;
 
 use crate::{
@@ -188,6 +188,8 @@ impl<'a> Executor2<'a> {
         )?;
         let elapsed = start_time.elapsed();
 
+        tracing::debug!("output_digest: {:?}", result.output_digest);
+
         // Set the session_journal to the committed data iff the guest set a non-zero output.
         let session_journal = result
             .output_digest
@@ -307,31 +309,28 @@ impl<'a> CircuitSyscall for Executor2<'a> {
         let syscall = ctx.peek_string(name_ptr)?;
         tracing::trace!("host_read({syscall}, into_guest: {})", buf.len());
 
-        let rlen = buf.len();
-        let buf = if buf.is_empty() {
-            &mut []
-        } else {
-            bytemuck::cast_slice_mut(buf)
-        };
+        let words = align_up(buf.len(), WORD_SIZE) / WORD_SIZE;
+        let mut to_guest = vec![0u32; words];
 
         self.return_cache.set(
             self.syscall_table
                 .get_syscall(&syscall)
                 .context(format!("Unknown syscall: {syscall:?}"))?
                 .borrow_mut()
-                .syscall(&syscall, &mut ctx, buf)?,
+                .syscall(&syscall, &mut ctx, &mut to_guest)?,
         );
+
+        let bytes = bytemuck::cast_slice(to_guest.as_slice());
+        let rlen = buf.len();
+        buf.copy_from_slice(&bytes[..rlen]);
 
         Ok(rlen as u32)
     }
 
-    fn host_write(
-        &self,
-        _ctx: &mut dyn CircuitSyscallContext,
-        _fd: u32,
-        _buf: &[u8],
-    ) -> Result<u32> {
-        unimplemented!()
+    fn host_write(&self, ctx: &mut dyn CircuitSyscallContext, _fd: u32, buf: &[u8]) -> Result<u32> {
+        let str = String::from_utf8(buf.to_vec())?;
+        tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
+        Ok(buf.len() as u32)
     }
 }
 

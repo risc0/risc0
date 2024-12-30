@@ -14,9 +14,10 @@
 
 use std::ops;
 
+use anyhow::{anyhow, Result};
 use derive_more::{Add, AddAssign, Debug, Sub};
 
-use super::{pager::PAGE_WORDS, platform::WORD_SIZE};
+use super::{pager::PAGE_WORDS, platform::WORD_SIZE, ZERO_PAGE_END_ADDR};
 
 #[derive(Add, AddAssign, Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, Sub)]
 #[debug("{_0:#010x}")]
@@ -45,6 +46,14 @@ impl ByteAddr {
 
     pub fn subaddr(&self) -> u32 {
         self.0 % WORD_SIZE as u32
+    }
+
+    pub fn check(&self) -> Result<ByteAddr> {
+        if *self < ZERO_PAGE_END_ADDR {
+            Err(anyhow!("{self:?} is an invalid guest address"))
+        } else {
+            Ok(*self)
+        }
     }
 }
 

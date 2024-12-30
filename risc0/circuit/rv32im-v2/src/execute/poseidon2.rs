@@ -481,10 +481,10 @@ pub fn write_done(ctx: &mut dyn Risc0Context) -> Result<()> {
 
 pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
     tracing::trace!("ecall");
-    let state_addr = ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A0)?;
-    let buf_in_addr = ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A1)?;
-    let buf_out_addr = ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A2)?;
-    let bits_count = ctx.load_u32(MACHINE_REGS_ADDR.waddr() + REG_A3)?;
+    let state_addr = ctx.load_machine_register(REG_A0)?;
+    let buf_in_addr = ctx.load_machine_register(REG_A1)?;
+    let buf_out_addr = ctx.load_machine_register(REG_A2)?;
+    let bits_count = ctx.load_machine_register(REG_A3)?;
     let mut p2 = Poseidon2State::new_ecall(state_addr, buf_in_addr, buf_out_addr, bits_count);
     p2.rest(ctx, CycleState::Decode)
 }

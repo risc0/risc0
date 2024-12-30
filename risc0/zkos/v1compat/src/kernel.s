@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+.equ GLOBAL_OUTPUT_ADDR, 0xffff0240
 .equ STACK_TOP, 0xfff00000
 .equ USER_REGS_ADDR, 0xffff0080
 .equ ECALL_DISPATCH_ADDR, 0xffff1000
@@ -20,6 +21,7 @@
 .equ HOST_ECALL_READ, 1
 .equ HOST_ECALL_SHA, 4
 .equ WORD_SIZE, 4
+.equ MAX_IO_BYTES, 1024
 .equ REG_T0, 5
 .equ REG_A0, 10
 .equ REG_A1, 11
@@ -30,27 +32,28 @@
 .section .text
 .global _start
 _start:
-    // Load the global pointer from the place the linker put it
-    // Note: we definitely don't want this relaxed since the GP is invalid
+    # Load the global pointer from the place the linker put it
+    # Note: we definitely don't want this relaxed since the GP is invalid
     .option push
     .option norelax
     la gp, __global_pointer$
     .option pop
 
-    // Set the kernel stack pointer near the top of kernel memory
+    # Set the kernel stack pointer near the top of kernel memory
     li sp, STACK_TOP
 
-    // Initialize the ecall dispatch table
+    # Initialize the ecall dispatch table
     li t0, ECALL_DISPATCH_ADDR
     la t1, ecall_dispatch
     sw t1, 0(t0)
 
-    // Initialize useful constants
+    # Initialize useful constants
     li t3, USER_REGS_ADDR
     la t4, ecall_table
     li t5, ECALL_TABLE_SIZE
+    li t6, MAX_IO_BYTES
 
-    // Jump into userspace
+    # Jump into userspace
     mret
 
 ecall_table:
@@ -63,60 +66,91 @@ ecall_table:
     j ecall_bigint2
 
 ecall_dispatch:
-    // load t0 from userspace
+    # load t0 from userspace
     lw a0, REG_T0 * WORD_SIZE (t3)
-    // check that ecall request is within range
-    bge a0, t5, panic
-    // adjust index so that it points to word sized entries
+    # check that ecall request is within range
+    bge a0, t5, 1f
+    # adjust index so that it points to word sized entries
     slli a0, a0, 2
-    // compute the table entry
+    # compute the table entry
     add a1, t4, a0
-    // jump into dispatch table
+    # jump into dispatch table
     jr a1
+1:
+    fence # panic
 
 ecall_halt:
+    # copy output digest from pointer in a1 to GLOBAL_OUTPUT_ADDR
+    lw t0, REG_A1 * WORD_SIZE (t3) # out_state
+    li t1, GLOBAL_OUTPUT_ADDR
+    lw t2, 0(t0)
+    sw t2, 0(t1)
+    lw t2, 4(t0)
+    sw t2, 4(t1)
+    lw t2, 8(t0)
+    sw t2, 8(t1)
+    lw t2, 12(t0)
+    sw t2, 12(t1)
+    lw t2, 16(t0)
+    sw t2, 16(t1)
+    lw t2, 20(t0)
+    sw t2, 20(t1)
+    lw t2, 24(t0)
+    sw t2, 24(t1)
+    lw t2, 28(t0)
+    sw t2, 28(t1)
+
     li a7, HOST_ECALL_TERMINATE
+    lw a0, REG_A0 * WORD_SIZE (t3) # user_exit
+    li a1, 0
     ecall
 
 ecall_input:
     fence
 
 ecall_software:
-    // prepare a software ecall
+    # prepare a software ecall
     li a7, HOST_ECALL_READ
-    lw a0, REG_A2 * WORD_SIZE (t3) // syscall_ptr -> fd
-    lw a1, REG_A0 * WORD_SIZE (t3) // from_host_ptr -> buf
-    lw a2, REG_A1 * WORD_SIZE (t3) // from_host_len -> len
+    lw a0, REG_A2 * WORD_SIZE (t3) # syscall_ptr -> fd
+    lw a1, REG_A0 * WORD_SIZE (t3) # from_host_ptr -> buf
+    lw a2, REG_A1 * WORD_SIZE (t3) # from_host_len -> len
     slli a2, a2, 2
-    // call the host
+
+    # check if length is > 1024
+    bltu t6, a2, 1f
+
+    # call the host
     ecall
 
-    // read (a0, a1) back from host
-    // fd == 0 means read (a0, a1) from host
+    # read (a0, a1) back from host
+    # fd == 0 means read (a0, a1) from host
     li a0, 0
-    // read into user registers starting at a0
+    # read into user registers starting at a0
     addi a1, t3, REG_A0 * WORD_SIZE
-    // read two words from host
+    # read two words from host
     li a2, 2 * WORD_SIZE
-    // call the host
+    # call the host
     ecall
 
-    // return back to userspace
+    # return back to userspace
+    mret
+1:
+    call ecall_software_slow
     mret
 
 ecall_sha:
-    // prepare a sha ecall
+    # prepare a sha ecall
     li a7, HOST_ECALL_SHA
-    lw a0, REG_A1 * WORD_SIZE (t3) // in_state
-    lw a1, REG_A0 * WORD_SIZE (t3) // out_state
-    lw a2, REG_A2 * WORD_SIZE (t3) // block_ptr1
-    lw a3, REG_A4 * WORD_SIZE (t3) // count
-    // TODO: supply k_addr
-    // TODO: deal with block_ptr2
-    lw a4, REG_A3 * WORD_SIZE (t3) // block_ptr2
-    // call the host
+    lw a0, REG_A1 * WORD_SIZE (t3) # in_state
+    lw a1, REG_A0 * WORD_SIZE (t3) # out_state
+    lw a2, REG_A2 * WORD_SIZE (t3) # block_ptr1
+    lw a3, REG_A4 * WORD_SIZE (t3) # count
+    # TODO: supply k_addr
+    # TODO: deal with block_ptr2
+    lw a4, REG_A3 * WORD_SIZE (t3) # block_ptr2
+    # call the host
     ecall
-    // return back to userspace
+    # return back to userspace
     mret
 
 ecall_bigint:
@@ -126,7 +160,4 @@ ecall_user:
     fence
 
 ecall_bigint2:
-    fence
-
-panic:
     fence

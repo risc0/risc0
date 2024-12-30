@@ -54,19 +54,13 @@ pub trait EmuContext {
     fn store_memory(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
     // Check access for instruction load
-    fn check_insn_load(&self, _addr: ByteAddr) -> bool {
-        true
-    }
+    fn check_insn_load(&self, addr: ByteAddr) -> bool;
 
     // Check access for data load
-    fn check_data_load(&self, _addr: ByteAddr) -> bool {
-        true
-    }
+    fn check_data_load(&self, addr: ByteAddr) -> bool;
 
     // Check access for data store
-    fn check_data_store(&self, _addr: ByteAddr) -> bool {
-        true
-    }
+    fn check_data_store(&self, addr: ByteAddr) -> bool;
 }
 
 #[derive(Default)]
@@ -84,10 +78,10 @@ pub enum Exception {
     Breakpoint,
     LoadMisaligned,
     #[allow(dead_code)]
-    LoadFault(ByteAddr),
+    LoadAccessFault(ByteAddr),
     #[allow(dead_code)]
     StoreMisaligned(ByteAddr),
-    StoreFault,
+    StoreAccessFault,
     #[allow(dead_code)]
     InvalidEcallDispatch(u32),
     #[allow(dead_code)]
@@ -540,7 +534,7 @@ impl Emulator {
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
-            return ctx.trap(Exception::LoadFault(addr));
+            return ctx.trap(Exception::LoadAccessFault(addr));
         }
         let data = ctx.load_memory(addr.waddr())?;
         let shift = 8 * (addr.0 & 3);
@@ -593,7 +587,7 @@ impl Emulator {
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_s()));
         let shift = 8 * (addr.0 & 3);
         if !ctx.check_data_store(addr) {
-            return ctx.trap(Exception::StoreFault);
+            return ctx.trap(Exception::StoreAccessFault);
         }
         let mut data = ctx.load_memory(addr.waddr())?;
         match kind {
@@ -715,9 +709,9 @@ pub fn disasm(insn: &Instruction, decoded: &DecodedInstruction) -> String {
         InsnKind::Lw => format!("lw {rd}, {}({rs1})", decoded.imm_i() as i32),
         InsnKind::LbU => format!("lbu {rd}, {}({rs1})", decoded.imm_i() as i32),
         InsnKind::LhU => format!("lhu {rd}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::Sb => format!("sb {rs2}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::Sh => format!("sh {rs2}, {}({rs1})", decoded.imm_i() as i32),
-        InsnKind::Sw => format!("sw {rs2}, {}({rs1})", decoded.imm_i() as i32),
+        InsnKind::Sb => format!("sb {rs2}, {}({rs1})", decoded.imm_s() as i32),
+        InsnKind::Sh => format!("sh {rs2}, {}({rs1})", decoded.imm_s() as i32),
+        InsnKind::Sw => format!("sw {rs2}, {}({rs1})", decoded.imm_s() as i32),
         InsnKind::Eany => match decoded.rs2 {
             0 => "ecall".to_string(),
             1 => "ebreak".to_string(),

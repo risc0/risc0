@@ -53,12 +53,12 @@ fn program_from_instructions(entry: u32, instructions: impl IntoIterator<Item = 
 
 pub fn basic() -> Program {
     program_from_instructions(
-        0x4000,
+        0x40000,
         [
             0x1234b137, // lui x2, 0x1234b000
             0xf387e1b7, // lui x3, 0xf387e000
             0x003100b3, // add x1, x2, x3
-            0x000045b7, // lui a1, 0x4
+            0x000105b7, // lui a1, 0x10
             0x00000073, // ecall(halt)
         ],
     )

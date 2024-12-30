@@ -59,7 +59,7 @@ impl ZeroCache {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct Page(Vec<u8>);
+pub struct Page(pub Vec<u8>);
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MemoryImage2 {
@@ -117,7 +117,6 @@ impl MemoryImage2 {
         kernel
             .image
             .insert(MEPC_ADDR.0, user.entry - WORD_SIZE as u32);
-        // .insert(MEPC_ADDR.waddr().0, user.entry - WORD_SIZE as u32);
         Self::new(kernel)
     }
 
