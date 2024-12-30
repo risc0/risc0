@@ -213,7 +213,7 @@ impl ComponentRegistry {
         self.components.insert(component.id(), component);
     }
 
-    fn create_component(id: &str) -> Result<Box<dyn Component>> {
+    pub fn create_component(&self, id: &str) -> Result<Box<dyn Component>> {
         match id {
             "rust" => Ok(Box::new(RustToolchain)),
             "cargo-risczero" => Ok(Box::new(CargoRiscZero)),
@@ -244,12 +244,12 @@ impl ComponentRegistry {
             ),
         });
 
-        let component = Self::create_component(id)?;
+        let component = self.create_component(id)?;
 
         // if a virtual component install its parent instead
         let (component_to_install, version_to_install) = if component.is_virtual() {
             if let Some(parent_id) = component.parent_component() {
-                (Self::create_component(parent_id)?, version)
+                (self.create_component(parent_id)?, version)
             } else {
                 return Err(RzupError::ComponentNotFound(format!(
                     "Virtual component {} has no parent",
@@ -280,7 +280,7 @@ impl ComponentRegistry {
         component_to_install.install(env, Some(&version), force)?;
 
         let versions = self.scan_component_versions(env, id)?;
-        let component = Self::create_component(id)?;
+        let component = self.create_component(id)?;
 
         self.settings.set_active_version(id, &version);
 
@@ -308,7 +308,7 @@ impl ComponentRegistry {
             message: format!("Uninstalling component {} (version: {:?})", id, version),
         });
 
-        let component = Self::create_component(id)?;
+        let component = self.create_component(id)?;
         component.uninstall(env, &version)
     }
 }

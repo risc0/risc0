@@ -139,6 +139,35 @@ impl Rzup {
 
         Ok(version_dir.join(component_id))
     }
+
+    pub fn get_version_path(
+        &self,
+        component_id: &str,
+        version: &Version,
+    ) -> Result<Option<PathBuf>> {
+        let component = self.registry.create_component(component_id)?;
+
+        if component.is_virtual() {
+            // look at parent
+            let parent_id = component.parent_component().ok_or_else(|| {
+                RzupError::ComponentNotFound(format!(
+                    "Virtual component {} has no parent",
+                    component_id
+                ))
+            })?;
+
+            let versions = self.installed_versions(parent_id);
+
+            if let Some(path) = versions.get(version) {
+                Ok(Some(path.join(component_id)))
+            } else {
+                Ok(None)
+            }
+        } else {
+            let versions = self.installed_versions(component_id);
+            Ok(versions.get(version).cloned())
+        }
+    }
 }
 
 #[cfg(test)]
@@ -192,5 +221,48 @@ mod tests {
         // Both default components should be installed
         assert!(!rzup.installed_versions("rust").is_empty());
         assert!(!rzup.installed_versions("cargo-risczero").is_empty());
+    }
+
+    #[test]
+    fn test_get_version_path_virtual() {
+        let (_tmp_dir, mut rzup) = setup_test_env();
+        let version = Version::new(1, 0, 0);
+
+        // Install parent component
+        rzup.install_component("cargo-risczero", Some(version.clone()), false)
+            .unwrap();
+
+        // Test virtual component path
+        let path = rzup.get_version_path("r0vm", &version).unwrap();
+        assert!(path.is_some());
+        let path = path.unwrap();
+        assert!(path.ends_with("r0vm"));
+        assert!(path
+            .parent()
+            .unwrap()
+            .ends_with(format!("v{}-cargo-risczero", version)));
+    }
+
+    #[test]
+    fn test_get_version_path() {
+        let (_tmp_dir, mut rzup) = setup_test_env();
+        let version = Version::new(1, 0, 0);
+
+        // Test when version is not installed
+        assert!(rzup
+            .get_version_path("cargo-risczero", &version)
+            .unwrap()
+            .is_none());
+
+        // Install version
+        rzup.install_component("cargo-risczero", Some(version.clone()), false)
+            .unwrap();
+
+        // Test when version is installed
+        let path = rzup.get_version_path("cargo-risczero", &version).unwrap();
+        assert!(path.is_some());
+        assert!(path
+            .unwrap()
+            .ends_with(format!("v{}-cargo-risczero", version)));
     }
 }
