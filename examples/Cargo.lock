@@ -2560,6 +2560,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "no_std_strings"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5b0c77c1b780822bc749a33e39aeb2c07584ab93332303babeabb645298a76e"
+
+[[package]]
 name = "nohash-hasher"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3591,6 +3597,7 @@ dependencies = [
 name = "risc0-zkos-v1compat"
 version = "0.1.0"
 dependencies = [
+ "no_std_strings",
  "risc0-build",
 ]
 

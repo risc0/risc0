@@ -423,6 +423,10 @@ impl<'a> Risc0Context for Preflight<'a> {
         self.pc = addr;
     }
 
+    fn set_user_pc(&mut self, _addr: ByteAddr) {
+        // no-op
+    }
+
     fn get_machine_mode(&self) -> u32 {
         self.machine_mode
     }
@@ -550,8 +554,9 @@ impl<'a> Risc0Context for Preflight<'a> {
         Ok(())
     }
 
-    fn on_terminate(&mut self, _a0: u32, _a1: u32) {
+    fn on_terminate(&mut self, _a0: u32, _a1: u32) -> Result<()> {
         // no-op
+        Ok(())
     }
 
     fn host_read(&mut self, _fd: u32, buf: &mut [u8]) -> Result<u32> {

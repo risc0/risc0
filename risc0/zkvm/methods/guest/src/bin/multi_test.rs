@@ -326,23 +326,23 @@ fn main() {
         MultiTestSpec::OutOfBoundsEcall => unsafe {
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x0,
-                in("x11") 0x0,
-                in("x12") 0x0,
-                in("x13") 0x0,
-                in("x14") 10000,
+                in("t0") 3,
+                in("a0") 0x0,
+                in("a1") 0x0,
+                in("a2") 0x0,
+                in("a3") 0x0,
+                in("a4") 10000,
             );
         },
         MultiTestSpec::TooManySha => unsafe {
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x400,
-                in("x11") 0x400,
-                in("x12") 0x400,
-                in("x13") 0x400,
-                in("x14") 10000,
+                in("t0") 3,
+                in("a0") 0x400,
+                in("a1") 0x400,
+                in("a2") 0x400,
+                in("a3") 0x400,
+                in("a4") 10000,
             );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {

@@ -31,6 +31,9 @@ pub trait Risc0Context {
     /// Set the program counter
     fn set_pc(&mut self, addr: ByteAddr);
 
+    // Set the user mode program counter
+    fn set_user_pc(&mut self, addr: ByteAddr);
+
     /// Get the machine mode
     fn get_machine_mode(&self) -> u32;
 
@@ -64,7 +67,7 @@ pub trait Risc0Context {
         s2: u32,
     ) -> Result<()>;
 
-    fn on_terminate(&mut self, a0: u32, a1: u32);
+    fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;
 
     fn suspend(&mut self) -> Result<()> {
         // default no-op
@@ -93,6 +96,10 @@ pub trait Risc0Context {
     fn on_sha2_cycle(&mut self, cur_state: CycleState, sha2: &Sha2State);
 
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
+
+    fn load_machine_register(&mut self, idx: usize) -> Result<u32> {
+        self.load_u32(MACHINE_REGS_ADDR.waddr() + idx)
+    }
 }
 
 pub struct Risc0Machine<'a> {
@@ -113,7 +120,7 @@ impl<'a> Risc0Machine<'a> {
 
     pub fn resume(ctx: &'a mut dyn Risc0Context) -> Result<()> {
         let mut this = Risc0Machine { ctx };
-        let pc = ByteAddr(this.load_memory(SUSPEND_PC_ADDR.waddr())?);
+        let pc = ByteAddr(this.load_memory(SUSPEND_PC_ADDR.waddr())?).check()?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
         // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
@@ -147,7 +154,7 @@ impl<'a> Risc0Machine<'a> {
         // }
 
         // let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr() + dispatch_idx)?);
-        let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?);
+        let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?).check()?;
         // tracing::trace!("user_ecall> idx: {dispatch_idx}, addr: {dispatch_addr:?}");
         tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
@@ -164,7 +171,7 @@ impl<'a> Risc0Machine<'a> {
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::Terminate, 0, 0, 0)?;
         let a0 = self.load_memory(USER_REGS_ADDR.waddr() + REG_A0)?;
         let a1 = self.load_memory(USER_REGS_ADDR.waddr() + REG_A1)?;
-        self.ctx.on_terminate(a0, a1);
+        self.ctx.on_terminate(a0, a1)?;
         self.ctx
             .on_ecall_cycle(CycleState::Terminate, CycleState::Suspend, 0, 0, 0)?;
         Ok(false)
@@ -183,6 +190,9 @@ impl<'a> Risc0Machine<'a> {
         }
         if len > MAX_IO_BYTES {
             bail!("Invalid length (too big) in host read: {len}");
+        }
+        if len > 0 {
+            ptr.check()?;
         }
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
@@ -261,7 +271,7 @@ impl<'a> Risc0Machine<'a> {
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostWrite, 0, 0, 0)?;
         let fd = self.load_register(REG_A0)?;
-        let ptr = ByteAddr(self.load_register(REG_A1)?);
+        let ptr = ByteAddr(self.load_register(REG_A1)?).check()?;
         let len = self.load_register(REG_A2)?;
         if ptr + len < ptr {
             bail!("Invalid length in host write: {len}");
@@ -305,6 +315,7 @@ impl<'a> Risc0Machine<'a> {
         let pc = self.ctx.get_pc();
         self.store_memory(MEPC_ADDR.waddr(), pc.0)?;
         self.ctx.set_pc(dispatch_addr);
+        self.ctx.set_user_pc(pc);
         self.ctx.set_machine_mode(1);
         Ok(())
     }
@@ -375,7 +386,7 @@ impl<'a> EmuContext for Risc0Machine<'a> {
         if !self.is_machine_mode() {
             bail!("Illegal mret in user mode");
         }
-        let dispatch_addr = ByteAddr(self.load_memory(MEPC_ADDR.waddr())?);
+        let dispatch_addr = ByteAddr(self.load_memory(MEPC_ADDR.waddr())?).check()?;
         self.ctx.set_pc(dispatch_addr + WORD_SIZE);
         self.ctx.set_machine_mode(0);
         Ok(true)
@@ -445,7 +456,9 @@ impl<'a> EmuContext for Risc0Machine<'a> {
     }
 
     fn check_data_load(&self, addr: ByteAddr) -> bool {
-        self.is_machine_mode() || is_user_memory(addr)
+        // self.is_machine_mode() || is_user_memory(addr)
+        addr >= ZERO_PAGE_END_ADDR && self.is_machine_mode() || is_user_memory(addr)
+        // self.check_insn_load(addr)
     }
 
     fn check_data_store(&self, addr: ByteAddr) -> bool {

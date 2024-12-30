@@ -21,7 +21,10 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{MemoryImage, Program};
+use risc0_binfmt::{ExitCode, MemoryImage, Program};
+use risc0_circuit_rv32im::prove::emu::testutil;
+use risc0_circuit_rv32im_v2::execute::MemoryImage2;
+use risc0_zkos_v1compat::KERNEL_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
@@ -29,12 +32,14 @@ use risc0_zkvm_methods::{
     SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
+use rstest::*;
+use rstest_reuse::*;
 use sha2::{Digest as _, Sha256};
-use test_log::test;
 
 use crate::{
     host::server::{
         exec::{
+            executor2::Executor2,
             profiler::{Frame, Profiler},
             syscall::{Syscall, SyscallContext},
         },
@@ -42,33 +47,55 @@ use crate::{
     },
     serde::to_vec,
     sha::{Digest, Digestible},
-    ExecutorEnv, ExecutorImpl, ExitCode,
+    ExecutorEnv, ExecutorImpl, Session, SimpleSegmentRef,
 };
 
-fn run_test(spec: MultiTestSpec) {
+#[derive(Clone, Copy)]
+enum TestVersion {
+    V1,
+    V2,
+}
+
+#[template]
+#[rstest]
+#[case(TestVersion::V1)]
+#[case(TestVersion::V2)]
+#[test_log::test]
+fn base(#[case] version: TestVersion) {}
+
+fn execute_elf(version: TestVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
+    match version {
+        TestVersion::V1 => ExecutorImpl::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+        TestVersion::V2 => Executor2::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+    }
+}
+
+fn multi_test(version: TestVersion, spec: MultiTestSpec) {
+    let session = multi_test_raw(version, spec).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+fn multi_test_raw(version: TestVersion, spec: MultiTestSpec) -> Result<Session> {
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    execute_elf(version, env, MULTI_TEST_ELF)
 }
 
-#[test]
-fn cpp_test() {
-    let session = ExecutorImpl::from_elf(ExecutorEnv::default(), BLST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+#[apply(base)]
+fn cpp_test(#[case] version: TestVersion) {
+    let session = execute_elf(version, ExecutorEnv::default(), BLST_ELF).unwrap();
     let message: String = session.journal.unwrap().decode().unwrap();
     assert_eq!(message.as_str(), "blst is such a blast");
 }
 
-#[test]
+#[test_log::test]
 #[should_panic(expected = "too small")]
 fn insufficient_segment_limit() {
     let env = ExecutorEnv::builder()
@@ -83,119 +110,50 @@ fn insufficient_segment_limit() {
         .unwrap();
 }
 
-#[test]
-fn basic() {
+#[apply(base)]
+fn basic(#[case] version: TestVersion) {
+    let program = testutil::basic();
     let env = ExecutorEnv::default();
-    let image = BTreeMap::from([
-        (0x4000, 0x1234b137), // lui x2, 0x1234b000
-        (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
-        (0x4008, 0x003100b3), // add x1, x2, x3
-        (0x400c, 0x000055b7), // lui x11, 0x5
-        (0x4010, 0x00000073), // ecall(halt)
-    ]);
-    let program = Program {
-        entry: 0x4000,
-        image,
-    };
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id();
+    match version {
+        TestVersion::V1 => {
+            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+            let pre_image_id = image.compute_id();
 
-    let mut exec = ExecutorImpl::new(env, image).unwrap();
-    let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    let segment = session.segments.first().unwrap().resolve().unwrap();
+            let mut exec = ExecutorImpl::new(env, image).unwrap();
+            let session = exec
+                .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+                .unwrap();
+            assert_eq!(session.exit_code, ExitCode::Halted(0));
+            let segment = session.segments.first().unwrap().resolve().unwrap();
 
-    assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.inner.v1().exit_code, ExitCode::Halted(0));
-    assert_eq!(segment.inner.v1().pre_state.digest(), pre_image_id);
-    assert_ne!(segment.inner.v1().post_state.digest(), pre_image_id);
-    assert_eq!(segment.index, 0);
+            assert_eq!(session.segments.len(), 1);
+            assert_eq!(segment.inner.v1().exit_code, ExitCode::Halted(0));
+            assert_eq!(segment.inner.v1().pre_state.digest(), pre_image_id);
+            assert_ne!(segment.inner.v1().post_state.digest(), pre_image_id);
+            assert_eq!(segment.index, 0);
+        }
+        TestVersion::V2 => {
+            let kernel = Program::load_elf(KERNEL_ELF, u32::MAX).unwrap();
+            let mut image = MemoryImage2::with_kernel(program, kernel);
+            let pre_image_id = *image.image_id();
+
+            let mut exec = Executor2::new(env, image).unwrap();
+            let session = exec
+                .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+                .unwrap();
+            assert_eq!(session.exit_code, ExitCode::Halted(0));
+            let segment = session.segments.first().unwrap().resolve().unwrap();
+
+            assert_eq!(session.segments.len(), 1);
+            assert_eq!(segment.inner.v2().exit_code, ExitCode::Halted(0));
+            assert_eq!(segment.inner.v2().pre_digest, pre_image_id);
+            assert_ne!(segment.inner.v2().post_digest, pre_image_id);
+            assert_eq!(segment.index, 0);
+        }
+    }
 }
 
-mod v2 {
-    use anyhow::Result;
-    use risc0_binfmt::ExitCode;
-    use risc0_circuit_rv32im_v2::execute::{testutil, MemoryImage2};
-    use risc0_zkvm_methods::HELLO_COMMIT_ELF;
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
-    use test_log::test;
-
-    use crate::{host::server::exec::executor2::Executor2, ExecutorEnv, Session, SimpleSegmentRef};
-
-    // const ZKOS_ELF: &[u8] = include_bytes!(env!("CARGO_BIN_FILE_RISC0_ZKOS_V1COMPAT_zkos"));
-
-    fn execute_image(env: ExecutorEnv, image: MemoryImage2) -> Result<Session> {
-        let mut exec = Executor2::new(env, image).unwrap();
-        exec.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
-    }
-
-    fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-        Executor2::from_elf(env, elf)
-            .unwrap()
-            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
-    }
-
-    fn multi_test(spec: MultiTestSpec) {
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-    }
-
-    #[test]
-    fn basic() {
-        let program = testutil::basic();
-        let mut image = MemoryImage2::new(program);
-        let pre_image_id = *image.image_id();
-
-        let env = ExecutorEnv::default();
-        let session = execute_image(env, image).unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-        let segment = session.segments.first().unwrap().resolve().unwrap();
-
-        assert_eq!(session.segments.len(), 1);
-        assert_eq!(segment.inner.v2().exit_code, ExitCode::Halted(0));
-        assert_eq!(segment.inner.v2().pre_digest, pre_image_id);
-        assert_ne!(segment.inner.v2().post_digest, pre_image_id);
-        assert_eq!(segment.index, 0);
-    }
-
-    #[test]
-    fn aligned_alloc() {
-        multi_test(MultiTestSpec::AlignedAlloc);
-    }
-
-    #[test]
-    fn alloc_zeroed() {
-        multi_test(MultiTestSpec::AllocZeroed);
-    }
-
-    #[test]
-    fn commit_hello_world() {
-        execute_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
-    }
-
-    // // Make sure panics in the callback get propagated correctly.
-    // #[test]
-    // #[should_panic(expected = "I am panicking from here!")]
-    // fn host_syscall_callback_panic() {
-    //     let env = ExecutorEnv::builder()
-    //         .write(&MultiTestSpec::Syscall { count: 5 })
-    //         .unwrap()
-    //         .io_callback(SYS_MULTI_TEST, |_| {
-    //             panic!("I am panicking from here!");
-    //         })
-    //         .build()
-    //         .unwrap();
-    //     let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    //     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    // }
-}
-
-#[test]
+#[test_log::test]
 fn system_split() {
     let entry = 0x4000;
     let env = ExecutorEnv::builder()
@@ -240,13 +198,13 @@ fn system_split() {
     assert_eq!(segments[1].index, 1);
 }
 
-#[test]
-fn libm_build() {
-    run_test(MultiTestSpec::LibM);
+#[apply(base)]
+fn libm_build(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::LibM);
 }
 
-#[test]
-fn host_syscall() {
+#[apply(base)]
+fn host_syscall(#[case] version: TestVersion) {
     let expected: Vec<Bytes> = vec![
         "".into(),
         "H".into(),
@@ -269,36 +227,27 @@ fn host_syscall() {
         })
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
 }
 
-#[test]
-fn host_syscall_words() {
-    let _expected: Vec<u32> = vec![0x01020304];
-    let input = MultiTestSpec::SyscallWords;
-    let _actual: Mutex<Vec<Bytes>> = Vec::new().into();
+#[apply(base)]
+fn host_syscall_words(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
-        .write(&input)
+        .write(&MultiTestSpec::SyscallWords)
         .unwrap()
         .io_callback(SYS_MULTI_TEST_WORDS, Ok)
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 // Make sure panics in the callback get propagated correctly.
-#[test]
+#[apply(base)]
 #[should_panic(expected = "I am panicking from here!")]
-fn host_syscall_callback_panic() {
+fn host_syscall_callback_panic(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Syscall { count: 5 })
         .unwrap()
@@ -307,29 +256,26 @@ fn host_syscall_callback_panic() {
         })
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
-#[test]
-fn sha_accel() {
-    run_test(MultiTestSpec::ShaConforms);
+#[apply(base)]
+fn sha_accel(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::ShaConforms);
 }
 
-#[test]
-fn sha_cycle_count() {
-    run_test(MultiTestSpec::ShaCycleCount);
+#[apply(base)]
+fn sha_cycle_count(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::ShaCycleCount);
 }
 
-#[test]
-fn rsa_compat() {
-    run_test(MultiTestSpec::RsaCompat);
+#[apply(base)]
+fn rsa_compat(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::RsaCompat);
 }
 
-#[test]
+#[test_log::test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
@@ -355,8 +301,8 @@ fn bigint_accel() {
     }
 }
 
-#[test]
-fn env_stdio() {
+#[apply(base)]
+fn env_stdio(#[case] version: TestVersion) {
     const MSG: &str = "Hello world!  This is a test of standard input and output.";
     const FD: u32 = 123;
     let spec = to_vec(&MultiTestSpec::EchoStdout { nbytes: 9, fd: FD }).unwrap();
@@ -368,10 +314,7 @@ fn env_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
     }
     assert_eq!(MSG, from_utf8(&stdout).unwrap());
@@ -381,8 +324,8 @@ fn env_stdio() {
 //
 // To make sure we don't miss any edge cases, this tries all permutations of
 // start alignment, end alignment, and 0, 1, or 2 whole words.
-#[test]
-fn posix_style_read() {
+#[apply(base)]
+fn posix_style_read(#[case] version: TestVersion) {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = (b'a'..=b'z')
@@ -416,8 +359,7 @@ fn posix_style_read() {
             .unwrap()
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-        let session = exec.run().unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
         let (actual, num_read): (Vec<u8>, Vec<usize>) = session.journal.unwrap().decode().unwrap();
@@ -467,8 +409,8 @@ fn posix_style_read() {
     }
 }
 
-#[test]
-fn short_read_combinations() {
+#[apply(base)]
+fn short_read_combinations(#[case] version: TestVersion) {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = (b'a'..=b'l').collect();
@@ -497,8 +439,7 @@ fn short_read_combinations() {
                 .unwrap()
                 .build()
                 .unwrap();
-            let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-            let session = exec.run().unwrap();
+            let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
             assert_eq!(session.exit_code, ExitCode::Halted(0));
 
             let (actual, num_read): (Vec<u8>, Vec<usize>) =
@@ -517,8 +458,8 @@ fn short_read_combinations() {
     }
 }
 
-#[test]
-fn unaligned_short_read() {
+#[apply(base)]
+fn unaligned_short_read(#[case] version: TestVersion) {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = vec![0; 9];
@@ -535,8 +476,7 @@ fn unaligned_short_read() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 
     let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
@@ -545,8 +485,8 @@ fn unaligned_short_read() {
     assert_eq!(actual, expected, "pos and lens: {spec:?}");
 }
 
-#[test]
-fn large_io_words() {
+#[apply(base)]
+fn large_io_words(#[case] version: TestVersion) {
     const FD: u32 = 123;
     let buf: Vec<u32> = (0..400_000).collect();
     let expected = buf.clone();
@@ -561,16 +501,15 @@ fn large_io_words() {
         .session_limit(Some(20_000_000))
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 
     let actual: &[u32] = bytemuck::cast_slice(&session.journal.as_ref().unwrap().bytes);
     assert_eq!(actual, expected);
 }
 
-#[test]
-fn large_io_bytes() {
+#[apply(base)]
+fn large_io_bytes(#[case] version: TestVersion) {
     const FD: u32 = 123;
     let buf: Vec<u32> = (0..400_000).collect();
     let nbytes = (buf.len() * WORD_SIZE) as u32;
@@ -583,10 +522,7 @@ fn large_io_bytes() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
     }
     let actual: &[u32] = bytemuck::cast_slice(&stdout);
@@ -597,7 +533,6 @@ mod sys_verify {
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
-    use test_log::test;
 
     use crate::{
         serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
@@ -641,7 +576,7 @@ mod sys_verify {
         session
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify() {
         let hello_commit_session = exec_hello_commit();
 
@@ -675,7 +610,7 @@ mod sys_verify {
             .is_err());
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_halt_codes() {
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
@@ -699,7 +634,7 @@ mod sys_verify {
         }
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_integrity() {
         let hello_commit_session = exec_hello_commit();
 
@@ -732,7 +667,7 @@ mod sys_verify {
             .is_err());
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_integrity_halt_codes() {
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
@@ -756,7 +691,7 @@ mod sys_verify {
         }
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_integrity_pause_codes() {
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_halt_codes: code = {code}");
@@ -780,7 +715,7 @@ mod sys_verify {
         }
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_integrity_pruned_claim() {
         let hello_commit_session = exec_hello_commit();
 
@@ -814,8 +749,8 @@ mod sys_verify {
     }
 }
 
-#[test]
-fn large_sha() {
+#[apply(base)]
+fn large_sha(#[case] version: TestVersion) {
     let data = vec![0u8; 100_000];
     let expected = hex::encode(Sha256::digest(&data));
     let env = ExecutorEnv::builder()
@@ -823,14 +758,13 @@ fn large_sha() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
     let actual = hex::encode(Digest::try_from(session.journal.unwrap().bytes).unwrap());
     assert_eq!(expected, actual);
 }
 
-#[test]
-fn std_stdio() {
+#[apply(base)]
+fn std_stdio(#[case] version: TestVersion) {
     const STDIN: &str = "Hello world from stdin!\n";
     const EXPECTED_STDOUT: &str = "Hello world on stdout!\n";
     const EXPECTED_STDERR: &str = "Hello world on stderr!\n";
@@ -849,17 +783,14 @@ fn std_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        ExecutorImpl::from_elf(env, STANDARD_LIB_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        execute_elf(version, env, STANDARD_LIB_ELF).unwrap();
     }
     assert_eq!(from_utf8(&stdout).unwrap(), expected_stdout());
     assert_eq!(from_utf8(&stderr).unwrap(), EXPECTED_STDERR);
 }
 
-#[test]
-fn environment() {
+#[apply(base)]
+fn std_environment(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
         .env_var("TEST_MODE", "ENV_VARS")
         .env_var("ENV_VAR1", "val1")
@@ -874,8 +805,7 @@ ENV_VAR3",
         )
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(version, env, STANDARD_LIB_ELF).unwrap();
     let actual = &session.journal.as_ref().unwrap().bytes;
     assert_eq!(
         from_utf8(actual).unwrap(),
@@ -886,39 +816,28 @@ ENV_VAR2=
     );
 }
 
-#[test]
-fn args() {
-    let test_cases: [&[String]; 3] = [
-        &[String::default()],
-        &[
-            "grep".to_string(),
-            "-c".to_string(),
-            "foo bar".to_string(),
-            "-".to_string(),
-        ],
-        &[String::default()],
-    ];
-    for args_arr in test_cases {
-        let env = ExecutorEnv::builder()
-            .env_var("TEST_MODE", "ARGS")
-            .args(args_arr)
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
-        let session = exec.run().unwrap();
-        let output: Vec<String> = session.journal.unwrap().decode().unwrap();
-        assert_eq!(
-            output,
-            args_arr
-                .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>(),
-        );
-    }
+#[apply(base)]
+fn std_args(
+    #[case] version: TestVersion,
+    #[values(
+        &[],
+        &["grep", "-c", "foo bar", "-"])
+    ]
+    args: &[&str],
+) {
+    let args: Vec<_> = args.iter().map(|s| s.to_string()).collect();
+    let env = ExecutorEnv::builder()
+        .env_var("TEST_MODE", "ARGS")
+        .args(&args)
+        .build()
+        .unwrap();
+    let session = execute_elf(version, env, STANDARD_LIB_ELF).unwrap();
+    let output: Vec<String> = session.journal.unwrap().decode().unwrap();
+    assert_eq!(output, args,);
 }
 
-#[test]
-fn buf_read() {
+#[apply(base)]
+fn std_buf_read(#[case] version: TestVersion) {
     // Host-provided input is 7 bytes, while the guest requests to read 9.
     let input = b"1234567";
     let env = ExecutorEnv::builder()
@@ -930,65 +849,51 @@ fn buf_read() {
         .write_slice(input.as_slice())
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(version, env, STANDARD_LIB_ELF).unwrap();
     let output = session.journal.unwrap().bytes;
     assert_eq!(output, input);
 }
 
-#[test]
-fn commit_hello_world() {
-    ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+#[apply(base)]
+fn commit_hello_world(#[case] version: TestVersion) {
+    execute_elf(version, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
 }
 
-#[test]
-fn random() {
-    run_test(MultiTestSpec::DoRandom);
+#[apply(base)]
+fn random(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::DoRandom);
 }
 
-#[test]
+#[apply(base)]
 #[should_panic(expected = "WARNING: `getrandom()` called from guest.")]
-fn getrandom_panic() {
-    let env = ExecutorEnv::builder().build().unwrap();
-    let _session = ExecutorImpl::from_elf(env, RAND_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+fn getrandom_panic(#[case] version: TestVersion) {
+    let env = ExecutorEnv::default();
+    execute_elf(version, env, RAND_ELF).unwrap();
 }
 
-#[test]
+#[apply(base)]
 #[should_panic(expected = "Guest panicked: sys_getenv is disabled")]
-fn sys_getenv_panic() {
-    let env = ExecutorEnv::builder().build().unwrap();
-    let _session = ExecutorImpl::from_elf(env, SYS_ENV_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+fn sys_getenv_panic(#[case] version: TestVersion) {
+    let env = ExecutorEnv::default();
+    execute_elf(version, env, SYS_ENV_ELF).unwrap();
 }
 
-#[test]
+#[apply(base)]
 #[should_panic(expected = "Guest panicked: sys_argc is disabled")]
-fn sys_args_panic() {
-    let env = ExecutorEnv::builder().build().unwrap();
-    let _session = ExecutorImpl::from_elf(env, SYS_ARGS_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+fn sys_args_panic(#[case] version: TestVersion) {
+    let env = ExecutorEnv::default();
+    execute_elf(version, env, SYS_ARGS_ELF).unwrap();
 }
 
-#[test]
-fn slice_io() {
+#[apply(base)]
+fn slice_io(#[case] version: TestVersion) {
     let run = |slice: &[u8]| {
         let env = ExecutorEnv::builder()
             .write_slice(&[slice.len() as u32])
             .write_slice(slice)
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, SLICE_IO_ELF).unwrap();
-        let session = exec.run().unwrap();
+        let session = execute_elf(version, env, SLICE_IO_ELF).unwrap();
         assert_eq!(session.journal.unwrap().bytes, slice);
     };
 
@@ -998,31 +903,19 @@ fn slice_io() {
 }
 
 // Check that a compliant host will return an error on panic.
-#[test]
-fn panic() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::Panic)
-        .unwrap()
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let err = exec.run().err().unwrap();
+#[apply(base)]
+fn panic(#[case] version: TestVersion) {
+    let err = multi_test_raw(version, MultiTestSpec::Panic).err().unwrap();
     assert!(err.to_string().contains("MultiTestSpec::Panic invoked"));
 }
 
-#[test]
-fn fault() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::Fault)
-        .unwrap()
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let err = exec.run().err().unwrap();
+#[apply(base)]
+fn fault(#[case] version: TestVersion) {
+    let err = multi_test_raw(version, MultiTestSpec::Fault).err().unwrap();
     assert!(err.to_string().contains("StoreAccessFault"));
 }
 
-#[test]
+#[test_log::test]
 fn profiler() {
     let mut profiler = Profiler::new(MULTI_TEST_ELF, Some("multi_test.elf")).unwrap();
     let env = ExecutorEnv::builder()
@@ -1109,21 +1002,15 @@ fn profiler() {
     assert!(check(&fr, addr), "{fr:#?} {addr}");
 }
 
-#[test]
-fn oom() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::Oom)
-        .unwrap()
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let err = exec.run().err().unwrap();
+#[apply(base)]
+fn oom(#[case] version: TestVersion) {
+    let err = multi_test_raw(version, MultiTestSpec::Oom).err().unwrap();
     assert!(err.to_string().contains("Out of memory"), "{err:?}");
 }
 
-#[test]
-fn memory_access() {
-    fn access_memory(addr: u32) -> Result<ExitCode> {
+#[apply(base)]
+fn memory_access(#[case] version: TestVersion) {
+    let access_memory = |addr: u32| -> Result<ExitCode> {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::OutOfBounds)
             .unwrap()
@@ -1131,47 +1018,47 @@ fn memory_access() {
             .unwrap()
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()?;
+        let session = execute_elf(version, env, MULTI_TEST_ELF)?;
         Ok(session.exit_code)
-    }
+    };
 
     assert!(access_memory(0x0000_0000)
         .err()
         .unwrap()
         .to_string()
         .contains("StoreAccessFault"));
-    assert!(access_memory(0x0C00_0000)
+
+    let addr = match version {
+        TestVersion::V1 => 0x0C00_0000,
+        TestVersion::V2 => 0xC000_0000,
+    };
+
+    assert!(access_memory(addr)
         .err()
         .unwrap()
         .to_string()
         .contains("StoreAccessFault"));
+
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
 
 /// The post-state digest (i.e. the Merkle root of the memory state at the end
 /// of the program) should be randomized on each execution to avoid potential
 /// leakage of private information.
-#[test]
-fn post_state_digest_randomization() {
+#[apply(base)]
+fn post_state_digest_randomization(#[case] version: TestVersion) {
     // Run a number of iterations of a guest and confirm all have the unique post
     // state digest.
     const ITERATIONS: usize = 10;
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
-            ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-                .unwrap()
-                .run()
-                .unwrap()
-                .segments
-                .last()
-                .unwrap()
-                .resolve()
-                .unwrap()
-                .inner
-                .v1()
-                .post_state
-                .digest()
+            let session = execute_elf(version, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            let inner = session.segments.last().unwrap().resolve().unwrap().inner;
+            match version {
+                TestVersion::V1 => inner.v1().post_state.digest(),
+                TestVersion::V2 => inner.v2().post_digest,
+            }
         })
         .collect();
     assert_eq!(post_state_digests.len(), ITERATIONS);
@@ -1196,93 +1083,115 @@ fn post_state_digest_randomization() {
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
-            let mut exec =
-                ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
-            // Override the default randomness syscall using crate-internal API.
-            exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
 
-            exec.run()
-                .unwrap()
-                .segments
-                .last()
-                .unwrap()
-                .resolve()
-                .unwrap()
-                .inner
-                .v1()
-                .post_state
-                .digest()
+            match version {
+                TestVersion::V1 => {
+                    let mut exec =
+                        ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+                    // Override the default randomness syscall using crate-internal API.
+                    exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
+                    exec.run()
+                        .unwrap()
+                        .segments
+                        .last()
+                        .unwrap()
+                        .resolve()
+                        .unwrap()
+                        .inner
+                        .v1()
+                        .post_state
+                        .digest()
+                }
+                TestVersion::V2 => {
+                    let mut exec =
+                        Executor2::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+                    // Override the default randomness syscall using crate-internal API.
+                    exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
+                    exec.run()
+                        .unwrap()
+                        .segments
+                        .last()
+                        .unwrap()
+                        .resolve()
+                        .unwrap()
+                        .inner
+                        .v2()
+                        .post_digest
+                }
+            }
         })
         .collect();
     assert_eq!(post_state_digests.len(), 1);
 }
 
-#[test]
-fn aligned_alloc() {
-    run_test(MultiTestSpec::AlignedAlloc);
+#[apply(base)]
+fn aligned_alloc(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::AlignedAlloc);
 }
 
-#[test]
-fn alloc_zeroed() {
-    run_test(MultiTestSpec::AllocZeroed);
+#[apply(base)]
+fn alloc_zeroed(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::AllocZeroed);
 }
 
-#[test]
+#[apply(base)]
 #[should_panic(expected = "too small")]
-fn too_many_sha() {
-    run_test(MultiTestSpec::TooManySha);
+fn too_many_sha(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::TooManySha);
 }
 
-#[test]
+#[apply(base)]
 #[should_panic(expected = "is an invalid guest address")]
-fn out_of_bounds_ecall() {
-    run_test(MultiTestSpec::OutOfBoundsEcall);
+fn out_of_bounds_ecall(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::OutOfBoundsEcall);
 }
 
-#[test]
-fn sys_fork() {
-    run_test(MultiTestSpec::SysFork);
+#[apply(base)]
+fn sys_fork(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::SysFork);
 }
 
-#[test]
+#[apply(base)]
 #[should_panic(expected = "Unknown syscall")]
-fn sys_fork_fork_panic() {
-    run_test(MultiTestSpec::SysForkFork);
+fn sys_fork_fork_panic(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::SysForkFork);
 }
 
-#[test]
+#[apply(base)]
 #[should_panic(expected = "Bad write file descriptor 3")]
-fn sys_fork_journal_panic() {
-    run_test(MultiTestSpec::SysForkJournalPanic);
+fn sys_fork_journal_panic(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::SysForkJournalPanic);
 }
 
-#[test]
-fn heap_alloc() {
+#[rstest]
+#[case(TestVersion::V1)]
+#[ignore]
+#[case(TestVersion::V2)]
+#[test_log::test]
+fn heap_alloc(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
         .write(&6_u32)
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, HEAP_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = execute_elf(version, env, HEAP_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
-#[test]
-fn heap_bug_zkvm_527() {
+#[apply(base)]
+fn heap_bug_zkvm_527(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder().build().unwrap();
-    let session = ExecutorImpl::from_elf(env, ZKVM_527_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = execute_elf(version, env, ZKVM_527_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
-#[test]
-fn keccak_update() {
-    run_test(MultiTestSpec::KeccakUpdate);
+#[apply(base)]
+fn keccak_update(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::KeccakUpdate);
+}
+
+#[apply(base)]
+fn keccak_update2(#[case] version: TestVersion) {
     let mut vars = HashMap::new();
     vars.insert("RISC0_KECCAK_PO2".to_string(), 15u32.to_string());
     let env = ExecutorEnv::builder()
@@ -1291,10 +1200,7 @@ fn keccak_update() {
         .env_vars(vars)
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     assert_eq!(
         session.pending_keccaks[0].claim_digest,
@@ -1303,14 +1209,14 @@ fn keccak_update() {
     assert_eq!(session.pending_keccaks[0].po2, 15,);
 }
 
-#[test]
-fn sha_single_keccak() {
-    run_test(MultiTestSpec::ShaSingleKeccak);
+#[apply(base)]
+fn sha_single_keccak(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::ShaSingleKeccak);
 }
 
-#[test]
-fn sys_keccak() {
-    run_test(MultiTestSpec::SysKeccak);
+#[apply(base)]
+fn sys_keccak(#[case] version: TestVersion) {
+    multi_test(version, MultiTestSpec::SysKeccak);
 }
 
 #[cfg(feature = "docker")]
@@ -1320,7 +1226,7 @@ mod docker {
 
     use crate::{ExecutorEnv, ExecutorImpl, Session, TraceEvent};
 
-    #[test]
+    #[test_log::test]
     fn trace() {
         let mut events: Vec<TraceEvent> = Vec::new();
         {
@@ -1386,7 +1292,7 @@ mod docker {
         }));
     }
 
-    #[test]
+    #[test_log::test]
     fn session_limit() {
         fn run_session(
             loop_cycles: u64,
