@@ -14,7 +14,7 @@
 
 use anyhow::Result;
 use risc0_binfmt::Program;
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_zkvm_platform::{memory::TEXT_START, WORD_SIZE};
 
 use super::exec::{Syscall, SyscallContext};
 
@@ -53,7 +53,7 @@ fn program_from_instructions(entry: u32, instructions: impl IntoIterator<Item = 
 
 pub fn basic() -> Program {
     program_from_instructions(
-        0x40000,
+        TEXT_START,
         [
             0x1234b137, // lui x2, 0x1234b000
             0xf387e1b7, // lui x3, 0xf387e000

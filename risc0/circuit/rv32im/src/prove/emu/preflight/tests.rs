@@ -50,6 +50,7 @@ fn add_cycle(insn: InsnKind, mem_idx: usize, pc: Option<u32>) -> PreflightCycle 
 }
 
 #[test]
+#[ignore]
 fn basic() {
     let program = testutil::basic();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();

@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{bail, Result};
+use risc0_zkp::core::hash::sha::BLOCK_WORDS;
 
 use crate::{
     execute::{platform::*, r0vm::Risc0Context, ByteAddr, WordAddr},
@@ -22,6 +23,12 @@ use crate::{
 const SHA2_STATE_LAYOUT: &ShaStateLayout = LAYOUT_TOP.inst_result.arm11.state;
 const SHA2_FP_COUNT: usize = 7;
 const SHA2_U32_COUNT: usize = 3;
+const SHA2_LOAD_STATE_CYCLES: u32 = 4;
+const SHA2_LOAD_DATA_CYCLES: u32 = BLOCK_WORDS as u32;
+const SHA2_MIX_CYCLES: u32 = 48;
+const SHA2_STORE_CYCLES: u32 = 4;
+const SHA2_BACK: usize =
+    (SHA2_LOAD_STATE_CYCLES + SHA2_LOAD_DATA_CYCLES + SHA2_MIX_CYCLES) as usize;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Sha2State {
@@ -100,7 +107,11 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
     let k_addr = ByteAddr(ctx.load_machine_register(REG_A4)?)
         .check()?
         .waddr();
-    tracing::trace!("sha2: {count} blocks");
+    tracing::debug!("sha2: {count} blocks");
+
+    if count > MAX_SHA_COUNT {
+        bail!("Invalid count (too big) in sha2 ecall: {count}");
+    }
 
     let mut sha2 = Sha2State {
         state_in_addr,
@@ -116,11 +127,11 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
     };
 
     let mut cur_state = CycleState::ShaEcall;
-    let mut old_a = RingBuffer::<68>::new();
-    let mut old_e = RingBuffer::<68>::new();
-    let mut old_w = RingBuffer::<16>::new();
+    let mut old_a = RingBuffer::<SHA2_BACK>::new();
+    let mut old_e = RingBuffer::<SHA2_BACK>::new();
+    let mut old_w = RingBuffer::<BLOCK_WORDS>::new();
 
-    for i in 0..4 {
+    for i in 0..SHA2_LOAD_STATE_CYCLES {
         sha2.round = i;
         sha2.step(ctx, &mut cur_state, CycleState::ShaLoadState);
         let a = ctx.load_u32(sha2.state_in_addr + 3u32 - i)?;
@@ -133,8 +144,9 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
         ctx.store_u32(sha2.state_out_addr + 7u32 - i, e)?;
     }
 
+    // HERE!
     while sha2.count != 0 {
-        for i in 0..16 {
+        for i in 0..SHA2_LOAD_DATA_CYCLES {
             sha2.round = i;
             sha2.step(ctx, &mut cur_state, CycleState::ShaLoadData);
             let k = ctx.load_u32(sha2.k_addr + i)?;
@@ -148,10 +160,10 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
             old_e.push(e);
         }
 
-        for i in 0..48 {
+        for i in 0..SHA2_MIX_CYCLES {
             sha2.round = i;
             sha2.step(ctx, &mut cur_state, CycleState::ShaMix);
-            let k = ctx.load_u32(sha2.k_addr + 16u32 + i)?;
+            let k = ctx.load_u32(sha2.k_addr + BLOCK_WORDS + i)?;
             sha2.w = compute_w(&old_w);
             old_w.push(sha2.w);
             let (a, e) = compute_ae(&old_a, &old_e, k, sha2.w);
@@ -161,11 +173,11 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
             old_e.push(e);
         }
 
-        for i in 0..4 {
+        for i in 0..SHA2_STORE_CYCLES {
             sha2.round = i;
             sha2.step(ctx, &mut cur_state, CycleState::ShaStoreState);
-            sha2.a = old_a.back(4).wrapping_add(old_a.back(68));
-            sha2.e = old_e.back(4).wrapping_add(old_e.back(68));
+            sha2.a = old_a.back(4).wrapping_add(old_a.back(SHA2_BACK));
+            sha2.e = old_e.back(4).wrapping_add(old_e.back(SHA2_BACK));
             sha2.w = 0;
             if i == 3 {
                 sha2.count -= 1;
@@ -183,7 +195,12 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
     Ok(())
 }
 
-fn compute_ae(old_a: &RingBuffer<68>, old_e: &RingBuffer<68>, k: u32, w: u32) -> (u32, u32) {
+fn compute_ae(
+    old_a: &RingBuffer<SHA2_BACK>,
+    old_e: &RingBuffer<SHA2_BACK>,
+    k: u32,
+    w: u32,
+) -> (u32, u32) {
     macro_rules! ch {
         ($x:expr, $y:expr, $z:expr) => {
             ($x & $y) ^ (!($x) & $z)

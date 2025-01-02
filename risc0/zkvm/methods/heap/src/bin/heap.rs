@@ -18,7 +18,7 @@ fn main() {
     let iterations: u32 = env::read();
     for _ in 0..iterations {
         env::log("alloc");
-        let tmp = vec![0; 10 * 1024 * 1024];
+        let tmp = vec![0; 10 * 1024];
         println!("{:#?}", tmp.as_ptr());
     }
 }

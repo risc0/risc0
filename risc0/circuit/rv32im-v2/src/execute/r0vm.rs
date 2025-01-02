@@ -227,6 +227,7 @@ impl<'a> Risc0Machine<'a> {
             rlen -= 1;
         }
 
+        // HERE!
         while rlen >= MAX_IO_WORDS {
             let words = min(rlen / MAX_IO_WORDS, MAX_IO_WORDS);
             // tracing::trace!("body: {words}");
