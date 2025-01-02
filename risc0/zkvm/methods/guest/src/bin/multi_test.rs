@@ -41,8 +41,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write,
+        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
@@ -326,7 +326,7 @@ fn main() {
         MultiTestSpec::OutOfBoundsEcall => unsafe {
             asm!(
                 "ecall",
-                in("t0") 3,
+                in("t0") ecall::SHA,
                 in("a0") 0x0,
                 in("a1") 0x0,
                 in("a2") 0x0,
@@ -335,13 +335,16 @@ fn main() {
             );
         },
         MultiTestSpec::TooManySha => unsafe {
+            let out_state = [0u32; DIGEST_WORDS];
+            let in_state = [0u32; DIGEST_WORDS];
+            let block = [0u32; 2 * DIGEST_WORDS];
             asm!(
                 "ecall",
-                in("t0") 3,
-                in("a0") 0x400,
-                in("a1") 0x400,
-                in("a2") 0x400,
-                in("a3") 0x400,
+                in("t0") ecall::SHA,
+                in("a0") out_state.as_ptr(),
+                in("a1") in_state.as_ptr(),
+                in("a2") block.as_ptr(),
+                in("a3") block.as_ptr().add(DIGEST_WORDS),
                 in("a4") 10000,
             );
         },

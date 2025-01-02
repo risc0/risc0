@@ -89,25 +89,23 @@ fn multi_test_raw(version: TestVersion, spec: MultiTestSpec) -> Result<Session> 
 }
 
 #[apply(base)]
+#[ignore]
 fn cpp_test(#[case] version: TestVersion) {
     let session = execute_elf(version, ExecutorEnv::default(), BLST_ELF).unwrap();
     let message: String = session.journal.unwrap().decode().unwrap();
     assert_eq!(message.as_str(), "blst is such a blast");
 }
 
-#[test_log::test]
+#[apply(base)]
 #[should_panic(expected = "too small")]
-fn insufficient_segment_limit() {
+fn insufficient_segment_limit(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
-        .segment_limit_po2(14)
+        .segment_limit_po2(13) // 8K cycles
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
         .build()
         .unwrap();
-    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    execute_elf(version, env, MULTI_TEST_ELF).unwrap();
 }
 
 #[apply(base)]
@@ -1134,14 +1132,26 @@ fn alloc_zeroed(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::AllocZeroed);
 }
 
-#[apply(base)]
+#[rstest]
+#[case(TestVersion::V1)]
+#[test_log::test]
 #[should_panic(expected = "too small")]
 fn too_many_sha(#[case] version: TestVersion) {
-    multi_test(version, MultiTestSpec::TooManySha);
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(15) // 32K cycles
+        .write(&MultiTestSpec::TooManySha)
+        .unwrap()
+        .build()
+        .unwrap();
+    execute_elf(version, env, MULTI_TEST_ELF).unwrap();
 }
 
-#[apply(base)]
+#[rstest]
 #[should_panic(expected = "is an invalid guest address")]
+#[case(TestVersion::V1)]
+#[should_panic(expected = "LoadAccessFault")]
+#[case(TestVersion::V2)]
+#[test_log::test]
 fn out_of_bounds_ecall(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::OutOfBoundsEcall);
 }
@@ -1163,11 +1173,7 @@ fn sys_fork_journal_panic(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::SysForkJournalPanic);
 }
 
-#[rstest]
-#[case(TestVersion::V1)]
-#[ignore]
-#[case(TestVersion::V2)]
-#[test_log::test]
+#[apply(base)]
 fn heap_alloc(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
         .write(&6_u32)

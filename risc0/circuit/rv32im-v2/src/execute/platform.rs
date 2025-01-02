@@ -126,6 +126,7 @@ pub const SYSCALL_MAX: u32 = 512;
 
 pub const MAX_IO_BYTES: u32 = 1024;
 pub const MAX_IO_WORDS: u32 = 4;
+pub const MAX_SHA_COUNT: u32 = 10;
 
 /// Returns whether `addr` is within user memory bounds.
 pub fn is_user_memory(addr: ByteAddr) -> bool {

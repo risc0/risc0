@@ -44,28 +44,28 @@ _start:
 
     # Initialize the ecall dispatch table
     li t0, ECALL_DISPATCH_ADDR
-    la t1, ecall_dispatch
+    la t1, _ecall_dispatch
     sw t1, 0(t0)
 
     # Initialize useful constants
     li t3, USER_REGS_ADDR
-    la t4, ecall_table
+    la t4, _ecall_table
     li t5, ECALL_TABLE_SIZE
     li t6, MAX_IO_BYTES
 
     # Jump into userspace
     mret
 
-ecall_table:
-    j ecall_halt
-    j ecall_input
-    j ecall_software
-    j ecall_sha
-    j ecall_bigint
-    j ecall_user
-    j ecall_bigint2
+_ecall_table:
+    j _ecall_halt
+    fence # input
+    j _ecall_software
+    j _ecall_sha
+    fence # bigint
+    fence # user
+    fence # bigint2
 
-ecall_dispatch:
+_ecall_dispatch:
     # load t0 from userspace
     lw a0, REG_T0 * WORD_SIZE (t3)
     # check that ecall request is within range
@@ -79,7 +79,7 @@ ecall_dispatch:
 1:
     fence # panic
 
-ecall_halt:
+_ecall_halt:
     # copy output digest from pointer in a1 to GLOBAL_OUTPUT_ADDR
     lw t0, REG_A1 * WORD_SIZE (t3) # out_state
     li t1, GLOBAL_OUTPUT_ADDR
@@ -105,10 +105,7 @@ ecall_halt:
     li a1, 0
     ecall
 
-ecall_input:
-    fence
-
-ecall_software:
+_ecall_software:
     # prepare a software ecall
     li a7, HOST_ECALL_READ
     lw a0, REG_A2 * WORD_SIZE (t3) # syscall_ptr -> fd
@@ -135,29 +132,12 @@ ecall_software:
     # return back to userspace
     mret
 1:
-    call ecall_software_slow
-    mret
+    j ecall_software
 
-ecall_sha:
-    # prepare a sha ecall
-    li a7, HOST_ECALL_SHA
-    lw a0, REG_A1 * WORD_SIZE (t3) # in_state
-    lw a1, REG_A0 * WORD_SIZE (t3) # out_state
+_ecall_sha:
+    lw a0, REG_A0 * WORD_SIZE (t3) # out_state
+    lw a1, REG_A1 * WORD_SIZE (t3) # in_state
     lw a2, REG_A2 * WORD_SIZE (t3) # block_ptr1
-    lw a3, REG_A4 * WORD_SIZE (t3) # count
-    # TODO: supply k_addr
-    # TODO: deal with block_ptr2
-    lw a4, REG_A3 * WORD_SIZE (t3) # block_ptr2
-    # call the host
-    ecall
-    # return back to userspace
-    mret
-
-ecall_bigint:
-    fence
-
-ecall_user:
-    fence
-
-ecall_bigint2:
-    fence
+    lw a3, REG_A3 * WORD_SIZE (t3) # block_ptr2
+    lw a4, REG_A4 * WORD_SIZE (t3) # count
+    j ecall_sha

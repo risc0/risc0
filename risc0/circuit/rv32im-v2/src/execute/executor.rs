@@ -109,9 +109,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         max_cycles: Option<u64>,
         mut callback: F,
     ) -> Result<ExecutorResult> {
-        let segment_limit = 1 << segment_po2;
+        let segment_limit: u32 = 1 << segment_po2;
+        assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
-        let mut segment_counter = 0u64;
+        let mut segment_counter = 0;
 
         self.reset();
 
@@ -127,6 +128,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             if self.segment_cycles() >= segment_threshold {
+                tracing::debug!(
+                    "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {}",
+                    self.phys_cycles,
+                    self.pager.cycles,
+                    self.segment_cycles()
+                );
+
+                assert!(self.segment_cycles() < segment_limit);
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
@@ -366,7 +375,6 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     }
 
     fn get_pc(&self) -> u32 {
-        // self.pc.0
         self.user_pc.0
     }
 }
