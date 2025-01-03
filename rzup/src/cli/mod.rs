@@ -6,6 +6,7 @@ pub(crate) mod output;
 use crate::error::Result;
 use crate::Rzup;
 use crate::RzupEvent;
+
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 use commands::UninstallCommand;

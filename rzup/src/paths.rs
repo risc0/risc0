@@ -1,7 +1,7 @@
-use semver::Version;
-
 use crate::env::Environment;
 use crate::error::Result;
+
+use semver::Version;
 use std::path::PathBuf;
 
 pub struct Paths;

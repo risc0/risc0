@@ -1,11 +1,11 @@
-use std::{path::PathBuf, time::Duration};
-
 pub mod github;
 
 use crate::RzupError;
 use crate::{env::Environment, Result, RzupEvent};
+
 use downloader::{downloader::Builder, Download};
 use semver::Version;
+use std::{path::PathBuf, time::Duration};
 
 pub struct Platform {
     arch: &'static str,

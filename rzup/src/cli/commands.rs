@@ -1,6 +1,7 @@
 use crate::error::Result;
 use crate::events::RzupEvent;
 use crate::{Rzup, RzupError};
+
 use clap::Parser;
 use colored::Colorize;
 use semver::Version;

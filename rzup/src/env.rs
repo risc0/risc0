@@ -1,6 +1,7 @@
 use crate::error::Result;
 use crate::RzupError;
 use crate::RzupEvent;
+
 use std::path::{Path, PathBuf};
 
 pub struct Environment {

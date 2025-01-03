@@ -1,7 +1,5 @@
 use clap::Parser;
-use rzup::cli::Cli;
-use rzup::error::Result;
-use rzup::Rzup;
+use rzup::{cli::Cli, error::Result, Rzup};
 
 fn main() -> Result<()> {
     let mut rzup = Rzup::new()?;

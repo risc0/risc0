@@ -11,12 +11,12 @@ mod settings;
 
 pub mod error;
 
-use crate::env::Environment;
-use crate::settings::Settings;
+use env::Environment;
 use events::RzupEvent;
 use paths::Paths;
 use registry::Registry;
 use semver::Version;
+use settings::Settings;
 use std::collections::HashMap;
 use std::path::PathBuf;
 

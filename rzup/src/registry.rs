@@ -8,6 +8,7 @@ use crate::paths::Paths;
 use crate::settings::Settings;
 use crate::RzupError;
 use crate::RzupEvent;
+
 use semver::Version;
 use std::collections::HashMap;
 

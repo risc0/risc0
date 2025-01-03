@@ -2,6 +2,7 @@ use crate::env::Environment;
 use crate::error::Result;
 use crate::events::RzupEvent;
 use crate::RzupError;
+
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

@@ -1,6 +1,7 @@
 use crate::distribution::{Distribution, Platform};
 use crate::env::Environment;
 use crate::{Result, RzupError, RzupEvent};
+
 use reqwest::blocking::Client;
 use semver::Version;
 use serde::Deserialize;
