@@ -9,11 +9,13 @@ mod paths;
 mod settings;
 
 pub mod error;
-use crate::components::registry::ComponentRegistry;
+pub(crate) mod registry;
+
 use crate::env::Environment;
 use crate::settings::Settings;
 use events::RzupEvent;
 use paths::Paths;
+use registry::Registry;
 use semver::Version;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -22,13 +24,13 @@ pub use error::{Result, RzupError};
 
 pub struct Rzup {
     environment: Environment,
-    registry: ComponentRegistry,
+    registry: Registry,
 }
 
 impl Rzup {
     pub fn new() -> Result<Self> {
         let environment = Environment::new()?;
-        let mut registry = ComponentRegistry::new(&environment)?;
+        let mut registry = Registry::new(&environment)?;
         Self::initialize_settings(&environment, &mut registry)?;
         registry.scan_environment(&environment)?;
 
@@ -40,7 +42,7 @@ impl Rzup {
 
     pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
         let environment = Environment::with_root(root)?;
-        let mut registry = ComponentRegistry::new(&environment)?;
+        let mut registry = Registry::new(&environment)?;
         Self::initialize_settings(&environment, &mut registry)?;
         registry.scan_environment(&environment)?;
 
@@ -50,10 +52,7 @@ impl Rzup {
         })
     }
 
-    fn initialize_settings(
-        environment: &Environment,
-        registry: &mut ComponentRegistry,
-    ) -> Result<()> {
+    fn initialize_settings(environment: &Environment, registry: &mut Registry) -> Result<()> {
         if !environment.settings_path().exists() {
             environment.emit(RzupEvent::Debug {
                 message: format!(
@@ -74,7 +73,8 @@ impl Rzup {
     }
 
     pub fn install_all(&mut self, force: bool) -> Result<()> {
-        self.registry.install_all(&self.environment, force)?;
+        self.registry
+            .install_all_components(&self.environment, force)?;
         self.registry.scan_environment(&self.environment)?;
         Ok(())
     }
@@ -99,11 +99,12 @@ impl Rzup {
     }
 
     pub fn list_versions(&self, id: &str) -> Result<Vec<Version>> {
-        self.registry.list_versions(&self.environment, id)
+        self.registry.list_component_versions(&self.environment, id)
     }
 
     pub fn get_active_version(&self, id: &str) -> Result<Option<(Version, std::path::PathBuf)>> {
-        self.registry.get_active_version(&self.environment, id)
+        self.registry
+            .get_active_component_version(&self.environment, id)
     }
 
     pub fn emit(&self, event: RzupEvent) {
@@ -117,7 +118,7 @@ impl Rzup {
 
     pub fn set_active_version(&mut self, id: &str, version: Version) -> Result<()> {
         self.registry
-            .set_active_version(&self.environment, id, version)
+            .set_active_component_version(&self.environment, id, version)
     }
 
     pub fn version_exists(&self, id: &str, version: &Version) -> Result<bool> {

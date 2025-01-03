@@ -1,4 +1,6 @@
-use crate::components::implementations::{CargoRiscZero, R0Vm, RustToolchain};
+use crate::components::cargo_risczero::CargoRiscZero;
+use crate::components::r0vm::R0Vm;
+use crate::components::rust::RustToolchain;
 use crate::components::Component;
 use crate::env::Environment;
 use crate::error::Result;
@@ -12,12 +14,12 @@ use std::collections::HashMap;
 static DEFAULT_COMPONENTS: &[&str] = &["rust", "cargo-risczero"];
 
 #[derive(Default, Debug)]
-pub(crate) struct ComponentRegistry {
+pub(crate) struct Registry {
     pub(crate) components: HashMap<&'static str, Box<dyn Component>>,
     settings: Settings,
 }
 
-impl ComponentRegistry {
+impl Registry {
     pub fn new(env: &Environment) -> Result<Self> {
         let settings = Settings::load(env)?;
         Ok(Self {
@@ -49,11 +51,11 @@ impl ComponentRegistry {
                 message: format!("Registering component: {}", component_id),
             });
 
-            self.register(component);
+            self.register_component(component);
 
             // Set active version if none exists
             if self.settings.get_active_version(component_id).is_none() {
-                if let Ok(versions) = self.list_versions(env, component_id) {
+                if let Ok(versions) = self.list_component_versions(env, component_id) {
                     if let Some(latest) = versions.into_iter().max() {
                         self.settings.set_active_version(component_id, &latest);
                     }
@@ -64,7 +66,7 @@ impl ComponentRegistry {
         Ok(())
     }
 
-    pub fn list_versions(&self, env: &Environment, id: &str) -> Result<Vec<Version>> {
+    pub fn list_component_versions(&self, env: &Environment, id: &str) -> Result<Vec<Version>> {
         let mut versions = Vec::new();
         let component_dir = Paths::get_component_dir(env, id)?;
 
@@ -95,7 +97,7 @@ impl ComponentRegistry {
         Ok(versions)
     }
 
-    pub fn get_active_version(
+    pub fn get_active_component_version(
         &self,
         env: &Environment,
         id: &str,
@@ -109,7 +111,7 @@ impl ComponentRegistry {
         Ok(None)
     }
 
-    pub fn set_active_version(
+    pub fn set_active_component_version(
         &mut self,
         env: &Environment,
         id: &str,
@@ -134,7 +136,7 @@ impl ComponentRegistry {
             .collect()
     }
 
-    fn register(&mut self, component: Box<dyn Component>) {
+    fn register_component(&mut self, component: Box<dyn Component>) {
         self.components.insert(component.id(), component);
     }
 
@@ -200,7 +202,7 @@ impl ComponentRegistry {
         Ok(())
     }
 
-    pub fn install_all(&mut self, env: &Environment, force: bool) -> Result<()> {
+    pub fn install_all_components(&mut self, env: &Environment, force: bool) -> Result<()> {
         for &component_id in DEFAULT_COMPONENTS {
             self.install_component(env, component_id, None, force)?;
         }
@@ -223,10 +225,10 @@ mod tests {
     use super::*;
     use tempfile::TempDir;
 
-    fn setup_test_registry() -> (TempDir, Environment, ComponentRegistry) {
+    fn setup_test_registry() -> (TempDir, Environment, Registry) {
         let tmp_dir = TempDir::new().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();
-        let registry = ComponentRegistry::new(&env).unwrap();
+        let registry = Registry::new(&env).unwrap();
         (tmp_dir, env, registry)
     }
 
@@ -248,11 +250,15 @@ mod tests {
             .unwrap();
 
         // Test version listing
-        let versions = registry.list_versions(&env, component_id).unwrap();
+        let versions = registry
+            .list_component_versions(&env, component_id)
+            .unwrap();
         assert!(versions.contains(&version));
 
         // Test active version
-        let active = registry.get_active_version(&env, component_id).unwrap();
+        let active = registry
+            .get_active_component_version(&env, component_id)
+            .unwrap();
         assert_eq!(active.map(|(v, _)| v), Some(version.clone()));
     }
 }

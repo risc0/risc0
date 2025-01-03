@@ -1,5 +1,6 @@
-mod implementations;
-pub(crate) mod registry;
+pub(crate) mod cargo_risczero;
+pub(crate) mod r0vm;
+pub(crate) mod rust;
 
 use crate::distribution::{github::GithubRelease, Distribution, Platform};
 use crate::env::Environment;
