@@ -12,7 +12,7 @@ pub(crate) struct InstallCommand {
     name: Option<String>,
     /// Version of the component to install (optional). If not provided, installs the latest version.
     version: Option<String>,
-    /// Force the install
+    /// Force the installation
     #[arg(short, long)]
     force: bool,
 }
@@ -29,9 +29,64 @@ impl InstallCommand {
                 rzup.install_all(self.force)?;
             }
             Some(name) => {
+                if name == "self" {
+                    rzup.emit(RzupEvent::InstallationStarted {
+                        id: "rzup".to_string(),
+                        version: "latest".to_string(),
+                    });
+
+                    let tmp_dir = rzup.environment.tmp_dir();
+                    let update_script = tmp_dir.join("rzup_update.sh");
+
+                    std::fs::write(
+                        &update_script,
+                        r#"#!/bin/bash
+                    set -e
+                    curl -sL https://risczero.com/install | bash -s -- --quiet
+                    "#,
+                    )?;
+
+                    #[cfg(unix)]
+                    {
+                        use std::os::unix::fs::PermissionsExt;
+                        let mut perms = std::fs::metadata(&update_script)?.permissions();
+                        perms.set_mode(0o755);
+                        std::fs::set_permissions(&update_script, perms)?;
+                    }
+
+                    // Execute quietly
+                    let output = std::process::Command::new("/bin/sh")
+                        .arg(&update_script)
+                        .output()
+                        .map_err(|e| {
+                            RzupError::Other(format!("Failed to execute update script: {}", e))
+                        })?;
+
+                    let _ = std::fs::remove_file(update_script);
+
+                    if !output.status.success() {
+                        rzup.emit(RzupEvent::InstallationFailed {
+                            id: "rzup".to_string(),
+                            version: "latest".to_string(),
+                        });
+                        return Err(RzupError::Other(format!(
+                            "Self-update failed: {}",
+                            String::from_utf8_lossy(&output.stderr)
+                        )));
+                    }
+
+                    rzup.emit(RzupEvent::InstallationCompleted {
+                        id: "rzup".to_string(),
+                        version: "latest".to_string(),
+                    });
+
+                    return Ok(());
+                }
+
                 rzup.install_component(&name, version, self.force)?;
             }
         }
+
         Ok(())
     }
 }
@@ -54,7 +109,7 @@ impl ShowCommand {
             let versions = rzup.list_versions(id)?;
 
             if !versions.is_empty() {
-                println!("\n{}", id);
+                println!("{}", id);
 
                 let active_version = rzup.get_active_version(id)?;
                 let mut sorted_versions = versions;
@@ -69,6 +124,7 @@ impl ShowCommand {
                         };
                     println!("{}{}", active_marker, version);
                 }
+                println!();
 
                 // Show warnings for missing active versions
                 if let Some(settings_version) = rzup.registry.settings().get_active_version(id) {
@@ -90,6 +146,13 @@ impl ShowCommand {
                 }
             }
         }
+
+        println!(
+            "{}: {}",
+            "rzup home".bold(),
+            rzup.environment.root_dir().display()
+        );
+
         Ok(())
     }
 }

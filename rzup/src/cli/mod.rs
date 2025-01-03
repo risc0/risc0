@@ -15,7 +15,7 @@ use output::EventPrinter;
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Install components (e.g. cargo-risczero)
+    /// Install and update RISC Zero components
     #[command(alias = "update")]
     Install(InstallCommand),
     /// Check for component updates
@@ -50,6 +50,7 @@ impl Cli {
     pub fn execute(self, rzup: &mut Rzup) -> Result<()> {
         if !self.quiet {
             let printer = EventPrinter::new(self.verbose);
+            printer.progress.finish_and_clear();
             rzup.set_event_handler(move |event| match event {
                 RzupEvent::DownloadStarted { id, version, url } => {
                     printer.handle_download(id, version, url)
