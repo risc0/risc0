@@ -22,11 +22,11 @@ impl InstallCommand {
             Some(v) => Some(Version::parse(&v).map_err(|_| RzupError::InvalidVersion(v))?),
             None => None,
         };
+
         match self.name {
             None => {
                 rzup.install_all(self.force)?;
             }
-
             Some(name) => {
                 rzup.install_component(&name, version, self.force)?;
             }
@@ -50,37 +50,42 @@ impl ShowCommand {
 
         for component in components {
             let id = component.id();
-            if let Some(versions) = rzup.registry.get_component_versions(id) {
+            let versions = rzup.list_versions(id)?;
+
+            if !versions.is_empty() {
                 println!("\n{}", id);
 
-                let settings_version = rzup.registry.settings().get_active_version(id);
-                let active_version = versions.get_active_version(rzup.registry.settings(), id);
+                let active_version = rzup.get_active_version(id)?;
+                let mut sorted_versions = versions;
+                sorted_versions.sort_by(|a, b| b.cmp(a)); // sort newest to oldest
 
-                let mut all_versions: Vec<&Version> = versions.list_versions();
-                all_versions.sort_by(|a, b| b.cmp(a)); // sort newest to oldest
-
-                for version in all_versions {
-                    let active_marker = if Some(version) == active_version.map(|(v, _)| v) {
-                        "* "
-                    } else {
-                        "  "
-                    };
+                for version in sorted_versions {
+                    let active_marker =
+                        if Some(version.clone()) == active_version.clone().map(|(v, _)| v) {
+                            "* ".bold()
+                        } else {
+                            "  ".normal()
+                        };
                     println!("{}{}", active_marker, version);
                 }
 
-                if let Some(settings_ver) = settings_version {
+                // Show warnings for missing active versions
+                if let Some(settings_version) = rzup.registry.settings().get_active_version(id) {
                     if active_version.is_none() {
                         println!(
                             "! Version {} specified in settings.toml is not installed",
-                            settings_ver
+                            settings_version
                         );
                         println!(
-                            "   Please use 'rzup use {} <VERSION>' to switch active component",
+                            "  Please use 'rzup use {} <VERSION>' to switch active component",
                             id,
                         );
                     }
                 } else if active_version.is_none() {
-                    println!("! No active version found.\n  Please use 'rzup use {} <version>' to set an active version", id);
+                    println!(
+                        "! No active version found.\n  Please use 'rzup use {} <version>' to set an active version",
+                        id
+                    );
                 }
             }
         }
@@ -92,7 +97,7 @@ impl ShowCommand {
 pub(crate) struct UseCommand {
     /// Name of component to activate
     name: String,
-    /// Version of component to acivate
+    /// Version of component to activate
     version: String,
 }
 
@@ -101,24 +106,16 @@ impl UseCommand {
         let version = Version::parse(&self.version)
             .map_err(|_| RzupError::InvalidVersion(self.version.clone()))?;
 
-        if let Some(versions) = rzup.registry.get_component_versions(&self.name) {
-            if versions.has_version(&version) {
-                rzup.registry
-                    .set_active_version(&rzup.environment, &self.name, version.clone())?;
-                println!(
-                    "Successfully set {} version {} as active",
-                    self.name, version
-                );
-            } else {
-                println!(
-                    "! Version {} of {} is not installed.\n  Please use 'rzup install {} {}' to install",
-                    version, self.name, self.name, version
-                );
-            }
+        if rzup.version_exists(&self.name, &version)? {
+            rzup.set_active_version(&self.name, version.clone())?;
+            println!(
+                "Successfully set {} version {} as active",
+                self.name, version
+            );
         } else {
             println!(
-                "! {} is not installed.\n  Please use 'rzup install {} {}' to install",
-                self.name, self.name, version
+                "! Version {} of {} is not installed.\n  Please use 'rzup install {} {}' to install",
+                version, self.name, self.name, version
             );
         }
 
@@ -133,41 +130,42 @@ impl CheckCommand {
     pub(crate) fn execute(&self, rzup: &Rzup) -> Result<()> {
         let components = rzup.registry.list_components();
         if components.is_empty() {
-            println!("! Nothing is installed\n  Please use 'rzup install' to install.")
+            println!("! Nothing is installed\n  Please use 'rzup install' to install.");
+            return Ok(());
         }
 
         let mut results = Vec::new();
 
         for component in components {
             let id = component.id();
-            rzup.environment().emit(RzupEvent::CheckUpdates {
+            rzup.emit(RzupEvent::CheckUpdates {
                 id: Some(id.to_string()),
             });
 
-            let latest_version = rzup.latest_version(id)?;
-            let versions = rzup.installed_versions(id);
-            let max_installed = versions.keys().max().unwrap();
+            let latest_version = rzup.get_latest_version(id)?;
+            let installed_versions = rzup.list_versions(id)?;
 
-            if !rzup.is_installed(id, &latest_version) {
-                results.push(format!(
-                    "{} - {} : {} -> {}",
-                    id.bold(),
-                    "Update Available".bold().yellow(),
-                    max_installed,
-                    latest_version,
-                ));
-            } else {
-                results.push(format!(
-                    "{} - {} : {}",
-                    id.bold(),
-                    "Up to date".bold().green(),
-                    max_installed
-                ));
+            if let Some(max_installed) = installed_versions.iter().max() {
+                if !rzup.version_exists(id, &latest_version)? {
+                    results.push(format!(
+                        "{} - {} : {} -> {}",
+                        id.bold(),
+                        "Update Available".bold().yellow(),
+                        max_installed,
+                        latest_version,
+                    ));
+                } else {
+                    results.push(format!(
+                        "{} - {} : {}",
+                        id.bold(),
+                        "Up to date".bold().green(),
+                        max_installed
+                    ));
+                }
             }
         }
 
-        rzup.environment()
-            .emit(RzupEvent::CheckUpdates { id: None });
+        rzup.emit(RzupEvent::CheckUpdates { id: None });
 
         for result in results {
             println!("{}", result);

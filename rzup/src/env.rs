@@ -59,10 +59,6 @@ impl Environment {
         &self.root_dir
     }
 
-    pub fn component_dir(&self, id: &str) -> Result<PathBuf> {
-        Ok(self.root_dir.join(id))
-    }
-
     pub fn settings_path(&self) -> &Path {
         &self.settings_file
     }

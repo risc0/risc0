@@ -2,54 +2,18 @@ use crate::components::implementations::{CargoRiscZero, R0Vm, RustToolchain};
 use crate::components::Component;
 use crate::env::Environment;
 use crate::error::Result;
+use crate::paths::Paths;
 use crate::settings::Settings;
 use crate::RzupError;
 use crate::RzupEvent;
 use semver::Version;
 use std::collections::HashMap;
-use std::path::PathBuf;
 
 static DEFAULT_COMPONENTS: &[&str] = &["rust", "cargo-risczero"];
-
-#[derive(Debug, Default, Clone)]
-pub(crate) struct ComponentVersions {
-    pub(crate) versions: HashMap<Version, PathBuf>,
-}
-
-impl ComponentVersions {
-    fn new() -> Self {
-        Self {
-            versions: HashMap::new(),
-        }
-    }
-
-    pub fn has_version(&self, version: &Version) -> bool {
-        self.versions.contains_key(version)
-    }
-
-    fn add_version(&mut self, version: Version, path: PathBuf) {
-        self.versions.insert(version, path);
-    }
-
-    pub fn get_active_version<'a>(
-        &'a self,
-        settings: &'a Settings,
-        component_id: &str,
-    ) -> Option<(&'a Version, &'a PathBuf)> {
-        settings
-            .get_active_version(component_id)
-            .and_then(|v| self.versions.get_key_value(&v))
-    }
-
-    pub fn list_versions(&self) -> Vec<&Version> {
-        self.versions.keys().collect()
-    }
-}
 
 #[derive(Default, Debug)]
 pub(crate) struct ComponentRegistry {
     pub(crate) components: HashMap<&'static str, Box<dyn Component>>,
-    versions: HashMap<&'static str, ComponentVersions>,
     settings: Settings,
 }
 
@@ -58,7 +22,6 @@ impl ComponentRegistry {
         let settings = Settings::load(env)?;
         Ok(Self {
             components: HashMap::new(),
-            versions: HashMap::new(),
             settings,
         })
     }
@@ -67,52 +30,12 @@ impl ComponentRegistry {
         &self.settings
     }
 
-    fn register_component_versions(
-        &mut self,
-        component: Box<dyn Component>,
-        versions: ComponentVersions,
-    ) -> Result<()> {
-        let component_id = component.id();
-
-        if versions.versions.is_empty() {
-            return Ok(());
-        }
-
-        // if virtual component, copy version from parent
-        let versions = if component.is_virtual() {
-            if let Some(parent_id) = component.parent_component() {
-                if let Some(parent_versions) = self.versions.get(parent_id) {
-                    parent_versions.clone()
-                } else {
-                    ComponentVersions::new()
-                }
-            } else {
-                ComponentVersions::new()
-            }
-        } else {
-            versions.clone()
-        };
-
-        self.register(component);
-        self.versions.insert(component_id, versions.clone());
-
-        // set active version if none exists
-        if self.settings.get_active_version(component_id).is_none() {
-            if let Some(latest) = versions.list_versions().into_iter().max() {
-                self.settings.set_active_version(component_id, latest);
-            }
-        }
-
-        Ok(())
-    }
-
     pub fn scan_environment(&mut self, env: &Environment) -> Result<()> {
         env.emit(RzupEvent::Debug {
             message: format!("Scanning environment at {}", env.root_dir().display()),
         });
 
         self.components.clear();
-        self.versions.clear();
 
         let components: Vec<Box<dyn Component>> = vec![
             Box::new(RustToolchain),
@@ -122,40 +45,37 @@ impl ComponentRegistry {
 
         for component in components {
             let component_id = component.id();
-
             env.emit(RzupEvent::Debug {
-                message: format!("Scanning versions for component: {}", component_id),
+                message: format!("Registering component: {}", component_id),
             });
 
-            let versions = self.scan_component_versions(env, component_id)?;
+            self.register(component);
 
-            env.emit(RzupEvent::Debug {
-                message: format!(
-                    "Found {} versions for {}",
-                    versions.versions.len(),
-                    component_id
-                ),
-            });
-
-            self.register_component_versions(component, versions)?;
+            // Set active version if none exists
+            if self.settings.get_active_version(component_id).is_none() {
+                if let Ok(versions) = self.list_versions(env, component_id) {
+                    if let Some(latest) = versions.into_iter().max() {
+                        self.settings.set_active_version(component_id, &latest);
+                    }
+                }
+            }
         }
 
         Ok(())
     }
 
-    fn scan_component_versions(&self, env: &Environment, id: &str) -> Result<ComponentVersions> {
-        let component_path = env.component_dir(id)?;
-        let mut versions = ComponentVersions::new();
+    pub fn list_versions(&self, env: &Environment, id: &str) -> Result<Vec<Version>> {
+        let mut versions = Vec::new();
+        let component_dir = Paths::get_component_dir(env, id)?;
 
-        if !component_path.exists() {
+        if !component_dir.exists() {
             return Ok(versions);
         }
 
         let component_suffix = format!("-{}", id);
 
-        for entry in std::fs::read_dir(component_path)? {
+        for entry in std::fs::read_dir(component_dir)? {
             let entry = entry?;
-
             if !entry.path().is_dir() {
                 continue;
             }
@@ -163,20 +83,30 @@ impl ComponentRegistry {
             let version = entry
                 .file_name()
                 .to_string_lossy()
-                .strip_suffix(&component_suffix)
-                .and_then(|v| v.strip_prefix('v'))
+                .strip_prefix('v')
+                .and_then(|v| v.strip_suffix(&component_suffix))
                 .and_then(|v| Version::parse(v).ok());
 
             if let Some(version) = version {
-                versions.add_version(version, entry.path());
+                versions.push(version);
             }
         }
 
         Ok(versions)
     }
 
-    pub fn get_component_versions(&self, id: &str) -> Option<&ComponentVersions> {
-        self.versions.get(id)
+    pub fn get_active_version(
+        &self,
+        env: &Environment,
+        id: &str,
+    ) -> Result<Option<(Version, std::path::PathBuf)>> {
+        if let Some(version) = self.settings.get_active_version(id) {
+            if Paths::version_exists(env, id, &version)? {
+                let path = Paths::get_version_dir(env, id, &version)?;
+                return Ok(Some((version, path)));
+            }
+        }
+        Ok(None)
     }
 
     pub fn set_active_version(
@@ -185,21 +115,16 @@ impl ComponentRegistry {
         id: &str,
         version: Version,
     ) -> Result<()> {
-        if let Some(versions) = self.versions.get(id) {
-            if !versions.has_version(&version) {
-                return Err(RzupError::InvalidVersion(format!(
-                    "Version {} is not installed",
-                    version
-                )));
-            }
-
-            // only set if the version exists
-            self.settings.set_active_version(id, &version);
-            self.settings.save(env)?;
-            Ok(())
-        } else {
-            Err(RzupError::ComponentNotFound(id.to_string()))
+        if !Paths::version_exists(env, id, &version)? {
+            return Err(RzupError::InvalidVersion(format!(
+                "Version {} is not installed",
+                version
+            )));
         }
+
+        self.settings.set_active_version(id, &version);
+        self.settings.save(env)?;
+        Ok(())
     }
 
     pub fn list_components(&self) -> Vec<&dyn Component> {
@@ -222,14 +147,6 @@ impl ComponentRegistry {
         }
     }
 
-    fn needs_installation(&self, id: &str, version: &Version, force: bool) -> bool {
-        force
-            || self
-                .versions
-                .get(id)
-                .map_or(true, |versions| !versions.has_version(version))
-    }
-
     pub fn install_component(
         &mut self,
         env: &Environment,
@@ -246,7 +163,7 @@ impl ComponentRegistry {
 
         let component = self.create_component(id)?;
 
-        // if a virtual component install its parent instead
+        // Handle virtual components
         let (component_to_install, version_to_install) = if component.is_virtual() {
             if let Some(parent_id) = component.parent_component() {
                 (self.create_component(parent_id)?, version)
@@ -265,7 +182,7 @@ impl ComponentRegistry {
             None => component_to_install.get_latest_version(env)?,
         };
 
-        if !self.needs_installation(id, &version, force) {
+        if !force && Paths::version_exists(env, id, &version)? {
             env.emit(RzupEvent::ComponentAlreadyInstalled {
                 id: id.to_string(),
                 version: version.to_string(),
@@ -273,18 +190,11 @@ impl ComponentRegistry {
             return Ok(());
         }
 
-        if !env.root_dir().exists() {
-            std::fs::create_dir_all(env.root_dir())?;
-        }
-
+        // Install component
         component_to_install.install(env, Some(&version), force)?;
 
-        let versions = self.scan_component_versions(env, id)?;
-        let component = self.create_component(id)?;
-
+        // Update settings
         self.settings.set_active_version(id, &version);
-
-        self.register_component_versions(component, versions)?;
         self.settings.save(env)?;
 
         Ok(())
@@ -294,7 +204,6 @@ impl ComponentRegistry {
         for &component_id in DEFAULT_COMPONENTS {
             self.install_component(env, component_id, None, force)?;
         }
-
         Ok(())
     }
 
@@ -304,10 +213,6 @@ impl ComponentRegistry {
         id: &str,
         version: Version,
     ) -> Result<()> {
-        env.emit(RzupEvent::Debug {
-            message: format!("Uninstalling component {} (version: {:?})", id, version),
-        });
-
         let component = self.create_component(id)?;
         component.uninstall(env, &version)
     }
@@ -332,27 +237,22 @@ mod tests {
     }
 
     #[test]
-    fn test_component_version_handling() {
-        let mut versions = ComponentVersions::new();
-        let version = Version::new(1, 0, 0);
-        let path = PathBuf::from("/test/path");
-
-        versions.add_version(version.clone(), path.clone());
-
-        assert!(versions.has_version(&version));
-        assert_eq!(versions.list_versions(), vec![&version]);
-    }
-
-    #[test]
-    fn test_registry_component_installation() {
+    fn test_version_management() {
         let (_tmp_dir, env, mut registry) = setup_test_registry();
         let version = Version::new(1, 0, 0);
+        let component_id = "cargo-risczero";
 
+        // Test installation
         registry
-            .install_component(&env, "cargo-risczero", Some(version.clone()), false)
+            .install_component(&env, component_id, Some(version.clone()), false)
             .unwrap();
 
-        let versions = registry.get_component_versions("cargo-risczero").unwrap();
-        assert!(versions.has_version(&version));
+        // Test version listing
+        let versions = registry.list_versions(&env, component_id).unwrap();
+        assert!(versions.contains(&version));
+
+        // Test active version
+        let active = registry.get_active_version(&env, component_id).unwrap();
+        assert_eq!(active.map(|(v, _)| v), Some(version.clone()));
     }
 }

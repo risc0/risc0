@@ -41,7 +41,3 @@ indicatif = { version = "0.17.9", optional = true }
 colored = { version = "2.2.0", optional = true }
 
 
-# TEMP
-# [lints.rust]
-# dead_code = "allow"
-# unused_variables = "allow"

@@ -5,6 +5,7 @@ mod distribution;
 mod env;
 
 mod events;
+mod paths;
 mod settings;
 
 pub mod error;
@@ -12,6 +13,7 @@ use crate::components::registry::ComponentRegistry;
 use crate::env::Environment;
 use crate::settings::Settings;
 use events::RzupEvent;
+use paths::Paths;
 use semver::Version;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -96,8 +98,30 @@ impl Rzup {
         Ok(())
     }
 
-    pub fn environment(&self) -> &Environment {
-        &self.environment
+    pub fn list_versions(&self, id: &str) -> Result<Vec<Version>> {
+        self.registry.list_versions(&self.environment, id)
+    }
+
+    pub fn get_active_version(&self, id: &str) -> Result<Option<(Version, std::path::PathBuf)>> {
+        self.registry.get_active_version(&self.environment, id)
+    }
+
+    pub fn emit(&self, event: RzupEvent) {
+        self.environment.emit(event)
+    }
+
+    pub fn get_latest_version(&self, id: &str) -> Result<Version> {
+        let component = self.registry.create_component(id)?;
+        component.get_latest_version(&self.environment)
+    }
+
+    pub fn set_active_version(&mut self, id: &str, version: Version) -> Result<()> {
+        self.registry
+            .set_active_version(&self.environment, id, version)
+    }
+
+    pub fn version_exists(&self, id: &str, version: &Version) -> Result<bool> {
+        Paths::version_exists(&self.environment, id, version)
     }
 
     pub fn settings(&self) -> &Settings {
@@ -107,44 +131,36 @@ impl Rzup {
     pub fn latest_version(&self, component_id: &str) -> Result<Version> {
         let components = &self.registry.components;
         let component = components.get(component_id).unwrap();
-        component.get_latest_version(self.environment())
+        component.get_latest_version(&self.environment)
     }
 
     pub fn installed_versions(&self, component_id: &str) -> HashMap<Version, PathBuf> {
-        self.registry
-            .get_component_versions(component_id)
-            .map_or_else(HashMap::new, |versions| versions.versions.clone())
+        let mut versions = HashMap::new();
+
+        if let Ok(component_dir) = Paths::get_component_dir(&self.environment, component_id) {
+            if let Ok(entries) = std::fs::read_dir(component_dir) {
+                for entry in entries.filter_map(|e| e.ok()) {
+                    let file_name = entry.file_name().to_string_lossy().to_string();
+                    if let Some(version_str) = file_name
+                        .strip_prefix('v')
+                        .and_then(|s| s.strip_suffix(&format!("-{}", component_id)))
+                    {
+                        if let Ok(version) = Version::parse(version_str) {
+                            versions.insert(version, entry.path());
+                        }
+                    }
+                }
+            }
+        }
+
+        versions
     }
 
     pub fn is_installed(&self, component_id: &str, version: &Version) -> bool {
-        self.installed_versions(component_id).contains_key(version)
+        Paths::version_exists(&self.environment, component_id, version).unwrap_or(false)
     }
 
-    // TODO: update this to work with toolchains too
-    pub fn get_bin_path(&self, component_id: &str) -> Result<PathBuf> {
-        let version = self
-            .settings()
-            .get_active_version(component_id)
-            .ok_or_else(|| {
-                RzupError::ComponentNotFound(format!(
-                    "No active version found for {}",
-                    component_id
-                ))
-            })?;
-
-        let installed_versions = self.installed_versions(component_id);
-        let version_dir = installed_versions.get(&version).ok_or_else(|| {
-            RzupError::ComponentNotFound(format!("{} version {} not found", component_id, version))
-        })?;
-
-        Ok(version_dir.join(component_id))
-    }
-
-    pub fn get_version_path(
-        &self,
-        component_id: &str,
-        version: &Version,
-    ) -> Result<Option<PathBuf>> {
+    pub fn get_bin_path(&self, component_id: &str, version: &Version) -> Result<Option<PathBuf>> {
         let component = self.registry.create_component(component_id)?;
 
         if component.is_virtual() {
@@ -156,17 +172,37 @@ impl Rzup {
                 ))
             })?;
 
-            let versions = self.installed_versions(parent_id);
-
-            if let Some(path) = versions.get(version) {
-                Ok(Some(path.join(component_id)))
+            if Paths::version_exists(&self.environment, parent_id, version)? {
+                Ok(Some(Paths::get_bin_path(
+                    &self.environment,
+                    parent_id,
+                    version,
+                    component_id,
+                )?))
             } else {
                 Ok(None)
             }
+        } else if Paths::version_exists(&self.environment, component_id, version)? {
+            Ok(Some(Paths::get_bin_dir(
+                &self.environment,
+                component_id,
+                version,
+            )?))
         } else {
-            let versions = self.installed_versions(component_id);
-            Ok(versions.get(version).cloned())
+            Ok(None)
         }
+    }
+
+    pub fn ensure_version_dirs(&self, component_id: &str, version: &Version) -> Result<()> {
+        Paths::create_version_dirs(&self.environment, component_id, version)
+    }
+
+    pub fn get_component_dir(&self, component_id: &str) -> Result<PathBuf> {
+        Paths::get_component_dir(&self.environment, component_id)
+    }
+
+    pub fn get_version_dir(&self, component_id: &str, version: &Version) -> Result<PathBuf> {
+        Paths::get_version_dir(&self.environment, component_id, version)
     }
 }
 
@@ -224,45 +260,29 @@ mod tests {
     }
 
     #[test]
-    fn test_get_version_path_virtual() {
-        let (_tmp_dir, mut rzup) = setup_test_env();
+    fn test_path_operations() {
+        let tmp_dir = TempDir::new().unwrap();
+        let rzup = Rzup::with_root(tmp_dir.path()).unwrap();
         let version = Version::new(1, 0, 0);
+        let component_id = "cargo-risczero";
 
-        // Install parent component
-        rzup.install_component("cargo-risczero", Some(version.clone()), false)
-            .unwrap();
+        // Test directory creation
+        rzup.ensure_version_dirs(component_id, &version).unwrap();
+        assert!(rzup.is_installed(component_id, &version));
 
-        // Test virtual component path
-        let path = rzup.get_version_path("r0vm", &version).unwrap();
-        assert!(path.is_some());
-        let path = path.unwrap();
-        assert!(path.ends_with("r0vm"));
-        assert!(path
-            .parent()
+        // Test binary path retrieval
+        let bin_path = rzup.get_bin_path(component_id, &version).unwrap();
+        assert!(bin_path.is_some());
+        assert!(bin_path
             .unwrap()
-            .ends_with(format!("v{}-cargo-risczero", version)));
-    }
+            .ends_with(format!("v{}-{}/bin", version, component_id)));
 
-    #[test]
-    fn test_get_version_path() {
-        let (_tmp_dir, mut rzup) = setup_test_env();
-        let version = Version::new(1, 0, 0);
-
-        // Test when version is not installed
-        assert!(rzup
-            .get_version_path("cargo-risczero", &version)
+        // Test virtual component
+        let virtual_component = "r0vm";
+        let virtual_bin_path = rzup.get_bin_path(virtual_component, &version).unwrap();
+        assert!(virtual_bin_path.is_some());
+        assert!(virtual_bin_path
             .unwrap()
-            .is_none());
-
-        // Install version
-        rzup.install_component("cargo-risczero", Some(version.clone()), false)
-            .unwrap();
-
-        // Test when version is installed
-        let path = rzup.get_version_path("cargo-risczero", &version).unwrap();
-        assert!(path.is_some());
-        assert!(path
-            .unwrap()
-            .ends_with(format!("v{}-cargo-risczero", version)));
+            .ends_with(format!("bin/{}", virtual_component)));
     }
 }

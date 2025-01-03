@@ -4,10 +4,11 @@ pub(crate) mod registry;
 use crate::distribution::{github::GithubRelease, Distribution, Platform};
 use crate::env::Environment;
 use crate::error::Result;
+use crate::paths::Paths;
 use crate::RzupEvent;
 use flate2::bufread::GzDecoder;
 use semver::Version;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use tar::Archive;
@@ -17,7 +18,6 @@ pub(crate) trait Component: std::fmt::Debug {
     fn id(&self) -> &'static str;
 
     fn distribution(&self) -> Box<dyn Distribution> {
-        // TODO: add match statement for alternative dists
         Box::new(GithubRelease)
     }
 
@@ -44,75 +44,27 @@ pub(crate) trait Component: std::fmt::Debug {
             version: version.to_string(),
         });
 
-        let version_dir = self.create_version_dir(env, version)?;
+        Paths::create_version_dirs(env, self.id(), version)?;
+
         let downloaded_file = self.get_downloaded(env, version)?;
 
-        if force && version_dir.exists() {
+        if force && Paths::version_exists(env, self.id(), version)? {
             env.emit(RzupEvent::Debug {
-                message: format!(
-                    "Force flag set - removing existing installation at {}",
-                    version_dir.display()
-                ),
+                message: "Force flag set - removing existing installation".to_string(),
             });
-            std::fs::remove_dir_all(&version_dir)?;
-            std::fs::create_dir_all(&version_dir)?;
+            Paths::cleanup_version(env, self.id(), version)?;
+            Paths::create_version_dirs(env, self.id(), version)?;
         }
 
-        // clean up
-        let cleanup = |env: &Environment, version_dir: &Path, downloaded_file: &Path| {
-            if version_dir.exists() {
-                env.emit(RzupEvent::Debug {
-                    message: format!(
-                        "Cleaning up failed installation directory: {}",
-                        version_dir.display()
-                    ),
-                });
-                if let Err(e) = std::fs::remove_dir_all(version_dir) {
-                    env.emit(RzupEvent::Debug {
-                        message: format!("Failed to remove installation directory: {}", e),
-                    });
-                }
-            }
-
-            if downloaded_file.exists() {
-                env.emit(RzupEvent::Debug {
-                    message: format!(
-                        "Cleaning up downloaded archive: {}",
-                        downloaded_file.display()
-                    ),
-                });
-                if let Err(e) = std::fs::remove_file(downloaded_file) {
-                    env.emit(RzupEvent::Debug {
-                        message: format!("Failed to remove downloaded archive: {}", e),
-                    });
-                }
-            }
-        };
-
-        // download and extract, cleaning up on error
-        let result = (|| -> Result<()> {
-            self.distribution()
-                .download_version(env, self.id(), Some(version))?;
-            self.extract_archive(env, &downloaded_file, &version_dir)?;
-            Ok(())
-        })();
-
-        if let Err(e) = &result {
+        if let Err(e) = self.download_and_extract(env, version, &downloaded_file) {
             env.emit(RzupEvent::Debug {
                 message: format!("Installation failed: {}", e),
             });
-            cleanup(env, &version_dir, &downloaded_file);
-            return Err(e.clone());
+            Paths::cleanup_version(env, self.id(), version)?;
+            return Err(e);
         }
 
-        // clean up just the downloaded file after installation
         if downloaded_file.exists() {
-            env.emit(RzupEvent::Debug {
-                message: format!(
-                    "Cleaning up downloaded archive: {}",
-                    downloaded_file.display()
-                ),
-            });
             if let Err(e) = std::fs::remove_file(&downloaded_file) {
                 env.emit(RzupEvent::Debug {
                     message: format!("Failed to remove downloaded archive: {}", e),
@@ -128,15 +80,6 @@ pub(crate) trait Component: std::fmt::Debug {
         Ok(())
     }
 
-    fn get_path(&self, env: &Environment) -> Result<PathBuf> {
-        env.component_dir(self.id())
-    }
-
-    fn get_version_path(&self, env: &Environment, version: &Version) -> Result<PathBuf> {
-        let base_path = self.get_path(env)?;
-        Ok(base_path.join(format!("v{}-{}", version, self.id())))
-    }
-
     fn uninstall(&self, env: &Environment, version: &Version) -> Result<()> {
         env.emit(RzupEvent::Debug {
             message: format!(
@@ -146,39 +89,29 @@ pub(crate) trait Component: std::fmt::Debug {
             ),
         });
 
-        let version_path = self.get_version_path(env, version)?;
-        if version_path.exists() {
-            fs::remove_dir_all(&version_path)?;
-            env.emit(RzupEvent::Uninstalled {
-                id: self.id().to_string(),
-                version: version.to_string(),
-            });
-        } else {
-            env.emit(RzupEvent::Debug {
-                message: format!(
-                    "Version {} of component {} is not installed",
-                    version,
-                    self.id()
-                ),
-            });
-        }
+        Paths::cleanup_version(env, self.id(), version)?;
 
-        // clean up the component directory if it's empty
-        let component_path = self.get_path(env)?;
-        if component_path.exists() {
-            let entries = fs::read_dir(&component_path)?;
-            if entries.count() == 0 {
-                fs::remove_dir(component_path)?;
-            }
-        }
+        env.emit(RzupEvent::Uninstalled {
+            id: self.id().to_string(),
+            version: version.to_string(),
+        });
 
         Ok(())
     }
 
-    fn create_version_dir(&self, env: &Environment, version: &Version) -> Result<PathBuf> {
-        let version_dir = self.get_version_path(env, version)?;
-        fs::create_dir_all(&version_dir)?;
-        Ok(version_dir)
+    fn download_and_extract(
+        &self,
+        env: &Environment,
+        version: &Version,
+        downloaded_file: &Path,
+    ) -> Result<()> {
+        self.distribution()
+            .download_version(env, self.id(), Some(version))?;
+
+        let version_dir = Paths::get_version_dir(env, self.id(), version)?;
+        self.extract_archive(env, downloaded_file, &version_dir)?;
+
+        Ok(())
     }
 
     fn get_downloaded(&self, env: &Environment, version: &Version) -> Result<PathBuf> {
