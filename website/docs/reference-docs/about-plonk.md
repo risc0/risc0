@@ -17,7 +17,7 @@ Implementation and documentation for RISC Zero's use of PLONK and PLOOKUP are in
 
 ## Basic Function
 
-PLONK makes uses of [accumulators](https://hackmd.io/@relgabizon/ByFgSDA7D) in order to ensure that one list is a permutation of another.
+PLONK makes use of [accumulators](https://hackmd.io/@relgabizon/ByFgSDA7D) in order to ensure that one list is a permutation of another.
 PLOOKUP uses PLONK to ensure that one list is contained in another list.
 
 ## Suggested Reading and Videos
