@@ -13,13 +13,12 @@
 // limitations under the License.
 
 use num_derive::FromPrimitive;
-
-use super::addr::{ByteAddr, WordAddr};
+use risc0_binfmt::{ByteAddr, WordAddr};
 
 pub const WORD_SIZE: usize = 4;
 pub const PAGE_BYTES: usize = 1024;
-pub const MEMORY_BYTES: usize = 1 << 32; // TODO: this only works on 64-bit machines
-pub const MEMORY_PAGES: usize = MEMORY_BYTES / PAGE_BYTES;
+pub const MEMORY_BYTES: u64 = 1 << 32;
+pub const MEMORY_PAGES: usize = (MEMORY_BYTES / PAGE_BYTES as u64) as usize;
 pub const MERKLE_TREE_DEPTH: usize = MEMORY_PAGES.ilog2() as usize;
 pub const LOOKUP_TABLE_CYCLES: usize = ((1 << 8) + (1 << 16)) / 16;
 

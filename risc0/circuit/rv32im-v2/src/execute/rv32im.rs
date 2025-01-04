@@ -13,11 +13,9 @@
 // limitations under the License.
 
 use anyhow::Result;
+use risc0_binfmt::{ByteAddr, WordAddr};
 
-use super::{
-    addr::{ByteAddr, WordAddr},
-    platform::{REG_MAX, REG_ZERO, WORD_SIZE},
-};
+use super::platform::{REG_MAX, REG_ZERO, WORD_SIZE};
 
 pub trait EmuContext {
     // Handle environment call
@@ -718,15 +716,5 @@ pub fn disasm(insn: &Instruction, decoded: &DecodedInstruction) -> String {
             _ => "illegal eany".to_string(),
         },
         InsnKind::Mret => "mret".to_string(),
-    }
-}
-
-impl InsnKind {
-    pub fn major(&self) -> u8 {
-        (*self as u32 / 8) as u8
-    }
-
-    pub fn minor(&self) -> u8 {
-        (*self as u32 % 8) as u8
     }
 }

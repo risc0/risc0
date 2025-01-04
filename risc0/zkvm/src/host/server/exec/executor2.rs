@@ -22,16 +22,17 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::{Program, SystemState};
+use risc0_binfmt::{ByteAddr as ByteAddr2, ExitCode, MemoryImage2, Program, SystemState};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_circuit_rv32im_v2::execute::{
-    platform::WORD_SIZE, ByteAddr as ByteAddr2, Executor, MemoryImage2, Syscall as CircuitSyscall,
+    platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
     SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
+    USER_END_ADDR,
 };
 use risc0_core::scope;
-use risc0_zkos_v1compat::KERNEL_ELF;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::{align_up, fileno, memory::GUEST_MAX_MEM};
+use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
@@ -75,8 +76,8 @@ impl<'a> Executor2<'a> {
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
     pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        let kernel = Program::load_elf(KERNEL_ELF, u32::MAX)?;
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
+        let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX)?;
+        let program = Program::load_elf(elf, USER_END_ADDR.0)?;
         let image = MemoryImage2::with_kernel(program, kernel);
 
         let profiler = if env.pprof_out.is_some() {
@@ -216,6 +217,12 @@ impl<'a> Executor2<'a> {
         self.image = result.post_image.clone();
         let syscall_metrics = self.syscall_table.metrics.borrow().clone();
 
+        // NOTE: When a segment ends in a Halted(_) state, the post_digest will be null.
+        let post_digest = match result.exit_code {
+            ExitCode::Halted(_) => Digest::ZERO,
+            _ => result.post_digest,
+        };
+
         let session = Session {
             segments: refs,
             input: self.env.input_digest.unwrap_or_default(),
@@ -232,7 +239,7 @@ impl<'a> Executor2<'a> {
             },
             post_state: SystemState {
                 pc: 0,
-                merkle_root: result.post_digest,
+                merkle_root: post_digest,
             },
             pending_zkrs,
             pending_keccaks,

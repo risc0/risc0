@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-.equ GLOBAL_OUTPUT_ADDR, 0xffff0240
+.equ USER_START_ADDR, 0x00010000
 .equ STACK_TOP, 0xfff00000
 .equ USER_REGS_ADDR, 0xffff0080
+.equ MEPC_ADDR, 0xffff0200
+.equ GLOBAL_OUTPUT_ADDR, 0xffff0240
 .equ ECALL_DISPATCH_ADDR, 0xffff1000
 .equ ECALL_TABLE_SIZE, 7
 .equ HOST_ECALL_TERMINATE, 0
@@ -52,6 +54,13 @@ _start:
     la t4, _ecall_table
     li t5, ECALL_TABLE_SIZE
     li t6, MAX_IO_BYTES
+
+    # Load the user program entry into MEPC
+    li a0, USER_START_ADDR
+    li a1, MEPC_ADDR
+    lw a2, 0(a0)
+    addi a2, a2, -WORD_SIZE
+    sw a2, 0(a1)
 
     # Jump into userspace
     mret

@@ -13,7 +13,9 @@
 // limitations under the License.
 
 pub(crate) mod paged_map;
+pub(crate) mod poseidon2;
 pub(crate) mod preflight;
+pub(crate) mod sha2;
 #[cfg(test)]
 mod tests;
 
@@ -21,6 +23,7 @@ use std::iter::zip;
 
 use anyhow::{Context, Result};
 use preflight::PreflightTrace;
+use risc0_binfmt::WordAddr;
 use risc0_circuit_rv32im_v2_sys::RawPreflightCycle;
 use risc0_core::scope;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::Elem as _, hal::Hal};
@@ -29,8 +32,8 @@ use self::preflight::Back;
 use super::hal::{CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
     execute::{
-        addr::WordAddr, platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State,
-        segment::Segment, sha2::Sha2State,
+        platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State, segment::Segment,
+        sha2::Sha2State,
     },
     zirgen::circuit::{
         CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_CODE, REGCOUNT_DATA,
@@ -231,4 +234,8 @@ impl Injector {
 
 fn node_addr_to_idx(addr: WordAddr) -> u32 {
     (MERKLE_TREE_END_ADDR - addr).0 / DIGEST_WORDS as u32
+}
+
+fn node_idx_to_addr(idx: u32) -> WordAddr {
+    MERKLE_TREE_END_ADDR - idx * DIGEST_WORDS as u32
 }

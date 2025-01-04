@@ -13,11 +13,9 @@
 // limitations under the License.
 
 use derive_more::Debug;
-use risc0_binfmt::ExitCode;
+use risc0_binfmt::{ExitCode, MemoryImage2};
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
-
-use super::image::MemoryImage2;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Segment {

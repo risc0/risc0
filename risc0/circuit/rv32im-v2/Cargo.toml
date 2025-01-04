@@ -61,6 +61,7 @@ execute = [
   "dep:derive_more",
   "dep:num-derive",
   "dep:num-traits",
+  "risc0-core/perf",
   "std",
 ]
 prove = [
@@ -70,8 +71,7 @@ prove = [
   "dep:risc0-circuit-rv32im-v2-sys",
   "dep:risc0-sys",
   "execute",
-  "risc0-core/perf",
   "risc0-zkp/prove",
   "std",
 ]
-std = ["risc0-zkp/std", "serde/std"]
+std = ["risc0-binfmt/std", "risc0-zkp/std", "serde/std"]

@@ -14,12 +14,12 @@
 
 use std::{cmp::min, fmt::Write as _};
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
+use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
-    addr::{ByteAddr, WordAddr},
     platform::*,
-    poseidon2::{self, Poseidon2State},
+    poseidon2::{Poseidon2, Poseidon2State},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
     sha2::{self, Sha2State},
 };
@@ -120,9 +120,9 @@ impl<'a> Risc0Machine<'a> {
 
     pub fn resume(ctx: &'a mut dyn Risc0Context) -> Result<()> {
         let mut this = Risc0Machine { ctx };
-        let pc = ByteAddr(this.load_memory(SUSPEND_PC_ADDR.waddr())?).check()?;
+        let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
-        // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
+        tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
         this.ctx.set_machine_mode(machine_mode);
         this.ctx.resume()
@@ -154,7 +154,7 @@ impl<'a> Risc0Machine<'a> {
         // }
 
         // let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr() + dispatch_idx)?);
-        let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?).check()?;
+        let dispatch_addr = guest_addr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?)?;
         // tracing::trace!("user_ecall> idx: {dispatch_idx}, addr: {dispatch_addr:?}");
         tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
@@ -192,7 +192,7 @@ impl<'a> Risc0Machine<'a> {
             bail!("Invalid length (too big) in host read: {len}");
         }
         if len > 0 {
-            ptr.check()?;
+            guest_addr(ptr.0)?;
         }
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
@@ -272,7 +272,7 @@ impl<'a> Risc0Machine<'a> {
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostWrite, 0, 0, 0)?;
         let fd = self.load_register(REG_A0)?;
-        let ptr = ByteAddr(self.load_register(REG_A1)?).check()?;
+        let ptr = ByteAddr(self.load_register(REG_A1)?);
         let len = self.load_register(REG_A2)?;
         if ptr + len < ptr {
             bail!("Invalid length in host write: {len}");
@@ -295,7 +295,7 @@ impl<'a> Risc0Machine<'a> {
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0)?;
-        poseidon2::ecall(self.ctx)?;
+        Poseidon2::ecall(self.ctx)?;
         // Ok(true)
         Ok(false)
     }
@@ -387,7 +387,7 @@ impl<'a> EmuContext for Risc0Machine<'a> {
         if !self.is_machine_mode() {
             bail!("Illegal mret in user mode");
         }
-        let dispatch_addr = ByteAddr(self.load_memory(MEPC_ADDR.waddr())?).check()?;
+        let dispatch_addr = guest_addr(self.load_memory(MEPC_ADDR.waddr())?)?;
         self.ctx.set_pc(dispatch_addr + WORD_SIZE);
         self.ctx.set_machine_mode(0);
         Ok(true)
@@ -464,5 +464,14 @@ impl<'a> EmuContext for Risc0Machine<'a> {
 
     fn check_data_store(&self, addr: ByteAddr) -> bool {
         self.check_data_load(addr)
+    }
+}
+
+pub(crate) fn guest_addr(addr: u32) -> Result<ByteAddr> {
+    let addr = ByteAddr(addr);
+    if addr < ZERO_PAGE_END_ADDR {
+        Err(anyhow!("{addr:?} is an invalid guest address"))
+    } else {
+        Ok(addr)
     }
 }

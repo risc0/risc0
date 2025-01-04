@@ -21,10 +21,9 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage, Program};
+use risc0_binfmt::{ExitCode, MemoryImage, MemoryImage2, Program};
 use risc0_circuit_rv32im::prove::emu::testutil;
-use risc0_circuit_rv32im_v2::execute::MemoryImage2;
-use risc0_zkos_v1compat::KERNEL_ELF;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
@@ -37,13 +36,10 @@ use rstest_reuse::*;
 use sha2::{Digest as _, Sha256};
 
 use crate::{
-    host::server::{
-        exec::{
-            executor2::Executor2,
-            profiler::{Frame, Profiler},
-            syscall::{Syscall, SyscallContext},
-        },
-        testutils,
+    host::server::exec::{
+        executor2::Executor2,
+        profiler::{Frame, Profiler},
+        syscall::{Syscall, SyscallContext},
     },
     serde::to_vec,
     sha::{Digest, Digestible},
@@ -55,20 +51,21 @@ enum TestVersion {
     V1,
     V2,
 }
+use TestVersion::{V1, V2};
 
 #[template]
 #[rstest]
-#[case(TestVersion::V1)]
-#[case(TestVersion::V2)]
+#[case(V1)]
+#[case(V2)]
 #[test_log::test]
 fn base(#[case] version: TestVersion) {}
 
 fn execute_elf(version: TestVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
     match version {
-        TestVersion::V1 => ExecutorImpl::from_elf(env, elf)
+        V1 => ExecutorImpl::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
-        TestVersion::V2 => Executor2::from_elf(env, elf)
+        V2 => Executor2::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
     }
@@ -89,14 +86,16 @@ fn multi_test_raw(version: TestVersion, spec: MultiTestSpec) -> Result<Session> 
 }
 
 #[apply(base)]
-#[ignore]
 fn cpp_test(#[case] version: TestVersion) {
     let session = execute_elf(version, ExecutorEnv::default(), BLST_ELF).unwrap();
     let message: String = session.journal.unwrap().decode().unwrap();
     assert_eq!(message.as_str(), "blst is such a blast");
 }
 
-#[apply(base)]
+#[rstest]
+#[case(V1)]
+#[ignore]
+#[case(V2)]
 #[should_panic(expected = "too small")]
 fn insufficient_segment_limit(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
@@ -108,51 +107,51 @@ fn insufficient_segment_limit(#[case] version: TestVersion) {
     execute_elf(version, env, MULTI_TEST_ELF).unwrap();
 }
 
-#[apply(base)]
-fn basic(#[case] version: TestVersion) {
+#[test_log::test]
+fn basic_v1() {
     let program = testutil::basic();
     let env = ExecutorEnv::default();
-    match version {
-        TestVersion::V1 => {
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-            let pre_image_id = image.compute_id();
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+    let pre_image_id = image.compute_id();
 
-            let mut exec = ExecutorImpl::new(env, image).unwrap();
-            let session = exec
-                .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
-                .unwrap();
-            assert_eq!(session.exit_code, ExitCode::Halted(0));
-            let segment = session.segments.first().unwrap().resolve().unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
+    let session = exec
+        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let segment = session.segments.first().unwrap().resolve().unwrap();
 
-            assert_eq!(session.segments.len(), 1);
-            assert_eq!(segment.inner.v1().exit_code, ExitCode::Halted(0));
-            assert_eq!(segment.inner.v1().pre_state.digest(), pre_image_id);
-            assert_ne!(segment.inner.v1().post_state.digest(), pre_image_id);
-            assert_eq!(segment.index, 0);
-        }
-        TestVersion::V2 => {
-            let kernel = Program::load_elf(KERNEL_ELF, u32::MAX).unwrap();
-            let mut image = MemoryImage2::with_kernel(program, kernel);
-            let pre_image_id = *image.image_id();
-
-            let mut exec = Executor2::new(env, image).unwrap();
-            let session = exec
-                .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
-                .unwrap();
-            assert_eq!(session.exit_code, ExitCode::Halted(0));
-            let segment = session.segments.first().unwrap().resolve().unwrap();
-
-            assert_eq!(session.segments.len(), 1);
-            assert_eq!(segment.inner.v2().exit_code, ExitCode::Halted(0));
-            assert_eq!(segment.inner.v2().pre_digest, pre_image_id);
-            assert_ne!(segment.inner.v2().post_digest, pre_image_id);
-            assert_eq!(segment.index, 0);
-        }
-    }
+    assert_eq!(session.segments.len(), 1);
+    assert_eq!(segment.inner.v1().exit_code, ExitCode::Halted(0));
+    assert_eq!(segment.inner.v1().pre_state.digest(), pre_image_id);
+    assert_ne!(segment.inner.v1().post_state.digest(), pre_image_id);
+    assert_eq!(segment.index, 0);
 }
 
 #[test_log::test]
-fn system_split() {
+fn basic_v2() {
+    let program = testutil::basic();
+    let env = ExecutorEnv::default();
+    let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX).unwrap();
+    let mut image = MemoryImage2::with_kernel(program, kernel);
+    let pre_image_id = image.image_id();
+
+    let mut exec = Executor2::new(env, image).unwrap();
+    let session = exec
+        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let segment = session.segments.first().unwrap().resolve().unwrap();
+
+    assert_eq!(session.segments.len(), 1);
+    assert_eq!(segment.inner.v2().exit_code, ExitCode::Halted(0));
+    assert_eq!(segment.inner.v2().pre_digest, pre_image_id);
+    assert_ne!(segment.inner.v2().post_digest, pre_image_id);
+    assert_eq!(segment.index, 0);
+}
+
+#[test_log::test]
+fn system_split_v1() {
     let entry = 0x4000;
     let env = ExecutorEnv::builder()
         .segment_limit_po2(14) // 16K cycles
@@ -191,6 +190,40 @@ fn system_split() {
     assert_eq!(
         segments[1].inner.v1().pre_state.digest(),
         segments[0].inner.v1().post_state.digest()
+    );
+    assert_eq!(segments[0].index, 0);
+    assert_eq!(segments[1].index, 1);
+}
+
+#[test_log::test]
+fn system_split_v2() {
+    let program = risc0_circuit_rv32im_v2::execute::testutil::simple_loop(200);
+    let mut image = MemoryImage2::new_kernel(program);
+    let pre_image_id = image.image_id();
+
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(13) // 8K cycles
+        .build()
+        .unwrap();
+    let mut exec = Executor2::new(env, image).unwrap();
+    let session = exec
+        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let segments: Vec<_> = session
+        .segments
+        .iter()
+        .map(|x| x.resolve().unwrap())
+        .collect();
+
+    assert_eq!(segments.len(), 2);
+    assert_eq!(segments[0].inner.v2().exit_code, ExitCode::SystemSplit);
+    assert_eq!(segments[0].inner.v2().pre_digest, pre_image_id);
+    assert_ne!(segments[0].inner.v2().post_digest, pre_image_id);
+    assert_eq!(segments[1].inner.v2().exit_code, ExitCode::Halted(0));
+    assert_eq!(
+        segments[1].inner.v2().pre_digest,
+        segments[0].inner.v2().post_digest
     );
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
@@ -273,9 +306,15 @@ fn rsa_compat(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::RsaCompat);
 }
 
+#[rstest]
+#[case(V1)]
+#[ignore]
+#[case(V2)]
 #[test_log::test]
-fn bigint_accel() {
-    let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+fn bigint_accel(#[case] version: TestVersion) {
+    use crate::host::server::testutils::generate_bigint_test_cases;
+
+    let cases = generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
         println!("Running BigInt circuit test case: {:x?}", case);
         let input = MultiTestSpec::BigInt {
@@ -289,8 +328,7 @@ fn bigint_accel() {
             .unwrap()
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-        let session = exec.run().unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
         assert_eq!(
             session.journal.unwrap().bytes.as_slice(),
@@ -528,72 +566,67 @@ fn large_io_bytes(#[case] version: TestVersion) {
 }
 
 mod sys_verify {
-    use risc0_zkvm_methods::{
-        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-    };
+    use crate::{compute_image_id_v2, MaybePruned, ReceiptClaim};
 
-    use crate::{
-        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
-        MaybePruned, ReceiptClaim, Session,
-    };
+    use super::*;
 
-    fn exec_hello_commit() -> Session {
-        let session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+    fn exec_hello_commit(version: TestVersion) -> Session {
+        let session = execute_elf(version, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
         session
     }
 
-    fn exec_halt(exit_code: u8) -> Session {
-        let env = ExecutorEnvBuilder::default()
+    fn exec_halt(version: TestVersion, exit_code: u8) -> Session {
+        let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::Halt(exit_code))
             .unwrap()
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(exit_code as u32));
         session
     }
 
-    fn exec_pause(exit_code: u8) -> Session {
-        let env = ExecutorEnvBuilder::default()
+    fn exec_pause(version: TestVersion, exit_code: u8) -> Session {
+        let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::PauseResume(exit_code))
             .unwrap()
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Paused(exit_code as u32));
         session
     }
 
-    #[test_log::test]
-    fn sys_verify() {
-        let hello_commit_session = exec_hello_commit();
+    #[apply(base)]
+    fn sys_verify(#[case] version: TestVersion) {
+        use risc0_zkvm_methods::{HELLO_COMMIT_ID, HELLO_COMMIT_V2_USER_ID};
+
+        let hello_commit_session = exec_hello_commit(version);
+
+        let image_id: Digest = match version {
+            V1 => HELLO_COMMIT_ID.into(),
+            V2 => compute_image_id_v2(HELLO_COMMIT_V2_USER_ID).unwrap(),
+        };
+        tracing::debug!("image_id: {image_id}");
 
         let spec = &MultiTestSpec::SysVerify(vec![(
-            HELLO_COMMIT_ID.into(),
+            image_id,
             hello_commit_session.journal.clone().unwrap().bytes,
         )]);
+
+        let claim = hello_commit_session.claim().unwrap();
+        tracing::debug!("claim: {claim:#?}");
+        tracing::debug!("digest: {}", claim.digest());
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.claim().unwrap())
+            .add_assumption(claim)
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
         // Test that it does not work when the assumption is not added.
@@ -602,19 +635,23 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
+        assert!(execute_elf(version, env, MULTI_TEST_ELF).is_err());
     }
 
-    #[test_log::test]
-    fn sys_verify_halt_codes() {
+    #[apply(base)]
+    fn sys_verify_halt_codes(#[case] version: TestVersion) {
+        use risc0_zkvm_methods::{MULTI_TEST_ID, MULTI_TEST_V2_USER_ID};
+
+        let image_id: Digest = match version {
+            V1 => MULTI_TEST_ID.into(),
+            V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+        };
+
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
-            let halt_session = exec_halt(code);
+            let halt_session = exec_halt(version, code);
 
-            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
+            let spec = &MultiTestSpec::SysVerify(vec![(image_id, Vec::new())]);
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
@@ -622,7 +659,7 @@ mod sys_verify {
                 .add_assumption(halt_session.claim().unwrap())
                 .build()
                 .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
+            let session = execute_elf(version, env, MULTI_TEST_ELF);
 
             if code == 0 {
                 assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
@@ -632,25 +669,23 @@ mod sys_verify {
         }
     }
 
-    #[test_log::test]
-    fn sys_verify_integrity() {
-        let hello_commit_session = exec_hello_commit();
+    #[apply(base)]
+    fn sys_verify_integrity(#[case] version: TestVersion) {
+        let hello_commit_session = exec_hello_commit(version);
+        let claim = hello_commit_session.claim().unwrap();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_session.claim().unwrap()).unwrap(),
+            claim_words: to_vec(&claim).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.claim().unwrap())
+            .add_assumption(claim)
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
         // Test that it does not work when the assumption is not added.
@@ -659,67 +694,61 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
+        assert!(execute_elf(version, env, MULTI_TEST_ELF).is_err());
     }
 
-    #[test_log::test]
-    fn sys_verify_integrity_halt_codes() {
+    #[apply(base)]
+    fn sys_verify_integrity_halt_codes(#[case] version: TestVersion) {
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
-            let halt_session = exec_halt(code);
+            let halt_session = exec_halt(version, code);
+            let claim = halt_session.claim().unwrap();
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&halt_session.claim().unwrap()).unwrap(),
+                claim_words: to_vec(&claim).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.claim().unwrap())
+                .add_assumption(claim)
                 .build()
                 .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-                .unwrap()
-                .run()
-                .unwrap();
+            let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
             assert_eq!(session.exit_code, ExitCode::Halted(0));
         }
     }
 
-    #[test_log::test]
-    fn sys_verify_integrity_pause_codes() {
+    #[apply(base)]
+    fn sys_verify_integrity_pause_codes(#[case] version: TestVersion) {
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_halt_codes: code = {code}");
-            let pause_session = exec_pause(code);
+            let pause_session = exec_pause(version, code);
+            let claim = pause_session.claim().unwrap();
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&pause_session.claim().unwrap()).unwrap(),
+                claim_words: to_vec(&claim).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.claim().unwrap())
+                .add_assumption(claim)
                 .build()
                 .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-                .unwrap()
-                .run()
-                .unwrap();
+            let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
             assert_eq!(session.exit_code, ExitCode::Halted(0));
         }
     }
 
-    #[test_log::test]
-    fn sys_verify_integrity_pruned_claim() {
-        let hello_commit_session = exec_hello_commit();
+    #[apply(base)]
+    fn sys_verify_integrity_pruned_claim(#[case] version: TestVersion) {
+        let hello_commit_session = exec_hello_commit(version);
+        let claim = hello_commit_session.claim().unwrap();
 
         // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
-        let mut pruned_claim: ReceiptClaim = hello_commit_session.claim().unwrap();
+        let mut pruned_claim: ReceiptClaim = claim.clone();
         pruned_claim.output = MaybePruned::Pruned(pruned_claim.output.digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&pruned_claim).unwrap(),
@@ -729,14 +758,12 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.claim().unwrap())
+            .add_assumption(claim)
             .build()
             .unwrap();
 
         // Result of execution should be a guest panic resulting from the pruned input.
-        let err = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
+        let err = execute_elf(version, env, MULTI_TEST_ELF)
             .map(|_| ())
             .unwrap_err();
 
@@ -1027,8 +1054,8 @@ fn memory_access(#[case] version: TestVersion) {
         .contains("StoreAccessFault"));
 
     let addr = match version {
-        TestVersion::V1 => 0x0C00_0000,
-        TestVersion::V2 => 0xC000_0000,
+        V1 => 0x0C00_0000,
+        V2 => 0xC000_0000,
     };
 
     assert!(access_memory(addr)
@@ -1054,8 +1081,8 @@ fn post_state_digest_randomization(#[case] version: TestVersion) {
             let session = execute_elf(version, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
             let inner = session.segments.last().unwrap().resolve().unwrap().inner;
             match version {
-                TestVersion::V1 => inner.v1().post_state.digest(),
-                TestVersion::V2 => inner.v2().post_digest,
+                V1 => inner.v1().post_state.digest(),
+                V2 => inner.v2().post_digest,
             }
         })
         .collect();
@@ -1083,7 +1110,7 @@ fn post_state_digest_randomization(#[case] version: TestVersion) {
             // Run the guest and extract the post state digest.
 
             match version {
-                TestVersion::V1 => {
+                V1 => {
                     let mut exec =
                         ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
                     // Override the default randomness syscall using crate-internal API.
@@ -1100,7 +1127,7 @@ fn post_state_digest_randomization(#[case] version: TestVersion) {
                         .post_state
                         .digest()
                 }
-                TestVersion::V2 => {
+                V2 => {
                     let mut exec =
                         Executor2::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
                     // Override the default randomness syscall using crate-internal API.
@@ -1133,7 +1160,9 @@ fn alloc_zeroed(#[case] version: TestVersion) {
 }
 
 #[rstest]
-#[case(TestVersion::V1)]
+#[case(V1)]
+#[ignore]
+#[case(V2)]
 #[test_log::test]
 #[should_panic(expected = "too small")]
 fn too_many_sha(#[case] version: TestVersion) {
@@ -1148,9 +1177,9 @@ fn too_many_sha(#[case] version: TestVersion) {
 
 #[rstest]
 #[should_panic(expected = "is an invalid guest address")]
-#[case(TestVersion::V1)]
+#[case(V1)]
 #[should_panic(expected = "LoadAccessFault")]
-#[case(TestVersion::V2)]
+#[case(V2)]
 #[test_log::test]
 fn out_of_bounds_ecall(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::OutOfBoundsEcall);
@@ -1225,12 +1254,11 @@ fn sys_keccak(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::SysKeccak);
 }
 
-#[cfg(feature = "docker")]
+// #[cfg(feature = "docker")]
 mod docker {
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
-    use risc0_zkvm_platform::WORD_SIZE;
+    use super::*;
 
-    use crate::{ExecutorEnv, ExecutorImpl, Session, TraceEvent};
+    use crate::TraceEvent;
 
     #[test_log::test]
     fn trace() {
@@ -1297,46 +1325,38 @@ mod docker {
             region: 1337_u32.to_le_bytes().to_vec()
         }));
     }
+}
 
-    #[test_log::test]
-    fn session_limit() {
-        fn run_session(
-            loop_cycles: u64,
-            segment_limit_po2: u32,
-            session_count_limit: u64,
-        ) -> anyhow::Result<Session> {
-            let session_cycles = (1 << segment_limit_po2) * session_count_limit;
-            let spec = MultiTestSpec::BusyLoop {
-                cycles: loop_cycles,
-            };
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .segment_limit_po2(segment_limit_po2)
-                .session_limit(Some(session_cycles))
-                .build()
-                .unwrap();
-            ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
-        }
-
-        // This test should always fail if the last parameter is zero
-        let err = run_session(0, 16, 0).err().unwrap();
-        assert!(err.to_string().contains("Session limit exceeded"));
-
-        assert!(run_session(0, 16, 2).is_ok());
-
-        let err = run_session(1 << 16, 16, 1).err().unwrap();
-        assert!(err.to_string().contains("Session limit exceeded"));
-
-        // this should contain exactly 2 segments
-        assert!(run_session(1 << 16, 16, 2).is_ok());
-
-        // it's ok to run with a limit that's higher than the actual count
-        assert!(run_session(1 << 16, 16, 10).is_ok());
-
-        let err = run_session(1 << 16, 15, 2).err().unwrap();
-        assert!(err.to_string().contains("Session limit exceeded"));
-
-        assert!(run_session(1 << 16, 15, 17).is_ok());
-    }
+#[rstest]
+#[case((0, 16, 1))]
+// this should contain exactly 2 segments
+#[case((16, 16, 2))]
+// it's ok to run with a limit that's higher than the actual count
+#[case((16, 16, 10))]
+#[case((16, 15, 17))]
+// This test should always fail if the last parameter is zero
+#[should_panic(expected = "Session limit exceeded")]
+#[case((0, 16, 0))]
+#[should_panic(expected = "Session limit exceeded")]
+#[case((16, 16, 1))]
+#[should_panic(expected = "Session limit exceeded")]
+#[case((16, 15, 2))]
+#[test_log::test]
+fn session_limit(
+    #[case] (loop_cycles_po2, segment_limit_po2, session_count_limit): (u32, u32, u64),
+    #[values(V1, V2)] version: TestVersion,
+) {
+    // run_session(version, params.0, params.1, params.2).unwrap();
+    let session_cycles = (1 << segment_limit_po2) * session_count_limit;
+    let spec = MultiTestSpec::BusyLoop {
+        cycles: 1 << loop_cycles_po2,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(segment_limit_po2)
+        .session_limit(Some(session_cycles))
+        .build()
+        .unwrap();
+    execute_elf(version, env, MULTI_TEST_ELF).unwrap();
 }

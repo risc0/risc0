@@ -44,10 +44,9 @@ pub(crate) struct GuestMetadata {
     #[serde(rename = "rustc-flags")]
     pub(crate) rustc_flags: Option<Vec<String>>,
 
-    /// Optional text address
-    pub(crate) text_addr: Option<u32>,
-
-    pub(crate) image_version: Option<u32>,
+    /// Indicates whether the guest program is a kernel.
+    #[serde(default)]
+    pub(crate) kernel: bool,
 }
 
 impl From<&Package> for GuestMetadata {

@@ -13,16 +13,14 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
+use risc0_binfmt::WordAddr;
 use risc0_zkp::core::hash::sha::BLOCK_WORDS;
 
-use crate::{
-    execute::{platform::*, r0vm::Risc0Context, ByteAddr, WordAddr},
-    zirgen::circuit::{ShaStateLayout, LAYOUT_TOP},
+use crate::execute::{
+    platform::*,
+    r0vm::{guest_addr, Risc0Context},
 };
 
-const SHA2_STATE_LAYOUT: &ShaStateLayout = LAYOUT_TOP.inst_result.arm11.state;
-const SHA2_FP_COUNT: usize = 7;
-const SHA2_U32_COUNT: usize = 3;
 const SHA2_LOAD_STATE_CYCLES: u32 = 4;
 const SHA2_LOAD_DATA_CYCLES: u32 = BLOCK_WORDS as u32;
 const SHA2_MIX_CYCLES: u32 = 48;
@@ -45,42 +43,6 @@ pub(crate) struct Sha2State {
 }
 
 impl Sha2State {
-    pub(crate) const fn fp_offsets() -> [usize; SHA2_FP_COUNT] {
-        [
-            SHA2_STATE_LAYOUT.state_in_addr._super.offset,
-            SHA2_STATE_LAYOUT.state_out_addr._super.offset,
-            SHA2_STATE_LAYOUT.data_addr._super.offset,
-            SHA2_STATE_LAYOUT.count._super.offset,
-            SHA2_STATE_LAYOUT.k_addr._super.offset,
-            SHA2_STATE_LAYOUT.round._super.offset,
-            SHA2_STATE_LAYOUT.next_state._super.offset,
-        ]
-    }
-
-    pub(crate) const fn u32_offsets() -> [usize; SHA2_U32_COUNT] {
-        [
-            SHA2_STATE_LAYOUT.a[0]._super.offset,
-            SHA2_STATE_LAYOUT.e[0]._super.offset,
-            SHA2_STATE_LAYOUT.w[0]._super.offset,
-        ]
-    }
-
-    pub(crate) fn fp_array(&self) -> [u32; SHA2_FP_COUNT] {
-        [
-            self.state_in_addr.0,
-            self.state_out_addr.0,
-            self.data_addr.0,
-            self.count,
-            self.k_addr.0,
-            self.round,
-            self.next_state as u32,
-        ]
-    }
-
-    pub(crate) fn u32_array(&self) -> [u32; SHA2_U32_COUNT] {
-        [self.a, self.e, self.w]
-    }
-
     fn step(
         &mut self,
         ctx: &mut dyn Risc0Context,
@@ -94,19 +56,11 @@ impl Sha2State {
 }
 
 pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
-    let state_in_addr = ByteAddr(ctx.load_machine_register(REG_A0)?)
-        .check()?
-        .waddr();
-    let state_out_addr = ByteAddr(ctx.load_machine_register(REG_A1)?)
-        .check()?
-        .waddr();
-    let data_addr = ByteAddr(ctx.load_machine_register(REG_A2)?)
-        .check()?
-        .waddr();
+    let state_in_addr = guest_addr(ctx.load_machine_register(REG_A0)?)?.waddr();
+    let state_out_addr = guest_addr(ctx.load_machine_register(REG_A1)?)?.waddr();
+    let data_addr = guest_addr(ctx.load_machine_register(REG_A2)?)?.waddr();
     let count = ctx.load_machine_register(REG_A3)? & 0xffff;
-    let k_addr = ByteAddr(ctx.load_machine_register(REG_A4)?)
-        .check()?
-        .waddr();
+    let k_addr = guest_addr(ctx.load_machine_register(REG_A4)?)?.waddr();
     tracing::debug!("sha2: {count} blocks");
 
     if count > MAX_SHA_COUNT {
