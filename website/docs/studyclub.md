@@ -8,7 +8,7 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 **Victor Graf** <br/>
 
 As of our v0.20 release, the zkVM supports verification of RISC Zero receipts inside the RISC Zero guest through a feature known as composition.
-With this feature, multiple zkVM programs can be composed and produce a single receipt that verifies all computation done to reach the final result.
+With this feature, multiple zkVM programs can be composed and produce a single receipt that verifies all computations done to reach the final result.
 
 This session of study club will discuss how to use proof composition, how proof composition works behind the scenes, and what use cases this unlocks.
 
