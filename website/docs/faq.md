@@ -29,7 +29,7 @@ When Alice executes code inside the zkVM, Alice gets back a <a href="https://dev
 Alice can pass the receipt to Bob, who can then <a href="https://dev.risczero.com/terminology#verify">verify</a> the receipt.
 <br/>
 <br/>
-By verifying the receipt, Bob can confirm that the expected code executed and produced the asserted results.
+By verifying the receipt, Bob can confirm that the expected code was executed and produced the asserted results.
 Any inputs Alice passes to the program during execution will be private unless Alice chooses to share them.
 </details>
  <br/>
