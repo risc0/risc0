@@ -65,7 +65,7 @@ We set the Control columns to 0 for these random noise rows, in order to turn of
 ## Lesson 4: Constructing Trace Polynomials
 
 > This lesson explains the mechanics of [Reed-Solomon encoding](../reference-docs/about-rs-codes.md).
-> RS encoding is a form of error-correcting code; it allows for efficient addition of redundancy to cryptographic messages.
+> RS encoding is a form of error-correcting code; it allows for the efficient addition of redundancy to cryptographic messages.
 
 Let's remove the `rule-checking columns` for a minute and turn our attention toward encoding our Trace data in terms of polynomials.
 Throughout these lessons, all of the arithmetic takes place in $\mathbb{F}_{97}$.
