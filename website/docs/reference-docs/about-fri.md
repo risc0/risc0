@@ -16,7 +16,7 @@ Given a Merkle root, the _FRI protocol_ is a recursive technique for proving tha
 
 The FRI protocol consists of a number of `commit` rounds followed by a number of `query` rounds.
 
-- In each `commit` round, the Prover commits a new (smaller) Merkle tree corresponding to evaluations of a lower-degree polynomial; the round-by-round commitments depend on a random mixing parameter that allows for an audit-trail in the upcoming query round.
+- In each `commit` round, the Prover commits a new (smaller) Merkle tree corresponding to evaluations of a lower-degree polynomial; the round-by-round commitments depend on a random mixing parameter that allows for an audit trail in the upcoming query round.
   - In each `commit` round, the degree of the FRI polynomial and the size of the associated Merkle tree is reduced by a factor of 16, in the RISC Zero implementation.
   - RISC Zero runs `commit` rounds until the degree of the FRI polynomial is less than or equal to 255.
 - In each `query` round, the Prover reveals Merkle branches (and leaves) from each of the FRI commitments. The branches revealed in the query rounds are selected using the [Fiat-Shamir Heuristic](https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic).
