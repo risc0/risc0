@@ -81,7 +81,7 @@ pub fn simple_loop() -> Program {
     //
     // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
     program_from_instructions(
-        0x4000,
+        TEXT_START,
         [
             0x00000713, // li      a4,0
             0x06400793, // li      a5,100
