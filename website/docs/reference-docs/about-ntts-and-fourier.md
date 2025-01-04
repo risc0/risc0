@@ -1,6 +1,6 @@
 # About Number Theoretic Transforms
 
-Number theoretic transforms (`NTTs`) and inverse number theoretic transforms (`iNTTs`) are a mechanism for converting between a `coefficient representation` and an `evaluation representation` of a given polynomial.
+Number theoretic transforms (`NTTs`) and inverse number theoretic transforms (`iNTTs`) are mechanisms for converting between a `coefficient representation` and an `evaluation representation` of a given polynomial.
 
 ## Documentation
 
