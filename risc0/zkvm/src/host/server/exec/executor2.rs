@@ -141,7 +141,7 @@ impl<'a> Executor2<'a> {
             self.image.clone(),
             self,
             self.env.input_digest,
-            vec![], // TODO
+            vec![], // TODO(flaub)
         );
 
         let start_time = Instant::now();

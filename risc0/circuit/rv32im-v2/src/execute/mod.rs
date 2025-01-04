@@ -35,7 +35,7 @@ pub use self::{
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
-pub const MAX_INSN_CYCLES: usize = 2000; // TODO: calculate actual value
+pub const MAX_INSN_CYCLES: usize = 2000; // TODO(flaub): calculate actual value
 
 pub(crate) fn node_idx(page_idx: u32) -> u32 {
     MEMORY_PAGES as u32 + page_idx

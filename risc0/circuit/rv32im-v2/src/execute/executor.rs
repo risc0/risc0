@@ -205,8 +205,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             pre_digest: initial_digest,
             post_digest,
             output_digest: self.output_digest,
-            paging_cycles: 0,   // TODO
-            reserved_cycles: 0, // TODO
+            paging_cycles: 0,   // TODO(flaub)
+            reserved_cycles: 0, // TODO(flaub)
         })
     }
 

@@ -533,7 +533,7 @@ impl<F: Field> Hal for CpuHal<F> {
         let mut output = output.as_slice_mut();
         let input = input.as_slice();
 
-        // TODO: parallelize
+        // TODO(flaub): parallelize
         for idx in 0..count {
             let mut tot = Self::ExtElem::ZERO;
             let mut cur_mix = Self::ExtElem::ONE;
