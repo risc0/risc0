@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = { workspace = true }
 
 [[bin]]
-name = "kernel"
+name = "v1compat"
 path = "src/main.rs"
 
 [dependencies]
@@ -17,5 +17,4 @@ risc0-build = { workspace = true }
 release = false
 
 [package.metadata.risc0]
-text_addr = 0xC0000000
-image_version = 2
+kernel = true

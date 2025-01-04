@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub(crate) mod addr;
 mod executor;
-pub(crate) mod image;
 pub(crate) mod pager;
 pub mod platform;
 pub(crate) mod poseidon2;
@@ -28,12 +26,8 @@ mod tests;
 pub mod testutil;
 mod trace;
 
-use risc0_zkp::core::digest::DIGEST_WORDS;
-
 pub use self::{
-    addr::{ByteAddr, WordAddr},
     executor::{Executor, ExecutorResult, SimpleSession},
-    image::MemoryImage2,
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},
@@ -41,12 +35,8 @@ pub use self::{
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
-pub const MAX_INSN_CYCLES: usize = 4000; // TODO: calculate actual value
+pub const MAX_INSN_CYCLES: usize = 2000; // TODO: calculate actual value
 
 pub(crate) fn node_idx(page_idx: u32) -> u32 {
     MEMORY_PAGES as u32 + page_idx
-}
-
-pub(crate) fn node_idx_to_addr(idx: u32) -> WordAddr {
-    MERKLE_TREE_END_ADDR - idx * DIGEST_WORDS as u32
 }

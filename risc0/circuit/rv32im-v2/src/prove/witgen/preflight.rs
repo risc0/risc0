@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::BTreeSet;
+
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
-use risc0_binfmt::ExitCode;
+use risc0_binfmt::{ByteAddr, ExitCode, WordAddr};
 use risc0_circuit_rv32im_v2_sys::{RawMemoryTransaction, RawPreflightCycle};
 use risc0_core::scope;
 use risc0_zkp::core::digest::DIGEST_WORDS;
 
 use crate::{
     execute::{
-        addr::{ByteAddr, WordAddr},
-        node_idx_to_addr,
-        pager::PagedMemory,
+        node_idx,
+        pager::{page_idx, PageState, PagedMemory},
         platform::*,
-        poseidon2::{self, Checksum, Poseidon2State},
+        poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{Risc0Context, Risc0Machine},
         rv32im::{DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
@@ -35,7 +36,7 @@ use crate::{
     zirgen::circuit::ExtVal,
 };
 
-use super::{node_addr_to_idx, paged_map::PagedMap};
+use super::{node_addr_to_idx, node_idx_to_addr, paged_map::PagedMap, poseidon2::Checksum};
 
 #[derive(Clone, Debug, Default)]
 pub(crate) enum Back {
@@ -138,16 +139,16 @@ impl<'a> Preflight<'a> {
     pub fn read_pages(&mut self) -> Result<()> {
         self.read_root()?;
         let activity = self.pager.loaded_pages();
-        poseidon2::read_start(self)?;
+        Poseidon2::read_start(self)?;
         for node_idx in activity.nodes {
-            poseidon2::read_node(self, node_idx)?;
+            Poseidon2::read_node(self, node_idx)?;
         }
         self.machine_mode = 1;
         for page_idx in activity.pages {
-            poseidon2::read_page(self, page_idx)?;
+            Poseidon2::read_page(self, page_idx)?;
         }
         self.machine_mode = 2;
-        poseidon2::read_done(self)?;
+        Poseidon2::read_done(self)?;
         self.phys_cycles = 0;
         Ok(())
     }
@@ -166,16 +167,16 @@ impl<'a> Preflight<'a> {
     pub fn write_pages(&mut self) -> Result<()> {
         let activity = self.pager.dirty_pages();
         self.pager.commit()?;
-        poseidon2::write_start(self)?;
+        Poseidon2::write_start(self)?;
         for &page_idx in activity.pages.iter().rev() {
-            poseidon2::write_page(self, page_idx)?;
+            Poseidon2::write_page(self, page_idx)?;
         }
         self.machine_mode = 4;
         for &node_idx in activity.nodes.iter().rev() {
-            poseidon2::write_node(self, node_idx)?;
+            Poseidon2::write_node(self, node_idx)?;
         }
         self.machine_mode = 5;
-        poseidon2::write_done(self)?;
+        Poseidon2::write_done(self)?;
         self.machine_mode = 0;
         self.write_root()
     }
@@ -548,9 +549,6 @@ impl<'a> Risc0Context for Preflight<'a> {
     ) -> Result<()> {
         self.add_cycle_special(cur_state, next_state, self.pc.0, 0, Back::Ecall(s0, s1, s2));
         self.phys_cycles += 1;
-        if next_state == CycleState::PoseidonEntry {
-            poseidon2::ecall(self)?;
-        }
         Ok(())
     }
 
@@ -600,5 +598,58 @@ impl<'a> Risc0Context for Preflight<'a> {
             Back::Poseidon2(p2.clone()),
         );
         self.phys_cycles += 1;
+    }
+}
+
+impl InsnKind {
+    pub fn major(&self) -> u8 {
+        (*self as u32 / 8) as u8
+    }
+
+    pub fn minor(&self) -> u8 {
+        (*self as u32 % 8) as u8
+    }
+}
+
+#[derive(Clone, Default, Debug)]
+pub(crate) struct PagingActivity {
+    pub pages: BTreeSet<u32>,
+    pub nodes: BTreeSet<u32>,
+}
+
+impl PagingActivity {
+    fn new(pages: BTreeSet<u32>) -> Self {
+        let mut nodes = BTreeSet::new();
+        for &page_idx in pages.iter() {
+            let mut node_idx = node_idx(page_idx);
+            while node_idx != 1 {
+                let parent_idx = node_idx / 2;
+                // tracing::trace!("add node: {node_idx:#010x}, parent_idx: {parent_idx:#010x}");
+                if !nodes.insert(parent_idx) {
+                    break;
+                }
+                node_idx = parent_idx;
+            }
+        }
+        Self { pages, nodes }
+    }
+}
+
+impl PagedMemory {
+    pub(crate) fn loaded_pages(&self) -> PagingActivity {
+        tracing::trace!("loaded_pages: {:#010x?}", self.image.pages.keys());
+        PagingActivity::new(self.image.pages.keys().copied().collect())
+    }
+
+    pub(crate) fn dirty_pages(&self) -> PagingActivity {
+        let pages = self
+            .page_states
+            .iter()
+            .filter(|(&node_idx, &state)| {
+                node_idx >= MEMORY_PAGES as u32 && state == PageState::Dirty
+            })
+            .map(|(&node_idx, _)| page_idx(node_idx))
+            .collect();
+        PagingActivity::new(pages)
     }
 }

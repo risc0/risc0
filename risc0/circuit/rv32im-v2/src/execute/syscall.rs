@@ -14,7 +14,7 @@
 
 use anyhow::Result;
 
-use super::ByteAddr;
+use risc0_binfmt::ByteAddr;
 
 /// A host-side implementation of a system call.
 pub trait Syscall {

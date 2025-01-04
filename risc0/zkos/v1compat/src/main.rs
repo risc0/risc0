@@ -18,7 +18,7 @@
 #[cfg(not(target_os = "zkvm"))]
 fn main() {}
 
-// #[cfg(target_os = "zkvm")]
+#[cfg(target_os = "zkvm")]
 mod zkvm {
     use core::{
         arch::{asm, global_asm},
@@ -33,7 +33,7 @@ mod zkvm {
     const BLOCK_WORDS: usize = 2 * DIGEST_WORDS;
     const MAX_IO_BYTES: u32 = 1024;
     const MAX_SHA_COUNT: u32 = 10;
-    const USER_REGS_ADDR: u32 = 0xffff0080;
+    const USER_REGS_ADDR: u32 = 0xffff_0080;
     const REG_A0: usize = 10;
     const REG_A1: usize = 11;
 

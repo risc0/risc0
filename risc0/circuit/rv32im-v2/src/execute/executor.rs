@@ -15,15 +15,13 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
-use risc0_binfmt::ExitCode;
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
     log2_ceil,
 };
 
 use super::{
-    addr::{ByteAddr, WordAddr},
-    image::MemoryImage2,
     pager::PagedMemory,
     platform::*,
     poseidon2::Poseidon2State,
@@ -118,18 +116,22 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
-        let initial_digest = *self.pager.image.image_id();
+        let initial_digest = self.pager.image.image_id();
+        tracing::debug!("initial_digest: {initial_digest}");
 
         while self.exit_code.is_none() {
             if let Some(max_cycles) = max_cycles {
                 if self.cycles.user >= max_cycles {
-                    bail!("Session limit exceeded");
+                    bail!(
+                        "Session limit exceeded: {} >= {max_cycles}",
+                        self.cycles.user
+                    );
                 }
             }
 
             if self.segment_cycles() >= segment_threshold {
                 tracing::debug!(
-                    "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {}",
+                    "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {} >= {segment_threshold}",
                     self.phys_cycles,
                     self.pager.cycles,
                     self.segment_cycles()
@@ -311,13 +313,23 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
     }
 
     fn on_terminate(&mut self, a0: u32, _a1: u32) -> Result<()> {
+        const TERMINATE: u32 = 0;
+        const PAUSE: u32 = 1;
+
         let output: Digest = self
             .peek_region(GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
             .as_slice()
             .try_into()?;
 
+        let halt_type = a0 & 0xff;
+        let user_exit = (a0 >> 8) & 0xff;
+
         self.user_cycles += 1;
-        self.exit_code = Some(ExitCode::Halted(a0));
+        self.exit_code = match halt_type {
+            TERMINATE => Some(ExitCode::Halted(user_exit)),
+            PAUSE => Some(ExitCode::Paused(user_exit)),
+            _ => bail!("Illegal halt type: {halt_type}"),
+        };
         self.output_digest = Some(output);
 
         Ok(())

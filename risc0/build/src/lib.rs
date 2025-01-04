@@ -36,7 +36,7 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use risc0_binfmt::compute_image_id;
+use risc0_binfmt::KERNEL_START_ADDR;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -166,17 +166,23 @@ pub struct GuestListEntry {
     pub elf: Cow<'static, [u8]>,
 
     /// The image id of the guest
-    pub image_ids: Vec<Digest>,
+    pub image_id: Digest,
+
+    /// The v2 UserID of the guest program.
+    pub v2_user_id: Digest,
+
+    /// The v2 KernelID of the kernel program.
+    pub v2_kernel_id: Option<Digest>,
 
     /// The path to the ELF binary
     pub path: Cow<'static, str>,
 }
 
-fn r0vm_image_id(path: &str) -> Result<Digest> {
+fn r0vm_image_id(path: &str, flag: &str) -> Result<Digest> {
     use hex::FromHex;
     let output = Command::new("r0vm")
         .env_remove("RUST_LOG")
-        .args(["--elf", path, "--id"])
+        .args(["--elf", path, flag])
         .output()?;
     if output.status.success() {
         let stdout = String::from_utf8(output.stdout)?;
@@ -189,17 +195,33 @@ fn r0vm_image_id(path: &str) -> Result<Digest> {
 }
 
 fn compute_image_id_v1(elf: &[u8], elf_path: &str) -> Result<Digest> {
-    Ok(match r0vm_image_id(elf_path) {
+    Ok(match r0vm_image_id(elf_path, "--id") {
         Ok(image_id) => image_id,
         Err(err) => {
             tty_println(&format!("failed to get image ID using r0vm: {err}"));
-            compute_image_id(elf)?
+            risc0_binfmt::compute_image_id(elf)?
         }
     })
 }
 
-fn compute_image_id_v2() -> Digest {
-    Digest::default()
+fn compute_image_id_v2(elf: &[u8], elf_path: &str, is_kernel: bool) -> Result<Digest> {
+    let flag = if is_kernel {
+        "--kernel-id"
+    } else {
+        "--user-id"
+    };
+    Ok(match r0vm_image_id(elf_path, flag) {
+        Ok(image_id) => image_id,
+        Err(err) => {
+            tty_println(&format!("failed to get image ID using r0vm: {err}"));
+
+            if is_kernel {
+                risc0_binfmt::compute_kernel_id_v2(elf)?
+            } else {
+                risc0_binfmt::compute_user_id_v2(elf)?
+            }
+        }
+    })
 }
 
 impl GuestBuilder for GuestListEntry {
@@ -207,28 +229,27 @@ impl GuestBuilder for GuestListEntry {
     /// image ID.
     fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self> {
         let mut elf = vec![];
-        let mut image_ids = vec![Digest::default(), Digest::default()];
+        let mut image_id = Digest::default();
+        let mut v2_user_id = Digest::default();
+        let mut v2_kernel_id = None;
 
         if !is_skip_build() {
             elf = std::fs::read(elf_path)?;
-            if let Some(image_version) = guest_info.metadata.image_version {
-                if image_version == 1 {
-                    image_ids[0] = compute_image_id_v1(&elf, elf_path)?;
-                } else if image_version == 2 {
-                    image_ids[1] = compute_image_id_v2();
-                } else {
-                    panic!("Invalid image_version: {image_version}");
-                }
+            let is_kernel = guest_info.metadata.kernel;
+            if is_kernel {
+                v2_kernel_id = Some(compute_image_id_v2(&elf, elf_path, is_kernel)?);
             } else {
-                image_ids[0] = compute_image_id_v1(&elf, elf_path)?;
-                image_ids[1] = compute_image_id_v2();
+                image_id = compute_image_id_v1(&elf, elf_path)?;
+                v2_user_id = compute_image_id_v2(&elf, elf_path, is_kernel)?;
             }
         }
 
         Ok(Self {
             name: Cow::Owned(name.to_owned()),
             elf: Cow::Owned(elf),
-            image_ids,
+            image_id,
+            v2_user_id,
+            v2_kernel_id,
             path: Cow::Owned(elf_path.to_owned()),
         })
     }
@@ -242,7 +263,7 @@ impl GuestBuilder for GuestListEntry {
         }
 
         let upper = self.name.to_uppercase().replace('-', "_");
-        let image_id = self.image_ids[0].as_words();
+        let image_id = self.image_id.as_words();
 
         let elf = if is_skip_build() {
             "&[]".to_string()
@@ -256,12 +277,18 @@ impl GuestBuilder for GuestListEntry {
         writeln!(&mut str, "pub const {upper}_PATH: &str = {:?};", self.path).unwrap();
         writeln!(&mut str, "pub const {upper}_ID: [u32; 8] = {image_id:?};").unwrap();
 
-        for (i, image_id) in self.image_ids.iter().enumerate() {
-            let image_id = image_id.as_words();
+        if let Some(kernel_id) = self.v2_kernel_id {
+            let kernel_id = kernel_id.as_words();
             writeln!(
                 &mut str,
-                "pub const {upper}_V{}ID: [u32; 8] = {image_id:?};",
-                i + 1,
+                "pub const {upper}_V2_KERNEL_ID: [u32; 8] = {kernel_id:?};"
+            )
+            .unwrap();
+        } else {
+            let user_id = self.v2_user_id.as_words();
+            writeln!(
+                &mut str,
+                "pub const {upper}_V2_USER_ID: [u32; 8] = {user_id:?};"
             )
             .unwrap();
         }
@@ -492,7 +519,11 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
 pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
     let rustc_flags = guest_meta.rustc_flags.clone().unwrap_or_default();
     let rustc_flags: Vec<_> = rustc_flags.iter().map(|s| s.as_str()).collect();
-    let text_addr = guest_meta.text_addr.unwrap_or(memory::TEXT_START);
+    let text_addr = if guest_meta.kernel {
+        KERNEL_START_ADDR.0
+    } else {
+        memory::TEXT_START
+    };
     [
         // Append other rust flags
         rustc_flags.as_slice(),
@@ -506,7 +537,7 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
             // https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_mono/ld.html#SEC3
             // for details.
             "-C",
-            &format!("link-arg=-Ttext=0x{text_addr:08X}"),
+            &format!("link-arg=-Ttext={text_addr:#010x}"),
             // Apparently not having an entry point is only a linker warning(!), so
             // error out in this case.
             "-C",
