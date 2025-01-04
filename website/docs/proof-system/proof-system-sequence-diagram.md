@@ -53,7 +53,7 @@ We use this Auxiliary Execution Trace to support:
 
 ### DEEP-ALI & FRI
 
-The rest of the protocol implements with [DEEP-ALI & FRI] as described in [EthSTARK].
+The rest of the protocol is implemented with [DEEP-ALI & FRI] as described in [EthSTARK].
 We describe this in more detail below, and refer readers to the [ZKP Whitepaper] for a more formal description of the protocol.
 
 ## Sequence Diagram
