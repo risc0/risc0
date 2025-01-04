@@ -28,7 +28,7 @@ See also: [env::commit()]
 ### Composition
 
 As of our 0.20 release, the [zkVM] supports verification of RISC Zero receipts inside the RISC Zero [guest] through a feature known as composition.
-With this, multiple zkVM programs can be _composed_ and produce a single receipt that verifies all computation done to reach the final result.
+With this, multiple zkVM programs can be _composed_ and produce a single receipt that verifies all computations done to reach the final result.
 
 Some use cases for composition include:
 
