@@ -10,7 +10,7 @@ The [Receipt] includes a [journal], which contains the public outputs of the
 [Session]. The contents of the [journal] are specified by calling
 [`env::commit()`] and [`env::commit_slice()`] in the [guest] code.
 
-In addition to the journal, a receipt makes a number of claims about the program
+In addition to the journal, a receipt makes a number of claims about the program's
 execution. These claims are summarized in the [ReceiptClaim].
 
 ### Types of Receipts
