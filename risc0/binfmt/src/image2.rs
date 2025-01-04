@@ -67,19 +67,19 @@ impl ZeroCache {
     }
 }
 
-/// TODO
+/// TODO(flaub)
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Page(pub Vec<u8>);
 
-/// TODO
+/// TODO(flaub)
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MemoryImage2 {
-    /// TODO
+    /// TODO(flaub)
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
     pub pages: BTreeMap<u32, Page>,
 
-    /// TODO
+    /// TODO(flaub)
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
     pub digests: BTreeMap<u32, Digest>,
@@ -121,14 +121,14 @@ impl MemoryImage2 {
         this
     }
 
-    /// TODO
+    /// TODO(flaub)
     pub fn new_user(program: Program) -> Self {
         let mut image = program.image;
         image.insert(USER_START_ADDR.0, program.entry);
         Self::new(image)
     }
 
-    /// TODO
+    /// TODO(flaub)
     pub fn new_kernel(program: Program) -> Self {
         let mut image = program.image;
         image.insert(SUSPEND_PC_ADDR.0, program.entry);
@@ -136,7 +136,7 @@ impl MemoryImage2 {
         Self::new(image)
     }
 
-    /// TODO
+    /// TODO(flaub)
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
         user.image.insert(USER_START_ADDR.0, user.entry);
         kernel.image.append(&mut user.image);
@@ -277,7 +277,7 @@ impl Default for Page {
 }
 
 impl Page {
-    /// TODO
+    /// TODO(flaub)
     pub fn digest(&self) -> Digest {
         let mut cells = [BabyBearElem::ZERO; CELLS];
         for i in 0..PAGE_WORDS / DIGEST_WORDS {
@@ -292,7 +292,7 @@ impl Page {
         cells_to_digest(&cells)
     }
 
-    /// TODO
+    /// TODO(flaub)
     pub fn load(&self, addr: WordAddr) -> u32 {
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         let mut bytes = [0u8; WORD_SIZE];
@@ -303,7 +303,7 @@ impl Page {
         word
     }
 
-    /// TODO
+    /// TODO(flaub)
     pub fn store(&mut self, addr: WordAddr, word: u32) {
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         // tracing::trace!("store({addr:?}, {byte_addr:#05x}, {word:#010x})");
