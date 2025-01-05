@@ -68,10 +68,10 @@ impl BuildCommand {
         for guest in &guest_list {
             let rel_elf_path = guest.path.strip_prefix(src_dir.to_str().unwrap()).unwrap();
             match guest.v2_image_id {
-                risc0_build::ImageIdV2::User(digest) => {
+                risc0_build::ImageIdKind::User(digest) => {
                     println!("UserID:   {} - {:?}", digest, rel_elf_path);
                 }
-                risc0_build::ImageIdV2::Kernel(digest) => {
+                risc0_build::ImageIdKind::Kernel(digest) => {
                     println!("KernelID: {} - {:?}", digest, rel_elf_path);
                 }
             }

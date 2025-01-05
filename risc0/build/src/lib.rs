@@ -160,7 +160,7 @@ impl GuestBuilder for MinGuestListEntry {
 
 /// TODO(flaub)
 #[derive(Debug, Clone)]
-pub enum ImageIdV2 {
+pub enum ImageIdKind {
     /// TODO(flaub)
     User(Digest),
 
@@ -181,7 +181,7 @@ pub struct GuestListEntry {
     pub image_id: Digest,
 
     /// The v2 image id of the guest program.
-    pub v2_image_id: ImageIdV2,
+    pub v2_image_id: ImageIdKind,
 
     /// The path to the ELF binary
     pub path: Cow<'static, str>,
@@ -242,18 +242,18 @@ impl GuestBuilder for GuestListEntry {
 
         let is_kernel = guest_info.metadata.kernel;
         let mut v2_image_id = if is_kernel {
-            ImageIdV2::Kernel(Digest::default())
+            ImageIdKind::Kernel(Digest::default())
         } else {
-            ImageIdV2::User(Digest::default())
+            ImageIdKind::User(Digest::default())
         };
 
         if !is_skip_build() {
             elf = std::fs::read(elf_path)?;
             if is_kernel {
-                v2_image_id = ImageIdV2::Kernel(compute_image_id_v2(&elf, elf_path, is_kernel)?);
+                v2_image_id = ImageIdKind::Kernel(compute_image_id_v2(&elf, elf_path, is_kernel)?);
             } else {
                 image_id = compute_image_id_v1(&elf, elf_path)?;
-                v2_image_id = ImageIdV2::User(compute_image_id_v2(&elf, elf_path, is_kernel)?);
+                v2_image_id = ImageIdKind::User(compute_image_id_v2(&elf, elf_path, is_kernel)?);
             }
         }
 
@@ -290,8 +290,8 @@ impl GuestBuilder for GuestListEntry {
         writeln!(&mut str, "pub const {upper}_ID: [u32; 8] = {image_id:?};").unwrap();
 
         let (part, v2_image_id) = match self.v2_image_id {
-            ImageIdV2::User(digest) => ("USER", digest),
-            ImageIdV2::Kernel(digest) => ("KERNEL", digest),
+            ImageIdKind::User(digest) => ("USER", digest),
+            ImageIdKind::Kernel(digest) => ("KERNEL", digest),
         };
         let v2_image_id = v2_image_id.as_words();
         writeln!(
@@ -830,7 +830,6 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
                 .unwrap_or_else(|| env::current_dir().unwrap());
             build_guest_package_docker(&guest.pkg, &src_dir, &guest.target_dir, &guest_info)
                 .unwrap();
-            // guest_methods_docker(&guest.pkg, get_out_dir(), &guest_info)
             guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
         } else {
             build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);

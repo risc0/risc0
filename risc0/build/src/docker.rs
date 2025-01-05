@@ -210,7 +210,7 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
 }
 
 // requires Docker to be installed
-// #[cfg(feature = "docker")]
+#[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
     use crate::{build_package, GuestListEntry};
