@@ -17,7 +17,7 @@ use std::path::Path;
 use anyhow::Result;
 use cargo_metadata::Package;
 use clap::Parser;
-use risc0_build::{DockerOptions, GuestOptions, ImageIdV2};
+use risc0_build::{DockerOptions, GuestOptions, ImageIdKind};
 use risc0_zkvm::sha::Digest;
 
 /// `cargo risczero bake`
@@ -93,11 +93,11 @@ impl BakeCommand {
             }
 
             match guest.v2_image_id {
-                ImageIdV2::User(digest) => {
+                ImageIdKind::User(digest) => {
                     let image_id_path = elfs_dir.join(file_name).with_extension("uid");
                     std::fs::write(image_id_path, digest.as_bytes())?
                 }
-                ImageIdV2::Kernel(digest) => {
+                ImageIdKind::Kernel(digest) => {
                     let image_id_path = elfs_dir.join(file_name).with_extension("kid");
                     std::fs::write(image_id_path, digest.as_bytes())?
                 }
