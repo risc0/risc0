@@ -1254,7 +1254,7 @@ fn sys_keccak(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::SysKeccak);
 }
 
-// #[cfg(feature = "docker")]
+#[cfg(feature = "docker")]
 mod docker {
     use super::*;
 
@@ -1267,7 +1267,10 @@ mod docker {
             let env = ExecutorEnv::builder()
                 .write(&MultiTestSpec::EventTrace)
                 .unwrap()
-                .trace_callback(|event| Ok(events.push(event)))
+                .trace_callback(|event| {
+                    events.push(event);
+                    Ok(())
+                })
                 .build()
                 .unwrap();
             ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
