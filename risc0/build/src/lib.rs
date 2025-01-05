@@ -156,6 +156,12 @@ impl GuestBuilder for MinGuestListEntry {
     }
 }
 
+#[derive(Debug, Clone)]
+enum ImageIdV2 {
+    User(Digest),
+    Kernel(Digest),
+}
+
 /// Represents an item in the generated list of compiled guest binaries
 #[derive(Debug, Clone)]
 pub struct GuestListEntry {
@@ -165,14 +171,11 @@ pub struct GuestListEntry {
     /// The compiled ELF guest binary
     pub elf: Cow<'static, [u8]>,
 
-    /// The image id of the guest
+    /// The image id of the guest program.
     pub image_id: Digest,
 
-    /// The v2 UserID of the guest program.
-    pub v2_user_id: Digest,
-
-    /// The v2 KernelID of the kernel program.
-    pub v2_kernel_id: Option<Digest>,
+    /// The v2 image id of the guest program.
+    v2_image_id: ImageIdV2,
 
     /// The path to the ELF binary
     pub path: Cow<'static, str>,
@@ -230,17 +233,21 @@ impl GuestBuilder for GuestListEntry {
     fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self> {
         let mut elf = vec![];
         let mut image_id = Digest::default();
-        let mut v2_user_id = Digest::default();
-        let mut v2_kernel_id = None;
+
+        let is_kernel = guest_info.metadata.kernel;
+        let mut v2_image_id = if is_kernel {
+            ImageIdV2::Kernel(Digest::default())
+        } else {
+            ImageIdV2::User(Digest::default())
+        };
 
         if !is_skip_build() {
             elf = std::fs::read(elf_path)?;
-            let is_kernel = guest_info.metadata.kernel;
             if is_kernel {
-                v2_kernel_id = Some(compute_image_id_v2(&elf, elf_path, is_kernel)?);
+                v2_image_id = ImageIdV2::Kernel(compute_image_id_v2(&elf, elf_path, is_kernel)?);
             } else {
                 image_id = compute_image_id_v1(&elf, elf_path)?;
-                v2_user_id = compute_image_id_v2(&elf, elf_path, is_kernel)?;
+                v2_image_id = ImageIdV2::User(compute_image_id_v2(&elf, elf_path, is_kernel)?);
             }
         }
 
@@ -248,8 +255,7 @@ impl GuestBuilder for GuestListEntry {
             name: Cow::Owned(name.to_owned()),
             elf: Cow::Owned(elf),
             image_id,
-            v2_user_id,
-            v2_kernel_id,
+            v2_image_id,
             path: Cow::Owned(elf_path.to_owned()),
         })
     }
@@ -277,21 +283,16 @@ impl GuestBuilder for GuestListEntry {
         writeln!(&mut str, "pub const {upper}_PATH: &str = {:?};", self.path).unwrap();
         writeln!(&mut str, "pub const {upper}_ID: [u32; 8] = {image_id:?};").unwrap();
 
-        if let Some(kernel_id) = self.v2_kernel_id {
-            let kernel_id = kernel_id.as_words();
-            writeln!(
-                &mut str,
-                "pub const {upper}_V2_KERNEL_ID: [u32; 8] = {kernel_id:?};"
-            )
-            .unwrap();
-        } else {
-            let user_id = self.v2_user_id.as_words();
-            writeln!(
-                &mut str,
-                "pub const {upper}_V2_USER_ID: [u32; 8] = {user_id:?};"
-            )
-            .unwrap();
-        }
+        let (part, v2_image_id) = match self.v2_image_id {
+            ImageIdV2::User(digest) => ("USER", digest),
+            ImageIdV2::Kernel(digest) => ("KERNEL", digest),
+        };
+        let v2_image_id = v2_image_id.as_words();
+        writeln!(
+            &mut str,
+            "pub const {upper}_V2_{part}_ID: [u32; 8] = {v2_image_id:?};",
+        )
+        .unwrap();
 
         str
     }
