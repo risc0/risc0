@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(not(target_os = "zkvm"))]
 pub const V1COMPAT_ELF: &[u8] = include_bytes!("../elfs/v1compat.elf");
 
+#[cfg(not(target_os = "zkvm"))]
 pub const V1COMPAT_V2_KERNEL_ID: &[u8] = include_bytes!("../elfs/v1compat.kid");
