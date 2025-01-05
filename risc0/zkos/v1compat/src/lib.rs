@@ -12,5 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(not(target_os = "zkvm"))]
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+pub const V1COMPAT_ELF: &[u8] = include_bytes!("../elfs/v1compat.elf");
+
+pub const V1COMPAT_V2_KERNEL_ID: &[u8] = include_bytes!("../elfs/v1compat.kid");

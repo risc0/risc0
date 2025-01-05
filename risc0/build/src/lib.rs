@@ -56,6 +56,8 @@ pub const RUST_RZUP_INDICATOR: &str = ".rzup";
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
+const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
+
 /// Get the path used by cargo-risczero that stores downloaded toolchains
 pub fn risc0_data() -> Result<PathBuf> {
     risc0_data_new().or_else(|_| risc0_data_compat())
@@ -63,7 +65,7 @@ pub fn risc0_data() -> Result<PathBuf> {
 
 // use the new location from rzup install.
 fn risc0_data_new() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = std::env::var("RISC0_HOME") {
+    let dir = if let Ok(dir) = env::var("RISC0_HOME") {
         dir.into()
     } else if let Some(home) = dirs::home_dir() {
         home.join(".risc0")
@@ -80,7 +82,7 @@ fn risc0_data_new() -> Result<PathBuf> {
 
 // check for backwards compatible cargo risczero install.
 fn risc0_data_compat() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+    let dir = if let Ok(dir) = env::var("RISC0_DATA_DIR") {
         dir.into()
     } else if let Some(root) = dirs::data_dir() {
         root.join("cargo-risczero")
@@ -156,9 +158,13 @@ impl GuestBuilder for MinGuestListEntry {
     }
 }
 
+/// TODO(flaub)
 #[derive(Debug, Clone)]
-enum ImageIdV2 {
+pub enum ImageIdV2 {
+    /// TODO(flaub)
     User(Digest),
+
+    /// TODO(flaub)
     Kernel(Digest),
 }
 
@@ -175,7 +181,7 @@ pub struct GuestListEntry {
     pub image_id: Digest,
 
     /// The v2 image id of the guest program.
-    v2_image_id: ImageIdV2,
+    pub v2_image_id: ImageIdV2,
 
     /// The path to the ELF binary
     pub path: Cow<'static, str>,
@@ -379,8 +385,13 @@ fn is_skip_build() -> bool {
 }
 
 fn get_env_var(name: &str) -> String {
-    println!("cargo:rerun-if-env-changed={name}");
-    env::var(name).unwrap_or_default()
+    let ret = env::var(name).unwrap_or_default();
+    if let Some(pkg) = env::var_os("CARGO_PKG_NAME") {
+        if pkg != "cargo-risczero" {
+            println!("cargo:rerun-if-env-changed={name}");
+        }
+    }
+    ret
 }
 
 /// Returns all methods associated with the given guest crate.
@@ -388,11 +399,11 @@ fn guest_methods<G: GuestBuilder>(
     pkg: &Package,
     target_dir: impl AsRef<Path>,
     guest_info: &GuestInfo,
+    profile: &str,
 ) -> Vec<G> {
-    let profile = if is_debug() { "debug" } else { "release" };
     pkg.targets
         .iter()
-        .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
+        .filter(|target| target.is_bin())
         .filter(|target| {
             target
                 .required_features
@@ -405,36 +416,8 @@ fn guest_methods<G: GuestBuilder>(
                 &target.name,
                 target_dir
                     .as_ref()
-                    .join("riscv32im-risc0-zkvm-elf")
+                    .join(RISC0_TARGET_TRIPLE)
                     .join(profile)
-                    .join(&target.name)
-                    .to_str()
-                    .context("elf path contains invalid unicode")
-                    .unwrap(),
-            )
-            .unwrap()
-        })
-        .collect()
-}
-
-/// Returns all methods associated with the given guest crate.
-fn guest_methods_docker<G: GuestBuilder>(
-    pkg: &Package,
-    target_dir: impl AsRef<Path>,
-    guest_info: &GuestInfo,
-) -> Vec<G> {
-    pkg.targets
-        .iter()
-        .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
-        .map(|target| {
-            G::build(
-                guest_info,
-                &target.name,
-                target_dir
-                    .as_ref()
-                    .join("riscv32im-risc0-zkvm-elf")
-                    .join("docker")
-                    .join(pkg.name.replace('-', "_"))
                     .join(&target.name)
                     .to_str()
                     .context("elf path contains invalid unicode")
@@ -477,9 +460,9 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     println!("Using rustc: {rustc}");
 
     let mut cmd = sanitized_cmd("cargo");
-    let mut args = vec![subcmd, "--target", "riscv32im-risc0-zkvm-elf"];
+    let mut args = vec![subcmd, "--target", RISC0_TARGET_TRIPLE];
 
-    if std::env::var("RISC0_BUILD_LOCKED").is_ok() {
+    if !get_env_var("RISC0_BUILD_LOCKED").is_empty() {
         args.push("--locked");
     }
 
@@ -491,8 +474,6 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         args.push("build-std-features=compiler-builtins-mem");
         cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
-
-    println!("Building guest package: cargo {}", args.join(" "));
 
     let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
 
@@ -554,8 +535,8 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
 fn cpp_toolchain_override() -> bool {
     // detect if there's an attempt to override the Cpp toolchain.
     // Overriding the toolchain useful for troubleshooting crates.
-    std::env::var("CC_riscv32im_risc0_zkvm_elf").is_ok()
-        || std::env::var("CFLAGS_riscv32im_risc0_zkvm_elf").is_ok()
+    !get_env_var("CC_riscv32im_risc0_zkvm_elf").is_empty()
+        || !get_env_var("CFLAGS_riscv32im_risc0_zkvm_elf").is_empty()
 }
 
 /// Builds a static library providing a rust runtime.
@@ -694,7 +675,7 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
     let stderr = child.stderr.take().unwrap();
 
     tty_println(&format!(
-        "{}: Starting build for riscv32im-risc0-zkvm-elf",
+        "{}: Starting build for {RISC0_TARGET_TRIPLE}",
         pkg.name
     ));
 
@@ -831,6 +812,8 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
         detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
     }
 
+    let profile = if is_debug() { "debug" } else { "release" };
+
     let mut guest_list = vec![];
     for guest in guest_packages {
         println!("Building guest package: {}", guest.name);
@@ -844,17 +827,14 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
             let src_dir = docker_opts
                 .root_dir
                 .clone()
-                .unwrap_or_else(|| std::env::current_dir().unwrap());
-            build_guest_package_docker(
-                guest.pkg.manifest_path.as_std_path(),
-                &src_dir,
-                &guest_info,
-            )
-            .unwrap();
-            guest_methods_docker(&guest.pkg, get_out_dir(), &guest_info)
+                .unwrap_or_else(|| env::current_dir().unwrap());
+            build_guest_package_docker(&guest.pkg, &src_dir, &guest.target_dir, &guest_info)
+                .unwrap();
+            // guest_methods_docker(&guest.pkg, get_out_dir(), &guest_info)
+            guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
         } else {
             build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);
-            guest_methods(&guest.pkg, &guest.target_dir, &guest_info)
+            guest_methods(&guest.pkg, &guest.target_dir, &guest_info, profile)
         };
 
         for method in methods {
@@ -887,6 +867,8 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
     // Since we generate methods.rs each time we run, it will always
     // be changed.
     println!("cargo:rerun-if-changed={}", methods_path.display());
+    println!("cargo:rerun-if-env-changed=RISC0_GUEST_LOGFILE");
+
     guest_list
 }
 
@@ -914,10 +896,7 @@ pub fn embed_methods() -> Vec<GuestListEntry> {
 
 /// Embed the current crate's binary targets built for RISC-V.
 pub fn embed_self() -> Vec<GuestListEntry> {
-    if std::env::var("CARGO_CFG_TARGET_OS")
-        .unwrap()
-        .contains("zkvm")
-    {
+    if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
         // Guest shouldn't recursively depend on itself.
         return vec![];
     }
@@ -932,4 +911,32 @@ pub fn embed_self() -> Vec<GuestListEntry> {
     }];
 
     build_methods(&pkgs)
+}
+
+/// TODO(flaub)
+pub fn build_package(
+    pkg: &Package,
+    target_dir: impl AsRef<Path>,
+    options: GuestOptions,
+) -> Result<Vec<GuestListEntry>> {
+    println!("Building guest package: {}", pkg.name);
+
+    let guest_info = GuestInfo {
+        options: options.clone(),
+        metadata: pkg.into(),
+    };
+
+    let profile = if is_debug() { "debug" } else { "release" };
+
+    if let Some(ref docker_opts) = options.use_docker {
+        let src_dir = docker_opts
+            .root_dir
+            .clone()
+            .unwrap_or_else(|| env::current_dir().unwrap());
+        build_guest_package_docker(pkg, &src_dir, target_dir.as_ref(), &guest_info)?;
+        Ok(guest_methods(pkg, &target_dir, &guest_info, "docker"))
+    } else {
+        build_guest_package(pkg, &target_dir, &guest_info);
+        Ok(guest_methods(pkg, &target_dir, &guest_info, profile))
+    }
 }
