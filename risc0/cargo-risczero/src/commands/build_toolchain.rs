@@ -31,7 +31,7 @@ const CONFIG_TOML: &str = include_str!("config.toml");
 
 /// `cargo risczero build-toolchain`
 #[derive(Parser)]
-pub struct BuildToolchain {
+pub struct BuildToolchainCommand {
     /// Version tag of the toolchain to build.
     #[arg(long)]
     version: Option<String>,
@@ -46,7 +46,7 @@ pub struct RustBuildOutput {
     pub toolchain_dir: PathBuf,
 }
 
-impl BuildToolchain {
+impl BuildToolchainCommand {
     pub fn run(&self) -> Result<()> {
         eprintln!("Building the riscv32im-risc0-zkvm-elf toolchain...");
 
