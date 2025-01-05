@@ -16,7 +16,7 @@ use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub enum PlannerErr {
-    PlanNotStartedString,
+    PlanNotStarted,
     PlanFinalized,
 }
 
@@ -116,7 +116,7 @@ impl Planner {
     pub fn finish(&mut self) -> Result<usize, PlannerErr> {
         // Return error if plan has not yet started
         if self.peaks.is_empty() {
-            return Err(PlannerErr::PlanNotStartedString);
+            return Err(PlannerErr::PlanNotStarted);
         }
 
         // Finish the plan (if it's not yet finished)
