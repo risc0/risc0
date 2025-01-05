@@ -86,10 +86,10 @@ pub struct Session {
     /// associated with continuations and padding up to the nearest power of 2.
     pub total_cycles: u64,
 
-    /// The system state of the initial [MemoryImage].
+    /// The system state of the initial MemoryImage.
     pub pre_state: SystemState,
 
-    /// The system state of the final [MemoryImage] at the end of execution.
+    /// The system state of the final MemoryImage at the end of execution.
     pub post_state: SystemState,
 
     /// A list of pending ZKR proof requests.

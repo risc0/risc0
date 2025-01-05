@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
+#![cfg_attr(target_os = "zkvm", no_std)]
 #![cfg_attr(target_os = "zkvm", no_main)]
 
 #[cfg(not(target_os = "zkvm"))]

@@ -158,19 +158,20 @@ pub use {
         prove_info::{ProveInfo, SessionStats},
         recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
     },
-    risc0_binfmt::{compute_image_id, compute_kernel_id_v2, compute_user_id_v2},
+    risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS,
     risc0_groth16::Seal as Groth16Seal,
 };
 
+#[cfg(feature = "std")]
+pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
+
 pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext, DEFAULT_MAX_PO2,
+    Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
+    Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
-//#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 use semver::Version;
 
@@ -208,7 +209,7 @@ fn metal_implies_prove() {
 }
 
 /// Compute and return the v2 ImageID of the specified ELF binary.
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub fn compute_image_id_v2(
     user_id: impl Into<risc0_zkp::core::digest::Digest>,
 ) -> Result<risc0_zkp::core::digest::Digest> {
