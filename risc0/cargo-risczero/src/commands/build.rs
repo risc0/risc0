@@ -14,7 +14,7 @@
 
 use anyhow::Result;
 use clap::Parser;
-use risc0_build::{DockerOptions, GuestOptions, TARGET_DIR};
+use risc0_build::{DockerOptions, GuestOptions};
 
 /// `cargo risczero build`
 ///
@@ -39,6 +39,8 @@ impl BuildCommand {
         let meta_cmd = self.features.forward_metadata(&mut meta_cmd);
         let meta = meta_cmd.exec()?;
 
+        let target_dir = meta.target_directory.as_std_path();
+
         let options = GuestOptions {
             features: self.features.features.clone(),
             use_docker: Some(DockerOptions {
@@ -49,30 +51,23 @@ impl BuildCommand {
         let mut guest_list = vec![];
         let (included, _excluded) = self.workspace.partition_packages(&meta);
         for pkg in included {
-            let pkg_name = pkg.name.replace('-', "_");
-            let target_dir = src_dir.join(TARGET_DIR).join(pkg_name);
             if pkg.targets.iter().any(|x| x.is_bin()) {
-                let mut guests = risc0_build::build_package(pkg, &target_dir, options.clone())?;
+                let mut guests = risc0_build::build_package(pkg, target_dir, options.clone())?;
                 guest_list.append(&mut guests);
             }
         }
 
         println!("ELFs ready at:");
         for guest in &guest_list {
-            let rel_elf_path = guest.path.strip_prefix(src_dir.to_str().unwrap()).unwrap();
-            println!("ImageID: {} - {:?}", guest.image_id, rel_elf_path);
-        }
+            println!("{}", guest.path);
 
-        println!();
-        println!("v2 Image IDs:");
-        for guest in &guest_list {
-            let rel_elf_path = guest.path.strip_prefix(src_dir.to_str().unwrap()).unwrap();
+            println!("  ImageID:  {}", guest.image_id);
             match guest.v2_image_id {
                 risc0_build::ImageIdKind::User(digest) => {
-                    println!("UserID:   {} - {:?}", digest, rel_elf_path);
+                    println!("  UserID:   {digest}");
                 }
                 risc0_build::ImageIdKind::Kernel(digest) => {
-                    println!("KernelID: {} - {:?}", digest, rel_elf_path);
+                    println!("  KernelID: {digest}");
                 }
             }
         }
