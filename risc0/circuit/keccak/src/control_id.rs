@@ -22,7 +22,8 @@ pub const KECCAK_CONTROL_IDS: &[Digest] = &[
     digest!("3bdc374b1b517c41447db21face8883804c92730fa1de5746217174b33adea32"), // keccak_lift po2=15
     digest!("aa86474afc64141ec0fc50722cf10e233526b3454e80fc49657adb1db247c320"), // keccak_lift po2=16
     digest!("2efcda7414108e6956eeda3fcfe0c7051b7d880806266830c7fb324ec599dc28"), // keccak_lift po2=17
+    digest!("8979d234ace6b26a41a71b353c31ba4ecce17500a851df1ce2357006e0af1206"), // keccak_lift po2=18
 ];
 
 pub const KECCAK_CONTROL_ROOT: Digest =
-    digest!("95492b3fbcbf45570e8e0a0890e8da3da92071415f74962736b0093dcc5bd15d");
+    digest!("c4c6721b179b8501218a842a3731e14017f0cc2eaaba2d076f98eb2aa305564f");
