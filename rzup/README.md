@@ -21,10 +21,12 @@ rzup install [OPTIONS] [NAME] [VERSION]
 ```
 
 Arguments:
+
 - `NAME`: (Optional) component name to install (e.g., "rust", "cargo-risczero")
 - `VERSION`: (Optional) Version to install. If no version is specified, it will use the latest release version.
 
 Options:
+
 - `-f, --force`: Force reinstallation even if already installed
 
 Examples:
@@ -39,6 +41,17 @@ rzup install cargo-risczero 1.0.0
 # Force reinstall latest rust toolchain
 rzup install rust --force
 ```
+
+### Update
+
+Update your RISC Zero installation.
+
+```sh
+# Update to latest versions of all components
+rzup update
+```
+
+_Note:_ `update` is an alias to `install`.
 
 ### Check
 
@@ -57,6 +70,7 @@ rzup use <NAME> <VERSION>
 ```
 
 Arguments:
+
 - `NAME`: Component name (required)
 - `VERSION`: Version to activate (required)
 
@@ -90,6 +104,7 @@ rzup uninstall <NAME> <VERSION>
 ```
 
 Arguments:
+
 - `NAME`: Component name (required)
 - `VERSION`: Version to uninstall (required)
 
@@ -106,6 +121,6 @@ rzup manages the following components:
 ## Configuration
 
 rzup stores its installations in:
+
 - Default: Linux/macOS: `$HOME/.risc0/`
 - Custom: Set with the `RISC0_HOME` environment variable
-
