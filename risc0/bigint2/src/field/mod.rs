@@ -112,6 +112,16 @@ pub fn modadd_256(
     assert!(crate::is_less(&result, &modulus));
 }
 
+/// Compute the multiplicative inverse of `inp` mod `modulus`
+///
+/// The result is returned in `result`. Note that this can only compute the inverse if a
+/// multiplicative inverse actually exists. Otherwise, no proof can be generated (and the executor
+/// will panic).
+///
+/// Most notably, this means `inp` cannot be zero ("no division by zero"), but the full rule is that
+/// `inp` and `modulus` must be relatively prime. When `modulus` is prime, this just means that
+/// `inp` must not be a multiple of `modulus`, but when `modulus` is composite there are more cases
+/// with no solution, e.g. `8` does not have an inverse mod `12`.
 pub fn modinv_256(
     inp: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
