@@ -994,10 +994,8 @@ struct ControlUserECALLLayout {
   NondetRegLayout safeMode;
   AddrDecomposeBitsLayout pcAddr;
   MemoryReadLayout loadInst;
-  MemoryReadLayout dispatchIdx;
-  NondetU16RegLayout _0;
   MemoryReadLayout newPcAddr;
-  MemoryWriteLayout _1;
+  MemoryWriteLayout _0;
 };
 struct Control0_SuperArm2Layout {
   ControlUserECALLLayout _super;
@@ -1009,13 +1007,13 @@ struct Control0_SuperArm2Layout {
   MemoryArgLayout _extra5;
   MemoryArgLayout _extra6;
   MemoryArgLayout _extra7;
-  CycleArgLayout _extra8;
-  CycleArgLayout _extra9;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
   CycleArgLayout _extra10;
   CycleArgLayout _extra11;
-  ArgU16Layout _extra12;
-  ArgU16Layout _extra13;
-  ArgU16Layout _extra14;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
   ArgU16Layout _extra15;
   ArgU16Layout _extra16;
   ArgU16Layout _extra17;
@@ -1026,10 +1024,10 @@ struct Control0_SuperArm2Layout {
   ArgU16Layout _extra22;
   ArgU16Layout _extra23;
   ArgU16Layout _extra24;
-  ArgU8Layout _extra25;
-  ArgU8Layout _extra26;
-  ArgU8Layout _extra27;
-  ArgU8Layout _extra28;
+  ArgU16Layout _extra25;
+  ArgU16Layout _extra26;
+  ArgU16Layout _extra27;
+  ArgU16Layout _extra28;
   ArgU8Layout _extra29;
   ArgU8Layout _extra30;
   ArgU8Layout _extra31;
@@ -1042,6 +1040,10 @@ struct Control0_SuperArm2Layout {
   ArgU8Layout _extra38;
   ArgU8Layout _extra39;
   ArgU8Layout _extra40;
+  ArgU8Layout _extra41;
+  ArgU8Layout _extra42;
+  ArgU8Layout _extra43;
+  ArgU8Layout _extra44;
 };
 struct ControlMRETLayout {
   NondetRegLayout safeMode;

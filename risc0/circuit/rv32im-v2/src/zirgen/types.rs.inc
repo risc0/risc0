@@ -3165,10 +3165,8 @@ pub struct ControlUserECALLLayout {
     pub safe_mode: &'static NondetRegLayout,
     pub pc_addr: &'static AddrDecomposeBitsLayout,
     pub load_inst: &'static MemoryReadLayout,
-    pub dispatch_idx: &'static MemoryReadLayout,
-    pub _0: &'static NondetU16RegLayout,
     pub new_pc_addr: &'static MemoryReadLayout,
-    pub _1: &'static MemoryWriteLayout,
+    pub _0: &'static MemoryWriteLayout,
 }
 impl risc0_zkp::layout::Component for ControlUserECALLLayout {
     fn ty_name(&self) -> &'static str {
@@ -3179,10 +3177,8 @@ impl risc0_zkp::layout::Component for ControlUserECALLLayout {
         v.visit_component("safe_mode", self.safe_mode)?;
         v.visit_component("pc_addr", self.pc_addr)?;
         v.visit_component("load_inst", self.load_inst)?;
-        v.visit_component("dispatch_idx", self.dispatch_idx)?;
-        v.visit_component("_0", self._0)?;
         v.visit_component("new_pc_addr", self.new_pc_addr)?;
-        v.visit_component("_1", self._1)?;
+        v.visit_component("_0", self._0)?;
         Ok(())
     }
 }
@@ -3196,13 +3192,13 @@ pub struct Control0_SuperArm2Layout {
     pub _extra5: &'static MemoryArgLayout,
     pub _extra6: &'static MemoryArgLayout,
     pub _extra7: &'static MemoryArgLayout,
-    pub _extra8: &'static CycleArgLayout,
-    pub _extra9: &'static CycleArgLayout,
+    pub _extra8: &'static MemoryArgLayout,
+    pub _extra9: &'static MemoryArgLayout,
     pub _extra10: &'static CycleArgLayout,
     pub _extra11: &'static CycleArgLayout,
-    pub _extra12: &'static ArgU16Layout,
-    pub _extra13: &'static ArgU16Layout,
-    pub _extra14: &'static ArgU16Layout,
+    pub _extra12: &'static CycleArgLayout,
+    pub _extra13: &'static CycleArgLayout,
+    pub _extra14: &'static CycleArgLayout,
     pub _extra15: &'static ArgU16Layout,
     pub _extra16: &'static ArgU16Layout,
     pub _extra17: &'static ArgU16Layout,
@@ -3213,10 +3209,10 @@ pub struct Control0_SuperArm2Layout {
     pub _extra22: &'static ArgU16Layout,
     pub _extra23: &'static ArgU16Layout,
     pub _extra24: &'static ArgU16Layout,
-    pub _extra25: &'static ArgU8Layout,
-    pub _extra26: &'static ArgU8Layout,
-    pub _extra27: &'static ArgU8Layout,
-    pub _extra28: &'static ArgU8Layout,
+    pub _extra25: &'static ArgU16Layout,
+    pub _extra26: &'static ArgU16Layout,
+    pub _extra27: &'static ArgU16Layout,
+    pub _extra28: &'static ArgU16Layout,
     pub _extra29: &'static ArgU8Layout,
     pub _extra30: &'static ArgU8Layout,
     pub _extra31: &'static ArgU8Layout,
@@ -3229,6 +3225,10 @@ pub struct Control0_SuperArm2Layout {
     pub _extra38: &'static ArgU8Layout,
     pub _extra39: &'static ArgU8Layout,
     pub _extra40: &'static ArgU8Layout,
+    pub _extra41: &'static ArgU8Layout,
+    pub _extra42: &'static ArgU8Layout,
+    pub _extra43: &'static ArgU8Layout,
+    pub _extra44: &'static ArgU8Layout,
 }
 impl risc0_zkp::layout::Component for Control0_SuperArm2Layout {
     fn ty_name(&self) -> &'static str {
@@ -3278,6 +3278,10 @@ impl risc0_zkp::layout::Component for Control0_SuperArm2Layout {
         v.visit_component("_extra38", self._extra38)?;
         v.visit_component("_extra39", self._extra39)?;
         v.visit_component("_extra40", self._extra40)?;
+        v.visit_component("_extra41", self._extra41)?;
+        v.visit_component("_extra42", self._extra42)?;
+        v.visit_component("_extra43", self._extra43)?;
+        v.visit_component("_extra44", self._extra44)?;
         Ok(())
     }
 }

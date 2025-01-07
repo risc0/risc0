@@ -7097,7 +7097,309 @@ pub const LAYOUT__520: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
     },
     med14: LAYOUT__522,
 };
-pub const LAYOUT__523: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__519: &ControlUserECALLLayout = &ControlUserECALLLayout {
+    safe_mode: &NondetRegLayout {
+        _super: &Reg { offset: 180 },
+    },
+    pc_addr: LAYOUT__520,
+    load_inst: LAYOUT__483,
+    new_pc_addr: LAYOUT__484,
+    _0: LAYOUT__492,
+};
+pub const LAYOUT__518: &Control0_SuperArm2Layout = &Control0_SuperArm2Layout {
+    _super: LAYOUT__519,
+    _extra0: LAYOUT__456,
+    _extra1: LAYOUT__457,
+    _extra2: LAYOUT__461,
+    _extra3: LAYOUT__462,
+    _extra4: LAYOUT__466,
+    _extra5: LAYOUT__467,
+    _extra6: LAYOUT__471,
+    _extra7: LAYOUT__472,
+    _extra8: LAYOUT__476,
+    _extra9: LAYOUT__477,
+    _extra10: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 106 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 107 },
+        },
+    },
+    _extra11: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 108 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 109 },
+        },
+    },
+    _extra12: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 110 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 111 },
+        },
+    },
+    _extra13: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 112 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 113 },
+        },
+    },
+    _extra14: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 114 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 115 },
+        },
+    },
+    _extra15: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 120 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 121 },
+        },
+    },
+    _extra16: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 122 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 123 },
+        },
+    },
+    _extra17: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 124 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 125 },
+        },
+    },
+    _extra18: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 126 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 127 },
+        },
+    },
+    _extra19: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 128 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 129 },
+        },
+    },
+    _extra20: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 130 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 131 },
+        },
+    },
+    _extra21: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 132 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 133 },
+        },
+    },
+    _extra22: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 134 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 135 },
+        },
+    },
+    _extra23: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 136 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 137 },
+        },
+    },
+    _extra24: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 138 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 139 },
+        },
+    },
+    _extra25: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 140 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 141 },
+        },
+    },
+    _extra26: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 142 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 143 },
+        },
+    },
+    _extra27: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 144 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 145 },
+        },
+    },
+    _extra28: &ArgU16Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 146 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 147 },
+        },
+    },
+    _extra29: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 148 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 149 },
+        },
+    },
+    _extra30: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 150 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 151 },
+        },
+    },
+    _extra31: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 152 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 153 },
+        },
+    },
+    _extra32: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 154 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 155 },
+        },
+    },
+    _extra33: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 156 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 157 },
+        },
+    },
+    _extra34: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 158 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 159 },
+        },
+    },
+    _extra35: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 160 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 161 },
+        },
+    },
+    _extra36: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 162 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 163 },
+        },
+    },
+    _extra37: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 164 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 165 },
+        },
+    },
+    _extra38: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 166 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 167 },
+        },
+    },
+    _extra39: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 168 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 169 },
+        },
+    },
+    _extra40: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 170 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 171 },
+        },
+    },
+    _extra41: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 172 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 173 },
+        },
+    },
+    _extra42: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 174 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 175 },
+        },
+    },
+    _extra43: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 176 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 177 },
+        },
+    },
+    _extra44: &ArgU8Layout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 178 },
+        },
+        val: &NondetRegLayout {
+            _super: &Reg { offset: 179 },
+        },
+    },
+};
+pub const LAYOUT__526: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 120 },
@@ -7107,297 +7409,7 @@ pub const LAYOUT__523: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__524: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__450,
-    _0: LAYOUT__493,
-};
-pub const LAYOUT__519: &ControlUserECALLLayout = &ControlUserECALLLayout {
-    safe_mode: &NondetRegLayout {
-        _super: &Reg { offset: 180 },
-    },
-    pc_addr: LAYOUT__520,
-    load_inst: LAYOUT__483,
-    dispatch_idx: LAYOUT__484,
-    _0: LAYOUT__523,
-    new_pc_addr: LAYOUT__524,
-    _1: LAYOUT__496,
-};
-pub const LAYOUT__518: &Control0_SuperArm2Layout = &Control0_SuperArm2Layout {
-    _super: LAYOUT__519,
-    _extra0: LAYOUT__461,
-    _extra1: LAYOUT__462,
-    _extra2: LAYOUT__466,
-    _extra3: LAYOUT__467,
-    _extra4: LAYOUT__471,
-    _extra5: LAYOUT__472,
-    _extra6: LAYOUT__476,
-    _extra7: LAYOUT__477,
-    _extra8: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 108 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 109 },
-        },
-    },
-    _extra9: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 110 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 111 },
-        },
-    },
-    _extra10: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 112 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 113 },
-        },
-    },
-    _extra11: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 114 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 115 },
-        },
-    },
-    _extra12: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 122 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 123 },
-        },
-    },
-    _extra13: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 124 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 125 },
-        },
-    },
-    _extra14: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 126 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 127 },
-        },
-    },
-    _extra15: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 128 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 129 },
-        },
-    },
-    _extra16: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 130 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 131 },
-        },
-    },
-    _extra17: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 132 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 133 },
-        },
-    },
-    _extra18: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 134 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 135 },
-        },
-    },
-    _extra19: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 136 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 137 },
-        },
-    },
-    _extra20: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 138 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 139 },
-        },
-    },
-    _extra21: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 140 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 141 },
-        },
-    },
-    _extra22: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 142 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 143 },
-        },
-    },
-    _extra23: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 144 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 145 },
-        },
-    },
-    _extra24: &ArgU16Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 146 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 147 },
-        },
-    },
-    _extra25: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 148 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 149 },
-        },
-    },
-    _extra26: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 150 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 151 },
-        },
-    },
-    _extra27: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 152 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 153 },
-        },
-    },
-    _extra28: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 154 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 155 },
-        },
-    },
-    _extra29: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 156 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 157 },
-        },
-    },
-    _extra30: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 158 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 159 },
-        },
-    },
-    _extra31: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 160 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 161 },
-        },
-    },
-    _extra32: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 162 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 163 },
-        },
-    },
-    _extra33: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 164 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 165 },
-        },
-    },
-    _extra34: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 166 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 167 },
-        },
-    },
-    _extra35: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 168 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 169 },
-        },
-    },
-    _extra36: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 170 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 171 },
-        },
-    },
-    _extra37: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 172 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 173 },
-        },
-    },
-    _extra38: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 174 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 175 },
-        },
-    },
-    _extra39: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 176 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 177 },
-        },
-    },
-    _extra40: &ArgU8Layout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 178 },
-        },
-        val: &NondetRegLayout {
-            _super: &Reg { offset: 179 },
-        },
-    },
-};
-pub const LAYOUT__528: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__527: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 122 },
@@ -7407,27 +7419,27 @@ pub const LAYOUT__528: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__527: &NormalizeU32Layout = &NormalizeU32Layout {
-    low16: LAYOUT__523,
+pub const LAYOUT__525: &NormalizeU32Layout = &NormalizeU32Layout {
+    low16: LAYOUT__526,
     low_carry: &NondetRegLayout {
         _super: &Reg { offset: 185 },
     },
-    high16: LAYOUT__528,
+    high16: LAYOUT__527,
     high_carry: &NondetRegLayout {
         _super: &Reg { offset: 186 },
     },
 };
-pub const LAYOUT__526: &ControlMRETLayout = &ControlMRETLayout {
+pub const LAYOUT__524: &ControlMRETLayout = &ControlMRETLayout {
     safe_mode: &NondetRegLayout {
         _super: &Reg { offset: 180 },
     },
     pc_addr: LAYOUT__520,
     load_inst: LAYOUT__483,
     pc: LAYOUT__484,
-    pc_add: LAYOUT__527,
+    pc_add: LAYOUT__525,
 };
-pub const LAYOUT__525: &Control0_SuperArm3Layout = &Control0_SuperArm3Layout {
-    _super: LAYOUT__526,
+pub const LAYOUT__523: &Control0_SuperArm3Layout = &Control0_SuperArm3Layout {
+    _super: LAYOUT__524,
     _extra0: LAYOUT__451,
     _extra1: LAYOUT__452,
     _extra2: LAYOUT__456,
@@ -7713,6 +7725,10 @@ pub const LAYOUT__525: &Control0_SuperArm3Layout = &Control0_SuperArm3Layout {
         },
     },
 };
+pub const LAYOUT__533: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__450,
+    _0: LAYOUT__493,
+};
 pub const LAYOUT__534: &MemoryReadLayout = &MemoryReadLayout {
     io: LAYOUT__455,
     _0: LAYOUT__497,
@@ -7733,18 +7749,18 @@ pub const LAYOUT__538: &MemoryReadLayout = &MemoryReadLayout {
     io: LAYOUT__475,
     _0: LAYOUT__513,
 };
-pub const LAYOUT__533: &MemoryReadLayout8LayoutArray = &[
+pub const LAYOUT__532: &MemoryReadLayout8LayoutArray = &[
     LAYOUT__483,
     LAYOUT__484,
-    LAYOUT__524,
+    LAYOUT__533,
     LAYOUT__534,
     LAYOUT__535,
     LAYOUT__536,
     LAYOUT__537,
     LAYOUT__538,
 ];
-pub const LAYOUT__532: &ControlSuspend_SuperArm0_SuperLayout =
-    &ControlSuspend_SuperArm0_SuperLayout { _1: LAYOUT__533 };
+pub const LAYOUT__531: &ControlSuspend_SuperArm0_SuperLayout =
+    &ControlSuspend_SuperArm0_SuperLayout { _1: LAYOUT__532 };
 pub const LAYOUT__540: &ControlSuspend_SuperArm1_SuperLayout =
     &ControlSuspend_SuperArm1_SuperLayout {
         state: &NondetRegLayout {
@@ -7816,8 +7832,8 @@ pub const LAYOUT__539: &ControlSuspend_SuperArm1Layout = &ControlSuspend_SuperAr
         },
     },
 };
-pub const LAYOUT__531: &ControlSuspend_SuperLayout = &ControlSuspend_SuperLayout {
-    arm0: LAYOUT__532,
+pub const LAYOUT__530: &ControlSuspend_SuperLayout = &ControlSuspend_SuperLayout {
+    arm0: LAYOUT__531,
     arm1: LAYOUT__539,
 };
 pub const LAYOUT__541: &_Arguments_ControlSuspend_SuperLayout =
@@ -7825,8 +7841,8 @@ pub const LAYOUT__541: &_Arguments_ControlSuspend_SuperLayout =
         memory_arg: LAYOUT__516,
         cycle_arg: LAYOUT__517,
     };
-pub const LAYOUT__530: &ControlSuspendLayout = &ControlSuspendLayout {
-    _super: LAYOUT__531,
+pub const LAYOUT__529: &ControlSuspendLayout = &ControlSuspendLayout {
+    _super: LAYOUT__530,
     pc_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 181 },
@@ -7837,8 +7853,8 @@ pub const LAYOUT__530: &ControlSuspendLayout = &ControlSuspendLayout {
     },
     _arguments_control_suspend__super: LAYOUT__541,
 };
-pub const LAYOUT__529: &Control0_SuperArm4Layout = &Control0_SuperArm4Layout {
-    _super: LAYOUT__530,
+pub const LAYOUT__528: &Control0_SuperArm4Layout = &Control0_SuperArm4Layout {
+    _super: LAYOUT__529,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 116 },
@@ -9797,8 +9813,8 @@ pub const LAYOUT__434: &Control0_SuperLayout = &Control0_SuperLayout {
     arm0: LAYOUT__435,
     arm1: LAYOUT__478,
     arm2: LAYOUT__518,
-    arm3: LAYOUT__525,
-    arm4: LAYOUT__529,
+    arm3: LAYOUT__523,
+    arm4: LAYOUT__528,
     arm5: LAYOUT__542,
     arm6: LAYOUT__553,
     arm7: LAYOUT__597,
