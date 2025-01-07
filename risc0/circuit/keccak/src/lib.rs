@@ -42,6 +42,7 @@ pub fn max_keccak_inputs(po2: u32) -> usize {
     max_keccak_cycles / KECCAK_PERMUTE_CYCLES
 }
 
+/// Given a slice of `KeccakState`, encoded as `[u8]`, produce the SHA-256 digest matching what is produced by the keccak circuit.
 #[cfg(feature = "prove")]
 pub fn compute_keccak_digest(input: &[u8]) -> Digest {
     use risc0_zkp::core::digest::{Digest, DIGEST_BYTES};
