@@ -148,14 +148,7 @@ impl<'a> Risc0Machine<'a> {
     }
 
     fn user_ecall(&mut self) -> Result<bool> {
-        // let dispatch_idx = self.load_register(REG_A7)?;
-        // if dispatch_idx >= SYSCALL_MAX {
-        //     return self.trap(TrapCause::InvalidEcallDispatch(dispatch_idx));
-        // }
-
-        // let dispatch_addr = ByteAddr(self.load_memory(ECALL_DISPATCH_ADDR.waddr() + dispatch_idx)?);
         let dispatch_addr = guest_addr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?)?;
-        // tracing::trace!("user_ecall> idx: {dispatch_idx}, addr: {dispatch_addr:?}");
         tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             return self.trap(Exception::UserEnvCall(dispatch_addr));

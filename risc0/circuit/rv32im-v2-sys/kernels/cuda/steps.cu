@@ -4118,48 +4118,39 @@ __device__ InstOutputStruct exec_ControlUserECALL(ExecContext& ctx,
   // ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:57)
   EQZ(arg1_0.mode, "ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:57)");
   // ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:58)
-  GetDataStruct x7 =
-      exec_MemoryRead(ctx, arg0, Val(1073725489), LAYOUT_LOOKUP(layout2, dispatchIdx));
+  GetDataStruct x7 = exec_MemoryRead(ctx, arg0, Val(1073726464), LAYOUT_LOOKUP(layout2, newPcAddr));
   // ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:59)
-  EQZ(x7._super.high, "ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:59)");
-  // ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:60)
-  Val x8 = (x7._super.low * Val(128));
-  NondetU16RegStruct x9 = exec_U16Reg(ctx, x8, LAYOUT_LOOKUP(layout2, _0));
-  // ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:61)
-  Val x10 = (x7._super.low + Val(1073726464));
-  GetDataStruct x11 = exec_MemoryRead(ctx, arg0, x10, LAYOUT_LOOKUP(layout2, newPcAddr));
-  // ControlUserECALL(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:62)
-  MemoryWriteStruct x12 =
-      exec_MemoryWrite(ctx, arg0, Val(1073725568), arg1_0.pcU32, LAYOUT_LOOKUP(layout2, _1));
-  return InstOutputStruct{.newPc = x11._super, .newState = Val(40), .newMode = Val(1)};
+  MemoryWriteStruct x8 =
+      exec_MemoryWrite(ctx, arg0, Val(1073725568), arg1_0.pcU32, LAYOUT_LOOKUP(layout2, _0));
+  return InstOutputStruct{.newPc = x7._super, .newState = Val(40), .newMode = Val(1)};
 }
 __device__ InstOutputStruct exec_ControlMRET(ExecContext& ctx,
                                              NondetRegStruct arg0,
                                              InstInputStruct arg1_0,
                                              BoundLayout<ControlMRETLayout> layout2) {
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:67)
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:64)
   NondetRegStruct x3 = exec_Reg(ctx, arg1_0.mode, LAYOUT_LOOKUP(layout2, safeMode));
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:68)
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:65)
   AddrDecomposeBitsStruct x4 =
       exec_AddrDecomposeBits(ctx, arg1_0.pcU32, x3._super, LAYOUT_LOOKUP(layout2, pcAddr));
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:69)
-  EQZ(x4.low2, "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:69)");
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:70)
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:66)
+  EQZ(x4.low2, "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:66)");
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:67)
   GetDataStruct x5 = exec_MemoryRead(ctx, arg0, x4._super, LAYOUT_LOOKUP(layout2, loadInst));
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:71)
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:68)
   Val x6 = (x5._super.high - Val(12320));
-  EQZ(x6, "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:71)");
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:72)
+  EQZ(x6, "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:68)");
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:69)
   Val x7 = (x5._super.low - Val(115));
-  EQZ(x7, "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:72)");
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:73)
-  EQZ((arg1_0.state - Val(40)), "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:73)");
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:74)
-  EQZ((arg1_0.mode - Val(1)), "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:74)");
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:75)
+  EQZ(x7, "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:69)");
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:70)
+  EQZ((arg1_0.state - Val(40)), "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:70)");
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:71)
+  EQZ((arg1_0.mode - Val(1)), "ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:71)");
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:72)
   GetDataStruct x8 = exec_MemoryRead(ctx, arg0, Val(1073725568), LAYOUT_LOOKUP(layout2, pc));
   // AddU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:27)
-  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:76)
+  // ControlMRET(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:73)
   Val x9 = (x8._super.low + Val(4));
   NormalizeU32Struct x10 = exec_NormalizeU32(
       ctx, DenormedValU32Struct{.low = x9, .high = x8._super.high}, LAYOUT_LOOKUP(layout2, pcAdd));
@@ -4170,22 +4161,22 @@ __device__ InstOutputStruct exec_ControlSuspend(ExecContext& ctx,
                                                 InstInputStruct arg1_0,
                                                 BoundLayout<ControlSuspendLayout> layout2,
                                                 GlobalBuf global3) {
-  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)
+  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:77)
   BoundLayout<_globalLayout> x4 = BIND_LAYOUT(kLayoutGlobal, global3);
-  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:82)
+  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:79)
   Val x5 = (arg1_0.pcU32.low + arg1_0.pcU32.high);
   NondetRegStruct x6 = exec_IsZero(ctx, x5, LAYOUT_LOOKUP(layout2, pcZero));
-  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:91)
+  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:88)
   ComponentStruct x7 = ComponentStruct{};
   // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
-  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:103)
+  // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:100)
   ValU32Struct x8 = ValU32Struct{.low = Val(0), .high = Val(0)};
   InstOutputStruct x9;
   if (to_size_t(x6._super)) {
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:84)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:81)
     EQZ((arg1_0.state - Val(4)),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:84)");
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:89)
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:81)");
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:86)
     GetDataStruct8Array x10 = map(
         Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)},
         LAYOUT_LOOKUP(layout2, _super.arm0._1),
@@ -4201,22 +4192,22 @@ __device__ InstOutputStruct exec_ControlSuspend(ExecContext& ctx,
                                                 x10[5]._super,
                                                 x10[6]._super,
                                                 x10[7]._super};
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:88)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:85)
     DigestRegStruct x15 = exec_DigestReg(ctx, x14, LAYOUT_LOOKUP(x4, output));
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:86)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)
     NondetRegStruct x16 = back_Reg(ctx, 0, LAYOUT_LOOKUP(x4, isTerminate));
     NondetRegStruct x17 = back_Reg(ctx, 0, LAYOUT_LOOKUP(x4, isTerminate));
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:91)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:88)
     Val x18 = (Val(1) - (Val(1) - x17._super));
     ComponentStruct x19;
     if (to_size_t((Val(1) - x16._super))) {
-      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:92)
+      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:89)
       NondetRegStruct x20 = exec_Reg(ctx, Val(0), LAYOUT_LOOKUP(x4, termA0low));
-      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:93)
+      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:90)
       NondetRegStruct x21 = exec_Reg(ctx, Val(0), LAYOUT_LOOKUP(x4, termA0high));
-      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:94)
+      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:91)
       NondetRegStruct x22 = exec_Reg(ctx, Val(0), LAYOUT_LOOKUP(x4, termA1low));
-      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:95)
+      // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:92)
       NondetRegStruct x23 = exec_Reg(ctx, Val(0), LAYOUT_LOOKUP(x4, termA1high));
       x19 = x7;
     } else if (to_size_t(x18)) {
@@ -4226,79 +4217,79 @@ __device__ InstOutputStruct exec_ControlSuspend(ExecContext& ctx,
     }
     x9 = InstOutputStruct{.newPc = x8, .newState = Val(16), .newMode = Val(3)};
   } else if (to_size_t((Val(1) - x6._super))) {
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:107)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:104)
     NondetRegStruct x24 =
         exec_Reg(ctx, arg1_0.state, LAYOUT_LOOKUP(layout2, _super.arm1._super.state));
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:108)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:105)
     Val x25 = (x24._super - Val(40));
     EQZ((x25 * (x24._super - Val(4))),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:108)");
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:111)
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:105)");
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:108)
     NondetRegStruct x26 = exec_Reg(ctx, (x25 * Val(1398101334)), LAYOUT_LOOKUP(x4, isTerminate));
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:113)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:110)
     MemoryWriteStruct x27 = exec_MemoryWrite(
         ctx, arg0, Val(1073725572), arg1_0.pcU32, LAYOUT_LOOKUP(layout2, _super.arm1._super._0));
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:114)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:111)
     MemoryWriteStruct x28 = exec_MemoryWrite(ctx,
                                              arg0,
                                              Val(1073725573),
                                              ValU32Struct{.low = arg1_0.mode, .high = Val(0)},
                                              LAYOUT_LOOKUP(layout2, _super.arm1._super._1));
-    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)
+    // ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra0.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra1.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra2.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra3.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra4.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra5.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra6.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra7.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra8.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra9.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra10.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra11.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra12.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra13.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra14.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra15.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra16.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra17.count._super), 0),
-        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:83)");
+        "ControlSuspend(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:80)");
     x9 = InstOutputStruct{.newPc = x8, .newState = Val(4), .newMode = arg1_0.mode};
   } else {
     assert(0 && "Reached unreachable mux arm");
@@ -4310,21 +4301,21 @@ __device__ InstOutputStruct exec_ControlStoreRoot(ExecContext& ctx,
                                                   InstInputStruct arg1_0,
                                                   BoundLayout<ControlStoreRootLayout> layout2,
                                                   GlobalBuf global3) {
-  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:120)
+  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:117)
   BoundLayout<_globalLayout> x4 = BIND_LAYOUT(kLayoutGlobal, global3);
-  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:121)
+  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:118)
   EQZ((arg1_0.state - Val(5)),
-      "ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:121)");
-  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:123)
+      "ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:118)");
+  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:120)
   GetDataStruct8Array x5 = map(
       Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)},
       LAYOUT_LOOKUP(layout2, _1),
       ([&](Val8Array::value_type x6, BoundLayout<MemoryPageOutLayout8LayoutArray::value_type> x7) {
-        // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:124)
+        // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:121)
         GetDataStruct x8 = exec_MemoryPageOut(ctx, arg0, (x6 + Val(1140850680)), x7);
         return x8;
       }));
-  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:123)
+  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:120)
   ValU32Struct8Array x9 = ValU32Struct8Array{x5[0]._super,
                                              x5[1]._super,
                                              x5[2]._super,
@@ -4333,10 +4324,10 @@ __device__ InstOutputStruct exec_ControlStoreRoot(ExecContext& ctx,
                                              x5[5]._super,
                                              x5[6]._super,
                                              x5[7]._super};
-  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:122)
+  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:119)
   DigestRegStruct x10 = exec_DigestReg(ctx, x9, LAYOUT_LOOKUP(x4, stateOut));
   // InstOutput(zirgen/circuit/rv32im/v2/dsl/inst.zir:49)
-  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:127)
+  // ControlStoreRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:124)
   InstOutputStruct x11 = InstOutputStruct{
       .newPc = ValU32Struct{.low = Val(0), .high = Val(0)}, .newState = Val(6), .newMode = Val(0)};
   return x11;
@@ -4345,16 +4336,16 @@ __device__ InstOutputStruct exec_ControlTable(ExecContext& ctx,
                                               NondetRegStruct arg0,
                                               InstInputStruct arg1_0,
                                               BoundLayout<ControlTableLayout> layout2) {
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:131)
-  EQZ((arg1_0.state - Val(6)), "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:131)");
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:128)
+  EQZ((arg1_0.state - Val(6)), "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:128)");
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:129)
   NondetRegStruct x3 = exec_Reg(ctx, arg1_0.pcU32.low, LAYOUT_LOOKUP(layout2, entry));
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:133)
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:130)
   NondetRegStruct x4 = exec_Reg(ctx, arg1_0.mode, LAYOUT_LOOKUP(layout2, mode));
   // Log(<preamble>:22)
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:134)
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:131)
   INVOKE_EXTERN(ctx, log, "mode/entry = ", std::initializer_list<Val>{x4._super, x3._super});
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:137)
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:134)
   Val16Array x5 = Val16Array{Val(0),
                              Val(1),
                              Val(2),
@@ -4371,34 +4362,34 @@ __device__ InstOutputStruct exec_ControlTable(ExecContext& ctx,
                              Val(13),
                              Val(14),
                              Val(15)};
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:142)
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:139)
   Val x6 = (x3._super + Val(16));
   // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:145)
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:142)
   ValU32Struct x7 = ValU32Struct{.low = Val(0), .high = Val(0)};
-  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:147)
+  // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:144)
   ValU32Struct x8 = ValU32Struct{.low = x6, .high = Val(0)};
   InstOutputStruct x9;
   if (to_size_t(x4._super)) {
-    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:137)
+    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:134)
     ControlTable_SuperArm0_Super__0Struct16Array x10 =
         map(x5,
             LAYOUT_LOOKUP(layout2, _super.arm0._super._1),
             ([&](Val16Array::value_type x11,
                  BoundLayout<ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray::value_type>
                      x12) {
-              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:138)
+              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)
               Val x13 = (x3._super + x11);
               // LookupCurrent(zirgen/circuit/rv32im/v2/dsl/lookups.zir:5)
-              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:139)
+              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:136)
               Val x14 = INVOKE_EXTERN(ctx, lookupCurrent, Val(16), x13);
               ArgU16Struct x15 = exec_ArgU16(ctx, neg_0(x14), x13, LAYOUT_LOOKUP(x12, arg));
-              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:140)
+              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:137)
               Val x16 = (x15.val._super - x13);
-              EQZ(x16, "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:140)");
+              EQZ(x16, "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:137)");
               return ControlTable_SuperArm0_Super__0Struct{};
             }));
-    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:143)
+    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:140)
     NondetRegStruct x17 =
         exec_IsZero(ctx, (x6 - Val(65536)), LAYOUT_LOOKUP(layout2, _super.arm0._super.done));
     InstOutputStruct x18;
@@ -4409,76 +4400,76 @@ __device__ InstOutputStruct exec_ControlTable(ExecContext& ctx,
     } else {
       assert(0 && "Reached unreachable mux arm");
     }
-    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)
+    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra1.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra2.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra3.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra4.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra5.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra6.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra7.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra8.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra9.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra10.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra11.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra12.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra13.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra14.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra15.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     x9 = x18;
   } else if (to_size_t((Val(1) - x4._super))) {
-    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:151)
+    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:148)
     ControlTable_SuperArm1_Super__0Struct16Array x19 =
         map(x5,
             LAYOUT_LOOKUP(layout2, _super.arm1._super._1),
             ([&](Val16Array::value_type x20,
                  BoundLayout<ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray::value_type>
                      x21) {
-              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:152)
+              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:149)
               Val x22 = (x3._super + x20);
               // LookupCurrent(zirgen/circuit/rv32im/v2/dsl/lookups.zir:5)
-              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:153)
+              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:150)
               Val x23 = INVOKE_EXTERN(ctx, lookupCurrent, Val(8), x22);
               ArgU8Struct x24 = exec_ArgU8(ctx, neg_0(x23), x22, LAYOUT_LOOKUP(x21, arg));
-              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:154)
+              // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:151)
               Val x25 = (x24.val._super - x22);
-              EQZ(x25, "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:154)");
+              EQZ(x25, "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:151)");
               return ControlTable_SuperArm1_Super__0Struct{};
             }));
-    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:157)
+    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:154)
     NondetRegStruct x26 =
         exec_IsZero(ctx, (x6 - Val(256)), LAYOUT_LOOKUP(layout2, _super.arm1._super.done));
     InstOutputStruct x27;
@@ -4489,55 +4480,55 @@ __device__ InstOutputStruct exec_ControlTable(ExecContext& ctx,
     } else {
       assert(0 && "Reached unreachable mux arm");
     }
-    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)
+    // ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra0.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra1.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra2.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra3.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra4.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra5.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra6.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra7.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra8.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra9.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra10.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra11.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra12.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra13.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra14.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra15.count._super), 0),
-        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:135)");
+        "ControlTable(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:132)");
     x9 = x27;
   } else {
     assert(0 && "Reached unreachable mux arm");
@@ -4549,39 +4540,39 @@ __device__ InstOutputStruct exec_ControlDone(ExecContext& ctx,
                                              InstInputStruct arg1_0,
                                              BoundLayout<ControlDoneLayout> layout2,
                                              GlobalBuf global3) {
-  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:166)
+  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:163)
   BoundLayout<_globalLayout> x4 = BIND_LAYOUT(kLayoutGlobal, global3);
+  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:164)
+  EQZ((arg1_0.state - Val(7)), "ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:164)");
   // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:167)
-  EQZ((arg1_0.state - Val(7)), "ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:167)");
-  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:170)
   Val x5 = (Val(1) - arg1_0.mode);
-  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:168)
+  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:165)
   NondetRegStruct x6 = back_Reg(ctx, 0, LAYOUT_LOOKUP(x4, isTerminate));
   NondetRegStruct x7 = back_Reg(ctx, 0, LAYOUT_LOOKUP(x4, isTerminate));
-  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:170)
+  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:167)
   ComponentStruct x8 = ComponentStruct{};
   ComponentStruct x9;
   if (to_size_t((x5 * (Val(1) - x6._super)))) {
     // Log(<preamble>:22)
-    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:171)
+    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:168)
     INVOKE_EXTERN(ctx, log, "Verifying end state", std::initializer_list<Val>{});
-    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:169)
+    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:166)
     NondetRegStruct x10 = back_Reg(ctx, 0, LAYOUT_LOOKUP(x4, shutdownCycle));
-    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:172)
+    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:169)
     IsCycleStruct x11 =
         exec_IsCycle(ctx, (arg0._super - x10._super), LAYOUT_LOOKUP(layout2, _2.arm0._0));
     x9 = x8;
   } else if (to_size_t((Val(1) - (x5 * (Val(1) - x7._super))))) {
-    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:170)
+    // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:167)
     STORE(LAYOUT_LOOKUP(layout2, _2.arm1._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _2.arm1._extra0.count._super), 0),
-        "ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:170)");
+        "ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:167)");
     x9 = x8;
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
   // InstOutput(zirgen/circuit/rv32im/v2/dsl/inst.zir:49)
-  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:176)
+  // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:173)
   InstOutputStruct x12 = InstOutputStruct{
       .newPc = ValU32Struct{.low = Val(0), .high = Val(0)}, .newState = Val(7), .newMode = Val(1)};
   return x12;
@@ -4591,962 +4582,974 @@ __device__ InstOutputStruct exec_Control0(ExecContext& ctx,
                                           InstInputStruct arg1_0,
                                           BoundLayout<Control0Layout> layout2,
                                           GlobalBuf global3) {
-  // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:180)
+  // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:177)
   DoCycleTableStruct x4 = exec_DoCycleTable(ctx, arg0, LAYOUT_LOOKUP(layout2, _0));
   InstOutputStruct x5;
   if (to_size_t(arg1_0.minorOnehot._super[0]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:182)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:179)
     InstOutputStruct x6 = exec_ControlLoadRoot(
         ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm0._super), global3);
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra24.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra25.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra26.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra27.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra28.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra29.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra30.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra31.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra32.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra33.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra34.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra35.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra36.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra36.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra37.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra37.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra38.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra38.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra39.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra39.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x6;
   } else if (to_size_t(arg1_0.minorOnehot._super[1]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:183)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:180)
     InstOutputStruct x7 =
         exec_ControlResume(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm1._super), global3);
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra24.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra25.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra26.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra27.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra28.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra29.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra30.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm1._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm1._extra31.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x7;
   } else if (to_size_t(arg1_0.minorOnehot._super[2]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:184)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
     InstOutputStruct x8 =
         exec_ControlUserECALL(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm2._super));
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra24.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra25.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra26.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra27.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra28.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra29.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra30.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra31.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra32.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra33.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra34.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra35.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra36.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra36.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra37.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra37.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra38.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra38.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra39.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra39.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra40.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra40.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
+    STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra41.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra41.count._super), 0),
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
+    STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra42.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra42.count._super), 0),
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
+    STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra43.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra43.count._super), 0),
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
+    STORE(LAYOUT_LOOKUP(layout2, _super.arm2._extra44.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm2._extra44.count._super), 0),
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x8;
   } else if (to_size_t(arg1_0.minorOnehot._super[3]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:185)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:182)
     InstOutputStruct x9 =
         exec_ControlMRET(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm3._super));
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra24.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra25.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra26.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra27.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra28.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra29.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra30.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra31.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra32.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra33.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra34.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra35.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra36.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra36.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra37.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra37.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra38.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra38.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra39.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra39.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra40.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra40.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra41.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra41.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra42.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra42.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra43.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra43.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra44.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra44.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm3._extra45.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm3._extra45.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x9;
   } else if (to_size_t(arg1_0.minorOnehot._super[4]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:186)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:183)
     InstOutputStruct x10 =
         exec_ControlSuspend(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm4._super), global3);
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra24.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra25.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra26.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra27.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra28.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra29.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra30.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm4._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm4._extra31.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x10;
   } else if (to_size_t(arg1_0.minorOnehot._super[5]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:187)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:184)
     InstOutputStruct x11 = exec_ControlStoreRoot(
         ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm5._super), global3);
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra24.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra25.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra26.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra27.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra28.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra29.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra30.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm5._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm5._extra31.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x11;
   } else if (to_size_t(arg1_0.minorOnehot._super[6]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:188)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:185)
     InstOutputStruct x12 =
         exec_ControlTable(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm6._super));
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm6._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm6._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x12;
   } else if (to_size_t(arg1_0.minorOnehot._super[7]._super)) {
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:189)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:186)
     InstOutputStruct x13 =
         exec_ControlDone(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm7._super), global3);
-    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)
+    // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra0.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra1.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra2.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra3.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra4.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra5.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra6.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra7.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra8.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra9.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra10.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra11.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra12.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra13.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra14.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra15.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra16.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra17.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra18.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra19.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra20.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra21.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra22.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra23.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra24.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra25.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra26.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra27.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra28.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra29.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra30.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra31.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra32.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra33.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra34.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra35.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra36.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra36.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra37.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra37.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra38.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra38.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra39.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra39.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra40.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra40.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra41.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra41.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra42.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra42.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra43.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra43.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra44.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra44.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra45.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra45.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra46.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra46.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra47.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra47.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra48.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra48.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra49.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra49.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra50.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra50.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra51.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra51.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra52.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra52.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra53.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra53.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     STORE(LAYOUT_LOOKUP(layout2, _super.arm7._extra54.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm7._extra54.count._super), 0),
-        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:181)");
+        "Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:178)");
     x5 = x13;
   } else {
     assert(0 && "Reached unreachable mux arm");
