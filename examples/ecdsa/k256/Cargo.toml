@@ -6,8 +6,8 @@ edition = "2021"
 default-run = "k256-example"
 
 [dependencies]
-k256-methods = { path = "methods" }
 k256 = { version = "0.13", features = ["serde"] }
+k256-methods = { path = "methods" }
 rand_core = "0.6.4"
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 

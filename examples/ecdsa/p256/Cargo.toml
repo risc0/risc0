@@ -6,8 +6,8 @@ edition = "2021"
 default-run = "p256-example"
 
 [dependencies]
-p256-methods = { path = "methods" }
 p256 = { version = "0.13.2", features = ["serde"] }
+p256-methods = { path = "methods" }
 rand_core = "0.6.4"
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 
