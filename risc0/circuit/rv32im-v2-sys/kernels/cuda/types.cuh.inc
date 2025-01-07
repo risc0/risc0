@@ -1420,6 +1420,7 @@ struct _Arguments_ECall0OutputLayout {
   MemoryArgLayout8LayoutArray memoryArg;
   CycleArgLayout4LayoutArray cycleArg;
   ArgU16Layout4LayoutArray argU16;
+  ArgU8Layout4LayoutArray argU8;
 };
 struct OneHot_5_Layout {
   NondetRegLayout5LayoutArray _super;
@@ -1441,6 +1442,10 @@ struct ECall0OutputArm0Layout {
   ArgU16Layout _extra7;
   ArgU16Layout _extra8;
   ArgU16Layout _extra9;
+  ArgU8Layout _extra10;
+  ArgU8Layout _extra11;
+  ArgU8Layout _extra12;
+  ArgU8Layout _extra13;
 };
 struct ECallTerminateLayout {
   MemoryReadLayout a0;
@@ -1458,6 +1463,10 @@ struct ECall0OutputArm1Layout {
   ArgU16Layout _extra7;
   ArgU16Layout _extra8;
   ArgU16Layout _extra9;
+  ArgU8Layout _extra10;
+  ArgU8Layout _extra11;
+  ArgU8Layout _extra12;
+  ArgU8Layout _extra13;
 };
 using NondetRegLayout4LayoutArray = ::cuda::std::array<NondetRegLayout,4>;
 struct OneHot_4_Layout {
@@ -1482,6 +1491,13 @@ struct ECallHostReadSetupLayout {
   NondetRegLayout len123;
   NondetRegLayout uneven;
 };
+struct ECall0OutputArm2Layout {
+  ECallHostReadSetupLayout _super;
+  ArgU8Layout _extra0;
+  ArgU8Layout _extra1;
+  ArgU8Layout _extra2;
+  ArgU8Layout _extra3;
+};
 struct ECallHostWriteLayout {
   MemoryReadLayout fd;
   MemoryReadLayout ptr;
@@ -1494,28 +1510,39 @@ struct ECall0OutputArm3Layout {
   ECallHostWriteLayout _super;
   ArgU16Layout _extra0;
   ArgU16Layout _extra1;
-};
-struct ECall0OutputArm4Layout {
-  MemoryArgLayout _extra0;
-  MemoryArgLayout _extra1;
-  MemoryArgLayout _extra2;
-  MemoryArgLayout _extra3;
-  MemoryArgLayout _extra4;
-  MemoryArgLayout _extra5;
-  MemoryArgLayout _extra6;
-  MemoryArgLayout _extra7;
-  CycleArgLayout _extra8;
-  CycleArgLayout _extra9;
-  CycleArgLayout _extra10;
-  CycleArgLayout _extra11;
-  ArgU16Layout _extra12;
-  ArgU16Layout _extra13;
-  ArgU16Layout _extra14;
-  ArgU16Layout _extra15;
+  ArgU8Layout _extra2;
+  ArgU8Layout _extra3;
+  ArgU8Layout _extra4;
+  ArgU8Layout _extra5;
 };
 struct MemoryWriteUnconstrainedLayout {
   MemoryIOLayout io;
   IsForwardLayout _0;
+};
+struct ECallHostReadBytesLayout {
+  DecomposeLow2Layout lenDecomp;
+  NondetRegLayout len123;
+  IsZeroLayout nextPtrEven;
+  NondetRegLayout uneven;
+  IsZeroLayout lenZero;
+  NondetRegLayout low0;
+  NondetRegLayout low1;
+  MemoryReadLayout origWord;
+  MemoryWriteUnconstrainedLayout _0;
+  SplitWordLayout oldBytes;
+  SplitWordLayout newBytes_0;
+};
+struct ECall0OutputArm4Layout {
+  ECallHostReadBytesLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  CycleArgLayout _extra4;
+  CycleArgLayout _extra5;
+  ArgU16Layout _extra6;
+  ArgU16Layout _extra7;
+  ArgU16Layout _extra8;
 };
 struct ECallHostReadWords__0_SuperLayout {
   NondetRegLayout addr;
@@ -1526,12 +1553,17 @@ struct ECallHostReadWordsLayout {
   DecomposeLow2Layout lenDecomp;
   DecomposeLow2Layout wordsDecomp;
   ECallHostReadWords__0_SuperLayout4LayoutArray _1;
-  IsZeroLayout lenZero;
+  IsZeroLayout newLenHighZero;
+  NondetRegLayout lenZero;
 };
 struct ECall0OutputArm5Layout {
   ECallHostReadWordsLayout _super;
   ArgU16Layout _extra0;
   ArgU16Layout _extra1;
+  ArgU8Layout _extra2;
+  ArgU8Layout _extra3;
+  ArgU8Layout _extra4;
+  ArgU8Layout _extra5;
 };
 struct ECall0OutputArm6Layout {
   MemoryArgLayout _extra0;
@@ -1550,6 +1582,10 @@ struct ECall0OutputArm6Layout {
   ArgU16Layout _extra13;
   ArgU16Layout _extra14;
   ArgU16Layout _extra15;
+  ArgU8Layout _extra16;
+  ArgU8Layout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
 };
 struct ECall0OutputArm7Layout {
   MemoryArgLayout _extra0;
@@ -1568,11 +1604,15 @@ struct ECall0OutputArm7Layout {
   ArgU16Layout _extra13;
   ArgU16Layout _extra14;
   ArgU16Layout _extra15;
+  ArgU8Layout _extra16;
+  ArgU8Layout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
 };
 struct ECall0OutputLayout {
   ECall0OutputArm0Layout arm0;
   ECall0OutputArm1Layout arm1;
-  ECallHostReadSetupLayout arm2;
+  ECall0OutputArm2Layout arm2;
   ECall0OutputArm3Layout arm3;
   ECall0OutputArm4Layout arm4;
   ECall0OutputArm5Layout arm5;
@@ -2467,8 +2507,6 @@ struct NondetRegStruct {
 struct NondetExtRegStruct {
   ExtVal _super;
 };
-struct BitRegStruct {
-};
 struct NondetFakeTwitRegStruct {
   Val _super;
 };
@@ -2573,6 +2611,7 @@ struct GetDataStruct {
 struct MemoryWriteStruct {
 };
 struct MemoryWriteUnconstrainedStruct {
+  MemoryIOStruct io;
 };
 using Val3Array = ::cuda::std::array<Val,3>;
 using NondetRegStruct3Array = ::cuda::std::array<NondetRegStruct,3>;

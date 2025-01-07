@@ -30,7 +30,7 @@ extern NondetRegStruct exec_Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetReg
 extern NondetExtRegStruct back_ExtReg(ExecContext& ctx,Index distance0, BoundLayout<NondetExtRegLayout> layout1)  ;
 extern NondetExtRegStruct exec_ExtReg(ExecContext& ctx,ExtVal arg0, BoundLayout<NondetExtRegLayout> layout1)  ;
 extern NondetRegStruct exec_NondetBitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
-extern BitRegStruct exec_BitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
+extern NondetRegStruct exec_BitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
 extern NondetRegStruct exec_NondetTwitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
 extern NondetFakeTwitRegStruct exec_NondetFakeTwitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetFakeTwitRegLayout> layout1)  ;
 extern FakeTwitRegStruct exec_FakeTwitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetFakeTwitRegLayout> layout1)  ;
@@ -147,6 +147,7 @@ extern OneHot_4_Struct exec_OneHot_4_(ExecContext& ctx,Val arg0, BoundLayout<One
 extern DecomposeLow2Struct exec_DecomposeLow2(ExecContext& ctx,Val arg0, BoundLayout<DecomposeLow2Layout> layout1)  ;
 extern ECallOutputStruct exec_ECallHostReadSetup(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallHostReadSetupLayout> layout2)  ;
 extern ECallOutputStruct exec_ECallHostWrite(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallHostWriteLayout> layout2)  ;
+extern ECallOutputStruct exec_ECallHostReadBytes(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, Val arg3, Val arg4, BoundLayout<ECallHostReadBytesLayout> layout5)  ;
 extern ECallOutputStruct exec_ECallHostReadWords(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, Val arg3, BoundLayout<ECallHostReadWordsLayout> layout4)  ;
 extern InstOutputStruct exec_ECall0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECall0Layout> layout2, GlobalBuf global3)  ;
 extern NondetRegStruct exec_SBox(ExecContext& ctx,Val arg0, BoundLayout<SBoxLayout> layout1)  ;

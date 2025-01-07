@@ -69,13 +69,12 @@ Val x3 = (x2._super * (Val(1) - x2._super));
 EQZ(x3, "loc(callsite( AssertBit ( zirgen/circuit/rv32im/v2/dsl/bits.zir :6:20) at  NondetBitReg ( zirgen/circuit/rv32im/v2/dsl/bits.zir :12:13)))");
 return x2;
 }
-BitRegStruct exec_BitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)   {
+NondetRegStruct exec_BitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)   {
 // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:17)
 NondetRegStruct x2 = exec_NondetBitReg(ctx,arg0, layout1);
 // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:18)
 EQZ((arg0 - x2._super), "BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:18)");
-return BitRegStruct{
-};
+return x2;
 }
 NondetRegStruct exec_NondetTwitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)   {
 // NondetTwitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:53)
@@ -723,7 +722,7 @@ MemoryIOStruct x4 = exec_MemoryIO(ctx,x3, arg1_0, LAYOUT_LOOKUP(layout2, io));
 // MemoryWriteUnconstrained(zirgen/circuit/rv32im/v2/dsl/mem.zir:105)
 IsForwardStruct x5 = exec_IsForward(ctx,x4, LAYOUT_LOOKUP(layout2, _0));
 return MemoryWriteUnconstrainedStruct{
-};
+  .io = x4};
 }
 GetDataStruct exec_MemoryPageIn(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<MemoryPageInLayout> layout2)   {
 // MemoryPageIn(zirgen/circuit/rv32im/v2/dsl/mem.zir:111)
@@ -4215,22 +4214,22 @@ return OneHot_5_Struct{
   ._super = x2};
 }
 ECallOutputStruct exec_MachineECall(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, BoundLayout<MachineECallLayout> layout3)   {
-// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:26)
+// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:25)
 GetDataStruct x4 = exec_MemoryRead(ctx,arg0, arg2_0, LAYOUT_LOOKUP(layout3, loadInst));
+// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:26)
+EQZ((arg1_0.state - Val(40)), "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:26)");
 // MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:27)
-EQZ((arg1_0.state - Val(40)), "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:27)");
+EQZ(x4._super.high, "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:27)");
 // MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:28)
-EQZ(x4._super.high, "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:28)");
-// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:29)
 Val x5 = (x4._super.low - Val(115));
-EQZ(x5, "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:29)");
+EQZ(x5, "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:28)");
+// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:29)
+EQZ((arg1_0.mode - Val(1)), "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:29)");
 // MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:30)
-EQZ((arg1_0.mode - Val(1)), "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:30)");
-// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:31)
 GetDataStruct x6 = exec_MemoryRead(ctx,arg0, Val(1073725457), LAYOUT_LOOKUP(layout3, dispatchIdx));
+// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:31)
+EQZ(x6._super.high, "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:31)");
 // MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:32)
-EQZ(x6._super.high, "MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:32)");
-// MachineECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:33)
 OneHot_5_Struct x7 = exec_OneHot_5_(ctx,x6._super.low, LAYOUT_LOOKUP(layout3, dispatch));
 Val x8;
 if (to_size_t(x7._super[0]._super)) {
@@ -4250,21 +4249,21 @@ return ECallOutputStruct{
   .state = x8,   .s0 = Val(0),   .s1 = Val(0),   .s2 = Val(0)};
 }
 ECallOutputStruct exec_ECallTerminate(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallTerminateLayout> layout2, GlobalBuf global3)   {
-// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:44)
+// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:43)
 BoundLayout<_globalLayout> x4 = BIND_LAYOUT(kLayoutGlobal, global3);
+// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:44)
+EQZ((arg1_0.state - Val(9)), "ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:44)");
 // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:45)
-EQZ((arg1_0.state - Val(9)), "ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:45)");
-// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:46)
 GetDataStruct x5 = exec_MemoryRead(ctx,arg0, Val(1073725482), LAYOUT_LOOKUP(layout2, a0));
-// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:47)
+// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:46)
 GetDataStruct x6 = exec_MemoryRead(ctx,arg0, Val(1073725483), LAYOUT_LOOKUP(layout2, a1));
-// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:48)
+// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:47)
 NondetRegStruct x7 = exec_Reg(ctx,x5._super.low, LAYOUT_LOOKUP(x4, termA0low));
-// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:49)
+// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:48)
 NondetRegStruct x8 = exec_Reg(ctx,x5._super.high, LAYOUT_LOOKUP(x4, termA0high));
-// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:50)
+// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:49)
 NondetRegStruct x9 = exec_Reg(ctx,x6._super.low, LAYOUT_LOOKUP(x4, termA1low));
-// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:51)
+// ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:50)
 NondetRegStruct x10 = exec_Reg(ctx,x6._super.high, LAYOUT_LOOKUP(x4, termA1high));
 return ECallOutputStruct{
   .state = Val(4),   .s0 = Val(0),   .s1 = Val(0),   .s2 = Val(0)};
@@ -4289,363 +4288,492 @@ return OneHot_4_Struct{
   ._super = x2};
 }
 DecomposeLow2Struct exec_DecomposeLow2(ExecContext& ctx,Val arg0, BoundLayout<DecomposeLow2Layout> layout1)   {
-// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:58)
+// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:57)
 NondetU16RegStruct x2 = exec_NondetU16Reg(ctx,(bitAnd(arg0, Val(65532)) * Val(1509949441)), LAYOUT_LOOKUP(layout1, high));
-// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:59)
+// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:58)
 NondetRegStruct x3 = exec_NondetReg(ctx,bitAnd(arg0, Val(3)), LAYOUT_LOOKUP(layout1, low2));
-// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:60)
+// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:59)
 Val x4 = (x2._super._super * Val(4));
-EQZ((arg0 - (x4 + x3._super)), "DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:60)");
-// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:61)
+EQZ((arg0 - (x4 + x3._super)), "DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:59)");
+// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:60)
 OneHot_4_Struct x5 = exec_OneHot_4_(ctx,x3._super, LAYOUT_LOOKUP(layout1, low2Hot));
-// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:62)
+// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:61)
 NondetRegStruct x6 = exec_IsZero(ctx,x2._super._super, LAYOUT_LOOKUP(layout1, highZero));
-// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:63)
+// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:62)
 Val x7 = (x6._super * x5._super[0]._super);
 NondetRegStruct x8 = exec_Reg(ctx,x7, LAYOUT_LOOKUP(layout1, isZero));
-// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:65)
+// DecomposeLow2(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:64)
 Val x9 = (x5._super[1]._super + x5._super[2]._super);
 return DecomposeLow2Struct{
   .high = x2,   .low2 = x3,   .low2Hot = x5,   .highZero = x6,   .isZero = x8,   .low2Nonzero = (x9 + x5._super[3]._super)};
 }
 ECallOutputStruct exec_ECallHostReadSetup(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallHostReadSetupLayout> layout2)   {
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:69)
-EQZ((arg1_0.state - Val(10)), "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:69)");
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:71)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:68)
+EQZ((arg1_0.state - Val(10)), "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:68)");
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:70)
 GetDataStruct x3 = exec_MemoryRead(ctx,arg0, Val(1073725450), LAYOUT_LOOKUP(layout2, fd));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:72)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:71)
 GetDataStruct x4 = exec_MemoryRead(ctx,arg0, Val(1073725451), LAYOUT_LOOKUP(layout2, ptr));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:73)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:72)
 GetDataStruct x5 = exec_MemoryRead(ctx,arg0, Val(1073725452), LAYOUT_LOOKUP(layout2, len));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:75)
-EQZ(x3._super.high, "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:75)");
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:77)
-EQZ(x5._super.high, "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:77)");
-// HostReadPrepare(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:8)
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:79)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:74)
+EQZ(x3._super.high, "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:74)");
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:76)
+EQZ(x5._super.high, "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:76)");
+// HostReadPrepare(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:7)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:78)
 Val x6 = INVOKE_EXTERN(ctx,hostReadPrepare, x3._super.low, x5._super.low);
 NondetU16RegStruct x7 = exec_NondetU16Reg(ctx,x6, LAYOUT_LOOKUP(layout2, newLen));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:81)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:80)
 Val x8 = (x5._super.low - x7._super._super);
 NondetU16RegStruct x9 = exec_U16Reg(ctx,x8, LAYOUT_LOOKUP(layout2, diff));
 // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:83)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:82)
 ValU32Struct x10 = ValU32Struct{
   .low = x7._super._super,   .high = Val(0)};
 MemoryWriteStruct x11 = exec_MemoryWrite(ctx,arg0, Val(1073725450), x10, LAYOUT_LOOKUP(layout2, _0));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:85)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:84)
 DecomposeLow2Struct x12 = exec_DecomposeLow2(ctx,x4._super.low, LAYOUT_LOOKUP(layout2, ptrDecomp));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:86)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:85)
 Val x13 = (x4._super.high * Val(16384));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:87)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:86)
 DecomposeLow2Struct x14 = exec_DecomposeLow2(ctx,x7._super._super, LAYOUT_LOOKUP(layout2, lenDecomp));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:89)
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:88)
 Val x15 = (x14.highZero._super * x14.low2Nonzero);
 NondetRegStruct x16 = exec_Reg(ctx,x15, LAYOUT_LOOKUP(layout2, len123));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:91)
-NondetRegStruct x17 = exec_Reg(ctx,(x16._super * x12.low2Nonzero), LAYOUT_LOOKUP(layout2, uneven));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:95)
-Val x18 = (x14.isZero._super * Val(40));
-// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:97)
-Val x19 = (Val(1) - x14.isZero._super);
-Val x20 = ((x18 + ((x19 * x17._super) * Val(12))) + ((x19 * (Val(1) - x17._super)) * Val(13)));
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:90)
+Val x17 = ((x16._super + x12.low2Nonzero) - (x16._super * x12.low2Nonzero));
+NondetRegStruct x18 = exec_Reg(ctx,x17, LAYOUT_LOOKUP(layout2, uneven));
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:94)
+Val x19 = (x14.isZero._super * Val(40));
+// ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:96)
+Val x20 = (Val(1) - x14.isZero._super);
+Val x21 = ((x19 + ((x20 * x18._super) * Val(12))) + ((x20 * (Val(1) - x18._super)) * Val(13)));
 return ECallOutputStruct{
-  .state = x20,   .s0 = (x13 + x12.high._super._super),   .s1 = x12.low2._super,   .s2 = x7._super._super};
+  .state = x21,   .s0 = (x13 + x12.high._super._super),   .s1 = x12.low2._super,   .s2 = x7._super._super};
 }
 ECallOutputStruct exec_ECallHostWrite(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallHostWriteLayout> layout2)   {
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:104)
-EQZ((arg1_0.state - Val(11)), "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:104)");
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:106)
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:103)
+EQZ((arg1_0.state - Val(11)), "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:103)");
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:105)
 GetDataStruct x3 = exec_MemoryRead(ctx,arg0, Val(1073725450), LAYOUT_LOOKUP(layout2, fd));
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:107)
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:106)
 GetDataStruct x4 = exec_MemoryRead(ctx,arg0, Val(1073725451), LAYOUT_LOOKUP(layout2, ptr));
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:108)
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:107)
 GetDataStruct x5 = exec_MemoryRead(ctx,arg0, Val(1073725452), LAYOUT_LOOKUP(layout2, len));
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:108)
+EQZ(x3._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:108)");
 // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:109)
-EQZ(x3._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:109)");
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:110)
-EQZ(x5._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:110)");
-// HostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:11)
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:112)
+EQZ(x5._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:109)");
+// HostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:10)
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:111)
 Val x6 = INVOKE_EXTERN(ctx,hostWrite, x3._super.low, x4._super.low, x4._super.high, x5._super.low);
 NondetU16RegStruct x7 = exec_NondetU16Reg(ctx,x6, LAYOUT_LOOKUP(layout2, newLen));
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:114)
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:113)
 Val x8 = (x5._super.low - x7._super._super);
 NondetU16RegStruct x9 = exec_U16Reg(ctx,x8, LAYOUT_LOOKUP(layout2, diff));
 // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
-// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:116)
+// ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:115)
 ValU32Struct x10 = ValU32Struct{
   .low = x7._super._super,   .high = Val(0)};
 MemoryWriteStruct x11 = exec_MemoryWrite(ctx,arg0, Val(1073725450), x10, LAYOUT_LOOKUP(layout2, _0));
 return ECallOutputStruct{
   .state = Val(40),   .s0 = Val(0),   .s1 = Val(0),   .s2 = Val(0)};
 }
+ECallOutputStruct exec_ECallHostReadBytes(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, Val arg3, Val arg4, BoundLayout<ECallHostReadBytesLayout> layout5)   {
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:121)
+EQZ((arg1_0.state - Val(12)), "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:121)");
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:123)
+Val x6 = (arg4 - Val(1));
+DecomposeLow2Struct x7 = exec_DecomposeLow2(ctx,x6, LAYOUT_LOOKUP(layout5, lenDecomp));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:125)
+Val x8 = (x7.highZero._super * x7.low2Nonzero);
+NondetRegStruct x9 = exec_Reg(ctx,x8, LAYOUT_LOOKUP(layout5, len123));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:127)
+NondetRegStruct x10 = exec_IsZero(ctx,(arg3 - Val(3)), LAYOUT_LOOKUP(layout5, nextPtrEven));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:128)
+Val x11 = (Val(1) - x10._super);
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:129)
+Val x12 = ((x10._super * (arg2_0 + Val(1))) + (x11 * arg2_0));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:132)
+Val x13 = ((x9._super + x11) - (x9._super * x11));
+NondetRegStruct x14 = exec_Reg(ctx,x13, LAYOUT_LOOKUP(layout5, uneven));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:134)
+NondetRegStruct x15 = exec_IsZero(ctx,x6, LAYOUT_LOOKUP(layout5, lenZero));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:136)
+NondetRegStruct x16 = exec_NondetBitReg(ctx,bitAnd(arg3, Val(1)), LAYOUT_LOOKUP(layout5, low0));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:137)
+NondetRegStruct x17 = exec_BitReg(ctx,((arg3 - x16._super) * Val(1006632961)), LAYOUT_LOOKUP(layout5, low1));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:139)
+GetDataStruct x18 = exec_MemoryRead(ctx,arg0, arg2_0, LAYOUT_LOOKUP(layout5, origWord));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:141)
+MemoryWriteUnconstrainedStruct x19 = exec_MemoryWriteUnconstrained(ctx,arg0, arg2_0, LAYOUT_LOOKUP(layout5, _0));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:143)
+Val x20 = (Val(1) - x17._super);
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)
+Val x21 = (x18._super.low - x19.io.newTxn.dataLow._super);
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:143)
+ComponentStruct x22 = ComponentStruct{
+};
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:146)
+Val x23 = (x18._super.high - x19.io.newTxn.dataHigh._super);
+ComponentStruct x24;
+if (to_size_t(x17._super)) {
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)
+EQZ(x21, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)");
+x24 = x22;
+} else if (to_size_t(x20)) {
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:146)
+EQZ(x23, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:146)");
+x24 = x22;
+} else {
+   assert(0 && "Reached unreachable mux arm");
+}
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:149)
+Val x25 = (x17._super * x18._super.high);
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:150)
+Val x26 = (x17._super * x19.io.newTxn.dataHigh._super);
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:152)
+SplitWordStruct x27 = exec_SplitWord(ctx,(x25 + (x20 * x18._super.low)), LAYOUT_LOOKUP(layout5, oldBytes));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:153)
+SplitWordStruct x28 = exec_SplitWord(ctx,(x26 + (x20 * x19.io.newTxn.dataLow._super)), LAYOUT_LOOKUP(layout5, newBytes_0));
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)
+Val x29 = (x27.byte0._super - x28.byte0._super);
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:158)
+Val x30 = (x27.byte1._super - x28.byte1._super);
+ComponentStruct x31;
+if (to_size_t(x16._super)) {
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)
+EQZ(x29, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)");
+x31 = x22;
+} else if (to_size_t((Val(1) - x16._super))) {
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:158)
+EQZ(x30, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:158)");
+x31 = x22;
+} else {
+   assert(0 && "Reached unreachable mux arm");
+}
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:164)
+Val x32 = (Val(1) - x15._super);
+// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:162)
+Val x33 = ((x15._super * Val(40)) + ((x32 * x14._super) * Val(12)));
+return ECallOutputStruct{
+  .state = (x33 + ((x32 * (Val(1) - x14._super)) * Val(13))),   .s0 = x12,   .s1 = (x11 * (arg3 + Val(1))),   .s2 = x6};
+}
 ECallOutputStruct exec_ECallHostReadWords(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, Val arg3, BoundLayout<ECallHostReadWordsLayout> layout4)   {
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:129)
-EQZ((arg1_0.state - Val(13)), "ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:129)");
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:130)
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:171)
+EQZ((arg1_0.state - Val(13)), "ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:171)");
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:172)
 DecomposeLow2Struct x5 = exec_DecomposeLow2(ctx,arg3, LAYOUT_LOOKUP(layout4, lenDecomp));
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:131)
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:173)
 DecomposeLow2Struct x6 = exec_DecomposeLow2(ctx,x5.high._super._super, LAYOUT_LOOKUP(layout4, wordsDecomp));
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:133)
-Val x7 = (x6.low2Hot._super[1]._super * x6.highZero._super);
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:134)
-Val x8 = (x6.low2Hot._super[2]._super * x6.highZero._super);
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:135)
-Val x9 = (x6.low2Hot._super[3]._super * x6.highZero._super);
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:136)
-Val x10 = (Val(1) - x6.highZero._super);
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:138)
-Val x11 = (((x7 + x8) + x9) + x10);
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:139)
-ECallHostReadWords__0Struct4Array x12 = map(Val4Array{Val(0), Val(1), Val(2), Val(3)}, LAYOUT_LOOKUP(layout4, _1), ([&](Val4Array::value_type x13, BoundLayout<ECallHostReadWords__0_SuperLayout4LayoutArray::value_type> x14) {
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:140)
-Val x15 = (Val4Array{x7, x8, x9, x10}[to_size_t(x13)] * (arg2_0 + x13));
-Val x16 = (Val(1) - Val4Array{x7, x8, x9, x10}[to_size_t(x13)]);
-NondetRegStruct x17 = exec_Reg(ctx,(x15 + (x16 * Val(1073725504))), LAYOUT_LOOKUP(x14, addr));
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:141)
-MemoryWriteUnconstrainedStruct x18 = exec_MemoryWriteUnconstrained(ctx,arg0, x17._super, LAYOUT_LOOKUP(x14, _0));
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:175)
+Val x7 = (x6.low2Hot._super[1]._super + x6.low2Hot._super[2]._super);
+Val x8 = ((x7 + x6.low2Hot._super[3]._super) * x6.highZero._super);
+Val x9 = (Val(1) - x6.highZero._super);
+Val x10 = (x8 + x9);
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:176)
+Val x11 = (x6.low2Hot._super[2]._super + x6.low2Hot._super[3]._super);
+Val x12 = ((x11 * x6.highZero._super) + x9);
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:177)
+Val x13 = (x6.low2Hot._super[3]._super * x6.highZero._super);
+Val x14 = (x13 + x9);
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:180)
+Val x15 = (((x10 + x12) + x14) + x9);
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:181)
+ECallHostReadWords__0Struct4Array x16 = map(Val4Array{Val(0), Val(1), Val(2), Val(3)}, LAYOUT_LOOKUP(layout4, _1), ([&](Val4Array::value_type x17, BoundLayout<ECallHostReadWords__0_SuperLayout4LayoutArray::value_type> x18) {
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:182)
+Val x19 = (Val4Array{x10, x12, x14, x9}[to_size_t(x17)] * (arg2_0 + x17));
+Val x20 = (Val(1) - Val4Array{x10, x12, x14, x9}[to_size_t(x17)]);
+NondetRegStruct x21 = exec_Reg(ctx,(x19 + (x20 * Val(1073725504))), LAYOUT_LOOKUP(x18, addr));
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:183)
+MemoryWriteUnconstrainedStruct x22 = exec_MemoryWriteUnconstrained(ctx,arg0, x21._super, LAYOUT_LOOKUP(x18, _0));
 return ECallHostReadWords__0Struct{
 };
 
 }));
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:143)
-Val x19 = (arg3 - (x11 * Val(4)));
-NondetRegStruct x20 = exec_IsZero(ctx,x19, LAYOUT_LOOKUP(layout4, lenZero));
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:148)
-Val x21 = (Val(1) - x20._super);
-// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:146)
-Val x22 = ((x20._super * Val(40)) + ((x21 * x5.low2Nonzero) * Val(12)));
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:185)
+Val x23 = (x5.high._super._super - x15);
+NondetRegStruct x24 = exec_IsZero(ctx,x23, LAYOUT_LOOKUP(layout4, newLenHighZero));
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:186)
+Val x25 = (x24._super * (Val(1) - x5.low2Nonzero));
+NondetRegStruct x26 = exec_Reg(ctx,x25, LAYOUT_LOOKUP(layout4, lenZero));
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:191)
+Val x27 = (Val(1) - x26._super);
+// ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:189)
+Val x28 = ((x26._super * Val(40)) + ((x27 * x24._super) * Val(12)));
 return ECallOutputStruct{
-  .state = (x22 + ((x21 * (Val(1) - x5.low2Nonzero)) * Val(13))),   .s0 = (arg2_0 + x11),   .s1 = Val(0),   .s2 = x19};
+  .state = (x28 + ((x27 * (Val(1) - x24._super)) * Val(13))),   .s0 = (arg2_0 + x15),   .s1 = Val(0),   .s2 = (arg3 - (x15 * Val(4)))};
 }
 InstOutputStruct exec_ECall0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECall0Layout> layout2, GlobalBuf global3)   {
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:158)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:201)
 DoCycleTableStruct x4 = exec_DoCycleTable(ctx,arg0, LAYOUT_LOOKUP(layout2, _0));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:159)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
 AddrDecomposeBitsStruct x5 = exec_AddrDecomposeBits(ctx,arg1_0.pcU32, arg1_0.mode, LAYOUT_LOOKUP(layout2, pcAddr));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:160)
-EQZ(x5.low2, "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:160)");
-// ECallOutput(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:13)
-// IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:22)
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:168)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:203)
+EQZ(x5.low2, "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:203)");
+// ECallOutput(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:12)
+// IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:21)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:211)
 ECallOutputStruct x6 = ECallOutputStruct{
   .state = Val(0),   .s0 = Val(0),   .s1 = Val(0),   .s2 = Val(0)};
 ECallOutputStruct x7;
 if (to_size_t(arg1_0.minorOnehot._super[0]._super)) {
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:162)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:205)
 ECallOutputStruct x8 = exec_MachineECall(ctx,arg0, arg1_0, x5._super, LAYOUT_LOOKUP(layout2, output.arm0._super));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra2.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra4.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra6.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra8.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra10.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra10.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra11.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra11.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra12.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra12.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra13.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra13.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 x7 = x8;
 } else if (to_size_t(arg1_0.minorOnehot._super[1]._super)) {
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:163)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:206)
 ECallOutputStruct x9 = exec_ECallTerminate(ctx,arg0, arg1_0, LAYOUT_LOOKUP(layout2, output.arm1._super), global3);
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra2.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra4.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra6.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra8.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra10.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra10.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra11.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra11.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra12.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra12.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra13.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra13.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 x7 = x9;
 } else if (to_size_t(arg1_0.minorOnehot._super[2]._super)) {
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:164)
-ECallOutputStruct x10 = exec_ECallHostReadSetup(ctx,arg0, arg1_0, LAYOUT_LOOKUP(layout2, output.arm2));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:207)
+ECallOutputStruct x10 = exec_ECallHostReadSetup(ctx,arg0, arg1_0, LAYOUT_LOOKUP(layout2, output.arm2._super));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra0.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra1.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra2.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra3.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 x7 = x10;
 } else if (to_size_t(arg1_0.minorOnehot._super[3]._super)) {
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:165)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:208)
 ECallOutputStruct x11 = exec_ECallHostWrite(ctx,arg0, arg1_0, LAYOUT_LOOKUP(layout2, output.arm3._super));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
 STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra2.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra3.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra4.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra5.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 x7 = x11;
 } else if (to_size_t(arg1_0.minorOnehot._super[4]._super)) {
-// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:123)
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:166)
-EQZ((arg1_0.state - Val(12)), "loc(callsite( ECallHostReadBytes ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :123:16) at  ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :166:24)))");
-// ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:124)
-EQZ(Val(2013265920), "loc(callsite( ECallHostReadBytes ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :124:6) at  ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :166:24)))");
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra2.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra4.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra6.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra8.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra10.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra10.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra11.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra12.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra12.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra13.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra14.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra14.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra15.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-x7 = ECallOutputStruct{
-  .state = Val(16),   .s0 = Val(0),   .s1 = Val(0),   .s2 = Val(0)};
-} else if (to_size_t(arg1_0.minorOnehot._super[5]._super)) {
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:167)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:209)
 NondetRegStruct x12 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout2, s0));
-NondetRegStruct x13 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout2, s2));
-ECallOutputStruct x14 = exec_ECallHostReadWords(ctx,arg0, arg1_0, x12._super, x13._super, LAYOUT_LOOKUP(layout2, output.arm5._super));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)
+NondetRegStruct x13 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout2, s1));
+NondetRegStruct x14 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout2, s2));
+ECallOutputStruct x15 = exec_ECallHostReadBytes(ctx,arg0, arg1_0, x12._super, x13._super, x14._super, LAYOUT_LOOKUP(layout2, output.arm4._super));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra0.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra1.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra2.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra3.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra4.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra5.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra6.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra7.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra8.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+x7 = x15;
+} else if (to_size_t(arg1_0.minorOnehot._super[5]._super)) {
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:210)
+NondetRegStruct x16 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout2, s0));
+NondetRegStruct x17 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout2, s2));
+ECallOutputStruct x18 = exec_ECallHostReadWords(ctx,arg0, arg1_0, x16._super, x17._super, LAYOUT_LOOKUP(layout2, output.arm5._super));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
 STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
-x7 = x14;
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra2.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra3.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra4.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra5.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+x7 = x18;
 } else if (to_size_t(arg1_0.minorOnehot._super[6]._super)) {
-// IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:21)
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:168)
-EQZ(Val(2013265920), "loc(callsite( IllegalECall ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :21:6) at  ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :168:18)))");
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)
+// IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:20)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:211)
+EQZ(Val(2013265920), "loc(callsite( IllegalECall ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :20:6) at  ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :211:18)))");
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra2.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra4.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra6.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra8.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra10.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra10.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra10.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra11.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra11.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra12.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra12.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra12.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra13.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra13.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra14.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra14.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra14.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra15.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra15.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra16.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra16.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra17.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra17.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra18.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra18.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra19.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra19.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 x7 = x6;
 } else if (to_size_t(arg1_0.minorOnehot._super[7]._super)) {
-// IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:21)
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:169)
-EQZ(Val(2013265920), "loc(callsite( IllegalECall ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :21:6) at  ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :169:18)))");
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)
+// IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:20)
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:212)
+EQZ(Val(2013265920), "loc(callsite( IllegalECall ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :20:6) at  ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :212:18)))");
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra0.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra1.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra2.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra2.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra3.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra4.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra4.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra5.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra6.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra6.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra7.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra8.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra8.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra9.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra10.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra10.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra10.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra11.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra11.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra12.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra12.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra12.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra13.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra13.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra14.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra14.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra14.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra15.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:161)");
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra15.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra16.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra16.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra17.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra17.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra18.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra18.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra19.count._super), Val(0));
+EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra19.count._super), 0), "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
 x7 = x6;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:171)
-NondetRegStruct x15 = exec_Reg(ctx,x7.s0, LAYOUT_LOOKUP(layout2, s0));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:172)
-NondetRegStruct x16 = exec_Reg(ctx,x7.s1, LAYOUT_LOOKUP(layout2, s1));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:173)
-NondetRegStruct x17 = exec_Reg(ctx,x7.s2, LAYOUT_LOOKUP(layout2, s2));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:174)
-NondetRegStruct x18 = exec_IsZero(ctx,(x7.state - Val(40)), LAYOUT_LOOKUP(layout2, isDecode));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:175)
-NondetRegStruct x19 = exec_IsZero(ctx,(x7.state - Val(16)), LAYOUT_LOOKUP(layout2, isP2Entry));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:176)
-NondetRegStruct x20 = exec_IsZero(ctx,(x7.state - Val(32)), LAYOUT_LOOKUP(layout2, isShaEcall));
-// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:177)
-Val x21 = ((x18._super + x19._super) + x20._super);
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:214)
+NondetRegStruct x19 = exec_Reg(ctx,x7.s0, LAYOUT_LOOKUP(layout2, s0));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:215)
+NondetRegStruct x20 = exec_Reg(ctx,x7.s1, LAYOUT_LOOKUP(layout2, s1));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:216)
+NondetRegStruct x21 = exec_Reg(ctx,x7.s2, LAYOUT_LOOKUP(layout2, s2));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:217)
+NondetRegStruct x22 = exec_IsZero(ctx,(x7.state - Val(40)), LAYOUT_LOOKUP(layout2, isDecode));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:218)
+NondetRegStruct x23 = exec_IsZero(ctx,(x7.state - Val(16)), LAYOUT_LOOKUP(layout2, isP2Entry));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:219)
+NondetRegStruct x24 = exec_IsZero(ctx,(x7.state - Val(32)), LAYOUT_LOOKUP(layout2, isShaEcall));
+// ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:220)
+Val x25 = ((x22._super + x23._super) + x24._super);
 // AddU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:27)
-Val x22 = (arg1_0.pcU32.low + (x21 * Val(4)));
-NormalizeU32Struct x23 = exec_NormalizeU32(ctx,DenormedValU32Struct{
-  .low = x22,   .high = arg1_0.pcU32.high}, LAYOUT_LOOKUP(layout2, addPC));
+Val x26 = (arg1_0.pcU32.low + (x25 * Val(4)));
+NormalizeU32Struct x27 = exec_NormalizeU32(ctx,DenormedValU32Struct{
+  .low = x26,   .high = arg1_0.pcU32.high}, LAYOUT_LOOKUP(layout2, addPC));
 return InstOutputStruct{
-  .newPc = x23._super,   .newState = x7.state,   .newMode = Val(1)};
+  .newPc = x27._super,   .newState = x7.state,   .newMode = Val(1)};
 }
 NondetRegStruct exec_SBox(ExecContext& ctx,Val arg0, BoundLayout<SBoxLayout> layout1)   {
 // SBox(zirgen/circuit/rv32im/v2/dsl/poseidon2.zir:25)
@@ -6224,7 +6352,7 @@ x15 = x14;
    assert(0 && "Reached unreachable mux arm");
 }
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:454)
-BitRegStruct x18 = exec_BitReg(ctx,(x9._super - arg1_0), LAYOUT_LOOKUP(layout3, _4));
+NondetRegStruct x18 = exec_BitReg(ctx,(x9._super - arg1_0), LAYOUT_LOOKUP(layout3, _4));
 PoseidonStateStruct x19;
 if (to_size_t(x10._super[0]._super)) {
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:456)
@@ -6985,11 +7113,11 @@ Val x74 = (((x73 + x59) + x60) + x61);
 Val x75 = (((x74 + x62) + x63) + x64);
 Val x76 = (((x75 + x65) + x66) + x67);
 Val x77 = (((x76 + x68) + x69) + x70);
-// EqArr(zirgen/circuit/rv32im/v2/dsl/arr.zir:33)
+// EqArr(zirgen/circuit/rv32im/v2/dsl/arr.zir:32)
 Val x78 = (((x57 + x51) + x52) - arg0[0]);
-EQZ(x78, "loc(callsite( EqArr ( zirgen/circuit/rv32im/v2/dsl/arr.zir :33:11) at  UnpackReg ( zirgen/circuit/rv32im/v2/dsl/pack.zir :36:14)))");
+EQZ(x78, "loc(callsite( EqArr ( zirgen/circuit/rv32im/v2/dsl/arr.zir :32:11) at  UnpackReg ( zirgen/circuit/rv32im/v2/dsl/pack.zir :36:14)))");
 Val x79 = (((x77 + x71) + x72) - arg0[1]);
-EQZ(x79, "loc(callsite( EqArr ( zirgen/circuit/rv32im/v2/dsl/arr.zir :33:11) at  UnpackReg ( zirgen/circuit/rv32im/v2/dsl/pack.zir :36:14)))");
+EQZ(x79, "loc(callsite( EqArr ( zirgen/circuit/rv32im/v2/dsl/arr.zir :32:11) at  UnpackReg ( zirgen/circuit/rv32im/v2/dsl/pack.zir :36:14)))");
 return UnpackReg_32__16_Struct{
   ._super = x34};
 }
@@ -10515,149 +10643,149 @@ return OneHot_12_Struct{
   ._super = x2};
 }
 TopStruct exec_Top(ExecContext& ctx,BoundLayout<TopLayout> layout0, GlobalBuf global1)   {
-// IsFirstCycle(zirgen/circuit/rv32im/v2/dsl/top.zir:18)
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:49)
+// IsFirstCycle(zirgen/circuit/rv32im/v2/dsl/top.zir:14)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:45)
 Val x2 = INVOKE_EXTERN(ctx,isFirstCycle_0);
 NondetRegStruct x3 = exec_NondetBitReg(ctx,x2, LAYOUT_LOOKUP(layout0, isFirstCycle));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 Val x4 = (Val(1) - x3._super);
 NondetRegStruct x5;
 if (to_size_t(x3._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:52)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:48)
 NondetRegStruct x6 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout0, nextState_0));
-EQZ((x6._super - Val(7)), "Top(zirgen/circuit/rv32im/v2/dsl/top.zir:52)");
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:53)
+EQZ((x6._super - Val(7)), "Top(zirgen/circuit/rv32im/v2/dsl/top.zir:48)");
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:49)
 NondetRegStruct x7 = exec_Reg(ctx,Val(0), LAYOUT_LOOKUP(layout0, cycleRedef.arm0));
 x5 = x7;
 } else if (to_size_t(x4)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:55)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
 NondetRegStruct x8 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout0, cycle));
 NondetRegStruct x9 = exec_Reg(ctx,(x8._super + Val(1)), LAYOUT_LOOKUP(layout0, cycleRedef.arm1));
 x5 = x9;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:58)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:54)
 NondetRegStruct x10 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout0, nextPcLow));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:59)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:55)
 NondetRegStruct x11 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout0, nextPcHigh));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:62)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:58)
 NondetRegStruct x12 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout0, nextState_0));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:64)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:60)
 NondetRegStruct x13 = back_Reg(ctx,1, LAYOUT_LOOKUP(layout0, nextMachineMode));
-// GetMajorMinor(zirgen/circuit/rv32im/v2/dsl/top.zir:25)
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:66)
+// GetMajorMinor(zirgen/circuit/rv32im/v2/dsl/top.zir:21)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:62)
 auto [x14, x15] = INVOKE_EXTERN(ctx,getMajorMinor);
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:68)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:64)
 NondetRegStruct x16 = exec_NondetReg(ctx,x14, LAYOUT_LOOKUP(layout0, major));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:69)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:65)
 NondetRegStruct x17 = exec_NondetReg(ctx,x15, LAYOUT_LOOKUP(layout0, minor));
 // Log(<preamble>:22)
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:70)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:66)
 INVOKE_EXTERN(ctx,log, "Major/Minor = ", std::initializer_list<Val>{x16._super, x17._super});
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:72)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:68)
 InstInputStruct x18 = exec_InstInput(ctx,x16._super, x17._super, ValU32Struct{
   .low = (x4 * x10._super),   .high = (x4 * x11._super)}, (x4 * x12._super), ((x4 * x13._super) + x3._super), LAYOUT_LOOKUP(layout0, instInput));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:74)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:70)
 OneHot_12_Struct x19 = exec_OneHot_12_(ctx,x16._super, LAYOUT_LOOKUP(layout0, majorOnehot));
 InstOutputStruct x20;
 if (to_size_t(x19._super[0]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x21 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:76)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:72)
 InstOutputStruct x22 = exec_Misc0(ctx,x21, x18, LAYOUT_LOOKUP(layout0, instResult.arm0));
 x20 = x22;
 } else if (to_size_t(x19._super[1]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x23 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:77)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:73)
 InstOutputStruct x24 = exec_Misc1(ctx,x23, x18, LAYOUT_LOOKUP(layout0, instResult.arm1));
 x20 = x24;
 } else if (to_size_t(x19._super[2]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x25 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:78)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:74)
 InstOutputStruct x26 = exec_Misc2(ctx,x25, x18, LAYOUT_LOOKUP(layout0, instResult.arm2));
 x20 = x26;
 } else if (to_size_t(x19._super[3]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x27 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:79)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:75)
 InstOutputStruct x28 = exec_Mul0(ctx,x27, x18, LAYOUT_LOOKUP(layout0, instResult.arm3));
 x20 = x28;
 } else if (to_size_t(x19._super[4]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x29 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:80)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:76)
 InstOutputStruct x30 = exec_Div0(ctx,x29, x18, LAYOUT_LOOKUP(layout0, instResult.arm4));
 x20 = x30;
 } else if (to_size_t(x19._super[5]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x31 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:81)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:77)
 InstOutputStruct x32 = exec_Mem0(ctx,x31, x18, LAYOUT_LOOKUP(layout0, instResult.arm5));
 x20 = x32;
 } else if (to_size_t(x19._super[6]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x33 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:82)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:78)
 InstOutputStruct x34 = exec_Mem1(ctx,x33, x18, LAYOUT_LOOKUP(layout0, instResult.arm6));
 x20 = x34;
 } else if (to_size_t(x19._super[7]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x35 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:83)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:79)
 InstOutputStruct x36 = exec_Control0(ctx,x35, x18, LAYOUT_LOOKUP(layout0, instResult.arm7), global1);
 x20 = x36;
 } else if (to_size_t(x19._super[8]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x37 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:84)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:80)
 InstOutputStruct x38 = exec_ECall0(ctx,x37, x18, LAYOUT_LOOKUP(layout0, instResult.arm8), global1);
 x20 = x38;
 } else if (to_size_t(x19._super[9]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x39 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:85)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:81)
 InstOutputStruct x40 = exec_Poseidon0(ctx,x39, x18, LAYOUT_LOOKUP(layout0, instResult.arm9), global1);
 x20 = x40;
 } else if (to_size_t(x19._super[10]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x41 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:86)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:82)
 InstOutputStruct x42 = exec_Poseidon1(ctx,x41, x18, LAYOUT_LOOKUP(layout0, instResult.arm10));
 x20 = x42;
 } else if (to_size_t(x19._super[11]._super)) {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x43 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:87)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:83)
 InstOutputStruct x44 = exec_Sha0(ctx,x43, x18, LAYOUT_LOOKUP(layout0, instResult.arm11));
 x20 = x44;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
 // Div(<preamble>:19)
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:90)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:86)
 Val x45 = (x20.newPc.low * Val(1509949441));
 Val x46 = (x20.newPc.high * Val(16384));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:51)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:47)
 NondetRegStruct x47 = back_Reg(ctx,0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
 // Log(<preamble>:22)
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:91)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:87)
 INVOKE_EXTERN(ctx,log, "Cycle, pc, state, mm", std::initializer_list<Val>{x47._super, (x45 + x46), x20.newState, x20.newMode});
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:92)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:88)
 NondetRegStruct x48 = exec_Reg(ctx,x20.newPc.low, LAYOUT_LOOKUP(layout0, nextPcLow));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:93)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:89)
 NondetRegStruct x49 = exec_Reg(ctx,x20.newPc.high, LAYOUT_LOOKUP(layout0, nextPcHigh));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:94)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:90)
 NondetRegStruct x50 = exec_Reg(ctx,x20.newState, LAYOUT_LOOKUP(layout0, nextState_0));
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:95)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:91)
 NondetRegStruct x51 = exec_Reg(ctx,x20.newMode, LAYOUT_LOOKUP(layout0, nextMachineMode));
 return TopStruct{
 };
 }
 void step_Top(ExecContext& ctx,MutableBuf data0, GlobalBuf global1)   {
-// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:27)
+// Top(zirgen/circuit/rv32im/v2/dsl/top.zir:23)
 BoundLayout<TopLayout> x2 = BIND_LAYOUT(kLayout_Top, data0);
 TopStruct x3 = exec_Top(ctx,x2, global1);
 return ;
@@ -14285,11 +14413,11 @@ ExtVal x1710 = (x1705 * x1708);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
 ExtVal x1711 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU16), 2), count._super), 0) * x1708);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1712 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.low16.arg.val._super), 0));
+ExtVal x1712 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 0), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
 ExtVal x1713 = (x1712 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1714 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.low16.arg.count._super), 0) * inv_0(x1713));
+ExtVal x1714 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 0), count._super), 0) * inv_0(x1713));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
 ExtVal x1715 = (((x1701 + x1706) + x1709) + x1714);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
@@ -14299,949 +14427,989 @@ ExtVal x1716 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), 0
 // zirgen/dsl/passes/GenerateAccum.cpp:180
 ExtVal x1717 = (((x1716 * (x1710 * x1713)) - (x1711 * x1713)) - ((x1705 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU16), 3), count._super), 0)) * x1713));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1717 - (x1710 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.low16.arg.count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1717 - (x1710 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1718 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.high16.arg.val._super), 0));
+ExtVal x1718 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 1), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
 ExtVal x1719 = (x1718 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1720 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.high16.arg.count._super), 0) * inv_0(x1719));
+ExtVal x1720 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 1), count._super), 0) * inv_0(x1719));
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x1721 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 2), val._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x1722 = (x1721 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x1723 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 2), count._super), 0) * inv_0(x1722));
+// zirgen/dsl/passes/GenerateAccum.cpp:217
+ExtVal x1724 = (x1719 * x1722);
+// zirgen/dsl/passes/GenerateAccum.cpp:223
+ExtVal x1725 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 1), count._super), 0) * x1722);
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x1726 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 3), val._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x1727 = (x1726 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x1728 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 3), count._super), 0) * inv_0(x1727));
+// zirgen/dsl/passes/GenerateAccum.cpp:241
+ExtVal x1729 = (((x1715 + x1720) + x1723) + x1728);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), (x1715 + x1720));
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), x1729);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1721 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), 0));
+ExtVal x1730 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1722 = ((x1721 * x1719) - LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.high16.arg.count._super), 0));
+ExtVal x1731 = (((x1730 * (x1724 * x1727)) - (x1725 * x1727)) - ((x1719 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 2), count._super), 0)) * x1727));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ(x1722, "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1731 - (x1724 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm8._arguments_ECall0Output.argU8), 3), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x1732 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.low16.arg.val._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x1733 = (x1732 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x1734 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.low16.arg.count._super), 0) * inv_0(x1733));
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x1735 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.high16.arg.val._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x1736 = (x1735 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x1737 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.high16.arg.count._super), 0) * inv_0(x1736));
+// zirgen/dsl/passes/GenerateAccum.cpp:223
+ExtVal x1738 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.low16.arg.count._super), 0) * x1736);
+// zirgen/dsl/passes/GenerateAccum.cpp:189
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), ((x1729 + x1734) + x1737));
+// zirgen/dsl/passes/GenerateAccum.cpp:177
+ExtVal x1739 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:180
+ExtVal x1740 = (((x1739 * (x1733 * x1736)) - x1738) - (x1733 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm8.addPC.high16.arg.count._super), 0)));
+// zirgen/dsl/passes/GenerateAccum.cpp:182
+EQZ(x1740, "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:122
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0));
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:124
-ExtVal x1723 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0));
+ExtVal x1741 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:125
-EQZ(x1723, "zirgen/dsl/passes/GenerateAccum.cpp:125");
+EQZ(x1741, "zirgen/dsl/passes/GenerateAccum.cpp:125");
 x5 = x4;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult._selector), 9), _super), 0))) {
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1724 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg1.cycle._super), 0));
+ExtVal x1742 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg1.cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1725 = (x1724 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1743 = (x1742 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1726 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg1.count._super), 0) * inv_0(x1725));
+ExtVal x1744 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg1.count._super), 0) * inv_0(x1743));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1727 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1) + x1726);
+ExtVal x1745 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1) + x1744);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1728 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg2.cycle._super), 0));
+ExtVal x1746 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg2.cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1729 = (x1728 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1747 = (x1746 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1730 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg2.count._super), 0) * inv_0(x1729));
+ExtVal x1748 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg2.count._super), 0) * inv_0(x1747));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1731 = (x1725 * x1729);
+ExtVal x1749 = (x1743 * x1747);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1732 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg1.count._super), 0) * x1729);
+ExtVal x1750 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg1.count._super), 0) * x1747);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1733 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), addr._super), 0));
-ExtVal x1734 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), cycle._super), 0));
-ExtVal x1735 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), dataLow._super), 0));
-ExtVal x1736 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), dataHigh._super), 0));
+ExtVal x1751 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), addr._super), 0));
+ExtVal x1752 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), cycle._super), 0));
+ExtVal x1753 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), dataLow._super), 0));
+ExtVal x1754 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1737 = (((x1733 + x1734) + x1735) + x1736);
+ExtVal x1755 = (((x1751 + x1752) + x1753) + x1754);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1738 = (x1737 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1756 = (x1755 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1739 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), count._super), 0) * inv_0(x1738));
+ExtVal x1757 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), count._super), 0) * inv_0(x1756));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1740 = ((x1727 + x1730) + x1739);
+ExtVal x1758 = ((x1745 + x1748) + x1757);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), x1740);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), x1758);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1741 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1));
+ExtVal x1759 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1742 = (((x1741 * (x1731 * x1738)) - (x1732 * x1738)) - ((x1725 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg2.count._super), 0)) * x1738));
+ExtVal x1760 = (((x1759 * (x1749 * x1756)) - (x1750 * x1756)) - ((x1743 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9._0.arg2.count._super), 0)) * x1756));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1742 - (x1731 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1760 - (x1749 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1743 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), addr._super), 0));
-ExtVal x1744 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), cycle._super), 0));
-ExtVal x1745 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), dataLow._super), 0));
-ExtVal x1746 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), dataHigh._super), 0));
+ExtVal x1761 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), addr._super), 0));
+ExtVal x1762 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), cycle._super), 0));
+ExtVal x1763 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), dataLow._super), 0));
+ExtVal x1764 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1747 = (((x1743 + x1744) + x1745) + x1746);
+ExtVal x1765 = (((x1761 + x1762) + x1763) + x1764);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1748 = (x1747 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1766 = (x1765 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1749 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), count._super), 0) * inv_0(x1748));
+ExtVal x1767 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), count._super), 0) * inv_0(x1766));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1750 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), addr._super), 0));
-ExtVal x1751 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), cycle._super), 0));
-ExtVal x1752 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), dataLow._super), 0));
-ExtVal x1753 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), dataHigh._super), 0));
+ExtVal x1768 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), addr._super), 0));
+ExtVal x1769 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), cycle._super), 0));
+ExtVal x1770 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), dataLow._super), 0));
+ExtVal x1771 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1754 = (((x1750 + x1751) + x1752) + x1753);
+ExtVal x1772 = (((x1768 + x1769) + x1770) + x1771);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1755 = (x1754 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1773 = (x1772 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1756 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), count._super), 0) * inv_0(x1755));
+ExtVal x1774 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), count._super), 0) * inv_0(x1773));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1757 = (x1748 * x1755);
+ExtVal x1775 = (x1766 * x1773);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1758 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), count._super), 0) * x1755);
+ExtVal x1776 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 1), count._super), 0) * x1773);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1759 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), addr._super), 0));
-ExtVal x1760 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), cycle._super), 0));
-ExtVal x1761 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), dataLow._super), 0));
-ExtVal x1762 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), dataHigh._super), 0));
+ExtVal x1777 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), addr._super), 0));
+ExtVal x1778 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), cycle._super), 0));
+ExtVal x1779 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), dataLow._super), 0));
+ExtVal x1780 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1763 = (((x1759 + x1760) + x1761) + x1762);
+ExtVal x1781 = (((x1777 + x1778) + x1779) + x1780);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1764 = (x1763 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1782 = (x1781 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1765 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), count._super), 0) * inv_0(x1764));
+ExtVal x1783 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), count._super), 0) * inv_0(x1782));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1766 = (((x1740 + x1749) + x1756) + x1765);
+ExtVal x1784 = (((x1758 + x1767) + x1774) + x1783);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), x1766);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), x1784);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1767 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0));
+ExtVal x1785 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1768 = (((x1767 * (x1757 * x1764)) - (x1758 * x1764)) - ((x1748 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), count._super), 0)) * x1764));
+ExtVal x1786 = (((x1785 * (x1775 * x1782)) - (x1776 * x1782)) - ((x1766 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 2), count._super), 0)) * x1782));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1768 - (x1757 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1786 - (x1775 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 3), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1769 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), addr._super), 0));
-ExtVal x1770 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), cycle._super), 0));
-ExtVal x1771 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), dataLow._super), 0));
-ExtVal x1772 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), dataHigh._super), 0));
+ExtVal x1787 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), addr._super), 0));
+ExtVal x1788 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), cycle._super), 0));
+ExtVal x1789 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), dataLow._super), 0));
+ExtVal x1790 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1773 = (((x1769 + x1770) + x1771) + x1772);
+ExtVal x1791 = (((x1787 + x1788) + x1789) + x1790);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1774 = (x1773 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1792 = (x1791 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1775 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), count._super), 0) * inv_0(x1774));
+ExtVal x1793 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), count._super), 0) * inv_0(x1792));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1776 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), addr._super), 0));
-ExtVal x1777 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), cycle._super), 0));
-ExtVal x1778 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), dataLow._super), 0));
-ExtVal x1779 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), dataHigh._super), 0));
+ExtVal x1794 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), addr._super), 0));
+ExtVal x1795 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), cycle._super), 0));
+ExtVal x1796 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), dataLow._super), 0));
+ExtVal x1797 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1780 = (((x1776 + x1777) + x1778) + x1779);
+ExtVal x1798 = (((x1794 + x1795) + x1796) + x1797);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1781 = (x1780 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1799 = (x1798 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1782 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), count._super), 0) * inv_0(x1781));
+ExtVal x1800 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), count._super), 0) * inv_0(x1799));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1783 = (x1774 * x1781);
+ExtVal x1801 = (x1792 * x1799);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1784 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), count._super), 0) * x1781);
+ExtVal x1802 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 4), count._super), 0) * x1799);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1785 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), addr._super), 0));
-ExtVal x1786 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), cycle._super), 0));
-ExtVal x1787 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), dataLow._super), 0));
-ExtVal x1788 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), dataHigh._super), 0));
+ExtVal x1803 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), addr._super), 0));
+ExtVal x1804 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), cycle._super), 0));
+ExtVal x1805 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), dataLow._super), 0));
+ExtVal x1806 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1789 = (((x1785 + x1786) + x1787) + x1788);
+ExtVal x1807 = (((x1803 + x1804) + x1805) + x1806);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1790 = (x1789 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1808 = (x1807 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1791 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), count._super), 0) * inv_0(x1790));
+ExtVal x1809 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), count._super), 0) * inv_0(x1808));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1792 = (((x1766 + x1775) + x1782) + x1791);
+ExtVal x1810 = (((x1784 + x1793) + x1800) + x1809);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), x1792);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), x1810);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1793 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0));
+ExtVal x1811 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1794 = (((x1793 * (x1783 * x1790)) - (x1784 * x1790)) - ((x1774 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), count._super), 0)) * x1790));
+ExtVal x1812 = (((x1811 * (x1801 * x1808)) - (x1802 * x1808)) - ((x1792 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 5), count._super), 0)) * x1808));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1794 - (x1783 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1812 - (x1801 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 6), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1795 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), addr._super), 0));
-ExtVal x1796 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), cycle._super), 0));
-ExtVal x1797 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), dataLow._super), 0));
-ExtVal x1798 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), dataHigh._super), 0));
+ExtVal x1813 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), addr._super), 0));
+ExtVal x1814 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), cycle._super), 0));
+ExtVal x1815 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), dataLow._super), 0));
+ExtVal x1816 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1799 = (((x1795 + x1796) + x1797) + x1798);
+ExtVal x1817 = (((x1813 + x1814) + x1815) + x1816);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1800 = (x1799 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1818 = (x1817 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1801 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), count._super), 0) * inv_0(x1800));
+ExtVal x1819 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), count._super), 0) * inv_0(x1818));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1802 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), addr._super), 0));
-ExtVal x1803 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), cycle._super), 0));
-ExtVal x1804 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), dataLow._super), 0));
-ExtVal x1805 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), dataHigh._super), 0));
+ExtVal x1820 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), addr._super), 0));
+ExtVal x1821 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), cycle._super), 0));
+ExtVal x1822 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), dataLow._super), 0));
+ExtVal x1823 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1806 = (((x1802 + x1803) + x1804) + x1805);
+ExtVal x1824 = (((x1820 + x1821) + x1822) + x1823);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1807 = (x1806 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1825 = (x1824 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1808 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), count._super), 0) * inv_0(x1807));
+ExtVal x1826 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), count._super), 0) * inv_0(x1825));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1809 = (x1800 * x1807);
+ExtVal x1827 = (x1818 * x1825);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1810 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), count._super), 0) * x1807);
+ExtVal x1828 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 7), count._super), 0) * x1825);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1811 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), addr._super), 0));
-ExtVal x1812 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), cycle._super), 0));
-ExtVal x1813 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), dataLow._super), 0));
-ExtVal x1814 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), dataHigh._super), 0));
+ExtVal x1829 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), addr._super), 0));
+ExtVal x1830 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), cycle._super), 0));
+ExtVal x1831 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), dataLow._super), 0));
+ExtVal x1832 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1815 = (((x1811 + x1812) + x1813) + x1814);
+ExtVal x1833 = (((x1829 + x1830) + x1831) + x1832);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1816 = (x1815 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1834 = (x1833 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1817 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), count._super), 0) * inv_0(x1816));
+ExtVal x1835 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), count._super), 0) * inv_0(x1834));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1818 = (((x1792 + x1801) + x1808) + x1817);
+ExtVal x1836 = (((x1810 + x1819) + x1826) + x1835);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), x1818);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), x1836);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1819 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0));
+ExtVal x1837 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1820 = (((x1819 * (x1809 * x1816)) - (x1810 * x1816)) - ((x1800 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), count._super), 0)) * x1816));
+ExtVal x1838 = (((x1837 * (x1827 * x1834)) - (x1828 * x1834)) - ((x1818 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 8), count._super), 0)) * x1834));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1820 - (x1809 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1838 - (x1827 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 9), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1821 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), addr._super), 0));
-ExtVal x1822 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), cycle._super), 0));
-ExtVal x1823 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), dataLow._super), 0));
-ExtVal x1824 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), dataHigh._super), 0));
+ExtVal x1839 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), addr._super), 0));
+ExtVal x1840 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), cycle._super), 0));
+ExtVal x1841 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), dataLow._super), 0));
+ExtVal x1842 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1825 = (((x1821 + x1822) + x1823) + x1824);
+ExtVal x1843 = (((x1839 + x1840) + x1841) + x1842);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1826 = (x1825 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1844 = (x1843 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1827 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), count._super), 0) * inv_0(x1826));
+ExtVal x1845 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), count._super), 0) * inv_0(x1844));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1828 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), addr._super), 0));
-ExtVal x1829 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), cycle._super), 0));
-ExtVal x1830 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), dataLow._super), 0));
-ExtVal x1831 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), dataHigh._super), 0));
+ExtVal x1846 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), addr._super), 0));
+ExtVal x1847 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), cycle._super), 0));
+ExtVal x1848 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), dataLow._super), 0));
+ExtVal x1849 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1832 = (((x1828 + x1829) + x1830) + x1831);
+ExtVal x1850 = (((x1846 + x1847) + x1848) + x1849);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1833 = (x1832 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1851 = (x1850 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1834 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), count._super), 0) * inv_0(x1833));
+ExtVal x1852 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), count._super), 0) * inv_0(x1851));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1835 = (x1826 * x1833);
+ExtVal x1853 = (x1844 * x1851);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1836 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), count._super), 0) * x1833);
+ExtVal x1854 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 10), count._super), 0) * x1851);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1837 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), addr._super), 0));
-ExtVal x1838 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), cycle._super), 0));
-ExtVal x1839 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), dataLow._super), 0));
-ExtVal x1840 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), dataHigh._super), 0));
+ExtVal x1855 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), addr._super), 0));
+ExtVal x1856 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), cycle._super), 0));
+ExtVal x1857 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), dataLow._super), 0));
+ExtVal x1858 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1841 = (((x1837 + x1838) + x1839) + x1840);
+ExtVal x1859 = (((x1855 + x1856) + x1857) + x1858);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1842 = (x1841 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1860 = (x1859 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1843 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), count._super), 0) * inv_0(x1842));
+ExtVal x1861 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), count._super), 0) * inv_0(x1860));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1844 = (((x1818 + x1827) + x1834) + x1843);
+ExtVal x1862 = (((x1836 + x1845) + x1852) + x1861);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), x1844);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), x1862);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1845 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0));
+ExtVal x1863 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1846 = (((x1845 * (x1835 * x1842)) - (x1836 * x1842)) - ((x1826 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), count._super), 0)) * x1842));
+ExtVal x1864 = (((x1863 * (x1853 * x1860)) - (x1854 * x1860)) - ((x1844 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 11), count._super), 0)) * x1860));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1846 - (x1835 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1864 - (x1853 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 12), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1847 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), addr._super), 0));
-ExtVal x1848 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), cycle._super), 0));
-ExtVal x1849 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), dataLow._super), 0));
-ExtVal x1850 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), dataHigh._super), 0));
+ExtVal x1865 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), addr._super), 0));
+ExtVal x1866 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), cycle._super), 0));
+ExtVal x1867 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), dataLow._super), 0));
+ExtVal x1868 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1851 = (((x1847 + x1848) + x1849) + x1850);
+ExtVal x1869 = (((x1865 + x1866) + x1867) + x1868);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1852 = (x1851 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1870 = (x1869 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1853 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), count._super), 0) * inv_0(x1852));
+ExtVal x1871 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), count._super), 0) * inv_0(x1870));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1854 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), addr._super), 0));
-ExtVal x1855 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), cycle._super), 0));
-ExtVal x1856 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), dataLow._super), 0));
-ExtVal x1857 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), dataHigh._super), 0));
+ExtVal x1872 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), addr._super), 0));
+ExtVal x1873 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), cycle._super), 0));
+ExtVal x1874 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), dataLow._super), 0));
+ExtVal x1875 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1858 = (((x1854 + x1855) + x1856) + x1857);
-// zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1859 = (x1858 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1860 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), count._super), 0) * inv_0(x1859));
-// zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1861 = (x1852 * x1859);
-// zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1862 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), count._super), 0) * x1859);
-// zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1863 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), addr._super), 0));
-ExtVal x1864 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), cycle._super), 0));
-ExtVal x1865 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), dataLow._super), 0));
-ExtVal x1866 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), dataHigh._super), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x1867 = (((x1863 + x1864) + x1865) + x1866);
-// zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1868 = (x1867 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1869 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), count._super), 0) * inv_0(x1868));
-// zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1870 = (((x1844 + x1853) + x1860) + x1869);
-// zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), x1870);
-// zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1871 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1872 = (((x1871 * (x1861 * x1868)) - (x1862 * x1868)) - ((x1852 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), count._super), 0)) * x1868));
-// zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1872 - (x1861 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
-// zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1873 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 0), cycle._super), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1874 = (x1873 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1875 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 0), count._super), 0) * inv_0(x1874));
-// zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1876 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 1), cycle._super), 0));
+ExtVal x1876 = (((x1872 + x1873) + x1874) + x1875);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
 ExtVal x1877 = (x1876 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1878 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 1), count._super), 0) * inv_0(x1877));
+ExtVal x1878 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), count._super), 0) * inv_0(x1877));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1879 = (x1874 * x1877);
+ExtVal x1879 = (x1870 * x1877);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1880 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 0), count._super), 0) * x1877);
+ExtVal x1880 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 13), count._super), 0) * x1877);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1881 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 2), cycle._super), 0));
+ExtVal x1881 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), addr._super), 0));
+ExtVal x1882 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), cycle._super), 0));
+ExtVal x1883 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), dataLow._super), 0));
+ExtVal x1884 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), dataHigh._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:157
+ExtVal x1885 = (((x1881 + x1882) + x1883) + x1884);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1882 = (x1881 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1886 = (x1885 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1883 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 2), count._super), 0) * inv_0(x1882));
+ExtVal x1887 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), count._super), 0) * inv_0(x1886));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1884 = (((x1870 + x1875) + x1878) + x1883);
+ExtVal x1888 = (((x1862 + x1871) + x1878) + x1887);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), x1884);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), x1888);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1885 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0));
+ExtVal x1889 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1886 = (((x1885 * (x1879 * x1882)) - (x1880 * x1882)) - ((x1874 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 1), count._super), 0)) * x1882));
+ExtVal x1890 = (((x1889 * (x1879 * x1886)) - (x1880 * x1886)) - ((x1870 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 14), count._super), 0)) * x1886));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1886 - (x1879 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 2), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1890 - (x1879 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.memoryArg), 15), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1887 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 3), cycle._super), 0));
+ExtVal x1891 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 0), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1888 = (x1887 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1892 = (x1891 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1889 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 3), count._super), 0) * inv_0(x1888));
+ExtVal x1893 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 0), count._super), 0) * inv_0(x1892));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1890 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 4), cycle._super), 0));
+ExtVal x1894 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 1), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1891 = (x1890 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1895 = (x1894 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1892 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 4), count._super), 0) * inv_0(x1891));
+ExtVal x1896 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 1), count._super), 0) * inv_0(x1895));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1893 = (x1888 * x1891);
+ExtVal x1897 = (x1892 * x1895);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1894 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 3), count._super), 0) * x1891);
+ExtVal x1898 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 0), count._super), 0) * x1895);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1895 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 5), cycle._super), 0));
+ExtVal x1899 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 2), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1896 = (x1895 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1900 = (x1899 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1897 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 5), count._super), 0) * inv_0(x1896));
+ExtVal x1901 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 2), count._super), 0) * inv_0(x1900));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1898 = (((x1884 + x1889) + x1892) + x1897);
+ExtVal x1902 = (((x1888 + x1893) + x1896) + x1901);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), x1898);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), x1902);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1899 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), 0));
+ExtVal x1903 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1900 = (((x1899 * (x1893 * x1896)) - (x1894 * x1896)) - ((x1888 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 4), count._super), 0)) * x1896));
+ExtVal x1904 = (((x1903 * (x1897 * x1900)) - (x1898 * x1900)) - ((x1892 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 1), count._super), 0)) * x1900));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1900 - (x1893 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 5), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1904 - (x1897 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 2), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1901 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 6), cycle._super), 0));
+ExtVal x1905 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 3), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1902 = (x1901 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1906 = (x1905 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1903 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 6), count._super), 0) * inv_0(x1902));
+ExtVal x1907 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 3), count._super), 0) * inv_0(x1906));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1904 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 7), cycle._super), 0));
+ExtVal x1908 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 4), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1905 = (x1904 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1909 = (x1908 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1906 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 7), count._super), 0) * inv_0(x1905));
+ExtVal x1910 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 4), count._super), 0) * inv_0(x1909));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1907 = (x1902 * x1905);
+ExtVal x1911 = (x1906 * x1909);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1908 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 6), count._super), 0) * x1905);
+ExtVal x1912 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 3), count._super), 0) * x1909);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1909 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 0), val._super), 0));
+ExtVal x1913 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 5), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1910 = (x1909 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1914 = (x1913 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1911 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 0), count._super), 0) * inv_0(x1910));
+ExtVal x1915 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 5), count._super), 0) * inv_0(x1914));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1912 = (((x1898 + x1903) + x1906) + x1911);
+ExtVal x1916 = (((x1902 + x1907) + x1910) + x1915);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), x1912);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), x1916);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1913 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0));
+ExtVal x1917 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 6), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1914 = (((x1913 * (x1907 * x1910)) - (x1908 * x1910)) - ((x1902 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 7), count._super), 0)) * x1910));
+ExtVal x1918 = (((x1917 * (x1911 * x1914)) - (x1912 * x1914)) - ((x1906 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 4), count._super), 0)) * x1914));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1914 - (x1907 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1918 - (x1911 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 5), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1915 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 1), val._super), 0));
+ExtVal x1919 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 6), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1916 = (x1915 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1920 = (x1919 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1917 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 1), count._super), 0) * inv_0(x1916));
+ExtVal x1921 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 6), count._super), 0) * inv_0(x1920));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1918 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 2), val._super), 0));
+ExtVal x1922 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 7), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1919 = (x1918 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1923 = (x1922 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1920 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 2), count._super), 0) * inv_0(x1919));
+ExtVal x1924 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 7), count._super), 0) * inv_0(x1923));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1921 = (x1916 * x1919);
+ExtVal x1925 = (x1920 * x1923);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1922 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 1), count._super), 0) * x1919);
+ExtVal x1926 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 6), count._super), 0) * x1923);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1923 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 3), val._super), 0));
+ExtVal x1927 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 0), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1924 = (x1923 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1928 = (x1927 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1925 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 3), count._super), 0) * inv_0(x1924));
+ExtVal x1929 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 0), count._super), 0) * inv_0(x1928));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1926 = (((x1912 + x1917) + x1920) + x1925);
+ExtVal x1930 = (((x1916 + x1921) + x1924) + x1929);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 9), x1926);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), x1930);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1927 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 9), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), 0));
+ExtVal x1931 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 7), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1928 = (((x1927 * (x1921 * x1924)) - (x1922 * x1924)) - ((x1916 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 2), count._super), 0)) * x1924));
+ExtVal x1932 = (((x1931 * (x1925 * x1928)) - (x1926 * x1928)) - ((x1920 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.cycleArg), 7), count._super), 0)) * x1928));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1928 - (x1921 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 3), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1932 - (x1925 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1929 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 4), val._super), 0));
+ExtVal x1933 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 1), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1930 = (x1929 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1934 = (x1933 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1931 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 4), count._super), 0) * inv_0(x1930));
+ExtVal x1935 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 1), count._super), 0) * inv_0(x1934));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1932 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 5), val._super), 0));
+ExtVal x1936 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 2), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1933 = (x1932 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1937 = (x1936 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1934 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 5), count._super), 0) * inv_0(x1933));
+ExtVal x1938 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 2), count._super), 0) * inv_0(x1937));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1935 = (x1930 * x1933);
+ExtVal x1939 = (x1934 * x1937);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1936 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 4), count._super), 0) * x1933);
+ExtVal x1940 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 1), count._super), 0) * x1937);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1937 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 6), val._super), 0));
+ExtVal x1941 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 3), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1938 = (x1937 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1942 = (x1941 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1939 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 6), count._super), 0) * inv_0(x1938));
+ExtVal x1943 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 3), count._super), 0) * inv_0(x1942));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1940 = (((x1926 + x1931) + x1934) + x1939);
+ExtVal x1944 = (((x1930 + x1935) + x1938) + x1943);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 10), x1940);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 9), x1944);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1941 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 10), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 9), 0));
+ExtVal x1945 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 9), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 8), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1942 = (((x1941 * (x1935 * x1938)) - (x1936 * x1938)) - ((x1930 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 5), count._super), 0)) * x1938));
+ExtVal x1946 = (((x1945 * (x1939 * x1942)) - (x1940 * x1942)) - ((x1934 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 2), count._super), 0)) * x1942));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1942 - (x1935 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 6), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1946 - (x1939 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 3), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1943 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 7), val._super), 0));
+ExtVal x1947 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 4), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1944 = (x1943 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1948 = (x1947 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1945 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 7), count._super), 0) * inv_0(x1944));
+ExtVal x1949 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 4), count._super), 0) * inv_0(x1948));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1946 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 8), val._super), 0));
+ExtVal x1950 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 5), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1947 = (x1946 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1951 = (x1950 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1948 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 8), count._super), 0) * inv_0(x1947));
+ExtVal x1952 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 5), count._super), 0) * inv_0(x1951));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1949 = (x1944 * x1947);
+ExtVal x1953 = (x1948 * x1951);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1950 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 7), count._super), 0) * x1947);
+ExtVal x1954 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 4), count._super), 0) * x1951);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1951 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 9), val._super), 0));
+ExtVal x1955 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 6), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1952 = (x1951 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1956 = (x1955 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1953 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 9), count._super), 0) * inv_0(x1952));
+ExtVal x1957 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 6), count._super), 0) * inv_0(x1956));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1954 = (((x1940 + x1945) + x1948) + x1953);
+ExtVal x1958 = (((x1944 + x1949) + x1952) + x1957);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 11), x1954);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 10), x1958);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1955 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 11), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 10), 0));
+ExtVal x1959 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 10), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 9), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1956 = (((x1955 * (x1949 * x1952)) - (x1950 * x1952)) - ((x1944 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 8), count._super), 0)) * x1952));
+ExtVal x1960 = (((x1959 * (x1953 * x1956)) - (x1954 * x1956)) - ((x1948 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 5), count._super), 0)) * x1956));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1956 - (x1949 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 9), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1960 - (x1953 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 6), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1957 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 10), val._super), 0));
+ExtVal x1961 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 7), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1958 = (x1957 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1962 = (x1961 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1959 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 10), count._super), 0) * inv_0(x1958));
+ExtVal x1963 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 7), count._super), 0) * inv_0(x1962));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1960 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 11), val._super), 0));
+ExtVal x1964 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 8), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1961 = (x1960 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1965 = (x1964 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1962 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 11), count._super), 0) * inv_0(x1961));
+ExtVal x1966 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 8), count._super), 0) * inv_0(x1965));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1963 = (x1958 * x1961);
+ExtVal x1967 = (x1962 * x1965);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1964 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 10), count._super), 0) * x1961);
+ExtVal x1968 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 7), count._super), 0) * x1965);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1965 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 12), val._super), 0));
+ExtVal x1969 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 9), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1966 = (x1965 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1970 = (x1969 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1967 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 12), count._super), 0) * inv_0(x1966));
+ExtVal x1971 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 9), count._super), 0) * inv_0(x1970));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1968 = (((x1954 + x1959) + x1962) + x1967);
+ExtVal x1972 = (((x1958 + x1963) + x1966) + x1971);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), x1968);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 11), x1972);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1969 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 11), 0));
+ExtVal x1973 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 11), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 10), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1970 = (((x1969 * (x1963 * x1966)) - (x1964 * x1966)) - ((x1958 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 11), count._super), 0)) * x1966));
+ExtVal x1974 = (((x1973 * (x1967 * x1970)) - (x1968 * x1970)) - ((x1962 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 8), count._super), 0)) * x1970));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1970 - (x1963 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 12), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1974 - (x1967 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 9), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1971 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 13), val._super), 0));
+ExtVal x1975 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 10), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1972 = (x1971 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1976 = (x1975 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1973 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 13), count._super), 0) * inv_0(x1972));
+ExtVal x1977 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 10), count._super), 0) * inv_0(x1976));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1974 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 14), val._super), 0));
+ExtVal x1978 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 11), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1975 = (x1974 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1979 = (x1978 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1976 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 14), count._super), 0) * inv_0(x1975));
+ExtVal x1980 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 11), count._super), 0) * inv_0(x1979));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1977 = (x1972 * x1975);
+ExtVal x1981 = (x1976 * x1979);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1978 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 13), count._super), 0) * x1975);
+ExtVal x1982 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 10), count._super), 0) * x1979);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1979 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 15), val._super), 0));
+ExtVal x1983 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 12), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1980 = (x1979 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1984 = (x1983 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1981 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 15), count._super), 0) * inv_0(x1980));
+ExtVal x1985 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 12), count._super), 0) * inv_0(x1984));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1982 = (((x1968 + x1973) + x1976) + x1981);
+ExtVal x1986 = (((x1972 + x1977) + x1980) + x1985);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), x1982);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), x1986);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1983 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0));
+ExtVal x1987 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 11), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1984 = (((x1983 * (x1977 * x1980)) - (x1978 * x1980)) - ((x1972 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 14), count._super), 0)) * x1980));
+ExtVal x1988 = (((x1987 * (x1981 * x1984)) - (x1982 * x1984)) - ((x1976 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 11), count._super), 0)) * x1984));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1984 - (x1977 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 15), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x1988 - (x1981 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 12), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1985 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 16), val._super), 0));
+ExtVal x1989 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 13), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1986 = (x1985 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1990 = (x1989 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1987 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 16), count._super), 0) * inv_0(x1986));
+ExtVal x1991 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 13), count._super), 0) * inv_0(x1990));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1988 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 17), val._super), 0));
+ExtVal x1992 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 14), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1989 = (x1988 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1993 = (x1992 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1990 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 17), count._super), 0) * inv_0(x1989));
+ExtVal x1994 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 14), count._super), 0) * inv_0(x1993));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x1991 = (x1986 * x1989);
+ExtVal x1995 = (x1990 * x1993);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x1992 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 16), count._super), 0) * x1989);
+ExtVal x1996 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 13), count._super), 0) * x1993);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1993 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 18), val._super), 0));
+ExtVal x1997 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 15), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x1994 = (x1993 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x1998 = (x1997 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x1995 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 18), count._super), 0) * inv_0(x1994));
+ExtVal x1999 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 15), count._super), 0) * inv_0(x1998));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x1996 = (((x1982 + x1987) + x1990) + x1995);
+ExtVal x2000 = (((x1986 + x1991) + x1994) + x1999);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 14), x1996);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), x2000);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x1997 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 14), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), 0));
+ExtVal x2001 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x1998 = (((x1997 * (x1991 * x1994)) - (x1992 * x1994)) - ((x1986 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 17), count._super), 0)) * x1994));
+ExtVal x2002 = (((x2001 * (x1995 * x1998)) - (x1996 * x1998)) - ((x1990 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 14), count._super), 0)) * x1998));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x1998 - (x1991 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 18), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2002 - (x1995 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 15), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x1999 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 19), val._super), 0));
+ExtVal x2003 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 16), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2000 = (x1999 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2004 = (x2003 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2001 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 19), count._super), 0) * inv_0(x2000));
+ExtVal x2005 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 16), count._super), 0) * inv_0(x2004));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2002 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 20), val._super), 0));
+ExtVal x2006 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 17), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2003 = (x2002 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2007 = (x2006 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2004 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 20), count._super), 0) * inv_0(x2003));
+ExtVal x2008 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 17), count._super), 0) * inv_0(x2007));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x2005 = (x2000 * x2003);
+ExtVal x2009 = (x2004 * x2007);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2006 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 19), count._super), 0) * x2003);
+ExtVal x2010 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 16), count._super), 0) * x2007);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2007 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 21), val._super), 0));
+ExtVal x2011 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 18), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2008 = (x2007 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2012 = (x2011 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2009 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 21), count._super), 0) * inv_0(x2008));
+ExtVal x2013 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 18), count._super), 0) * inv_0(x2012));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2010 = (((x1996 + x2001) + x2004) + x2009);
+ExtVal x2014 = (((x2000 + x2005) + x2008) + x2013);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 15), x2010);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 14), x2014);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2011 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 15), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 14), 0));
+ExtVal x2015 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 14), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2012 = (((x2011 * (x2005 * x2008)) - (x2006 * x2008)) - ((x2000 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 20), count._super), 0)) * x2008));
+ExtVal x2016 = (((x2015 * (x2009 * x2012)) - (x2010 * x2012)) - ((x2004 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 17), count._super), 0)) * x2012));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x2012 - (x2005 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 21), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2016 - (x2009 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 18), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2013 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 22), val._super), 0));
+ExtVal x2017 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 19), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2014 = (x2013 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2018 = (x2017 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2015 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 22), count._super), 0) * inv_0(x2014));
+ExtVal x2019 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 19), count._super), 0) * inv_0(x2018));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2016 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 23), val._super), 0));
+ExtVal x2020 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 20), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2017 = (x2016 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2021 = (x2020 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2018 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 23), count._super), 0) * inv_0(x2017));
+ExtVal x2022 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 20), count._super), 0) * inv_0(x2021));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x2019 = (x2014 * x2017);
+ExtVal x2023 = (x2018 * x2021);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2020 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 22), count._super), 0) * x2017);
+ExtVal x2024 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 19), count._super), 0) * x2021);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2021 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 0), val._super), 0));
+ExtVal x2025 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 21), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2022 = (x2021 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2026 = (x2025 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2023 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 0), count._super), 0) * inv_0(x2022));
+ExtVal x2027 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 21), count._super), 0) * inv_0(x2026));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2024 = (((x2010 + x2015) + x2018) + x2023);
+ExtVal x2028 = (((x2014 + x2019) + x2022) + x2027);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 16), x2024);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 15), x2028);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2025 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 16), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 15), 0));
+ExtVal x2029 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 15), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 14), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2026 = (((x2025 * (x2019 * x2022)) - (x2020 * x2022)) - ((x2014 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 23), count._super), 0)) * x2022));
+ExtVal x2030 = (((x2029 * (x2023 * x2026)) - (x2024 * x2026)) - ((x2018 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 20), count._super), 0)) * x2026));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x2026 - (x2019 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2030 - (x2023 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 21), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2027 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 1), val._super), 0));
+ExtVal x2031 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 22), val._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2028 = (x2027 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2032 = (x2031 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2029 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 1), count._super), 0) * inv_0(x2028));
+ExtVal x2033 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 22), count._super), 0) * inv_0(x2032));
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x2034 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU16.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 23), val._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x2035 = (x2034 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x2036 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 23), count._super), 0) * inv_0(x2035));
+// zirgen/dsl/passes/GenerateAccum.cpp:217
+ExtVal x2037 = (x2032 * x2035);
+// zirgen/dsl/passes/GenerateAccum.cpp:223
+ExtVal x2038 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 22), count._super), 0) * x2035);
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x2039 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 0), val._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x2040 = (x2039 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x2041 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 0), count._super), 0) * inv_0(x2040));
+// zirgen/dsl/passes/GenerateAccum.cpp:241
+ExtVal x2042 = (((x2028 + x2033) + x2036) + x2041);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 17), (x2024 + x2029));
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 16), x2042);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2030 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 17), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 16), 0));
+ExtVal x2043 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 16), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 15), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2031 = ((x2030 * x2028) - LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 1), count._super), 0));
+ExtVal x2044 = (((x2043 * (x2037 * x2040)) - (x2038 * x2040)) - ((x2032 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU16), 23), count._super), 0)) * x2040));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ(x2031, "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2044 - (x2037 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x2045 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.argU8.val), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 1), val._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x2046 = (x2045 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x2047 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 1), count._super), 0) * inv_0(x2046));
+// zirgen/dsl/passes/GenerateAccum.cpp:189
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 17), (x2042 + x2047));
+// zirgen/dsl/passes/GenerateAccum.cpp:177
+ExtVal x2048 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 17), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 16), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:180
+ExtVal x2049 = ((x2048 * x2046) - LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9._arguments_Poseidon0State.argU8), 1), count._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:182
+EQZ(x2049, "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:122
 STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 17), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:124
-ExtVal x2032 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 17), 0));
+ExtVal x2050 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 17), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:125
-EQZ(x2032, "zirgen/dsl/passes/GenerateAccum.cpp:125");
+EQZ(x2050, "zirgen/dsl/passes/GenerateAccum.cpp:125");
 x5 = x4;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult._selector), 10), _super), 0))) {
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2033 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg1.cycle._super), 0));
+ExtVal x2051 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg1.cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2034 = (x2033 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2052 = (x2051 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2035 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg1.count._super), 0) * inv_0(x2034));
+ExtVal x2053 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg1.count._super), 0) * inv_0(x2052));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2036 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1) + x2035);
+ExtVal x2054 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1) + x2053);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2037 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg2.cycle._super), 0));
+ExtVal x2055 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg2.cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2038 = (x2037 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2056 = (x2055 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2039 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg2.count._super), 0) * inv_0(x2038));
+ExtVal x2057 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg2.count._super), 0) * inv_0(x2056));
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2040 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg1.count._super), 0) * x2038);
+ExtVal x2058 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg1.count._super), 0) * x2056);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), (x2036 + x2039));
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), (x2054 + x2057));
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2041 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1));
+ExtVal x2059 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2042 = (((x2041 * (x2034 * x2038)) - x2040) - (x2034 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg2.count._super), 0)));
+ExtVal x2060 = (((x2059 * (x2052 * x2056)) - x2058) - (x2052 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10._0.arg2.count._super), 0)));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ(x2042, "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ(x2060, "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:122
 STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:124
-ExtVal x2043 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0));
+ExtVal x2061 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:125
-EQZ(x2043, "zirgen/dsl/passes/GenerateAccum.cpp:125");
+EQZ(x2061, "zirgen/dsl/passes/GenerateAccum.cpp:125");
 x5 = x4;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult._selector), 11), _super), 0))) {
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2044 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg1.cycle._super), 0));
+ExtVal x2062 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg1.cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2045 = (x2044 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2063 = (x2062 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2046 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg1.count._super), 0) * inv_0(x2045));
+ExtVal x2064 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg1.count._super), 0) * inv_0(x2063));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2047 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1) + x2046);
+ExtVal x2065 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1) + x2064);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2048 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg2.cycle._super), 0));
+ExtVal x2066 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg2.cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2049 = (x2048 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2067 = (x2066 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2050 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg2.count._super), 0) * inv_0(x2049));
+ExtVal x2068 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg2.count._super), 0) * inv_0(x2067));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x2051 = (x2045 * x2049);
+ExtVal x2069 = (x2063 * x2067);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2052 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg1.count._super), 0) * x2049);
+ExtVal x2070 = (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg1.count._super), 0) * x2067);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2053 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), addr._super), 0));
-ExtVal x2054 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), cycle._super), 0));
-ExtVal x2055 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), dataLow._super), 0));
-ExtVal x2056 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), dataHigh._super), 0));
+ExtVal x2071 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), addr._super), 0));
+ExtVal x2072 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), cycle._super), 0));
+ExtVal x2073 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), dataLow._super), 0));
+ExtVal x2074 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2057 = (((x2053 + x2054) + x2055) + x2056);
+ExtVal x2075 = (((x2071 + x2072) + x2073) + x2074);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2058 = (x2057 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2076 = (x2075 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2059 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), count._super), 0) * inv_0(x2058));
+ExtVal x2077 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), count._super), 0) * inv_0(x2076));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2060 = ((x2047 + x2050) + x2059);
+ExtVal x2078 = ((x2065 + x2068) + x2077);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), x2060);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), x2078);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2061 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1));
+ExtVal x2079 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 1));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2062 = (((x2061 * (x2051 * x2058)) - (x2052 * x2058)) - ((x2045 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg2.count._super), 0)) * x2058));
+ExtVal x2080 = (((x2079 * (x2069 * x2076)) - (x2070 * x2076)) - ((x2063 * LOAD(LAYOUT_LOOKUP(arg0, instResult.arm11._0.arg2.count._super), 0)) * x2076));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x2062 - (x2051 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2080 - (x2069 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 0), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2063 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), addr._super), 0));
-ExtVal x2064 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), cycle._super), 0));
-ExtVal x2065 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), dataLow._super), 0));
-ExtVal x2066 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), dataHigh._super), 0));
+ExtVal x2081 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), addr._super), 0));
+ExtVal x2082 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), cycle._super), 0));
+ExtVal x2083 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), dataLow._super), 0));
+ExtVal x2084 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2067 = (((x2063 + x2064) + x2065) + x2066);
+ExtVal x2085 = (((x2081 + x2082) + x2083) + x2084);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2068 = (x2067 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2086 = (x2085 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2069 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), count._super), 0) * inv_0(x2068));
+ExtVal x2087 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), count._super), 0) * inv_0(x2086));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2070 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), addr._super), 0));
-ExtVal x2071 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), cycle._super), 0));
-ExtVal x2072 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), dataLow._super), 0));
-ExtVal x2073 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), dataHigh._super), 0));
+ExtVal x2088 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), addr._super), 0));
+ExtVal x2089 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), cycle._super), 0));
+ExtVal x2090 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), dataLow._super), 0));
+ExtVal x2091 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2074 = (((x2070 + x2071) + x2072) + x2073);
+ExtVal x2092 = (((x2088 + x2089) + x2090) + x2091);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2075 = (x2074 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2093 = (x2092 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2076 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), count._super), 0) * inv_0(x2075));
+ExtVal x2094 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), count._super), 0) * inv_0(x2093));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x2077 = (x2068 * x2075);
+ExtVal x2095 = (x2086 * x2093);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2078 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), count._super), 0) * x2075);
+ExtVal x2096 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 1), count._super), 0) * x2093);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2079 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), addr._super), 0));
-ExtVal x2080 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), cycle._super), 0));
-ExtVal x2081 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), dataLow._super), 0));
-ExtVal x2082 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), dataHigh._super), 0));
+ExtVal x2097 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), addr._super), 0));
+ExtVal x2098 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), cycle._super), 0));
+ExtVal x2099 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), dataLow._super), 0));
+ExtVal x2100 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2083 = (((x2079 + x2080) + x2081) + x2082);
+ExtVal x2101 = (((x2097 + x2098) + x2099) + x2100);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2084 = (x2083 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2102 = (x2101 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2085 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), count._super), 0) * inv_0(x2084));
+ExtVal x2103 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), count._super), 0) * inv_0(x2102));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2086 = (((x2060 + x2069) + x2076) + x2085);
+ExtVal x2104 = (((x2078 + x2087) + x2094) + x2103);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), x2086);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), x2104);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2087 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0));
+ExtVal x2105 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 0), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2088 = (((x2087 * (x2077 * x2084)) - (x2078 * x2084)) - ((x2068 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), count._super), 0)) * x2084));
+ExtVal x2106 = (((x2105 * (x2095 * x2102)) - (x2096 * x2102)) - ((x2086 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 2), count._super), 0)) * x2102));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x2088 - (x2077 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2106 - (x2095 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 3), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2089 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), addr._super), 0));
-ExtVal x2090 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), cycle._super), 0));
-ExtVal x2091 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), dataLow._super), 0));
-ExtVal x2092 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), dataHigh._super), 0));
+ExtVal x2107 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), addr._super), 0));
+ExtVal x2108 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), cycle._super), 0));
+ExtVal x2109 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), dataLow._super), 0));
+ExtVal x2110 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2093 = (((x2089 + x2090) + x2091) + x2092);
+ExtVal x2111 = (((x2107 + x2108) + x2109) + x2110);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2094 = (x2093 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2112 = (x2111 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2095 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), count._super), 0) * inv_0(x2094));
+ExtVal x2113 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), count._super), 0) * inv_0(x2112));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2096 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), addr._super), 0));
-ExtVal x2097 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), cycle._super), 0));
-ExtVal x2098 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), dataLow._super), 0));
-ExtVal x2099 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), dataHigh._super), 0));
+ExtVal x2114 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), addr._super), 0));
+ExtVal x2115 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), cycle._super), 0));
+ExtVal x2116 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), dataLow._super), 0));
+ExtVal x2117 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2100 = (((x2096 + x2097) + x2098) + x2099);
+ExtVal x2118 = (((x2114 + x2115) + x2116) + x2117);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2101 = (x2100 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2119 = (x2118 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2102 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), count._super), 0) * inv_0(x2101));
+ExtVal x2120 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), count._super), 0) * inv_0(x2119));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x2103 = (x2094 * x2101);
+ExtVal x2121 = (x2112 * x2119);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2104 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), count._super), 0) * x2101);
+ExtVal x2122 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 4), count._super), 0) * x2119);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2105 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), addr._super), 0));
-ExtVal x2106 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), cycle._super), 0));
-ExtVal x2107 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), dataLow._super), 0));
-ExtVal x2108 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), dataHigh._super), 0));
+ExtVal x2123 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), addr._super), 0));
+ExtVal x2124 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), cycle._super), 0));
+ExtVal x2125 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), dataLow._super), 0));
+ExtVal x2126 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2109 = (((x2105 + x2106) + x2107) + x2108);
+ExtVal x2127 = (((x2123 + x2124) + x2125) + x2126);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2110 = (x2109 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2128 = (x2127 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2111 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), count._super), 0) * inv_0(x2110));
+ExtVal x2129 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), count._super), 0) * inv_0(x2128));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2112 = (((x2086 + x2095) + x2102) + x2111);
+ExtVal x2130 = (((x2104 + x2113) + x2120) + x2129);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), x2112);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), x2130);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2113 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0));
+ExtVal x2131 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 1), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2114 = (((x2113 * (x2103 * x2110)) - (x2104 * x2110)) - ((x2094 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), count._super), 0)) * x2110));
+ExtVal x2132 = (((x2131 * (x2121 * x2128)) - (x2122 * x2128)) - ((x2112 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 5), count._super), 0)) * x2128));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x2114 - (x2103 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2132 - (x2121 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 6), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2115 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), addr._super), 0));
-ExtVal x2116 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), cycle._super), 0));
-ExtVal x2117 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), dataLow._super), 0));
-ExtVal x2118 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), dataHigh._super), 0));
+ExtVal x2133 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), addr._super), 0));
+ExtVal x2134 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), cycle._super), 0));
+ExtVal x2135 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), dataLow._super), 0));
+ExtVal x2136 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2119 = (((x2115 + x2116) + x2117) + x2118);
+ExtVal x2137 = (((x2133 + x2134) + x2135) + x2136);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2120 = (x2119 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2138 = (x2137 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2121 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), count._super), 0) * inv_0(x2120));
+ExtVal x2139 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), count._super), 0) * inv_0(x2138));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2122 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), addr._super), 0));
-ExtVal x2123 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), cycle._super), 0));
-ExtVal x2124 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), dataLow._super), 0));
-ExtVal x2125 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), dataHigh._super), 0));
+ExtVal x2140 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), addr._super), 0));
+ExtVal x2141 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), cycle._super), 0));
+ExtVal x2142 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), dataLow._super), 0));
+ExtVal x2143 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), dataHigh._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2126 = (((x2122 + x2123) + x2124) + x2125);
-// zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2127 = (x2126 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2128 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), count._super), 0) * inv_0(x2127));
-// zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x2129 = (x2120 * x2127);
-// zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2130 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), count._super), 0) * x2127);
-// zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2131 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), addr._super), 0));
-ExtVal x2132 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), cycle._super), 0));
-ExtVal x2133 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), dataLow._super), 0));
-ExtVal x2134 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), dataHigh._super), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:157
-ExtVal x2135 = (((x2131 + x2132) + x2133) + x2134);
-// zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2136 = (x2135 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2137 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), count._super), 0) * inv_0(x2136));
-// zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2138 = (((x2112 + x2121) + x2128) + x2137);
-// zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), x2138);
-// zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2139 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2140 = (((x2139 * (x2129 * x2136)) - (x2130 * x2136)) - ((x2120 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), count._super), 0)) * x2136));
-// zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x2140 - (x2129 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
-// zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2141 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 0), cycle._super), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2142 = (x2141 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
-// zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2143 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 0), count._super), 0) * inv_0(x2142));
-// zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2144 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 1), cycle._super), 0));
+ExtVal x2144 = (((x2140 + x2141) + x2142) + x2143);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
 ExtVal x2145 = (x2144 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2146 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 1), count._super), 0) * inv_0(x2145));
+ExtVal x2146 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), count._super), 0) * inv_0(x2145));
 // zirgen/dsl/passes/GenerateAccum.cpp:217
-ExtVal x2147 = (x2142 * x2145);
+ExtVal x2147 = (x2138 * x2145);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2148 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 0), count._super), 0) * x2145);
+ExtVal x2148 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 7), count._super), 0) * x2145);
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2149 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 2), cycle._super), 0));
+ExtVal x2149 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.addr), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), addr._super), 0));
+ExtVal x2150 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), cycle._super), 0));
+ExtVal x2151 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataLow), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), dataLow._super), 0));
+ExtVal x2152 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.memoryArg.dataHigh), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), dataHigh._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:157
+ExtVal x2153 = (((x2149 + x2150) + x2151) + x2152);
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2150 = (x2149 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2154 = (x2153 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2151 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 2), count._super), 0) * inv_0(x2150));
+ExtVal x2155 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), count._super), 0) * inv_0(x2154));
 // zirgen/dsl/passes/GenerateAccum.cpp:241
-ExtVal x2152 = (((x2138 + x2143) + x2146) + x2151);
+ExtVal x2156 = (((x2130 + x2139) + x2146) + x2155);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), x2152);
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), x2156);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2153 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0));
+ExtVal x2157 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 2), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2154 = (((x2153 * (x2147 * x2150)) - (x2148 * x2150)) - ((x2142 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 1), count._super), 0)) * x2150));
+ExtVal x2158 = (((x2157 * (x2147 * x2154)) - (x2148 * x2154)) - ((x2138 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 8), count._super), 0)) * x2154));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ((x2154 - (x2147 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 2), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2158 - (x2147 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.memoryArg), 9), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2155 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 3), cycle._super), 0));
+ExtVal x2159 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 0), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2156 = (x2155 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2160 = (x2159 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2157 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 3), count._super), 0) * inv_0(x2156));
+ExtVal x2161 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 0), count._super), 0) * inv_0(x2160));
 // zirgen/dsl/passes/GenerateAccum.cpp:146
-ExtVal x2158 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 4), cycle._super), 0));
+ExtVal x2162 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 1), cycle._super), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:238
-ExtVal x2159 = (x2158 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+ExtVal x2163 = (x2162 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:240
-ExtVal x2160 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 4), count._super), 0) * inv_0(x2159));
+ExtVal x2164 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 1), count._super), 0) * inv_0(x2163));
+// zirgen/dsl/passes/GenerateAccum.cpp:217
+ExtVal x2165 = (x2160 * x2163);
 // zirgen/dsl/passes/GenerateAccum.cpp:223
-ExtVal x2161 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 3), count._super), 0) * x2159);
+ExtVal x2166 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 0), count._super), 0) * x2163);
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x2167 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 2), cycle._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x2168 = (x2167 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x2169 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 2), count._super), 0) * inv_0(x2168));
+// zirgen/dsl/passes/GenerateAccum.cpp:241
+ExtVal x2170 = (((x2156 + x2161) + x2164) + x2169);
 // zirgen/dsl/passes/GenerateAccum.cpp:189
-STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), ((x2152 + x2157) + x2160));
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), x2170);
 // zirgen/dsl/passes/GenerateAccum.cpp:177
-ExtVal x2162 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0));
+ExtVal x2171 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 3), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:180
-ExtVal x2163 = (((x2162 * (x2156 * x2159)) - x2161) - (x2156 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 4), count._super), 0)));
+ExtVal x2172 = (((x2171 * (x2165 * x2168)) - (x2166 * x2168)) - ((x2160 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 1), count._super), 0)) * x2168));
 // zirgen/dsl/passes/GenerateAccum.cpp:182
-EQZ(x2163, "zirgen/dsl/passes/GenerateAccum.cpp:182");
+EQZ((x2172 - (x2165 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 2), count._super), 0))), "zirgen/dsl/passes/GenerateAccum.cpp:182");
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x2173 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 3), cycle._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x2174 = (x2173 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x2175 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 3), count._super), 0) * inv_0(x2174));
+// zirgen/dsl/passes/GenerateAccum.cpp:146
+ExtVal x2176 = (LOAD_EXT(LAYOUT_LOOKUP(x3, randomness.cycleArg.cycle), 0) * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 4), cycle._super), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:238
+ExtVal x2177 = (x2176 + LOAD_EXT(LAYOUT_LOOKUP(x3, randomness._offset), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:240
+ExtVal x2178 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 4), count._super), 0) * inv_0(x2177));
+// zirgen/dsl/passes/GenerateAccum.cpp:223
+ExtVal x2179 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 3), count._super), 0) * x2177);
+// zirgen/dsl/passes/GenerateAccum.cpp:189
+STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), ((x2170 + x2175) + x2178));
+// zirgen/dsl/passes/GenerateAccum.cpp:177
+ExtVal x2180 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 4), 0));
+// zirgen/dsl/passes/GenerateAccum.cpp:180
+ExtVal x2181 = (((x2180 * (x2174 * x2177)) - x2179) - (x2174 * LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm11._arguments_Sha0State.cycleArg), 4), count._super), 0)));
+// zirgen/dsl/passes/GenerateAccum.cpp:182
+EQZ(x2181, "zirgen/dsl/passes/GenerateAccum.cpp:182");
 // zirgen/dsl/passes/GenerateAccum.cpp:122
 STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:124
-ExtVal x2164 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0));
+ExtVal x2182 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) - LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 5), 0));
 // zirgen/dsl/passes/GenerateAccum.cpp:125
-EQZ(x2164, "zirgen/dsl/passes/GenerateAccum.cpp:125");
+EQZ(x2182, "zirgen/dsl/passes/GenerateAccum.cpp:125");
 x5 = x4;
 } else {
    assert(0 && "Reached unreachable mux arm");

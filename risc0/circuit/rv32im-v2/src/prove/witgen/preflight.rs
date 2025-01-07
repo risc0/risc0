@@ -567,6 +567,7 @@ impl<'a> Risc0Context for Preflight<'a> {
             bail!("Invalid segment: truncated read record");
         }
         buf[..rlen].copy_from_slice(record);
+        self.cur_read += 1;
         Ok(rlen as u32)
     }
 

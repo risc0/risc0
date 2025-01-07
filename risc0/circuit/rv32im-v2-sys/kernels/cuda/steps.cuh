@@ -44,9 +44,9 @@ extern __device__ NondetExtRegStruct exec_ExtReg(ExecContext& ctx,
 extern __device__ NondetRegStruct exec_NondetBitReg(ExecContext& ctx,
                                                     Val arg0,
                                                     BoundLayout<NondetRegLayout> layout1);
-extern __device__ BitRegStruct exec_BitReg(ExecContext& ctx,
-                                           Val arg0,
-                                           BoundLayout<NondetRegLayout> layout1);
+extern __device__ NondetRegStruct exec_BitReg(ExecContext& ctx,
+                                              Val arg0,
+                                              BoundLayout<NondetRegLayout> layout1);
 extern __device__ NondetRegStruct exec_NondetTwitReg(ExecContext& ctx,
                                                      Val arg0,
                                                      BoundLayout<NondetRegLayout> layout1);
@@ -481,6 +481,14 @@ extern __device__ ECallOutputStruct exec_ECallHostWrite(ExecContext& ctx,
                                                         NondetRegStruct arg0,
                                                         InstInputStruct arg1_0,
                                                         BoundLayout<ECallHostWriteLayout> layout2);
+extern __device__ ECallOutputStruct
+exec_ECallHostReadBytes(ExecContext& ctx,
+                        NondetRegStruct arg0,
+                        InstInputStruct arg1_0,
+                        Val arg2_0,
+                        Val arg3,
+                        Val arg4,
+                        BoundLayout<ECallHostReadBytesLayout> layout5);
 extern __device__ ECallOutputStruct
 exec_ECallHostReadWords(ExecContext& ctx,
                         NondetRegStruct arg0,
