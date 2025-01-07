@@ -15,7 +15,7 @@ cargo run --release
 Notable details:
 
 - Using a patched version of the [tiny-keccak] crate. Including this patch will accelerate _all_ usages of keccak that use the `tiny-keccak` crate in any transitive dependency.
-  - This will use the RISC Zero keccak precompile in the zkVM guest, which has _much_ higher performance than any software implementation.
+- This will use the RISC Zero keccak precompile in the zkVM guest, which has _much_ higher performance than any software implementation.
 - We could have passed the guest a `String` rather than a string literal for the same result.
 
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
