@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ecdsa_methods::BENCHMARK_ELF;
+use k256_methods::BENCHMARK_ELF;
 use risc0_zkvm::{default_executor, ExecutorEnv};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ecdsa_methods::{ECDSA_VERIFY_ELF, ECDSA_VERIFY_ID};
 use k256::{
     ecdsa::{signature::Signer, Signature, SigningKey, VerifyingKey},
     EncodedPoint,
 };
+use k256_methods::{K256_VERIFY_ELF, K256_VERIFY_ID};
 use rand_core::OsRng;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 
@@ -40,7 +40,7 @@ fn prove_ecdsa_verification(
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    prover.prove(env, ECDSA_VERIFY_ELF).unwrap().receipt
+    prover.prove(env, K256_VERIFY_ELF).unwrap().receipt
 }
 
 fn main() {
@@ -53,7 +53,7 @@ fn main() {
     let receipt = prove_ecdsa_verification(signing_key.verifying_key(), message, &signature);
 
     // Verify the receipt and then access the journal.
-    receipt.verify(ECDSA_VERIFY_ID).unwrap();
+    receipt.verify(K256_VERIFY_ID).unwrap();
     let (receipt_verifying_key, receipt_message): (EncodedPoint, Vec<u8>) =
         receipt.journal.decode().unwrap();
 
