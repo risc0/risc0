@@ -760,9 +760,15 @@ fn do_embed_methods<G: GuestBuilder>(
                 .root_dir
                 .clone()
                 .unwrap_or_else(|| std::env::current_dir().unwrap());
+            let custom_env = docker_opts
+                .env
+                .iter()
+                .map(|(key, val)| (key.as_str(), val.as_str()))
+                .collect::<Vec<_>>();
             build_guest_package_docker(
                 guest_pkg.manifest_path.as_std_path(),
                 &src_dir,
+                &custom_env,
                 &guest_build_opts,
             )
             .unwrap();

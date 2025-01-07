@@ -24,6 +24,9 @@ pub struct DockerOptions {
     ///
     /// The current working directory is used if `None` is specified.
     pub root_dir: Option<PathBuf>,
+
+    /// Additional environment variables for the build container.
+    pub env: Vec<(String, String)>,
 }
 
 /// Options defining how to embed a guest package in

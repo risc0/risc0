@@ -46,14 +46,21 @@ pub enum BuildStatus {
 pub fn docker_build(
     manifest_path: &Path,
     src_dir: &Path,
+    custom_env: &[(&str, &str)],
     guest_opts: &GuestOptions,
 ) -> Result<BuildStatus> {
-    build_guest_package_docker(manifest_path, src_dir, &guest_opts.clone().into())
+    build_guest_package_docker(
+        manifest_path,
+        src_dir,
+        custom_env,
+        &guest_opts.clone().into(),
+    )
 }
 
 pub(crate) fn build_guest_package_docker(
     manifest_path: &Path,
     src_dir: &Path,
+    custom_env: &[(&str, &str)],
     guest_opts: &GuestBuildOptions,
 ) -> Result<BuildStatus> {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
@@ -93,7 +100,13 @@ pub(crate) fn build_guest_package_docker(
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
-        create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), guest_opts)?;
+        create_dockerfile(
+            rel_manifest_path,
+            temp_path,
+            pkg_name.as_str(),
+            custom_env,
+            guest_opts,
+        )?;
         build(&src_dir, temp_path)?;
     }
     println!("ELFs ready at:");
@@ -116,6 +129,7 @@ fn create_dockerfile(
     manifest_path: &Path,
     temp_dir: &Path,
     pkg_name: &str,
+    custom_env: &[(&str, &str)],
     guest_opts: &GuestBuildOptions,
 ) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
@@ -165,6 +179,7 @@ fn create_dockerfile(
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
         )])
         .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
+        .env(custom_env)
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)
