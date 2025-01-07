@@ -255,12 +255,21 @@ impl<'a> Risc0Machine<'a> {
             cur_state = next_state;
         }
 
-        while rlen > 0 && !ptr.is_aligned() {
+        while rlen > 0 {
             // tracing::trace!("suffix");
             self.store_u8(ptr, bytes[i])?;
             ptr += 1u32;
             i += 1;
             rlen -= 1;
+
+            if rlen == 0 {
+                self.next_pc();
+            }
+
+            let next_state = next_io_state(ptr, rlen);
+            self.ctx
+                .on_ecall_cycle(cur_state, next_state, ptr.waddr().0, ptr.subaddr(), rlen)?;
+            cur_state = next_state;
         }
 
         // Ok(true)
