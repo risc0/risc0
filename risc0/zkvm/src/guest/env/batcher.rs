@@ -28,7 +28,7 @@ use risc0_zkvm_platform::syscall::{
 #[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
-    inputs: Vec<KeccakState>,
+    inputs: vec::Vec<KeccakState>,
     po2: u32,
     max_inputs: usize,
 }

@@ -15,6 +15,7 @@
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
+use risc0_binfmt::ExitCode;
 use risc0_circuit_rv32im_v2_sys::{RawMemoryTransaction, RawPreflightCycle};
 use risc0_core::scope;
 use risc0_zkp::core::digest::DIGEST_WORDS;
@@ -179,8 +180,7 @@ impl<'a> Preflight<'a> {
     // Do table reification
     pub fn generate_tables(&mut self) -> Result<()> {
         self.trace.table_split_cycle = self.trace.cycles.len() as u32;
-        self.fini();
-        Ok(())
+        self.fini()
     }
 
     pub fn padding(&mut self) -> Result<()> {
@@ -208,7 +208,7 @@ impl<'a> Preflight<'a> {
             } else {
                 // Otherwise, compute cycle diff and another diff
                 let diff = txn.cycle - txn.prev_cycle;
-                self.trace.cycles[diff as usize].diff_count += 1;
+                self.trace.cycles[(diff / 2) as usize].diff_count[(diff % 2) as usize] += 1;
             }
 
             // If last cycle, set final value to original value
@@ -250,7 +250,7 @@ impl<'a> Preflight<'a> {
         Ok(())
     }
 
-    fn fini(&mut self) {
+    fn fini(&mut self) -> Result<()> {
         for i in (16..256).step_by(16) {
             self.add_cycle_special(
                 CycleState::ControlTable,
@@ -278,6 +278,15 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+        if !matches!(self.segment.exit_code, ExitCode::Halted(_)) {
+            let segment_threshold = self.segment.segment_threshold as usize;
+            if self.trace.cycles.len() < segment_threshold {
+                bail!("Stopping segment too early");
+            }
+            let diff = self.trace.cycles.len() - segment_threshold;
+            self.trace.cycles[diff / 2].diff_count[diff % 2] += 1;
+        }
+        self.machine_mode = 1;
         self.add_cycle_special(
             CycleState::ControlDone,
             CycleState::ControlDone,
@@ -285,6 +294,7 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+        Ok(())
     }
 
     fn read_root(&mut self) -> Result<()> {
@@ -336,7 +346,7 @@ impl<'a> Preflight<'a> {
             user_cycle: self.user_cycle,
             txn_idx: self.txn_idx,
             paging_idx,
-            diff_count: 0,
+            diff_count: [0, 0],
         };
         // tracing::trace!("[{}]: {cycle:?}", self.trace.cycles.len());
         self.trace.cycles.push(cycle);
@@ -490,7 +500,7 @@ impl<'a> Risc0Context for Preflight<'a> {
     // Pass memory ops to pager + record
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
         // tracing::trace!("load_u32: {addr:?}");
-        let cycle = self.trace.cycles.len();
+        let cycle = (2 * self.trace.cycles.len()) as u32;
         let word = if addr >= MERKLE_TREE_START_ADDR {
             self.page_memory
                 .get(&addr)
@@ -499,12 +509,10 @@ impl<'a> Risc0Context for Preflight<'a> {
             self.pager.load(addr)?
         };
         self.orig_words.get_mut(&addr).get_or_insert(word);
-        let prev_cycle = self
-            .prev_cycle
-            .insert_default(&addr, cycle as u32, u32::MAX);
+        let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
         self.trace.txns.push(RawMemoryTransaction {
             addr: addr.0,
-            cycle: cycle as u32,
+            cycle,
             word,
             prev_cycle,
             prev_word: word,
@@ -513,7 +521,7 @@ impl<'a> Risc0Context for Preflight<'a> {
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        let cycle = self.trace.cycles.len();
+        let cycle = (2 * self.trace.cycles.len() + 1) as u32;
         let prev_word = if addr >= MEMORY_END_ADDR {
             self.page_memory
                 .insert(&addr, word)
@@ -523,12 +531,10 @@ impl<'a> Risc0Context for Preflight<'a> {
             self.pager.store(addr, word)?;
             prev_word
         };
-        let prev_cycle = self
-            .prev_cycle
-            .insert_default(&addr, cycle as u32, u32::MAX);
+        let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
         self.trace.txns.push(RawMemoryTransaction {
             addr: addr.0,
-            cycle: cycle as u32,
+            cycle,
             word,
             prev_cycle,
             prev_word,
