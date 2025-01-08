@@ -2291,6 +2291,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "keccak-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "lazy-regex"
 version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3434,6 +3441,7 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
+ "keccak",
  "paste",
  "rayon",
  "risc0-binfmt",
@@ -3586,6 +3594,16 @@ dependencies = [
  "risc0-groth16",
  "risc0-zkvm",
  "serde_json",
+]
+
+[[package]]
+name = "risc0-keccak-example"
+version = "0.12.0"
+dependencies = [
+ "clap",
+ "hex",
+ "keccak-methods",
+ "risc0-zkvm",
 ]
 
 [[package]]
