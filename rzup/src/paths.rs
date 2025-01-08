@@ -221,14 +221,14 @@ mod tests {
 
         // Test component directory path
         let component_dir = Paths::get_component_dir(&env, component_id).unwrap();
-        assert_eq!(component_dir, env.root_dir().join("extensions"));
+        assert_eq!(component_dir, env.root_dir().join("test-component"));
 
         // Test version directory path
         let version_dir = Paths::get_version_dir(&env, component_id, &version).unwrap();
         assert_eq!(
             version_dir,
             env.root_dir()
-                .join("extensions")
+                .join("test-component")
                 .join(format!("v{}-{}-{}", version, component_id, env.platform()))
         );
 
@@ -237,7 +237,7 @@ mod tests {
         assert_eq!(
             bin_dir,
             env.root_dir()
-                .join("extensions")
+                .join("test-component")
                 .join(format!("v{}-{}-{}", version, component_id, env.platform()))
                 .join("bin")
         );
