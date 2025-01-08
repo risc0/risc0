@@ -24,7 +24,7 @@ pub(crate) struct InstallCommand {
 impl InstallCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
         let version = match self.version {
-            Some(v) => Some(Version::parse(&v).map_err(|_| RzupError::InvalidVersion(v))?),
+            Some(v) => Some(Version::parse(&v).map_err(|_| RzupError::InvalidVersion(format!("{v}\n\n  {}: use semantic version (e.g. 1.0.0)", "tip".green())))?),
             None => None,
         };
 
