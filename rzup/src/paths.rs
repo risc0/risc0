@@ -8,7 +8,15 @@ pub struct Paths;
 
 impl Paths {
     pub fn get_component_dir(env: &Environment, component_id: &str) -> Result<PathBuf> {
-        Ok(env.root_dir().join(component_id))
+        match component_id {
+            "rust" => {
+
+                Ok(env.root_dir().join("toolchains").join(component_id))
+            }
+            _ => {
+                Ok(env.root_dir().join("extensions").join(component_id))
+            }
+        }
     }
 
     pub fn get_version_dir(

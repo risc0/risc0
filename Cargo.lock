@@ -4781,6 +4781,7 @@ dependencies = [
  "dirs",
  "downloader",
  "flate2",
+ "fs2",
  "indicatif",
  "reqwest",
  "semver",
