@@ -150,13 +150,11 @@ impl ShowCommand {
                 }
             }
         }
-
         println!(
-            "{}: {}",
+            "\n{}: {}",
             "rzup home".bold(),
             rzup.environment.root_dir().display()
         );
-
         Ok(())
     }
 }
