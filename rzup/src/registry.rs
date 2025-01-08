@@ -126,6 +126,10 @@ impl Registry {
 
             let dir_name = entry.file_name().to_string_lossy().to_string();
 
+            if !dir_name.contains(id) {
+                continue;
+            }
+
             match Paths::parse_version_from_path(&dir_name, id) {
                 Some(version) => {
                     env.emit(RzupEvent::Debug {
