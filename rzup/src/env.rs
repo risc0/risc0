@@ -2,15 +2,15 @@ use crate::error::Result;
 use crate::RzupError;
 use crate::RzupEvent;
 
-use std::path::{Path, PathBuf};
 use crate::distribution::Platform;
+use std::path::{Path, PathBuf};
 
 pub struct Environment {
     root_dir: PathBuf,
     tmp_dir: PathBuf,
     settings_file: PathBuf,
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
-    platform: Platform
+    platform: Platform,
 }
 
 impl Environment {
@@ -25,7 +25,7 @@ impl Environment {
             tmp_dir,
             settings_file,
             event_handler: None,
-            platform
+            platform,
         })
     }
 
@@ -37,7 +37,7 @@ impl Environment {
                 .ok_or_else(|| {
                     RzupError::Environment("Could not determine home directory".to_string())
                 })?
-                .join(".risc02")
+                .join(".risc0")
         };
 
         let env = Self::with_root(root_dir)?;
@@ -86,7 +86,7 @@ mod tests {
     fn test_default_env() {
         let env = Environment::new().unwrap();
         let home_dir = dirs::home_dir().unwrap();
-        let expected_root = home_dir.join(".risc02");
+        let expected_root = home_dir.join(".risc0");
 
         assert_eq!(env.root_dir, expected_root);
         assert_eq!(env.tmp_dir, expected_root.join("tmp"));

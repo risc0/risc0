@@ -54,44 +54,36 @@ impl Registry {
 
             self.register_component(component);
 
-            // Set active version if none exists
+            // Check if we already have an active version set
             if self.settings.get_active_version(component_id).is_none() {
-                if let Ok(versions) = self.list_component_versions(env, component_id) {
-                    if let Some(latest) = versions.into_iter().max() {
-                        self.settings.set_active_version(component_id, &latest);
-                    }
+                let mut all_versions = self.list_component_versions(env, component_id)?;
+
+                all_versions.sort_by(|a, b| b.cmp(a));
+
+                // If we found any versions, set the highest one as active
+                if let Some(highest_version) = all_versions.first() {
+                    env.emit(RzupEvent::Debug {
+                        message: format!(
+                            "Setting highest version {} as active for {}",
+                            highest_version, component_id
+                        ),
+                    });
+                    self.settings
+                        .set_active_version(component_id, highest_version);
                 }
             }
         }
 
+        self.settings.save(env)?;
         Ok(())
     }
 
     pub fn list_component_versions(&self, env: &Environment, id: &str) -> Result<Vec<Version>> {
-        let mut versions = Vec::new();
-        let component_dir = Paths::get_component_dir(env, id)?;
-
-        if !component_dir.exists() {
-            return Ok(versions);
-        }
-
-        let component_suffix = format!("-{}-{}", id, env.platform());
-
-        for entry in std::fs::read_dir(component_dir)? {
-            let entry = entry?;
-            if !entry.path().is_dir() {
-                continue;
-            }
-
-            let version = entry
-                .file_name()
-                .to_string_lossy()
-                .strip_prefix('v')
-                .and_then(|v| v.strip_suffix(&component_suffix))
-                .and_then(|v| Version::parse(v).ok());
-
-            if let Some(version) = version {
-                versions.push(version);
+        let mut versions = Paths::list_component_versions(env, id)?;
+        let legacy_versions = Paths::list_legacy_versions(env, id)?;
+        for legacy_version in legacy_versions {
+            if !versions.contains(&legacy_version) {
+                versions.push(legacy_version);
             }
         }
 
@@ -182,7 +174,12 @@ impl Registry {
 
         let version = match version_to_install {
             Some(v) => v,
-            None => component_to_install.get_latest_version(env)?,
+            None => {
+                env.emit(RzupEvent::Debug {
+                    message: format!("No version specified, fetching latest for {}", id),
+                });
+                component_to_install.get_latest_version(env)?
+            }
         };
 
         if !force && Paths::version_exists(env, id, &version)? {
@@ -192,6 +189,9 @@ impl Registry {
             });
             return Ok(());
         }
+
+        // Create necessary directories before installation
+        Paths::create_version_dirs(env, id, &version)?;
 
         // Install component
         component_to_install.install(env, Some(&version), force)?;
@@ -240,6 +240,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires GitHub API access"]
     fn test_version_management() {
         let (_tmp_dir, env, mut registry) = setup_test_registry();
         let version = Version::new(1, 0, 0);

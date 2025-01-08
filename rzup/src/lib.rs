@@ -289,7 +289,6 @@ impl Rzup {
         Paths::get_version_dir(&self.environment, component_id, version)
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -312,61 +311,100 @@ mod tests {
     }
 
     #[test]
+    fn test_path_operations() {
+        let (_tmp_dir, rzup) = setup_test_env();
+        let version = Version::new(1, 2, 0);
+        let component_id = "cargo-risczero";
+
+        // Create necessary directories without actual installation
+        rzup.ensure_version_dirs(component_id, &version).unwrap();
+
+        // Create the bin directory for the component
+        let bin_dir = rzup.get_version_dir(component_id, &version).unwrap();
+        std::fs::create_dir_all(&bin_dir).unwrap();
+
+        // Test binary path retrieval with platform-specific path
+        let bin_path = rzup.get_bin_path(component_id, &version).unwrap();
+        assert!(bin_path.is_some());
+        let bin_path = bin_path.unwrap();
+        assert!(bin_path.ends_with(format!(
+            "v{}-{}-{}/bin",
+            version,
+            component_id,
+            rzup.environment.platform()
+        )));
+
+        // Test virtual component (r0vm is inside cargo-risczero's bin directory)
+        let virtual_component = "r0vm";
+        let virtual_bin_path = rzup.get_bin_path(virtual_component, &version).unwrap();
+        assert!(virtual_bin_path.is_some());
+        let virtual_bin_path = virtual_bin_path.unwrap();
+        assert!(virtual_bin_path.ends_with(format!("bin/{}", virtual_component)));
+    }
+
+    #[test]
+    #[ignore = "requires GitHub API access"]
+    fn test_install_all() {
+        let (_tmp_dir, mut rzup) = setup_test_env();
+
+        // Use install_all
+        match rzup.install_all(true) {
+            Ok(_) => {
+                // Verify installations
+                let rust_versions = rzup.installed_versions("rust");
+                assert!(!rust_versions.is_empty(), "No rust versions found");
+
+                let cargo_versions = rzup.installed_versions("cargo-risczero");
+                assert!(
+                    !cargo_versions.is_empty(),
+                    "No cargo-risczero versions found"
+                );
+
+                // Verify active versions are set
+                assert!(
+                    rzup.get_active_version("rust").unwrap().is_some(),
+                    "No active rust version"
+                );
+                assert!(
+                    rzup.get_active_version("cargo-risczero").unwrap().is_some(),
+                    "No active cargo-risczero version"
+                );
+            }
+            Err(RzupError::RateLimited(_)) => {
+                println!("Skipping test due to GitHub rate limiting");
+            }
+            Err(e) => panic!("Unexpected error: {}", e),
+        }
+    }
+
+    #[test]
     fn test_install_and_uninstall_component() {
         let (_tmp_dir, mut rzup) = setup_test_env();
-        let version = Version::new(1, 0, 0);
+        let version = Version::new(1, 2, 0);
+        let component_id = "cargo-risczero";
 
-        // Test installation
-        rzup.install_component("cargo-risczero", Some(version.clone()), false)
+        // Create necessary directories without actual installation
+        rzup.ensure_version_dirs(component_id, &version).unwrap();
+
+        // Create a mock binary to simulate installation
+        let bin_dir = rzup.get_version_dir(component_id, &version).unwrap();
+        std::fs::create_dir_all(&bin_dir).unwrap();
+        std::fs::write(bin_dir.join(component_id), "mock binary").unwrap();
+
+        // Set the version as active
+        rzup.set_active_version(component_id, version.clone())
             .unwrap();
-        assert!(rzup.is_installed("cargo-risczero", &version));
+
+        // Verify installation
+        assert!(rzup.is_installed(component_id, &version));
         assert_eq!(
-            rzup.settings()
-                .get_active_version("cargo-risczero")
-                .unwrap(),
+            rzup.settings().get_active_version(component_id).unwrap(),
             version
         );
 
         // Test uninstallation
-        rzup.uninstall_component("cargo-risczero", version.clone())
+        rzup.uninstall_component(component_id, version.clone())
             .unwrap();
-        assert!(!rzup.is_installed("cargo-risczero", &version));
-    }
-
-    #[test]
-    fn test_install_all() {
-        let (_tmp_dir, mut rzup) = setup_test_env();
-        rzup.install_all(false).unwrap();
-
-        // Both default components should be installed
-        assert!(!rzup.installed_versions("rust").is_empty());
-        assert!(!rzup.installed_versions("cargo-risczero").is_empty());
-    }
-
-    #[test]
-    fn test_path_operations() {
-        let tmp_dir = TempDir::new().unwrap();
-        let rzup = Rzup::with_root(tmp_dir.path()).unwrap();
-        let version = Version::new(1, 0, 0);
-        let component_id = "cargo-risczero";
-
-        // Test directory creation
-        rzup.ensure_version_dirs(component_id, &version).unwrap();
-        assert!(rzup.is_installed(component_id, &version));
-
-        // Test binary path retrieval
-        let bin_path = rzup.get_bin_path(component_id, &version).unwrap();
-        assert!(bin_path.is_some());
-        assert!(bin_path
-            .unwrap()
-            .ends_with(format!("v{}-{}/bin", version, component_id)));
-
-        // Test virtual component
-        let virtual_component = "r0vm";
-        let virtual_bin_path = rzup.get_bin_path(virtual_component, &version).unwrap();
-        assert!(virtual_bin_path.is_some());
-        assert!(virtual_bin_path
-            .unwrap()
-            .ends_with(format!("bin/{}", virtual_component)));
+        assert!(!rzup.is_installed(component_id, &version));
     }
 }

@@ -7,7 +7,7 @@ use colored::Colorize;
 use semver::Version;
 
 fn component_parser() -> Vec<&'static str> {
-  vec!["rust", "cargo-risczero", "r0vm", "self"]
+    vec!["rust", "cargo-risczero", "r0vm", "self"]
 }
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
@@ -24,7 +24,12 @@ pub(crate) struct InstallCommand {
 impl InstallCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
         let version = match self.version {
-            Some(v) => Some(Version::parse(&v).map_err(|_| RzupError::InvalidVersion(format!("{v}\n\n  {}: use semantic version (e.g. 1.0.0)", "tip".green())))?),
+            Some(v) => Some(Version::parse(&v).map_err(|_| {
+                RzupError::InvalidVersion(format!(
+                    "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
+                    "tip".green()
+                ))
+            })?),
             None => None,
         };
 
@@ -108,55 +113,47 @@ impl ShowCommand {
         println!("{}", "Installed components:".bold());
         println!("{}", "--------------------".bold());
 
-        for component in components {
-            let id = component.id();
-            let versions = rzup.list_versions(id)?;
+        let mut component_ids: Vec<_> = components
+            .iter()
+            .filter(|c| !c.is_virtual())
+            .map(|c| c.id())
+            .collect();
+        component_ids.sort_unstable();
 
+        for component_id in component_ids {
+            let versions = rzup.list_versions(component_id)?;
             if !versions.is_empty() {
-                println!("{}", id);
+                println!("\n{}", component_id);
 
-                let active_version = rzup.get_active_version(id)?;
-                let mut sorted_versions = versions;
+                let active_version = rzup.get_active_version(component_id)?;
+                let current_version = rzup.settings().get_active_version(component_id);
+
+                let mut sorted_versions = versions.clone();
                 sorted_versions.sort_by(|a, b| b.cmp(a)); // sort newest to oldest
 
                 for version in sorted_versions {
-                    let active_marker =
-                        if Some(version.clone()) == active_version.clone().map(|(v, _)| v) {
-                            "* ".bold()
-                        } else {
-                            "  ".normal()
-                        };
-                    println!("{}{}", active_marker, version);
+                    let is_active = active_version
+                        .as_ref()
+                        .map_or(false, |(v, _)| v == &version);
+                    let marker = if is_active { "* " } else { "  " };
+                    println!("{}{}", marker.bold(), version);
                 }
-                println!();
 
-                // Show warnings for missing active versions
-                if let Some(settings_version) = rzup.registry.settings().get_active_version(id) {
-                    if active_version.is_none() {
+                // Only show warning if version in settings doesn't exist in versions list
+                if let Some(settings_version) = current_version {
+                    if !versions.contains(&settings_version) {
                         println!(
                             "! Version {} specified in settings.toml is not installed",
                             settings_version
                         );
                         println!(
                             "  Please use 'rzup use {} <VERSION>' to switch active component",
-                            id,
+                            component_id,
                         );
                     }
-                } else if active_version.is_none() {
-                    println!(
-                        "! No active version found.\n  Please use 'rzup use {} <version>' to set an active version",
-                        id
-                    );
                 }
             }
         }
-
-        println!(
-            "{}: {}",
-            "rzup home".bold(),
-            rzup.environment.root_dir().display()
-        );
-
         Ok(())
     }
 }
