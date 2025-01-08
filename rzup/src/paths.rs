@@ -10,11 +10,10 @@ impl Paths {
     pub fn get_component_dir(env: &Environment, component_id: &str) -> Result<PathBuf> {
         match component_id {
             "rust" => {
-
-                Ok(env.root_dir().join("toolchains").join(component_id))
+                Ok(env.root_dir().join("toolchains"))
             }
             _ => {
-                Ok(env.root_dir().join("extensions").join(component_id))
+                Ok(env.root_dir().join("extensions"))
             }
         }
     }
@@ -25,7 +24,7 @@ impl Paths {
         version: &Version,
     ) -> Result<PathBuf> {
         let base_path = Self::get_component_dir(env, component_id)?;
-        Ok(base_path.join(format!("v{}-{}", version, component_id)))
+        Ok(base_path.join(format!("v{}-{}-{}", version, component_id, env.platform())))
     }
 
     pub fn get_bin_dir(

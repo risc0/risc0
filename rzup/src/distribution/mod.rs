@@ -15,7 +15,8 @@ pub struct Platform {
 
 impl Platform {
 
-    pub fn new(arch: &str, os: &str) -> Self {
+    // TODO: allow specifying platform
+    pub fn _new(arch: &'static str, os: &'static str) -> Self {
         Self {
             arch,
             os,

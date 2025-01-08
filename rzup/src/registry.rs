@@ -75,7 +75,7 @@ impl Registry {
             return Ok(versions);
         }
 
-        let component_suffix = format!("-{}", id);
+        let component_suffix = format!("-{}-{}", id, env.platform());
 
         for entry in std::fs::read_dir(component_dir)? {
             let entry = entry?;
