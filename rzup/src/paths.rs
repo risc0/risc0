@@ -1,8 +1,5 @@
 use crate::env::Environment;
 use crate::error::Result;
-use std::collections::HashSet;
-
-use crate::distribution::Platform;
 use crate::events::RzupEvent;
 use semver::Version;
 use std::path::PathBuf;
