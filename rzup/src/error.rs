@@ -8,7 +8,7 @@ pub enum RzupError {
     #[error("Installation failed: {0}")]
     InstallationFailed(String),
 
-    #[error("Invalid version: {0}")]
+    #[error("Invalid version: {0}\n  tip: use semantic version (e.g. 1.0.0)")]
     InvalidVersion(String),
 
     #[error("IO error: {0}")]

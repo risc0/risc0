@@ -6,11 +6,15 @@ use clap::Parser;
 use colored::Colorize;
 use semver::Version;
 
+fn component_parser() -> Vec<&'static str> {
+  vec!["rust", "cargo-risczero", "r0vm", "self"]
+}
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
     /// Name of component to install (e.g. rust). If not provided, installs all default components.
+    #[arg(value_parser=component_parser())]
     name: Option<String>,
-    /// Version of the component to install (optional). If not provided, installs the latest version.
+    /// Version of the component to install (e.g. 1.0.0). If not provided, installs the latest version.
     version: Option<String>,
     /// Force the installation
     #[arg(short, long)]
@@ -160,6 +164,7 @@ impl ShowCommand {
 #[derive(Parser)]
 pub(crate) struct UseCommand {
     /// Name of component to activate
+    #[arg(value_parser=component_parser())]
     name: String,
     /// Version of component to activate
     version: String,
@@ -242,6 +247,7 @@ impl CheckCommand {
 #[derive(Parser)]
 pub(crate) struct UninstallCommand {
     /// Name of component to uninstall
+    #[arg(value_parser=component_parser())]
     name: String,
     /// Version of the component to uninstall
     version: String,
