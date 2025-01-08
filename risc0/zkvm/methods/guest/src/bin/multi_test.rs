@@ -518,8 +518,52 @@ fn main() {
         }
         MultiTestSpec::KeccakUpdate => {
             let mut state = KeccakState::default();
-            env::keccak_update(&mut state);
+            env::risc0_keccak_update(&mut state);
             assert_eq!(state, KECCAK_UPDATE);
+        }
+        MultiTestSpec::KeccakUpdate2 => {
+            fn test_input() -> KeccakState {
+                let mut state = KeccakState::default();
+                let mut pows = 987654321_u64;
+                for part in state.as_mut_slice() {
+                    *part = pows;
+                    pows = pows.wrapping_mul(123456789);
+                }
+                state
+            }
+            let mut state = test_input();
+
+            env::risc0_keccak_update(&mut state);
+            assert_eq!(
+                state,
+                [
+                    0xd79e8c6b59a6985b,
+                    0xbd19ccee63a9d40,
+                    0xa0a6df6a1793fd20,
+                    0x6f5e7d6a579ba02d,
+                    0x6ff99cb37183ea75,
+                    0x4a7736b846248f01,
+                    0xed6d5dac353f6586,
+                    0xa59ea1c9373e19f7,
+                    0x2a82c3bd8daf69db,
+                    0x7e49515cc085cfcb,
+                    0xf65fb55c8584c54c,
+                    0xf89d733d89b147df,
+                    0xeb85471d7cbcad68,
+                    0x2786372c23d217c,
+                    0xac0b725dc2443591,
+                    0x1cad0517091d449d,
+                    0x6afd9494cb125e27,
+                    0x74fb209306e9daa0,
+                    0x352c0570fa607115,
+                    0xc1b2b78e8fd1ab23,
+                    0x661c47f949651c0d,
+                    0x91bdd8d5e378e77a,
+                    0xdbaf74e7812a697b,
+                    0xe4458a47859ad246,
+                    0xd5f9328619cd99f7
+                ]
+            );
         }
     }
 }
