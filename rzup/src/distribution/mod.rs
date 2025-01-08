@@ -4,9 +4,9 @@ use crate::RzupError;
 use crate::{env::Environment, Result, RzupEvent};
 
 use downloader::{downloader::Builder, Download};
+use fs2::FileExt;
 use semver::Version;
 use std::{path::PathBuf, time::Duration};
-use fs2::FileExt;
 
 pub struct Platform {
     arch: &'static str,
@@ -14,13 +14,9 @@ pub struct Platform {
 }
 
 impl Platform {
-
     // TODO: allow specifying platform
     pub fn _new(arch: &'static str, os: &'static str) -> Self {
-        Self {
-            arch,
-            os,
-        }
+        Self { arch, os }
     }
     pub fn detect() -> Self {
         Self {
@@ -87,7 +83,9 @@ pub(crate) trait Distribution {
 
         let platform = env.platform();
         let archive_name = self.get_archive_name(component_id, Some(version), platform);
-        let lock_path = env.tmp_dir().join(format!("{}.lock", archive_name.display()));
+        let lock_path = env
+            .tmp_dir()
+            .join(format!("{}.lock", archive_name.display()));
 
         // create and lock the file
         let lock_file = std::fs::OpenOptions::new()
@@ -106,20 +104,19 @@ pub(crate) trait Distribution {
                     .connect_timeout(Duration::from_secs(4))
                     .download_folder(env.tmp_dir())
                     .parallel_requests(1)
-                    .build().unwrap();
+                    .build()
+                    .unwrap();
 
                 dl.download(&[archive]).unwrap();
 
                 // clean up lock file
-                std::fs::remove_file(lock_path).unwrap();
+                std::fs::remove_file(lock_path)?;
                 Ok(())
-            },
-            Err(_) => {
-                Err(RzupError::Other(format!(
-                    "Another process is currently downloading {} version {}",
-                    component_id, version
-                )))
             }
+            Err(_) => Err(RzupError::Other(format!(
+                "Another process is currently downloading {} version {}",
+                component_id, version
+            ))),
         }
     }
 

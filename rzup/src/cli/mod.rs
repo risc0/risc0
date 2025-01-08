@@ -85,7 +85,11 @@ impl Cli {
         };
 
         if let Err(e) = result {
-            eprintln!("{} {}\n\nFor more information, try '--help'.", "error:".red(), e);
+            eprintln!(
+                "{} {}\n\nFor more information, try '--help'.",
+                "error:".red(),
+                e
+            );
             std::process::exit(1);
         }
 

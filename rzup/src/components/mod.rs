@@ -117,9 +117,9 @@ pub(crate) trait Component: std::fmt::Debug {
 
     fn get_downloaded(&self, env: &Environment, version: &Version) -> Result<PathBuf> {
         let platform = env.platform();
-        let archive_name =
-            self.distribution()
-                .get_archive_name(self.id(), Some(version), platform);
+        let archive_name = self
+            .distribution()
+            .get_archive_name(self.id(), Some(version), platform);
         Ok(env.tmp_dir().join(archive_name))
     }
 
