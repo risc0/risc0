@@ -1,7 +1,7 @@
 #[cfg(feature = "cli")]
 pub(crate) mod commands;
 #[cfg(feature = "cli")]
-pub(crate) mod output;
+pub(crate) mod printer;
 
 use crate::error::Result;
 use crate::Rzup;
@@ -11,7 +11,7 @@ use clap::{Parser, Subcommand};
 use colored::Colorize;
 use commands::UninstallCommand;
 use commands::{CheckCommand, InstallCommand, ShowCommand, UseCommand};
-use output::EventPrinter;
+use printer::EventPrinter;
 
 #[derive(Subcommand)]
 enum Commands {
