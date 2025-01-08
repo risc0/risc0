@@ -3,12 +3,14 @@ use crate::RzupError;
 use crate::RzupEvent;
 
 use std::path::{Path, PathBuf};
+use crate::distribution::Platform;
 
 pub struct Environment {
     root_dir: PathBuf,
     tmp_dir: PathBuf,
     settings_file: PathBuf,
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
+    platform: Platform
 }
 
 impl Environment {
@@ -16,12 +18,14 @@ impl Environment {
         let root_dir = root.into();
         let tmp_dir = root_dir.join("tmp");
         let settings_file = root_dir.join("settings.toml");
+        let platform = Platform::detect();
 
         Ok(Self {
             root_dir,
             tmp_dir,
             settings_file,
             event_handler: None,
+            platform
         })
     }
 
@@ -66,6 +70,10 @@ impl Environment {
 
     pub fn tmp_dir(&self) -> &Path {
         &self.tmp_dir
+    }
+
+    pub fn platform(&self) -> &Platform {
+        &self.platform
     }
 }
 

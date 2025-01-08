@@ -14,7 +14,14 @@ pub struct Platform {
 }
 
 impl Platform {
-    pub fn new() -> Self {
+
+    pub fn new(arch: &str, os: &str) -> Self {
+        Self {
+            arch,
+            os,
+        }
+    }
+    pub fn detect() -> Self {
         Self {
             arch: std::env::consts::ARCH,
             os: std::env::consts::OS,
@@ -77,19 +84,20 @@ pub(crate) trait Distribution {
             )));
         }
 
-        let platform = Platform::new();
-        let archive_name = self.get_archive_name(component_id, Some(version), &platform);
+        let platform = env.platform();
+        let archive_name = self.get_archive_name(component_id, Some(version), platform);
         let lock_path = env.tmp_dir().join(format!("{}.lock", archive_name.display()));
 
         // create and lock the file
         let lock_file = std::fs::OpenOptions::new()
             .write(true)
             .create(true)
+            .truncate(true)
             .open(&lock_path)?;
 
         match lock_file.try_lock_exclusive() {
             Ok(_) => {
-                let download_url = self.download_url(env, component_id, Some(version), &platform)?;
+                let download_url = self.download_url(env, component_id, Some(version), platform)?;
 
                 // do download
                 let archive = Download::new(&download_url).file_name(&archive_name);
