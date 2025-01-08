@@ -8,9 +8,6 @@ impl Component for R0Vm {
         "r0vm"
     }
 
-    fn is_virtual(&self) -> bool {
-        true
-    }
 
     fn parent_component(&self) -> Option<&'static str> {
         Some("cargo-risczero")

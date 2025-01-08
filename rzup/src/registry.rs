@@ -83,13 +83,11 @@ impl Registry {
 
         // Handle virtual components first
         if let Some(component) = self.components.get(id) {
-            if component.is_virtual() {
-                if let Some(parent_id) = component.parent_component() {
-                    env.emit(RzupEvent::Debug {
-                        message: format!("Virtual component {} using parent {}", id, parent_id),
-                    });
-                    return self.list_component_versions(env, parent_id);
-                }
+            if let Some(parent_id) = component.parent_component() {
+                env.emit(RzupEvent::Debug {
+                    message: format!("Component {} using parent {}", id, parent_id),
+                });
+                return self.list_component_versions(env, parent_id);
             }
         }
 
@@ -144,10 +142,8 @@ impl Registry {
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
         // For virtual components, get active version from parent
         if let Some(component) = self.components.get(id) {
-            if component.is_virtual() {
-                if let Some(parent_id) = component.parent_component() {
-                    return self.get_active_component_version(env, parent_id);
-                }
+            if let Some(parent_id) = component.parent_component() {
+                return self.get_active_component_version(env, parent_id);
             }
         }
 
@@ -215,15 +211,8 @@ impl Registry {
         let component = self.create_component(id)?;
 
         // Handle virtual components
-        let (component_to_install, version_to_install) = if component.is_virtual() {
-            if let Some(parent_id) = component.parent_component() {
-                (self.create_component(parent_id)?, version)
-            } else {
-                return Err(RzupError::ComponentNotFound(format!(
-                    "Virtual component {} has no parent",
-                    id
-                )));
-            }
+        let (component_to_install, version_to_install) = if let Some(parent_id) = component.parent_component() {
+            (self.create_component(parent_id)?, version)
         } else {
             (component, version)
         };

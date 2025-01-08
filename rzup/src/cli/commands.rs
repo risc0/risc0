@@ -115,7 +115,7 @@ impl ShowCommand {
 
         let mut component_ids: Vec<_> = components
             .iter()
-            .filter(|c| !c.is_virtual())
+            .filter(|c| c.parent_component().is_none())
             .map(|c| c.id())
             .collect();
         component_ids.sort_unstable();

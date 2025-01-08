@@ -231,15 +231,8 @@ impl Rzup {
     pub fn get_bin_path(&self, component_id: &str, version: &Version) -> Result<Option<PathBuf>> {
         let component = self.registry.create_component(component_id)?;
 
-        if component.is_virtual() {
+        if let Some(parent_id) = component.parent_component() {
             // look at parent
-            let parent_id = component.parent_component().ok_or_else(|| {
-                RzupError::ComponentNotFound(format!(
-                    "Virtual component {} has no parent",
-                    component_id
-                ))
-            })?;
-
             if Paths::version_exists(&self.environment, parent_id, version)? {
                 Ok(Some(Paths::get_bin_path(
                     &self.environment,

@@ -22,16 +22,12 @@ pub(crate) trait Component: std::fmt::Debug {
         Box::new(GithubRelease)
     }
 
-    fn is_virtual(&self) -> bool {
-        false
-    }
-
     fn parent_component(&self) -> Option<&'static str> {
         None
     }
 
     fn install(&self, env: &Environment, version: Option<&Version>, force: bool) -> Result<()> {
-        if self.is_virtual() {
+        if self.parent_component().is_some() {
             return Ok(()); // dont direct install virtual-components
         }
 
