@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::components::cargo_risczero::CargoRiscZero;
+use crate::components::cpp::CppToolchain;
 use crate::components::r0vm::R0Vm;
 use crate::components::rust::RustToolchain;
 use crate::components::Component;
@@ -25,7 +26,7 @@ use crate::RzupEvent;
 use semver::Version;
 use std::collections::HashMap;
 
-static DEFAULT_COMPONENTS: &[&str] = &["rust", "cargo-risczero"];
+static DEFAULT_COMPONENTS: &[&str] = &["rust", "cargo-risczero", "cpp"];
 
 #[derive(Default, Debug)]
 pub(crate) struct Registry {
@@ -56,6 +57,7 @@ impl Registry {
         let components: Vec<Box<dyn Component>> = vec![
             Box::new(RustToolchain),
             Box::new(CargoRiscZero),
+            Box::new(CppToolchain),
             Box::new(R0Vm),
         ];
 
@@ -204,6 +206,7 @@ impl Registry {
         match id {
             "rust" => Ok(Box::new(RustToolchain)),
             "cargo-risczero" => Ok(Box::new(CargoRiscZero)),
+            "cpp" => Ok(Box::new(CppToolchain)),
             "r0vm" => Ok(Box::new(R0Vm)),
             _ => Err(RzupError::ComponentNotFound(id.to_string())),
         }

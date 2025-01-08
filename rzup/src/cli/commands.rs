@@ -20,8 +20,9 @@ use colored::Colorize;
 use semver::Version;
 
 fn component_parser() -> Vec<&'static str> {
-    vec!["rust", "cargo-risczero", "r0vm", "self"]
+    vec!["rust", "cargo-risczero", "r0vm", "self", "cpp"]
 }
+
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
     /// Name of component to install (e.g. rust). If not provided, installs all default components.
@@ -37,12 +38,33 @@ pub(crate) struct InstallCommand {
 impl InstallCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
         let version = match self.version {
-            Some(v) => Some(Version::parse(&v).map_err(|_| {
-                RzupError::InvalidVersion(format!(
-                    "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
-                    "tip".green()
-                ))
-            })?),
+            Some(v) => Some(match self.name.as_deref() {
+                // special handling for cpp date-based versions
+                // TODO: Move away from date version tags to semver
+                Some("cpp") => {
+                    let parts: Vec<_> = v.split('.').collect();
+                    if parts.len() != 3 || parts.iter().any(|p| p.parse::<u64>().unwrap_or(0) == 0)
+                    {
+                        return Err(RzupError::InvalidVersion(format!(
+                            "{v}\n\n  {}: invalid date format YYYY.MM.DD",
+                            "tip".green()
+                        )));
+                    }
+
+                    Version::new(
+                        parts[0].parse().unwrap_or(0),
+                        parts[1].parse().unwrap_or(0),
+                        parts[2].parse().unwrap_or(0),
+                    )
+                }
+                // semver parsing for all others
+                _ => Version::parse(&v).map_err(|_| {
+                    RzupError::InvalidVersion(format!(
+                        "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
+                        "tip".green()
+                    ))
+                })?,
+            }),
             None => None,
         };
 
@@ -51,7 +73,10 @@ impl InstallCommand {
                 rzup.install_all(self.force)?;
             }
             Some(name) => {
-                if name == "self" {
+                if name != "self" {
+                    rzup.install_component(&name, version, self.force)?;
+                } else {
+                    // update/install rzup by downloading and executing the installation script
                     rzup.emit(RzupEvent::InstallationStarted {
                         id: "rzup".to_string(),
                         version: "latest".to_string(),
@@ -104,8 +129,6 @@ impl InstallCommand {
 
                     return Ok(());
                 }
-
-                rzup.install_component(&name, version, self.force)?;
             }
         }
 

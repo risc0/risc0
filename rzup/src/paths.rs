@@ -22,7 +22,7 @@ pub struct Paths;
 impl Paths {
     pub fn get_component_dir(env: &Environment, component_id: &str) -> Result<PathBuf> {
         match component_id {
-            "rust" => Ok(env.root_dir().join("toolchains")),
+            "rust" | "cpp" => Ok(env.root_dir().join("toolchains")),
             "cargo-risczero" | "r0vm" => Ok(env.root_dir().join("extensions")),
             _ => Ok(env.root_dir().join(component_id)), // Default for new components
         }
@@ -104,16 +104,6 @@ impl Paths {
             std::fs::create_dir_all(&version_dir)?;
         }
 
-        if component_id != "rust" {
-            let bin_dir = version_dir.join("bin");
-            if !bin_dir.exists() {
-                env.emit(RzupEvent::Debug {
-                    message: format!("Creating bin directory: {}", bin_dir.display()),
-                });
-                std::fs::create_dir_all(bin_dir)?;
-            }
-        }
-
         // Also ensure tmp directory exists
         let tmp_dir = env.tmp_dir();
         if !tmp_dir.exists() {
@@ -159,6 +149,20 @@ impl Paths {
                 .strip_prefix("r0.")
                 .and_then(|v| v.split('-').next())
                 .and_then(|v| Version::parse(v).ok())
+        } else if component_id == "cpp" && !dir_name.starts_with('v') {
+            // Handle legacy cpp format (YYYY.MM.DD-risc0-cpp-...)
+            dir_name.split('-').next().and_then(|v| {
+                let parts: Vec<_> = v.split('.').collect();
+                if parts.len() == 3 {
+                    Some(Version::new(
+                        parts[0].parse().unwrap_or(0),
+                        parts[1].parse().unwrap_or(0),
+                        parts[2].parse().unwrap_or(0),
+                    ))
+                } else {
+                    None
+                }
+            })
         } else if dir_name.starts_with('v') {
             if let Some(version_part) = dir_name.strip_prefix('v') {
                 if version_part.contains(&format!("-{}-", component_id)) {

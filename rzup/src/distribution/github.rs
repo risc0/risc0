@@ -32,6 +32,7 @@ impl GithubRelease {
         match component_id {
             "cargo-risczero" => "risc0",
             "rust" => "rust",
+            "cpp" => "toolchain",
             _ => "risc0",
         }
         .to_string()
@@ -44,6 +45,14 @@ impl GithubRelease {
                 "tar.gz",
             ),
             "cargo-risczero" => (format!("cargo-risczero-{}", platform), "tgz"),
+            "cpp" => {
+                let triple = match (platform.arch, platform.os) {
+                    ("x86_64", "linux") => "riscv32im-linux-x86_64",
+                    ("aarch64", "macos") => "riscv32im-osx-arm64",
+                    _ => panic!("Unsupported platform for cpp toolchain"),
+                };
+                (triple.to_string(), "tar.xz")
+            }
             _ => (format!("{}-{}", component_id, platform), "tgz"),
         }
     }
@@ -52,6 +61,11 @@ impl GithubRelease {
         match component_id {
             // rust toolchain uses date-based versions with r0. prefix
             "rust" => format!("r0.{}.{}.{}", version.major, version.minor, version.patch),
+            // cpp toolchain uses date-based versions
+            "cpp" => format!(
+                "{:04}.{:02}.{:02}",
+                version.major, version.minor, version.patch
+            ),
             // cargo-risczero use v-prefixed versions
             _ => format!("v{}", version),
         }
@@ -133,6 +147,20 @@ impl Distribution for GithubRelease {
                 .tag_name
                 .strip_prefix("r0.")
                 .ok_or_else(|| RzupError::InvalidVersion(release.tag_name.clone()))?,
+            "cpp" => &*{
+                // Convert date-based version (YYYY.MM.DD) to semver
+                let parts: Vec<_> = release.tag_name.split('.').collect();
+                if parts.len() == 3 {
+                    format!(
+                        "{}.{}.{}",
+                        parts[0].parse::<u64>().unwrap_or(0),
+                        parts[1].parse::<u64>().unwrap_or(0),
+                        parts[2].parse::<u64>().unwrap_or(0)
+                    )
+                } else {
+                    return Err(RzupError::InvalidVersion(release.tag_name));
+                }
+            },
             _ => release
                 .tag_name
                 .strip_prefix('v')
