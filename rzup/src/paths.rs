@@ -240,9 +240,12 @@ mod tests {
         let version_dir = Paths::get_version_dir(&env, component_id, &version).unwrap();
         assert_eq!(
             version_dir,
-            env.root_dir()
-                .join("test-component")
-                .join(format!("v{}-{}-{}", version, component_id, env.platform()))
+            env.root_dir().join("test-component").join(format!(
+                "v{}-{}-{}",
+                version,
+                component_id,
+                env.platform()
+            ))
         );
 
         // Test bin directory path

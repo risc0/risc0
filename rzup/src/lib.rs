@@ -355,8 +355,12 @@ mod tests {
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         // Test installation
-        rzup.install_component("cargo-risczero", Some(cargo_risczero_version.clone()), false)
-            .unwrap();
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version.clone()),
+            false,
+        )
+        .unwrap();
         assert!(rzup.is_installed("cargo-risczero", &cargo_risczero_version));
         assert_eq!(
             rzup.settings()
@@ -370,7 +374,6 @@ mod tests {
             .unwrap();
         assert!(!rzup.is_installed("cargo-risczero", &cargo_risczero_version));
 
-
         // Rust
         let rust_version = Version::new(1, 79, 0);
         rzup.install_component("rust", Some(rust_version.clone()), false)
@@ -381,8 +384,5 @@ mod tests {
         rzup.uninstall_component("rust", rust_version.clone())
             .unwrap();
         assert!(!rzup.is_installed("rust", &rust_version));
-
-
     }
-
 }

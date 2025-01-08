@@ -127,12 +127,15 @@ impl Registry {
             match Paths::parse_version_from_path(&dir_name, id) {
                 Some(version) => {
                     env.emit(RzupEvent::Debug {
-                        message: format!("Successfully parsed version {} from {}", version, dir_name),
+                        message: format!(
+                            "Successfully parsed version {} from {}",
+                            version, dir_name
+                        ),
                     });
                     if !versions.contains(&version) {
                         versions.push(version.clone());
                     }
-                },
+                }
                 None => {
                     env.emit(RzupEvent::Debug {
                         message: format!("Failed to parse version from directory: {}", dir_name),
@@ -143,7 +146,6 @@ impl Registry {
 
         // Sort versions from newest to oldest
         versions.sort_by(|a, b| b.cmp(a));
-
 
         Ok(versions)
     }
@@ -224,11 +226,12 @@ impl Registry {
         let component = self.create_component(id)?;
 
         // Handle virtual components
-        let (component_to_install, version_to_install) = if let Some(parent_id) = component.parent_component() {
-            (self.create_component(parent_id)?, version)
-        } else {
-            (component, version)
-        };
+        let (component_to_install, version_to_install) =
+            if let Some(parent_id) = component.parent_component() {
+                (self.create_component(parent_id)?, version)
+            } else {
+                (component, version)
+            };
 
         let version = match version_to_install {
             Some(v) => v,
