@@ -3,15 +3,15 @@ use crate::error::Result;
 use crate::RzupError;
 use crate::RzupEvent;
 
-use std::path::{Path, PathBuf};
 use crate::distribution::Platform;
+use std::path::{Path, PathBuf};
 
 pub struct Environment {
     root_dir: PathBuf,
     tmp_dir: PathBuf,
     settings_file: PathBuf,
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
-    platform: Platform
+    platform: Platform,
 }
 
 impl Environment {

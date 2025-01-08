@@ -16,6 +16,7 @@ mod tests {
     use semver::Version;
 
     #[test]
+    #[ignore = "requires GitHub API access"]
     fn test_cargo_risczero_install() {
         let tmp_dir = tempfile::tempdir().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();

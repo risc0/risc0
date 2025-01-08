@@ -1,6 +1,9 @@
 use crate::env::Environment;
 use crate::error::Result;
+use std::collections::HashSet;
 
+use crate::distribution::Platform;
+use crate::events::RzupEvent;
 use semver::Version;
 use std::path::PathBuf;
 
@@ -9,12 +12,9 @@ pub struct Paths;
 impl Paths {
     pub fn get_component_dir(env: &Environment, component_id: &str) -> Result<PathBuf> {
         match component_id {
-            "rust" => {
-                Ok(env.root_dir().join("toolchains"))
-            }
-            _ => {
-                Ok(env.root_dir().join("extensions"))
-            }
+            "rust" => Ok(env.root_dir().join("toolchains")),
+            "cargo-risczero" | "r0vm" => Ok(env.root_dir().join("extensions")),
+            _ => Ok(env.root_dir().join(component_id)), // Default for new components
         }
     }
 
@@ -78,16 +78,39 @@ impl Paths {
         component_id: &str,
         version: &Version,
     ) -> Result<()> {
+        let component_dir = Self::get_component_dir(env, component_id)?;
+        if !component_dir.exists() {
+            env.emit(RzupEvent::Debug {
+                message: format!("Creating component directory: {}", component_dir.display()),
+            });
+            std::fs::create_dir_all(&component_dir)?;
+        }
+
         let version_dir = Self::get_version_dir(env, component_id, version)?;
         if !version_dir.exists() {
+            env.emit(RzupEvent::Debug {
+                message: format!("Creating version directory: {}", version_dir.display()),
+            });
             std::fs::create_dir_all(&version_dir)?;
         }
 
         if component_id != "rust" {
             let bin_dir = version_dir.join("bin");
             if !bin_dir.exists() {
+                env.emit(RzupEvent::Debug {
+                    message: format!("Creating bin directory: {}", bin_dir.display()),
+                });
                 std::fs::create_dir_all(bin_dir)?;
             }
+        }
+
+        // Also ensure tmp directory exists
+        let tmp_dir = env.tmp_dir();
+        if !tmp_dir.exists() {
+            env.emit(RzupEvent::Debug {
+                message: format!("Creating tmp directory: {}", tmp_dir.display()),
+            });
+            std::fs::create_dir_all(tmp_dir)?;
         }
 
         Ok(())
