@@ -1,3 +1,4 @@
+use std::fs;
 use crate::error::Result;
 use crate::RzupError;
 use crate::RzupEvent;
@@ -14,19 +15,34 @@ pub struct Environment {
 }
 
 impl Environment {
+    fn ensure_directories(&self) -> Result<()> {
+        if !self.root_dir.exists() {
+            fs::create_dir_all(&self.root_dir)?;
+        }
+
+        if !self.tmp_dir.exists() {
+            fs::create_dir_all(&self.tmp_dir)?;
+        }
+
+        Ok(())
+    }
+
     pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
         let root_dir = root.into();
         let tmp_dir = root_dir.join("tmp");
         let settings_file = root_dir.join("settings.toml");
         let platform = Platform::detect();
 
-        Ok(Self {
+        let env = Self {
             root_dir,
             tmp_dir,
             settings_file,
             event_handler: None,
-            platform
-        })
+            platform,
+        };
+
+        env.ensure_directories()?;
+        Ok(env)
     }
 
     pub fn new() -> Result<Self> {
@@ -37,7 +53,7 @@ impl Environment {
                 .ok_or_else(|| {
                     RzupError::Environment("Could not determine home directory".to_string())
                 })?
-                .join(".risc02")
+                .join(".risc0")
         };
 
         let env = Self::with_root(root_dir)?;
@@ -86,7 +102,7 @@ mod tests {
     fn test_default_env() {
         let env = Environment::new().unwrap();
         let home_dir = dirs::home_dir().unwrap();
-        let expected_root = home_dir.join(".risc02");
+        let expected_root = home_dir.join(".risc0");
 
         assert_eq!(env.root_dir, expected_root);
         assert_eq!(env.tmp_dir, expected_root.join("tmp"));

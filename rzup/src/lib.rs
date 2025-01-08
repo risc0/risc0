@@ -314,33 +314,37 @@ mod tests {
     #[test]
     fn test_install_and_uninstall_component() {
         let (_tmp_dir, mut rzup) = setup_test_env();
-        let version = Version::new(1, 0, 0);
+        let cargo_risczero_version = Version::new(1, 0, 0);
 
         // Test installation
-        rzup.install_component("cargo-risczero", Some(version.clone()), false)
+        rzup.install_component("cargo-risczero", Some(cargo_risczero_version.clone()), false)
             .unwrap();
-        assert!(rzup.is_installed("cargo-risczero", &version));
+        assert!(rzup.is_installed("cargo-risczero", &cargo_risczero_version));
         assert_eq!(
             rzup.settings()
                 .get_active_version("cargo-risczero")
                 .unwrap(),
-            version
+            cargo_risczero_version
         );
 
         // Test uninstallation
-        rzup.uninstall_component("cargo-risczero", version.clone())
+        rzup.uninstall_component("cargo-risczero", cargo_risczero_version.clone())
             .unwrap();
-        assert!(!rzup.is_installed("cargo-risczero", &version));
-    }
+        assert!(!rzup.is_installed("cargo-risczero", &cargo_risczero_version));
 
-    #[test]
-    fn test_install_all() {
-        let (_tmp_dir, mut rzup) = setup_test_env();
-        rzup.install_all(false).unwrap();
 
-        // Both default components should be installed
-        assert!(!rzup.installed_versions("rust").is_empty());
-        assert!(!rzup.installed_versions("cargo-risczero").is_empty());
+        // Rust
+        let rust_version = Version::new(1, 79, 0);
+        rzup.install_component("rust", Some(rust_version.clone()), false)
+            .unwrap();
+        assert!(rzup.is_installed("rust", &rust_version));
+
+        // Test uninstallation
+        rzup.uninstall_component("rust", rust_version.clone())
+            .unwrap();
+        assert!(!rzup.is_installed("rust", &rust_version));
+
+
     }
 
     #[test]
@@ -359,7 +363,7 @@ mod tests {
         assert!(bin_path.is_some());
         assert!(bin_path
             .unwrap()
-            .ends_with(format!("v{}-{}/bin", version, component_id)));
+            .ends_with(format!("v{}-{}-{}/bin", version, component_id, rzup.environment.platform())));
 
         // Test virtual component
         let virtual_component = "r0vm";

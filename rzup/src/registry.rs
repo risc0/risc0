@@ -69,13 +69,30 @@ impl Registry {
 
     pub fn list_component_versions(&self, env: &Environment, id: &str) -> Result<Vec<Version>> {
         let mut versions = Vec::new();
-        let component_dir = Paths::get_component_dir(env, id)?;
 
-        if !component_dir.exists() {
-            return Ok(versions);
+        // Handle virtual components first
+        if let Some(component) = self.components.get(id) {
+            if component.is_virtual() {
+                if let Some(parent_id) = component.parent_component() {
+                    env.emit(RzupEvent::Debug {
+                        message: format!("Virtual component {} using parent {}", id, parent_id),
+                    });
+                    return self.list_component_versions(env, parent_id);
+                }
+            }
         }
 
-        let component_suffix = format!("-{}-{}", id, env.platform());
+        let component_dir = Paths::get_component_dir(env, id)?;
+        env.emit(RzupEvent::Debug {
+            message: format!("Scanning directory: {}", component_dir.display()),
+        });
+
+        if !component_dir.exists() {
+            env.emit(RzupEvent::Debug {
+                message: format!("Directory does not exist: {}", component_dir.display()),
+            });
+            return Ok(versions);
+        }
 
         for entry in std::fs::read_dir(component_dir)? {
             let entry = entry?;
@@ -83,17 +100,28 @@ impl Registry {
                 continue;
             }
 
-            let version = entry
-                .file_name()
-                .to_string_lossy()
-                .strip_prefix('v')
-                .and_then(|v| v.strip_suffix(&component_suffix))
-                .and_then(|v| Version::parse(v).ok());
+            let dir_name = entry.file_name().to_string_lossy().to_string();
 
-            if let Some(version) = version {
-                versions.push(version);
+            match Paths::parse_version_from_path(&dir_name, id) {
+                Some(version) => {
+                    env.emit(RzupEvent::Debug {
+                        message: format!("Successfully parsed version {} from {}", version, dir_name),
+                    });
+                    if !versions.contains(&version) {
+                        versions.push(version.clone());
+                    }
+                },
+                None => {
+                    env.emit(RzupEvent::Debug {
+                        message: format!("Failed to parse version from directory: {}", dir_name),
+                    });
+                }
             }
         }
+
+        // Sort versions from newest to oldest
+        versions.sort_by(|a, b| b.cmp(a));
+
 
         Ok(versions)
     }
@@ -103,10 +131,19 @@ impl Registry {
         env: &Environment,
         id: &str,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
+        // For virtual components, get active version from parent
+        if let Some(component) = self.components.get(id) {
+            if component.is_virtual() {
+                if let Some(parent_id) = component.parent_component() {
+                    return self.get_active_component_version(env, parent_id);
+                }
+            }
+        }
+
         if let Some(version) = self.settings.get_active_version(id) {
             if Paths::version_exists(env, id, &version)? {
-                let path = Paths::get_version_dir(env, id, &version)?;
-                return Ok(Some((version, path)));
+                let version_dir = Paths::get_version_dir(env, id, &version)?;
+                return Ok(Some((version, version_dir)));
             }
         }
         Ok(None)
