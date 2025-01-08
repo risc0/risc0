@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -173,11 +173,15 @@ impl crate::Externs for MachineContext {
             for i in 0..count {
                 let poly: Vec<BabyBearElem> = (0..k)
                     .map(|j| {
-                        BabyBearElem::new_raw(if flip {
-                            arr[i * k + j]
-                        } else {
-                            arr[j * count + i]
-                        })
+                        // TODO: Figure out why we're sometimes
+                        // getting out-of-bounds field elements here and remove the modulo-P
+                        BabyBearElem::new_raw(
+                            if flip {
+                                arr[i * k + j]
+                            } else {
+                                arr[j * count + i]
+                            } % risc0_zkp::field::baby_bear::P,
+                        )
                     })
                     .collect();
                 self.cur_iop_body.push_back(poly);

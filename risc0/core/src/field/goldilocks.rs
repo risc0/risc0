@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -106,10 +106,6 @@ impl field::Elem for Elem {
 
     fn is_valid(&self) -> bool {
         self.0 != Self::INVALID.0
-    }
-
-    fn is_reduced(&self) -> bool {
-        self.0 < P
     }
 }
 
@@ -406,15 +402,6 @@ impl field::Elem for ExtElem {
 
     fn is_valid(&self) -> bool {
         self.0 != Self::INVALID.0
-    }
-
-    fn is_reduced(&self) -> bool {
-        for comp in self.0 {
-            if !comp.is_reduced() {
-                return false;
-            }
-        }
-        true
     }
 }
 

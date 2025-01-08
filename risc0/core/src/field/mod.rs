@@ -108,12 +108,6 @@ pub trait Elem: 'static
     /// methods, this may be called on an INVALID element.
     fn is_valid(&self) -> bool;
 
-    /// Returns true if this element is represented in reduced/normalized form.
-    /// Every element has exactly one reduced form. For a field of prime order
-    /// P, this typically means the underlying data is < P, and for an extension
-    /// field, this typically means every component is in reduced form.
-    fn is_reduced(&self) -> bool;
-
     /// Returns 0 if this element is INVALID, else the value of this
     /// element.  Unlike most methods, this may be called on an
     /// INVALID element.
@@ -128,12 +122,6 @@ pub trait Elem: 'static
     /// Returns this element, but checks to make sure it's valid.
     fn ensure_valid(&self) -> &Self {
         debug_assert!(self.is_valid());
-        self
-    }
-
-    /// Returns this element, but checks to make sure it's in reduced form.
-    fn ensure_reduced(&self) -> &Self {
-        assert!(self.is_reduced());
         self
     }
 

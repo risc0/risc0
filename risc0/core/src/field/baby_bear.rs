@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -148,15 +148,11 @@ impl field::Elem for Elem {
     }
 
     fn from_u32_words(val: &[u32]) -> Self {
-        Self(val[0])
+        Elem::new_raw(val[0])
     }
 
     fn is_valid(&self) -> bool {
         self.0 != Self::INVALID.0
-    }
-
-    fn is_reduced(&self) -> bool {
-        self.0 < P
     }
 }
 
@@ -207,6 +203,9 @@ impl Elem {
     ///
     /// Requires that `x` comes pre-encoded in Montgomery form.
     pub const fn new_raw(x: u32) -> Self {
+        if x >= P {
+            panic!("Raw field element not within field bounds");
+        }
         Self(x)
     }
 
@@ -274,7 +273,7 @@ impl ops::Neg for Elem {
     type Output = Self;
 
     fn neg(self) -> Self {
-        Elem(0) - *self.ensure_valid()
+        Elem::new(0) - *self.ensure_valid()
     }
 }
 
@@ -505,7 +504,7 @@ impl field::Elem for ExtElem {
     }
 
     fn from_u32_words(val: &[u32]) -> Self {
-        field::ExtElem::from_subelems(val.iter().map(|word| Elem(*word)))
+        field::ExtElem::from_subelems(val.iter().map(|word| Elem::new_raw(*word)))
     }
 
     // So we're not checking every subfield element every time we do
@@ -514,10 +513,6 @@ impl field::Elem for ExtElem {
     // when we do operations on them anyways.
     fn is_valid(&self) -> bool {
         self.0[0].is_valid()
-    }
-
-    fn is_reduced(&self) -> bool {
-        self.0.iter().all(|x| x.is_reduced())
     }
 }
 
@@ -940,16 +935,42 @@ mod tests {
             let elem = Elem::random(&mut rng);
             assert_eq!(elem, Elem::from_u32_words(&elem.to_u32_words()));
 
-            let val: u32 = rng.gen();
+            let val: u32 = rng.gen::<u32>() % P;
             assert_eq!(val, Elem::from_u32_words(&[val]).to_u32_words()[0]);
         }
         for _ in 0..100 {
             let elem = ExtElem::random(&mut rng);
             assert_eq!(elem, ExtElem::from_u32_words(&elem.to_u32_words()));
 
-            let vec: Vec<u32> = vec![rng.gen(), rng.gen(), rng.gen(), rng.gen()];
+            let vec: Vec<u32> = vec![
+                rng.gen::<u32>() % P,
+                rng.gen::<u32>() % P,
+                rng.gen::<u32>() % P,
+                rng.gen::<u32>() % P,
+            ];
 
             assert_eq!(vec, ExtElem::from_u32_words(&vec).to_u32_words());
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "not within field bounds")]
+    fn u32_conversions_out_of_bound_1() {
+        let _ = Elem::new_raw(P);
+    }
+    #[test]
+    #[should_panic(expected = "not within field bounds")]
+    fn u32_conversions_out_of_bound_2() {
+        let _ = Elem::from_u32_words(&[P]);
+    }
+    #[test]
+    #[should_panic(expected = "not within field bounds")]
+    fn u32_conversions_out_of_bound_3() {
+        let _ = ExtElem::from_u32_words(&[P, 0, 0, 0]);
+    }
+    #[test]
+    #[should_panic(expected = "not within field bounds")]
+    fn u32_conversions_out_of_bound_4() {
+        let _ = ExtElem::from_u32_words(&[0, 0, 0, P]);
     }
 }

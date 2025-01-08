@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,9 +52,6 @@ impl HashFn<BabyBear> for Poseidon2HashFn {
             .map(|w| BabyBearElem::new_raw(*w))
             .collect();
         assert!(both.len() == DIGEST_WORDS * 2);
-        for elem in &both {
-            assert!(elem.is_reduced());
-        }
         to_digest(unpadded_hash(both.iter()))
     }
 
