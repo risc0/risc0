@@ -41,7 +41,7 @@ impl Platform {
     pub fn target_triple(&self) -> String {
         match self.os {
             "macos" => format!("{}-apple-darwin", self.arch),
-            "linux" => format!("{}-{}-gnu", self.arch, self.os),
+            "linux" => format!("{}-unknown-{}-gnu", self.arch, self.os),
             _ => format!("{}-{}-{}", self.arch, self.os, std::env::consts::FAMILY),
         }
     }
