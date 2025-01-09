@@ -151,37 +151,31 @@ impl Paths {
                 .and_then(|v| Version::parse(v).ok())
         } else if component_id == "cpp" && !dir_name.starts_with('v') {
             // Handle legacy cpp format (YYYY.MM.DD-risc0-cpp-...)
-            dir_name.split('-').next().and_then(|v| {
-                let parts: Vec<_> = v.split('.').collect();
-                if parts.len() == 3 {
-                    Some(Version::new(
-                        parts[0].parse().unwrap_or(0),
-                        parts[1].parse().unwrap_or(0),
-                        parts[2].parse().unwrap_or(0),
-                    ))
-                } else {
-                    None
-                }
+            let v = dir_name.split('-').next()?;
+            let parts: Vec<_> = v.split('.').collect();
+            (parts.len() == 3).then(|| {
+                Version::new(
+                    parts[0].parse().unwrap_or(0),
+                    parts[1].parse().unwrap_or(0),
+                    parts[2].parse().unwrap_or(0),
+                )
             })
         } else if dir_name.starts_with('v') {
-            if let Some(version_part) = dir_name.strip_prefix('v') {
-                if version_part.contains(&format!("-{}-", component_id)) {
-                    // New format with platform suffix
-                    version_part
-                        .split(&format!("-{}-", component_id))
-                        .next()
-                        .and_then(extract_version)
-                } else if version_part.ends_with(component_id) {
-                    // Legacy format without platform suffix
-                    version_part
-                        .split(&format!("-{}", component_id))
-                        .next()
-                        .and_then(extract_version)
-                } else {
-                    extract_version(version_part.split('-').next()?)
-                }
+            let version_part = dir_name.strip_prefix('v')?;
+            if version_part.contains(&format!("-{component_id}-")) {
+                // New format with platform suffix
+                version_part
+                    .split(&format!("-{component_id}-"))
+                    .next()
+                    .and_then(extract_version)
+            } else if version_part.ends_with(component_id) {
+                // Legacy format without platform suffix
+                version_part
+                    .split(&format!("-{component_id}"))
+                    .next()
+                    .and_then(extract_version)
             } else {
-                None
+                extract_version(version_part.split('-').next()?)
             }
         } else {
             None
