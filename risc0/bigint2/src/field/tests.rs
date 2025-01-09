@@ -305,6 +305,7 @@ fn extfield_xxone_mul() {
     const RHS0: &[u8] = b"02";
     const RHS1: &[u8] = b"02";
     const PRIME: &[u8] = b"07";
+    const PRIMESQR: &[u8] = b"31";
     const EXPECTED0: &[u8] = b"00";
     const EXPECTED1: &[u8] = b"06";
 
@@ -313,12 +314,13 @@ fn extfield_xxone_mul() {
     let rhs0 = BigUint::parse_bytes(RHS0, 16).unwrap();
     let rhs1 = BigUint::parse_bytes(RHS1, 16).unwrap();
     let prime = BigUint::parse_bytes(PRIME, 16).unwrap();
+    let primesqr = BigUint::parse_bytes(PRIMESQR, 16).unwrap();
     let expected0 = BigUint::parse_bytes(EXPECTED0, 16).unwrap();
     let expected1 = BigUint::parse_bytes(EXPECTED1, 16).unwrap();
     let expected = (expected0, expected1);
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs0, lhs1, rhs0, rhs1, prime))
+            .write(&(lhs0, lhs1, rhs0, rhs1, prime, primesqr))
             .unwrap()
             .build()
             .unwrap();

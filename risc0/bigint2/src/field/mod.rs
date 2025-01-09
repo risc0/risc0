@@ -197,14 +197,16 @@ pub fn extfield_xxone_mul_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    modsqr: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
     unsafe {
-        sys_bigint2_4(
+        sys_bigint2_5(
             EXTFIELD_XXONE_MUL_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
             modulus.as_ptr() as *const u32,
+            modsqr.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
