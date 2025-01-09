@@ -16,13 +16,14 @@ use risc0_binfmt::Program;
 use test_log::test;
 
 use super::segment_prover;
-use crate::execute::{image::MemoryImage2, testutil, DEFAULT_SEGMENT_LIMIT_PO2};
+use crate::execute::{image::MemoryImage2, testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES};
 
 fn run_program(program: Program) {
     let image = MemoryImage2::new(program);
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,

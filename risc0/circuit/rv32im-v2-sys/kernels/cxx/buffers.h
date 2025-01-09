@@ -25,11 +25,11 @@ struct Buffer {
   Fp* buf;
   size_t rows;
   size_t cols;
-  bool checkedReads;
+  bool checked;
 
   void set(size_t row, size_t col, Fp val) {
     Fp& elem = buf[col * rows + row];
-    if (elem != Fp::invalid() && elem != val) {
+    if (elem != Fp::invalid() && elem != val && checked) {
       printf("set(row: %zu, col: %zu, val: 0x%08x) cur: 0x%08x\n",
              row,
              col,
@@ -43,7 +43,7 @@ struct Buffer {
 
   Fp get(size_t row, size_t col) {
     Fp ret = buf[col * rows + row];
-    if (ret == Fp::invalid() && checkedReads) {
+    if (ret == Fp::invalid() && checked) {
       printf("get(row: %zu, col: %zu) -> 0x%08x\n", row, col, ret.asRaw());
       throw std::runtime_error("Read of unset value");
     }

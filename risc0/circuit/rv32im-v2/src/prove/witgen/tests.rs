@@ -23,7 +23,7 @@ use crate::{
     execute::{
         image::MemoryImage2,
         testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
-        DEFAULT_SEGMENT_LIMIT_PO2,
+        DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
     },
     prove::{hal::StepMode, witgen::WitnessGenerator},
     zirgen::circuit::{ExtVal, REGCOUNT_DATA},
@@ -34,6 +34,7 @@ fn run_preflight(program: Program) {
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall,
         None,
@@ -64,6 +65,7 @@ fn fwd_rev_ab_test(program: Program) {
     let session = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,

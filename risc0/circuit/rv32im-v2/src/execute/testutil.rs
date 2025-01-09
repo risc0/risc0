@@ -15,12 +15,18 @@
 use anyhow::{bail, Result};
 use risc0_binfmt::Program;
 use risc0_core::scope;
-use risc0_zkp::{core::digest::Digest, MAX_CYCLES_PO2};
+use risc0_zkp::{
+    core::{digest::Digest, log2_ceil},
+    MAX_CYCLES_PO2,
+};
 
-use super::{image::MemoryImage2, platform::*, syscall::Syscall, Executor, SimpleSession};
+use super::{
+    image::MemoryImage2, pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor,
+    SimpleSession,
+};
 
 pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
-pub const MIN_CYCLES_PO2: usize = 8;
+pub const MIN_CYCLES_PO2: usize = log2_ceil(LOOKUP_TABLE_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
 pub struct NullSyscall;
@@ -38,6 +44,7 @@ impl Syscall for NullSyscall {
 pub fn execute<S: Syscall>(
     image: MemoryImage2,
     segment_limit_po2: usize,
+    max_insn_cycles: usize,
     max_cycles: Option<u64>,
     syscall_handler: &S,
     input_digest: Option<Digest>,
@@ -52,6 +59,7 @@ pub fn execute<S: Syscall>(
     let trace = Vec::new();
     let result = Executor::new(image, syscall_handler, input_digest, trace).run(
         segment_limit_po2,
+        max_insn_cycles,
         max_cycles,
         |segment| {
             tracing::trace!("{segment:#?}");

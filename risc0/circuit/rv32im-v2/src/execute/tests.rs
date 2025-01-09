@@ -15,7 +15,7 @@
 use risc0_binfmt::ExitCode;
 use test_log::test;
 
-use super::{image::MemoryImage2, testutil, DEFAULT_SEGMENT_LIMIT_PO2};
+use super::{image::MemoryImage2, testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES};
 
 // impl Syscall for BasicSyscall {
 //     fn syscall(
@@ -47,6 +47,7 @@ fn basic() {
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,
@@ -72,7 +73,8 @@ fn system_split() {
 
     let result = testutil::execute(
         image,
-        13,
+        testutil::MIN_CYCLES_PO2,
+        100,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,

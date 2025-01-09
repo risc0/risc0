@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -518,7 +518,7 @@ fn main() {
         }
         MultiTestSpec::KeccakUpdate => {
             let mut state = KeccakState::default();
-            env::keccak_update(&mut state);
+            env::risc0_keccak_update(&mut state);
             assert_eq!(state, KECCAK_UPDATE);
         }
         MultiTestSpec::KeccakUpdate2 => {
@@ -533,7 +533,7 @@ fn main() {
             }
             let mut state = test_input();
 
-            env::keccak_update(&mut state);
+            env::risc0_keccak_update(&mut state);
             assert_eq!(
                 state,
                 [
