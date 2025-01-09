@@ -7,6 +7,8 @@ By implementing these operations directly in the "hardware" of
 the zkVM, programs that use these precompiles execute faster and can be proven
 with significantly less resources [^1].
 
+To see statistics on precompile usage in your guest program, use `RISC0_INFO=1`.
+
 ## Patched Crates
 
 We have patched several popular cryptographic Rust crates to create

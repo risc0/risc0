@@ -2768,6 +2768,7 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
+ "keccak",
  "paste",
  "rayon",
  "risc0-binfmt",
