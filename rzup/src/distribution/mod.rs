@@ -89,8 +89,7 @@ pub(crate) trait Distribution {
                 version: version.to_string(),
             });
             return Err(RzupError::InvalidVersion(format!(
-                "{} is not available for {}",
-                version, component_id
+                "{version} is not available for {component_id}",
             )));
         }
 
@@ -107,30 +106,28 @@ pub(crate) trait Distribution {
             .truncate(true)
             .open(&lock_path)?;
 
-        match lock_file.try_lock_exclusive() {
-            Ok(_) => {
-                let download_url = self.download_url(env, component_id, Some(version), platform)?;
+        lock_file.try_lock_exclusive().map_err(|_| {
+            RzupError::Other(format!(
+                "Another process is currently downloading {component_id} version {version}",
+            ))
+        })?;
 
-                // do download
-                let archive = Download::new(&download_url).file_name(&archive_name);
-                let mut dl = Builder::default()
-                    .connect_timeout(Duration::from_secs(4))
-                    .download_folder(env.tmp_dir())
-                    .parallel_requests(1)
-                    .build()
-                    .unwrap();
+        let download_url = self.download_url(env, component_id, Some(version), platform)?;
 
-                dl.download(&[archive]).unwrap();
+        // do download
+        let archive = Download::new(&download_url).file_name(&archive_name);
+        let mut dl = Builder::default()
+            .connect_timeout(Duration::from_secs(4))
+            .download_folder(env.tmp_dir())
+            .parallel_requests(1)
+            .build()
+            .unwrap();
 
-                // clean up lock file
-                std::fs::remove_file(lock_path)?;
-                Ok(())
-            }
-            Err(_) => Err(RzupError::Other(format!(
-                "Another process is currently downloading {} version {}",
-                component_id, version
-            ))),
-        }
+        dl.download(&[archive]).unwrap();
+
+        // clean up lock file
+        std::fs::remove_file(lock_path)?;
+        Ok(())
     }
 
     fn latest_version(&self, env: &Environment, component_id: &str) -> Result<Version>;
