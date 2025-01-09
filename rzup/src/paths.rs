@@ -20,30 +20,22 @@ use std::path::PathBuf;
 pub struct Paths;
 
 impl Paths {
-    pub fn get_component_dir(env: &Environment, component_id: &str) -> Result<PathBuf> {
+    pub fn get_component_dir(env: &Environment, component_id: &str) -> PathBuf {
         match component_id {
-            "rust" | "cpp" => Ok(env.root_dir().join("toolchains")),
-            "cargo-risczero" | "r0vm" => Ok(env.root_dir().join("extensions")),
-            _ => Ok(env.root_dir().join(component_id)), // Default for new components
+            "rust" | "cpp" => env.root_dir().join("toolchains"),
+            "cargo-risczero" | "r0vm" => env.root_dir().join("extensions"),
+            _ => env.root_dir().join(component_id),
         }
     }
 
-    pub fn get_version_dir(
-        env: &Environment,
-        component_id: &str,
-        version: &Version,
-    ) -> Result<PathBuf> {
-        let base_path = Self::get_component_dir(env, component_id)?;
-        Ok(base_path.join(format!("v{}-{}-{}", version, component_id, env.platform())))
+    pub fn get_version_dir(env: &Environment, component_id: &str, version: &Version) -> PathBuf {
+        let base_path = Self::get_component_dir(env, component_id);
+        base_path.join(format!("v{version}-{component_id}-{}", env.platform()))
     }
 
-    pub fn get_bin_dir(
-        env: &Environment,
-        component_id: &str,
-        version: &Version,
-    ) -> Result<PathBuf> {
-        let version_dir = Self::get_version_dir(env, component_id, version)?;
-        Ok(version_dir.join("bin"))
+    pub fn get_bin_dir(env: &Environment, component_id: &str, version: &Version) -> PathBuf {
+        let version_dir = Self::get_version_dir(env, component_id, version);
+        version_dir.join("bin")
     }
 
     pub fn get_bin_path(
@@ -51,9 +43,9 @@ impl Paths {
         component_id: &str,
         version: &Version,
         bin: &str,
-    ) -> Result<PathBuf> {
-        let bin_dir = Self::get_bin_dir(env, component_id, version)?;
-        Ok(bin_dir.join(bin))
+    ) -> PathBuf {
+        let bin_dir = Self::get_bin_dir(env, component_id, version);
+        bin_dir.join(bin)
     }
 
     pub fn version_exists(
@@ -61,7 +53,7 @@ impl Paths {
         component_id: &str,
         version: &Version,
     ) -> Result<bool> {
-        let component_dir = Self::get_component_dir(env, component_id)?;
+        let component_dir = Self::get_component_dir(env, component_id);
         if !component_dir.exists() {
             return Ok(false);
         }
@@ -88,7 +80,7 @@ impl Paths {
         component_id: &str,
         version: &Version,
     ) -> Result<()> {
-        let component_dir = Self::get_component_dir(env, component_id)?;
+        let component_dir = Self::get_component_dir(env, component_id);
         if !component_dir.exists() {
             env.emit(RzupEvent::Debug {
                 message: format!("Creating component directory: {}", component_dir.display()),
@@ -96,7 +88,7 @@ impl Paths {
             std::fs::create_dir_all(&component_dir)?;
         }
 
-        let version_dir = Self::get_version_dir(env, component_id, version)?;
+        let version_dir = Self::get_version_dir(env, component_id, version);
         if !version_dir.exists() {
             env.emit(RzupEvent::Debug {
                 message: format!("Creating version directory: {}", version_dir.display()),
@@ -117,12 +109,12 @@ impl Paths {
     }
 
     pub fn cleanup_version(env: &Environment, component_id: &str, version: &Version) -> Result<()> {
-        let version_dir = Self::get_version_dir(env, component_id, version)?;
+        let version_dir = Self::get_version_dir(env, component_id, version);
         if version_dir.exists() {
             std::fs::remove_dir_all(&version_dir)?;
         }
 
-        let component_dir = Self::get_component_dir(env, component_id)?;
+        let component_dir = Self::get_component_dir(env, component_id);
         if component_dir.exists() && std::fs::read_dir(&component_dir)?.count() == 0 {
             std::fs::remove_dir(component_dir)?;
         }

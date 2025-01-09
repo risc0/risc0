@@ -143,6 +143,9 @@ impl Rzup {
     ///
     /// # Arguments
     /// * `id` - Component identifier
+    ///
+    /// # Returns
+    /// A newest-to-oldest list of installed component versions
     pub fn list_versions(&self, id: &str) -> Result<Vec<Version>> {
         self.registry.list_component_versions(&self.environment, id)
     }
@@ -205,23 +208,21 @@ impl Rzup {
     /// * `component_id` - Component identifier
     pub fn installed_versions(&self, component_id: &str) -> HashMap<Version, PathBuf> {
         let mut versions = HashMap::new();
+        let component_dir = Paths::get_component_dir(&self.environment, component_id);
 
-        if let Ok(component_dir) = Paths::get_component_dir(&self.environment, component_id) {
-            if let Ok(entries) = std::fs::read_dir(component_dir) {
-                for entry in entries.filter_map(|e| e.ok()) {
-                    let file_name = entry.file_name().to_string_lossy().to_string();
-                    if let Some(version_str) = file_name
-                        .strip_prefix('v')
-                        .and_then(|s| s.strip_suffix(&format!("-{}", component_id)))
-                    {
-                        if let Ok(version) = Version::parse(version_str) {
-                            versions.insert(version, entry.path());
-                        }
+        if let Ok(entries) = std::fs::read_dir(component_dir) {
+            for entry in entries.filter_map(|e| e.ok()) {
+                let file_name = entry.file_name().to_string_lossy().to_string();
+                if let Some(version_str) = file_name
+                    .strip_prefix('v')
+                    .and_then(|s| s.strip_suffix(&format!("-{component_id}")))
+                {
+                    if let Ok(version) = Version::parse(version_str) {
+                        versions.insert(version, entry.path());
                     }
                 }
             }
         }
-
         versions
     }
 
@@ -241,29 +242,30 @@ impl Rzup {
     /// # Arguments
     /// * `component_id` - Component identifier
     /// * `version` - Version to get path for
-    pub fn get_bin_path(&self, component_id: &str, version: &Version) -> Result<Option<PathBuf>> {
-        let component = self.registry.create_component(component_id)?;
-
-        if let Some(parent_id) = component.parent_component() {
-            // look at parent
-            if Paths::version_exists(&self.environment, parent_id, version)? {
-                Ok(Some(Paths::get_bin_path(
-                    &self.environment,
-                    parent_id,
-                    version,
-                    component_id,
-                )?))
-            } else {
-                Ok(None)
+    pub fn get_bin_path(&self, component_id: &str, version: &Version) -> Option<PathBuf> {
+        match self.registry.create_component(component_id) {
+            Ok(component) => {
+                if let Some(parent_id) = component.parent_component() {
+                    // For virtual components, look at parent
+                    if let Ok(true) = Paths::version_exists(&self.environment, parent_id, version) {
+                        Some(Paths::get_bin_path(
+                            &self.environment,
+                            parent_id,
+                            version,
+                            component_id,
+                        ))
+                    } else {
+                        None
+                    }
+                } else if let Ok(true) =
+                    Paths::version_exists(&self.environment, component_id, version)
+                {
+                    Some(Paths::get_bin_dir(&self.environment, component_id, version))
+                } else {
+                    None
+                }
             }
-        } else if Paths::version_exists(&self.environment, component_id, version)? {
-            Ok(Some(Paths::get_bin_dir(
-                &self.environment,
-                component_id,
-                version,
-            )?))
-        } else {
-            Ok(None)
+            Err(_) => None,
         }
     }
 
@@ -282,7 +284,7 @@ impl Rzup {
     ///
     /// # Arguments
     /// * `component_id` - Component identifier
-    pub fn get_component_dir(&self, component_id: &str) -> Result<PathBuf> {
+    pub fn get_component_dir(&self, component_id: &str) -> PathBuf {
         Paths::get_component_dir(&self.environment, component_id)
     }
 
@@ -291,7 +293,7 @@ impl Rzup {
     /// # Arguments
     /// * `component_id` - Component identifier
     /// * `version` - Version to get directory for
-    pub fn get_version_dir(&self, component_id: &str, version: &Version) -> Result<PathBuf> {
+    pub fn get_version_dir(&self, component_id: &str, version: &Version) -> PathBuf {
         Paths::get_version_dir(&self.environment, component_id, version)
     }
 }
@@ -326,7 +328,7 @@ mod tests {
         rzup.ensure_version_dirs(component_id, &version).unwrap();
 
         // Create the bin directory for the component
-        let bin_dir = rzup.get_version_dir(component_id, &version).unwrap();
+        let bin_dir = rzup.get_version_dir(component_id, &version);
         std::fs::create_dir_all(&bin_dir).unwrap();
 
         // Test binary path retrieval with platform-specific path
@@ -334,9 +336,7 @@ mod tests {
         assert!(bin_path.is_some());
         let bin_path = bin_path.unwrap();
         assert!(bin_path.ends_with(format!(
-            "v{}-{}-{}/bin",
-            version,
-            component_id,
+            "v{version}-{component_id}-{}/bin",
             rzup.environment.platform()
         )));
 
@@ -345,7 +345,7 @@ mod tests {
         let virtual_bin_path = rzup.get_bin_path(virtual_component, &version).unwrap();
         assert!(virtual_bin_path.is_some());
         let virtual_bin_path = virtual_bin_path.unwrap();
-        assert!(virtual_bin_path.ends_with(format!("bin/{}", virtual_component)));
+        assert!(virtual_bin_path.ends_with(format!("bin/{virtual_component}")));
     }
 
     #[test]

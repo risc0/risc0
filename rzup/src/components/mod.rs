@@ -98,7 +98,7 @@ pub(crate) trait Component: std::fmt::Debug {
         // Download and extract
         self.distribution()
             .download_version(env, self.id(), Some(version))?;
-        let version_dir = Paths::get_version_dir(env, self.id(), version)?;
+        let version_dir = Paths::get_version_dir(env, self.id(), version);
 
         if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
             Paths::cleanup_version(env, self.id(), version)?;

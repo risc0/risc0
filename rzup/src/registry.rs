@@ -106,7 +106,7 @@ impl Registry {
             }
         }
 
-        let component_dir = Paths::get_component_dir(env, id)?;
+        let component_dir = Paths::get_component_dir(env, id);
         env.emit(RzupEvent::Debug {
             message: format!("Scanning directory: {}", component_dir.display()),
         });
@@ -170,7 +170,7 @@ impl Registry {
 
         if let Some(version) = self.settings.get_active_version(id) {
             if Paths::version_exists(env, id, &version)? {
-                let version_dir = Paths::get_version_dir(env, id, &version)?;
+                let version_dir = Paths::get_version_dir(env, id, &version);
                 return Ok(Some((version, version_dir)));
             }
         }

@@ -43,17 +43,17 @@ impl Settings {
         env.emit(RzupEvent::Debug {
             message: format!("Loading settings from {}", settings_path.display()),
         });
-        let contents = fs::read_to_string(settings_path)
-            .map_err(|e| RzupError::Environment(format!("Failed to read settings file: {}", e)))?;
 
-        toml::from_str(&contents)
-            .map_err(|e| RzupError::Environment(format!("Failed to parse settings file: {}", e)))
+        let contents = fs::read_to_string(settings_path)
+            .map_err(|e| RzupError::Environment(format!("Failed to read settings file: {e}")))?;
+
+        Ok(toml::from_str(&contents).expect("Failed to parse settings file"))
     }
 
     pub(crate) fn save(&self, env: &Environment) -> Result<()> {
         if let Some(parent) = env.settings_path().parent() {
             fs::create_dir_all(parent).map_err(|e| {
-                RzupError::Environment(format!("Failed to create settings directory: {}", e))
+                RzupError::Environment(format!("Failed to create settings directory: {e}"))
             })?;
         }
 
@@ -61,11 +61,10 @@ impl Settings {
             message: format!("Saving settings to {}", env.settings_path().display()),
         });
 
-        let contents = toml::to_string_pretty(self)
-            .map_err(|e| RzupError::Environment(format!("Failed to serialize settings: {}", e)))?;
+        let contents = toml::to_string_pretty(self).expect("Failed to serialize settings");
 
         fs::write(env.settings_path(), contents)
-            .map_err(|e| RzupError::Environment(format!("Failed to write settings file: {}", e)))?;
+            .map_err(|e| RzupError::Environment(format!("Failed to write settings file: {e}")))?;
 
         Ok(())
     }

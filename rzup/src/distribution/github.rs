@@ -107,6 +107,40 @@ impl Distribution for GithubRelease {
         PathBuf::from(format!("{}.{}", asset_name, extension))
     }
 
+    fn check_release_exists(&self, component_id: &str, version: &Version) -> Result<bool> {
+        let client = Client::builder()
+            .timeout(Duration::from_secs(10))
+            .build()
+            .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {}", e)))?;
+
+        let repo = self.repo_name(component_id);
+        let version_str = self.get_version_str(component_id, version);
+        let url = format!(
+            "https://api.github.com/repos/risc0/{}/releases/tags/{}",
+            repo, version_str
+        );
+
+        let response = client
+            .get(&url)
+            .header("User-Agent", "rzup")
+            .send()
+            .map_err(|e| RzupError::Other(format!("Failed to check release: {}", e)))?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => Ok(true),
+            reqwest::StatusCode::NOT_FOUND => Ok(false),
+            reqwest::StatusCode::FORBIDDEN | reqwest::StatusCode::TOO_MANY_REQUESTS => {
+                Err(RzupError::RateLimited(
+                    "GitHub API rate limit exceeded. Please try again later.".to_string(),
+                ))
+            }
+            status => Err(RzupError::Other(format!(
+                "Unexpected response checking release: {}",
+                status
+            ))),
+        }
+    }
+
     fn latest_version(&self, env: &Environment, component_id: &str) -> Result<Version> {
         env.emit(RzupEvent::Debug {
             message: format!("Fetching latest version for {}", component_id),
@@ -146,60 +180,23 @@ impl Distribution for GithubRelease {
             "rust" => release
                 .tag_name
                 .strip_prefix("r0.")
-                .ok_or_else(|| RzupError::InvalidVersion(release.tag_name.clone()))?,
+                .expect("Invalid rust version tag format"),
             "cpp" => &*{
-                // Convert date-based version (YYYY.MM.DD) to semver
                 let parts: Vec<_> = release.tag_name.split('.').collect();
-                if parts.len() == 3 {
-                    format!(
-                        "{}.{}.{}",
-                        parts[0].parse::<u64>().unwrap_or(0),
-                        parts[1].parse::<u64>().unwrap_or(0),
-                        parts[2].parse::<u64>().unwrap_or(0)
-                    )
-                } else {
-                    return Err(RzupError::InvalidVersion(release.tag_name));
-                }
+                assert_eq!(parts.len(), 3, "Invalid cpp version tag format");
+                format!(
+                    "{}.{}.{}",
+                    parts[0].parse::<u64>().expect("Invalid cpp version number"),
+                    parts[1].parse::<u64>().expect("Invalid cpp version number"),
+                    parts[2].parse::<u64>().expect("Invalid cpp version number")
+                )
             },
             _ => release
                 .tag_name
                 .strip_prefix('v')
-                .ok_or_else(|| RzupError::InvalidVersion(release.tag_name.clone()))?,
+                .expect("Invalid version tag format"),
         };
 
         Version::parse(version_str).map_err(|_| RzupError::InvalidVersion(version_str.to_string()))
-    }
-    fn check_release_exists(&self, component_id: &str, version: &Version) -> Result<bool> {
-        let client = Client::builder()
-            .timeout(Duration::from_secs(10))
-            .build()
-            .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {}", e)))?;
-
-        let repo = self.repo_name(component_id);
-        let version_str = self.get_version_str(component_id, version);
-        let url = format!(
-            "https://api.github.com/repos/risc0/{}/releases/tags/{}",
-            repo, version_str
-        );
-
-        let response = client
-            .get(&url)
-            .header("User-Agent", "rzup")
-            .send()
-            .map_err(|e| RzupError::Other(format!("Failed to check release: {}", e)))?;
-
-        match response.status() {
-            reqwest::StatusCode::OK => Ok(true),
-            reqwest::StatusCode::NOT_FOUND => Ok(false),
-            reqwest::StatusCode::FORBIDDEN | reqwest::StatusCode::TOO_MANY_REQUESTS => {
-                Err(RzupError::RateLimited(
-                    "GitHub API rate limit exceeded. Please try again later.".to_string(),
-                ))
-            }
-            status => Err(RzupError::Other(format!(
-                "Unexpected response checking release: {}",
-                status
-            ))),
-        }
     }
 }
