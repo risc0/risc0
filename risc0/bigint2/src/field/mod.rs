@@ -29,6 +29,7 @@ const MODMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_256.blob");
 const MODSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_256.blob");
 const EXTFIELDADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfieldadd_256.blob");
 const EXTFIELDMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfieldmul_256.blob");
+const EXTFIELD_XXONE_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_xxone_mul_256.blob");
 const EXTFIELD_DEG4_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg4_mul_256.blob");
 const EXTFIELDSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfieldsub_256.blob");
 
@@ -186,6 +187,23 @@ pub fn extfieldmul_256(
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
             monic_irr.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_xxone_mul_256(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_4(
+            EXTFIELD_XXONE_MUL_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
             modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
