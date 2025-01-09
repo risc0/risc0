@@ -228,24 +228,24 @@ impl Registry {
         let component = self.create_component(id)?;
 
         // Handle virtual components
-        let (component_to_install, version_to_install) =
+        let (component_to_install, version_to_install, component_id) =
             if let Some(parent_id) = component.parent_component() {
-                (self.create_component(parent_id)?, version)
+                (self.create_component(parent_id)?, version, parent_id)
             } else {
-                (component, version)
+                (component, version, id)
             };
 
         let version = match version_to_install {
             Some(v) => v,
             None => {
                 env.emit(RzupEvent::Debug {
-                    message: format!("No version specified, fetching latest for {id}"),
+                    message: format!("No version specified, fetching latest for {component_id}"),
                 });
                 component_to_install.get_latest_version(env)?
             }
         };
 
-        if !force && Paths::version_exists(env, id, &version)? {
+        if !force && Paths::version_exists(env, component_id, &version)? {
             env.emit(RzupEvent::ComponentAlreadyInstalled {
                 id: id.to_string(),
                 version: version.to_string(),
@@ -254,13 +254,13 @@ impl Registry {
         }
 
         // Create necessary directories before installation
-        Paths::create_version_dirs(env, id, &version)?;
+        Paths::create_version_dirs(env, component_id, &version)?;
 
         // Install component
         component_to_install.install(env, Some(&version), force)?;
 
         // Update settings
-        self.settings.set_active_version(id, &version);
+        self.settings.set_active_version(component_id, &version);
         self.settings.save(env)?;
 
         Ok(())
