@@ -35,6 +35,21 @@ use std::path::PathBuf;
 
 pub use error::{Result, RzupError};
 
+#[derive(Debug)]
+pub struct BaseUrls {
+    pub risc0_github_base_url: String,
+    pub github_api_base_url: String,
+}
+
+impl Default for BaseUrls {
+    fn default() -> Self {
+        Self {
+            risc0_github_base_url: "https://github.com/risc0".into(),
+            github_api_base_url: "https://api.github.com".into(),
+        }
+    }
+}
+
 /// Rzup manages the RISC Zero toolchain components by handling installation, uninstallation,
 /// and version management of various tools like the Rust toolchain and cargo extensions.
 pub struct Rzup {
@@ -48,7 +63,7 @@ impl Rzup {
     /// This will initialize the registry, settings, and scan the environment for installed components.
     pub fn new() -> Result<Self> {
         let environment = Environment::new()?;
-        let mut registry = Registry::new(&environment)?;
+        let mut registry = Registry::new(&environment, Default::default())?;
         Self::initialize_settings(&environment, &mut registry)?;
         registry.scan_environment(&environment)?;
 
@@ -62,9 +77,10 @@ impl Rzup {
     ///
     /// # Arguments
     /// * `root` - The root directory path for storing components and settings
-    pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
+    /// * `base_urls` - The base URLs used to communicate with GitHub
+    pub fn with_root(root: impl Into<PathBuf>, base_urls: BaseUrls) -> Result<Self> {
         let environment = Environment::with_root(root)?;
-        let mut registry = Registry::new(&environment)?;
+        let mut registry = Registry::new(&environment, base_urls)?;
         Self::initialize_settings(&environment, &mut registry)?;
         registry.scan_environment(&environment)?;
 
@@ -169,7 +185,7 @@ impl Rzup {
     /// * `id` - Component identifier
     pub fn get_latest_version(&self, id: &str) -> Result<Version> {
         let component = self.registry.create_component(id)?;
-        component.get_latest_version(&self.environment)
+        component.get_latest_version(&self.environment, self.registry.base_urls())
     }
 
     /// Sets the active version for a component.
@@ -199,7 +215,7 @@ impl Rzup {
     pub fn latest_version(&self, component_id: &str) -> Result<Version> {
         let components = &self.registry.components;
         let component = components.get(component_id).unwrap();
-        component.get_latest_version(&self.environment)
+        component.get_latest_version(&self.environment, self.registry.base_urls())
     }
 
     /// Gets the mapping of all installed versions and their paths for a component.
@@ -304,7 +320,7 @@ mod tests {
 
     fn setup_test_env() -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
-        let rzup = Rzup::with_root(tmp_dir.path()).unwrap();
+        let rzup = Rzup::with_root(tmp_dir.path(), Default::default()).unwrap();
         (tmp_dir, rzup)
     }
 

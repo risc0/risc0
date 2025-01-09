@@ -13,7 +13,7 @@
 // limitations under the License.
 use crate::distribution::{Distribution, Platform};
 use crate::env::Environment;
-use crate::{Result, RzupError, RzupEvent};
+use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
 use reqwest::blocking::Client;
 use semver::Version;
@@ -25,9 +25,16 @@ use std::time::Duration;
 struct GithubReleaseResponse {
     tag_name: String,
 }
-pub struct GithubRelease;
 
-impl GithubRelease {
+pub struct GithubRelease<'a> {
+    base_urls: &'a BaseUrls,
+}
+
+impl<'a> GithubRelease<'a> {
+    pub fn new(base_urls: &'a BaseUrls) -> Self {
+        Self { base_urls }
+    }
+
     fn repo_name(&self, component_id: &str) -> String {
         match component_id {
             "cargo-risczero" => "risc0",
@@ -69,7 +76,7 @@ impl GithubRelease {
     }
 }
 
-impl Distribution for GithubRelease {
+impl<'a> Distribution for GithubRelease<'a> {
     fn download_url(
         &self,
         env: &Environment,
@@ -89,7 +96,8 @@ impl Distribution for GithubRelease {
         };
         let repo = self.repo_name(component_id);
         Ok(format!(
-            "https://github.com/risc0/{repo}/releases/download/{version_str}/{asset}.{ext}",
+            "{base_url}/{repo}/releases/download/{version_str}/{asset}.{ext}",
+            base_url = self.base_urls.risc0_github_base_url
         ))
     }
 
@@ -111,7 +119,10 @@ impl Distribution for GithubRelease {
 
         let repo = self.repo_name(component_id);
         let version_str = self.get_version_str(component_id, version);
-        let url = format!("https://api.github.com/repos/risc0/{repo}/releases/tags/{version_str}",);
+        let url = format!(
+            "{base_url}/repos/risc0/{repo}/releases/tags/{version_str}",
+            base_url = self.base_urls.github_api_base_url
+        );
 
         let response = client
             .get(&url)
@@ -144,7 +155,10 @@ impl Distribution for GithubRelease {
             .map_err(|e| RzupError::Other(e.to_string()))?;
 
         let repo = self.repo_name(component_id);
-        let url = format!("https://api.github.com/repos/risc0/{repo}/releases/latest",);
+        let url = format!(
+            "{base_url}/repos/risc0/{repo}/releases/latest",
+            base_url = self.base_urls.github_api_base_url
+        );
 
         let response = client
             .get(&url)

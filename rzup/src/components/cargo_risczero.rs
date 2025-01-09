@@ -37,8 +37,12 @@ mod tests {
 
         let version = Version::new(1, 0, 0);
 
+        let base_urls = Default::default();
+
         // Test installation
-        component.install(&env, Some(&version), true).unwrap();
+        component
+            .install(&env, &base_urls, Some(&version), true)
+            .unwrap();
 
         // Clean up
         component.uninstall(&env, &version).unwrap();

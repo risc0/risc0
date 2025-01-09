@@ -20,8 +20,7 @@ use crate::env::Environment;
 use crate::error::Result;
 use crate::paths::Paths;
 use crate::settings::Settings;
-use crate::RzupError;
-use crate::RzupEvent;
+use crate::{BaseUrls, RzupError, RzupEvent};
 
 use semver::Version;
 use std::collections::HashMap;
@@ -32,19 +31,25 @@ static DEFAULT_COMPONENTS: &[&str] = &["rust", "cargo-risczero", "cpp"];
 pub(crate) struct Registry {
     pub(crate) components: HashMap<&'static str, Box<dyn Component>>,
     settings: Settings,
+    base_urls: BaseUrls,
 }
 
 impl Registry {
-    pub fn new(env: &Environment) -> Result<Self> {
+    pub fn new(env: &Environment, base_urls: BaseUrls) -> Result<Self> {
         let settings = Settings::load(env)?;
         Ok(Self {
             components: HashMap::new(),
             settings,
+            base_urls,
         })
     }
 
     pub fn settings(&self) -> &Settings {
         &self.settings
+    }
+
+    pub fn base_urls(&self) -> &BaseUrls {
+        &self.base_urls
     }
 
     pub fn scan_environment(&mut self, env: &Environment) -> Result<()> {
@@ -241,7 +246,7 @@ impl Registry {
                 env.emit(RzupEvent::Debug {
                     message: format!("No version specified, fetching latest for {component_id}"),
                 });
-                component_to_install.get_latest_version(env)?
+                component_to_install.get_latest_version(env, &self.base_urls)?
             }
         };
 
@@ -257,7 +262,7 @@ impl Registry {
         Paths::create_version_dirs(env, component_id, &version)?;
 
         // Install component
-        component_to_install.install(env, Some(&version), force)?;
+        component_to_install.install(env, &self.base_urls, Some(&version), force)?;
 
         // Update settings
         self.settings.set_active_version(component_id, &version);
@@ -292,7 +297,8 @@ mod tests {
     fn setup_test_registry() -> (TempDir, Environment, Registry) {
         let tmp_dir = TempDir::new().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();
-        let registry = Registry::new(&env).unwrap();
+
+        let registry = Registry::new(&env, Default::default()).unwrap();
         (tmp_dir, env, registry)
     }
 
