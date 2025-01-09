@@ -112,22 +112,30 @@ pub(crate) trait Distribution {
             ))
         })?;
 
-        let download_url = self.download_url(env, component_id, Some(version), platform)?;
+        let download_result = (|| {
+            let download_url = self.download_url(env, component_id, Some(version), platform)?;
 
-        // do download
-        let archive = Download::new(&download_url).file_name(&archive_name);
-        let mut dl = Builder::default()
-            .connect_timeout(Duration::from_secs(4))
-            .download_folder(env.tmp_dir())
-            .parallel_requests(1)
-            .build()
-            .unwrap();
+            let archive = Download::new(&download_url).file_name(&archive_name);
+            let mut dl = Builder::default()
+                .connect_timeout(Duration::from_secs(4))
+                .download_folder(env.tmp_dir())
+                .parallel_requests(1)
+                .build()
+                .unwrap();
 
-        dl.download(&[archive]).unwrap();
+            dl.download(&[archive])
+                .unwrap()
+                .into_iter()
+                .map(|res| res.map(|_| ()))
+                .collect::<std::result::Result<(), _>>()
+                .map_err(|e| RzupError::Other(format!("Error downloading: {e}")))?;
+            Ok(())
+        })();
 
         // clean up lock file
         std::fs::remove_file(lock_path)?;
-        Ok(())
+
+        download_result
     }
 
     fn latest_version(&self, env: &Environment, component_id: &str) -> Result<Version>;
