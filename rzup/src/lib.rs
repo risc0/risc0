@@ -333,8 +333,7 @@ mod tests {
 
         // Test binary path retrieval with platform-specific path
         let bin_path = rzup.get_bin_path(component_id, &version).unwrap();
-        assert!(bin_path.is_some());
-        let bin_path = bin_path.unwrap();
+        let bin_path = bin_path;
         assert!(bin_path.ends_with(format!(
             "v{version}-{component_id}-{}/bin",
             rzup.environment.platform()
@@ -343,8 +342,7 @@ mod tests {
         // Test virtual component (r0vm is inside cargo-risczero's bin directory)
         let virtual_component = "r0vm";
         let virtual_bin_path = rzup.get_bin_path(virtual_component, &version).unwrap();
-        assert!(virtual_bin_path.is_some());
-        let virtual_bin_path = virtual_bin_path.unwrap();
+        let virtual_bin_path = virtual_bin_path;
         assert!(virtual_bin_path.ends_with(format!("bin/{virtual_component}")));
     }
 
