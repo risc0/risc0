@@ -73,6 +73,7 @@ where
 
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum StepMode {
+    #[allow(dead_code)]
     Parallel,
     #[cfg(test)]
     SeqForward,
@@ -135,6 +136,7 @@ where
             self.circuit_hal.as_ref(),
             segment,
             StepMode::Parallel,
+            // StepMode::SeqForward,
             rand_z,
         )?;
 

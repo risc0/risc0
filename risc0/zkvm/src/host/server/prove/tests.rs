@@ -18,14 +18,24 @@ use risc0_circuit_rv32im::prove::emu::testutil;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
-use test_log::test;
+use rstest::*;
+use rstest_reuse::*;
 
 use super::get_prover_server;
 use crate::{
-    host::server::testutils,
+    host::{client::prove::SegmentVersion, server::testutils},
     serde::{from_slice, to_vec},
     ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, Session, VerifierContext,
 };
+
+use SegmentVersion::{V1, V2};
+
+#[template]
+#[rstest]
+#[case(V1)]
+#[case(V2)]
+#[test_log::test]
+fn base(#[case] version: SegmentVersion) {}
 
 fn prove_session_fast(session: &Session) -> Receipt {
     let prover = get_prover_server(&ProverOpts::fast()).unwrap();
@@ -45,7 +55,7 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
 
-#[test]
+#[test_log::test]
 fn prove_nothing_succinct() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
@@ -63,12 +73,22 @@ fn prove_nothing_succinct() {
         .unwrap(); // ensure that we got a succinct receipt.
 }
 
-#[test]
-fn hashfn_poseidon2() {
-    prove_nothing("poseidon2").unwrap();
+#[apply(base)]
+fn prove_nothing_default(#[case] version: SegmentVersion) {
+    // prove_nothing("poseidon2").unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::composite().with_segment_version(version);
+    get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap();
 }
 
-#[test]
+#[test_log::test]
 fn receipt_serde() {
     let receipt = prove_nothing("sha-256").unwrap().receipt;
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
@@ -77,7 +97,7 @@ fn receipt_serde() {
     decoded.verify(MULTI_TEST_ID).unwrap();
 }
 
-#[test]
+#[test_log::test]
 fn check_image_id() {
     let receipt = prove_nothing("sha-256").unwrap().receipt;
     let mut image_id: Digest = MULTI_TEST_ID.into();
@@ -90,7 +110,7 @@ fn check_image_id() {
     ));
 }
 
-#[test]
+#[test_log::test]
 fn sha_basics() {
     fn run_sha(msg: &str) -> String {
         let env = ExecutorEnv::builder()
@@ -122,7 +142,7 @@ fn sha_basics() {
     );
 }
 
-#[test]
+#[test_log::test]
 fn sha_iter() {
     let input = MultiTestSpec::ShaDigestIter {
         data: Vec::from([0u8; 32]),
@@ -143,7 +163,7 @@ fn sha_iter() {
     )
 }
 
-#[test]
+#[test_log::test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
@@ -168,7 +188,7 @@ fn bigint_accel() {
     }
 }
 
-#[test]
+#[test_log::test]
 fn memory_io() {
     fn run_memio(pairs: &[(usize, usize)]) -> Result<ExitCode> {
         let input = MultiTestSpec::ReadWriteMem {
@@ -224,7 +244,7 @@ fn memory_io() {
     assert!(err.contains("LoadAddressMisaligned"), "{err}");
 }
 
-#[test]
+#[test_log::test]
 fn session_events() {
     use std::{cell::RefCell, rc::Rc};
 
@@ -357,7 +377,7 @@ mod riscv {
     test_case!(xori);
 }
 
-#[test]
+#[test_log::test]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseResume(0))
@@ -381,7 +401,7 @@ fn pause_resume() {
     prove_session_fast(&session);
 }
 
-#[test]
+#[test_log::test]
 fn pause_exit_nonzero() {
     let user_exit_code = 1;
     let env = ExecutorEnv::builder()
@@ -403,7 +423,7 @@ fn pause_exit_nonzero() {
     prove_session_fast(&session);
 }
 
-#[test]
+#[test_log::test]
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
@@ -442,7 +462,7 @@ fn continuation() {
     }
 }
 
-#[test]
+#[test_log::test]
 fn sys_input() {
     use hex::FromHex;
     let digest =
@@ -475,7 +495,7 @@ mod docker {
         multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF,
     };
 
-    #[test]
+    #[test_log::test]
     fn stark2snark() {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::DoNothing)
@@ -566,7 +586,7 @@ mod docker {
         println!("{:?}", session.stats());
     }
 
-    #[test]
+    #[test_log::test]
     fn verify_in_guest() {
         let composite_receipt_sha256 = generate_receipt(ProverOpts::fast());
         exec_verify(&composite_receipt_sha256);
@@ -585,7 +605,7 @@ mod docker {
         groth16_receipt.inner.groth16().unwrap();
     }
 
-    #[test]
+    #[test_log::test]
     fn prover_stark2snark() {
         // composite receipts
         let composite_receipt = &generate_receipt(ProverOpts::composite());
@@ -617,7 +637,6 @@ mod sys_verify {
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
-    use test_log::test;
 
     use super::get_prover_server;
     use crate::{
@@ -689,7 +708,7 @@ mod sys_verify {
         ONCE.get_or_init(prove_hello_commit)
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_1() {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
@@ -713,7 +732,7 @@ mod sys_verify {
             .unwrap();
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_2() {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
@@ -733,7 +752,7 @@ mod sys_verify {
             .is_err());
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_3() {
         let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
@@ -762,7 +781,7 @@ mod sys_verify {
         // verify with wrong resolution results in verifier error.
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
@@ -812,7 +831,7 @@ mod sys_verify {
             .is_err());
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_integrity_halt_1() {
         // Generate a receipt for an execution ending in a guest error indicated
         // by ExitCode::Halted(1).
@@ -838,7 +857,7 @@ mod sys_verify {
             .unwrap();
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_verify_assumption() {
         let test_circuit_receipt = prove_test_recursion_circuit();
         let test_circuit_assumption = Assumption {
@@ -894,7 +913,7 @@ mod sys_verify {
             .is_err());
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_prove_zkr() {
         // Random Poseidon2 "digest" to act as the "control root".
         let suite = Poseidon2HashSuite::new_suite();
@@ -960,7 +979,7 @@ mod sys_verify {
         }
     }
 
-    #[test]
+    #[test_log::test]
     fn sys_prove_zkr_noop() {
         let suite = Poseidon2HashSuite::new_suite();
         let (_, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
@@ -1007,7 +1026,7 @@ mod sys_verify {
     }
 }
 
-#[test]
+#[test_log::test]
 fn run_unconstrained() -> Result<()> {
     const RUN_UNCONSTRAINED_PO2: u32 = 17;
     const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
@@ -1054,7 +1073,7 @@ mod soundness {
         prove::soundness,
     };
 
-    #[test]
+    #[test_log::test]
     fn proven() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1065,7 +1084,7 @@ mod soundness {
         assert_eq!(security, 41.66407);
     }
 
-    #[test]
+    #[test_log::test]
     fn conjectured_strict() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1076,7 +1095,7 @@ mod soundness {
         assert_eq!(security, 74.88997);
     }
 
-    #[test]
+    #[test_log::test]
     fn toy_model() {
         let cycles: usize = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;

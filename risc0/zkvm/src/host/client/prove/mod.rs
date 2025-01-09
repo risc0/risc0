@@ -153,6 +153,12 @@ pub trait Executor {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo>;
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) enum SegmentVersion {
+    V1,
+    V2,
+}
+
 /// Options to configure a [Prover].
 #[derive(Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -178,6 +184,9 @@ pub struct ProverOpts {
 
     /// Maximum cycle count, as a power of two (po2) that these prover options support.
     pub(crate) max_segment_po2: usize,
+
+    /// TODO(flaub)
+    pub(crate) segment_version: SegmentVersion,
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
@@ -215,6 +224,7 @@ impl Default for ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 }
@@ -236,6 +246,7 @@ impl ProverOpts {
                 .unwrap()
                 .collect(),
             max_segment_po2: po2_max,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -255,6 +266,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: risc0_circuit_rv32im::control_ids("sha-256", DEFAULT_MAX_PO2).collect(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -267,6 +279,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -279,6 +292,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -293,6 +307,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -333,6 +348,15 @@ impl ProverOpts {
     pub fn with_segment_po2_max(self, max_segment_po2: usize) -> Self {
         Self {
             max_segment_po2,
+            ..self
+        }
+    }
+
+    /// TODO(flaub)
+    #[cfg(test)]
+    pub(crate) fn with_segment_version(self, segment_version: SegmentVersion) -> Self {
+        Self {
+            segment_version,
             ..self
         }
     }

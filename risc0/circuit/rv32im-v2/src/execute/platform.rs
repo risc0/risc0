@@ -121,6 +121,14 @@ pub enum CycleState {
     Decode = 40,
 }
 
+impl CycleState {
+    pub fn is_host_read(&self) -> bool {
+        *self == CycleState::HostReadSetup
+            || *self == CycleState::HostReadBytes
+            || *self == CycleState::HostReadWords
+    }
+}
+
 pub const SYSCALL_MAX: u32 = 512;
 
 pub const MAX_IO_BYTES: u32 = 1024;

@@ -29,7 +29,7 @@ use crate::{
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{Risc0Context, Risc0Machine},
-        rv32im::{DecodedInstruction, Emulator, InsnKind, Instruction},
+        rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
         sha2::Sha2State,
     },
@@ -359,7 +359,6 @@ impl<'a> Preflight<'a> {
     }
 
     fn add_cycle_insn(&mut self, state: CycleState, pc: u32, insn: InsnKind) {
-        tracing::trace!("[{}]: {pc:#010x}> {insn:?}", self.trace.cycles.len());
         match insn {
             InsnKind::Eany => {
                 // Technically we need to switch on the machine mode *entering* the EANY
@@ -407,10 +406,10 @@ impl<'a> Preflight<'a> {
         paging_idx: u32,
         back: Back,
     ) {
-        let cur_state = cur_state as u32;
-        let major = (7 + cur_state / 8) as u8;
-        let minor = (cur_state % 8) as u8;
-        // tracing::trace!("add_cycle_special(cur_state: {cur_state}, next_state: {next_state}, major: {major}, minor: {minor})");
+        let raw_cur_state = cur_state as u32;
+        let major = (7 + raw_cur_state / 8) as u8;
+        let minor = (raw_cur_state % 8) as u8;
+        // tracing::trace!("add_cycle_special(cur_state: {cur_state:?}, next_state: {next_state:?}, major: {major}, minor: {minor})");
         self.add_cycle(next_state, pc, major, minor, paging_idx, back);
     }
 }
@@ -478,7 +477,13 @@ impl<'a> Risc0Context for Preflight<'a> {
         Ok(())
     }
 
-    fn on_insn_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
+    fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
+        tracing::trace!(
+            "[{}]: {:?}> {}",
+            self.trace.cycles.len(),
+            self.pc,
+            disasm(insn, decoded)
+        );
         self.add_cycle_insn(CycleState::Decode, self.pc.0, insn.kind);
         self.user_cycle += 1;
         self.phys_cycles += 1;
@@ -507,13 +512,15 @@ impl<'a> Risc0Context for Preflight<'a> {
         };
         self.orig_words.get_mut(&addr).get_or_insert(word);
         let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
-        self.trace.txns.push(RawMemoryTransaction {
+        let txn = RawMemoryTransaction {
             addr: addr.0,
             cycle,
             word,
             prev_cycle,
             prev_word: word,
-        });
+        };
+        // tracing::trace!("txn: {txn:?}");
+        self.trace.txns.push(txn);
         Ok(word)
     }
 
@@ -529,13 +536,15 @@ impl<'a> Risc0Context for Preflight<'a> {
             prev_word
         };
         let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
-        self.trace.txns.push(RawMemoryTransaction {
+        let txn = RawMemoryTransaction {
             addr: addr.0,
             cycle,
             word,
             prev_cycle,
             prev_word,
-        });
+        };
+        // tracing::trace!("txn: {txn:?}");
+        self.trace.txns.push(txn);
         Ok(())
     }
 

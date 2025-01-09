@@ -15,15 +15,14 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
-use risc0_circuit_rv32im::prove::segment_prover;
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
     host::{
-        client::prove::ReceiptKind,
+        client::prove::{ReceiptKind, SegmentVersion},
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::session::InnerSegment,
+        server::{exec::executor2::Executor2, session::InnerSegment},
     },
     prove_registered_zkr,
     receipt::{
@@ -31,8 +30,9 @@ use crate::{
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
     sha::Digestible,
-    Assumption, AssumptionReceipt, CompositeReceipt, InnerAssumptionReceipt, Output, ProverOpts,
-    Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
+    InnerAssumptionReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -48,6 +48,19 @@ impl ProverImpl {
 }
 
 impl ProverServer for ProverImpl {
+    fn prove_with_ctx(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        elf: &[u8],
+    ) -> Result<ProveInfo> {
+        let session = match self.opts.segment_version {
+            SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)?.run()?,
+            SegmentVersion::V2 => Executor2::from_elf(env, elf)?.run()?,
+        };
+        self.prove_session(ctx, &session)
+    }
+
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         tracing::debug!(
             "prove_session: exit_code = {:?}, journal = {:?}, segments: {}",
@@ -196,10 +209,14 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let segment_prover = segment_prover(&self.opts.hashfn)?;
         let seal = match &segment.inner {
-            InnerSegment::V1(segment) => segment_prover.prove_segment(segment)?,
-            InnerSegment::V2(_segment) => todo!(),
+            InnerSegment::V1(segment) => {
+                risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
+                    .prove_segment(segment)?
+            }
+            InnerSegment::V2(segment) => {
+                risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(segment)?
+            }
         };
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;

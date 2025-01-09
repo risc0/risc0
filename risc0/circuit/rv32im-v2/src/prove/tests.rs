@@ -42,6 +42,11 @@ fn basic() {
     run_program(testutil::basic());
 }
 
+#[test]
+fn multi_read() {
+    run_program(testutil::multi_read());
+}
+
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests
 // They were built using the toolchain from:

@@ -172,6 +172,7 @@ impl<'a> Risc0Machine<'a> {
 
     fn ecall_read(&mut self) -> Result<bool> {
         tracing::trace!("ecall_read");
+
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostReadSetup, 0, 0, 0)?;
         let mut cur_state = CycleState::HostReadSetup;
@@ -197,18 +198,29 @@ impl<'a> Risc0Machine<'a> {
 
         fn next_io_state(ptr: ByteAddr, rlen: u32) -> CycleState {
             if rlen == 0 {
-                return CycleState::Decode;
+                CycleState::Decode
+            } else if !ptr.is_aligned() || rlen < WORD_SIZE as u32 {
+                CycleState::HostReadBytes
+            } else {
+                CycleState::HostReadWords
             }
-            if !ptr.is_aligned() || rlen < WORD_SIZE as u32 {
-                return CycleState::HostReadBytes;
-            }
-            CycleState::HostReadWords
         }
 
-        let next_state = next_io_state(ptr, rlen);
-        self.ctx
-            .on_ecall_cycle(cur_state, next_state, ptr.waddr().0, ptr.subaddr(), rlen)?;
-        cur_state = next_state;
+        macro_rules! add_cycle {
+            ($ptr:expr, $rlen:expr) => {{
+                let next_state = next_io_state($ptr, $rlen);
+                self.ctx.on_ecall_cycle(
+                    cur_state,
+                    next_state,
+                    $ptr.waddr().0,
+                    $ptr.subaddr(),
+                    $rlen,
+                )?;
+                cur_state = next_state;
+            }};
+        }
+
+        add_cycle!(ptr, rlen);
 
         let mut i = 0;
 
@@ -218,6 +230,11 @@ impl<'a> Risc0Machine<'a> {
             ptr += 1u32;
             i += 1;
             rlen -= 1;
+            if rlen == 0 {
+                self.next_pc();
+            }
+
+            add_cycle!(ptr, rlen);
         }
 
         // HERE!
@@ -242,10 +259,7 @@ impl<'a> Risc0Machine<'a> {
                 self.next_pc();
             }
 
-            let next_state = next_io_state(ptr, rlen);
-            self.ctx
-                .on_ecall_cycle(cur_state, next_state, ptr.waddr().0, ptr.subaddr(), rlen)?;
-            cur_state = next_state;
+            add_cycle!(ptr, rlen);
         }
 
         while rlen > 0 {
@@ -259,10 +273,7 @@ impl<'a> Risc0Machine<'a> {
                 self.next_pc();
             }
 
-            let next_state = next_io_state(ptr, rlen);
-            self.ctx
-                .on_ecall_cycle(cur_state, next_state, ptr.waddr().0, ptr.subaddr(), rlen)?;
-            cur_state = next_state;
+            add_cycle!(ptr, rlen);
         }
 
         // Ok(true)
