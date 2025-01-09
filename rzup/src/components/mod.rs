@@ -52,8 +52,7 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
         }
         _ => {
             return Err(crate::RzupError::InstallationFailed(format!(
-                "Unsupported archive format: {}",
-                filename
+                "Unsupported archive format: {filename}",
             )))
         }
     }
@@ -107,7 +106,7 @@ pub(crate) trait Component: std::fmt::Debug {
 
         if let Err(e) = std::fs::remove_file(&downloaded_file) {
             env.emit(RzupEvent::Debug {
-                message: format!("Failed to remove downloaded archive: {}", e),
+                message: format!("Failed to remove downloaded archive: {e}"),
             });
         }
 

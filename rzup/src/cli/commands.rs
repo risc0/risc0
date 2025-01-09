@@ -106,7 +106,7 @@ impl InstallCommand {
                         .arg(&update_script)
                         .output()
                         .map_err(|e| {
-                            RzupError::Other(format!("Failed to execute update script: {}", e))
+                            RzupError::Other(format!("Failed to execute update script: {e}"))
                         })?;
 
                     let _ = std::fs::remove_file(update_script);
@@ -159,7 +159,7 @@ impl ShowCommand {
         for component_id in component_ids {
             let versions = rzup.list_versions(component_id)?;
             if !versions.is_empty() {
-                println!("\n{}", component_id);
+                println!("\n{component_id}");
 
                 let active_version = rzup.get_active_version(component_id)?;
                 let current_version = rzup.settings().get_active_version(component_id);
@@ -172,19 +172,17 @@ impl ShowCommand {
                         .as_ref()
                         .map_or(false, |(v, _)| v == &version);
                     let marker = if is_active { "* " } else { "  " };
-                    println!("{}{}", marker.bold(), version);
+                    println!("{}{version}", marker.bold());
                 }
 
                 // Only show warning if version in settings doesn't exist in versions list
                 if let Some(settings_version) = current_version {
                     if !versions.contains(&settings_version) {
                         println!(
-                            "! Version {} specified in settings.toml is not installed",
-                            settings_version
+                            "! Version {settings_version} specified in settings.toml is not installed",
                         );
                         println!(
-                            "  Please use 'rzup use {} <VERSION>' to switch active component",
-                            component_id,
+                            "  Please use 'rzup use {component_id} <VERSION>' to switch active component",
                         );
                     }
                 }
@@ -212,17 +210,13 @@ impl UseCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
         let version = Version::parse(&self.version)
             .map_err(|_| RzupError::InvalidVersion(self.version.clone()))?;
-
-        if rzup.version_exists(&self.name, &version)? {
-            rzup.set_active_version(&self.name, version.clone())?;
-            println!(
-                "Successfully set {} version {} as active",
-                self.name, version
-            );
+        let name = self.name;
+        if rzup.version_exists(&name, &version)? {
+            rzup.set_active_version(&name, version.clone())?;
+            println!("Successfully set {name} version {version} as active",);
         } else {
             println!(
-                "! Version {} of {} is not installed.\n  Please use 'rzup install {} {}' to install",
-                version, self.name, self.name, version
+                "! Version {version} of {name} is not installed.\n  Please use 'rzup install {name} {version}' to install",
             );
         }
 
@@ -255,18 +249,15 @@ impl CheckCommand {
             if let Some(max_installed) = installed_versions.iter().max() {
                 if !rzup.version_exists(id, &latest_version)? {
                     results.push(format!(
-                        "{} - {} : {} -> {}",
+                        "{} - {} : {max_installed} -> {latest_version}",
                         id.bold(),
                         "Update Available".bold().yellow(),
-                        max_installed,
-                        latest_version,
                     ));
                 } else {
                     results.push(format!(
-                        "{} - {} : {}",
+                        "{} - {} : {max_installed}",
                         id.bold(),
                         "Up to date".bold().green(),
-                        max_installed
                     ));
                 }
             }
@@ -275,7 +266,7 @@ impl CheckCommand {
         rzup.emit(RzupEvent::CheckUpdates { id: None });
 
         for result in results {
-            println!("{}", result);
+            println!("{result}");
         }
 
         Ok(())

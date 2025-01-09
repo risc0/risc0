@@ -40,36 +40,33 @@ impl EventPrinter {
 
     pub fn complete_progress(&self, message: &str) {
         self.progress.finish_and_clear();
-        println!("{}", message);
+        println!("{message}");
         self.progress.reset(); // Reset for next operation
     }
 
     pub fn handle_download(&self, id: String, version: String, _url: String) {
-        self.start_progress(format!("Downloading {} version {}", id, version));
+        self.start_progress(format!("Downloading {id} version {version}"));
     }
 
     pub fn handle_download_complete(&self, id: String, version: String) {
-        self.complete_progress(&format!("✓ Downloaded {} version {}", id, version));
-        self.start_progress(format!("Installing {} version {}", id, version));
+        self.complete_progress(&format!("✓ Downloaded {id} version {version}"));
+        self.start_progress(format!("Installing {id} version {version}"));
     }
 
     pub fn handle_install(&self, id: String, version: String) {
-        self.start_progress(format!("Installing {} version {}", id, version));
+        self.start_progress(format!("Installing {id} version {version}"));
     }
 
     pub fn handle_install_complete(&self, id: String, version: String) {
-        self.complete_progress(&format!("✓ Installed {} version {}", id, version));
+        self.complete_progress(&format!("✓ Installed {id} version {version}"));
     }
 
     pub fn handle_already_installed(&self, id: String, version: String) {
-        self.complete_progress(&format!(
-            "! Version {} of {} is already installed",
-            version, id
-        ));
+        self.complete_progress(&format!("! Version {version} of {id} is already installed",));
     }
 
     pub fn handle_uninstall(&self, id: String, version: String) {
-        self.complete_progress(&format!("Uninstalled {} version {}", id, version));
+        self.complete_progress(&format!("Uninstalled {id} version {version}"));
     }
 
     pub fn handle_checking_updates(&self, id: Option<String>) {
@@ -86,7 +83,7 @@ impl EventPrinter {
     pub fn handle_debug(&self, message: String) {
         if self.verbose {
             self.progress.suspend(|| {
-                println!("Debug: {}", message);
+                println!("Debug: {message}");
             });
         }
     }

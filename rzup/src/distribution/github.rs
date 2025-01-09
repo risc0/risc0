@@ -40,11 +40,8 @@ impl GithubRelease {
 
     fn asset_name(&self, component_id: &str, platform: &Platform) -> (String, &'static str) {
         match component_id {
-            "rust" => (
-                format!("rust-toolchain-{}", platform.target_triple()),
-                "tar.gz",
-            ),
-            "cargo-risczero" => (format!("cargo-risczero-{}", platform), "tgz"),
+            "rust" => (format!("rust-toolchain-{platform}"), "tar.gz"),
+            "cargo-risczero" => (format!("cargo-risczero-{platform}"), "tgz"),
             "cpp" => {
                 let triple = match (platform.arch, platform.os) {
                     ("x86_64", "linux") => "riscv32im-linux-x86_64",
@@ -53,7 +50,7 @@ impl GithubRelease {
                 };
                 (triple.to_string(), "tar.xz")
             }
-            _ => (format!("{}-{}", component_id, platform), "tgz"),
+            _ => (format!("{component_id}-{platform}"), "tgz"),
         }
     }
 
@@ -67,7 +64,7 @@ impl GithubRelease {
                 version.major, version.minor, version.patch
             ),
             // cargo-risczero use v-prefixed versions
-            _ => format!("v{}", version),
+            _ => format!("v{version}"),
         }
     }
 }
@@ -85,15 +82,14 @@ impl Distribution for GithubRelease {
             Some(v) => self.get_version_str(component_id, v),
             None => {
                 env.emit(RzupEvent::Debug {
-                    message: format!("No version specified, fetching latest for {}", component_id),
+                    message: format!("No version specified, fetching latest for {component_id}"),
                 });
                 format!("v{}", self.latest_version(env, component_id)?)
             }
         };
         let repo = self.repo_name(component_id);
         Ok(format!(
-            "https://github.com/risc0/{}/releases/download/{}/{}.{}",
-            repo, version_str, asset, ext
+            "https://github.com/risc0/{repo}/releases/download/{version_str}/{asset}.{ext}",
         ))
     }
 
@@ -103,28 +99,25 @@ impl Distribution for GithubRelease {
         _version: Option<&Version>,
         platform: &Platform,
     ) -> PathBuf {
-        let (asset_name, extension) = self.asset_name(component_id, platform);
-        PathBuf::from(format!("{}.{}", asset_name, extension))
+        let (asset_name, ext) = self.asset_name(component_id, platform);
+        PathBuf::from(format!("{asset_name}.{ext}"))
     }
 
     fn check_release_exists(&self, component_id: &str, version: &Version) -> Result<bool> {
         let client = Client::builder()
             .timeout(Duration::from_secs(10))
             .build()
-            .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {}", e)))?;
+            .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
 
         let repo = self.repo_name(component_id);
         let version_str = self.get_version_str(component_id, version);
-        let url = format!(
-            "https://api.github.com/repos/risc0/{}/releases/tags/{}",
-            repo, version_str
-        );
+        let url = format!("https://api.github.com/repos/risc0/{repo}/releases/tags/{version_str}",);
 
         let response = client
             .get(&url)
             .header("User-Agent", "rzup")
             .send()
-            .map_err(|e| RzupError::Other(format!("Failed to check release: {}", e)))?;
+            .map_err(|e| RzupError::Other(format!("Failed to check release: {e}")))?;
 
         match response.status() {
             reqwest::StatusCode::OK => Ok(true),
@@ -135,15 +128,14 @@ impl Distribution for GithubRelease {
                 ))
             }
             status => Err(RzupError::Other(format!(
-                "Unexpected response checking release: {}",
-                status
+                "Unexpected response checking release: {status}",
             ))),
         }
     }
 
     fn latest_version(&self, env: &Environment, component_id: &str) -> Result<Version> {
         env.emit(RzupEvent::Debug {
-            message: format!("Fetching latest version for {}", component_id),
+            message: format!("Fetching latest version for {component_id}"),
         });
 
         let client = Client::builder()
@@ -152,10 +144,7 @@ impl Distribution for GithubRelease {
             .map_err(|e| RzupError::Other(e.to_string()))?;
 
         let repo = self.repo_name(component_id);
-        let url = format!(
-            "https://api.github.com/repos/risc0/{}/releases/latest",
-            repo
-        );
+        let url = format!("https://api.github.com/repos/risc0/{repo}/releases/latest",);
 
         let response = client
             .get(&url)

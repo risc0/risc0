@@ -64,7 +64,7 @@ impl Registry {
         for component in components {
             let component_id = component.id();
             env.emit(RzupEvent::Debug {
-                message: format!("Registering component: {}", component_id),
+                message: format!("Registering component: {component_id}"),
             });
 
             self.register_component(component);
@@ -79,8 +79,7 @@ impl Registry {
                 if let Some(highest_version) = all_versions.first() {
                     env.emit(RzupEvent::Debug {
                         message: format!(
-                            "Setting highest version {} as active for {}",
-                            highest_version, component_id
+                            "Setting highest version {highest_version} as active for {component_id}",
                         ),
                     });
                     self.settings
@@ -100,7 +99,7 @@ impl Registry {
         if let Some(component) = self.components.get(id) {
             if let Some(parent_id) = component.parent_component() {
                 env.emit(RzupEvent::Debug {
-                    message: format!("Component {} using parent {}", id, parent_id),
+                    message: format!("Component {id} using parent {parent_id}"),
                 });
                 return self.list_component_versions(env, parent_id);
             }
@@ -133,10 +132,7 @@ impl Registry {
             match Paths::parse_version_from_path(&dir_name, id) {
                 Some(version) => {
                     env.emit(RzupEvent::Debug {
-                        message: format!(
-                            "Successfully parsed version {} from {}",
-                            version, dir_name
-                        ),
+                        message: format!("Successfully parsed version {version} from {dir_name}",),
                     });
                     if !versions.contains(&version) {
                         versions.push(version.clone());
@@ -144,7 +140,7 @@ impl Registry {
                 }
                 None => {
                     env.emit(RzupEvent::Debug {
-                        message: format!("Failed to parse version from directory: {}", dir_name),
+                        message: format!("Failed to parse version from directory: {dir_name}"),
                     });
                 }
             }
@@ -185,8 +181,7 @@ impl Registry {
     ) -> Result<()> {
         if !Paths::version_exists(env, id, &version)? {
             return Err(RzupError::InvalidVersion(format!(
-                "Version {} is not installed",
-                version
+                "Version {version} is not installed",
             )));
         }
 
@@ -225,8 +220,8 @@ impl Registry {
     ) -> Result<()> {
         env.emit(RzupEvent::Debug {
             message: format!(
-                "Installing component {} (version: {:?}, force: {})",
-                id, version, force
+                "Installing component {id} (version: {:?}, force: {force})",
+                version
             ),
         });
 
@@ -244,7 +239,7 @@ impl Registry {
             Some(v) => v,
             None => {
                 env.emit(RzupEvent::Debug {
-                    message: format!("No version specified, fetching latest for {}", id),
+                    message: format!("No version specified, fetching latest for {id}"),
                 });
                 component_to_install.get_latest_version(env)?
             }

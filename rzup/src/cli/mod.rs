@@ -99,9 +99,8 @@ impl Cli {
 
         if let Err(e) = result {
             eprintln!(
-                "{} {}\n\nFor more information, try '--help'.",
+                "{} {e}\n\nFor more information, try '--help'.",
                 "error:".red(),
-                e
             );
             std::process::exit(1);
         }
@@ -114,10 +113,9 @@ fn banner() -> String {
     let version = env!("CARGO_PKG_VERSION");
     format!(
         r#"
-rzup v{}
+rzup v{version}
 
    {}"#,
-        version,
         r#"RISC
    ZERO"#
             .bold()

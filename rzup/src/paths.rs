@@ -244,7 +244,7 @@ mod tests {
             bin_dir,
             env.root_dir()
                 .join("test-component")
-                .join(format!("v{}-{}-{}", version, component_id, env.platform()))
+                .join(format!("v{version}-{component_id}-{}", env.platform()))
                 .join("bin")
         );
     }
