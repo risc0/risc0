@@ -197,7 +197,7 @@ pub fn extfield_xxone_mul_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
-    modsqr: &[u32; FIELD_256_WIDTH_WORDS],
+    modsqr: &[u32; 2*FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
     unsafe {
