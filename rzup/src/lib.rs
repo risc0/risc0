@@ -338,6 +338,13 @@ mod tests {
                 .unwrap()
         }
 
+        fn not_found() -> HyperResponse {
+            hyper::Response::builder()
+                .status(404)
+                .body(http_body_util::Full::new(hyper::body::Bytes::from("")))
+                .unwrap()
+        }
+
         fn empty_tar_gz_response() -> HyperResponse {
             let mut tar_bytes = vec![];
             let mut tar_builder = tar::Builder::new(&mut tar_bytes);
@@ -405,6 +412,10 @@ mod tests {
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => empty_tar_gz_response(),
+            "/gihub_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
+            "/gihub_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
+            "/risc0_github/risc0/releases/download/v1.1.0/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => empty_tar_gz_response(),
             unknown => panic!("unexpected URI: {unknown}"),
         })
     }
@@ -509,7 +520,7 @@ mod tests {
         assert!(virtual_bin_path.ends_with(format!("bin/{virtual_component}")));
     }
 
-    fn test_install_and_uninstall_component(base_urls: BaseUrls) {
+    fn test_install_and_uninstall_end_to_end(base_urls: BaseUrls) {
         let (_tmp_dir, mut rzup) = setup_test_env(base_urls);
         let cargo_risczero_version = Version::new(1, 0, 0);
 
@@ -545,5 +556,187 @@ mod tests {
         assert!(!rzup.is_installed("rust", &rust_version));
     }
 
-    http_test_harness!(test_install_and_uninstall_component);
+    http_test_harness!(test_install_and_uninstall_end_to_end);
+
+    fn run_and_assert_events(
+        rzup: &mut Rzup,
+        body: impl FnOnce(&mut Rzup),
+        expected_events: Vec<RzupEvent>,
+    ) {
+        let (event_send, event_recv) = std::sync::mpsc::channel();
+        rzup.set_event_handler(move |event| {
+            event_send.send(event).unwrap();
+        });
+
+        body(rzup);
+        rzup.set_event_handler(|_| {});
+
+        let mut events = vec![];
+        while let Ok(event) = event_recv.recv() {
+            if !matches!(event, RzupEvent::Debug { .. }) {
+                events.push(event);
+            }
+        }
+        assert_eq!(events, expected_events);
+    }
+
+    #[test]
+    fn install() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version = Version::new(1, 0, 0);
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.install_component(
+                    "cargo-risczero",
+                    Some(cargo_risczero_version.clone()),
+                    false,
+                )
+                .unwrap();
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                },
+                RzupEvent::InstallationCompleted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn set_active_version() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version1 = Version::new(1, 0, 0);
+        let cargo_risczero_version2 = Version::new(1, 1, 0);
+
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version1.clone()),
+            false,
+        )
+        .unwrap();
+
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version2.clone()),
+            false,
+        )
+        .unwrap();
+
+        assert_eq!(
+            rzup.get_active_version("cargo-risczero")
+                .unwrap()
+                .unwrap()
+                .0,
+            cargo_risczero_version2
+        );
+
+        rzup.set_active_version("cargo-risczero", cargo_risczero_version1.clone())
+            .unwrap();
+
+        assert_eq!(
+            rzup.get_active_version("cargo-risczero")
+                .unwrap()
+                .unwrap()
+                .0,
+            cargo_risczero_version1
+        );
+    }
+
+    #[test]
+    fn install_non_existent() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version = Version::new(5, 0, 0);
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                let error = rzup
+                    .install_component(
+                        "cargo-risczero",
+                        Some(cargo_risczero_version.clone()),
+                        false,
+                    )
+                    .unwrap_err();
+                assert_eq!(
+                    error,
+                    RzupError::InvalidVersion("5.0.0 is not available for cargo-risczero".into())
+                );
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "cargo-risczero".into(),
+                    version: "5.0.0".into(),
+                },
+                RzupEvent::InstallationFailed {
+                    id: "cargo-risczero".into(),
+                    version: "5.0.0".into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
+    fn already_installed() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version = Version::new(1, 0, 0);
+
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version.clone()),
+            false,
+        )
+        .unwrap();
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.install_component(
+                    "cargo-risczero",
+                    Some(cargo_risczero_version.clone()),
+                    false,
+                )
+                .unwrap();
+            },
+            vec![RzupEvent::ComponentAlreadyInstalled {
+                id: "cargo-risczero".into(),
+                version: "1.0.0".into(),
+            }],
+        );
+    }
+
+    #[test]
+    fn uninstall_events() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version = Version::new(1, 0, 0);
+
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version.clone()),
+            false,
+        )
+        .unwrap();
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.uninstall_component("cargo-risczero", cargo_risczero_version.clone())
+                    .unwrap();
+            },
+            vec![RzupEvent::Uninstalled {
+                id: "cargo-risczero".into(),
+                version: "1.0.0".into(),
+            }],
+        );
+    }
 }

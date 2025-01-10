@@ -13,7 +13,7 @@
 // limitations under the License.
 use thiserror::Error;
 
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, PartialEq, Eq)]
 pub enum RzupError {
     #[error("Component not found: {0}")]
     ComponentNotFound(String),
