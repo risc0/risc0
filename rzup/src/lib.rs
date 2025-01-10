@@ -728,6 +728,55 @@ mod tests {
     }
 
     #[test]
+    fn already_installed_forced() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version = Version::new(1, 0, 0);
+
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version.clone()),
+            false,
+        )
+        .unwrap();
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.install_component(
+                    "cargo-risczero",
+                    Some(cargo_risczero_version.clone()),
+                    true,
+                )
+                .unwrap();
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                },
+                RzupEvent::DownloadStarted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                    url: format!(
+                        "{base_url}/risc0/releases/download/v1.0.0/\
+                        cargo-risczero-x86_64-unknown-linux-gnu.tgz",
+                        base_url = server.base_urls.risc0_github_base_url
+                    ),
+                },
+                RzupEvent::DownloadCompleted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                },
+                RzupEvent::InstallationCompleted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                },
+            ],
+        );
+    }
+
+    #[test]
     fn uninstall_events() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
