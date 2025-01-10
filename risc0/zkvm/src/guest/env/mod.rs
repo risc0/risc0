@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@
 //! [guest-optimization]:
 //!     https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
+#[cfg(feature = "unstable")]
 mod batcher;
 mod read;
 mod verify;
@@ -78,15 +79,15 @@ use alloc::{
     alloc::{alloc, Layout},
     vec,
 };
+use core::cell::OnceCell;
 
 use anyhow::Result;
 use bytemuck::Pod;
-use core::cell::OnceCell;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_keccak, sys_log,
-        sys_pause, syscall_2, SyscallName, DIGEST_BYTES, DIGEST_WORDS,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
+        syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -100,12 +101,23 @@ use crate::{
     Assumptions, MaybePruned, Output,
 };
 
-use self::batcher::KeccakBatcher;
 pub use self::{
     read::{FdReader, Read},
     verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
     write::{FdWriter, Write},
 };
+
+/// This module is intended for internal testing only.
+#[doc(hidden)]
+pub mod testing {
+    #[cfg(feature = "unstable")]
+    pub fn sha_single_keccak(
+        claim_state: &mut risc0_zkp::core::digest::Digest,
+        keccak_state: &risc0_circuit_keccak::KeccakState,
+    ) {
+        super::batcher::sha_single_keccak(claim_state, keccak_state)
+    }
+}
 
 static mut HASHER: OnceCell<Sha256> = OnceCell::new();
 
@@ -119,26 +131,31 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 /// information leakage through the post-state digest.
 static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
+/// Used for batching keccak proofs
+#[cfg(feature = "unstable")]
+static mut KECCAK2_BATCHER: OnceCell<batcher::Keccak2Batcher> = OnceCell::new();
+
 /// Initialize globals before program main
 pub(crate) fn init() {
     unsafe {
         #[allow(static_mut_refs)]
         HASHER.set(Sha256::new()).unwrap();
         #[allow(static_mut_refs)]
+        #[cfg(feature = "unstable")]
+        KECCAK2_BATCHER.set(batcher::Keccak2Batcher::new()).unwrap();
+        #[allow(static_mut_refs)]
         syscall::sys_rand(
             MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
             MEMORY_IMAGE_ENTROPY.len(),
-        )
+        );
     }
 }
 
 /// Finalize execution
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
-        #[allow(static_mut_refs)]
-        if KECCAK_BATCHER.has_data() {
-            KECCAK_BATCHER.finalize_transcript();
-        }
+        #[cfg(feature = "unstable")]
+        KECCAK2_BATCHER.take().unwrap().finalize();
 
         #[allow(static_mut_refs)]
         let hasher = HASHER.take();
@@ -481,23 +498,12 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
     T::deserialize(&mut crate::serde::Deserializer::new(reader))
 }
 
-/// take an input, and delim and returns a host-generated keccak hash.
+/// get an updated keccak state
+///
+/// While is accesses a static mutable, this is considered safe because the zkVM
+/// is single-threaded and non-preemptive.
+#[cfg(feature = "unstable")]
 #[no_mangle]
-pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
-    let nondet_digest = [0u8; DIGEST_BYTES];
-    unsafe {
-        sys_keccak(
-            input.as_ptr(),
-            input.len(),
-            nondet_digest.as_ptr() as *mut [u32; DIGEST_WORDS],
-        );
-        KECCAK_BATCHER
-            .write_keccak_entry(input, &nondet_digest)
-            .unwrap();
-    };
-
-    Ok(nondet_digest)
+pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
+    unsafe { KECCAK2_BATCHER.get_mut().unwrap().update(state) }
 }
-
-/// Used for batching keccak proofs
-pub static mut KECCAK_BATCHER: KeccakBatcher = KeccakBatcher::init();

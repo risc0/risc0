@@ -28,16 +28,16 @@ use crate::{
     get_prover_server, get_version,
     host::{
         client::{
-            env::{CoprocessorCallback, ProveZkrRequest},
+            env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
         },
-        server::session::NullSegmentRef,
+        server::{prove::keccak::prove_keccak, session::NullSegmentRef},
     },
-    prove_zkr,
+    prove_registered_zkr,
     recursion::identity_p254,
     AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
-    Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
-    VerifierContext,
+    Receipt, ReceiptClaim, Segment, SegmentReceipt, Session, SuccinctReceipt, TraceCallback,
+    TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -72,9 +72,7 @@ impl Read for PosixIoProxy {
         };
 
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -105,9 +103,7 @@ impl Write for PosixIoProxy {
         };
 
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -122,6 +118,7 @@ impl Write for PosixIoProxy {
     }
 }
 
+#[derive(Clone)]
 struct SliceIoProxy {
     conn: ConnectionWrapper,
 }
@@ -129,12 +126,6 @@ struct SliceIoProxy {
 impl SliceIoProxy {
     fn new(conn: ConnectionWrapper) -> Self {
         Self { conn }
-    }
-
-    fn try_clone(&self) -> Result<Self> {
-        Ok(SliceIoProxy {
-            conn: self.conn.try_clone()?,
-        })
     }
 }
 
@@ -151,9 +142,7 @@ impl SliceIo for SliceIoProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -184,9 +173,7 @@ impl TraceCallback for TraceProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -218,6 +205,37 @@ impl CoprocessorCallback for CoprocessorProxy {
                                 pb::api::ProveZkrRequest {
                                     claim_digest: Some(proof_request.claim_digest.into()),
                                     control_id: Some(proof_request.control_id.into()),
+                                    input: proof_request.input,
+                                    receipt_out: None,
+                                }
+                            })),
+                        },
+                    )),
+                })),
+            })),
+        };
+        tracing::trace!("tx: {request:?}");
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
+        tracing::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
+    }
+
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        let request = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
+                        pb::api::CoprocessorRequest {
+                            kind: Some(pb::api::coprocessor_request::Kind::ProveKeccak({
+                                pb::api::ProveKeccakRequest {
+                                    claim_digest: Some(proof_request.claim_digest.into()),
+                                    po2: proof_request.po2 as u32,
+                                    control_root: Some(proof_request.control_root.into()),
                                     input: proof_request.input,
                                     receipt_out: None,
                                 }
@@ -269,7 +287,13 @@ impl Server {
             .ok_or(malformed_err())?
             .try_into()
             .map_err(|err: semver::Error| anyhow!(err))?;
-        if !check_client_version(&client_version, &server_version) {
+
+        #[cfg(not(feature = "r0vm-ver-compat"))]
+        let check_client_func = check_client_version;
+        #[cfg(feature = "r0vm-ver-compat")]
+        let check_client_func = check_client_version_compat;
+
+        if !check_client_func(&client_version, &server_version) {
             let msg = format!(
                 "incompatible client version: {client_version}, server version: {server_version}"
             );
@@ -283,10 +307,9 @@ impl Server {
             })),
         };
         tracing::trace!("tx: {reply:?}");
-        conn.send(reply)?;
-
-        let request: pb::api::ServerRequest = conn.recv()?;
+        let request: pb::api::ServerRequest = conn.send_recv(reply)?;
         tracing::trace!("rx: {request:?}");
+
         match request.kind.ok_or(malformed_err())? {
             pb::api::server_request::Kind::Prove(request) => self.on_prove(conn, request),
             pb::api::server_request::Kind::Execute(request) => self.on_execute(conn, request),
@@ -302,6 +325,9 @@ impl Server {
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
             pb::api::server_request::Kind::Verify(request) => self.on_verify(conn, request),
             pb::api::server_request::Kind::ProveZkr(request) => self.on_prove_zkr(conn, request),
+            pb::api::server_request::Kind::ProveKeccak(request) => {
+                self.on_prove_keccak(conn, request)
+            }
         }
     }
 
@@ -459,7 +485,7 @@ impl Server {
     ) -> Result<()> {
         fn inner(request: pb::api::ProveZkrRequest) -> Result<pb::api::ProveZkrReply> {
             let control_id = request.control_id.ok_or(malformed_err())?.try_into()?;
-            let receipt = prove_zkr(&control_id, &request.input)?;
+            let receipt = prove_registered_zkr(&control_id, vec![control_id], &request.input)?;
 
             let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();
@@ -480,6 +506,44 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::ProveZkrReply {
             kind: Some(pb::api::prove_zkr_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
+                },
+            )),
+        });
+
+        tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_prove_keccak(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ProveKeccakRequest,
+    ) -> Result<()> {
+        fn inner(request_pb: pb::api::ProveKeccakRequest) -> Result<pb::api::ProveKeccakReply> {
+            let request: ProveKeccakRequest = request_pb.clone().try_into()?;
+            let receipt = prove_keccak(&request)?;
+
+            let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request_pb.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ProveKeccakReply {
+                kind: Some(pb::api::prove_keccak_reply::Kind::Ok(
+                    pb::api::ProveKeccakResult {
+                        receipt: Some(asset),
+                    },
+                )),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ProveKeccakReply {
+            kind: Some(pb::api::prove_keccak_reply::Kind::Error(
                 pb::api::GenericError {
                     reason: err.to_string(),
                 },
@@ -722,24 +786,24 @@ fn build_env<'a>(
     env_builder.env_vars(request.env_vars.clone());
     env_builder.args(&request.args);
     for fd in request.read_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         let reader = BufReader::new(proxy);
         env_builder.read_fd(*fd, reader);
     }
     for fd in request.write_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         env_builder.write_fd(*fd, proxy);
     }
-    let proxy = SliceIoProxy::new(conn.try_clone()?);
+    let proxy = SliceIoProxy::new(conn.clone());
     for name in request.slice_ios.iter() {
-        env_builder.slice_io(name, proxy.try_clone()?);
+        env_builder.slice_io(name, proxy.clone());
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
     env_builder.session_limit(request.session_limit);
     if request.trace_events.is_some() {
-        let proxy = TraceProxy::new(conn.try_clone()?);
+        let proxy = TraceProxy::new(conn.clone());
         env_builder.trace_callback(proxy);
     }
     if !request.pprof_out.is_empty() {
@@ -749,7 +813,7 @@ fn build_env<'a>(
         env_builder.segment_path(Path::new(&request.segment_path));
     }
     if request.coprocessor {
-        let proxy = CoprocessorProxy::new(conn.try_clone()?);
+        let proxy = CoprocessorProxy::new(conn.clone());
         env_builder.coprocessor_callback(proxy);
     }
 
@@ -812,6 +876,7 @@ impl pb::api::Asset {
     }
 }
 
+#[allow(dead_code)]
 fn check_client_version(client: &semver::Version, server: &semver::Version) -> bool {
     if server.pre.is_empty() {
         let comparator = semver::Comparator {
@@ -827,51 +892,108 @@ fn check_client_version(client: &semver::Version, server: &semver::Version) -> b
     }
 }
 
+#[allow(dead_code)]
+fn check_client_version_compat(client: &semver::Version, server: &semver::Version) -> bool {
+    client.major == server.major
+}
+
 #[cfg(feature = "redis")]
 fn execute_redis(
     conn: &mut ConnectionWrapper,
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
-) -> Result<crate::Session> {
-    use redis::{Commands, SetExpiry, SetOptions};
+) -> Result<Session> {
+    use redis::{Client, Commands, ConnectionLike, SetExpiry, SetOptions};
+    use std::{
+        sync::{
+            mpsc::{sync_channel, Receiver},
+            Arc, Mutex,
+        },
+        thread::{spawn, JoinHandle},
+    };
 
     let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {
         Ok(val_str) => val_str.parse::<usize>().unwrap_or(100),
         Err(_) => 100,
     };
-    let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
-    let mut connection_copy = conn.try_clone()?;
-    let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        let client = redis::Client::open(params.url)
-            .map_err(anyhow::Error::new)
-            .unwrap();
-        let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
-        while let Ok((segment_key, segment)) = receiver.recv() {
-            let segment_bytes = bincode::serialize(&segment)
-                .map_err(anyhow::Error::new)
-                .unwrap();
-            let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
-            let _: () = connection
-                .set_options(segment_key.clone(), segment_bytes, opts)
-                .map_err(anyhow::Error::new)
-                .unwrap();
+    let (sender, receiver) = sync_channel::<(String, Segment)>(channel_size);
+    let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
 
-            let asset = pb::api::Asset {
-                kind: Some(pb::api::asset::Kind::Redis(segment_key)),
-            };
-            send_segment_done_msg(&mut connection_copy, segment, Some(asset)).unwrap();
+    let redis_err = Arc::new(Mutex::new(None));
+    let redis_err_clone = redis_err.clone();
+
+    let conn = conn.clone();
+    let join_handle: JoinHandle<()> = spawn(move || {
+        fn inner(
+            redis_url: String,
+            receiver: &Receiver<(String, Segment)>,
+            opts: SetOptions,
+            mut conn: ConnectionWrapper,
+        ) -> Result<()> {
+            let client = Client::open(redis_url).context("Failed to open Redis connection")?;
+            let mut connection = client
+                .get_connection()
+                .context("Failed to get redis connection")?;
+            while let Ok((segment_key, segment)) = receiver.recv() {
+                if !connection.is_open() {
+                    connection = client
+                        .get_connection()
+                        .context("Failed to get redis connection")?;
+                }
+                let segment_bytes =
+                    bincode::serialize(&segment).context("Failed to deserialize segment")?;
+                match connection.set_options(segment_key.clone(), segment_bytes.clone(), opts) {
+                    Ok(()) => (),
+                    Err(err) => {
+                        tracing::warn!(
+                            "Failed to set redis key with TTL, trying again. Error: {err}"
+                        );
+                        connection = client
+                            .get_connection()
+                            .context("Failed to get redis connection")?;
+                        let _: () = connection
+                            .set_options(segment_key.clone(), segment_bytes, opts)
+                            .context("Failed to set redis key with TTL again")?;
+                    }
+                };
+                let asset = pb::api::Asset {
+                    kind: Some(pb::api::asset::Kind::Redis(segment_key)),
+                };
+                send_segment_done_msg(&mut conn, segment, Some(asset))
+                    .context("Failed to send segment_done msg")?;
+            }
+            Ok(())
+        }
+
+        if let Err(err) = inner(params.url, &receiver, opts, conn) {
+            *redis_err_clone.lock().unwrap() = Some(err);
         }
     });
 
     let session = exec.run_with_callback(|segment| {
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key, segment))?;
+        if let Err(send_err) = sender.send((segment_key, segment)) {
+            let mut redis_err_opt = redis_err.lock().unwrap();
+            let redis_err_inner = redis_err_opt.take();
+            return Err(match redis_err_inner {
+                Some(redis_thread_err) => {
+                    tracing::error!(
+                        "Redis err: {redis_thread_err} root: {:?}",
+                        redis_thread_err.root_cause()
+                    );
+                    anyhow!(redis_thread_err)
+                }
+                None => send_err.into(),
+            });
+        }
         Ok(Box::new(NullSegmentRef))
     });
 
     drop(sender);
 
-    join_handle.join().expect("redis task failure");
+    join_handle
+        .join()
+        .map_err(|err| anyhow!("redis task join failed: {err:?}"))?;
 
     session
 }
@@ -880,7 +1002,7 @@ fn execute_default(
     conn: &mut ConnectionWrapper,
     exec: &mut ExecutorImpl,
     segments_out: &pb::api::AssetRequest,
-) -> Result<crate::Session> {
+) -> Result<Session> {
     exec.run_with_callback(|segment| {
         let segment_bytes = bincode::serialize(&segment)?;
         let asset = pb::api::Asset::from_bytes(
@@ -912,11 +1034,11 @@ fn send_segment_done_msg(
             )),
         })),
     };
-    tracing::trace!("tx: {msg:?}");
-    conn.send(msg)?;
 
-    let reply: pb::api::GenericReply = conn.recv()?;
+    tracing::trace!("tx: {msg:?}");
+    let reply: pb::api::GenericReply = conn.send_recv(msg)?;
     tracing::trace!("rx: {reply:?}");
+
     let kind = reply.kind.ok_or(malformed_err())?;
     if let pb::api::generic_reply::Kind::Error(err) = kind {
         bail!(err)
@@ -928,15 +1050,19 @@ fn send_segment_done_msg(
 mod tests {
     use semver::Version;
 
-    use super::check_client_version;
+    use super::{check_client_version, check_client_version_compat};
+
+    fn test_inner(check_func: fn(&Version, &Version) -> bool, client: &str, server: &str) -> bool {
+        check_func(
+            &Version::parse(client).unwrap(),
+            &Version::parse(server).unwrap(),
+        )
+    }
 
     #[test]
     fn check_version() {
         fn test(client: &str, server: &str) -> bool {
-            check_client_version(
-                &Version::parse(client).unwrap(),
-                &Version::parse(server).unwrap(),
-            )
+            test_inner(check_client_version, client, server)
         }
 
         assert!(test("0.18.0", "0.18.0"));
@@ -945,11 +1071,24 @@ mod tests {
         assert!(test("0.19.0", "0.18.0"));
         assert!(test("1.0.0", "0.18.0"));
         assert!(test("1.1.0", "1.0.0"));
+        assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
 
+        assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
         assert!(!test("0.18.0", "0.19.0"));
         assert!(!test("0.18.0", "1.0.0"));
+    }
 
-        assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
-        assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
+    #[test]
+    fn check_version_compat() {
+        fn test(client: &str, server: &str) -> bool {
+            test_inner(check_client_version_compat, client, server)
+        }
+
+        assert!(test("1.1.0", "1.1.0"));
+        assert!(test("1.1.1", "1.1.1"));
+        assert!(test("1.2.0", "1.1.1"));
+        assert!(test("1.2.0-rc.1", "1.1.1"));
+
+        assert!(!test("2.0.0", "1.1.1"));
     }
 }

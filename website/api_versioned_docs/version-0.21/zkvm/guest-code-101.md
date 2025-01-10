@@ -49,7 +49,7 @@ list, but include some highlights here:
   [`env::log`]
 
 For more information on optimization & performance, see our pages on
-[Cryptography Acceleration][acceleration] and [Benchmarking][benchmarks].
+[Cryptography Precompiles][precompiles] and [Benchmarking][benchmarks].
 
 ## Boilerplate before `main()`
 
@@ -86,7 +86,6 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [`env::stdout`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.stdout.html
 [`env::write_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.write_slice.html
 [`env::write`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.write.html
-[acceleration]: ./acceleration.md
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
@@ -97,6 +96,7 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [hello-world]: ./tutorials/hello-world.md
 [host]: /terminology#host
 [journal]: /terminology#journal
+[precompiles]: ./precompiles.md
 [quickstart]: ./quickstart.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest

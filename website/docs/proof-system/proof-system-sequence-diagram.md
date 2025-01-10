@@ -49,7 +49,7 @@ We use this Auxiliary Execution Trace to support:
    The lookup argument is currently implemented using the approach described in [PLOOKUP].
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit. <br />
    Here, the tables and the witness are committed in the main trace, and grand product accumulators are committed in the auxiliary trace.
-3. A big integer accelerator to enable [fast cryptographic operations][acceleration]<br />
+3. A big integer accelerator to enable [fast cryptographic operations][precompiles]<br />
    The bigint accelerator implements multiplication of `a` and `b` by asking the host to provide the product `c` as non-deterministic advice. Then, the verifier provides randomness `r`, and the constraints enforce that when `a`, `b`, and `c` are interpreted as polynomials, `a(r) * b(r) == c(r)`. <br />
    Here, `a`, `b`, and `c` are committed in the main trace, and the evaluations at `r` are committed in the auxiliary trace.
 
@@ -126,7 +126,6 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 Thanks for reading! If you have questions or feedback, we'd love to hear from you on Discord or Twitter.
 
-[acceleration]: /api/zkvm/acceleration
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
 [ethSTARK]: https://eprint.iacr.org/2021/582.pdf
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
@@ -134,6 +133,7 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [Image ID]: /terminology#image-id
 [log derivative]: https://eprint.iacr.org/2022/1530.pdf
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
+[precompiles]: /api/zkvm/precompiles
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [STARK]: ../reference-docs/about-starks.md
 [Winterfell]: https://github.com/facebook/winterfell
