@@ -62,7 +62,7 @@ impl Rzup {
     ///
     /// This will initialize the registry, settings, and scan the environment for installed components.
     pub fn new() -> Result<Self> {
-        let environment = Environment::new()?;
+        let environment = Environment::new(|s| std::env::var(s))?;
         let mut registry = Registry::new(&environment, Default::default())?;
         Self::initialize_settings(&environment, &mut registry)?;
         registry.scan_environment(&environment)?;

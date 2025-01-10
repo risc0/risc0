@@ -19,6 +19,8 @@ use std::fs;
 use crate::distribution::Platform;
 use std::path::{Path, PathBuf};
 
+type VarResult<T> = std::result::Result<T, std::env::VarError>;
+
 pub struct Environment {
     root_dir: PathBuf,
     tmp_dir: PathBuf,
@@ -58,8 +60,8 @@ impl Environment {
         Ok(env)
     }
 
-    pub fn new() -> Result<Self> {
-        let root_dir = if let Ok(dir) = std::env::var("RISC0_HOME") {
+    pub fn new(mut env_accessor: impl FnMut(&str) -> VarResult<String>) -> Result<Self> {
+        let root_dir = if let Ok(dir) = env_accessor("RISC0_HOME") {
             PathBuf::from(dir)
         } else {
             dirs::home_dir()
@@ -109,11 +111,14 @@ impl Environment {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
+
+    fn no_env(_: &str) -> VarResult<String> {
+        Err(std::env::VarError::NotPresent)
+    }
 
     #[test]
     fn test_default_env() {
-        let env = Environment::new().unwrap();
+        let env = Environment::new(no_env).unwrap();
         let home_dir = dirs::home_dir().unwrap();
         let expected_root = home_dir.join(".risc0");
 
@@ -138,11 +143,12 @@ mod tests {
     fn test_environment_with_risc0_home() {
         let tmp_dir = tempfile::tempdir().unwrap();
         let r0_tmp_dir = tmp_dir.path().join("risc0");
-        env::set_var("RISC0_HOME", &r0_tmp_dir);
 
-        let env = Environment::new().unwrap();
+        let env = Environment::new(|key| {
+            assert_eq!(key, "RISC0_HOME");
+            Ok(r0_tmp_dir.to_string_lossy().into())
+        })
+        .unwrap();
         assert_eq!(env.root_dir, r0_tmp_dir);
-
-        env::remove_var("RISC0_HOME");
     }
 }
