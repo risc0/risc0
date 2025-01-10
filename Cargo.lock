@@ -815,7 +815,7 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "temp-env",
- "thiserror 1.0.69",
+ "thiserror 2.0.6",
  "tokio",
  "tracing-subscriber 0.3.19",
  "uuid",
@@ -4830,7 +4830,7 @@ dependencies = [
  "tar",
  "tempfile",
  "termcolor",
- "thiserror 1.0.69",
+ "thiserror 2.0.6",
  "tokio",
  "xz",
 ]
