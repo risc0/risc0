@@ -31,6 +31,8 @@ sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
+# workaround - remove when borsh deps have been fixed
+winnow = "=0.6.18"
 
 [target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
 metal = { workspace = true }
