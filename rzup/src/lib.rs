@@ -212,12 +212,6 @@ impl Rzup {
         self.registry.settings()
     }
 
-    pub fn latest_version(&self, component_id: &str) -> Result<Version> {
-        let components = &self.registry.components;
-        let component = components.get(component_id).unwrap();
-        component.get_latest_version(&self.environment, self.registry.base_urls())
-    }
-
     /// Gets the mapping of all installed versions and their paths for a component.
     ///
     /// # Arguments
@@ -835,6 +829,17 @@ mod tests {
                 id: "cargo-risczero".into(),
                 version: "1.0.0".into(),
             }],
+        );
+    }
+
+    #[test]
+    fn get_latest_version() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, rzup) = setup_test_env(server.base_urls.clone());
+
+        assert_eq!(
+            rzup.get_latest_version("cargo-risczero").unwrap(),
+            Version::new(1, 1, 0)
         );
     }
 }
