@@ -4338,7 +4338,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-v2"
-version = "0.1.0"
+version = "0.1.0-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4365,7 +4365,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-v2-sys"
-version = "0.1.0"
+version = "0.1.0-rc.1"
 dependencies = [
  "cc",
  "cust",
