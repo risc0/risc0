@@ -849,7 +849,6 @@ dependencies = [
  "serde",
  "sha2",
  "tracing",
- "winnow 0.6.18",
 ]
 
 [[package]]
@@ -1022,7 +1021,7 @@ checksum = "6a8534fd7f78b5405e860340ad6575217ce99f38d4d5c8f2442cb5ecb50090e1"
 dependencies = [
  "indexmap",
  "toml_datetime",
- "winnow 0.5.40",
+ "winnow",
 ]
 
 [[package]]
@@ -1132,15 +1131,6 @@ name = "winnow"
 version = "0.5.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f593a95398737aeed53e489c785df13f3618e41dbcd6718c6addbf1395aa6876"
-dependencies = [
- "memchr",
-]
-
-[[package]]
-name = "winnow"
-version = "0.6.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68a9bda4691f099d435ad181000724da8e5899daa10713c2d432552b9ccd3a6f"
 dependencies = [
  "memchr",
 ]

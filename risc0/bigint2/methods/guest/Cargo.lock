@@ -819,7 +819,6 @@ dependencies = [
  "serde",
  "sha2",
  "tracing",
- "winnow",
 ]
 
 [[package]]
