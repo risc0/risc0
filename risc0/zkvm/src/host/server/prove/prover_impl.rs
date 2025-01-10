@@ -22,7 +22,7 @@ use crate::{
         client::prove::{ReceiptKind, SegmentVersion},
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, session::InnerSegment},
+        server::session::InnerSegment,
     },
     prove_registered_zkr,
     receipt::{

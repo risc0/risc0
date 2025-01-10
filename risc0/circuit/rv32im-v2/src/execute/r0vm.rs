@@ -172,7 +172,6 @@ impl<'a> Risc0Machine<'a> {
 
     fn ecall_read(&mut self) -> Result<bool> {
         tracing::trace!("ecall_read");
-
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostReadSetup, 0, 0, 0)?;
         let mut cur_state = CycleState::HostReadSetup;

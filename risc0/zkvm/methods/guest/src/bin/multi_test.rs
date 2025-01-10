@@ -521,7 +521,7 @@ fn main() {
         }
         MultiTestSpec::KeccakUpdate => {
             let mut state = KeccakState::default();
-            env::keccak_update(&mut state);
+            env::risc0_keccak_update(&mut state);
             assert_eq!(state, KECCAK_UPDATE);
         }
         MultiTestSpec::KeccakUpdate2 => {
@@ -536,7 +536,7 @@ fn main() {
             }
             let mut state = test_input();
 
-            env::keccak_update(&mut state);
+            env::risc0_keccak_update(&mut state);
             assert_eq!(
                 state,
                 [

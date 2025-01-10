@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -496,8 +496,12 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 }
 
 /// get an updated keccak state
+///
+/// While is accesses a static mutable, this is considered safe because the zkVM
+/// is single-threaded and non-preemptive.
 #[cfg(feature = "unstable")]
-pub fn keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
+#[no_mangle]
+pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
     #[allow(static_mut_refs)]
     unsafe {
         KECCAK2_BATCHER.get_mut().unwrap().update(state)
