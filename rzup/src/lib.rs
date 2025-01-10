@@ -601,6 +601,19 @@ mod tests {
                     id: "cargo-risczero".into(),
                     version: "1.0.0".into(),
                 },
+                RzupEvent::DownloadStarted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                    url: format!(
+                        "{base_url}/risc0/releases/download/v1.0.0/\
+                        cargo-risczero-x86_64-unknown-linux-gnu.tgz",
+                        base_url = server.base_urls.risc0_github_base_url
+                    ),
+                },
+                RzupEvent::DownloadCompleted {
+                    id: "cargo-risczero".into(),
+                    version: "1.0.0".into(),
+                },
                 RzupEvent::InstallationCompleted {
                     id: "cargo-risczero".into(),
                     version: "1.0.0".into(),

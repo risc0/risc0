@@ -99,6 +99,8 @@ pub(crate) trait Distribution {
             .tmp_dir()
             .join(format!("{}.lock", archive_name.display()));
 
+        let download_url = self.download_url(env, component_id, Some(version), platform)?;
+
         // create and lock the file
         let lock_file = std::fs::OpenOptions::new()
             .write(true)
@@ -112,25 +114,32 @@ pub(crate) trait Distribution {
             ))
         })?;
 
-        let download_result = (|| {
-            let download_url = self.download_url(env, component_id, Some(version), platform)?;
+        env.emit(RzupEvent::DownloadStarted {
+            id: component_id.into(),
+            version: version.to_string(),
+            url: download_url.clone(),
+        });
 
-            let archive = Download::new(&download_url).file_name(&archive_name);
-            let mut dl = Builder::default()
-                .connect_timeout(Duration::from_secs(4))
-                .download_folder(env.tmp_dir())
-                .parallel_requests(1)
-                .build()
-                .unwrap();
+        let archive = Download::new(&download_url).file_name(&archive_name);
+        let mut dl = Builder::default()
+            .connect_timeout(Duration::from_secs(4))
+            .download_folder(env.tmp_dir())
+            .parallel_requests(1)
+            .build()
+            .unwrap();
 
-            dl.download(&[archive])
-                .unwrap()
-                .into_iter()
-                .map(|res| res.map(|_| ()))
-                .collect::<std::result::Result<(), _>>()
-                .map_err(|e| RzupError::Other(format!("Error downloading: {e}")))?;
-            Ok(())
-        })();
+        let download_result = dl
+            .download(&[archive])
+            .unwrap()
+            .into_iter()
+            .map(|res| res.map(|_| ()))
+            .collect::<std::result::Result<(), _>>()
+            .map_err(|e| RzupError::Other(format!("Error downloading: {e}")));
+
+        env.emit(RzupEvent::DownloadCompleted {
+            id: component_id.into(),
+            version: version.to_string(),
+        });
 
         // clean up lock file
         std::fs::remove_file(lock_path)?;
