@@ -24,21 +24,16 @@ impl Component for CppToolchain {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::{env::Environment, http_test_harness, BaseUrls};
     use semver::Version;
 
-    use super::*;
-    use crate::env::Environment;
-
-    #[test]
-    #[ignore = "requires GitHub API access"]
-    fn test_cpp_toolchain_install() {
+    fn test_cpp_toolchain_install(base_urls: BaseUrls) {
         let tmp_dir = tempfile::tempdir().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();
         let component = CppToolchain;
 
         let version = Version::new(2024, 1, 5);
-
-        let base_urls = Default::default();
 
         // Test installation
         component
@@ -48,4 +43,6 @@ mod tests {
         // Clean up
         component.uninstall(&env, &version).unwrap();
     }
+
+    http_test_harness!(test_cpp_toolchain_install);
 }

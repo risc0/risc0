@@ -292,26 +292,25 @@ impl Registry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{http_test_harness, BaseUrls};
     use tempfile::TempDir;
 
-    fn setup_test_registry() -> (TempDir, Environment, Registry) {
+    fn setup_test_registry(base_urls: BaseUrls) -> (TempDir, Environment, Registry) {
         let tmp_dir = TempDir::new().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();
 
-        let registry = Registry::new(&env, Default::default()).unwrap();
+        let registry = Registry::new(&env, base_urls).unwrap();
         (tmp_dir, env, registry)
     }
 
     #[test]
     fn test_registry_initialization() {
-        let (_tmp_dir, _env, registry) = setup_test_registry();
+        let (_tmp_dir, _env, registry) = setup_test_registry(Default::default());
         assert!(registry.list_components().is_empty());
     }
 
-    #[test]
-    #[ignore = "requires GitHub API access"]
-    fn test_version_management() {
-        let (_tmp_dir, env, mut registry) = setup_test_registry();
+    fn test_version_management(base_urls: BaseUrls) {
+        let (_tmp_dir, env, mut registry) = setup_test_registry(base_urls);
         let version = Version::new(1, 0, 0);
         let component_id = "cargo-risczero";
 
@@ -332,4 +331,6 @@ mod tests {
             .unwrap();
         assert_eq!(active.map(|(v, _)| v), Some(version.clone()));
     }
+
+    http_test_harness!(test_version_management);
 }

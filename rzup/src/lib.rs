@@ -35,7 +35,7 @@ use std::path::PathBuf;
 
 pub use error::{Result, RzupError};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BaseUrls {
     pub risc0_github_base_url: String,
     pub github_api_base_url: String,
@@ -316,17 +316,157 @@ impl Rzup {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::convert::Infallible;
+    use std::io::Write as _;
+    use std::net::SocketAddr;
     use tempfile::TempDir;
 
-    fn setup_test_env() -> (TempDir, Rzup) {
+    pub struct MockDistributionServer {
+        pub base_urls: BaseUrls,
+    }
+
+    type HyperResponse = hyper::Response<http_body_util::Full<hyper::body::Bytes>>;
+
+    async fn request_handler(
+        req: hyper::Request<hyper::body::Incoming>,
+    ) -> std::result::Result<HyperResponse, Infallible> {
+        fn json_response(json: &'static str) -> HyperResponse {
+            hyper::Response::builder()
+                .status(200)
+                .header("content-type", "application/json")
+                .body(http_body_util::Full::new(hyper::body::Bytes::from(json)))
+                .unwrap()
+        }
+
+        fn empty_tar_gz_response() -> HyperResponse {
+            let mut tar_bytes = vec![];
+            let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+            let mut header = tar::Header::new_gnu();
+            header.set_size(4);
+            tar_builder
+                .append_data(&mut header, "tar_contents.bin", &[1, 2, 3, 4][..])
+                .unwrap();
+            tar_builder.finish().unwrap();
+            drop(tar_builder);
+
+            let mut tar_gz_bytes = vec![];
+            let mut encoder =
+                flate2::write::GzEncoder::new(&mut tar_gz_bytes, flate2::Compression::default());
+            encoder.write_all(&tar_bytes).unwrap();
+            drop(encoder);
+
+            hyper::Response::builder()
+                .status(200)
+                .header("content-type", "application/octet-stream")
+                .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                    tar_gz_bytes,
+                )))
+                .unwrap()
+        }
+
+        fn empty_tar_xz_response() -> HyperResponse {
+            let mut tar_bytes = vec![];
+            let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+            let mut header = tar::Header::new_gnu();
+            header.set_size(4);
+            tar_builder
+                .append_data(&mut header, "tar_contents.bin", &[1, 2, 3, 4][..])
+                .unwrap();
+            tar_builder.finish().unwrap();
+            drop(tar_builder);
+
+            let mut tar_xz_bytes = vec![];
+            let mut encoder = xz::write::XzEncoder::new(&mut tar_xz_bytes, 1);
+            encoder.write_all(&tar_bytes).unwrap();
+            drop(encoder);
+
+            hyper::Response::builder()
+                .status(200)
+                .header("content-type", "application/octet-stream")
+                .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                    tar_xz_bytes,
+                )))
+                .unwrap()
+        }
+
+        Ok(match &req.uri().to_string()[..] {
+            "/gihub_api/repos/risc0/risc0/releases/latest" => {
+                json_response("{\"tag_name\":\"v1.1.0\"}")
+            }
+            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
+            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
+            "/risc0_github/risc0/releases/download/v1.0.0/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => empty_tar_gz_response(),
+            "/risc0_github/rust/releases/download/r0.1.79.0/\
+                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => empty_tar_gz_response(),
+            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
+            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
+                empty_tar_xz_response(),
+            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
+            "/risc0_github/rust/releases/download/r0.1.81.0/\
+                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => empty_tar_gz_response(),
+            unknown => panic!("unexpected URI: {unknown}"),
+        })
+    }
+
+    #[tokio::main]
+    async fn server_main(sender: tokio::sync::oneshot::Sender<SocketAddr>) {
+        let listener = tokio::net::TcpListener::bind("localhost:0").await.unwrap();
+        sender.send(listener.local_addr().unwrap()).unwrap();
+
+        while let Ok((stream, _)) = listener.accept().await {
+            hyper::server::conn::http1::Builder::new()
+                .serve_connection(
+                    hyper_util::rt::TokioIo::new(stream),
+                    hyper::service::service_fn(request_handler),
+                )
+                .await
+                .unwrap()
+        }
+    }
+
+    impl MockDistributionServer {
+        pub fn new() -> Self {
+            let (send, recv) = tokio::sync::oneshot::channel();
+            std::thread::spawn(move || server_main(send));
+            let address = recv.blocking_recv().unwrap();
+            Self {
+                base_urls: BaseUrls {
+                    risc0_github_base_url: format!("http://{address}/risc0_github"),
+                    github_api_base_url: format!("http://{address}/gihub_api"),
+                },
+            }
+        }
+    }
+
+    #[macro_export]
+    macro_rules! http_test_harness {
+        ($test_name:ident) => {
+            paste::paste! {
+                #[test]
+                #[ignore = "requires GitHub API access"]
+                fn [<$test_name _against_real_github>]() {
+                    $test_name(Default::default())
+                }
+
+                #[test]
+                fn [<$test_name _against_mock_server>]() {
+                    let server = crate::tests::MockDistributionServer::new();
+                    $test_name(server.base_urls.clone())
+                }
+            }
+        };
+    }
+
+    fn setup_test_env(base_urls: BaseUrls) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
-        let rzup = Rzup::with_root(tmp_dir.path(), Default::default()).unwrap();
+        let rzup = Rzup::with_root(tmp_dir.path(), base_urls).unwrap();
         (tmp_dir, rzup)
     }
 
     #[test]
     fn test_rzup_initialization() {
-        let (_tmp_dir, rzup) = setup_test_env();
+        let (_tmp_dir, rzup) = setup_test_env(Default::default());
         assert!(rzup.settings().get_active_version("rust").is_none());
         assert!(rzup
             .settings()
@@ -336,7 +476,7 @@ mod tests {
 
     #[test]
     fn test_path_operations() {
-        let (_tmp_dir, rzup) = setup_test_env();
+        let (_tmp_dir, rzup) = setup_test_env(Default::default());
         let version = Version::new(1, 2, 0);
         let component_id = "cargo-risczero";
 
@@ -362,10 +502,8 @@ mod tests {
         assert!(virtual_bin_path.ends_with(format!("bin/{virtual_component}")));
     }
 
-    #[test]
-    #[ignore = "requires GitHub API access"]
-    fn test_install_and_uninstall_component() {
-        let (_tmp_dir, mut rzup) = setup_test_env();
+    fn test_install_and_uninstall_component(base_urls: BaseUrls) {
+        let (_tmp_dir, mut rzup) = setup_test_env(base_urls);
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         // Test installation
@@ -399,4 +537,6 @@ mod tests {
             .unwrap();
         assert!(!rzup.is_installed("rust", &rust_version));
     }
+
+    http_test_harness!(test_install_and_uninstall_component);
 }

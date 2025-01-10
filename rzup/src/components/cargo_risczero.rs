@@ -25,19 +25,15 @@ impl Component for CargoRiscZero {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::env::Environment;
+    use crate::{env::Environment, http_test_harness, BaseUrls};
     use semver::Version;
 
-    #[test]
-    #[ignore = "requires GitHub API access"]
-    fn test_cargo_risczero_install() {
+    fn test_cargo_risczero_install(base_urls: BaseUrls) {
         let tmp_dir = tempfile::tempdir().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();
         let component = CargoRiscZero;
 
         let version = Version::new(1, 0, 0);
-
-        let base_urls = Default::default();
 
         // Test installation
         component
@@ -47,4 +43,6 @@ mod tests {
         // Clean up
         component.uninstall(&env, &version).unwrap();
     }
+
+    http_test_harness!(test_cargo_risczero_install);
 }
