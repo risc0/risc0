@@ -1,6 +1,6 @@
-const url = require("url");
-const path = require("path");
-const fs = require("fs");
+const url = require("node:url");
+const path = require("node:path");
+const fs = require("node:fs");
 
 // this is a hand-written remark plugin that adds the .md extension to links that point to markdown files
 // if it becomes annoying/wrong, we can always remove it
