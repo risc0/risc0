@@ -292,7 +292,7 @@ impl Registry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{http_test_harness, BaseUrls};
+    use crate::{http_test_harness, tests::invalid_base_urls, BaseUrls};
     use tempfile::TempDir;
 
     fn setup_test_registry(base_urls: BaseUrls) -> (TempDir, Environment, Registry) {
@@ -305,7 +305,7 @@ mod tests {
 
     #[test]
     fn test_registry_initialization() {
-        let (_tmp_dir, _env, registry) = setup_test_registry(Default::default());
+        let (_tmp_dir, _env, registry) = setup_test_registry(invalid_base_urls());
         assert!(registry.list_components().is_empty());
     }
 

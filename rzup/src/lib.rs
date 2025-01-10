@@ -458,6 +458,13 @@ mod tests {
         };
     }
 
+    pub fn invalid_base_urls() -> BaseUrls {
+        BaseUrls {
+            risc0_github_base_url: "".into(),
+            github_api_base_url: "".into(),
+        }
+    }
+
     fn setup_test_env(base_urls: BaseUrls) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
         let rzup = Rzup::with_root(tmp_dir.path(), base_urls).unwrap();
@@ -466,7 +473,7 @@ mod tests {
 
     #[test]
     fn test_rzup_initialization() {
-        let (_tmp_dir, rzup) = setup_test_env(Default::default());
+        let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls());
         assert!(rzup.settings().get_active_version("rust").is_none());
         assert!(rzup
             .settings()
@@ -476,7 +483,7 @@ mod tests {
 
     #[test]
     fn test_path_operations() {
-        let (_tmp_dir, rzup) = setup_test_env(Default::default());
+        let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls());
         let version = Version::new(1, 2, 0);
         let component_id = "cargo-risczero";
 
