@@ -43,5 +43,6 @@ colored = { version = "2.2.0", optional = true }
 http-body-util = "0.1.2"
 hyper = { version = "1.5.1", features = ["server"] }
 hyper-util = "0.1.10"
+maplit = "1.0.2"
 paste = "1.0.15"
 tokio = { version = "1.42.0", features = ["rt", "macros"] }

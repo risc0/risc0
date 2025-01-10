@@ -226,12 +226,13 @@ impl Rzup {
         let mut versions = HashMap::new();
         let component_dir = Paths::get_component_dir(&self.environment, component_id);
 
+        let suffix = format!("-{component_id}-{}", self.environment.platform());
         if let Ok(entries) = std::fs::read_dir(component_dir) {
             for entry in entries.filter_map(|e| e.ok()) {
                 let file_name = entry.file_name().to_string_lossy().to_string();
                 if let Some(version_str) = file_name
                     .strip_prefix('v')
-                    .and_then(|s| s.strip_suffix(&format!("-{component_id}")))
+                    .and_then(|s| s.strip_suffix(&suffix))
                 {
                     if let Ok(version) = Version::parse(version_str) {
                         versions.insert(version, entry.path());
@@ -316,6 +317,7 @@ impl Rzup {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use maplit::hashmap;
     use std::convert::Infallible;
     use std::io::Write as _;
     use std::net::SocketAddr;
@@ -660,6 +662,40 @@ mod tests {
                 .unwrap()
                 .0,
             cargo_risczero_version1
+        );
+    }
+
+    #[test]
+    fn installed_versions() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version1 = Version::new(1, 0, 0);
+        let cargo_risczero_version2 = Version::new(1, 1, 0);
+
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version1.clone()),
+            false,
+        )
+        .unwrap();
+
+        rzup.install_component(
+            "cargo-risczero",
+            Some(cargo_risczero_version2.clone()),
+            false,
+        )
+        .unwrap();
+
+        assert_eq!(
+            rzup.installed_versions("cargo-risczero"),
+            hashmap! {
+                cargo_risczero_version1 => tmp_dir.path().join(
+                    "extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu"
+                ),
+                cargo_risczero_version2 => tmp_dir.path().join(
+                    "extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu"
+                ),
+            }
         );
     }
 
