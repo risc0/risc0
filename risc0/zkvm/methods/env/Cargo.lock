@@ -672,7 +672,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -685,7 +685,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -699,7 +699,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -712,7 +712,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "metal",
@@ -726,7 +726,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -734,7 +734,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -753,7 +753,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -775,7 +775,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -807,7 +807,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.3.0-alpha.1"
+version = "1.2.1-rc.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -941,9 +941,9 @@ dependencies = [
 
 [[package]]
 name = "tracing"
-version = "0.1.41"
+version = "0.1.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "784e0ac535deb450455cbfa28a6f0df145ea1bb7ae51b821cf5e7927fdcfbdd0"
+checksum = "c3523ab5a71916ccf420eebdf5521fcef02141234bbc0b8a49f2fdc4544364ef"
 dependencies = [
  "log",
  "pin-project-lite",
@@ -953,9 +953,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-attributes"
-version = "0.1.28"
+version = "0.1.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "395ae124c09f9e6918a2310af6038fba074bcf474ac352496d5910dd59a2226d"
+checksum = "34704c8d6ebcbc939824180af020566b01a7c01f80641264eba0999f6c2b6be7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -964,9 +964,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.33"
+version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e672c95779cf947c5311f83787af4fa8fffd12fb27e4993211a84bdfd9610f9c"
+checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
  "once_cell",
  "valuable",

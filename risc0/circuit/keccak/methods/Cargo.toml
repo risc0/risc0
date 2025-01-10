@@ -1,7 +1,10 @@
 [package]
 name = "risc0-circuit-keccak-methods"
-version = "0.1.0"
-edition = "2021"
+version = { workspace = true }
+edition = { workspace = true }
+
+[package.metadata.release]
+release = false
 
 [build-dependencies]
 risc0-build = { workspace = true }
