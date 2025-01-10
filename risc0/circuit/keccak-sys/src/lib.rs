@@ -32,6 +32,7 @@ pub struct RawPreflightTrace {
     pub preimages: *const [u64; 25],
     pub preimages_count: u32,
     pub preimage_idxs: *const u32,
+    pub run_order: *const u32,
 }
 
 #[repr(C)]
@@ -94,4 +95,6 @@ extern "C" {
         domain: u32,
         poly_mix_pows: *const u32,
     ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_keccak_cuda_reset() -> *const std::os::raw::c_char;
 }

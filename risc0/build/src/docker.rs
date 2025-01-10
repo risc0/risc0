@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -153,13 +153,20 @@ fn create_dockerfile(
     .concat()
     .join(" ");
 
-    let build = DockerFile::new()
+    let mut build = DockerFile::new()
         .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[("CARGO_TARGET_DIR", "target")]);
+
+    #[cfg(feature = "unstable")]
+    {
+        build = build.env(&[("RISC0_FEATURE_bigint2", "")]);
+    }
+
+    build = build
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
@@ -265,7 +272,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "ebac68a6e4a0daecd8c96466605bc2eecb43f3f0b6962b2dfa5e1d8b6b61d725",
+            "4e98458b9e449d8e2c3726f01b84c9cae2823ba183b2cbafd8fce10fd1af99ad",
         );
     }
 }

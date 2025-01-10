@@ -851,6 +851,7 @@ name = "risc0-zkvm-platform"
 version = "1.2.1-rc.0"
 dependencies = [
  "bytemuck",
+ "cfg-if",
  "getrandom",
  "libm",
  "stability",

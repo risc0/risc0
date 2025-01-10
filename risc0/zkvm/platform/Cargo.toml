@@ -8,6 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+cfg-if = "1.0"
 stability = "0.2"
 
 # This crate should have as few dependencies as possible so it can be
