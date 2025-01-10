@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
 use std::rc::Rc;
 
 use rand::thread_rng;
-use risc0_binfmt::Program;
+use risc0_binfmt::{MemoryImage2, Program};
 use risc0_zkp::field::Elem;
 use test_log::test;
 
 use crate::{
     execute::{
-        image::MemoryImage2,
         testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
     },
@@ -30,7 +29,7 @@ use crate::{
 };
 
 fn run_preflight(program: Program) {
-    let image = MemoryImage2::new(program);
+    let image = MemoryImage2::new_kernel(program);
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
@@ -60,7 +59,7 @@ fn simple_loop() {
 }
 
 fn fwd_rev_ab_test(program: Program) {
-    let image = MemoryImage2::new(program);
+    let image = MemoryImage2::new_kernel(program);
 
     let session = testutil::execute(
         image,

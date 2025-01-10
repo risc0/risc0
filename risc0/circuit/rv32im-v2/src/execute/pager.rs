@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 use anyhow::{bail, Result};
 use derive_more::Debug;
+use risc0_binfmt::{MemoryImage2, Page, WordAddr};
 use risc0_zkp::core::digest::Digest;
 
-use super::{
-    addr::WordAddr,
-    image::{MemoryImage2, Page},
-    node_idx,
-    platform::*,
-};
+use super::{node_idx, platform::*};
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 
@@ -59,34 +55,10 @@ const INVALID_IDX: u32 = u32::MAX;
 const NUM_PAGES: usize = 4 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-enum PageState {
+pub(crate) enum PageState {
     Unloaded,
     Loaded,
     Dirty,
-}
-
-#[derive(Clone, Default, Debug)]
-pub(crate) struct PagingActivity {
-    pub pages: BTreeSet<u32>,
-    pub nodes: BTreeSet<u32>,
-}
-
-impl PagingActivity {
-    fn new(pages: BTreeSet<u32>) -> Self {
-        let mut nodes = BTreeSet::new();
-        for &page_idx in pages.iter() {
-            let mut node_idx = node_idx(page_idx);
-            while node_idx != 1 {
-                let parent_idx = node_idx / 2;
-                // tracing::trace!("add node: {node_idx:#010x}, parent_idx: {parent_idx:#010x}");
-                if !nodes.insert(parent_idx) {
-                    break;
-                }
-                node_idx = parent_idx;
-            }
-        }
-        Self { pages, nodes }
-    }
 }
 
 #[derive(Debug)]
@@ -97,7 +69,7 @@ pub(crate) struct PagedMemory {
     #[debug(skip)]
     page_cache: Vec<Page>,
     #[debug("{page_states:#x?}")]
-    page_states: BTreeMap<u32, PageState>,
+    pub(crate) page_states: BTreeMap<u32, PageState>,
     pub cycles: u32,
 }
 
@@ -119,23 +91,6 @@ impl PagedMemory {
         self.cycles = RESERVED_PAGING_CYCLES;
     }
 
-    pub(crate) fn loaded_pages(&self) -> PagingActivity {
-        tracing::trace!("loaded_pages: {:#010x?}", self.image.pages.keys());
-        PagingActivity::new(self.image.pages.keys().copied().collect())
-    }
-
-    pub(crate) fn dirty_pages(&self) -> PagingActivity {
-        let pages = self
-            .page_states
-            .iter()
-            .filter(|(&node_idx, &state)| {
-                node_idx >= MEMORY_PAGES as u32 && state == PageState::Dirty
-            })
-            .map(|(&node_idx, _)| page_idx(node_idx))
-            .collect();
-        PagingActivity::new(pages)
-    }
-
     pub(crate) fn peek(&mut self, addr: WordAddr) -> Result<u32> {
         if addr >= MEMORY_END_ADDR {
             bail!("Invalid peek address: {addr:?}");
@@ -148,6 +103,17 @@ impl PagedMemory {
         } else {
             // Loaded, get from cache
             Ok(self.page_cache[cache_idx as usize].load(addr))
+        }
+    }
+
+    pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        let cache_idx = self.page_table[page_idx as usize];
+        if cache_idx == INVALID_IDX {
+            // Unloaded, peek into image
+            Ok(self.image.get_page(page_idx)?.0.clone())
+        } else {
+            // Loaded, get from cache
+            Ok(self.page_cache[cache_idx as usize].0.clone())
         }
     }
 
@@ -196,7 +162,7 @@ impl PagedMemory {
     pub(crate) fn commit(&mut self) -> Result<(Digest, MemoryImage2, Digest)> {
         // tracing::trace!("commit: {self:#?}");
 
-        let pre_state = *self.image.image_id();
+        let pre_state = self.image.image_id();
 
         let mut image = MemoryImage2::default();
 
@@ -238,7 +204,7 @@ impl PagedMemory {
             }
         }
 
-        let post_state = *self.image.image_id();
+        let post_state = self.image.image_id();
 
         Ok((pre_state, image, post_state))
     }
@@ -278,6 +244,6 @@ impl PagedMemory {
     }
 }
 
-fn page_idx(node_idx: u32) -> u32 {
+pub(crate) fn page_idx(node_idx: u32) -> u32 {
     node_idx - MEMORY_PAGES as u32
 }
