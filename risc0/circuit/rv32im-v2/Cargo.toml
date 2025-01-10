@@ -26,7 +26,7 @@ tracing = { version = "0.1", default-features = false, features = [
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 anyhow = { version = "1.0", features = ["backtrace"], optional = true }
-bytemuck = { version = "1.13", optional = true }
+bytemuck = { version = "1.21", optional = true }
 cfg-if = { version = "1.0", optional = true }
 derive_more = { version = "1.0", features = [
   "add",
