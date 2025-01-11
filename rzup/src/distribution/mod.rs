@@ -13,14 +13,6 @@
 // limitations under the License.
 pub mod github;
 
-use crate::RzupError;
-use crate::{env::Environment, Result, RzupEvent};
-
-use downloader::{downloader::Builder, Download};
-use fs2::FileExt;
-use semver::Version;
-use std::{path::PathBuf, time::Duration};
-
 pub struct Platform {
     arch: &'static str,
     os: &'static str,
@@ -51,101 +43,4 @@ impl std::fmt::Display for Platform {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.target_triple())
     }
-}
-
-pub(crate) trait Distribution {
-    fn download_url(
-        &self,
-        env: &Environment,
-        component_id: &str,
-        version: Option<&Version>,
-        platform: &Platform,
-    ) -> Result<String>;
-
-    fn get_archive_name(
-        &self,
-        component_id: &str,
-        version: Option<&Version>,
-        platform: &Platform,
-    ) -> PathBuf;
-
-    fn check_release_exists(&self, component_id: &str, version: &Version) -> Result<bool>;
-
-    fn download_version(
-        &self,
-        env: &Environment,
-        component_id: &str,
-        version: Option<&Version>,
-    ) -> Result<()> {
-        let version = match version {
-            Some(v) => v,
-            None => &self.latest_version(env, component_id)?,
-        };
-
-        // check if release exists before download
-        if !self.check_release_exists(component_id, version)? {
-            env.emit(RzupEvent::InstallationFailed {
-                id: component_id.to_string(),
-                version: version.to_string(),
-            });
-            return Err(RzupError::InvalidVersion(format!(
-                "{version} is not available for {component_id}",
-            )));
-        }
-
-        let platform = env.platform();
-        let archive_name = self.get_archive_name(component_id, Some(version), platform);
-        let lock_path = env
-            .tmp_dir()
-            .join(format!("{}.lock", archive_name.display()));
-
-        let download_url = self.download_url(env, component_id, Some(version), platform)?;
-
-        // create and lock the file
-        let lock_file = std::fs::OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(&lock_path)?;
-
-        lock_file.try_lock_exclusive().map_err(|_| {
-            RzupError::Other(format!(
-                "Another process is currently downloading {component_id} version {version}",
-            ))
-        })?;
-
-        env.emit(RzupEvent::DownloadStarted {
-            id: component_id.into(),
-            version: version.to_string(),
-            url: download_url.clone(),
-        });
-
-        let archive = Download::new(&download_url).file_name(&archive_name);
-        let mut dl = Builder::default()
-            .connect_timeout(Duration::from_secs(4))
-            .download_folder(env.tmp_dir())
-            .parallel_requests(1)
-            .build()
-            .unwrap();
-
-        let download_result = dl
-            .download(&[archive])
-            .unwrap()
-            .into_iter()
-            .map(|res| res.map(|_| ()))
-            .collect::<std::result::Result<(), _>>()
-            .map_err(|e| RzupError::Other(format!("Error downloading: {e}")));
-
-        env.emit(RzupEvent::DownloadCompleted {
-            id: component_id.into(),
-            version: version.to_string(),
-        });
-
-        // clean up lock file
-        std::fs::remove_file(lock_path)?;
-
-        download_result
-    }
-
-    fn latest_version(&self, env: &Environment, component_id: &str) -> Result<Version>;
 }

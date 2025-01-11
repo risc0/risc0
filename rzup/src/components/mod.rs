@@ -16,7 +16,7 @@ pub(crate) mod cpp;
 pub(crate) mod r0vm;
 pub(crate) mod rust;
 
-use crate::distribution::{github::GithubRelease, Distribution};
+use crate::distribution::github::GithubRelease;
 use crate::env::Environment;
 use crate::error::Result;
 use crate::paths::Paths;
@@ -62,8 +62,8 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
 pub(crate) trait Component: std::fmt::Debug {
     fn id(&self) -> &'static str;
 
-    fn distribution<'a>(&self, base_urls: &'a BaseUrls) -> Box<dyn Distribution + 'a> {
-        Box::new(GithubRelease::new(base_urls))
+    fn distribution<'a>(&self, base_urls: &'a BaseUrls) -> GithubRelease<'a> {
+        GithubRelease::new(base_urls)
     }
 
     fn parent_component(&self) -> Option<&'static str> {
