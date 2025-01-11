@@ -62,10 +62,6 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
 pub(crate) trait Component: std::fmt::Debug {
     fn id(&self) -> &'static str;
 
-    fn distribution<'a>(&self, base_urls: &'a BaseUrls) -> GithubRelease<'a> {
-        GithubRelease::new(base_urls)
-    }
-
     fn parent_component(&self) -> Option<&'static str> {
         None
     }
@@ -81,7 +77,9 @@ pub(crate) trait Component: std::fmt::Debug {
             return Ok(()); // dont direct install virtual-components
         }
 
-        let latest_version = self.distribution(base_urls).latest_version(env, "")?;
+        let distribution = GithubRelease::new(base_urls);
+
+        let latest_version = distribution.latest_version(env, "")?;
         let version = version.unwrap_or(&latest_version);
         env.emit(RzupEvent::InstallationStarted {
             id: self.id().to_string(),
@@ -90,9 +88,7 @@ pub(crate) trait Component: std::fmt::Debug {
 
         Paths::create_version_dirs(env, self.id(), version)?;
 
-        let archive_name =
-            self.distribution(base_urls)
-                .get_archive_name(self.id(), Some(version), env.platform());
+        let archive_name = distribution.get_archive_name(self.id(), Some(version), env.platform());
         let downloaded_file = env.tmp_dir().join(archive_name);
 
         if force {
@@ -101,8 +97,7 @@ pub(crate) trait Component: std::fmt::Debug {
         }
 
         // Download and extract
-        self.distribution(base_urls)
-            .download_version(env, self.id(), Some(version))?;
+        distribution.download_version(env, self.id(), Some(version))?;
         let version_dir = Paths::get_version_dir(env, self.id(), version);
 
         if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
@@ -134,6 +129,7 @@ pub(crate) trait Component: std::fmt::Debug {
     }
 
     fn get_latest_version(&self, env: &Environment, base_urls: &BaseUrls) -> Result<Version> {
-        self.distribution(base_urls).latest_version(env, self.id())
+        let distribution = GithubRelease::new(base_urls);
+        distribution.latest_version(env, self.id())
     }
 }
