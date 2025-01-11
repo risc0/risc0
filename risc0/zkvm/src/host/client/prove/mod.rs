@@ -33,8 +33,10 @@ use {self::bonsai::BonsaiProver, crate::is_dev_mode};
 use self::external::ExternalProver;
 
 use crate::{
-    get_version, host::prove_info::ProveInfo, receipt::DEFAULT_MAX_PO2, ExecutorEnv, Receipt,
-    SessionInfo, VerifierContext,
+    get_version,
+    host::prove_info::ProveInfo,
+    receipt::{segment::SegmentVersion, DEFAULT_MAX_PO2},
+    ExecutorEnv, Receipt, SessionInfo, VerifierContext,
 };
 
 /// A Prover can execute a given ELF binary and produce a
@@ -98,7 +100,7 @@ pub trait Prover {
     ) -> Result<ProveInfo> {
         self.prove_with_ctx(
             env,
-            &VerifierContext::from_max_po2(opts.max_segment_po2),
+            &VerifierContext::from_max_po2(opts.max_segment_po2, opts.segment_version),
             elf,
             opts,
         )
@@ -153,12 +155,6 @@ pub trait Executor {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo>;
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-pub(crate) enum SegmentVersion {
-    V1,
-    V2,
-}
-
 /// Options to configure a [Prover].
 #[derive(Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -186,7 +182,7 @@ pub struct ProverOpts {
     pub(crate) max_segment_po2: usize,
 
     /// TODO(flaub)
-    pub(crate) segment_version: SegmentVersion,
+    pub segment_version: SegmentVersion,
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
@@ -367,6 +363,11 @@ impl ProverOpts {
     ) -> Result<risc0_zkp::core::hash::HashSuite<risc0_zkp::field::baby_bear::BabyBear>> {
         risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
             .ok_or_else(|| anyhow::anyhow!("unsupported hash suite: {}", self.hashfn))
+    }
+
+    /// TODO(flaub)
+    pub fn verifier_context(&self) -> VerifierContext {
+        VerifierContext::from_max_po2(self.max_segment_po2, self.segment_version)
     }
 }
 

@@ -19,14 +19,15 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
     host::{
-        client::prove::{ReceiptKind, SegmentVersion},
+        client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::session::InnerSegment,
+        server::{exec::executor2::Executor2, session::InnerSegment},
     },
     prove_registered_zkr,
     receipt::{
-        segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        segment::{decode_receipt_claim_from_seal, SegmentVersion},
+        InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
     sha::Digestible,
@@ -48,6 +49,11 @@ impl ProverImpl {
 }
 
 impl ProverServer for ProverImpl {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+        let ctx = self.opts.verifier_context();
+        self.prove_with_ctx(env, &ctx, elf)
+    }
+
     fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
@@ -209,18 +215,20 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let seal = match &segment.inner {
-            InnerSegment::V1(segment) => {
-                risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
-                    .prove_segment(segment)?
+        let (seal, claim, segment_version) = match &segment.inner {
+            InnerSegment::V1(inner) => {
+                let seal = risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
+                    .prove_segment(inner)?;
+                let mut claim = decode_receipt_claim_from_seal(&seal)?;
+                claim.output = segment.output.clone().into();
+                (seal, claim, SegmentVersion::V1)
             }
             InnerSegment::V2(segment) => {
-                risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(segment)?
+                let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(segment)?;
+                let claim = ReceiptClaim::decode_from_seal_v2(&seal)?;
+                (seal, claim, SegmentVersion::V2)
             }
         };
-
-        let mut claim = decode_receipt_claim_from_seal(&seal)?;
-        claim.output = segment.output.clone().into();
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
@@ -235,6 +243,7 @@ impl ProverServer for ProverImpl {
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
+            segment_version,
         };
         receipt.verify_integrity_with_context(ctx)?;
 

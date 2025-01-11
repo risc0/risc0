@@ -22,7 +22,7 @@ pub(crate) mod info;
 pub(crate) mod poly_ext;
 pub(crate) mod taps;
 
-pub(crate) struct CircuitImpl;
+pub struct CircuitImpl;
 
 #[allow(unused)]
 #[allow(non_camel_case_types)]

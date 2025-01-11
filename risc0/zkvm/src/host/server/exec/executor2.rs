@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(dead_code)]
-
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
@@ -68,6 +66,7 @@ impl<'a> Executor2<'a> {
     /// work will be done in each segment. This is the execution phase:
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
+    #[allow(dead_code)]
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage2) -> Result<Self> {
         Self::with_details(env, image, None)
     }
@@ -75,13 +74,22 @@ impl<'a> Executor2<'a> {
     /// Construct a new [Executor2] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
-    pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX)?;
-        let program = Program::load_elf(elf, USER_END_ADDR.0)?;
+    pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
+        Self::from_user_kernel_elfs(env, elf, V1COMPAT_ELF)
+    }
+
+    /// TODO(flaub)
+    pub fn from_user_kernel_elfs(
+        mut env: ExecutorEnv<'a>,
+        user_elf: &[u8],
+        kernel_elf: &[u8],
+    ) -> Result<Self> {
+        let kernel = Program::load_elf(kernel_elf, u32::MAX)?;
+        let program = Program::load_elf(user_elf, USER_END_ADDR.0)?;
         let image = MemoryImage2::with_kernel(program, kernel);
 
         let profiler = if env.pprof_out.is_some() {
-            let profiler = Rc::new(RefCell::new(Profiler::new(elf, None)?));
+            let profiler = Rc::new(RefCell::new(Profiler::new(user_elf, None)?));
             env.trace.push(profiler.clone());
             Some(profiler)
         } else {
@@ -89,6 +97,14 @@ impl<'a> Executor2<'a> {
         };
 
         Self::with_details(env, image, profiler)
+    }
+
+    /// TODO(flaub)
+    #[allow(dead_code)]
+    pub(crate) fn from_kernel_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
+        let kernel = Program::load_elf(elf, u32::MAX)?;
+        let image = MemoryImage2::new_kernel(kernel);
+        Self::with_details(env, image, None)
     }
 
     fn with_details(

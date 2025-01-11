@@ -74,11 +74,11 @@ pub enum Exception {
     #[allow(dead_code)]
     IllegalInstruction(u32),
     Breakpoint,
-    LoadMisaligned,
+    LoadAddressMisaligned,
     #[allow(dead_code)]
     LoadAccessFault(ByteAddr),
     #[allow(dead_code)]
-    StoreMisaligned(ByteAddr),
+    StoreAddressMisaligned(ByteAddr),
     StoreAccessFault,
     #[allow(dead_code)]
     InvalidEcallDispatch(u32),
@@ -546,7 +546,7 @@ impl Emulator {
             }
             InsnKind::Lh => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(Exception::LoadMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 let mut out = (data >> shift) & 0xffff;
                 if out & 0x8000 != 0 {
@@ -556,14 +556,14 @@ impl Emulator {
             }
             InsnKind::Lw => {
                 if addr.0 & 0x03 != 0 {
-                    return ctx.trap(Exception::LoadMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 data
             }
             InsnKind::LbU => (data >> shift) & 0xff,
             InsnKind::LhU => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(Exception::LoadMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 (data >> shift) & 0xffff
             }
@@ -596,7 +596,7 @@ impl Emulator {
             InsnKind::Sh => {
                 if addr.0 & 0x01 != 0 {
                     tracing::debug!("Misaligned SH");
-                    return ctx.trap(Exception::StoreMisaligned(addr));
+                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
                 }
                 data ^= data & (0xffff << shift);
                 data |= (rs2 & 0xffff) << shift;
@@ -604,7 +604,7 @@ impl Emulator {
             InsnKind::Sw => {
                 if addr.0 & 0x03 != 0 {
                     tracing::debug!("Misaligned SW");
-                    return ctx.trap(Exception::StoreMisaligned(addr));
+                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
                 }
                 data = rs2;
             }

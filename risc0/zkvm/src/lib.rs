@@ -167,10 +167,11 @@ pub use {
 pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
 
 pub use receipt::{
-    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
-    Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
-    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
+    segment::SegmentVersion, AssumptionReceipt, CompositeReceipt,
+    CompositeReceiptVerifierParameters, FakeReceipt, Groth16Receipt,
+    Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt, Journal, Receipt,
+    ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
+    SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
 
 use semver::Version;

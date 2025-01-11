@@ -234,8 +234,8 @@ impl Datasheet {
         println!("lift");
 
         let opts = ProverOpts::all_po2s();
+        let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::all_po2s();
 
         let env = ExecutorEnv::builder()
             .write_slice(&0u32.to_le_bytes())
@@ -273,8 +273,8 @@ impl Datasheet {
         println!("join");
 
         let opts = ProverOpts::all_po2s();
+        let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::all_po2s();
 
         let (po2, iters) = CYCLES_PO2_ITERS[1];
 

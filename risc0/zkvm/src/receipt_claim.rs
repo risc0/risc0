@@ -22,13 +22,14 @@
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
-use anyhow::{anyhow, ensure};
+use anyhow::{anyhow, bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
 use risc0_zkp::core::digest::Digest;
+use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -143,6 +144,41 @@ impl ReceiptClaim {
         flat.push(user_exit);
         write_sha_halfs(flat, &self.output.digest::<sha::Impl>());
         Ok(())
+    }
+
+    pub(crate) fn decode_from_seal_v2(seal: &[u32]) -> anyhow::Result<ReceiptClaim> {
+        let claim = risc0_circuit_rv32im_v2::Claim::decode(seal)?;
+        tracing::debug!("claim: {claim:#?}");
+
+        let exit_code = if claim.is_terminate {
+            let halt_type = claim.term_a0 & 0xff;
+            let user_exit = (claim.term_a0 >> 8) & 0xff;
+            match halt_type {
+                halt::TERMINATE => ExitCode::Halted(user_exit),
+                halt::PAUSE => ExitCode::Paused(user_exit),
+                _ => bail!("Illegal halt type: {halt_type}"),
+            }
+        } else {
+            ExitCode::SystemSplit
+        };
+        let post_state = match exit_code {
+            ExitCode::Halted(_) => Digest::ZERO,
+            _ => claim.post_state,
+        };
+
+        Ok(ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: claim.pre_state,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: post_state,
+            }),
+            exit_code,
+            input: MaybePruned::Pruned(claim.input),
+            output: MaybePruned::Pruned(claim.output),
+        })
     }
 }
 

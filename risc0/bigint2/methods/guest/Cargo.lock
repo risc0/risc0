@@ -798,6 +798,8 @@ dependencies = [
 name = "risc0-circuit-rv32im-v2"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "bytemuck",
  "paste",
  "risc0-binfmt",
  "risc0-core",

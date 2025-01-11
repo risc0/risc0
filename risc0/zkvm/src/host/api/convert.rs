@@ -22,14 +22,12 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
-    host::client::{
-        env::{ProveKeccakRequest, ProveZkrRequest},
-        prove::SegmentVersion,
-    },
+    host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
-        merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
-        FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt,
-        SuccinctReceipt,
+        merkle::MerkleProof,
+        segment::{decode_receipt_claim_from_seal, SegmentVersion},
+        CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata,
+        SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::Unknown,
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
@@ -445,6 +443,7 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
                 .verifier_parameters
                 .ok_or(malformed_err())?
                 .try_into()?,
+            segment_version: SegmentVersion::V1,
         })
     }
 }
