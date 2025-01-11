@@ -25,7 +25,7 @@ impl Component for CppToolchain {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{env::Environment, http_test_harness, BaseUrls};
+    use crate::{components, env::Environment, http_test_harness, BaseUrls};
     use semver::Version;
 
     fn test_cpp_toolchain_install(base_urls: BaseUrls) {
@@ -36,12 +36,10 @@ mod tests {
         let version = Version::new(2024, 1, 5);
 
         // Test installation
-        component
-            .install(&env, &base_urls, Some(&version), true)
-            .unwrap();
+        components::install(&component, &env, &base_urls, Some(&version), true).unwrap();
 
         // Clean up
-        component.uninstall(&env, &version).unwrap();
+        components::uninstall(&component, &env, &version).unwrap();
     }
 
     http_test_harness!(test_cpp_toolchain_install);

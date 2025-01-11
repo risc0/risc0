@@ -11,11 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::components::cargo_risczero::CargoRiscZero;
-use crate::components::cpp::CppToolchain;
-use crate::components::r0vm::R0Vm;
-use crate::components::rust::RustToolchain;
-use crate::components::Component;
+use crate::components::{
+    self, cargo_risczero::CargoRiscZero, cpp::CppToolchain, r0vm::R0Vm, rust::RustToolchain,
+    Component,
+};
 use crate::env::Environment;
 use crate::error::Result;
 use crate::paths::Paths;
@@ -246,7 +245,7 @@ impl Registry {
                 env.emit(RzupEvent::Debug {
                     message: format!("No version specified, fetching latest for {component_id}"),
                 });
-                component_to_install.get_latest_version(env, &self.base_urls)?
+                components::get_latest_version(&component_to_install, env, &self.base_urls)?
             }
         };
 
@@ -262,7 +261,13 @@ impl Registry {
         Paths::create_version_dirs(env, component_id, &version)?;
 
         // Install component
-        component_to_install.install(env, &self.base_urls, Some(&version), force)?;
+        components::install(
+            &component_to_install,
+            env,
+            &self.base_urls,
+            Some(&version),
+            force,
+        )?;
 
         // Update settings
         self.settings.set_active_version(component_id, &version);
@@ -285,7 +290,7 @@ impl Registry {
         version: Version,
     ) -> Result<()> {
         let component = self.create_component(id)?;
-        component.uninstall(env, &version)
+        components::uninstall(&component, env, &version)
     }
 }
 

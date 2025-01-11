@@ -185,7 +185,7 @@ impl Rzup {
     /// * `id` - Component identifier
     pub fn get_latest_version(&self, id: &str) -> Result<Version> {
         let component = self.registry.create_component(id)?;
-        component.get_latest_version(&self.environment, self.registry.base_urls())
+        components::get_latest_version(&component, &self.environment, self.registry.base_urls())
     }
 
     /// Sets the active version for a component.

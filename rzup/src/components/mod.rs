@@ -65,71 +65,85 @@ pub(crate) trait Component: std::fmt::Debug {
     fn parent_component(&self) -> Option<&'static str> {
         None
     }
+}
 
-    fn install(
-        &self,
-        env: &Environment,
-        base_urls: &BaseUrls,
-        version: Option<&Version>,
-        force: bool,
-    ) -> Result<()> {
-        if self.parent_component().is_some() {
-            return Ok(()); // dont direct install virtual-components
-        }
-
-        let distribution = GithubRelease::new(base_urls);
-
-        let latest_version = distribution.latest_version(env, "")?;
-        let version = version.unwrap_or(&latest_version);
-        env.emit(RzupEvent::InstallationStarted {
-            id: self.id().to_string(),
-            version: version.to_string(),
-        });
-
-        Paths::create_version_dirs(env, self.id(), version)?;
-
-        let archive_name = distribution.get_archive_name(self.id(), Some(version), env.platform());
-        let downloaded_file = env.tmp_dir().join(archive_name);
-
-        if force {
-            Paths::cleanup_version(env, self.id(), version)?;
-            Paths::create_version_dirs(env, self.id(), version)?;
-        }
-
-        // Download and extract
-        distribution.download_version(env, self.id(), Some(version))?;
-        let version_dir = Paths::get_version_dir(env, self.id(), version);
-
-        if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
-            Paths::cleanup_version(env, self.id(), version)?;
-            return Err(e);
-        }
-
-        if let Err(e) = std::fs::remove_file(&downloaded_file) {
-            env.emit(RzupEvent::Debug {
-                message: format!("Failed to remove downloaded archive: {e}"),
-            });
-        }
-
-        env.emit(RzupEvent::InstallationCompleted {
-            id: self.id().to_string(),
-            version: version.to_string(),
-        });
-
-        Ok(())
+impl Component for Box<dyn Component + 'static> {
+    fn id(&self) -> &'static str {
+        (**self).id()
     }
 
-    fn uninstall(&self, env: &Environment, version: &Version) -> Result<()> {
-        Paths::cleanup_version(env, self.id(), version)?;
-        env.emit(RzupEvent::Uninstalled {
-            id: self.id().to_string(),
-            version: version.to_string(),
-        });
-        Ok(())
+    fn parent_component(&self) -> Option<&'static str> {
+        (**self).parent_component()
+    }
+}
+
+pub fn install(
+    component: &impl Component,
+    env: &Environment,
+    base_urls: &BaseUrls,
+    version: Option<&Version>,
+    force: bool,
+) -> Result<()> {
+    if component.parent_component().is_some() {
+        return Ok(()); // dont direct install virtual-components
     }
 
-    fn get_latest_version(&self, env: &Environment, base_urls: &BaseUrls) -> Result<Version> {
-        let distribution = GithubRelease::new(base_urls);
-        distribution.latest_version(env, self.id())
+    let distribution = GithubRelease::new(base_urls);
+
+    let latest_version = distribution.latest_version(env, "")?;
+    let version = version.unwrap_or(&latest_version);
+    env.emit(RzupEvent::InstallationStarted {
+        id: component.id().to_string(),
+        version: version.to_string(),
+    });
+
+    Paths::create_version_dirs(env, component.id(), version)?;
+
+    let archive_name = distribution.get_archive_name(component.id(), Some(version), env.platform());
+    let downloaded_file = env.tmp_dir().join(archive_name);
+
+    if force {
+        Paths::cleanup_version(env, component.id(), version)?;
+        Paths::create_version_dirs(env, component.id(), version)?;
     }
+
+    // Download and extract
+    distribution.download_version(env, component.id(), Some(version))?;
+    let version_dir = Paths::get_version_dir(env, component.id(), version);
+
+    if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
+        Paths::cleanup_version(env, component.id(), version)?;
+        return Err(e);
+    }
+
+    if let Err(e) = std::fs::remove_file(&downloaded_file) {
+        env.emit(RzupEvent::Debug {
+            message: format!("Failed to remove downloaded archive: {e}"),
+        });
+    }
+
+    env.emit(RzupEvent::InstallationCompleted {
+        id: component.id().to_string(),
+        version: version.to_string(),
+    });
+
+    Ok(())
+}
+
+pub fn uninstall(component: &impl Component, env: &Environment, version: &Version) -> Result<()> {
+    Paths::cleanup_version(env, component.id(), version)?;
+    env.emit(RzupEvent::Uninstalled {
+        id: component.id().to_string(),
+        version: version.to_string(),
+    });
+    Ok(())
+}
+
+pub fn get_latest_version(
+    component: &impl Component,
+    env: &Environment,
+    base_urls: &BaseUrls,
+) -> Result<Version> {
+    let distribution = GithubRelease::new(base_urls);
+    distribution.latest_version(env, component.id())
 }
