@@ -237,15 +237,6 @@ impl Rzup {
         versions
     }
 
-    /// Checks if a specific version of a component is installed.
-    ///
-    /// # Arguments
-    /// * `component_id` - Component identifier
-    /// * `version` - Version to check
-    pub fn is_installed(&self, component_id: &str, version: &Version) -> bool {
-        Paths::version_exists(&self.environment, component_id, version).unwrap_or(false)
-    }
-
     /// Gets the binary path for a component version.
     ///
     /// For virtual components, returns the path within the parent component.
@@ -527,7 +518,9 @@ mod tests {
             false,
         )
         .unwrap();
-        assert!(rzup.is_installed("cargo-risczero", &cargo_risczero_version));
+        assert!(rzup
+            .version_exists("cargo-risczero", &cargo_risczero_version)
+            .unwrap());
         assert_eq!(
             rzup.settings()
                 .get_active_version("cargo-risczero")
@@ -538,18 +531,20 @@ mod tests {
         // Test uninstallation
         rzup.uninstall_component("cargo-risczero", cargo_risczero_version.clone())
             .unwrap();
-        assert!(!rzup.is_installed("cargo-risczero", &cargo_risczero_version));
+        assert!(!rzup
+            .version_exists("cargo-risczero", &cargo_risczero_version)
+            .unwrap());
 
         // Rust
         let rust_version = Version::new(1, 79, 0);
         rzup.install_component("rust", Some(rust_version.clone()), false)
             .unwrap();
-        assert!(rzup.is_installed("rust", &rust_version));
+        assert!(rzup.version_exists("rust", &rust_version).unwrap());
 
         // Test uninstallation
         rzup.uninstall_component("rust", rust_version.clone())
             .unwrap();
-        assert!(!rzup.is_installed("rust", &rust_version));
+        assert!(!rzup.version_exists("rust", &rust_version).unwrap());
     }
 
     http_test_harness!(test_install_and_uninstall_end_to_end);
