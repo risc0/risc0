@@ -915,7 +915,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -928,7 +928,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -942,7 +942,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -955,7 +955,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "anyhow",
  "metal",
@@ -969,7 +969,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -977,7 +977,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -996,7 +996,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1018,7 +1018,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1043,7 +1043,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.2.1-rc.0"
+version = "1.2.1-rc.1"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -1469,9 +1469,9 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winnow"
-version = "0.6.20"
+version = "0.6.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36c1fec1a2bb5866f07c25f68c26e565c4c200aebb96d7e55710c19d3e8ac49b"
+checksum = "68a9bda4691f099d435ad181000724da8e5899daa10713c2d432552b9ccd3a6f"
 dependencies = [
  "memchr",
 ]
