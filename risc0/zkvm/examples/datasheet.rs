@@ -22,8 +22,7 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
-    RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, RECURSION_PO2,
 };
 use serde::Serialize;
 use serde_with::{serde_as, DurationNanoSeconds};
