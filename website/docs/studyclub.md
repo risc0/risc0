@@ -23,7 +23,7 @@ Full recordings and slides from past sessions are [available on YouTube](https:/
 
 ### Showcases & Use Cases
 
-- [Unlocking the ZK Future: Uses Cases for ZK](https://www.youtube.com/watch?v=J4YHSdG0KnA\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=1)
+- [Unlocking the ZK Future: Use Cases for ZK](https://www.youtube.com/watch?v=J4YHSdG0KnA\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=1)
 - [Intro to Zeth: a block prover for Ethereum (built on Bonsai)](https://www.youtube.com/watch?v=4pBmf839eOA\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=2)
 
 ### Developer Tooling
@@ -39,7 +39,7 @@ Full recordings and slides from past sessions are [available on YouTube](https:/
 ### Mathematical Primitives
 
 - [Intro to Hash Functions](https://www.youtube.com/watch?v=_MIxjDs70W8\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=1)
-- [Intro Finite Fields](https://www.youtube.com/watch?v=g-GDvnJsZgg\&list=PLcPzhUaCxlCiddOGuYdDbFlZhH8nwtR8D)
+- [Intro to Finite Fields](https://www.youtube.com/watch?v=g-GDvnJsZgg\&list=PLcPzhUaCxlCiddOGuYdDbFlZhH8nwtR8D)
 - [Finite Field Implementations: Algorithms for Fast Multiplication](https://www.youtube.com/watch?v=hUl8ZB6hpUM\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=6)
 - [Intro to Number Theoretic Transforms (NTTs)](https://www.youtube.com/watch?v=IFsxQUbI6x0\&list=PLcPzhUaCxlChIKDDR_WghPQ1HeK01YHpa)
 - [Intro to Reed-Solomon Codes](https://www.youtube.com/watch?v=NHAuw2mkg0o\&list=PLcPzhUaCxlCgPFYnnhDbsE-7H3scbtjye)
