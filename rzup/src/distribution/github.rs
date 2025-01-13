@@ -18,10 +18,54 @@ use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
 use downloader::{downloader::Builder, Download};
 use fs2::FileExt;
-use reqwest::blocking::Client;
+use reqwest::{blocking::Client, IntoUrl};
 use semver::Version;
 use serde::Deserialize;
 use std::{path::PathBuf, time::Duration};
+
+fn http_client_get(url: impl IntoUrl) -> Result<reqwest::blocking::Response> {
+    let client = Client::builder()
+        .timeout(Duration::from_secs(10))
+        .build()
+        .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
+
+    client
+        .get(url)
+        .header("User-Agent", "rzup")
+        .send()
+        .map_err(|e| RzupError::Other(e.to_string()))
+}
+
+fn error_on_status(status: reqwest::StatusCode) -> Result<()> {
+    if !status.is_success() {
+        match status {
+            reqwest::StatusCode::FORBIDDEN | reqwest::StatusCode::TOO_MANY_REQUESTS => {
+                Err(RzupError::RateLimited(
+                    "GitHub API rate limit exceeded. Please try again later.".to_string(),
+                ))
+            }
+            status => Err(RzupError::Other(format!("Unexpected response: {status}",))),
+        }
+    } else {
+        Ok(())
+    }
+}
+
+fn check_for_not_found(url: impl IntoUrl) -> Result<bool> {
+    let response = http_client_get(url)?;
+    let status = response.status();
+    if status == reqwest::StatusCode::NOT_FOUND {
+        return Ok(false);
+    }
+    error_on_status(status)?;
+    Ok(true)
+}
+
+fn download_json<RetT: serde::de::DeserializeOwned>(url: impl IntoUrl) -> Result<RetT> {
+    let response = http_client_get(url)?;
+    error_on_status(response.status())?;
+    response.json().map_err(|e| RzupError::Other(e.to_string()))
+}
 
 #[derive(Deserialize)]
 struct GithubReleaseResponse {
@@ -114,11 +158,6 @@ impl<'a> GithubRelease<'a> {
     }
 
     fn check_release_exists(&self, component: &Component, version: &Version) -> Result<bool> {
-        let client = Client::builder()
-            .timeout(Duration::from_secs(10))
-            .build()
-            .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
-
         let repo = self.repo_name(component);
         let version_str = self.get_version_str(component, version);
         let url = format!(
@@ -126,24 +165,7 @@ impl<'a> GithubRelease<'a> {
             base_url = self.base_urls.github_api_base_url
         );
 
-        let response = client
-            .get(&url)
-            .header("User-Agent", "rzup")
-            .send()
-            .map_err(|e| RzupError::Other(format!("Failed to check release: {e}")))?;
-
-        match response.status() {
-            reqwest::StatusCode::OK => Ok(true),
-            reqwest::StatusCode::NOT_FOUND => Ok(false),
-            reqwest::StatusCode::FORBIDDEN | reqwest::StatusCode::TOO_MANY_REQUESTS => {
-                Err(RzupError::RateLimited(
-                    "GitHub API rate limit exceeded. Please try again later.".to_string(),
-                ))
-            }
-            status => Err(RzupError::Other(format!(
-                "Unexpected response checking release: {status}",
-            ))),
-        }
+        check_for_not_found(&url)
     }
 
     pub fn latest_version(&self, env: &Environment, component: &Component) -> Result<Version> {
@@ -151,34 +173,13 @@ impl<'a> GithubRelease<'a> {
             message: format!("Fetching latest version for {component}"),
         });
 
-        let client = Client::builder()
-            .timeout(Duration::from_secs(10))
-            .build()
-            .map_err(|e| RzupError::Other(e.to_string()))?;
-
         let repo = self.repo_name(component);
         let url = format!(
             "{base_url}/repos/risc0/{repo}/releases/latest",
             base_url = self.base_urls.github_api_base_url
         );
 
-        let response = client
-            .get(&url)
-            .header("User-Agent", "rzup")
-            .send()
-            .unwrap();
-
-        let status = response.status();
-
-        if status == 403 || status == 429 {
-            return Err(RzupError::RateLimited(
-                "GitHub API rate limit exceeded. Please try again later.".to_string(),
-            ));
-        }
-
-        let release: GithubReleaseResponse = response
-            .json()
-            .map_err(|e| RzupError::Other(e.to_string()))?;
+        let release: GithubReleaseResponse = download_json(&url)?;
 
         // parse version from tag name
         let version_str = match component {
