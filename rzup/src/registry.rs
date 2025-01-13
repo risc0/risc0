@@ -11,24 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::components::{
-    self, cargo_risczero::CargoRiscZero, cpp::CppToolchain, r0vm::R0Vm, rust::RustToolchain,
-    Component,
-};
+use crate::components::{self, Component};
 use crate::env::Environment;
 use crate::error::Result;
 use crate::paths::Paths;
 use crate::settings::Settings;
 use crate::{BaseUrls, RzupError, RzupEvent};
 
+use enumset::EnumSet;
 use semver::Version;
-use std::collections::HashMap;
-
-static DEFAULT_COMPONENTS: &[&str] = &["rust", "cargo-risczero", "cpp"];
 
 #[derive(Default, Debug)]
 pub(crate) struct Registry {
-    pub(crate) components: HashMap<&'static str, Box<dyn Component>>,
+    pub(crate) components: EnumSet<Component>,
     settings: Settings,
     base_urls: BaseUrls,
 }
@@ -37,7 +32,7 @@ impl Registry {
     pub fn new(env: &Environment, base_urls: BaseUrls) -> Result<Self> {
         let settings = Settings::load(env)?;
         Ok(Self {
-            components: HashMap::new(),
+            components: EnumSet::new(),
             settings,
             base_urls,
         })
@@ -58,24 +53,16 @@ impl Registry {
 
         self.components.clear();
 
-        let components: Vec<Box<dyn Component>> = vec![
-            Box::new(RustToolchain),
-            Box::new(CargoRiscZero),
-            Box::new(CppToolchain),
-            Box::new(R0Vm),
-        ];
-
-        for component in components {
-            let component_id = component.id();
+        for component in Component::iter() {
             env.emit(RzupEvent::Debug {
-                message: format!("Registering component: {component_id}"),
+                message: format!("Registering component: {component}"),
             });
 
             self.register_component(component);
 
             // Check if we already have an active version set
-            if self.settings.get_active_version(component_id).is_none() {
-                let mut all_versions = self.list_component_versions(env, component_id)?;
+            if self.settings.get_active_version(&component).is_none() {
+                let mut all_versions = self.list_component_versions(env, &component)?;
 
                 all_versions.sort_by(|a, b| b.cmp(a));
 
@@ -83,11 +70,11 @@ impl Registry {
                 if let Some(highest_version) = all_versions.first() {
                     env.emit(RzupEvent::Debug {
                         message: format!(
-                            "Setting highest version {highest_version} as active for {component_id}",
+                            "Setting highest version {highest_version} as active for {component}",
                         ),
                     });
                     self.settings
-                        .set_active_version(component_id, highest_version);
+                        .set_active_version(&component, highest_version);
                 }
             }
         }
@@ -96,20 +83,24 @@ impl Registry {
         Ok(())
     }
 
-    pub fn list_component_versions(&self, env: &Environment, id: &str) -> Result<Vec<Version>> {
+    pub fn list_component_versions(
+        &self,
+        env: &Environment,
+        component: &Component,
+    ) -> Result<Vec<Version>> {
         let mut versions = Vec::new();
 
         // Handle virtual components first
-        if let Some(component) = self.components.get(id) {
+        if self.components.contains(*component) {
             if let Some(parent_id) = component.parent_component() {
                 env.emit(RzupEvent::Debug {
-                    message: format!("Component {id} using parent {parent_id}"),
+                    message: format!("Component {component} using parent {parent_id}"),
                 });
-                return self.list_component_versions(env, parent_id);
+                return self.list_component_versions(env, &parent_id);
             }
         }
 
-        let component_dir = Paths::get_component_dir(env, id);
+        let component_dir = Paths::get_component_dir(env, component);
         env.emit(RzupEvent::Debug {
             message: format!("Scanning directory: {}", component_dir.display()),
         });
@@ -129,11 +120,11 @@ impl Registry {
 
             let dir_name = entry.file_name().to_string_lossy().to_string();
 
-            if !dir_name.contains(id) {
+            if !dir_name.contains(component.as_str()) {
                 continue;
             }
 
-            match Paths::parse_version_from_path(&dir_name, id) {
+            match Paths::parse_version_from_path(&dir_name, component) {
                 Some(version) => {
                     env.emit(RzupEvent::Debug {
                         message: format!("Successfully parsed version {version} from {dir_name}",),
@@ -159,18 +150,18 @@ impl Registry {
     pub fn get_active_component_version(
         &self,
         env: &Environment,
-        id: &str,
+        component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
         // For virtual components, get active version from parent
-        if let Some(component) = self.components.get(id) {
+        if self.components.contains(*component) {
             if let Some(parent_id) = component.parent_component() {
-                return self.get_active_component_version(env, parent_id);
+                return self.get_active_component_version(env, &parent_id);
             }
         }
 
-        if let Some(version) = self.settings.get_active_version(id) {
-            if Paths::version_exists(env, id, &version)? {
-                let version_dir = Paths::get_version_dir(env, id, &version);
+        if let Some(version) = self.settings.get_active_version(component) {
+            if Paths::version_exists(env, component, &version)? {
+                let version_dir = Paths::get_version_dir(env, component, &version);
                 return Ok(Some((version, version_dir)));
             }
         }
@@ -180,85 +171,72 @@ impl Registry {
     pub fn set_active_component_version(
         &mut self,
         env: &Environment,
-        id: &str,
+        component: &Component,
         version: Version,
     ) -> Result<()> {
-        if !Paths::version_exists(env, id, &version)? {
+        if !Paths::version_exists(env, component, &version)? {
             return Err(RzupError::InvalidVersion(format!(
                 "Version {version} is not installed",
             )));
         }
 
-        self.settings.set_active_version(id, &version);
+        self.settings.set_active_version(component, &version);
         self.settings.save(env)?;
         Ok(())
     }
 
-    pub fn list_components(&self) -> Vec<&dyn Component> {
-        self.components
-            .values()
-            .map(|boxed| boxed.as_ref())
-            .collect()
+    pub fn list_components(&self) -> Vec<Component> {
+        self.components.iter().collect()
     }
 
-    fn register_component(&mut self, component: Box<dyn Component>) {
-        self.components.insert(component.id(), component);
-    }
-
-    pub fn create_component(&self, id: &str) -> Result<Box<dyn Component>> {
-        match id {
-            "rust" => Ok(Box::new(RustToolchain)),
-            "cargo-risczero" => Ok(Box::new(CargoRiscZero)),
-            "cpp" => Ok(Box::new(CppToolchain)),
-            "r0vm" => Ok(Box::new(R0Vm)),
-            _ => Err(RzupError::ComponentNotFound(id.to_string())),
-        }
+    fn register_component(&mut self, component: Component) {
+        self.components.insert(component);
     }
 
     pub fn install_component(
         &mut self,
         env: &Environment,
-        id: &str,
+        component: &Component,
         version: Option<Version>,
         force: bool,
     ) -> Result<()> {
         env.emit(RzupEvent::Debug {
             message: format!(
-                "Installing component {id} (version: {:?}, force: {force})",
+                "Installing component {component} (version: {:?}, force: {force})",
                 version
             ),
         });
 
-        let component = self.create_component(id)?;
-
         // Handle virtual components
-        let (component_to_install, version_to_install, component_id) =
+        let (component_to_install, version_to_install) =
             if let Some(parent_id) = component.parent_component() {
-                (self.create_component(parent_id)?, version, parent_id)
+                (parent_id, version)
             } else {
-                (component, version, id)
+                (*component, version)
             };
 
         let version = match version_to_install {
             Some(v) => v,
             None => {
                 env.emit(RzupEvent::Debug {
-                    message: format!("No version specified, fetching latest for {component_id}"),
+                    message: format!(
+                        "No version specified, fetching latest for {component_to_install}"
+                    ),
                 });
                 components::get_latest_version(&component_to_install, env, &self.base_urls)?
             }
         };
 
-        if !force && Paths::version_exists(env, component_id, &version)? {
+        if !force && Paths::version_exists(env, &component_to_install, &version)? {
             env.emit(RzupEvent::ComponentAlreadyInstalled {
-                id: id.to_string(),
+                id: component.to_string(),
                 version: version.to_string(),
             });
             return Ok(());
         }
 
         // Create necessary directories before installation
-        Paths::create_version_dirs(env, component_id, &version)?;
+        Paths::create_version_dirs(env, &component_to_install, &version)?;
 
         // Install component
         components::install(
@@ -270,15 +248,16 @@ impl Registry {
         )?;
 
         // Update settings
-        self.settings.set_active_version(component_id, &version);
+        self.settings
+            .set_active_version(&component_to_install, &version);
         self.settings.save(env)?;
 
         Ok(())
     }
 
     pub fn install_all_components(&mut self, env: &Environment, force: bool) -> Result<()> {
-        for &component_id in DEFAULT_COMPONENTS {
-            self.install_component(env, component_id, None, force)?;
+        for component in Component::iter() {
+            self.install_component(env, &component, None, force)?;
         }
         Ok(())
     }
@@ -286,11 +265,10 @@ impl Registry {
     pub fn uninstall_component(
         &mut self,
         env: &Environment,
-        id: &str,
+        component: &Component,
         version: Version,
     ) -> Result<()> {
-        let component = self.create_component(id)?;
-        components::uninstall(&component, env, &version)
+        components::uninstall(component, env, &version)
     }
 }
 
@@ -317,22 +295,20 @@ mod tests {
     fn test_version_management(base_urls: BaseUrls) {
         let (_tmp_dir, env, mut registry) = setup_test_registry(base_urls);
         let version = Version::new(1, 0, 0);
-        let component_id = "cargo-risczero";
+        let component = Component::CargoRiscZero;
 
         // Test installation
         registry
-            .install_component(&env, component_id, Some(version.clone()), false)
+            .install_component(&env, &component, Some(version.clone()), false)
             .unwrap();
 
         // Test version listing
-        let versions = registry
-            .list_component_versions(&env, component_id)
-            .unwrap();
+        let versions = registry.list_component_versions(&env, &component).unwrap();
         assert!(versions.contains(&version));
 
         // Test active version
         let active = registry
-            .get_active_component_version(&env, component_id)
+            .get_active_component_version(&env, &component)
             .unwrap();
         assert_eq!(active.map(|(v, _)| v), Some(version.clone()));
     }

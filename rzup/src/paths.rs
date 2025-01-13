@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use crate::components::Component;
 use crate::env::Environment;
 use crate::error::Result;
 use crate::events::RzupEvent;
@@ -20,40 +21,39 @@ use std::path::PathBuf;
 pub struct Paths;
 
 impl Paths {
-    pub fn get_component_dir(env: &Environment, component_id: &str) -> PathBuf {
-        match component_id {
-            "rust" | "cpp" => env.root_dir().join("toolchains"),
-            "cargo-risczero" | "r0vm" => env.root_dir().join("extensions"),
-            _ => env.root_dir().join(component_id),
+    pub fn get_component_dir(env: &Environment, component: &Component) -> PathBuf {
+        match component {
+            Component::RustToolchain | Component::CppToolchain => env.root_dir().join("toolchains"),
+            Component::CargoRiscZero | Component::R0Vm => env.root_dir().join("extensions"),
         }
     }
 
-    pub fn get_version_dir(env: &Environment, component_id: &str, version: &Version) -> PathBuf {
-        let base_path = Self::get_component_dir(env, component_id);
-        base_path.join(format!("v{version}-{component_id}-{}", env.platform()))
+    pub fn get_version_dir(env: &Environment, component: &Component, version: &Version) -> PathBuf {
+        let base_path = Self::get_component_dir(env, component);
+        base_path.join(format!("v{version}-{component}-{}", env.platform()))
     }
 
-    pub fn get_bin_dir(env: &Environment, component_id: &str, version: &Version) -> PathBuf {
-        let version_dir = Self::get_version_dir(env, component_id, version);
+    pub fn get_bin_dir(env: &Environment, component: &Component, version: &Version) -> PathBuf {
+        let version_dir = Self::get_version_dir(env, component, version);
         version_dir.join("bin")
     }
 
     pub fn get_bin_path(
         env: &Environment,
-        component_id: &str,
+        component: &Component,
         version: &Version,
         bin: &str,
     ) -> PathBuf {
-        let bin_dir = Self::get_bin_dir(env, component_id, version);
+        let bin_dir = Self::get_bin_dir(env, component, version);
         bin_dir.join(bin)
     }
 
     pub fn version_exists(
         env: &Environment,
-        component_id: &str,
+        component: &Component,
         version: &Version,
     ) -> Result<bool> {
-        let component_dir = Self::get_component_dir(env, component_id);
+        let component_dir = Self::get_component_dir(env, component);
         if !component_dir.exists() {
             return Ok(false);
         }
@@ -65,7 +65,7 @@ impl Paths {
             }
 
             let dir_name = entry.file_name().to_string_lossy().to_string();
-            if let Some(parsed_version) = Self::parse_version_from_path(&dir_name, component_id) {
+            if let Some(parsed_version) = Self::parse_version_from_path(&dir_name, component) {
                 if parsed_version == *version {
                     return Ok(true);
                 }
@@ -77,10 +77,10 @@ impl Paths {
 
     pub fn create_version_dirs(
         env: &Environment,
-        component_id: &str,
+        component: &Component,
         version: &Version,
     ) -> Result<()> {
-        let component_dir = Self::get_component_dir(env, component_id);
+        let component_dir = Self::get_component_dir(env, component);
         if !component_dir.exists() {
             env.emit(RzupEvent::Debug {
                 message: format!("Creating component directory: {}", component_dir.display()),
@@ -88,7 +88,7 @@ impl Paths {
             std::fs::create_dir_all(&component_dir)?;
         }
 
-        let version_dir = Self::get_version_dir(env, component_id, version);
+        let version_dir = Self::get_version_dir(env, component, version);
         if !version_dir.exists() {
             env.emit(RzupEvent::Debug {
                 message: format!("Creating version directory: {}", version_dir.display()),
@@ -108,13 +108,17 @@ impl Paths {
         Ok(())
     }
 
-    pub fn cleanup_version(env: &Environment, component_id: &str, version: &Version) -> Result<()> {
-        let version_dir = Self::get_version_dir(env, component_id, version);
+    pub fn cleanup_version(
+        env: &Environment,
+        component: &Component,
+        version: &Version,
+    ) -> Result<()> {
+        let version_dir = Self::get_version_dir(env, component, version);
         if version_dir.exists() {
             std::fs::remove_dir_all(&version_dir)?;
         }
 
-        let component_dir = Self::get_component_dir(env, component_id);
+        let component_dir = Self::get_component_dir(env, component);
         if component_dir.exists() && std::fs::read_dir(&component_dir)?.count() == 0 {
             std::fs::remove_dir(component_dir)?;
         }
@@ -122,7 +126,7 @@ impl Paths {
         Ok(())
     }
 
-    pub fn parse_version_from_path(dir_name: &str, component_id: &str) -> Option<Version> {
+    pub fn parse_version_from_path(dir_name: &str, component: &Component) -> Option<Version> {
         fn extract_version(version_part: &str) -> Option<Version> {
             let segments: Vec<&str> = version_part.split('-').collect();
             match segments.len() {
@@ -135,13 +139,13 @@ impl Paths {
             }
         }
 
-        let result = if dir_name.starts_with("r0.") && component_id == "rust" {
+        let result = if dir_name.starts_with("r0.") && component == &Component::RustToolchain {
             // Handle legacy rust format
             dir_name
                 .strip_prefix("r0.")
                 .and_then(|v| v.split('-').next())
                 .and_then(|v| Version::parse(v).ok())
-        } else if component_id == "cpp" && !dir_name.starts_with('v') {
+        } else if component == &Component::CppToolchain && !dir_name.starts_with('v') {
             // Handle legacy cpp format (YYYY.MM.DD-risc0-cpp-...)
             let v = dir_name.split('-').next()?;
             let parts: Vec<_> = v.split('.').collect();
@@ -154,16 +158,16 @@ impl Paths {
             })
         } else if dir_name.starts_with('v') {
             let version_part = dir_name.strip_prefix('v')?;
-            if version_part.contains(&format!("-{component_id}-")) {
+            if version_part.contains(&format!("-{component}-")) {
                 // New format with platform suffix
                 version_part
-                    .split(&format!("-{component_id}-"))
+                    .split(&format!("-{component}-"))
                     .next()
                     .and_then(extract_version)
-            } else if version_part.ends_with(component_id) {
+            } else if version_part.ends_with(component.as_str()) {
                 // Legacy format without platform suffix
                 version_part
-                    .split(&format!("-{component_id}"))
+                    .split(&format!("-{component}"))
                     .next()
                     .and_then(extract_version)
             } else {
@@ -192,75 +196,43 @@ mod tests {
     #[test]
     fn test_parse_legacy_rust_version() {
         let dir_name = "r0.1.81.0-risc0-rust-aarch64-apple-darwin";
-        let version = Paths::parse_version_from_path(dir_name, "rust");
+        let version = Paths::parse_version_from_path(dir_name, &Component::RustToolchain);
         assert_eq!(version, Version::parse("1.81.0").ok());
     }
 
     #[test]
     fn test_parse_legacy_cargo_risczero_version() {
         let dir_name = "v1.2.1-rc.0-cargo-risczero";
-        let version = Paths::parse_version_from_path(dir_name, "cargo-risczero");
+        let version = Paths::parse_version_from_path(dir_name, &Component::CargoRiscZero);
         assert_eq!(version, Version::parse("1.2.1-rc.0").ok());
     }
 
     #[test]
     fn test_parse_new_format_version() {
         let dir_name = "v1.2.0-cargo-risczero-aarch64-apple-darwin";
-        let version = Paths::parse_version_from_path(dir_name, "cargo-risczero");
+        let version = Paths::parse_version_from_path(dir_name, &Component::CargoRiscZero);
         assert_eq!(version, Version::parse("1.2.0").ok());
     }
 
     #[test]
     fn test_parse_new_rust_format_version() {
         let dir_name = "v1.79.0-rust-aarch64-apple-darwin";
-        let version = Paths::parse_version_from_path(dir_name, "rust");
+        let version = Paths::parse_version_from_path(dir_name, &Component::RustToolchain);
         assert_eq!(version, Version::parse("1.79.0").ok());
-    }
-    #[test]
-    fn test_component_paths() {
-        let (_tmp_dir, env) = setup_test_env();
-        let version = Version::new(1, 0, 0);
-        let component_id = "test-component";
-
-        // Test component directory path
-        let component_dir = Paths::get_component_dir(&env, component_id);
-        assert_eq!(component_dir, env.root_dir().join("test-component"));
-
-        // Test version directory path
-        let version_dir = Paths::get_version_dir(&env, component_id, &version);
-        assert_eq!(
-            version_dir,
-            env.root_dir().join("test-component").join(format!(
-                "v{}-{}-{}",
-                version,
-                component_id,
-                env.platform()
-            ))
-        );
-
-        // Test bin directory path
-        let bin_dir = Paths::get_bin_dir(&env, component_id, &version);
-        assert_eq!(
-            bin_dir,
-            env.root_dir()
-                .join("test-component")
-                .join(format!("v{version}-{component_id}-{}", env.platform()))
-                .join("bin")
-        );
     }
 
     #[test]
     fn test_directory_creation_and_cleanup() {
         let (_tmp_dir, env) = setup_test_env();
         let version = Version::new(1, 0, 0);
-        let component_id = "test-component";
+        let component = Component::RustToolchain;
 
         // Test directory creation
-        Paths::create_version_dirs(&env, component_id, &version).unwrap();
-        assert!(Paths::version_exists(&env, component_id, &version).unwrap());
+        Paths::create_version_dirs(&env, &component, &version).unwrap();
+        assert!(Paths::version_exists(&env, &component, &version).unwrap());
 
         // Test directory cleanup
-        Paths::cleanup_version(&env, component_id, &version).unwrap();
-        assert!(!Paths::version_exists(&env, component_id, &version).unwrap());
+        Paths::cleanup_version(&env, &component, &version).unwrap();
+        assert!(!Paths::version_exists(&env, &component, &version).unwrap());
     }
 }

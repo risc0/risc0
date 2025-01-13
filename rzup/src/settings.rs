@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use crate::components::Component;
 use crate::env::Environment;
 use crate::error::Result;
 use crate::events::RzupEvent;
@@ -69,22 +70,22 @@ impl Settings {
         Ok(())
     }
 
-    pub(crate) fn get_active_version(&self, component: &str) -> Option<Version> {
+    pub(crate) fn get_active_version(&self, component: &Component) -> Option<Version> {
         self.active_versions
-            .get(component)
+            .get(component.as_str())
             .and_then(|v| Version::parse(v).ok())
     }
 
-    pub(crate) fn set_active_version(&mut self, component: &str, version: &Version) {
+    pub(crate) fn set_active_version(&mut self, component: &Component, version: &Version) {
         self.active_versions
             .insert(component.to_string(), version.to_string());
         // if cargo-risczero, also set r0vm and vice-versa
-        if component == "cargo-risczero" {
+        if component == &Component::CargoRiscZero {
             self.active_versions
-                .insert("r0vm".to_string(), version.to_string());
-        } else if component == "r0vm" {
+                .insert(Component::R0Vm.to_string(), version.to_string());
+        } else if component == &Component::R0Vm {
             self.active_versions
-                .insert("cargo-risczero".to_string(), version.to_string());
+                .insert(Component::CargoRiscZero.to_string(), version.to_string());
         }
     }
 }
@@ -102,14 +103,17 @@ mod tests {
 
         // Add some test data
         let version = Version::new(1, 0, 0);
-        settings.set_active_version("test-component", &version);
+        settings.set_active_version(&Component::CargoRiscZero, &version);
 
         // Save settings
         settings.save(&env).unwrap();
 
         // Load settings and verify
         let loaded = Settings::load(&env).unwrap();
-        assert_eq!(loaded.get_active_version("test-component"), Some(version));
+        assert_eq!(
+            loaded.get_active_version(&Component::CargoRiscZero),
+            Some(version)
+        );
     }
 
     #[test]

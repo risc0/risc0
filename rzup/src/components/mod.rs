@@ -11,18 +11,67 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-pub(crate) mod cargo_risczero;
-pub(crate) mod cpp;
-pub(crate) mod r0vm;
-pub(crate) mod rust;
-
 use crate::distribution::github::GithubRelease;
 use crate::env::Environment;
-use crate::error::Result;
+use crate::error::{Result, RzupError};
 use crate::paths::Paths;
 use crate::{BaseUrls, RzupEvent};
+use enumset::EnumSetType;
 use semver::Version;
+use std::fmt;
 use std::path::Path;
+use std::str::FromStr;
+use strum::EnumIter;
+
+#[derive(Debug, EnumSetType, EnumIter)]
+pub enum Component {
+    CargoRiscZero,
+    CppToolchain,
+    R0Vm,
+    RustToolchain,
+}
+
+impl fmt::Display for Component {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl Component {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::CargoRiscZero => "cargo-risczero",
+            Self::CppToolchain => "cpp",
+            Self::R0Vm => "r0vm",
+            Self::RustToolchain => "rust",
+        }
+    }
+
+    pub fn parent_component(&self) -> Option<Self> {
+        match self {
+            Self::R0Vm => Some(Component::CargoRiscZero),
+            _ => None,
+        }
+    }
+
+    pub fn iter() -> impl Iterator<Item = Self> {
+        <Self as strum::IntoEnumIterator>::iter()
+    }
+}
+
+impl FromStr for Component {
+    type Err = RzupError;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "cargo-risczero" => Ok(Self::CargoRiscZero),
+            "cpp" => Ok(Self::CppToolchain),
+            "r0vm" => Ok(Self::R0Vm),
+            "rust" => Ok(Self::RustToolchain),
+            c => Err(RzupError::ComponentNotFound(c.into())),
+        }
+    }
+}
 
 fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) -> Result<()> {
     use flate2::bufread::GzDecoder;
@@ -59,26 +108,8 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
     Ok(())
 }
 
-pub(crate) trait Component: std::fmt::Debug {
-    fn id(&self) -> &'static str;
-
-    fn parent_component(&self) -> Option<&'static str> {
-        None
-    }
-}
-
-impl Component for Box<dyn Component + 'static> {
-    fn id(&self) -> &'static str {
-        (**self).id()
-    }
-
-    fn parent_component(&self) -> Option<&'static str> {
-        (**self).parent_component()
-    }
-}
-
 pub fn install(
-    component: &impl Component,
+    component: &Component,
     env: &Environment,
     base_urls: &BaseUrls,
     version: Option<&Version>,
@@ -90,29 +121,29 @@ pub fn install(
 
     let distribution = GithubRelease::new(base_urls);
 
-    let latest_version = distribution.latest_version(env, "")?;
+    let latest_version = distribution.latest_version(env, &Component::CargoRiscZero)?;
     let version = version.unwrap_or(&latest_version);
     env.emit(RzupEvent::InstallationStarted {
-        id: component.id().to_string(),
+        id: component.to_string(),
         version: version.to_string(),
     });
 
-    Paths::create_version_dirs(env, component.id(), version)?;
+    Paths::create_version_dirs(env, component, version)?;
 
-    let archive_name = distribution.get_archive_name(component.id(), Some(version), env.platform());
+    let archive_name = distribution.get_archive_name(component, Some(version), env.platform());
     let downloaded_file = env.tmp_dir().join(archive_name);
 
     if force {
-        Paths::cleanup_version(env, component.id(), version)?;
-        Paths::create_version_dirs(env, component.id(), version)?;
+        Paths::cleanup_version(env, component, version)?;
+        Paths::create_version_dirs(env, component, version)?;
     }
 
     // Download and extract
-    distribution.download_version(env, component.id(), Some(version))?;
-    let version_dir = Paths::get_version_dir(env, component.id(), version);
+    distribution.download_version(env, component, Some(version))?;
+    let version_dir = Paths::get_version_dir(env, component, version);
 
     if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
-        Paths::cleanup_version(env, component.id(), version)?;
+        Paths::cleanup_version(env, component, version)?;
         return Err(e);
     }
 
@@ -123,27 +154,82 @@ pub fn install(
     }
 
     env.emit(RzupEvent::InstallationCompleted {
-        id: component.id().to_string(),
+        id: component.to_string(),
         version: version.to_string(),
     });
 
     Ok(())
 }
 
-pub fn uninstall(component: &impl Component, env: &Environment, version: &Version) -> Result<()> {
-    Paths::cleanup_version(env, component.id(), version)?;
+pub fn uninstall(component: &Component, env: &Environment, version: &Version) -> Result<()> {
+    Paths::cleanup_version(env, component, version)?;
     env.emit(RzupEvent::Uninstalled {
-        id: component.id().to_string(),
+        id: component.to_string(),
         version: version.to_string(),
     });
     Ok(())
 }
 
 pub fn get_latest_version(
-    component: &impl Component,
+    component: &Component,
     env: &Environment,
     base_urls: &BaseUrls,
 ) -> Result<Version> {
     let distribution = GithubRelease::new(base_urls);
-    distribution.latest_version(env, component.id())
+    distribution.latest_version(env, component)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{components, env::Environment, http_test_harness, BaseUrls};
+    use semver::Version;
+
+    fn test_rust_toolchain_install(base_urls: BaseUrls) {
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let env = Environment::with_root(tmp_dir.path()).unwrap();
+        let component = Component::RustToolchain;
+
+        let version = Version::new(1, 81, 0);
+
+        // Test installation
+        components::install(&component, &env, &base_urls, Some(&version), true).unwrap();
+
+        // Clean up
+        components::uninstall(&component, &env, &version).unwrap();
+    }
+
+    http_test_harness!(test_rust_toolchain_install);
+
+    fn test_cpp_toolchain_install(base_urls: BaseUrls) {
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let env = Environment::with_root(tmp_dir.path()).unwrap();
+        let component = Component::CppToolchain;
+
+        let version = Version::new(2024, 1, 5);
+
+        // Test installation
+        components::install(&component, &env, &base_urls, Some(&version), true).unwrap();
+
+        // Clean up
+        components::uninstall(&component, &env, &version).unwrap();
+    }
+
+    http_test_harness!(test_cpp_toolchain_install);
+
+    fn test_cargo_risczero_install(base_urls: BaseUrls) {
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let env = Environment::with_root(tmp_dir.path()).unwrap();
+        let component = Component::CargoRiscZero;
+
+        let version = Version::new(1, 0, 0);
+
+        // Test installation
+        components::install(&component, &env, &base_urls, Some(&version), true).unwrap();
+
+        // Clean up
+        components::uninstall(&component, &env, &version).unwrap();
+    }
+
+    http_test_harness!(test_cargo_risczero_install);
 }
