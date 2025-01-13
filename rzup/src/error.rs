@@ -43,6 +43,12 @@ impl From<std::io::Error> for RzupError {
     }
 }
 
+impl From<semver::Error> for RzupError {
+    fn from(e: semver::Error) -> Self {
+        Self::InvalidVersion(e.to_string())
+    }
+}
+
 impl From<anyhow::Error> for RzupError {
     fn from(e: anyhow::Error) -> Self {
         RzupError::Other(e.to_string())

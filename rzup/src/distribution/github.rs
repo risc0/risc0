@@ -75,6 +75,70 @@ fn download_to_writer(url: impl IntoUrl, w: &mut impl std::io::Write) -> Result<
     Ok(())
 }
 
+fn parse_version_from_tag_name(component: &Component, tag_name: &str) -> Result<Version> {
+    Ok(match component {
+        Component::RustToolchain => {
+            Version::parse(tag_name.strip_prefix("r0.").ok_or_else(|| {
+                RzupError::InvalidVersion("Invalid Rust version tag format".into())
+            })?)?
+        }
+        Component::CppToolchain => {
+            let parts: Vec<_> = tag_name.split('.').collect();
+            if parts.len() != 3 {
+                return Err(RzupError::InvalidVersion(
+                    "Invalid C++ version tag format".into(),
+                ));
+            }
+            let numbers = parts
+                .into_iter()
+                .map(|p| {
+                    p.parse::<u64>()
+                        .map_err(|_| RzupError::InvalidVersion("Invalid cpp version number".into()))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            Version::new(numbers[0], numbers[1], numbers[2])
+        }
+        Component::CargoRiscZero | Component::R0Vm => Version::parse(
+            tag_name
+                .strip_prefix('v')
+                .ok_or_else(|| RzupError::InvalidVersion("Invalid version tag format".into()))?,
+        )?,
+    })
+}
+
+#[test]
+fn parse_version_from_tag_name_test() {
+    assert_eq!(
+        parse_version_from_tag_name(&Component::RustToolchain, "r0.1.2.3").unwrap(),
+        Version::new(1, 2, 3)
+    );
+    assert!(parse_version_from_tag_name(&Component::RustToolchain, "r0.foo").is_err());
+    assert!(parse_version_from_tag_name(&Component::RustToolchain, "").is_err());
+    assert_eq!(
+        parse_version_from_tag_name(&Component::CppToolchain, "1.2.3").unwrap(),
+        Version::new(1, 2, 3)
+    );
+    assert!(parse_version_from_tag_name(&Component::CppToolchain, "1.2").is_err());
+    assert!(parse_version_from_tag_name(&Component::CppToolchain, "1").is_err());
+    assert!(parse_version_from_tag_name(&Component::CppToolchain, "a.b.c").is_err());
+    assert!(parse_version_from_tag_name(&Component::CppToolchain, "1.2.c").is_err());
+    assert!(parse_version_from_tag_name(&Component::CppToolchain, "").is_err());
+    assert_eq!(
+        parse_version_from_tag_name(&Component::CargoRiscZero, "v1.2.3").unwrap(),
+        Version::new(1, 2, 3)
+    );
+    assert!(parse_version_from_tag_name(&Component::CargoRiscZero, "v1.2").is_err());
+    assert!(parse_version_from_tag_name(&Component::CargoRiscZero, "v").is_err());
+    assert!(parse_version_from_tag_name(&Component::CargoRiscZero, "").is_err());
+    assert_eq!(
+        parse_version_from_tag_name(&Component::R0Vm, "v1.2.3").unwrap(),
+        Version::new(1, 2, 3)
+    );
+    assert!(parse_version_from_tag_name(&Component::R0Vm, "v1.2").is_err());
+    assert!(parse_version_from_tag_name(&Component::R0Vm, "v").is_err());
+    assert!(parse_version_from_tag_name(&Component::R0Vm, "").is_err());
+}
+
 #[derive(Deserialize)]
 struct GithubReleaseResponse {
     tag_name: String,
@@ -89,14 +153,13 @@ impl<'a> GithubRelease<'a> {
         Self { base_urls }
     }
 
-    fn repo_name(&self, component: &Component) -> String {
+    fn repo_name(&self, component: &Component) -> &'static str {
         match component {
             Component::CargoRiscZero => "risc0",
             Component::RustToolchain => "rust",
             Component::CppToolchain => "toolchain",
             _ => "risc0",
         }
-        .to_string()
     }
 
     fn asset_name(&self, component: &Component, platform: &Platform) -> (String, &'static str) {
@@ -189,29 +252,7 @@ impl<'a> GithubRelease<'a> {
 
         let release: GithubReleaseResponse = download_json(&url)?;
 
-        // parse version from tag name
-        let version_str = match component {
-            Component::RustToolchain => release
-                .tag_name
-                .strip_prefix("r0.")
-                .expect("Invalid rust version tag format"),
-            Component::CppToolchain => &*{
-                let parts: Vec<_> = release.tag_name.split('.').collect();
-                assert_eq!(parts.len(), 3, "Invalid cpp version tag format");
-                format!(
-                    "{}.{}.{}",
-                    parts[0].parse::<u64>().expect("Invalid cpp version number"),
-                    parts[1].parse::<u64>().expect("Invalid cpp version number"),
-                    parts[2].parse::<u64>().expect("Invalid cpp version number")
-                )
-            },
-            _ => release
-                .tag_name
-                .strip_prefix('v')
-                .expect("Invalid version tag format"),
-        };
-
-        Version::parse(version_str).map_err(|_| RzupError::InvalidVersion(version_str.to_string()))
+        parse_version_from_tag_name(component, &release.tag_name)
     }
 
     pub fn download_version(
