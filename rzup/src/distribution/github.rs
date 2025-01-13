@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::components::Component;
-use crate::distribution::{Os, Platform};
+use crate::distribution::{parse_cpp_version, Os, Platform};
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
@@ -82,22 +82,7 @@ fn parse_version_from_tag_name(component: &Component, tag_name: &str) -> Result<
                 RzupError::InvalidVersion("Invalid Rust version tag format".into())
             })?)?
         }
-        Component::CppToolchain => {
-            let parts: Vec<_> = tag_name.split('.').collect();
-            if parts.len() != 3 {
-                return Err(RzupError::InvalidVersion(
-                    "Invalid C++ version tag format".into(),
-                ));
-            }
-            let numbers = parts
-                .into_iter()
-                .map(|p| {
-                    p.parse::<u64>()
-                        .map_err(|_| RzupError::InvalidVersion("Invalid cpp version number".into()))
-                })
-                .collect::<Result<Vec<_>>>()?;
-            Version::new(numbers[0], numbers[1], numbers[2])
-        }
+        Component::CppToolchain => parse_cpp_version(tag_name)?,
         Component::CargoRiscZero | Component::R0Vm => Version::parse(
             tag_name
                 .strip_prefix('v')

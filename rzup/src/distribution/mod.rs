@@ -14,6 +14,7 @@
 pub mod github;
 
 use crate::error::{Result, RzupError};
+use semver::Version;
 use std::fmt;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -68,4 +69,32 @@ impl std::fmt::Display for Platform {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.target_triple())
     }
+}
+
+pub fn parse_cpp_version(s: &str) -> Result<Version> {
+    let parts: Vec<_> = s.split('.').collect();
+    if parts.len() != 3 {
+        return Err(RzupError::InvalidVersion(
+            "Invalid C++ version tag format".into(),
+        ));
+    }
+    let numbers = parts
+        .into_iter()
+        .map(|p| {
+            p.parse::<u64>()
+                .map_err(|_| RzupError::InvalidVersion("Invalid C++ version number".into()))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    Ok(Version::new(numbers[0], numbers[1], numbers[2]))
+}
+
+#[test]
+fn parse_cpp_version_test() {
+    assert_eq!(
+        parse_cpp_version("2025.01.01").unwrap(),
+        Version::new(2025, 1, 1)
+    );
+    assert!(parse_cpp_version("2025.a.01").is_err());
+    assert!(parse_cpp_version("2025.01.01.04").is_err());
+    assert!(parse_cpp_version("2025.01").is_err());
 }

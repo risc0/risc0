@@ -39,31 +39,12 @@ pub(crate) struct InstallCommand {
 }
 
 fn parse_cpp_version(v: &str) -> Result<Version> {
-    let parts: Vec<_> = v.split('.').collect();
-    if parts.len() != 3 || parts.iter().any(|p| p.parse::<u64>().unwrap_or(0) == 0) {
-        return Err(RzupError::InvalidVersion(format!(
+    crate::distribution::parse_cpp_version(v).map_err(|_| {
+        RzupError::InvalidVersion(format!(
             "{v}\n\n  {}: invalid date format YYYY.MM.DD",
             "tip".green()
-        )));
-    }
-
-    Ok(Version::new(
-        parts[0].parse().unwrap_or(0),
-        parts[1].parse().unwrap_or(0),
-        parts[2].parse().unwrap_or(0),
-    ))
-}
-
-#[test]
-fn parse_cpp_version_test() {
-    assert_eq!(
-        parse_cpp_version("2025.01.01").unwrap(),
-        Version::new(2025, 1, 1)
-    );
-    assert!(parse_cpp_version("2025.0.01").is_err());
-    assert!(parse_cpp_version("2025.a.01").is_err());
-    assert!(parse_cpp_version("2025.01.01.04").is_err());
-    assert!(parse_cpp_version("2025.01").is_err());
+        ))
+    })
 }
 
 fn self_update(rzup: &mut Rzup) -> Result<()> {
