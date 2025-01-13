@@ -29,7 +29,7 @@ fn main() {
     let prime = prime.to_u32_array();
 
     let mut result = [[0u32; risc0_bigint2::field::FIELD_256_WIDTH_WORDS]; risc0_bigint2::field::EXT_DEGREE_2];
-    risc0_bigint2::field::extfieldadd_256(&lhs, &rhs, &prime, &mut result);
+    risc0_bigint2::field::extfield_deg2_sub_256(&lhs, &rhs, &prime, &mut result);
 
     let result = (BigUint::from_slice(&result[0]), BigUint::from_slice(&result[1]));
 
