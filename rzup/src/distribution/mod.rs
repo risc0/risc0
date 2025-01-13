@@ -145,6 +145,12 @@ fn download_json<RetT: serde::de::DeserializeOwned>(url: impl IntoUrl) -> Result
     response.json().map_err(|e| RzupError::Other(e.to_string()))
 }
 
+pub fn download_text(url: impl IntoUrl) -> Result<String> {
+    let response = http_client_get(url)?;
+    error_on_status(response.status())?;
+    response.text().map_err(|e| RzupError::Other(e.to_string()))
+}
+
 fn download_to_writer(url: impl IntoUrl, w: &mut impl std::io::Write) -> Result<()> {
     let mut response = http_client_get(url)?;
     error_on_status(response.status())?;

@@ -305,37 +305,15 @@ impl Rzup {
             version: "latest".to_string(),
         });
 
-        let tmp_dir = self.environment.tmp_dir();
-        std::fs::create_dir_all(&tmp_dir)?;
+        let script_contents = distribution::download_text(format!(
+            "{base_url}/install",
+            base_url = self.registry.base_urls().risc0_base_url
+        ))?;
 
-        let update_script = tmp_dir.join("rzup_update.sh");
-
-        std::fs::write(
-            &update_script,
-            format!(
-                r#"#!/bin/bash
-                set -eo pipefail
-                curl -sL {risc0}/install | bash -s -- --quiet
-                "#,
-                risc0 = self.registry.base_urls().risc0_base_url
-            ),
-        )?;
-
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let mut perms = std::fs::metadata(&update_script)?.permissions();
-            perms.set_mode(0o755);
-            std::fs::set_permissions(&update_script, perms)?;
-        }
-
-        // Execute quietly
-        let output = std::process::Command::new("/bin/bash")
-            .arg(&update_script)
+        let output = std::process::Command::new("/usr/bin/env")
+            .args(["bash", "-c", &script_contents])
             .output()
             .map_err(|e| RzupError::Other(format!("Failed to execute update script: {e}")))?;
-
-        let _ = std::fs::remove_file(update_script);
 
         if !output.status.success() {
             self.emit(RzupEvent::InstallationFailed {
