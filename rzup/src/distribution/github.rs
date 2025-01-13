@@ -12,68 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::components::Component;
-use crate::distribution::{parse_cpp_version, Os, Platform};
+use crate::distribution::{
+    check_for_not_found, download_json, download_to_writer, parse_cpp_version, Os, Platform,
+};
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
 use fs2::FileExt;
-use reqwest::{blocking::Client, IntoUrl};
 use semver::Version;
 use serde::Deserialize;
-use std::{path::PathBuf, time::Duration};
-
-fn http_client_get(url: impl IntoUrl) -> Result<reqwest::blocking::Response> {
-    let client = Client::builder()
-        .timeout(Duration::from_secs(10))
-        .build()
-        .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
-
-    client
-        .get(url)
-        .header("User-Agent", "rzup")
-        .send()
-        .map_err(|e| RzupError::Other(e.to_string()))
-}
-
-fn error_on_status(status: reqwest::StatusCode) -> Result<()> {
-    if !status.is_success() {
-        match status {
-            reqwest::StatusCode::FORBIDDEN | reqwest::StatusCode::TOO_MANY_REQUESTS => {
-                Err(RzupError::RateLimited(
-                    "GitHub API rate limit exceeded. Please try again later.".to_string(),
-                ))
-            }
-            status => Err(RzupError::Other(format!("Unexpected response: {status}",))),
-        }
-    } else {
-        Ok(())
-    }
-}
-
-fn check_for_not_found(url: impl IntoUrl) -> Result<bool> {
-    let response = http_client_get(url)?;
-    let status = response.status();
-    if status == reqwest::StatusCode::NOT_FOUND {
-        return Ok(false);
-    }
-    error_on_status(status)?;
-    Ok(true)
-}
-
-fn download_json<RetT: serde::de::DeserializeOwned>(url: impl IntoUrl) -> Result<RetT> {
-    let response = http_client_get(url)?;
-    error_on_status(response.status())?;
-    response.json().map_err(|e| RzupError::Other(e.to_string()))
-}
-
-fn download_to_writer(url: impl IntoUrl, w: &mut impl std::io::Write) -> Result<()> {
-    let mut response = http_client_get(url)?;
-    error_on_status(response.status())?;
-    response
-        .copy_to(w)
-        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
-    Ok(())
-}
+use std::path::PathBuf;
 
 fn parse_version_from_tag_name(component: &Component, tag_name: &str) -> Result<Version> {
     Ok(match component {
