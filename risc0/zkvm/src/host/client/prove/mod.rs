@@ -349,7 +349,7 @@ impl ProverOpts {
     }
 
     /// TODO(flaub)
-    #[cfg(test)]
+    #[allow(dead_code)]
     pub(crate) fn with_segment_version(self, segment_version: SegmentVersion) -> Self {
         Self {
             segment_version,

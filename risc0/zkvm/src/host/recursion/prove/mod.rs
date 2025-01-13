@@ -48,7 +48,7 @@ use crate::{
     },
     receipt_claim::{Assumption, MaybePruned, Merge},
     sha::Digestible,
-    ProverOpts, ReceiptClaim, Unknown,
+    ProverOpts, ReceiptClaim, SegmentVersion, Unknown,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -418,26 +418,41 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
+        let out_size = match segment.segment_version {
+            SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE,
+            SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::OUTPUT_SIZE,
+        };
+
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.
         let mut iop = ReadIOP::new(&segment.seal, inner_hash_suite.rng.as_ref());
-        iop.read_field_elem_slice::<BabyBearElem>(risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE);
+        iop.read_field_elem_slice::<BabyBearElem>(out_size);
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift(po2, &opts.hashfn)?;
+        let (program, control_id) = match segment.segment_version {
+            SegmentVersion::V1 => zkr::lift(po2, &opts.hashfn)?,
+            SegmentVersion::V2 => zkr::lift_rv32im_v2(po2, &opts.hashfn)?,
+        };
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
-        // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
-        let which = po2 - MIN_CYCLES_PO2;
-        let inner_control_id = POSEIDON2_CONTROL_IDS[which];
-        prover.add_seal(
-            &segment.seal,
-            &inner_control_id,
-            &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
-        )?;
+        match segment.segment_version {
+            SegmentVersion::V1 => {
+                // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
+                let which = po2 - MIN_CYCLES_PO2;
+                let inner_control_id = POSEIDON2_CONTROL_IDS[which];
+                prover.add_seal(
+                    &segment.seal,
+                    &inner_control_id,
+                    &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
+                )?;
+            }
+            SegmentVersion::V2 => {
+                prover.add_input(&segment.seal);
+            }
+        }
 
         Ok(prover)
     }

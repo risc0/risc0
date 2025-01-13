@@ -123,6 +123,7 @@ impl Bootstrap {
                 .map(str::to_string)
                 .into_iter()
                 .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
+                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
                 .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");

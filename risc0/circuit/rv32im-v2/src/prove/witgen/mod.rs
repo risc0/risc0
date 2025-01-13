@@ -128,7 +128,7 @@ impl<H: Hal> WitnessGenerator<H> {
             // tracing::trace!(
             //     "[{row}] pc: {:#010x}, state: {:?}",
             //     cycle.pc,
-            //     CycleState::from_u32(cycle.state).unwrap()
+            //     crate::execute::CycleState::from_u32(cycle.state).unwrap()
             // );
             match back {
                 Back::None => {}
@@ -210,17 +210,22 @@ impl Injector {
         const NEXT_PC_LOW: usize = LAYOUT_TOP.next_pc_low._super.offset;
         const NEXT_PC_HIGH: usize = LAYOUT_TOP.next_pc_high._super.offset;
         const NEXT_STATE: usize = LAYOUT_TOP.next_state_0._super.offset;
-        const MACHINE_MODE: usize = LAYOUT_TOP.next_machine_mode._super.offset;
+        const NEXT_MACHINE_MODE: usize = LAYOUT_TOP.next_machine_mode._super.offset;
         self.set(row, CYCLE_COL, row as u32);
         self.set(row, NEXT_PC_LOW, cycle.pc & 0xffff);
         self.set(row, NEXT_PC_HIGH, cycle.pc >> 16);
         self.set(row, NEXT_STATE, cycle.state);
-        self.set(row, MACHINE_MODE, cycle.machine_mode as u32);
+        if row != 0 {
+            self.set(row, NEXT_MACHINE_MODE, cycle.machine_mode as u32);
+        }
         self.index.push(self.offsets.len() as u32);
     }
 
     fn set(&mut self, row: usize, col: usize, value: u32) {
         let idx = col * self.rows + row;
+        if row == 0 {
+            tracing::debug!("row: {row}, col: {col}, value: {value}, idx: {idx}");
+        }
         self.offsets.push(idx as u32);
         self.values.push(value.into());
     }

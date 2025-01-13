@@ -40,20 +40,28 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("d621555070b62e383b8e16511aa8b244cb442656c5c396302fe75816c477b902"), // recursion lift_19.zkr
     digest!("66f12c252c978962a100976c69ea6a4dfb2b4a2a504d6d5c60fb8e2fff6f4b61"), // recursion lift_20.zkr
     digest!("88a6322eccb8f141087c48174211df1d0e071603ebfefb69f0099836569e384a"), // recursion lift_21.zkr
+    digest!("2fd3c00a3359de45f4c8964c8dda4f706fbd8d57e2af5b190c554c668977bd41"), // recursion lift_rv32im_v2_14.zkr
+    digest!("b3a7d910d36adf5d2bd4a409c0e4352a6581492ad45a693ad5c48a4eda3b606d"), // recursion lift_rv32im_v2_15.zkr
+    digest!("cda166366c82e16e101bd439af418e50149462447b162a1c0f11921449d5784f"), // recursion lift_rv32im_v2_16.zkr
+    digest!("cfc4505c8734ae62b7178a643f30530c9498517341c2ff1ab30b80221a0ae26f"), // recursion lift_rv32im_v2_17.zkr
+    digest!("e0abee492fc65a59cd51ee0a4308663407b0e06cb9864f3268dfb63d53649d4a"), // recursion lift_rv32im_v2_18.zkr
+    digest!("8599373e9159d328dcc78f4ba34bd81f6b514604e6d6ec6f53e7ed1f55c30566"), // recursion lift_rv32im_v2_19.zkr
+    digest!("9c44ee592e594b25cd4aac120018c413d7c4846085a76a5c7069576cec51281c"), // recursion lift_rv32im_v2_20.zkr
+    digest!("59c57e00a6bfa665cbfd6f4709fc476283042042f0064f4c0298cd11302fb83a"), // recursion lift_rv32im_v2_21.zkr
     digest!("53a7b23d07f99e5d5685e85874f5181e8486aa267a0ae607ffe9ba47c8bdda4a"), // recursion resolve.zkr
     digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"), // recursion union.zkr
 ];
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("8cdad9242664be3112aba377c5425a4df735eb1c6966472b561d2855932c0469");
+    digest!("1e116c1a1d135612aa89444ad19fc3489c93b8653196256f6a2d976de4428951");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
     digest!("c07a65145c3cb48b6101962ea607a4dd93c753bb26975cb47feb00d3666e4404");
 
 /// Control IDs for included recursion programs (ZKRs), using Poseidon2 over BabyBear.
-pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 16] = [
+pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 27] = [
     (
         "identity.zkr",
         digest!("0d79bc33b4760b4783cbb96fdc87724c7e0c463eb0ba1b2705d39f43c698bd2d"),
@@ -107,6 +115,50 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 16] = [
         digest!("d8c1dd073822ac1da582bd52bed7ee35f106326dcb7a191d66df420016339571"),
     ),
     (
+        "lift_rv32im_v2_14.zkr",
+        digest!("2fd3c00a3359de45f4c8964c8dda4f706fbd8d57e2af5b190c554c668977bd41"),
+    ),
+    (
+        "lift_rv32im_v2_15.zkr",
+        digest!("b3a7d910d36adf5d2bd4a409c0e4352a6581492ad45a693ad5c48a4eda3b606d"),
+    ),
+    (
+        "lift_rv32im_v2_16.zkr",
+        digest!("cda166366c82e16e101bd439af418e50149462447b162a1c0f11921449d5784f"),
+    ),
+    (
+        "lift_rv32im_v2_17.zkr",
+        digest!("cfc4505c8734ae62b7178a643f30530c9498517341c2ff1ab30b80221a0ae26f"),
+    ),
+    (
+        "lift_rv32im_v2_18.zkr",
+        digest!("e0abee492fc65a59cd51ee0a4308663407b0e06cb9864f3268dfb63d53649d4a"),
+    ),
+    (
+        "lift_rv32im_v2_19.zkr",
+        digest!("8599373e9159d328dcc78f4ba34bd81f6b514604e6d6ec6f53e7ed1f55c30566"),
+    ),
+    (
+        "lift_rv32im_v2_20.zkr",
+        digest!("9c44ee592e594b25cd4aac120018c413d7c4846085a76a5c7069576cec51281c"),
+    ),
+    (
+        "lift_rv32im_v2_21.zkr",
+        digest!("59c57e00a6bfa665cbfd6f4709fc476283042042f0064f4c0298cd11302fb83a"),
+    ),
+    (
+        "lift_rv32im_v2_22.zkr",
+        digest!("15a9613592b1994cd13e961eea109d69bc9ffa271bcb42680291b43480b50c00"),
+    ),
+    (
+        "lift_rv32im_v2_23.zkr",
+        digest!("81dced6ffdd1c10e6f50512bb5a67627bb3b4d6e7f39f167358511674e0ac13f"),
+    ),
+    (
+        "lift_rv32im_v2_24.zkr",
+        digest!("55a49338a188912268eda807dd4cf563bee14b20f455d4368a323f6aeb88ec60"),
+    ),
+    (
         "resolve.zkr",
         digest!("53a7b23d07f99e5d5685e85874f5181e8486aa267a0ae607ffe9ba47c8bdda4a"),
     ),
@@ -121,7 +173,7 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 16] = [
 ];
 
 /// Control IDs for included recursion programs (ZKRs), using SHA-256.
-pub const SHA256_CONTROL_IDS: [(&str, Digest); 16] = [
+pub const SHA256_CONTROL_IDS: [(&str, Digest); 27] = [
     (
         "identity.zkr",
         digest!("d7ecd18c7d06fc468166147cf20869aa10f32e097a0c166146a5a62dd2d975ea"),
@@ -173,6 +225,50 @@ pub const SHA256_CONTROL_IDS: [(&str, Digest); 16] = [
     (
         "lift_24.zkr",
         digest!("a827fd3663ab862331c47b1ba985fde346c13851535b1d80693b6367771644a7"),
+    ),
+    (
+        "lift_rv32im_v2_14.zkr",
+        digest!("73df356afb836e7de7e73667e79795d13c477f87dc53e007326f6034f28e973d"),
+    ),
+    (
+        "lift_rv32im_v2_15.zkr",
+        digest!("af61a74dcc03575ff0437f2d3efe9cf53717d6913666e28f62d7bd9a477bf6d2"),
+    ),
+    (
+        "lift_rv32im_v2_16.zkr",
+        digest!("df365ae2190da15083f2838c6e01a846a75ede7501bdde8f0c958e586de10ae0"),
+    ),
+    (
+        "lift_rv32im_v2_17.zkr",
+        digest!("8e683a04df3720de4212f2723f7ad65eddeb548a56f3ddca1e4b07ec1c80cd7d"),
+    ),
+    (
+        "lift_rv32im_v2_18.zkr",
+        digest!("e56a7d692c56653c1c3989c5f13d3ef4476d28968382faeda45100cf1d249d37"),
+    ),
+    (
+        "lift_rv32im_v2_19.zkr",
+        digest!("532b6ffff06963c8f9814eed72fd6f72ada2fe5b17a06b09a0635f173ce40ec0"),
+    ),
+    (
+        "lift_rv32im_v2_20.zkr",
+        digest!("065ebbf0008bb94b75620bb52c222363b6783b305104d23bbab6e6c19e95d122"),
+    ),
+    (
+        "lift_rv32im_v2_21.zkr",
+        digest!("9776610ff5a6cb224c5a83d305f5ad3ae75cc727eacc9a524462a6cafa68c073"),
+    ),
+    (
+        "lift_rv32im_v2_22.zkr",
+        digest!("a9d9b966ea9b382c9540f43ba4a4ab6b2f7bc0a0df54b0612939ccd7142b450f"),
+    ),
+    (
+        "lift_rv32im_v2_23.zkr",
+        digest!("f5867328bbc7838bcce17a7f751857e89ac9802799483dcc545951ca68fcecd8"),
+    ),
+    (
+        "lift_rv32im_v2_24.zkr",
+        digest!("01ba967233f3b1dc1345f8715cb1be9710a920d8f7774724bcd0611038416c3d"),
     ),
     (
         "resolve.zkr",

@@ -116,7 +116,7 @@ fn receipt_serde(#[case] version: SegmentVersion) {
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: Receipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
-    let ctx = VerifierContext::from_version(version);
+    let ctx = VerifierContext::for_version(version);
     decoded
         .verify_with_context(&ctx, multi_test_id(version))
         .unwrap();
@@ -129,7 +129,7 @@ fn check_image_id(#[case] version: SegmentVersion) {
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
-    let ctx = VerifierContext::from_version(version);
+    let ctx = VerifierContext::for_version(version);
     assert!(matches!(
         receipt.verify_with_context(&ctx, image_id).unwrap_err(),
         VerificationError::ClaimDigestMismatch { .. }
@@ -247,7 +247,7 @@ fn memory_io(#[case] pairs: &[(usize, usize)], #[values(V1, V2)] version: Segmen
         .build()
         .unwrap();
     let receipt = prove_elf(version, env, MULTI_TEST_ELF).unwrap();
-    let ctx = VerifierContext::from_version(version);
+    let ctx = VerifierContext::for_version(version);
     receipt.verify_integrity_with_context(&ctx).unwrap();
     assert_eq!(
         receipt.claim().unwrap().as_value().unwrap().exit_code,
@@ -486,7 +486,6 @@ fn continuation_v1() {
 }
 
 #[test_log::test]
-#[ignore]
 fn continuation_v2() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
@@ -725,7 +724,7 @@ mod sys_verify {
 
         // Double check that the receipt verifies with the expected image ID and exit code.
         halt_receipt
-            .verify_integrity_with_context(&VerifierContext::from_version(version))
+            .verify_integrity_with_context(&VerifierContext::for_version(version))
             .unwrap();
         let halt_claim = halt_receipt.claim().unwrap();
         assert_eq!(
@@ -794,7 +793,7 @@ mod sys_verify {
         prove_elf(version, env, MULTI_TEST_ELF)
             .unwrap()
             .verify_with_context(
-                &VerifierContext::from_version(version),
+                &VerifierContext::for_version(version),
                 multi_test_id(version),
             )
             .unwrap();
@@ -867,7 +866,7 @@ mod sys_verify {
         prove_elf(version, env, MULTI_TEST_ELF)
             .unwrap()
             .verify_with_context(
-                &VerifierContext::from_version(version),
+                &VerifierContext::for_version(version),
                 multi_test_id(version),
             )
             .unwrap();
@@ -913,7 +912,7 @@ mod sys_verify {
         prove_elf(version, env, MULTI_TEST_ELF)
             .unwrap()
             .verify_with_context(
-                &VerifierContext::from_version(version),
+                &VerifierContext::for_version(version),
                 multi_test_id(version),
             )
             .unwrap();
@@ -940,7 +939,7 @@ mod sys_verify {
         let receipt = prove_elf(version, env, MULTI_TEST_ELF).unwrap();
         receipt
             .verify_with_context(
-                &VerifierContext::from_version(version),
+                &VerifierContext::for_version(version),
                 multi_test_id(version),
             )
             .unwrap();
@@ -957,7 +956,7 @@ mod sys_verify {
         let receipt = prove_elf_succinct(version, env, MULTI_TEST_ELF).unwrap();
         receipt
             .verify_with_context(
-                &VerifierContext::from_version(version),
+                &VerifierContext::for_version(version),
                 multi_test_id(version),
             )
             .unwrap();

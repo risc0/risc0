@@ -71,13 +71,11 @@ where
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum StepMode {
-    #[allow(dead_code)]
     Parallel,
-    #[cfg(test)]
     SeqForward,
-    #[cfg(test)]
     SeqReverse,
 }
 
@@ -135,8 +133,8 @@ where
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),
             segment,
-            StepMode::Parallel,
-            // StepMode::SeqForward,
+            // StepMode::Parallel,
+            StepMode::SeqForward,
             rand_z,
         )?;
 

@@ -20,7 +20,7 @@ use super::CircuitImpl;
 
 impl CircuitInfo for CircuitImpl {
     #[rustfmt::skip]
-    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(*b"ZIRGEN_TEST_____");
+    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(*b"RV32IM:v2_______");
 
     #[rustfmt::skip]
     const OUTPUT_SIZE: usize = 74;

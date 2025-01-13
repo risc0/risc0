@@ -87,7 +87,6 @@ impl Segment {
         preflight.body()?;
         preflight.write_pages()?;
         preflight.generate_tables()?;
-        preflight.padding()?;
         preflight.wrap_memory_txns()?;
         preflight.update_p2_zcheck()?;
 
@@ -187,20 +186,6 @@ impl<'a> Preflight<'a> {
         self.fini()
     }
 
-    pub fn padding(&mut self) -> Result<()> {
-        let last_cycle = 1 << self.segment.po2;
-        for _ in self.trace.cycles.len()..last_cycle {
-            self.add_cycle_special(
-                CycleState::ControlDone,
-                CycleState::ControlDone,
-                0,
-                0,
-                Back::None,
-            );
-        }
-        Ok(())
-    }
-
     // Now, go back and update memory transactions to wrap around
     fn wrap_memory_txns(&mut self) -> Result<()> {
         for txn in self.trace.txns.iter_mut() {
@@ -282,7 +267,7 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
-        if !matches!(self.segment.exit_code, ExitCode::Halted(_)) {
+        if self.segment.exit_code == ExitCode::SystemSplit {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
                 bail!("Stopping segment too early");
@@ -298,6 +283,16 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+        let last_cycle = 1 << self.segment.po2;
+        for _ in self.trace.cycles.len()..last_cycle {
+            self.add_cycle_special(
+                CycleState::ControlDone,
+                CycleState::ControlDone,
+                0,
+                0,
+                Back::None,
+            );
+        }
         Ok(())
     }
 
