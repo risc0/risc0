@@ -139,6 +139,46 @@ fn parse_version_from_tag_name_test() {
     assert!(parse_version_from_tag_name(&Component::R0Vm, "").is_err());
 }
 
+fn component_repo_name(component: &Component) -> &'static str {
+    match component {
+        Component::CargoRiscZero | Component::R0Vm => "risc0",
+        Component::RustToolchain => "rust",
+        Component::CppToolchain => "toolchain",
+    }
+}
+
+fn component_asset_name(component: &Component, platform: &Platform) -> (String, &'static str) {
+    match component {
+        Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
+        Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
+        Component::CppToolchain => {
+            let triple = match (platform.arch, platform.os) {
+                ("x86_64", "linux") => "riscv32im-linux-x86_64",
+                ("aarch64", "macos") => "riscv32im-osx-arm64",
+                _ => panic!("Unsupported platform for cpp toolchain"),
+            };
+            (triple.to_string(), "tar.xz")
+        }
+        Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
+    }
+}
+
+fn component_version_str(component: &Component, version: &Version) -> String {
+    match component {
+        // rust toolchain uses date-based versions with r0. prefix
+        Component::RustToolchain => {
+            format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
+        }
+        // cpp toolchain uses date-based versions
+        Component::CppToolchain => format!(
+            "{:04}.{:02}.{:02}",
+            version.major, version.minor, version.patch
+        ),
+        // cargo-risczero use v-prefixed versions
+        Component::CargoRiscZero | Component::R0Vm => format!("v{version}"),
+    }
+}
+
 #[derive(Deserialize)]
 struct GithubReleaseResponse {
     tag_name: String,
@@ -153,47 +193,6 @@ impl<'a> GithubRelease<'a> {
         Self { base_urls }
     }
 
-    fn repo_name(&self, component: &Component) -> &'static str {
-        match component {
-            Component::CargoRiscZero => "risc0",
-            Component::RustToolchain => "rust",
-            Component::CppToolchain => "toolchain",
-            _ => "risc0",
-        }
-    }
-
-    fn asset_name(&self, component: &Component, platform: &Platform) -> (String, &'static str) {
-        match component {
-            Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
-            Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
-            Component::CppToolchain => {
-                let triple = match (platform.arch, platform.os) {
-                    ("x86_64", "linux") => "riscv32im-linux-x86_64",
-                    ("aarch64", "macos") => "riscv32im-osx-arm64",
-                    _ => panic!("Unsupported platform for cpp toolchain"),
-                };
-                (triple.to_string(), "tar.xz")
-            }
-            _ => (format!("{component}-{platform}"), "tgz"),
-        }
-    }
-
-    fn get_version_str(&self, component: &Component, version: &Version) -> String {
-        match component {
-            // rust toolchain uses date-based versions with r0. prefix
-            Component::RustToolchain => {
-                format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
-            }
-            // cpp toolchain uses date-based versions
-            Component::CppToolchain => format!(
-                "{:04}.{:02}.{:02}",
-                version.major, version.minor, version.patch
-            ),
-            // cargo-risczero use v-prefixed versions
-            _ => format!("v{version}"),
-        }
-    }
-
     fn download_url(
         &self,
         env: &Environment,
@@ -201,9 +200,9 @@ impl<'a> GithubRelease<'a> {
         version: Option<&Version>,
         platform: &Platform,
     ) -> Result<String> {
-        let (asset, ext) = self.asset_name(component, platform);
+        let (asset, ext) = component_asset_name(component, platform);
         let version_str = match version {
-            Some(v) => self.get_version_str(component, v),
+            Some(v) => component_version_str(component, v),
             None => {
                 env.emit(RzupEvent::Debug {
                     message: format!("No version specified, fetching latest for {component}"),
@@ -211,7 +210,7 @@ impl<'a> GithubRelease<'a> {
                 format!("v{}", self.latest_version(env, component)?)
             }
         };
-        let repo = self.repo_name(component);
+        let repo = component_repo_name(component);
         Ok(format!(
             "{base_url}/{repo}/releases/download/{version_str}/{asset}.{ext}",
             base_url = self.base_urls.risc0_github_base_url
@@ -224,13 +223,13 @@ impl<'a> GithubRelease<'a> {
         _version: Option<&Version>,
         platform: &Platform,
     ) -> PathBuf {
-        let (asset_name, ext) = self.asset_name(component, platform);
+        let (asset_name, ext) = component_asset_name(component, platform);
         PathBuf::from(format!("{asset_name}.{ext}"))
     }
 
     fn check_release_exists(&self, component: &Component, version: &Version) -> Result<bool> {
-        let repo = self.repo_name(component);
-        let version_str = self.get_version_str(component, version);
+        let repo = component_repo_name(component);
+        let version_str = component_version_str(component, version);
         let url = format!(
             "{base_url}/repos/risc0/{repo}/releases/tags/{version_str}",
             base_url = self.base_urls.github_api_base_url
@@ -244,7 +243,7 @@ impl<'a> GithubRelease<'a> {
             message: format!("Fetching latest version for {component}"),
         });
 
-        let repo = self.repo_name(component);
+        let repo = component_repo_name(component);
         let url = format!(
             "{base_url}/repos/risc0/{repo}/releases/latest",
             base_url = self.base_urls.github_api_base_url
