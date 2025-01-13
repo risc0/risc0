@@ -27,7 +27,6 @@ tempfile = "3.14.0"
 semver = "1.0.24"
 serde = { version = "1.0.215", features = ["derive"] }
 toml = "0.8.19"
-downloader = { version = "0.2.8", default-features = false, features = ["rustls-tls"] }
 flate2 = "1.0.35"
 fs2 = "0.4.3"
 xz = "0.1.0"
@@ -47,4 +46,4 @@ hyper = { version = "1.5.1", features = ["server"] }
 hyper-util = "0.1.10"
 maplit = "1.0.2"
 paste = "1.0.15"
-tokio = { version = "1.42.0", features = ["rt", "macros"] }
+tokio = { version = "1.42.0", features = ["rt", "rt-multi-thread", "macros"] }

@@ -16,7 +16,6 @@ use crate::distribution::Platform;
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
-use downloader::{downloader::Builder, Download};
 use fs2::FileExt;
 use reqwest::{blocking::Client, IntoUrl};
 use semver::Version;
@@ -65,6 +64,15 @@ fn download_json<RetT: serde::de::DeserializeOwned>(url: impl IntoUrl) -> Result
     let response = http_client_get(url)?;
     error_on_status(response.status())?;
     response.json().map_err(|e| RzupError::Other(e.to_string()))
+}
+
+fn download_to_writer(url: impl IntoUrl, w: &mut impl std::io::Write) -> Result<()> {
+    let mut response = http_client_get(url)?;
+    error_on_status(response.status())?;
+    response
+        .copy_to(w)
+        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+    Ok(())
 }
 
 #[derive(Deserialize)]
@@ -255,21 +263,16 @@ impl<'a> GithubRelease<'a> {
             url: download_url.clone(),
         });
 
-        let archive = Download::new(&download_url).file_name(&archive_name);
-        let mut dl = Builder::default()
-            .connect_timeout(Duration::from_secs(4))
-            .download_folder(env.tmp_dir())
-            .parallel_requests(1)
-            .build()
-            .unwrap();
+        let download_result = (|| {
+            let download_path = env.tmp_dir().join(archive_name);
+            let mut download_file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(&download_path)?;
 
-        let download_result = dl
-            .download(&[archive])
-            .unwrap()
-            .into_iter()
-            .map(|res| res.map(|_| ()))
-            .collect::<std::result::Result<(), _>>()
-            .map_err(|e| RzupError::Other(format!("Error downloading: {e}")));
+            download_to_writer(&download_url, &mut download_file)
+        })();
 
         env.emit(RzupEvent::DownloadCompleted {
             id: component.to_string(),
