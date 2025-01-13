@@ -38,101 +38,118 @@ pub(crate) struct InstallCommand {
     force: bool,
 }
 
-impl InstallCommand {
-    pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
-        let version = match self.version {
-            Some(v) => Some(match self.name.as_deref() {
-                // special handling for cpp date-based versions
-                // TODO: Move away from date version tags to semver
-                Some("cpp") => {
-                    let parts: Vec<_> = v.split('.').collect();
-                    if parts.len() != 3 || parts.iter().any(|p| p.parse::<u64>().unwrap_or(0) == 0)
-                    {
-                        return Err(RzupError::InvalidVersion(format!(
-                            "{v}\n\n  {}: invalid date format YYYY.MM.DD",
-                            "tip".green()
-                        )));
-                    }
+fn parse_cpp_version(v: &str) -> Result<Version> {
+    let parts: Vec<_> = v.split('.').collect();
+    if parts.len() != 3 || parts.iter().any(|p| p.parse::<u64>().unwrap_or(0) == 0) {
+        return Err(RzupError::InvalidVersion(format!(
+            "{v}\n\n  {}: invalid date format YYYY.MM.DD",
+            "tip".green()
+        )));
+    }
 
-                    Version::new(
-                        parts[0].parse().unwrap_or(0),
-                        parts[1].parse().unwrap_or(0),
-                        parts[2].parse().unwrap_or(0),
-                    )
-                }
-                // semver parsing for all others
-                _ => Version::parse(&v).map_err(|_| {
-                    RzupError::InvalidVersion(format!(
-                        "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
-                        "tip".green()
-                    ))
-                })?,
-            }),
-            None => None,
+    Ok(Version::new(
+        parts[0].parse().unwrap_or(0),
+        parts[1].parse().unwrap_or(0),
+        parts[2].parse().unwrap_or(0),
+    ))
+}
+
+#[test]
+fn parse_cpp_version_test() {
+    assert_eq!(
+        parse_cpp_version("2025.01.01").unwrap(),
+        Version::new(2025, 1, 1)
+    );
+    assert!(parse_cpp_version("2025.0.01").is_err());
+    assert!(parse_cpp_version("2025.a.01").is_err());
+    assert!(parse_cpp_version("2025.01.01.04").is_err());
+    assert!(parse_cpp_version("2025.01").is_err());
+}
+
+fn self_update(rzup: &mut Rzup) -> Result<()> {
+    // update/install rzup by downloading and executing the installation script
+    rzup.emit(RzupEvent::InstallationStarted {
+        id: "rzup".to_string(),
+        version: "latest".to_string(),
+    });
+
+    let tmp_dir = rzup.environment.tmp_dir();
+    let update_script = tmp_dir.join("rzup_update.sh");
+
+    std::fs::write(
+        &update_script,
+        r#"#!/bin/bash
+        set -e
+        curl -sL https://risczero.com/install | bash -s -- --quiet
+        "#,
+    )?;
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = std::fs::metadata(&update_script)?.permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&update_script, perms)?;
+    }
+
+    // Execute quietly
+    let output = std::process::Command::new("/bin/sh")
+        .arg(&update_script)
+        .output()
+        .map_err(|e| RzupError::Other(format!("Failed to execute update script: {e}")))?;
+
+    let _ = std::fs::remove_file(update_script);
+
+    if !output.status.success() {
+        rzup.emit(RzupEvent::InstallationFailed {
+            id: "rzup".to_string(),
+            version: "latest".to_string(),
+        });
+        return Err(RzupError::Other(format!(
+            "Self-update failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+
+    rzup.emit(RzupEvent::InstallationCompleted {
+        id: "rzup".to_string(),
+        version: "latest".to_string(),
+    });
+
+    Ok(())
+}
+
+impl InstallCommand {
+    fn parse_version(&self) -> Result<Option<Version>> {
+        let Some(v) = &self.version else {
+            return Ok(None);
         };
 
-        match self.name {
-            None => {
-                rzup.install_all(self.force)?;
+        // special handling for cpp date-based versions
+        // TODO: Move away from date version tags to semver
+        if self.name.as_ref().is_some_and(|n| n == "cpp") {
+            return Ok(Some(parse_cpp_version(v)?));
+        }
+
+        Ok(Some(Version::parse(v).map_err(|_| {
+            RzupError::InvalidVersion(format!(
+                "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
+                "tip".green()
+            ))
+        })?))
+    }
+
+    pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
+        let version = self.parse_version()?;
+
+        if let Some(name) = &self.name {
+            if name != "self" {
+                rzup.install_component(&name.parse()?, version, self.force)?;
+            } else {
+                self_update(rzup)?
             }
-            Some(name) => {
-                if name != "self" {
-                    rzup.install_component(&name.parse()?, version, self.force)?;
-                } else {
-                    // update/install rzup by downloading and executing the installation script
-                    rzup.emit(RzupEvent::InstallationStarted {
-                        id: "rzup".to_string(),
-                        version: "latest".to_string(),
-                    });
-
-                    let tmp_dir = rzup.environment.tmp_dir();
-                    let update_script = tmp_dir.join("rzup_update.sh");
-
-                    std::fs::write(
-                        &update_script,
-                        r#"#!/bin/bash
-                    set -e
-                    curl -sL https://risczero.com/install | bash -s -- --quiet
-                    "#,
-                    )?;
-
-                    #[cfg(unix)]
-                    {
-                        use std::os::unix::fs::PermissionsExt;
-                        let mut perms = std::fs::metadata(&update_script)?.permissions();
-                        perms.set_mode(0o755);
-                        std::fs::set_permissions(&update_script, perms)?;
-                    }
-
-                    // Execute quietly
-                    let output = std::process::Command::new("/bin/sh")
-                        .arg(&update_script)
-                        .output()
-                        .map_err(|e| {
-                            RzupError::Other(format!("Failed to execute update script: {e}"))
-                        })?;
-
-                    let _ = std::fs::remove_file(update_script);
-
-                    if !output.status.success() {
-                        rzup.emit(RzupEvent::InstallationFailed {
-                            id: "rzup".to_string(),
-                            version: "latest".to_string(),
-                        });
-                        return Err(RzupError::Other(format!(
-                            "Self-update failed: {}",
-                            String::from_utf8_lossy(&output.stderr)
-                        )));
-                    }
-
-                    rzup.emit(RzupEvent::InstallationCompleted {
-                        id: "rzup".to_string(),
-                        version: "latest".to_string(),
-                    });
-
-                    return Ok(());
-                }
-            }
+        } else {
+            rzup.install_all(self.force)?;
         }
 
         Ok(())
