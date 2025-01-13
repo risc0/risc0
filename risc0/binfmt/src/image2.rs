@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,23 +16,32 @@ use std::{collections::BTreeMap, sync::LazyLock};
 
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
-use risc0_binfmt::Program;
 use risc0_zkp::{
     core::{
         digest::{Digest, DIGEST_WORDS},
         hash::poseidon2::{poseidon2_mix, CELLS},
     },
-    field::Elem as _,
+    field::{baby_bear::BabyBearElem, Elem as _},
 };
 use serde::{Deserialize, Serialize};
 
-use crate::zirgen::circuit::Val;
-
-use super::{
+use crate::{
     addr::{ByteAddr, WordAddr},
-    pager::PAGE_WORDS,
-    platform::*,
+    Program, PAGE_BYTES, PAGE_WORDS, WORD_SIZE,
 };
+
+const MEMORY_BYTES: u64 = 1 << 32;
+const MEMORY_PAGES: usize = (MEMORY_BYTES / PAGE_BYTES as u64) as usize;
+const MERKLE_TREE_DEPTH: usize = MEMORY_PAGES.ilog2() as usize;
+
+/// Start address for user-mode memory.
+pub const USER_START_ADDR: ByteAddr = ByteAddr(0x0001_0000);
+
+/// Start address for kernel-mode memory.
+pub const KERNEL_START_ADDR: ByteAddr = ByteAddr(0xc000_0000);
+
+const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
+const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
 
 static ZERO_CACHE: LazyLock<ZeroCache> = LazyLock::new(ZeroCache::new);
 
@@ -58,14 +67,19 @@ impl ZeroCache {
     }
 }
 
+/// TODO(flaub)
 #[derive(Clone, Serialize, Deserialize)]
-pub struct Page(Vec<u8>);
+pub struct Page(pub Vec<u8>);
 
+/// TODO(flaub)
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MemoryImage2 {
+    /// TODO(flaub)
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
     pub pages: BTreeMap<u32, Page>,
+
+    /// TODO(flaub)
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
     pub digests: BTreeMap<u32, Digest>,
@@ -81,14 +95,10 @@ impl Default for MemoryImage2 {
 }
 
 impl MemoryImage2 {
-    pub fn new(program: Program) -> Self {
+    fn new(image: BTreeMap<u32, u32>) -> Self {
         let mut this = Self::default();
-        let mut cur_page_idx = 0xffffffff_u32;
+        let mut cur_page_idx = u32::MAX;
         let mut cur_page: Option<Page> = None;
-
-        let mut image = program.image;
-        image.insert(SUSPEND_PC_ADDR.0, program.entry);
-        image.insert(SUSPEND_MODE_ADDR.0, 1);
 
         for (&addr, &word) in image.iter() {
             let addr = ByteAddr(addr).waddr();
@@ -111,13 +121,28 @@ impl MemoryImage2 {
         this
     }
 
+    /// TODO(flaub)
+    pub fn new_user(program: Program) -> Self {
+        let mut image = program.image;
+        image.insert(USER_START_ADDR.0, program.entry);
+        Self::new(image)
+    }
+
+    /// TODO(flaub)
+    pub fn new_kernel(program: Program) -> Self {
+        let mut image = program.image;
+        image.insert(SUSPEND_PC_ADDR.0, program.entry);
+        image.insert(SUSPEND_MODE_ADDR.0, 1);
+        Self::new(image)
+    }
+
+    /// TODO(flaub)
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
+        user.image.insert(USER_START_ADDR.0, user.entry);
         kernel.image.append(&mut user.image);
-        kernel
-            .image
-            .insert(MEPC_ADDR.0, user.entry - WORD_SIZE as u32);
-        // .insert(MEPC_ADDR.waddr().0, user.entry - WORD_SIZE as u32);
-        Self::new(kernel)
+        kernel.image.insert(SUSPEND_PC_ADDR.0, kernel.entry);
+        kernel.image.insert(SUSPEND_MODE_ADDR.0, 1);
+        Self::new(kernel.image)
     }
 
     /// Return the page data, fails if unavailable
@@ -169,17 +194,27 @@ impl MemoryImage2 {
     }
 
     /// Return the root digest
-    pub fn image_id(&mut self) -> &Digest {
-        self.get_digest(1).unwrap()
+    pub fn image_id(&mut self) -> Digest {
+        *self.get_digest(1).unwrap()
+    }
+
+    /// Return the user portion of the MT
+    pub fn user_id(&mut self) -> Digest {
+        *self.get_digest(2).unwrap()
+    }
+
+    /// Return the kernel portion of the MT
+    pub fn kernel_id(&mut self) -> Digest {
+        *self.get_digest(3).unwrap()
     }
 
     /// Expand if digest at `digest_idx` is a zero, return if expanded
     fn expand_if_zero(&mut self, digest_idx: u32) -> bool {
-        let ret = self.is_zero(digest_idx);
-        if ret {
-            self.expand_zero(digest_idx);
-        }
-        ret
+        self.is_zero(digest_idx)
+            .then(|| {
+                self.expand_zero(digest_idx);
+            })
+            .is_some()
     }
 
     /// Check if given MT node is a zero
@@ -242,20 +277,22 @@ impl Default for Page {
 }
 
 impl Page {
+    /// TODO(flaub)
     pub fn digest(&self) -> Digest {
-        let mut cells = [Val::ZERO; CELLS];
+        let mut cells = [BabyBearElem::ZERO; CELLS];
         for i in 0..PAGE_WORDS / DIGEST_WORDS {
             for j in 0..DIGEST_WORDS {
                 let addr = WordAddr((i * DIGEST_WORDS + j) as u32);
                 let word = self.load(addr);
-                cells[2 * j] = Val::new(word & 0xffff);
-                cells[2 * j + 1] = Val::new(word >> 16);
+                cells[2 * j] = BabyBearElem::new(word & 0xffff);
+                cells[2 * j + 1] = BabyBearElem::new(word >> 16);
             }
             poseidon2_mix(&mut cells);
         }
         cells_to_digest(&cells)
     }
 
+    /// TODO(flaub)
     pub fn load(&self, addr: WordAddr) -> u32 {
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         let mut bytes = [0u8; WORD_SIZE];
@@ -266,6 +303,7 @@ impl Page {
         word
     }
 
+    /// TODO(flaub)
     pub fn store(&mut self, addr: WordAddr, word: u32) {
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         // tracing::trace!("store({addr:?}, {byte_addr:#05x}, {word:#010x})");
@@ -273,24 +311,24 @@ impl Page {
     }
 }
 
-struct DigestPair {
-    lhs: Digest,
-    rhs: Digest,
+pub(crate) struct DigestPair {
+    pub(crate) lhs: Digest,
+    pub(crate) rhs: Digest,
 }
 
 impl DigestPair {
     pub fn digest(&self) -> Digest {
-        let mut cells = [Val::ZERO; CELLS];
+        let mut cells = [BabyBearElem::ZERO; CELLS];
         for i in 0..DIGEST_WORDS {
-            cells[i] = Val::new(self.rhs.as_words()[i]);
-            cells[DIGEST_WORDS + i] = Val::new(self.lhs.as_words()[i]);
+            cells[i] = BabyBearElem::new(self.rhs.as_words()[i]);
+            cells[DIGEST_WORDS + i] = BabyBearElem::new(self.lhs.as_words()[i]);
         }
         poseidon2_mix(&mut cells);
         cells_to_digest(&cells)
     }
 }
 
-fn cells_to_digest(cells: &[Val; CELLS]) -> Digest {
+fn cells_to_digest(cells: &[BabyBearElem; CELLS]) -> Digest {
     Digest::new([
         cells[0].as_u32(),
         cells[1].as_u32(),
@@ -307,11 +345,10 @@ fn cells_to_digest(cells: &[Val; CELLS]) -> Digest {
 mod tests {
     use std::collections::BTreeMap;
 
-    use risc0_binfmt::Program;
     use risc0_zkp::digest;
     use test_log::test;
 
-    use super::{MemoryImage2, ZERO_CACHE};
+    use super::{MemoryImage2, Program, ZERO_CACHE};
 
     #[test]
     fn poseidon2_zeros() {
@@ -350,13 +387,13 @@ mod tests {
             entry,
             image: BTreeMap::from([(entry, 0x1234b337)]),
         };
-        let mut image = MemoryImage2::new(program);
+        let mut image = MemoryImage2::new_kernel(program);
         assert_eq!(
             *image.get_digest(0x0040_0100).unwrap(),
             digest!("242ce034cc4e9326f8b7071124454b2be1a1cd5d21b6483c7ff81d4ba5ac9566")
         );
         assert_eq!(
-            *image.image_id(),
+            image.image_id(),
             digest!("9d41290fa400705127c0240cb646586cc6ea8a23d560aa57cfa86c1369d9d53f")
         );
     }
