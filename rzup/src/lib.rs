@@ -40,6 +40,7 @@ pub use error::{Result, RzupError};
 pub struct BaseUrls {
     pub risc0_github_base_url: String,
     pub github_api_base_url: String,
+    pub risc0_base_url: String,
 }
 
 impl Default for BaseUrls {
@@ -47,6 +48,7 @@ impl Default for BaseUrls {
         Self {
             risc0_github_base_url: "https://github.com/risc0".into(),
             github_api_base_url: "https://api.github.com".into(),
+            risc0_base_url: "https://risczero.com".into(),
         }
     }
 }
@@ -295,7 +297,66 @@ impl Rzup {
     pub fn get_version_dir(&self, component: &Component, version: &Version) -> PathBuf {
         Paths::get_version_dir(&self.environment, component, version)
     }
+
+    /// Update rzup by downloading and re-running the installation script.
+    pub fn self_update(&self) -> Result<()> {
+        self.emit(RzupEvent::InstallationStarted {
+            id: "rzup".to_string(),
+            version: "latest".to_string(),
+        });
+
+        let tmp_dir = self.environment.tmp_dir();
+        std::fs::create_dir_all(&tmp_dir)?;
+
+        let update_script = tmp_dir.join("rzup_update.sh");
+
+        std::fs::write(
+            &update_script,
+            format!(
+                r#"#!/bin/bash
+                set -eo pipefail
+                curl -sL {risc0}/install | bash -s -- --quiet
+                "#,
+                risc0 = self.registry.base_urls().risc0_base_url
+            ),
+        )?;
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = std::fs::metadata(&update_script)?.permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&update_script, perms)?;
+        }
+
+        // Execute quietly
+        let output = std::process::Command::new("/bin/bash")
+            .arg(&update_script)
+            .output()
+            .map_err(|e| RzupError::Other(format!("Failed to execute update script: {e}")))?;
+
+        let _ = std::fs::remove_file(update_script);
+
+        if !output.status.success() {
+            self.emit(RzupEvent::InstallationFailed {
+                id: "rzup".to_string(),
+                version: "latest".to_string(),
+            });
+            return Err(RzupError::Other(format!(
+                "Self-update failed: {}",
+                String::from_utf8_lossy(&output.stderr)
+            )));
+        }
+
+        self.emit(RzupEvent::InstallationCompleted {
+            id: "rzup".to_string(),
+            version: "latest".to_string(),
+        });
+
+        Ok(())
+    }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -312,6 +373,7 @@ mod tests {
     type HyperResponse = hyper::Response<http_body_util::Full<hyper::body::Bytes>>;
 
     async fn request_handler(
+        install_script: String,
         req: hyper::Request<hyper::body::Incoming>,
     ) -> std::result::Result<HyperResponse, Infallible> {
         fn json_response(json: &'static str) -> HyperResponse {
@@ -326,6 +388,14 @@ mod tests {
             hyper::Response::builder()
                 .status(404)
                 .body(http_body_util::Full::new(hyper::body::Bytes::from("")))
+                .unwrap()
+        }
+
+        fn text_response(text: String) -> HyperResponse {
+            hyper::Response::builder()
+                .status(200)
+                .header("content-type", "text/plain")
+                .body(http_body_util::Full::new(hyper::body::Bytes::from(text)))
                 .unwrap()
         }
 
@@ -400,20 +470,24 @@ mod tests {
             "/gihub_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.1.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => empty_tar_gz_response(),
+            "/risc0/install" => text_response(install_script.clone()),
             unknown => panic!("unexpected URI: {unknown}"),
         })
     }
 
     #[tokio::main]
-    async fn server_main(sender: tokio::sync::oneshot::Sender<SocketAddr>) {
+    async fn server_main(install_script: String, sender: tokio::sync::oneshot::Sender<SocketAddr>) {
         let listener = tokio::net::TcpListener::bind("localhost:0").await.unwrap();
         sender.send(listener.local_addr().unwrap()).unwrap();
 
         while let Ok((stream, _)) = listener.accept().await {
+            let install_script = install_script.clone();
             hyper::server::conn::http1::Builder::new()
                 .serve_connection(
                     hyper_util::rt::TokioIo::new(stream),
-                    hyper::service::service_fn(request_handler),
+                    hyper::service::service_fn(move |req| {
+                        request_handler(install_script.clone(), req)
+                    }),
                 )
                 .await
                 .unwrap()
@@ -421,16 +495,21 @@ mod tests {
     }
 
     impl MockDistributionServer {
-        pub fn new() -> Self {
+        pub fn new_with_install_script(install_script: String) -> Self {
             let (send, recv) = tokio::sync::oneshot::channel();
-            std::thread::spawn(move || server_main(send));
+            std::thread::spawn(move || server_main(install_script, send));
             let address = recv.blocking_recv().unwrap();
             Self {
                 base_urls: BaseUrls {
                     risc0_github_base_url: format!("http://{address}/risc0_github"),
                     github_api_base_url: format!("http://{address}/gihub_api"),
+                    risc0_base_url: format!("http://{address}/risc0"),
                 },
             }
+        }
+
+        pub fn new() -> Self {
+            Self::new_with_install_script("".into())
         }
     }
 
@@ -457,6 +536,7 @@ mod tests {
         BaseUrls {
             risc0_github_base_url: "".into(),
             github_api_base_url: "".into(),
+            risc0_base_url: "".into(),
         }
     }
 
@@ -840,5 +920,72 @@ mod tests {
             rzup.get_latest_version(&Component::CargoRiscZero).unwrap(),
             Version::new(1, 1, 0)
         );
+    }
+
+    #[test]
+    fn self_update() {
+        let temp_dir = TempDir::new().unwrap();
+        let server = MockDistributionServer::new_with_install_script(format!(
+            "#!/bin/bash
+            set -eo pipefail
+            touch {}/self_update_ran
+            ",
+            temp_dir.path().display()
+        ));
+        let (_, mut rzup) = setup_test_env(server.base_urls.clone());
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.self_update().unwrap();
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "rzup".into(),
+                    version: "latest".into(),
+                },
+                RzupEvent::InstallationCompleted {
+                    id: "rzup".into(),
+                    version: "latest".into(),
+                },
+            ],
+        );
+        assert!(temp_dir.path().join("self_update_ran").exists());
+    }
+
+    #[test]
+    fn self_update_failure() {
+        let temp_dir = TempDir::new().unwrap();
+        let server = MockDistributionServer::new_with_install_script(
+            "#!/bin/bash
+            set -eo pipefail
+            echo test_failure 1>&2
+            exit 1
+            "
+            .into(),
+        );
+        let (_, mut rzup) = setup_test_env(server.base_urls.clone());
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                let error = rzup.self_update().unwrap_err();
+                assert_eq!(
+                    error,
+                    RzupError::Other("Self-update failed: test_failure\n".into())
+                );
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "rzup".into(),
+                    version: "latest".into(),
+                },
+                RzupEvent::InstallationFailed {
+                    id: "rzup".into(),
+                    version: "latest".into(),
+                },
+            ],
+        );
+        assert!(!temp_dir.path().join("self_update_ran").exists());
     }
 }
