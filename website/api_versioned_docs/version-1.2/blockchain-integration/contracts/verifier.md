@@ -56,8 +56,6 @@ You can find detailed information in the [version management design][version-man
 
 > NOTE: The tables below are generated from the [`deployment.toml`][deployment.toml] file in the risc0-ethereum repository.
 
-<!-- GENERATED CONTENT BEGIN -->
-
 ### Ethereum Mainnet (1)
 
 | Contract                                   | Address                                                              |
@@ -67,7 +65,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-1-etherscan]    |
 | TimelockController                         | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][timelock-1-etherscan] |
 
-<br/>
+<br />
 
 ### Ethereum Sepolia (11155111)
 
@@ -78,7 +76,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-11155111-etherscan]    |
 | TimelockController                         | [`0xB4E3306129208cC8e6E75157f75f62eAe0B920a0`][timelock-11155111-etherscan] |
 
-<br/>
+<br />
 
 ### Ethereum Holesky (17000)
 
@@ -89,7 +87,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-17000-etherscan]    |
 | TimelockController                         | [`0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319`][timelock-17000-etherscan] |
 
-<br/>
+<br />
 
 ### Arbitrum Mainnet (42161)
 
@@ -100,7 +98,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-42161-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-42161-etherscan] |
 
-<br/>
+<br />
 
 ### Arbitrum Sepolia (421614)
 
@@ -111,7 +109,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-421614-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-421614-etherscan] |
 
-<br/>
+<br />
 
 ### Avalanche Mainnet (43114)
 
@@ -122,7 +120,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1`][estop-43114-etherscan]    |
 | TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43114-etherscan] |
 
-<br/>
+<br />
 
 ### Avalanche Fuji (43113)
 
@@ -133,7 +131,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-43113-etherscan]    |
 | TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43113-etherscan] |
 
-<br/>
+<br />
 
 ### Base Mainnet (8453)
 
@@ -144,7 +142,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-8453-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-8453-etherscan] |
 
-<br/>
+<br />
 
 ### Base Sepolia (84532)
 
@@ -155,7 +153,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-84532-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-84532-etherscan] |
 
-<br/>
+<br />
 
 ### Optimism Mainnet (10)
 
@@ -166,7 +164,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-10-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-10-etherscan] |
 
-<br/>
+<br />
 
 ### Optimism Sepolia (11155420)
 
@@ -177,7 +175,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-11155420-etherscan]    |
 | TimelockController                         | [`0x2DEfEA335392bb62d01f74e338697C7B31De254C`][timelock-11155420-etherscan] |
 
-<br/>
+<br />
 
 ### Linea Mainnet (59144)
 
@@ -188,7 +186,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x6Fb722974D67A55091c70129Bd0Bb06ec025ce5D`][estop-59144-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-59144-etherscan] |
 
-<br/>
+<br />
 
 ### Polygon zkEVM Mainnet (1101)
 
@@ -199,9 +197,7 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1`][estop-1101-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-1101-etherscan] |
 
-<br/>
-
-<!-- GENERATED CONTENT END-->
+<br />
 
 [deployment.toml]: https://github.com/risc0/risc0-ethereum/tree/release-1.2/contracts/deployment.toml
 [estop-1-etherscan]: https://etherscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code

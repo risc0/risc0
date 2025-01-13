@@ -75,7 +75,7 @@ Users seeking to pin to a specific version of zkVM can use the following table t
 | -------------- | -------------------------------------- |
 | 1.0.0 - Latest | `0x310fe598`                           |
 
-<!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
+{/* TODO: Move this example into risc0-ethereum such that it will be under the same version management */}
 
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/27eba00a5237cbefd0c742dee73ced697df3527a/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
