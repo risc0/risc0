@@ -14,11 +14,21 @@
 pub mod github;
 
 use crate::error::{Result, RzupError};
+use std::fmt;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Os {
     MacOs,
     Linux,
+}
+
+impl fmt::Display for Os {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::MacOs => write!(f, "Mac OS"),
+            Self::Linux => write!(f, "Linux"),
+        }
+    }
 }
 
 pub struct Platform {
@@ -27,15 +37,23 @@ pub struct Platform {
 }
 
 impl Platform {
+    fn new(arch: &'static str, os: Os) -> Self {
+        Self { arch, os }
+    }
+
     pub fn detect() -> Result<Self> {
         let arch = std::env::consts::ARCH;
         let os = match std::env::consts::OS {
             "macos" => Os::MacOs,
             "linux" => Os::Linux,
-            other => return Err(RzupError::UnsupportedOs(other.into())),
+            other => {
+                return Err(RzupError::UnsupportedPlatform(format!(
+                    "unknown OS: {other}"
+                )))
+            }
         };
 
-        Ok(Self { arch, os })
+        Ok(Self::new(arch, os))
     }
 
     pub fn target_triple(&self) -> String {

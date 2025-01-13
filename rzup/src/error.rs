@@ -36,8 +36,8 @@ pub enum RzupError {
     #[error("Rate Limited: {0}")]
     RateLimited(String),
 
-    #[error("Unsupported OS: {0}")]
-    UnsupportedOs(String),
+    #[error("Unsupported Platform: {0}")]
+    UnsupportedPlatform(String),
 }
 
 impl From<std::io::Error> for RzupError {

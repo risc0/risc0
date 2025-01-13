@@ -130,7 +130,7 @@ pub fn install(
 
     Paths::create_version_dirs(env, component, version)?;
 
-    let archive_name = distribution.get_archive_name(component, Some(version), env.platform());
+    let archive_name = distribution.get_archive_name(component, Some(version), env.platform())?;
     let downloaded_file = env.tmp_dir().join(archive_name);
 
     if force {

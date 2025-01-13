@@ -147,20 +147,76 @@ fn component_repo_name(component: &Component) -> &'static str {
     }
 }
 
-fn component_asset_name(component: &Component, platform: &Platform) -> (String, &'static str) {
-    match component {
+fn component_asset_name(
+    component: &Component,
+    platform: &Platform,
+) -> Result<(String, &'static str)> {
+    Ok(match component {
         Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
         Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
         Component::CppToolchain => {
             let triple = match (platform.arch, platform.os) {
                 ("x86_64", Os::Linux) => "riscv32im-linux-x86_64",
                 ("aarch64", Os::MacOs) => "riscv32im-osx-arm64",
-                _ => panic!("Unsupported platform for cpp toolchain"),
+                (other, os) => {
+                    return Err(RzupError::UnsupportedPlatform(format!(
+                        "unknown architecture {other} for {os}"
+                    )))
+                }
             };
             (triple.to_string(), "tar.xz")
         }
         Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
-    }
+    })
+}
+
+#[test]
+fn component_asset_name_test() {
+    assert_eq!(
+        component_asset_name(
+            &Component::RustToolchain,
+            &Platform::new("x86_64", Os::Linux)
+        )
+        .unwrap(),
+        ("rust-toolchain-x86_64-unknown-linux-gnu".into(), "tar.gz")
+    );
+    assert_eq!(
+        component_asset_name(
+            &Component::CargoRiscZero,
+            &Platform::new("x86_64", Os::Linux)
+        )
+        .unwrap(),
+        ("cargo-risczero-x86_64-unknown-linux-gnu".into(), "tgz")
+    );
+    assert_eq!(
+        component_asset_name(
+            &Component::CppToolchain,
+            &Platform::new("x86_64", Os::Linux)
+        )
+        .unwrap(),
+        ("riscv32im-linux-x86_64".into(), "tar.xz")
+    );
+    assert_eq!(
+        component_asset_name(&Component::R0Vm, &Platform::new("x86_64", Os::Linux)).unwrap(),
+        ("r0vm-x86_64-unknown-linux-gnu".into(), "tgz")
+    );
+
+    assert_eq!(
+        component_asset_name(
+            &Component::CppToolchain,
+            &Platform::new("aarch64", Os::MacOs)
+        )
+        .unwrap(),
+        ("riscv32im-osx-arm64".into(), "tar.xz")
+    );
+    assert_eq!(
+        component_asset_name(
+            &Component::CppToolchain,
+            &Platform::new("x86_64", Os::MacOs)
+        )
+        .unwrap_err(),
+        RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
+    );
 }
 
 fn component_version_str(component: &Component, version: &Version) -> String {
@@ -200,7 +256,7 @@ impl<'a> GithubRelease<'a> {
         version: Option<&Version>,
         platform: &Platform,
     ) -> Result<String> {
-        let (asset, ext) = component_asset_name(component, platform);
+        let (asset, ext) = component_asset_name(component, platform)?;
         let version_str = match version {
             Some(v) => component_version_str(component, v),
             None => {
@@ -222,9 +278,9 @@ impl<'a> GithubRelease<'a> {
         component: &Component,
         _version: Option<&Version>,
         platform: &Platform,
-    ) -> PathBuf {
-        let (asset_name, ext) = component_asset_name(component, platform);
-        PathBuf::from(format!("{asset_name}.{ext}"))
+    ) -> Result<PathBuf> {
+        let (asset_name, ext) = component_asset_name(component, platform)?;
+        Ok(PathBuf::from(format!("{asset_name}.{ext}")))
     }
 
     fn check_release_exists(&self, component: &Component, version: &Version) -> Result<bool> {
@@ -277,7 +333,7 @@ impl<'a> GithubRelease<'a> {
         }
 
         let platform = env.platform();
-        let archive_name = self.get_archive_name(component, Some(version), platform);
+        let archive_name = self.get_archive_name(component, Some(version), platform)?;
         let lock_path = env
             .tmp_dir()
             .join(format!("{}.lock", archive_name.display()));
