@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::components::Component;
-use crate::distribution::Platform;
+use crate::distribution::{Os, Platform};
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
@@ -153,8 +153,8 @@ fn component_asset_name(component: &Component, platform: &Platform) -> (String, 
         Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
         Component::CppToolchain => {
             let triple = match (platform.arch, platform.os) {
-                ("x86_64", "linux") => "riscv32im-linux-x86_64",
-                ("aarch64", "macos") => "riscv32im-osx-arm64",
+                ("x86_64", Os::Linux) => "riscv32im-linux-x86_64",
+                ("aarch64", Os::MacOs) => "riscv32im-osx-arm64",
                 _ => panic!("Unsupported platform for cpp toolchain"),
             };
             (triple.to_string(), "tar.xz")

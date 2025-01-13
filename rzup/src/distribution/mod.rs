@@ -13,28 +13,35 @@
 // limitations under the License.
 pub mod github;
 
+use crate::error::{Result, RzupError};
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum Os {
+    MacOs,
+    Linux,
+}
+
 pub struct Platform {
     arch: &'static str,
-    os: &'static str,
+    os: Os,
 }
 
 impl Platform {
-    // TODO: allow specifying platform
-    pub fn _new(arch: &'static str, os: &'static str) -> Self {
-        Self { arch, os }
-    }
-    pub fn detect() -> Self {
-        Self {
-            arch: std::env::consts::ARCH,
-            os: std::env::consts::OS,
-        }
+    pub fn detect() -> Result<Self> {
+        let arch = std::env::consts::ARCH;
+        let os = match std::env::consts::OS {
+            "macos" => Os::MacOs,
+            "linux" => Os::Linux,
+            other => return Err(RzupError::UnsupportedOs(other.into())),
+        };
+
+        Ok(Self { arch, os })
     }
 
     pub fn target_triple(&self) -> String {
         match self.os {
-            "macos" => format!("{}-apple-darwin", self.arch),
-            "linux" => format!("{}-unknown-{}-gnu", self.arch, self.os),
-            _ => format!("{}-{}-{}", self.arch, self.os, std::env::consts::FAMILY),
+            Os::MacOs => format!("{}-apple-darwin", self.arch),
+            Os::Linux => format!("{}-unknown-linux-gnu", self.arch),
         }
     }
 }

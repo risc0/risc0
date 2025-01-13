@@ -46,7 +46,7 @@ impl Environment {
         let root_dir = root.into();
         let tmp_dir = root_dir.join("tmp");
         let settings_file = root_dir.join("settings.toml");
-        let platform = Platform::detect();
+        let platform = Platform::detect()?;
 
         let env = Self {
             root_dir,
