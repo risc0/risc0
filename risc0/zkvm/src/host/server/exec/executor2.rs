@@ -62,7 +62,7 @@ pub struct Executor2<'a> {
 }
 
 impl<'a> Executor2<'a> {
-    /// Construct a new [Executor2] from a [MemoryImage] and entry point.
+    /// Construct a new [Executor2] from a [MemoryImage2] and entry point.
     ///
     /// Before a guest program is proven, the [Executor2] is responsible for
     /// deciding where a zkVM program should be split into [Segment]s and what
