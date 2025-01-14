@@ -339,7 +339,7 @@ mod tests {
                 .unwrap()
         }
 
-        fn empty_tar_gz_response() -> HyperResponse {
+        fn dummy_tar_gz_response() -> HyperResponse {
             let mut tar_bytes = vec![];
             let mut tar_builder = tar::Builder::new(&mut tar_bytes);
             let mut header = tar::Header::new_gnu();
@@ -365,7 +365,7 @@ mod tests {
                 .unwrap()
         }
 
-        fn empty_tar_xz_response() -> HyperResponse {
+        fn dummy_tar_xz_response() -> HyperResponse {
             let mut tar_bytes = vec![];
             let mut tar_builder = tar::Builder::new(&mut tar_bytes);
             let mut header = tar::Header::new_gnu();
@@ -397,19 +397,19 @@ mod tests {
             "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => empty_tar_gz_response(),
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
-                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => empty_tar_gz_response(),
+                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
-                empty_tar_xz_response(),
+                dummy_tar_xz_response(),
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
-                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => empty_tar_gz_response(),
+                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/gihub_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
             "/gihub_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.1.0/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => empty_tar_gz_response(),
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0/install" => text_response(install_script.clone()),
             unknown => panic!("unexpected URI: {unknown}"),
         })
@@ -637,6 +637,11 @@ mod tests {
                         cargo-risczero-x86_64-unknown-linux-gnu.tgz",
                         base_url = server.base_urls.risc0_github_base_url
                     ),
+                    len: Some(86),
+                },
+                RzupEvent::DownloadProgress {
+                    id: "cargo-risczero".into(),
+                    incr: 86,
                 },
                 RzupEvent::DownloadCompleted {
                     id: "cargo-risczero".into(),
@@ -796,6 +801,11 @@ mod tests {
                         cargo-risczero-x86_64-unknown-linux-gnu.tgz",
                         base_url = server.base_urls.risc0_github_base_url
                     ),
+                    len: Some(86),
+                },
+                RzupEvent::DownloadProgress {
+                    id: "cargo-risczero".into(),
+                    incr: 86,
                 },
                 RzupEvent::DownloadCompleted {
                     id: "cargo-risczero".into(),

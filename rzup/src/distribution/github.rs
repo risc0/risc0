@@ -13,7 +13,8 @@
 // limitations under the License.
 use crate::components::Component;
 use crate::distribution::{
-    check_for_not_found, download_json, download_to_writer, parse_cpp_version, Os, Platform,
+    check_for_not_found, download_bytes, download_json, parse_cpp_version, Os, Platform,
+    ProgressWriter,
 };
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
@@ -286,12 +287,6 @@ impl<'a> GithubRelease<'a> {
             ))
         })?;
 
-        env.emit(RzupEvent::DownloadStarted {
-            id: component.to_string(),
-            version: version.to_string(),
-            url: download_url.clone(),
-        });
-
         let download_result = (|| {
             let download_path = env.tmp_dir().join(archive_name);
             let mut download_file = std::fs::OpenOptions::new()
@@ -300,7 +295,22 @@ impl<'a> GithubRelease<'a> {
                 .truncate(true)
                 .open(&download_path)?;
 
-            download_to_writer(&download_url, &mut download_file)
+            let mut resp = download_bytes(&download_url)?;
+
+            env.emit(RzupEvent::DownloadStarted {
+                id: component.to_string(),
+                version: version.to_string(),
+                url: download_url.clone(),
+                len: resp.content_length(),
+            });
+
+            resp.copy_to(&mut ProgressWriter::new(
+                component.to_string(),
+                env,
+                &mut download_file,
+            ))
+            .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+            Ok(())
         })();
 
         env.emit(RzupEvent::DownloadCompleted {

@@ -12,31 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::RzupEvent;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 
 #[derive(Clone)]
 pub(super) struct Ui {
     verbose: bool,
-    pub progress: ProgressBar,
+    multi_progress: MultiProgress,
+    status: ProgressBar,
+    download: Option<ProgressBar>,
 }
 
 impl Ui {
     pub fn new(verbose: bool) -> Self {
-        let progress = ProgressBar::new_spinner().with_style(
+        let multi_progress = MultiProgress::new();
+        let status = ProgressBar::new_spinner().with_style(
             ProgressStyle::default_spinner()
                 .template("{spinner} {msg}")
                 .unwrap()
                 .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"),
         );
-        progress.enable_steady_tick(std::time::Duration::from_millis(80));
-        Self { verbose, progress }
+        multi_progress.add(status.clone());
+        status.enable_steady_tick(std::time::Duration::from_millis(80));
+        Self {
+            verbose,
+            multi_progress,
+            status,
+            download: None,
+        }
     }
 
-    pub fn run(self, ui_recv: std::sync::mpsc::Receiver<RzupEvent>) {
+    pub fn run(mut self, ui_recv: std::sync::mpsc::Receiver<RzupEvent>) {
         while let Ok(event) = ui_recv.recv() {
             match event {
-                RzupEvent::DownloadStarted { id, version, url } => {
-                    self.handle_download(id, version, url)
+                RzupEvent::DownloadStarted {
+                    id,
+                    version,
+                    url,
+                    len,
+                } => self.handle_download(id, version, url, len),
+                RzupEvent::DownloadProgress { id, incr } => {
+                    self.handle_download_progress(id, incr);
                 }
                 RzupEvent::DownloadCompleted { id, version } => {
                     self.handle_download_complete(id, version)
@@ -49,7 +64,7 @@ impl Ui {
                     self.handle_already_installed(id, version)
                 }
                 RzupEvent::InstallationFailed { id: _, version: _ } => {
-                    self.progress.finish_and_clear();
+                    self.status.finish_and_clear();
                 }
                 RzupEvent::Uninstalled { id, version } => self.handle_uninstall(id, version),
                 RzupEvent::CheckUpdates { id } => self.handle_checking_updates(id),
@@ -58,66 +73,85 @@ impl Ui {
         }
     }
 
-    fn start_progress(&self, message: String) {
-        self.progress.reset();
-        self.progress
+    fn start_progress(&mut self, message: String) {
+        self.status.reset();
+        self.status
             .enable_steady_tick(std::time::Duration::from_millis(80));
-        self.progress.set_message(message);
+        self.status.set_message(message);
     }
 
-    pub fn complete_progress(&self, message: &str) {
-        self.progress.finish_and_clear();
-        println!("{message}");
-        self.progress.reset(); // Reset for next operation
+    fn complete_progress(&mut self, message: &str) {
+        self.status.finish_and_clear();
+        self.multi_progress.println(message).unwrap();
+        self.status.reset(); // Reset for next operation
     }
 
-    pub fn handle_download(&self, id: String, version: String, _url: String) {
+    fn handle_download(&mut self, id: String, version: String, _url: String, len: Option<u64>) {
         self.start_progress(format!("Downloading {id} version {version}"));
+        if let Some(len) = len {
+            let download_progress = ProgressBar::new(len);
+            download_progress.set_style(
+                ProgressStyle::with_template("{wide_bar} {binary_bytes}/{binary_total_bytes}")
+                    .unwrap(),
+            );
+            self.download = Some(download_progress.clone());
+            self.multi_progress.add(download_progress);
+        }
     }
 
-    pub fn handle_download_complete(&self, id: String, version: String) {
+    fn handle_download_progress(&mut self, _id: String, incr: u64) {
+        if let Some(download_progress) = &self.download {
+            download_progress.inc(incr);
+        }
+    }
+
+    fn handle_download_complete(&mut self, id: String, version: String) {
         self.complete_progress(&format!("✓ Downloaded {id} version {version}"));
+
+        if let Some(download_progress) = self.download.take() {
+            download_progress.finish_and_clear();
+            self.multi_progress.remove(&download_progress);
+        }
+
         self.start_progress(format!("Installing {id} version {version}"));
     }
 
-    pub fn handle_install(&self, id: String, version: String) {
+    fn handle_install(&mut self, id: String, version: String) {
         self.start_progress(format!("Installing {id} version {version}"));
     }
 
-    pub fn handle_install_complete(&self, id: String, version: String) {
+    fn handle_install_complete(&mut self, id: String, version: String) {
         self.complete_progress(&format!("✓ Installed {id} version {version}"));
     }
 
-    pub fn handle_already_installed(&self, id: String, version: String) {
+    fn handle_already_installed(&mut self, id: String, version: String) {
         self.complete_progress(&format!("! Version {version} of {id} is already installed",));
     }
 
-    pub fn handle_uninstall(&self, id: String, version: String) {
+    fn handle_uninstall(&mut self, id: String, version: String) {
         self.complete_progress(&format!("Uninstalled {id} version {version}"));
     }
 
-    pub fn handle_checking_updates(&self, id: Option<String>) {
+    fn handle_checking_updates(&mut self, id: Option<String>) {
         match id {
             Some(_) => {
                 self.start_progress("Checking for updates ...".to_string());
             }
             None => {
-                self.progress.finish_and_clear();
+                self.status.finish_and_clear();
             }
         }
     }
 
-    pub fn handle_debug(&self, message: String) {
+    fn handle_debug(&mut self, message: String) {
         if self.verbose {
-            self.progress.suspend(|| {
-                println!("Debug: {message}");
-            });
+            self.multi_progress.println(message).unwrap();
         }
     }
 }
 
 impl Drop for Ui {
     fn drop(&mut self) {
-        self.progress.finish_and_clear();
+        self.status.finish_and_clear();
     }
 }

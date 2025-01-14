@@ -14,10 +14,10 @@
 pub mod github;
 
 use crate::error::{Result, RzupError};
+use crate::{Environment, RzupEvent};
 use reqwest::{blocking::Client, IntoUrl};
 use semver::Version;
-use std::fmt;
-use std::time::Duration;
+use std::{fmt, io, time::Duration};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Os {
@@ -151,11 +151,35 @@ pub fn download_text(url: impl IntoUrl) -> Result<String> {
     response.text().map_err(|e| RzupError::Other(e.to_string()))
 }
 
-fn download_to_writer(url: impl IntoUrl, w: &mut impl std::io::Write) -> Result<()> {
-    let mut response = http_client_get(url)?;
+fn download_bytes(url: impl IntoUrl) -> Result<reqwest::blocking::Response> {
+    let response = http_client_get(url)?;
     error_on_status(response.status())?;
-    response
-        .copy_to(w)
-        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
-    Ok(())
+    Ok(response)
+}
+
+struct ProgressWriter<'a, WriterT> {
+    id: String,
+    env: &'a Environment,
+    writer: WriterT,
+}
+
+impl<'a, WriterT> ProgressWriter<'a, WriterT> {
+    fn new(id: String, env: &'a Environment, writer: WriterT) -> Self {
+        Self { id, env, writer }
+    }
+}
+
+impl<'a, WriterT: io::Write> io::Write for ProgressWriter<'a, WriterT> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        let written = self.writer.write(buf)?;
+        self.env.emit(RzupEvent::DownloadProgress {
+            id: self.id.clone(),
+            incr: u64::try_from(buf.len()).unwrap(),
+        });
+        Ok(written)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        self.writer.flush()
+    }
 }

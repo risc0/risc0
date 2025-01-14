@@ -17,6 +17,11 @@ pub enum RzupEvent {
         id: String,
         version: String,
         url: String,
+        len: Option<u64>,
+    },
+    DownloadProgress {
+        id: String,
+        incr: u64,
     },
     DownloadCompleted {
         id: String,
