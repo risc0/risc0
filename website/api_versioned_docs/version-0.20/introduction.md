@@ -118,7 +118,7 @@ If you want to report a bug or contribute to our code, you can do so on
 You're welcome to join [our Discord community][discord] to discuss RISC Zero,
 ask questions, and see how other people use RISC Zero!
 
-Follow us on [Twitter] and [YouTube], and [sign up for our mailing
+Follow us on [X] and [YouTube], and [sign up for our mailing
 list][mailing-list] to get our latest announcements.
 
 [Bonsai]: ./bonsai/bonsai-overview.md
@@ -137,7 +137,7 @@ list][mailing-list] to get our latest announcements.
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [rust-libraries]: https://github.com/risc0/risc0#rust-libraries
 [startup]: https://risczero.com/news/series-a
-[twitter]: https://twitter.com/risczero
+[twitter]: https://x.com/risczero
 [waldo]: https://risczero.com/news/waldo
 [YouTube]: https://www.youtube.com/@risczero
 [zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
