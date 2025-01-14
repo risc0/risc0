@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,23 +15,28 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
-use risc0_binfmt::ExitCode;
-use risc0_zkp::core::{digest::Digest, log2_ceil};
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, WordAddr};
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_BYTES},
+    log2_ceil,
+};
 
 use super::{
-    addr::{ByteAddr, WordAddr},
-    image::MemoryImage2,
     pager::PagedMemory,
-    platform::{CycleState, LOOKUP_TABLE_CYCLES},
+    platform::*,
+    poseidon2::Poseidon2State,
     r0vm::{Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
+    sha2::Sha2State,
     syscall::Syscall,
     trace::{TraceCallback, TraceEvent},
+    SyscallContext,
 };
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
+    user_pc: ByteAddr,
     machine_mode: u32,
     user_cycles: u32,
     phys_cycles: u32,
@@ -55,6 +60,8 @@ pub struct ExecutorResult {
     pub pre_digest: Digest,
     pub post_digest: Digest,
     pub output_digest: Option<Digest>,
+    pub paging_cycles: u64,
+    pub reserved_cycles: u64,
 }
 
 #[derive(Default)]
@@ -77,6 +84,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     ) -> Self {
         Self {
             pc: ByteAddr(0),
+            user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
             phys_cycles: 0,
@@ -99,24 +107,37 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         max_cycles: Option<u64>,
         mut callback: F,
     ) -> Result<ExecutorResult> {
-        let segment_limit = 1 << segment_po2;
+        let segment_limit: u32 = 1 << segment_po2;
+        assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
-        let mut segment_counter = 0u64;
+        let mut segment_counter = 0;
 
         self.reset();
 
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
-        let initial_digest = *self.pager.image.image_id();
+        let initial_digest = self.pager.image.image_id();
+        tracing::debug!("initial_digest: {initial_digest}");
 
         while self.exit_code.is_none() {
             if let Some(max_cycles) = max_cycles {
                 if self.cycles.user >= max_cycles {
-                    bail!("Session limit exceeded");
+                    bail!(
+                        "Session limit exceeded: {} >= {max_cycles}",
+                        self.cycles.user
+                    );
                 }
             }
 
             if self.segment_cycles() >= segment_threshold {
+                tracing::debug!(
+                    "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {} >= {segment_threshold}",
+                    self.phys_cycles,
+                    self.pager.cycles,
+                    self.segment_cycles()
+                );
+
+                assert!(self.segment_cycles() < segment_limit);
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
@@ -184,6 +205,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             pre_digest: initial_digest,
             post_digest,
             output_digest: self.output_digest,
+            paging_cycles: 0,   // TODO(flaub)
+            reserved_cycles: 0, // TODO(flaub)
         })
     }
 
@@ -220,6 +243,10 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
 
     fn set_pc(&mut self, addr: ByteAddr) {
         self.pc = addr;
+    }
+
+    fn set_user_pc(&mut self, addr: ByteAddr) {
+        self.user_pc = addr;
     }
 
     fn get_machine_mode(&self) -> u32 {
@@ -285,21 +312,81 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         self.pager.store(addr, word)
     }
 
-    fn on_terminate(&mut self, a0: u32, _a1: u32) {
+    fn on_terminate(&mut self, a0: u32, _a1: u32) -> Result<()> {
+        const TERMINATE: u32 = 0;
+        const PAUSE: u32 = 1;
+
+        let output: Digest = self
+            .peek_region(GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
+            .as_slice()
+            .try_into()?;
+
+        let halt_type = a0 & 0xff;
+        let user_exit = (a0 >> 8) & 0xff;
+
         self.user_cycles += 1;
-        self.exit_code = Some(ExitCode::Halted(a0));
+        self.exit_code = match halt_type {
+            TERMINATE => Some(ExitCode::Halted(user_exit)),
+            PAUSE => Some(ExitCode::Paused(user_exit)),
+            _ => bail!("Illegal halt type: {halt_type}"),
+        };
+        self.output_digest = Some(output);
+
+        Ok(())
     }
 
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_read(fd, buf)?;
+        let rlen = self.syscall_handler.host_read(self, fd, buf)?;
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
         Ok(rlen)
     }
 
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_write(fd, buf)?;
+        let rlen = self.syscall_handler.host_write(self, fd, buf)?;
         self.write_record.push(rlen);
         Ok(rlen)
+    }
+
+    fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
+        self.phys_cycles += 1;
+    }
+
+    fn on_poseidon2_cycle(&mut self, cur_state: CycleState, _p2: &Poseidon2State) {
+        tracing::trace!("on_poseidon2_cycle: {cur_state:?}");
+        self.phys_cycles += 1;
+    }
+}
+
+impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
+    fn peek_register(&mut self, idx: usize) -> Result<u32> {
+        if idx >= REG_MAX {
+            bail!("invalid register: x{idx}");
+        }
+        Risc0Context::peek_u32(self, USER_REGS_ADDR.waddr() + idx)
+    }
+
+    fn peek_u32(&mut self, addr: ByteAddr) -> Result<u32> {
+        // let addr = Self::check_guest_addr(addr)?;
+        Risc0Context::peek_u32(self, addr.waddr())
+    }
+
+    fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
+        // let addr = Self::check_guest_addr(addr)?;
+        let word = Risc0Context::peek_u32(self, addr.waddr())?;
+        let bytes = word.to_le_bytes();
+        Ok(bytes[addr.subaddr() as usize])
+    }
+
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        self.pager.peek_page(page_idx)
+    }
+
+    fn get_cycle(&self) -> u64 {
+        self.cycles.user
+    }
+
+    fn get_pc(&self) -> u32 {
+        self.user_pc.0
     }
 }

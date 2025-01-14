@@ -8,9 +8,9 @@ struct OneHot_8_Layout {
 struct InstInputLayout {
   OneHot_8_Layout minorOnehot;
 };
-using NondetRegLayout11LayoutArray = std::array<NondetRegLayout, 11>;
-struct OneHot_11_Layout {
-  NondetRegLayout11LayoutArray _super;
+using NondetRegLayout12LayoutArray = std::array<NondetRegLayout, 12>;
+struct OneHot_12_Layout {
+  NondetRegLayout12LayoutArray _super;
 };
 struct ArgU16Layout {
   NondetRegLayout count;
@@ -86,12 +86,9 @@ struct DecoderLayout {
   NondetRegLayout _rd_0;
   NondetRegLayout opcode;
 };
-struct U16RegLayout {
-  NondetU16RegLayout ret;
-};
 struct AddrDecomposeLayout {
   NondetRegLayout low2;
-  U16RegLayout upperDiff;
+  NondetU16RegLayout upperDiff;
   IsZeroLayout _0;
   NondetU16RegLayout med14;
 };
@@ -565,10 +562,25 @@ struct DivInputLayout {
   ReadRegLayout rs1;
   ReadRegLayout rs2;
 };
-using ArgU16Layout9LayoutArray = std::array<ArgU16Layout, 9>;
+using ArgU16Layout16LayoutArray = std::array<ArgU16Layout, 16>;
 struct _Arguments_Div0MulOutputLayout {
-  ArgU16Layout9LayoutArray argU16;
+  ArgU16Layout16LayoutArray argU16;
   ArgU8Layout13LayoutArray argU8;
+};
+using ArgU16Layout2LayoutArray = std::array<ArgU16Layout, 2>;
+struct _Arguments_DoDiv__1Layout {
+  ArgU16Layout2LayoutArray argU16;
+};
+struct DoDiv__1Arm0Layout {
+  ArgU16Layout _extra0;
+  ArgU16Layout _extra1;
+};
+struct DoDiv__1Arm1_SuperLayout {
+  CmpLessThanUnsignedLayout lt;
+};
+struct DoDiv__1Layout {
+  DoDiv__1Arm0Layout arm0;
+  DoDiv__1Arm1_SuperLayout arm1;
 };
 struct DoDivLayout {
   NondetRegLayout quotLow;
@@ -577,6 +589,13 @@ struct DoDivLayout {
   NondetU16RegLayout remHigh;
   MultiplyAccumulateLayout mul;
   NondetRegLayout topBitType;
+  IsZeroLayout isZero;
+  NondetRegLayout topNum;
+  NondetU16RegLayout _0;
+  NormalizeU32Layout denomAbs;
+  NormalizeU32Layout remNormal;
+  _Arguments_DoDiv__1Layout _arguments_DoDiv__1;
+  DoDiv__1Layout _3;
 };
 struct OpSRLLayout {
   DynPo2Layout shiftMul;
@@ -661,7 +680,7 @@ struct Div0Layout {
 struct AddrDecomposeBitsLayout {
   NondetRegLayout low0;
   NondetRegLayout low1;
-  U16RegLayout upperDiff;
+  NondetU16RegLayout upperDiff;
   IsZeroLayout _0;
   NondetU16RegLayout med14;
 };
@@ -975,10 +994,8 @@ struct ControlUserECALLLayout {
   NondetRegLayout safeMode;
   AddrDecomposeBitsLayout pcAddr;
   MemoryReadLayout loadInst;
-  MemoryReadLayout dispatchIdx;
-  U16RegLayout _0;
   MemoryReadLayout newPcAddr;
-  MemoryWriteLayout _1;
+  MemoryWriteLayout _0;
 };
 struct Control0_SuperArm2Layout {
   ControlUserECALLLayout _super;
@@ -990,13 +1007,13 @@ struct Control0_SuperArm2Layout {
   MemoryArgLayout _extra5;
   MemoryArgLayout _extra6;
   MemoryArgLayout _extra7;
-  CycleArgLayout _extra8;
-  CycleArgLayout _extra9;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
   CycleArgLayout _extra10;
   CycleArgLayout _extra11;
-  ArgU16Layout _extra12;
-  ArgU16Layout _extra13;
-  ArgU16Layout _extra14;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
   ArgU16Layout _extra15;
   ArgU16Layout _extra16;
   ArgU16Layout _extra17;
@@ -1007,10 +1024,10 @@ struct Control0_SuperArm2Layout {
   ArgU16Layout _extra22;
   ArgU16Layout _extra23;
   ArgU16Layout _extra24;
-  ArgU8Layout _extra25;
-  ArgU8Layout _extra26;
-  ArgU8Layout _extra27;
-  ArgU8Layout _extra28;
+  ArgU16Layout _extra25;
+  ArgU16Layout _extra26;
+  ArgU16Layout _extra27;
+  ArgU16Layout _extra28;
   ArgU8Layout _extra29;
   ArgU8Layout _extra30;
   ArgU8Layout _extra31;
@@ -1023,6 +1040,10 @@ struct Control0_SuperArm2Layout {
   ArgU8Layout _extra38;
   ArgU8Layout _extra39;
   ArgU8Layout _extra40;
+  ArgU8Layout _extra41;
+  ArgU8Layout _extra42;
+  ArgU8Layout _extra43;
+  ArgU8Layout _extra44;
 };
 struct ControlMRETLayout {
   NondetRegLayout safeMode;
@@ -1259,7 +1280,6 @@ struct ControlTable_SuperLayout {
   ControlTable_SuperArm0Layout arm0;
   ControlTable_SuperArm1Layout arm1;
 };
-using ArgU16Layout16LayoutArray = std::array<ArgU16Layout, 16>;
 using ArgU8Layout16LayoutArray = std::array<ArgU8Layout, 16>;
 struct _Arguments_ControlTable_SuperLayout {
   ArgU16Layout16LayoutArray argU16;
@@ -1397,20 +1417,20 @@ struct Control0Layout {
 };
 using MemoryArgLayout8LayoutArray = std::array<MemoryArgLayout, 8>;
 using CycleArgLayout4LayoutArray = std::array<CycleArgLayout, 4>;
-using ArgU16Layout2LayoutArray = std::array<ArgU16Layout, 2>;
+using ArgU16Layout4LayoutArray = std::array<ArgU16Layout, 4>;
 struct _Arguments_ECall0OutputLayout {
   MemoryArgLayout8LayoutArray memoryArg;
   CycleArgLayout4LayoutArray cycleArg;
-  ArgU16Layout2LayoutArray argU16;
+  ArgU16Layout4LayoutArray argU16;
+  ArgU8Layout4LayoutArray argU8;
 };
-using NondetRegLayout4LayoutArray = std::array<NondetRegLayout, 4>;
-struct OneHot_4_Layout {
-  NondetRegLayout4LayoutArray _super;
+struct OneHot_5_Layout {
+  NondetRegLayout5LayoutArray _super;
 };
 struct MachineECallLayout {
   MemoryReadLayout loadInst;
   MemoryReadLayout dispatchIdx;
-  OneHot_4_Layout dispatch;
+  OneHot_5_Layout dispatch;
 };
 struct ECall0OutputArm0Layout {
   MachineECallLayout _super;
@@ -1422,6 +1442,12 @@ struct ECall0OutputArm0Layout {
   CycleArgLayout _extra5;
   ArgU16Layout _extra6;
   ArgU16Layout _extra7;
+  ArgU16Layout _extra8;
+  ArgU16Layout _extra9;
+  ArgU8Layout _extra10;
+  ArgU8Layout _extra11;
+  ArgU8Layout _extra12;
+  ArgU8Layout _extra13;
 };
 struct ECallTerminateLayout {
   MemoryReadLayout a0;
@@ -1437,9 +1463,19 @@ struct ECall0OutputArm1Layout {
   CycleArgLayout _extra5;
   ArgU16Layout _extra6;
   ArgU16Layout _extra7;
+  ArgU16Layout _extra8;
+  ArgU16Layout _extra9;
+  ArgU8Layout _extra10;
+  ArgU8Layout _extra11;
+  ArgU8Layout _extra12;
+  ArgU8Layout _extra13;
+};
+using NondetRegLayout4LayoutArray = std::array<NondetRegLayout, 4>;
+struct OneHot_4_Layout {
+  NondetRegLayout4LayoutArray _super;
 };
 struct DecomposeLow2Layout {
-  NondetRegLayout high;
+  NondetU16RegLayout high;
   NondetRegLayout low2;
   OneHot_4_Layout low2Hot;
   IsZeroLayout highZero;
@@ -1450,40 +1486,65 @@ struct ECallHostReadSetupLayout {
   MemoryReadLayout ptr;
   MemoryReadLayout len;
   NondetU16RegLayout newLen;
-  U16RegLayout diff;
+  NondetU16RegLayout diff;
   MemoryWriteLayout _0;
   DecomposeLow2Layout ptrDecomp;
   DecomposeLow2Layout lenDecomp;
   NondetRegLayout len123;
   NondetRegLayout uneven;
 };
+struct ECall0OutputArm2Layout {
+  ECallHostReadSetupLayout _super;
+  ArgU8Layout _extra0;
+  ArgU8Layout _extra1;
+  ArgU8Layout _extra2;
+  ArgU8Layout _extra3;
+};
 struct ECallHostWriteLayout {
   MemoryReadLayout fd;
   MemoryReadLayout ptr;
   MemoryReadLayout len;
   NondetU16RegLayout newLen;
-  U16RegLayout diff;
+  NondetU16RegLayout diff;
   MemoryWriteLayout _0;
 };
-struct ECall0OutputArm4Layout {
-  MemoryArgLayout _extra0;
-  MemoryArgLayout _extra1;
-  MemoryArgLayout _extra2;
-  MemoryArgLayout _extra3;
-  MemoryArgLayout _extra4;
-  MemoryArgLayout _extra5;
-  MemoryArgLayout _extra6;
-  MemoryArgLayout _extra7;
-  CycleArgLayout _extra8;
-  CycleArgLayout _extra9;
-  CycleArgLayout _extra10;
-  CycleArgLayout _extra11;
-  ArgU16Layout _extra12;
-  ArgU16Layout _extra13;
+struct ECall0OutputArm3Layout {
+  ECallHostWriteLayout _super;
+  ArgU16Layout _extra0;
+  ArgU16Layout _extra1;
+  ArgU8Layout _extra2;
+  ArgU8Layout _extra3;
+  ArgU8Layout _extra4;
+  ArgU8Layout _extra5;
 };
 struct MemoryWriteUnconstrainedLayout {
   MemoryIOLayout io;
   IsForwardLayout _0;
+};
+struct ECallHostReadBytesLayout {
+  DecomposeLow2Layout lenDecomp;
+  NondetRegLayout len123;
+  IsZeroLayout nextPtrEven;
+  NondetRegLayout uneven;
+  IsZeroLayout lenZero;
+  NondetRegLayout low0;
+  NondetRegLayout low1;
+  MemoryReadLayout origWord;
+  MemoryWriteUnconstrainedLayout _0;
+  SplitWordLayout oldBytes;
+  SplitWordLayout newBytes_0;
+};
+struct ECall0OutputArm4Layout {
+  ECallHostReadBytesLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  CycleArgLayout _extra4;
+  CycleArgLayout _extra5;
+  ArgU16Layout _extra6;
+  ArgU16Layout _extra7;
+  ArgU16Layout _extra8;
 };
 struct ECallHostReadWords__0_SuperLayout {
   NondetRegLayout addr;
@@ -1494,12 +1555,17 @@ struct ECallHostReadWordsLayout {
   DecomposeLow2Layout lenDecomp;
   DecomposeLow2Layout wordsDecomp;
   ECallHostReadWords__0_SuperLayout4LayoutArray _1;
-  IsZeroLayout lenZero;
+  IsZeroLayout newLenHighZero;
+  NondetRegLayout lenZero;
 };
 struct ECall0OutputArm5Layout {
   ECallHostReadWordsLayout _super;
   ArgU16Layout _extra0;
   ArgU16Layout _extra1;
+  ArgU8Layout _extra2;
+  ArgU8Layout _extra3;
+  ArgU8Layout _extra4;
+  ArgU8Layout _extra5;
 };
 struct ECall0OutputArm6Layout {
   MemoryArgLayout _extra0;
@@ -1516,6 +1582,12 @@ struct ECall0OutputArm6Layout {
   CycleArgLayout _extra11;
   ArgU16Layout _extra12;
   ArgU16Layout _extra13;
+  ArgU16Layout _extra14;
+  ArgU16Layout _extra15;
+  ArgU8Layout _extra16;
+  ArgU8Layout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
 };
 struct ECall0OutputArm7Layout {
   MemoryArgLayout _extra0;
@@ -1532,12 +1604,18 @@ struct ECall0OutputArm7Layout {
   CycleArgLayout _extra11;
   ArgU16Layout _extra12;
   ArgU16Layout _extra13;
+  ArgU16Layout _extra14;
+  ArgU16Layout _extra15;
+  ArgU8Layout _extra16;
+  ArgU8Layout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
 };
 struct ECall0OutputLayout {
   ECall0OutputArm0Layout arm0;
   ECall0OutputArm1Layout arm1;
-  ECallHostReadSetupLayout arm2;
-  ECallHostWriteLayout arm3;
+  ECall0OutputArm2Layout arm2;
+  ECall0OutputArm3Layout arm3;
   ECall0OutputArm4Layout arm4;
   ECall0OutputArm5Layout arm5;
   ECall0OutputArm6Layout arm6;
@@ -1553,6 +1631,7 @@ struct ECall0Layout {
   ECall0OutputLayout output;
   IsZeroLayout isDecode;
   IsZeroLayout isP2Entry;
+  IsZeroLayout isShaEcall;
   NormalizeU32Layout addPC;
 };
 using NondetRegLayout24LayoutArray = std::array<NondetRegLayout, 24>;
@@ -1574,11 +1653,12 @@ struct PoseidonStateLayout {
   NondetRegLayout24LayoutArray inner;
   NondetExtRegLayout zcheck;
 };
+using ArgU16Layout24LayoutArray = std::array<ArgU16Layout, 24>;
 using ArgU8Layout2LayoutArray = std::array<ArgU8Layout, 2>;
 struct _Arguments_Poseidon0StateLayout {
   MemoryArgLayout16LayoutArray memoryArg;
   CycleArgLayout8LayoutArray cycleArg;
-  ArgU16Layout16LayoutArray argU16;
+  ArgU16Layout24LayoutArray argU16;
   ArgU8Layout2LayoutArray argU8;
 };
 struct PoseidonEntry_SuperArm0Layout {
@@ -1654,8 +1734,16 @@ struct Poseidon0StateArm0Layout {
   ArgU16Layout _extra25;
   ArgU16Layout _extra26;
   ArgU16Layout _extra27;
-  ArgU8Layout _extra28;
-  ArgU8Layout _extra29;
+  ArgU16Layout _extra28;
+  ArgU16Layout _extra29;
+  ArgU16Layout _extra30;
+  ArgU16Layout _extra31;
+  ArgU16Layout _extra32;
+  ArgU16Layout _extra33;
+  ArgU16Layout _extra34;
+  ArgU16Layout _extra35;
+  ArgU8Layout _extra36;
+  ArgU8Layout _extra37;
 };
 struct ReadElemLayout {
   MemoryReadLayout elem32;
@@ -1683,8 +1771,16 @@ struct Poseidon0StateArm1Layout {
   ArgU16Layout _extra13;
   ArgU16Layout _extra14;
   ArgU16Layout _extra15;
-  ArgU8Layout _extra16;
-  ArgU8Layout _extra17;
+  ArgU16Layout _extra16;
+  ArgU16Layout _extra17;
+  ArgU16Layout _extra18;
+  ArgU16Layout _extra19;
+  ArgU16Layout _extra20;
+  ArgU16Layout _extra21;
+  ArgU16Layout _extra22;
+  ArgU16Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
 };
 using NondetRegLayout3LayoutArray = std::array<NondetRegLayout, 3>;
 struct OneHot_3_Layout {
@@ -1757,8 +1853,16 @@ struct Poseidon0StateArm2Layout {
   ArgU16Layout _extra13;
   ArgU16Layout _extra14;
   ArgU16Layout _extra15;
-  ArgU8Layout _extra16;
-  ArgU8Layout _extra17;
+  ArgU16Layout _extra16;
+  ArgU16Layout _extra17;
+  ArgU16Layout _extra18;
+  ArgU16Layout _extra19;
+  ArgU16Layout _extra20;
+  ArgU16Layout _extra21;
+  ArgU16Layout _extra22;
+  ArgU16Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
 };
 struct Poseidon0StateArm3Layout {
   PoseidonStateLayout _super;
@@ -1802,8 +1906,16 @@ struct Poseidon0StateArm3Layout {
   ArgU16Layout _extra37;
   ArgU16Layout _extra38;
   ArgU16Layout _extra39;
-  ArgU8Layout _extra40;
-  ArgU8Layout _extra41;
+  ArgU16Layout _extra40;
+  ArgU16Layout _extra41;
+  ArgU16Layout _extra42;
+  ArgU16Layout _extra43;
+  ArgU16Layout _extra44;
+  ArgU16Layout _extra45;
+  ArgU16Layout _extra46;
+  ArgU16Layout _extra47;
+  ArgU8Layout _extra48;
+  ArgU8Layout _extra49;
 };
 struct Poseidon0StateArm4Layout {
   PoseidonStateLayout _super;
@@ -1847,8 +1959,16 @@ struct Poseidon0StateArm4Layout {
   ArgU16Layout _extra37;
   ArgU16Layout _extra38;
   ArgU16Layout _extra39;
-  ArgU8Layout _extra40;
-  ArgU8Layout _extra41;
+  ArgU16Layout _extra40;
+  ArgU16Layout _extra41;
+  ArgU16Layout _extra42;
+  ArgU16Layout _extra43;
+  ArgU16Layout _extra44;
+  ArgU16Layout _extra45;
+  ArgU16Layout _extra46;
+  ArgU16Layout _extra47;
+  ArgU8Layout _extra48;
+  ArgU8Layout _extra49;
 };
 struct PoseidonCheckOut__0_SuperLayout {
   ReadElemLayout goal;
@@ -1878,11 +1998,38 @@ struct PoseidonDoOut_SuperArm0Layout {
   ArgU16Layout _extra13;
   ArgU16Layout _extra14;
   ArgU16Layout _extra15;
+  ArgU16Layout _extra16;
+  ArgU16Layout _extra17;
+  ArgU16Layout _extra18;
+  ArgU16Layout _extra19;
+  ArgU16Layout _extra20;
+  ArgU16Layout _extra21;
+  ArgU16Layout _extra22;
+  ArgU16Layout _extra23;
+};
+struct _Arguments_FieldToWord__0Layout {
+  ArgU16Layout1LayoutArray argU16;
+};
+struct FieldToWord__0Arm0_SuperLayout {
+  NondetU16RegLayout _0;
+};
+struct FieldToWord__0Arm1_SuperLayout {
+  NondetU16RegLayout _0;
+};
+struct FieldToWord__0Layout {
+  FieldToWord__0Arm0_SuperLayout arm0;
+  FieldToWord__0Arm1_SuperLayout arm1;
+};
+struct FieldToWordLayout {
+  NondetU16RegLayout low;
+  NondetU16RegLayout high;
+  NondetRegLayout lowIsZero;
+  _Arguments_FieldToWord__0Layout _arguments_FieldToWord__0;
+  FieldToWord__0Layout _2;
 };
 struct PoseidonStoreOut__0_SuperLayout {
-  NondetU16RegLayout low;
-  U16RegLayout high;
-  MemoryWriteLayout _0;
+  FieldToWordLayout ftw;
+  MemoryWriteLayout mw;
 };
 using PoseidonStoreOut__0_SuperLayout8LayoutArray = std::array<PoseidonStoreOut__0_SuperLayout, 8>;
 struct PoseidonStoreOutLayout {
@@ -1899,7 +2046,7 @@ struct PoseidonDoOut_SuperLayout {
 struct _Arguments_PoseidonDoOut_SuperLayout {
   MemoryArgLayout16LayoutArray memoryArg;
   CycleArgLayout8LayoutArray cycleArg;
-  ArgU16Layout16LayoutArray argU16;
+  ArgU16Layout24LayoutArray argU16;
 };
 struct PoseidonDoOutLayout {
   PoseidonDoOut_SuperLayout _super;
@@ -1923,12 +2070,9 @@ using NondetRegLayout6LayoutArray = std::array<NondetRegLayout, 6>;
 struct OneHot_6_Layout {
   NondetRegLayout6LayoutArray _super;
 };
-struct U8RegLayout {
-  NondetU8RegLayout ret;
-};
 struct IsU24Layout {
   NondetU16RegLayout low16;
-  U8RegLayout _0;
+  NondetU8RegLayout _0;
 };
 using ArgU8Layout1LayoutArray = std::array<ArgU8Layout, 1>;
 struct _Arguments_PoseidonPaging__1Layout {
@@ -1995,11 +2139,18 @@ struct Poseidon0StateArm6Layout {
   ArgU16Layout _extra35;
   ArgU16Layout _extra36;
   ArgU16Layout _extra37;
+  ArgU16Layout _extra38;
+  ArgU16Layout _extra39;
+  ArgU16Layout _extra40;
+  ArgU16Layout _extra41;
+  ArgU16Layout _extra42;
+  ArgU16Layout _extra43;
+  ArgU16Layout _extra44;
+  ArgU16Layout _extra45;
 };
 struct PoseidonStoreState__0_SuperLayout {
-  NondetU16RegLayout low;
-  U16RegLayout high;
-  MemoryWriteLayout _0;
+  FieldToWordLayout ftw;
+  MemoryWriteLayout mw;
 };
 using PoseidonStoreState__0_SuperLayout8LayoutArray = std::array<PoseidonStoreState__0_SuperLayout, 8>;
 struct PoseidonStoreStateLayout {
@@ -2074,8 +2225,199 @@ struct Poseidon1Layout {
   PoseidonStateLayout state;
   Poseidon1StateLayout stateRedef;
 };
+using NondetRegLayout32LayoutArray = std::array<NondetRegLayout, 32>;
+struct ShaStateLayout {
+  NondetRegLayout stateInAddr;
+  NondetRegLayout stateOutAddr;
+  NondetRegLayout dataAddr;
+  NondetRegLayout count;
+  NondetRegLayout kAddr;
+  NondetRegLayout round;
+  NondetRegLayout nextState;
+  NondetRegLayout32LayoutArray a;
+  NondetRegLayout32LayoutArray e;
+  NondetRegLayout32LayoutArray w;
+};
+using MemoryArgLayout10LayoutArray = std::array<MemoryArgLayout, 10>;
+using CycleArgLayout5LayoutArray = std::array<CycleArgLayout, 5>;
+struct _Arguments_Sha0StateLayout {
+  MemoryArgLayout10LayoutArray memoryArg;
+  CycleArgLayout5LayoutArray cycleArg;
+};
+struct ShaEcallLayout {
+  ShaStateLayout _super;
+  ReadAddrLayout stateInAddr;
+  ReadAddrLayout stateOutAddr;
+  ReadAddrLayout dataAddr;
+  MemoryReadLayout _0;
+  ReadAddrLayout kAddr;
+};
+struct ShaLoadStateLayout {
+  ShaStateLayout _super;
+  IsZeroLayout lastRound;
+  IsZeroLayout countZero;
+  MemoryReadLayout a32;
+  MemoryReadLayout e32;
+  MemoryWriteLayout _0;
+  MemoryWriteLayout _1;
+};
+struct Sha0StateArm1Layout {
+  ShaLoadStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  CycleArgLayout _extra2;
+};
+struct UnpackReg_32__16_Layout {
+  NondetRegLayout32LayoutArray _super;
+};
+struct CarryExtractLayout {
+  NondetRegLayout bit0;
+  NondetRegLayout bit1;
+  NondetRegLayout bit2;
+};
+struct CarryAndExpandLayout {
+  UnpackReg_32__16_Layout _super;
+  CarryExtractLayout lowCarry;
+  CarryExtractLayout highCarry;
+};
+struct ShaLoadDataLayout {
+  ShaStateLayout _super;
+  IsZeroLayout lastRound;
+  MemoryReadLayout k;
+  MemoryReadLayout wMem;
+  NondetRegLayout32LayoutArray wBits;
+  CarryAndExpandLayout a;
+  CarryAndExpandLayout e;
+};
+struct Sha0StateArm2Layout {
+  ShaLoadDataLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  CycleArgLayout _extra6;
+  CycleArgLayout _extra7;
+  CycleArgLayout _extra8;
+};
+struct ShaMixLayout {
+  ShaStateLayout _super;
+  IsZeroLayout lastRound;
+  MemoryReadLayout k;
+  CarryAndExpandLayout wBits;
+  CarryAndExpandLayout a;
+  CarryAndExpandLayout e;
+};
+struct Sha0StateArm3Layout {
+  ShaMixLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  CycleArgLayout _extra8;
+  CycleArgLayout _extra9;
+  CycleArgLayout _extra10;
+  CycleArgLayout _extra11;
+};
+struct ShaStoreStateLayout {
+  ShaStateLayout _super;
+  IsZeroLayout lastRound;
+  IsZeroLayout countZero;
+  CarryAndExpandLayout a;
+  CarryAndExpandLayout e;
+  MemoryWriteLayout _1;
+  MemoryWriteLayout _2;
+};
+struct Sha0StateArm4Layout {
+  ShaStoreStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  CycleArgLayout _extra6;
+  CycleArgLayout _extra7;
+  CycleArgLayout _extra8;
+};
+struct Sha0StateArm5Layout {
+  ShaStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  CycleArgLayout _extra10;
+  CycleArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+};
+struct Sha0StateArm6Layout {
+  ShaStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  CycleArgLayout _extra10;
+  CycleArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+};
+struct Sha0StateArm7Layout {
+  ShaStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  CycleArgLayout _extra10;
+  CycleArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+};
+struct Sha0StateLayout {
+  ShaStateLayout _super;
+  ShaEcallLayout arm0;
+  Sha0StateArm1Layout arm1;
+  Sha0StateArm2Layout arm2;
+  Sha0StateArm3Layout arm3;
+  Sha0StateArm4Layout arm4;
+  Sha0StateArm5Layout arm5;
+  Sha0StateArm6Layout arm6;
+  Sha0StateArm7Layout arm7;
+};
+struct Sha0Layout {
+  DoCycleTableLayout _0;
+  ShaStateLayout state;
+  _Arguments_Sha0StateLayout _arguments_Sha0State;
+  Sha0StateLayout stateRedef;
+};
 struct TopInstResultLayout {
-  NondetRegLayout11LayoutArray _selector;
+  NondetRegLayout12LayoutArray _selector;
   Misc0Layout arm0;
   Misc1Layout arm1;
   Misc2Layout arm2;
@@ -2087,6 +2429,7 @@ struct TopInstResultLayout {
   ECall0Layout arm8;
   Poseidon0Layout arm9;
   Poseidon1Layout arm10;
+  Sha0Layout arm11;
 };
 struct TopCycleLayout {
   NondetRegLayout _super;
@@ -2104,7 +2447,7 @@ struct TopLayout {
   NondetRegLayout major;
   NondetRegLayout minor;
   InstInputLayout instInput;
-  OneHot_11_Layout majorOnehot;
+  OneHot_12_Layout majorOnehot;
   TopInstResultLayout instResult;
 };
 struct DigestRegValues_SuperLayout {
@@ -2166,8 +2509,6 @@ struct NondetRegStruct {
 struct NondetExtRegStruct {
   ExtVal _super;
 };
-struct BitRegStruct {
-};
 struct NondetFakeTwitRegStruct {
   Val _super;
 };
@@ -2183,11 +2524,11 @@ struct ArgU16Struct {
   NondetRegStruct count;
   NondetRegStruct val;
 };
-struct U16RegStruct {
-  Val _super;
+struct NondetU16RegStruct {
+  NondetRegStruct _super;
 };
 using Val5Array = std::array<Val, 5>;
-using Val16Array = std::array<Val, 16>;
+using Val30Array = std::array<Val, 30>;
 using NondetRegStruct5Array = std::array<NondetRegStruct, 5>;
 struct ToBits_5_Struct {
   NondetRegStruct5Array _super;
@@ -2224,6 +2565,7 @@ struct CmpLessThanUnsignedStruct {
 struct CmpLessThanStruct {
   NondetRegStruct isLessThan;
 };
+using Val16Array = std::array<Val, 16>;
 using NondetRegStruct16Array = std::array<NondetRegStruct, 16>;
 struct ToBits_16_Struct {
   NondetRegStruct16Array _super;
@@ -2271,6 +2613,7 @@ struct GetDataStruct {
 struct MemoryWriteStruct {
 };
 struct MemoryWriteUnconstrainedStruct {
+  MemoryIOStruct io;
 };
 using Val3Array = std::array<Val, 3>;
 using NondetRegStruct3Array = std::array<NondetRegStruct, 3>;
@@ -2284,6 +2627,7 @@ struct OneHot_8_Struct {
   NondetRegStruct8Array bits;
 };
 struct InstInputStruct {
+  Val minor;
   ValU32Struct pcU32;
   Val state;
   Val mode;
@@ -2301,7 +2645,7 @@ struct ExpandU32Struct {
   Val neg;
 };
 struct SplitTotalStruct {
-  NondetRegStruct out;
+  NondetU16RegStruct out;
   Val carry;
 };
 struct MultiplySettingsStruct {
@@ -2312,6 +2656,7 @@ struct MultiplySettingsStruct {
 struct MultiplyAccumulateStruct {
   ValU32Struct outLow;
   ValU32Struct outHigh;
+  Val bNeg;
 };
 struct DivInputStruct {
   InstInputStruct _super;
@@ -2319,6 +2664,8 @@ struct DivInputStruct {
   DecoderStruct decoded;
   GetDataStruct rs1;
   GetDataStruct rs2;
+};
+struct ComponentStruct {
 };
 struct DivideReturnStruct {
   ValU32Struct quot;
@@ -2385,8 +2732,6 @@ using ControlLoadRoot__0Struct8Array = std::array<ControlLoadRoot__0Struct, 8>;
 struct ControlResume_SuperArm1_Super__0Struct {
 };
 using ControlResume_SuperArm1_Super__0Struct8Array = std::array<ControlResume_SuperArm1_Super__0Struct, 8>;
-struct ComponentStruct {
-};
 using GetDataStruct8Array = std::array<GetDataStruct, 8>;
 struct ControlTable_SuperArm0_Super__0Struct {
 };
@@ -2394,10 +2739,8 @@ struct ControlTable_SuperArm1_Super__0Struct {
 };
 using ControlTable_SuperArm0_Super__0Struct16Array = std::array<ControlTable_SuperArm0_Super__0Struct, 16>;
 using ControlTable_SuperArm1_Super__0Struct16Array = std::array<ControlTable_SuperArm1_Super__0Struct, 16>;
-using Val4Array = std::array<Val, 4>;
-using NondetRegStruct4Array = std::array<NondetRegStruct, 4>;
-struct OneHot_4_Struct {
-  NondetRegStruct4Array _super;
+struct OneHot_5_Struct {
+  NondetRegStruct5Array _super;
 };
 struct ECallOutputStruct {
   Val state;
@@ -2405,8 +2748,13 @@ struct ECallOutputStruct {
   Val s1;
   Val s2;
 };
+using Val4Array = std::array<Val, 4>;
+using NondetRegStruct4Array = std::array<NondetRegStruct, 4>;
+struct OneHot_4_Struct {
+  NondetRegStruct4Array _super;
+};
 struct DecomposeLow2Struct {
-  NondetRegStruct high;
+  NondetU16RegStruct high;
   NondetRegStruct low2;
   OneHot_4_Struct low2Hot;
   NondetRegStruct highZero;
@@ -2472,6 +2820,9 @@ using ReadElemStruct8Array = std::array<ReadElemStruct, 8>;
 struct PoseidonCheckOut__0Struct {
 };
 using PoseidonCheckOut__0Struct8Array = std::array<PoseidonCheckOut__0Struct, 8>;
+struct FieldToWordStruct {
+  ValU32Struct ret;
+};
 struct PoseidonStoreOut__0Struct {
 };
 using PoseidonStoreOut__0Struct8Array = std::array<PoseidonStoreOut__0Struct, 8>;
@@ -2486,10 +2837,48 @@ struct OneHot_6_Struct {
   NondetRegStruct6Array _super;
   NondetRegStruct6Array bits;
 };
-using Val11Array = std::array<Val, 11>;
-using NondetRegStruct11Array = std::array<NondetRegStruct, 11>;
-struct OneHot_11_Struct {
-  NondetRegStruct11Array _super;
+struct CarryExtractStruct {
+  Val carry;
+  Val out;
+};
+using Val2Array = std::array<Val, 2>;
+struct DivStruct {
+  Val _super;
+};
+using DivStruct32Array = std::array<DivStruct, 32>;
+using Val32Array = std::array<Val, 32>;
+using NondetRegStruct32Array = std::array<NondetRegStruct, 32>;
+struct UnpackReg_32__16_Struct {
+  NondetRegStruct32Array _super;
+};
+struct ShaStateAStruct {
+  NondetRegStruct _super;
+};
+using ShaStateAStruct32Array = std::array<ShaStateAStruct, 32>;
+struct ShaStateEStruct {
+  NondetRegStruct _super;
+};
+using ShaStateEStruct32Array = std::array<ShaStateEStruct, 32>;
+struct ShaStateWStruct {
+  NondetRegStruct _super;
+};
+using ShaStateWStruct32Array = std::array<ShaStateWStruct, 32>;
+struct ShaStateStruct {
+  NondetRegStruct stateInAddr;
+  NondetRegStruct stateOutAddr;
+  NondetRegStruct dataAddr;
+  NondetRegStruct count;
+  NondetRegStruct kAddr;
+  NondetRegStruct round;
+  NondetRegStruct nextState;
+  ShaStateAStruct32Array a;
+  ShaStateEStruct32Array e;
+  ShaStateWStruct32Array w;
+};
+using Val12Array = std::array<Val, 12>;
+using NondetRegStruct12Array = std::array<NondetRegStruct, 12>;
+struct OneHot_12_Struct {
+  NondetRegStruct12Array _super;
 };
 struct TopStruct {
 };
