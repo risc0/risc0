@@ -22,7 +22,7 @@ each fork's repository on GitHub.
 | Crate                                                         | Versions supported            | Patch Statement Example                                                                          |
 | ------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
 | [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases) | 0.10.8, 0.10.7, 0.10.6, 0.9.9 | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }` |
-| [`tiny-keccak`](https://github.com/risc0/tiny-keccak/releases) | 2.0.2 | `tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", rev = "7ff2b8465891d1cbb55a69e553e05d369ce41d72" }` |
+| [`tiny-keccak`](https://github.com/risc0/tiny-keccak/releases) | 2.0.2 | `tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }` |
 
 ### ECDSA
 
