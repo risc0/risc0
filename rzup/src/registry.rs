@@ -235,9 +235,6 @@ impl Registry {
             return Ok(());
         }
 
-        // Create necessary directories before installation
-        Paths::create_version_dirs(env, &component_to_install, &version)?;
-
         // Install component
         components::install(
             &component_to_install,

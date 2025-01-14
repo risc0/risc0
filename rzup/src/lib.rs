@@ -244,17 +244,6 @@ impl Rzup {
         }
     }
 
-    /// Ensures version directories exist for a component.
-    ///
-    /// Creates the necessary directory structure if it doesn't exist.
-    ///
-    /// # Arguments
-    /// * `component` - Component
-    /// * `version` - Version to create directories for
-    pub fn ensure_version_dirs(&self, component: &Component, version: &Version) -> Result<()> {
-        Paths::create_version_dirs(&self.environment, component, version)
-    }
-
     /// Gets the component directory path.
     ///
     /// # Arguments
@@ -516,9 +505,6 @@ mod tests {
         let version = Version::new(1, 2, 0);
         let component = Component::CargoRiscZero;
 
-        // Create necessary directories without actual installation
-        rzup.ensure_version_dirs(&component, &version).unwrap();
-
         // Create the bin directory for the component
         let bin_dir = rzup.get_version_dir(&component, &version);
         std::fs::create_dir_all(&bin_dir).unwrap();
@@ -558,6 +544,10 @@ mod tests {
                 .unwrap(),
             cargo_risczero_version
         );
+        assert_eq!(
+            rzup.list_versions(&Component::CargoRiscZero).unwrap(),
+            vec![Version::new(1, 0, 0)]
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::CargoRiscZero, cargo_risczero_version.clone())
@@ -565,6 +555,10 @@ mod tests {
         assert!(!rzup
             .version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
             .unwrap());
+        assert_eq!(
+            rzup.list_versions(&Component::CargoRiscZero).unwrap(),
+            vec![]
+        );
 
         // Rust
         let rust_version = Version::new(1, 79, 0);
@@ -573,6 +567,10 @@ mod tests {
         assert!(rzup
             .version_exists(&Component::RustToolchain, &rust_version)
             .unwrap());
+        assert_eq!(
+            rzup.list_versions(&Component::RustToolchain).unwrap(),
+            vec![Version::new(1, 79, 0)]
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::RustToolchain, rust_version.clone())
@@ -580,6 +578,10 @@ mod tests {
         assert!(!rzup
             .version_exists(&Component::RustToolchain, &rust_version)
             .unwrap());
+        assert_eq!(
+            rzup.list_versions(&Component::CargoRiscZero).unwrap(),
+            vec![]
+        );
     }
 
     http_test_harness!(test_install_and_uninstall_end_to_end);
@@ -720,6 +722,11 @@ mod tests {
                     version: "5.0.0".into(),
                 },
             ],
+        );
+
+        assert_eq!(
+            rzup.list_versions(&Component::CargoRiscZero).unwrap(),
+            vec![]
         );
     }
 

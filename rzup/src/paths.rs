@@ -14,7 +14,6 @@
 use crate::components::Component;
 use crate::env::Environment;
 use crate::error::Result;
-use crate::events::RzupEvent;
 use semver::Version;
 use std::path::PathBuf;
 
@@ -73,39 +72,6 @@ impl Paths {
         }
 
         Ok(false)
-    }
-
-    pub fn create_version_dirs(
-        env: &Environment,
-        component: &Component,
-        version: &Version,
-    ) -> Result<()> {
-        let component_dir = Self::get_component_dir(env, component);
-        if !component_dir.exists() {
-            env.emit(RzupEvent::Debug {
-                message: format!("Creating component directory: {}", component_dir.display()),
-            });
-            std::fs::create_dir_all(&component_dir)?;
-        }
-
-        let version_dir = Self::get_version_dir(env, component, version);
-        if !version_dir.exists() {
-            env.emit(RzupEvent::Debug {
-                message: format!("Creating version directory: {}", version_dir.display()),
-            });
-            std::fs::create_dir_all(&version_dir)?;
-        }
-
-        // Also ensure tmp directory exists
-        let tmp_dir = env.tmp_dir();
-        if !tmp_dir.exists() {
-            env.emit(RzupEvent::Debug {
-                message: format!("Creating tmp directory: {}", tmp_dir.display()),
-            });
-            std::fs::create_dir_all(tmp_dir)?;
-        }
-
-        Ok(())
     }
 
     pub fn cleanup_version(
@@ -227,8 +193,8 @@ mod tests {
         let version = Version::new(1, 0, 0);
         let component = Component::RustToolchain;
 
-        // Test directory creation
-        Paths::create_version_dirs(&env, &component, &version).unwrap();
+        let version_dir = Paths::get_version_dir(&env, &component, &version);
+        std::fs::create_dir_all(&version_dir).unwrap();
         assert!(Paths::version_exists(&env, &component, &version).unwrap());
 
         // Test directory cleanup

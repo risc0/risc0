@@ -128,14 +128,11 @@ pub fn install(
         version: version.to_string(),
     });
 
-    Paths::create_version_dirs(env, component, version)?;
-
     let archive_name = distribution.get_archive_name(component, Some(version), env.platform())?;
     let downloaded_file = env.tmp_dir().join(archive_name);
 
     if force {
         Paths::cleanup_version(env, component, version)?;
-        Paths::create_version_dirs(env, component, version)?;
     }
 
     // Download and extract
