@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -137,13 +137,11 @@ static mut KECCAK2_BATCHER: OnceCell<batcher::Keccak2Batcher> = OnceCell::new();
 
 /// Initialize globals before program main
 pub(crate) fn init() {
+    #[allow(static_mut_refs)]
     unsafe {
-        #[allow(static_mut_refs)]
         HASHER.set(Sha256::new()).unwrap();
-        #[allow(static_mut_refs)]
         #[cfg(feature = "unstable")]
         KECCAK2_BATCHER.set(batcher::Keccak2Batcher::new()).unwrap();
-        #[allow(static_mut_refs)]
         syscall::sys_rand(
             MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
             MEMORY_IMAGE_ENTROPY.len(),
@@ -153,14 +151,13 @@ pub(crate) fn init() {
 
 /// Finalize execution
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
+    #[allow(static_mut_refs)]
     unsafe {
         #[cfg(feature = "unstable")]
         KECCAK2_BATCHER.take().unwrap().finalize();
 
-        #[allow(static_mut_refs)]
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
-        #[allow(static_mut_refs)]
         let output = Output {
             journal: MaybePruned::Pruned(journal_digest),
             assumptions: MaybePruned::Pruned(ASSUMPTIONS_DIGEST.digest()),
@@ -499,7 +496,14 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 }
 
 /// get an updated keccak state
+///
+/// While is accesses a static mutable, this is considered safe because the zkVM
+/// is single-threaded and non-preemptive.
 #[cfg(feature = "unstable")]
-pub fn keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
-    unsafe { KECCAK2_BATCHER.get_mut().unwrap().update(state) }
+#[no_mangle]
+pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
+    #[allow(static_mut_refs)]
+    unsafe {
+        KECCAK2_BATCHER.get_mut().unwrap().update(state)
+    }
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::execute::addr::WordAddr;
+use risc0_binfmt::WordAddr;
 
 const ENTRY_COUNT: usize = 1 << 11;
 const PAGED_MAP_MASK: u32 = (1 << 10) - 1;
@@ -104,10 +104,7 @@ impl PagedMap {
     ///
     /// If the map did have this key present, the value is updated, and the old value is returned.
     pub fn insert(&mut self, addr: &WordAddr, word: u32) -> Option<u32> {
-        let entry = self.get_mut(addr);
-        let result = *entry;
-        *entry = Some(word);
-        result
+        std::mem::replace(self.get_mut(addr), Some(word))
     }
 
     pub fn insert_default(&mut self, addr: &WordAddr, word: u32, default: u32) -> u32 {

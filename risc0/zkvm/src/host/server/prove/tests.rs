@@ -425,9 +425,9 @@ fn continuation() {
 
     let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
-        assert_eq!(segment.inner.exit_code, ExitCode::SystemSplit);
+        assert_eq!(segment.inner.v1().exit_code, ExitCode::SystemSplit);
     }
-    assert_eq!(final_segment.inner.exit_code, ExitCode::Halted(0));
+    assert_eq!(final_segment.inner.v1().exit_code, ExitCode::Halted(0));
 
     let receipt = prove_session_fast(&session);
     for (idx, receipt) in receipt

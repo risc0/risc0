@@ -1,16 +1,16 @@
 __device__ constexpr NondetRegLayout8LayoutArray kLayout__3 =
-    NondetRegLayout8LayoutArray{NondetRegLayout{._super = /*offset=*/19},
-                                NondetRegLayout{._super = /*offset=*/20},
+    NondetRegLayout8LayoutArray{NondetRegLayout{._super = /*offset=*/20},
                                 NondetRegLayout{._super = /*offset=*/21},
                                 NondetRegLayout{._super = /*offset=*/22},
                                 NondetRegLayout{._super = /*offset=*/23},
                                 NondetRegLayout{._super = /*offset=*/24},
                                 NondetRegLayout{._super = /*offset=*/25},
-                                NondetRegLayout{._super = /*offset=*/26}};
+                                NondetRegLayout{._super = /*offset=*/26},
+                                NondetRegLayout{._super = /*offset=*/27}};
 __device__ constexpr OneHot_8_Layout kLayout__2 = OneHot_8_Layout{._super = kLayout__3};
 __device__ constexpr InstInputLayout kLayout__1 = InstInputLayout{.minorOnehot = kLayout__2};
-__device__ constexpr NondetRegLayout11LayoutArray kLayout__5 =
-    NondetRegLayout11LayoutArray{NondetRegLayout{._super = /*offset=*/1},
+__device__ constexpr NondetRegLayout12LayoutArray kLayout__5 =
+    NondetRegLayout12LayoutArray{NondetRegLayout{._super = /*offset=*/1},
                                  NondetRegLayout{._super = /*offset=*/2},
                                  NondetRegLayout{._super = /*offset=*/3},
                                  NondetRegLayout{._super = /*offset=*/4},
@@ -20,267 +20,268 @@ __device__ constexpr NondetRegLayout11LayoutArray kLayout__5 =
                                  NondetRegLayout{._super = /*offset=*/8},
                                  NondetRegLayout{._super = /*offset=*/9},
                                  NondetRegLayout{._super = /*offset=*/10},
-                                 NondetRegLayout{._super = /*offset=*/11}};
-__device__ constexpr OneHot_11_Layout kLayout__4 = OneHot_11_Layout{._super = kLayout__5};
+                                 NondetRegLayout{._super = /*offset=*/11},
+                                 NondetRegLayout{._super = /*offset=*/12}};
+__device__ constexpr OneHot_12_Layout kLayout__4 = OneHot_12_Layout{._super = kLayout__5};
 __device__ constexpr NondetU16RegLayout kLayout__10 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                                           .val = NondetRegLayout{._super = /*offset=*/38}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                                           .val = NondetRegLayout{._super = /*offset=*/39}}};
 __device__ constexpr NondetU16RegLayout kLayout__11 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/40},
-                                           .val = NondetRegLayout{._super = /*offset=*/41}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/41},
+                                           .val = NondetRegLayout{._super = /*offset=*/42}}};
 __device__ constexpr NormalizeU32Layout kLayout__9 =
     NormalizeU32Layout{.low16 = kLayout__10,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/39},
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/40},
                        .high16 = kLayout__11,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/42}};
+                       .highCarry = NondetRegLayout{._super = /*offset=*/43}};
 __device__ constexpr NondetU16RegLayout kLayout__13 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                                           .val = NondetRegLayout{._super = /*offset=*/44}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/44},
+                                           .val = NondetRegLayout{._super = /*offset=*/45}}};
 __device__ constexpr NondetU16RegLayout kLayout__14 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/46},
-                                           .val = NondetRegLayout{._super = /*offset=*/47}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/47},
+                                           .val = NondetRegLayout{._super = /*offset=*/48}}};
 __device__ constexpr NormalizeU32Layout kLayout__12 =
     NormalizeU32Layout{.low16 = kLayout__13,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/45},
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/46},
                        .high16 = kLayout__14,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/48}};
+                       .highCarry = NondetRegLayout{._super = /*offset=*/49}};
 __device__ constexpr MemoryArgLayout kLayout__18 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/53},
-                    .addr = NondetRegLayout{._super = /*offset=*/52},
-                    .cycle = NondetRegLayout{._super = /*offset=*/54},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/55},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/56}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/54},
+                    .addr = NondetRegLayout{._super = /*offset=*/53},
+                    .cycle = NondetRegLayout{._super = /*offset=*/55},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/56},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/57}};
 __device__ constexpr MemoryArgLayout kLayout__19 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/57},
-                    .addr = NondetRegLayout{._super = /*offset=*/52},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/58},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/59}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/58},
+                    .addr = NondetRegLayout{._super = /*offset=*/53},
+                    .cycle = NondetRegLayout{._super = /*offset=*/59},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/60},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/61}};
 __device__ constexpr MemoryIOLayout kLayout__17 =
     MemoryIOLayout{.oldTxn = kLayout__18, .newTxn = kLayout__19};
 __device__ constexpr IsCycleLayout kLayout__21 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/60},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/61}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/62},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/63}}};
 __device__ constexpr IsForwardLayout kLayout__20 = IsForwardLayout{._0 = kLayout__21};
 __device__ constexpr MemoryWriteLayout kLayout__16 =
     MemoryWriteLayout{.io = kLayout__17, ._0 = kLayout__20};
 __device__ constexpr WriteRdLayout kLayout__15 =
-    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/49},
-                                        .inv = NondetRegLayout{._super = /*offset=*/50}},
-                  .writeAddr = NondetRegLayout{._super = /*offset=*/51},
+    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/50},
+                                        .inv = NondetRegLayout{._super = /*offset=*/51}},
+                  .writeAddr = NondetRegLayout{._super = /*offset=*/52},
                   ._0 = kLayout__16};
 __device__ constexpr FinalizeMiscLayout kLayout__8 =
     FinalizeMiscLayout{.writeData = kLayout__9, .pcNorm = kLayout__12, ._0 = kLayout__15};
-__device__ constexpr DecoderLayout kLayout__24 =
-    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/62},
-                  ._f7_45 = NondetRegLayout{._super = /*offset=*/63},
-                  ._f7_23 = NondetRegLayout{._super = /*offset=*/64},
-                  ._f7_01 = NondetRegLayout{._super = /*offset=*/65},
-                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/66},
-                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/67},
-                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/68},
-                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/69},
-                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/70},
-                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/71},
-                  ._f3_2 = NondetRegLayout{._super = /*offset=*/72},
-                  ._f3_01 = NondetRegLayout{._super = /*offset=*/73},
-                  ._rd_34 = NondetRegLayout{._super = /*offset=*/74},
-                  ._rd_12 = NondetRegLayout{._super = /*offset=*/75},
-                  ._rd_0 = NondetRegLayout{._super = /*offset=*/76},
-                  .opcode = NondetRegLayout{._super = /*offset=*/77}};
+__device__ constexpr DoCycleTableLayout kLayout__22 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/64},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/65}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/66},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/67}}};
+__device__ constexpr DecoderLayout kLayout__25 =
+    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/68},
+                  ._f7_45 = NondetRegLayout{._super = /*offset=*/69},
+                  ._f7_23 = NondetRegLayout{._super = /*offset=*/70},
+                  ._f7_01 = NondetRegLayout{._super = /*offset=*/71},
+                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/72},
+                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/73},
+                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/74},
+                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/75},
+                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/76},
+                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/77},
+                  ._f3_2 = NondetRegLayout{._super = /*offset=*/78},
+                  ._f3_01 = NondetRegLayout{._super = /*offset=*/79},
+                  ._rd_34 = NondetRegLayout{._super = /*offset=*/80},
+                  ._rd_12 = NondetRegLayout{._super = /*offset=*/81},
+                  ._rd_0 = NondetRegLayout{._super = /*offset=*/82},
+                  .opcode = NondetRegLayout{._super = /*offset=*/83}};
 __device__ constexpr NondetU16RegLayout kLayout__27 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/80},
-                                           .val = NondetRegLayout{._super = /*offset=*/81}}};
-__device__ constexpr U16RegLayout kLayout__26 = U16RegLayout{.ret = kLayout__27};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/85},
+                                           .val = NondetRegLayout{._super = /*offset=*/86}}};
 __device__ constexpr NondetU16RegLayout kLayout__28 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/84},
-                                           .val = NondetRegLayout{._super = /*offset=*/85}}};
-__device__ constexpr AddrDecomposeLayout kLayout__25 =
-    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/79},
-                        .upperDiff = kLayout__26,
-                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/82},
-                                           .inv = NondetRegLayout{._super = /*offset=*/83}},
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/89},
+                                           .val = NondetRegLayout{._super = /*offset=*/90}}};
+__device__ constexpr AddrDecomposeLayout kLayout__26 =
+    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/84},
+                        .upperDiff = kLayout__27,
+                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/87},
+                                           .inv = NondetRegLayout{._super = /*offset=*/88}},
                         .med14 = kLayout__28};
 __device__ constexpr MemoryArgLayout kLayout__31 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/87},
-                    .addr = NondetRegLayout{._super = /*offset=*/86},
-                    .cycle = NondetRegLayout{._super = /*offset=*/88},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/89},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/90}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/92},
+                    .addr = NondetRegLayout{._super = /*offset=*/91},
+                    .cycle = NondetRegLayout{._super = /*offset=*/93},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/94},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/95}};
 __device__ constexpr MemoryArgLayout kLayout__32 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
-                    .addr = NondetRegLayout{._super = /*offset=*/86},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/92},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/93}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/96},
+                    .addr = NondetRegLayout{._super = /*offset=*/91},
+                    .cycle = NondetRegLayout{._super = /*offset=*/97},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/98},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/99}};
 __device__ constexpr MemoryIOLayout kLayout__30 =
     MemoryIOLayout{.oldTxn = kLayout__31, .newTxn = kLayout__32};
 __device__ constexpr IsCycleLayout kLayout__34 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/94},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/95}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/100},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/101}}};
 __device__ constexpr IsForwardLayout kLayout__33 = IsForwardLayout{._0 = kLayout__34};
 __device__ constexpr MemoryReadLayout kLayout__29 =
     MemoryReadLayout{.io = kLayout__30, ._0 = kLayout__33};
-__device__ constexpr DecodeInstLayout kLayout__23 =
-    DecodeInstLayout{._super = kLayout__24,
-                     .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/78},
-                                           .cycle = NondetRegLayout{._super = /*offset=*/0}},
-                     .pcAddr = kLayout__25,
-                     .loadInst = kLayout__29};
+__device__ constexpr DecodeInstLayout kLayout__24 =
+    DecodeInstLayout{._super = kLayout__25, .pcAddr = kLayout__26, .loadInst = kLayout__29};
 __device__ constexpr MemoryArgLayout kLayout__38 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                    .addr = NondetRegLayout{._super = /*offset=*/96},
-                    .cycle = NondetRegLayout{._super = /*offset=*/98},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/99},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/100}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
+                    .addr = NondetRegLayout{._super = /*offset=*/102},
+                    .cycle = NondetRegLayout{._super = /*offset=*/104},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/105},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/106}};
 __device__ constexpr MemoryArgLayout kLayout__39 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                    .addr = NondetRegLayout{._super = /*offset=*/96},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/102},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/103}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/107},
+                    .addr = NondetRegLayout{._super = /*offset=*/102},
+                    .cycle = NondetRegLayout{._super = /*offset=*/108},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/109},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/110}};
 __device__ constexpr MemoryIOLayout kLayout__37 =
     MemoryIOLayout{.oldTxn = kLayout__38, .newTxn = kLayout__39};
 __device__ constexpr IsCycleLayout kLayout__41 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/105}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/111},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/112}}};
 __device__ constexpr IsForwardLayout kLayout__40 = IsForwardLayout{._0 = kLayout__41};
 __device__ constexpr MemoryReadLayout kLayout__36 =
     MemoryReadLayout{.io = kLayout__37, ._0 = kLayout__40};
 __device__ constexpr ReadRegLayout kLayout__35 =
-    ReadRegLayout{._super = kLayout__36, .addr = NondetRegLayout{._super = /*offset=*/106}};
+    ReadRegLayout{._super = kLayout__36, .addr = NondetRegLayout{._super = /*offset=*/113}};
 __device__ constexpr MemoryArgLayout kLayout__45 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
-                    .addr = NondetRegLayout{._super = /*offset=*/107},
-                    .cycle = NondetRegLayout{._super = /*offset=*/109},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/110},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/111}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/115},
+                    .addr = NondetRegLayout{._super = /*offset=*/114},
+                    .cycle = NondetRegLayout{._super = /*offset=*/116},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/117},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/118}};
 __device__ constexpr MemoryArgLayout kLayout__46 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
-                    .addr = NondetRegLayout{._super = /*offset=*/107},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/113},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/114}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/119},
+                    .addr = NondetRegLayout{._super = /*offset=*/114},
+                    .cycle = NondetRegLayout{._super = /*offset=*/120},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/121},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/122}};
 __device__ constexpr MemoryIOLayout kLayout__44 =
     MemoryIOLayout{.oldTxn = kLayout__45, .newTxn = kLayout__46};
 __device__ constexpr IsCycleLayout kLayout__48 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/115},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/116}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/123},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/124}}};
 __device__ constexpr IsForwardLayout kLayout__47 = IsForwardLayout{._0 = kLayout__48};
 __device__ constexpr MemoryReadLayout kLayout__43 =
     MemoryReadLayout{.io = kLayout__44, ._0 = kLayout__47};
 __device__ constexpr ReadRegLayout kLayout__42 =
-    ReadRegLayout{._super = kLayout__43, .addr = NondetRegLayout{._super = /*offset=*/117}};
-__device__ constexpr MiscInputLayout kLayout__22 =
-    MiscInputLayout{.decoded = kLayout__23, .rs1 = kLayout__35, .rs2 = kLayout__42};
+    ReadRegLayout{._super = kLayout__43, .addr = NondetRegLayout{._super = /*offset=*/125}};
+__device__ constexpr MiscInputLayout kLayout__23 =
+    MiscInputLayout{.decoded = kLayout__24, .rs1 = kLayout__35, .rs2 = kLayout__42};
 __device__ constexpr ArgU16Layout5LayoutArray kLayout__50 =
-    ArgU16Layout5LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                          .val = NondetRegLayout{._super = /*offset=*/28}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                          .val = NondetRegLayout{._super = /*offset=*/30}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                          .val = NondetRegLayout{._super = /*offset=*/32}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                          .val = NondetRegLayout{._super = /*offset=*/34}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                                          .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ArgU16Layout5LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                          .val = NondetRegLayout{._super = /*offset=*/29}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                          .val = NondetRegLayout{._super = /*offset=*/31}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                          .val = NondetRegLayout{._super = /*offset=*/33}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                          .val = NondetRegLayout{._super = /*offset=*/35}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                                          .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr _Arguments_Misc0MiscOutputLayout kLayout__49 =
     _Arguments_Misc0MiscOutputLayout{.argU16 = kLayout__50};
 __device__ constexpr Misc0MiscOutputArm0Layout kLayout__52 = Misc0MiscOutputArm0Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc0MiscOutputArm1Layout kLayout__53 = Misc0MiscOutputArm1Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr NondetRegLayout16LayoutArray kLayout__60 =
-    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/118},
-                                 NondetRegLayout{._super = /*offset=*/119},
-                                 NondetRegLayout{._super = /*offset=*/120},
-                                 NondetRegLayout{._super = /*offset=*/121},
-                                 NondetRegLayout{._super = /*offset=*/122},
-                                 NondetRegLayout{._super = /*offset=*/123},
-                                 NondetRegLayout{._super = /*offset=*/124},
-                                 NondetRegLayout{._super = /*offset=*/125},
-                                 NondetRegLayout{._super = /*offset=*/126},
+    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/126},
                                  NondetRegLayout{._super = /*offset=*/127},
                                  NondetRegLayout{._super = /*offset=*/128},
                                  NondetRegLayout{._super = /*offset=*/129},
                                  NondetRegLayout{._super = /*offset=*/130},
                                  NondetRegLayout{._super = /*offset=*/131},
                                  NondetRegLayout{._super = /*offset=*/132},
-                                 NondetRegLayout{._super = /*offset=*/133}};
-__device__ constexpr ToBits_16_Layout kLayout__59 = ToBits_16_Layout{._super = kLayout__60};
-__device__ constexpr NondetRegLayout16LayoutArray kLayout__62 =
-    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/134},
+                                 NondetRegLayout{._super = /*offset=*/133},
+                                 NondetRegLayout{._super = /*offset=*/134},
                                  NondetRegLayout{._super = /*offset=*/135},
                                  NondetRegLayout{._super = /*offset=*/136},
                                  NondetRegLayout{._super = /*offset=*/137},
                                  NondetRegLayout{._super = /*offset=*/138},
                                  NondetRegLayout{._super = /*offset=*/139},
                                  NondetRegLayout{._super = /*offset=*/140},
-                                 NondetRegLayout{._super = /*offset=*/141},
-                                 NondetRegLayout{._super = /*offset=*/142},
+                                 NondetRegLayout{._super = /*offset=*/141}};
+__device__ constexpr ToBits_16_Layout kLayout__59 = ToBits_16_Layout{._super = kLayout__60};
+__device__ constexpr NondetRegLayout16LayoutArray kLayout__62 =
+    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/142},
                                  NondetRegLayout{._super = /*offset=*/143},
                                  NondetRegLayout{._super = /*offset=*/144},
                                  NondetRegLayout{._super = /*offset=*/145},
                                  NondetRegLayout{._super = /*offset=*/146},
                                  NondetRegLayout{._super = /*offset=*/147},
                                  NondetRegLayout{._super = /*offset=*/148},
-                                 NondetRegLayout{._super = /*offset=*/149}};
-__device__ constexpr ToBits_16_Layout kLayout__61 = ToBits_16_Layout{._super = kLayout__62};
-__device__ constexpr BitwiseAndU16Layout kLayout__58 =
-    BitwiseAndU16Layout{.bitsX = kLayout__59, .bitsY = kLayout__61};
-__device__ constexpr NondetRegLayout16LayoutArray kLayout__65 =
-    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/150},
+                                 NondetRegLayout{._super = /*offset=*/149},
+                                 NondetRegLayout{._super = /*offset=*/150},
                                  NondetRegLayout{._super = /*offset=*/151},
                                  NondetRegLayout{._super = /*offset=*/152},
                                  NondetRegLayout{._super = /*offset=*/153},
                                  NondetRegLayout{._super = /*offset=*/154},
                                  NondetRegLayout{._super = /*offset=*/155},
                                  NondetRegLayout{._super = /*offset=*/156},
-                                 NondetRegLayout{._super = /*offset=*/157},
-                                 NondetRegLayout{._super = /*offset=*/158},
+                                 NondetRegLayout{._super = /*offset=*/157}};
+__device__ constexpr ToBits_16_Layout kLayout__61 = ToBits_16_Layout{._super = kLayout__62};
+__device__ constexpr BitwiseAndU16Layout kLayout__58 =
+    BitwiseAndU16Layout{.bitsX = kLayout__59, .bitsY = kLayout__61};
+__device__ constexpr NondetRegLayout16LayoutArray kLayout__65 =
+    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/158},
                                  NondetRegLayout{._super = /*offset=*/159},
                                  NondetRegLayout{._super = /*offset=*/160},
                                  NondetRegLayout{._super = /*offset=*/161},
                                  NondetRegLayout{._super = /*offset=*/162},
                                  NondetRegLayout{._super = /*offset=*/163},
                                  NondetRegLayout{._super = /*offset=*/164},
-                                 NondetRegLayout{._super = /*offset=*/165}};
-__device__ constexpr ToBits_16_Layout kLayout__64 = ToBits_16_Layout{._super = kLayout__65};
-__device__ constexpr NondetRegLayout16LayoutArray kLayout__67 =
-    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/166},
+                                 NondetRegLayout{._super = /*offset=*/165},
+                                 NondetRegLayout{._super = /*offset=*/166},
                                  NondetRegLayout{._super = /*offset=*/167},
                                  NondetRegLayout{._super = /*offset=*/168},
                                  NondetRegLayout{._super = /*offset=*/169},
                                  NondetRegLayout{._super = /*offset=*/170},
                                  NondetRegLayout{._super = /*offset=*/171},
                                  NondetRegLayout{._super = /*offset=*/172},
-                                 NondetRegLayout{._super = /*offset=*/173},
-                                 NondetRegLayout{._super = /*offset=*/174},
+                                 NondetRegLayout{._super = /*offset=*/173}};
+__device__ constexpr ToBits_16_Layout kLayout__64 = ToBits_16_Layout{._super = kLayout__65};
+__device__ constexpr NondetRegLayout16LayoutArray kLayout__67 =
+    NondetRegLayout16LayoutArray{NondetRegLayout{._super = /*offset=*/174},
                                  NondetRegLayout{._super = /*offset=*/175},
                                  NondetRegLayout{._super = /*offset=*/176},
                                  NondetRegLayout{._super = /*offset=*/177},
                                  NondetRegLayout{._super = /*offset=*/178},
                                  NondetRegLayout{._super = /*offset=*/179},
                                  NondetRegLayout{._super = /*offset=*/180},
-                                 NondetRegLayout{._super = /*offset=*/181}};
+                                 NondetRegLayout{._super = /*offset=*/181},
+                                 NondetRegLayout{._super = /*offset=*/182},
+                                 NondetRegLayout{._super = /*offset=*/183},
+                                 NondetRegLayout{._super = /*offset=*/184},
+                                 NondetRegLayout{._super = /*offset=*/185},
+                                 NondetRegLayout{._super = /*offset=*/186},
+                                 NondetRegLayout{._super = /*offset=*/187},
+                                 NondetRegLayout{._super = /*offset=*/188},
+                                 NondetRegLayout{._super = /*offset=*/189}};
 __device__ constexpr ToBits_16_Layout kLayout__66 = ToBits_16_Layout{._super = kLayout__67};
 __device__ constexpr BitwiseAndU16Layout kLayout__63 =
     BitwiseAndU16Layout{.bitsX = kLayout__64, .bitsY = kLayout__66};
@@ -290,99 +291,99 @@ __device__ constexpr BitwiseXorLayout kLayout__56 = BitwiseXorLayout{.andXy = kL
 __device__ constexpr OpXORLayout kLayout__55 = OpXORLayout{._0 = kLayout__56};
 __device__ constexpr Misc0MiscOutputArm2Layout kLayout__54 = Misc0MiscOutputArm2Layout{
     ._super = kLayout__55,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr BitwiseOrLayout kLayout__70 = BitwiseOrLayout{.andXy = kLayout__57};
 __device__ constexpr OpORLayout kLayout__69 = OpORLayout{._0 = kLayout__70};
 __device__ constexpr Misc0MiscOutputArm3Layout kLayout__68 = Misc0MiscOutputArm3Layout{
     ._super = kLayout__69,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr OpANDLayout kLayout__72 = OpANDLayout{._0 = kLayout__57};
 __device__ constexpr Misc0MiscOutputArm4Layout kLayout__71 = Misc0MiscOutputArm4Layout{
     ._super = kLayout__72,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr NondetU16RegLayout kLayout__76 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                           .val = NondetRegLayout{._super = /*offset=*/28}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                           .val = NondetRegLayout{._super = /*offset=*/29}}};
 __device__ constexpr NondetU16RegLayout kLayout__77 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                           .val = NondetRegLayout{._super = /*offset=*/30}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                           .val = NondetRegLayout{._super = /*offset=*/31}}};
 __device__ constexpr NormalizeU32Layout kLayout__75 =
     NormalizeU32Layout{.low16 = kLayout__76,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/118},
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/126},
                        .high16 = kLayout__77,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/119}};
+                       .highCarry = NondetRegLayout{._super = /*offset=*/127}};
 __device__ constexpr NondetU16RegLayout kLayout__79 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                           .val = NondetRegLayout{._super = /*offset=*/32}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                           .val = NondetRegLayout{._super = /*offset=*/33}}};
 __device__ constexpr GetSignU32Layout kLayout__78 = GetSignU32Layout{
-    ._super = NondetRegLayout{._super = /*offset=*/120}, .restTimesTwo = kLayout__79};
+    ._super = NondetRegLayout{._super = /*offset=*/128}, .restTimesTwo = kLayout__79};
 __device__ constexpr NondetU16RegLayout kLayout__81 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                           .val = NondetRegLayout{._super = /*offset=*/34}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                           .val = NondetRegLayout{._super = /*offset=*/35}}};
 __device__ constexpr GetSignU32Layout kLayout__80 = GetSignU32Layout{
-    ._super = NondetRegLayout{._super = /*offset=*/121}, .restTimesTwo = kLayout__81};
+    ._super = NondetRegLayout{._super = /*offset=*/129}, .restTimesTwo = kLayout__81};
 __device__ constexpr NondetU16RegLayout kLayout__83 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                                           .val = NondetRegLayout{._super = /*offset=*/36}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                                           .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr GetSignU32Layout kLayout__82 = GetSignU32Layout{
-    ._super = NondetRegLayout{._super = /*offset=*/122}, .restTimesTwo = kLayout__83};
+    ._super = NondetRegLayout{._super = /*offset=*/130}, .restTimesTwo = kLayout__83};
 __device__ constexpr CmpLessThanLayout kLayout__74 =
     CmpLessThanLayout{.diff = kLayout__75,
                       .s1 = kLayout__78,
                       .s2 = kLayout__80,
                       .s3 = kLayout__82,
-                      .overflow = NondetRegLayout{._super = /*offset=*/123},
-                      .isLessThan = NondetRegLayout{._super = /*offset=*/124}};
+                      .overflow = NondetRegLayout{._super = /*offset=*/131},
+                      .isLessThan = NondetRegLayout{._super = /*offset=*/132}};
 __device__ constexpr OpSLTLayout kLayout__73 = OpSLTLayout{.cmp = kLayout__74};
 __device__ constexpr CmpLessThanUnsignedLayout kLayout__86 =
     CmpLessThanUnsignedLayout{.diff = kLayout__75};
 __device__ constexpr OpSLTULayout kLayout__85 = OpSLTULayout{.cmp = kLayout__86};
 __device__ constexpr Misc0MiscOutputArm6Layout kLayout__84 = Misc0MiscOutputArm6Layout{
     ._super = kLayout__85,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc0MiscOutputArm7Layout kLayout__87 = Misc0MiscOutputArm7Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc0MiscOutputLayout kLayout__51 = Misc0MiscOutputLayout{.arm0 = kLayout__52,
                                                                                .arm1 = kLayout__53,
                                                                                .arm2 = kLayout__54,
@@ -392,7 +393,8 @@ __device__ constexpr Misc0MiscOutputLayout kLayout__51 = Misc0MiscOutputLayout{.
                                                                                .arm6 = kLayout__84,
                                                                                .arm7 = kLayout__87};
 __device__ constexpr Misc0Layout kLayout__7 = Misc0Layout{._super = kLayout__8,
-                                                          .input = kLayout__22,
+                                                          ._0 = kLayout__22,
+                                                          .input = kLayout__23,
                                                           ._arguments_Misc0MiscOutput = kLayout__49,
                                                           .miscOutput = kLayout__51};
 __device__ constexpr _Arguments_Misc1MiscOutputLayout kLayout__89 =
@@ -400,84 +402,84 @@ __device__ constexpr _Arguments_Misc1MiscOutputLayout kLayout__89 =
 __device__ constexpr OpXORILayout kLayout__92 = OpXORILayout{._0 = kLayout__56};
 __device__ constexpr Misc1MiscOutputArm0Layout kLayout__91 = Misc1MiscOutputArm0Layout{
     ._super = kLayout__92,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr OpORILayout kLayout__94 = OpORILayout{._0 = kLayout__70};
 __device__ constexpr Misc1MiscOutputArm1Layout kLayout__93 = Misc1MiscOutputArm1Layout{
     ._super = kLayout__94,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr OpANDILayout kLayout__96 = OpANDILayout{._0 = kLayout__57};
 __device__ constexpr Misc1MiscOutputArm2Layout kLayout__95 = Misc1MiscOutputArm2Layout{
     ._super = kLayout__96,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr OpSLTILayout kLayout__97 = OpSLTILayout{.cmp = kLayout__74};
 __device__ constexpr OpSLTIULayout kLayout__99 = OpSLTIULayout{.cmp = kLayout__86};
 __device__ constexpr Misc1MiscOutputArm4Layout kLayout__98 = Misc1MiscOutputArm4Layout{
     ._super = kLayout__99,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr CmpEqualLayout kLayout__102 =
-    CmpEqualLayout{.lowSame = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/118},
-                                           .inv = NondetRegLayout{._super = /*offset=*/119}},
-                   .highSame = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/120},
-                                            .inv = NondetRegLayout{._super = /*offset=*/121}},
-                   .isEqual = NondetRegLayout{._super = /*offset=*/122}};
+    CmpEqualLayout{.lowSame = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/126},
+                                           .inv = NondetRegLayout{._super = /*offset=*/127}},
+                   .highSame = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/128},
+                                            .inv = NondetRegLayout{._super = /*offset=*/129}},
+                   .isEqual = NondetRegLayout{._super = /*offset=*/130}};
 __device__ constexpr OpBEQLayout kLayout__101 = OpBEQLayout{.cmp = kLayout__102};
 __device__ constexpr Misc1MiscOutputArm5Layout kLayout__100 = Misc1MiscOutputArm5Layout{
     ._super = kLayout__101,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr OpBNELayout kLayout__104 = OpBNELayout{.cmp = kLayout__102};
 __device__ constexpr Misc1MiscOutputArm6Layout kLayout__103 = Misc1MiscOutputArm6Layout{
     ._super = kLayout__104,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr OpBLTLayout kLayout__105 = OpBLTLayout{.cmp = kLayout__74};
 __device__ constexpr Misc1MiscOutputLayout kLayout__90 =
     Misc1MiscOutputLayout{.arm0 = kLayout__91,
@@ -490,7 +492,8 @@ __device__ constexpr Misc1MiscOutputLayout kLayout__90 =
                           .arm7 = kLayout__105};
 __device__ constexpr Misc1Layout kLayout__88 =
     Misc1Layout{._super = kLayout__8,
-                .input = kLayout__22,
+                ._0 = kLayout__22,
+                .input = kLayout__23,
                 ._arguments_Misc1MiscOutput = kLayout__89,
                 .miscOutput = kLayout__90};
 __device__ constexpr _Arguments_Misc2MiscOutputLayout kLayout__107 =
@@ -499,76 +502,76 @@ __device__ constexpr OpBGELayout kLayout__109 = OpBGELayout{.cmp = kLayout__74};
 __device__ constexpr OpBLTULayout kLayout__111 = OpBLTULayout{.cmp = kLayout__86};
 __device__ constexpr Misc2MiscOutputArm1Layout kLayout__110 = Misc2MiscOutputArm1Layout{
     ._super = kLayout__111,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr OpBGEULayout kLayout__113 = OpBGEULayout{.cmp = kLayout__86};
 __device__ constexpr Misc2MiscOutputArm2Layout kLayout__112 = Misc2MiscOutputArm2Layout{
     ._super = kLayout__113,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc2MiscOutputArm3Layout kLayout__114 = Misc2MiscOutputArm3Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc2MiscOutputArm4Layout kLayout__115 = Misc2MiscOutputArm4Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc2MiscOutputArm5Layout kLayout__116 = Misc2MiscOutputArm5Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc2MiscOutputArm6Layout kLayout__117 = Misc2MiscOutputArm6Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc2MiscOutputArm7Layout kLayout__118 = Misc2MiscOutputArm7Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}}};
 __device__ constexpr Misc2MiscOutputLayout kLayout__108 =
     Misc2MiscOutputLayout{.arm0 = kLayout__109,
                           .arm1 = kLayout__110,
@@ -580,245 +583,246 @@ __device__ constexpr Misc2MiscOutputLayout kLayout__108 =
                           .arm7 = kLayout__118};
 __device__ constexpr Misc2Layout kLayout__106 =
     Misc2Layout{._super = kLayout__8,
-                .input = kLayout__22,
+                ._0 = kLayout__22,
+                .input = kLayout__23,
                 ._arguments_Misc2MiscOutput = kLayout__107,
                 .miscOutput = kLayout__108};
-__device__ constexpr DecoderLayout kLayout__122 =
-    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/65},
-                  ._f7_45 = NondetRegLayout{._super = /*offset=*/66},
-                  ._f7_23 = NondetRegLayout{._super = /*offset=*/67},
-                  ._f7_01 = NondetRegLayout{._super = /*offset=*/68},
-                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/69},
-                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/70},
-                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/71},
-                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/72},
-                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/73},
-                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/74},
-                  ._f3_2 = NondetRegLayout{._super = /*offset=*/75},
-                  ._f3_01 = NondetRegLayout{._super = /*offset=*/76},
-                  ._rd_34 = NondetRegLayout{._super = /*offset=*/77},
-                  ._rd_12 = NondetRegLayout{._super = /*offset=*/78},
-                  ._rd_0 = NondetRegLayout{._super = /*offset=*/79},
-                  .opcode = NondetRegLayout{._super = /*offset=*/80}};
+__device__ constexpr DoCycleTableLayout kLayout__120 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/66},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/67}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/69}}};
+__device__ constexpr DecoderLayout kLayout__123 =
+    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/70},
+                  ._f7_45 = NondetRegLayout{._super = /*offset=*/71},
+                  ._f7_23 = NondetRegLayout{._super = /*offset=*/72},
+                  ._f7_01 = NondetRegLayout{._super = /*offset=*/73},
+                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/74},
+                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/75},
+                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/76},
+                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/77},
+                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/78},
+                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/79},
+                  ._f3_2 = NondetRegLayout{._super = /*offset=*/80},
+                  ._f3_01 = NondetRegLayout{._super = /*offset=*/81},
+                  ._rd_34 = NondetRegLayout{._super = /*offset=*/82},
+                  ._rd_12 = NondetRegLayout{._super = /*offset=*/83},
+                  ._rd_0 = NondetRegLayout{._super = /*offset=*/84},
+                  .opcode = NondetRegLayout{._super = /*offset=*/85}};
 __device__ constexpr NondetU16RegLayout kLayout__125 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/83},
-                                           .val = NondetRegLayout{._super = /*offset=*/84}}};
-__device__ constexpr U16RegLayout kLayout__124 = U16RegLayout{.ret = kLayout__125};
-__device__ constexpr NondetU16RegLayout kLayout__126 =
     NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/87},
                                            .val = NondetRegLayout{._super = /*offset=*/88}}};
-__device__ constexpr AddrDecomposeLayout kLayout__123 =
-    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/82},
-                        .upperDiff = kLayout__124,
-                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/85},
-                                           .inv = NondetRegLayout{._super = /*offset=*/86}},
+__device__ constexpr NondetU16RegLayout kLayout__126 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/91},
+                                           .val = NondetRegLayout{._super = /*offset=*/92}}};
+__device__ constexpr AddrDecomposeLayout kLayout__124 =
+    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/86},
+                        .upperDiff = kLayout__125,
+                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/89},
+                                           .inv = NondetRegLayout{._super = /*offset=*/90}},
                         .med14 = kLayout__126};
 __device__ constexpr MemoryArgLayout kLayout__129 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/90},
-                    .addr = NondetRegLayout{._super = /*offset=*/89},
-                    .cycle = NondetRegLayout{._super = /*offset=*/91},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/92},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/93}};
-__device__ constexpr MemoryArgLayout kLayout__130 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/94},
-                    .addr = NondetRegLayout{._super = /*offset=*/89},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/95},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/96}};
+                    .addr = NondetRegLayout{._super = /*offset=*/93},
+                    .cycle = NondetRegLayout{._super = /*offset=*/95},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/96},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/97}};
+__device__ constexpr MemoryArgLayout kLayout__130 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/98},
+                    .addr = NondetRegLayout{._super = /*offset=*/93},
+                    .cycle = NondetRegLayout{._super = /*offset=*/99},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/100},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/101}};
 __device__ constexpr MemoryIOLayout kLayout__128 =
     MemoryIOLayout{.oldTxn = kLayout__129, .newTxn = kLayout__130};
 __device__ constexpr IsCycleLayout kLayout__132 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/98}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/102},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/103}}};
 __device__ constexpr IsForwardLayout kLayout__131 = IsForwardLayout{._0 = kLayout__132};
 __device__ constexpr MemoryReadLayout kLayout__127 =
     MemoryReadLayout{.io = kLayout__128, ._0 = kLayout__131};
-__device__ constexpr DecodeInstLayout kLayout__121 =
-    DecodeInstLayout{._super = kLayout__122,
-                     .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/81},
-                                           .cycle = NondetRegLayout{._super = /*offset=*/0}},
-                     .pcAddr = kLayout__123,
-                     .loadInst = kLayout__127};
+__device__ constexpr DecodeInstLayout kLayout__122 =
+    DecodeInstLayout{._super = kLayout__123, .pcAddr = kLayout__124, .loadInst = kLayout__127};
 __device__ constexpr MemoryArgLayout kLayout__136 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/100},
-                    .addr = NondetRegLayout{._super = /*offset=*/99},
-                    .cycle = NondetRegLayout{._super = /*offset=*/101},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/102},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/103}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
+                    .addr = NondetRegLayout{._super = /*offset=*/104},
+                    .cycle = NondetRegLayout{._super = /*offset=*/106},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/107},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/108}};
 __device__ constexpr MemoryArgLayout kLayout__137 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
-                    .addr = NondetRegLayout{._super = /*offset=*/99},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/105},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/106}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/109},
+                    .addr = NondetRegLayout{._super = /*offset=*/104},
+                    .cycle = NondetRegLayout{._super = /*offset=*/110},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/111},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/112}};
 __device__ constexpr MemoryIOLayout kLayout__135 =
     MemoryIOLayout{.oldTxn = kLayout__136, .newTxn = kLayout__137};
 __device__ constexpr IsCycleLayout kLayout__139 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/107},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/108}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/113},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/114}}};
 __device__ constexpr IsForwardLayout kLayout__138 = IsForwardLayout{._0 = kLayout__139};
 __device__ constexpr MemoryReadLayout kLayout__134 =
     MemoryReadLayout{.io = kLayout__135, ._0 = kLayout__138};
 __device__ constexpr ReadRegLayout kLayout__133 =
-    ReadRegLayout{._super = kLayout__134, .addr = NondetRegLayout{._super = /*offset=*/109}};
+    ReadRegLayout{._super = kLayout__134, .addr = NondetRegLayout{._super = /*offset=*/115}};
 __device__ constexpr MemoryArgLayout kLayout__143 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/111},
-                    .addr = NondetRegLayout{._super = /*offset=*/110},
-                    .cycle = NondetRegLayout{._super = /*offset=*/112},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/113},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/114}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/117},
+                    .addr = NondetRegLayout{._super = /*offset=*/116},
+                    .cycle = NondetRegLayout{._super = /*offset=*/118},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/119},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/120}};
 __device__ constexpr MemoryArgLayout kLayout__144 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/115},
-                    .addr = NondetRegLayout{._super = /*offset=*/110},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/116},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/117}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/121},
+                    .addr = NondetRegLayout{._super = /*offset=*/116},
+                    .cycle = NondetRegLayout{._super = /*offset=*/122},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/123},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/124}};
 __device__ constexpr MemoryIOLayout kLayout__142 =
     MemoryIOLayout{.oldTxn = kLayout__143, .newTxn = kLayout__144};
 __device__ constexpr IsCycleLayout kLayout__146 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/118},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/119}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/125},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/126}}};
 __device__ constexpr IsForwardLayout kLayout__145 = IsForwardLayout{._0 = kLayout__146};
 __device__ constexpr MemoryReadLayout kLayout__141 =
     MemoryReadLayout{.io = kLayout__142, ._0 = kLayout__145};
 __device__ constexpr ReadRegLayout kLayout__140 =
-    ReadRegLayout{._super = kLayout__141, .addr = NondetRegLayout{._super = /*offset=*/120}};
-__device__ constexpr MulInputLayout kLayout__120 =
-    MulInputLayout{.decoded = kLayout__121, .rs1 = kLayout__133, .rs2 = kLayout__140};
+    ReadRegLayout{._super = kLayout__141, .addr = NondetRegLayout{._super = /*offset=*/127}};
+__device__ constexpr MulInputLayout kLayout__121 =
+    MulInputLayout{.decoded = kLayout__122, .rs1 = kLayout__133, .rs2 = kLayout__140};
 __device__ constexpr ArgU16Layout6LayoutArray kLayout__148 =
-    ArgU16Layout6LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                          .val = NondetRegLayout{._super = /*offset=*/28}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                          .val = NondetRegLayout{._super = /*offset=*/30}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                          .val = NondetRegLayout{._super = /*offset=*/32}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                          .val = NondetRegLayout{._super = /*offset=*/34}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                                          .val = NondetRegLayout{._super = /*offset=*/36}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                                          .val = NondetRegLayout{._super = /*offset=*/38}}};
+    ArgU16Layout6LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                          .val = NondetRegLayout{._super = /*offset=*/29}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                          .val = NondetRegLayout{._super = /*offset=*/31}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                          .val = NondetRegLayout{._super = /*offset=*/33}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                          .val = NondetRegLayout{._super = /*offset=*/35}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                                          .val = NondetRegLayout{._super = /*offset=*/37}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                                          .val = NondetRegLayout{._super = /*offset=*/39}}};
 __device__ constexpr ArgU8Layout13LayoutArray kLayout__149 =
-    ArgU8Layout13LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/39},
-                                         .val = NondetRegLayout{._super = /*offset=*/40}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                                         .val = NondetRegLayout{._super = /*offset=*/42}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                                         .val = NondetRegLayout{._super = /*offset=*/44}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/45},
-                                         .val = NondetRegLayout{._super = /*offset=*/46}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/47},
-                                         .val = NondetRegLayout{._super = /*offset=*/48}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/49},
-                                         .val = NondetRegLayout{._super = /*offset=*/50}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/51},
-                                         .val = NondetRegLayout{._super = /*offset=*/52}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/53},
-                                         .val = NondetRegLayout{._super = /*offset=*/54}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/55},
-                                         .val = NondetRegLayout{._super = /*offset=*/56}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/57},
-                                         .val = NondetRegLayout{._super = /*offset=*/58}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/59},
-                                         .val = NondetRegLayout{._super = /*offset=*/60}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/61},
-                                         .val = NondetRegLayout{._super = /*offset=*/62}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/63},
-                                         .val = NondetRegLayout{._super = /*offset=*/64}}};
+    ArgU8Layout13LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/40},
+                                         .val = NondetRegLayout{._super = /*offset=*/41}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/42},
+                                         .val = NondetRegLayout{._super = /*offset=*/43}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/44},
+                                         .val = NondetRegLayout{._super = /*offset=*/45}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/46},
+                                         .val = NondetRegLayout{._super = /*offset=*/47}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/48},
+                                         .val = NondetRegLayout{._super = /*offset=*/49}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/50},
+                                         .val = NondetRegLayout{._super = /*offset=*/51}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                                         .val = NondetRegLayout{._super = /*offset=*/53}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                         .val = NondetRegLayout{._super = /*offset=*/55}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                         .val = NondetRegLayout{._super = /*offset=*/57}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                                         .val = NondetRegLayout{._super = /*offset=*/59}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/60},
+                                         .val = NondetRegLayout{._super = /*offset=*/61}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/62},
+                                         .val = NondetRegLayout{._super = /*offset=*/63}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/64},
+                                         .val = NondetRegLayout{._super = /*offset=*/65}}};
 __device__ constexpr _Arguments_Mul0MulOutputLayout kLayout__147 =
     _Arguments_Mul0MulOutputLayout{.argU16 = kLayout__148, .argU8 = kLayout__149};
 __device__ constexpr NondetRegLayout5LayoutArray kLayout__154 =
-    NondetRegLayout5LayoutArray{NondetRegLayout{._super = /*offset=*/121},
-                                NondetRegLayout{._super = /*offset=*/122},
-                                NondetRegLayout{._super = /*offset=*/123},
-                                NondetRegLayout{._super = /*offset=*/124},
-                                NondetRegLayout{._super = /*offset=*/125}};
+    NondetRegLayout5LayoutArray{NondetRegLayout{._super = /*offset=*/128},
+                                NondetRegLayout{._super = /*offset=*/129},
+                                NondetRegLayout{._super = /*offset=*/130},
+                                NondetRegLayout{._super = /*offset=*/131},
+                                NondetRegLayout{._super = /*offset=*/132}};
 __device__ constexpr ToBits_5_Layout kLayout__153 = ToBits_5_Layout{._super = kLayout__154};
 __device__ constexpr DynPo2Layout kLayout__152 =
     DynPo2Layout{.low5 = kLayout__153,
                  .checkU16 = kLayout__76,
-                 .b3 = NondetRegLayout{._super = /*offset=*/126},
-                 .low = NondetRegLayout{._super = /*offset=*/127},
-                 .high = NondetRegLayout{._super = /*offset=*/128}};
+                 .b3 = NondetRegLayout{._super = /*offset=*/133},
+                 .low = NondetRegLayout{._super = /*offset=*/134},
+                 .high = NondetRegLayout{._super = /*offset=*/135}};
 __device__ constexpr NondetU8RegLayout kLayout__158 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/39},
-                                         .val = NondetRegLayout{._super = /*offset=*/40}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/40},
+                                         .val = NondetRegLayout{._super = /*offset=*/41}}};
 __device__ constexpr NondetU8RegLayout kLayout__159 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                                         .val = NondetRegLayout{._super = /*offset=*/42}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/42},
+                                         .val = NondetRegLayout{._super = /*offset=*/43}}};
 __device__ constexpr NondetU8RegLayout kLayout__160 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                                         .val = NondetRegLayout{._super = /*offset=*/44}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/44},
+                                         .val = NondetRegLayout{._super = /*offset=*/45}}};
 __device__ constexpr NondetU8RegLayout kLayout__161 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/45},
-                                         .val = NondetRegLayout{._super = /*offset=*/46}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/46},
+                                         .val = NondetRegLayout{._super = /*offset=*/47}}};
 __device__ constexpr NondetU8RegLayout kLayout__162 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/47},
-                                         .val = NondetRegLayout{._super = /*offset=*/48}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/48},
+                                         .val = NondetRegLayout{._super = /*offset=*/49}}};
 __device__ constexpr ExpandU32Layout kLayout__157 =
     ExpandU32Layout{.b0 = kLayout__158,
                     .b1 = kLayout__159,
                     .b2 = kLayout__160,
                     .b3 = kLayout__161,
                     .b3Top7times2 = kLayout__162,
-                    .topBit = NondetRegLayout{._super = /*offset=*/129}};
+                    .topBit = NondetRegLayout{._super = /*offset=*/136}};
 __device__ constexpr NondetU8RegLayout kLayout__164 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/49},
-                                         .val = NondetRegLayout{._super = /*offset=*/50}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/50},
+                                         .val = NondetRegLayout{._super = /*offset=*/51}}};
 __device__ constexpr NondetU8RegLayout kLayout__165 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/51},
-                                         .val = NondetRegLayout{._super = /*offset=*/52}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                                         .val = NondetRegLayout{._super = /*offset=*/53}}};
 __device__ constexpr NondetU8RegLayout kLayout__166 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/53},
-                                         .val = NondetRegLayout{._super = /*offset=*/54}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                         .val = NondetRegLayout{._super = /*offset=*/55}}};
 __device__ constexpr NondetU8RegLayout kLayout__167 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/55},
-                                         .val = NondetRegLayout{._super = /*offset=*/56}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                         .val = NondetRegLayout{._super = /*offset=*/57}}};
 __device__ constexpr NondetU8RegLayout kLayout__168 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/57},
-                                         .val = NondetRegLayout{._super = /*offset=*/58}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                                         .val = NondetRegLayout{._super = /*offset=*/59}}};
 __device__ constexpr ExpandU32Layout kLayout__163 =
     ExpandU32Layout{.b0 = kLayout__164,
                     .b1 = kLayout__165,
                     .b2 = kLayout__166,
                     .b3 = kLayout__167,
                     .b3Top7times2 = kLayout__168,
-                    .topBit = NondetRegLayout{._super = /*offset=*/130}};
+                    .topBit = NondetRegLayout{._super = /*offset=*/137}};
 __device__ constexpr NondetU8RegLayout kLayout__170 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/59},
-                                         .val = NondetRegLayout{._super = /*offset=*/60}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/60},
+                                         .val = NondetRegLayout{._super = /*offset=*/61}}};
 __device__ constexpr SplitTotalLayout kLayout__169 = SplitTotalLayout{
     .out = kLayout__79,
     .carryByte = kLayout__170,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/132},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/133}}};
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/139},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/140}}};
 __device__ constexpr NondetU8RegLayout kLayout__172 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/61},
-                                         .val = NondetRegLayout{._super = /*offset=*/62}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/62},
+                                         .val = NondetRegLayout{._super = /*offset=*/63}}};
 __device__ constexpr SplitTotalLayout kLayout__171 = SplitTotalLayout{
     .out = kLayout__81,
     .carryByte = kLayout__172,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/134},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/135}}};
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/141},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/142}}};
 __device__ constexpr NondetU8RegLayout kLayout__174 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/63},
-                                         .val = NondetRegLayout{._super = /*offset=*/64}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/64},
+                                         .val = NondetRegLayout{._super = /*offset=*/65}}};
 __device__ constexpr SplitTotalLayout kLayout__173 = SplitTotalLayout{
     .out = kLayout__83,
     .carryByte = kLayout__174,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/136},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/137}}};
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/143},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/144}}};
 __device__ constexpr MultiplyAccumulateLayout kLayout__156 = MultiplyAccumulateLayout{
     .ax = kLayout__157,
     .bx = kLayout__163,
-    .cSign = NondetRegLayout{._super = /*offset=*/131},
+    .cSign = NondetRegLayout{._super = /*offset=*/138},
     .cRestTimes2 = kLayout__77,
     .s0 = kLayout__169,
     .s1 = kLayout__171,
     .s2 = kLayout__173,
     .s3Out = kLayout__10,
-    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/138},
-                                       .reg1 = NondetRegLayout{._super = /*offset=*/139}}};
+    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/145},
+                                       .reg1 = NondetRegLayout{._super = /*offset=*/146}}};
 __device__ constexpr DoMulLayout kLayout__155 = DoMulLayout{.mul = kLayout__156};
 __device__ constexpr OpSLLLayout kLayout__151 =
     OpSLLLayout{.shiftMul = kLayout__152, ._0 = kLayout__155};
@@ -830,139 +834,139 @@ __device__ constexpr ExpandU32Layout kLayout__180 =
                     .b2 = kLayout__160,
                     .b3 = kLayout__161,
                     .b3Top7times2 = kLayout__162,
-                    .topBit = NondetRegLayout{._super = /*offset=*/121}};
+                    .topBit = NondetRegLayout{._super = /*offset=*/128}};
 __device__ constexpr ExpandU32Layout kLayout__181 =
     ExpandU32Layout{.b0 = kLayout__164,
                     .b1 = kLayout__165,
                     .b2 = kLayout__166,
                     .b3 = kLayout__167,
                     .b3Top7times2 = kLayout__168,
-                    .topBit = NondetRegLayout{._super = /*offset=*/122}};
+                    .topBit = NondetRegLayout{._super = /*offset=*/129}};
 __device__ constexpr SplitTotalLayout kLayout__182 = SplitTotalLayout{
     .out = kLayout__77,
     .carryByte = kLayout__170,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/124},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/125}}};
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/131},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/132}}};
 __device__ constexpr SplitTotalLayout kLayout__183 = SplitTotalLayout{
     .out = kLayout__79,
     .carryByte = kLayout__172,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/126},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/127}}};
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/133},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/134}}};
 __device__ constexpr SplitTotalLayout kLayout__184 = SplitTotalLayout{
     .out = kLayout__81,
     .carryByte = kLayout__174,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/128},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/129}}};
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/135},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/136}}};
 __device__ constexpr MultiplyAccumulateLayout kLayout__179 = MultiplyAccumulateLayout{
     .ax = kLayout__180,
     .bx = kLayout__181,
-    .cSign = NondetRegLayout{._super = /*offset=*/123},
+    .cSign = NondetRegLayout{._super = /*offset=*/130},
     .cRestTimes2 = kLayout__76,
     .s0 = kLayout__182,
     .s1 = kLayout__183,
     .s2 = kLayout__184,
     .s3Out = kLayout__83,
-    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/130},
-                                       .reg1 = NondetRegLayout{._super = /*offset=*/131}}};
+    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/137},
+                                       .reg1 = NondetRegLayout{._super = /*offset=*/138}}};
 __device__ constexpr DoMulLayout kLayout__178 = DoMulLayout{.mul = kLayout__179};
 __device__ constexpr OpMULLayout kLayout__177 = OpMULLayout{._0 = kLayout__178};
 __device__ constexpr Mul0MulOutputArm2Layout kLayout__176 = Mul0MulOutputArm2Layout{
     ._super = kLayout__177,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                            .val = NondetRegLayout{._super = /*offset=*/38}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                            .val = NondetRegLayout{._super = /*offset=*/39}}};
 __device__ constexpr OpMULHLayout kLayout__186 = OpMULHLayout{._0 = kLayout__178};
 __device__ constexpr Mul0MulOutputArm3Layout kLayout__185 = Mul0MulOutputArm3Layout{
     ._super = kLayout__186,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                            .val = NondetRegLayout{._super = /*offset=*/38}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                            .val = NondetRegLayout{._super = /*offset=*/39}}};
 __device__ constexpr OpMULHSULayout kLayout__188 = OpMULHSULayout{._0 = kLayout__178};
 __device__ constexpr Mul0MulOutputArm4Layout kLayout__187 = Mul0MulOutputArm4Layout{
     ._super = kLayout__188,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                            .val = NondetRegLayout{._super = /*offset=*/38}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                            .val = NondetRegLayout{._super = /*offset=*/39}}};
 __device__ constexpr OpMULHULayout kLayout__190 = OpMULHULayout{._0 = kLayout__178};
 __device__ constexpr Mul0MulOutputArm5Layout kLayout__189 = Mul0MulOutputArm5Layout{
     ._super = kLayout__190,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                            .val = NondetRegLayout{._super = /*offset=*/38}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                            .val = NondetRegLayout{._super = /*offset=*/39}}};
 __device__ constexpr Mul0MulOutputArm6Layout kLayout__191 = Mul0MulOutputArm6Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                            .val = NondetRegLayout{._super = /*offset=*/38}},
-    ._extra6 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/39},
-                           .val = NondetRegLayout{._super = /*offset=*/40}},
-    ._extra7 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                           .val = NondetRegLayout{._super = /*offset=*/42}},
-    ._extra8 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                           .val = NondetRegLayout{._super = /*offset=*/44}},
-    ._extra9 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/45},
-                           .val = NondetRegLayout{._super = /*offset=*/46}},
-    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/47},
-                            .val = NondetRegLayout{._super = /*offset=*/48}},
-    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/49},
-                            .val = NondetRegLayout{._super = /*offset=*/50}},
-    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/51},
-                            .val = NondetRegLayout{._super = /*offset=*/52}},
-    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/53},
-                            .val = NondetRegLayout{._super = /*offset=*/54}},
-    ._extra14 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/55},
-                            .val = NondetRegLayout{._super = /*offset=*/56}},
-    ._extra15 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/57},
-                            .val = NondetRegLayout{._super = /*offset=*/58}},
-    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/59},
-                            .val = NondetRegLayout{._super = /*offset=*/60}},
-    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/61},
-                            .val = NondetRegLayout{._super = /*offset=*/62}},
-    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/63},
-                            .val = NondetRegLayout{._super = /*offset=*/64}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                            .val = NondetRegLayout{._super = /*offset=*/39}},
+    ._extra6 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/40},
+                           .val = NondetRegLayout{._super = /*offset=*/41}},
+    ._extra7 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/42},
+                           .val = NondetRegLayout{._super = /*offset=*/43}},
+    ._extra8 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/44},
+                           .val = NondetRegLayout{._super = /*offset=*/45}},
+    ._extra9 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/46},
+                           .val = NondetRegLayout{._super = /*offset=*/47}},
+    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/48},
+                            .val = NondetRegLayout{._super = /*offset=*/49}},
+    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/50},
+                            .val = NondetRegLayout{._super = /*offset=*/51}},
+    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                            .val = NondetRegLayout{._super = /*offset=*/53}},
+    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                            .val = NondetRegLayout{._super = /*offset=*/55}},
+    ._extra14 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                            .val = NondetRegLayout{._super = /*offset=*/57}},
+    ._extra15 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}},
+    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/60},
+                            .val = NondetRegLayout{._super = /*offset=*/61}},
+    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/62},
+                            .val = NondetRegLayout{._super = /*offset=*/63}},
+    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/64},
+                            .val = NondetRegLayout{._super = /*offset=*/65}}};
 __device__ constexpr Mul0MulOutputArm7Layout kLayout__192 = Mul0MulOutputArm7Layout{
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                            .val = NondetRegLayout{._super = /*offset=*/28}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                            .val = NondetRegLayout{._super = /*offset=*/30}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                            .val = NondetRegLayout{._super = /*offset=*/32}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                            .val = NondetRegLayout{._super = /*offset=*/34}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                            .val = NondetRegLayout{._super = /*offset=*/36}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                            .val = NondetRegLayout{._super = /*offset=*/38}},
-    ._extra6 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/39},
-                           .val = NondetRegLayout{._super = /*offset=*/40}},
-    ._extra7 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                           .val = NondetRegLayout{._super = /*offset=*/42}},
-    ._extra8 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                           .val = NondetRegLayout{._super = /*offset=*/44}},
-    ._extra9 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/45},
-                           .val = NondetRegLayout{._super = /*offset=*/46}},
-    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/47},
-                            .val = NondetRegLayout{._super = /*offset=*/48}},
-    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/49},
-                            .val = NondetRegLayout{._super = /*offset=*/50}},
-    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/51},
-                            .val = NondetRegLayout{._super = /*offset=*/52}},
-    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/53},
-                            .val = NondetRegLayout{._super = /*offset=*/54}},
-    ._extra14 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/55},
-                            .val = NondetRegLayout{._super = /*offset=*/56}},
-    ._extra15 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/57},
-                            .val = NondetRegLayout{._super = /*offset=*/58}},
-    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/59},
-                            .val = NondetRegLayout{._super = /*offset=*/60}},
-    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/61},
-                            .val = NondetRegLayout{._super = /*offset=*/62}},
-    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/63},
-                            .val = NondetRegLayout{._super = /*offset=*/64}}};
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                            .val = NondetRegLayout{._super = /*offset=*/29}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                            .val = NondetRegLayout{._super = /*offset=*/31}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                            .val = NondetRegLayout{._super = /*offset=*/33}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                            .val = NondetRegLayout{._super = /*offset=*/35}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                            .val = NondetRegLayout{._super = /*offset=*/37}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                            .val = NondetRegLayout{._super = /*offset=*/39}},
+    ._extra6 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/40},
+                           .val = NondetRegLayout{._super = /*offset=*/41}},
+    ._extra7 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/42},
+                           .val = NondetRegLayout{._super = /*offset=*/43}},
+    ._extra8 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/44},
+                           .val = NondetRegLayout{._super = /*offset=*/45}},
+    ._extra9 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/46},
+                           .val = NondetRegLayout{._super = /*offset=*/47}},
+    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/48},
+                            .val = NondetRegLayout{._super = /*offset=*/49}},
+    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/50},
+                            .val = NondetRegLayout{._super = /*offset=*/51}},
+    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                            .val = NondetRegLayout{._super = /*offset=*/53}},
+    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                            .val = NondetRegLayout{._super = /*offset=*/55}},
+    ._extra14 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                            .val = NondetRegLayout{._super = /*offset=*/57}},
+    ._extra15 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}},
+    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/60},
+                            .val = NondetRegLayout{._super = /*offset=*/61}},
+    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/62},
+                            .val = NondetRegLayout{._super = /*offset=*/63}},
+    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/64},
+                            .val = NondetRegLayout{._super = /*offset=*/65}}};
 __device__ constexpr Mul0MulOutputLayout kLayout__150 = Mul0MulOutputLayout{.arm0 = kLayout__151,
                                                                             .arm1 = kLayout__175,
                                                                             .arm2 = kLayout__176,
@@ -972,3812 +976,4877 @@ __device__ constexpr Mul0MulOutputLayout kLayout__150 = Mul0MulOutputLayout{.arm
                                                                             .arm6 = kLayout__191,
                                                                             .arm7 = kLayout__192};
 __device__ constexpr MemoryArgLayout kLayout__196 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                    .addr = NondetRegLayout{._super = /*offset=*/143},
-                    .cycle = NondetRegLayout{._super = /*offset=*/145},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/146},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/147}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                    .addr = NondetRegLayout{._super = /*offset=*/150},
+                    .cycle = NondetRegLayout{._super = /*offset=*/152},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/153},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/154}};
 __device__ constexpr MemoryArgLayout kLayout__197 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/148},
-                    .addr = NondetRegLayout{._super = /*offset=*/143},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/149},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/150}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/155},
+                    .addr = NondetRegLayout{._super = /*offset=*/150},
+                    .cycle = NondetRegLayout{._super = /*offset=*/156},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/157},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/158}};
 __device__ constexpr MemoryIOLayout kLayout__195 =
     MemoryIOLayout{.oldTxn = kLayout__196, .newTxn = kLayout__197};
 __device__ constexpr IsCycleLayout kLayout__199 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/152}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/159},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/160}}};
 __device__ constexpr IsForwardLayout kLayout__198 = IsForwardLayout{._0 = kLayout__199};
 __device__ constexpr MemoryWriteLayout kLayout__194 =
     MemoryWriteLayout{.io = kLayout__195, ._0 = kLayout__198};
 __device__ constexpr WriteRdLayout kLayout__193 =
-    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/140},
-                                        .inv = NondetRegLayout{._super = /*offset=*/141}},
-                  .writeAddr = NondetRegLayout{._super = /*offset=*/142},
+    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/147},
+                                        .inv = NondetRegLayout{._super = /*offset=*/148}},
+                  .writeAddr = NondetRegLayout{._super = /*offset=*/149},
                   ._0 = kLayout__194};
 __device__ constexpr NondetU16RegLayout kLayout__201 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                                           .val = NondetRegLayout{._super = /*offset=*/154}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                                           .val = NondetRegLayout{._super = /*offset=*/162}}};
 __device__ constexpr NondetU16RegLayout kLayout__202 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                                           .val = NondetRegLayout{._super = /*offset=*/157}}};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                                           .val = NondetRegLayout{._super = /*offset=*/165}}};
 __device__ constexpr NormalizeU32Layout kLayout__200 =
     NormalizeU32Layout{.low16 = kLayout__201,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/155},
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/163},
                        .high16 = kLayout__202,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/158}};
-__device__ constexpr Mul0Layout kLayout__119 = Mul0Layout{.input = kLayout__120,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/166}};
+__device__ constexpr Mul0Layout kLayout__119 = Mul0Layout{._0 = kLayout__120,
+                                                          .input = kLayout__121,
                                                           ._arguments_Mul0MulOutput = kLayout__147,
                                                           .mulOutput = kLayout__150,
-                                                          ._0 = kLayout__193,
+                                                          ._1 = kLayout__193,
                                                           .pcAdd = kLayout__200};
-__device__ constexpr DecoderLayout kLayout__206 =
-    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/71},
-                  ._f7_45 = NondetRegLayout{._super = /*offset=*/72},
-                  ._f7_23 = NondetRegLayout{._super = /*offset=*/73},
-                  ._f7_01 = NondetRegLayout{._super = /*offset=*/74},
-                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/75},
-                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/76},
-                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/77},
-                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/78},
-                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/79},
-                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/80},
-                  ._f3_2 = NondetRegLayout{._super = /*offset=*/81},
-                  ._f3_01 = NondetRegLayout{._super = /*offset=*/82},
-                  ._rd_34 = NondetRegLayout{._super = /*offset=*/83},
-                  ._rd_12 = NondetRegLayout{._super = /*offset=*/84},
-                  ._rd_0 = NondetRegLayout{._super = /*offset=*/85},
-                  .opcode = NondetRegLayout{._super = /*offset=*/86}};
+__device__ constexpr DoCycleTableLayout kLayout__204 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/86},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/87}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/88},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/89}}};
+__device__ constexpr DecoderLayout kLayout__207 =
+    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/90},
+                  ._f7_45 = NondetRegLayout{._super = /*offset=*/91},
+                  ._f7_23 = NondetRegLayout{._super = /*offset=*/92},
+                  ._f7_01 = NondetRegLayout{._super = /*offset=*/93},
+                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/94},
+                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/95},
+                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/96},
+                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/97},
+                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/98},
+                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/99},
+                  ._f3_2 = NondetRegLayout{._super = /*offset=*/100},
+                  ._f3_01 = NondetRegLayout{._super = /*offset=*/101},
+                  ._rd_34 = NondetRegLayout{._super = /*offset=*/102},
+                  ._rd_12 = NondetRegLayout{._super = /*offset=*/103},
+                  ._rd_0 = NondetRegLayout{._super = /*offset=*/104},
+                  .opcode = NondetRegLayout{._super = /*offset=*/105}};
 __device__ constexpr NondetU16RegLayout kLayout__209 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/89},
-                                           .val = NondetRegLayout{._super = /*offset=*/90}}};
-__device__ constexpr U16RegLayout kLayout__208 = U16RegLayout{.ret = kLayout__209};
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
+                                           .val = NondetRegLayout{._super = /*offset=*/108}}};
 __device__ constexpr NondetU16RegLayout kLayout__210 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/93},
-                                           .val = NondetRegLayout{._super = /*offset=*/94}}};
-__device__ constexpr AddrDecomposeLayout kLayout__207 =
-    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/88},
-                        .upperDiff = kLayout__208,
-                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/91},
-                                           .inv = NondetRegLayout{._super = /*offset=*/92}},
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
+                                           .val = NondetRegLayout{._super = /*offset=*/112}}};
+__device__ constexpr AddrDecomposeLayout kLayout__208 =
+    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/106},
+                        .upperDiff = kLayout__209,
+                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/109},
+                                           .inv = NondetRegLayout{._super = /*offset=*/110}},
                         .med14 = kLayout__210};
 __device__ constexpr MemoryArgLayout kLayout__213 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/96},
-                    .addr = NondetRegLayout{._super = /*offset=*/95},
-                    .cycle = NondetRegLayout{._super = /*offset=*/97},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/98},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/99}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                    .addr = NondetRegLayout{._super = /*offset=*/113},
+                    .cycle = NondetRegLayout{._super = /*offset=*/115},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/116},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/117}};
 __device__ constexpr MemoryArgLayout kLayout__214 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/100},
-                    .addr = NondetRegLayout{._super = /*offset=*/95},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/101},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/102}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/118},
+                    .addr = NondetRegLayout{._super = /*offset=*/113},
+                    .cycle = NondetRegLayout{._super = /*offset=*/119},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/120},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/121}};
 __device__ constexpr MemoryIOLayout kLayout__212 =
     MemoryIOLayout{.oldTxn = kLayout__213, .newTxn = kLayout__214};
 __device__ constexpr IsCycleLayout kLayout__216 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/104}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/122},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/123}}};
 __device__ constexpr IsForwardLayout kLayout__215 = IsForwardLayout{._0 = kLayout__216};
 __device__ constexpr MemoryReadLayout kLayout__211 =
     MemoryReadLayout{.io = kLayout__212, ._0 = kLayout__215};
-__device__ constexpr DecodeInstLayout kLayout__205 =
-    DecodeInstLayout{._super = kLayout__206,
-                     .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/87},
-                                           .cycle = NondetRegLayout{._super = /*offset=*/0}},
-                     .pcAddr = kLayout__207,
-                     .loadInst = kLayout__211};
+__device__ constexpr DecodeInstLayout kLayout__206 =
+    DecodeInstLayout{._super = kLayout__207, .pcAddr = kLayout__208, .loadInst = kLayout__211};
 __device__ constexpr MemoryArgLayout kLayout__220 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
-                    .addr = NondetRegLayout{._super = /*offset=*/105},
-                    .cycle = NondetRegLayout{._super = /*offset=*/107},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/108},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/109}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/125},
+                    .addr = NondetRegLayout{._super = /*offset=*/124},
+                    .cycle = NondetRegLayout{._super = /*offset=*/126},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/127},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/128}};
 __device__ constexpr MemoryArgLayout kLayout__221 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
-                    .addr = NondetRegLayout{._super = /*offset=*/105},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/111},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/112}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/129},
+                    .addr = NondetRegLayout{._super = /*offset=*/124},
+                    .cycle = NondetRegLayout{._super = /*offset=*/130},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/131},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/132}};
 __device__ constexpr MemoryIOLayout kLayout__219 =
     MemoryIOLayout{.oldTxn = kLayout__220, .newTxn = kLayout__221};
 __device__ constexpr IsCycleLayout kLayout__223 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/113},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/114}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/133},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/134}}};
 __device__ constexpr IsForwardLayout kLayout__222 = IsForwardLayout{._0 = kLayout__223};
 __device__ constexpr MemoryReadLayout kLayout__218 =
     MemoryReadLayout{.io = kLayout__219, ._0 = kLayout__222};
 __device__ constexpr ReadRegLayout kLayout__217 =
-    ReadRegLayout{._super = kLayout__218, .addr = NondetRegLayout{._super = /*offset=*/115}};
+    ReadRegLayout{._super = kLayout__218, .addr = NondetRegLayout{._super = /*offset=*/135}};
 __device__ constexpr MemoryArgLayout kLayout__227 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/117},
-                    .addr = NondetRegLayout{._super = /*offset=*/116},
-                    .cycle = NondetRegLayout{._super = /*offset=*/118},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/119},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/120}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/137},
+                    .addr = NondetRegLayout{._super = /*offset=*/136},
+                    .cycle = NondetRegLayout{._super = /*offset=*/138},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/139},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/140}};
 __device__ constexpr MemoryArgLayout kLayout__228 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/121},
-                    .addr = NondetRegLayout{._super = /*offset=*/116},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/122},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/123}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                    .addr = NondetRegLayout{._super = /*offset=*/136},
+                    .cycle = NondetRegLayout{._super = /*offset=*/142},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/143},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/144}};
 __device__ constexpr MemoryIOLayout kLayout__226 =
     MemoryIOLayout{.oldTxn = kLayout__227, .newTxn = kLayout__228};
 __device__ constexpr IsCycleLayout kLayout__230 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/124},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/125}}};
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/146}}};
 __device__ constexpr IsForwardLayout kLayout__229 = IsForwardLayout{._0 = kLayout__230};
 __device__ constexpr MemoryReadLayout kLayout__225 =
     MemoryReadLayout{.io = kLayout__226, ._0 = kLayout__229};
 __device__ constexpr ReadRegLayout kLayout__224 =
-    ReadRegLayout{._super = kLayout__225, .addr = NondetRegLayout{._super = /*offset=*/126}};
-__device__ constexpr DivInputLayout kLayout__204 =
-    DivInputLayout{.decoded = kLayout__205, .rs1 = kLayout__217, .rs2 = kLayout__224};
-__device__ constexpr ArgU16Layout9LayoutArray kLayout__232 =
-    ArgU16Layout9LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                          .val = NondetRegLayout{._super = /*offset=*/28}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                          .val = NondetRegLayout{._super = /*offset=*/30}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                          .val = NondetRegLayout{._super = /*offset=*/32}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                          .val = NondetRegLayout{._super = /*offset=*/34}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/35},
-                                          .val = NondetRegLayout{._super = /*offset=*/36}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/37},
-                                          .val = NondetRegLayout{._super = /*offset=*/38}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/39},
-                                          .val = NondetRegLayout{._super = /*offset=*/40}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                                          .val = NondetRegLayout{._super = /*offset=*/42}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                                          .val = NondetRegLayout{._super = /*offset=*/44}}};
+    ReadRegLayout{._super = kLayout__225, .addr = NondetRegLayout{._super = /*offset=*/147}};
+__device__ constexpr DivInputLayout kLayout__205 =
+    DivInputLayout{.decoded = kLayout__206, .rs1 = kLayout__217, .rs2 = kLayout__224};
+__device__ constexpr ArgU16Layout16LayoutArray kLayout__232 =
+    ArgU16Layout16LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                           .val = NondetRegLayout{._super = /*offset=*/29}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                           .val = NondetRegLayout{._super = /*offset=*/31}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                           .val = NondetRegLayout{._super = /*offset=*/33}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                           .val = NondetRegLayout{._super = /*offset=*/35}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/36},
+                                           .val = NondetRegLayout{._super = /*offset=*/37}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/38},
+                                           .val = NondetRegLayout{._super = /*offset=*/39}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/40},
+                                           .val = NondetRegLayout{._super = /*offset=*/41}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/42},
+                                           .val = NondetRegLayout{._super = /*offset=*/43}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/44},
+                                           .val = NondetRegLayout{._super = /*offset=*/45}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/46},
+                                           .val = NondetRegLayout{._super = /*offset=*/47}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/48},
+                                           .val = NondetRegLayout{._super = /*offset=*/49}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/50},
+                                           .val = NondetRegLayout{._super = /*offset=*/51}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                                           .val = NondetRegLayout{._super = /*offset=*/53}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                           .val = NondetRegLayout{._super = /*offset=*/55}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                           .val = NondetRegLayout{._super = /*offset=*/57}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                                           .val = NondetRegLayout{._super = /*offset=*/59}}};
 __device__ constexpr ArgU8Layout13LayoutArray kLayout__233 =
-    ArgU8Layout13LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/45},
-                                         .val = NondetRegLayout{._super = /*offset=*/46}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/47},
-                                         .val = NondetRegLayout{._super = /*offset=*/48}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/49},
-                                         .val = NondetRegLayout{._super = /*offset=*/50}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/51},
-                                         .val = NondetRegLayout{._super = /*offset=*/52}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/53},
-                                         .val = NondetRegLayout{._super = /*offset=*/54}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/55},
-                                         .val = NondetRegLayout{._super = /*offset=*/56}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/57},
-                                         .val = NondetRegLayout{._super = /*offset=*/58}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/59},
-                                         .val = NondetRegLayout{._super = /*offset=*/60}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/61},
-                                         .val = NondetRegLayout{._super = /*offset=*/62}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/63},
-                                         .val = NondetRegLayout{._super = /*offset=*/64}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/65},
-                                         .val = NondetRegLayout{._super = /*offset=*/66}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                                         .val = NondetRegLayout{._super = /*offset=*/68}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                                         .val = NondetRegLayout{._super = /*offset=*/70}}};
+    ArgU8Layout13LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/60},
+                                         .val = NondetRegLayout{._super = /*offset=*/61}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/62},
+                                         .val = NondetRegLayout{._super = /*offset=*/63}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/64},
+                                         .val = NondetRegLayout{._super = /*offset=*/65}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/66},
+                                         .val = NondetRegLayout{._super = /*offset=*/67}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/68},
+                                         .val = NondetRegLayout{._super = /*offset=*/69}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/70},
+                                         .val = NondetRegLayout{._super = /*offset=*/71}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                                         .val = NondetRegLayout{._super = /*offset=*/73}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                                         .val = NondetRegLayout{._super = /*offset=*/75}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                                         .val = NondetRegLayout{._super = /*offset=*/77}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                                         .val = NondetRegLayout{._super = /*offset=*/79}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                                         .val = NondetRegLayout{._super = /*offset=*/81}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                                         .val = NondetRegLayout{._super = /*offset=*/83}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                                         .val = NondetRegLayout{._super = /*offset=*/85}}};
 __device__ constexpr _Arguments_Div0MulOutputLayout kLayout__231 =
     _Arguments_Div0MulOutputLayout{.argU16 = kLayout__232, .argU8 = kLayout__233};
 __device__ constexpr NondetRegLayout5LayoutArray kLayout__239 =
-    NondetRegLayout5LayoutArray{NondetRegLayout{._super = /*offset=*/127},
-                                NondetRegLayout{._super = /*offset=*/128},
-                                NondetRegLayout{._super = /*offset=*/129},
-                                NondetRegLayout{._super = /*offset=*/130},
-                                NondetRegLayout{._super = /*offset=*/131}};
+    NondetRegLayout5LayoutArray{NondetRegLayout{._super = /*offset=*/148},
+                                NondetRegLayout{._super = /*offset=*/149},
+                                NondetRegLayout{._super = /*offset=*/150},
+                                NondetRegLayout{._super = /*offset=*/151},
+                                NondetRegLayout{._super = /*offset=*/152}};
 __device__ constexpr ToBits_5_Layout kLayout__238 = ToBits_5_Layout{._super = kLayout__239};
 __device__ constexpr DynPo2Layout kLayout__237 =
     DynPo2Layout{.low5 = kLayout__238,
                  .checkU16 = kLayout__76,
-                 .b3 = NondetRegLayout{._super = /*offset=*/132},
-                 .low = NondetRegLayout{._super = /*offset=*/133},
-                 .high = NondetRegLayout{._super = /*offset=*/134}};
+                 .b3 = NondetRegLayout{._super = /*offset=*/153},
+                 .low = NondetRegLayout{._super = /*offset=*/154},
+                 .high = NondetRegLayout{._super = /*offset=*/155}};
+__device__ constexpr NondetU8RegLayout kLayout__243 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/66},
+                                         .val = NondetRegLayout{._super = /*offset=*/67}}};
+__device__ constexpr NondetU8RegLayout kLayout__244 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/68},
+                                         .val = NondetRegLayout{._super = /*offset=*/69}}};
 __device__ constexpr ExpandU32Layout kLayout__242 =
-    ExpandU32Layout{.b0 = kLayout__161,
-                    .b1 = kLayout__162,
-                    .b2 = kLayout__164,
-                    .b3 = kLayout__165,
-                    .b3Top7times2 = kLayout__166,
-                    .topBit = NondetRegLayout{._super = /*offset=*/137}};
-__device__ constexpr ExpandU32Layout kLayout__243 =
-    ExpandU32Layout{.b0 = kLayout__167,
-                    .b1 = kLayout__168,
-                    .b2 = kLayout__170,
-                    .b3 = kLayout__172,
-                    .b3Top7times2 = kLayout__174,
-                    .topBit = NondetRegLayout{._super = /*offset=*/138}};
-__device__ constexpr NondetU8RegLayout kLayout__245 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/65},
-                                         .val = NondetRegLayout{._super = /*offset=*/66}}};
-__device__ constexpr SplitTotalLayout kLayout__244 = SplitTotalLayout{
-    .out = kLayout__83,
-    .carryByte = kLayout__245,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/140},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/141}}};
+    ExpandU32Layout{.b0 = kLayout__170,
+                    .b1 = kLayout__172,
+                    .b2 = kLayout__174,
+                    .b3 = kLayout__243,
+                    .b3Top7times2 = kLayout__244,
+                    .topBit = NondetRegLayout{._super = /*offset=*/158}};
+__device__ constexpr NondetU8RegLayout kLayout__246 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/70},
+                                         .val = NondetRegLayout{._super = /*offset=*/71}}};
 __device__ constexpr NondetU8RegLayout kLayout__247 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                                         .val = NondetRegLayout{._super = /*offset=*/68}}};
-__device__ constexpr SplitTotalLayout kLayout__246 = SplitTotalLayout{
-    .out = kLayout__10,
-    .carryByte = kLayout__247,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/142},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/143}}};
-__device__ constexpr NondetU16RegLayout kLayout__249 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/39},
-                                           .val = NondetRegLayout{._super = /*offset=*/40}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                                         .val = NondetRegLayout{._super = /*offset=*/73}}};
+__device__ constexpr NondetU8RegLayout kLayout__248 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                                         .val = NondetRegLayout{._super = /*offset=*/75}}};
+__device__ constexpr NondetU8RegLayout kLayout__249 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                                         .val = NondetRegLayout{._super = /*offset=*/77}}};
 __device__ constexpr NondetU8RegLayout kLayout__250 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                                         .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr SplitTotalLayout kLayout__248 = SplitTotalLayout{
-    .out = kLayout__249,
-    .carryByte = kLayout__250,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/144},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/145}}};
-__device__ constexpr NondetU16RegLayout kLayout__251 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                                           .val = NondetRegLayout{._super = /*offset=*/42}}};
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                                         .val = NondetRegLayout{._super = /*offset=*/79}}};
+__device__ constexpr ExpandU32Layout kLayout__245 =
+    ExpandU32Layout{.b0 = kLayout__246,
+                    .b1 = kLayout__247,
+                    .b2 = kLayout__248,
+                    .b3 = kLayout__249,
+                    .b3Top7times2 = kLayout__250,
+                    .topBit = NondetRegLayout{._super = /*offset=*/159}};
+__device__ constexpr NondetU8RegLayout kLayout__252 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                                         .val = NondetRegLayout{._super = /*offset=*/81}}};
+__device__ constexpr SplitTotalLayout kLayout__251 = SplitTotalLayout{
+    .out = kLayout__83,
+    .carryByte = kLayout__252,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/161},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/162}}};
+__device__ constexpr NondetU8RegLayout kLayout__254 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                                         .val = NondetRegLayout{._super = /*offset=*/83}}};
+__device__ constexpr SplitTotalLayout kLayout__253 = SplitTotalLayout{
+    .out = kLayout__10,
+    .carryByte = kLayout__254,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/163},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/164}}};
+__device__ constexpr NondetU16RegLayout kLayout__256 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/40},
+                                           .val = NondetRegLayout{._super = /*offset=*/41}}};
+__device__ constexpr NondetU8RegLayout kLayout__257 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                                         .val = NondetRegLayout{._super = /*offset=*/85}}};
+__device__ constexpr SplitTotalLayout kLayout__255 = SplitTotalLayout{
+    .out = kLayout__256,
+    .carryByte = kLayout__257,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/165},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/166}}};
+__device__ constexpr NondetU16RegLayout kLayout__258 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/42},
+                                           .val = NondetRegLayout{._super = /*offset=*/43}}};
 __device__ constexpr MultiplyAccumulateLayout kLayout__241 = MultiplyAccumulateLayout{
     .ax = kLayout__242,
-    .bx = kLayout__243,
-    .cSign = NondetRegLayout{._super = /*offset=*/139},
+    .bx = kLayout__245,
+    .cSign = NondetRegLayout{._super = /*offset=*/160},
     .cRestTimes2 = kLayout__81,
-    .s0 = kLayout__244,
-    .s1 = kLayout__246,
-    .s2 = kLayout__248,
-    .s3Out = kLayout__251,
-    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/146},
-                                       .reg1 = NondetRegLayout{._super = /*offset=*/147}}};
+    .s0 = kLayout__251,
+    .s1 = kLayout__253,
+    .s2 = kLayout__255,
+    .s3Out = kLayout__258,
+    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/167},
+                                       .reg1 = NondetRegLayout{._super = /*offset=*/168}}};
+__device__ constexpr NondetU16RegLayout kLayout__260 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/46},
+                                           .val = NondetRegLayout{._super = /*offset=*/47}}};
+__device__ constexpr NondetU16RegLayout kLayout__261 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/48},
+                                           .val = NondetRegLayout{._super = /*offset=*/49}}};
+__device__ constexpr NormalizeU32Layout kLayout__259 =
+    NormalizeU32Layout{.low16 = kLayout__260,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/173},
+                       .high16 = kLayout__261,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/174}};
+__device__ constexpr NondetU16RegLayout kLayout__263 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/50},
+                                           .val = NondetRegLayout{._super = /*offset=*/51}}};
+__device__ constexpr NondetU16RegLayout kLayout__264 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                                           .val = NondetRegLayout{._super = /*offset=*/53}}};
+__device__ constexpr NormalizeU32Layout kLayout__262 =
+    NormalizeU32Layout{.low16 = kLayout__263,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/175},
+                       .high16 = kLayout__264,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/176}};
+__device__ constexpr ArgU16Layout2LayoutArray kLayout__266 =
+    ArgU16Layout2LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                          .val = NondetRegLayout{._super = /*offset=*/55}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                          .val = NondetRegLayout{._super = /*offset=*/57}}};
+__device__ constexpr _Arguments_DoDiv__1Layout kLayout__265 =
+    _Arguments_DoDiv__1Layout{.argU16 = kLayout__266};
+__device__ constexpr DoDiv__1Arm0Layout kLayout__268 =
+    DoDiv__1Arm0Layout{._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                               .val = NondetRegLayout{._super = /*offset=*/55}},
+                       ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                               .val = NondetRegLayout{._super = /*offset=*/57}}};
+__device__ constexpr NondetU16RegLayout kLayout__272 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                           .val = NondetRegLayout{._super = /*offset=*/55}}};
+__device__ constexpr NondetU16RegLayout kLayout__273 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                           .val = NondetRegLayout{._super = /*offset=*/57}}};
+__device__ constexpr NormalizeU32Layout kLayout__271 =
+    NormalizeU32Layout{.low16 = kLayout__272,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/177},
+                       .high16 = kLayout__273,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/178}};
+__device__ constexpr CmpLessThanUnsignedLayout kLayout__270 =
+    CmpLessThanUnsignedLayout{.diff = kLayout__271};
+__device__ constexpr DoDiv__1Arm1_SuperLayout kLayout__269 =
+    DoDiv__1Arm1_SuperLayout{.lt = kLayout__270};
+__device__ constexpr DoDiv__1Layout kLayout__267 =
+    DoDiv__1Layout{.arm0 = kLayout__268, .arm1 = kLayout__269};
 __device__ constexpr DoDivLayout kLayout__240 =
-    DoDivLayout{.quotLow = NondetRegLayout{._super = /*offset=*/135},
-                .quotHigh = NondetRegLayout{._super = /*offset=*/136},
+    DoDivLayout{.quotLow = NondetRegLayout{._super = /*offset=*/156},
+                .quotHigh = NondetRegLayout{._super = /*offset=*/157},
                 .remLow = kLayout__77,
                 .remHigh = kLayout__79,
                 .mul = kLayout__241,
-                .topBitType = NondetRegLayout{._super = /*offset=*/148}};
+                .topBitType = NondetRegLayout{._super = /*offset=*/169},
+                .isZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/170},
+                                       .inv = NondetRegLayout{._super = /*offset=*/171}},
+                .topNum = NondetRegLayout{._super = /*offset=*/172},
+                ._0 = kLayout__13,
+                .denomAbs = kLayout__259,
+                .remNormal = kLayout__262,
+                ._arguments_DoDiv__1 = kLayout__265,
+                ._3 = kLayout__267};
 __device__ constexpr OpSRLLayout kLayout__236 =
     OpSRLLayout{.shiftMul = kLayout__237, ._0 = kLayout__240};
 __device__ constexpr Div0MulOutputArm0Layout kLayout__235 = Div0MulOutputArm0Layout{
     ._super = kLayout__236,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                            .val = NondetRegLayout{._super = /*offset=*/44}}};
-__device__ constexpr TopBitLayout kLayout__253 =
-    TopBitLayout{._super = NondetRegLayout{._super = /*offset=*/135}, .rest = kLayout__77};
-__device__ constexpr ExpandU32Layout kLayout__256 =
-    ExpandU32Layout{.b0 = kLayout__161,
-                    .b1 = kLayout__162,
-                    .b2 = kLayout__164,
-                    .b3 = kLayout__165,
-                    .b3Top7times2 = kLayout__166,
-                    .topBit = NondetRegLayout{._super = /*offset=*/138}};
-__device__ constexpr ExpandU32Layout kLayout__257 =
-    ExpandU32Layout{.b0 = kLayout__167,
-                    .b1 = kLayout__168,
-                    .b2 = kLayout__170,
-                    .b3 = kLayout__172,
-                    .b3Top7times2 = kLayout__174,
-                    .topBit = NondetRegLayout{._super = /*offset=*/139}};
-__device__ constexpr SplitTotalLayout kLayout__258 = SplitTotalLayout{
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr TopBitLayout kLayout__275 =
+    TopBitLayout{._super = NondetRegLayout{._super = /*offset=*/156}, .rest = kLayout__77};
+__device__ constexpr ExpandU32Layout kLayout__278 =
+    ExpandU32Layout{.b0 = kLayout__170,
+                    .b1 = kLayout__172,
+                    .b2 = kLayout__174,
+                    .b3 = kLayout__243,
+                    .b3Top7times2 = kLayout__244,
+                    .topBit = NondetRegLayout{._super = /*offset=*/159}};
+__device__ constexpr ExpandU32Layout kLayout__279 =
+    ExpandU32Layout{.b0 = kLayout__246,
+                    .b1 = kLayout__247,
+                    .b2 = kLayout__248,
+                    .b3 = kLayout__249,
+                    .b3Top7times2 = kLayout__250,
+                    .topBit = NondetRegLayout{._super = /*offset=*/160}};
+__device__ constexpr SplitTotalLayout kLayout__280 = SplitTotalLayout{
     .out = kLayout__10,
-    .carryByte = kLayout__245,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/141},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/142}}};
-__device__ constexpr SplitTotalLayout kLayout__259 = SplitTotalLayout{
-    .out = kLayout__249,
-    .carryByte = kLayout__247,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/143},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/144}}};
-__device__ constexpr SplitTotalLayout kLayout__260 = SplitTotalLayout{
-    .out = kLayout__251,
-    .carryByte = kLayout__250,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/145},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/146}}};
-__device__ constexpr MultiplyAccumulateLayout kLayout__255 = MultiplyAccumulateLayout{
-    .ax = kLayout__256,
-    .bx = kLayout__257,
-    .cSign = NondetRegLayout{._super = /*offset=*/140},
+    .carryByte = kLayout__252,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/162},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/163}}};
+__device__ constexpr SplitTotalLayout kLayout__281 = SplitTotalLayout{
+    .out = kLayout__256,
+    .carryByte = kLayout__254,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/164},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/165}}};
+__device__ constexpr SplitTotalLayout kLayout__282 = SplitTotalLayout{
+    .out = kLayout__258,
+    .carryByte = kLayout__257,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/166},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/167}}};
+__device__ constexpr MultiplyAccumulateLayout kLayout__277 = MultiplyAccumulateLayout{
+    .ax = kLayout__278,
+    .bx = kLayout__279,
+    .cSign = NondetRegLayout{._super = /*offset=*/161},
     .cRestTimes2 = kLayout__83,
-    .s0 = kLayout__258,
-    .s1 = kLayout__259,
-    .s2 = kLayout__260,
+    .s0 = kLayout__280,
+    .s1 = kLayout__281,
+    .s2 = kLayout__282,
     .s3Out = kLayout__13,
-    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/147},
-                                       .reg1 = NondetRegLayout{._super = /*offset=*/148}}};
-__device__ constexpr DoDivLayout kLayout__254 =
-    DoDivLayout{.quotLow = NondetRegLayout{._super = /*offset=*/136},
-                .quotHigh = NondetRegLayout{._super = /*offset=*/137},
+    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/168},
+                                       .reg1 = NondetRegLayout{._super = /*offset=*/169}}};
+__device__ constexpr NormalizeU32Layout kLayout__283 =
+    NormalizeU32Layout{.low16 = kLayout__261,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/174},
+                       .high16 = kLayout__263,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/175}};
+__device__ constexpr NormalizeU32Layout kLayout__284 =
+    NormalizeU32Layout{.low16 = kLayout__264,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/176},
+                       .high16 = kLayout__272,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/177}};
+__device__ constexpr ArgU16Layout2LayoutArray kLayout__286 =
+    ArgU16Layout2LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                          .val = NondetRegLayout{._super = /*offset=*/57}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                                          .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr _Arguments_DoDiv__1Layout kLayout__285 =
+    _Arguments_DoDiv__1Layout{.argU16 = kLayout__286};
+__device__ constexpr DoDiv__1Arm0Layout kLayout__288 =
+    DoDiv__1Arm0Layout{._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                                               .val = NondetRegLayout{._super = /*offset=*/57}},
+                       ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                                               .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr NondetU16RegLayout kLayout__292 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                                           .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr NormalizeU32Layout kLayout__291 =
+    NormalizeU32Layout{.low16 = kLayout__273,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/178},
+                       .high16 = kLayout__292,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/179}};
+__device__ constexpr CmpLessThanUnsignedLayout kLayout__290 =
+    CmpLessThanUnsignedLayout{.diff = kLayout__291};
+__device__ constexpr DoDiv__1Arm1_SuperLayout kLayout__289 =
+    DoDiv__1Arm1_SuperLayout{.lt = kLayout__290};
+__device__ constexpr DoDiv__1Layout kLayout__287 =
+    DoDiv__1Layout{.arm0 = kLayout__288, .arm1 = kLayout__289};
+__device__ constexpr DoDivLayout kLayout__276 =
+    DoDivLayout{.quotLow = NondetRegLayout{._super = /*offset=*/157},
+                .quotHigh = NondetRegLayout{._super = /*offset=*/158},
                 .remLow = kLayout__79,
                 .remHigh = kLayout__81,
-                .mul = kLayout__255,
-                .topBitType = NondetRegLayout{._super = /*offset=*/149}};
-__device__ constexpr OpSRALayout kLayout__252 =
-    OpSRALayout{.shiftMul = kLayout__237, .flip = kLayout__253, ._0 = kLayout__254};
-__device__ constexpr OpSRLILayout kLayout__262 =
+                .mul = kLayout__277,
+                .topBitType = NondetRegLayout{._super = /*offset=*/170},
+                .isZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/171},
+                                       .inv = NondetRegLayout{._super = /*offset=*/172}},
+                .topNum = NondetRegLayout{._super = /*offset=*/173},
+                ._0 = kLayout__260,
+                .denomAbs = kLayout__283,
+                .remNormal = kLayout__284,
+                ._arguments_DoDiv__1 = kLayout__285,
+                ._3 = kLayout__287};
+__device__ constexpr OpSRALayout kLayout__274 =
+    OpSRALayout{.shiftMul = kLayout__237, .flip = kLayout__275, ._0 = kLayout__276};
+__device__ constexpr OpSRLILayout kLayout__294 =
     OpSRLILayout{.shiftMul = kLayout__237, ._0 = kLayout__240};
-__device__ constexpr Div0MulOutputArm2Layout kLayout__261 = Div0MulOutputArm2Layout{
-    ._super = kLayout__262,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                            .val = NondetRegLayout{._super = /*offset=*/44}}};
-__device__ constexpr OpSRAILayout kLayout__263 =
-    OpSRAILayout{.shiftMul = kLayout__237, .flip = kLayout__253, ._0 = kLayout__254};
-__device__ constexpr ExpandU32Layout kLayout__268 =
-    ExpandU32Layout{.b0 = kLayout__161,
-                    .b1 = kLayout__162,
-                    .b2 = kLayout__164,
-                    .b3 = kLayout__165,
-                    .b3Top7times2 = kLayout__166,
-                    .topBit = NondetRegLayout{._super = /*offset=*/129}};
-__device__ constexpr ExpandU32Layout kLayout__269 =
-    ExpandU32Layout{.b0 = kLayout__167,
-                    .b1 = kLayout__168,
-                    .b2 = kLayout__170,
-                    .b3 = kLayout__172,
-                    .b3Top7times2 = kLayout__174,
-                    .topBit = NondetRegLayout{._super = /*offset=*/130}};
-__device__ constexpr SplitTotalLayout kLayout__270 = SplitTotalLayout{
+__device__ constexpr Div0MulOutputArm2Layout kLayout__293 = Div0MulOutputArm2Layout{
+    ._super = kLayout__294,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr OpSRAILayout kLayout__295 =
+    OpSRAILayout{.shiftMul = kLayout__237, .flip = kLayout__275, ._0 = kLayout__276};
+__device__ constexpr ExpandU32Layout kLayout__300 =
+    ExpandU32Layout{.b0 = kLayout__170,
+                    .b1 = kLayout__172,
+                    .b2 = kLayout__174,
+                    .b3 = kLayout__243,
+                    .b3Top7times2 = kLayout__244,
+                    .topBit = NondetRegLayout{._super = /*offset=*/150}};
+__device__ constexpr ExpandU32Layout kLayout__301 =
+    ExpandU32Layout{.b0 = kLayout__246,
+                    .b1 = kLayout__247,
+                    .b2 = kLayout__248,
+                    .b3 = kLayout__249,
+                    .b3Top7times2 = kLayout__250,
+                    .topBit = NondetRegLayout{._super = /*offset=*/151}};
+__device__ constexpr SplitTotalLayout kLayout__302 = SplitTotalLayout{
     .out = kLayout__81,
-    .carryByte = kLayout__245,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/132},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/133}}};
-__device__ constexpr SplitTotalLayout kLayout__271 = SplitTotalLayout{
+    .carryByte = kLayout__252,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/153},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/154}}};
+__device__ constexpr SplitTotalLayout kLayout__303 = SplitTotalLayout{
     .out = kLayout__83,
-    .carryByte = kLayout__247,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/134},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/135}}};
-__device__ constexpr SplitTotalLayout kLayout__272 = SplitTotalLayout{
+    .carryByte = kLayout__254,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/155},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/156}}};
+__device__ constexpr SplitTotalLayout kLayout__304 = SplitTotalLayout{
     .out = kLayout__10,
-    .carryByte = kLayout__250,
-    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/136},
-                                          .reg1 = NondetRegLayout{._super = /*offset=*/137}}};
-__device__ constexpr MultiplyAccumulateLayout kLayout__267 = MultiplyAccumulateLayout{
-    .ax = kLayout__268,
-    .bx = kLayout__269,
-    .cSign = NondetRegLayout{._super = /*offset=*/131},
+    .carryByte = kLayout__257,
+    .carryExtra = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/157},
+                                          .reg1 = NondetRegLayout{._super = /*offset=*/158}}};
+__device__ constexpr MultiplyAccumulateLayout kLayout__299 = MultiplyAccumulateLayout{
+    .ax = kLayout__300,
+    .bx = kLayout__301,
+    .cSign = NondetRegLayout{._super = /*offset=*/152},
     .cRestTimes2 = kLayout__79,
-    .s0 = kLayout__270,
-    .s1 = kLayout__271,
-    .s2 = kLayout__272,
-    .s3Out = kLayout__249,
-    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/138},
-                                       .reg1 = NondetRegLayout{._super = /*offset=*/139}}};
-__device__ constexpr DoDivLayout kLayout__266 =
-    DoDivLayout{.quotLow = NondetRegLayout{._super = /*offset=*/127},
-                .quotHigh = NondetRegLayout{._super = /*offset=*/128},
+    .s0 = kLayout__302,
+    .s1 = kLayout__303,
+    .s2 = kLayout__304,
+    .s3Out = kLayout__256,
+    .s3Carry = NondetFakeTwitRegLayout{.reg0 = NondetRegLayout{._super = /*offset=*/159},
+                                       .reg1 = NondetRegLayout{._super = /*offset=*/160}}};
+__device__ constexpr NormalizeU32Layout kLayout__305 =
+    NormalizeU32Layout{.low16 = kLayout__13,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/165},
+                       .high16 = kLayout__260,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/166}};
+__device__ constexpr NormalizeU32Layout kLayout__306 =
+    NormalizeU32Layout{.low16 = kLayout__261,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/167},
+                       .high16 = kLayout__263,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/168}};
+__device__ constexpr ArgU16Layout2LayoutArray kLayout__308 =
+    ArgU16Layout2LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                                          .val = NondetRegLayout{._super = /*offset=*/53}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                          .val = NondetRegLayout{._super = /*offset=*/55}}};
+__device__ constexpr _Arguments_DoDiv__1Layout kLayout__307 =
+    _Arguments_DoDiv__1Layout{.argU16 = kLayout__308};
+__device__ constexpr DoDiv__1Arm0Layout kLayout__310 =
+    DoDiv__1Arm0Layout{._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/52},
+                                               .val = NondetRegLayout{._super = /*offset=*/53}},
+                       ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/54},
+                                               .val = NondetRegLayout{._super = /*offset=*/55}}};
+__device__ constexpr NormalizeU32Layout kLayout__313 =
+    NormalizeU32Layout{.low16 = kLayout__264,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/169},
+                       .high16 = kLayout__272,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/170}};
+__device__ constexpr CmpLessThanUnsignedLayout kLayout__312 =
+    CmpLessThanUnsignedLayout{.diff = kLayout__313};
+__device__ constexpr DoDiv__1Arm1_SuperLayout kLayout__311 =
+    DoDiv__1Arm1_SuperLayout{.lt = kLayout__312};
+__device__ constexpr DoDiv__1Layout kLayout__309 =
+    DoDiv__1Layout{.arm0 = kLayout__310, .arm1 = kLayout__311};
+__device__ constexpr DoDivLayout kLayout__298 =
+    DoDivLayout{.quotLow = NondetRegLayout{._super = /*offset=*/148},
+                .quotHigh = NondetRegLayout{._super = /*offset=*/149},
                 .remLow = kLayout__76,
                 .remHigh = kLayout__77,
-                .mul = kLayout__267,
-                .topBitType = NondetRegLayout{._super = /*offset=*/140}};
-__device__ constexpr OpDIVLayout kLayout__265 = OpDIVLayout{._0 = kLayout__266};
-__device__ constexpr Div0MulOutputArm4Layout kLayout__264 = Div0MulOutputArm4Layout{
-    ._super = kLayout__265,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                            .val = NondetRegLayout{._super = /*offset=*/42}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                            .val = NondetRegLayout{._super = /*offset=*/44}}};
-__device__ constexpr OpDIVULayout kLayout__274 = OpDIVULayout{._0 = kLayout__266};
-__device__ constexpr Div0MulOutputArm5Layout kLayout__273 = Div0MulOutputArm5Layout{
-    ._super = kLayout__274,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                            .val = NondetRegLayout{._super = /*offset=*/42}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                            .val = NondetRegLayout{._super = /*offset=*/44}}};
-__device__ constexpr OpREMLayout kLayout__276 = OpREMLayout{._0 = kLayout__266};
-__device__ constexpr Div0MulOutputArm6Layout kLayout__275 = Div0MulOutputArm6Layout{
-    ._super = kLayout__276,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                            .val = NondetRegLayout{._super = /*offset=*/42}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                            .val = NondetRegLayout{._super = /*offset=*/44}}};
-__device__ constexpr OpREMULayout kLayout__278 = OpREMULayout{._0 = kLayout__266};
-__device__ constexpr Div0MulOutputArm7Layout kLayout__277 = Div0MulOutputArm7Layout{
-    ._super = kLayout__278,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/41},
-                            .val = NondetRegLayout{._super = /*offset=*/42}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/43},
-                            .val = NondetRegLayout{._super = /*offset=*/44}}};
+                .mul = kLayout__299,
+                .topBitType = NondetRegLayout{._super = /*offset=*/161},
+                .isZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/162},
+                                       .inv = NondetRegLayout{._super = /*offset=*/163}},
+                .topNum = NondetRegLayout{._super = /*offset=*/164},
+                ._0 = kLayout__258,
+                .denomAbs = kLayout__305,
+                .remNormal = kLayout__306,
+                ._arguments_DoDiv__1 = kLayout__307,
+                ._3 = kLayout__309};
+__device__ constexpr OpDIVLayout kLayout__297 = OpDIVLayout{._0 = kLayout__298};
+__device__ constexpr Div0MulOutputArm4Layout kLayout__296 = Div0MulOutputArm4Layout{
+    ._super = kLayout__297,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                            .val = NondetRegLayout{._super = /*offset=*/57}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr OpDIVULayout kLayout__315 = OpDIVULayout{._0 = kLayout__298};
+__device__ constexpr Div0MulOutputArm5Layout kLayout__314 = Div0MulOutputArm5Layout{
+    ._super = kLayout__315,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                            .val = NondetRegLayout{._super = /*offset=*/57}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr OpREMLayout kLayout__317 = OpREMLayout{._0 = kLayout__298};
+__device__ constexpr Div0MulOutputArm6Layout kLayout__316 = Div0MulOutputArm6Layout{
+    ._super = kLayout__317,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                            .val = NondetRegLayout{._super = /*offset=*/57}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}}};
+__device__ constexpr OpREMULayout kLayout__319 = OpREMULayout{._0 = kLayout__298};
+__device__ constexpr Div0MulOutputArm7Layout kLayout__318 = Div0MulOutputArm7Layout{
+    ._super = kLayout__319,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/56},
+                            .val = NondetRegLayout{._super = /*offset=*/57}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/58},
+                            .val = NondetRegLayout{._super = /*offset=*/59}}};
 __device__ constexpr Div0MulOutputLayout kLayout__234 = Div0MulOutputLayout{.arm0 = kLayout__235,
-                                                                            .arm1 = kLayout__252,
-                                                                            .arm2 = kLayout__261,
-                                                                            .arm3 = kLayout__263,
-                                                                            .arm4 = kLayout__264,
-                                                                            .arm5 = kLayout__273,
-                                                                            .arm6 = kLayout__275,
-                                                                            .arm7 = kLayout__277};
-__device__ constexpr MemoryArgLayout kLayout__282 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/154},
-                    .addr = NondetRegLayout{._super = /*offset=*/153},
-                    .cycle = NondetRegLayout{._super = /*offset=*/155},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/156},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/157}};
-__device__ constexpr MemoryArgLayout kLayout__283 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/158},
-                    .addr = NondetRegLayout{._super = /*offset=*/153},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/159},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/160}};
-__device__ constexpr MemoryIOLayout kLayout__281 =
-    MemoryIOLayout{.oldTxn = kLayout__282, .newTxn = kLayout__283};
-__device__ constexpr IsCycleLayout kLayout__285 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/161},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/162}}};
-__device__ constexpr IsForwardLayout kLayout__284 = IsForwardLayout{._0 = kLayout__285};
-__device__ constexpr MemoryWriteLayout kLayout__280 =
-    MemoryWriteLayout{.io = kLayout__281, ._0 = kLayout__284};
-__device__ constexpr WriteRdLayout kLayout__279 =
-    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/150},
-                                        .inv = NondetRegLayout{._super = /*offset=*/151}},
-                  .writeAddr = NondetRegLayout{._super = /*offset=*/152},
-                  ._0 = kLayout__280};
-__device__ constexpr NondetU16RegLayout kLayout__287 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                                           .val = NondetRegLayout{._super = /*offset=*/164}}};
-__device__ constexpr NondetU16RegLayout kLayout__288 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                                           .val = NondetRegLayout{._super = /*offset=*/167}}};
-__device__ constexpr NormalizeU32Layout kLayout__286 =
-    NormalizeU32Layout{.low16 = kLayout__287,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/165},
-                       .high16 = kLayout__288,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/168}};
-__device__ constexpr Div0Layout kLayout__203 = Div0Layout{.input = kLayout__204,
+                                                                            .arm1 = kLayout__274,
+                                                                            .arm2 = kLayout__293,
+                                                                            .arm3 = kLayout__295,
+                                                                            .arm4 = kLayout__296,
+                                                                            .arm5 = kLayout__314,
+                                                                            .arm6 = kLayout__316,
+                                                                            .arm7 = kLayout__318};
+__device__ constexpr MemoryArgLayout kLayout__323 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                    .addr = NondetRegLayout{._super = /*offset=*/183},
+                    .cycle = NondetRegLayout{._super = /*offset=*/185},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/186},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/187}};
+__device__ constexpr MemoryArgLayout kLayout__324 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/188},
+                    .addr = NondetRegLayout{._super = /*offset=*/183},
+                    .cycle = NondetRegLayout{._super = /*offset=*/189},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/190},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/191}};
+__device__ constexpr MemoryIOLayout kLayout__322 =
+    MemoryIOLayout{.oldTxn = kLayout__323, .newTxn = kLayout__324};
+__device__ constexpr IsCycleLayout kLayout__326 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/192},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/193}}};
+__device__ constexpr IsForwardLayout kLayout__325 = IsForwardLayout{._0 = kLayout__326};
+__device__ constexpr MemoryWriteLayout kLayout__321 =
+    MemoryWriteLayout{.io = kLayout__322, ._0 = kLayout__325};
+__device__ constexpr WriteRdLayout kLayout__320 =
+    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/180},
+                                        .inv = NondetRegLayout{._super = /*offset=*/181}},
+                  .writeAddr = NondetRegLayout{._super = /*offset=*/182},
+                  ._0 = kLayout__321};
+__device__ constexpr NondetU16RegLayout kLayout__328 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/194},
+                                           .val = NondetRegLayout{._super = /*offset=*/195}}};
+__device__ constexpr NondetU16RegLayout kLayout__329 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/197},
+                                           .val = NondetRegLayout{._super = /*offset=*/198}}};
+__device__ constexpr NormalizeU32Layout kLayout__327 =
+    NormalizeU32Layout{.low16 = kLayout__328,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/196},
+                       .high16 = kLayout__329,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/199}};
+__device__ constexpr Div0Layout kLayout__203 = Div0Layout{._0 = kLayout__204,
+                                                          .input = kLayout__205,
                                                           ._arguments_Div0MulOutput = kLayout__231,
                                                           .mulOutput = kLayout__234,
-                                                          ._0 = kLayout__279,
-                                                          .pcAdd = kLayout__286};
-__device__ constexpr DecoderLayout kLayout__292 =
-    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/35},
-                  ._f7_45 = NondetRegLayout{._super = /*offset=*/36},
-                  ._f7_23 = NondetRegLayout{._super = /*offset=*/37},
-                  ._f7_01 = NondetRegLayout{._super = /*offset=*/38},
-                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/39},
-                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/40},
-                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/41},
-                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/42},
-                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/43},
-                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/44},
-                  ._f3_2 = NondetRegLayout{._super = /*offset=*/45},
-                  ._f3_01 = NondetRegLayout{._super = /*offset=*/46},
-                  ._rd_34 = NondetRegLayout{._super = /*offset=*/47},
-                  ._rd_12 = NondetRegLayout{._super = /*offset=*/48},
-                  ._rd_0 = NondetRegLayout{._super = /*offset=*/49},
-                  .opcode = NondetRegLayout{._super = /*offset=*/50}};
-__device__ constexpr NondetU16RegLayout kLayout__295 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/53},
-                                           .val = NondetRegLayout{._super = /*offset=*/54}}};
-__device__ constexpr U16RegLayout kLayout__294 = U16RegLayout{.ret = kLayout__295};
-__device__ constexpr NondetU16RegLayout kLayout__296 =
+                                                          ._1 = kLayout__320,
+                                                          .pcAdd = kLayout__327};
+__device__ constexpr DoCycleTableLayout kLayout__331 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/36},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/37}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/38},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/39}}};
+__device__ constexpr DecoderLayout kLayout__334 =
+    DecoderLayout{._f7_6 = NondetRegLayout{._super = /*offset=*/40},
+                  ._f7_45 = NondetRegLayout{._super = /*offset=*/41},
+                  ._f7_23 = NondetRegLayout{._super = /*offset=*/42},
+                  ._f7_01 = NondetRegLayout{._super = /*offset=*/43},
+                  ._rs2_34 = NondetRegLayout{._super = /*offset=*/44},
+                  ._rs2_12 = NondetRegLayout{._super = /*offset=*/45},
+                  ._rs2_0 = NondetRegLayout{._super = /*offset=*/46},
+                  ._rs1_34 = NondetRegLayout{._super = /*offset=*/47},
+                  ._rs1_12 = NondetRegLayout{._super = /*offset=*/48},
+                  ._rs1_0 = NondetRegLayout{._super = /*offset=*/49},
+                  ._f3_2 = NondetRegLayout{._super = /*offset=*/50},
+                  ._f3_01 = NondetRegLayout{._super = /*offset=*/51},
+                  ._rd_34 = NondetRegLayout{._super = /*offset=*/52},
+                  ._rd_12 = NondetRegLayout{._super = /*offset=*/53},
+                  ._rd_0 = NondetRegLayout{._super = /*offset=*/54},
+                  .opcode = NondetRegLayout{._super = /*offset=*/55}};
+__device__ constexpr NondetU16RegLayout kLayout__336 =
     NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/57},
                                            .val = NondetRegLayout{._super = /*offset=*/58}}};
-__device__ constexpr AddrDecomposeLayout kLayout__293 =
-    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/52},
-                        .upperDiff = kLayout__294,
-                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/55},
-                                           .inv = NondetRegLayout{._super = /*offset=*/56}},
-                        .med14 = kLayout__296};
-__device__ constexpr MemoryArgLayout kLayout__299 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/60},
-                    .addr = NondetRegLayout{._super = /*offset=*/59},
-                    .cycle = NondetRegLayout{._super = /*offset=*/61},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/62},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/63}};
-__device__ constexpr MemoryArgLayout kLayout__300 =
+__device__ constexpr NondetU16RegLayout kLayout__337 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/61},
+                                           .val = NondetRegLayout{._super = /*offset=*/62}}};
+__device__ constexpr AddrDecomposeLayout kLayout__335 =
+    AddrDecomposeLayout{.low2 = NondetRegLayout{._super = /*offset=*/56},
+                        .upperDiff = kLayout__336,
+                        ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/59},
+                                           .inv = NondetRegLayout{._super = /*offset=*/60}},
+                        .med14 = kLayout__337};
+__device__ constexpr MemoryArgLayout kLayout__340 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/64},
-                    .addr = NondetRegLayout{._super = /*offset=*/59},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/65},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/66}};
-__device__ constexpr MemoryIOLayout kLayout__298 =
-    MemoryIOLayout{.oldTxn = kLayout__299, .newTxn = kLayout__300};
-__device__ constexpr IsCycleLayout kLayout__302 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/67},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/68}}};
-__device__ constexpr IsForwardLayout kLayout__301 = IsForwardLayout{._0 = kLayout__302};
-__device__ constexpr MemoryReadLayout kLayout__297 =
-    MemoryReadLayout{.io = kLayout__298, ._0 = kLayout__301};
-__device__ constexpr DecodeInstLayout kLayout__291 =
-    DecodeInstLayout{._super = kLayout__292,
-                     .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/51},
-                                           .cycle = NondetRegLayout{._super = /*offset=*/0}},
-                     .pcAddr = kLayout__293,
-                     .loadInst = kLayout__297};
-__device__ constexpr MemoryArgLayout kLayout__306 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
-                    .addr = NondetRegLayout{._super = /*offset=*/69},
-                    .cycle = NondetRegLayout{._super = /*offset=*/71},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/72},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/73}};
-__device__ constexpr MemoryArgLayout kLayout__307 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/74},
-                    .addr = NondetRegLayout{._super = /*offset=*/69},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/75},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/76}};
-__device__ constexpr MemoryIOLayout kLayout__305 =
-    MemoryIOLayout{.oldTxn = kLayout__306, .newTxn = kLayout__307};
-__device__ constexpr IsCycleLayout kLayout__309 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/77},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/78}}};
-__device__ constexpr IsForwardLayout kLayout__308 = IsForwardLayout{._0 = kLayout__309};
-__device__ constexpr MemoryReadLayout kLayout__304 =
-    MemoryReadLayout{.io = kLayout__305, ._0 = kLayout__308};
-__device__ constexpr ReadRegLayout kLayout__303 =
-    ReadRegLayout{._super = kLayout__304, .addr = NondetRegLayout{._super = /*offset=*/79}};
-__device__ constexpr NormalizeU32Layout kLayout__310 =
-    NormalizeU32Layout{.low16 = kLayout__27,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/82},
-                       .high16 = kLayout__125,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/85}};
-__device__ constexpr NondetU16RegLayout kLayout__313 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/88},
-                                           .val = NondetRegLayout{._super = /*offset=*/89}}};
-__device__ constexpr U16RegLayout kLayout__312 = U16RegLayout{.ret = kLayout__313};
-__device__ constexpr NondetU16RegLayout kLayout__314 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/92},
-                                           .val = NondetRegLayout{._super = /*offset=*/93}}};
-__device__ constexpr AddrDecomposeBitsLayout kLayout__311 =
-    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/86},
-                            .low1 = NondetRegLayout{._super = /*offset=*/87},
-                            .upperDiff = kLayout__312,
-                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/90},
-                                               .inv = NondetRegLayout{._super = /*offset=*/91}},
-                            .med14 = kLayout__314};
-__device__ constexpr MemoryArgLayout kLayout__317 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                    .addr = NondetRegLayout{._super = /*offset=*/94},
-                    .cycle = NondetRegLayout{._super = /*offset=*/96},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/97},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/98}};
-__device__ constexpr MemoryArgLayout kLayout__318 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                    .addr = NondetRegLayout{._super = /*offset=*/94},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/100},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/101}};
-__device__ constexpr MemoryIOLayout kLayout__316 =
-    MemoryIOLayout{.oldTxn = kLayout__317, .newTxn = kLayout__318};
-__device__ constexpr IsCycleLayout kLayout__320 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/102},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/103}}};
-__device__ constexpr IsForwardLayout kLayout__319 = IsForwardLayout{._0 = kLayout__320};
-__device__ constexpr MemoryReadLayout kLayout__315 =
-    MemoryReadLayout{.io = kLayout__316, ._0 = kLayout__319};
-__device__ constexpr MemLoadInputLayout kLayout__290 = MemLoadInputLayout{.decoded = kLayout__291,
-                                                                          .rs1 = kLayout__303,
-                                                                          .addrU32 = kLayout__310,
-                                                                          .addr = kLayout__311,
-                                                                          .data = kLayout__315};
-__device__ constexpr ArgU8Layout3LayoutArray kLayout__322 =
-    ArgU8Layout3LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                        .val = NondetRegLayout{._super = /*offset=*/28}},
-                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                        .val = NondetRegLayout{._super = /*offset=*/30}},
-                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                        .val = NondetRegLayout{._super = /*offset=*/32}}};
-__device__ constexpr _Arguments_Mem0OutputLayout kLayout__321 =
-    _Arguments_Mem0OutputLayout{.argU8 = kLayout__322,
-                                .argU16 = ArgU16Layout1LayoutArray{
-                                    ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}}};
-__device__ constexpr NondetU8RegLayout kLayout__327 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                         .val = NondetRegLayout{._super = /*offset=*/28}}};
-__device__ constexpr NondetU8RegLayout kLayout__328 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                         .val = NondetRegLayout{._super = /*offset=*/30}}};
-__device__ constexpr SplitWordLayout kLayout__326 =
-    SplitWordLayout{.byte0 = kLayout__327, .byte1 = kLayout__328};
-__device__ constexpr NondetU8RegLayout kLayout__329 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                         .val = NondetRegLayout{._super = /*offset=*/32}}};
-__device__ constexpr OpLBLayout kLayout__325 =
-    OpLBLayout{.bytes = kLayout__326,
-               .highBit = NondetRegLayout{._super = /*offset=*/104},
-               .low7x2 = kLayout__329};
-__device__ constexpr Mem0OutputArm0Layout kLayout__324 =
-    Mem0OutputArm0Layout{._super = kLayout__325,
-                         ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr OpLHLayout kLayout__331 =
-    OpLHLayout{.highBit = NondetRegLayout{._super = /*offset=*/104}, .low15x2 = kLayout__81};
-__device__ constexpr Mem0OutputArm1Layout kLayout__330 =
-    Mem0OutputArm1Layout{._super = kLayout__331,
-                         ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}}};
-__device__ constexpr Mem0OutputArm2Layout kLayout__332 =
-    Mem0OutputArm2Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr OpLBULayout kLayout__334 = OpLBULayout{.bytes = kLayout__326};
-__device__ constexpr Mem0OutputArm3Layout kLayout__333 =
-    Mem0OutputArm3Layout{._super = kLayout__334,
-                         ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem0OutputArm4Layout kLayout__335 =
-    Mem0OutputArm4Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem0OutputArm5Layout kLayout__336 =
-    Mem0OutputArm5Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem0OutputArm6Layout kLayout__337 =
-    Mem0OutputArm6Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem0OutputArm7Layout kLayout__338 =
-    Mem0OutputArm7Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                 .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem0OutputLayout kLayout__323 = Mem0OutputLayout{.arm0 = kLayout__324,
-                                                                      .arm1 = kLayout__330,
-                                                                      .arm2 = kLayout__332,
-                                                                      .arm3 = kLayout__333,
-                                                                      .arm4 = kLayout__335,
-                                                                      .arm5 = kLayout__336,
-                                                                      .arm6 = kLayout__337,
-                                                                      .arm7 = kLayout__338};
-__device__ constexpr MemoryArgLayout kLayout__342 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/109},
-                    .addr = NondetRegLayout{._super = /*offset=*/108},
-                    .cycle = NondetRegLayout{._super = /*offset=*/110},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/111},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/112}};
-__device__ constexpr MemoryArgLayout kLayout__343 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/113},
-                    .addr = NondetRegLayout{._super = /*offset=*/108},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/114},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/115}};
-__device__ constexpr MemoryIOLayout kLayout__341 =
-    MemoryIOLayout{.oldTxn = kLayout__342, .newTxn = kLayout__343};
-__device__ constexpr IsCycleLayout kLayout__345 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/116},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/117}}};
-__device__ constexpr IsForwardLayout kLayout__344 = IsForwardLayout{._0 = kLayout__345};
-__device__ constexpr MemoryWriteLayout kLayout__340 =
-    MemoryWriteLayout{.io = kLayout__341, ._0 = kLayout__344};
-__device__ constexpr WriteRdLayout kLayout__339 =
-    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/105},
-                                        .inv = NondetRegLayout{._super = /*offset=*/106}},
-                  .writeAddr = NondetRegLayout{._super = /*offset=*/107},
-                  ._0 = kLayout__340};
-__device__ constexpr NondetU16RegLayout kLayout__347 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
-                                           .val = NondetRegLayout{._super = /*offset=*/119}}};
-__device__ constexpr NondetU16RegLayout kLayout__348 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                                           .val = NondetRegLayout{._super = /*offset=*/122}}};
-__device__ constexpr NormalizeU32Layout kLayout__346 =
-    NormalizeU32Layout{.low16 = kLayout__347,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/120},
-                       .high16 = kLayout__348,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/123}};
-__device__ constexpr Mem0Layout kLayout__289 = Mem0Layout{.input = kLayout__290,
-                                                          ._arguments_Mem0Output = kLayout__321,
-                                                          .output = kLayout__323,
-                                                          ._0 = kLayout__339,
-                                                          .pcAdd = kLayout__346};
-__device__ constexpr MemoryArgLayout kLayout__354 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/81},
-                    .addr = NondetRegLayout{._super = /*offset=*/80},
-                    .cycle = NondetRegLayout{._super = /*offset=*/82},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/83},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/84}};
-__device__ constexpr MemoryArgLayout kLayout__355 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/85},
-                    .addr = NondetRegLayout{._super = /*offset=*/80},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/86},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/87}};
-__device__ constexpr MemoryIOLayout kLayout__353 =
-    MemoryIOLayout{.oldTxn = kLayout__354, .newTxn = kLayout__355};
-__device__ constexpr IsCycleLayout kLayout__357 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/88},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/89}}};
-__device__ constexpr IsForwardLayout kLayout__356 = IsForwardLayout{._0 = kLayout__357};
-__device__ constexpr MemoryReadLayout kLayout__352 =
-    MemoryReadLayout{.io = kLayout__353, ._0 = kLayout__356};
-__device__ constexpr ReadRegLayout kLayout__351 =
-    ReadRegLayout{._super = kLayout__352, .addr = NondetRegLayout{._super = /*offset=*/90}};
-__device__ constexpr NondetU16RegLayout kLayout__359 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/91},
-                                           .val = NondetRegLayout{._super = /*offset=*/92}}};
-__device__ constexpr NondetU16RegLayout kLayout__360 =
+                    .addr = NondetRegLayout{._super = /*offset=*/63},
+                    .cycle = NondetRegLayout{._super = /*offset=*/65},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/66},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/67}};
+__device__ constexpr MemoryArgLayout kLayout__341 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                    .addr = NondetRegLayout{._super = /*offset=*/63},
+                    .cycle = NondetRegLayout{._super = /*offset=*/69},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/70},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/71}};
+__device__ constexpr MemoryIOLayout kLayout__339 =
+    MemoryIOLayout{.oldTxn = kLayout__340, .newTxn = kLayout__341};
+__device__ constexpr IsCycleLayout kLayout__343 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/72},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/73}}};
+__device__ constexpr IsForwardLayout kLayout__342 = IsForwardLayout{._0 = kLayout__343};
+__device__ constexpr MemoryReadLayout kLayout__338 =
+    MemoryReadLayout{.io = kLayout__339, ._0 = kLayout__342};
+__device__ constexpr DecodeInstLayout kLayout__333 =
+    DecodeInstLayout{._super = kLayout__334, .pcAddr = kLayout__335, .loadInst = kLayout__338};
+__device__ constexpr MemoryArgLayout kLayout__347 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/75},
+                    .addr = NondetRegLayout{._super = /*offset=*/74},
+                    .cycle = NondetRegLayout{._super = /*offset=*/76},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/77},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/78}};
+__device__ constexpr MemoryArgLayout kLayout__348 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/79},
+                    .addr = NondetRegLayout{._super = /*offset=*/74},
+                    .cycle = NondetRegLayout{._super = /*offset=*/80},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/81},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/82}};
+__device__ constexpr MemoryIOLayout kLayout__346 =
+    MemoryIOLayout{.oldTxn = kLayout__347, .newTxn = kLayout__348};
+__device__ constexpr IsCycleLayout kLayout__350 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/83},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/84}}};
+__device__ constexpr IsForwardLayout kLayout__349 = IsForwardLayout{._0 = kLayout__350};
+__device__ constexpr MemoryReadLayout kLayout__345 =
+    MemoryReadLayout{.io = kLayout__346, ._0 = kLayout__349};
+__device__ constexpr ReadRegLayout kLayout__344 =
+    ReadRegLayout{._super = kLayout__345, .addr = NondetRegLayout{._super = /*offset=*/85}};
+__device__ constexpr NondetU16RegLayout kLayout__352 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                                           .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr NormalizeU32Layout kLayout__351 =
+    NormalizeU32Layout{.low16 = kLayout__352,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/88},
+                       .high16 = kLayout__28,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/91}};
+__device__ constexpr NondetU16RegLayout kLayout__354 =
     NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/94},
                                            .val = NondetRegLayout{._super = /*offset=*/95}}};
-__device__ constexpr NormalizeU32Layout kLayout__358 =
-    NormalizeU32Layout{.low16 = kLayout__359,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/93},
-                       .high16 = kLayout__360,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/96}};
-__device__ constexpr NondetU16RegLayout kLayout__363 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/99},
-                                           .val = NondetRegLayout{._super = /*offset=*/100}}};
-__device__ constexpr U16RegLayout kLayout__362 = U16RegLayout{.ret = kLayout__363};
-__device__ constexpr NondetU16RegLayout kLayout__364 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/103},
-                                           .val = NondetRegLayout{._super = /*offset=*/104}}};
-__device__ constexpr AddrDecomposeBitsLayout kLayout__361 =
-    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/97},
-                            .low1 = NondetRegLayout{._super = /*offset=*/98},
-                            .upperDiff = kLayout__362,
-                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/101},
-                                               .inv = NondetRegLayout{._super = /*offset=*/102}},
-                            .med14 = kLayout__364};
-__device__ constexpr MemStoreInputLayout kLayout__350 = MemStoreInputLayout{.decoded = kLayout__291,
-                                                                            .rs1 = kLayout__303,
-                                                                            .rs2 = kLayout__351,
-                                                                            .addrU32 = kLayout__358,
-                                                                            .addr = kLayout__361,
-                                                                            .data = kLayout__218};
-__device__ constexpr ArgU8Layout4LayoutArray kLayout__366 =
-    ArgU8Layout4LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                        .val = NondetRegLayout{._super = /*offset=*/28}},
-                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                        .val = NondetRegLayout{._super = /*offset=*/30}},
-                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                        .val = NondetRegLayout{._super = /*offset=*/32}},
-                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                        .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr _Arguments_Mem1OutputLayout kLayout__365 =
-    _Arguments_Mem1OutputLayout{.argU8 = kLayout__366};
+__device__ constexpr NondetU16RegLayout kLayout__355 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/98},
+                                           .val = NondetRegLayout{._super = /*offset=*/99}}};
+__device__ constexpr AddrDecomposeBitsLayout kLayout__353 =
+    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/92},
+                            .low1 = NondetRegLayout{._super = /*offset=*/93},
+                            .upperDiff = kLayout__354,
+                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/96},
+                                               .inv = NondetRegLayout{._super = /*offset=*/97}},
+                            .med14 = kLayout__355};
+__device__ constexpr MemoryArgLayout kLayout__358 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
+                    .addr = NondetRegLayout{._super = /*offset=*/100},
+                    .cycle = NondetRegLayout{._super = /*offset=*/102},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/103},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/104}};
+__device__ constexpr MemoryArgLayout kLayout__359 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
+                    .addr = NondetRegLayout{._super = /*offset=*/100},
+                    .cycle = NondetRegLayout{._super = /*offset=*/106},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/107},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/108}};
+__device__ constexpr MemoryIOLayout kLayout__357 =
+    MemoryIOLayout{.oldTxn = kLayout__358, .newTxn = kLayout__359};
+__device__ constexpr IsCycleLayout kLayout__361 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/109},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/110}}};
+__device__ constexpr IsForwardLayout kLayout__360 = IsForwardLayout{._0 = kLayout__361};
+__device__ constexpr MemoryReadLayout kLayout__356 =
+    MemoryReadLayout{.io = kLayout__357, ._0 = kLayout__360};
+__device__ constexpr MemLoadInputLayout kLayout__332 = MemLoadInputLayout{.decoded = kLayout__333,
+                                                                          .rs1 = kLayout__344,
+                                                                          .addrU32 = kLayout__351,
+                                                                          .addr = kLayout__353,
+                                                                          .data = kLayout__356};
+__device__ constexpr ArgU8Layout3LayoutArray kLayout__363 =
+    ArgU8Layout3LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                        .val = NondetRegLayout{._super = /*offset=*/29}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                        .val = NondetRegLayout{._super = /*offset=*/31}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                        .val = NondetRegLayout{._super = /*offset=*/33}}};
+__device__ constexpr _Arguments_Mem0OutputLayout kLayout__362 =
+    _Arguments_Mem0OutputLayout{.argU8 = kLayout__363,
+                                .argU16 = ArgU16Layout1LayoutArray{
+                                    ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}}};
+__device__ constexpr NondetU8RegLayout kLayout__368 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                         .val = NondetRegLayout{._super = /*offset=*/29}}};
+__device__ constexpr NondetU8RegLayout kLayout__369 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                         .val = NondetRegLayout{._super = /*offset=*/31}}};
+__device__ constexpr SplitWordLayout kLayout__367 =
+    SplitWordLayout{.byte0 = kLayout__368, .byte1 = kLayout__369};
 __device__ constexpr NondetU8RegLayout kLayout__370 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                         .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr SplitWordLayout kLayout__369 =
-    SplitWordLayout{.byte0 = kLayout__329, .byte1 = kLayout__370};
-__device__ constexpr OpSBLayout kLayout__368 =
-    OpSBLayout{.origBytes = kLayout__326, .newBytes = kLayout__369};
-__device__ constexpr Mem1OutputArm1Layout kLayout__371 =
-    Mem1OutputArm1Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem1OutputArm2Layout kLayout__372 =
-    Mem1OutputArm2Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem1OutputArm3Layout kLayout__373 =
-    Mem1OutputArm3Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem1OutputArm4Layout kLayout__374 =
-    Mem1OutputArm4Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem1OutputArm5Layout kLayout__375 =
-    Mem1OutputArm5Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem1OutputArm6Layout kLayout__376 =
-    Mem1OutputArm6Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem1OutputArm7Layout kLayout__377 =
-    Mem1OutputArm7Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/27},
-                                                .val = NondetRegLayout{._super = /*offset=*/28}},
-                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/29},
-                                                .val = NondetRegLayout{._super = /*offset=*/30}},
-                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/31},
-                                                .val = NondetRegLayout{._super = /*offset=*/32}},
-                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/33},
-                                                .val = NondetRegLayout{._super = /*offset=*/34}}};
-__device__ constexpr Mem1OutputLayout kLayout__367 = Mem1OutputLayout{.arm0 = kLayout__368,
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                         .val = NondetRegLayout{._super = /*offset=*/33}}};
+__device__ constexpr OpLBLayout kLayout__366 =
+    OpLBLayout{.bytes = kLayout__367,
+               .highBit = NondetRegLayout{._super = /*offset=*/111},
+               .low7x2 = kLayout__370};
+__device__ constexpr Mem0OutputArm0Layout kLayout__365 =
+    Mem0OutputArm0Layout{._super = kLayout__366,
+                         ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr OpLHLayout kLayout__372 =
+    OpLHLayout{.highBit = NondetRegLayout{._super = /*offset=*/111}, .low15x2 = kLayout__81};
+__device__ constexpr Mem0OutputArm1Layout kLayout__371 =
+    Mem0OutputArm1Layout{._super = kLayout__372,
+                         ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}}};
+__device__ constexpr Mem0OutputArm2Layout kLayout__373 =
+    Mem0OutputArm2Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr OpLBULayout kLayout__375 = OpLBULayout{.bytes = kLayout__367};
+__device__ constexpr Mem0OutputArm3Layout kLayout__374 =
+    Mem0OutputArm3Layout{._super = kLayout__375,
+                         ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem0OutputArm4Layout kLayout__376 =
+    Mem0OutputArm4Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem0OutputArm5Layout kLayout__377 =
+    Mem0OutputArm5Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem0OutputArm6Layout kLayout__378 =
+    Mem0OutputArm6Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem0OutputArm7Layout kLayout__379 =
+    Mem0OutputArm7Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                 .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem0OutputLayout kLayout__364 = Mem0OutputLayout{.arm0 = kLayout__365,
                                                                       .arm1 = kLayout__371,
-                                                                      .arm2 = kLayout__372,
-                                                                      .arm3 = kLayout__373,
-                                                                      .arm4 = kLayout__374,
-                                                                      .arm5 = kLayout__375,
-                                                                      .arm6 = kLayout__376,
-                                                                      .arm7 = kLayout__377};
-__device__ constexpr MemoryArgLayout kLayout__381 =
+                                                                      .arm2 = kLayout__373,
+                                                                      .arm3 = kLayout__374,
+                                                                      .arm4 = kLayout__376,
+                                                                      .arm5 = kLayout__377,
+                                                                      .arm6 = kLayout__378,
+                                                                      .arm7 = kLayout__379};
+__device__ constexpr MemoryArgLayout kLayout__383 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/116},
                     .addr = NondetRegLayout{._super = /*offset=*/115},
                     .cycle = NondetRegLayout{._super = /*offset=*/117},
                     .dataLow = NondetRegLayout{._super = /*offset=*/118},
                     .dataHigh = NondetRegLayout{._super = /*offset=*/119}};
-__device__ constexpr MemoryArgLayout kLayout__382 =
+__device__ constexpr MemoryArgLayout kLayout__384 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/120},
                     .addr = NondetRegLayout{._super = /*offset=*/115},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/121},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/122}};
-__device__ constexpr MemoryIOLayout kLayout__380 =
-    MemoryIOLayout{.oldTxn = kLayout__381, .newTxn = kLayout__382};
-__device__ constexpr IsCycleLayout kLayout__384 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/123},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/124}}};
-__device__ constexpr IsForwardLayout kLayout__383 = IsForwardLayout{._0 = kLayout__384};
-__device__ constexpr MemoryWriteLayout kLayout__379 =
-    MemoryWriteLayout{.io = kLayout__380, ._0 = kLayout__383};
-__device__ constexpr MemStoreFinalizeLayout kLayout__378 =
-    MemStoreFinalizeLayout{._0 = kLayout__379};
-__device__ constexpr NondetU16RegLayout kLayout__386 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                                           .val = NondetRegLayout{._super = /*offset=*/126}}};
-__device__ constexpr NondetU16RegLayout kLayout__387 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
-                                           .val = NondetRegLayout{._super = /*offset=*/129}}};
-__device__ constexpr NormalizeU32Layout kLayout__385 =
-    NormalizeU32Layout{.low16 = kLayout__386,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/127},
-                       .high16 = kLayout__387,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/130}};
-__device__ constexpr Mem1Layout kLayout__349 = Mem1Layout{.input = kLayout__350,
-                                                          ._arguments_Mem1Output = kLayout__365,
-                                                          .output = kLayout__367,
-                                                          ._0 = kLayout__378,
-                                                          .pcAdd = kLayout__385};
+                    .cycle = NondetRegLayout{._super = /*offset=*/121},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/122},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/123}};
+__device__ constexpr MemoryIOLayout kLayout__382 =
+    MemoryIOLayout{.oldTxn = kLayout__383, .newTxn = kLayout__384};
+__device__ constexpr IsCycleLayout kLayout__386 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/124},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/125}}};
+__device__ constexpr IsForwardLayout kLayout__385 = IsForwardLayout{._0 = kLayout__386};
+__device__ constexpr MemoryWriteLayout kLayout__381 =
+    MemoryWriteLayout{.io = kLayout__382, ._0 = kLayout__385};
+__device__ constexpr WriteRdLayout kLayout__380 =
+    WriteRdLayout{.isRd0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/112},
+                                        .inv = NondetRegLayout{._super = /*offset=*/113}},
+                  .writeAddr = NondetRegLayout{._super = /*offset=*/114},
+                  ._0 = kLayout__381};
+__device__ constexpr NondetU16RegLayout kLayout__388 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                                           .val = NondetRegLayout{._super = /*offset=*/127}}};
+__device__ constexpr NondetU16RegLayout kLayout__389 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
+                                           .val = NondetRegLayout{._super = /*offset=*/130}}};
+__device__ constexpr NormalizeU32Layout kLayout__387 =
+    NormalizeU32Layout{.low16 = kLayout__388,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/128},
+                       .high16 = kLayout__389,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/131}};
+__device__ constexpr Mem0Layout kLayout__330 = Mem0Layout{._0 = kLayout__331,
+                                                          .input = kLayout__332,
+                                                          ._arguments_Mem0Output = kLayout__362,
+                                                          .output = kLayout__364,
+                                                          ._1 = kLayout__380,
+                                                          .pcAdd = kLayout__387};
+__device__ constexpr MemoryArgLayout kLayout__395 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/87},
+                    .addr = NondetRegLayout{._super = /*offset=*/86},
+                    .cycle = NondetRegLayout{._super = /*offset=*/88},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/89},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/90}};
 __device__ constexpr MemoryArgLayout kLayout__396 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/27},
-                    .addr = NondetRegLayout{._super = /*offset=*/28},
-                    .cycle = NondetRegLayout{._super = /*offset=*/29},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/30},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/31}};
-__device__ constexpr MemoryArgLayout kLayout__397 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/32},
-                    .addr = NondetRegLayout{._super = /*offset=*/28},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/33},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/34}};
-__device__ constexpr MemoryIOLayout kLayout__395 =
-    MemoryIOLayout{.oldTxn = kLayout__396, .newTxn = kLayout__397};
-__device__ constexpr MemoryPageInLayout kLayout__394 = MemoryPageInLayout{.io = kLayout__395};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__393 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__394};
-__device__ constexpr MemoryArgLayout kLayout__401 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/35},
-                    .addr = NondetRegLayout{._super = /*offset=*/36},
-                    .cycle = NondetRegLayout{._super = /*offset=*/37},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/38},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/39}};
-__device__ constexpr MemoryArgLayout kLayout__402 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/40},
-                    .addr = NondetRegLayout{._super = /*offset=*/36},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/41},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/42}};
-__device__ constexpr MemoryIOLayout kLayout__400 =
-    MemoryIOLayout{.oldTxn = kLayout__401, .newTxn = kLayout__402};
-__device__ constexpr MemoryPageInLayout kLayout__399 = MemoryPageInLayout{.io = kLayout__400};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__398 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__399};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
+                    .addr = NondetRegLayout{._super = /*offset=*/86},
+                    .cycle = NondetRegLayout{._super = /*offset=*/92},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/93},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/94}};
+__device__ constexpr MemoryIOLayout kLayout__394 =
+    MemoryIOLayout{.oldTxn = kLayout__395, .newTxn = kLayout__396};
+__device__ constexpr IsCycleLayout kLayout__398 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/96}}};
+__device__ constexpr IsForwardLayout kLayout__397 = IsForwardLayout{._0 = kLayout__398};
+__device__ constexpr MemoryReadLayout kLayout__393 =
+    MemoryReadLayout{.io = kLayout__394, ._0 = kLayout__397};
+__device__ constexpr ReadRegLayout kLayout__392 =
+    ReadRegLayout{._super = kLayout__393, .addr = NondetRegLayout{._super = /*offset=*/97}};
+__device__ constexpr NondetU16RegLayout kLayout__400 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/101},
+                                           .val = NondetRegLayout{._super = /*offset=*/102}}};
+__device__ constexpr NormalizeU32Layout kLayout__399 =
+    NormalizeU32Layout{.low16 = kLayout__355,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/100},
+                       .high16 = kLayout__400,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/103}};
+__device__ constexpr NondetU16RegLayout kLayout__402 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/106},
+                                           .val = NondetRegLayout{._super = /*offset=*/107}}};
+__device__ constexpr NondetU16RegLayout kLayout__403 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/110},
+                                           .val = NondetRegLayout{._super = /*offset=*/111}}};
+__device__ constexpr AddrDecomposeBitsLayout kLayout__401 =
+    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/104},
+                            .low1 = NondetRegLayout{._super = /*offset=*/105},
+                            .upperDiff = kLayout__402,
+                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/108},
+                                               .inv = NondetRegLayout{._super = /*offset=*/109}},
+                            .med14 = kLayout__403};
 __device__ constexpr MemoryArgLayout kLayout__406 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/43},
-                    .addr = NondetRegLayout{._super = /*offset=*/44},
-                    .cycle = NondetRegLayout{._super = /*offset=*/45},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/46},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/47}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/113},
+                    .addr = NondetRegLayout{._super = /*offset=*/112},
+                    .cycle = NondetRegLayout{._super = /*offset=*/114},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/115},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/116}};
 __device__ constexpr MemoryArgLayout kLayout__407 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/48},
-                    .addr = NondetRegLayout{._super = /*offset=*/44},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/49},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/50}};
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/117},
+                    .addr = NondetRegLayout{._super = /*offset=*/112},
+                    .cycle = NondetRegLayout{._super = /*offset=*/118},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/119},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/120}};
 __device__ constexpr MemoryIOLayout kLayout__405 =
     MemoryIOLayout{.oldTxn = kLayout__406, .newTxn = kLayout__407};
-__device__ constexpr MemoryPageInLayout kLayout__404 = MemoryPageInLayout{.io = kLayout__405};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__403 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__404};
-__device__ constexpr MemoryArgLayout kLayout__411 =
+__device__ constexpr IsCycleLayout kLayout__409 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/121},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/122}}};
+__device__ constexpr IsForwardLayout kLayout__408 = IsForwardLayout{._0 = kLayout__409};
+__device__ constexpr MemoryReadLayout kLayout__404 =
+    MemoryReadLayout{.io = kLayout__405, ._0 = kLayout__408};
+__device__ constexpr MemStoreInputLayout kLayout__391 = MemStoreInputLayout{.decoded = kLayout__333,
+                                                                            .rs1 = kLayout__344,
+                                                                            .rs2 = kLayout__392,
+                                                                            .addrU32 = kLayout__399,
+                                                                            .addr = kLayout__401,
+                                                                            .data = kLayout__404};
+__device__ constexpr ArgU8Layout4LayoutArray kLayout__411 =
+    ArgU8Layout4LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                        .val = NondetRegLayout{._super = /*offset=*/29}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                        .val = NondetRegLayout{._super = /*offset=*/31}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                        .val = NondetRegLayout{._super = /*offset=*/33}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                        .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr _Arguments_Mem1OutputLayout kLayout__410 =
+    _Arguments_Mem1OutputLayout{.argU8 = kLayout__411};
+__device__ constexpr NondetU8RegLayout kLayout__415 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                         .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr SplitWordLayout kLayout__414 =
+    SplitWordLayout{.byte0 = kLayout__370, .byte1 = kLayout__415};
+__device__ constexpr OpSBLayout kLayout__413 =
+    OpSBLayout{.origBytes = kLayout__367, .newBytes = kLayout__414};
+__device__ constexpr Mem1OutputArm1Layout kLayout__416 =
+    Mem1OutputArm1Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem1OutputArm2Layout kLayout__417 =
+    Mem1OutputArm2Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem1OutputArm3Layout kLayout__418 =
+    Mem1OutputArm3Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem1OutputArm4Layout kLayout__419 =
+    Mem1OutputArm4Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem1OutputArm5Layout kLayout__420 =
+    Mem1OutputArm5Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem1OutputArm6Layout kLayout__421 =
+    Mem1OutputArm6Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem1OutputArm7Layout kLayout__422 =
+    Mem1OutputArm7Layout{._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/28},
+                                                .val = NondetRegLayout{._super = /*offset=*/29}},
+                         ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/30},
+                                                .val = NondetRegLayout{._super = /*offset=*/31}},
+                         ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/32},
+                                                .val = NondetRegLayout{._super = /*offset=*/33}},
+                         ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/34},
+                                                .val = NondetRegLayout{._super = /*offset=*/35}}};
+__device__ constexpr Mem1OutputLayout kLayout__412 = Mem1OutputLayout{.arm0 = kLayout__413,
+                                                                      .arm1 = kLayout__416,
+                                                                      .arm2 = kLayout__417,
+                                                                      .arm3 = kLayout__418,
+                                                                      .arm4 = kLayout__419,
+                                                                      .arm5 = kLayout__420,
+                                                                      .arm6 = kLayout__421,
+                                                                      .arm7 = kLayout__422};
+__device__ constexpr MemoryArgLayout kLayout__426 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/124},
+                    .addr = NondetRegLayout{._super = /*offset=*/123},
+                    .cycle = NondetRegLayout{._super = /*offset=*/125},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/126},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/127}};
+__device__ constexpr MemoryArgLayout kLayout__427 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/128},
+                    .addr = NondetRegLayout{._super = /*offset=*/123},
+                    .cycle = NondetRegLayout{._super = /*offset=*/129},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/130},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/131}};
+__device__ constexpr MemoryIOLayout kLayout__425 =
+    MemoryIOLayout{.oldTxn = kLayout__426, .newTxn = kLayout__427};
+__device__ constexpr IsCycleLayout kLayout__429 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/133}}};
+__device__ constexpr IsForwardLayout kLayout__428 = IsForwardLayout{._0 = kLayout__429};
+__device__ constexpr MemoryWriteLayout kLayout__424 =
+    MemoryWriteLayout{.io = kLayout__425, ._0 = kLayout__428};
+__device__ constexpr MemStoreFinalizeLayout kLayout__423 =
+    MemStoreFinalizeLayout{._0 = kLayout__424};
+__device__ constexpr NondetU16RegLayout kLayout__431 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                                           .val = NondetRegLayout{._super = /*offset=*/135}}};
+__device__ constexpr NondetU16RegLayout kLayout__432 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
+                                           .val = NondetRegLayout{._super = /*offset=*/138}}};
+__device__ constexpr NormalizeU32Layout kLayout__430 =
+    NormalizeU32Layout{.low16 = kLayout__431,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/136},
+                       .high16 = kLayout__432,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/139}};
+__device__ constexpr Mem1Layout kLayout__390 = Mem1Layout{._0 = kLayout__331,
+                                                          .input = kLayout__391,
+                                                          ._arguments_Mem1Output = kLayout__410,
+                                                          .output = kLayout__412,
+                                                          ._1 = kLayout__423,
+                                                          .pcAdd = kLayout__430};
+__device__ constexpr MemoryArgLayout kLayout__441 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/28},
+                    .addr = NondetRegLayout{._super = /*offset=*/29},
+                    .cycle = NondetRegLayout{._super = /*offset=*/30},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/31},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/32}};
+__device__ constexpr MemoryArgLayout kLayout__442 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/33},
+                    .addr = NondetRegLayout{._super = /*offset=*/29},
+                    .cycle = NondetRegLayout{._super = /*offset=*/34},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/35},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/36}};
+__device__ constexpr MemoryIOLayout kLayout__440 =
+    MemoryIOLayout{.oldTxn = kLayout__441, .newTxn = kLayout__442};
+__device__ constexpr MemoryPageInLayout kLayout__439 = MemoryPageInLayout{.io = kLayout__440};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__438 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__439};
+__device__ constexpr MemoryArgLayout kLayout__446 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/37},
+                    .addr = NondetRegLayout{._super = /*offset=*/38},
+                    .cycle = NondetRegLayout{._super = /*offset=*/39},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/40},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/41}};
+__device__ constexpr MemoryArgLayout kLayout__447 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/42},
+                    .addr = NondetRegLayout{._super = /*offset=*/38},
+                    .cycle = NondetRegLayout{._super = /*offset=*/43},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/44},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/45}};
+__device__ constexpr MemoryIOLayout kLayout__445 =
+    MemoryIOLayout{.oldTxn = kLayout__446, .newTxn = kLayout__447};
+__device__ constexpr MemoryPageInLayout kLayout__444 = MemoryPageInLayout{.io = kLayout__445};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__443 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__444};
+__device__ constexpr MemoryArgLayout kLayout__451 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/46},
+                    .addr = NondetRegLayout{._super = /*offset=*/47},
+                    .cycle = NondetRegLayout{._super = /*offset=*/48},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/49},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/50}};
+__device__ constexpr MemoryArgLayout kLayout__452 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/51},
-                    .addr = NondetRegLayout{._super = /*offset=*/52},
-                    .cycle = NondetRegLayout{._super = /*offset=*/53},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/54},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/55}};
-__device__ constexpr MemoryArgLayout kLayout__412 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/56},
-                    .addr = NondetRegLayout{._super = /*offset=*/52},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/57},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/58}};
-__device__ constexpr MemoryIOLayout kLayout__410 =
-    MemoryIOLayout{.oldTxn = kLayout__411, .newTxn = kLayout__412};
-__device__ constexpr MemoryPageInLayout kLayout__409 = MemoryPageInLayout{.io = kLayout__410};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__408 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__409};
-__device__ constexpr MemoryArgLayout kLayout__416 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/59},
-                    .addr = NondetRegLayout{._super = /*offset=*/60},
+                    .addr = NondetRegLayout{._super = /*offset=*/47},
+                    .cycle = NondetRegLayout{._super = /*offset=*/52},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/53},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/54}};
+__device__ constexpr MemoryIOLayout kLayout__450 =
+    MemoryIOLayout{.oldTxn = kLayout__451, .newTxn = kLayout__452};
+__device__ constexpr MemoryPageInLayout kLayout__449 = MemoryPageInLayout{.io = kLayout__450};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__448 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__449};
+__device__ constexpr MemoryArgLayout kLayout__456 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/55},
+                    .addr = NondetRegLayout{._super = /*offset=*/56},
+                    .cycle = NondetRegLayout{._super = /*offset=*/57},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/58},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/59}};
+__device__ constexpr MemoryArgLayout kLayout__457 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/60},
+                    .addr = NondetRegLayout{._super = /*offset=*/56},
                     .cycle = NondetRegLayout{._super = /*offset=*/61},
                     .dataLow = NondetRegLayout{._super = /*offset=*/62},
                     .dataHigh = NondetRegLayout{._super = /*offset=*/63}};
-__device__ constexpr MemoryArgLayout kLayout__417 =
+__device__ constexpr MemoryIOLayout kLayout__455 =
+    MemoryIOLayout{.oldTxn = kLayout__456, .newTxn = kLayout__457};
+__device__ constexpr MemoryPageInLayout kLayout__454 = MemoryPageInLayout{.io = kLayout__455};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__453 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__454};
+__device__ constexpr MemoryArgLayout kLayout__461 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/64},
-                    .addr = NondetRegLayout{._super = /*offset=*/60},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/65},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/66}};
-__device__ constexpr MemoryIOLayout kLayout__415 =
-    MemoryIOLayout{.oldTxn = kLayout__416, .newTxn = kLayout__417};
-__device__ constexpr MemoryPageInLayout kLayout__414 = MemoryPageInLayout{.io = kLayout__415};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__413 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__414};
-__device__ constexpr MemoryArgLayout kLayout__421 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/67},
-                    .addr = NondetRegLayout{._super = /*offset=*/68},
-                    .cycle = NondetRegLayout{._super = /*offset=*/69},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/70},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/71}};
-__device__ constexpr MemoryArgLayout kLayout__422 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/72},
-                    .addr = NondetRegLayout{._super = /*offset=*/68},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/73},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/74}};
-__device__ constexpr MemoryIOLayout kLayout__420 =
-    MemoryIOLayout{.oldTxn = kLayout__421, .newTxn = kLayout__422};
-__device__ constexpr MemoryPageInLayout kLayout__419 = MemoryPageInLayout{.io = kLayout__420};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__418 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__419};
-__device__ constexpr MemoryArgLayout kLayout__426 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/75},
-                    .addr = NondetRegLayout{._super = /*offset=*/76},
-                    .cycle = NondetRegLayout{._super = /*offset=*/77},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/78},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/79}};
-__device__ constexpr MemoryArgLayout kLayout__427 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/80},
-                    .addr = NondetRegLayout{._super = /*offset=*/76},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/81},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/82}};
-__device__ constexpr MemoryIOLayout kLayout__425 =
-    MemoryIOLayout{.oldTxn = kLayout__426, .newTxn = kLayout__427};
-__device__ constexpr MemoryPageInLayout kLayout__424 = MemoryPageInLayout{.io = kLayout__425};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__423 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__424};
-__device__ constexpr MemoryArgLayout kLayout__431 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/83},
-                    .addr = NondetRegLayout{._super = /*offset=*/84},
-                    .cycle = NondetRegLayout{._super = /*offset=*/85},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/86},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/87}};
-__device__ constexpr MemoryArgLayout kLayout__432 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/88},
-                    .addr = NondetRegLayout{._super = /*offset=*/84},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/89},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/90}};
-__device__ constexpr MemoryIOLayout kLayout__430 =
-    MemoryIOLayout{.oldTxn = kLayout__431, .newTxn = kLayout__432};
-__device__ constexpr MemoryPageInLayout kLayout__429 = MemoryPageInLayout{.io = kLayout__430};
-__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__428 =
-    ControlLoadRoot__0_SuperLayout{.mem = kLayout__429};
-__device__ constexpr ControlLoadRoot__0_SuperLayout8LayoutArray kLayout__392 =
-    ControlLoadRoot__0_SuperLayout8LayoutArray{kLayout__393,
-                                               kLayout__398,
-                                               kLayout__403,
-                                               kLayout__408,
-                                               kLayout__413,
-                                               kLayout__418,
-                                               kLayout__423,
-                                               kLayout__428};
-__device__ constexpr ControlLoadRootLayout kLayout__391 = ControlLoadRootLayout{._1 = kLayout__392};
-__device__ constexpr Control0_SuperArm0Layout kLayout__390 = Control0_SuperArm0Layout{
-    ._super = kLayout__391,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
-                              .cycle = NondetRegLayout{._super = /*offset=*/92}},
-    ._extra1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/93},
-                              .cycle = NondetRegLayout{._super = /*offset=*/94}},
-    ._extra2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                              .cycle = NondetRegLayout{._super = /*offset=*/96}},
-    ._extra3 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                              .cycle = NondetRegLayout{._super = /*offset=*/98}},
-    ._extra4 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                              .cycle = NondetRegLayout{._super = /*offset=*/100}},
-    ._extra5 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                              .cycle = NondetRegLayout{._super = /*offset=*/102}},
-    ._extra6 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                              .cycle = NondetRegLayout{._super = /*offset=*/104}},
-    ._extra7 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                              .cycle = NondetRegLayout{._super = /*offset=*/106}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                            .val = NondetRegLayout{._super = /*offset=*/108}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                            .val = NondetRegLayout{._super = /*offset=*/110}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                             .val = NondetRegLayout{._super = /*offset=*/112}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                             .val = NondetRegLayout{._super = /*offset=*/114}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                             .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                             .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                             .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                             .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                             .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                             .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}},
-    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                            .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                            .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                            .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                            .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                            .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                            .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                            .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                            .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra32 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                            .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra33 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                            .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra34 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra35 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra36 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra37 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra38 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra39 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr IsCycleLayout kLayout__440 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/92}}};
-__device__ constexpr IsForwardLayout kLayout__439 = IsForwardLayout{._0 = kLayout__440};
-__device__ constexpr MemoryReadLayout kLayout__438 =
-    MemoryReadLayout{.io = kLayout__395, ._0 = kLayout__439};
-__device__ constexpr IsCycleLayout kLayout__443 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/93},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/94}}};
-__device__ constexpr IsForwardLayout kLayout__442 = IsForwardLayout{._0 = kLayout__443};
-__device__ constexpr MemoryReadLayout kLayout__441 =
-    MemoryReadLayout{.io = kLayout__400, ._0 = kLayout__442};
-__device__ constexpr ControlResume_SuperArm0_SuperLayout kLayout__437 =
-    ControlResume_SuperArm0_SuperLayout{.pc = kLayout__438, .mode = kLayout__441};
-__device__ constexpr ControlResume_SuperArm0Layout kLayout__436 = ControlResume_SuperArm0Layout{
-    ._super = kLayout__437,
-    ._extra0 = kLayout__406,
-    ._extra1 = kLayout__407,
-    ._extra2 = kLayout__411,
-    ._extra3 = kLayout__412,
-    ._extra4 = kLayout__416,
-    ._extra5 = kLayout__417,
-    ._extra6 = kLayout__421,
-    ._extra7 = kLayout__422,
-    ._extra8 = kLayout__426,
-    ._extra9 = kLayout__427,
-    ._extra10 = kLayout__431,
-    ._extra11 = kLayout__432,
-    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                               .cycle = NondetRegLayout{._super = /*offset=*/96}},
-    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                               .cycle = NondetRegLayout{._super = /*offset=*/98}},
-    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                               .cycle = NondetRegLayout{._super = /*offset=*/100}},
-    ._extra15 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                               .cycle = NondetRegLayout{._super = /*offset=*/102}},
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                               .cycle = NondetRegLayout{._super = /*offset=*/104}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                               .cycle = NondetRegLayout{._super = /*offset=*/106}}};
-__device__ constexpr MemoryWriteLayout kLayout__447 =
-    MemoryWriteLayout{.io = kLayout__395, ._0 = kLayout__439};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__446 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__447};
-__device__ constexpr MemoryWriteLayout kLayout__449 =
-    MemoryWriteLayout{.io = kLayout__400, ._0 = kLayout__442};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__448 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__449};
-__device__ constexpr IsCycleLayout kLayout__453 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/96}}};
-__device__ constexpr IsForwardLayout kLayout__452 = IsForwardLayout{._0 = kLayout__453};
-__device__ constexpr MemoryWriteLayout kLayout__451 =
-    MemoryWriteLayout{.io = kLayout__405, ._0 = kLayout__452};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__450 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__451};
-__device__ constexpr MemoryWriteLayout kLayout__455 =
-    MemoryWriteLayout{.io = kLayout__410, ._0 = kLayout__131};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__454 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__455};
-__device__ constexpr IsCycleLayout kLayout__459 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/100}}};
-__device__ constexpr IsForwardLayout kLayout__458 = IsForwardLayout{._0 = kLayout__459};
-__device__ constexpr MemoryWriteLayout kLayout__457 =
-    MemoryWriteLayout{.io = kLayout__415, ._0 = kLayout__458};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__456 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__457};
-__device__ constexpr IsCycleLayout kLayout__463 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/102}}};
-__device__ constexpr IsForwardLayout kLayout__462 = IsForwardLayout{._0 = kLayout__463};
-__device__ constexpr MemoryWriteLayout kLayout__461 =
-    MemoryWriteLayout{.io = kLayout__420, ._0 = kLayout__462};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__460 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__461};
-__device__ constexpr MemoryWriteLayout kLayout__465 =
-    MemoryWriteLayout{.io = kLayout__425, ._0 = kLayout__215};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__464 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__465};
-__device__ constexpr IsCycleLayout kLayout__469 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/106}}};
-__device__ constexpr IsForwardLayout kLayout__468 = IsForwardLayout{._0 = kLayout__469};
-__device__ constexpr MemoryWriteLayout kLayout__467 =
-    MemoryWriteLayout{.io = kLayout__430, ._0 = kLayout__468};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__466 =
-    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__467};
-__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout8LayoutArray kLayout__445 =
-    ControlResume_SuperArm1_Super__0_SuperLayout8LayoutArray{kLayout__446,
-                                                             kLayout__448,
-                                                             kLayout__450,
-                                                             kLayout__454,
-                                                             kLayout__456,
-                                                             kLayout__460,
-                                                             kLayout__464,
-                                                             kLayout__466};
-__device__ constexpr ControlResume_SuperArm1_SuperLayout kLayout__444 =
-    ControlResume_SuperArm1_SuperLayout{._1 = kLayout__445};
-__device__ constexpr ControlResume_SuperLayout kLayout__435 =
-    ControlResume_SuperLayout{.arm0 = kLayout__436, .arm1 = kLayout__444};
-__device__ constexpr MemoryArgLayout16LayoutArray kLayout__471 =
-    MemoryArgLayout16LayoutArray{kLayout__396,
-                                 kLayout__397,
-                                 kLayout__401,
-                                 kLayout__402,
-                                 kLayout__406,
-                                 kLayout__407,
-                                 kLayout__411,
-                                 kLayout__412,
-                                 kLayout__416,
-                                 kLayout__417,
-                                 kLayout__421,
-                                 kLayout__422,
-                                 kLayout__426,
-                                 kLayout__427,
-                                 kLayout__431,
-                                 kLayout__432};
-__device__ constexpr CycleArgLayout8LayoutArray kLayout__472 =
-    CycleArgLayout8LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/92}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/93},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/94}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/96}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/98}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/100}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/102}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/104}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/106}}};
-__device__ constexpr _Arguments_ControlResume_SuperLayout kLayout__470 =
-    _Arguments_ControlResume_SuperLayout{.memoryArg = kLayout__471, .cycleArg = kLayout__472};
-__device__ constexpr ControlResumeLayout kLayout__434 =
-    ControlResumeLayout{._super = kLayout__435,
-                        .pcZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/171},
-                                               .inv = NondetRegLayout{._super = /*offset=*/172}},
-                        ._arguments_ControlResume_Super = kLayout__470};
-__device__ constexpr Control0_SuperArm1Layout kLayout__433 = Control0_SuperArm1Layout{
-    ._super = kLayout__434,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                            .val = NondetRegLayout{._super = /*offset=*/108}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                            .val = NondetRegLayout{._super = /*offset=*/110}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                            .val = NondetRegLayout{._super = /*offset=*/112}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                            .val = NondetRegLayout{._super = /*offset=*/114}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                            .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                            .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                            .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                            .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                            .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                            .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}},
-    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                            .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                            .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                            .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                            .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra20 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                            .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra21 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                            .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra22 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                            .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra23 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                            .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                            .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                            .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr NondetU16RegLayout kLayout__477 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                                           .val = NondetRegLayout{._super = /*offset=*/108}}};
-__device__ constexpr U16RegLayout kLayout__476 = U16RegLayout{.ret = kLayout__477};
-__device__ constexpr NondetU16RegLayout kLayout__478 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                                           .val = NondetRegLayout{._super = /*offset=*/110}}};
-__device__ constexpr AddrDecomposeBitsLayout kLayout__475 =
-    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/172},
-                            .low1 = NondetRegLayout{._super = /*offset=*/173},
-                            .upperDiff = kLayout__476,
-                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/174},
-                                               .inv = NondetRegLayout{._super = /*offset=*/175}},
-                            .med14 = kLayout__478};
-__device__ constexpr NondetU16RegLayout kLayout__480 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                                           .val = NondetRegLayout{._super = /*offset=*/112}}};
-__device__ constexpr U16RegLayout kLayout__479 = U16RegLayout{.ret = kLayout__480};
-__device__ constexpr MemoryReadLayout kLayout__481 =
-    MemoryReadLayout{.io = kLayout__405, ._0 = kLayout__452};
-__device__ constexpr ControlUserECALLLayout kLayout__474 =
-    ControlUserECALLLayout{.safeMode = NondetRegLayout{._super = /*offset=*/171},
-                           .pcAddr = kLayout__475,
-                           .loadInst = kLayout__438,
-                           .dispatchIdx = kLayout__441,
-                           ._0 = kLayout__479,
-                           .newPcAddr = kLayout__481,
-                           ._1 = kLayout__455};
-__device__ constexpr Control0_SuperArm2Layout kLayout__473 = Control0_SuperArm2Layout{
-    ._super = kLayout__474,
-    ._extra0 = kLayout__416,
-    ._extra1 = kLayout__417,
-    ._extra2 = kLayout__421,
-    ._extra3 = kLayout__422,
-    ._extra4 = kLayout__426,
-    ._extra5 = kLayout__427,
-    ._extra6 = kLayout__431,
-    ._extra7 = kLayout__432,
-    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                              .cycle = NondetRegLayout{._super = /*offset=*/100}},
-    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                              .cycle = NondetRegLayout{._super = /*offset=*/102}},
-    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                               .cycle = NondetRegLayout{._super = /*offset=*/104}},
-    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                               .cycle = NondetRegLayout{._super = /*offset=*/106}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                             .val = NondetRegLayout{._super = /*offset=*/114}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                             .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                             .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                             .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                             .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                             .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                             .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}},
-    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                            .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                            .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                            .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                            .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                            .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                            .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                            .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra32 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                            .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra33 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                            .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra34 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                            .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra35 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra36 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra37 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra38 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra39 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr NondetU16RegLayout kLayout__485 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                                           .val = NondetRegLayout{._super = /*offset=*/114}}};
-__device__ constexpr NormalizeU32Layout kLayout__484 =
-    NormalizeU32Layout{.low16 = kLayout__480,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/176},
-                       .high16 = kLayout__485,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/177}};
-__device__ constexpr ControlMRETLayout kLayout__483 =
-    ControlMRETLayout{.safeMode = NondetRegLayout{._super = /*offset=*/171},
-                      .pcAddr = kLayout__475,
-                      .loadInst = kLayout__438,
-                      .pc = kLayout__441,
-                      .pcAdd = kLayout__484};
-__device__ constexpr Control0_SuperArm3Layout kLayout__482 = Control0_SuperArm3Layout{
-    ._super = kLayout__483,
-    ._extra0 = kLayout__406,
-    ._extra1 = kLayout__407,
-    ._extra2 = kLayout__411,
-    ._extra3 = kLayout__412,
-    ._extra4 = kLayout__416,
-    ._extra5 = kLayout__417,
-    ._extra6 = kLayout__421,
-    ._extra7 = kLayout__422,
-    ._extra8 = kLayout__426,
-    ._extra9 = kLayout__427,
-    ._extra10 = kLayout__431,
-    ._extra11 = kLayout__432,
-    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                               .cycle = NondetRegLayout{._super = /*offset=*/96}},
-    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                               .cycle = NondetRegLayout{._super = /*offset=*/98}},
-    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                               .cycle = NondetRegLayout{._super = /*offset=*/100}},
-    ._extra15 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                               .cycle = NondetRegLayout{._super = /*offset=*/102}},
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                               .cycle = NondetRegLayout{._super = /*offset=*/104}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                               .cycle = NondetRegLayout{._super = /*offset=*/106}},
-    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                             .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                             .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                             .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                             .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                             .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                             .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}},
-    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                            .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                            .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra32 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                            .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra33 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                            .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra34 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                            .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra35 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                            .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra36 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                            .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra37 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                            .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra38 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                            .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra39 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                            .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra41 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra42 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra43 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra44 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra45 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr MemoryReadLayout kLayout__491 =
-    MemoryReadLayout{.io = kLayout__410, ._0 = kLayout__131};
-__device__ constexpr MemoryReadLayout kLayout__492 =
-    MemoryReadLayout{.io = kLayout__415, ._0 = kLayout__458};
-__device__ constexpr MemoryReadLayout kLayout__493 =
-    MemoryReadLayout{.io = kLayout__420, ._0 = kLayout__462};
-__device__ constexpr MemoryReadLayout kLayout__494 =
-    MemoryReadLayout{.io = kLayout__425, ._0 = kLayout__215};
-__device__ constexpr MemoryReadLayout kLayout__495 =
-    MemoryReadLayout{.io = kLayout__430, ._0 = kLayout__468};
-__device__ constexpr MemoryReadLayout8LayoutArray kLayout__490 =
-    MemoryReadLayout8LayoutArray{kLayout__438,
-                                 kLayout__441,
-                                 kLayout__481,
-                                 kLayout__491,
-                                 kLayout__492,
-                                 kLayout__493,
-                                 kLayout__494,
-                                 kLayout__495};
-__device__ constexpr ControlSuspend_SuperArm0_SuperLayout kLayout__489 =
-    ControlSuspend_SuperArm0_SuperLayout{._1 = kLayout__490};
-__device__ constexpr ControlSuspend_SuperArm1_SuperLayout kLayout__497 =
-    ControlSuspend_SuperArm1_SuperLayout{
-        .state = NondetRegLayout{._super = /*offset=*/171}, ._0 = kLayout__447, ._1 = kLayout__449};
-__device__ constexpr ControlSuspend_SuperArm1Layout kLayout__496 = ControlSuspend_SuperArm1Layout{
-    ._super = kLayout__497,
-    ._extra0 = kLayout__406,
-    ._extra1 = kLayout__407,
-    ._extra2 = kLayout__411,
-    ._extra3 = kLayout__412,
-    ._extra4 = kLayout__416,
-    ._extra5 = kLayout__417,
-    ._extra6 = kLayout__421,
-    ._extra7 = kLayout__422,
-    ._extra8 = kLayout__426,
-    ._extra9 = kLayout__427,
-    ._extra10 = kLayout__431,
-    ._extra11 = kLayout__432,
-    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                               .cycle = NondetRegLayout{._super = /*offset=*/96}},
-    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                               .cycle = NondetRegLayout{._super = /*offset=*/98}},
-    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                               .cycle = NondetRegLayout{._super = /*offset=*/100}},
-    ._extra15 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                               .cycle = NondetRegLayout{._super = /*offset=*/102}},
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                               .cycle = NondetRegLayout{._super = /*offset=*/104}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                               .cycle = NondetRegLayout{._super = /*offset=*/106}}};
-__device__ constexpr ControlSuspend_SuperLayout kLayout__488 =
-    ControlSuspend_SuperLayout{.arm0 = kLayout__489, .arm1 = kLayout__496};
-__device__ constexpr _Arguments_ControlSuspend_SuperLayout kLayout__498 =
-    _Arguments_ControlSuspend_SuperLayout{.memoryArg = kLayout__471, .cycleArg = kLayout__472};
-__device__ constexpr ControlSuspendLayout kLayout__487 =
-    ControlSuspendLayout{._super = kLayout__488,
-                         .pcZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/172},
-                                                .inv = NondetRegLayout{._super = /*offset=*/173}},
-                         ._arguments_ControlSuspend_Super = kLayout__498};
-__device__ constexpr Control0_SuperArm4Layout kLayout__486 = Control0_SuperArm4Layout{
-    ._super = kLayout__487,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                            .val = NondetRegLayout{._super = /*offset=*/108}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                            .val = NondetRegLayout{._super = /*offset=*/110}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                            .val = NondetRegLayout{._super = /*offset=*/112}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                            .val = NondetRegLayout{._super = /*offset=*/114}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                            .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                            .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                            .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                            .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                            .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                            .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}},
-    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                            .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                            .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                            .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                            .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra20 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                            .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra21 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                            .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra22 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                            .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra23 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                            .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                            .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                            .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr MemoryPageOutLayout kLayout__502 =
-    MemoryPageOutLayout{.io = kLayout__395, ._0 = kLayout__439};
-__device__ constexpr MemoryPageOutLayout kLayout__503 =
-    MemoryPageOutLayout{.io = kLayout__400, ._0 = kLayout__442};
-__device__ constexpr MemoryPageOutLayout kLayout__504 =
-    MemoryPageOutLayout{.io = kLayout__405, ._0 = kLayout__452};
-__device__ constexpr MemoryPageOutLayout kLayout__505 =
-    MemoryPageOutLayout{.io = kLayout__410, ._0 = kLayout__131};
-__device__ constexpr MemoryPageOutLayout kLayout__506 =
-    MemoryPageOutLayout{.io = kLayout__415, ._0 = kLayout__458};
-__device__ constexpr MemoryPageOutLayout kLayout__507 =
-    MemoryPageOutLayout{.io = kLayout__420, ._0 = kLayout__462};
-__device__ constexpr MemoryPageOutLayout kLayout__508 =
-    MemoryPageOutLayout{.io = kLayout__425, ._0 = kLayout__215};
-__device__ constexpr MemoryPageOutLayout kLayout__509 =
-    MemoryPageOutLayout{.io = kLayout__430, ._0 = kLayout__468};
-__device__ constexpr MemoryPageOutLayout8LayoutArray kLayout__501 =
-    MemoryPageOutLayout8LayoutArray{kLayout__502,
-                                    kLayout__503,
-                                    kLayout__504,
-                                    kLayout__505,
-                                    kLayout__506,
-                                    kLayout__507,
-                                    kLayout__508,
-                                    kLayout__509};
-__device__ constexpr ControlStoreRootLayout kLayout__500 =
-    ControlStoreRootLayout{._1 = kLayout__501};
-__device__ constexpr Control0_SuperArm5Layout kLayout__499 = Control0_SuperArm5Layout{
-    ._super = kLayout__500,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                            .val = NondetRegLayout{._super = /*offset=*/108}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                            .val = NondetRegLayout{._super = /*offset=*/110}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                            .val = NondetRegLayout{._super = /*offset=*/112}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                            .val = NondetRegLayout{._super = /*offset=*/114}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                            .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                            .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                            .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                            .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                            .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                            .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}},
-    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                            .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                            .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                            .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                            .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra20 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                            .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra21 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                            .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra22 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                            .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra23 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                            .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                            .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                            .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__516 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                            .val = NondetRegLayout{._super = /*offset=*/108}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__517 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                            .val = NondetRegLayout{._super = /*offset=*/110}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__518 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                            .val = NondetRegLayout{._super = /*offset=*/112}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__519 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                            .val = NondetRegLayout{._super = /*offset=*/114}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__520 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                            .val = NondetRegLayout{._super = /*offset=*/116}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__521 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                            .val = NondetRegLayout{._super = /*offset=*/118}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__522 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                            .val = NondetRegLayout{._super = /*offset=*/120}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__523 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                            .val = NondetRegLayout{._super = /*offset=*/122}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__524 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                            .val = NondetRegLayout{._super = /*offset=*/124}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__525 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                            .val = NondetRegLayout{._super = /*offset=*/126}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__526 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                            .val = NondetRegLayout{._super = /*offset=*/128}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__527 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                            .val = NondetRegLayout{._super = /*offset=*/130}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__528 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                            .val = NondetRegLayout{._super = /*offset=*/132}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__529 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                            .val = NondetRegLayout{._super = /*offset=*/134}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__530 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                            .val = NondetRegLayout{._super = /*offset=*/136}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__531 =
-    ControlTable_SuperArm0_Super__0_SuperLayout{
-        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                            .val = NondetRegLayout{._super = /*offset=*/138}}};
-__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray kLayout__515 =
-    ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray{kLayout__516,
-                                                             kLayout__517,
-                                                             kLayout__518,
-                                                             kLayout__519,
-                                                             kLayout__520,
-                                                             kLayout__521,
-                                                             kLayout__522,
-                                                             kLayout__523,
-                                                             kLayout__524,
-                                                             kLayout__525,
-                                                             kLayout__526,
-                                                             kLayout__527,
-                                                             kLayout__528,
-                                                             kLayout__529,
-                                                             kLayout__530,
-                                                             kLayout__531};
-__device__ constexpr ControlTable_SuperArm0_SuperLayout kLayout__514 =
-    ControlTable_SuperArm0_SuperLayout{
-        ._1 = kLayout__515,
-        .done = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/171},
-                             .inv = NondetRegLayout{._super = /*offset=*/172}}};
-__device__ constexpr ControlTable_SuperArm0Layout kLayout__513 = ControlTable_SuperArm0Layout{
-    ._super = kLayout__514,
-    ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                           .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                           .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                           .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                           .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra4 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                           .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra5 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                           .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra6 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                           .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra7 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                           .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra8 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                           .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra9 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                           .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra14 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra15 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__535 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                           .val = NondetRegLayout{._super = /*offset=*/140}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__536 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                           .val = NondetRegLayout{._super = /*offset=*/142}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__537 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                           .val = NondetRegLayout{._super = /*offset=*/144}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__538 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                           .val = NondetRegLayout{._super = /*offset=*/146}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__539 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                           .val = NondetRegLayout{._super = /*offset=*/148}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__540 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                           .val = NondetRegLayout{._super = /*offset=*/150}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__541 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                           .val = NondetRegLayout{._super = /*offset=*/152}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__542 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                           .val = NondetRegLayout{._super = /*offset=*/154}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__543 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                           .val = NondetRegLayout{._super = /*offset=*/156}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__544 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                           .val = NondetRegLayout{._super = /*offset=*/158}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__545 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                           .val = NondetRegLayout{._super = /*offset=*/160}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__546 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                           .val = NondetRegLayout{._super = /*offset=*/162}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__547 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                           .val = NondetRegLayout{._super = /*offset=*/164}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__548 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                           .val = NondetRegLayout{._super = /*offset=*/166}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__549 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                           .val = NondetRegLayout{._super = /*offset=*/168}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__550 =
-    ControlTable_SuperArm1_Super__0_SuperLayout{
-        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                           .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray kLayout__534 =
-    ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray{kLayout__535,
-                                                             kLayout__536,
-                                                             kLayout__537,
-                                                             kLayout__538,
-                                                             kLayout__539,
-                                                             kLayout__540,
-                                                             kLayout__541,
-                                                             kLayout__542,
-                                                             kLayout__543,
-                                                             kLayout__544,
-                                                             kLayout__545,
-                                                             kLayout__546,
-                                                             kLayout__547,
-                                                             kLayout__548,
-                                                             kLayout__549,
-                                                             kLayout__550};
-__device__ constexpr ControlTable_SuperArm1_SuperLayout kLayout__533 =
-    ControlTable_SuperArm1_SuperLayout{
-        ._1 = kLayout__534,
-        .done = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/171},
-                             .inv = NondetRegLayout{._super = /*offset=*/172}}};
-__device__ constexpr ControlTable_SuperArm1Layout kLayout__532 = ControlTable_SuperArm1Layout{
-    ._super = kLayout__533,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                            .val = NondetRegLayout{._super = /*offset=*/108}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                            .val = NondetRegLayout{._super = /*offset=*/110}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                            .val = NondetRegLayout{._super = /*offset=*/112}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                            .val = NondetRegLayout{._super = /*offset=*/114}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                            .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                            .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                            .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                            .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                            .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                            .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}}};
-__device__ constexpr ControlTable_SuperLayout kLayout__512 =
-    ControlTable_SuperLayout{.arm0 = kLayout__513, .arm1 = kLayout__532};
-__device__ constexpr ArgU16Layout16LayoutArray kLayout__552 =
-    ArgU16Layout16LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                                           .val = NondetRegLayout{._super = /*offset=*/108}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                                           .val = NondetRegLayout{._super = /*offset=*/110}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                                           .val = NondetRegLayout{._super = /*offset=*/112}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                                           .val = NondetRegLayout{._super = /*offset=*/114}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                                           .val = NondetRegLayout{._super = /*offset=*/116}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                                           .val = NondetRegLayout{._super = /*offset=*/118}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                                           .val = NondetRegLayout{._super = /*offset=*/120}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                                           .val = NondetRegLayout{._super = /*offset=*/122}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                                           .val = NondetRegLayout{._super = /*offset=*/124}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                                           .val = NondetRegLayout{._super = /*offset=*/126}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                                           .val = NondetRegLayout{._super = /*offset=*/128}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                                           .val = NondetRegLayout{._super = /*offset=*/130}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                                           .val = NondetRegLayout{._super = /*offset=*/132}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                                           .val = NondetRegLayout{._super = /*offset=*/134}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                                           .val = NondetRegLayout{._super = /*offset=*/136}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                                           .val = NondetRegLayout{._super = /*offset=*/138}}};
-__device__ constexpr ArgU8Layout16LayoutArray kLayout__553 =
-    ArgU8Layout16LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                                         .val = NondetRegLayout{._super = /*offset=*/140}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                                         .val = NondetRegLayout{._super = /*offset=*/142}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                                         .val = NondetRegLayout{._super = /*offset=*/144}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                                         .val = NondetRegLayout{._super = /*offset=*/146}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                                         .val = NondetRegLayout{._super = /*offset=*/148}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                                         .val = NondetRegLayout{._super = /*offset=*/150}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                                         .val = NondetRegLayout{._super = /*offset=*/152}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                                         .val = NondetRegLayout{._super = /*offset=*/154}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                                         .val = NondetRegLayout{._super = /*offset=*/156}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                                         .val = NondetRegLayout{._super = /*offset=*/158}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                                         .val = NondetRegLayout{._super = /*offset=*/160}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                                         .val = NondetRegLayout{._super = /*offset=*/162}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                                         .val = NondetRegLayout{._super = /*offset=*/164}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                                         .val = NondetRegLayout{._super = /*offset=*/166}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                                         .val = NondetRegLayout{._super = /*offset=*/168}},
-                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                                         .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr _Arguments_ControlTable_SuperLayout kLayout__551 =
-    _Arguments_ControlTable_SuperLayout{.argU16 = kLayout__552, .argU8 = kLayout__553};
-__device__ constexpr ControlTableLayout kLayout__511 =
-    ControlTableLayout{._super = kLayout__512,
-                       .entry = NondetRegLayout{._super = /*offset=*/173},
-                       .mode = NondetRegLayout{._super = /*offset=*/174},
-                       ._arguments_ControlTable_Super = kLayout__551};
-__device__ constexpr Control0_SuperArm6Layout kLayout__510 = Control0_SuperArm6Layout{
-    ._super = kLayout__511,
-    ._extra0 = kLayout__396,
-    ._extra1 = kLayout__397,
-    ._extra2 = kLayout__401,
-    ._extra3 = kLayout__402,
-    ._extra4 = kLayout__406,
-    ._extra5 = kLayout__407,
-    ._extra6 = kLayout__411,
-    ._extra7 = kLayout__412,
-    ._extra8 = kLayout__416,
-    ._extra9 = kLayout__417,
-    ._extra10 = kLayout__421,
-    ._extra11 = kLayout__422,
-    ._extra12 = kLayout__426,
-    ._extra13 = kLayout__427,
-    ._extra14 = kLayout__431,
-    ._extra15 = kLayout__432,
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
-                               .cycle = NondetRegLayout{._super = /*offset=*/92}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/93},
-                               .cycle = NondetRegLayout{._super = /*offset=*/94}},
-    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                               .cycle = NondetRegLayout{._super = /*offset=*/96}},
-    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                               .cycle = NondetRegLayout{._super = /*offset=*/98}},
-    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                               .cycle = NondetRegLayout{._super = /*offset=*/100}},
-    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                               .cycle = NondetRegLayout{._super = /*offset=*/102}},
-    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                               .cycle = NondetRegLayout{._super = /*offset=*/104}},
-    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                               .cycle = NondetRegLayout{._super = /*offset=*/106}}};
-__device__ constexpr Control0_SuperArm7Layout kLayout__554 = Control0_SuperArm7Layout{
-    ._extra0 = kLayout__396,
-    ._extra1 = kLayout__397,
-    ._extra2 = kLayout__401,
-    ._extra3 = kLayout__402,
-    ._extra4 = kLayout__406,
-    ._extra5 = kLayout__407,
-    ._extra6 = kLayout__411,
-    ._extra7 = kLayout__412,
-    ._extra8 = kLayout__416,
-    ._extra9 = kLayout__417,
-    ._extra10 = kLayout__421,
-    ._extra11 = kLayout__422,
-    ._extra12 = kLayout__426,
-    ._extra13 = kLayout__427,
-    ._extra14 = kLayout__431,
-    ._extra15 = kLayout__432,
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
-                               .cycle = NondetRegLayout{._super = /*offset=*/92}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/93},
-                               .cycle = NondetRegLayout{._super = /*offset=*/94}},
-    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                               .cycle = NondetRegLayout{._super = /*offset=*/96}},
-    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/97},
-                               .cycle = NondetRegLayout{._super = /*offset=*/98}},
-    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
-                               .cycle = NondetRegLayout{._super = /*offset=*/100}},
-    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/101},
-                               .cycle = NondetRegLayout{._super = /*offset=*/102}},
-    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                               .cycle = NondetRegLayout{._super = /*offset=*/104}},
-    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/105},
-                               .cycle = NondetRegLayout{._super = /*offset=*/106}},
-    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/107},
-                             .val = NondetRegLayout{._super = /*offset=*/108}},
-    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/109},
-                             .val = NondetRegLayout{._super = /*offset=*/110}},
-    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/111},
-                             .val = NondetRegLayout{._super = /*offset=*/112}},
-    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/113},
-                             .val = NondetRegLayout{._super = /*offset=*/114}},
-    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/115},
-                             .val = NondetRegLayout{._super = /*offset=*/116}},
-    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/117},
-                             .val = NondetRegLayout{._super = /*offset=*/118}},
-    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/119},
-                             .val = NondetRegLayout{._super = /*offset=*/120}},
-    ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/121},
-                             .val = NondetRegLayout{._super = /*offset=*/122}},
-    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/123},
-                             .val = NondetRegLayout{._super = /*offset=*/124}},
-    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/125},
-                             .val = NondetRegLayout{._super = /*offset=*/126}},
-    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/127},
-                             .val = NondetRegLayout{._super = /*offset=*/128}},
-    ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/129},
-                             .val = NondetRegLayout{._super = /*offset=*/130}},
-    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/131},
-                             .val = NondetRegLayout{._super = /*offset=*/132}},
-    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/133},
-                             .val = NondetRegLayout{._super = /*offset=*/134}},
-    ._extra38 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
-                             .val = NondetRegLayout{._super = /*offset=*/136}},
-    ._extra39 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/137},
-                             .val = NondetRegLayout{._super = /*offset=*/138}},
-    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/139},
-                            .val = NondetRegLayout{._super = /*offset=*/140}},
-    ._extra41 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/141},
-                            .val = NondetRegLayout{._super = /*offset=*/142}},
-    ._extra42 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/143},
-                            .val = NondetRegLayout{._super = /*offset=*/144}},
-    ._extra43 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/145},
-                            .val = NondetRegLayout{._super = /*offset=*/146}},
-    ._extra44 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/147},
-                            .val = NondetRegLayout{._super = /*offset=*/148}},
-    ._extra45 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/149},
-                            .val = NondetRegLayout{._super = /*offset=*/150}},
-    ._extra46 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/151},
-                            .val = NondetRegLayout{._super = /*offset=*/152}},
-    ._extra47 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/153},
-                            .val = NondetRegLayout{._super = /*offset=*/154}},
-    ._extra48 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/155},
-                            .val = NondetRegLayout{._super = /*offset=*/156}},
-    ._extra49 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/157},
-                            .val = NondetRegLayout{._super = /*offset=*/158}},
-    ._extra50 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/159},
-                            .val = NondetRegLayout{._super = /*offset=*/160}},
-    ._extra51 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/161},
-                            .val = NondetRegLayout{._super = /*offset=*/162}},
-    ._extra52 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/163},
-                            .val = NondetRegLayout{._super = /*offset=*/164}},
-    ._extra53 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/165},
-                            .val = NondetRegLayout{._super = /*offset=*/166}},
-    ._extra54 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/167},
-                            .val = NondetRegLayout{._super = /*offset=*/168}},
-    ._extra55 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/169},
-                            .val = NondetRegLayout{._super = /*offset=*/170}}};
-__device__ constexpr Control0_SuperLayout kLayout__389 = Control0_SuperLayout{.arm0 = kLayout__390,
-                                                                              .arm1 = kLayout__433,
-                                                                              .arm2 = kLayout__473,
-                                                                              .arm3 = kLayout__482,
-                                                                              .arm4 = kLayout__486,
-                                                                              .arm5 = kLayout__499,
-                                                                              .arm6 = kLayout__510,
-                                                                              .arm7 = kLayout__554};
-__device__ constexpr _Arguments_Control0_SuperLayout kLayout__555 =
-    _Arguments_Control0_SuperLayout{.memoryArg = kLayout__471,
-                                    .cycleArg = kLayout__472,
-                                    .argU16 = kLayout__552,
-                                    .argU8 = kLayout__553};
-__device__ constexpr Control0Layout kLayout__388 =
-    Control0Layout{._super = kLayout__389,
-                   .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/178},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/0}},
-                   ._arguments_Control0_Super = kLayout__555};
-__device__ constexpr NondetU16RegLayout kLayout__559 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
-                                           .val = NondetRegLayout{._super = /*offset=*/77}}};
-__device__ constexpr U16RegLayout kLayout__558 = U16RegLayout{.ret = kLayout__559};
-__device__ constexpr AddrDecomposeBitsLayout kLayout__557 =
-    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/74},
-                            .low1 = NondetRegLayout{._super = /*offset=*/75},
-                            .upperDiff = kLayout__558,
-                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/78},
-                                               .inv = NondetRegLayout{._super = /*offset=*/79}},
-                            .med14 = kLayout__27};
-__device__ constexpr MemoryArgLayout8LayoutArray kLayout__561 =
-    MemoryArgLayout8LayoutArray{kLayout__396,
-                                kLayout__397,
-                                kLayout__401,
-                                kLayout__402,
-                                kLayout__406,
-                                kLayout__407,
-                                kLayout__411,
-                                kLayout__412};
-__device__ constexpr CycleArgLayout4LayoutArray kLayout__562 =
-    CycleArgLayout4LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/59},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/60}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/61},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/62}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/63},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/64}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/65},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/66}}};
-__device__ constexpr ArgU16Layout2LayoutArray kLayout__563 =
-    ArgU16Layout2LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                                          .val = NondetRegLayout{._super = /*offset=*/68}},
-                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                                          .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr _Arguments_ECall0OutputLayout kLayout__560 = _Arguments_ECall0OutputLayout{
-    .memoryArg = kLayout__561, .cycleArg = kLayout__562, .argU16 = kLayout__563};
-__device__ constexpr IsCycleLayout kLayout__569 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/59},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/60}}};
-__device__ constexpr IsForwardLayout kLayout__568 = IsForwardLayout{._0 = kLayout__569};
-__device__ constexpr MemoryReadLayout kLayout__567 =
-    MemoryReadLayout{.io = kLayout__395, ._0 = kLayout__568};
-__device__ constexpr IsCycleLayout kLayout__572 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/61},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/62}}};
-__device__ constexpr IsForwardLayout kLayout__571 = IsForwardLayout{._0 = kLayout__572};
-__device__ constexpr MemoryReadLayout kLayout__570 =
-    MemoryReadLayout{.io = kLayout__400, ._0 = kLayout__571};
-__device__ constexpr NondetRegLayout4LayoutArray kLayout__574 =
-    NondetRegLayout4LayoutArray{NondetRegLayout{._super = /*offset=*/82},
-                                NondetRegLayout{._super = /*offset=*/83},
-                                NondetRegLayout{._super = /*offset=*/84},
-                                NondetRegLayout{._super = /*offset=*/85}};
-__device__ constexpr OneHot_4_Layout kLayout__573 = OneHot_4_Layout{._super = kLayout__574};
-__device__ constexpr MachineECallLayout kLayout__566 = MachineECallLayout{
-    .loadInst = kLayout__567, .dispatchIdx = kLayout__570, .dispatch = kLayout__573};
-__device__ constexpr ECall0OutputArm0Layout kLayout__565 = ECall0OutputArm0Layout{
-    ._super = kLayout__566,
-    ._extra0 = kLayout__406,
-    ._extra1 = kLayout__407,
-    ._extra2 = kLayout__411,
-    ._extra3 = kLayout__412,
-    ._extra4 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/63},
-                              .cycle = NondetRegLayout{._super = /*offset=*/64}},
-    ._extra5 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/65},
-                              .cycle = NondetRegLayout{._super = /*offset=*/66}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                            .val = NondetRegLayout{._super = /*offset=*/68}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                            .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr ECallTerminateLayout kLayout__576 =
-    ECallTerminateLayout{.a0 = kLayout__567, .a1 = kLayout__570};
-__device__ constexpr ECall0OutputArm1Layout kLayout__575 = ECall0OutputArm1Layout{
-    ._super = kLayout__576,
-    ._extra0 = kLayout__406,
-    ._extra1 = kLayout__407,
-    ._extra2 = kLayout__411,
-    ._extra3 = kLayout__412,
-    ._extra4 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/63},
-                              .cycle = NondetRegLayout{._super = /*offset=*/64}},
-    ._extra5 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/65},
-                              .cycle = NondetRegLayout{._super = /*offset=*/66}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                            .val = NondetRegLayout{._super = /*offset=*/68}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                            .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr IsCycleLayout kLayout__580 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/63},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/64}}};
-__device__ constexpr IsForwardLayout kLayout__579 = IsForwardLayout{._0 = kLayout__580};
-__device__ constexpr MemoryReadLayout kLayout__578 =
-    MemoryReadLayout{.io = kLayout__405, ._0 = kLayout__579};
-__device__ constexpr NondetU16RegLayout kLayout__581 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                                           .val = NondetRegLayout{._super = /*offset=*/68}}};
-__device__ constexpr NondetU16RegLayout kLayout__583 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                                           .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr U16RegLayout kLayout__582 = U16RegLayout{.ret = kLayout__583};
-__device__ constexpr IsCycleLayout kLayout__586 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/65},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/66}}};
-__device__ constexpr IsForwardLayout kLayout__585 = IsForwardLayout{._0 = kLayout__586};
-__device__ constexpr MemoryWriteLayout kLayout__584 =
-    MemoryWriteLayout{.io = kLayout__410, ._0 = kLayout__585};
-__device__ constexpr NondetRegLayout4LayoutArray kLayout__589 =
-    NondetRegLayout4LayoutArray{NondetRegLayout{._super = /*offset=*/84},
-                                NondetRegLayout{._super = /*offset=*/85},
-                                NondetRegLayout{._super = /*offset=*/86},
-                                NondetRegLayout{._super = /*offset=*/87}};
-__device__ constexpr OneHot_4_Layout kLayout__588 = OneHot_4_Layout{._super = kLayout__589};
-__device__ constexpr DecomposeLow2Layout kLayout__587 =
-    DecomposeLow2Layout{.high = NondetRegLayout{._super = /*offset=*/82},
-                        .low2 = NondetRegLayout{._super = /*offset=*/83},
-                        .low2Hot = kLayout__588,
-                        .highZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/88},
-                                                 .inv = NondetRegLayout{._super = /*offset=*/89}},
-                        .isZero = NondetRegLayout{._super = /*offset=*/90}};
-__device__ constexpr NondetRegLayout4LayoutArray kLayout__592 =
-    NondetRegLayout4LayoutArray{NondetRegLayout{._super = /*offset=*/93},
-                                NondetRegLayout{._super = /*offset=*/94},
-                                NondetRegLayout{._super = /*offset=*/95},
-                                NondetRegLayout{._super = /*offset=*/96}};
-__device__ constexpr OneHot_4_Layout kLayout__591 = OneHot_4_Layout{._super = kLayout__592};
-__device__ constexpr DecomposeLow2Layout kLayout__590 =
-    DecomposeLow2Layout{.high = NondetRegLayout{._super = /*offset=*/91},
-                        .low2 = NondetRegLayout{._super = /*offset=*/92},
-                        .low2Hot = kLayout__591,
-                        .highZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/97},
-                                                 .inv = NondetRegLayout{._super = /*offset=*/98}},
-                        .isZero = NondetRegLayout{._super = /*offset=*/99}};
-__device__ constexpr ECallHostReadSetupLayout kLayout__577 =
-    ECallHostReadSetupLayout{.fd = kLayout__567,
-                             .ptr = kLayout__570,
-                             .len = kLayout__578,
-                             .newLen = kLayout__581,
-                             .diff = kLayout__582,
-                             ._0 = kLayout__584,
-                             .ptrDecomp = kLayout__587,
-                             .lenDecomp = kLayout__590,
-                             .len123 = NondetRegLayout{._super = /*offset=*/100},
-                             .uneven = NondetRegLayout{._super = /*offset=*/101}};
-__device__ constexpr ECallHostWriteLayout kLayout__593 =
-    ECallHostWriteLayout{.fd = kLayout__567,
-                         .ptr = kLayout__570,
-                         .len = kLayout__578,
-                         .newLen = kLayout__581,
-                         .diff = kLayout__582,
-                         ._0 = kLayout__584};
-__device__ constexpr ECall0OutputArm4Layout kLayout__594 = ECall0OutputArm4Layout{
-    ._extra0 = kLayout__396,
-    ._extra1 = kLayout__397,
-    ._extra2 = kLayout__401,
-    ._extra3 = kLayout__402,
-    ._extra4 = kLayout__406,
-    ._extra5 = kLayout__407,
-    ._extra6 = kLayout__411,
-    ._extra7 = kLayout__412,
-    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/59},
-                              .cycle = NondetRegLayout{._super = /*offset=*/60}},
-    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/61},
-                              .cycle = NondetRegLayout{._super = /*offset=*/62}},
-    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/63},
-                               .cycle = NondetRegLayout{._super = /*offset=*/64}},
-    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/65},
-                               .cycle = NondetRegLayout{._super = /*offset=*/66}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                             .val = NondetRegLayout{._super = /*offset=*/68}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                             .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__599 =
-    MemoryWriteUnconstrainedLayout{.io = kLayout__395, ._0 = kLayout__568};
-__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__598 =
-    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/100},
-                                      ._0 = kLayout__599};
-__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__601 =
-    MemoryWriteUnconstrainedLayout{.io = kLayout__400, ._0 = kLayout__571};
-__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__600 =
-    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/101},
-                                      ._0 = kLayout__601};
-__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__603 =
-    MemoryWriteUnconstrainedLayout{.io = kLayout__405, ._0 = kLayout__579};
-__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__602 =
-    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/102},
-                                      ._0 = kLayout__603};
-__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__605 =
-    MemoryWriteUnconstrainedLayout{.io = kLayout__410, ._0 = kLayout__585};
-__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__604 =
-    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/103},
-                                      ._0 = kLayout__605};
-__device__ constexpr ECallHostReadWords__0_SuperLayout4LayoutArray kLayout__597 =
-    ECallHostReadWords__0_SuperLayout4LayoutArray{
-        kLayout__598, kLayout__600, kLayout__602, kLayout__604};
-__device__ constexpr ECallHostReadWordsLayout kLayout__596 = ECallHostReadWordsLayout{
-    .lenDecomp = kLayout__587,
-    .wordsDecomp = kLayout__590,
-    ._1 = kLayout__597,
-    .lenZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/104},
-                            .inv = NondetRegLayout{._super = /*offset=*/105}}};
-__device__ constexpr ECall0OutputArm5Layout kLayout__595 = ECall0OutputArm5Layout{
-    ._super = kLayout__596,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                            .val = NondetRegLayout{._super = /*offset=*/68}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                            .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr ECall0OutputArm6Layout kLayout__606 = ECall0OutputArm6Layout{
-    ._extra0 = kLayout__396,
-    ._extra1 = kLayout__397,
-    ._extra2 = kLayout__401,
-    ._extra3 = kLayout__402,
-    ._extra4 = kLayout__406,
-    ._extra5 = kLayout__407,
-    ._extra6 = kLayout__411,
-    ._extra7 = kLayout__412,
-    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/59},
-                              .cycle = NondetRegLayout{._super = /*offset=*/60}},
-    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/61},
-                              .cycle = NondetRegLayout{._super = /*offset=*/62}},
-    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/63},
-                               .cycle = NondetRegLayout{._super = /*offset=*/64}},
-    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/65},
-                               .cycle = NondetRegLayout{._super = /*offset=*/66}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                             .val = NondetRegLayout{._super = /*offset=*/68}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                             .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr ECall0OutputArm7Layout kLayout__607 = ECall0OutputArm7Layout{
-    ._extra0 = kLayout__396,
-    ._extra1 = kLayout__397,
-    ._extra2 = kLayout__401,
-    ._extra3 = kLayout__402,
-    ._extra4 = kLayout__406,
-    ._extra5 = kLayout__407,
-    ._extra6 = kLayout__411,
-    ._extra7 = kLayout__412,
-    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/59},
-                              .cycle = NondetRegLayout{._super = /*offset=*/60}},
-    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/61},
-                              .cycle = NondetRegLayout{._super = /*offset=*/62}},
-    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/63},
-                               .cycle = NondetRegLayout{._super = /*offset=*/64}},
-    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/65},
-                               .cycle = NondetRegLayout{._super = /*offset=*/66}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/67},
-                             .val = NondetRegLayout{._super = /*offset=*/68}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/69},
-                             .val = NondetRegLayout{._super = /*offset=*/70}}};
-__device__ constexpr ECall0OutputLayout kLayout__564 = ECall0OutputLayout{.arm0 = kLayout__565,
-                                                                          .arm1 = kLayout__575,
-                                                                          .arm2 = kLayout__577,
-                                                                          .arm3 = kLayout__593,
-                                                                          .arm4 = kLayout__594,
-                                                                          .arm5 = kLayout__595,
-                                                                          .arm6 = kLayout__606,
-                                                                          .arm7 = kLayout__607};
-__device__ constexpr NondetU16RegLayout kLayout__609 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/110},
-                                           .val = NondetRegLayout{._super = /*offset=*/111}}};
-__device__ constexpr NormalizeU32Layout kLayout__608 =
-    NormalizeU32Layout{.low16 = kLayout__609,
-                       .lowCarry = NondetRegLayout{._super = /*offset=*/112},
-                       .high16 = kLayout__485,
-                       .highCarry = NondetRegLayout{._super = /*offset=*/115}};
-__device__ constexpr ECall0Layout kLayout__556 =
-    ECall0Layout{.s0 = NondetRegLayout{._super = /*offset=*/71},
-                 .s1 = NondetRegLayout{._super = /*offset=*/72},
-                 .s2 = NondetRegLayout{._super = /*offset=*/73},
-                 .pcAddr = kLayout__557,
-                 ._arguments_ECall0Output = kLayout__560,
-                 .output = kLayout__564,
-                 .isDecode = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/106},
-                                          .inv = NondetRegLayout{._super = /*offset=*/107}},
-                 .isP2Entry = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/108},
-                                           .inv = NondetRegLayout{._super = /*offset=*/109}},
-                 .addPC = kLayout__608,
-                 .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/116},
-                                       .cycle = NondetRegLayout{._super = /*offset=*/0}}};
-__device__ constexpr NondetRegLayout24LayoutArray kLayout__612 = NondetRegLayout24LayoutArray{
-    NondetRegLayout{._super = /*offset=*/38}, NondetRegLayout{._super = /*offset=*/39},
-    NondetRegLayout{._super = /*offset=*/40}, NondetRegLayout{._super = /*offset=*/41},
-    NondetRegLayout{._super = /*offset=*/42}, NondetRegLayout{._super = /*offset=*/43},
-    NondetRegLayout{._super = /*offset=*/44}, NondetRegLayout{._super = /*offset=*/45},
-    NondetRegLayout{._super = /*offset=*/46}, NondetRegLayout{._super = /*offset=*/47},
-    NondetRegLayout{._super = /*offset=*/48}, NondetRegLayout{._super = /*offset=*/49},
-    NondetRegLayout{._super = /*offset=*/50}, NondetRegLayout{._super = /*offset=*/51},
-    NondetRegLayout{._super = /*offset=*/52}, NondetRegLayout{._super = /*offset=*/53},
-    NondetRegLayout{._super = /*offset=*/54}, NondetRegLayout{._super = /*offset=*/55},
-    NondetRegLayout{._super = /*offset=*/56}, NondetRegLayout{._super = /*offset=*/57},
-    NondetRegLayout{._super = /*offset=*/58}, NondetRegLayout{._super = /*offset=*/59},
-    NondetRegLayout{._super = /*offset=*/60}, NondetRegLayout{._super = /*offset=*/61}};
-__device__ constexpr PoseidonStateLayout kLayout__611 =
-    PoseidonStateLayout{.hasState = NondetRegLayout{._super = /*offset=*/27},
-                        .stateAddr = NondetRegLayout{._super = /*offset=*/28},
-                        .bufOutAddr = NondetRegLayout{._super = /*offset=*/29},
-                        .isElem = NondetRegLayout{._super = /*offset=*/30},
-                        .checkOut = NondetRegLayout{._super = /*offset=*/31},
-                        .loadTxType = NondetRegLayout{._super = /*offset=*/32},
-                        .nextState = NondetRegLayout{._super = /*offset=*/33},
-                        .subState = NondetRegLayout{._super = /*offset=*/34},
-                        .bufInAddr = NondetRegLayout{._super = /*offset=*/35},
-                        .count = NondetRegLayout{._super = /*offset=*/36},
-                        .mode = NondetRegLayout{._super = /*offset=*/37},
-                        .inner = kLayout__612,
-                        .zcheck = NondetExtRegLayout{._super = /*offset=*/62}};
-__device__ constexpr MemoryArgLayout kLayout__615 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/66},
-                    .addr = NondetRegLayout{._super = /*offset=*/67},
-                    .cycle = NondetRegLayout{._super = /*offset=*/68},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/69},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/70}};
-__device__ constexpr MemoryArgLayout kLayout__616 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/71},
-                    .addr = NondetRegLayout{._super = /*offset=*/67},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/72},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/73}};
-__device__ constexpr MemoryArgLayout kLayout__617 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/74},
-                    .addr = NondetRegLayout{._super = /*offset=*/75},
-                    .cycle = NondetRegLayout{._super = /*offset=*/76},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/77},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/78}};
-__device__ constexpr MemoryArgLayout kLayout__618 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/79},
-                    .addr = NondetRegLayout{._super = /*offset=*/75},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
+                    .addr = NondetRegLayout{._super = /*offset=*/65},
+                    .cycle = NondetRegLayout{._super = /*offset=*/66},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/67},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/68}};
+__device__ constexpr MemoryArgLayout kLayout__462 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/69},
+                    .addr = NondetRegLayout{._super = /*offset=*/65},
+                    .cycle = NondetRegLayout{._super = /*offset=*/70},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/71},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/72}};
+__device__ constexpr MemoryIOLayout kLayout__460 =
+    MemoryIOLayout{.oldTxn = kLayout__461, .newTxn = kLayout__462};
+__device__ constexpr MemoryPageInLayout kLayout__459 = MemoryPageInLayout{.io = kLayout__460};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__458 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__459};
+__device__ constexpr MemoryArgLayout kLayout__466 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/73},
+                    .addr = NondetRegLayout{._super = /*offset=*/74},
+                    .cycle = NondetRegLayout{._super = /*offset=*/75},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/76},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/77}};
+__device__ constexpr MemoryArgLayout kLayout__467 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/78},
+                    .addr = NondetRegLayout{._super = /*offset=*/74},
+                    .cycle = NondetRegLayout{._super = /*offset=*/79},
                     .dataLow = NondetRegLayout{._super = /*offset=*/80},
                     .dataHigh = NondetRegLayout{._super = /*offset=*/81}};
-__device__ constexpr MemoryArgLayout kLayout__619 =
+__device__ constexpr MemoryIOLayout kLayout__465 =
+    MemoryIOLayout{.oldTxn = kLayout__466, .newTxn = kLayout__467};
+__device__ constexpr MemoryPageInLayout kLayout__464 = MemoryPageInLayout{.io = kLayout__465};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__463 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__464};
+__device__ constexpr MemoryArgLayout kLayout__471 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/82},
                     .addr = NondetRegLayout{._super = /*offset=*/83},
                     .cycle = NondetRegLayout{._super = /*offset=*/84},
                     .dataLow = NondetRegLayout{._super = /*offset=*/85},
                     .dataHigh = NondetRegLayout{._super = /*offset=*/86}};
-__device__ constexpr MemoryArgLayout kLayout__620 =
+__device__ constexpr MemoryArgLayout kLayout__472 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/87},
                     .addr = NondetRegLayout{._super = /*offset=*/83},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
+                    .cycle = NondetRegLayout{._super = /*offset=*/88},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/89},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/90}};
+__device__ constexpr MemoryIOLayout kLayout__470 =
+    MemoryIOLayout{.oldTxn = kLayout__471, .newTxn = kLayout__472};
+__device__ constexpr MemoryPageInLayout kLayout__469 = MemoryPageInLayout{.io = kLayout__470};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__468 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__469};
+__device__ constexpr MemoryArgLayout kLayout__476 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
+                    .addr = NondetRegLayout{._super = /*offset=*/92},
+                    .cycle = NondetRegLayout{._super = /*offset=*/93},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/94},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/95}};
+__device__ constexpr MemoryArgLayout kLayout__477 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/96},
+                    .addr = NondetRegLayout{._super = /*offset=*/92},
+                    .cycle = NondetRegLayout{._super = /*offset=*/97},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/98},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/99}};
+__device__ constexpr MemoryIOLayout kLayout__475 =
+    MemoryIOLayout{.oldTxn = kLayout__476, .newTxn = kLayout__477};
+__device__ constexpr MemoryPageInLayout kLayout__474 = MemoryPageInLayout{.io = kLayout__475};
+__device__ constexpr ControlLoadRoot__0_SuperLayout kLayout__473 =
+    ControlLoadRoot__0_SuperLayout{.mem = kLayout__474};
+__device__ constexpr ControlLoadRoot__0_SuperLayout8LayoutArray kLayout__437 =
+    ControlLoadRoot__0_SuperLayout8LayoutArray{kLayout__438,
+                                               kLayout__443,
+                                               kLayout__448,
+                                               kLayout__453,
+                                               kLayout__458,
+                                               kLayout__463,
+                                               kLayout__468,
+                                               kLayout__473};
+__device__ constexpr ControlLoadRootLayout kLayout__436 = ControlLoadRootLayout{._1 = kLayout__437};
+__device__ constexpr Control0_SuperArm0Layout kLayout__435 = Control0_SuperArm0Layout{
+    ._super = kLayout__436,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/100},
+                              .cycle = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/102},
+                              .cycle = NondetRegLayout{._super = /*offset=*/103}},
+    ._extra2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                              .cycle = NondetRegLayout{._super = /*offset=*/105}},
+    ._extra3 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                              .cycle = NondetRegLayout{._super = /*offset=*/107}},
+    ._extra4 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                              .cycle = NondetRegLayout{._super = /*offset=*/109}},
+    ._extra5 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                              .cycle = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra6 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                              .cycle = NondetRegLayout{._super = /*offset=*/113}},
+    ._extra7 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                              .cycle = NondetRegLayout{._super = /*offset=*/115}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                            .val = NondetRegLayout{._super = /*offset=*/117}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                            .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                             .val = NondetRegLayout{._super = /*offset=*/121}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                             .val = NondetRegLayout{._super = /*offset=*/123}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                             .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                             .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                             .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                             .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                             .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}},
+    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                            .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                            .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                            .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                            .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                            .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                            .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra32 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra33 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                            .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra34 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra35 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra36 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra37 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra38 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra39 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr MemoryReadLayout kLayout__483 =
+    MemoryReadLayout{.io = kLayout__440, ._0 = kLayout__33};
+__device__ constexpr MemoryReadLayout kLayout__484 =
+    MemoryReadLayout{.io = kLayout__445, ._0 = kLayout__131};
+__device__ constexpr ControlResume_SuperArm0_SuperLayout kLayout__482 =
+    ControlResume_SuperArm0_SuperLayout{.pc = kLayout__483, .mode = kLayout__484};
+__device__ constexpr ControlResume_SuperArm0Layout kLayout__481 = ControlResume_SuperArm0Layout{
+    ._super = kLayout__482,
+    ._extra0 = kLayout__451,
+    ._extra1 = kLayout__452,
+    ._extra2 = kLayout__456,
+    ._extra3 = kLayout__457,
+    ._extra4 = kLayout__461,
+    ._extra5 = kLayout__462,
+    ._extra6 = kLayout__466,
+    ._extra7 = kLayout__467,
+    ._extra8 = kLayout__471,
+    ._extra9 = kLayout__472,
+    ._extra10 = kLayout__476,
+    ._extra11 = kLayout__477,
+    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                               .cycle = NondetRegLayout{._super = /*offset=*/105}},
+    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                               .cycle = NondetRegLayout{._super = /*offset=*/107}},
+    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                               .cycle = NondetRegLayout{._super = /*offset=*/109}},
+    ._extra15 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                               .cycle = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                               .cycle = NondetRegLayout{._super = /*offset=*/113}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                               .cycle = NondetRegLayout{._super = /*offset=*/115}}};
+__device__ constexpr MemoryWriteLayout kLayout__488 =
+    MemoryWriteLayout{.io = kLayout__440, ._0 = kLayout__33};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__487 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__488};
+__device__ constexpr MemoryWriteLayout kLayout__490 =
+    MemoryWriteLayout{.io = kLayout__445, ._0 = kLayout__131};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__489 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__490};
+__device__ constexpr IsCycleLayout kLayout__494 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/105}}};
+__device__ constexpr IsForwardLayout kLayout__493 = IsForwardLayout{._0 = kLayout__494};
+__device__ constexpr MemoryWriteLayout kLayout__492 =
+    MemoryWriteLayout{.io = kLayout__450, ._0 = kLayout__493};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__491 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__492};
+__device__ constexpr IsCycleLayout kLayout__498 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/107}}};
+__device__ constexpr IsForwardLayout kLayout__497 = IsForwardLayout{._0 = kLayout__498};
+__device__ constexpr MemoryWriteLayout kLayout__496 =
+    MemoryWriteLayout{.io = kLayout__455, ._0 = kLayout__497};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__495 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__496};
+__device__ constexpr IsCycleLayout kLayout__502 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/109}}};
+__device__ constexpr IsForwardLayout kLayout__501 = IsForwardLayout{._0 = kLayout__502};
+__device__ constexpr MemoryWriteLayout kLayout__500 =
+    MemoryWriteLayout{.io = kLayout__460, ._0 = kLayout__501};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__499 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__500};
+__device__ constexpr IsCycleLayout kLayout__506 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/111}}};
+__device__ constexpr IsForwardLayout kLayout__505 = IsForwardLayout{._0 = kLayout__506};
+__device__ constexpr MemoryWriteLayout kLayout__504 =
+    MemoryWriteLayout{.io = kLayout__465, ._0 = kLayout__505};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__503 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__504};
+__device__ constexpr IsCycleLayout kLayout__510 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/113}}};
+__device__ constexpr IsForwardLayout kLayout__509 = IsForwardLayout{._0 = kLayout__510};
+__device__ constexpr MemoryWriteLayout kLayout__508 =
+    MemoryWriteLayout{.io = kLayout__470, ._0 = kLayout__509};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__507 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__508};
+__device__ constexpr IsCycleLayout kLayout__514 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/115}}};
+__device__ constexpr IsForwardLayout kLayout__513 = IsForwardLayout{._0 = kLayout__514};
+__device__ constexpr MemoryWriteLayout kLayout__512 =
+    MemoryWriteLayout{.io = kLayout__475, ._0 = kLayout__513};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout kLayout__511 =
+    ControlResume_SuperArm1_Super__0_SuperLayout{._0 = kLayout__512};
+__device__ constexpr ControlResume_SuperArm1_Super__0_SuperLayout8LayoutArray kLayout__486 =
+    ControlResume_SuperArm1_Super__0_SuperLayout8LayoutArray{kLayout__487,
+                                                             kLayout__489,
+                                                             kLayout__491,
+                                                             kLayout__495,
+                                                             kLayout__499,
+                                                             kLayout__503,
+                                                             kLayout__507,
+                                                             kLayout__511};
+__device__ constexpr ControlResume_SuperArm1_SuperLayout kLayout__485 =
+    ControlResume_SuperArm1_SuperLayout{._1 = kLayout__486};
+__device__ constexpr ControlResume_SuperLayout kLayout__480 =
+    ControlResume_SuperLayout{.arm0 = kLayout__481, .arm1 = kLayout__485};
+__device__ constexpr MemoryArgLayout16LayoutArray kLayout__516 =
+    MemoryArgLayout16LayoutArray{kLayout__441,
+                                 kLayout__442,
+                                 kLayout__446,
+                                 kLayout__447,
+                                 kLayout__451,
+                                 kLayout__452,
+                                 kLayout__456,
+                                 kLayout__457,
+                                 kLayout__461,
+                                 kLayout__462,
+                                 kLayout__466,
+                                 kLayout__467,
+                                 kLayout__471,
+                                 kLayout__472,
+                                 kLayout__476,
+                                 kLayout__477};
+__device__ constexpr CycleArgLayout8LayoutArray kLayout__517 =
+    CycleArgLayout8LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/100},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/101}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/102},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/103}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/105}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/107}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/109}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/111}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/113}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/115}}};
+__device__ constexpr _Arguments_ControlResume_SuperLayout kLayout__515 =
+    _Arguments_ControlResume_SuperLayout{.memoryArg = kLayout__516, .cycleArg = kLayout__517};
+__device__ constexpr ControlResumeLayout kLayout__479 =
+    ControlResumeLayout{._super = kLayout__480,
+                        .pcZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/180},
+                                               .inv = NondetRegLayout{._super = /*offset=*/181}},
+                        ._arguments_ControlResume_Super = kLayout__515};
+__device__ constexpr Control0_SuperArm1Layout kLayout__478 = Control0_SuperArm1Layout{
+    ._super = kLayout__479,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                            .val = NondetRegLayout{._super = /*offset=*/117}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                            .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                            .val = NondetRegLayout{._super = /*offset=*/121}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                            .val = NondetRegLayout{._super = /*offset=*/123}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                            .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                            .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                            .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                            .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                            .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                            .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}},
+    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                            .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                            .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                            .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                            .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra20 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra21 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                            .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra22 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra23 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                            .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                            .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr NondetU16RegLayout kLayout__521 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                                           .val = NondetRegLayout{._super = /*offset=*/117}}};
+__device__ constexpr NondetU16RegLayout kLayout__522 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                                           .val = NondetRegLayout{._super = /*offset=*/119}}};
+__device__ constexpr AddrDecomposeBitsLayout kLayout__520 =
+    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/181},
+                            .low1 = NondetRegLayout{._super = /*offset=*/182},
+                            .upperDiff = kLayout__521,
+                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/183},
+                                               .inv = NondetRegLayout{._super = /*offset=*/184}},
+                            .med14 = kLayout__522};
+__device__ constexpr ControlUserECALLLayout kLayout__519 =
+    ControlUserECALLLayout{.safeMode = NondetRegLayout{._super = /*offset=*/180},
+                           .pcAddr = kLayout__520,
+                           .loadInst = kLayout__483,
+                           .newPcAddr = kLayout__484,
+                           ._0 = kLayout__492};
+__device__ constexpr Control0_SuperArm2Layout kLayout__518 = Control0_SuperArm2Layout{
+    ._super = kLayout__519,
+    ._extra0 = kLayout__456,
+    ._extra1 = kLayout__457,
+    ._extra2 = kLayout__461,
+    ._extra3 = kLayout__462,
+    ._extra4 = kLayout__466,
+    ._extra5 = kLayout__467,
+    ._extra6 = kLayout__471,
+    ._extra7 = kLayout__472,
+    ._extra8 = kLayout__476,
+    ._extra9 = kLayout__477,
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                               .cycle = NondetRegLayout{._super = /*offset=*/107}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                               .cycle = NondetRegLayout{._super = /*offset=*/109}},
+    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                               .cycle = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                               .cycle = NondetRegLayout{._super = /*offset=*/113}},
+    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                               .cycle = NondetRegLayout{._super = /*offset=*/115}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                             .val = NondetRegLayout{._super = /*offset=*/121}},
+    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                             .val = NondetRegLayout{._super = /*offset=*/123}},
+    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                             .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                             .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                             .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                             .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                             .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}},
+    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                            .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                            .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                            .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra32 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                            .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra33 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra34 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                            .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra35 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra36 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                            .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra37 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra38 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                            .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra39 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra41 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra42 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra43 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra44 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr NondetU16RegLayout kLayout__526 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                                           .val = NondetRegLayout{._super = /*offset=*/121}}};
+__device__ constexpr NondetU16RegLayout kLayout__527 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                                           .val = NondetRegLayout{._super = /*offset=*/123}}};
+__device__ constexpr NormalizeU32Layout kLayout__525 =
+    NormalizeU32Layout{.low16 = kLayout__526,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/185},
+                       .high16 = kLayout__527,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/186}};
+__device__ constexpr ControlMRETLayout kLayout__524 =
+    ControlMRETLayout{.safeMode = NondetRegLayout{._super = /*offset=*/180},
+                      .pcAddr = kLayout__520,
+                      .loadInst = kLayout__483,
+                      .pc = kLayout__484,
+                      .pcAdd = kLayout__525};
+__device__ constexpr Control0_SuperArm3Layout kLayout__523 = Control0_SuperArm3Layout{
+    ._super = kLayout__524,
+    ._extra0 = kLayout__451,
+    ._extra1 = kLayout__452,
+    ._extra2 = kLayout__456,
+    ._extra3 = kLayout__457,
+    ._extra4 = kLayout__461,
+    ._extra5 = kLayout__462,
+    ._extra6 = kLayout__466,
+    ._extra7 = kLayout__467,
+    ._extra8 = kLayout__471,
+    ._extra9 = kLayout__472,
+    ._extra10 = kLayout__476,
+    ._extra11 = kLayout__477,
+    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                               .cycle = NondetRegLayout{._super = /*offset=*/105}},
+    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                               .cycle = NondetRegLayout{._super = /*offset=*/107}},
+    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                               .cycle = NondetRegLayout{._super = /*offset=*/109}},
+    ._extra15 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                               .cycle = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                               .cycle = NondetRegLayout{._super = /*offset=*/113}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                               .cycle = NondetRegLayout{._super = /*offset=*/115}},
+    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                             .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                             .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                             .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                             .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                             .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}},
+    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                            .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                            .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra32 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                            .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra33 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                            .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra34 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra35 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                            .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra36 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra37 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                            .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra38 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra39 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                            .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra41 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra42 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra43 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra44 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra45 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr MemoryReadLayout kLayout__533 =
+    MemoryReadLayout{.io = kLayout__450, ._0 = kLayout__493};
+__device__ constexpr MemoryReadLayout kLayout__534 =
+    MemoryReadLayout{.io = kLayout__455, ._0 = kLayout__497};
+__device__ constexpr MemoryReadLayout kLayout__535 =
+    MemoryReadLayout{.io = kLayout__460, ._0 = kLayout__501};
+__device__ constexpr MemoryReadLayout kLayout__536 =
+    MemoryReadLayout{.io = kLayout__465, ._0 = kLayout__505};
+__device__ constexpr MemoryReadLayout kLayout__537 =
+    MemoryReadLayout{.io = kLayout__470, ._0 = kLayout__509};
+__device__ constexpr MemoryReadLayout kLayout__538 =
+    MemoryReadLayout{.io = kLayout__475, ._0 = kLayout__513};
+__device__ constexpr MemoryReadLayout8LayoutArray kLayout__532 =
+    MemoryReadLayout8LayoutArray{kLayout__483,
+                                 kLayout__484,
+                                 kLayout__533,
+                                 kLayout__534,
+                                 kLayout__535,
+                                 kLayout__536,
+                                 kLayout__537,
+                                 kLayout__538};
+__device__ constexpr ControlSuspend_SuperArm0_SuperLayout kLayout__531 =
+    ControlSuspend_SuperArm0_SuperLayout{._1 = kLayout__532};
+__device__ constexpr ControlSuspend_SuperArm1_SuperLayout kLayout__540 =
+    ControlSuspend_SuperArm1_SuperLayout{
+        .state = NondetRegLayout{._super = /*offset=*/180}, ._0 = kLayout__488, ._1 = kLayout__490};
+__device__ constexpr ControlSuspend_SuperArm1Layout kLayout__539 = ControlSuspend_SuperArm1Layout{
+    ._super = kLayout__540,
+    ._extra0 = kLayout__451,
+    ._extra1 = kLayout__452,
+    ._extra2 = kLayout__456,
+    ._extra3 = kLayout__457,
+    ._extra4 = kLayout__461,
+    ._extra5 = kLayout__462,
+    ._extra6 = kLayout__466,
+    ._extra7 = kLayout__467,
+    ._extra8 = kLayout__471,
+    ._extra9 = kLayout__472,
+    ._extra10 = kLayout__476,
+    ._extra11 = kLayout__477,
+    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                               .cycle = NondetRegLayout{._super = /*offset=*/105}},
+    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                               .cycle = NondetRegLayout{._super = /*offset=*/107}},
+    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                               .cycle = NondetRegLayout{._super = /*offset=*/109}},
+    ._extra15 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                               .cycle = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                               .cycle = NondetRegLayout{._super = /*offset=*/113}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                               .cycle = NondetRegLayout{._super = /*offset=*/115}}};
+__device__ constexpr ControlSuspend_SuperLayout kLayout__530 =
+    ControlSuspend_SuperLayout{.arm0 = kLayout__531, .arm1 = kLayout__539};
+__device__ constexpr _Arguments_ControlSuspend_SuperLayout kLayout__541 =
+    _Arguments_ControlSuspend_SuperLayout{.memoryArg = kLayout__516, .cycleArg = kLayout__517};
+__device__ constexpr ControlSuspendLayout kLayout__529 =
+    ControlSuspendLayout{._super = kLayout__530,
+                         .pcZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/181},
+                                                .inv = NondetRegLayout{._super = /*offset=*/182}},
+                         ._arguments_ControlSuspend_Super = kLayout__541};
+__device__ constexpr Control0_SuperArm4Layout kLayout__528 = Control0_SuperArm4Layout{
+    ._super = kLayout__529,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                            .val = NondetRegLayout{._super = /*offset=*/117}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                            .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                            .val = NondetRegLayout{._super = /*offset=*/121}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                            .val = NondetRegLayout{._super = /*offset=*/123}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                            .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                            .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                            .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                            .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                            .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                            .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}},
+    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                            .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                            .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                            .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                            .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra20 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra21 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                            .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra22 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra23 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                            .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                            .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr MemoryPageOutLayout kLayout__545 =
+    MemoryPageOutLayout{.io = kLayout__440, ._0 = kLayout__33};
+__device__ constexpr MemoryPageOutLayout kLayout__546 =
+    MemoryPageOutLayout{.io = kLayout__445, ._0 = kLayout__131};
+__device__ constexpr MemoryPageOutLayout kLayout__547 =
+    MemoryPageOutLayout{.io = kLayout__450, ._0 = kLayout__493};
+__device__ constexpr MemoryPageOutLayout kLayout__548 =
+    MemoryPageOutLayout{.io = kLayout__455, ._0 = kLayout__497};
+__device__ constexpr MemoryPageOutLayout kLayout__549 =
+    MemoryPageOutLayout{.io = kLayout__460, ._0 = kLayout__501};
+__device__ constexpr MemoryPageOutLayout kLayout__550 =
+    MemoryPageOutLayout{.io = kLayout__465, ._0 = kLayout__505};
+__device__ constexpr MemoryPageOutLayout kLayout__551 =
+    MemoryPageOutLayout{.io = kLayout__470, ._0 = kLayout__509};
+__device__ constexpr MemoryPageOutLayout kLayout__552 =
+    MemoryPageOutLayout{.io = kLayout__475, ._0 = kLayout__513};
+__device__ constexpr MemoryPageOutLayout8LayoutArray kLayout__544 =
+    MemoryPageOutLayout8LayoutArray{kLayout__545,
+                                    kLayout__546,
+                                    kLayout__547,
+                                    kLayout__548,
+                                    kLayout__549,
+                                    kLayout__550,
+                                    kLayout__551,
+                                    kLayout__552};
+__device__ constexpr ControlStoreRootLayout kLayout__543 =
+    ControlStoreRootLayout{._1 = kLayout__544};
+__device__ constexpr Control0_SuperArm5Layout kLayout__542 = Control0_SuperArm5Layout{
+    ._super = kLayout__543,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                            .val = NondetRegLayout{._super = /*offset=*/117}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                            .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                            .val = NondetRegLayout{._super = /*offset=*/121}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                            .val = NondetRegLayout{._super = /*offset=*/123}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                            .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                            .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                            .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                            .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                            .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                            .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}},
+    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                            .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                            .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                            .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                            .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra20 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra21 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                            .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra22 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra23 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                            .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                            .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra26 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra27 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra30 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra31 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__559 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                            .val = NondetRegLayout{._super = /*offset=*/117}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__560 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                            .val = NondetRegLayout{._super = /*offset=*/119}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__561 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                            .val = NondetRegLayout{._super = /*offset=*/121}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__562 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                            .val = NondetRegLayout{._super = /*offset=*/123}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__563 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                            .val = NondetRegLayout{._super = /*offset=*/125}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__564 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                            .val = NondetRegLayout{._super = /*offset=*/127}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__565 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                            .val = NondetRegLayout{._super = /*offset=*/129}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__566 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                            .val = NondetRegLayout{._super = /*offset=*/131}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__567 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                            .val = NondetRegLayout{._super = /*offset=*/133}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__568 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                            .val = NondetRegLayout{._super = /*offset=*/135}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__569 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                            .val = NondetRegLayout{._super = /*offset=*/137}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__570 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                            .val = NondetRegLayout{._super = /*offset=*/139}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__571 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                            .val = NondetRegLayout{._super = /*offset=*/141}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__572 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                            .val = NondetRegLayout{._super = /*offset=*/143}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__573 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                            .val = NondetRegLayout{._super = /*offset=*/145}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout kLayout__574 =
+    ControlTable_SuperArm0_Super__0_SuperLayout{
+        .arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                            .val = NondetRegLayout{._super = /*offset=*/147}}};
+__device__ constexpr ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray kLayout__558 =
+    ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray{kLayout__559,
+                                                             kLayout__560,
+                                                             kLayout__561,
+                                                             kLayout__562,
+                                                             kLayout__563,
+                                                             kLayout__564,
+                                                             kLayout__565,
+                                                             kLayout__566,
+                                                             kLayout__567,
+                                                             kLayout__568,
+                                                             kLayout__569,
+                                                             kLayout__570,
+                                                             kLayout__571,
+                                                             kLayout__572,
+                                                             kLayout__573,
+                                                             kLayout__574};
+__device__ constexpr ControlTable_SuperArm0_SuperLayout kLayout__557 =
+    ControlTable_SuperArm0_SuperLayout{
+        ._1 = kLayout__558,
+        .done = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/180},
+                             .inv = NondetRegLayout{._super = /*offset=*/181}}};
+__device__ constexpr ControlTable_SuperArm0Layout kLayout__556 = ControlTable_SuperArm0Layout{
+    ._super = kLayout__557,
+    ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                           .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                           .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                           .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                           .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra4 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                           .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra5 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                           .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra6 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                           .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra7 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                           .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra8 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                           .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra9 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                           .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra14 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra15 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__578 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                           .val = NondetRegLayout{._super = /*offset=*/149}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__579 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                           .val = NondetRegLayout{._super = /*offset=*/151}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__580 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                           .val = NondetRegLayout{._super = /*offset=*/153}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__581 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                           .val = NondetRegLayout{._super = /*offset=*/155}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__582 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                           .val = NondetRegLayout{._super = /*offset=*/157}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__583 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                           .val = NondetRegLayout{._super = /*offset=*/159}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__584 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                           .val = NondetRegLayout{._super = /*offset=*/161}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__585 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                           .val = NondetRegLayout{._super = /*offset=*/163}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__586 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                           .val = NondetRegLayout{._super = /*offset=*/165}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__587 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                           .val = NondetRegLayout{._super = /*offset=*/167}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__588 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                           .val = NondetRegLayout{._super = /*offset=*/169}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__589 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                           .val = NondetRegLayout{._super = /*offset=*/171}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__590 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                           .val = NondetRegLayout{._super = /*offset=*/173}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__591 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                           .val = NondetRegLayout{._super = /*offset=*/175}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__592 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                           .val = NondetRegLayout{._super = /*offset=*/177}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout kLayout__593 =
+    ControlTable_SuperArm1_Super__0_SuperLayout{
+        .arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                           .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray kLayout__577 =
+    ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray{kLayout__578,
+                                                             kLayout__579,
+                                                             kLayout__580,
+                                                             kLayout__581,
+                                                             kLayout__582,
+                                                             kLayout__583,
+                                                             kLayout__584,
+                                                             kLayout__585,
+                                                             kLayout__586,
+                                                             kLayout__587,
+                                                             kLayout__588,
+                                                             kLayout__589,
+                                                             kLayout__590,
+                                                             kLayout__591,
+                                                             kLayout__592,
+                                                             kLayout__593};
+__device__ constexpr ControlTable_SuperArm1_SuperLayout kLayout__576 =
+    ControlTable_SuperArm1_SuperLayout{
+        ._1 = kLayout__577,
+        .done = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/180},
+                             .inv = NondetRegLayout{._super = /*offset=*/181}}};
+__device__ constexpr ControlTable_SuperArm1Layout kLayout__575 = ControlTable_SuperArm1Layout{
+    ._super = kLayout__576,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                            .val = NondetRegLayout{._super = /*offset=*/117}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                            .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                            .val = NondetRegLayout{._super = /*offset=*/121}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                            .val = NondetRegLayout{._super = /*offset=*/123}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                            .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                            .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                            .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                            .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                            .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                            .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}}};
+__device__ constexpr ControlTable_SuperLayout kLayout__555 =
+    ControlTable_SuperLayout{.arm0 = kLayout__556, .arm1 = kLayout__575};
+__device__ constexpr ArgU16Layout16LayoutArray kLayout__595 =
+    ArgU16Layout16LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                                           .val = NondetRegLayout{._super = /*offset=*/117}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                                           .val = NondetRegLayout{._super = /*offset=*/119}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                                           .val = NondetRegLayout{._super = /*offset=*/121}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                                           .val = NondetRegLayout{._super = /*offset=*/123}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                                           .val = NondetRegLayout{._super = /*offset=*/125}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                                           .val = NondetRegLayout{._super = /*offset=*/127}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                                           .val = NondetRegLayout{._super = /*offset=*/129}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                                           .val = NondetRegLayout{._super = /*offset=*/131}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                                           .val = NondetRegLayout{._super = /*offset=*/133}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                                           .val = NondetRegLayout{._super = /*offset=*/135}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                                           .val = NondetRegLayout{._super = /*offset=*/137}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                                           .val = NondetRegLayout{._super = /*offset=*/139}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                                           .val = NondetRegLayout{._super = /*offset=*/141}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                                           .val = NondetRegLayout{._super = /*offset=*/143}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                                           .val = NondetRegLayout{._super = /*offset=*/145}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                                           .val = NondetRegLayout{._super = /*offset=*/147}}};
+__device__ constexpr ArgU8Layout16LayoutArray kLayout__596 =
+    ArgU8Layout16LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                                         .val = NondetRegLayout{._super = /*offset=*/149}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                                         .val = NondetRegLayout{._super = /*offset=*/151}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                                         .val = NondetRegLayout{._super = /*offset=*/153}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                                         .val = NondetRegLayout{._super = /*offset=*/155}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                                         .val = NondetRegLayout{._super = /*offset=*/157}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                                         .val = NondetRegLayout{._super = /*offset=*/159}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                                         .val = NondetRegLayout{._super = /*offset=*/161}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                                         .val = NondetRegLayout{._super = /*offset=*/163}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                                         .val = NondetRegLayout{._super = /*offset=*/165}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                                         .val = NondetRegLayout{._super = /*offset=*/167}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                                         .val = NondetRegLayout{._super = /*offset=*/169}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                                         .val = NondetRegLayout{._super = /*offset=*/171}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                                         .val = NondetRegLayout{._super = /*offset=*/173}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                                         .val = NondetRegLayout{._super = /*offset=*/175}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                                         .val = NondetRegLayout{._super = /*offset=*/177}},
+                             ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                                         .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr _Arguments_ControlTable_SuperLayout kLayout__594 =
+    _Arguments_ControlTable_SuperLayout{.argU16 = kLayout__595, .argU8 = kLayout__596};
+__device__ constexpr ControlTableLayout kLayout__554 =
+    ControlTableLayout{._super = kLayout__555,
+                       .entry = NondetRegLayout{._super = /*offset=*/182},
+                       .mode = NondetRegLayout{._super = /*offset=*/183},
+                       ._arguments_ControlTable_Super = kLayout__594};
+__device__ constexpr Control0_SuperArm6Layout kLayout__553 = Control0_SuperArm6Layout{
+    ._super = kLayout__554,
+    ._extra0 = kLayout__441,
+    ._extra1 = kLayout__442,
+    ._extra2 = kLayout__446,
+    ._extra3 = kLayout__447,
+    ._extra4 = kLayout__451,
+    ._extra5 = kLayout__452,
+    ._extra6 = kLayout__456,
+    ._extra7 = kLayout__457,
+    ._extra8 = kLayout__461,
+    ._extra9 = kLayout__462,
+    ._extra10 = kLayout__466,
+    ._extra11 = kLayout__467,
+    ._extra12 = kLayout__471,
+    ._extra13 = kLayout__472,
+    ._extra14 = kLayout__476,
+    ._extra15 = kLayout__477,
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/100},
+                               .cycle = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/102},
+                               .cycle = NondetRegLayout{._super = /*offset=*/103}},
+    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                               .cycle = NondetRegLayout{._super = /*offset=*/105}},
+    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                               .cycle = NondetRegLayout{._super = /*offset=*/107}},
+    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                               .cycle = NondetRegLayout{._super = /*offset=*/109}},
+    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                               .cycle = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                               .cycle = NondetRegLayout{._super = /*offset=*/113}},
+    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                               .cycle = NondetRegLayout{._super = /*offset=*/115}}};
+__device__ constexpr _Arguments_ControlDone__0Layout kLayout__599 =
+    _Arguments_ControlDone__0Layout{.cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
+                                        .count = NondetRegLayout{._super = /*offset=*/100},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/101}}}};
+__device__ constexpr ControlDone__0Arm0_SuperLayout kLayout__601 =
+    ControlDone__0Arm0_SuperLayout{._0 = kLayout__34};
+__device__ constexpr ControlDone__0Arm1Layout kLayout__602 = ControlDone__0Arm1Layout{
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/100},
+                              .cycle = NondetRegLayout{._super = /*offset=*/101}}};
+__device__ constexpr ControlDone__0Layout kLayout__600 =
+    ControlDone__0Layout{.arm0 = kLayout__601, .arm1 = kLayout__602};
+__device__ constexpr ControlDoneLayout kLayout__598 =
+    ControlDoneLayout{._arguments_ControlDone__0 = kLayout__599, ._2 = kLayout__600};
+__device__ constexpr Control0_SuperArm7Layout kLayout__597 = Control0_SuperArm7Layout{
+    ._super = kLayout__598,
+    ._extra0 = kLayout__441,
+    ._extra1 = kLayout__442,
+    ._extra2 = kLayout__446,
+    ._extra3 = kLayout__447,
+    ._extra4 = kLayout__451,
+    ._extra5 = kLayout__452,
+    ._extra6 = kLayout__456,
+    ._extra7 = kLayout__457,
+    ._extra8 = kLayout__461,
+    ._extra9 = kLayout__462,
+    ._extra10 = kLayout__466,
+    ._extra11 = kLayout__467,
+    ._extra12 = kLayout__471,
+    ._extra13 = kLayout__472,
+    ._extra14 = kLayout__476,
+    ._extra15 = kLayout__477,
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/102},
+                               .cycle = NondetRegLayout{._super = /*offset=*/103}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/104},
+                               .cycle = NondetRegLayout{._super = /*offset=*/105}},
+    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
+                               .cycle = NondetRegLayout{._super = /*offset=*/107}},
+    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                               .cycle = NondetRegLayout{._super = /*offset=*/109}},
+    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/110},
+                               .cycle = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                               .cycle = NondetRegLayout{._super = /*offset=*/113}},
+    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
+                               .cycle = NondetRegLayout{._super = /*offset=*/115}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/116},
+                             .val = NondetRegLayout{._super = /*offset=*/117}},
+    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/118},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/120},
+                             .val = NondetRegLayout{._super = /*offset=*/121}},
+    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/122},
+                             .val = NondetRegLayout{._super = /*offset=*/123}},
+    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/124},
+                             .val = NondetRegLayout{._super = /*offset=*/125}},
+    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/126},
+                             .val = NondetRegLayout{._super = /*offset=*/127}},
+    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/128},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/130},
+                             .val = NondetRegLayout{._super = /*offset=*/131}},
+    ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                             .val = NondetRegLayout{._super = /*offset=*/133}},
+    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/134},
+                             .val = NondetRegLayout{._super = /*offset=*/135}},
+    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/136},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/138},
+                             .val = NondetRegLayout{._super = /*offset=*/139}},
+    ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/140},
+                             .val = NondetRegLayout{._super = /*offset=*/141}},
+    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/142},
+                             .val = NondetRegLayout{._super = /*offset=*/143}},
+    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/144},
+                             .val = NondetRegLayout{._super = /*offset=*/145}},
+    ._extra38 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
+                             .val = NondetRegLayout{._super = /*offset=*/147}},
+    ._extra39 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/148},
+                            .val = NondetRegLayout{._super = /*offset=*/149}},
+    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/150},
+                            .val = NondetRegLayout{._super = /*offset=*/151}},
+    ._extra41 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/152},
+                            .val = NondetRegLayout{._super = /*offset=*/153}},
+    ._extra42 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/154},
+                            .val = NondetRegLayout{._super = /*offset=*/155}},
+    ._extra43 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/157}},
+    ._extra44 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/158},
+                            .val = NondetRegLayout{._super = /*offset=*/159}},
+    ._extra45 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/161}},
+    ._extra46 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/162},
+                            .val = NondetRegLayout{._super = /*offset=*/163}},
+    ._extra47 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/165}},
+    ._extra48 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/166},
+                            .val = NondetRegLayout{._super = /*offset=*/167}},
+    ._extra49 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                            .val = NondetRegLayout{._super = /*offset=*/169}},
+    ._extra50 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/170},
+                            .val = NondetRegLayout{._super = /*offset=*/171}},
+    ._extra51 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                            .val = NondetRegLayout{._super = /*offset=*/173}},
+    ._extra52 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/174},
+                            .val = NondetRegLayout{._super = /*offset=*/175}},
+    ._extra53 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                            .val = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra54 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
+                            .val = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr Control0_SuperLayout kLayout__434 = Control0_SuperLayout{.arm0 = kLayout__435,
+                                                                              .arm1 = kLayout__478,
+                                                                              .arm2 = kLayout__518,
+                                                                              .arm3 = kLayout__523,
+                                                                              .arm4 = kLayout__528,
+                                                                              .arm5 = kLayout__542,
+                                                                              .arm6 = kLayout__553,
+                                                                              .arm7 = kLayout__597};
+__device__ constexpr DoCycleTableLayout kLayout__603 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/187},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/188}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/189},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr _Arguments_Control0_SuperLayout kLayout__604 =
+    _Arguments_Control0_SuperLayout{.memoryArg = kLayout__516,
+                                    .cycleArg = kLayout__517,
+                                    .argU16 = kLayout__595,
+                                    .argU8 = kLayout__596};
+__device__ constexpr Control0Layout kLayout__433 = Control0Layout{
+    ._super = kLayout__434, ._0 = kLayout__603, ._arguments_Control0_Super = kLayout__604};
+__device__ constexpr DoCycleTableLayout kLayout__606 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/91},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/92}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/93},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/94}}};
+__device__ constexpr NondetU16RegLayout kLayout__608 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/97},
+                                           .val = NondetRegLayout{._super = /*offset=*/98}}};
+__device__ constexpr AddrDecomposeBitsLayout kLayout__607 =
+    AddrDecomposeBitsLayout{.low0 = NondetRegLayout{._super = /*offset=*/95},
+                            .low1 = NondetRegLayout{._super = /*offset=*/96},
+                            .upperDiff = kLayout__608,
+                            ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/99},
+                                               .inv = NondetRegLayout{._super = /*offset=*/100}},
+                            .med14 = kLayout__400};
+__device__ constexpr MemoryArgLayout8LayoutArray kLayout__610 =
+    MemoryArgLayout8LayoutArray{kLayout__441,
+                                kLayout__442,
+                                kLayout__446,
+                                kLayout__447,
+                                kLayout__451,
+                                kLayout__452,
+                                kLayout__456,
+                                kLayout__457};
+__device__ constexpr CycleArgLayout4LayoutArray kLayout__611 =
+    CycleArgLayout4LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/64},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/65}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/66},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/67}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/69}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/71}}};
+__device__ constexpr ArgU16Layout4LayoutArray kLayout__612 =
+    ArgU16Layout4LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                                          .val = NondetRegLayout{._super = /*offset=*/73}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                                          .val = NondetRegLayout{._super = /*offset=*/75}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                                          .val = NondetRegLayout{._super = /*offset=*/77}},
+                             ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                                          .val = NondetRegLayout{._super = /*offset=*/79}}};
+__device__ constexpr ArgU8Layout4LayoutArray kLayout__613 =
+    ArgU8Layout4LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                                        .val = NondetRegLayout{._super = /*offset=*/81}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                                        .val = NondetRegLayout{._super = /*offset=*/83}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                                        .val = NondetRegLayout{._super = /*offset=*/85}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                                        .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr _Arguments_ECall0OutputLayout kLayout__609 =
+    _Arguments_ECall0OutputLayout{.memoryArg = kLayout__610,
+                                  .cycleArg = kLayout__611,
+                                  .argU16 = kLayout__612,
+                                  .argU8 = kLayout__613};
+__device__ constexpr IsCycleLayout kLayout__619 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/64},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/65}}};
+__device__ constexpr IsForwardLayout kLayout__618 = IsForwardLayout{._0 = kLayout__619};
+__device__ constexpr MemoryReadLayout kLayout__617 =
+    MemoryReadLayout{.io = kLayout__440, ._0 = kLayout__618};
+__device__ constexpr IsCycleLayout kLayout__622 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/66},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/67}}};
+__device__ constexpr IsForwardLayout kLayout__621 = IsForwardLayout{._0 = kLayout__622};
+__device__ constexpr MemoryReadLayout kLayout__620 =
+    MemoryReadLayout{.io = kLayout__445, ._0 = kLayout__621};
+__device__ constexpr NondetRegLayout5LayoutArray kLayout__624 =
+    NondetRegLayout5LayoutArray{NondetRegLayout{._super = /*offset=*/103},
+                                NondetRegLayout{._super = /*offset=*/104},
+                                NondetRegLayout{._super = /*offset=*/105},
+                                NondetRegLayout{._super = /*offset=*/106},
+                                NondetRegLayout{._super = /*offset=*/107}};
+__device__ constexpr OneHot_5_Layout kLayout__623 = OneHot_5_Layout{._super = kLayout__624};
+__device__ constexpr MachineECallLayout kLayout__616 = MachineECallLayout{
+    .loadInst = kLayout__617, .dispatchIdx = kLayout__620, .dispatch = kLayout__623};
+__device__ constexpr ECall0OutputArm0Layout kLayout__615 = ECall0OutputArm0Layout{
+    ._super = kLayout__616,
+    ._extra0 = kLayout__451,
+    ._extra1 = kLayout__452,
+    ._extra2 = kLayout__456,
+    ._extra3 = kLayout__457,
+    ._extra4 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                              .cycle = NondetRegLayout{._super = /*offset=*/69}},
+    ._extra5 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
+                              .cycle = NondetRegLayout{._super = /*offset=*/71}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                            .val = NondetRegLayout{._super = /*offset=*/73}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                            .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                            .val = NondetRegLayout{._super = /*offset=*/77}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                            .val = NondetRegLayout{._super = /*offset=*/79}},
+    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                            .val = NondetRegLayout{._super = /*offset=*/81}},
+    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                            .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                            .val = NondetRegLayout{._super = /*offset=*/85}},
+    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                            .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr ECallTerminateLayout kLayout__626 =
+    ECallTerminateLayout{.a0 = kLayout__617, .a1 = kLayout__620};
+__device__ constexpr ECall0OutputArm1Layout kLayout__625 = ECall0OutputArm1Layout{
+    ._super = kLayout__626,
+    ._extra0 = kLayout__451,
+    ._extra1 = kLayout__452,
+    ._extra2 = kLayout__456,
+    ._extra3 = kLayout__457,
+    ._extra4 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                              .cycle = NondetRegLayout{._super = /*offset=*/69}},
+    ._extra5 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
+                              .cycle = NondetRegLayout{._super = /*offset=*/71}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                            .val = NondetRegLayout{._super = /*offset=*/73}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                            .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                            .val = NondetRegLayout{._super = /*offset=*/77}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                            .val = NondetRegLayout{._super = /*offset=*/79}},
+    ._extra10 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                            .val = NondetRegLayout{._super = /*offset=*/81}},
+    ._extra11 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                            .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra12 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                            .val = NondetRegLayout{._super = /*offset=*/85}},
+    ._extra13 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                            .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr IsCycleLayout kLayout__631 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/69}}};
+__device__ constexpr IsForwardLayout kLayout__630 = IsForwardLayout{._0 = kLayout__631};
+__device__ constexpr MemoryReadLayout kLayout__629 =
+    MemoryReadLayout{.io = kLayout__450, ._0 = kLayout__630};
+__device__ constexpr NondetU16RegLayout kLayout__632 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                                           .val = NondetRegLayout{._super = /*offset=*/73}}};
+__device__ constexpr NondetU16RegLayout kLayout__633 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                                           .val = NondetRegLayout{._super = /*offset=*/75}}};
+__device__ constexpr IsCycleLayout kLayout__636 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/71}}};
+__device__ constexpr IsForwardLayout kLayout__635 = IsForwardLayout{._0 = kLayout__636};
+__device__ constexpr MemoryWriteLayout kLayout__634 =
+    MemoryWriteLayout{.io = kLayout__455, ._0 = kLayout__635};
+__device__ constexpr NondetU16RegLayout kLayout__638 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                                           .val = NondetRegLayout{._super = /*offset=*/77}}};
+__device__ constexpr NondetRegLayout4LayoutArray kLayout__640 =
+    NondetRegLayout4LayoutArray{NondetRegLayout{._super = /*offset=*/104},
+                                NondetRegLayout{._super = /*offset=*/105},
+                                NondetRegLayout{._super = /*offset=*/106},
+                                NondetRegLayout{._super = /*offset=*/107}};
+__device__ constexpr OneHot_4_Layout kLayout__639 = OneHot_4_Layout{._super = kLayout__640};
+__device__ constexpr DecomposeLow2Layout kLayout__637 = DecomposeLow2Layout{
+    .high = kLayout__638,
+    .low2 = NondetRegLayout{._super = /*offset=*/103},
+    .low2Hot = kLayout__639,
+    .highZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/108},
+                             .inv = NondetRegLayout{._super = /*offset=*/109}},
+    .isZero = NondetRegLayout{._super = /*offset=*/110}};
+__device__ constexpr NondetU16RegLayout kLayout__642 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                                           .val = NondetRegLayout{._super = /*offset=*/79}}};
+__device__ constexpr NondetRegLayout4LayoutArray kLayout__644 =
+    NondetRegLayout4LayoutArray{NondetRegLayout{._super = /*offset=*/112},
+                                NondetRegLayout{._super = /*offset=*/113},
+                                NondetRegLayout{._super = /*offset=*/114},
+                                NondetRegLayout{._super = /*offset=*/115}};
+__device__ constexpr OneHot_4_Layout kLayout__643 = OneHot_4_Layout{._super = kLayout__644};
+__device__ constexpr DecomposeLow2Layout kLayout__641 = DecomposeLow2Layout{
+    .high = kLayout__642,
+    .low2 = NondetRegLayout{._super = /*offset=*/111},
+    .low2Hot = kLayout__643,
+    .highZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/116},
+                             .inv = NondetRegLayout{._super = /*offset=*/117}},
+    .isZero = NondetRegLayout{._super = /*offset=*/118}};
+__device__ constexpr ECallHostReadSetupLayout kLayout__628 =
+    ECallHostReadSetupLayout{.fd = kLayout__617,
+                             .ptr = kLayout__620,
+                             .len = kLayout__629,
+                             .newLen = kLayout__632,
+                             .diff = kLayout__633,
+                             ._0 = kLayout__634,
+                             .ptrDecomp = kLayout__637,
+                             .lenDecomp = kLayout__641,
+                             .len123 = NondetRegLayout{._super = /*offset=*/119},
+                             .uneven = NondetRegLayout{._super = /*offset=*/120}};
+__device__ constexpr ECall0OutputArm2Layout kLayout__627 =
+    ECall0OutputArm2Layout{._super = kLayout__628,
+                           ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                                                  .val = NondetRegLayout{._super = /*offset=*/81}},
+                           ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                                                  .val = NondetRegLayout{._super = /*offset=*/83}},
+                           ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                                                  .val = NondetRegLayout{._super = /*offset=*/85}},
+                           ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                                                  .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr ECallHostWriteLayout kLayout__646 =
+    ECallHostWriteLayout{.fd = kLayout__617,
+                         .ptr = kLayout__620,
+                         .len = kLayout__629,
+                         .newLen = kLayout__632,
+                         .diff = kLayout__633,
+                         ._0 = kLayout__634};
+__device__ constexpr ECall0OutputArm3Layout kLayout__645 = ECall0OutputArm3Layout{
+    ._super = kLayout__646,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                            .val = NondetRegLayout{._super = /*offset=*/77}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                            .val = NondetRegLayout{._super = /*offset=*/79}},
+    ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                           .val = NondetRegLayout{._super = /*offset=*/81}},
+    ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                           .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra4 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                           .val = NondetRegLayout{._super = /*offset=*/85}},
+    ._extra5 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                           .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr DecomposeLow2Layout kLayout__649 = DecomposeLow2Layout{
+    .high = kLayout__632,
+    .low2 = NondetRegLayout{._super = /*offset=*/103},
+    .low2Hot = kLayout__639,
+    .highZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/108},
+                             .inv = NondetRegLayout{._super = /*offset=*/109}},
+    .isZero = NondetRegLayout{._super = /*offset=*/110}};
+__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__650 =
+    MemoryWriteUnconstrainedLayout{.io = kLayout__445, ._0 = kLayout__621};
+__device__ constexpr SplitWordLayout kLayout__651 =
+    SplitWordLayout{.byte0 = kLayout__252, .byte1 = kLayout__254};
+__device__ constexpr NondetU8RegLayout kLayout__653 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                                         .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr SplitWordLayout kLayout__652 =
+    SplitWordLayout{.byte0 = kLayout__257, .byte1 = kLayout__653};
+__device__ constexpr ECallHostReadBytesLayout kLayout__648 = ECallHostReadBytesLayout{
+    .lenDecomp = kLayout__649,
+    .len123 = NondetRegLayout{._super = /*offset=*/111},
+    .nextPtrEven = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/112},
+                                .inv = NondetRegLayout{._super = /*offset=*/113}},
+    .uneven = NondetRegLayout{._super = /*offset=*/114},
+    .lenZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/115},
+                            .inv = NondetRegLayout{._super = /*offset=*/116}},
+    .low0 = NondetRegLayout{._super = /*offset=*/117},
+    .low1 = NondetRegLayout{._super = /*offset=*/118},
+    .origWord = kLayout__617,
+    ._0 = kLayout__650,
+    .oldBytes = kLayout__651,
+    .newBytes_0 = kLayout__652};
+__device__ constexpr ECall0OutputArm4Layout kLayout__647 = ECall0OutputArm4Layout{
+    ._super = kLayout__648,
+    ._extra0 = kLayout__451,
+    ._extra1 = kLayout__452,
+    ._extra2 = kLayout__456,
+    ._extra3 = kLayout__457,
+    ._extra4 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                              .cycle = NondetRegLayout{._super = /*offset=*/69}},
+    ._extra5 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
+                              .cycle = NondetRegLayout{._super = /*offset=*/71}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                            .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                            .val = NondetRegLayout{._super = /*offset=*/77}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                            .val = NondetRegLayout{._super = /*offset=*/79}}};
+__device__ constexpr DecomposeLow2Layout kLayout__656 = DecomposeLow2Layout{
+    .high = kLayout__633,
+    .low2 = NondetRegLayout{._super = /*offset=*/111},
+    .low2Hot = kLayout__643,
+    .highZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/116},
+                             .inv = NondetRegLayout{._super = /*offset=*/117}},
+    .isZero = NondetRegLayout{._super = /*offset=*/118}};
+__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__659 =
+    MemoryWriteUnconstrainedLayout{.io = kLayout__440, ._0 = kLayout__618};
+__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__658 =
+    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/119},
+                                      ._0 = kLayout__659};
+__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__660 =
+    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/120},
+                                      ._0 = kLayout__650};
+__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__662 =
+    MemoryWriteUnconstrainedLayout{.io = kLayout__450, ._0 = kLayout__630};
+__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__661 =
+    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/121},
+                                      ._0 = kLayout__662};
+__device__ constexpr MemoryWriteUnconstrainedLayout kLayout__664 =
+    MemoryWriteUnconstrainedLayout{.io = kLayout__455, ._0 = kLayout__635};
+__device__ constexpr ECallHostReadWords__0_SuperLayout kLayout__663 =
+    ECallHostReadWords__0_SuperLayout{.addr = NondetRegLayout{._super = /*offset=*/122},
+                                      ._0 = kLayout__664};
+__device__ constexpr ECallHostReadWords__0_SuperLayout4LayoutArray kLayout__657 =
+    ECallHostReadWords__0_SuperLayout4LayoutArray{
+        kLayout__658, kLayout__660, kLayout__661, kLayout__663};
+__device__ constexpr ECallHostReadWordsLayout kLayout__655 = ECallHostReadWordsLayout{
+    .lenDecomp = kLayout__649,
+    .wordsDecomp = kLayout__656,
+    ._1 = kLayout__657,
+    .newLenHighZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/123},
+                                   .inv = NondetRegLayout{._super = /*offset=*/124}},
+    .lenZero = NondetRegLayout{._super = /*offset=*/125}};
+__device__ constexpr ECall0OutputArm5Layout kLayout__654 = ECall0OutputArm5Layout{
+    ._super = kLayout__655,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                            .val = NondetRegLayout{._super = /*offset=*/77}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                            .val = NondetRegLayout{._super = /*offset=*/79}},
+    ._extra2 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                           .val = NondetRegLayout{._super = /*offset=*/81}},
+    ._extra3 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                           .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra4 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                           .val = NondetRegLayout{._super = /*offset=*/85}},
+    ._extra5 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                           .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr ECall0OutputArm6Layout kLayout__665 = ECall0OutputArm6Layout{
+    ._extra0 = kLayout__441,
+    ._extra1 = kLayout__442,
+    ._extra2 = kLayout__446,
+    ._extra3 = kLayout__447,
+    ._extra4 = kLayout__451,
+    ._extra5 = kLayout__452,
+    ._extra6 = kLayout__456,
+    ._extra7 = kLayout__457,
+    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/64},
+                              .cycle = NondetRegLayout{._super = /*offset=*/65}},
+    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/66},
+                              .cycle = NondetRegLayout{._super = /*offset=*/67}},
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                               .cycle = NondetRegLayout{._super = /*offset=*/69}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
+                               .cycle = NondetRegLayout{._super = /*offset=*/71}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                             .val = NondetRegLayout{._super = /*offset=*/73}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                             .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                             .val = NondetRegLayout{._super = /*offset=*/77}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                             .val = NondetRegLayout{._super = /*offset=*/79}},
+    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                            .val = NondetRegLayout{._super = /*offset=*/81}},
+    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                            .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                            .val = NondetRegLayout{._super = /*offset=*/85}},
+    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                            .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr ECall0OutputArm7Layout kLayout__666 = ECall0OutputArm7Layout{
+    ._extra0 = kLayout__441,
+    ._extra1 = kLayout__442,
+    ._extra2 = kLayout__446,
+    ._extra3 = kLayout__447,
+    ._extra4 = kLayout__451,
+    ._extra5 = kLayout__452,
+    ._extra6 = kLayout__456,
+    ._extra7 = kLayout__457,
+    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/64},
+                              .cycle = NondetRegLayout{._super = /*offset=*/65}},
+    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/66},
+                              .cycle = NondetRegLayout{._super = /*offset=*/67}},
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/68},
+                               .cycle = NondetRegLayout{._super = /*offset=*/69}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/70},
+                               .cycle = NondetRegLayout{._super = /*offset=*/71}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/72},
+                             .val = NondetRegLayout{._super = /*offset=*/73}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/74},
+                             .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/76},
+                             .val = NondetRegLayout{._super = /*offset=*/77}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/78},
+                             .val = NondetRegLayout{._super = /*offset=*/79}},
+    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/80},
+                            .val = NondetRegLayout{._super = /*offset=*/81}},
+    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/82},
+                            .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra18 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/84},
+                            .val = NondetRegLayout{._super = /*offset=*/85}},
+    ._extra19 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/86},
+                            .val = NondetRegLayout{._super = /*offset=*/87}}};
+__device__ constexpr ECall0OutputLayout kLayout__614 = ECall0OutputLayout{.arm0 = kLayout__615,
+                                                                          .arm1 = kLayout__625,
+                                                                          .arm2 = kLayout__627,
+                                                                          .arm3 = kLayout__645,
+                                                                          .arm4 = kLayout__647,
+                                                                          .arm5 = kLayout__654,
+                                                                          .arm6 = kLayout__665,
+                                                                          .arm7 = kLayout__666};
+__device__ constexpr NondetU16RegLayout kLayout__668 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/132},
+                                           .val = NondetRegLayout{._super = /*offset=*/133}}};
+__device__ constexpr NondetU16RegLayout kLayout__669 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/135},
+                                           .val = NondetRegLayout{._super = /*offset=*/136}}};
+__device__ constexpr NormalizeU32Layout kLayout__667 =
+    NormalizeU32Layout{.low16 = kLayout__668,
+                       .lowCarry = NondetRegLayout{._super = /*offset=*/134},
+                       .high16 = kLayout__669,
+                       .highCarry = NondetRegLayout{._super = /*offset=*/137}};
+__device__ constexpr ECall0Layout kLayout__605 =
+    ECall0Layout{.s0 = NondetRegLayout{._super = /*offset=*/88},
+                 .s1 = NondetRegLayout{._super = /*offset=*/89},
+                 .s2 = NondetRegLayout{._super = /*offset=*/90},
+                 ._0 = kLayout__606,
+                 .pcAddr = kLayout__607,
+                 ._arguments_ECall0Output = kLayout__609,
+                 .output = kLayout__614,
+                 .isDecode = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/126},
+                                          .inv = NondetRegLayout{._super = /*offset=*/127}},
+                 .isP2Entry = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/128},
+                                           .inv = NondetRegLayout{._super = /*offset=*/129}},
+                 .isShaEcall = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/130},
+                                            .inv = NondetRegLayout{._super = /*offset=*/131}},
+                 .addPC = kLayout__667};
+__device__ constexpr DoCycleTableLayout kLayout__671 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/191},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/192}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/193},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/194}}};
+__device__ constexpr NondetRegLayout24LayoutArray kLayout__673 = NondetRegLayout24LayoutArray{
+    NondetRegLayout{._super = /*offset=*/39}, NondetRegLayout{._super = /*offset=*/40},
+    NondetRegLayout{._super = /*offset=*/41}, NondetRegLayout{._super = /*offset=*/42},
+    NondetRegLayout{._super = /*offset=*/43}, NondetRegLayout{._super = /*offset=*/44},
+    NondetRegLayout{._super = /*offset=*/45}, NondetRegLayout{._super = /*offset=*/46},
+    NondetRegLayout{._super = /*offset=*/47}, NondetRegLayout{._super = /*offset=*/48},
+    NondetRegLayout{._super = /*offset=*/49}, NondetRegLayout{._super = /*offset=*/50},
+    NondetRegLayout{._super = /*offset=*/51}, NondetRegLayout{._super = /*offset=*/52},
+    NondetRegLayout{._super = /*offset=*/53}, NondetRegLayout{._super = /*offset=*/54},
+    NondetRegLayout{._super = /*offset=*/55}, NondetRegLayout{._super = /*offset=*/56},
+    NondetRegLayout{._super = /*offset=*/57}, NondetRegLayout{._super = /*offset=*/58},
+    NondetRegLayout{._super = /*offset=*/59}, NondetRegLayout{._super = /*offset=*/60},
+    NondetRegLayout{._super = /*offset=*/61}, NondetRegLayout{._super = /*offset=*/62}};
+__device__ constexpr PoseidonStateLayout kLayout__672 =
+    PoseidonStateLayout{.hasState = NondetRegLayout{._super = /*offset=*/28},
+                        .stateAddr = NondetRegLayout{._super = /*offset=*/29},
+                        .bufOutAddr = NondetRegLayout{._super = /*offset=*/30},
+                        .isElem = NondetRegLayout{._super = /*offset=*/31},
+                        .checkOut = NondetRegLayout{._super = /*offset=*/32},
+                        .loadTxType = NondetRegLayout{._super = /*offset=*/33},
+                        .nextState = NondetRegLayout{._super = /*offset=*/34},
+                        .subState = NondetRegLayout{._super = /*offset=*/35},
+                        .bufInAddr = NondetRegLayout{._super = /*offset=*/36},
+                        .count = NondetRegLayout{._super = /*offset=*/37},
+                        .mode = NondetRegLayout{._super = /*offset=*/38},
+                        .inner = kLayout__673,
+                        .zcheck = NondetExtRegLayout{._super = /*offset=*/63}};
+__device__ constexpr MemoryArgLayout kLayout__676 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/67},
+                    .addr = NondetRegLayout{._super = /*offset=*/68},
+                    .cycle = NondetRegLayout{._super = /*offset=*/69},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/70},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/71}};
+__device__ constexpr MemoryArgLayout kLayout__677 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/72},
+                    .addr = NondetRegLayout{._super = /*offset=*/68},
+                    .cycle = NondetRegLayout{._super = /*offset=*/73},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/74},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/75}};
+__device__ constexpr MemoryArgLayout kLayout__678 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/76},
+                    .addr = NondetRegLayout{._super = /*offset=*/77},
+                    .cycle = NondetRegLayout{._super = /*offset=*/78},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/79},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/80}};
+__device__ constexpr MemoryArgLayout kLayout__679 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/81},
+                    .addr = NondetRegLayout{._super = /*offset=*/77},
+                    .cycle = NondetRegLayout{._super = /*offset=*/82},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/83},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/84}};
+__device__ constexpr MemoryArgLayout kLayout__680 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/85},
+                    .addr = NondetRegLayout{._super = /*offset=*/86},
+                    .cycle = NondetRegLayout{._super = /*offset=*/87},
                     .dataLow = NondetRegLayout{._super = /*offset=*/88},
                     .dataHigh = NondetRegLayout{._super = /*offset=*/89}};
-__device__ constexpr MemoryArgLayout kLayout__621 =
+__device__ constexpr MemoryArgLayout kLayout__681 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/90},
-                    .addr = NondetRegLayout{._super = /*offset=*/91},
-                    .cycle = NondetRegLayout{._super = /*offset=*/92},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/93},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/94}};
-__device__ constexpr MemoryArgLayout kLayout__622 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/95},
-                    .addr = NondetRegLayout{._super = /*offset=*/91},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/96},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/97}};
-__device__ constexpr MemoryArgLayout kLayout__623 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/98},
-                    .addr = NondetRegLayout{._super = /*offset=*/99},
+                    .addr = NondetRegLayout{._super = /*offset=*/86},
+                    .cycle = NondetRegLayout{._super = /*offset=*/91},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/92},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/93}};
+__device__ constexpr MemoryArgLayout kLayout__682 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/94},
+                    .addr = NondetRegLayout{._super = /*offset=*/95},
+                    .cycle = NondetRegLayout{._super = /*offset=*/96},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/97},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/98}};
+__device__ constexpr MemoryArgLayout kLayout__683 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/99},
+                    .addr = NondetRegLayout{._super = /*offset=*/95},
                     .cycle = NondetRegLayout{._super = /*offset=*/100},
                     .dataLow = NondetRegLayout{._super = /*offset=*/101},
                     .dataHigh = NondetRegLayout{._super = /*offset=*/102}};
-__device__ constexpr MemoryArgLayout kLayout__624 =
+__device__ constexpr MemoryArgLayout kLayout__684 =
     MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/103},
-                    .addr = NondetRegLayout{._super = /*offset=*/99},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/104},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/105}};
-__device__ constexpr MemoryArgLayout kLayout__625 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/106},
-                    .addr = NondetRegLayout{._super = /*offset=*/107},
-                    .cycle = NondetRegLayout{._super = /*offset=*/108},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/109},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/110}};
-__device__ constexpr MemoryArgLayout kLayout__626 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/111},
-                    .addr = NondetRegLayout{._super = /*offset=*/107},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/112},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/113}};
-__device__ constexpr MemoryArgLayout kLayout__627 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/114},
-                    .addr = NondetRegLayout{._super = /*offset=*/115},
-                    .cycle = NondetRegLayout{._super = /*offset=*/116},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/117},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/118}};
-__device__ constexpr MemoryArgLayout kLayout__628 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/119},
-                    .addr = NondetRegLayout{._super = /*offset=*/115},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/120},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/121}};
-__device__ constexpr MemoryArgLayout kLayout__629 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/122},
-                    .addr = NondetRegLayout{._super = /*offset=*/123},
-                    .cycle = NondetRegLayout{._super = /*offset=*/124},
-                    .dataLow = NondetRegLayout{._super = /*offset=*/125},
-                    .dataHigh = NondetRegLayout{._super = /*offset=*/126}};
-__device__ constexpr MemoryArgLayout kLayout__630 =
-    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/127},
-                    .addr = NondetRegLayout{._super = /*offset=*/123},
-                    .cycle = NondetRegLayout{._super = /*offset=*/0},
+                    .addr = NondetRegLayout{._super = /*offset=*/104},
+                    .cycle = NondetRegLayout{._super = /*offset=*/105},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/106},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/107}};
+__device__ constexpr MemoryArgLayout kLayout__685 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/108},
+                    .addr = NondetRegLayout{._super = /*offset=*/104},
+                    .cycle = NondetRegLayout{._super = /*offset=*/109},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/110},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/111}};
+__device__ constexpr MemoryArgLayout kLayout__686 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/112},
+                    .addr = NondetRegLayout{._super = /*offset=*/113},
+                    .cycle = NondetRegLayout{._super = /*offset=*/114},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/115},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/116}};
+__device__ constexpr MemoryArgLayout kLayout__687 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/117},
+                    .addr = NondetRegLayout{._super = /*offset=*/113},
+                    .cycle = NondetRegLayout{._super = /*offset=*/118},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/119},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/120}};
+__device__ constexpr MemoryArgLayout kLayout__688 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/121},
+                    .addr = NondetRegLayout{._super = /*offset=*/122},
+                    .cycle = NondetRegLayout{._super = /*offset=*/123},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/124},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/125}};
+__device__ constexpr MemoryArgLayout kLayout__689 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/126},
+                    .addr = NondetRegLayout{._super = /*offset=*/122},
+                    .cycle = NondetRegLayout{._super = /*offset=*/127},
                     .dataLow = NondetRegLayout{._super = /*offset=*/128},
                     .dataHigh = NondetRegLayout{._super = /*offset=*/129}};
-__device__ constexpr MemoryArgLayout16LayoutArray kLayout__614 =
-    MemoryArgLayout16LayoutArray{kLayout__615,
-                                 kLayout__616,
-                                 kLayout__617,
-                                 kLayout__618,
-                                 kLayout__619,
-                                 kLayout__620,
-                                 kLayout__621,
-                                 kLayout__622,
-                                 kLayout__623,
-                                 kLayout__624,
-                                 kLayout__625,
-                                 kLayout__626,
-                                 kLayout__627,
-                                 kLayout__628,
-                                 kLayout__629,
-                                 kLayout__630};
-__device__ constexpr CycleArgLayout8LayoutArray kLayout__631 =
-    CycleArgLayout8LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/131}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/133}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/135}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/137}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/138},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/139}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/141}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/142},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/143}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/145}}};
-__device__ constexpr ArgU16Layout16LayoutArray kLayout__632 =
-    ArgU16Layout16LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                                           .val = NondetRegLayout{._super = /*offset=*/147}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                                           .val = NondetRegLayout{._super = /*offset=*/149}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                                           .val = NondetRegLayout{._super = /*offset=*/151}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                                           .val = NondetRegLayout{._super = /*offset=*/153}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                                           .val = NondetRegLayout{._super = /*offset=*/155}},
+__device__ constexpr MemoryArgLayout kLayout__690 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
+                    .addr = NondetRegLayout{._super = /*offset=*/131},
+                    .cycle = NondetRegLayout{._super = /*offset=*/132},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/133},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/134}};
+__device__ constexpr MemoryArgLayout kLayout__691 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/135},
+                    .addr = NondetRegLayout{._super = /*offset=*/131},
+                    .cycle = NondetRegLayout{._super = /*offset=*/136},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/137},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/138}};
+__device__ constexpr MemoryArgLayout16LayoutArray kLayout__675 =
+    MemoryArgLayout16LayoutArray{kLayout__676,
+                                 kLayout__677,
+                                 kLayout__678,
+                                 kLayout__679,
+                                 kLayout__680,
+                                 kLayout__681,
+                                 kLayout__682,
+                                 kLayout__683,
+                                 kLayout__684,
+                                 kLayout__685,
+                                 kLayout__686,
+                                 kLayout__687,
+                                 kLayout__688,
+                                 kLayout__689,
+                                 kLayout__690,
+                                 kLayout__691};
+__device__ constexpr CycleArgLayout8LayoutArray kLayout__692 =
+    CycleArgLayout8LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/140}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/142}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/144}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/146}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/147},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/148}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/150}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/152}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/153},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/154}}};
+__device__ constexpr ArgU16Layout24LayoutArray kLayout__693 =
+    ArgU16Layout24LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                                           .val = NondetRegLayout{._super = /*offset=*/74}},
                               ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                                           .val = NondetRegLayout{._super = /*offset=*/157}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                                           .val = NondetRegLayout{._super = /*offset=*/159}},
+                                           .val = NondetRegLayout{._super = /*offset=*/75}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                                           .val = NondetRegLayout{._super = /*offset=*/158}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                                           .val = NondetRegLayout{._super = /*offset=*/83}},
                               ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                                           .val = NondetRegLayout{._super = /*offset=*/161}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                                           .val = NondetRegLayout{._super = /*offset=*/163}},
+                                           .val = NondetRegLayout{._super = /*offset=*/84}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                                           .val = NondetRegLayout{._super = /*offset=*/162}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                                           .val = NondetRegLayout{._super = /*offset=*/92}},
                               ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                                           .val = NondetRegLayout{._super = /*offset=*/165}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                                           .val = NondetRegLayout{._super = /*offset=*/167}},
+                                           .val = NondetRegLayout{._super = /*offset=*/93}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                                           .val = NondetRegLayout{._super = /*offset=*/166}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                                           .val = NondetRegLayout{._super = /*offset=*/101}},
                               ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                                           .val = NondetRegLayout{._super = /*offset=*/169}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                                           .val = NondetRegLayout{._super = /*offset=*/171}},
+                                           .val = NondetRegLayout{._super = /*offset=*/102}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                                           .val = NondetRegLayout{._super = /*offset=*/170}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                                           .val = NondetRegLayout{._super = /*offset=*/110}},
                               ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                                           .val = NondetRegLayout{._super = /*offset=*/173}},
-                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                                           .val = NondetRegLayout{._super = /*offset=*/175}},
+                                           .val = NondetRegLayout{._super = /*offset=*/111}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                                           .val = NondetRegLayout{._super = /*offset=*/174}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                                           .val = NondetRegLayout{._super = /*offset=*/119}},
                               ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                                           .val = NondetRegLayout{._super = /*offset=*/177}}};
-__device__ constexpr ArgU8Layout2LayoutArray kLayout__633 =
-    ArgU8Layout2LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                                        .val = NondetRegLayout{._super = /*offset=*/179}},
-                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                                        .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr _Arguments_Poseidon0StateLayout kLayout__613 =
-    _Arguments_Poseidon0StateLayout{.memoryArg = kLayout__614,
-                                    .cycleArg = kLayout__631,
-                                    .argU16 = kLayout__632,
-                                    .argU8 = kLayout__633};
-__device__ constexpr PoseidonEntry_SuperArm0Layout kLayout__638 = PoseidonEntry_SuperArm0Layout{
-    ._super = kLayout__611,
-    ._extra0 = kLayout__615,
-    ._extra1 = kLayout__616,
-    ._extra2 = kLayout__617,
-    ._extra3 = kLayout__618,
-    ._extra4 = kLayout__619,
-    ._extra5 = kLayout__620,
-    ._extra6 = kLayout__621,
-    ._extra7 = kLayout__622,
-    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                              .cycle = NondetRegLayout{._super = /*offset=*/131}},
-    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                              .cycle = NondetRegLayout{._super = /*offset=*/133}},
-    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                               .cycle = NondetRegLayout{._super = /*offset=*/135}},
-    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                               .cycle = NondetRegLayout{._super = /*offset=*/137}}};
-__device__ constexpr MemoryIOLayout kLayout__642 =
-    MemoryIOLayout{.oldTxn = kLayout__615, .newTxn = kLayout__616};
-__device__ constexpr IsCycleLayout kLayout__644 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/131}}};
-__device__ constexpr IsForwardLayout kLayout__643 = IsForwardLayout{._0 = kLayout__644};
-__device__ constexpr MemoryReadLayout kLayout__641 =
-    MemoryReadLayout{.io = kLayout__642, ._0 = kLayout__643};
-__device__ constexpr ReadAddrLayout kLayout__640 = ReadAddrLayout{.addr32 = kLayout__641};
-__device__ constexpr MemoryIOLayout kLayout__647 =
-    MemoryIOLayout{.oldTxn = kLayout__617, .newTxn = kLayout__618};
-__device__ constexpr IsCycleLayout kLayout__649 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/133}}};
-__device__ constexpr IsForwardLayout kLayout__648 = IsForwardLayout{._0 = kLayout__649};
-__device__ constexpr MemoryReadLayout kLayout__646 =
-    MemoryReadLayout{.io = kLayout__647, ._0 = kLayout__648};
-__device__ constexpr ReadAddrLayout kLayout__645 = ReadAddrLayout{.addr32 = kLayout__646};
-__device__ constexpr MemoryIOLayout kLayout__652 =
-    MemoryIOLayout{.oldTxn = kLayout__619, .newTxn = kLayout__620};
-__device__ constexpr IsCycleLayout kLayout__654 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/135}}};
-__device__ constexpr IsForwardLayout kLayout__653 = IsForwardLayout{._0 = kLayout__654};
-__device__ constexpr MemoryReadLayout kLayout__651 =
-    MemoryReadLayout{.io = kLayout__652, ._0 = kLayout__653};
-__device__ constexpr ReadAddrLayout kLayout__650 = ReadAddrLayout{.addr32 = kLayout__651};
-__device__ constexpr MemoryIOLayout kLayout__656 =
-    MemoryIOLayout{.oldTxn = kLayout__621, .newTxn = kLayout__622};
-__device__ constexpr IsCycleLayout kLayout__658 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/137}}};
-__device__ constexpr IsForwardLayout kLayout__657 = IsForwardLayout{._0 = kLayout__658};
-__device__ constexpr MemoryReadLayout kLayout__655 =
-    MemoryReadLayout{.io = kLayout__656, ._0 = kLayout__657};
-__device__ constexpr PoseidonEcallLayout kLayout__639 = PoseidonEcallLayout{
-    ._super = kLayout__611,
-    .stateAddr = kLayout__640,
-    .bufInAddr = kLayout__645,
-    .bufOutAddr = kLayout__650,
-    .bitsAndCount = kLayout__655,
-    ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/182},
-                       .inv = NondetRegLayout{._super = /*offset=*/183}},
-    .isElem = NondetRegLayout{._super = /*offset=*/184},
-    .checkOut = NondetRegLayout{._super = /*offset=*/185},
-    .countZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/186},
-                              .inv = NondetRegLayout{._super = /*offset=*/187}}};
-__device__ constexpr PoseidonEntry_SuperLayout kLayout__637 =
-    PoseidonEntry_SuperLayout{._super = kLayout__611, .arm0 = kLayout__638, .arm1 = kLayout__639};
-__device__ constexpr MemoryArgLayout8LayoutArray kLayout__660 =
-    MemoryArgLayout8LayoutArray{kLayout__615,
-                                kLayout__616,
-                                kLayout__617,
-                                kLayout__618,
-                                kLayout__619,
-                                kLayout__620,
-                                kLayout__621,
-                                kLayout__622};
-__device__ constexpr CycleArgLayout4LayoutArray kLayout__661 =
-    CycleArgLayout4LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/131}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/133}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/135}},
-                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                                              .cycle = NondetRegLayout{._super = /*offset=*/137}}};
-__device__ constexpr _Arguments_PoseidonEntry_SuperLayout kLayout__659 =
-    _Arguments_PoseidonEntry_SuperLayout{.memoryArg = kLayout__660, .cycleArg = kLayout__661};
-__device__ constexpr PoseidonEntryLayout kLayout__636 =
-    PoseidonEntryLayout{._super = kLayout__637,
-                        .pcZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/188},
-                                               .inv = NondetRegLayout{._super = /*offset=*/189}},
-                        ._arguments_PoseidonEntry_Super = kLayout__659};
-__device__ constexpr Poseidon0StateArm0Layout kLayout__635 = Poseidon0StateArm0Layout{
-    ._super = kLayout__636,
-    ._extra0 = kLayout__623,
-    ._extra1 = kLayout__624,
-    ._extra2 = kLayout__625,
-    ._extra3 = kLayout__626,
-    ._extra4 = kLayout__627,
-    ._extra5 = kLayout__628,
-    ._extra6 = kLayout__629,
-    ._extra7 = kLayout__630,
-    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/138},
-                              .cycle = NondetRegLayout{._super = /*offset=*/139}},
-    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
-                              .cycle = NondetRegLayout{._super = /*offset=*/141}},
-    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/142},
-                               .cycle = NondetRegLayout{._super = /*offset=*/143}},
-    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                               .cycle = NondetRegLayout{._super = /*offset=*/145}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                             .val = NondetRegLayout{._super = /*offset=*/147}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                             .val = NondetRegLayout{._super = /*offset=*/149}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                             .val = NondetRegLayout{._super = /*offset=*/151}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                             .val = NondetRegLayout{._super = /*offset=*/153}},
-    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                             .val = NondetRegLayout{._super = /*offset=*/155}},
-    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                             .val = NondetRegLayout{._super = /*offset=*/157}},
-    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                             .val = NondetRegLayout{._super = /*offset=*/159}},
-    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                             .val = NondetRegLayout{._super = /*offset=*/161}},
-    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                             .val = NondetRegLayout{._super = /*offset=*/163}},
-    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                             .val = NondetRegLayout{._super = /*offset=*/165}},
-    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                             .val = NondetRegLayout{._super = /*offset=*/167}},
-    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                             .val = NondetRegLayout{._super = /*offset=*/169}},
-    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                             .val = NondetRegLayout{._super = /*offset=*/171}},
+                                           .val = NondetRegLayout{._super = /*offset=*/120}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                                           .val = NondetRegLayout{._super = /*offset=*/178}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                                           .val = NondetRegLayout{._super = /*offset=*/128}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                                           .val = NondetRegLayout{._super = /*offset=*/129}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                                           .val = NondetRegLayout{._super = /*offset=*/182}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                                           .val = NondetRegLayout{._super = /*offset=*/137}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                                           .val = NondetRegLayout{._super = /*offset=*/138}},
+                              ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                                           .val = NondetRegLayout{._super = /*offset=*/186}}};
+__device__ constexpr ArgU8Layout2LayoutArray kLayout__694 =
+    ArgU8Layout2LayoutArray{ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                                        .val = NondetRegLayout{._super = /*offset=*/188}},
+                            ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                                        .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr _Arguments_Poseidon0StateLayout kLayout__674 =
+    _Arguments_Poseidon0StateLayout{.memoryArg = kLayout__675,
+                                    .cycleArg = kLayout__692,
+                                    .argU16 = kLayout__693,
+                                    .argU8 = kLayout__694};
+__device__ constexpr PoseidonEntry_SuperArm0Layout kLayout__699 = PoseidonEntry_SuperArm0Layout{
+    ._super = kLayout__672,
+    ._extra0 = kLayout__676,
+    ._extra1 = kLayout__677,
+    ._extra2 = kLayout__678,
+    ._extra3 = kLayout__679,
+    ._extra4 = kLayout__680,
+    ._extra5 = kLayout__681,
+    ._extra6 = kLayout__682,
+    ._extra7 = kLayout__683,
+    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                              .cycle = NondetRegLayout{._super = /*offset=*/140}},
+    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                              .cycle = NondetRegLayout{._super = /*offset=*/142}},
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                               .cycle = NondetRegLayout{._super = /*offset=*/144}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                               .cycle = NondetRegLayout{._super = /*offset=*/146}}};
+__device__ constexpr MemoryIOLayout kLayout__703 =
+    MemoryIOLayout{.oldTxn = kLayout__676, .newTxn = kLayout__677};
+__device__ constexpr IsCycleLayout kLayout__705 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/140}}};
+__device__ constexpr IsForwardLayout kLayout__704 = IsForwardLayout{._0 = kLayout__705};
+__device__ constexpr MemoryReadLayout kLayout__702 =
+    MemoryReadLayout{.io = kLayout__703, ._0 = kLayout__704};
+__device__ constexpr ReadAddrLayout kLayout__701 = ReadAddrLayout{.addr32 = kLayout__702};
+__device__ constexpr MemoryIOLayout kLayout__708 =
+    MemoryIOLayout{.oldTxn = kLayout__678, .newTxn = kLayout__679};
+__device__ constexpr IsCycleLayout kLayout__710 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/142}}};
+__device__ constexpr IsForwardLayout kLayout__709 = IsForwardLayout{._0 = kLayout__710};
+__device__ constexpr MemoryReadLayout kLayout__707 =
+    MemoryReadLayout{.io = kLayout__708, ._0 = kLayout__709};
+__device__ constexpr ReadAddrLayout kLayout__706 = ReadAddrLayout{.addr32 = kLayout__707};
+__device__ constexpr MemoryIOLayout kLayout__713 =
+    MemoryIOLayout{.oldTxn = kLayout__680, .newTxn = kLayout__681};
+__device__ constexpr IsCycleLayout kLayout__715 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/144}}};
+__device__ constexpr IsForwardLayout kLayout__714 = IsForwardLayout{._0 = kLayout__715};
+__device__ constexpr MemoryReadLayout kLayout__712 =
+    MemoryReadLayout{.io = kLayout__713, ._0 = kLayout__714};
+__device__ constexpr ReadAddrLayout kLayout__711 = ReadAddrLayout{.addr32 = kLayout__712};
+__device__ constexpr MemoryIOLayout kLayout__717 =
+    MemoryIOLayout{.oldTxn = kLayout__682, .newTxn = kLayout__683};
+__device__ constexpr MemoryReadLayout kLayout__716 =
+    MemoryReadLayout{.io = kLayout__717, ._0 = kLayout__229};
+__device__ constexpr PoseidonEcallLayout kLayout__700 = PoseidonEcallLayout{
+    ._super = kLayout__672,
+    .stateAddr = kLayout__701,
+    .bufInAddr = kLayout__706,
+    .bufOutAddr = kLayout__711,
+    .bitsAndCount = kLayout__716,
+    ._0 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/195},
+                       .inv = NondetRegLayout{._super = /*offset=*/196}},
+    .isElem = NondetRegLayout{._super = /*offset=*/197},
+    .checkOut = NondetRegLayout{._super = /*offset=*/198},
+    .countZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/199},
+                              .inv = NondetRegLayout{._super = /*offset=*/200}}};
+__device__ constexpr PoseidonEntry_SuperLayout kLayout__698 =
+    PoseidonEntry_SuperLayout{._super = kLayout__672, .arm0 = kLayout__699, .arm1 = kLayout__700};
+__device__ constexpr MemoryArgLayout8LayoutArray kLayout__719 =
+    MemoryArgLayout8LayoutArray{kLayout__676,
+                                kLayout__677,
+                                kLayout__678,
+                                kLayout__679,
+                                kLayout__680,
+                                kLayout__681,
+                                kLayout__682,
+                                kLayout__683};
+__device__ constexpr CycleArgLayout4LayoutArray kLayout__720 =
+    CycleArgLayout4LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/140}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/142}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/144}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/146}}};
+__device__ constexpr _Arguments_PoseidonEntry_SuperLayout kLayout__718 =
+    _Arguments_PoseidonEntry_SuperLayout{.memoryArg = kLayout__719, .cycleArg = kLayout__720};
+__device__ constexpr PoseidonEntryLayout kLayout__697 =
+    PoseidonEntryLayout{._super = kLayout__698,
+                        .pcZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/201},
+                                               .inv = NondetRegLayout{._super = /*offset=*/202}},
+                        ._arguments_PoseidonEntry_Super = kLayout__718};
+__device__ constexpr Poseidon0StateArm0Layout kLayout__696 = Poseidon0StateArm0Layout{
+    ._super = kLayout__697,
+    ._extra0 = kLayout__684,
+    ._extra1 = kLayout__685,
+    ._extra2 = kLayout__686,
+    ._extra3 = kLayout__687,
+    ._extra4 = kLayout__688,
+    ._extra5 = kLayout__689,
+    ._extra6 = kLayout__690,
+    ._extra7 = kLayout__691,
+    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/147},
+                              .cycle = NondetRegLayout{._super = /*offset=*/148}},
+    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                              .cycle = NondetRegLayout{._super = /*offset=*/150}},
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                               .cycle = NondetRegLayout{._super = /*offset=*/152}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/153},
+                               .cycle = NondetRegLayout{._super = /*offset=*/154}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                             .val = NondetRegLayout{._super = /*offset=*/74}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                             .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                             .val = NondetRegLayout{._super = /*offset=*/158}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                             .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                             .val = NondetRegLayout{._super = /*offset=*/84}},
+    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                             .val = NondetRegLayout{._super = /*offset=*/162}},
+    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                             .val = NondetRegLayout{._super = /*offset=*/92}},
+    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                             .val = NondetRegLayout{._super = /*offset=*/93}},
+    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                             .val = NondetRegLayout{._super = /*offset=*/166}},
+    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                             .val = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                             .val = NondetRegLayout{._super = /*offset=*/102}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                             .val = NondetRegLayout{._super = /*offset=*/170}},
+    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                             .val = NondetRegLayout{._super = /*offset=*/110}},
     ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                             .val = NondetRegLayout{._super = /*offset=*/173}},
-    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                             .val = NondetRegLayout{._super = /*offset=*/175}},
-    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                             .val = NondetRegLayout{._super = /*offset=*/177}},
-    ._extra28 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                            .val = NondetRegLayout{._super = /*offset=*/179}},
-    ._extra29 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                            .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr ReadElemLayout kLayout__665 = ReadElemLayout{.elem32 = kLayout__641};
-__device__ constexpr ReadElemLayout kLayout__666 = ReadElemLayout{.elem32 = kLayout__646};
-__device__ constexpr ReadElemLayout kLayout__667 = ReadElemLayout{.elem32 = kLayout__651};
-__device__ constexpr ReadElemLayout kLayout__668 = ReadElemLayout{.elem32 = kLayout__655};
-__device__ constexpr MemoryIOLayout kLayout__671 =
-    MemoryIOLayout{.oldTxn = kLayout__623, .newTxn = kLayout__624};
-__device__ constexpr IsCycleLayout kLayout__673 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/138},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/139}}};
-__device__ constexpr IsForwardLayout kLayout__672 = IsForwardLayout{._0 = kLayout__673};
-__device__ constexpr MemoryReadLayout kLayout__670 =
-    MemoryReadLayout{.io = kLayout__671, ._0 = kLayout__672};
-__device__ constexpr ReadElemLayout kLayout__669 = ReadElemLayout{.elem32 = kLayout__670};
-__device__ constexpr MemoryIOLayout kLayout__676 =
-    MemoryIOLayout{.oldTxn = kLayout__625, .newTxn = kLayout__626};
-__device__ constexpr IsCycleLayout kLayout__678 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/141}}};
-__device__ constexpr IsForwardLayout kLayout__677 = IsForwardLayout{._0 = kLayout__678};
-__device__ constexpr MemoryReadLayout kLayout__675 =
-    MemoryReadLayout{.io = kLayout__676, ._0 = kLayout__677};
-__device__ constexpr ReadElemLayout kLayout__674 = ReadElemLayout{.elem32 = kLayout__675};
-__device__ constexpr MemoryIOLayout kLayout__681 =
-    MemoryIOLayout{.oldTxn = kLayout__627, .newTxn = kLayout__628};
-__device__ constexpr IsCycleLayout kLayout__683 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/142},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/143}}};
-__device__ constexpr IsForwardLayout kLayout__682 = IsForwardLayout{._0 = kLayout__683};
-__device__ constexpr MemoryReadLayout kLayout__680 =
-    MemoryReadLayout{.io = kLayout__681, ._0 = kLayout__682};
-__device__ constexpr ReadElemLayout kLayout__679 = ReadElemLayout{.elem32 = kLayout__680};
-__device__ constexpr MemoryIOLayout kLayout__686 =
-    MemoryIOLayout{.oldTxn = kLayout__629, .newTxn = kLayout__630};
-__device__ constexpr IsCycleLayout kLayout__688 =
-    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                                        .cycle = NondetRegLayout{._super = /*offset=*/145}}};
-__device__ constexpr IsForwardLayout kLayout__687 = IsForwardLayout{._0 = kLayout__688};
-__device__ constexpr MemoryReadLayout kLayout__685 =
-    MemoryReadLayout{.io = kLayout__686, ._0 = kLayout__687};
-__device__ constexpr ReadElemLayout kLayout__684 = ReadElemLayout{.elem32 = kLayout__685};
-__device__ constexpr ReadElemLayout8LayoutArray kLayout__664 =
-    ReadElemLayout8LayoutArray{kLayout__665,
-                               kLayout__666,
-                               kLayout__667,
-                               kLayout__668,
-                               kLayout__669,
-                               kLayout__674,
-                               kLayout__679,
-                               kLayout__684};
-__device__ constexpr PoseidonLoadStateLayout kLayout__663 =
-    PoseidonLoadStateLayout{._super = kLayout__611, .loadList = kLayout__664};
-__device__ constexpr Poseidon0StateArm1Layout kLayout__662 = Poseidon0StateArm1Layout{
-    ._super = kLayout__663,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                            .val = NondetRegLayout{._super = /*offset=*/147}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                            .val = NondetRegLayout{._super = /*offset=*/149}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                            .val = NondetRegLayout{._super = /*offset=*/151}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                            .val = NondetRegLayout{._super = /*offset=*/153}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                            .val = NondetRegLayout{._super = /*offset=*/155}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                            .val = NondetRegLayout{._super = /*offset=*/157}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                            .val = NondetRegLayout{._super = /*offset=*/159}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                            .val = NondetRegLayout{._super = /*offset=*/161}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                            .val = NondetRegLayout{._super = /*offset=*/163}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                            .val = NondetRegLayout{._super = /*offset=*/165}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                             .val = NondetRegLayout{._super = /*offset=*/167}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                             .val = NondetRegLayout{._super = /*offset=*/169}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                             .val = NondetRegLayout{._super = /*offset=*/171}},
+                             .val = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                             .val = NondetRegLayout{._super = /*offset=*/174}},
+    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                             .val = NondetRegLayout{._super = /*offset=*/120}},
+    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                             .val = NondetRegLayout{._super = /*offset=*/178}},
+    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                             .val = NondetRegLayout{._super = /*offset=*/128}},
+    ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                             .val = NondetRegLayout{._super = /*offset=*/182}},
+    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                             .val = NondetRegLayout{._super = /*offset=*/138}},
+    ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                             .val = NondetRegLayout{._super = /*offset=*/186}},
+    ._extra36 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                            .val = NondetRegLayout{._super = /*offset=*/188}},
+    ._extra37 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                            .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr ReadElemLayout kLayout__724 = ReadElemLayout{.elem32 = kLayout__702};
+__device__ constexpr ReadElemLayout kLayout__725 = ReadElemLayout{.elem32 = kLayout__707};
+__device__ constexpr ReadElemLayout kLayout__726 = ReadElemLayout{.elem32 = kLayout__712};
+__device__ constexpr ReadElemLayout kLayout__727 = ReadElemLayout{.elem32 = kLayout__716};
+__device__ constexpr MemoryIOLayout kLayout__730 =
+    MemoryIOLayout{.oldTxn = kLayout__684, .newTxn = kLayout__685};
+__device__ constexpr IsCycleLayout kLayout__732 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/147},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/148}}};
+__device__ constexpr IsForwardLayout kLayout__731 = IsForwardLayout{._0 = kLayout__732};
+__device__ constexpr MemoryReadLayout kLayout__729 =
+    MemoryReadLayout{.io = kLayout__730, ._0 = kLayout__731};
+__device__ constexpr ReadElemLayout kLayout__728 = ReadElemLayout{.elem32 = kLayout__729};
+__device__ constexpr MemoryIOLayout kLayout__735 =
+    MemoryIOLayout{.oldTxn = kLayout__686, .newTxn = kLayout__687};
+__device__ constexpr IsCycleLayout kLayout__737 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/150}}};
+__device__ constexpr IsForwardLayout kLayout__736 = IsForwardLayout{._0 = kLayout__737};
+__device__ constexpr MemoryReadLayout kLayout__734 =
+    MemoryReadLayout{.io = kLayout__735, ._0 = kLayout__736};
+__device__ constexpr ReadElemLayout kLayout__733 = ReadElemLayout{.elem32 = kLayout__734};
+__device__ constexpr MemoryIOLayout kLayout__740 =
+    MemoryIOLayout{.oldTxn = kLayout__688, .newTxn = kLayout__689};
+__device__ constexpr IsCycleLayout kLayout__742 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/152}}};
+__device__ constexpr IsForwardLayout kLayout__741 = IsForwardLayout{._0 = kLayout__742};
+__device__ constexpr MemoryReadLayout kLayout__739 =
+    MemoryReadLayout{.io = kLayout__740, ._0 = kLayout__741};
+__device__ constexpr ReadElemLayout kLayout__738 = ReadElemLayout{.elem32 = kLayout__739};
+__device__ constexpr MemoryIOLayout kLayout__745 =
+    MemoryIOLayout{.oldTxn = kLayout__690, .newTxn = kLayout__691};
+__device__ constexpr IsCycleLayout kLayout__747 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/153},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/154}}};
+__device__ constexpr IsForwardLayout kLayout__746 = IsForwardLayout{._0 = kLayout__747};
+__device__ constexpr MemoryReadLayout kLayout__744 =
+    MemoryReadLayout{.io = kLayout__745, ._0 = kLayout__746};
+__device__ constexpr ReadElemLayout kLayout__743 = ReadElemLayout{.elem32 = kLayout__744};
+__device__ constexpr ReadElemLayout8LayoutArray kLayout__723 =
+    ReadElemLayout8LayoutArray{kLayout__724,
+                               kLayout__725,
+                               kLayout__726,
+                               kLayout__727,
+                               kLayout__728,
+                               kLayout__733,
+                               kLayout__738,
+                               kLayout__743};
+__device__ constexpr PoseidonLoadStateLayout kLayout__722 =
+    PoseidonLoadStateLayout{._super = kLayout__672, .loadList = kLayout__723};
+__device__ constexpr Poseidon0StateArm1Layout kLayout__721 = Poseidon0StateArm1Layout{
+    ._super = kLayout__722,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                            .val = NondetRegLayout{._super = /*offset=*/74}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                            .val = NondetRegLayout{._super = /*offset=*/158}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                            .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/84}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                            .val = NondetRegLayout{._super = /*offset=*/162}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                            .val = NondetRegLayout{._super = /*offset=*/92}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/93}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                            .val = NondetRegLayout{._super = /*offset=*/166}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                            .val = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                             .val = NondetRegLayout{._super = /*offset=*/102}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                             .val = NondetRegLayout{._super = /*offset=*/170}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                             .val = NondetRegLayout{._super = /*offset=*/110}},
     ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                             .val = NondetRegLayout{._super = /*offset=*/173}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                             .val = NondetRegLayout{._super = /*offset=*/175}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                             .val = NondetRegLayout{._super = /*offset=*/177}},
-    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                            .val = NondetRegLayout{._super = /*offset=*/179}},
-    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                            .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr OneHot_3_Layout kLayout__693 = OneHot_3_Layout{
-    ._super = NondetRegLayout3LayoutArray{NondetRegLayout{._super = /*offset=*/182},
-                                          NondetRegLayout{._super = /*offset=*/183},
-                                          NondetRegLayout{._super = /*offset=*/184}}};
-__device__ constexpr MemoryPageInLayout kLayout__698 = MemoryPageInLayout{.io = kLayout__642};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__697 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__698,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                              .cycle = NondetRegLayout{._super = /*offset=*/131}}};
-__device__ constexpr MemoryPageOutLayout kLayout__699 =
-    MemoryPageOutLayout{.io = kLayout__642, ._0 = kLayout__643};
-__device__ constexpr MemoryGet_SuperLayout kLayout__696 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__641, .arm1 = kLayout__697, .arm2 = kLayout__699};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__701 =
-    MemoryArgLayout2LayoutArray{kLayout__615, kLayout__616};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__700 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__701,
+                             .val = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                             .val = NondetRegLayout{._super = /*offset=*/174}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                             .val = NondetRegLayout{._super = /*offset=*/120}},
+    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                             .val = NondetRegLayout{._super = /*offset=*/178}},
+    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                             .val = NondetRegLayout{._super = /*offset=*/128}},
+    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                             .val = NondetRegLayout{._super = /*offset=*/182}},
+    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                             .val = NondetRegLayout{._super = /*offset=*/138}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                             .val = NondetRegLayout{._super = /*offset=*/186}},
+    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                            .val = NondetRegLayout{._super = /*offset=*/188}},
+    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                            .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr OneHot_3_Layout kLayout__752 = OneHot_3_Layout{
+    ._super = NondetRegLayout3LayoutArray{NondetRegLayout{._super = /*offset=*/195},
+                                          NondetRegLayout{._super = /*offset=*/196},
+                                          NondetRegLayout{._super = /*offset=*/197}}};
+__device__ constexpr MemoryPageInLayout kLayout__757 = MemoryPageInLayout{.io = kLayout__703};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__756 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__757,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                              .cycle = NondetRegLayout{._super = /*offset=*/140}}};
+__device__ constexpr MemoryPageOutLayout kLayout__758 =
+    MemoryPageOutLayout{.io = kLayout__703, ._0 = kLayout__704};
+__device__ constexpr MemoryGet_SuperLayout kLayout__755 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__702, .arm1 = kLayout__756, .arm2 = kLayout__758};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__760 =
+    MemoryArgLayout2LayoutArray{kLayout__676, kLayout__677};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__759 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__760,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/130},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/131}}}};
-__device__ constexpr MemoryGetLayout kLayout__695 =
-    MemoryGetLayout{._super = kLayout__696, ._arguments_MemoryGet_Super = kLayout__700};
-__device__ constexpr MemoryPageInLayout kLayout__705 = MemoryPageInLayout{.io = kLayout__647};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__704 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__705,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                              .cycle = NondetRegLayout{._super = /*offset=*/133}}};
-__device__ constexpr MemoryPageOutLayout kLayout__706 =
-    MemoryPageOutLayout{.io = kLayout__647, ._0 = kLayout__648};
-__device__ constexpr MemoryGet_SuperLayout kLayout__703 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__646, .arm1 = kLayout__704, .arm2 = kLayout__706};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__708 =
-    MemoryArgLayout2LayoutArray{kLayout__617, kLayout__618};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__707 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__708,
+                                         .count = NondetRegLayout{._super = /*offset=*/139},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/140}}}};
+__device__ constexpr MemoryGetLayout kLayout__754 =
+    MemoryGetLayout{._super = kLayout__755, ._arguments_MemoryGet_Super = kLayout__759};
+__device__ constexpr MemoryPageInLayout kLayout__764 = MemoryPageInLayout{.io = kLayout__708};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__763 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__764,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                              .cycle = NondetRegLayout{._super = /*offset=*/142}}};
+__device__ constexpr MemoryPageOutLayout kLayout__765 =
+    MemoryPageOutLayout{.io = kLayout__708, ._0 = kLayout__709};
+__device__ constexpr MemoryGet_SuperLayout kLayout__762 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__707, .arm1 = kLayout__763, .arm2 = kLayout__765};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__767 =
+    MemoryArgLayout2LayoutArray{kLayout__678, kLayout__679};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__766 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__767,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/132},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/133}}}};
-__device__ constexpr MemoryGetLayout kLayout__702 =
-    MemoryGetLayout{._super = kLayout__703, ._arguments_MemoryGet_Super = kLayout__707};
-__device__ constexpr MemoryPageInLayout kLayout__712 = MemoryPageInLayout{.io = kLayout__652};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__711 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__712,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                              .cycle = NondetRegLayout{._super = /*offset=*/135}}};
-__device__ constexpr MemoryPageOutLayout kLayout__713 =
-    MemoryPageOutLayout{.io = kLayout__652, ._0 = kLayout__653};
-__device__ constexpr MemoryGet_SuperLayout kLayout__710 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__651, .arm1 = kLayout__711, .arm2 = kLayout__713};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__715 =
-    MemoryArgLayout2LayoutArray{kLayout__619, kLayout__620};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__714 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__715,
+                                         .count = NondetRegLayout{._super = /*offset=*/141},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/142}}}};
+__device__ constexpr MemoryGetLayout kLayout__761 =
+    MemoryGetLayout{._super = kLayout__762, ._arguments_MemoryGet_Super = kLayout__766};
+__device__ constexpr MemoryPageInLayout kLayout__771 = MemoryPageInLayout{.io = kLayout__713};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__770 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__771,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                              .cycle = NondetRegLayout{._super = /*offset=*/144}}};
+__device__ constexpr MemoryPageOutLayout kLayout__772 =
+    MemoryPageOutLayout{.io = kLayout__713, ._0 = kLayout__714};
+__device__ constexpr MemoryGet_SuperLayout kLayout__769 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__712, .arm1 = kLayout__770, .arm2 = kLayout__772};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__774 =
+    MemoryArgLayout2LayoutArray{kLayout__680, kLayout__681};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__773 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__774,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/134},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/135}}}};
-__device__ constexpr MemoryGetLayout kLayout__709 =
-    MemoryGetLayout{._super = kLayout__710, ._arguments_MemoryGet_Super = kLayout__714};
-__device__ constexpr MemoryPageInLayout kLayout__719 = MemoryPageInLayout{.io = kLayout__656};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__718 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__719,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                              .cycle = NondetRegLayout{._super = /*offset=*/137}}};
-__device__ constexpr MemoryPageOutLayout kLayout__720 =
-    MemoryPageOutLayout{.io = kLayout__656, ._0 = kLayout__657};
-__device__ constexpr MemoryGet_SuperLayout kLayout__717 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__655, .arm1 = kLayout__718, .arm2 = kLayout__720};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__722 =
-    MemoryArgLayout2LayoutArray{kLayout__621, kLayout__622};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__721 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__722,
+                                         .count = NondetRegLayout{._super = /*offset=*/143},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/144}}}};
+__device__ constexpr MemoryGetLayout kLayout__768 =
+    MemoryGetLayout{._super = kLayout__769, ._arguments_MemoryGet_Super = kLayout__773};
+__device__ constexpr MemoryPageInLayout kLayout__778 = MemoryPageInLayout{.io = kLayout__717};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__777 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__778,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                              .cycle = NondetRegLayout{._super = /*offset=*/146}}};
+__device__ constexpr MemoryPageOutLayout kLayout__779 =
+    MemoryPageOutLayout{.io = kLayout__717, ._0 = kLayout__229};
+__device__ constexpr MemoryGet_SuperLayout kLayout__776 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__716, .arm1 = kLayout__777, .arm2 = kLayout__779};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__781 =
+    MemoryArgLayout2LayoutArray{kLayout__682, kLayout__683};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__780 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__781,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/136},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/137}}}};
-__device__ constexpr MemoryGetLayout kLayout__716 =
-    MemoryGetLayout{._super = kLayout__717, ._arguments_MemoryGet_Super = kLayout__721};
-__device__ constexpr MemoryPageInLayout kLayout__726 = MemoryPageInLayout{.io = kLayout__671};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__725 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__726,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/138},
-                              .cycle = NondetRegLayout{._super = /*offset=*/139}}};
-__device__ constexpr MemoryPageOutLayout kLayout__727 =
-    MemoryPageOutLayout{.io = kLayout__671, ._0 = kLayout__672};
-__device__ constexpr MemoryGet_SuperLayout kLayout__724 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__670, .arm1 = kLayout__725, .arm2 = kLayout__727};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__729 =
-    MemoryArgLayout2LayoutArray{kLayout__623, kLayout__624};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__728 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__729,
+                                         .count = NondetRegLayout{._super = /*offset=*/145},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/146}}}};
+__device__ constexpr MemoryGetLayout kLayout__775 =
+    MemoryGetLayout{._super = kLayout__776, ._arguments_MemoryGet_Super = kLayout__780};
+__device__ constexpr MemoryPageInLayout kLayout__785 = MemoryPageInLayout{.io = kLayout__730};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__784 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__785,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/147},
+                              .cycle = NondetRegLayout{._super = /*offset=*/148}}};
+__device__ constexpr MemoryPageOutLayout kLayout__786 =
+    MemoryPageOutLayout{.io = kLayout__730, ._0 = kLayout__731};
+__device__ constexpr MemoryGet_SuperLayout kLayout__783 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__729, .arm1 = kLayout__784, .arm2 = kLayout__786};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__788 =
+    MemoryArgLayout2LayoutArray{kLayout__684, kLayout__685};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__787 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__788,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/138},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/139}}}};
-__device__ constexpr MemoryGetLayout kLayout__723 =
-    MemoryGetLayout{._super = kLayout__724, ._arguments_MemoryGet_Super = kLayout__728};
-__device__ constexpr MemoryPageInLayout kLayout__733 = MemoryPageInLayout{.io = kLayout__676};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__732 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__733,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
-                              .cycle = NondetRegLayout{._super = /*offset=*/141}}};
-__device__ constexpr MemoryPageOutLayout kLayout__734 =
-    MemoryPageOutLayout{.io = kLayout__676, ._0 = kLayout__677};
-__device__ constexpr MemoryGet_SuperLayout kLayout__731 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__675, .arm1 = kLayout__732, .arm2 = kLayout__734};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__736 =
-    MemoryArgLayout2LayoutArray{kLayout__625, kLayout__626};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__735 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__736,
+                                         .count = NondetRegLayout{._super = /*offset=*/147},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/148}}}};
+__device__ constexpr MemoryGetLayout kLayout__782 =
+    MemoryGetLayout{._super = kLayout__783, ._arguments_MemoryGet_Super = kLayout__787};
+__device__ constexpr MemoryPageInLayout kLayout__792 = MemoryPageInLayout{.io = kLayout__735};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__791 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__792,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                              .cycle = NondetRegLayout{._super = /*offset=*/150}}};
+__device__ constexpr MemoryPageOutLayout kLayout__793 =
+    MemoryPageOutLayout{.io = kLayout__735, ._0 = kLayout__736};
+__device__ constexpr MemoryGet_SuperLayout kLayout__790 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__734, .arm1 = kLayout__791, .arm2 = kLayout__793};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__795 =
+    MemoryArgLayout2LayoutArray{kLayout__686, kLayout__687};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__794 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__795,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/140},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/141}}}};
-__device__ constexpr MemoryGetLayout kLayout__730 =
-    MemoryGetLayout{._super = kLayout__731, ._arguments_MemoryGet_Super = kLayout__735};
-__device__ constexpr MemoryPageInLayout kLayout__740 = MemoryPageInLayout{.io = kLayout__681};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__739 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__740,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/142},
-                              .cycle = NondetRegLayout{._super = /*offset=*/143}}};
-__device__ constexpr MemoryPageOutLayout kLayout__741 =
-    MemoryPageOutLayout{.io = kLayout__681, ._0 = kLayout__682};
-__device__ constexpr MemoryGet_SuperLayout kLayout__738 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__680, .arm1 = kLayout__739, .arm2 = kLayout__741};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__743 =
-    MemoryArgLayout2LayoutArray{kLayout__627, kLayout__628};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__742 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__743,
+                                         .count = NondetRegLayout{._super = /*offset=*/149},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/150}}}};
+__device__ constexpr MemoryGetLayout kLayout__789 =
+    MemoryGetLayout{._super = kLayout__790, ._arguments_MemoryGet_Super = kLayout__794};
+__device__ constexpr MemoryPageInLayout kLayout__799 = MemoryPageInLayout{.io = kLayout__740};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__798 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__799,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                              .cycle = NondetRegLayout{._super = /*offset=*/152}}};
+__device__ constexpr MemoryPageOutLayout kLayout__800 =
+    MemoryPageOutLayout{.io = kLayout__740, ._0 = kLayout__741};
+__device__ constexpr MemoryGet_SuperLayout kLayout__797 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__739, .arm1 = kLayout__798, .arm2 = kLayout__800};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__802 =
+    MemoryArgLayout2LayoutArray{kLayout__688, kLayout__689};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__801 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__802,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/142},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/143}}}};
-__device__ constexpr MemoryGetLayout kLayout__737 =
-    MemoryGetLayout{._super = kLayout__738, ._arguments_MemoryGet_Super = kLayout__742};
-__device__ constexpr MemoryPageInLayout kLayout__747 = MemoryPageInLayout{.io = kLayout__686};
-__device__ constexpr MemoryGet_SuperArm1Layout kLayout__746 = MemoryGet_SuperArm1Layout{
-    ._super = kLayout__747,
-    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                              .cycle = NondetRegLayout{._super = /*offset=*/145}}};
-__device__ constexpr MemoryPageOutLayout kLayout__748 =
-    MemoryPageOutLayout{.io = kLayout__686, ._0 = kLayout__687};
-__device__ constexpr MemoryGet_SuperLayout kLayout__745 =
-    MemoryGet_SuperLayout{.arm0 = kLayout__685, .arm1 = kLayout__746, .arm2 = kLayout__748};
-__device__ constexpr MemoryArgLayout2LayoutArray kLayout__750 =
-    MemoryArgLayout2LayoutArray{kLayout__629, kLayout__630};
-__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__749 =
-    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__750,
+                                         .count = NondetRegLayout{._super = /*offset=*/151},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/152}}}};
+__device__ constexpr MemoryGetLayout kLayout__796 =
+    MemoryGetLayout{._super = kLayout__797, ._arguments_MemoryGet_Super = kLayout__801};
+__device__ constexpr MemoryPageInLayout kLayout__806 = MemoryPageInLayout{.io = kLayout__745};
+__device__ constexpr MemoryGet_SuperArm1Layout kLayout__805 = MemoryGet_SuperArm1Layout{
+    ._super = kLayout__806,
+    ._extra0 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/153},
+                              .cycle = NondetRegLayout{._super = /*offset=*/154}}};
+__device__ constexpr MemoryPageOutLayout kLayout__807 =
+    MemoryPageOutLayout{.io = kLayout__745, ._0 = kLayout__746};
+__device__ constexpr MemoryGet_SuperLayout kLayout__804 =
+    MemoryGet_SuperLayout{.arm0 = kLayout__744, .arm1 = kLayout__805, .arm2 = kLayout__807};
+__device__ constexpr MemoryArgLayout2LayoutArray kLayout__809 =
+    MemoryArgLayout2LayoutArray{kLayout__690, kLayout__691};
+__device__ constexpr _Arguments_MemoryGet_SuperLayout kLayout__808 =
+    _Arguments_MemoryGet_SuperLayout{.memoryArg = kLayout__809,
                                      .cycleArg = CycleArgLayout1LayoutArray{CycleArgLayout{
-                                         .count = NondetRegLayout{._super = /*offset=*/144},
-                                         .cycle = NondetRegLayout{._super = /*offset=*/145}}}};
-__device__ constexpr MemoryGetLayout kLayout__744 =
-    MemoryGetLayout{._super = kLayout__745, ._arguments_MemoryGet_Super = kLayout__749};
-__device__ constexpr MemoryGetLayout8LayoutArray kLayout__694 =
-    MemoryGetLayout8LayoutArray{kLayout__695,
-                                kLayout__702,
-                                kLayout__709,
-                                kLayout__716,
-                                kLayout__723,
-                                kLayout__730,
-                                kLayout__737,
-                                kLayout__744};
-__device__ constexpr PoseidonLoadInShortLayout kLayout__692 = PoseidonLoadInShortLayout{
-    ._super = kLayout__611, .txType = kLayout__693, .loadList = kLayout__694};
-__device__ constexpr PoseidonLoadInLowLayout kLayout__751 = PoseidonLoadInLowLayout{
-    ._super = kLayout__611, .txType = kLayout__693, .loadList = kLayout__694};
-__device__ constexpr PoseidonLoadInHighLayout kLayout__752 = PoseidonLoadInHighLayout{
-    ._super = kLayout__611, .txType = kLayout__693, .loadList = kLayout__694};
-__device__ constexpr PoseidonLoadIn_SuperLayout kLayout__691 = PoseidonLoadIn_SuperLayout{
-    ._super = kLayout__611, .arm0 = kLayout__692, .arm1 = kLayout__751, .arm2 = kLayout__752};
-__device__ constexpr OneHot_3_Layout kLayout__753 = OneHot_3_Layout{
-    ._super = NondetRegLayout3LayoutArray{NondetRegLayout{._super = /*offset=*/185},
-                                          NondetRegLayout{._super = /*offset=*/186},
-                                          NondetRegLayout{._super = /*offset=*/187}}};
-__device__ constexpr _Arguments_PoseidonLoadIn_SuperLayout kLayout__754 =
-    _Arguments_PoseidonLoadIn_SuperLayout{.memoryArg = kLayout__614, .cycleArg = kLayout__631};
-__device__ constexpr PoseidonLoadInLayout kLayout__690 = PoseidonLoadInLayout{
-    ._super = kLayout__691, ._0 = kLayout__753, ._arguments_PoseidonLoadIn_Super = kLayout__754};
-__device__ constexpr Poseidon0StateArm2Layout kLayout__689 = Poseidon0StateArm2Layout{
-    ._super = kLayout__690,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                            .val = NondetRegLayout{._super = /*offset=*/147}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                            .val = NondetRegLayout{._super = /*offset=*/149}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                            .val = NondetRegLayout{._super = /*offset=*/151}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                            .val = NondetRegLayout{._super = /*offset=*/153}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                            .val = NondetRegLayout{._super = /*offset=*/155}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                            .val = NondetRegLayout{._super = /*offset=*/157}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                            .val = NondetRegLayout{._super = /*offset=*/159}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                            .val = NondetRegLayout{._super = /*offset=*/161}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                            .val = NondetRegLayout{._super = /*offset=*/163}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                            .val = NondetRegLayout{._super = /*offset=*/165}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                             .val = NondetRegLayout{._super = /*offset=*/167}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                             .val = NondetRegLayout{._super = /*offset=*/169}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                             .val = NondetRegLayout{._super = /*offset=*/171}},
+                                         .count = NondetRegLayout{._super = /*offset=*/153},
+                                         .cycle = NondetRegLayout{._super = /*offset=*/154}}}};
+__device__ constexpr MemoryGetLayout kLayout__803 =
+    MemoryGetLayout{._super = kLayout__804, ._arguments_MemoryGet_Super = kLayout__808};
+__device__ constexpr MemoryGetLayout8LayoutArray kLayout__753 =
+    MemoryGetLayout8LayoutArray{kLayout__754,
+                                kLayout__761,
+                                kLayout__768,
+                                kLayout__775,
+                                kLayout__782,
+                                kLayout__789,
+                                kLayout__796,
+                                kLayout__803};
+__device__ constexpr PoseidonLoadInShortLayout kLayout__751 = PoseidonLoadInShortLayout{
+    ._super = kLayout__672, .txType = kLayout__752, .loadList = kLayout__753};
+__device__ constexpr PoseidonLoadInLowLayout kLayout__810 = PoseidonLoadInLowLayout{
+    ._super = kLayout__672, .txType = kLayout__752, .loadList = kLayout__753};
+__device__ constexpr PoseidonLoadInHighLayout kLayout__811 = PoseidonLoadInHighLayout{
+    ._super = kLayout__672, .txType = kLayout__752, .loadList = kLayout__753};
+__device__ constexpr PoseidonLoadIn_SuperLayout kLayout__750 = PoseidonLoadIn_SuperLayout{
+    ._super = kLayout__672, .arm0 = kLayout__751, .arm1 = kLayout__810, .arm2 = kLayout__811};
+__device__ constexpr OneHot_3_Layout kLayout__812 = OneHot_3_Layout{
+    ._super = NondetRegLayout3LayoutArray{NondetRegLayout{._super = /*offset=*/198},
+                                          NondetRegLayout{._super = /*offset=*/199},
+                                          NondetRegLayout{._super = /*offset=*/200}}};
+__device__ constexpr _Arguments_PoseidonLoadIn_SuperLayout kLayout__813 =
+    _Arguments_PoseidonLoadIn_SuperLayout{.memoryArg = kLayout__675, .cycleArg = kLayout__692};
+__device__ constexpr PoseidonLoadInLayout kLayout__749 = PoseidonLoadInLayout{
+    ._super = kLayout__750, ._0 = kLayout__812, ._arguments_PoseidonLoadIn_Super = kLayout__813};
+__device__ constexpr Poseidon0StateArm2Layout kLayout__748 = Poseidon0StateArm2Layout{
+    ._super = kLayout__749,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                            .val = NondetRegLayout{._super = /*offset=*/74}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                            .val = NondetRegLayout{._super = /*offset=*/158}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                            .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/84}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                            .val = NondetRegLayout{._super = /*offset=*/162}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                            .val = NondetRegLayout{._super = /*offset=*/92}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/93}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                            .val = NondetRegLayout{._super = /*offset=*/166}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                            .val = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                             .val = NondetRegLayout{._super = /*offset=*/102}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                             .val = NondetRegLayout{._super = /*offset=*/170}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                             .val = NondetRegLayout{._super = /*offset=*/110}},
     ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                             .val = NondetRegLayout{._super = /*offset=*/173}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                             .val = NondetRegLayout{._super = /*offset=*/175}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                             .val = NondetRegLayout{._super = /*offset=*/177}},
-    ._extra16 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                            .val = NondetRegLayout{._super = /*offset=*/179}},
-    ._extra17 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                            .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr Poseidon0StateArm3Layout kLayout__755 = Poseidon0StateArm3Layout{
-    ._super = kLayout__611,
-    ._extra0 = kLayout__615,
-    ._extra1 = kLayout__616,
-    ._extra2 = kLayout__617,
-    ._extra3 = kLayout__618,
-    ._extra4 = kLayout__619,
-    ._extra5 = kLayout__620,
-    ._extra6 = kLayout__621,
-    ._extra7 = kLayout__622,
-    ._extra8 = kLayout__623,
-    ._extra9 = kLayout__624,
-    ._extra10 = kLayout__625,
-    ._extra11 = kLayout__626,
-    ._extra12 = kLayout__627,
-    ._extra13 = kLayout__628,
-    ._extra14 = kLayout__629,
-    ._extra15 = kLayout__630,
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                               .cycle = NondetRegLayout{._super = /*offset=*/131}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                               .cycle = NondetRegLayout{._super = /*offset=*/133}},
-    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                               .cycle = NondetRegLayout{._super = /*offset=*/135}},
-    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                               .cycle = NondetRegLayout{._super = /*offset=*/137}},
-    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/138},
-                               .cycle = NondetRegLayout{._super = /*offset=*/139}},
-    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
-                               .cycle = NondetRegLayout{._super = /*offset=*/141}},
-    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/142},
-                               .cycle = NondetRegLayout{._super = /*offset=*/143}},
-    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                               .cycle = NondetRegLayout{._super = /*offset=*/145}},
-    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                             .val = NondetRegLayout{._super = /*offset=*/147}},
-    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                             .val = NondetRegLayout{._super = /*offset=*/149}},
-    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                             .val = NondetRegLayout{._super = /*offset=*/151}},
-    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                             .val = NondetRegLayout{._super = /*offset=*/153}},
-    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                             .val = NondetRegLayout{._super = /*offset=*/155}},
-    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                             .val = NondetRegLayout{._super = /*offset=*/157}},
-    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                             .val = NondetRegLayout{._super = /*offset=*/159}},
-    ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                             .val = NondetRegLayout{._super = /*offset=*/161}},
-    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                             .val = NondetRegLayout{._super = /*offset=*/163}},
-    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                             .val = NondetRegLayout{._super = /*offset=*/165}},
-    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                             .val = NondetRegLayout{._super = /*offset=*/167}},
-    ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                             .val = NondetRegLayout{._super = /*offset=*/169}},
-    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                             .val = NondetRegLayout{._super = /*offset=*/171}},
-    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                             .val = NondetRegLayout{._super = /*offset=*/173}},
-    ._extra38 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                             .val = NondetRegLayout{._super = /*offset=*/175}},
-    ._extra39 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                             .val = NondetRegLayout{._super = /*offset=*/177}},
-    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                            .val = NondetRegLayout{._super = /*offset=*/179}},
-    ._extra41 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                            .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr Poseidon0StateArm4Layout kLayout__756 = Poseidon0StateArm4Layout{
-    ._super = kLayout__611,
-    ._extra0 = kLayout__615,
-    ._extra1 = kLayout__616,
-    ._extra2 = kLayout__617,
-    ._extra3 = kLayout__618,
-    ._extra4 = kLayout__619,
-    ._extra5 = kLayout__620,
-    ._extra6 = kLayout__621,
-    ._extra7 = kLayout__622,
-    ._extra8 = kLayout__623,
-    ._extra9 = kLayout__624,
-    ._extra10 = kLayout__625,
-    ._extra11 = kLayout__626,
-    ._extra12 = kLayout__627,
-    ._extra13 = kLayout__628,
-    ._extra14 = kLayout__629,
-    ._extra15 = kLayout__630,
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                               .cycle = NondetRegLayout{._super = /*offset=*/131}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                               .cycle = NondetRegLayout{._super = /*offset=*/133}},
-    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                               .cycle = NondetRegLayout{._super = /*offset=*/135}},
-    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                               .cycle = NondetRegLayout{._super = /*offset=*/137}},
-    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/138},
-                               .cycle = NondetRegLayout{._super = /*offset=*/139}},
-    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
-                               .cycle = NondetRegLayout{._super = /*offset=*/141}},
-    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/142},
-                               .cycle = NondetRegLayout{._super = /*offset=*/143}},
-    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                               .cycle = NondetRegLayout{._super = /*offset=*/145}},
-    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                             .val = NondetRegLayout{._super = /*offset=*/147}},
-    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                             .val = NondetRegLayout{._super = /*offset=*/149}},
-    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                             .val = NondetRegLayout{._super = /*offset=*/151}},
-    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                             .val = NondetRegLayout{._super = /*offset=*/153}},
-    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                             .val = NondetRegLayout{._super = /*offset=*/155}},
-    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                             .val = NondetRegLayout{._super = /*offset=*/157}},
-    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                             .val = NondetRegLayout{._super = /*offset=*/159}},
-    ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                             .val = NondetRegLayout{._super = /*offset=*/161}},
-    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                             .val = NondetRegLayout{._super = /*offset=*/163}},
-    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                             .val = NondetRegLayout{._super = /*offset=*/165}},
-    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                             .val = NondetRegLayout{._super = /*offset=*/167}},
-    ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                             .val = NondetRegLayout{._super = /*offset=*/169}},
-    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                             .val = NondetRegLayout{._super = /*offset=*/171}},
-    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                             .val = NondetRegLayout{._super = /*offset=*/173}},
-    ._extra38 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                             .val = NondetRegLayout{._super = /*offset=*/175}},
-    ._extra39 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                             .val = NondetRegLayout{._super = /*offset=*/177}},
-    ._extra40 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                            .val = NondetRegLayout{._super = /*offset=*/179}},
-    ._extra41 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                            .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__763 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__665};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__764 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__666};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__765 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__667};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__766 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__668};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__767 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__669};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__768 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__674};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__769 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__679};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__770 =
-    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__684};
-__device__ constexpr PoseidonCheckOut__0_SuperLayout8LayoutArray kLayout__762 =
-    PoseidonCheckOut__0_SuperLayout8LayoutArray{kLayout__763,
-                                                kLayout__764,
-                                                kLayout__765,
-                                                kLayout__766,
-                                                kLayout__767,
-                                                kLayout__768,
-                                                kLayout__769,
-                                                kLayout__770};
-__device__ constexpr PoseidonCheckOutLayout kLayout__761 = PoseidonCheckOutLayout{
-    ._super = kLayout__611,
-    ._1 = kLayout__762,
-    .isNormal = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/182},
-                             .inv = NondetRegLayout{._super = /*offset=*/183}},
-    .extInv = NondetExtRegLayout{._super = /*offset=*/184}};
-__device__ constexpr PoseidonDoOut_SuperArm0Layout kLayout__760 = PoseidonDoOut_SuperArm0Layout{
-    ._super = kLayout__761,
-    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                            .val = NondetRegLayout{._super = /*offset=*/147}},
-    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                            .val = NondetRegLayout{._super = /*offset=*/149}},
-    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                            .val = NondetRegLayout{._super = /*offset=*/151}},
-    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                            .val = NondetRegLayout{._super = /*offset=*/153}},
-    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                            .val = NondetRegLayout{._super = /*offset=*/155}},
-    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                            .val = NondetRegLayout{._super = /*offset=*/157}},
-    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                            .val = NondetRegLayout{._super = /*offset=*/159}},
-    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                            .val = NondetRegLayout{._super = /*offset=*/161}},
-    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                            .val = NondetRegLayout{._super = /*offset=*/163}},
-    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                            .val = NondetRegLayout{._super = /*offset=*/165}},
-    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                             .val = NondetRegLayout{._super = /*offset=*/167}},
-    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                             .val = NondetRegLayout{._super = /*offset=*/169}},
-    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                             .val = NondetRegLayout{._super = /*offset=*/171}},
-    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                             .val = NondetRegLayout{._super = /*offset=*/173}},
-    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                             .val = NondetRegLayout{._super = /*offset=*/175}},
-    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                             .val = NondetRegLayout{._super = /*offset=*/177}}};
-__device__ constexpr NondetU16RegLayout kLayout__774 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/146},
-                                           .val = NondetRegLayout{._super = /*offset=*/147}}};
-__device__ constexpr NondetU16RegLayout kLayout__776 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/148},
-                                           .val = NondetRegLayout{._super = /*offset=*/149}}};
-__device__ constexpr U16RegLayout kLayout__775 = U16RegLayout{.ret = kLayout__776};
-__device__ constexpr MemoryWriteLayout kLayout__777 =
-    MemoryWriteLayout{.io = kLayout__642, ._0 = kLayout__643};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__773 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__774, .high = kLayout__775, ._0 = kLayout__777};
-__device__ constexpr NondetU16RegLayout kLayout__779 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                                           .val = NondetRegLayout{._super = /*offset=*/151}}};
-__device__ constexpr NondetU16RegLayout kLayout__781 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                                           .val = NondetRegLayout{._super = /*offset=*/153}}};
-__device__ constexpr U16RegLayout kLayout__780 = U16RegLayout{.ret = kLayout__781};
-__device__ constexpr MemoryWriteLayout kLayout__782 =
-    MemoryWriteLayout{.io = kLayout__647, ._0 = kLayout__648};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__778 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__779, .high = kLayout__780, ._0 = kLayout__782};
-__device__ constexpr NondetU16RegLayout kLayout__784 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                                           .val = NondetRegLayout{._super = /*offset=*/155}}};
-__device__ constexpr U16RegLayout kLayout__785 = U16RegLayout{.ret = kLayout__202};
-__device__ constexpr MemoryWriteLayout kLayout__786 =
-    MemoryWriteLayout{.io = kLayout__652, ._0 = kLayout__653};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__783 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__784, .high = kLayout__785, ._0 = kLayout__786};
-__device__ constexpr NondetU16RegLayout kLayout__788 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                                           .val = NondetRegLayout{._super = /*offset=*/159}}};
-__device__ constexpr NondetU16RegLayout kLayout__790 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                                           .val = NondetRegLayout{._super = /*offset=*/161}}};
-__device__ constexpr U16RegLayout kLayout__789 = U16RegLayout{.ret = kLayout__790};
-__device__ constexpr MemoryWriteLayout kLayout__791 =
-    MemoryWriteLayout{.io = kLayout__656, ._0 = kLayout__657};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__787 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__788, .high = kLayout__789, ._0 = kLayout__791};
-__device__ constexpr NondetU16RegLayout kLayout__793 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                                           .val = NondetRegLayout{._super = /*offset=*/163}}};
-__device__ constexpr NondetU16RegLayout kLayout__795 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                                           .val = NondetRegLayout{._super = /*offset=*/165}}};
-__device__ constexpr U16RegLayout kLayout__794 = U16RegLayout{.ret = kLayout__795};
-__device__ constexpr MemoryWriteLayout kLayout__796 =
-    MemoryWriteLayout{.io = kLayout__671, ._0 = kLayout__672};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__792 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__793, .high = kLayout__794, ._0 = kLayout__796};
-__device__ constexpr NondetU16RegLayout kLayout__799 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                                           .val = NondetRegLayout{._super = /*offset=*/169}}};
-__device__ constexpr U16RegLayout kLayout__798 = U16RegLayout{.ret = kLayout__799};
-__device__ constexpr MemoryWriteLayout kLayout__800 =
-    MemoryWriteLayout{.io = kLayout__676, ._0 = kLayout__677};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__797 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__288, .high = kLayout__798, ._0 = kLayout__800};
-__device__ constexpr NondetU16RegLayout kLayout__802 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                                           .val = NondetRegLayout{._super = /*offset=*/171}}};
-__device__ constexpr NondetU16RegLayout kLayout__804 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                                           .val = NondetRegLayout{._super = /*offset=*/173}}};
-__device__ constexpr U16RegLayout kLayout__803 = U16RegLayout{.ret = kLayout__804};
-__device__ constexpr MemoryWriteLayout kLayout__805 =
-    MemoryWriteLayout{.io = kLayout__681, ._0 = kLayout__682};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__801 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__802, .high = kLayout__803, ._0 = kLayout__805};
-__device__ constexpr NondetU16RegLayout kLayout__807 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                                           .val = NondetRegLayout{._super = /*offset=*/175}}};
-__device__ constexpr NondetU16RegLayout kLayout__809 =
-    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                                           .val = NondetRegLayout{._super = /*offset=*/177}}};
-__device__ constexpr U16RegLayout kLayout__808 = U16RegLayout{.ret = kLayout__809};
-__device__ constexpr MemoryWriteLayout kLayout__810 =
-    MemoryWriteLayout{.io = kLayout__686, ._0 = kLayout__687};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__806 =
-    PoseidonStoreOut__0_SuperLayout{.low = kLayout__807, .high = kLayout__808, ._0 = kLayout__810};
-__device__ constexpr PoseidonStoreOut__0_SuperLayout8LayoutArray kLayout__772 =
-    PoseidonStoreOut__0_SuperLayout8LayoutArray{kLayout__773,
-                                                kLayout__778,
-                                                kLayout__783,
-                                                kLayout__787,
-                                                kLayout__792,
-                                                kLayout__797,
-                                                kLayout__801,
-                                                kLayout__806};
-__device__ constexpr PoseidonStoreOutLayout kLayout__771 = PoseidonStoreOutLayout{
-    ._super = kLayout__611,
-    ._1 = kLayout__772,
-    .isNormal = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/182},
-                             .inv = NondetRegLayout{._super = /*offset=*/183}},
-    .extInv = NondetExtRegLayout{._super = /*offset=*/184}};
-__device__ constexpr PoseidonDoOut_SuperLayout kLayout__759 =
-    PoseidonDoOut_SuperLayout{._super = kLayout__611, .arm0 = kLayout__760, .arm1 = kLayout__771};
-__device__ constexpr _Arguments_PoseidonDoOut_SuperLayout kLayout__811 =
-    _Arguments_PoseidonDoOut_SuperLayout{
-        .memoryArg = kLayout__614, .cycleArg = kLayout__631, .argU16 = kLayout__632};
-__device__ constexpr PoseidonDoOutLayout kLayout__758 =
-    PoseidonDoOutLayout{._super = kLayout__759, ._arguments_PoseidonDoOut_Super = kLayout__811};
-__device__ constexpr Poseidon0StateArm5Layout kLayout__757 = Poseidon0StateArm5Layout{
-    ._super = kLayout__758,
-    ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                           .val = NondetRegLayout{._super = /*offset=*/179}},
-    ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                           .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr PoseidonPaging_SuperLayout kLayout__814 =
-    PoseidonPaging_SuperLayout{._super = kLayout__611,
-                               .arm0 = kLayout__611,
-                               .arm1 = kLayout__611,
-                               .arm2 = kLayout__611,
-                               .arm3 = kLayout__611,
-                               .arm4 = kLayout__611,
-                               .arm5 = kLayout__611};
-__device__ constexpr NondetRegLayout6LayoutArray kLayout__816 =
-    NondetRegLayout6LayoutArray{NondetRegLayout{._super = /*offset=*/184},
-                                NondetRegLayout{._super = /*offset=*/185},
-                                NondetRegLayout{._super = /*offset=*/186},
-                                NondetRegLayout{._super = /*offset=*/187},
-                                NondetRegLayout{._super = /*offset=*/188},
-                                NondetRegLayout{._super = /*offset=*/189}};
-__device__ constexpr OneHot_6_Layout kLayout__815 = OneHot_6_Layout{._super = kLayout__816};
-__device__ constexpr NondetU8RegLayout kLayout__819 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                                         .val = NondetRegLayout{._super = /*offset=*/179}}};
-__device__ constexpr U8RegLayout kLayout__818 = U8RegLayout{.ret = kLayout__819};
-__device__ constexpr IsU24Layout kLayout__817 =
-    IsU24Layout{.low16 = kLayout__774, ._0 = kLayout__818};
-__device__ constexpr _Arguments_PoseidonPaging__1Layout kLayout__820 =
-    _Arguments_PoseidonPaging__1Layout{.argU16 = ArgU16Layout1LayoutArray{ArgU16Layout{
-                                           .count = NondetRegLayout{._super = /*offset=*/148},
-                                           .val = NondetRegLayout{._super = /*offset=*/149}}},
-                                       .argU8 = ArgU8Layout1LayoutArray{ArgU8Layout{
-                                           .count = NondetRegLayout{._super = /*offset=*/180},
-                                           .val = NondetRegLayout{._super = /*offset=*/181}}}};
-__device__ constexpr NondetU8RegLayout kLayout__825 =
-    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                                         .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr U8RegLayout kLayout__824 = U8RegLayout{.ret = kLayout__825};
-__device__ constexpr IsU24Layout kLayout__823 =
-    IsU24Layout{.low16 = kLayout__776, ._0 = kLayout__824};
-__device__ constexpr PoseidonPaging__1Arm0_SuperLayout kLayout__822 =
-    PoseidonPaging__1Arm0_SuperLayout{._0 = kLayout__823};
-__device__ constexpr PoseidonPaging__1Arm1_SuperLayout kLayout__826 =
-    PoseidonPaging__1Arm1_SuperLayout{._0 = kLayout__823};
-__device__ constexpr PoseidonPaging__1Layout kLayout__821 =
-    PoseidonPaging__1Layout{.arm0 = kLayout__822, .arm1 = kLayout__826};
-__device__ constexpr PoseidonPagingLayout kLayout__813 =
-    PoseidonPagingLayout{._super = kLayout__814,
-                         .curIdx = NondetRegLayout{._super = /*offset=*/182},
-                         .curMode = NondetRegLayout{._super = /*offset=*/183},
-                         .modeSplit = kLayout__815,
-                         ._0 = kLayout__817,
-                         ._arguments_PoseidonPaging__1 = kLayout__820,
-                         ._3 = kLayout__821,
-                         ._4 = NondetRegLayout{._super = /*offset=*/190}};
-__device__ constexpr Poseidon0StateArm6Layout kLayout__812 = Poseidon0StateArm6Layout{
-    ._super = kLayout__813,
-    ._extra0 = kLayout__615,
-    ._extra1 = kLayout__616,
-    ._extra2 = kLayout__617,
-    ._extra3 = kLayout__618,
-    ._extra4 = kLayout__619,
-    ._extra5 = kLayout__620,
-    ._extra6 = kLayout__621,
-    ._extra7 = kLayout__622,
-    ._extra8 = kLayout__623,
-    ._extra9 = kLayout__624,
-    ._extra10 = kLayout__625,
-    ._extra11 = kLayout__626,
-    ._extra12 = kLayout__627,
-    ._extra13 = kLayout__628,
-    ._extra14 = kLayout__629,
-    ._extra15 = kLayout__630,
-    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/130},
-                               .cycle = NondetRegLayout{._super = /*offset=*/131}},
-    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/132},
-                               .cycle = NondetRegLayout{._super = /*offset=*/133}},
-    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/134},
-                               .cycle = NondetRegLayout{._super = /*offset=*/135}},
-    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
-                               .cycle = NondetRegLayout{._super = /*offset=*/137}},
-    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/138},
-                               .cycle = NondetRegLayout{._super = /*offset=*/139}},
-    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
-                               .cycle = NondetRegLayout{._super = /*offset=*/141}},
-    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/142},
-                               .cycle = NondetRegLayout{._super = /*offset=*/143}},
-    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/144},
-                               .cycle = NondetRegLayout{._super = /*offset=*/145}},
-    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/150},
-                             .val = NondetRegLayout{._super = /*offset=*/151}},
-    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/152},
-                             .val = NondetRegLayout{._super = /*offset=*/153}},
-    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/154},
-                             .val = NondetRegLayout{._super = /*offset=*/155}},
-    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
-                             .val = NondetRegLayout{._super = /*offset=*/157}},
-    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/158},
-                             .val = NondetRegLayout{._super = /*offset=*/159}},
-    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
-                             .val = NondetRegLayout{._super = /*offset=*/161}},
-    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/162},
-                             .val = NondetRegLayout{._super = /*offset=*/163}},
+                             .val = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                             .val = NondetRegLayout{._super = /*offset=*/174}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                             .val = NondetRegLayout{._super = /*offset=*/120}},
+    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                             .val = NondetRegLayout{._super = /*offset=*/178}},
+    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                             .val = NondetRegLayout{._super = /*offset=*/128}},
+    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                             .val = NondetRegLayout{._super = /*offset=*/182}},
+    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                             .val = NondetRegLayout{._super = /*offset=*/138}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                             .val = NondetRegLayout{._super = /*offset=*/186}},
+    ._extra24 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                            .val = NondetRegLayout{._super = /*offset=*/188}},
+    ._extra25 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                            .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr Poseidon0StateArm3Layout kLayout__814 = Poseidon0StateArm3Layout{
+    ._super = kLayout__672,
+    ._extra0 = kLayout__676,
+    ._extra1 = kLayout__677,
+    ._extra2 = kLayout__678,
+    ._extra3 = kLayout__679,
+    ._extra4 = kLayout__680,
+    ._extra5 = kLayout__681,
+    ._extra6 = kLayout__682,
+    ._extra7 = kLayout__683,
+    ._extra8 = kLayout__684,
+    ._extra9 = kLayout__685,
+    ._extra10 = kLayout__686,
+    ._extra11 = kLayout__687,
+    ._extra12 = kLayout__688,
+    ._extra13 = kLayout__689,
+    ._extra14 = kLayout__690,
+    ._extra15 = kLayout__691,
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                               .cycle = NondetRegLayout{._super = /*offset=*/140}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                               .cycle = NondetRegLayout{._super = /*offset=*/142}},
+    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                               .cycle = NondetRegLayout{._super = /*offset=*/144}},
+    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                               .cycle = NondetRegLayout{._super = /*offset=*/146}},
+    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/147},
+                               .cycle = NondetRegLayout{._super = /*offset=*/148}},
+    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                               .cycle = NondetRegLayout{._super = /*offset=*/150}},
+    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                               .cycle = NondetRegLayout{._super = /*offset=*/152}},
+    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/153},
+                               .cycle = NondetRegLayout{._super = /*offset=*/154}},
+    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                             .val = NondetRegLayout{._super = /*offset=*/74}},
+    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                             .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                             .val = NondetRegLayout{._super = /*offset=*/158}},
+    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                             .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                             .val = NondetRegLayout{._super = /*offset=*/84}},
+    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                             .val = NondetRegLayout{._super = /*offset=*/162}},
+    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                             .val = NondetRegLayout{._super = /*offset=*/92}},
     ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
-                             .val = NondetRegLayout{._super = /*offset=*/165}},
-    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/166},
-                             .val = NondetRegLayout{._super = /*offset=*/167}},
-    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
-                             .val = NondetRegLayout{._super = /*offset=*/169}},
-    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/170},
-                             .val = NondetRegLayout{._super = /*offset=*/171}},
+                             .val = NondetRegLayout{._super = /*offset=*/93}},
+    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                             .val = NondetRegLayout{._super = /*offset=*/166}},
+    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                             .val = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                             .val = NondetRegLayout{._super = /*offset=*/102}},
+    ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                             .val = NondetRegLayout{._super = /*offset=*/170}},
+    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                             .val = NondetRegLayout{._super = /*offset=*/110}},
+    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                             .val = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra38 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                             .val = NondetRegLayout{._super = /*offset=*/174}},
+    ._extra39 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra40 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                             .val = NondetRegLayout{._super = /*offset=*/120}},
+    ._extra41 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                             .val = NondetRegLayout{._super = /*offset=*/178}},
+    ._extra42 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                             .val = NondetRegLayout{._super = /*offset=*/128}},
+    ._extra43 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra44 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                             .val = NondetRegLayout{._super = /*offset=*/182}},
+    ._extra45 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra46 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                             .val = NondetRegLayout{._super = /*offset=*/138}},
+    ._extra47 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                             .val = NondetRegLayout{._super = /*offset=*/186}},
+    ._extra48 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                            .val = NondetRegLayout{._super = /*offset=*/188}},
+    ._extra49 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                            .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr Poseidon0StateArm4Layout kLayout__815 = Poseidon0StateArm4Layout{
+    ._super = kLayout__672,
+    ._extra0 = kLayout__676,
+    ._extra1 = kLayout__677,
+    ._extra2 = kLayout__678,
+    ._extra3 = kLayout__679,
+    ._extra4 = kLayout__680,
+    ._extra5 = kLayout__681,
+    ._extra6 = kLayout__682,
+    ._extra7 = kLayout__683,
+    ._extra8 = kLayout__684,
+    ._extra9 = kLayout__685,
+    ._extra10 = kLayout__686,
+    ._extra11 = kLayout__687,
+    ._extra12 = kLayout__688,
+    ._extra13 = kLayout__689,
+    ._extra14 = kLayout__690,
+    ._extra15 = kLayout__691,
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                               .cycle = NondetRegLayout{._super = /*offset=*/140}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                               .cycle = NondetRegLayout{._super = /*offset=*/142}},
+    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                               .cycle = NondetRegLayout{._super = /*offset=*/144}},
+    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                               .cycle = NondetRegLayout{._super = /*offset=*/146}},
+    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/147},
+                               .cycle = NondetRegLayout{._super = /*offset=*/148}},
+    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                               .cycle = NondetRegLayout{._super = /*offset=*/150}},
+    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                               .cycle = NondetRegLayout{._super = /*offset=*/152}},
+    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/153},
+                               .cycle = NondetRegLayout{._super = /*offset=*/154}},
+    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                             .val = NondetRegLayout{._super = /*offset=*/74}},
+    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                             .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                             .val = NondetRegLayout{._super = /*offset=*/158}},
+    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                             .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                             .val = NondetRegLayout{._super = /*offset=*/84}},
+    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                             .val = NondetRegLayout{._super = /*offset=*/162}},
+    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                             .val = NondetRegLayout{._super = /*offset=*/92}},
+    ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                             .val = NondetRegLayout{._super = /*offset=*/93}},
+    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                             .val = NondetRegLayout{._super = /*offset=*/166}},
+    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                             .val = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                             .val = NondetRegLayout{._super = /*offset=*/102}},
+    ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                             .val = NondetRegLayout{._super = /*offset=*/170}},
+    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                             .val = NondetRegLayout{._super = /*offset=*/110}},
+    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                             .val = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra38 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                             .val = NondetRegLayout{._super = /*offset=*/174}},
+    ._extra39 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra40 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                             .val = NondetRegLayout{._super = /*offset=*/120}},
+    ._extra41 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                             .val = NondetRegLayout{._super = /*offset=*/178}},
+    ._extra42 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                             .val = NondetRegLayout{._super = /*offset=*/128}},
+    ._extra43 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra44 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                             .val = NondetRegLayout{._super = /*offset=*/182}},
+    ._extra45 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra46 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                             .val = NondetRegLayout{._super = /*offset=*/138}},
+    ._extra47 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                             .val = NondetRegLayout{._super = /*offset=*/186}},
+    ._extra48 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                            .val = NondetRegLayout{._super = /*offset=*/188}},
+    ._extra49 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                            .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__822 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__724};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__823 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__725};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__824 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__726};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__825 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__727};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__826 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__728};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__827 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__733};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__828 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__738};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout kLayout__829 =
+    PoseidonCheckOut__0_SuperLayout{.goal = kLayout__743};
+__device__ constexpr PoseidonCheckOut__0_SuperLayout8LayoutArray kLayout__821 =
+    PoseidonCheckOut__0_SuperLayout8LayoutArray{kLayout__822,
+                                                kLayout__823,
+                                                kLayout__824,
+                                                kLayout__825,
+                                                kLayout__826,
+                                                kLayout__827,
+                                                kLayout__828,
+                                                kLayout__829};
+__device__ constexpr PoseidonCheckOutLayout kLayout__820 = PoseidonCheckOutLayout{
+    ._super = kLayout__672,
+    ._1 = kLayout__821,
+    .isNormal = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/195},
+                             .inv = NondetRegLayout{._super = /*offset=*/196}},
+    .extInv = NondetExtRegLayout{._super = /*offset=*/197}};
+__device__ constexpr PoseidonDoOut_SuperArm0Layout kLayout__819 = PoseidonDoOut_SuperArm0Layout{
+    ._super = kLayout__820,
+    ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                            .val = NondetRegLayout{._super = /*offset=*/74}},
+    ._extra1 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                            .val = NondetRegLayout{._super = /*offset=*/75}},
+    ._extra2 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                            .val = NondetRegLayout{._super = /*offset=*/158}},
+    ._extra3 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                            .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra4 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                            .val = NondetRegLayout{._super = /*offset=*/84}},
+    ._extra5 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                            .val = NondetRegLayout{._super = /*offset=*/162}},
+    ._extra6 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                            .val = NondetRegLayout{._super = /*offset=*/92}},
+    ._extra7 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                            .val = NondetRegLayout{._super = /*offset=*/93}},
+    ._extra8 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                            .val = NondetRegLayout{._super = /*offset=*/166}},
+    ._extra9 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                            .val = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra10 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                             .val = NondetRegLayout{._super = /*offset=*/102}},
+    ._extra11 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                             .val = NondetRegLayout{._super = /*offset=*/170}},
+    ._extra12 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                             .val = NondetRegLayout{._super = /*offset=*/110}},
+    ._extra13 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                             .val = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra14 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                             .val = NondetRegLayout{._super = /*offset=*/174}},
+    ._extra15 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra16 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                             .val = NondetRegLayout{._super = /*offset=*/120}},
+    ._extra17 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                             .val = NondetRegLayout{._super = /*offset=*/178}},
+    ._extra18 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                             .val = NondetRegLayout{._super = /*offset=*/128}},
+    ._extra19 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra20 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                             .val = NondetRegLayout{._super = /*offset=*/182}},
+    ._extra21 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra22 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                             .val = NondetRegLayout{._super = /*offset=*/138}},
+    ._extra23 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                             .val = NondetRegLayout{._super = /*offset=*/186}}};
+__device__ constexpr NondetU16RegLayout kLayout__834 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/155},
+                                           .val = NondetRegLayout{._super = /*offset=*/74}}};
+__device__ constexpr NondetU16RegLayout kLayout__835 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},
+                                           .val = NondetRegLayout{._super = /*offset=*/75}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__836 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                                              .val = NondetRegLayout{._super = /*offset=*/158}}}};
+__device__ constexpr NondetU16RegLayout kLayout__839 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                                           .val = NondetRegLayout{._super = /*offset=*/158}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__838 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__839};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__840 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__839};
+__device__ constexpr FieldToWord__0Layout kLayout__837 =
+    FieldToWord__0Layout{.arm0 = kLayout__838, .arm1 = kLayout__840};
+__device__ constexpr FieldToWordLayout kLayout__833 =
+    FieldToWordLayout{.low = kLayout__834,
+                      .high = kLayout__835,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/195},
+                      ._arguments_FieldToWord__0 = kLayout__836,
+                      ._2 = kLayout__837};
+__device__ constexpr MemoryWriteLayout kLayout__841 =
+    MemoryWriteLayout{.io = kLayout__703, ._0 = kLayout__704};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__832 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__833, .mw = kLayout__841};
+__device__ constexpr NondetU16RegLayout kLayout__844 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                                           .val = NondetRegLayout{._super = /*offset=*/83}}};
+__device__ constexpr NondetU16RegLayout kLayout__845 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                                           .val = NondetRegLayout{._super = /*offset=*/84}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__846 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                                              .val = NondetRegLayout{._super = /*offset=*/162}}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__848 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__201};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__849 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__201};
+__device__ constexpr FieldToWord__0Layout kLayout__847 =
+    FieldToWord__0Layout{.arm0 = kLayout__848, .arm1 = kLayout__849};
+__device__ constexpr FieldToWordLayout kLayout__843 =
+    FieldToWordLayout{.low = kLayout__844,
+                      .high = kLayout__845,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/196},
+                      ._arguments_FieldToWord__0 = kLayout__846,
+                      ._2 = kLayout__847};
+__device__ constexpr MemoryWriteLayout kLayout__850 =
+    MemoryWriteLayout{.io = kLayout__708, ._0 = kLayout__709};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__842 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__843, .mw = kLayout__850};
+__device__ constexpr NondetU16RegLayout kLayout__853 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                                           .val = NondetRegLayout{._super = /*offset=*/92}}};
+__device__ constexpr NondetU16RegLayout kLayout__854 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                                           .val = NondetRegLayout{._super = /*offset=*/93}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__855 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                                              .val = NondetRegLayout{._super = /*offset=*/166}}}};
+__device__ constexpr NondetU16RegLayout kLayout__858 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                                           .val = NondetRegLayout{._super = /*offset=*/166}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__857 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__858};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__859 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__858};
+__device__ constexpr FieldToWord__0Layout kLayout__856 =
+    FieldToWord__0Layout{.arm0 = kLayout__857, .arm1 = kLayout__859};
+__device__ constexpr FieldToWordLayout kLayout__852 =
+    FieldToWordLayout{.low = kLayout__853,
+                      .high = kLayout__854,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/197},
+                      ._arguments_FieldToWord__0 = kLayout__855,
+                      ._2 = kLayout__856};
+__device__ constexpr MemoryWriteLayout kLayout__860 =
+    MemoryWriteLayout{.io = kLayout__713, ._0 = kLayout__714};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__851 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__852, .mw = kLayout__860};
+__device__ constexpr NondetU16RegLayout kLayout__863 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                                           .val = NondetRegLayout{._super = /*offset=*/101}}};
+__device__ constexpr NondetU16RegLayout kLayout__864 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                                           .val = NondetRegLayout{._super = /*offset=*/102}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__865 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                                              .val = NondetRegLayout{._super = /*offset=*/170}}}};
+__device__ constexpr NondetU16RegLayout kLayout__868 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                                           .val = NondetRegLayout{._super = /*offset=*/170}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__867 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__868};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__869 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__868};
+__device__ constexpr FieldToWord__0Layout kLayout__866 =
+    FieldToWord__0Layout{.arm0 = kLayout__867, .arm1 = kLayout__869};
+__device__ constexpr FieldToWordLayout kLayout__862 =
+    FieldToWordLayout{.low = kLayout__863,
+                      .high = kLayout__864,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/198},
+                      ._arguments_FieldToWord__0 = kLayout__865,
+                      ._2 = kLayout__866};
+__device__ constexpr MemoryWriteLayout kLayout__870 =
+    MemoryWriteLayout{.io = kLayout__717, ._0 = kLayout__229};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__861 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__862, .mw = kLayout__870};
+__device__ constexpr NondetU16RegLayout kLayout__873 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                                           .val = NondetRegLayout{._super = /*offset=*/110}}};
+__device__ constexpr NondetU16RegLayout kLayout__874 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
+                                           .val = NondetRegLayout{._super = /*offset=*/111}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__875 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                                              .val = NondetRegLayout{._super = /*offset=*/174}}}};
+__device__ constexpr NondetU16RegLayout kLayout__878 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                                           .val = NondetRegLayout{._super = /*offset=*/174}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__877 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__878};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__879 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__878};
+__device__ constexpr FieldToWord__0Layout kLayout__876 =
+    FieldToWord__0Layout{.arm0 = kLayout__877, .arm1 = kLayout__879};
+__device__ constexpr FieldToWordLayout kLayout__872 =
+    FieldToWordLayout{.low = kLayout__873,
+                      .high = kLayout__874,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/199},
+                      ._arguments_FieldToWord__0 = kLayout__875,
+                      ._2 = kLayout__876};
+__device__ constexpr MemoryWriteLayout kLayout__880 =
+    MemoryWriteLayout{.io = kLayout__730, ._0 = kLayout__731};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__871 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__872, .mw = kLayout__880};
+__device__ constexpr NondetU16RegLayout kLayout__883 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                                           .val = NondetRegLayout{._super = /*offset=*/119}}};
+__device__ constexpr NondetU16RegLayout kLayout__884 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                                           .val = NondetRegLayout{._super = /*offset=*/120}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__885 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                                              .val = NondetRegLayout{._super = /*offset=*/178}}}};
+__device__ constexpr NondetU16RegLayout kLayout__888 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                                           .val = NondetRegLayout{._super = /*offset=*/178}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__887 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__888};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__889 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__888};
+__device__ constexpr FieldToWord__0Layout kLayout__886 =
+    FieldToWord__0Layout{.arm0 = kLayout__887, .arm1 = kLayout__889};
+__device__ constexpr FieldToWordLayout kLayout__882 =
+    FieldToWordLayout{.low = kLayout__883,
+                      .high = kLayout__884,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/200},
+                      ._arguments_FieldToWord__0 = kLayout__885,
+                      ._2 = kLayout__886};
+__device__ constexpr MemoryWriteLayout kLayout__890 =
+    MemoryWriteLayout{.io = kLayout__735, ._0 = kLayout__736};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__881 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__882, .mw = kLayout__890};
+__device__ constexpr NondetU16RegLayout kLayout__893 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                                           .val = NondetRegLayout{._super = /*offset=*/128}}};
+__device__ constexpr NondetU16RegLayout kLayout__894 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                                           .val = NondetRegLayout{._super = /*offset=*/129}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__895 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                                              .val = NondetRegLayout{._super = /*offset=*/182}}}};
+__device__ constexpr NondetU16RegLayout kLayout__898 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                                           .val = NondetRegLayout{._super = /*offset=*/182}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__897 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__898};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__899 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__898};
+__device__ constexpr FieldToWord__0Layout kLayout__896 =
+    FieldToWord__0Layout{.arm0 = kLayout__897, .arm1 = kLayout__899};
+__device__ constexpr FieldToWordLayout kLayout__892 =
+    FieldToWordLayout{.low = kLayout__893,
+                      .high = kLayout__894,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/201},
+                      ._arguments_FieldToWord__0 = kLayout__895,
+                      ._2 = kLayout__896};
+__device__ constexpr MemoryWriteLayout kLayout__900 =
+    MemoryWriteLayout{.io = kLayout__740, ._0 = kLayout__741};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__891 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__892, .mw = kLayout__900};
+__device__ constexpr NondetU16RegLayout kLayout__903 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                                           .val = NondetRegLayout{._super = /*offset=*/137}}};
+__device__ constexpr NondetU16RegLayout kLayout__904 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                                           .val = NondetRegLayout{._super = /*offset=*/138}}};
+__device__ constexpr _Arguments_FieldToWord__0Layout kLayout__905 = _Arguments_FieldToWord__0Layout{
+    .argU16 =
+        ArgU16Layout1LayoutArray{ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                                              .val = NondetRegLayout{._super = /*offset=*/186}}}};
+__device__ constexpr NondetU16RegLayout kLayout__908 =
+    NondetU16RegLayout{.arg = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                                           .val = NondetRegLayout{._super = /*offset=*/186}}};
+__device__ constexpr FieldToWord__0Arm0_SuperLayout kLayout__907 =
+    FieldToWord__0Arm0_SuperLayout{._0 = kLayout__908};
+__device__ constexpr FieldToWord__0Arm1_SuperLayout kLayout__909 =
+    FieldToWord__0Arm1_SuperLayout{._0 = kLayout__908};
+__device__ constexpr FieldToWord__0Layout kLayout__906 =
+    FieldToWord__0Layout{.arm0 = kLayout__907, .arm1 = kLayout__909};
+__device__ constexpr FieldToWordLayout kLayout__902 =
+    FieldToWordLayout{.low = kLayout__903,
+                      .high = kLayout__904,
+                      .lowIsZero = NondetRegLayout{._super = /*offset=*/202},
+                      ._arguments_FieldToWord__0 = kLayout__905,
+                      ._2 = kLayout__906};
+__device__ constexpr MemoryWriteLayout kLayout__910 =
+    MemoryWriteLayout{.io = kLayout__745, ._0 = kLayout__746};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout kLayout__901 =
+    PoseidonStoreOut__0_SuperLayout{.ftw = kLayout__902, .mw = kLayout__910};
+__device__ constexpr PoseidonStoreOut__0_SuperLayout8LayoutArray kLayout__831 =
+    PoseidonStoreOut__0_SuperLayout8LayoutArray{kLayout__832,
+                                                kLayout__842,
+                                                kLayout__851,
+                                                kLayout__861,
+                                                kLayout__871,
+                                                kLayout__881,
+                                                kLayout__891,
+                                                kLayout__901};
+__device__ constexpr PoseidonStoreOutLayout kLayout__830 = PoseidonStoreOutLayout{
+    ._super = kLayout__672,
+    ._1 = kLayout__831,
+    .isNormal = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/203},
+                             .inv = NondetRegLayout{._super = /*offset=*/204}},
+    .extInv = NondetExtRegLayout{._super = /*offset=*/205}};
+__device__ constexpr PoseidonDoOut_SuperLayout kLayout__818 =
+    PoseidonDoOut_SuperLayout{._super = kLayout__672, .arm0 = kLayout__819, .arm1 = kLayout__830};
+__device__ constexpr _Arguments_PoseidonDoOut_SuperLayout kLayout__911 =
+    _Arguments_PoseidonDoOut_SuperLayout{
+        .memoryArg = kLayout__675, .cycleArg = kLayout__692, .argU16 = kLayout__693};
+__device__ constexpr PoseidonDoOutLayout kLayout__817 =
+    PoseidonDoOutLayout{._super = kLayout__818, ._arguments_PoseidonDoOut_Super = kLayout__911};
+__device__ constexpr Poseidon0StateArm5Layout kLayout__816 = Poseidon0StateArm5Layout{
+    ._super = kLayout__817,
+    ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                           .val = NondetRegLayout{._super = /*offset=*/188}},
+    ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                           .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr PoseidonPaging_SuperLayout kLayout__914 =
+    PoseidonPaging_SuperLayout{._super = kLayout__672,
+                               .arm0 = kLayout__672,
+                               .arm1 = kLayout__672,
+                               .arm2 = kLayout__672,
+                               .arm3 = kLayout__672,
+                               .arm4 = kLayout__672,
+                               .arm5 = kLayout__672};
+__device__ constexpr NondetRegLayout6LayoutArray kLayout__916 =
+    NondetRegLayout6LayoutArray{NondetRegLayout{._super = /*offset=*/197},
+                                NondetRegLayout{._super = /*offset=*/198},
+                                NondetRegLayout{._super = /*offset=*/199},
+                                NondetRegLayout{._super = /*offset=*/200},
+                                NondetRegLayout{._super = /*offset=*/201},
+                                NondetRegLayout{._super = /*offset=*/202}};
+__device__ constexpr OneHot_6_Layout kLayout__915 = OneHot_6_Layout{._super = kLayout__916};
+__device__ constexpr NondetU8RegLayout kLayout__918 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                                         .val = NondetRegLayout{._super = /*offset=*/188}}};
+__device__ constexpr IsU24Layout kLayout__917 =
+    IsU24Layout{.low16 = kLayout__834, ._0 = kLayout__918};
+__device__ constexpr _Arguments_PoseidonPaging__1Layout kLayout__919 =
+    _Arguments_PoseidonPaging__1Layout{.argU16 = ArgU16Layout1LayoutArray{ArgU16Layout{
+                                           .count = NondetRegLayout{._super = /*offset=*/156},
+                                           .val = NondetRegLayout{._super = /*offset=*/75}}},
+                                       .argU8 = ArgU8Layout1LayoutArray{ArgU8Layout{
+                                           .count = NondetRegLayout{._super = /*offset=*/189},
+                                           .val = NondetRegLayout{._super = /*offset=*/190}}}};
+__device__ constexpr NondetU8RegLayout kLayout__923 =
+    NondetU8RegLayout{.arg = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                                         .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr IsU24Layout kLayout__922 =
+    IsU24Layout{.low16 = kLayout__835, ._0 = kLayout__923};
+__device__ constexpr PoseidonPaging__1Arm0_SuperLayout kLayout__921 =
+    PoseidonPaging__1Arm0_SuperLayout{._0 = kLayout__922};
+__device__ constexpr PoseidonPaging__1Arm1_SuperLayout kLayout__924 =
+    PoseidonPaging__1Arm1_SuperLayout{._0 = kLayout__922};
+__device__ constexpr PoseidonPaging__1Layout kLayout__920 =
+    PoseidonPaging__1Layout{.arm0 = kLayout__921, .arm1 = kLayout__924};
+__device__ constexpr PoseidonPagingLayout kLayout__913 =
+    PoseidonPagingLayout{._super = kLayout__914,
+                         .curIdx = NondetRegLayout{._super = /*offset=*/195},
+                         .curMode = NondetRegLayout{._super = /*offset=*/196},
+                         .modeSplit = kLayout__915,
+                         ._0 = kLayout__917,
+                         ._arguments_PoseidonPaging__1 = kLayout__919,
+                         ._3 = kLayout__920,
+                         ._4 = NondetRegLayout{._super = /*offset=*/203}};
+__device__ constexpr Poseidon0StateArm6Layout kLayout__912 = Poseidon0StateArm6Layout{
+    ._super = kLayout__913,
+    ._extra0 = kLayout__676,
+    ._extra1 = kLayout__677,
+    ._extra2 = kLayout__678,
+    ._extra3 = kLayout__679,
+    ._extra4 = kLayout__680,
+    ._extra5 = kLayout__681,
+    ._extra6 = kLayout__682,
+    ._extra7 = kLayout__683,
+    ._extra8 = kLayout__684,
+    ._extra9 = kLayout__685,
+    ._extra10 = kLayout__686,
+    ._extra11 = kLayout__687,
+    ._extra12 = kLayout__688,
+    ._extra13 = kLayout__689,
+    ._extra14 = kLayout__690,
+    ._extra15 = kLayout__691,
+    ._extra16 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/139},
+                               .cycle = NondetRegLayout{._super = /*offset=*/140}},
+    ._extra17 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/141},
+                               .cycle = NondetRegLayout{._super = /*offset=*/142}},
+    ._extra18 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/143},
+                               .cycle = NondetRegLayout{._super = /*offset=*/144}},
+    ._extra19 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                               .cycle = NondetRegLayout{._super = /*offset=*/146}},
+    ._extra20 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/147},
+                               .cycle = NondetRegLayout{._super = /*offset=*/148}},
+    ._extra21 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                               .cycle = NondetRegLayout{._super = /*offset=*/150}},
+    ._extra22 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/151},
+                               .cycle = NondetRegLayout{._super = /*offset=*/152}},
+    ._extra23 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/153},
+                               .cycle = NondetRegLayout{._super = /*offset=*/154}},
+    ._extra24 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/157},
+                             .val = NondetRegLayout{._super = /*offset=*/158}},
+    ._extra25 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/159},
+                             .val = NondetRegLayout{._super = /*offset=*/83}},
+    ._extra26 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/160},
+                             .val = NondetRegLayout{._super = /*offset=*/84}},
+    ._extra27 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/161},
+                             .val = NondetRegLayout{._super = /*offset=*/162}},
+    ._extra28 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/163},
+                             .val = NondetRegLayout{._super = /*offset=*/92}},
+    ._extra29 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/164},
+                             .val = NondetRegLayout{._super = /*offset=*/93}},
+    ._extra30 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/165},
+                             .val = NondetRegLayout{._super = /*offset=*/166}},
+    ._extra31 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/167},
+                             .val = NondetRegLayout{._super = /*offset=*/101}},
+    ._extra32 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/168},
+                             .val = NondetRegLayout{._super = /*offset=*/102}},
+    ._extra33 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/169},
+                             .val = NondetRegLayout{._super = /*offset=*/170}},
+    ._extra34 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/171},
+                             .val = NondetRegLayout{._super = /*offset=*/110}},
     ._extra35 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/172},
-                             .val = NondetRegLayout{._super = /*offset=*/173}},
-    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/174},
-                             .val = NondetRegLayout{._super = /*offset=*/175}},
-    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
-                             .val = NondetRegLayout{._super = /*offset=*/177}}};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__830 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__774, .high = kLayout__775, ._0 = kLayout__777};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__831 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__779, .high = kLayout__780, ._0 = kLayout__782};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__832 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__784, .high = kLayout__785, ._0 = kLayout__786};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__833 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__788, .high = kLayout__789, ._0 = kLayout__791};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__834 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__793, .high = kLayout__794, ._0 = kLayout__796};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__835 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__288, .high = kLayout__798, ._0 = kLayout__800};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__836 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__802, .high = kLayout__803, ._0 = kLayout__805};
-__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__837 =
-    PoseidonStoreState__0_SuperLayout{
-        .low = kLayout__807, .high = kLayout__808, ._0 = kLayout__810};
-__device__ constexpr PoseidonStoreState__0_SuperLayout8LayoutArray kLayout__829 =
-    PoseidonStoreState__0_SuperLayout8LayoutArray{kLayout__830,
-                                                  kLayout__831,
-                                                  kLayout__832,
-                                                  kLayout__833,
-                                                  kLayout__834,
-                                                  kLayout__835,
-                                                  kLayout__836,
-                                                  kLayout__837};
-__device__ constexpr PoseidonStoreStateLayout kLayout__828 =
-    PoseidonStoreStateLayout{._super = kLayout__611, ._1 = kLayout__829};
-__device__ constexpr Poseidon0StateArm7Layout kLayout__827 = Poseidon0StateArm7Layout{
-    ._super = kLayout__828,
-    ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/178},
-                           .val = NondetRegLayout{._super = /*offset=*/179}},
-    ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/180},
-                           .val = NondetRegLayout{._super = /*offset=*/181}}};
-__device__ constexpr Poseidon0StateLayout kLayout__634 =
-    Poseidon0StateLayout{._super = kLayout__611,
-                         .arm0 = kLayout__635,
-                         .arm1 = kLayout__662,
-                         .arm2 = kLayout__689,
-                         .arm3 = kLayout__755,
-                         .arm4 = kLayout__756,
-                         .arm5 = kLayout__757,
-                         .arm6 = kLayout__812,
-                         .arm7 = kLayout__827};
-__device__ constexpr Poseidon0Layout kLayout__610 =
-    Poseidon0Layout{.state = kLayout__611,
-                    ._arguments_Poseidon0State = kLayout__613,
-                    .stateRedef = kLayout__634,
-                    .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/191},
-                                          .cycle = NondetRegLayout{._super = /*offset=*/0}}};
-__device__ constexpr SBoxLayout24LayoutArray kLayout__843 =
-    SBoxLayout24LayoutArray{SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/72},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/73}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/74},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/75}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/76},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/77}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/78},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/79}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/80},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/81}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/82},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/83}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/84},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/85}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/86},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/87}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/88},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/89}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/90},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/91}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/92},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/93}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/94},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/95}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/96},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/97}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/98},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/99}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/100},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/101}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/102},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/103}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/104},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/105}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/106},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/107}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/108},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/109}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/110},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/111}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/112},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/113}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/114},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/115}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/116},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/117}},
-                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/118},
-                                       .cubed = NondetRegLayout{._super = /*offset=*/119}}};
-__device__ constexpr DoExtRoundLayout kLayout__842 = DoExtRoundLayout{._1 = kLayout__843};
-__device__ constexpr NondetRegLayout8LayoutArray kLayout__845 =
-    NondetRegLayout8LayoutArray{NondetRegLayout{._super = /*offset=*/120},
-                                NondetRegLayout{._super = /*offset=*/121},
-                                NondetRegLayout{._super = /*offset=*/122},
-                                NondetRegLayout{._super = /*offset=*/123},
-                                NondetRegLayout{._super = /*offset=*/124},
-                                NondetRegLayout{._super = /*offset=*/125},
+                             .val = NondetRegLayout{._super = /*offset=*/111}},
+    ._extra36 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/173},
+                             .val = NondetRegLayout{._super = /*offset=*/174}},
+    ._extra37 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/175},
+                             .val = NondetRegLayout{._super = /*offset=*/119}},
+    ._extra38 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/176},
+                             .val = NondetRegLayout{._super = /*offset=*/120}},
+    ._extra39 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/177},
+                             .val = NondetRegLayout{._super = /*offset=*/178}},
+    ._extra40 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/179},
+                             .val = NondetRegLayout{._super = /*offset=*/128}},
+    ._extra41 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/180},
+                             .val = NondetRegLayout{._super = /*offset=*/129}},
+    ._extra42 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/181},
+                             .val = NondetRegLayout{._super = /*offset=*/182}},
+    ._extra43 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/183},
+                             .val = NondetRegLayout{._super = /*offset=*/137}},
+    ._extra44 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/184},
+                             .val = NondetRegLayout{._super = /*offset=*/138}},
+    ._extra45 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/185},
+                             .val = NondetRegLayout{._super = /*offset=*/186}}};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__928 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__833, .mw = kLayout__841};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__929 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__843, .mw = kLayout__850};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__930 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__852, .mw = kLayout__860};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__931 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__862, .mw = kLayout__870};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__932 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__872, .mw = kLayout__880};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__933 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__882, .mw = kLayout__890};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__934 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__892, .mw = kLayout__900};
+__device__ constexpr PoseidonStoreState__0_SuperLayout kLayout__935 =
+    PoseidonStoreState__0_SuperLayout{.ftw = kLayout__902, .mw = kLayout__910};
+__device__ constexpr PoseidonStoreState__0_SuperLayout8LayoutArray kLayout__927 =
+    PoseidonStoreState__0_SuperLayout8LayoutArray{kLayout__928,
+                                                  kLayout__929,
+                                                  kLayout__930,
+                                                  kLayout__931,
+                                                  kLayout__932,
+                                                  kLayout__933,
+                                                  kLayout__934,
+                                                  kLayout__935};
+__device__ constexpr PoseidonStoreStateLayout kLayout__926 =
+    PoseidonStoreStateLayout{._super = kLayout__672, ._1 = kLayout__927};
+__device__ constexpr Poseidon0StateArm7Layout kLayout__925 = Poseidon0StateArm7Layout{
+    ._super = kLayout__926,
+    ._extra0 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/187},
+                           .val = NondetRegLayout{._super = /*offset=*/188}},
+    ._extra1 = ArgU8Layout{.count = NondetRegLayout{._super = /*offset=*/189},
+                           .val = NondetRegLayout{._super = /*offset=*/190}}};
+__device__ constexpr Poseidon0StateLayout kLayout__695 =
+    Poseidon0StateLayout{._super = kLayout__672,
+                         .arm0 = kLayout__696,
+                         .arm1 = kLayout__721,
+                         .arm2 = kLayout__748,
+                         .arm3 = kLayout__814,
+                         .arm4 = kLayout__815,
+                         .arm5 = kLayout__816,
+                         .arm6 = kLayout__912,
+                         .arm7 = kLayout__925};
+__device__ constexpr Poseidon0Layout kLayout__670 =
+    Poseidon0Layout{._0 = kLayout__671,
+                    .state = kLayout__672,
+                    ._arguments_Poseidon0State = kLayout__674,
+                    .stateRedef = kLayout__695};
+__device__ constexpr DoCycleTableLayout kLayout__937 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/67},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/68}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/69},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/70}}};
+__device__ constexpr SBoxLayout24LayoutArray kLayout__942 =
+    SBoxLayout24LayoutArray{SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/77},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/78}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/79},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/80}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/81},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/82}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/83},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/84}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/85},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/86}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/87},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/88}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/89},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/90}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/91},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/92}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/93},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/94}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/95},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/96}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/97},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/98}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/99},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/100}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/101},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/102}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/103},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/104}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/105},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/106}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/107},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/108}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/109},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/110}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/111},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/112}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/113},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/114}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/115},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/116}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/117},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/118}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/119},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/120}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/121},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/122}},
+                            SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/123},
+                                       .cubed = NondetRegLayout{._super = /*offset=*/124}}};
+__device__ constexpr DoExtRoundLayout kLayout__941 = DoExtRoundLayout{._1 = kLayout__942};
+__device__ constexpr NondetRegLayout8LayoutArray kLayout__944 =
+    NondetRegLayout8LayoutArray{NondetRegLayout{._super = /*offset=*/125},
                                 NondetRegLayout{._super = /*offset=*/126},
-                                NondetRegLayout{._super = /*offset=*/127}};
-__device__ constexpr OneHot_8_Layout kLayout__844 = OneHot_8_Layout{._super = kLayout__845};
-__device__ constexpr DoExtRoundByIdxLayout kLayout__841 =
-    DoExtRoundByIdxLayout{._super = kLayout__842, .idxHot = kLayout__844};
-__device__ constexpr PoseidonExtRoundLayout kLayout__840 = PoseidonExtRoundLayout{
-    ._super = kLayout__611,
-    .isRound3 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/66},
-                             .inv = NondetRegLayout{._super = /*offset=*/67}},
-    .isRound7 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/68},
-                             .inv = NondetRegLayout{._super = /*offset=*/69}},
-    .lastBlock = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/70},
-                              .inv = NondetRegLayout{._super = /*offset=*/71}},
-    .nextInner = kLayout__841};
-__device__ constexpr DoIntRoundLayout kLayout__849 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/66},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/67}}};
-__device__ constexpr DoIntRoundLayout kLayout__850 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/68},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/69}}};
-__device__ constexpr DoIntRoundLayout kLayout__851 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/70},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/71}}};
-__device__ constexpr DoIntRoundLayout kLayout__852 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/72},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/73}}};
-__device__ constexpr DoIntRoundLayout kLayout__853 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/74},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/75}}};
-__device__ constexpr DoIntRoundLayout kLayout__854 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/76},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/77}}};
-__device__ constexpr DoIntRoundLayout kLayout__855 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/78},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/79}}};
-__device__ constexpr DoIntRoundLayout kLayout__856 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/80},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/81}}};
-__device__ constexpr DoIntRoundLayout kLayout__857 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/82},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/83}}};
-__device__ constexpr DoIntRoundLayout kLayout__858 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/84},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/85}}};
-__device__ constexpr DoIntRoundLayout kLayout__859 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/86},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/87}}};
-__device__ constexpr DoIntRoundLayout kLayout__860 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/88},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/89}}};
-__device__ constexpr DoIntRoundLayout kLayout__861 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/90},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/91}}};
-__device__ constexpr DoIntRoundLayout kLayout__862 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/92},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/93}}};
-__device__ constexpr DoIntRoundLayout kLayout__863 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/94},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/95}}};
-__device__ constexpr DoIntRoundLayout kLayout__864 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/96},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/97}}};
-__device__ constexpr DoIntRoundLayout kLayout__865 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/98},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/99}}};
-__device__ constexpr DoIntRoundLayout kLayout__866 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/100},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/101}}};
-__device__ constexpr DoIntRoundLayout kLayout__867 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/102},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/103}}};
-__device__ constexpr DoIntRoundLayout kLayout__868 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/104},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/105}}};
-__device__ constexpr DoIntRoundLayout kLayout__869 =
-    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/106},
-                                        .cubed = NondetRegLayout{._super = /*offset=*/107}}};
-__device__ constexpr DoIntRoundLayout21LayoutArray kLayout__848 = DoIntRoundLayout21LayoutArray{
-    kLayout__849, kLayout__850, kLayout__851, kLayout__852, kLayout__853, kLayout__854,
-    kLayout__855, kLayout__856, kLayout__857, kLayout__858, kLayout__859, kLayout__860,
-    kLayout__861, kLayout__862, kLayout__863, kLayout__864, kLayout__865, kLayout__866,
-    kLayout__867, kLayout__868, kLayout__869};
-__device__ constexpr DoIntRoundsLayout kLayout__847 = DoIntRoundsLayout{._super = kLayout__848};
-__device__ constexpr PoseidonIntRoundsLayout kLayout__846 =
-    PoseidonIntRoundsLayout{._super = kLayout__611, .nextInner = kLayout__847};
-__device__ constexpr Poseidon1StateLayout kLayout__839 =
-    Poseidon1StateLayout{._super = kLayout__611,
-                         .arm0 = kLayout__840,
-                         .arm1 = kLayout__846,
-                         .arm2 = kLayout__611,
-                         .arm3 = kLayout__611,
-                         .arm4 = kLayout__611,
-                         .arm5 = kLayout__611,
-                         .arm6 = kLayout__611,
-                         .arm7 = kLayout__611};
-__device__ constexpr Poseidon1Layout kLayout__838 =
-    Poseidon1Layout{.state = kLayout__611,
-                    .stateRedef = kLayout__839,
-                    .arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/128},
-                                          .cycle = NondetRegLayout{._super = /*offset=*/0}}};
+                                NondetRegLayout{._super = /*offset=*/127},
+                                NondetRegLayout{._super = /*offset=*/128},
+                                NondetRegLayout{._super = /*offset=*/129},
+                                NondetRegLayout{._super = /*offset=*/130},
+                                NondetRegLayout{._super = /*offset=*/131},
+                                NondetRegLayout{._super = /*offset=*/132}};
+__device__ constexpr OneHot_8_Layout kLayout__943 = OneHot_8_Layout{._super = kLayout__944};
+__device__ constexpr DoExtRoundByIdxLayout kLayout__940 =
+    DoExtRoundByIdxLayout{._super = kLayout__941, .idxHot = kLayout__943};
+__device__ constexpr PoseidonExtRoundLayout kLayout__939 = PoseidonExtRoundLayout{
+    ._super = kLayout__672,
+    .isRound3 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/71},
+                             .inv = NondetRegLayout{._super = /*offset=*/72}},
+    .isRound7 = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/73},
+                             .inv = NondetRegLayout{._super = /*offset=*/74}},
+    .lastBlock = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/75},
+                              .inv = NondetRegLayout{._super = /*offset=*/76}},
+    .nextInner = kLayout__940};
+__device__ constexpr DoIntRoundLayout kLayout__948 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/71},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/72}}};
+__device__ constexpr DoIntRoundLayout kLayout__949 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/73},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/74}}};
+__device__ constexpr DoIntRoundLayout kLayout__950 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/75},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/76}}};
+__device__ constexpr DoIntRoundLayout kLayout__951 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/77},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/78}}};
+__device__ constexpr DoIntRoundLayout kLayout__952 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/79},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/80}}};
+__device__ constexpr DoIntRoundLayout kLayout__953 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/81},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/82}}};
+__device__ constexpr DoIntRoundLayout kLayout__954 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/83},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/84}}};
+__device__ constexpr DoIntRoundLayout kLayout__955 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/85},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/86}}};
+__device__ constexpr DoIntRoundLayout kLayout__956 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/87},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/88}}};
+__device__ constexpr DoIntRoundLayout kLayout__957 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/89},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/90}}};
+__device__ constexpr DoIntRoundLayout kLayout__958 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/91},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/92}}};
+__device__ constexpr DoIntRoundLayout kLayout__959 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/93},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/94}}};
+__device__ constexpr DoIntRoundLayout kLayout__960 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/95},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/96}}};
+__device__ constexpr DoIntRoundLayout kLayout__961 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/97},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/98}}};
+__device__ constexpr DoIntRoundLayout kLayout__962 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/99},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/100}}};
+__device__ constexpr DoIntRoundLayout kLayout__963 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/101},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/102}}};
+__device__ constexpr DoIntRoundLayout kLayout__964 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/103},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/104}}};
+__device__ constexpr DoIntRoundLayout kLayout__965 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/105},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/106}}};
+__device__ constexpr DoIntRoundLayout kLayout__966 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/107},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/108}}};
+__device__ constexpr DoIntRoundLayout kLayout__967 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/109},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/110}}};
+__device__ constexpr DoIntRoundLayout kLayout__968 =
+    DoIntRoundLayout{.sbox = SBoxLayout{._super = NondetRegLayout{._super = /*offset=*/111},
+                                        .cubed = NondetRegLayout{._super = /*offset=*/112}}};
+__device__ constexpr DoIntRoundLayout21LayoutArray kLayout__947 = DoIntRoundLayout21LayoutArray{
+    kLayout__948, kLayout__949, kLayout__950, kLayout__951, kLayout__952, kLayout__953,
+    kLayout__954, kLayout__955, kLayout__956, kLayout__957, kLayout__958, kLayout__959,
+    kLayout__960, kLayout__961, kLayout__962, kLayout__963, kLayout__964, kLayout__965,
+    kLayout__966, kLayout__967, kLayout__968};
+__device__ constexpr DoIntRoundsLayout kLayout__946 = DoIntRoundsLayout{._super = kLayout__947};
+__device__ constexpr PoseidonIntRoundsLayout kLayout__945 =
+    PoseidonIntRoundsLayout{._super = kLayout__672, .nextInner = kLayout__946};
+__device__ constexpr Poseidon1StateLayout kLayout__938 =
+    Poseidon1StateLayout{._super = kLayout__672,
+                         .arm0 = kLayout__939,
+                         .arm1 = kLayout__945,
+                         .arm2 = kLayout__672,
+                         .arm3 = kLayout__672,
+                         .arm4 = kLayout__672,
+                         .arm5 = kLayout__672,
+                         .arm6 = kLayout__672,
+                         .arm7 = kLayout__672};
+__device__ constexpr Poseidon1Layout kLayout__936 =
+    Poseidon1Layout{._0 = kLayout__937, .state = kLayout__672, .stateRedef = kLayout__938};
+__device__ constexpr DoCycleTableLayout kLayout__970 =
+    DoCycleTableLayout{.arg1 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/186},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/187}},
+                       .arg2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/188},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/189}}};
+__device__ constexpr NondetRegLayout32LayoutArray kLayout__972 = NondetRegLayout32LayoutArray{
+    NondetRegLayout{._super = /*offset=*/35}, NondetRegLayout{._super = /*offset=*/36},
+    NondetRegLayout{._super = /*offset=*/37}, NondetRegLayout{._super = /*offset=*/38},
+    NondetRegLayout{._super = /*offset=*/39}, NondetRegLayout{._super = /*offset=*/40},
+    NondetRegLayout{._super = /*offset=*/41}, NondetRegLayout{._super = /*offset=*/42},
+    NondetRegLayout{._super = /*offset=*/43}, NondetRegLayout{._super = /*offset=*/44},
+    NondetRegLayout{._super = /*offset=*/45}, NondetRegLayout{._super = /*offset=*/46},
+    NondetRegLayout{._super = /*offset=*/47}, NondetRegLayout{._super = /*offset=*/48},
+    NondetRegLayout{._super = /*offset=*/49}, NondetRegLayout{._super = /*offset=*/50},
+    NondetRegLayout{._super = /*offset=*/51}, NondetRegLayout{._super = /*offset=*/52},
+    NondetRegLayout{._super = /*offset=*/53}, NondetRegLayout{._super = /*offset=*/54},
+    NondetRegLayout{._super = /*offset=*/55}, NondetRegLayout{._super = /*offset=*/56},
+    NondetRegLayout{._super = /*offset=*/57}, NondetRegLayout{._super = /*offset=*/58},
+    NondetRegLayout{._super = /*offset=*/59}, NondetRegLayout{._super = /*offset=*/60},
+    NondetRegLayout{._super = /*offset=*/61}, NondetRegLayout{._super = /*offset=*/62},
+    NondetRegLayout{._super = /*offset=*/63}, NondetRegLayout{._super = /*offset=*/64},
+    NondetRegLayout{._super = /*offset=*/65}, NondetRegLayout{._super = /*offset=*/66}};
+__device__ constexpr NondetRegLayout32LayoutArray kLayout__973 = NondetRegLayout32LayoutArray{
+    NondetRegLayout{._super = /*offset=*/67}, NondetRegLayout{._super = /*offset=*/68},
+    NondetRegLayout{._super = /*offset=*/69}, NondetRegLayout{._super = /*offset=*/70},
+    NondetRegLayout{._super = /*offset=*/71}, NondetRegLayout{._super = /*offset=*/72},
+    NondetRegLayout{._super = /*offset=*/73}, NondetRegLayout{._super = /*offset=*/74},
+    NondetRegLayout{._super = /*offset=*/75}, NondetRegLayout{._super = /*offset=*/76},
+    NondetRegLayout{._super = /*offset=*/77}, NondetRegLayout{._super = /*offset=*/78},
+    NondetRegLayout{._super = /*offset=*/79}, NondetRegLayout{._super = /*offset=*/80},
+    NondetRegLayout{._super = /*offset=*/81}, NondetRegLayout{._super = /*offset=*/82},
+    NondetRegLayout{._super = /*offset=*/83}, NondetRegLayout{._super = /*offset=*/84},
+    NondetRegLayout{._super = /*offset=*/85}, NondetRegLayout{._super = /*offset=*/86},
+    NondetRegLayout{._super = /*offset=*/87}, NondetRegLayout{._super = /*offset=*/88},
+    NondetRegLayout{._super = /*offset=*/89}, NondetRegLayout{._super = /*offset=*/90},
+    NondetRegLayout{._super = /*offset=*/91}, NondetRegLayout{._super = /*offset=*/92},
+    NondetRegLayout{._super = /*offset=*/93}, NondetRegLayout{._super = /*offset=*/94},
+    NondetRegLayout{._super = /*offset=*/95}, NondetRegLayout{._super = /*offset=*/96},
+    NondetRegLayout{._super = /*offset=*/97}, NondetRegLayout{._super = /*offset=*/98}};
+__device__ constexpr NondetRegLayout32LayoutArray kLayout__974 = NondetRegLayout32LayoutArray{
+    NondetRegLayout{._super = /*offset=*/99},  NondetRegLayout{._super = /*offset=*/100},
+    NondetRegLayout{._super = /*offset=*/101}, NondetRegLayout{._super = /*offset=*/102},
+    NondetRegLayout{._super = /*offset=*/103}, NondetRegLayout{._super = /*offset=*/104},
+    NondetRegLayout{._super = /*offset=*/105}, NondetRegLayout{._super = /*offset=*/106},
+    NondetRegLayout{._super = /*offset=*/107}, NondetRegLayout{._super = /*offset=*/108},
+    NondetRegLayout{._super = /*offset=*/109}, NondetRegLayout{._super = /*offset=*/110},
+    NondetRegLayout{._super = /*offset=*/111}, NondetRegLayout{._super = /*offset=*/112},
+    NondetRegLayout{._super = /*offset=*/113}, NondetRegLayout{._super = /*offset=*/114},
+    NondetRegLayout{._super = /*offset=*/115}, NondetRegLayout{._super = /*offset=*/116},
+    NondetRegLayout{._super = /*offset=*/117}, NondetRegLayout{._super = /*offset=*/118},
+    NondetRegLayout{._super = /*offset=*/119}, NondetRegLayout{._super = /*offset=*/120},
+    NondetRegLayout{._super = /*offset=*/121}, NondetRegLayout{._super = /*offset=*/122},
+    NondetRegLayout{._super = /*offset=*/123}, NondetRegLayout{._super = /*offset=*/124},
+    NondetRegLayout{._super = /*offset=*/125}, NondetRegLayout{._super = /*offset=*/126},
+    NondetRegLayout{._super = /*offset=*/127}, NondetRegLayout{._super = /*offset=*/128},
+    NondetRegLayout{._super = /*offset=*/129}, NondetRegLayout{._super = /*offset=*/130}};
+__device__ constexpr ShaStateLayout kLayout__971 =
+    ShaStateLayout{.stateInAddr = NondetRegLayout{._super = /*offset=*/28},
+                   .stateOutAddr = NondetRegLayout{._super = /*offset=*/29},
+                   .dataAddr = NondetRegLayout{._super = /*offset=*/30},
+                   .count = NondetRegLayout{._super = /*offset=*/31},
+                   .kAddr = NondetRegLayout{._super = /*offset=*/32},
+                   .round = NondetRegLayout{._super = /*offset=*/33},
+                   .nextState = NondetRegLayout{._super = /*offset=*/34},
+                   .a = kLayout__972,
+                   .e = kLayout__973,
+                   .w = kLayout__974};
+__device__ constexpr MemoryArgLayout kLayout__977 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/131},
+                    .addr = NondetRegLayout{._super = /*offset=*/132},
+                    .cycle = NondetRegLayout{._super = /*offset=*/133},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/134},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/135}};
+__device__ constexpr MemoryArgLayout kLayout__978 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/136},
+                    .addr = NondetRegLayout{._super = /*offset=*/132},
+                    .cycle = NondetRegLayout{._super = /*offset=*/137},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/138},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/139}};
+__device__ constexpr MemoryArgLayout kLayout__979 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/140},
+                    .addr = NondetRegLayout{._super = /*offset=*/141},
+                    .cycle = NondetRegLayout{._super = /*offset=*/142},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/143},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/144}};
+__device__ constexpr MemoryArgLayout kLayout__980 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/145},
+                    .addr = NondetRegLayout{._super = /*offset=*/141},
+                    .cycle = NondetRegLayout{._super = /*offset=*/146},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/147},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/148}};
+__device__ constexpr MemoryArgLayout kLayout__981 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/149},
+                    .addr = NondetRegLayout{._super = /*offset=*/150},
+                    .cycle = NondetRegLayout{._super = /*offset=*/151},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/152},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/153}};
+__device__ constexpr MemoryArgLayout kLayout__982 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/154},
+                    .addr = NondetRegLayout{._super = /*offset=*/150},
+                    .cycle = NondetRegLayout{._super = /*offset=*/155},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/156},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/157}};
+__device__ constexpr MemoryArgLayout kLayout__983 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/158},
+                    .addr = NondetRegLayout{._super = /*offset=*/159},
+                    .cycle = NondetRegLayout{._super = /*offset=*/160},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/161},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/162}};
+__device__ constexpr MemoryArgLayout kLayout__984 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/163},
+                    .addr = NondetRegLayout{._super = /*offset=*/159},
+                    .cycle = NondetRegLayout{._super = /*offset=*/164},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/165},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/166}};
+__device__ constexpr MemoryArgLayout kLayout__985 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/167},
+                    .addr = NondetRegLayout{._super = /*offset=*/168},
+                    .cycle = NondetRegLayout{._super = /*offset=*/169},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/170},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/171}};
+__device__ constexpr MemoryArgLayout kLayout__986 =
+    MemoryArgLayout{.count = NondetRegLayout{._super = /*offset=*/172},
+                    .addr = NondetRegLayout{._super = /*offset=*/168},
+                    .cycle = NondetRegLayout{._super = /*offset=*/173},
+                    .dataLow = NondetRegLayout{._super = /*offset=*/174},
+                    .dataHigh = NondetRegLayout{._super = /*offset=*/175}};
+__device__ constexpr MemoryArgLayout10LayoutArray kLayout__976 =
+    MemoryArgLayout10LayoutArray{kLayout__977,
+                                 kLayout__978,
+                                 kLayout__979,
+                                 kLayout__980,
+                                 kLayout__981,
+                                 kLayout__982,
+                                 kLayout__983,
+                                 kLayout__984,
+                                 kLayout__985,
+                                 kLayout__986};
+__device__ constexpr CycleArgLayout5LayoutArray kLayout__987 =
+    CycleArgLayout5LayoutArray{CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/176},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/177}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/178},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/179}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/181}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/183}},
+                               CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                                              .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr _Arguments_Sha0StateLayout kLayout__975 =
+    _Arguments_Sha0StateLayout{.memoryArg = kLayout__976, .cycleArg = kLayout__987};
+__device__ constexpr MemoryIOLayout kLayout__992 =
+    MemoryIOLayout{.oldTxn = kLayout__977, .newTxn = kLayout__978};
+__device__ constexpr IsCycleLayout kLayout__994 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/176},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/177}}};
+__device__ constexpr IsForwardLayout kLayout__993 = IsForwardLayout{._0 = kLayout__994};
+__device__ constexpr MemoryReadLayout kLayout__991 =
+    MemoryReadLayout{.io = kLayout__992, ._0 = kLayout__993};
+__device__ constexpr ReadAddrLayout kLayout__990 = ReadAddrLayout{.addr32 = kLayout__991};
+__device__ constexpr MemoryIOLayout kLayout__997 =
+    MemoryIOLayout{.oldTxn = kLayout__979, .newTxn = kLayout__980};
+__device__ constexpr IsCycleLayout kLayout__999 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/178},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/179}}};
+__device__ constexpr IsForwardLayout kLayout__998 = IsForwardLayout{._0 = kLayout__999};
+__device__ constexpr MemoryReadLayout kLayout__996 =
+    MemoryReadLayout{.io = kLayout__997, ._0 = kLayout__998};
+__device__ constexpr ReadAddrLayout kLayout__995 = ReadAddrLayout{.addr32 = kLayout__996};
+__device__ constexpr MemoryIOLayout kLayout__1002 =
+    MemoryIOLayout{.oldTxn = kLayout__981, .newTxn = kLayout__982};
+__device__ constexpr IsCycleLayout kLayout__1004 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/181}}};
+__device__ constexpr IsForwardLayout kLayout__1003 = IsForwardLayout{._0 = kLayout__1004};
+__device__ constexpr MemoryReadLayout kLayout__1001 =
+    MemoryReadLayout{.io = kLayout__1002, ._0 = kLayout__1003};
+__device__ constexpr ReadAddrLayout kLayout__1000 = ReadAddrLayout{.addr32 = kLayout__1001};
+__device__ constexpr MemoryIOLayout kLayout__1006 =
+    MemoryIOLayout{.oldTxn = kLayout__983, .newTxn = kLayout__984};
+__device__ constexpr IsCycleLayout kLayout__1008 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/183}}};
+__device__ constexpr IsForwardLayout kLayout__1007 = IsForwardLayout{._0 = kLayout__1008};
+__device__ constexpr MemoryReadLayout kLayout__1005 =
+    MemoryReadLayout{.io = kLayout__1006, ._0 = kLayout__1007};
+__device__ constexpr MemoryIOLayout kLayout__1011 =
+    MemoryIOLayout{.oldTxn = kLayout__985, .newTxn = kLayout__986};
+__device__ constexpr IsCycleLayout kLayout__1013 =
+    IsCycleLayout{.arg = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                                        .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr IsForwardLayout kLayout__1012 = IsForwardLayout{._0 = kLayout__1013};
+__device__ constexpr MemoryReadLayout kLayout__1010 =
+    MemoryReadLayout{.io = kLayout__1011, ._0 = kLayout__1012};
+__device__ constexpr ReadAddrLayout kLayout__1009 = ReadAddrLayout{.addr32 = kLayout__1010};
+__device__ constexpr ShaEcallLayout kLayout__989 = ShaEcallLayout{._super = kLayout__971,
+                                                                  .stateInAddr = kLayout__990,
+                                                                  .stateOutAddr = kLayout__995,
+                                                                  .dataAddr = kLayout__1000,
+                                                                  ._0 = kLayout__1005,
+                                                                  .kAddr = kLayout__1009};
+__device__ constexpr MemoryWriteLayout kLayout__1016 =
+    MemoryWriteLayout{.io = kLayout__1002, ._0 = kLayout__1003};
+__device__ constexpr MemoryWriteLayout kLayout__1017 =
+    MemoryWriteLayout{.io = kLayout__1006, ._0 = kLayout__1007};
+__device__ constexpr ShaLoadStateLayout kLayout__1015 = ShaLoadStateLayout{
+    ._super = kLayout__971,
+    .lastRound = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/190},
+                              .inv = NondetRegLayout{._super = /*offset=*/191}},
+    .countZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/192},
+                              .inv = NondetRegLayout{._super = /*offset=*/193}},
+    .a32 = kLayout__991,
+    .e32 = kLayout__996,
+    ._0 = kLayout__1016,
+    ._1 = kLayout__1017};
+__device__ constexpr Sha0StateArm1Layout kLayout__1014 = Sha0StateArm1Layout{
+    ._super = kLayout__1015,
+    ._extra0 = kLayout__985,
+    ._extra1 = kLayout__986,
+    ._extra2 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                              .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr UnpackReg_32__16_Layout kLayout__1021 =
+    UnpackReg_32__16_Layout{._super = kLayout__972};
+__device__ constexpr CarryExtractLayout kLayout__1022 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/192},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/193},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/194}};
+__device__ constexpr CarryExtractLayout kLayout__1023 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/195},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/196},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/197}};
+__device__ constexpr CarryAndExpandLayout kLayout__1020 = CarryAndExpandLayout{
+    ._super = kLayout__1021, .lowCarry = kLayout__1022, .highCarry = kLayout__1023};
+__device__ constexpr UnpackReg_32__16_Layout kLayout__1025 =
+    UnpackReg_32__16_Layout{._super = kLayout__973};
+__device__ constexpr CarryExtractLayout kLayout__1026 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/198},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/199},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/200}};
+__device__ constexpr CarryExtractLayout kLayout__1027 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/201},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/202},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/203}};
+__device__ constexpr CarryAndExpandLayout kLayout__1024 = CarryAndExpandLayout{
+    ._super = kLayout__1025, .lowCarry = kLayout__1026, .highCarry = kLayout__1027};
+__device__ constexpr ShaLoadDataLayout kLayout__1019 =
+    ShaLoadDataLayout{._super = kLayout__971,
+                      .lastRound = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/190},
+                                                .inv = NondetRegLayout{._super = /*offset=*/191}},
+                      .k = kLayout__991,
+                      .wMem = kLayout__996,
+                      .wBits = kLayout__974,
+                      .a = kLayout__1020,
+                      .e = kLayout__1024};
+__device__ constexpr Sha0StateArm2Layout kLayout__1018 = Sha0StateArm2Layout{
+    ._super = kLayout__1019,
+    ._extra0 = kLayout__981,
+    ._extra1 = kLayout__982,
+    ._extra2 = kLayout__983,
+    ._extra3 = kLayout__984,
+    ._extra4 = kLayout__985,
+    ._extra5 = kLayout__986,
+    ._extra6 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                              .cycle = NondetRegLayout{._super = /*offset=*/181}},
+    ._extra7 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                              .cycle = NondetRegLayout{._super = /*offset=*/183}},
+    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                              .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr UnpackReg_32__16_Layout kLayout__1031 =
+    UnpackReg_32__16_Layout{._super = kLayout__974};
+__device__ constexpr CarryAndExpandLayout kLayout__1030 = CarryAndExpandLayout{
+    ._super = kLayout__1031, .lowCarry = kLayout__1022, .highCarry = kLayout__1023};
+__device__ constexpr CarryAndExpandLayout kLayout__1032 = CarryAndExpandLayout{
+    ._super = kLayout__1021, .lowCarry = kLayout__1026, .highCarry = kLayout__1027};
+__device__ constexpr CarryExtractLayout kLayout__1034 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/204},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/205},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/206}};
+__device__ constexpr CarryExtractLayout kLayout__1035 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/207},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/208},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/209}};
+__device__ constexpr CarryAndExpandLayout kLayout__1033 = CarryAndExpandLayout{
+    ._super = kLayout__1025, .lowCarry = kLayout__1034, .highCarry = kLayout__1035};
+__device__ constexpr ShaMixLayout kLayout__1029 =
+    ShaMixLayout{._super = kLayout__971,
+                 .lastRound = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/190},
+                                           .inv = NondetRegLayout{._super = /*offset=*/191}},
+                 .k = kLayout__991,
+                 .wBits = kLayout__1030,
+                 .a = kLayout__1032,
+                 .e = kLayout__1033};
+__device__ constexpr Sha0StateArm3Layout kLayout__1028 = Sha0StateArm3Layout{
+    ._super = kLayout__1029,
+    ._extra0 = kLayout__979,
+    ._extra1 = kLayout__980,
+    ._extra2 = kLayout__981,
+    ._extra3 = kLayout__982,
+    ._extra4 = kLayout__983,
+    ._extra5 = kLayout__984,
+    ._extra6 = kLayout__985,
+    ._extra7 = kLayout__986,
+    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/178},
+                              .cycle = NondetRegLayout{._super = /*offset=*/179}},
+    ._extra9 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                              .cycle = NondetRegLayout{._super = /*offset=*/181}},
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                               .cycle = NondetRegLayout{._super = /*offset=*/183}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                               .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr CarryExtractLayout kLayout__1039 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/194},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/195},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/196}};
+__device__ constexpr CarryExtractLayout kLayout__1040 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/197},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/198},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/199}};
+__device__ constexpr CarryAndExpandLayout kLayout__1038 = CarryAndExpandLayout{
+    ._super = kLayout__1021, .lowCarry = kLayout__1039, .highCarry = kLayout__1040};
+__device__ constexpr CarryExtractLayout kLayout__1042 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/200},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/201},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/202}};
+__device__ constexpr CarryExtractLayout kLayout__1043 =
+    CarryExtractLayout{.bit0 = NondetRegLayout{._super = /*offset=*/203},
+                       .bit1 = NondetRegLayout{._super = /*offset=*/204},
+                       .bit2 = NondetRegLayout{._super = /*offset=*/205}};
+__device__ constexpr CarryAndExpandLayout kLayout__1041 = CarryAndExpandLayout{
+    ._super = kLayout__1025, .lowCarry = kLayout__1042, .highCarry = kLayout__1043};
+__device__ constexpr MemoryWriteLayout kLayout__1044 =
+    MemoryWriteLayout{.io = kLayout__992, ._0 = kLayout__993};
+__device__ constexpr MemoryWriteLayout kLayout__1045 =
+    MemoryWriteLayout{.io = kLayout__997, ._0 = kLayout__998};
+__device__ constexpr ShaStoreStateLayout kLayout__1037 = ShaStoreStateLayout{
+    ._super = kLayout__971,
+    .lastRound = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/190},
+                              .inv = NondetRegLayout{._super = /*offset=*/191}},
+    .countZero = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/192},
+                              .inv = NondetRegLayout{._super = /*offset=*/193}},
+    .a = kLayout__1038,
+    .e = kLayout__1041,
+    ._1 = kLayout__1044,
+    ._2 = kLayout__1045};
+__device__ constexpr Sha0StateArm4Layout kLayout__1036 = Sha0StateArm4Layout{
+    ._super = kLayout__1037,
+    ._extra0 = kLayout__981,
+    ._extra1 = kLayout__982,
+    ._extra2 = kLayout__983,
+    ._extra3 = kLayout__984,
+    ._extra4 = kLayout__985,
+    ._extra5 = kLayout__986,
+    ._extra6 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                              .cycle = NondetRegLayout{._super = /*offset=*/181}},
+    ._extra7 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                              .cycle = NondetRegLayout{._super = /*offset=*/183}},
+    ._extra8 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                              .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr Sha0StateArm5Layout kLayout__1046 = Sha0StateArm5Layout{
+    ._super = kLayout__971,
+    ._extra0 = kLayout__977,
+    ._extra1 = kLayout__978,
+    ._extra2 = kLayout__979,
+    ._extra3 = kLayout__980,
+    ._extra4 = kLayout__981,
+    ._extra5 = kLayout__982,
+    ._extra6 = kLayout__983,
+    ._extra7 = kLayout__984,
+    ._extra8 = kLayout__985,
+    ._extra9 = kLayout__986,
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/176},
+                               .cycle = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/178},
+                               .cycle = NondetRegLayout{._super = /*offset=*/179}},
+    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                               .cycle = NondetRegLayout{._super = /*offset=*/181}},
+    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                               .cycle = NondetRegLayout{._super = /*offset=*/183}},
+    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                               .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr Sha0StateArm6Layout kLayout__1047 = Sha0StateArm6Layout{
+    ._super = kLayout__971,
+    ._extra0 = kLayout__977,
+    ._extra1 = kLayout__978,
+    ._extra2 = kLayout__979,
+    ._extra3 = kLayout__980,
+    ._extra4 = kLayout__981,
+    ._extra5 = kLayout__982,
+    ._extra6 = kLayout__983,
+    ._extra7 = kLayout__984,
+    ._extra8 = kLayout__985,
+    ._extra9 = kLayout__986,
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/176},
+                               .cycle = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/178},
+                               .cycle = NondetRegLayout{._super = /*offset=*/179}},
+    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                               .cycle = NondetRegLayout{._super = /*offset=*/181}},
+    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                               .cycle = NondetRegLayout{._super = /*offset=*/183}},
+    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                               .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr Sha0StateArm7Layout kLayout__1048 = Sha0StateArm7Layout{
+    ._super = kLayout__971,
+    ._extra0 = kLayout__977,
+    ._extra1 = kLayout__978,
+    ._extra2 = kLayout__979,
+    ._extra3 = kLayout__980,
+    ._extra4 = kLayout__981,
+    ._extra5 = kLayout__982,
+    ._extra6 = kLayout__983,
+    ._extra7 = kLayout__984,
+    ._extra8 = kLayout__985,
+    ._extra9 = kLayout__986,
+    ._extra10 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/176},
+                               .cycle = NondetRegLayout{._super = /*offset=*/177}},
+    ._extra11 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/178},
+                               .cycle = NondetRegLayout{._super = /*offset=*/179}},
+    ._extra12 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/180},
+                               .cycle = NondetRegLayout{._super = /*offset=*/181}},
+    ._extra13 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/182},
+                               .cycle = NondetRegLayout{._super = /*offset=*/183}},
+    ._extra14 = CycleArgLayout{.count = NondetRegLayout{._super = /*offset=*/184},
+                               .cycle = NondetRegLayout{._super = /*offset=*/185}}};
+__device__ constexpr Sha0StateLayout kLayout__988 = Sha0StateLayout{._super = kLayout__971,
+                                                                    .arm0 = kLayout__989,
+                                                                    .arm1 = kLayout__1014,
+                                                                    .arm2 = kLayout__1018,
+                                                                    .arm3 = kLayout__1028,
+                                                                    .arm4 = kLayout__1036,
+                                                                    .arm5 = kLayout__1046,
+                                                                    .arm6 = kLayout__1047,
+                                                                    .arm7 = kLayout__1048};
+__device__ constexpr Sha0Layout kLayout__969 = Sha0Layout{._0 = kLayout__970,
+                                                          .state = kLayout__971,
+                                                          ._arguments_Sha0State = kLayout__975,
+                                                          .stateRedef = kLayout__988};
 __device__ constexpr TopInstResultLayout kLayout__6 = TopInstResultLayout{._selector = kLayout__5,
                                                                           .arm0 = kLayout__7,
                                                                           .arm1 = kLayout__88,
                                                                           .arm2 = kLayout__106,
                                                                           .arm3 = kLayout__119,
                                                                           .arm4 = kLayout__203,
-                                                                          .arm5 = kLayout__289,
-                                                                          .arm6 = kLayout__349,
-                                                                          .arm7 = kLayout__388,
-                                                                          .arm8 = kLayout__556,
-                                                                          .arm9 = kLayout__610,
-                                                                          .arm10 = kLayout__838};
+                                                                          .arm5 = kLayout__330,
+                                                                          .arm6 = kLayout__390,
+                                                                          .arm7 = kLayout__433,
+                                                                          .arm8 = kLayout__605,
+                                                                          .arm9 = kLayout__670,
+                                                                          .arm10 = kLayout__936,
+                                                                          .arm11 = kLayout__969};
 __device__ constexpr TopLayout kLayout__0 =
-    TopLayout{.nextPcLow = NondetRegLayout{._super = /*offset=*/12},
-              .nextPcHigh = NondetRegLayout{._super = /*offset=*/13},
-              .nextState_0 = NondetRegLayout{._super = /*offset=*/14},
-              .nextMachineMode = NondetRegLayout{._super = /*offset=*/15},
-              .isFirstCycle = NondetRegLayout{._super = /*offset=*/16},
-              .cycleND = NondetRegLayout{._super = /*offset=*/0},
-              .cycle = NondetRegLayout{._super = /*offset=*/0},
-              .major = NondetRegLayout{._super = /*offset=*/17},
-              .minor = NondetRegLayout{._super = /*offset=*/18},
+    TopLayout{.cycle = NondetRegLayout{._super = /*offset=*/0},
+              .nextPcLow = NondetRegLayout{._super = /*offset=*/13},
+              .nextPcHigh = NondetRegLayout{._super = /*offset=*/14},
+              .nextState_0 = NondetRegLayout{._super = /*offset=*/15},
+              .nextMachineMode = NondetRegLayout{._super = /*offset=*/16},
+              .isFirstCycle = NondetRegLayout{._super = /*offset=*/17},
+              .cycleRedef = TopCycleLayout{._super = NondetRegLayout{._super = /*offset=*/0},
+                                           .arm0 = NondetRegLayout{._super = /*offset=*/0},
+                                           .arm1 = NondetRegLayout{._super = /*offset=*/0}},
+              .major = NondetRegLayout{._super = /*offset=*/18},
+              .minor = NondetRegLayout{._super = /*offset=*/19},
               .instInput = kLayout__1,
               .majorOnehot = kLayout__4,
               .instResult = kLayout__6};
-__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__871 =
+__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__1050 =
     DigestRegValues_SuperLayout8LayoutArray{
         DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/0},
                                     .high = NondetRegLayout{._super = /*offset=*/1}},
@@ -4795,8 +5864,8 @@ __device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__871 =
                                     .high = NondetRegLayout{._super = /*offset=*/13}},
         DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/14},
                                     .high = NondetRegLayout{._super = /*offset=*/15}}};
-__device__ constexpr DigestRegLayout kLayout__870 = DigestRegLayout{.values = kLayout__871};
-__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__873 =
+__device__ constexpr DigestRegLayout kLayout__1049 = DigestRegLayout{.values = kLayout__1050};
+__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__1052 =
     DigestRegValues_SuperLayout8LayoutArray{
         DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/17},
                                     .high = NondetRegLayout{._super = /*offset=*/18}},
@@ -4814,46 +5883,46 @@ __device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__873 =
                                     .high = NondetRegLayout{._super = /*offset=*/30}},
         DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/31},
                                     .high = NondetRegLayout{._super = /*offset=*/32}}};
-__device__ constexpr DigestRegLayout kLayout__872 = DigestRegLayout{.values = kLayout__873};
-__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__875 =
+__device__ constexpr DigestRegLayout kLayout__1051 = DigestRegLayout{.values = kLayout__1052};
+__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__1054 =
     DigestRegValues_SuperLayout8LayoutArray{
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/37},
-                                    .high = NondetRegLayout{._super = /*offset=*/38}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/39},
-                                    .high = NondetRegLayout{._super = /*offset=*/40}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/41},
-                                    .high = NondetRegLayout{._super = /*offset=*/42}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/43},
-                                    .high = NondetRegLayout{._super = /*offset=*/44}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/45},
-                                    .high = NondetRegLayout{._super = /*offset=*/46}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/47},
-                                    .high = NondetRegLayout{._super = /*offset=*/48}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/49},
-                                    .high = NondetRegLayout{._super = /*offset=*/50}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/51},
-                                    .high = NondetRegLayout{._super = /*offset=*/52}}};
-__device__ constexpr DigestRegLayout kLayout__874 = DigestRegLayout{.values = kLayout__875};
-__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__877 =
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/38},
+                                    .high = NondetRegLayout{._super = /*offset=*/39}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/40},
+                                    .high = NondetRegLayout{._super = /*offset=*/41}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/42},
+                                    .high = NondetRegLayout{._super = /*offset=*/43}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/44},
+                                    .high = NondetRegLayout{._super = /*offset=*/45}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/46},
+                                    .high = NondetRegLayout{._super = /*offset=*/47}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/48},
+                                    .high = NondetRegLayout{._super = /*offset=*/49}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/50},
+                                    .high = NondetRegLayout{._super = /*offset=*/51}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/52},
+                                    .high = NondetRegLayout{._super = /*offset=*/53}}};
+__device__ constexpr DigestRegLayout kLayout__1053 = DigestRegLayout{.values = kLayout__1054};
+__device__ constexpr DigestRegValues_SuperLayout8LayoutArray kLayout__1056 =
     DigestRegValues_SuperLayout8LayoutArray{
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/53},
-                                    .high = NondetRegLayout{._super = /*offset=*/54}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/55},
-                                    .high = NondetRegLayout{._super = /*offset=*/56}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/57},
-                                    .high = NondetRegLayout{._super = /*offset=*/58}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/59},
-                                    .high = NondetRegLayout{._super = /*offset=*/60}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/61},
-                                    .high = NondetRegLayout{._super = /*offset=*/62}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/63},
-                                    .high = NondetRegLayout{._super = /*offset=*/64}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/65},
-                                    .high = NondetRegLayout{._super = /*offset=*/66}},
-        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/67},
-                                    .high = NondetRegLayout{._super = /*offset=*/68}}};
-__device__ constexpr DigestRegLayout kLayout__876 = DigestRegLayout{.values = kLayout__877};
-__device__ constexpr _accumLayout kLayout__878 =
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/54},
+                                    .high = NondetRegLayout{._super = /*offset=*/55}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/56},
+                                    .high = NondetRegLayout{._super = /*offset=*/57}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/58},
+                                    .high = NondetRegLayout{._super = /*offset=*/59}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/60},
+                                    .high = NondetRegLayout{._super = /*offset=*/61}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/62},
+                                    .high = NondetRegLayout{._super = /*offset=*/63}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/64},
+                                    .high = NondetRegLayout{._super = /*offset=*/65}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/66},
+                                    .high = NondetRegLayout{._super = /*offset=*/67}},
+        DigestRegValues_SuperLayout{.low = NondetRegLayout{._super = /*offset=*/68},
+                                    .high = NondetRegLayout{._super = /*offset=*/69}}};
+__device__ constexpr DigestRegLayout kLayout__1055 = DigestRegLayout{.values = kLayout__1056};
+__device__ constexpr _accumLayout kLayout__1057 =
     _accumLayout{.argU8 = Arg_ArgU8Layout{.val = /*offset=*/0},
                  .argU16 = Arg_ArgU16Layout{.val = /*offset=*/4},
                  .memoryArg = Arg_MemoryArgLayout{.addr = /*offset=*/8,
@@ -4862,69 +5931,44 @@ __device__ constexpr _accumLayout kLayout__878 =
                                                   .dataHigh = /*offset=*/20},
                  .cycleArg = Arg_CycleArgLayout{.cycle = /*offset=*/24},
                  ._offset = /*offset=*/28};
-__device__ constexpr LayoutAccumLayout kLayoutTestSuccRunAccum =
-    LayoutAccumLayout{.columns = Reg19LayoutArray{/*offset=*/0,
-                                                  /*offset=*/4,
-                                                  /*offset=*/8,
-                                                  /*offset=*/12,
-                                                  /*offset=*/16,
-                                                  /*offset=*/20,
-                                                  /*offset=*/24,
-                                                  /*offset=*/28,
-                                                  /*offset=*/32,
-                                                  /*offset=*/36,
-                                                  /*offset=*/40,
-                                                  /*offset=*/44,
-                                                  /*offset=*/48,
-                                                  /*offset=*/52,
-                                                  /*offset=*/56,
-                                                  /*offset=*/60,
-                                                  /*offset=*/64,
-                                                  /*offset=*/68,
-                                                  /*offset=*/72}};
-__device__ constexpr LayoutAccumLayout kLayout_TopAccum =
-    LayoutAccumLayout{.columns = Reg19LayoutArray{/*offset=*/0,
-                                                  /*offset=*/4,
-                                                  /*offset=*/8,
-                                                  /*offset=*/12,
-                                                  /*offset=*/16,
-                                                  /*offset=*/20,
-                                                  /*offset=*/24,
-                                                  /*offset=*/28,
-                                                  /*offset=*/32,
-                                                  /*offset=*/36,
-                                                  /*offset=*/40,
-                                                  /*offset=*/44,
-                                                  /*offset=*/48,
-                                                  /*offset=*/52,
-                                                  /*offset=*/56,
-                                                  /*offset=*/60,
-                                                  /*offset=*/64,
-                                                  /*offset=*/68,
-                                                  /*offset=*/72}};
+__device__ constexpr LayoutAccumLayout kLayoutTestSuccRunAccum = LayoutAccumLayout{
+    .columns = Reg20LayoutArray{
+        /*offset=*/0,  /*offset=*/4,  /*offset=*/8,  /*offset=*/12, /*offset=*/16,
+        /*offset=*/20, /*offset=*/24, /*offset=*/28, /*offset=*/32, /*offset=*/36,
+        /*offset=*/40, /*offset=*/44, /*offset=*/48, /*offset=*/52, /*offset=*/56,
+        /*offset=*/60, /*offset=*/64, /*offset=*/68, /*offset=*/72, /*offset=*/76}};
+__device__ constexpr LayoutAccumLayout kLayout_TopAccum = LayoutAccumLayout{
+    .columns = Reg20LayoutArray{
+        /*offset=*/0,  /*offset=*/4,  /*offset=*/8,  /*offset=*/12, /*offset=*/16,
+        /*offset=*/20, /*offset=*/24, /*offset=*/28, /*offset=*/32, /*offset=*/36,
+        /*offset=*/40, /*offset=*/44, /*offset=*/48, /*offset=*/52, /*offset=*/56,
+        /*offset=*/60, /*offset=*/64, /*offset=*/68, /*offset=*/72, /*offset=*/76}};
 __device__ constexpr TestSuccRunLayout kLayoutTestSuccRun = TestSuccRunLayout{._0 = kLayout__0};
 __device__ constexpr TopLayout kLayout_Top =
-    TopLayout{.nextPcLow = NondetRegLayout{._super = /*offset=*/12},
-              .nextPcHigh = NondetRegLayout{._super = /*offset=*/13},
-              .nextState_0 = NondetRegLayout{._super = /*offset=*/14},
-              .nextMachineMode = NondetRegLayout{._super = /*offset=*/15},
-              .isFirstCycle = NondetRegLayout{._super = /*offset=*/16},
-              .cycleND = NondetRegLayout{._super = /*offset=*/0},
-              .cycle = NondetRegLayout{._super = /*offset=*/0},
-              .major = NondetRegLayout{._super = /*offset=*/17},
-              .minor = NondetRegLayout{._super = /*offset=*/18},
+    TopLayout{.cycle = NondetRegLayout{._super = /*offset=*/0},
+              .nextPcLow = NondetRegLayout{._super = /*offset=*/13},
+              .nextPcHigh = NondetRegLayout{._super = /*offset=*/14},
+              .nextState_0 = NondetRegLayout{._super = /*offset=*/15},
+              .nextMachineMode = NondetRegLayout{._super = /*offset=*/16},
+              .isFirstCycle = NondetRegLayout{._super = /*offset=*/17},
+              .cycleRedef = TopCycleLayout{._super = NondetRegLayout{._super = /*offset=*/0},
+                                           .arm0 = NondetRegLayout{._super = /*offset=*/0},
+                                           .arm1 = NondetRegLayout{._super = /*offset=*/0}},
+              .major = NondetRegLayout{._super = /*offset=*/18},
+              .minor = NondetRegLayout{._super = /*offset=*/19},
               .instInput = kLayout__1,
               .majorOnehot = kLayout__4,
               .instResult = kLayout__6};
 __device__ constexpr _globalLayout kLayoutGlobal =
-    _globalLayout{.input = kLayout__870,
+    _globalLayout{.input = kLayout__1049,
                   .isTerminate = NondetRegLayout{._super = /*offset=*/16},
-                  .output = kLayout__872,
+                  .output = kLayout__1051,
                   .rng = NondetExtRegLayout{._super = /*offset=*/33},
-                  .stateIn = kLayout__874,
-                  .stateOut = kLayout__876,
-                  .termA0high = NondetRegLayout{._super = /*offset=*/69},
-                  .termA0low = NondetRegLayout{._super = /*offset=*/70},
-                  .termA1high = NondetRegLayout{._super = /*offset=*/71},
-                  .termA1low = NondetRegLayout{._super = /*offset=*/72}};
-__device__ constexpr _mixLayout kLayoutMix = _mixLayout{.randomness = kLayout__878};
+                  .shutdownCycle = NondetRegLayout{._super = /*offset=*/37},
+                  .stateIn = kLayout__1053,
+                  .stateOut = kLayout__1055,
+                  .termA0high = NondetRegLayout{._super = /*offset=*/70},
+                  .termA0low = NondetRegLayout{._super = /*offset=*/71},
+                  .termA1high = NondetRegLayout{._super = /*offset=*/72},
+                  .termA1low = NondetRegLayout{._super = /*offset=*/73}};
+__device__ constexpr _mixLayout kLayoutMix = _mixLayout{.randomness = kLayout__1057};

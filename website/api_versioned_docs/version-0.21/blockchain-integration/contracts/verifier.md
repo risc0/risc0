@@ -10,7 +10,7 @@ Using the zkVM, any computation performed off-chain can be proven on-chain using
 This simplifies system architecture and eliminates the need for multiple contracts for different circuits.
 Even in the case of a system that needs to use custom circuits, it's possible to prove the resulting custom [receipts][term-receipt] within a [zkVM][term-zkvm] program through [proof composition][article-proof-composition] and submit the resulting proof to the verifier contract.
 
-<!-- TODO: Link to auto-generated Solidity annotation docs -->
+{/* TODO: Link to auto-generated Solidity annotation docs */}
 
 ## Using the Verifier Contract
 

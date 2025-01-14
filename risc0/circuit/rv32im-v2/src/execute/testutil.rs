@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,24 +13,30 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_binfmt::Program;
+use risc0_binfmt::{MemoryImage2, Program};
 use risc0_core::scope;
-use risc0_zkp::{core::digest::Digest, MAX_CYCLES_PO2};
+use risc0_zkp::{
+    core::{digest::Digest, log2_ceil},
+    MAX_CYCLES_PO2,
+};
 
-use super::{image::MemoryImage2, platform::*, syscall::Syscall, Executor, SimpleSession};
+use super::{
+    pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor, SimpleSession,
+    SyscallContext,
+};
 
 pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
-pub const MIN_CYCLES_PO2: usize = 8;
+pub const MIN_CYCLES_PO2: usize = log2_ceil(LOOKUP_TABLE_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
 pub struct NullSyscall;
 
 impl Syscall for NullSyscall {
-    fn host_read(&self, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
+    fn host_read(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
         unimplemented!()
     }
 
-    fn host_write(&self, _fd: u32, _buf: &[u8]) -> Result<u32> {
+    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
         unimplemented!()
     }
 }
@@ -38,6 +44,7 @@ impl Syscall for NullSyscall {
 pub fn execute<S: Syscall>(
     image: MemoryImage2,
     segment_limit_po2: usize,
+    max_insn_cycles: usize,
     max_cycles: Option<u64>,
     syscall_handler: &S,
     input_digest: Option<Digest>,
@@ -52,6 +59,7 @@ pub fn execute<S: Syscall>(
     let trace = Vec::new();
     let result = Executor::new(image, syscall_handler, input_digest, trace).run(
         segment_limit_po2,
+        max_insn_cycles,
         max_cycles,
         |segment| {
             tracing::trace!("{segment:#?}");
@@ -64,7 +72,9 @@ pub fn execute<S: Syscall>(
 }
 
 /// Constructs a program from an iterator of instructions starting from an entrypoint.
-fn program_from_instructions(entry: u32, instructions: impl IntoIterator<Item = u32>) -> Program {
+fn program_from_instructions(instructions: impl IntoIterator<Item = u32>) -> Program {
+    let entry = USER_START_ADDR + WORD_SIZE;
+    let entry = entry.0;
     let mut pc = entry;
 
     Program {
@@ -81,16 +91,13 @@ fn program_from_instructions(entry: u32, instructions: impl IntoIterator<Item = 
 }
 
 pub fn basic() -> Program {
-    program_from_instructions(
-        USER_START_ADDR.0,
-        [
-            lui(REG_T1, 0x1234b),
-            lui(REG_T2, 0xf387e),
-            add(REG_T0, REG_T1, REG_T2),
-            lui(REG_A1, 0x4),
-            ecall(),
-        ],
-    )
+    program_from_instructions([
+        lui(REG_T1, 0x1234b),
+        lui(REG_T2, 0xf387e),
+        add(REG_T0, REG_T1, REG_T2),
+        lui(REG_A1, 0x4),
+        ecall(),
+    ])
 }
 
 pub fn simple_loop(count: u32) -> Program {
@@ -116,19 +123,16 @@ pub fn simple_loop(count: u32) -> Program {
     let high = (count as i32 - low) >> 12;
     tracing::debug!("{count:#010x}: ({high:#010x}, {low:#010x})");
 
-    program_from_instructions(
-        USER_START_ADDR.0,
-        [
-            addi(REG_A4, REG_ZERO, 0),
-            lui(REG_A5, high as u32),
-            addi(REG_A5, REG_A5, low as u32),
-            // loop:
-            addi(REG_A4, REG_A4, 1),
-            blt(REG_A4, REG_A5, -4 /*loop: */),
-            lui(REG_A1, 0x1000),
-            ecall(),
-        ],
-    )
+    program_from_instructions([
+        addi(REG_A4, REG_ZERO, 0),
+        lui(REG_A5, high as u32),
+        addi(REG_A5, REG_A5, low as u32),
+        // loop:
+        addi(REG_A4, REG_A4, 1),
+        blt(REG_A4, REG_A5, -4 /*loop: */),
+        lui(REG_A1, 0x1000),
+        ecall(),
+    ])
 }
 
 // 31        25 | 24  20 | 19  15 | 14  12 | 11        7 | 6    0 |

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -246,7 +246,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             if let Some(max_cycles) = max_cycles {
                 if self.cycles.user >= max_cycles {
-                    bail!("Session limit exceeded");
+                    bail!(
+                        "Session limit exceeded: {} >= {max_cycles}",
+                        self.cycles.user
+                    );
                 }
             }
 
@@ -431,7 +434,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
-        tracing::debug!("[{}] ecall_software", self.insn_cycles);
+        tracing::trace!("[{}] ecall_software", self.insn_cycles);
         let into_guest_ptr = ByteAddr(self.load_register(REG_A0)?);
         let into_guest_len = self.load_register(REG_A1)? as usize;
         if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
@@ -484,7 +487,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        tracing::debug!("[{}] ecall_sha", self.insn_cycles);
+        tracing::trace!("[{}] ecall_sha", self.insn_cycles);
         let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
         let count = self.load_register(REG_A4)?;
