@@ -15,7 +15,7 @@
 [![MIT licensed][licence-badge]][licence-url]
 [![Build Status][actions-badge]][actions-url]
 [![Discord chat][discord-badge]][discord-url]
-[![Twitter][twitter-badge]][twitter-url]
+[![X][twitter-badge]][twitter-url]
 
 RISC Zero is a zero-knowledge verifiable general computing platform based on
 [zk-STARKs][zk-proof] and the [RISC-V] microarchitecture.
@@ -26,7 +26,7 @@ details. In the case of RISC Zero, the prover can show they correctly executed
 some code (known to both parties), while only revealing to the verifier the
 output of the code, not any of its inputs or any state during execution.
 
-The code runs in a special virtual machine, called a _zkVM_. The RISC Zero zkVM
+The code runs in a special virtual machine, called a *zkVM*. The RISC Zero zkVM
 emulates a small [RISC-V] computer, allowing it to run arbitrary code in any
 language, so long as a compiler toolchain exists that targets RISC-V. Currently,
 SDK support exists for Rust, C, and C⁠+⁠+.
@@ -34,23 +34,23 @@ SDK support exists for Rust, C, and C⁠+⁠+.
 ## Protocol overview and terminology
 
 First, the code to be proven must be compiled from its implementation language
-into a _method_. A method is represented by a RISC-V ELF file with a special
+into a *method*. A method is represented by a RISC-V ELF file with a special
 entry point that runs the code of the method. Additionally, one can compute for
-a given method its _image ID_ which is a special type of cryptographic hash of
+a given method its *image ID* which is a special type of cryptographic hash of
 the ELF file, and is required for verification.
 
 Next, the host program runs and proves the method inside the zkVM. The logical
-RISC-V machine running inside the zkVM is called the _guest_ and the prover
-running the zkVM is called the _host_. The guest and the host can communicate
+RISC-V machine running inside the zkVM is called the *guest* and the prover
+running the zkVM is called the *host*. The guest and the host can communicate
 with each other during the execution of the method, but the host cannot modify
 the execution of the guest in any way, or the proof being generated will be
 invalid. During execution, the guest code can write to a special append-only log
-called the _journal_ which represents the official output of the computation.
+called the *journal* which represents the official output of the computation.
 
-Presuming the method terminated correctly, a _receipt_ is produced, which
+Presuming the method terminated correctly, a *receipt* is produced, which
 provides the proof of correct execution. This receipt consists of 2 parts: the
 journal written during execution and a blob of opaque cryptographic data called
-the _seal_.
+the *seal*.
 
 The verifier can then verify the receipt and examine the log. If any tampering
 was done to the journal or the seal, the receipt will fail to verify.
@@ -176,21 +176,39 @@ The following feature flags are present in one or more of the crates listed abov
 This project is licensed under the Apache2 license. See [LICENSE](LICENSE).
 
 [actions-badge]: https://img.shields.io/github/actions/workflow/status/risc0/risc0/main.yml?branch=main
+
 [actions-url]: https://github.com/risc0/risc0/actions?query=workflow%3ACI+branch%3Amain
+
 [cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
+
 [crates-badge]: https://img.shields.io/badge/crates.io-v1.2-orange
+
 [crates-url]: https://crates.io/crates/risc0-zkvm
+
 [crates.io]: https://crates.io
+
 [discord-badge]: https://img.shields.io/discord/953703904086994974.svg?logo=discord&style=flat-square
+
 [discord-url]: https://discord.gg/risczero
+
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+
 [licence-badge]: https://img.shields.io/github/license/risc0/risc0?color=blue
+
 [licence-url]: https://github.com/risc0/risc0/blob/main/LICENSE
+
 [proof-system-in-detail]: https://dev.risczero.com/proof-system-in-detail.pdf
+
 [quickstart]: https://dev.risczero.com/api/zkvm/quickstart
+
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
+
 [security-model]: https://dev.risczero.com/api/security-model
+
 [twitter-badge]: https://img.shields.io/twitter/follow/risczero
-[twitter-url]: https://twitter.com/risczero
+
+[twitter-url]: https://x.com/risczero
+
 [zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
+
 [zksummit10-talk]: https://www.youtube.com/watch?v=wkIBN2CGJdc
