@@ -18,6 +18,7 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
+    default_rv32im_version,
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
@@ -44,7 +45,9 @@ pub struct ProverImpl {
 impl ProverImpl {
     /// Construct a [ProverImpl].
     pub fn new(opts: ProverOpts) -> Self {
-        Self { opts }
+        Self {
+            opts: opts.with_segment_version(default_rv32im_version()),
+        }
     }
 }
 

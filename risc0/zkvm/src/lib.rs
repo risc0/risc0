@@ -106,6 +106,7 @@ pub use {
         },
         server::{
             exec::executor::ExecutorImpl,
+            exec::executor2::Executor2,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -217,4 +218,19 @@ pub fn compute_image_id_v2(
     let kernel_id: risc0_zkp::core::digest::Digest =
         risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID.try_into()?;
     risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
+}
+
+/// TODO(flaub)
+#[cfg(feature = "std")]
+pub fn default_rv32im_version() -> SegmentVersion {
+    let default_version: u32 = std::env::var("RISC0_RV32IM_VER")
+        .ok()
+        .unwrap_or("1".to_string())
+        .parse()
+        .unwrap_or(1);
+
+    match default_version {
+        2 => SegmentVersion::V2,
+        _ => SegmentVersion::V1,
+    }
 }
