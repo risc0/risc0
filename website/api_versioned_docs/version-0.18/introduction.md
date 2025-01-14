@@ -76,7 +76,7 @@ If you want to report a bug or contribute to our code, you can do so on [GitHub]
 
 You're welcome to join [our Discord community](https://discord.gg/risczero) to discuss RISC Zero, ask questions, and see how other people use RISC Zero!
 
-Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.youtube.com/@risczero) to get our latest announcements.
+Follow us on [X](https://x.com/risczero) and [YouTube](https://www.youtube.com/@risczero) to get our latest announcements.
 
 [April 2022]: https://www.risczero.com/news/announce
 [Bonsai]: bonsai/bonsai-overview.md
