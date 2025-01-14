@@ -89,21 +89,16 @@ pub(crate) struct ShowCommand;
 
 impl ShowCommand {
     pub(crate) fn execute(self, rzup: &Rzup) -> Result<()> {
-        let components = rzup.registry.list_components();
-        if components.is_empty() {
-            println!("! Nothing is installed\n  Please use 'rzup install' to install.");
-            return Ok(());
-        }
         println!("{}", "Installed components:".bold());
         println!("{}", "--------------------".bold());
 
-        for component in &components {
-            let versions = rzup.list_versions(component)?;
+        for component in Component::iter() {
+            let versions = rzup.list_versions(&component)?;
             if !versions.is_empty() {
                 println!("\n{component}");
 
-                let active_version = rzup.get_active_version(component)?;
-                let current_version = rzup.settings().get_active_version(component);
+                let active_version = rzup.get_active_version(&component)?;
+                let current_version = rzup.settings().get_active_version(&component);
 
                 let mut sorted_versions = versions.clone();
                 sorted_versions.sort_by(|a, b| b.cmp(a)); // sort newest to oldest
@@ -170,24 +165,18 @@ pub(crate) struct CheckCommand;
 
 impl CheckCommand {
     pub(crate) fn execute(&self, rzup: &Rzup) -> Result<()> {
-        let components = rzup.registry.list_components();
-        if components.is_empty() {
-            println!("! Nothing is installed\n  Please use 'rzup install' to install.");
-            return Ok(());
-        }
-
         let mut results = Vec::new();
 
-        for component in &components {
+        for component in Component::iter() {
             rzup.emit(RzupEvent::CheckUpdates {
                 id: Some(component.to_string()),
             });
 
-            let latest_version = rzup.get_latest_version(component)?;
-            let installed_versions = rzup.list_versions(component)?;
+            let latest_version = rzup.get_latest_version(&component)?;
+            let installed_versions = rzup.list_versions(&component)?;
 
             if let Some(max_installed) = installed_versions.iter().max() {
-                if !rzup.version_exists(component, &latest_version)? {
+                if !rzup.version_exists(&component, &latest_version)? {
                     results.push(format!(
                         "{} - {} : {max_installed} -> {latest_version}",
                         component.to_string().bold(),

@@ -16,14 +16,13 @@ use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::paths::Paths;
 use crate::{BaseUrls, RzupEvent};
-use enumset::EnumSetType;
 use semver::Version;
 use std::fmt;
 use std::path::Path;
 use std::str::FromStr;
 use strum::EnumIter;
 
-#[derive(Debug, EnumSetType, EnumIter)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, EnumIter)]
 pub enum Component {
     CargoRiscZero,
     CppToolchain,

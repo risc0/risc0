@@ -18,12 +18,10 @@ use crate::paths::Paths;
 use crate::settings::Settings;
 use crate::{BaseUrls, RzupError, RzupEvent};
 
-use enumset::EnumSet;
 use semver::Version;
 
 #[derive(Default, Debug)]
 pub(crate) struct Registry {
-    pub(crate) components: EnumSet<Component>,
     settings: Settings,
     base_urls: BaseUrls,
 }
@@ -32,7 +30,6 @@ impl Registry {
     pub fn new(env: &Environment, base_urls: BaseUrls) -> Result<Self> {
         let settings = Settings::load(env)?;
         Ok(Self {
-            components: EnumSet::new(),
             settings,
             base_urls,
         })
@@ -51,14 +48,10 @@ impl Registry {
             message: format!("Scanning environment at {}", env.root_dir().display()),
         });
 
-        self.components.clear();
-
         for component in Component::iter() {
             env.emit(RzupEvent::Debug {
                 message: format!("Registering component: {component}"),
             });
-
-            self.register_component(component);
 
             // Check if we already have an active version set
             if self.settings.get_active_version(&component).is_none() {
@@ -91,13 +84,11 @@ impl Registry {
         let mut versions = Vec::new();
 
         // Handle virtual components first
-        if self.components.contains(*component) {
-            if let Some(parent_id) = component.parent_component() {
-                env.emit(RzupEvent::Debug {
-                    message: format!("Component {component} using parent {parent_id}"),
-                });
-                return self.list_component_versions(env, &parent_id);
-            }
+        if let Some(parent_id) = component.parent_component() {
+            env.emit(RzupEvent::Debug {
+                message: format!("Component {component} using parent {parent_id}"),
+            });
+            return self.list_component_versions(env, &parent_id);
         }
 
         let component_dir = Paths::get_component_dir(env, component);
@@ -153,10 +144,8 @@ impl Registry {
         component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
         // For virtual components, get active version from parent
-        if self.components.contains(*component) {
-            if let Some(parent_id) = component.parent_component() {
-                return self.get_active_component_version(env, &parent_id);
-            }
+        if let Some(parent_id) = component.parent_component() {
+            return self.get_active_component_version(env, &parent_id);
         }
 
         if let Some(version) = self.settings.get_active_version(component) {
@@ -183,14 +172,6 @@ impl Registry {
         self.settings.set_active_version(component, &version);
         self.settings.save(env)?;
         Ok(())
-    }
-
-    pub fn list_components(&self) -> Vec<Component> {
-        self.components.iter().collect()
-    }
-
-    fn register_component(&mut self, component: Component) {
-        self.components.insert(component);
     }
 
     pub fn install_component(
@@ -272,7 +253,7 @@ impl Registry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{http_test_harness, tests::invalid_base_urls, BaseUrls};
+    use crate::{http_test_harness, BaseUrls};
     use tempfile::TempDir;
 
     fn setup_test_registry(base_urls: BaseUrls) -> (TempDir, Environment, Registry) {
@@ -281,12 +262,6 @@ mod tests {
 
         let registry = Registry::new(&env, base_urls).unwrap();
         (tmp_dir, env, registry)
-    }
-
-    #[test]
-    fn test_registry_initialization() {
-        let (_tmp_dir, _env, registry) = setup_test_registry(invalid_base_urls());
-        assert!(registry.list_components().is_empty());
     }
 
     fn test_version_management(base_urls: BaseUrls) {
