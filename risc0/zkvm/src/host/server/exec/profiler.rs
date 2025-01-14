@@ -15,9 +15,13 @@
 //! Support for profiling the guest.
 //!
 //! This counts cycles spent at each location when executing the
-//! guest.  It does not trace full stack traces, but only provides the
-//! top level stack frame.  (More than one stack frame may show up
-//! in the case of inlined functions).
+//! guest. It counts the number of cycles spent in each unique stack
+//! of call frames, allowing pprof to generate a flamegraph showing
+//! where guest cycles are spent.
+//!
+//! Reported cycles are "user cycles". User cycles do not include
+//! paging, and it does not include padding to extend the trace to
+//! the nearest power of two.
 
 use std::{
     cell::RefCell,

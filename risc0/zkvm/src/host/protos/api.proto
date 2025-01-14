@@ -17,6 +17,7 @@ message ServerRequest {
     CompressRequest compress = 8;
     VerifyRequest verify = 9;
     ProveZkrRequest prove_zkr = 10;
+    ProveKeccakRequest prove_keccak = 11;
   }
 }
 
@@ -75,6 +76,27 @@ message ProveZkrReply {
 }
 
 message ProveZkrResult {
+  Asset receipt = 1;
+}
+
+message ProveKeccakRequest {
+  base.Digest claim_digest = 1;
+  uint32 po2 = 2;
+  base.Digest control_root = 3;
+  bytes input = 4;
+
+  // This is optional in the context of a CoprocessorRequest
+  AssetRequest receipt_out = 5;
+}
+
+message ProveKeccakReply {
+  oneof kind {
+    ProveKeccakResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message ProveKeccakResult {
   Asset receipt = 1;
 }
 
@@ -318,6 +340,7 @@ message TraceEvent {
 message CoprocessorRequest {
   oneof kind {
     ProveZkrRequest prove_zkr = 1;
+    ProveKeccakRequest prove_keccak = 2;
   }
 }
 

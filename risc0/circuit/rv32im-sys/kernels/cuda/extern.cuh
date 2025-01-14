@@ -262,3 +262,20 @@ extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, Fp* args
     outs[i] = x.elems[i];
   }
 }
+
+inline __device__ void
+extern_syscallBigInt2Precompute(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
+  // no-op
+}
+
+inline __device__ void
+extern_syscallBigInt2Witness(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
+  PreflightTrace* trace = static_cast<MachineContext*>(ctx)->trace;
+  size_t extraIdx = trace->cycles[cycle].extraIdx;
+  for (size_t i = 0; i < 4; i++) {
+    uint32_t word = trace->extras[extraIdx + i];
+    for (size_t j = 0; j < sizeof(uint32_t); j++) {
+      outs[i * 4 + j] = Fp(word >> (j * 8) & 0xff);
+    }
+  }
+}

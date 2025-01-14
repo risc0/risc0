@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ const CONFIG_TOML: &str = include_str!("config.toml");
 
 /// `cargo risczero build-toolchain`
 #[derive(Parser)]
-pub struct BuildToolchain {
+pub struct BuildToolchainCommand {
     /// Version tag of the toolchain to build.
     #[arg(long)]
     version: Option<String>,
@@ -39,11 +39,14 @@ pub struct BuildToolchain {
 
 /// Output info of a successful rust toolchain build.
 pub struct RustBuildOutput {
+    // NOTE: target is currently unused, and the code loops over files in the build directory
+    // instead. Is this something that should be changed?
+    #[allow(dead_code)]
     pub target: String,
     pub toolchain_dir: PathBuf,
 }
 
-impl BuildToolchain {
+impl BuildToolchainCommand {
     pub fn run(&self) -> Result<()> {
         eprintln!("Building the riscv32im-risc0-zkvm-elf toolchain...");
 
@@ -73,7 +76,7 @@ impl BuildToolchain {
             let tool = tool?;
             let tool_name = tool.file_name();
             eprintln!("copy tool: {tool_name:?}");
-            std::fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+            std::fs::copy(tool.path(), target_bin_dir.join(tool_name))?;
         }
 
         RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &out.toolchain_dir)?;

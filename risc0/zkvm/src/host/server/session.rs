@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,19 +18,23 @@
 use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use anyhow::{ensure, Result};
-use risc0_binfmt::{MemoryImage, SystemState};
-use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
+use enum_map::EnumMap;
+use risc0_binfmt::SystemState;
+use risc0_circuit_rv32im::prove::{emu::exec::EcallMetric, segment::Segment as SegmentV1};
+use risc0_circuit_rv32im_v2::execute::Segment as SegmentV2;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{
-        client::env::{ProveZkrRequest, SegmentPath},
+        client::env::{ProveKeccakRequest, ProveZkrRequest, SegmentPath},
         prove_info::SessionStats,
     },
     sha::Digest,
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
     ReceiptClaim,
 };
+
+use super::exec::syscall::{SyscallKind, SyscallMetric};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -61,9 +65,6 @@ pub struct Session {
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 
-    /// The final [MemoryImage] at the end of execution.
-    pub post_image: MemoryImage,
-
     /// The list of assumptions made by the guest and resolved by the host.
     pub assumptions: Vec<(Assumption, AssumptionReceipt)>,
 
@@ -74,19 +75,36 @@ pub struct Session {
     /// padding.
     pub user_cycles: u64,
 
+    /// The number of cycles needed for paging operations.
+    pub paging_cycles: u64,
+
+    /// The number of cycles needed for the proof system which includes padding
+    /// up to the nearest power of 2.
+    pub reserved_cycles: u64,
+
     /// Total number of cycles that a prover experiences. This includes overhead
     /// associated with continuations and padding up to the nearest power of 2.
     pub total_cycles: u64,
 
-    /// The system state of the initial [MemoryImage].
+    /// The system state of the initial MemoryImage.
     pub pre_state: SystemState,
 
-    /// The system state of the final [MemoryImage] at the end of execution.
+    /// The system state of the final MemoryImage at the end of execution.
     pub post_state: SystemState,
 
     /// A list of pending ZKR proof requests.
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
+
+    /// A list of pending keccak proof requests.
+    // TODO: make this scalable so we don't OOM
+    pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
+
+    /// ecall metrics grouped by name.
+    pub(crate) ecall_metrics: Vec<(String, EcallMetric)>,
+
+    /// syscall metrics grouped by kind.
+    pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
 }
 
 /// The execution trace of a portion of a program.
@@ -102,8 +120,35 @@ pub struct Segment {
     /// The index of this [Segment] within the [Session]
     pub index: u32,
 
-    pub(crate) inner: CircuitSegment,
+    pub(crate) inner: InnerSegment,
+
     pub(crate) output: Option<Output>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) enum InnerSegment {
+    V1(SegmentV1),
+    V2(SegmentV2),
+}
+
+impl InnerSegment {
+    #[cfg(test)]
+    pub(crate) fn v1(&self) -> &SegmentV1 {
+        if let Self::V1(inner) = self {
+            inner
+        } else {
+            panic!("InnerSegment is not v1")
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn v2(&self) -> &SegmentV2 {
+        if let Self::V2(inner) = self {
+            inner
+        } else {
+            panic!("InnerSegment is not v2")
+        }
+    }
 }
 
 impl Segment {
@@ -111,7 +156,17 @@ impl Segment {
     ///
     /// If the [Segment]'s execution trace had 2^20 rows, this would return 20.
     pub fn po2(&self) -> usize {
-        self.inner.po2
+        match &self.inner {
+            InnerSegment::V1(segment) => segment.po2,
+            InnerSegment::V2(segment) => segment.po2 as usize,
+        }
+    }
+
+    pub(crate) fn user_cycles(&self) -> u32 {
+        match &self.inner {
+            InnerSegment::V1(segment) => segment.insn_cycles as u32,
+            InnerSegment::V2(segment) => segment.user_cycles,
+        }
     }
 }
 
@@ -144,27 +199,35 @@ impl Session {
         input: Digest,
         journal: Option<Vec<u8>>,
         exit_code: ExitCode,
-        post_image: MemoryImage,
         assumptions: Vec<(Assumption, AssumptionReceipt)>,
         user_cycles: u64,
+        paging_cycles: u64,
+        reserved_cycles: u64,
         total_cycles: u64,
         pre_state: SystemState,
         post_state: SystemState,
         pending_zkrs: Vec<ProveZkrRequest>,
+        pending_keccaks: Vec<ProveKeccakRequest>,
+        ecall_metrics: Vec<(String, EcallMetric)>,
+        syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
     ) -> Self {
         Self {
             segments,
             input,
             journal: journal.map(Journal::new),
             exit_code,
-            post_image,
             assumptions,
             hooks: Vec::new(),
             user_cycles,
+            paging_cycles,
+            reserved_cycles,
             total_cycles,
             pre_state,
             post_state,
             pending_zkrs,
+            pending_keccaks,
+            ecall_metrics,
+            syscall_metrics,
         }
     }
 
@@ -232,12 +295,53 @@ impl Session {
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
     pub fn log(&self) {
-        let cycle_efficiency = self.user_cycles as f64 / self.total_cycles as f64 * 100.0;
+        if std::env::var_os("RISC0_INFO").is_none() {
+            return;
+        }
+
+        let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
 
         tracing::info!("number of segments: {}", self.segments.len());
-        tracing::info!("total cycles: {}", self.total_cycles);
-        tracing::info!("user cycles: {}", self.user_cycles);
-        tracing::debug!("cycle efficiency: {}%", cycle_efficiency as u32);
+        tracing::info!("{} total cycles", self.total_cycles);
+        tracing::info!(
+            "{} user cycles ({:.2}%)",
+            self.user_cycles,
+            pct(self.user_cycles)
+        );
+        tracing::info!(
+            "{} paging cycles ({:.2}%)",
+            self.paging_cycles,
+            pct(self.paging_cycles)
+        );
+        tracing::info!(
+            "{} reserved cycles ({:.2}%)",
+            self.reserved_cycles,
+            pct(self.reserved_cycles)
+        );
+
+        tracing::info!("ecalls");
+        let mut ecall_metrics = self.ecall_metrics.clone();
+        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
+        for (name, metric) in ecall_metrics.iter().rev() {
+            tracing::info!(
+                "\t{} {name} calls, {} cycles, ({:.2}%)",
+                metric.count,
+                metric.cycles,
+                pct(metric.cycles)
+            );
+        }
+
+        tracing::info!("syscalls");
+        let mut syscall_metrics: Vec<_> = self.syscall_metrics.iter().collect();
+        syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
+        for (name, metric) in syscall_metrics.iter().rev() {
+            tracing::info!("\t{} {name:?} calls", metric.count);
+        }
+
+        assert_eq!(
+            self.total_cycles,
+            self.user_cycles + self.paging_cycles + self.reserved_cycles
+        );
     }
 
     /// Returns stats for the session
@@ -248,6 +352,8 @@ impl Session {
             segments: self.segments.len(),
             total_cycles: self.total_cycles,
             user_cycles: self.user_cycles,
+            paging_cycles: self.paging_cycles,
+            reserved_cycles: self.reserved_cycles,
         }
     }
 }

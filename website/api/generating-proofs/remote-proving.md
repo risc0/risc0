@@ -8,8 +8,7 @@ To get a taste of what you can do with Bonsai, check out [Zeth][external-zeth], 
 
 If you already have an API key, you can request proofs from Bonsai in any of the following ways:
 
-- Set the environment variables `BONSAI_API_KEY=<YOUR_API_KEY>` and `BONSAI_API_URL=<BONSAI_URL>`.
-  <br/>
+- Set the environment variables `BONSAI_API_KEY=<YOUR_API_KEY>` and `BONSAI_API_URL=<BONSAI_URL>`. <br />
   When using [`default_prover()`][external-default-prover-fn] in your [host code][docs-host-code], setting these variables will automatically send your proving jobs to Bonsai.
 - via the **[Bonsai SDK][external-bonsai-sdk]** (for accessing Bonsai from Rust)
 - via the **[Bonsai REST API][external-bonsai-rest-api]** (for building your own client or accessing Bonsai directly)

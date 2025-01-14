@@ -28,6 +28,7 @@ fn main() {
 
     let docker_opts = DockerOptions {
         root_dir: Some("../../..".into()),
+        env: vec![],
     };
 
     let use_docker = if env::var("RISC0_USE_DOCKER").is_ok() {

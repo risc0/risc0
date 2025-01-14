@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ use risc0_zkp::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem,
     },
-    hal::{cpu::CpuHal, CircuitHal, Hal},
+    hal::{cpu::CpuHal, AccumPreflight, CircuitHal, Hal},
     prove::adapter::ProveAdapter,
     ZK_CYCLES,
 };
@@ -162,55 +162,55 @@ mod cpu {
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "cuda")] {
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn sha256_hal_pair() -> HalPair<cuda::CudaHalSha256, cuda::CudaCircuitHalSha256> {
             cuda::sha256_hal_pair()
         }
 
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<cuda::CudaHalPoseidon2, cuda::CudaCircuitHalPoseidon2> {
             cuda::poseidon2_hal_pair()
         }
 
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::poseidon254_hal_pair()
         }
     } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn sha256_hal_pair() -> HalPair<metal::MetalHalSha256, metal::MetalCircuitHal<metal::MetalHashSha256>> {
             metal::sha256_hal_pair()
         }
 
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<metal::MetalHalPoseidon2, metal::MetalCircuitHal<metal::MetalHashPoseidon2>> {
             metal::poseidon2_hal_pair()
         }
 
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::poseidon254_hal_pair()
         }
     } else {
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn sha256_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::sha256_hal_pair()
         }
 
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::poseidon2_hal_pair()
         }
 
-        /// TODO
+        /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::poseidon254_hal_pair()
@@ -374,7 +374,9 @@ impl Prover {
                     hal.copy_from_elem("io", &adapter.get_io().as_slice())
                 );
 
-                circuit_hal.accumulate(&ctrl, &io, &data, &mix, &accum, steps);
+                // The recursion circuit doesn't make use of the preflight.
+                let preflight = AccumPreflight::default();
+                circuit_hal.accumulate(&preflight, &ctrl, &io, &data, &mix, &accum, steps);
 
                 prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
 

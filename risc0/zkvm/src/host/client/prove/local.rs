@@ -61,8 +61,8 @@ impl Executor for LocalProver {
         let mut segments = Vec::new();
         let session = exec.run_with_callback(|segment| {
             segments.push(SegmentInfo {
-                po2: segment.inner.po2 as u32,
-                cycles: segment.inner.insn_cycles as u32,
+                po2: segment.po2() as u32,
+                cycles: segment.user_cycles(),
             });
             Ok(Box::new(NullSegmentRef))
         })?;
@@ -71,7 +71,7 @@ impl Executor for LocalProver {
             segments,
             journal: session.journal.unwrap_or_default(),
             exit_code: session.exit_code,
-            receipt_claim,
+            receipt_claim: Some(receipt_claim),
         })
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
 #[cfg(test)]
 mod tests;
 
-use std::{array, cell::RefCell, collections::BTreeSet, mem, rc::Rc};
+use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
 use anyhow::{bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
+use enum_map::{Enum, EnumMap};
+use num_bigint::BigUint;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -31,20 +33,17 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     align_up,
     memory::{is_guest_memory, GUEST_MAX_MEM},
-    syscall::{
-        bigint, ecall, halt,
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_MAX, REG_T0},
-        IO_CHUNK_WORDS,
-    },
+    syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     PAGE_SIZE, WORD_SIZE,
 };
 use sha2::digest::generic_array::GenericArray;
 
 use super::{
     addr::{ByteAddr, WordAddr},
+    bibc,
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    BIGINT_CYCLES, SYSTEM_START,
+    BIGINT2_WIDTH_BYTES, BIGINT_CYCLES, SYSTEM_START,
 };
 use crate::{
     prove::{
@@ -108,16 +107,39 @@ pub struct ExecutorResult {
     pub exit_code: ExitCode,
     pub post_image: MemoryImage,
     pub user_cycles: u64,
+    pub paging_cycles: u64,
+    pub reserved_cycles: u64,
     pub total_cycles: u64,
     pub pre_state: SystemState,
     pub post_state: SystemState,
     pub output_digest: Option<Digest>,
+    pub ecall_metrics: Vec<(String, EcallMetric)>,
+}
+
+#[derive(Clone, Copy, Debug, Enum)]
+enum EcallKind {
+    BigInt,
+    BigInt2,
+    Input,
+    Software,
+    Sha2,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct EcallMetric {
+    pub count: u64,
+    pub cycles: u64,
 }
 
 #[derive(Default)]
+struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
+
+#[derive(Default)]
 struct SessionCycles {
-    user: usize,
-    total: usize,
+    total: u64,
+    user: u64,
+    paging: u64,
+    reserved: u64,
 }
 
 pub struct SimpleSession {
@@ -134,6 +156,7 @@ struct PendingState {
     output_digest: Option<Digest>,
     exit_code: Option<ExitCode>,
     events: BTreeSet<TraceEvent>,
+    ecall: Option<EcallKind>,
 }
 
 pub struct Executor<'a, 'b, S: Syscall> {
@@ -148,6 +171,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     pending: PendingState,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
+    ecall_metrics: EcallMetrics,
 }
 
 impl PendingState {
@@ -157,6 +181,7 @@ impl PendingState {
         self.syscall = None;
         self.output_digest = None;
         self.exit_code = None;
+        self.ecall = None;
     }
 }
 
@@ -185,9 +210,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 output_digest: None,
                 exit_code: None,
                 events: BTreeSet::new(),
+                ecall: None,
             },
             trace,
             cycles: SessionCycles::default(),
+            ecall_metrics: Default::default(),
         }
     }
 
@@ -218,8 +245,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             if let Some(max_cycles) = max_cycles {
-                if self.cycles.user >= max_cycles as usize {
-                    bail!("Session limit exceeded");
+                if self.cycles.user >= max_cycles {
+                    bail!(
+                        "Session limit exceeded: {} >= {max_cycles}",
+                        self.cycles.user
+                    );
                 }
             }
 
@@ -236,9 +266,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             } else {
                 self.pager.undo();
                 let used_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
-                let waste = (1 << segment_po2) - used_cycles;
+                let po2_padding = (1 << segment_po2) - used_cycles;
                 tracing::debug!(
-                    "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, waste: {waste}, pending: {:?}",
+                    "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, padding: {po2_padding}, pending: {:?}",
                     self.insn_cycles,
                     self.pager.cycles,
                     self.pending
@@ -260,6 +290,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 })?;
                 segments += 1;
                 self.cycles.total += 1 << segment_po2;
+                self.cycles.paging += self.pager.cycles as u64;
+                self.cycles.reserved += (po2_padding + RESERVED_CYCLES) as u64;
                 self.pager.clear();
                 self.insn_cycles = 0;
 
@@ -272,6 +304,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
         let segment_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
         let po2 = log2_ceil(segment_cycles.next_power_of_two());
+        let po2_padding = (1 << po2) - segment_cycles;
         let exit_code = self.exit_code.unwrap();
 
         callback(Segment {
@@ -288,6 +321,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })?;
         segments += 1;
         self.cycles.total += 1 << po2;
+        self.cycles.paging += self.pager.cycles as u64;
+        self.cycles.reserved += (po2_padding + RESERVED_CYCLES) as u64;
 
         // NOTE: When a segment ends in a Halted(_) state, the post_state will be null.
         let post_state = match exit_code {
@@ -298,15 +333,20 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             _ => post_state,
         };
 
+        let ecall_metrics = std::mem::take(&mut self.ecall_metrics);
+
         Ok(ExecutorResult {
             segments,
             exit_code,
             post_image: self.pager.image.clone(),
-            user_cycles: self.cycles.user.try_into()?,
-            total_cycles: self.cycles.total.try_into()?,
+            user_cycles: self.cycles.user,
+            paging_cycles: self.cycles.paging,
+            reserved_cycles: self.cycles.reserved,
+            total_cycles: self.cycles.total,
             pre_state: initial_state,
             post_state,
             output_digest: self.output_digest,
+            ecall_metrics: ecall_metrics.into(),
         })
     }
 
@@ -315,7 +355,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             trace
                 .borrow_mut()
                 .trace_callback(TraceEvent::InstructionStart {
-                    cycle: self.cycles.user.try_into()?,
+                    cycle: self.cycles.user,
                     pc: self.pc.0,
                     insn: self.pending.insn,
                 })?;
@@ -327,7 +367,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         self.pc = self.pending.pc;
         self.insn_cycles += self.pending.cycles;
-        self.cycles.user += self.pending.cycles;
+        self.cycles.user += self.pending.cycles as u64;
+
+        if let Some(kind) = self.pending.ecall.take() {
+            self.ecall_metrics.0[kind].count += 1;
+            self.ecall_metrics.0[kind].cycles += self.pending.cycles as u64;
+        }
+
         self.pending.cycles = 0;
         self.pending.events.clear();
         if let Some(syscall) = self.pending.syscall.take() {
@@ -380,6 +426,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let word = self.input_digest.as_words()[a0];
         self.store_register(REG_A0, word)?;
 
+        self.pending.ecall = Some(EcallKind::Input);
         self.pending.cycles += 1;
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -387,7 +434,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
-        tracing::debug!("[{}] ecall_software", self.insn_cycles);
+        tracing::trace!("[{}] ecall_software", self.insn_cycles);
         let into_guest_ptr = ByteAddr(self.load_register(REG_A0)?);
         let into_guest_len = self.load_register(REG_A1)? as usize;
         if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
@@ -432,6 +479,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         tracing::trace!("{syscall:08x?}");
 
+        self.pending.ecall = Some(EcallKind::Software);
         self.pending.cycles += chunks + 1; // syscallBody + syscallFini
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -439,7 +487,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        tracing::debug!("[{}] ecall_sha", self.insn_cycles);
+        tracing::trace!("[{}] ecall_sha", self.insn_cycles);
         let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
         let count = self.load_register(REG_A4)?;
@@ -483,6 +531,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         self.store_region_into_guest(state_out_ptr, bytemuck::cast_slice(&state))?;
 
+        self.pending.ecall = Some(EcallKind::Sha2);
         self.pending.cycles += sha_cycles(count as usize);
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -533,7 +582,36 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             self.store_u32_into_guest(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
         }
 
+        self.pending.ecall = Some(EcallKind::BigInt);
         self.pending.cycles += BIGINT_CYCLES;
+        self.pending.pc = self.pc + WORD_SIZE;
+
+        Ok(true)
+    }
+
+    fn ecall_bigint2(&mut self) -> Result<bool> {
+        let blob_ptr = self.load_guest_addr_from_register(REG_A0)?.waddr();
+        let nondet_program_ptr = self.load_guest_addr_from_register(REG_T1)?;
+        let verify_program_ptr = self.load_guest_addr_from_register(REG_T2)?;
+        let consts_ptr = self.load_guest_addr_from_register(REG_T3)?;
+
+        let nondet_program_size = self.load_u32_from_guest(blob_ptr.baddr())?;
+        let verify_program_size = self.load_u32_from_guest((blob_ptr + 1u32).baddr())?;
+        let consts_size = self.load_u32_from_guest((blob_ptr + 2u32).baddr())?;
+
+        let program_bytes = self
+            .load_region_from_guest(nondet_program_ptr, nondet_program_size * WORD_SIZE as u32)?;
+        let mut cursor = Cursor::new(program_bytes);
+        let program = bibc::Program::decode(&mut cursor)?;
+        program.eval(self)?;
+
+        self.load_region_from_guest(verify_program_ptr, verify_program_size * WORD_SIZE as u32)?;
+        self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
+
+        let cycles = verify_program_size as usize + 1;
+
+        self.pending.ecall = Some(EcallKind::BigInt2);
+        self.pending.cycles += cycles;
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
@@ -571,6 +649,16 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let ret = array::from_fn(|i| bytes[i]);
         // tracing::trace!("load_array({addr:?}) -> {ret:02x?}");
         Ok(ret)
+    }
+
+    fn load_region_from_guest(&mut self, base: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        let mut region = Vec::new();
+        for i in 0..size {
+            let addr = base + i;
+            Self::check_guest_addr(addr)?;
+            region.push(self.load_u8(addr)?);
+        }
+        Ok(region)
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
@@ -637,6 +725,28 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
+impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+        let base = ByteAddr(self.load_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
+        let bytes = self.load_region_from_guest(addr, count)?;
+        Ok(BigUint::from_bytes_le(&bytes))
+    }
+
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+        let base = ByteAddr(self.load_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
+        let mut bytes = value.to_bytes_le();
+        if bytes.len() < count as usize {
+            bytes.resize(count as usize, 0);
+        }
+        ensure!(bytes.len() == count as usize);
+        self.store_region_into_guest(addr, &bytes)
+    }
+}
+
 impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
     fn ecall(&mut self) -> Result<bool> {
         match self.load_register(REG_T0)? {
@@ -645,6 +755,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
+            ecall::BIGINT2 => self.ecall_bigint2(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }
@@ -726,7 +837,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
 
 impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     fn get_cycle(&self) -> u64 {
-        self.cycles.user as u64
+        self.cycles.user
     }
 
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
@@ -803,4 +914,14 @@ pub fn execute_elf<S: Syscall>(
         syscall_handler,
         input_digest,
     )
+}
+
+impl From<EcallMetrics> for Vec<(String, EcallMetric)> {
+    fn from(metrics: EcallMetrics) -> Self {
+        metrics
+            .0
+            .into_iter()
+            .map(|(kind, metric)| (format!("{kind:?}"), metric))
+            .collect()
+    }
 }

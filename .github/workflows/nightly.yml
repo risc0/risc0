@@ -4,14 +4,10 @@ on:
   schedule:
     - cron: '0 7 * * *' # Nightly (ish) Pacific
   workflow_dispatch:
-    inputs:
-      crate_count:
-        description: 'How many crates (sorted by downloads) to test'
-        default: 100
 
 env:
   RISC0_BUILD_LOCKED: 1
-  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0-2
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.81.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 jobs:
@@ -24,10 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
-      - name: Set the variables
-        env:
-          DEFAULT_CRATE_COUNT: 1000
-        run: echo "TOP_N_CRATES=${{ github.event.inputs.crate_count || env.DEFAULT_CRATE_COUNT }}" >> $GITHUB_ENV
 
       - run: cargo install --force --path risc0/cargo-risczero
 
@@ -40,25 +32,14 @@ jobs:
       - name: Create working directory
         run: mkdir -p ${{ runner.temp }}/crate-validation/
 
-      - name: Generate the profile
-        run: |
-          target/release/gen-profiles \
-          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
-          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
-          -c $TOP_N_CRATES
-        working-directory: tools/crates-validator/
-
       - name: Validate profiles
         run: |
           target/release/main \
           -p ${{ github.workspace }} \
-          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -P profiles/profiles-1000.yaml \
           -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
-
-      - name: Delete input profile
-        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
 
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
         if: always()

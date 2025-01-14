@@ -37,6 +37,7 @@
 
 #include <array>
 #include <cstdint>
+#include <exception>
 
 using namespace risc0;
 using namespace risc0::circuit::rv32im;
@@ -339,10 +340,11 @@ void risc0_circuit_rv32im_step_verify_accum(
   });
 }
 
-AccumContext* risc0_circuit_rv32im_accum_context_alloc(size_t steps) {
+AccumContext* risc0_circuit_rv32im_accum_context_alloc(size_t steps, uint8_t* isParSafe) {
   AccumContext* ctx = new AccumContext;
   ctx->steps = steps;
   ctx->cells.resize(steps, AccumCell{FpExt(1), FpExt(1)});
+  ctx->isParSafe = isParSafe;
   return ctx;
 }
 
@@ -357,12 +359,12 @@ void risc0_circuit_rv32im_calc_prefix_products(risc0_error* err, AccumContext* c
   });
 }
 
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
-#endif
-
-FpExt risc0_circuit_rv32im_poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
-  return circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
+void risc0_circuit_rv32im_poly_fp(
+    risc0_error* err, size_t cycle, size_t steps, FpExt* poly_mix, Fp** args, FpExt* result) {
+  ffi_wrap<uint32_t>(err, 0, [&] {
+    *result = circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
+    return 0;
+  });
 }
 
 const char* risc0_circuit_string_ptr(risc0_string* str) {

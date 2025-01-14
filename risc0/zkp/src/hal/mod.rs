@@ -257,9 +257,16 @@ pub trait Hal {
     }
 }
 
+#[derive(Clone, Default)]
+pub struct AccumPreflight {
+    pub is_par_safe: Vec<u8>,
+}
+
 pub trait CircuitHal<H: Hal> {
+    #[allow(clippy::too_many_arguments)]
     fn accumulate(
         &self,
+        preflight: &AccumPreflight,
         ctrl: &H::Buffer<H::Elem>,
         io: &H::Buffer<H::Elem>,
         data: &H::Buffer<H::Elem>,
@@ -287,10 +294,10 @@ pub fn tracker() -> &'static Mutex<MemoryTracker> {
     ONCE.get_or_init(|| Mutex::new(MemoryTracker::default()))
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct MemoryTracker {
-    pub total: usize,
-    pub peak: usize,
+    pub total: isize,
+    pub peak: isize,
 }
 
 impl MemoryTracker {
@@ -300,12 +307,12 @@ impl MemoryTracker {
     }
 
     pub fn alloc(&mut self, size: usize) {
-        self.total += size;
+        self.total += size as isize;
         self.peak = self.peak.max(self.total);
     }
 
     pub fn free(&mut self, size: usize) {
-        self.total = self.total.saturating_sub(size);
+        self.total -= size as isize;
     }
 }
 

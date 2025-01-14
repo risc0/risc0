@@ -7,7 +7,7 @@ We'll be using a guest program with three different implementations of the
 Fibonacci sequence calculation to provide a base profile to explore. You can
 find all the code used as example in the [profiling example][example-profiling].
 
-<!-- NOTE: This content matches the README under examples/profiling/README.md -->
+{/* NOTE: This content matches the README under examples/profiling/README.md */}
 
 ## Background
 
@@ -36,12 +36,13 @@ it the [pprof] tool.
 Run the Fibonacci profiling example with:
 
 ```bash
-RISC0_PPROF_OUT=./profile.pb cargo run
+RISC0_PPROF_OUT=./profile.pb RISC0_DEV_MODE=1 RISC0_INFO=1 cargo run
 ```
 
 The above command will run the Fibonacci computation for 1000 iterations and
 write the profiling output to `profile.pb`. Use the environment variable
 `RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
+We recommend running profiling in [dev mode][devmode] to avoid unneccesary proving time.
 
 ### Step 3: Visualization
 
@@ -103,6 +104,7 @@ web interface.
     measurement overhead.
 
 [cycle count]: /terminology#clock-cycles
+[devmode]: ../generating-proofs/dev-mode.md
 [example-profiling]: https://github.com/risc0/risc0/tree/main/examples/profiling
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install

@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0-2
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.81.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
@@ -36,7 +36,6 @@ jobs:
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
       crates-validation: ${{ steps.filter.outputs.crates-validation }}
-      crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       risc0: ${{ steps.filter.outputs.risc0 }}
@@ -76,9 +75,6 @@ jobs:
               - *base
               - risc0/**
               - tools/crates-validator/**
-            crates-validator:
-              - *base
-              - tools/crates-validator/**
             doc:
               - *base
               - bonsai/sdk/**
@@ -111,7 +107,6 @@ jobs:
       - check-external
       - check-template
       - clippy
-      - crates-validator
       - crates-validation
       - doc
       - docs-rs
@@ -238,6 +233,7 @@ jobs:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
@@ -309,6 +305,7 @@ jobs:
       RISC0_PROVER: ipc
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
+      # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
@@ -391,14 +388,14 @@ jobs:
       - uses: ./.github/actions/rustup
         with:
           # Building with docs.rs config requires the nightly toolchain.
-          toolchain: nightly
+          toolchain: nightly-2024-09-04
       - uses: ./.github/actions/sccache
         with:
           key: macOS-nightly
-      - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +nightly doc -p risc0-zkp -Fprove,std --no-deps
-      - run: cargo +nightly doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +nightly doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
@@ -439,15 +436,19 @@ jobs:
         uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
           crate: cargo-semver-checks
-          version: "0.31.0"
+          version: "0.36.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
         run: |
           cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
             --exclude cargo-risczero \
             --exclude doc-test \
             --exclude fibonacci-methods \
-            --exclude risc0-circuit-bigint \
-            --exclude risc0-circuit-bigint-test-methods \
+            --exclude risc0-bigint2 \
+            --exclude risc0-bigint2-methods \
+            --exclude risc0-circuit-rv32im-v2 \
+            --exclude risc0-circuit-rv32im-v2-sys \
+            --exclude risc0-circuit-keccak-methods \
+            --exclude risc0-zkos-v1compat \
             --exclude risc0-zkvm-receipts \
             --exclude risc0-zkvm-methods
       - run: sccache --show-stats
@@ -493,22 +494,6 @@ jobs:
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
       - run: sccache --show-stats
 
-  crates-validator:
-    if: needs.changes.outputs.crates-validator == 'true'
-    needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
-    env:
-      RISC0_BUILD_LOCKED: 1
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: macOS-default
-      - run: cargo test
-        working-directory: tools/crates-validator
-      - run: sccache --show-stats
-
   crates-validation:
     if: needs.changes.outputs.crates-validation == 'true'
     needs: changes
@@ -526,27 +511,20 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo test
+        working-directory: tools/crates-validator/
       - run: cargo build --release
         working-directory: tools/crates-validator/
       - name: Create working directory
         run: mkdir -p ${{ runner.temp }}/crate-validation/
-      - name: Generate the profile
-        run: |
-          target/release/gen-profiles \
-          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
-          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
-          -c $TOP_N_CRATES
-        working-directory: tools/crates-validator/
       - name: Validate profiles
         run: |
           target/release/main \
           -p ${{ github.workspace }} \
-          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -P profiles/profiles-10.yaml \
           -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
-      - name: Delete input profile
-        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
         if: always()
       - run: sccache --show-stats
@@ -609,7 +587,7 @@ jobs:
       - name: 🍞 Setup Bun
         uses: risc0/setup-bun@v1.2.1
         with:
-          bun-version: 1.1.29
+          bun-version: 1.1.34
       - run: bun install
         working-directory: web
       - run: bun run ci

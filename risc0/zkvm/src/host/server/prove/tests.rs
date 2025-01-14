@@ -425,9 +425,9 @@ fn continuation() {
 
     let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
-        assert_eq!(segment.inner.exit_code, ExitCode::SystemSplit);
+        assert_eq!(segment.inner.v1().exit_code, ExitCode::SystemSplit);
     }
-    assert_eq!(final_segment.inner.exit_code, ExitCode::Halted(0));
+    assert_eq!(final_segment.inner.v1().exit_code, ExitCode::Halted(0));
 
     let receipt = prove_session_fast(&session);
     for (idx, receipt) in receipt
@@ -627,7 +627,7 @@ mod sys_verify {
         serde::to_vec,
         sha::Digestible,
         Assumption, CoprocessorCallback, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
-        ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, RECURSION_PO2,
+        ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, RECURSION_PO2,
     };
 
     fn prove_hello_commit() -> Receipt {
@@ -935,18 +935,27 @@ mod sys_verify {
     }
 
     struct Coprocessor {
-        pub(crate) requests: Vec<ProveZkrRequest>,
+        pub(crate) zkr_requests: Vec<ProveZkrRequest>,
+        pub(crate) keccak_requests: Vec<ProveKeccakRequest>,
     }
 
     impl Coprocessor {
         fn new() -> Self {
-            Self { requests: vec![] }
+            Self {
+                zkr_requests: vec![],
+                keccak_requests: vec![],
+            }
         }
     }
 
     impl CoprocessorCallback for Coprocessor {
         fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> anyhow::Result<()> {
-            self.requests.push(proof_request);
+            self.zkr_requests.push(proof_request);
+            Ok(())
+        }
+
+        fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> anyhow::Result<()> {
+            self.keccak_requests.push(proof_request);
             Ok(())
         }
     }
@@ -993,7 +1002,8 @@ mod sys_verify {
 
         // Because we added an already proven assumption, there should be no
         // request to invoke the coprocessor.
-        assert!(coprocessor.borrow().requests.is_empty());
+        assert!(coprocessor.borrow().zkr_requests.is_empty());
+        assert!(coprocessor.borrow().keccak_requests.is_empty());
     }
 }
 
@@ -1052,7 +1062,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::proven::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 41.752773);
+        assert_eq!(security, 41.66407);
     }
 
     #[test]
@@ -1063,7 +1073,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 74.90066);
+        assert_eq!(security, 74.88997);
     }
 
     #[test]
@@ -1074,6 +1084,6 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::toy_model_security::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 98.32892);
+        assert_eq!(security, 97.945);
     }
 }

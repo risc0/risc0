@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ pub use {
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
         recursion::{
-            prove::{prove_zkr, register_zkr},
+            prove::{prove_registered_zkr, prove_zkr, register_zkr},
             RECURSION_PO2,
         },
         server::{
@@ -119,6 +119,7 @@ pub use {
     },
 };
 
+#[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "bonsai")]
 pub use self::host::client::prove::bonsai::BonsaiProver;
 
@@ -144,7 +145,12 @@ pub use {
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 #[cfg(feature = "unstable")]
-pub use self::host::client::env::{CoprocessorCallback, ProveZkrRequest};
+pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+#[cfg(feature = "unstable")]
+pub use self::host::server::prove::keccak::prove_keccak;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {
@@ -157,14 +163,15 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
+#[cfg(feature = "std")]
+pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
+
 pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext, DEFAULT_MAX_PO2,
+    Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
+    Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
-//#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 use semver::Version;
 
@@ -199,4 +206,14 @@ pub fn is_dev_mode() -> bool {
 fn metal_implies_prove() {
     // we should be able to access prove feature items when metal has been enabled
     let _prover = get_prover_server(&ProverOpts::default());
+}
+
+/// Compute and return the v2 ImageID of the specified ELF binary.
+#[cfg(feature = "prove")]
+pub fn compute_image_id_v2(
+    user_id: impl Into<risc0_zkp::core::digest::Digest>,
+) -> Result<risc0_zkp::core::digest::Digest> {
+    let kernel_id: risc0_zkp::core::digest::Digest =
+        risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID.try_into()?;
+    risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
 }

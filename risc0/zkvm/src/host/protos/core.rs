@@ -16,6 +16,10 @@ pub struct SessionStats {
     pub total_cycles: u64,
     #[prost(uint64, tag = "3")]
     pub user_cycles: u64,
+    #[prost(uint64, tag = "4")]
+    pub paging_cycles: u64,
+    #[prost(uint64, tag = "5")]
+    pub reserved_cycles: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

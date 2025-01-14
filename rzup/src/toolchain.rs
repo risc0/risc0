@@ -23,10 +23,11 @@ use crate::{
     verbose_msg,
 };
 use anyhow::{bail, Context, Result};
+use downloader::{Download, Downloader};
 use flate2::bufread::GzDecoder;
 use std::{
     fs,
-    io::{BufReader, Write},
+    io::BufReader,
     os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
     process::Command,
@@ -34,6 +35,7 @@ use std::{
 };
 use tar::Archive;
 use tempfile::tempdir;
+use tokio::task;
 use xz::bufread::XzDecoder;
 
 const CONFIG_TOML: &str = include_str!("config.toml");
@@ -115,10 +117,7 @@ impl Toolchain {
         toolchain_root_dir: &Path,
         force: bool,
     ) -> Result<PathBuf> {
-        let client = http_client()?;
-
         let temp_dir = tempdir()?;
-
         let temp_file_path = match self {
             Toolchain::Rust => temp_dir.path().join("tmp_r0_rust_toolchain.tar.gz"),
             Toolchain::Cpp => temp_dir.path().join("tmp_r0_cpp_toolchain.tar.xz"),
@@ -173,32 +172,30 @@ impl Toolchain {
             "Requesting toolchain download from {}",
             &asset.browser_download_url
         ));
-        let response = client.get(&asset.browser_download_url).send().await?;
-        if !response.status().is_success() {
-            return Err(RzupError::Other(format!(
-                "Failed to download asset: {:?}",
-                response.status()
-            ))
-            .into());
-        }
 
-        verbose_msg!(format!(
-            "Creating temporary path at {}",
-            &temp_file_path.display()
-        ));
+        let download_url = asset.browser_download_url.clone();
+        let temp_file_path_clone = temp_file_path.clone();
+        let temp_dir_path = temp_dir.path().to_path_buf();
 
-        let mut file = fs::File::create(&temp_file_path)?;
-        let content = response.bytes().await?;
+        task::spawn_blocking(move || -> Result<()> {
+            let mut downloader = Downloader::builder()
+                .download_folder(&temp_dir_path)
+                .parallel_requests(1)
+                .build()?;
 
-        verbose_msg!(format!(
-            "Writing contents to file {}",
-            temp_file_path.display()
-        ));
+            let dl = Download::new(&download_url).file_name(&temp_file_path_clone);
 
-        file.write_all(&content)?;
+            let results = downloader.download(&[dl])?;
 
-        let tarball = fs::File::open(temp_file_path)?;
+            if let Some(Err(e)) = results.first() {
+                return Err(RzupError::Other(format!("Failed to download asset: {:?}", e)).into());
+            }
 
+            Ok(())
+        })
+        .await??;
+
+        let tarball = fs::File::open(&temp_file_path)?;
         info_msg!(format!("Extracting {} toolchain...", self.to_str()));
 
         match self {
@@ -226,7 +223,7 @@ impl Toolchain {
                         if entry.file_type()?.is_file() {
                             let mut perms = entry.metadata()?.permissions();
                             verbose_msg!(format!(
-                                "Setting permissons for {} to 0o755",
+                                "Setting permissions for {} to 0o755",
                                 entry.file_name().to_string_lossy()
                             ));
                             perms.set_mode(0o755);
@@ -263,7 +260,7 @@ impl Toolchain {
                 ));
 
                 // Move subdir contents to toolchain dir
-                self.move_toolchain(&subdir, &toolchain_dir)?;
+                Toolchain::move_toolchain(&subdir, &toolchain_dir)?;
             }
         }
 
@@ -422,7 +419,7 @@ impl Toolchain {
                 self.prepare_git_repo(source_url, tag, &build_dir)?;
 
                 let build_output = self.build_toolchain(&build_dir)?;
-                self.move_toolchain(&build_output.toolchain_dir, &final_toolchain_dir)?;
+                Toolchain::move_toolchain(&build_output.toolchain_dir, &final_toolchain_dir)?;
                 self.copy_tools(&build_output.toolchain_dir, &final_toolchain_dir)?;
                 self.link(&final_toolchain_dir)?;
             }
@@ -518,14 +515,26 @@ impl Toolchain {
         }
     }
 
-    fn move_toolchain(&self, src: &Path, dst: &Path) -> Result<()> {
+    fn move_toolchain(src: &Path, dst: &Path) -> Result<()> {
         fs::create_dir_all(dst)?;
         for entry in fs::read_dir(src)? {
             let entry = entry?;
-            let entry_path = entry.path();
-            let file_name = entry.file_name();
-            fs::rename(entry_path, dst.join(file_name))?;
+            let src_path = entry.path();
+            let dst_path = dst.join(entry.file_name());
+            if src_path.is_dir() {
+                // recursively copy dir
+                fs::create_dir_all(&dst_path)?;
+                Toolchain::move_toolchain(&src_path, &dst_path)?;
+            } else {
+                fs::copy(&src_path, &dst_path)?;
+                let metadata = src_path.metadata()?;
+                let permissions = metadata.permissions();
+                fs::set_permissions(&dst_path, permissions)?;
+            }
         }
+        // clean up
+        fs::remove_dir_all(src)?;
+
         Ok(())
     }
 
@@ -537,7 +546,7 @@ impl Toolchain {
             let tool = tool?;
             let tool_name = tool.file_name();
             eprintln!("copy tool: {tool_name:?}");
-            fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+            fs::copy(tool.path(), target_bin_dir.join(tool_name))?;
         }
 
         Ok(())
