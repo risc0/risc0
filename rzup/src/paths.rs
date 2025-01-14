@@ -106,38 +106,24 @@ impl Paths {
             }
         }
 
-        let result = if dir_name.starts_with("r0.") && component == &Component::RustToolchain {
+        if dir_name.starts_with("r0.") && component == &Component::RustToolchain {
             // Handle legacy rust format
-            dir_name
-                .strip_prefix("r0.")
-                .and_then(|v| v.split('-').next())
-                .and_then(|v| Version::parse(v).ok())
+            Version::parse(dir_name.strip_prefix("r0.")?.split('-').next()?).ok()
         } else if component == &Component::CppToolchain && !dir_name.starts_with('v') {
             // Handle legacy cpp format (YYYY.MM.DD-risc0-cpp-...)
-            let v = dir_name.split('-').next()?;
-            parse_cpp_version(&v).ok()
+            parse_cpp_version(dir_name.split('-').next()?).ok()
         } else if dir_name.starts_with('v') {
             let version_part = dir_name.strip_prefix('v')?;
-            if version_part.contains(&format!("-{component}-")) {
+            if let Some(p) = version_part.find(&format!("-{component}")) {
                 // New format with platform suffix
-                version_part
-                    .split(&format!("-{component}-"))
-                    .next()
-                    .and_then(extract_version)
-            } else if version_part.ends_with(component.as_str()) {
-                // Legacy format without platform suffix
-                version_part
-                    .split(&format!("-{component}"))
-                    .next()
-                    .and_then(extract_version)
+                extract_version(&version_part[..p])
             } else {
-                extract_version(version_part.split('-').next()?)
+                let p = version_part.find('-')?;
+                extract_version(&version_part[..p])
             }
         } else {
             None
-        };
-
-        result
+        }
     }
 }
 
