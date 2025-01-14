@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 pub(crate) mod commands;
-pub(crate) mod printer;
+pub(crate) mod ui;
 
 use crate::error::Result;
 use crate::Rzup;
@@ -22,7 +22,7 @@ use clap::{Parser, Subcommand};
 use colored::Colorize;
 use commands::UninstallCommand;
 use commands::{CheckCommand, InstallCommand, ShowCommand, UseCommand};
-use printer::EventPrinter;
+use ui::Ui;
 
 #[derive(Subcommand)]
 enum Commands {
@@ -60,30 +60,28 @@ pub struct Cli {
 impl Cli {
     pub fn execute(self, rzup: &mut Rzup) -> Result<()> {
         if !self.quiet {
-            let printer = EventPrinter::new(self.verbose);
-            printer.progress.finish_and_clear();
+            let ui = Ui::new(self.verbose);
+            ui.progress.finish_and_clear();
             rzup.set_event_handler(move |event| match event {
                 RzupEvent::DownloadStarted { id, version, url } => {
-                    printer.handle_download(id, version, url)
+                    ui.handle_download(id, version, url)
                 }
                 RzupEvent::DownloadCompleted { id, version } => {
-                    printer.handle_download_complete(id, version)
+                    ui.handle_download_complete(id, version)
                 }
-                RzupEvent::InstallationStarted { id, version } => {
-                    printer.handle_install(id, version)
-                }
+                RzupEvent::InstallationStarted { id, version } => ui.handle_install(id, version),
                 RzupEvent::InstallationCompleted { id, version } => {
-                    printer.handle_install_complete(id, version)
+                    ui.handle_install_complete(id, version)
                 }
                 RzupEvent::ComponentAlreadyInstalled { id, version } => {
-                    printer.handle_already_installed(id, version)
+                    ui.handle_already_installed(id, version)
                 }
                 RzupEvent::InstallationFailed { id: _, version: _ } => {
-                    printer.progress.finish_and_clear();
+                    ui.progress.finish_and_clear();
                 }
-                RzupEvent::Uninstalled { id, version } => printer.handle_uninstall(id, version),
-                RzupEvent::CheckUpdates { id } => printer.handle_checking_updates(id),
-                RzupEvent::Debug { message } => printer.handle_debug(message),
+                RzupEvent::Uninstalled { id, version } => ui.handle_uninstall(id, version),
+                RzupEvent::CheckUpdates { id } => ui.handle_checking_updates(id),
+                RzupEvent::Debug { message } => ui.handle_debug(message),
             });
         }
 

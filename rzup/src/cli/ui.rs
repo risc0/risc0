@@ -14,12 +14,12 @@
 use indicatif::{ProgressBar, ProgressStyle};
 
 #[derive(Clone)]
-pub(super) struct EventPrinter {
+pub(super) struct Ui {
     verbose: bool,
     pub progress: ProgressBar,
 }
 
-impl EventPrinter {
+impl Ui {
     pub fn new(verbose: bool) -> Self {
         let progress = ProgressBar::new_spinner().with_style(
             ProgressStyle::default_spinner()
@@ -89,7 +89,7 @@ impl EventPrinter {
     }
 }
 
-impl Drop for EventPrinter {
+impl Drop for Ui {
     fn drop(&mut self) {
         self.progress.finish_and_clear();
     }
