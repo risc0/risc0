@@ -16,17 +16,20 @@ use std::{env, path::PathBuf};
 
 use cargo_metadata::Package;
 use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
 
 /// Options for configuring a docker build environment.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, TypedBuilder)]
+#[builder(field_defaults(default))]
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///
     /// The current working directory is used if `None` is specified.
-    pub root_dir: Option<PathBuf>,
+    #[builder(setter(strip_option))]
+    root_dir: Option<PathBuf>,
 
     /// Additional environment variables for the build container.
-    pub env: Vec<(String, String)>,
+    env: Vec<(String, String)>,
 }
 
 impl DockerOptions {
@@ -48,13 +51,29 @@ impl DockerOptions {
 
 /// Options defining how to embed a guest package in
 /// [`crate::embed_methods_with_options`].
-#[derive(Default, Clone)]
+///
+/// ```
+/// use risc0_build::{DockerOptions, GuestOptions};
+///
+/// let docker_options = DockerOptions::builder()
+///     .root_dir("../../".into())
+///     .env(vec![("ENV_VAR".to_string(), "value".to_string())])
+///     .build();
+///
+/// let guest_options = GuestOptions::builder()
+///     .features(vec!["my-features".to_string()])
+///     .use_docker(docker_options)
+///     .build();
+/// ```
+#[derive(Default, Clone, Debug, TypedBuilder)]
+#[builder(field_defaults(default))]
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
-    pub features: Vec<String>,
+    pub(crate) features: Vec<String>,
 
     /// Use a docker environment for building.
-    pub use_docker: Option<DockerOptions>,
+    #[builder(setter(strip_option))]
+    pub(crate) use_docker: Option<DockerOptions>,
 }
 
 /// Metadata defining options to build a guest
