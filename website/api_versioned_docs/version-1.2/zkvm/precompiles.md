@@ -29,6 +29,7 @@ each fork's repository on GitHub.
 | Crate                                                                  | Versions supported             | Patch Statement Example                                                                                        | Requires Unstable Flag? |
 | ---------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------- |
 | [`k256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases) | 0.13.4, 0.13.3, 0.13.2, 0.13.1 | `k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.3-risczero.1" }` | [Yes] |
+| [`p256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases) | 0.13.2 | `p256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "p256/v0.13.2-risczero.0" }` | [Yes]
 
 ### EDDSA
 
