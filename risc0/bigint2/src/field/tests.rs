@@ -17,9 +17,10 @@ extern crate num_bigint_dig as num_bigint;
 
 use num_bigint::BigUint;
 
-use risc0_bigint2_methods::{EXTFIELD_DEG4_MUL_ELF, EXTFIELD_XXONE_MUL_ELF,
-    EXTFIELDMUL_ELF, EXTFIELDSUB_ELF, EXTFIELDADD_ELF,
-    MODADD_ELF, MODINV_ELF, MODMUL_ELF, MODSUB_ELF};
+use risc0_bigint2_methods::{
+    EXTFIELDADD_ELF, EXTFIELDMUL_ELF, EXTFIELDSUB_ELF, EXTFIELD_DEG4_MUL_ELF,
+    EXTFIELD_XXONE_MUL_ELF, MODADD_ELF, MODINV_ELF, MODMUL_ELF, MODSUB_ELF,
+};
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
 };
@@ -184,10 +185,10 @@ fn extfieldadd() {
     let expected = (expected0, expected1);
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs0, lhs1, rhs0, rhs1, prime))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(lhs0, lhs1, rhs0, rhs1, prime))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EXTFIELDADD_ELF)
         .unwrap()
@@ -226,10 +227,10 @@ fn extfieldsub() {
     let expected = (expected0, expected1);
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs0, lhs1, rhs0, rhs1, prime))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(lhs0, lhs1, rhs0, rhs1, prime))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EXTFIELDSUB_ELF)
         .unwrap()
@@ -274,10 +275,10 @@ fn extfieldmul() {
     let expected = (expected0, expected1);
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs0, lhs1, rhs0, rhs1, monicirr0, monicirr1, prime))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(lhs0, lhs1, rhs0, rhs1, monicirr0, monicirr1, prime))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EXTFIELDMUL_ELF)
         .unwrap()
@@ -320,10 +321,10 @@ fn extfield_xxone_mul() {
     let expected = (expected0, expected1);
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs0, lhs1, rhs0, rhs1, prime, primesqr))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(lhs0, lhs1, rhs0, rhs1, prime, primesqr))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EXTFIELD_XXONE_MUL_ELF)
         .unwrap()
@@ -390,13 +391,13 @@ fn extfield_deg4_mul() {
     let expected = (expected0, expected1, expected2, expected3);
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs0, lhs1, lhs2, lhs3,
-                     rhs0, rhs1, rhs2, rhs3,
-                     monicirr0, monicirr1, monicirr2, monicirr3,
-                     prime))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(
+            lhs0, lhs1, lhs2, lhs3, rhs0, rhs1, rhs2, rhs3, monicirr0, monicirr1, monicirr2,
+            monicirr3, prime,
+        ))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EXTFIELD_DEG4_MUL_ELF)
         .unwrap()
@@ -404,7 +405,7 @@ fn extfield_deg4_mul() {
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     let result: (BigUint, BigUint, BigUint, BigUint) =
-      session.journal.as_ref().unwrap().decode().unwrap();
+        session.journal.as_ref().unwrap().decode().unwrap();
     assert_eq!(result, expected);
 
     let prover = get_prover_server(&ProverOpts::fast()).unwrap();
