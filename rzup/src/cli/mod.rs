@@ -16,7 +16,6 @@ pub(crate) mod ui;
 
 use crate::error::Result;
 use crate::Rzup;
-use crate::RzupEvent;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
@@ -59,39 +58,32 @@ pub struct Cli {
 
 impl Cli {
     pub fn execute(self, rzup: &mut Rzup) -> Result<()> {
-        if !self.quiet {
-            let ui = Ui::new(self.verbose);
-            ui.progress.finish_and_clear();
-            rzup.set_event_handler(move |event| match event {
-                RzupEvent::DownloadStarted { id, version, url } => {
-                    ui.handle_download(id, version, url)
-                }
-                RzupEvent::DownloadCompleted { id, version } => {
-                    ui.handle_download_complete(id, version)
-                }
-                RzupEvent::InstallationStarted { id, version } => ui.handle_install(id, version),
-                RzupEvent::InstallationCompleted { id, version } => {
-                    ui.handle_install_complete(id, version)
-                }
-                RzupEvent::ComponentAlreadyInstalled { id, version } => {
-                    ui.handle_already_installed(id, version)
-                }
-                RzupEvent::InstallationFailed { id: _, version: _ } => {
-                    ui.progress.finish_and_clear();
-                }
-                RzupEvent::Uninstalled { id, version } => ui.handle_uninstall(id, version),
-                RzupEvent::CheckUpdates { id } => ui.handle_checking_updates(id),
-                RzupEvent::Debug { message } => ui.handle_debug(message),
-            });
-        }
+        let result = std::thread::scope(|scope| {
+            if !self.quiet {
+                let (ui_send, ui_recv) = std::sync::mpsc::channel();
+                rzup.set_event_handler(move |event| {
+                    let _ = ui_send.send(event);
+                });
 
-        let result = match self.command {
-            Commands::Install(cmd) => cmd.execute(rzup),
-            Commands::Show(cmd) => cmd.execute(rzup),
-            Commands::Use(cmd) => cmd.execute(rzup),
-            Commands::Check(cmd) => cmd.execute(rzup),
-            Commands::Uninstall(cmd) => cmd.execute(rzup),
-        };
+                let ui = Ui::new(self.verbose);
+                scope.spawn(move || {
+                    ui.run(ui_recv);
+                });
+            }
+
+            let result = match self.command {
+                Commands::Install(cmd) => cmd.execute(rzup),
+                Commands::Show(cmd) => cmd.execute(rzup),
+                Commands::Use(cmd) => cmd.execute(rzup),
+                Commands::Check(cmd) => cmd.execute(rzup),
+                Commands::Uninstall(cmd) => cmd.execute(rzup),
+            };
+
+            // This has side-effect of dropping the channel
+            rzup.set_event_handler(|_| {});
+
+            result
+        });
 
         if let Err(e) = result {
             eprintln!(

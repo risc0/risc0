@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use crate::RzupEvent;
 use indicatif::{ProgressBar, ProgressStyle};
 
 #[derive(Clone)]
@@ -29,6 +30,32 @@ impl Ui {
         );
         progress.enable_steady_tick(std::time::Duration::from_millis(80));
         Self { verbose, progress }
+    }
+
+    pub fn run(self, ui_recv: std::sync::mpsc::Receiver<RzupEvent>) {
+        while let Ok(event) = ui_recv.recv() {
+            match event {
+                RzupEvent::DownloadStarted { id, version, url } => {
+                    self.handle_download(id, version, url)
+                }
+                RzupEvent::DownloadCompleted { id, version } => {
+                    self.handle_download_complete(id, version)
+                }
+                RzupEvent::InstallationStarted { id, version } => self.handle_install(id, version),
+                RzupEvent::InstallationCompleted { id, version } => {
+                    self.handle_install_complete(id, version)
+                }
+                RzupEvent::ComponentAlreadyInstalled { id, version } => {
+                    self.handle_already_installed(id, version)
+                }
+                RzupEvent::InstallationFailed { id: _, version: _ } => {
+                    self.progress.finish_and_clear();
+                }
+                RzupEvent::Uninstalled { id, version } => self.handle_uninstall(id, version),
+                RzupEvent::CheckUpdates { id } => self.handle_checking_updates(id),
+                RzupEvent::Debug { message } => self.handle_debug(message),
+            }
+        }
     }
 
     fn start_progress(&self, message: String) {
