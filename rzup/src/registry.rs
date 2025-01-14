@@ -43,39 +43,6 @@ impl Registry {
         &self.base_urls
     }
 
-    pub fn scan_environment(&mut self, env: &Environment) -> Result<()> {
-        env.emit(RzupEvent::Debug {
-            message: format!("Scanning environment at {}", env.root_dir().display()),
-        });
-
-        for component in Component::iter() {
-            env.emit(RzupEvent::Debug {
-                message: format!("Registering component: {component}"),
-            });
-
-            // Check if we already have an active version set
-            if self.settings.get_active_version(&component).is_none() {
-                let mut all_versions = self.list_component_versions(env, &component)?;
-
-                all_versions.sort_by(|a, b| b.cmp(a));
-
-                // If we found any versions, set the highest one as active
-                if let Some(highest_version) = all_versions.first() {
-                    env.emit(RzupEvent::Debug {
-                        message: format!(
-                            "Setting highest version {highest_version} as active for {component}",
-                        ),
-                    });
-                    self.settings
-                        .set_active_version(&component, highest_version);
-                }
-            }
-        }
-
-        self.settings.save(env)?;
-        Ok(())
-    }
-
     pub fn list_component_versions(
         &self,
         env: &Environment,
@@ -246,7 +213,27 @@ impl Registry {
         component: &Component,
         version: Version,
     ) -> Result<()> {
-        components::uninstall(component, env, &version)
+        components::uninstall(component, env, &version)?;
+
+        // Check if we uninstalled the active version
+        if self.get_active_component_version(env, component)?.is_none() {
+            let mut all_versions = self.list_component_versions(env, component)?;
+
+            all_versions.sort_by(|a, b| b.cmp(a));
+
+            // If we found any versions, set the highest one as active
+            if let Some(highest_version) = all_versions.first() {
+                env.emit(RzupEvent::Debug {
+                    message: format!(
+                        "Setting highest version {highest_version} as active for {component}",
+                    ),
+                });
+                self.settings.set_active_version(component, highest_version);
+                self.settings.save(env)?;
+            }
+        }
+
+        Ok(())
     }
 }
 

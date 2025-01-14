@@ -67,7 +67,6 @@ impl Rzup {
         let environment = Environment::new(|s| std::env::var(s))?;
         let mut registry = Registry::new(&environment, Default::default())?;
         Self::initialize_settings(&environment, &mut registry)?;
-        registry.scan_environment(&environment)?;
 
         Ok(Self {
             environment,
@@ -84,7 +83,6 @@ impl Rzup {
         let environment = Environment::with_root(root)?;
         let mut registry = Registry::new(&environment, base_urls)?;
         Self::initialize_settings(&environment, &mut registry)?;
-        registry.scan_environment(&environment)?;
 
         Ok(Self {
             environment,
@@ -123,7 +121,6 @@ impl Rzup {
     pub fn install_all(&mut self, force: bool) -> Result<()> {
         self.registry
             .install_all_components(&self.environment, force)?;
-        self.registry.scan_environment(&self.environment)?;
         Ok(())
     }
 
@@ -141,7 +138,6 @@ impl Rzup {
     ) -> Result<()> {
         self.registry
             .install_component(&self.environment, component, version, force)?;
-        self.registry.scan_environment(&self.environment)?;
         Ok(())
     }
 
@@ -153,7 +149,6 @@ impl Rzup {
     pub fn uninstall_component(&mut self, component: &Component, version: Version) -> Result<()> {
         self.registry
             .uninstall_component(&self.environment, component, version)?;
-        self.registry.scan_environment(&self.environment)?;
         Ok(())
     }
 
@@ -693,6 +688,39 @@ mod tests {
                 .unwrap()
                 .0,
             cargo_risczero_version1
+        );
+    }
+
+    #[test]
+    fn active_version_after_uninstall() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version1 = Version::new(1, 0, 0);
+        let cargo_risczero_version2 = Version::new(1, 1, 0);
+
+        rzup.install_component(
+            &Component::CargoRiscZero,
+            Some(cargo_risczero_version2.clone()),
+            false,
+        )
+        .unwrap();
+
+        rzup.install_component(
+            &Component::CargoRiscZero,
+            Some(cargo_risczero_version1.clone()),
+            false,
+        )
+        .unwrap();
+
+        rzup.uninstall_component(&Component::CargoRiscZero, cargo_risczero_version1.clone())
+            .unwrap();
+
+        assert_eq!(
+            rzup.get_active_version(&Component::CargoRiscZero)
+                .unwrap()
+                .unwrap()
+                .0,
+            cargo_risczero_version2
         );
     }
 
