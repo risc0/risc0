@@ -19,32 +19,32 @@ each fork's repository on GitHub.
 
 ### Hash Functions
 
-| Crate                                                         | Versions supported            | Patch Statement Example                                                                          | Requires Unstable Flag |
+| Crate                                                         | Versions supported            | Patch Statement Example                                                                          | Requires Unstable Flag? |
 | ------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------- |
 | [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases) | 0.10.8, 0.10.7, 0.10.6, 0.9.9 | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }` | No |
 | [`tiny-keccak`](https://github.com/risc0/tiny-keccak/releases) | 2.0.2 | `tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }` | [Yes] |
 
 ### ECDSA
 
-| Crate                                                                  | Versions supported             | Patch Statement Example                                                                                        | Requires Unstable Flag |
+| Crate                                                                  | Versions supported             | Patch Statement Example                                                                                        | Requires Unstable Flag? |
 | ---------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------- |
 | [`k256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases) | 0.13.4, 0.13.3, 0.13.2, 0.13.1 | `k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.3-risczero.1" }` | [Yes] |
 
 ### EDDSA
 
-| Crate                                                                    | Versions supported  | Patch Statement Example                                                                                   | Requires Unstable Flag |
+| Crate                                                                    | Versions supported  | Patch Statement Example                                                                                   | Requires Unstable Flag? |
 | ------------------------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------- |
 | [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-dalek", tag = "curve25519-4.1.2-risczero.0" }` | No |
 
 ### RSA
 
-| Crate                                                     | Versions supported | Patch Statement Example                                                                     | Requires Unstable Flag |
+| Crate                                                     | Versions supported | Patch Statement Example                                                                     | Requires Unstable Flag? |
 | --------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------- | ---------------------- |
 | [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases) | 0.9.6              | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }` | [Yes] |
 
 ### Other Patched Crates
 
-| Crate                                                                         | Versions supported         | Patch Statement Example                                                                                    | Requires Unstable Flag |
+| Crate                                                                         | Versions supported         | Patch Statement Example                                                                                    | Requires Unstable Flag? |
 | ----------------------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------- |
 | [`crypto-bigint`](https://github.com/risc0/RustCrypto-crypto-bigint/releases) | 0.5.5, 0.5.4, 0.5.3, 0.5.2 | `crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }` | [Yes] |
 
