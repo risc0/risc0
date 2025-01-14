@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
-use risc0_circuit_rv32im_v2::{HighLowU16, Rv32imV2Claim};
 
 use anyhow::{anyhow, bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -29,6 +28,7 @@ use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
+use risc0_circuit_rv32im_v2::{HighLowU16, Rv32imV2Claim};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
