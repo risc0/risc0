@@ -351,7 +351,7 @@ fn extfield_deg4_mul() {
     //   8xxx + 24xx + 24x + 12 ==
     //   1x^6 + 0x^5 + 3x^4 + 6xxx + 4xx + 4x + 5 ==
     //   xx(x^4+1)-xx + 3(x^4+1)-3 + 6xxx + 4xx + 4x + 5 ==
-    //   -xx - 3 + 6xxx + 4xx + 4x + 4 == 6xxx + 3xx + 4x + 1 
+    //   -xx - 3 + 6xxx + 4xx + 4x + 4 == 6xxx + 3xx + 4x + 1
     const LHS0: &[u8] = b"04";
     const LHS1: &[u8] = b"05";
     const LHS2: &[u8] = b"02";

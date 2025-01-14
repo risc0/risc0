@@ -21,7 +21,8 @@ use crate::ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5};
 use crate::WORD_SIZE;
 
 pub const FIELD_256_WIDTH_WORDS: usize = 256 / (WORD_SIZE * 8);
-pub const EXT_DEGREE_2: usize = 2;  // TODO
+pub const EXT_DEGREE_2: usize = 2;
+pub const EXT_DEGREE_4: usize = 4;
 
 const MODADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "modadd_256.blob");
 const MODINV_256_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_256.blob");
@@ -166,7 +167,6 @@ pub fn modsub_256(
     assert!(crate::is_less(&result, &modulus));
 }
 
-// TODO: Make it clearer that these functions are for degree 2 extensions
 pub fn extfield_deg2_add_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
@@ -204,11 +204,11 @@ pub fn extfield_deg2_mul_256(
 }
 
 pub fn extfield_deg4_mul_256(
-    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; 4],
-    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; 4],
-    monic_irr: &[[u32; FIELD_256_WIDTH_WORDS]; 4],
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    monic_irr: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
-    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; 4],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
 ) {
     unsafe {
         sys_bigint2_5(
