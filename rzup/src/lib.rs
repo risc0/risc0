@@ -65,8 +65,7 @@ impl Rzup {
     /// This will initialize the registry, settings, and scan the environment for installed components.
     pub fn new() -> Result<Self> {
         let environment = Environment::new(|s| std::env::var(s))?;
-        let mut registry = Registry::new(&environment, Default::default())?;
-        Self::initialize_settings(&environment, &mut registry)?;
+        let registry = Registry::new(&environment, Default::default())?;
 
         Ok(Self {
             environment,
@@ -81,26 +80,12 @@ impl Rzup {
     /// * `base_urls` - The base URLs used to communicate with GitHub
     pub fn with_root(root: impl Into<PathBuf>, base_urls: BaseUrls) -> Result<Self> {
         let environment = Environment::with_root(root)?;
-        let mut registry = Registry::new(&environment, base_urls)?;
-        Self::initialize_settings(&environment, &mut registry)?;
+        let registry = Registry::new(&environment, base_urls)?;
 
         Ok(Self {
             environment,
             registry,
         })
-    }
-
-    fn initialize_settings(environment: &Environment, registry: &mut Registry) -> Result<()> {
-        if !environment.settings_path().exists() {
-            environment.emit(RzupEvent::Debug {
-                message: format!(
-                    "Creating new settings file at {}",
-                    environment.settings_path().display()
-                ),
-            });
-        }
-        registry.settings().save(environment)?;
-        Ok(())
     }
 
     /// Sets an event handler for receiving notifications about operations.
