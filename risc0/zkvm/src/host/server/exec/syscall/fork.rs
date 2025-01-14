@@ -14,7 +14,7 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::{anyhow, bail, Context as _, Result};
 use risc0_circuit_rv32im::prove::emu::{
     addr::{ByteAddr, WordAddr},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
@@ -114,7 +114,15 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         if !is_guest_memory(into_guest_ptr.0) && !into_guest_ptr.is_null() {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
+
         let into_guest_len = EmuContext::load_register(self, REG_A1)? as usize;
+        if into_guest_len > 0 && !into_guest_ptr.is_null() {
+            let end_addr = into_guest_ptr
+                .checked_add(into_guest_len as u32)
+                .ok_or_else(|| anyhow!("invalid guest address range"))?;
+            Self::check_guest_addr(end_addr)?;
+        }
+
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.load_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
@@ -140,8 +148,7 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
         if !into_guest_ptr.is_null() {
-            Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
-            self.store_region(into_guest_ptr, bytemuck::cast_slice(&into_guest))?
+            self.store_region(into_guest_ptr, bytemuck::cast_slice(&into_guest))?;
         }
 
         self.store_register(REG_A0, a0)?;
