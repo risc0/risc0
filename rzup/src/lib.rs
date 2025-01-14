@@ -636,6 +636,33 @@ mod tests {
     }
 
     #[test]
+    fn list_multiple_versions() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let cargo_risczero_version1 = Version::new(1, 0, 0);
+        let cargo_risczero_version2 = Version::new(1, 1, 0);
+
+        rzup.install_component(
+            &Component::CargoRiscZero,
+            Some(cargo_risczero_version1.clone()),
+            false,
+        )
+        .unwrap();
+
+        rzup.install_component(
+            &Component::CargoRiscZero,
+            Some(cargo_risczero_version2.clone()),
+            false,
+        )
+        .unwrap();
+
+        assert_eq!(
+            rzup.list_versions(&Component::CargoRiscZero).unwrap(),
+            vec![cargo_risczero_version2, cargo_risczero_version1]
+        );
+    }
+
+    #[test]
     fn set_active_version() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
