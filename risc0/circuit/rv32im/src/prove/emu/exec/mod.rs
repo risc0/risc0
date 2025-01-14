@@ -440,10 +440,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         if into_guest_len > 0 && !into_guest_ptr.is_null() {
             let end_addr = into_guest_ptr
-                .0
                 .checked_add(into_guest_len as u32)
                 .ok_or_else(|| anyhow!("invalid guest address range"))?;
-            Self::check_guest_addr(ByteAddr(end_addr))?;
+            Self::check_guest_addr(end_addr)?;
         }
 
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
