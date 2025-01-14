@@ -225,7 +225,7 @@ impl ProverServer for ProverImpl {
             }
             InnerSegment::V2(segment) => {
                 let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(segment)?;
-                let claim = ReceiptClaim::decode_from_seal_v2(&seal)?;
+                let claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.po2))?;
                 (seal, claim, SegmentVersion::V2)
             }
         };

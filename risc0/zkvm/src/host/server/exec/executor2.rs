@@ -22,10 +22,12 @@ use std::{
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{ByteAddr as ByteAddr2, ExitCode, MemoryImage2, Program, SystemState};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_circuit_rv32im_v2::execute::{
-    platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
-    SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
-    USER_END_ADDR,
+use risc0_circuit_rv32im_v2::{
+    execute::{
+        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
+    },
+    MAX_INSN_CYCLES,
 };
 use risc0_core::scope;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
@@ -38,6 +40,7 @@ use crate::{
         client::env::SegmentPath,
         server::session::{InnerSegment, Session},
     },
+    receipt_claim::exit_code_from_rv32im_v2_claim,
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
 
@@ -167,11 +170,13 @@ impl<'a> Executor2<'a> {
             self.env.session_limit,
             |inner| {
                 let output = inner
-                    .exit_code
-                    .expects_output()
+                    .claim
+                    .terminate_state
+                    .is_some()
                     .then(|| -> Option<Result<_>> {
                         inner
-                            .output_digest
+                            .claim
+                            .output
                             .and_then(|digest| {
                                 (digest != Digest::ZERO).then(|| journal.buf.borrow().clone())
                             })
@@ -205,16 +210,18 @@ impl<'a> Executor2<'a> {
         )?;
         let elapsed = start_time.elapsed();
 
-        tracing::debug!("output_digest: {:?}", result.output_digest);
+        tracing::debug!("output_digest: {:?}", result.claim.output);
+
+        let exit_code = exit_code_from_rv32im_v2_claim(&result.claim)?;
 
         // Set the session_journal to the committed data iff the guest set a non-zero output.
         let session_journal = result
-            .output_digest
+            .claim
+            .output
             .and_then(|digest| (digest != Digest::ZERO).then(|| journal.buf.take()));
-        if !result.exit_code.expects_output() && session_journal.is_some() {
+        if !exit_code.expects_output() && session_journal.is_some() {
             tracing::debug!(
-                "dropping non-empty journal due to exit code {:?}: 0x{}",
-                result.exit_code,
+                "dropping non-empty journal due to exit code {exit_code:?}: 0x{}",
                 hex::encode(journal.buf.borrow().as_slice())
             );
         };
@@ -234,16 +241,16 @@ impl<'a> Executor2<'a> {
         let syscall_metrics = self.syscall_table.metrics.borrow().clone();
 
         // NOTE: When a segment ends in a Halted(_) state, the post_digest will be null.
-        let post_digest = match result.exit_code {
+        let post_digest = match exit_code {
             ExitCode::Halted(_) => Digest::ZERO,
-            _ => result.post_digest,
+            _ => result.claim.post_state,
         };
 
         let session = Session {
             segments: refs,
             input: self.env.input_digest.unwrap_or_default(),
             journal: session_journal.map(crate::Journal::new),
-            exit_code: result.exit_code,
+            exit_code,
             assumptions,
             user_cycles: result.user_cycles,
             paging_cycles: result.paging_cycles,
@@ -251,7 +258,7 @@ impl<'a> Executor2<'a> {
             total_cycles: result.total_cycles,
             pre_state: SystemState {
                 pc: 0,
-                merkle_root: result.pre_digest,
+                merkle_root: result.claim.pre_state,
             },
             post_state: SystemState {
                 pc: 0,

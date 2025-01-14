@@ -76,68 +76,74 @@ pub fn execute<S: Syscall>(
     Ok(SimpleSession { segments, result })
 }
 
-pub fn basic() -> Program {
-    let mut asm = Assembler::new();
-    asm.lui(REG_T1, 0x1234b);
-    asm.lui(REG_T2, 0xf387e);
-    asm.add(REG_T0, REG_T1, REG_T2);
-    asm.lui(REG_A1, 0x4);
-    asm.ecall();
-    asm.program()
-}
+pub mod user {
+    use super::*;
 
-pub fn multi_read() -> Program {
-    const LENGTHS: &[u32] = &[0, 1, 2, 3, 4, 5, 7, 13, 19, 40, 101];
-
-    let ptr = 0x0050_0000;
-
-    let mut asm = Assembler::new();
-    asm.li(REG_T0, ptr);
-    // Try all 4 alignments
-    for i in 0..4 {
-        // Try a variety of size
-        for &len in LENGTHS {
-            asm.host_ecall_read(0, ptr + i, len);
-            for k in 0..len {
-                asm.lb(REG_T1, REG_T0, i + k);
-                asm.li(REG_T2, k);
-                asm.beq(REG_T1, REG_T2, 8);
-                asm.die();
-            }
-        }
+    pub fn basic() -> Program {
+        let mut asm = Assembler::new();
+        asm.li(REG_A1, 0x4000_0000);
+        asm.ecall();
+        asm.program()
     }
 
-    asm.host_terminate(0);
-
-    asm.program()
+    pub fn simple_loop(count: u32) -> Program {
+        let mut asm = Assembler::new();
+        asm.addi(REG_A4, REG_ZERO, 0);
+        asm.li(REG_A5, count);
+        // loop:
+        asm.addi(REG_A4, REG_A4, 1);
+        asm.blt(REG_A4, REG_A5, -4 /*loop: */);
+        asm.lui(REG_A1, 0x1000);
+        asm.ecall();
+        asm.program()
+    }
 }
 
-pub fn simple_loop(count: u32) -> Program {
-    // loop.asm:
-    //
-    // .global _boot
-    // .text
-    //
-    // _boot:
-    //     li      a4,0
-    //     li      a5,100
-    // loop:
-    //     addi    a4,a4,1
-    //     blt     a4,a5,loop
-    //     lui     a1,0x1000
-    //     ecall
-    //
-    // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
+pub mod kernel {
+    use super::*;
 
-    let mut asm = Assembler::new();
-    asm.addi(REG_A4, REG_ZERO, 0);
-    asm.li(REG_A5, count);
-    // loop:
-    asm.addi(REG_A4, REG_A4, 1);
-    asm.blt(REG_A4, REG_A5, -4 /*loop: */);
-    asm.lui(REG_A1, 0x1000);
-    asm.ecall();
-    asm.program()
+    pub fn basic() -> Program {
+        let mut asm = Assembler::new();
+        asm.host_terminate(0, 0);
+        asm.program()
+    }
+
+    pub fn simple_loop(count: u32) -> Program {
+        let mut asm = Assembler::new();
+        asm.addi(REG_A4, REG_ZERO, 0);
+        asm.li(REG_A5, count);
+        // loop:
+        asm.addi(REG_A4, REG_A4, 1);
+        asm.blt(REG_A4, REG_A5, -4 /*loop: */);
+        asm.host_terminate(0, 0);
+        asm.program()
+    }
+
+    pub fn multi_read() -> Program {
+        const LENGTHS: &[u32] = &[0, 1, 2, 3, 4, 5, 7, 13, 19, 40, 101];
+
+        let ptr = 0x0050_0000;
+
+        let mut asm = Assembler::new();
+        asm.li(REG_T0, ptr);
+        // Try all 4 alignments
+        for i in 0..4 {
+            // Try a variety of size
+            for &len in LENGTHS {
+                asm.host_ecall_read(0, ptr + i, len);
+                for k in 0..len {
+                    asm.lb(REG_T1, REG_T0, i + k);
+                    asm.li(REG_T2, k);
+                    asm.beq(REG_T1, REG_T2, 8);
+                    asm.die();
+                }
+            }
+        }
+
+        asm.host_terminate(0, 0);
+
+        asm.program()
+    }
 }
 
 #[allow(unused)]
@@ -288,9 +294,10 @@ impl Assembler {
         self.ecall();
     }
 
-    pub fn host_terminate(&mut self, exit_code: u32) {
+    pub fn host_terminate(&mut self, a0: u32, a1: u32) {
         self.li(REG_A7, HOST_ECALL_TERMINATE);
-        self.li(REG_A0, exit_code);
+        self.li(REG_A0, a0);
+        self.li(REG_A1, a1);
         self.ecall();
     }
 

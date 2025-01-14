@@ -208,7 +208,7 @@ fn generate_busy_loop_segments(
     let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving rv32im");
-    let ctx = VerifierContext::default();
+    let ctx = opts.verifier_context();
     let segment_receipts = session
         .segments
         .iter()
@@ -429,6 +429,6 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("1e116c1a1d135612aa89444ad19fc3489c93b8653196256f6a2d976de4428951")
+        digest!("ffe166017b1ab460995b45510524c60e3756344feff2414f44cda25c33a78058")
     );
 }

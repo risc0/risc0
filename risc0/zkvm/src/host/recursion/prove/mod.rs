@@ -75,7 +75,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
     let mut prover = Prover::new_lift(segment_receipt, opts.clone())?;
 
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
@@ -107,7 +107,7 @@ pub fn join(
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_join(a, b, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
 
     // Construct the expected claim that should have result from the join.
@@ -187,7 +187,7 @@ where
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
 
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
@@ -218,7 +218,7 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 
     let mut prover = Prover::new_identity(a, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
     let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&a.claim)?;
 
@@ -336,7 +336,7 @@ pub fn test_zkr(
     let receipt = prover.run()?;
 
     // Read the claim digest from the second of the global output slots.
-    let claim_digest = risc0_binfmt::read_sha_halfs(&mut VecDeque::from_iter(
+    let claim_digest = read_sha_halfs(&mut VecDeque::from_iter(
         bytemuck::checked::cast_slice::<_, BabyBearElem>(
             &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
         )

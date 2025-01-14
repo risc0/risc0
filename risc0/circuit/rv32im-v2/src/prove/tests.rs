@@ -16,7 +16,10 @@ use risc0_binfmt::{MemoryImage2, Program};
 use test_log::test;
 
 use super::segment_prover;
-use crate::execute::{testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES};
+use crate::{
+    execute::{testutil, DEFAULT_SEGMENT_LIMIT_PO2},
+    MAX_INSN_CYCLES,
+};
 
 fn run_program(program: Program) {
     let image = MemoryImage2::new_kernel(program);
@@ -39,12 +42,12 @@ fn run_program(program: Program) {
 
 #[test]
 fn basic() {
-    run_program(testutil::basic());
+    run_program(testutil::kernel::basic());
 }
 
 #[test]
 fn multi_read() {
-    run_program(testutil::multi_read());
+    run_program(testutil::kernel::multi_read());
 }
 
 // These tests come from:

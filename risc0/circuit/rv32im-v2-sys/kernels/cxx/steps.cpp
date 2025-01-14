@@ -4254,9 +4254,9 @@ BoundLayout<_globalLayout> x4 = BIND_LAYOUT(kLayoutGlobal, global3);
 // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:44)
 EQZ((arg1_0.state - Val(9)), "ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:44)");
 // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:45)
-GetDataStruct x5 = exec_MemoryRead(ctx,arg0, Val(1073725482), LAYOUT_LOOKUP(layout2, a0));
+GetDataStruct x5 = exec_MemoryRead(ctx,arg0, Val(1073725450), LAYOUT_LOOKUP(layout2, a0));
 // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:46)
-GetDataStruct x6 = exec_MemoryRead(ctx,arg0, Val(1073725483), LAYOUT_LOOKUP(layout2, a1));
+GetDataStruct x6 = exec_MemoryRead(ctx,arg0, Val(1073725451), LAYOUT_LOOKUP(layout2, a1));
 // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:47)
 NondetRegStruct x7 = exec_Reg(ctx,x5._super.low, LAYOUT_LOOKUP(x4, termA0low));
 // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:48)

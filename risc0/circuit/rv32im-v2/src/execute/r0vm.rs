@@ -162,8 +162,8 @@ impl<'a> Risc0Machine<'a> {
         tracing::trace!("ecall_terminate");
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::Terminate, 0, 0, 0)?;
-        let a0 = self.load_memory(USER_REGS_ADDR.waddr() + REG_A0)?;
-        let a1 = self.load_memory(USER_REGS_ADDR.waddr() + REG_A1)?;
+        let a0 = self.load_register(REG_A0)?;
+        let a1 = self.load_register(REG_A1)?;
         self.ctx.on_terminate(a0, a1)?;
         self.ctx
             .on_ecall_cycle(CycleState::Terminate, CycleState::Suspend, 0, 0, 0)?;

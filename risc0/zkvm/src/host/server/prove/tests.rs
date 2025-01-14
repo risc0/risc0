@@ -15,6 +15,7 @@
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, MemoryImage2};
 use risc0_circuit_rv32im::prove::emu::testutil;
+use risc0_circuit_rv32im_v2::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
@@ -489,7 +490,7 @@ fn continuation_v1() {
 fn continuation_v2() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    let program = risc0_circuit_rv32im_v2::execute::testutil::simple_loop(200);
+    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
     let image = MemoryImage2::new_kernel(program);
 
     let env = ExecutorEnv::builder()
@@ -506,9 +507,12 @@ fn continuation_v2() {
 
     let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
-        assert_eq!(segment.inner.v2().exit_code, ExitCode::SystemSplit);
+        assert_eq!(segment.inner.v2().claim.terminate_state, None);
     }
-    assert_eq!(final_segment.inner.v2().exit_code, ExitCode::Halted(0));
+    assert_eq!(
+        final_segment.inner.v2().claim.terminate_state,
+        Some(TerminateState::default())
+    );
 
     let receipt = prove_session(V2, &session).unwrap();
     for (idx, receipt) in receipt

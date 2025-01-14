@@ -84,8 +84,8 @@ impl<H: Hal> WitnessGenerator<H> {
 
         for i in 0..DIGEST_WORDS {
             // state in
-            let low = segment.pre_digest.as_words()[i] & 0xffff;
-            let high = segment.pre_digest.as_words()[i] >> 16;
+            let low = segment.claim.pre_state.as_words()[i] & 0xffff;
+            let high = segment.claim.pre_state.as_words()[i] >> 16;
             global[LAYOUT_GLOBAL.state_in.values[i].low._super.offset] = low.into();
             global[LAYOUT_GLOBAL.state_in.values[i].high._super.offset] = high.into();
 
@@ -102,7 +102,12 @@ impl<H: Hal> WitnessGenerator<H> {
         }
 
         // is_terminate
-        global[LAYOUT_GLOBAL.is_terminate._super.offset] = 1u32.into();
+        let is_terminate = if segment.claim.terminate_state.is_some() {
+            1u32
+        } else {
+            0u32
+        };
+        global[LAYOUT_GLOBAL.is_terminate._super.offset] = is_terminate.into();
 
         // shutdown_cycle
         global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
@@ -215,17 +220,12 @@ impl Injector {
         self.set(row, NEXT_PC_LOW, cycle.pc & 0xffff);
         self.set(row, NEXT_PC_HIGH, cycle.pc >> 16);
         self.set(row, NEXT_STATE, cycle.state);
-        if row != 0 {
-            self.set(row, NEXT_MACHINE_MODE, cycle.machine_mode as u32);
-        }
+        self.set(row, NEXT_MACHINE_MODE, cycle.machine_mode as u32);
         self.index.push(self.offsets.len() as u32);
     }
 
     fn set(&mut self, row: usize, col: usize, value: u32) {
         let idx = col * self.rows + row;
-        if row == 0 {
-            tracing::debug!("row: {row}, col: {col}, value: {value}, idx: {idx}");
-        }
         self.offsets.push(idx as u32);
         self.values.push(value.into());
     }

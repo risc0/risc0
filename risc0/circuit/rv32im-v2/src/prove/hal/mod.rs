@@ -133,8 +133,8 @@ where
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),
             segment,
-            // StepMode::Parallel,
-            StepMode::SeqForward,
+            StepMode::Parallel,
+            // StepMode::SeqForward,
             rand_z,
         )?;
 

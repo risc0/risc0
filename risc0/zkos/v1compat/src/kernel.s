@@ -109,9 +109,19 @@ _ecall_halt:
     lw t2, 28(t0)
     sw t2, 28(t1)
 
-    li a7, HOST_ECALL_TERMINATE
-    lw a0, REG_A0 * WORD_SIZE (t3) # user_exit
+    # a0 has the following format for v1 ABI:
+    # u8(0, 0, user_exit, halt_type)
+    # We need this format to be compatible with Rv32imV2Claim:
+    # u16(user_exit, halt_type)
+    lw a0, REG_A0 * WORD_SIZE (t3)
+    srli a1, a0, 8
+    andi a1, a1, 0xff
+    slli a1, a1, 16
+    andi a0, a0, 0xff
+    or a0, a1, a0
+
     li a1, 0
+    li a7, HOST_ECALL_TERMINATE
     ecall
 
 _ecall_software:

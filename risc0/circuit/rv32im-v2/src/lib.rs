@@ -28,10 +28,13 @@ use risc0_zkp::{
     layout::Tree,
     verify::VerificationError,
 };
+use serde::{Deserialize, Serialize};
 
 use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
 
 pub use self::zirgen::CircuitImpl;
+
+pub const MAX_INSN_CYCLES: usize = 2000; // TODO(flaub): calculate actual value
 
 pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
     let hash_suite = Poseidon2HashSuite::new_suite();
@@ -42,21 +45,39 @@ pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
     risc0_zkp::verify::verify(&CircuitImpl, &hash_suite, seal, check_code_fn)
 }
 
-#[derive(Debug)]
-pub struct Claim {
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct HighLowU16(pub u16, pub u16);
+
+impl From<HighLowU16> for u32 {
+    fn from(x: HighLowU16) -> Self {
+        (x.0 as u32) << 16 | (x.1 as u32)
+    }
+}
+
+impl From<u32> for HighLowU16 {
+    fn from(x: u32) -> Self {
+        Self((x >> 16) as u16, (x & 0xffff) as u16)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct TerminateState {
+    pub a0: HighLowU16,
+    pub a1: HighLowU16,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Rv32imV2Claim {
     pub pre_state: Digest,
     pub post_state: Digest,
     pub input: Digest,
-    pub output: Digest,
-    pub is_terminate: bool,
-    #[debug("{term_a0:#010x}")]
-    pub term_a0: u32,
-    #[debug("{term_a1:#010x}")]
-    pub term_a1: u32,
+    pub output: Option<Digest>,
+    pub terminate_state: Option<TerminateState>,
+    pub shutdown_cycle: Option<u32>,
 }
 
-impl Claim {
-    pub fn decode(seal: &[u32]) -> Result<Claim> {
+impl Rv32imV2Claim {
+    pub fn decode(seal: &[u32]) -> Result<Rv32imV2Claim> {
         let io: &[Val] = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
         let global = Tree::new(io, LAYOUT_GLOBAL);
 
@@ -67,19 +88,32 @@ impl Claim {
         let is_terminate = global.map(|c| c.is_terminate).get_u32_from_elem()?;
         let term_a0_high = global.map(|c| c.term_a0high).get_u32_from_elem()?;
         let term_a0_low = global.map(|c| c.term_a0low).get_u32_from_elem()?;
-        let term_a0 = term_a0_high << 16 | term_a0_low;
         let term_a1_high = global.map(|c| c.term_a1high).get_u32_from_elem()?;
         let term_a1_low = global.map(|c| c.term_a1low).get_u32_from_elem()?;
-        let term_a1 = term_a1_high << 16 | term_a1_low;
+        let shutdown_cycle = global.map(|c| c.shutdown_cycle).get_u32_from_elem()?;
 
-        Ok(Claim {
+        let terminate_state = if is_terminate == 1 {
+            Some(TerminateState {
+                a0: HighLowU16(term_a0_high as u16, term_a0_low as u16),
+                a1: HighLowU16(term_a1_high as u16, term_a1_low as u16),
+            })
+        } else {
+            None
+        };
+
+        let output = if is_terminate == 1 {
+            Some(output)
+        } else {
+            None
+        };
+
+        Ok(Rv32imV2Claim {
             pre_state,
             post_state,
             input,
             output,
-            is_terminate: is_terminate != 0,
-            term_a0,
-            term_a1,
+            terminate_state,
+            shutdown_cycle: Some(shutdown_cycle),
         })
     }
 }

@@ -17,7 +17,7 @@ use std::collections::BTreeSet;
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
-use risc0_binfmt::{ByteAddr, ExitCode, WordAddr};
+use risc0_binfmt::{ByteAddr, WordAddr};
 use risc0_circuit_rv32im_v2_sys::{RawMemoryTransaction, RawPreflightCycle};
 use risc0_core::scope;
 use risc0_zkp::core::digest::DIGEST_WORDS;
@@ -159,6 +159,13 @@ impl<'a> Preflight<'a> {
         while self.phys_cycles < self.segment.suspend_cycle {
             Risc0Machine::step(&mut emu, self)?;
         }
+        tracing::debug!(
+            "suspend(cycle: {}:{}, pc: {:?}, mode: {})",
+            self.trace.cycles.len(),
+            self.phys_cycles,
+            self.pc,
+            self.machine_mode
+        );
         Risc0Machine::suspend(self)
     }
 
@@ -267,7 +274,7 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
-        if self.segment.exit_code == ExitCode::SystemSplit {
+        if self.segment.claim.terminate_state.is_none() {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
                 bail!("Stopping segment too early");
@@ -427,6 +434,7 @@ impl<'a> Risc0Context for Preflight<'a> {
     }
 
     fn set_machine_mode(&mut self, mode: u32) {
+        tracing::trace!("[{}] set_machine_mode({mode})", self.trace.cycles.len());
         self.machine_mode = mode;
     }
 

@@ -136,7 +136,7 @@ impl SegmentReceipt {
             }
             SegmentVersion::V2 => {
                 risc0_circuit_rv32im_v2::verify(&self.seal)?;
-                ReceiptClaim::decode_from_seal_v2(&self.seal)
+                ReceiptClaim::decode_from_seal_v2(&self.seal, None)
                     .or(Err(VerificationError::ReceiptFormatError))?
             }
         };
