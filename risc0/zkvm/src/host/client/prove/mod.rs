@@ -36,7 +36,7 @@ use crate::{
     get_version,
     host::prove_info::ProveInfo,
     receipt::{segment::SegmentVersion, DEFAULT_MAX_PO2},
-    ExecutorEnv, Receipt, SessionInfo, VerifierContext,
+    ExecutorEnv, Receipt, SegmentReceiptVerifierParameters, SessionInfo, VerifierContext,
 };
 
 /// A Prover can execute a given ELF binary and produce a
@@ -156,7 +156,7 @@ pub trait Executor {
 }
 
 /// Options to configure a [Prover].
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ProverOpts {
     /// Identifier of the hash function to use for the STARK proving protocol.
@@ -186,7 +186,7 @@ pub struct ProverOpts {
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
-#[derive(Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ReceiptKind {
     /// Request that a [CompositeReceipt][crate::CompositeReceipt] be generated.
@@ -367,7 +367,12 @@ impl ProverOpts {
 
     /// TODO(flaub)
     pub fn verifier_context(&self) -> VerifierContext {
-        VerifierContext::from_max_po2(self.max_segment_po2, self.segment_version)
+        VerifierContext::default().with_segment_verifier_parameters(
+            SegmentReceiptVerifierParameters::from_max_po2(
+                self.max_segment_po2,
+                self.segment_version,
+            ),
+        )
     }
 }
 
