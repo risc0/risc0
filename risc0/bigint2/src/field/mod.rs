@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ const EXTFIELD_DEG4_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_de
 const EXTFIELD_DEG2_SUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_sub_256.blob");
 const EXTFIELD_XXONE_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_xxone_mul_256.blob");
 
-// These "unchecked" modular arithmetic operations provide no guarantee that `result >= modulus`
+// These "unchecked" modular arithmetic operations provide no guarantee that `result < modulus`
 // This can be acceptable when computing internal results during a series of finite field
 // operations, but will not work for other use cases (e.g. comparing to a hash value).
 
@@ -118,6 +118,16 @@ pub fn modadd_256(
     assert!(crate::is_less(&result, &modulus));
 }
 
+/// Compute the multiplicative inverse of `inp` mod `modulus`
+///
+/// The result is returned in `result`. Note that this can only compute the inverse if a
+/// multiplicative inverse actually exists. Otherwise, no proof can be generated (and the executor
+/// will panic).
+///
+/// Most notably, this means `inp` cannot be zero ("no division by zero"), but the full rule is that
+/// `inp` and `modulus` must be relatively prime. When `modulus` is prime, this just means that
+/// `inp` must not be a multiple of `modulus`, but when `modulus` is composite there are more cases
+/// with no solution, e.g. `8` does not have an inverse mod `12`.
 pub fn modinv_256(
     inp: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write,
+        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
@@ -326,23 +326,26 @@ fn main() {
         MultiTestSpec::OutOfBoundsEcall => unsafe {
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x0,
-                in("x11") 0x0,
-                in("x12") 0x0,
-                in("x13") 0x0,
-                in("x14") 10000,
+                in("t0") ecall::SHA,
+                in("a0") 0x0,
+                in("a1") 0x0,
+                in("a2") 0x0,
+                in("a3") 0x0,
+                in("a4") 10000,
             );
         },
         MultiTestSpec::TooManySha => unsafe {
+            let out_state = [0u32; DIGEST_WORDS];
+            let in_state = [0u32; DIGEST_WORDS];
+            let block = [0u32; 2 * DIGEST_WORDS];
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x400,
-                in("x11") 0x400,
-                in("x12") 0x400,
-                in("x13") 0x400,
-                in("x14") 10000,
+                in("t0") ecall::SHA,
+                in("a0") out_state.as_ptr(),
+                in("a1") in_state.as_ptr(),
+                in("a2") block.as_ptr(),
+                in("a3") block.as_ptr().add(DIGEST_WORDS),
+                in("a4") 10000,
             );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {
@@ -518,8 +521,52 @@ fn main() {
         }
         MultiTestSpec::KeccakUpdate => {
             let mut state = KeccakState::default();
-            env::keccak_update(&mut state);
+            env::risc0_keccak_update(&mut state);
             assert_eq!(state, KECCAK_UPDATE);
+        }
+        MultiTestSpec::KeccakUpdate2 => {
+            fn test_input() -> KeccakState {
+                let mut state = KeccakState::default();
+                let mut pows = 987654321_u64;
+                for part in state.as_mut_slice() {
+                    *part = pows;
+                    pows = pows.wrapping_mul(123456789);
+                }
+                state
+            }
+            let mut state = test_input();
+
+            env::risc0_keccak_update(&mut state);
+            assert_eq!(
+                state,
+                [
+                    0xd79e8c6b59a6985b,
+                    0xbd19ccee63a9d40,
+                    0xa0a6df6a1793fd20,
+                    0x6f5e7d6a579ba02d,
+                    0x6ff99cb37183ea75,
+                    0x4a7736b846248f01,
+                    0xed6d5dac353f6586,
+                    0xa59ea1c9373e19f7,
+                    0x2a82c3bd8daf69db,
+                    0x7e49515cc085cfcb,
+                    0xf65fb55c8584c54c,
+                    0xf89d733d89b147df,
+                    0xeb85471d7cbcad68,
+                    0x2786372c23d217c,
+                    0xac0b725dc2443591,
+                    0x1cad0517091d449d,
+                    0x6afd9494cb125e27,
+                    0x74fb209306e9daa0,
+                    0x352c0570fa607115,
+                    0xc1b2b78e8fd1ab23,
+                    0x661c47f949651c0d,
+                    0x91bdd8d5e378e77a,
+                    0xdbaf74e7812a697b,
+                    0xe4458a47859ad246,
+                    0xd5f9328619cd99f7
+                ]
+            );
         }
     }
 }
