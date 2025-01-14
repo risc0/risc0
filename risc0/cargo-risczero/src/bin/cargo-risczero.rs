@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,9 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
-#[cfg(feature = "experimental")]
-use cargo_risczero::BuildSubcommand;
-use cargo_risczero::{Cargo, RisczeroCmd};
+use cargo_risczero::{CargoCli, Commands};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
 
@@ -24,21 +22,18 @@ fn main() -> Result<()> {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    let Cargo::Risczero(args) = Cargo::parse();
+    let CargoCli::Risczero(args) = CargoCli::parse();
     match args.command {
-        RisczeroCmd::Build(cmd) => cmd.run(),
-        RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
-        RisczeroCmd::Install(cmd) => cmd.run(),
-        RisczeroCmd::Datasheet(cmd) => cmd.run(),
-        RisczeroCmd::New(cmd) => cmd.run(),
-        RisczeroCmd::Deploy(cmd) => cmd.run(),
-        RisczeroCmd::Verify(cmd) => cmd.run(),
+        Commands::Bake(cmd) => cmd.run(),
+        Commands::Build(cmd) => cmd.run(),
+        Commands::BuildToolchain(cmd) => cmd.run(),
+        Commands::Datasheet(cmd) => cmd.run(),
+        Commands::Deploy(cmd) => cmd.run(),
         #[cfg(feature = "experimental")]
-        RisczeroCmd::BuildCrate(build) => build.run(BuildSubcommand::Build),
-        #[cfg(feature = "experimental")]
-        RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
-
-        // TODO: Define this enum within the binary rather than `lib.rs`.
+        Commands::Guest(cmd) => cmd.run(),
+        Commands::Install(cmd) => cmd.run(),
+        Commands::New(cmd) => cmd.run(),
+        Commands::Verify(cmd) => cmd.run(),
         _ => unreachable!(),
     }
 }

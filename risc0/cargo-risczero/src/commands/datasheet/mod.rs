@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ use tabled::{settings::Style, Table, Tabled};
 /// `cargo risczero datasheet`
 #[derive(clap::Parser)]
 #[non_exhaustive]
-pub struct Datasheet {
+pub struct DatasheetCommand {
     /// Filter which benchmarks to run.
     #[arg(name = "BENCHMARKS")]
     pub filter: Vec<Benchmark>,
@@ -95,7 +95,7 @@ fn parse_po2(s: &str) -> Result<u32, String> {
     }
 }
 
-impl Datasheet {
+impl DatasheetCommand {
     /// Returns which benchmarks the user has chosen to run.
     ///
     /// Each benchmark is provided at most once in enum case order.

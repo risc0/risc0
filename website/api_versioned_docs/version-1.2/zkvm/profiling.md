@@ -7,8 +7,6 @@ We'll be using a guest program with three different implementations of the
 Fibonacci sequence calculation to provide a base profile to explore. You can
 find all the code used as example in the [profiling example][example-profiling].
 
-<!-- NOTE: This content matches the README under examples/profiling/README.md -->
-
 ## Background
 
 Profiling tools, like [pprof] and [perf], allow collecting performance

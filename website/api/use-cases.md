@@ -44,7 +44,7 @@ In addition to being far easier to build on, we're also delivering on
 [performance]. The zkVM has GPU acceleration for CUDA and Metal, and with
 [continuations] we've enabled parallel proving of large programs.
 
-**Ready to start building?** <br/>
+**Ready to start building?** <br />
 Check out our [Getting Started] page.
 
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay

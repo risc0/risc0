@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,17 +30,17 @@ extern NondetRegStruct exec_Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetReg
 extern NondetExtRegStruct back_ExtReg(ExecContext& ctx,Index distance0, BoundLayout<NondetExtRegLayout> layout1)  ;
 extern NondetExtRegStruct exec_ExtReg(ExecContext& ctx,ExtVal arg0, BoundLayout<NondetExtRegLayout> layout1)  ;
 extern NondetRegStruct exec_NondetBitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
-extern BitRegStruct exec_BitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
+extern NondetRegStruct exec_BitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
 extern NondetRegStruct exec_NondetTwitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
 extern NondetFakeTwitRegStruct exec_NondetFakeTwitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetFakeTwitRegLayout> layout1)  ;
 extern FakeTwitRegStruct exec_FakeTwitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetFakeTwitRegLayout> layout1)  ;
 extern NondetRegStruct exec_IsZero(ExecContext& ctx,Val arg0, BoundLayout<IsZeroLayout> layout1)  ;
 extern ArgU8Struct exec_ArgU8(ExecContext& ctx,Val arg0, Val arg1_0, BoundLayout<ArgU8Layout> layout2)  ;
 extern NondetRegStruct exec_NondetU8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
-extern U8RegStruct exec_U8Reg(ExecContext& ctx,Val arg0, BoundLayout<U8RegLayout> layout1)  ;
+extern U8RegStruct exec_U8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
 extern ArgU16Struct exec_ArgU16(ExecContext& ctx,Val arg0, Val arg1_0, BoundLayout<ArgU16Layout> layout2)  ;
-extern NondetRegStruct exec_NondetU16Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU16RegLayout> layout1)  ;
-extern U16RegStruct exec_U16Reg(ExecContext& ctx,Val arg0, BoundLayout<U16RegLayout> layout1)  ;
+extern NondetU16RegStruct exec_NondetU16Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU16RegLayout> layout1)  ;
+extern NondetU16RegStruct exec_U16Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU16RegLayout> layout1)  ;
 extern ToBits_5_Struct exec_ToBits_5_(ExecContext& ctx,Val arg0, BoundLayout<ToBits_5_Layout> layout1)  ;
 extern ValU32Struct exec_DynPo2(ExecContext& ctx,Val arg0, BoundLayout<DynPo2Layout> layout1)  ;
 extern NormalizeU32Struct exec_NormalizeU32(ExecContext& ctx,DenormedValU32Struct arg0, BoundLayout<NormalizeU32Layout> layout1)  ;
@@ -140,12 +140,14 @@ extern InstOutputStruct exec_ControlStoreRoot(ExecContext& ctx,NondetRegStruct a
 extern InstOutputStruct exec_ControlTable(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlTableLayout> layout2)  ;
 extern InstOutputStruct exec_ControlDone(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlDoneLayout> layout2, GlobalBuf global3)  ;
 extern InstOutputStruct exec_Control0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Control0Layout> layout2, GlobalBuf global3)  ;
-extern OneHot_4_Struct exec_OneHot_4_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_4_Layout> layout1)  ;
+extern OneHot_5_Struct exec_OneHot_5_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_5_Layout> layout1)  ;
 extern ECallOutputStruct exec_MachineECall(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, BoundLayout<MachineECallLayout> layout3)  ;
 extern ECallOutputStruct exec_ECallTerminate(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallTerminateLayout> layout2, GlobalBuf global3)  ;
+extern OneHot_4_Struct exec_OneHot_4_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_4_Layout> layout1)  ;
 extern DecomposeLow2Struct exec_DecomposeLow2(ExecContext& ctx,Val arg0, BoundLayout<DecomposeLow2Layout> layout1)  ;
 extern ECallOutputStruct exec_ECallHostReadSetup(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallHostReadSetupLayout> layout2)  ;
 extern ECallOutputStruct exec_ECallHostWrite(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECallHostWriteLayout> layout2)  ;
+extern ECallOutputStruct exec_ECallHostReadBytes(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, Val arg3, Val arg4, BoundLayout<ECallHostReadBytesLayout> layout5)  ;
 extern ECallOutputStruct exec_ECallHostReadWords(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, Val arg3, BoundLayout<ECallHostReadWordsLayout> layout4)  ;
 extern InstOutputStruct exec_ECall0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ECall0Layout> layout2, GlobalBuf global3)  ;
 extern NondetRegStruct exec_SBox(ExecContext& ctx,Val arg0, BoundLayout<SBoxLayout> layout1)  ;
@@ -169,6 +171,7 @@ extern PoseidonStateStruct exec_PoseidonLoadIn(ExecContext& ctx,NondetRegStruct 
 extern PoseidonStateStruct exec_PoseidonExtRound(ExecContext& ctx,PoseidonStateStruct arg0, BoundLayout<PoseidonExtRoundLayout> layout1)  ;
 extern PoseidonStateStruct exec_PoseidonIntRounds(ExecContext& ctx,PoseidonStateStruct arg0, BoundLayout<PoseidonIntRoundsLayout> layout1)  ;
 extern PoseidonStateStruct exec_PoseidonCheckOut(ExecContext& ctx,NondetRegStruct arg0, PoseidonStateStruct arg1_0, BoundLayout<PoseidonCheckOutLayout> layout2)  ;
+extern FieldToWordStruct exec_FieldToWord(ExecContext& ctx,Val arg0, BoundLayout<FieldToWordLayout> layout1)  ;
 extern PoseidonStateStruct exec_PoseidonStoreOut(ExecContext& ctx,NondetRegStruct arg0, PoseidonStateStruct arg1_0, BoundLayout<PoseidonStoreOutLayout> layout2)  ;
 extern PoseidonStateStruct exec_PoseidonDoOut(ExecContext& ctx,NondetRegStruct arg0, PoseidonStateStruct arg1_0, BoundLayout<PoseidonDoOutLayout> layout2)  ;
 extern PoseidonStateStruct exec_PoseidonStoreState(ExecContext& ctx,NondetRegStruct arg0, PoseidonStateStruct arg1_0, BoundLayout<PoseidonStoreStateLayout> layout2)  ;
@@ -183,7 +186,19 @@ extern OneHot_6_Struct exec_OneHot_6_(ExecContext& ctx,Val arg0, BoundLayout<One
 extern PoseidonStateStruct exec_PoseidonPaging(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, PoseidonStateStruct arg2_0, BoundLayout<PoseidonPagingLayout> layout3)  ;
 extern InstOutputStruct exec_Poseidon0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Poseidon0Layout> layout2, GlobalBuf global3)  ;
 extern InstOutputStruct exec_Poseidon1(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Poseidon1Layout> layout2)  ;
-extern OneHot_11_Struct exec_OneHot_11_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_11_Layout> layout1)  ;
+extern CarryExtractStruct exec_CarryExtract(ExecContext& ctx,Val arg0, BoundLayout<CarryExtractLayout> layout1)  ;
+extern UnpackReg_32__16_Struct exec_UnpackReg_32__16_(ExecContext& ctx,Val2Array arg0, BoundLayout<UnpackReg_32__16_Layout> layout1)  ;
+extern UnpackReg_32__16_Struct exec_CarryAndExpand(ExecContext& ctx,Val2Array arg0, BoundLayout<CarryAndExpandLayout> layout1)  ;
+extern ShaStateStruct back_ShaState(ExecContext& ctx,Index distance0, BoundLayout<ShaStateLayout> layout1)  ;
+extern ShaStateStruct exec_ShaState(ExecContext& ctx,Val32Array arg0, Val32Array arg1_0, Val32Array arg2_0, Val arg3, Val arg4, Val arg5, Val arg6, Val arg7, Val arg8, Val arg9, BoundLayout<ShaStateLayout> layout10)  ;
+extern ShaStateStruct exec_ShaInvalid(ExecContext& ctx,BoundLayout<ShaStateLayout> layout0)  ;
+extern ShaStateStruct exec_ShaEcall(ExecContext& ctx,NondetRegStruct arg0, BoundLayout<ShaEcallLayout> layout1)  ;
+extern ShaStateStruct exec_ShaLoadState(ExecContext& ctx,NondetRegStruct arg0, ShaStateStruct arg1_0, BoundLayout<ShaLoadStateLayout> layout2)  ;
+extern ShaStateStruct exec_ShaLoadData(ExecContext& ctx,NondetRegStruct arg0, ShaStateStruct arg1_0, ShaStateStruct arg2_0, ShaStateStruct arg3, ShaStateStruct arg4, BoundLayout<ShaLoadDataLayout> layout5)  ;
+extern ShaStateStruct exec_ShaMix(ExecContext& ctx,NondetRegStruct arg0, ShaStateStruct arg1_0, ShaStateStruct arg2_0, ShaStateStruct arg3, ShaStateStruct arg4, ShaStateStruct arg5, ShaStateStruct arg6, ShaStateStruct arg7, BoundLayout<ShaMixLayout> layout8)  ;
+extern ShaStateStruct exec_ShaStoreState(ExecContext& ctx,NondetRegStruct arg0, ShaStateStruct arg1_0, ShaStateStruct arg2_0, ShaStateStruct arg3, BoundLayout<ShaStoreStateLayout> layout4)  ;
+extern InstOutputStruct exec_Sha0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Sha0Layout> layout2)  ;
+extern OneHot_12_Struct exec_OneHot_12_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_12_Layout> layout1)  ;
 extern TopStruct exec_Top(ExecContext& ctx,BoundLayout<TopLayout> layout0, GlobalBuf global1)  ;
 extern void step_Top(ExecContext& ctx,MutableBuf data0, GlobalBuf global1)  ;
 extern ComponentStruct exec_TopAccum(ExecContext& ctx,BoundLayout<TopLayout> arg0, BoundLayout<LayoutAccumLayout> layout1, GlobalBuf mix2)  ;
