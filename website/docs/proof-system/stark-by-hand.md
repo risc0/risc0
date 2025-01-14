@@ -427,7 +427,7 @@ The key point here is that the FRI folding procedure can be checked _locally_: t
 
 Whew! Congratulations and thank you for making it this far!
 
-Got questions, feedback, or corrections? Find us on [Twitter](https://twitter.com/risczero) and [Discord](https://discord.gg/risczero).
+Got questions, feedback, or corrections? Find us on [X](https://x.com/risczero) and [Discord](https://discord.gg/risczero).
 
 [cryptographic security model]: /api/security-model
 [RISC-V]: https://en.wikipedia.org/wiki/RISC-V
