@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::components::Component;
+use crate::distribution::parse_cpp_version;
 use crate::env::Environment;
 use crate::error::Result;
 use semver::Version;
@@ -114,14 +115,7 @@ impl Paths {
         } else if component == &Component::CppToolchain && !dir_name.starts_with('v') {
             // Handle legacy cpp format (YYYY.MM.DD-risc0-cpp-...)
             let v = dir_name.split('-').next()?;
-            let parts: Vec<_> = v.split('.').collect();
-            (parts.len() == 3).then(|| {
-                Version::new(
-                    parts[0].parse().unwrap_or(0),
-                    parts[1].parse().unwrap_or(0),
-                    parts[2].parse().unwrap_or(0),
-                )
-            })
+            parse_cpp_version(&v).ok()
         } else if dir_name.starts_with('v') {
             let version_part = dir_name.strip_prefix('v')?;
             if version_part.contains(&format!("-{component}-")) {
