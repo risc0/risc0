@@ -114,9 +114,7 @@ pub fn install(
     version: Option<&Version>,
     force: bool,
 ) -> Result<()> {
-    if component.parent_component().is_some() {
-        return Ok(()); // dont direct install virtual-components
-    }
+    let component_to_install = component.parent_component().unwrap_or(component.clone());
 
     let distribution = GithubRelease::new(base_urls);
 
@@ -127,19 +125,20 @@ pub fn install(
         version: version.to_string(),
     });
 
-    let archive_name = distribution.get_archive_name(component, Some(version), env.platform())?;
+    let archive_name =
+        distribution.get_archive_name(&component_to_install, Some(version), env.platform())?;
     let downloaded_file = env.tmp_dir().join(archive_name);
 
     if force {
-        Paths::cleanup_version(env, component, version)?;
+        Paths::cleanup_version(env, &component_to_install, version)?;
     }
 
     // Download and extract
-    distribution.download_version(env, component, Some(version))?;
-    let version_dir = Paths::get_version_dir(env, component, version);
+    distribution.download_version(env, &component_to_install, Some(version))?;
+    let version_dir = Paths::get_version_dir(env, &component_to_install, version);
 
     if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
-        Paths::cleanup_version(env, component, version)?;
+        Paths::cleanup_version(env, &component_to_install, version)?;
         return Err(e);
     }
 

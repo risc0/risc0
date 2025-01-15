@@ -710,6 +710,27 @@ mod tests {
     }
 
     #[test]
+    fn install_r0vm() {
+        let server = MockDistributionServer::new();
+        install_test(
+            server.base_urls.clone(),
+            Component::R0Vm,
+            Component::CargoRiscZero,
+            Version::new(1, 0, 0),
+            format!(
+                "{base_url}/risc0/releases/download/v1.0.0/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz",
+                base_url = server.base_urls.risc0_github_base_url
+            ),
+            vec![(
+                ".cargo/bin/cargo-risczero".into(),
+                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                    .into(),
+            )],
+        )
+    }
+
+    #[test]
     fn list_multiple_versions() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
