@@ -722,11 +722,17 @@ mod tests {
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
-            vec![(
-                ".cargo/bin/cargo-risczero".into(),
-                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
-                    .into(),
-            )],
+            vec![
+                (
+                    ".cargo/bin/cargo-risczero".into(),
+                    ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                        .into(),
+                ),
+                (
+                    ".cargo/bin/r0vm".into(),
+                    ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/r0vm".into(),
+                )
+            ],
         )
     }
 

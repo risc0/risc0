@@ -162,7 +162,9 @@ fn symlink(original: &Path, link: &Path) -> Result<()> {
 }
 
 pub fn set_active(env: &Environment, component: &Component, version: &Version) -> Result<()> {
-    let version_dir = Paths::get_version_dir(env, component, version);
+    let installed_component = component.parent_component().unwrap_or(component.clone());
+    let version_dir = Paths::get_version_dir(env, &installed_component, version);
+
     std::fs::create_dir_all(env.cargo_bin_dir())?;
 
     match component {
@@ -170,6 +172,7 @@ pub fn set_active(env: &Environment, component: &Component, version: &Version) -
             &version_dir.join("cargo-risczero"),
             &env.cargo_bin_dir().join("cargo-risczero"),
         )?,
+        Component::R0Vm => symlink(&version_dir.join("r0vm"), &env.cargo_bin_dir().join("r0vm"))?,
         _ => {}
     };
     Ok(())
