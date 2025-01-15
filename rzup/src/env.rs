@@ -25,6 +25,7 @@ pub struct Environment {
     risc0_dir: PathBuf,
     tmp_dir: PathBuf,
     cargo_bin_dir: PathBuf,
+    rustup_toolchain_dir: PathBuf,
     settings_file: PathBuf,
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
     platform: Platform,
@@ -47,6 +48,7 @@ impl Environment {
         let risc0_dir = risc0_dir.into();
         let tmp_dir = risc0_dir.join("tmp");
         let cargo_bin_dir = home_dir.as_ref().join(".cargo/bin");
+        let rustup_toolchain_dir = home_dir.as_ref().join(".rustup/toolchains");
         let settings_file = risc0_dir.join("settings.toml");
         let platform = Platform::detect()?;
 
@@ -54,6 +56,7 @@ impl Environment {
             risc0_dir,
             tmp_dir,
             cargo_bin_dir,
+            rustup_toolchain_dir,
             settings_file,
             event_handler: None,
             platform,
@@ -102,6 +105,10 @@ impl Environment {
         &self.cargo_bin_dir
     }
 
+    pub fn rustup_toolchain_dir(&self) -> &Path {
+        &self.rustup_toolchain_dir
+    }
+
     pub fn settings_path(&self) -> &Path {
         &self.settings_file
     }
@@ -129,9 +136,11 @@ mod tests {
         let home_dir = dirs::home_dir().unwrap();
         let expected_risc0_dir = home_dir.join(".risc0");
         let expected_cargo_bin_dir = home_dir.join(".cargo/bin");
+        let expected_rustup_toolchain_dir = home_dir.join(".rustup/toolchains");
 
         assert_eq!(env.risc0_dir, expected_risc0_dir);
         assert_eq!(env.cargo_bin_dir, expected_cargo_bin_dir);
+        assert_eq!(env.rustup_toolchain_dir, expected_rustup_toolchain_dir);
         assert_eq!(env.tmp_dir, expected_risc0_dir.join("tmp"));
         assert_eq!(env.settings_file, expected_risc0_dir.join("settings.toml"));
     }

@@ -157,6 +157,9 @@ fn symlink(original: &Path, link: &Path) -> Result<()> {
     if std::fs::symlink_metadata(link).is_ok() {
         std::fs::remove_file(link)?;
     }
+    if let Some(parent) = link.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
     std::os::unix::fs::symlink(original, link)
         .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
 }
@@ -165,15 +168,16 @@ pub fn set_active(env: &Environment, component: &Component, version: &Version) -
     let installed_component = component.parent_component().unwrap_or(*component);
     let version_dir = Paths::get_version_dir(env, &installed_component, version);
 
-    std::fs::create_dir_all(env.cargo_bin_dir())?;
-
     match component {
         Component::CargoRiscZero => symlink(
             &version_dir.join("cargo-risczero"),
             &env.cargo_bin_dir().join("cargo-risczero"),
         )?,
         Component::R0Vm => symlink(&version_dir.join("r0vm"), &env.cargo_bin_dir().join("r0vm"))?,
-        _ => {}
+        Component::RustToolchain => {
+            symlink(&version_dir, &env.rustup_toolchain_dir().join("risc0"))?
+        }
+        Component::CppToolchain => symlink(&version_dir, &env.risc0_dir().join("cpp"))?,
     };
     Ok(())
 }

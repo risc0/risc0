@@ -908,7 +908,10 @@ mod tests {
                 ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
                 ".risc0/settings.toml".into(),
             ],
-            vec![],
+            vec![(
+                ".rustup/toolchains/risc0".into(),
+                ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu".into(),
+            )],
         )
     }
 
@@ -930,7 +933,10 @@ mod tests {
                 ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
                 ".risc0/settings.toml".into(),
             ],
-            vec![],
+            vec![(
+                ".risc0/cpp".into(),
+                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu".into(),
+            )],
         )
     }
 
@@ -1074,8 +1080,14 @@ mod tests {
             Component::RustToolchain,
             Version::new(1, 79, 0),
             Version::new(1, 81, 0),
-            vec![],
-            vec![],
+            vec![(
+                ".rustup/toolchains/risc0".into(),
+                ".risc0/toolchains/v1.79.0-rust-x86_64-unknown-linux-gnu".into(),
+            )],
+            vec![(
+                ".rustup/toolchains/risc0".into(),
+                ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu".into(),
+            )],
         );
     }
 
@@ -1085,8 +1097,14 @@ mod tests {
             Component::CppToolchain,
             Version::new(2024, 1, 5),
             Version::new(2024, 1, 6),
-            vec![],
-            vec![],
+            vec![(
+                ".risc0/cpp".into(),
+                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu".into(),
+            )],
+            vec![(
+                ".risc0/cpp".into(),
+                ".risc0/toolchains/v2024.1.6-cpp-x86_64-unknown-linux-gnu".into(),
+            )],
         );
     }
 
