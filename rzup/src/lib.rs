@@ -720,6 +720,55 @@ mod tests {
         assert_symlinks(tmp_dir.path(), expected_symlinks);
     }
 
+    fn already_installed_force_test(
+        base_urls: BaseUrls,
+        component: Component,
+        component_to_install: Component,
+        version: Version,
+        expected_url: String,
+        download_length: u64,
+        expected_symlinks: Vec<(String, String)>,
+    ) {
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
+
+        rzup.install_component(&component, Some(version.clone()), false)
+            .unwrap();
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.install_component(&component, Some(version.clone()), true)
+                    .unwrap();
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: component.to_string(),
+                    version: version.to_string(),
+                },
+                RzupEvent::DownloadStarted {
+                    id: component_to_install.to_string(),
+                    version: version.to_string(),
+                    url: expected_url,
+                    len: Some(download_length),
+                },
+                RzupEvent::DownloadProgress {
+                    id: component_to_install.to_string(),
+                    incr: download_length,
+                },
+                RzupEvent::DownloadCompleted {
+                    id: component_to_install.to_string(),
+                    version: version.to_string(),
+                },
+                RzupEvent::InstallationCompleted {
+                    id: component.to_string(),
+                    version: version.to_string(),
+                },
+            ],
+        );
+
+        assert_symlinks(tmp_dir.path(), expected_symlinks);
+    }
+
     fn install_test(
         base_urls: BaseUrls,
         component: Component,
@@ -739,7 +788,22 @@ mod tests {
             expected_symlinks.clone(),
         );
 
-        already_installed_test(base_urls, component, version, expected_symlinks.clone());
+        already_installed_test(
+            base_urls.clone(),
+            component,
+            version.clone(),
+            expected_symlinks.clone(),
+        );
+
+        already_installed_force_test(
+            base_urls.clone(),
+            component,
+            component_to_install,
+            version.clone(),
+            expected_url.clone(),
+            download_length,
+            expected_symlinks.clone(),
+        );
     }
 
     #[test]
@@ -965,60 +1029,6 @@ mod tests {
         assert_eq!(
             rzup.list_versions(&Component::CargoRiscZero).unwrap(),
             vec![]
-        );
-    }
-
-    #[test]
-    fn already_installed_forced() {
-        let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
-        let cargo_risczero_version = Version::new(1, 0, 0);
-
-        rzup.install_component(
-            &Component::CargoRiscZero,
-            Some(cargo_risczero_version.clone()),
-            false,
-        )
-        .unwrap();
-
-        run_and_assert_events(
-            &mut rzup,
-            |rzup| {
-                rzup.install_component(
-                    &Component::CargoRiscZero,
-                    Some(cargo_risczero_version.clone()),
-                    true,
-                )
-                .unwrap();
-            },
-            vec![
-                RzupEvent::InstallationStarted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
-                },
-                RzupEvent::DownloadStarted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
-                    url: format!(
-                        "{base_url}/risc0/releases/download/v1.0.0/\
-                        cargo-risczero-x86_64-unknown-linux-gnu.tgz",
-                        base_url = server.base_urls.risc0_github_base_url
-                    ),
-                    len: Some(86),
-                },
-                RzupEvent::DownloadProgress {
-                    id: "cargo-risczero".into(),
-                    incr: 86,
-                },
-                RzupEvent::DownloadCompleted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
-                },
-                RzupEvent::InstallationCompleted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
-                },
-            ],
         );
     }
 
