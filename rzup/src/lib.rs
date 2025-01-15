@@ -145,8 +145,7 @@ impl Rzup {
     /// # Returns
     /// A newest-to-oldest list of installed component versions
     pub fn list_versions(&self, component: &Component) -> Result<Vec<Version>> {
-        self.registry
-            .list_component_versions(&self.environment, component)
+        Registry::list_component_versions(&self.environment, component)
     }
 
     /// Gets the currently active version of a component and its path.

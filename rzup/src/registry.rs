@@ -44,7 +44,6 @@ impl Registry {
     }
 
     pub fn list_component_versions(
-        &self,
         env: &Environment,
         component: &Component,
     ) -> Result<Vec<Version>> {
@@ -55,7 +54,7 @@ impl Registry {
             env.emit(RzupEvent::Debug {
                 message: format!("Component {component} using parent {parent_id}"),
             });
-            return self.list_component_versions(env, &parent_id);
+            return Self::list_component_versions(env, &parent_id);
         }
 
         let component_dir = Paths::get_component_dir(env, component);
@@ -217,7 +216,7 @@ impl Registry {
 
         // Check if we uninstalled the active version
         if self.get_active_component_version(env, component)?.is_none() {
-            let mut all_versions = self.list_component_versions(env, component)?;
+            let mut all_versions = Self::list_component_versions(env, component)?;
 
             all_versions.sort_by(|a, b| b.cmp(a));
 
