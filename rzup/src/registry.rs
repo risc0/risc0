@@ -191,7 +191,8 @@ impl Registry {
             force,
         )?;
 
-        self.set_active_component_version(env, &component_to_install, version)?;
+        self.set_active_component_version(env, &component_to_install, version.clone())?;
+        self.set_active_component_version(env, component, version)?;
 
         Ok(())
     }
@@ -203,14 +204,7 @@ impl Registry {
         Ok(())
     }
 
-    pub fn uninstall_component(
-        &mut self,
-        env: &Environment,
-        component: &Component,
-        version: Version,
-    ) -> Result<()> {
-        components::uninstall(component, env, &version)?;
-
+    fn find_new_active_version(&mut self, env: &Environment, component: &Component) -> Result<()> {
         // Check if we uninstalled the active version
         if self.get_active_component_version(env, component)?.is_none() {
             let mut all_versions = Self::list_component_versions(env, component)?;
@@ -227,6 +221,22 @@ impl Registry {
                 self.set_active_component_version(env, &component, highest_version.clone())?;
             }
         }
+        Ok(())
+    }
+
+    pub fn uninstall_component(
+        &mut self,
+        env: &Environment,
+        component: &Component,
+        version: Version,
+    ) -> Result<()> {
+        if let Some(parent) = component.parent_component() {
+            components::uninstall(&parent, env, &version)?;
+            self.find_new_active_version(env, &parent)?;
+        } else {
+            components::uninstall(component, env, &version)?;
+        }
+        self.find_new_active_version(env, component)?;
 
         Ok(())
     }

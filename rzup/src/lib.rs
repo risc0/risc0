@@ -549,6 +549,35 @@ mod tests {
             vec![]
         );
 
+        // Test virtual installation
+        rzup.install_component(
+            &Component::R0Vm,
+            Some(cargo_risczero_version.clone()),
+            false,
+        )
+        .unwrap();
+        assert!(rzup
+            .version_exists(&Component::R0Vm, &cargo_risczero_version)
+            .unwrap());
+        assert_eq!(
+            rzup.settings()
+                .get_active_version(&Component::R0Vm)
+                .unwrap(),
+            cargo_risczero_version
+        );
+        assert_eq!(
+            rzup.list_versions(&Component::R0Vm).unwrap(),
+            vec![Version::new(1, 0, 0)]
+        );
+
+        // Test uninstallation
+        rzup.uninstall_component(&Component::R0Vm, cargo_risczero_version.clone())
+            .unwrap();
+        assert!(!rzup
+            .version_exists(&Component::R0Vm, &cargo_risczero_version)
+            .unwrap());
+        assert_eq!(rzup.list_versions(&Component::R0Vm).unwrap(), vec![]);
+
         // Rust
         let rust_version = Version::new(1, 79, 0);
         rzup.install_component(&Component::RustToolchain, Some(rust_version.clone()), false)
