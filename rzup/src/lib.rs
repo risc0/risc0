@@ -737,6 +737,23 @@ mod tests {
     }
 
     #[test]
+    fn install_rust() {
+        let server = MockDistributionServer::new();
+        install_test(
+            server.base_urls.clone(),
+            Component::RustToolchain,
+            Component::RustToolchain,
+            Version::new(1, 81, 0),
+            format!(
+                "{base_url}/rust/releases/download/r0.1.81.0/\
+                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz",
+                base_url = server.base_urls.risc0_github_base_url
+            ),
+            vec![],
+        )
+    }
+
+    #[test]
     fn list_multiple_versions() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
