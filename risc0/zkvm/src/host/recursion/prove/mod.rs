@@ -135,47 +135,48 @@ pub fn join(
     })
 }
 
-/// Run the union program to compress two succinct receipts into one.
-///
-/// By repeated application of the union program, any number of succinct
-/// receipts can be compressed into a single receipt.
-pub fn union(
-    a: &SuccinctReceipt<Unknown>,
-    b: &SuccinctReceipt<Unknown>,
-) -> Result<SuccinctReceipt<ReceiptClaim>> {
-    tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
-    tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
-
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_union(a, b, opts.clone())?;
-    let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
-    out_stream.extend(receipt.output.iter());
-
-    // Construct the expected claim that should have result from the join.
-    let ab_claim = ReceiptClaim {
-        pre: a.claim.as_value()?.pre.clone(),
-        post: b.claim.as_value()?.post.clone(),
-        exit_code: b.claim.as_value()?.exit_code,
-        input: a.claim.as_value()?.input.clone(),
-        output: b.claim.as_value()?.output.clone(),
-    };
-
-    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
-    tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
-
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: opts.hashfn,
-        control_id: prover.control_id,
-        control_inclusion_proof,
-        claim: claim_decoded.merge(&ab_claim)?.into(),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
-}
+///// Run the union program to compress two succinct receipts into one.
+/////
+///// By repeated application of the union program, any number of succinct
+///// receipts can be compressed into a single receipt.
+//pub fn union(
+//    _a: &SuccinctReceipt<Unknown>,
+//    _b: &SuccinctReceipt<Unknown>,
+//) -> Result<SuccinctReceipt<ReceiptClaim>> {
+//    todo!()
+//    tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
+//    tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
+//
+//    let opts = ProverOpts::succinct();
+//    let mut prover = Prover::new_union(a, b, opts.clone())?;
+//    let receipt = prover.prover.run()?;
+//    let mut out_stream = VecDeque::<u32>::new();
+//    out_stream.extend(receipt.output.iter());
+//
+//    // Construct the expected claim that should have result from the join.
+//    let ab_claim = ReceiptClaim {
+//        pre: a.claim.as_value()?.pre.clone(),
+//        post: b.claim.as_value()?.post.clone(),
+//        exit_code: b.claim.as_value()?.exit_code,
+//        input: a.claim.as_value()?.input.clone(),
+//        output: b.claim.as_value()?.output.clone(),
+//    };
+//
+//    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+//    tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
+//
+//    // Include an inclusion proof for control_id to allow verification against a root.
+//    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
+//        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
+//    Ok(SuccinctReceipt {
+//        seal: receipt.seal,
+//        hashfn: opts.hashfn,
+//        control_id: prover.control_id,
+//        control_inclusion_proof,
+//        claim: claim_decoded.merge(&ab_claim)?.into(),
+//        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+//    })
+//}
 
 /// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
 /// receipt proving the validity of the assumption.
@@ -501,25 +502,26 @@ impl Prover {
     /// By repeated application of the union program, any number of succinct
     /// receipts can be compressed into a single receipt.
     pub fn new_union(
-        a: &SuccinctReceipt<Unknown>,
-        b: &SuccinctReceipt<Unknown>,
-        opts: ProverOpts,
+        _a: &SuccinctReceipt<Unknown>,
+        _b: &SuccinctReceipt<Unknown>,
+        _opts: ProverOpts,
     ) -> Result<Self> {
-        ensure!(
-            a.hashfn == "poseidon2",
-            "union recursion program only supports poseidon2 hashfn; received {}",
-            a.hashfn
-        );
-        ensure!(
-            b.hashfn == "poseidon2",
-            "union recursion program only supports poseidon2 hashfn; received {}",
-            b.hashfn
-        );
-
-        let (program, control_id) = zkr::union(&opts.hashfn)?;
-        let mut prover = Prover::new(program, control_id, opts);
-
-        Ok(prover)
+        todo!()
+        //        ensure!(
+        //            a.hashfn == "poseidon2",
+        //            "union recursion program only supports poseidon2 hashfn; received {}",
+        //            a.hashfn
+        //        );
+        //        ensure!(
+        //            b.hashfn == "poseidon2",
+        //            "union recursion program only supports poseidon2 hashfn; received {}",
+        //            b.hashfn
+        //        );
+        //
+        //        let (program, control_id) = union(&opts.hashfn)?;
+        //        let mut prover = Prover::new(program, control_id, opts);
+        //
+        //        Ok(prover)
     }
 
     /// Initialize a recursion prover with the join program to compress two receipts of the same

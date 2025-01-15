@@ -284,10 +284,16 @@ pub struct UnionClaim {
     // Digest of the "left" Assumption struct.
     //
     // The left should always be lesser of the two when interpreting the digest as a big-endian number.
-    DigestVal left;
+    left: Digest,
     // Digest of the "right" Assumption struct.
-    DigestVal right;
-};
+    right: Digest,
+}
+
+impl Digestible for UnionClaim {
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>("risc0.UnionClaim", &[self.left, self.right], &[])
+    }
+}
 
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
 ///
