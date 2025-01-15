@@ -288,6 +288,7 @@ mod tests {
     use std::convert::Infallible;
     use std::io::Write as _;
     use std::net::SocketAddr;
+    use std::path::Path;
     use tempfile::TempDir;
 
     pub struct MockDistributionServer {
@@ -626,14 +627,35 @@ mod tests {
         assert_eq!(events, expected_events);
     }
 
-    fn install_test(
+    fn assert_symlinks(path: &Path, mut expected_symlinks: Vec<(String, String)>) {
+        let mut found_symlinks = vec![];
+        for entry in walkdir::WalkDir::new(path) {
+            let entry = entry.unwrap();
+            if entry.path_is_symlink() {
+                let entry_path = entry.path();
+                let entry_relative_path = entry_path.strip_prefix(path).unwrap();
+                let target_path = std::fs::read_link(&entry_path).unwrap();
+                let target_relative_path = target_path.strip_prefix(path).unwrap();
+                found_symlinks.push((
+                    entry_relative_path.to_str().unwrap().to_owned(),
+                    target_relative_path.to_str().unwrap().to_owned(),
+                ));
+            }
+        }
+
+        found_symlinks.sort();
+        expected_symlinks.sort();
+        assert_eq!(found_symlinks, expected_symlinks);
+    }
+
+    fn fresh_install_test(
         base_urls: BaseUrls,
         component: Component,
         component_to_install: Component,
         version: Version,
         expected_url: String,
         download_length: u64,
-        mut expected_symlinks: Vec<(String, String)>,
+        expected_symlinks: Vec<(String, String)>,
     ) {
         let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
 
@@ -669,24 +691,55 @@ mod tests {
             ],
         );
 
-        let mut found_symlinks = vec![];
-        for entry in walkdir::WalkDir::new(tmp_dir.path()) {
-            let entry = entry.unwrap();
-            if entry.path_is_symlink() {
-                let entry_path = entry.path();
-                let entry_relative_path = entry_path.strip_prefix(tmp_dir.path()).unwrap();
-                let target_path = std::fs::read_link(&entry_path).unwrap();
-                let target_relative_path = target_path.strip_prefix(tmp_dir.path()).unwrap();
-                found_symlinks.push((
-                    entry_relative_path.to_str().unwrap().to_owned(),
-                    target_relative_path.to_str().unwrap().to_owned(),
-                ));
-            }
-        }
+        assert_symlinks(tmp_dir.path(), expected_symlinks);
+    }
 
-        found_symlinks.sort();
-        expected_symlinks.sort();
-        assert_eq!(found_symlinks, expected_symlinks);
+    fn already_installed_test(
+        base_urls: BaseUrls,
+        component: Component,
+        version: Version,
+        expected_symlinks: Vec<(String, String)>,
+    ) {
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
+
+        rzup.install_component(&component, Some(version.clone()), false)
+            .unwrap();
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.install_component(&component, Some(version.clone()), false)
+                    .unwrap();
+            },
+            vec![RzupEvent::ComponentAlreadyInstalled {
+                id: component.to_string(),
+                version: version.to_string(),
+            }],
+        );
+
+        assert_symlinks(tmp_dir.path(), expected_symlinks);
+    }
+
+    fn install_test(
+        base_urls: BaseUrls,
+        component: Component,
+        component_to_install: Component,
+        version: Version,
+        expected_url: String,
+        download_length: u64,
+        expected_symlinks: Vec<(String, String)>,
+    ) {
+        fresh_install_test(
+            base_urls.clone(),
+            component,
+            component_to_install,
+            version.clone(),
+            expected_url.clone(),
+            download_length,
+            expected_symlinks.clone(),
+        );
+
+        already_installed_test(base_urls, component, version, expected_symlinks.clone());
     }
 
     #[test]
@@ -912,36 +965,6 @@ mod tests {
         assert_eq!(
             rzup.list_versions(&Component::CargoRiscZero).unwrap(),
             vec![]
-        );
-    }
-
-    #[test]
-    fn already_installed() {
-        let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
-        let cargo_risczero_version = Version::new(1, 0, 0);
-
-        rzup.install_component(
-            &Component::CargoRiscZero,
-            Some(cargo_risczero_version.clone()),
-            false,
-        )
-        .unwrap();
-
-        run_and_assert_events(
-            &mut rzup,
-            |rzup| {
-                rzup.install_component(
-                    &Component::CargoRiscZero,
-                    Some(cargo_risczero_version.clone()),
-                    false,
-                )
-                .unwrap();
-            },
-            vec![RzupEvent::ComponentAlreadyInstalled {
-                id: "cargo-risczero".into(),
-                version: "1.0.0".into(),
-            }],
         );
     }
 
