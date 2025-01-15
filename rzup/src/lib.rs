@@ -627,9 +627,9 @@ mod tests {
     }
 
     #[test]
-    fn install() {
+    fn install_cargo_risczero() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         run_and_assert_events(
@@ -670,6 +670,15 @@ mod tests {
                     version: "1.0.0".into(),
                 },
             ],
+        );
+
+        let contents =
+            std::fs::read_link(tmp_dir.path().join(".cargo/bin/cargo-risczero")).unwrap();
+        assert_eq!(
+            contents,
+            tmp_dir.path().join(
+                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+            )
         );
     }
 

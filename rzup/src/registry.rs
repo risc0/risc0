@@ -137,6 +137,9 @@ impl Registry {
 
         self.settings.set_active_version(component, &version);
         self.settings.save(env)?;
+
+        components::set_active(env, component, &version)?;
+
         Ok(())
     }
 

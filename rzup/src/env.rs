@@ -103,7 +103,6 @@ impl Environment {
         &self.risc0_dir
     }
 
-    #[allow(dead_code)]
     pub fn cargo_bin_dir(&self) -> &Path {
         &self.cargo_bin_dir
     }

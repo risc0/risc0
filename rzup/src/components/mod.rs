@@ -157,6 +157,28 @@ pub fn install(
     Ok(())
 }
 
+fn symlink(original: &Path, link: &Path) -> Result<()> {
+    if std::fs::symlink_metadata(&link).is_ok() {
+        std::fs::remove_file(&link)?;
+    }
+    std::os::unix::fs::symlink(original, link)
+        .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
+}
+
+pub fn set_active(env: &Environment, component: &Component, version: &Version) -> Result<()> {
+    let version_dir = Paths::get_version_dir(env, component, version);
+    std::fs::create_dir_all(env.cargo_bin_dir())?;
+
+    match component {
+        Component::CargoRiscZero => symlink(
+            &version_dir.join("cargo-risczero"),
+            &env.cargo_bin_dir().join("cargo-risczero"),
+        )?,
+        _ => {}
+    };
+    Ok(())
+}
+
 pub fn uninstall(component: &Component, env: &Environment, version: &Version) -> Result<()> {
     Paths::cleanup_version(env, component, version)?;
     env.emit(RzupEvent::Uninstalled {
