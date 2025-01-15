@@ -151,6 +151,22 @@ impl Registry {
         Ok(())
     }
 
+    fn version_or_latest(
+        &self,
+        env: &Environment,
+        component: &Component,
+        version: Option<Version>,
+    ) -> Result<Version> {
+        if let Some(v) = version {
+            Ok(v)
+        } else {
+            env.emit(RzupEvent::Debug {
+                message: format!("No version specified, fetching latest for {component}"),
+            });
+            components::get_latest_version(&component, env, &self.base_urls)
+        }
+    }
+
     pub fn install_component(
         &mut self,
         env: &Environment,
@@ -165,25 +181,8 @@ impl Registry {
             ),
         });
 
-        // Handle virtual components
-        let (component_to_install, version_to_install) =
-            if let Some(parent_id) = component.parent_component() {
-                (parent_id, version)
-            } else {
-                (*component, version)
-            };
-
-        let version = match version_to_install {
-            Some(v) => v,
-            None => {
-                env.emit(RzupEvent::Debug {
-                    message: format!(
-                        "No version specified, fetching latest for {component_to_install}"
-                    ),
-                });
-                components::get_latest_version(&component_to_install, env, &self.base_urls)?
-            }
-        };
+        let component_to_install = component.parent_component().unwrap_or(component.clone());
+        let version = self.version_or_latest(env, &component_to_install, version)?;
 
         if !force && Paths::version_exists(env, &component_to_install, &version)? {
             env.emit(RzupEvent::ComponentAlreadyInstalled {
@@ -193,11 +192,12 @@ impl Registry {
             return Ok(());
         }
 
-        // Install component
         components::install(&component, env, &self.base_urls, &version, force)?;
 
         self.set_active_component_version(env, &component_to_install, version.clone())?;
-        self.set_active_component_version(env, component, version)?;
+        if component != &component_to_install {
+            self.set_active_component_version(env, component, version)?;
+        }
 
         Ok(())
     }
