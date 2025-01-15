@@ -17,7 +17,7 @@ mod tests;
 
 use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
-use anyhow::{bail, ensure, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use enum_map::{Enum, EnumMap};
 use num_bigint::BigUint;
@@ -440,6 +440,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
+
+        if into_guest_len > 0 && !into_guest_ptr.is_null() {
+            let end_addr = into_guest_ptr
+                .checked_add(into_guest_len as u32)
+                .ok_or_else(|| anyhow!("invalid guest address range"))?;
+            Self::check_guest_addr(end_addr)?;
+        }
+
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.peek_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
@@ -469,8 +477,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
         if into_guest_len > 0 && !into_guest_ptr.is_null() {
-            Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
-            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?
+            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?;
         }
 
         let (a0, a1) = syscall.regs;
