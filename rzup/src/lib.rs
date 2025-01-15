@@ -169,6 +169,10 @@ impl Rzup {
         self.environment.emit(event)
     }
 
+    fn print(&self, message: String) {
+        self.emit(RzupEvent::Print { message });
+    }
+
     /// Fetches the latest available version of a component.
     ///
     /// # Arguments

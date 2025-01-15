@@ -53,4 +53,7 @@ pub enum RzupEvent {
     Debug {
         message: String,
     },
+    Print {
+        message: String,
+    },
 }

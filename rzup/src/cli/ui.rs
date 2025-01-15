@@ -69,6 +69,7 @@ impl Ui {
                 RzupEvent::Uninstalled { id, version } => self.handle_uninstall(id, version),
                 RzupEvent::CheckUpdates { id } => self.handle_checking_updates(id),
                 RzupEvent::Debug { message } => self.handle_debug(message),
+                RzupEvent::Print { message } => self.handle_print(message),
             }
         }
     }
@@ -147,6 +148,10 @@ impl Ui {
         if self.verbose {
             self.multi_progress.println(message).unwrap();
         }
+    }
+
+    fn handle_print(&mut self, message: String) {
+        self.multi_progress.println(message).unwrap();
     }
 }
 

@@ -89,13 +89,13 @@ pub(crate) struct ShowCommand;
 
 impl ShowCommand {
     pub(crate) fn execute(self, rzup: &Rzup) -> Result<()> {
-        println!("{}", "Installed components:".bold());
-        println!("{}", "--------------------".bold());
+        rzup.print(format!("{}", "Installed components:".bold()));
+        rzup.print(format!("{}", "--------------------".bold()));
 
         for component in Component::iter() {
             let versions = rzup.list_versions(&component)?;
             if !versions.is_empty() {
-                println!("\n{component}");
+                rzup.print(format!("\n{component}"));
 
                 let active_version = rzup.get_active_version(&component)?;
                 let current_version = rzup.settings().get_active_version(&component);
@@ -108,27 +108,27 @@ impl ShowCommand {
                         .as_ref()
                         .map_or(false, |(v, _)| v == &version);
                     let marker = if is_active { "* " } else { "  " };
-                    println!("{}{version}", marker.bold());
+                    rzup.print(format!("{}{version}", marker.bold()));
                 }
 
                 // Only show warning if version in settings doesn't exist in versions list
                 if let Some(settings_version) = current_version {
                     if !versions.contains(&settings_version) {
-                        println!(
+                        rzup.print(format!(
                             "! Version {settings_version} specified in settings.toml is not installed",
-                        );
-                        println!(
+                        ));
+                        rzup.print(format!(
                             "  Please use 'rzup use {component} <VERSION>' to switch active component",
-                        );
+                        ));
                     }
                 }
             }
         }
-        println!(
+        rzup.print(format!(
             "\n{}: {}",
             "rzup home".bold(),
             rzup.environment.risc0_dir().display()
-        );
+        ));
         Ok(())
     }
 }
@@ -149,11 +149,13 @@ impl UseCommand {
         let component = self.name.parse()?;
         if rzup.version_exists(&component, &version)? {
             rzup.set_active_version(&component, version.clone())?;
-            println!("Successfully set {component} version {version} as active",);
+            rzup.print(format!(
+                "Successfully set {component} version {version} as active"
+            ));
         } else {
-            println!(
+            rzup.print(format!(
                 "! Version {version} of {component} is not installed.\n  Please use 'rzup install {component} {version}' to install",
-            );
+            ));
         }
 
         Ok(())
@@ -195,7 +197,7 @@ impl CheckCommand {
         rzup.emit(RzupEvent::CheckUpdates { id: None });
 
         for result in results {
-            println!("{result}");
+            rzup.print(format!("{result}"));
         }
 
         Ok(())
