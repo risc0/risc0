@@ -43,13 +43,10 @@ impl Environment {
         Ok(())
     }
 
-    pub fn with_paths(
-        risc0_dir: impl Into<PathBuf>,
-        cargo_bin_dir: impl Into<PathBuf>,
-    ) -> Result<Self> {
+    pub fn with_paths(risc0_dir: impl Into<PathBuf>, home_dir: impl AsRef<Path>) -> Result<Self> {
         let risc0_dir = risc0_dir.into();
         let tmp_dir = risc0_dir.join("tmp");
-        let cargo_bin_dir = cargo_bin_dir.into();
+        let cargo_bin_dir = home_dir.as_ref().join(".cargo/bin");
         let settings_file = risc0_dir.join("settings.toml");
         let platform = Platform::detect()?;
 
@@ -77,9 +74,7 @@ impl Environment {
             home_dir.join(".risc0")
         };
 
-        let cargo_bin_dir = home_dir.join(".cargo/bin");
-
-        let env = Self::with_paths(risc0_dir, cargo_bin_dir)?;
+        let env = Self::with_paths(risc0_dir, home_dir)?;
         env.emit(RzupEvent::Debug {
             message: format!("Initialized environment at {}", env.risc0_dir().display()),
         });
@@ -148,7 +143,7 @@ mod tests {
         let env = Environment::with_paths(tmp_dir1.path(), tmp_dir2.path()).unwrap();
 
         assert_eq!(env.risc0_dir, tmp_dir1.path());
-        assert_eq!(env.cargo_bin_dir, tmp_dir2.path());
+        assert_eq!(env.cargo_bin_dir, tmp_dir2.path().join(".cargo/bin"));
         assert_eq!(env.tmp_dir, tmp_dir1.path().join("tmp"));
         assert_eq!(env.settings_file, tmp_dir1.path().join("settings.toml"));
     }

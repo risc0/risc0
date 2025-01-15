@@ -137,11 +137,7 @@ mod tests {
 
     fn setup_test_env() -> (TempDir, Environment) {
         let tmp_dir = TempDir::new().unwrap();
-        let env = Environment::with_paths(
-            tmp_dir.path().join(".risc0"),
-            tmp_dir.path().join(".cargo/bin"),
-        )
-        .unwrap();
+        let env = Environment::with_paths(tmp_dir.path().join(".risc0"), tmp_dir.path()).unwrap();
         (tmp_dir, env)
     }
 

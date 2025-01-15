@@ -31,7 +31,7 @@ use paths::Paths;
 use registry::Registry;
 use semver::Version;
 use settings::Settings;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub use error::{Result, RzupError};
 
@@ -77,14 +77,14 @@ impl Rzup {
     ///
     /// # Arguments
     /// * `risc0_dir` - The root directory path for storing components and settings
-    /// * `cargo_bin_dir` - The directory to link Rust binaries (usually ~/.cargo/bin)
+    /// * `home_dir` - The path to the user's home directory
     /// * `base_urls` - The base URLs used to communicate with GitHub
     pub fn with_paths(
         risc0_dir: impl Into<PathBuf>,
-        cargo_bin_dir: impl Into<PathBuf>,
+        home_dir: impl AsRef<Path>,
         base_urls: BaseUrls,
     ) -> Result<Self> {
-        let environment = Environment::with_paths(risc0_dir, cargo_bin_dir)?;
+        let environment = Environment::with_paths(risc0_dir, home_dir)?;
         let registry = Registry::new(&environment, base_urls)?;
 
         Ok(Self {
@@ -470,12 +470,8 @@ mod tests {
 
     fn setup_test_env(base_urls: BaseUrls) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
-        let rzup = Rzup::with_paths(
-            tmp_dir.path().join(".risc0"),
-            tmp_dir.path().join(".cargo/bin"),
-            base_urls,
-        )
-        .unwrap();
+        let rzup =
+            Rzup::with_paths(tmp_dir.path().join(".risc0"), tmp_dir.path(), base_urls).unwrap();
         (tmp_dir, rzup)
     }
 
