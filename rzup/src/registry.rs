@@ -19,6 +19,38 @@ use crate::settings::Settings;
 use crate::{BaseUrls, RzupError, RzupEvent};
 
 use semver::Version;
+use std::collections::BTreeSet;
+
+fn parse_version_from_entry(
+    env: &Environment,
+    component: &Component,
+    entry: &std::fs::DirEntry,
+) -> Result<Option<Version>> {
+    if !entry.path().is_dir() {
+        return Ok(None);
+    }
+
+    let dir_name = entry.file_name().to_string_lossy().to_string();
+
+    if !dir_name.contains(component.as_str()) {
+        return Ok(None);
+    }
+
+    match Paths::parse_version_from_path(&dir_name, component) {
+        Some(version) => {
+            env.emit(RzupEvent::Debug {
+                message: format!("Successfully parsed version {version} from {dir_name}",),
+            });
+            Ok(Some(version))
+        }
+        None => {
+            env.emit(RzupEvent::Debug {
+                message: format!("Failed to parse version from directory: {dir_name}"),
+            });
+            Ok(None)
+        }
+    }
+}
 
 #[derive(Default, Debug)]
 pub(crate) struct Registry {
@@ -47,7 +79,7 @@ impl Registry {
         env: &Environment,
         component: &Component,
     ) -> Result<Vec<Version>> {
-        let mut versions = Vec::new();
+        let mut versions = BTreeSet::new();
 
         // Handle virtual components first
         if let Some(parent_id) = component.parent_component() {
@@ -66,42 +98,18 @@ impl Registry {
             env.emit(RzupEvent::Debug {
                 message: format!("Directory does not exist: {}", component_dir.display()),
             });
-            return Ok(versions);
+            return Ok(vec![]);
         }
 
         for entry in std::fs::read_dir(component_dir)? {
             let entry = entry?;
-            if !entry.path().is_dir() {
-                continue;
-            }
-
-            let dir_name = entry.file_name().to_string_lossy().to_string();
-
-            if !dir_name.contains(component.as_str()) {
-                continue;
-            }
-
-            match Paths::parse_version_from_path(&dir_name, component) {
-                Some(version) => {
-                    env.emit(RzupEvent::Debug {
-                        message: format!("Successfully parsed version {version} from {dir_name}",),
-                    });
-                    if !versions.contains(&version) {
-                        versions.push(version.clone());
-                    }
-                }
-                None => {
-                    env.emit(RzupEvent::Debug {
-                        message: format!("Failed to parse version from directory: {dir_name}"),
-                    });
-                }
+            if let Some(version) = parse_version_from_entry(env, component, &entry)? {
+                versions.insert(version);
             }
         }
 
         // Sort versions from newest to oldest
-        versions.sort_by(|a, b| b.cmp(a));
-
-        Ok(versions)
+        Ok(versions.into_iter().rev().collect())
     }
 
     pub fn get_active_component_version(
