@@ -27,6 +27,7 @@
     "@types/jest": "29.5.14",
     "@types/lodash-es": "4.17.12",
     "@types/node": "22.10.6",
+    "@vitejs/plugin-react-swc": "3.7.2",
     "vitest": "2.1.8"
   },
   "packageManager": "bun@1.1.43"
