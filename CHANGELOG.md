@@ -2,6 +2,26 @@
 
 ## Next (upcoming release)
 
+## [v1.2.1 (2025-01-15)](https://github.com/risc0/risc0/releases/tag/v1.2.1)
+
+### 🔥 Performance Improvements
+
+* Implement `keccak` precompile. This offers performance improvements for any guest program that uses the `keccak` hash function, such as Ethereum block proving.
+* Implement `secp256r1` (`p256`) precompile. This offers performance improvements for any guest program that performs arithmetic over the `secp256r1` curve, such as verifying TEE attestations.
+* For more information about precompiles go to https://dev.risczero.com/api/zkvm/precompiles.
+
+### ⚡️ Features
+
+* Add `keccak` example.
+* Add `p256` support to ECDSA example.
+* Add `RISC0_INFO=1` to get profiling information.
+* Add `used` and `free` methods to bump allocator to enable collecting memory metrics on the guest.
+
+### Fixes
+
+* Add `RUST_LIB_BACKTRACE` to `sys_getenv` allow-list to facilitate debugging guest code and allow the `anyhow!` macro to work without crashing the guest.
+* Add `RISC0_FEATURE_bigint2` in the Docker build environment.
+
 ## [v1.2.0 (2024-12-04)](https://github.com/risc0/risc0/releases/tag/v1.2.0)
 
 ### 🔥 Performance Improvements
