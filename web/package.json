@@ -24,10 +24,12 @@
     "zustand": "5.0.3"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "6.6.3",
     "@types/jest": "29.5.14",
     "@types/lodash-es": "4.17.12",
     "@types/node": "22.10.6",
     "@vitejs/plugin-react-swc": "3.7.2",
+    "happy-dom": "16.6.0",
     "vitest": "2.1.8"
   },
   "packageManager": "bun@1.1.43"
