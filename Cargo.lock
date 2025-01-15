@@ -4796,6 +4796,7 @@ dependencies = [
  "thiserror 2.0.8",
  "tokio",
  "toml",
+ "walkdir",
  "xz",
 ]
 

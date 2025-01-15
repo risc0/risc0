@@ -626,60 +626,87 @@ mod tests {
         assert_eq!(events, expected_events);
     }
 
-    #[test]
-    fn install_cargo_risczero() {
-        let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
-        let cargo_risczero_version = Version::new(1, 0, 0);
+    fn install_test(
+        base_urls: BaseUrls,
+        component: Component,
+        component_to_install: Component,
+        version: Version,
+        expected_url: String,
+        mut expected_symlinks: Vec<(String, String)>,
+    ) {
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
 
         run_and_assert_events(
             &mut rzup,
             |rzup| {
-                rzup.install_component(
-                    &Component::CargoRiscZero,
-                    Some(cargo_risczero_version.clone()),
-                    false,
-                )
-                .unwrap();
+                rzup.install_component(&component, Some(version.clone()), false)
+                    .unwrap();
             },
             vec![
                 RzupEvent::InstallationStarted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
+                    id: component.to_string(),
+                    version: version.to_string(),
                 },
                 RzupEvent::DownloadStarted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
-                    url: format!(
-                        "{base_url}/risc0/releases/download/v1.0.0/\
-                        cargo-risczero-x86_64-unknown-linux-gnu.tgz",
-                        base_url = server.base_urls.risc0_github_base_url
-                    ),
+                    id: component_to_install.to_string(),
+                    version: version.to_string(),
+                    url: expected_url,
                     len: Some(86),
                 },
                 RzupEvent::DownloadProgress {
-                    id: "cargo-risczero".into(),
+                    id: component_to_install.to_string(),
                     incr: 86,
                 },
                 RzupEvent::DownloadCompleted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
+                    id: component_to_install.to_string(),
+                    version: version.to_string(),
                 },
                 RzupEvent::InstallationCompleted {
-                    id: "cargo-risczero".into(),
-                    version: "1.0.0".into(),
+                    id: component.to_string(),
+                    version: version.to_string(),
                 },
             ],
         );
 
-        let contents =
-            std::fs::read_link(tmp_dir.path().join(".cargo/bin/cargo-risczero")).unwrap();
-        assert_eq!(
-            contents,
-            tmp_dir.path().join(
+        let mut found_symlinks = vec![];
+        for entry in walkdir::WalkDir::new(tmp_dir.path()) {
+            let entry = entry.unwrap();
+            if entry.path_is_symlink() {
+                let entry_path = entry.path();
+                let entry_relative_path = entry_path.strip_prefix(tmp_dir.path()).unwrap();
+                let target_path = std::fs::read_link(&entry_path).unwrap();
+                let target_relative_path = target_path.strip_prefix(tmp_dir.path()).unwrap();
+                found_symlinks.push((
+                    entry_relative_path.to_str().unwrap().to_owned(),
+                    target_relative_path.to_str().unwrap().to_owned(),
+                ));
+            }
+        }
+
+        found_symlinks.sort();
+        expected_symlinks.sort();
+        assert_eq!(found_symlinks, expected_symlinks);
+    }
+
+    #[test]
+    fn install_cargo_risczero() {
+        let server = MockDistributionServer::new();
+        install_test(
+            server.base_urls.clone(),
+            Component::CargoRiscZero,
+            Component::CargoRiscZero,
+            Version::new(1, 0, 0),
+            format!(
+                "{base_url}/risc0/releases/download/v1.0.0/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz",
+                base_url = server.base_urls.risc0_github_base_url
+            ),
+            vec![(
+                ".cargo/bin/cargo-risczero".into(),
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
-            )
-        );
+                    .into(),
+            )],
+        )
     }
 
     #[test]

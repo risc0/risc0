@@ -45,3 +45,4 @@ hyper = { version = "1.5.1", features = ["server"] }
 hyper-util = "0.1.10"
 paste = "1.0.15"
 tokio = { version = "1.42.0", features = ["rt", "rt-multi-thread", "macros"] }
+walkdir = "2.5.0"
