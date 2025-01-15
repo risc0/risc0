@@ -648,6 +648,22 @@ mod tests {
         assert_eq!(found_symlinks, expected_symlinks);
     }
 
+    fn assert_files(path: &Path, mut expected_files: Vec<String>) {
+        let mut found_files = vec![];
+        for entry in walkdir::WalkDir::new(path.join(".risc0")) {
+            let entry = entry.unwrap();
+            if entry.file_type().is_file() {
+                let entry_path = entry.path();
+                let entry_relative_path = entry_path.strip_prefix(path).unwrap();
+                found_files.push(entry_relative_path.to_str().unwrap().to_owned());
+            }
+        }
+
+        found_files.sort();
+        expected_files.sort();
+        assert_eq!(found_files, expected_files);
+    }
+
     fn fresh_install_test(
         base_urls: BaseUrls,
         component: Component,
@@ -655,6 +671,7 @@ mod tests {
         version: Version,
         expected_url: String,
         download_length: u64,
+        expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
     ) {
         let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
@@ -692,12 +709,14 @@ mod tests {
         );
 
         assert_symlinks(tmp_dir.path(), expected_symlinks);
+        assert_files(tmp_dir.path(), expected_files);
     }
 
     fn already_installed_test(
         base_urls: BaseUrls,
         component: Component,
         version: Version,
+        expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
     ) {
         let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
@@ -718,6 +737,7 @@ mod tests {
         );
 
         assert_symlinks(tmp_dir.path(), expected_symlinks);
+        assert_files(tmp_dir.path(), expected_files);
     }
 
     fn already_installed_force_test(
@@ -727,6 +747,7 @@ mod tests {
         version: Version,
         expected_url: String,
         download_length: u64,
+        expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
     ) {
         let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
@@ -767,6 +788,7 @@ mod tests {
         );
 
         assert_symlinks(tmp_dir.path(), expected_symlinks);
+        assert_files(tmp_dir.path(), expected_files);
     }
 
     fn install_test(
@@ -776,6 +798,7 @@ mod tests {
         version: Version,
         expected_url: String,
         download_length: u64,
+        expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
     ) {
         fresh_install_test(
@@ -785,6 +808,7 @@ mod tests {
             version.clone(),
             expected_url.clone(),
             download_length,
+            expected_files.clone(),
             expected_symlinks.clone(),
         );
 
@@ -792,6 +816,7 @@ mod tests {
             base_urls.clone(),
             component,
             version.clone(),
+            expected_files.clone(),
             expected_symlinks.clone(),
         );
 
@@ -802,6 +827,7 @@ mod tests {
             version.clone(),
             expected_url.clone(),
             download_length,
+            expected_files.clone(),
             expected_symlinks.clone(),
         );
     }
@@ -820,6 +846,11 @@ mod tests {
                 base_url = server.base_urls.risc0_github_base_url
             ),
             86,
+            vec![
+                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin"
+                    .into(),
+                ".risc0/settings.toml".into(),
+            ],
             vec![(
                 ".cargo/bin/cargo-risczero".into(),
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
@@ -842,6 +873,10 @@ mod tests {
                 base_url = server.base_urls.risc0_github_base_url
             ),
             86,
+            vec![
+                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
+                ".risc0/settings.toml".into(),
+            ],
             vec![
                 (
                     ".cargo/bin/cargo-risczero".into(),
@@ -870,6 +905,10 @@ mod tests {
                 base_url = server.base_urls.risc0_github_base_url
             ),
             86,
+            vec![
+                ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
+                ".risc0/settings.toml".into(),
+            ],
             vec![],
         )
     }
@@ -888,6 +927,10 @@ mod tests {
                 base_url = server.base_urls.risc0_github_base_url
             ),
             128,
+            vec![
+                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
+                ".risc0/settings.toml".into(),
+            ],
             vec![],
         )
     }
