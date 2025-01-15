@@ -388,6 +388,9 @@ mod tests {
             "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response(),
+            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
+            "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
+                dummy_tar_xz_response(),
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
@@ -935,30 +938,55 @@ mod tests {
         )
     }
 
-    #[test]
-    fn list_multiple_versions() {
+    fn test_list_multiple_versions(component: Component, version1: Version, version2: Version) {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
-        let cargo_risczero_version1 = Version::new(1, 0, 0);
-        let cargo_risczero_version2 = Version::new(1, 1, 0);
 
-        rzup.install_component(
-            &Component::CargoRiscZero,
-            Some(cargo_risczero_version1.clone()),
-            false,
-        )
-        .unwrap();
+        rzup.install_component(&component, Some(version1.clone()), false)
+            .unwrap();
 
-        rzup.install_component(
-            &Component::CargoRiscZero,
-            Some(cargo_risczero_version2.clone()),
-            false,
-        )
-        .unwrap();
+        rzup.install_component(&component, Some(version2.clone()), false)
+            .unwrap();
 
         assert_eq!(
-            rzup.list_versions(&Component::CargoRiscZero).unwrap(),
-            vec![cargo_risczero_version2, cargo_risczero_version1]
+            rzup.list_versions(&component).unwrap(),
+            vec![version2, version1]
+        );
+    }
+
+    #[test]
+    fn list_multiple_versions_cargo_risczero() {
+        test_list_multiple_versions(
+            Component::CargoRiscZero,
+            Version::new(1, 0, 0),
+            Version::new(1, 1, 0),
+        );
+    }
+
+    #[test]
+    fn list_multiple_versions_r0vm() {
+        test_list_multiple_versions(
+            Component::R0Vm,
+            Version::new(1, 0, 0),
+            Version::new(1, 1, 0),
+        );
+    }
+
+    #[test]
+    fn list_multiple_versions_rust() {
+        test_list_multiple_versions(
+            Component::RustToolchain,
+            Version::new(1, 79, 0),
+            Version::new(1, 81, 0),
+        );
+    }
+
+    #[test]
+    fn list_multiple_versions_cpp() {
+        test_list_multiple_versions(
+            Component::CppToolchain,
+            Version::new(2024, 1, 5),
+            Version::new(2024, 1, 6),
         );
     }
 
