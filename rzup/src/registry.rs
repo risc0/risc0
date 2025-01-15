@@ -163,7 +163,7 @@ impl Registry {
             env.emit(RzupEvent::Debug {
                 message: format!("No version specified, fetching latest for {component}"),
             });
-            components::get_latest_version(&component, env, &self.base_urls)
+            components::get_latest_version(component, env, &self.base_urls)
         }
     }
 
@@ -181,7 +181,7 @@ impl Registry {
             ),
         });
 
-        let component_to_install = component.parent_component().unwrap_or(component.clone());
+        let component_to_install = component.parent_component().unwrap_or(*component);
         let version = self.version_or_latest(env, &component_to_install, version)?;
 
         if !force && Paths::version_exists(env, &component_to_install, &version)? {
@@ -192,7 +192,7 @@ impl Registry {
             return Ok(());
         }
 
-        components::install(&component, env, &self.base_urls, &version, force)?;
+        components::install(component, env, &self.base_urls, &version, force)?;
 
         self.set_active_component_version(env, &component_to_install, version.clone())?;
         if component != &component_to_install {
@@ -223,7 +223,7 @@ impl Registry {
                         "Setting highest version {highest_version} as active for {component}",
                     ),
                 });
-                self.set_active_component_version(env, &component, highest_version.clone())?;
+                self.set_active_component_version(env, component, highest_version.clone())?;
             }
         }
         Ok(())

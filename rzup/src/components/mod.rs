@@ -114,7 +114,7 @@ pub fn install(
     version: &Version,
     force: bool,
 ) -> Result<()> {
-    let component_to_install = component.parent_component().unwrap_or(component.clone());
+    let component_to_install = component.parent_component().unwrap_or(*component);
 
     let distribution = GithubRelease::new(base_urls);
 
@@ -154,15 +154,15 @@ pub fn install(
 }
 
 fn symlink(original: &Path, link: &Path) -> Result<()> {
-    if std::fs::symlink_metadata(&link).is_ok() {
-        std::fs::remove_file(&link)?;
+    if std::fs::symlink_metadata(link).is_ok() {
+        std::fs::remove_file(link)?;
     }
     std::os::unix::fs::symlink(original, link)
         .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
 }
 
 pub fn set_active(env: &Environment, component: &Component, version: &Version) -> Result<()> {
-    let installed_component = component.parent_component().unwrap_or(component.clone());
+    let installed_component = component.parent_component().unwrap_or(*component);
     let version_dir = Paths::get_version_dir(env, &installed_component, version);
 
     std::fs::create_dir_all(env.cargo_bin_dir())?;
