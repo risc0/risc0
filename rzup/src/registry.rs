@@ -191,10 +191,7 @@ impl Registry {
             force,
         )?;
 
-        // Update settings
-        self.settings
-            .set_active_version(&component_to_install, &version);
-        self.settings.save(env)?;
+        self.set_active_component_version(env, &component_to_install, version)?;
 
         Ok(())
     }
@@ -227,8 +224,7 @@ impl Registry {
                         "Setting highest version {highest_version} as active for {component}",
                     ),
                 });
-                self.settings.set_active_version(component, highest_version);
-                self.settings.save(env)?;
+                self.set_active_component_version(env, &component, highest_version.clone())?;
             }
         }
 
