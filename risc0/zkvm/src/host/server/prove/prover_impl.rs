@@ -18,7 +18,6 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
-    default_rv32im_version,
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
@@ -31,6 +30,7 @@ use crate::{
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
+    risc0_rv32im_ver,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
     InnerAssumptionReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
@@ -44,10 +44,11 @@ pub struct ProverImpl {
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts) -> Self {
-        Self {
-            opts: opts.with_segment_version(default_rv32im_version()),
+    pub fn new(mut opts: ProverOpts) -> Self {
+        if let Some(version) = risc0_rv32im_ver() {
+            opts = opts.with_segment_version(version);
         }
+        Self { opts }
     }
 }
 

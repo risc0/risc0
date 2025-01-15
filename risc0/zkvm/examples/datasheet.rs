@@ -22,7 +22,7 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    default_rv32im_version, get_prover_server, Executor2, ExecutorEnv, ExecutorImpl, ProverOpts,
+    get_prover_server, risc0_rv32im_ver, Executor2, ExecutorEnv, ExecutorImpl, ProverOpts,
     ReceiptKind, SegmentVersion, Session, SimpleSegmentRef, RECURSION_PO2,
 };
 use serde::Serialize;
@@ -108,23 +108,23 @@ struct Args {
 }
 
 fn min_cycles_po2() -> usize {
-    match default_rv32im_version() {
-        SegmentVersion::V1 => MIN_CYCLES_PO2_V1,
-        SegmentVersion::V2 => MIN_CYCLES_PO2_V2,
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => MIN_CYCLES_PO2_V2,
+        _ => MIN_CYCLES_PO2_V1,
     }
 }
 
 fn cycles_po2_iters() -> &'static [(u32, u32)] {
-    match default_rv32im_version() {
-        SegmentVersion::V1 => CYCLES_PO2_ITERS_V1,
-        SegmentVersion::V2 => CYCLES_PO2_ITERS_V2,
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => CYCLES_PO2_ITERS_V2,
+        _ => CYCLES_PO2_ITERS_V1,
     }
 }
 
 fn iterations_1m_cycles() -> u32 {
-    match default_rv32im_version() {
-        SegmentVersion::V1 => 1024 * 512 - 10,
-        SegmentVersion::V2 => 1024 * 512 - 45,
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => 1024 * 512 - 45,
+        _ => 1024 * 512 - 10,
     }
 }
 
@@ -140,11 +140,11 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
     }
 }
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
-    match default_rv32im_version() {
-        SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => Executor2::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
-        SegmentVersion::V2 => Executor2::from_elf(env, elf)
+        _ => ExecutorImpl::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
     }
@@ -277,7 +277,8 @@ impl Datasheet {
     fn lift(&mut self) {
         println!("lift");
 
-        let opts = ProverOpts::all_po2s().with_segment_version(default_rv32im_version());
+        let opts = ProverOpts::all_po2s()
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
 
@@ -315,7 +316,8 @@ impl Datasheet {
     fn join(&mut self) {
         println!("join");
 
-        let opts = ProverOpts::all_po2s().with_segment_version(default_rv32im_version());
+        let opts = ProverOpts::all_po2s()
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
 
@@ -365,7 +367,7 @@ impl Datasheet {
 
         let opts = ProverOpts::all_po2s()
             .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(default_rv32im_version());
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
@@ -400,7 +402,7 @@ impl Datasheet {
 
         let opts = ProverOpts::all_po2s()
             .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(default_rv32im_version());
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -439,7 +441,7 @@ impl Datasheet {
 
         let opts = ProverOpts::all_po2s()
             .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(default_rv32im_version());
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -477,7 +479,7 @@ impl Datasheet {
 
         let opts = ProverOpts::all_po2s()
             .with_receipt_kind(ReceiptKind::Groth16)
-            .with_segment_version(default_rv32im_version());
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
