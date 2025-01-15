@@ -90,7 +90,7 @@ is. Since the statistics concern only the executor phase, it is recommended to
 run your application in dev-mode to avoid the overhead of proof generation:
 
 ```bash
-RISC0_DEV_MODE=1 RUST_LOG=info cargo run --release
+RISC0_DEV_MODE=1 RUST_LOG=info RISC0_INFO=1 cargo run --release
 ```
 
 The statistics include:
