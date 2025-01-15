@@ -23,8 +23,10 @@ pub struct Paths;
 impl Paths {
     pub fn get_component_dir(env: &Environment, component: &Component) -> PathBuf {
         match component {
-            Component::RustToolchain | Component::CppToolchain => env.root_dir().join("toolchains"),
-            Component::CargoRiscZero | Component::R0Vm => env.root_dir().join("extensions"),
+            Component::RustToolchain | Component::CppToolchain => {
+                env.risc0_dir().join("toolchains")
+            }
+            Component::CargoRiscZero | Component::R0Vm => env.risc0_dir().join("extensions"),
         }
     }
 
@@ -135,7 +137,11 @@ mod tests {
 
     fn setup_test_env() -> (TempDir, Environment) {
         let tmp_dir = TempDir::new().unwrap();
-        let env = Environment::with_root(tmp_dir.path()).unwrap();
+        let env = Environment::with_paths(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".cargo/bin"),
+        )
+        .unwrap();
         (tmp_dir, env)
     }
 

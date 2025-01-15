@@ -22,8 +22,9 @@ use std::path::{Path, PathBuf};
 type VarResult<T> = std::result::Result<T, std::env::VarError>;
 
 pub struct Environment {
-    root_dir: PathBuf,
+    risc0_dir: PathBuf,
     tmp_dir: PathBuf,
+    cargo_bin_dir: PathBuf,
     settings_file: PathBuf,
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
     platform: Platform,
@@ -31,8 +32,8 @@ pub struct Environment {
 
 impl Environment {
     fn ensure_directories(&self) -> Result<()> {
-        if !self.root_dir.exists() {
-            fs::create_dir_all(&self.root_dir)?;
+        if !self.risc0_dir.exists() {
+            fs::create_dir_all(&self.risc0_dir)?;
         }
 
         if !self.tmp_dir.exists() {
@@ -42,15 +43,20 @@ impl Environment {
         Ok(())
     }
 
-    pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
-        let root_dir = root.into();
-        let tmp_dir = root_dir.join("tmp");
-        let settings_file = root_dir.join("settings.toml");
+    pub fn with_paths(
+        risc0_dir: impl Into<PathBuf>,
+        cargo_bin_dir: impl Into<PathBuf>,
+    ) -> Result<Self> {
+        let risc0_dir = risc0_dir.into();
+        let tmp_dir = risc0_dir.join("tmp");
+        let cargo_bin_dir = cargo_bin_dir.into();
+        let settings_file = risc0_dir.join("settings.toml");
         let platform = Platform::detect()?;
 
         let env = Self {
-            root_dir,
+            risc0_dir,
             tmp_dir,
+            cargo_bin_dir,
             settings_file,
             event_handler: None,
             platform,
@@ -61,19 +67,21 @@ impl Environment {
     }
 
     pub fn new(mut env_accessor: impl FnMut(&str) -> VarResult<String>) -> Result<Self> {
-        let root_dir = if let Ok(dir) = env_accessor("RISC0_HOME") {
+        let home_dir = dirs::home_dir().ok_or_else(|| {
+            RzupError::Environment("Could not determine home directory".to_string())
+        })?;
+
+        let risc0_dir = if let Ok(dir) = env_accessor("RISC0_HOME") {
             PathBuf::from(dir)
         } else {
-            dirs::home_dir()
-                .ok_or_else(|| {
-                    RzupError::Environment("Could not determine home directory".to_string())
-                })?
-                .join(".risc0")
+            home_dir.join(".risc0")
         };
 
-        let env = Self::with_root(root_dir)?;
+        let cargo_bin_dir = home_dir.join(".cargo/bin");
+
+        let env = Self::with_paths(risc0_dir, cargo_bin_dir)?;
         env.emit(RzupEvent::Debug {
-            message: format!("Initialized environment at {}", env.root_dir().display()),
+            message: format!("Initialized environment at {}", env.risc0_dir().display()),
         });
         Ok(env)
     }
@@ -91,8 +99,13 @@ impl Environment {
         }
     }
 
-    pub fn root_dir(&self) -> &Path {
-        &self.root_dir
+    pub fn risc0_dir(&self) -> &Path {
+        &self.risc0_dir
+    }
+
+    #[allow(dead_code)]
+    pub fn cargo_bin_dir(&self) -> &Path {
+        &self.cargo_bin_dir
     }
 
     pub fn settings_path(&self) -> &Path {
@@ -120,23 +133,25 @@ mod tests {
     fn test_default_env() {
         let env = Environment::new(no_env).unwrap();
         let home_dir = dirs::home_dir().unwrap();
-        let expected_root = home_dir.join(".risc0");
+        let expected_risc0_dir = home_dir.join(".risc0");
+        let expected_cargo_bin_dir = home_dir.join(".cargo/bin");
 
-        assert_eq!(env.root_dir, expected_root);
-        assert_eq!(env.tmp_dir, expected_root.join("tmp"));
-        assert_eq!(env.settings_file, expected_root.join("settings.toml"));
+        assert_eq!(env.risc0_dir, expected_risc0_dir);
+        assert_eq!(env.cargo_bin_dir, expected_cargo_bin_dir);
+        assert_eq!(env.tmp_dir, expected_risc0_dir.join("tmp"));
+        assert_eq!(env.settings_file, expected_risc0_dir.join("settings.toml"));
     }
 
     #[test]
     fn test_custom_root() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let tmp_path = tmp_dir.path().to_path_buf();
+        let tmp_dir1 = tempfile::tempdir().unwrap();
+        let tmp_dir2 = tempfile::tempdir().unwrap();
+        let env = Environment::with_paths(tmp_dir1.path(), tmp_dir2.path()).unwrap();
 
-        let env = Environment::with_root(&tmp_path).unwrap();
-
-        assert_eq!(env.root_dir, tmp_path);
-        assert_eq!(env.tmp_dir, tmp_path.join("tmp"));
-        assert_eq!(env.settings_file, tmp_path.join("settings.toml"));
+        assert_eq!(env.risc0_dir, tmp_dir1.path());
+        assert_eq!(env.cargo_bin_dir, tmp_dir2.path());
+        assert_eq!(env.tmp_dir, tmp_dir1.path().join("tmp"));
+        assert_eq!(env.settings_file, tmp_dir1.path().join("settings.toml"));
     }
 
     #[test]
@@ -149,6 +164,6 @@ mod tests {
             Ok(r0_tmp_dir.to_string_lossy().into())
         })
         .unwrap();
-        assert_eq!(env.root_dir, r0_tmp_dir);
+        assert_eq!(env.risc0_dir, r0_tmp_dir);
     }
 }

@@ -76,10 +76,15 @@ impl Rzup {
     /// Creates a new Rzup instance with a custom root directory.
     ///
     /// # Arguments
-    /// * `root` - The root directory path for storing components and settings
+    /// * `risc0_dir` - The root directory path for storing components and settings
+    /// * `cargo_bin_dir` - The directory to link Rust binaries (usually ~/.cargo/bin)
     /// * `base_urls` - The base URLs used to communicate with GitHub
-    pub fn with_root(root: impl Into<PathBuf>, base_urls: BaseUrls) -> Result<Self> {
-        let environment = Environment::with_root(root)?;
+    pub fn with_paths(
+        risc0_dir: impl Into<PathBuf>,
+        cargo_bin_dir: impl Into<PathBuf>,
+        base_urls: BaseUrls,
+    ) -> Result<Self> {
+        let environment = Environment::with_paths(risc0_dir, cargo_bin_dir)?;
         let registry = Registry::new(&environment, base_urls)?;
 
         Ok(Self {
@@ -461,7 +466,12 @@ mod tests {
 
     fn setup_test_env(base_urls: BaseUrls) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
-        let rzup = Rzup::with_root(tmp_dir.path(), base_urls).unwrap();
+        let rzup = Rzup::with_paths(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".cargo/bin"),
+            base_urls,
+        )
+        .unwrap();
         (tmp_dir, rzup)
     }
 

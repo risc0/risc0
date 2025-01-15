@@ -127,7 +127,7 @@ impl ShowCommand {
         println!(
             "\n{}: {}",
             "rzup home".bold(),
-            rzup.environment.root_dir().display()
+            rzup.environment.risc0_dir().display()
         );
         Ok(())
     }
