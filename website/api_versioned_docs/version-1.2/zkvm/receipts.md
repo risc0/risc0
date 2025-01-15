@@ -15,13 +15,9 @@ for the [execution] of your application. Receipts can be passed to third parties
 and [verified][verify] in order to cryptographically attest to the validity of
 your application's output.
 
-<!-- The following text is duplicated from the definition of "receipt" on the terminology page.-->
-
 The receipt consists of a [journal] and a [seal]. The journal attests to the
 public outputs of the program, and the seal is the opaque blob that
 cryptographically attests to the validity of the receipt.
-
-<!-- End receipt definition. -->
 
 ## How Are Receipts Used?
 

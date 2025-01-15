@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1022,8 +1022,8 @@ fn send_segment_done_msg(
 ) -> Result<()> {
     let segment = Some(pb::api::SegmentInfo {
         index: segment.index,
-        po2: segment.inner.po2 as u32,
-        cycles: segment.inner.insn_cycles as u32,
+        po2: segment.po2() as u32,
+        cycles: segment.user_cycles(),
         segment: some_asset,
     });
 

@@ -65,8 +65,6 @@ cycles that have occurred in your program.
 
 As an example:
 
-<!-- NOTE: Ignored since we do not yet have a way to test guest code in docs -->
-
 ```rust no_run title="methods/guest/src/main.rs"
 # use risc0_zkvm::guest::env;
 fn my_operation_to_measure() {
@@ -329,8 +327,8 @@ and [256-bit modular multiplication][bigint]. By implementing these operations
 directly in the "hardware" of the zkVM, programs that use these accelerators
 execute faster and can be proven with significantly less resources [^2].
 
-For more information about cryptography acceleration, [cryptography
-acceleration][acceleration].
+For more information about cryptography precompiles, [cryptography
+precompiles][precompiles].
 
 Using the accelerator, a SHA-256 compress operation typically takes 68 cycles
 per 64-byte block and 6 cycles to initialize. A 256-bit modular multiply takes
@@ -393,8 +391,8 @@ machine, and the `cuda` feature enabled.
   - Sometimes `opt-level = 2` is faster than `3`. Try `s` and `z` too.
   - Try setting `codegen-units = 1`.
 - When you need a map, use `BTreeMap` instead of `HashMap`.
-- When you need to hash data, use the [accelerated implementation of
-  SHA-256][acceleration].
+- When you need to hash data, use the [precompile implementation of
+  SHA-256][precompiles].
 - Look for places where you are copying or (de)serializing data when not
   necessary.
 
@@ -415,9 +413,9 @@ cycle counts added.
 | JALR rd,rs1,offset  | Jump and Link Register             | rd ← pc + length(inst)pc ← (rs1 + offset) ∧ -2 | 1                                               |
 | BEQ rs1,rs2,offset  | Branch Equal                       | if rs1 = rs2 then pc ← pc + offset             | 1                                               |
 | BNE rs1,rs2,offset  | Branch Not Equal                   | if rs1 ≠ rs2 then pc ← pc + offset             | 1                                               |
-| BLT rs1,rs2,offset  | Branch Less Than                   | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BLT rs1,rs2,offset  | Branch Less Than                   | if rs1 \< rs2 then pc ← pc + offset            | 1                                               |
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 \< rs2 then pc ← pc + offset            | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
 | LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
 | LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
@@ -428,8 +426,8 @@ cycle counts added.
 | SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
 | SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
-| SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
-| SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
+| SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) \< sx(imm)                        | 1                                               |
+| SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) \< ux(imm)                        | 1                                               |
 | XORI rd,rs1,imm     | Xor Immediate                      | rd ← ux(rs1) ⊕ ux(imm)                         | 2                                               |
 | ORI rd,rs1,imm      | Or Immediate                       | rd ← ux(rs1) ∨ ux(imm)                         | 2                                               |
 | ANDI rd,rs1,imm     | And Immediate                      | rd ← ux(rs1) ∧ ux(imm)                         | 2                                               |
@@ -439,8 +437,8 @@ cycle counts added.
 | ADD rd,rs1,rs2      | Add                                | rd ← sx(rs1) + sx(rs2)                         | 1                                               |
 | SUB rd,rs1,rs2      | Subtract                           | rd ← sx(rs1) - sx(rs2)                         | 1                                               |
 | SLL rd,rs1,rs2      | Shift Left Logical                 | rd ← ux(rs1) « rs2                             | 1                                               |
-| SLT rd,rs1,rs2      | Set Less Than                      | rd ← sx(rs1) < sx(rs2)                         | 1                                               |
-| SLTU rd,rs1,rs2     | Set Less Than Unsigned             | rd ← ux(rs1) < ux(rs2)                         | 1                                               |
+| SLT rd,rs1,rs2      | Set Less Than                      | rd ← sx(rs1) \< sx(rs2)                        | 1                                               |
+| SLTU rd,rs1,rs2     | Set Less Than Unsigned             | rd ← ux(rs1) \< ux(rs2)                        | 1                                               |
 | XOR rd,rs1,rs2      | Xor                                | rd ← ux(rs1) ⊕ ux(rs2)                         | 2                                               |
 | SRL rd,rs1,rs2      | Shift Right Logical                | rd ← ux(rs1) » rs2                             | 2                                               |
 | SRA rd,rs1,rs2      | Shift Right Arithmetic             | rd ← sx(rs1) » rs2                             | 2                                               |
@@ -493,7 +491,6 @@ below.
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/1.2/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/1.2/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/1.2/risc0_zkvm/guest/env/fn.read.html
-[acceleration]: ./acceleration.md
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [algorithm]: https://briansmith.org/ecc-inversion-addition-chains-01
 [alignment]: https://doc.rust-lang.org/reference/type-layout.html#the-alignment-modifiers
@@ -521,6 +518,7 @@ below.
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [perf-book]: https://nnethercote.github.io/perf-book
 [pprof]: https://github.com/google/pprof
+[precompiles]: ./precompiles.md
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register

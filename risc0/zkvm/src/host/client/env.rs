@@ -24,9 +24,10 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
+use risc0_circuit_keccak::KECCAK_PO2_RANGE;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
@@ -173,6 +174,17 @@ impl<'a> ExecutorEnvBuilder<'a> {
             if let Ok(env_var) = std::env::var("RISC0_PPROF_OUT") {
                 inner.pprof_out = Some(env_var.into());
             }
+        }
+
+        if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
+            let po2_val = po2.parse::<u32>()?;
+            if !KECCAK_PO2_RANGE.contains(&(po2_val as usize)) {
+                bail!(
+                    "invalid keccak po2 {po2}. Expected range: {:?}",
+                    KECCAK_PO2_RANGE
+                );
+            }
+            inner.env_vars.insert("RISC0_KECCAK_PO2".to_string(), po2);
         }
 
         Ok(inner)

@@ -30,11 +30,11 @@ from the guest for reading/writing/committing. For a complete list, see the
 [`guest` module][risc0-zkvm-guest] documentation; we include a brief list which
 should be sufficient for building your first application:
 
-- **Reading inputs** <br/>
+- **Reading inputs** <br />
   [`env::read`], [`env::read_slice`], and [`env::stdin`]
-- **Writing private outputs to [host]**<br/>
+- **Writing private outputs to [host]**<br />
   [`env::write`], [`env::write_slice`], [`env::stdout`], [`env::stderr`]
-- **Committing public outputs to [journal]**<br/>
+- **Committing public outputs to [journal]**<br />
   [`env::commit`], [`env::commit_slice`]
 
 ## Tools for Debugging & Optimization
@@ -43,26 +43,26 @@ There are also a number of functions available to support with debugging and
 performance analysis. As above, we refer to the [`guest` module][risc0-zkvm-guest] for a full
 list, but include some highlights here:
 
-- **Count Cycles** <br/>
+- **Count Cycles** <br />
   [`env::cycle_count`]
-- **Print a debug message**<br/>
+- **Print a debug message**<br />
   [`env::log`]
 
 For more information on optimization & performance, see our pages on
-[Cryptography Acceleration][acceleration] and [Benchmarking][benchmarks].
+[Cryptography Precompiles][precompiles] and [Benchmarking][benchmarks].
 
 ## Boilerplate before `main()`
 
 In our [template] and [examples], there's a bit of boilerplate code before
 `main()`. In this section, we explain what each of those lines is doing:
 
-- `#![no_std]` <br/>
+- `#![no_std]` <br />
   The guest code should be as lightweight as possible for performance reasons.
   So, since we aren't using `std`, we exclude it.
-- `#![no_main]` <br/>
+- `#![no_main]` <br />
   The guest code is never launched as a standalone Rust executable, so we
   specify `#![no_main]`.
-- `risc0_zkvm_guest::entry!(main);` <br/>
+- `risc0_zkvm_guest::entry!(main);` <br />
   We must make the guest code available for the host to launch, and to do that
   we must specify which function to call when the host starts executing this
   guest code. We use the `risc0_zkvm_guest::entry!` macro to indicate the
@@ -86,7 +86,6 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [`env::stdout`]: https://docs.rs/risc0-zkvm/1.2/risc0_zkvm/guest/env/fn.stdout.html
 [`env::write_slice`]: https://docs.rs/risc0-zkvm/1.2/risc0_zkvm/guest/env/fn.write_slice.html
 [`env::write`]: https://docs.rs/risc0-zkvm/1.2/risc0_zkvm/guest/env/fn.write.html
-[acceleration]: ./acceleration.md
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
@@ -97,6 +96,7 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [hello-world]: ./tutorials/hello-world.md
 [host]: /terminology#host
 [journal]: /terminology#journal
+[precompiles]: ./precompiles.md
 [quickstart]: ./quickstart.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/1.2/risc0_zkvm/guest

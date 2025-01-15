@@ -99,8 +99,8 @@
         },
         {
           "type": "doc",
-          "label": "Acceleration",
-          "id": "zkvm/developer-guide/acceleration"
+          "label": "Precompiles",
+          "id": "zkvm/developer-guide/precompiles"
         },
         {
           "type": "doc",

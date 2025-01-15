@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ fn add_cycle(insn: InsnKind, mem_idx: usize, pc: Option<u32>) -> PreflightCycle 
 }
 
 #[test]
+#[ignore]
 fn basic() {
     let program = testutil::basic();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();

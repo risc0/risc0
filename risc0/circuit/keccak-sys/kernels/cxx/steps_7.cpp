@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,43 +16,118 @@
 #include "witgen.h"
 
 namespace risc0::circuit::keccak::cpu {
-ThetaP1Struct exec_ThetaP1(ExecContext& ctx,Val64Array5Array5Array arg0, BoundLayout<ThetaP1Layout> layout1)   {
-// ThetaP1(zirgen/circuit/keccak2/keccak.zir:11)
-ThetaP1_Super_SuperStruct5Array x2 = map(Val5Array{Val(0), Val(1), Val(2), Val(3), Val(4)}, LAYOUT_LOOKUP(layout1, _super), ([&](Val5Array::value_type x3, BoundLayout<ThetaP1_Super_SuperLayout5LayoutArray::value_type> x4) {
-// ThetaP1(zirgen/circuit/keccak2/keccak.zir:12)
-ThetaP1_Super_Super_SuperStruct64Array x5 = map(Val64Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7), Val(8), Val(9), Val(10), Val(11), Val(12), Val(13), Val(14), Val(15), Val(16), Val(17), Val(18), Val(19), Val(20), Val(21), Val(22), Val(23), Val(24), Val(25), Val(26), Val(27), Val(28), Val(29), Val(30), Val(31), Val(32), Val(33), Val(34), Val(35), Val(36), Val(37), Val(38), Val(39), Val(40), Val(41), Val(42), Val(43), Val(44), Val(45), Val(46), Val(47), Val(48), Val(49), Val(50), Val(51), Val(52), Val(53), Val(54), Val(55), Val(56), Val(57), Val(58), Val(59), Val(60), Val(61), Val(62), Val(63)}, LAYOUT_LOOKUP(x4, _super), ([&](Val64Array::value_type x6, BoundLayout<NondetRegLayout64LayoutArray::value_type> x7) {
-// ThetaP1(zirgen/circuit/keccak2/keccak.zir:13)
-Val5Array x8 = Val5Array{arg0[0][to_size_t(x3)][to_size_t(x6)], arg0[1][to_size_t(x3)][to_size_t(x6)], arg0[2][to_size_t(x3)][to_size_t(x6)], arg0[3][to_size_t(x3)][to_size_t(x6)], arg0[4][to_size_t(x3)][to_size_t(x6)]};
-NondetRegStruct x9 = exec_Xor5(ctx,x8, x7);
-return ThetaP1_Super_Super_SuperStruct{
-  ._super = x9};
-
-}));
-return ThetaP1_Super_SuperStruct{
-  ._super = x5};
-
-}));
-return ThetaP1Struct{
-  ._super = x2};
+void step_Top_6(ExecContext& ctx,MutableBuf arg0)   {
+// Reg(<preamble>:4)
+// ControlState(zirgen/circuit/keccak2/top.zir:401)
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:454)
+// Top(zirgen/circuit/keccak2/top.zir:481)
+set(ctx,arg0, 12, Val(9));
+// ControlState(zirgen/circuit/keccak2/top.zir:402)
+set(ctx,arg0, 13, Val(1));
+// ControlState(zirgen/circuit/keccak2/top.zir:403)
+set(ctx,arg0, 14, Val(0));
+// ControlState(zirgen/circuit/keccak2/top.zir:404)
+set(ctx,arg0, 15, Val(0));
+return ;
 }
-TopStateStruct exec_InitCycle(ExecContext& ctx,BoundLayout<TopStateLayout> layout0)   {
-// Log(<preamble>:22)
-// InitCycle(zirgen/circuit/keccak2/top.zir:307)
-INVOKE_EXTERN(ctx,log, "InitCycle", std::initializer_list<Val>{});
-// InitCycle(zirgen/circuit/keccak2/top.zir:316)
-TopStateStruct x1 = exec_TopState(ctx,Val800Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, Val100Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, Val16Array{Val(58983), Val(27145), Val(44677), Val(47975), Val(62322), Val(15470), Val(62778), Val(42319), Val(21119), Val(20750), Val(26764), Val(39685), Val(55723), Val(8067), Val(52505), Val(23520)}, layout0);
-return x1;
+void step_Top_22(ExecContext& ctx,MutableBuf arg0)   {
+// ShaNextBlock(zirgen/circuit/keccak2/top.zir:426)
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:461)
+Val x1 = (get(ctx,arg0, 14, 1) - Val(3));
+// IsZero(zirgen/circuit/keccak2/is_zero.zir:8)
+set(ctx,arg0, 934, isz(x1));
+Val x2 = get(ctx,arg0, 934, 0);
+// IsZero(zirgen/circuit/keccak2/is_zero.zir:11)
+set(ctx,arg0, 935, inv_0(x1));
+// ShaNextBlock(zirgen/circuit/keccak2/top.zir:427)
+Val x3 = (Val(1) - x2);
+// Reg(<preamble>:4)
+// ShaNextBlock(zirgen/circuit/keccak2/top.zir:428)
+set(ctx,arg0, 936, (x2 * (Val(1) - get(ctx,arg0, 13, 1))));
+Val x4 = get(ctx,arg0, 936, 0);
+// ShaNextBlock(zirgen/circuit/keccak2/top.zir:429)
+Val x5 = ((Val(1) - x3) - x4);
+if (to_size_t(x3)) {
+// ShaNextBlock(zirgen/circuit/keccak2/top.zir:430)
+step_Top_17(ctx,arg0);
 }
-WrapOneHotStruct exec_WrapOneHot(ExecContext& ctx,OneHot_12_Struct arg0, BoundLayout<WrapOneHotLayout> layout1)   {
-// WrapOneHot(zirgen/circuit/keccak2/top.zir:470)
-WrapOneHot_SuperStruct12Array x2 = map(Val12Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7), Val(8), Val(9), Val(10), Val(11)}, LAYOUT_LOOKUP(layout1, _super), ([&](Val12Array::value_type x3, BoundLayout<NondetRegLayout12LayoutArray::value_type> x4) {
-NondetRegStruct x5 = exec_Reg(ctx,arg0.bits[to_size_t(x3)]._super._super, x4);
-return WrapOneHot_SuperStruct{
-  ._super = x5};
-
-}));
-return WrapOneHotStruct{
-  ._super = x2};
+if (to_size_t(x4)) {
+step_Top_18(ctx,arg0);
+}
+if (to_size_t(x5)) {
+step_Top_21(ctx,arg0);
+}
+return ;
+}
+void step_Top_38(ExecContext& ctx,MutableBuf arg0)   {
+// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+// OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
+// LoadWin(zirgen/circuit/keccak2/top.zir:164)
+// ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+// Top(zirgen/circuit/keccak2/top.zir:499)
+Val x1 = get(ctx,arg0, 1090, 0);
+Val x2 = get(ctx,arg0, 1091, 0);
+// LoadWin(zirgen/circuit/keccak2/top.zir:167)
+Val x3 = ((get(ctx,arg0, 820, 1) * x1) + (get(ctx,arg0, 852, 1) * x2));
+// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+// OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
+// LoadWin(zirgen/circuit/keccak2/top.zir:164)
+Val x4 = get(ctx,arg0, 1092, 0);
+// ShaCycle(zirgen/circuit/keccak2/top.zir:188)
+Val x5 = get(ctx,arg0, 1081, 0);
+// LoadWin(zirgen/circuit/keccak2/top.zir:174)
+// ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+Val x6 = ((get(ctx,arg0, 836, 1) * x1) + (get(ctx,arg0, 868, 1) * x2));
+// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+// OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
+// ShaCycle(zirgen/circuit/keccak2/top.zir:188)
+Val x7 = get(ctx,arg0, 1082, 0);
+// LoadWin(zirgen/circuit/keccak2/top.zir:166)
+// ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+Val x8 = (((x3 + (get(ctx,arg0, 884, 1) * x4)) * x5) + ((x6 + (get(ctx,arg0, 900, 1) * x4)) * x7));
+// LoadWin(zirgen/circuit/keccak2/top.zir:167)
+Val x9 = ((get(ctx,arg0, 821, 1) * x1) + (get(ctx,arg0, 853, 1) * x2));
+// LoadWin(zirgen/circuit/keccak2/top.zir:174)
+Val x10 = ((get(ctx,arg0, 837, 1) * x1) + (get(ctx,arg0, 869, 1) * x2));
+// LoadWin(zirgen/circuit/keccak2/top.zir:166)
+Val x11 = (((x9 + (get(ctx,arg0, 885, 1) * x4)) * x5) + ((x10 + (get(ctx,arg0, 901, 1) * x4)) * x7));
+// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+// ExpandBE(zirgen/circuit/keccak2/sha2.zir:54)
+// DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+// ShaCycle(zirgen/circuit/keccak2/top.zir:194)
+set(ctx,arg0, 592, (bitAnd(x11, Val(256)) * Val(2005401601)));
+set(ctx,arg0, 593, (bitAnd(x11, Val(512)) * Val(2009333761)));
+set(ctx,arg0, 594, (bitAnd(x11, Val(1024)) * Val(2011299841)));
+set(ctx,arg0, 595, (bitAnd(x11, Val(2048)) * Val(2012282881)));
+set(ctx,arg0, 596, (bitAnd(x11, Val(4096)) * Val(2012774401)));
+set(ctx,arg0, 597, (bitAnd(x11, Val(8192)) * Val(2013020161)));
+set(ctx,arg0, 598, (bitAnd(x11, Val(16384)) * Val(2013143041)));
+set(ctx,arg0, 599, (bitAnd(x11, Val(32768)) * Val(2013204481)));
+set(ctx,arg0, 600, bitAnd(x11, Val(1)));
+set(ctx,arg0, 601, (bitAnd(x11, Val(2)) * Val(1006632961)));
+set(ctx,arg0, 602, (bitAnd(x11, Val(4)) * Val(1509949441)));
+set(ctx,arg0, 603, (bitAnd(x11, Val(8)) * Val(1761607681)));
+set(ctx,arg0, 604, (bitAnd(x11, Val(16)) * Val(1887436801)));
+set(ctx,arg0, 605, (bitAnd(x11, Val(32)) * Val(1950351361)));
+set(ctx,arg0, 606, (bitAnd(x11, Val(64)) * Val(1981808641)));
+set(ctx,arg0, 607, (bitAnd(x11, Val(128)) * Val(1997537281)));
+set(ctx,arg0, 608, (bitAnd(x8, Val(256)) * Val(2005401601)));
+set(ctx,arg0, 609, (bitAnd(x8, Val(512)) * Val(2009333761)));
+set(ctx,arg0, 610, (bitAnd(x8, Val(1024)) * Val(2011299841)));
+set(ctx,arg0, 611, (bitAnd(x8, Val(2048)) * Val(2012282881)));
+set(ctx,arg0, 612, (bitAnd(x8, Val(4096)) * Val(2012774401)));
+set(ctx,arg0, 613, (bitAnd(x8, Val(8192)) * Val(2013020161)));
+set(ctx,arg0, 614, (bitAnd(x8, Val(16384)) * Val(2013143041)));
+set(ctx,arg0, 615, (bitAnd(x8, Val(32768)) * Val(2013204481)));
+set(ctx,arg0, 616, bitAnd(x8, Val(1)));
+set(ctx,arg0, 617, (bitAnd(x8, Val(2)) * Val(1006632961)));
+set(ctx,arg0, 618, (bitAnd(x8, Val(4)) * Val(1509949441)));
+set(ctx,arg0, 619, (bitAnd(x8, Val(8)) * Val(1761607681)));
+set(ctx,arg0, 620, (bitAnd(x8, Val(16)) * Val(1887436801)));
+set(ctx,arg0, 621, (bitAnd(x8, Val(32)) * Val(1950351361)));
+set(ctx,arg0, 622, (bitAnd(x8, Val(64)) * Val(1981808641)));
+set(ctx,arg0, 623, (bitAnd(x8, Val(128)) * Val(1997537281)));
+return ;
 }
 
 } // namespace risc0::circuit::keccak::cpu
