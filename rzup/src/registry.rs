@@ -186,7 +186,7 @@ impl Registry {
         }
 
         // Install component
-        components::install(&component, env, &self.base_urls, Some(&version), force)?;
+        components::install(&component, env, &self.base_urls, &version, force)?;
 
         self.set_active_component_version(env, &component_to_install, version.clone())?;
         self.set_active_component_version(env, component, version)?;

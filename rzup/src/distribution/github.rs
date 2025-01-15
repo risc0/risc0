@@ -185,21 +185,12 @@ impl<'a> GithubRelease<'a> {
 
     fn download_url(
         &self,
-        env: &Environment,
         component: &Component,
-        version: Option<&Version>,
+        version: &Version,
         platform: &Platform,
     ) -> Result<String> {
         let (asset, ext) = component_asset_name(component, platform)?;
-        let version_str = match version {
-            Some(v) => component_version_str(component, v),
-            None => {
-                env.emit(RzupEvent::Debug {
-                    message: format!("No version specified, fetching latest for {component}"),
-                });
-                format!("v{}", self.latest_version(env, component)?)
-            }
-        };
+        let version_str = component_version_str(component, version);
         let repo = component_repo_name(component);
         Ok(format!(
             "{base_url}/{repo}/releases/download/{version_str}/{asset}.{ext}",
@@ -207,12 +198,7 @@ impl<'a> GithubRelease<'a> {
         ))
     }
 
-    pub fn get_archive_name(
-        &self,
-        component: &Component,
-        _version: Option<&Version>,
-        platform: &Platform,
-    ) -> Result<PathBuf> {
+    pub fn get_archive_name(&self, component: &Component, platform: &Platform) -> Result<PathBuf> {
         let (asset_name, ext) = component_asset_name(component, platform)?;
         Ok(PathBuf::from(format!("{asset_name}.{ext}")))
     }
@@ -248,13 +234,8 @@ impl<'a> GithubRelease<'a> {
         &self,
         env: &Environment,
         component: &Component,
-        version: Option<&Version>,
+        version: &Version,
     ) -> Result<()> {
-        let version = match version {
-            Some(v) => v,
-            None => &self.latest_version(env, component)?,
-        };
-
         // check if release exists before download
         if !self.check_release_exists(component, version)? {
             env.emit(RzupEvent::InstallationFailed {
@@ -267,12 +248,12 @@ impl<'a> GithubRelease<'a> {
         }
 
         let platform = env.platform();
-        let archive_name = self.get_archive_name(component, Some(version), platform)?;
+        let archive_name = self.get_archive_name(component, platform)?;
         let lock_path = env
             .tmp_dir()
             .join(format!("{}.lock", archive_name.display()));
 
-        let download_url = self.download_url(env, component, Some(version), platform)?;
+        let download_url = self.download_url(component, version, platform)?;
 
         // create and lock the file
         let lock_file = std::fs::OpenOptions::new()

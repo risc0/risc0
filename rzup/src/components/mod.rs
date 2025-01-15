@@ -111,22 +111,19 @@ pub fn install(
     component: &Component,
     env: &Environment,
     base_urls: &BaseUrls,
-    version: Option<&Version>,
+    version: &Version,
     force: bool,
 ) -> Result<()> {
     let component_to_install = component.parent_component().unwrap_or(component.clone());
 
     let distribution = GithubRelease::new(base_urls);
 
-    let latest_version = distribution.latest_version(env, &Component::CargoRiscZero)?;
-    let version = version.unwrap_or(&latest_version);
     env.emit(RzupEvent::InstallationStarted {
         id: component.to_string(),
         version: version.to_string(),
     });
 
-    let archive_name =
-        distribution.get_archive_name(&component_to_install, Some(version), env.platform())?;
+    let archive_name = distribution.get_archive_name(&component_to_install, env.platform())?;
     let downloaded_file = env.tmp_dir().join(archive_name);
 
     if force {
@@ -134,7 +131,7 @@ pub fn install(
     }
 
     // Download and extract
-    distribution.download_version(env, &component_to_install, Some(version))?;
+    distribution.download_version(env, &component_to_install, version)?;
     let version_dir = Paths::get_version_dir(env, &component_to_install, version);
 
     if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
@@ -211,7 +208,7 @@ mod tests {
         let version = Version::new(1, 81, 0);
 
         // Test installation
-        components::install(&component, &env, &base_urls, Some(&version), true).unwrap();
+        components::install(&component, &env, &base_urls, &version, true).unwrap();
 
         // Clean up
         components::uninstall(&component, &env, &version).unwrap();
@@ -228,7 +225,7 @@ mod tests {
         let version = Version::new(2024, 1, 5);
 
         // Test installation
-        components::install(&component, &env, &base_urls, Some(&version), true).unwrap();
+        components::install(&component, &env, &base_urls, &version, true).unwrap();
 
         // Clean up
         components::uninstall(&component, &env, &version).unwrap();
@@ -245,7 +242,7 @@ mod tests {
         let version = Version::new(1, 0, 0);
 
         // Test installation
-        components::install(&component, &env, &base_urls, Some(&version), true).unwrap();
+        components::install(&component, &env, &base_urls, &version, true).unwrap();
 
         // Clean up
         components::uninstall(&component, &env, &version).unwrap();
