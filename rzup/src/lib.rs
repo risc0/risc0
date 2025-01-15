@@ -632,6 +632,7 @@ mod tests {
         component_to_install: Component,
         version: Version,
         expected_url: String,
+        download_length: u64,
         mut expected_symlinks: Vec<(String, String)>,
     ) {
         let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
@@ -651,11 +652,11 @@ mod tests {
                     id: component_to_install.to_string(),
                     version: version.to_string(),
                     url: expected_url,
-                    len: Some(86),
+                    len: Some(download_length),
                 },
                 RzupEvent::DownloadProgress {
                     id: component_to_install.to_string(),
-                    incr: 86,
+                    incr: download_length,
                 },
                 RzupEvent::DownloadCompleted {
                     id: component_to_install.to_string(),
@@ -701,6 +702,7 @@ mod tests {
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
+            86,
             vec![(
                 ".cargo/bin/cargo-risczero".into(),
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
@@ -722,6 +724,7 @@ mod tests {
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
+            86,
             vec![
                 (
                     ".cargo/bin/cargo-risczero".into(),
@@ -749,6 +752,25 @@ mod tests {
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
+            86,
+            vec![],
+        )
+    }
+
+    #[test]
+    fn install_cpp() {
+        let server = MockDistributionServer::new();
+        install_test(
+            server.base_urls.clone(),
+            Component::CppToolchain,
+            Component::CppToolchain,
+            Version::new(2024, 1, 5),
+            format!(
+                "{base_url}/toolchain/releases/download/2024.01.05/\
+                riscv32im-linux-x86_64.tar.xz",
+                base_url = server.base_urls.risc0_github_base_url
+            ),
+            128,
             vec![],
         )
     }
