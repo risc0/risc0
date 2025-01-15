@@ -79,14 +79,6 @@ impl Settings {
     pub(crate) fn set_active_version(&mut self, component: &Component, version: &Version) {
         self.active_versions
             .insert(component.to_string(), version.to_string());
-        // if cargo-risczero, also set r0vm and vice-versa
-        if component == &Component::CargoRiscZero {
-            self.active_versions
-                .insert(Component::R0Vm.to_string(), version.to_string());
-        } else if component == &Component::R0Vm {
-            self.active_versions
-                .insert(Component::CargoRiscZero.to_string(), version.to_string());
-        }
     }
 }
 

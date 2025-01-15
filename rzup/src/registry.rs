@@ -117,11 +117,6 @@ impl Registry {
         env: &Environment,
         component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
-        // For virtual components, get active version from parent
-        if let Some(parent_id) = component.parent_component() {
-            return self.get_active_component_version(env, &parent_id);
-        }
-
         if let Some(version) = self.settings.get_active_version(component) {
             if Paths::version_exists(env, component, &version)? {
                 let version_dir = Paths::get_version_dir(env, component, &version);
@@ -194,9 +189,13 @@ impl Registry {
 
         components::install(component, env, &self.base_urls, &version, force)?;
 
-        self.set_active_component_version(env, &component_to_install, version.clone())?;
-        if component != &component_to_install {
-            self.set_active_component_version(env, component, version)?;
+        self.set_active_component_version(env, component, version.clone())?;
+
+        if self
+            .get_active_component_version(env, &component_to_install)?
+            .is_none()
+        {
+            self.set_active_component_version(env, &component_to_install, version)?;
         }
 
         Ok(())

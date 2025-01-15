@@ -1050,7 +1050,7 @@ mod tests {
             vec![
                 (
                     ".cargo/bin/cargo-risczero".into(),
-                    ".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                    ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
                         .into(),
                 ),
                 (
@@ -1061,7 +1061,7 @@ mod tests {
             vec![
                 (
                     ".cargo/bin/cargo-risczero".into(),
-                    ".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                    ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
                         .into(),
                 ),
                 (
