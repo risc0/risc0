@@ -75,6 +75,8 @@ extern crate alloc;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
+#[cfg(feature = "unstable")]
+mod mmr;
 mod receipt;
 mod receipt_claim;
 pub mod serde;

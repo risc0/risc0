@@ -18,10 +18,13 @@ use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
 
+use crate::mmr::Mmr;
+
 /// This struct implements the batching of calls to the keccak accelerator.
 #[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
+    mmr: Mmr,
 }
 
 impl Keccak2Batcher {
@@ -32,6 +35,7 @@ impl Keccak2Batcher {
     pub fn new() -> Self {
         Self {
             claim_state: SHA256_INIT,
+            mmr: Mmr::default(),
         }
     }
 
@@ -56,9 +60,16 @@ impl Keccak2Batcher {
         unsafe {
             sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
         }
-        crate::guest::env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
+        self.mmr.insert(claim_digest);
 
         self.reset();
+    }
+
+    pub fn final_finalize(&mut self) {
+        if !self.inputs.is_empty() {
+            let claim_digest = self.mmr.root().unwrap();
+            crate::guest::env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
+        }
     }
 
     fn claim_digest(&self) -> Digest {
