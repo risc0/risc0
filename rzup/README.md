@@ -108,6 +108,21 @@ Arguments:
 - `NAME`: Component name (required)
 - `VERSION`: Version to uninstall (required)
 
+### Build
+
+Build a particular component from source.
+
+```sh
+rzup build <NAME> <COMMIT-OR-TAG>
+```
+
+Right now this command only supports building the Rust toolchain.
+
+Downloads the source code for the given component from GitHub, builds it, installs it, and makes it
+the default version.
+
+The resulting version of the component will contain the commit hash.
+
 ## Components
 
 rzup manages the following components:
@@ -115,8 +130,14 @@ rzup manages the following components:
 1. **rust**: The RISC Zero Rust toolchain
    - Rust compiler and tools optimized for the RISC Zero zkVM
 
-2. **cargo-risczero**: The RISC Zero Cargo extension
+2. **cpp**: The RISC Zero C++ toolchain
+   - The C++ compiler and tools optimized for the RISC Zero zkVM
+
+3. **cargo-risczero**: The RISC Zero Cargo extension
    - Provides cargo subcommands for RISC Zero development
+
+4. **r0vm**: The RISC Zero zkVM
+    - Precompiled version of the RISC Zero zkVM
 
 ## Configuration
 
