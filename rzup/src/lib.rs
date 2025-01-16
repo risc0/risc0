@@ -1319,6 +1319,8 @@ mod tests {
             mkdir -p build/foo/stage2-tools-bin
             touch build/foo/stage2/bin/rustc
             touch build/foo/stage2-tools-bin/cargo-fmt
+            echo 'build output line 1'
+            echo 'build output line 2'
             ",
         );
 
@@ -1341,6 +1343,8 @@ mod tests {
             touch build/foo/stage2/bin/rustc
             touch build/foo/stage2-tools-bin/cargo-fmt
             touch build/foo/stage2-tools-bin/bar-fmt
+            echo 'build output line 1'
+            echo 'build output line 2'
             ",
         );
 
@@ -1377,7 +1381,19 @@ mod tests {
                     message: "./x build".into(),
                 },
                 RzupEvent::BuildingRustToolchainUpdate {
+                    message: "build output line 1".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "build output line 2".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
                     message: "./x build --stage 2".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "build output line 1".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "build output line 2".into(),
                 },
                 RzupEvent::BuildingRustToolchainUpdate {
                     message: "installing".into(),

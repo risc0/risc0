@@ -19,10 +19,75 @@ use crate::events::RzupEvent;
 use crate::paths::Paths;
 use semver::Version;
 
+use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 const CONFIG_TOML: &str = include_str!("rust-toolchain-build-config.toml");
+
+fn stream_lines(
+    reader: impl BufRead,
+    mut output_cb: impl FnMut(&str) + Clone + Send + Sync,
+) -> Result<String> {
+    let mut output = String::new();
+    for line in reader.lines() {
+        let line = line.map_err(|e| RzupError::Other(e.to_string()))?;
+        output_cb(&line);
+        output += &line;
+        output += "\n";
+    }
+    Ok(output)
+}
+
+pub fn run_command_and_stream_output(
+    program: &str,
+    args: &[&str],
+    current_dir: Option<&Path>,
+    env: &[(&str, &str)],
+    output_cb: impl FnMut(&str) + Clone + Send + Sync,
+) -> Result<String> {
+    let mut cmd = Command::new(program);
+    cmd.args(args);
+    cmd.envs(env.iter().copied());
+
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
+
+    if let Some(path) = current_dir {
+        cmd.current_dir(path);
+    }
+    let mut child = cmd.spawn()?;
+
+    std::thread::scope(|scope| {
+        let stdout = BufReader::new(child.stdout.take().unwrap());
+        let stderr = BufReader::new(child.stderr.take().unwrap());
+
+        let output_cb_clone = output_cb.clone();
+        let stdout_thread = scope.spawn(move || stream_lines(stdout, output_cb_clone));
+
+        let output_cb_clone = output_cb.clone();
+        let stderr_thread = scope.spawn(move || stream_lines(stderr, output_cb_clone));
+
+        let status = child.wait()?;
+
+        let stdout_res = stdout_thread.join().unwrap();
+        let stderr_res = stderr_thread.join().unwrap();
+
+        if !status.success() {
+            let stdout = stdout_res.unwrap_or_default();
+            let stderr = stderr_res.unwrap_or_default();
+            let cmd_str =
+                Vec::from_iter(std::iter::once(program).chain(args.iter().copied())).join(" ");
+
+            return Err(RzupError::Other(format!(
+                "Process `{cmd_str}` failed with status {status}\n\
+                stodout: {stdout}\n\
+                stderr: {stderr}",
+            )));
+        }
+        stdout_res
+    })
+}
 
 pub fn run_command(
     program: &str,
@@ -30,26 +95,7 @@ pub fn run_command(
     current_dir: Option<&Path>,
     env: &[(&str, &str)],
 ) -> Result<String> {
-    let mut cmd = Command::new(program);
-    cmd.args(args);
-    cmd.envs(env.iter().copied());
-    if let Some(path) = current_dir {
-        cmd.current_dir(path);
-    }
-    let output = cmd.output()?;
-    if !output.status.success() {
-        let cmd_str =
-            Vec::from_iter(std::iter::once(program).chain(args.iter().copied())).join(" ");
-        return Err(RzupError::Other(format!(
-            "Process `{cmd_str}` failed with status {}\n\
-            stodout: {}\n\
-            stderr: {}",
-            &output.status,
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr)
-        )));
-    }
-    String::from_utf8(output.stdout).map_err(|e| RzupError::Other(e.to_string()))
+    run_command_and_stream_output(program, args, current_dir, env, |_| {})
 }
 
 fn git_clone(src: &str, dest: &Path) -> Result<()> {
@@ -164,7 +210,7 @@ pub fn build_rust_toolchain(
         message: "./x build".into(),
     });
 
-    run_command(
+    run_command_and_stream_output(
         "./x",
         &["build"],
         Some(&repo_dir),
@@ -172,6 +218,11 @@ pub fn build_rust_toolchain(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
             "-Cpasses=loweratomic",
         )],
+        |line| {
+            env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                message: line.into(),
+            });
+        },
     )
     .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain build: {e}")))?;
 
@@ -179,7 +230,7 @@ pub fn build_rust_toolchain(
         message: "./x build --stage 2".into(),
     });
 
-    run_command(
+    run_command_and_stream_output(
         "./x",
         &["build", "--stage", "2"],
         Some(&repo_dir),
@@ -187,6 +238,11 @@ pub fn build_rust_toolchain(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
             "-Cpasses=loweratomic",
         )],
+        |line| {
+            env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                message: line.into(),
+            });
+        },
     )
     .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain build --stage 2: {e}")))?;
 
