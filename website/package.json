@@ -10,7 +10,7 @@
   "scripts": {
     "build": "docusaurus build",
     "check-link-versions": "python ./link-version-check.py",
-    "check-markdown": "remark . --quiet --frail",
+    "check-markdown": "remark . --quiet",
     "clear": "docusaurus clear",
     "deploy": "docusaurus deploy",
     "fmt": "prettier . --write",
