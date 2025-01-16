@@ -74,18 +74,20 @@ impl Rzup {
         })
     }
 
-    /// Creates a new Rzup instance with a custom root directory.
+    /// Creates a new Rzup instance with a custom root directory, base URLs, and GitHub token.
     ///
     /// # Arguments
     /// * `risc0_dir` - The root directory path for storing components and settings
     /// * `home_dir` - The path to the user's home directory
     /// * `base_urls` - The base URLs used to communicate with GitHub
-    pub fn with_paths(
+    /// * `github_token` - The token to use when communicating with GitHub
+    pub fn with_paths_urls_and_token(
         risc0_dir: impl Into<PathBuf>,
         home_dir: impl AsRef<Path>,
         base_urls: BaseUrls,
+        github_token: Option<String>,
     ) -> Result<Self> {
-        let environment = Environment::with_paths(risc0_dir, home_dir)?;
+        let environment = Environment::with_paths_and_token(risc0_dir, home_dir, github_token)?;
         let registry = Registry::new(&environment, base_urls)?;
 
         Ok(Self {
@@ -257,10 +259,13 @@ impl Rzup {
             version: "latest".to_string(),
         });
 
-        let script_contents = distribution::download_text(format!(
-            "{base_url}/install",
-            base_url = self.registry.base_urls().risc0_base_url
-        ))?;
+        let script_contents = distribution::download_text(
+            format!(
+                "{base_url}/install",
+                base_url = self.registry.base_urls().risc0_base_url
+            ),
+            &None,
+        )?;
 
         let output = std::process::Command::new("/usr/bin/env")
             .args(["bash", "-c", &script_contents])
@@ -310,6 +315,7 @@ mod tests {
 
     async fn request_handler(
         install_script: String,
+        require_bearer_token: bool,
         req: hyper::Request<hyper::body::Incoming>,
     ) -> std::result::Result<HyperResponse, Infallible> {
         fn json_response(json: &'static str) -> HyperResponse {
@@ -386,6 +392,14 @@ mod tests {
                 .unwrap()
         }
 
+        if require_bearer_token {
+            let value = req
+                .headers()
+                .get("Authorization")
+                .expect("Authorization provided");
+            assert_eq!(value, "Bearer suchsecrettesttoken");
+        }
+
         Ok(match &req.uri().to_string()[..] {
             "/gihub_api/repos/risc0/risc0/releases/latest" => {
                 json_response("{\"tag_name\":\"v1.1.0\"}")
@@ -415,7 +429,11 @@ mod tests {
     }
 
     #[tokio::main]
-    async fn server_main(install_script: String, sender: tokio::sync::oneshot::Sender<SocketAddr>) {
+    async fn server_main(
+        install_script: String,
+        require_bearer_token: bool,
+        sender: tokio::sync::oneshot::Sender<SocketAddr>,
+    ) {
         let listener = tokio::net::TcpListener::bind("localhost:0").await.unwrap();
         sender.send(listener.local_addr().unwrap()).unwrap();
 
@@ -425,7 +443,7 @@ mod tests {
                 .serve_connection(
                     hyper_util::rt::TokioIo::new(stream),
                     hyper::service::service_fn(move |req| {
-                        request_handler(install_script.clone(), req)
+                        request_handler(install_script.clone(), require_bearer_token, req)
                     }),
                 )
                 .await
@@ -434,9 +452,9 @@ mod tests {
     }
 
     impl MockDistributionServer {
-        pub fn new_with_install_script(install_script: String) -> Self {
+        pub fn new_with_options(install_script: String, require_bearer_token: bool) -> Self {
             let (send, recv) = tokio::sync::oneshot::channel();
-            std::thread::spawn(move || server_main(install_script, send));
+            std::thread::spawn(move || server_main(install_script, require_bearer_token, send));
             let address = recv.blocking_recv().unwrap();
             Self {
                 base_urls: BaseUrls {
@@ -448,7 +466,15 @@ mod tests {
         }
 
         pub fn new() -> Self {
-            Self::new_with_install_script("".into())
+            Self::new_with_options("".into(), false)
+        }
+
+        pub fn new_with_install_script(install_script: String) -> Self {
+            Self::new_with_options(install_script, false)
+        }
+
+        pub fn new_with_required_bearer_token() -> Self {
+            Self::new_with_options("".into(), true)
         }
     }
 
@@ -479,16 +505,21 @@ mod tests {
         }
     }
 
-    fn setup_test_env(base_urls: BaseUrls) -> (TempDir, Rzup) {
+    fn setup_test_env(base_urls: BaseUrls, github_token: Option<String>) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
-        let rzup =
-            Rzup::with_paths(tmp_dir.path().join(".risc0"), tmp_dir.path(), base_urls).unwrap();
+        let rzup = Rzup::with_paths_urls_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path(),
+            base_urls,
+            github_token,
+        )
+        .unwrap();
         (tmp_dir, rzup)
     }
 
     #[test]
     fn test_rzup_initialization() {
-        let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls());
+        let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls(), None);
         assert!(rzup
             .settings()
             .get_default_version(&Component::RustToolchain)
@@ -501,7 +532,7 @@ mod tests {
 
     #[test]
     fn test_path_operations() {
-        let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls());
+        let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls(), None);
         let version = Version::new(1, 2, 0);
         let component = Component::CargoRiscZero;
 
@@ -525,7 +556,7 @@ mod tests {
     }
 
     fn test_install_and_uninstall_end_to_end(base_urls: BaseUrls) {
-        let (_tmp_dir, mut rzup) = setup_test_env(base_urls);
+        let (_tmp_dir, mut rzup) = setup_test_env(base_urls, None);
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         // Test installation
@@ -687,8 +718,10 @@ mod tests {
         download_length: u64,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        use_github_token: bool,
     ) {
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
+        let github_token = use_github_token.then_some("suchsecrettesttoken".into());
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token);
 
         run_and_assert_events(
             &mut rzup,
@@ -732,8 +765,10 @@ mod tests {
         version: Version,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        use_github_token: bool,
     ) {
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
+        let github_token = use_github_token.then_some("suchsecrettesttoken".into());
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token);
 
         rzup.install_component(&component, Some(version.clone()), false)
             .unwrap();
@@ -763,8 +798,10 @@ mod tests {
         download_length: u64,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        use_github_token: bool,
     ) {
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone());
+        let github_token = use_github_token.then_some("suchsecrettesttoken".into());
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token);
 
         rzup.install_component(&component, Some(version.clone()), false)
             .unwrap();
@@ -814,6 +851,7 @@ mod tests {
         download_length: u64,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        use_github_token: bool,
     ) {
         fresh_install_test(
             base_urls.clone(),
@@ -824,6 +862,7 @@ mod tests {
             download_length,
             expected_files.clone(),
             expected_symlinks.clone(),
+            use_github_token,
         );
 
         already_installed_test(
@@ -832,6 +871,7 @@ mod tests {
             version.clone(),
             expected_files.clone(),
             expected_symlinks.clone(),
+            use_github_token,
         );
 
         already_installed_force_test(
@@ -843,6 +883,7 @@ mod tests {
             download_length,
             expected_files.clone(),
             expected_symlinks.clone(),
+            use_github_token,
         );
     }
 
@@ -869,6 +910,7 @@ mod tests {
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
                     .into(),
             )],
+            false, /* use_github_token */
         )
     }
 
@@ -900,6 +942,7 @@ mod tests {
                     ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/r0vm".into(),
                 )
             ],
+            false /* use_github_token */
         )
     }
 
@@ -922,6 +965,7 @@ mod tests {
                 ".rustup/toolchains/risc0".into(),
                 ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu".into(),
             )],
+            false, /* use_github_token */
         )
     }
 
@@ -946,12 +990,40 @@ mod tests {
                 ".risc0/cpp".into(),
                 ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu".into(),
             )],
+            false, /* use_github_token */
+        )
+    }
+
+    #[test]
+    fn install_with_github_token() {
+        let server = MockDistributionServer::new_with_required_bearer_token();
+        install_test(
+            server.base_urls.clone(),
+            Component::CargoRiscZero,
+            Component::CargoRiscZero,
+            Version::new(1, 0, 0),
+            format!(
+                "{base_url}/risc0/releases/download/v1.0.0/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz",
+                base_url = server.base_urls.risc0_github_base_url
+            ),
+            86,
+            vec![
+                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin"
+                    .into(),
+            ],
+            vec![(
+                ".cargo/bin/cargo-risczero".into(),
+                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                    .into(),
+            )],
+            true, /* use_github_token */
         )
     }
 
     fn test_list_multiple_versions(component: Component, version1: Version, version2: Version) {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
 
         rzup.install_component(&component, Some(version1.clone()), false)
             .unwrap();
@@ -1009,7 +1081,7 @@ mod tests {
         expected_symlinks2: Vec<(String, String)>,
     ) {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
 
         rzup.install_component(&component, Some(version1.clone()), false)
             .unwrap();
@@ -1120,7 +1192,7 @@ mod tests {
     #[test]
     fn default_version_after_uninstall() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
         let cargo_risczero_version1 = Version::new(1, 0, 0);
         let cargo_risczero_version2 = Version::new(1, 1, 0);
 
@@ -1153,7 +1225,7 @@ mod tests {
     #[test]
     fn install_non_existent() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
         let cargo_risczero_version = Version::new(5, 0, 0);
 
         run_and_assert_events(
@@ -1192,7 +1264,7 @@ mod tests {
     #[test]
     fn uninstall_events() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         rzup.install_component(
@@ -1218,7 +1290,7 @@ mod tests {
     #[test]
     fn get_latest_version() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, rzup) = setup_test_env(server.base_urls.clone());
+        let (_tmp_dir, rzup) = setup_test_env(server.base_urls.clone(), None);
 
         assert_eq!(
             rzup.get_latest_version(&Component::CargoRiscZero).unwrap(),
@@ -1236,7 +1308,7 @@ mod tests {
             ",
             temp_dir.path().display()
         ));
-        let (_, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (_, mut rzup) = setup_test_env(server.base_urls.clone(), None);
 
         run_and_assert_events(
             &mut rzup,
@@ -1268,7 +1340,7 @@ mod tests {
             "
             .into(),
         );
-        let (_, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (_, mut rzup) = setup_test_env(server.base_urls.clone(), None);
 
         run_and_assert_events(
             &mut rzup,
@@ -1359,7 +1431,7 @@ mod tests {
     #[test]
     fn build_rust_toolchain() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
 
         let (test_repo, version) = create_fake_rust_repo(&tmp_dir);
 
@@ -1424,7 +1496,7 @@ mod tests {
     #[test]
     fn build_rust_toolchain_twice_different_versions() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
 
         let (test_repo, master) = create_fake_rust_repo(&tmp_dir);
 

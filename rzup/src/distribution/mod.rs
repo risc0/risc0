@@ -101,17 +101,22 @@ fn parse_cpp_version_test() {
     assert!(parse_cpp_version("2025.01").is_err());
 }
 
-fn http_client_get(url: impl IntoUrl) -> Result<reqwest::blocking::Response> {
+fn http_client_get(
+    url: impl IntoUrl,
+    bearer_token: &Option<String>,
+) -> Result<reqwest::blocking::Response> {
     let client = Client::builder()
         .timeout(Duration::from_secs(10))
         .build()
         .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
 
-    client
-        .get(url)
-        .header("User-Agent", "rzup")
-        .send()
-        .map_err(|e| RzupError::Other(e.to_string()))
+    let mut builder = client.get(url).header("User-Agent", "rzup");
+
+    if let Some(token) = bearer_token {
+        builder = builder.header("Authorization", format!("Bearer {token}"));
+    }
+
+    builder.send().map_err(|e| RzupError::Other(e.to_string()))
 }
 
 fn error_on_status(status: reqwest::StatusCode) -> Result<()> {
@@ -129,8 +134,8 @@ fn error_on_status(status: reqwest::StatusCode) -> Result<()> {
     }
 }
 
-fn check_for_not_found(url: impl IntoUrl) -> Result<bool> {
-    let response = http_client_get(url)?;
+fn check_for_not_found(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<bool> {
+    let response = http_client_get(url, bearer_token)?;
     let status = response.status();
     if status == reqwest::StatusCode::NOT_FOUND {
         return Ok(false);
@@ -139,20 +144,26 @@ fn check_for_not_found(url: impl IntoUrl) -> Result<bool> {
     Ok(true)
 }
 
-fn download_json<RetT: serde::de::DeserializeOwned>(url: impl IntoUrl) -> Result<RetT> {
-    let response = http_client_get(url)?;
+fn download_json<RetT: serde::de::DeserializeOwned>(
+    url: impl IntoUrl,
+    bearer_token: &Option<String>,
+) -> Result<RetT> {
+    let response = http_client_get(url, bearer_token)?;
     error_on_status(response.status())?;
     response.json().map_err(|e| RzupError::Other(e.to_string()))
 }
 
-pub fn download_text(url: impl IntoUrl) -> Result<String> {
-    let response = http_client_get(url)?;
+pub fn download_text(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<String> {
+    let response = http_client_get(url, bearer_token)?;
     error_on_status(response.status())?;
     response.text().map_err(|e| RzupError::Other(e.to_string()))
 }
 
-fn download_bytes(url: impl IntoUrl) -> Result<reqwest::blocking::Response> {
-    let response = http_client_get(url)?;
+fn download_bytes(
+    url: impl IntoUrl,
+    bearer_token: &Option<String>,
+) -> Result<reqwest::blocking::Response> {
+    let response = http_client_get(url, bearer_token)?;
     error_on_status(response.status())?;
     Ok(response)
 }

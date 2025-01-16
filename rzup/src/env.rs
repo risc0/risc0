@@ -29,6 +29,7 @@ pub struct Environment {
     settings_file: PathBuf,
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
     platform: Platform,
+    github_token: Option<String>,
 }
 
 impl Environment {
@@ -51,7 +52,11 @@ impl Environment {
         Ok(())
     }
 
-    pub fn with_paths(risc0_dir: impl Into<PathBuf>, home_dir: impl AsRef<Path>) -> Result<Self> {
+    pub fn with_paths_and_token(
+        risc0_dir: impl Into<PathBuf>,
+        home_dir: impl AsRef<Path>,
+        github_token: Option<String>,
+    ) -> Result<Self> {
         let risc0_dir = risc0_dir.into();
         let tmp_dir = risc0_dir.join("tmp");
         let cargo_bin_dir = home_dir.as_ref().join(".cargo/bin");
@@ -67,6 +72,7 @@ impl Environment {
             settings_file,
             event_handler: None,
             platform,
+            github_token,
         };
 
         env.ensure_directories()?;
@@ -84,7 +90,9 @@ impl Environment {
             home_dir.join(".risc0")
         };
 
-        let env = Self::with_paths(risc0_dir, home_dir)?;
+        let github_token = env_accessor("GITHUB_TOKEN").ok();
+
+        let env = Self::with_paths_and_token(risc0_dir, home_dir, github_token)?;
         env.emit(RzupEvent::Debug {
             message: format!("Initialized environment at {}", env.risc0_dir().display()),
         });
@@ -127,6 +135,10 @@ impl Environment {
     pub fn platform(&self) -> &Platform {
         &self.platform
     }
+
+    pub fn github_token(&self) -> &Option<String> {
+        &self.github_token
+    }
 }
 
 #[cfg(test)]
@@ -157,24 +169,29 @@ mod tests {
     fn test_custom_root() {
         let tmp_dir1 = tempfile::tempdir().unwrap();
         let tmp_dir2 = tempfile::tempdir().unwrap();
-        let env = Environment::with_paths(tmp_dir1.path(), tmp_dir2.path()).unwrap();
+        let env =
+            Environment::with_paths_and_token(tmp_dir1.path(), tmp_dir2.path(), Some("foo".into()))
+                .unwrap();
 
         assert_eq!(env.risc0_dir, tmp_dir1.path());
         assert_eq!(env.cargo_bin_dir, tmp_dir2.path().join(".cargo/bin"));
         assert_eq!(env.tmp_dir, tmp_dir1.path().join("tmp"));
         assert_eq!(env.settings_file, tmp_dir1.path().join("settings.toml"));
+        assert_eq!(env.github_token, Some("foo".into()));
     }
 
     #[test]
-    fn test_environment_with_risc0_home() {
+    fn test_environment_with_risc0_home_and_github_token() {
         let tmp_dir = tempfile::tempdir().unwrap();
         let r0_tmp_dir = tmp_dir.path().join("risc0");
 
-        let env = Environment::new(|key| {
-            assert_eq!(key, "RISC0_HOME");
-            Ok(r0_tmp_dir.to_string_lossy().into())
+        let env = Environment::new(|key| match key {
+            "RISC0_HOME" => Ok(r0_tmp_dir.to_string_lossy().into()),
+            "GITHUB_TOKEN" => Ok("foobar".into()),
+            other => panic!("unexpected read of {other:?} environment variable"),
         })
         .unwrap();
         assert_eq!(env.risc0_dir, r0_tmp_dir);
+        assert_eq!(env.github_token, Some("foobar".into()));
     }
 }

@@ -203,7 +203,12 @@ impl<'a> GithubRelease<'a> {
         Ok(PathBuf::from(format!("{asset_name}.{ext}")))
     }
 
-    fn check_release_exists(&self, component: &Component, version: &Version) -> Result<bool> {
+    fn check_release_exists(
+        &self,
+        env: &Environment,
+        component: &Component,
+        version: &Version,
+    ) -> Result<bool> {
         let repo = component_repo_name(component);
         let version_str = component_version_str(component, version);
         let url = format!(
@@ -211,7 +216,7 @@ impl<'a> GithubRelease<'a> {
             base_url = self.base_urls.github_api_base_url
         );
 
-        check_for_not_found(&url)
+        check_for_not_found(&url, env.github_token())
     }
 
     pub fn latest_version(&self, env: &Environment, component: &Component) -> Result<Version> {
@@ -225,7 +230,7 @@ impl<'a> GithubRelease<'a> {
             base_url = self.base_urls.github_api_base_url
         );
 
-        let release: GithubReleaseResponse = download_json(&url)?;
+        let release: GithubReleaseResponse = download_json(&url, env.github_token())?;
 
         parse_version_from_tag_name(component, &release.tag_name)
     }
@@ -237,7 +242,7 @@ impl<'a> GithubRelease<'a> {
         version: &Version,
     ) -> Result<()> {
         // check if release exists before download
-        if !self.check_release_exists(component, version)? {
+        if !self.check_release_exists(env, component, version)? {
             env.emit(RzupEvent::InstallationFailed {
                 id: component.to_string(),
                 version: version.to_string(),
@@ -276,7 +281,7 @@ impl<'a> GithubRelease<'a> {
                 .truncate(true)
                 .open(&download_path)?;
 
-            let mut resp = download_bytes(&download_url)?;
+            let mut resp = download_bytes(&download_url, env.github_token())?;
 
             env.emit(RzupEvent::DownloadStarted {
                 id: component.to_string(),

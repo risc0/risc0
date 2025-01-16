@@ -35,6 +35,10 @@ pub const INSTALL_HELP: &str = "Discussion:
     `--force` flag is provided, in which case it will delete the existing
     version first.
 
+    When communicating with GitHub, the value of the `GITHUB_TOKEN` environment
+    variable is used for authentication if set. This can be useful to get
+    around rate limiting.
+
     The default version of the component is updated to the version that was
     just installed.";
 
@@ -185,7 +189,11 @@ impl DefaultCommand {
 }
 
 pub const CHECK_HELP: &str = "Discussion:
-    Checks GitHub to see if the latest version of a component is installed or not.";
+    Checks GitHub to see if the latest version of a component is installed or not.
+
+    When communicating with GitHub, the value of the `GITHUB_TOKEN` environment
+    variable is used for authentication. This can be useful to get around rate
+    limiting.";
 
 #[derive(Parser)]
 pub(crate) struct CheckCommand;
