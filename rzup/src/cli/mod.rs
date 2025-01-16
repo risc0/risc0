@@ -20,7 +20,7 @@ use crate::Rzup;
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 use commands::UninstallCommand;
-use commands::{BuildCommand, CheckCommand, InstallCommand, ShowCommand, UseCommand};
+use commands::{BuildCommand, CheckCommand, DefaultCommand, InstallCommand, ShowCommand};
 use ui::Ui;
 
 #[derive(Subcommand)]
@@ -31,9 +31,9 @@ enum Commands {
     /// Check for new component versions
     #[command(after_help = commands::CHECK_HELP)]
     Check(CheckCommand),
-    /// Set a component version as active
-    #[command(after_help = commands::USE_HELP)]
-    Use(UseCommand),
+    /// Set a component version as default
+    #[command(after_help = commands::DEFAULT_HELP)]
+    Default(DefaultCommand),
     /// Show installed components
     #[command(after_help = commands::SHOW_HELP)]
     Show(ShowCommand),
@@ -52,7 +52,7 @@ pub const RZUP_HELP: &str = "Discussion:
     environment variable, or in `~/.risc0` if not set.
 
     Rust software components symlink their binaries into ~/.cargo/bin/ when
-    made active.";
+    made default.";
 
 #[derive(Parser)]
 #[command(name = "rzup", version)]
@@ -90,7 +90,7 @@ impl Cli {
             let result = match self.command {
                 Commands::Install(cmd) => cmd.execute(rzup),
                 Commands::Show(cmd) => cmd.execute(rzup),
-                Commands::Use(cmd) => cmd.execute(rzup),
+                Commands::Default(cmd) => cmd.execute(rzup),
                 Commands::Check(cmd) => cmd.execute(rzup),
                 Commands::Uninstall(cmd) => cmd.execute(rzup),
                 Commands::Build(cmd) => cmd.execute(rzup),

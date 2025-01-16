@@ -164,7 +164,7 @@ fn symlink(original: &Path, link: &Path) -> Result<()> {
         .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
 }
 
-pub fn set_active(env: &Environment, component: &Component, version: &Version) -> Result<()> {
+pub fn set_default(env: &Environment, component: &Component, version: &Version) -> Result<()> {
     let installed_component = component.parent_component().unwrap_or(*component);
     let version_dir = Paths::get_version_dir(env, &installed_component, version);
 

@@ -93,7 +93,7 @@ rust
   1.81.0
 ```
 
-The `*` indicates the currently active version.
+The `*` indicates the current default version.
 
 ### Uninstall
 

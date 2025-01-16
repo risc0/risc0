@@ -25,7 +25,7 @@ use std::fs;
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct Settings {
     #[serde(default)]
-    active_versions: HashMap<String, String>,
+    default_versions: HashMap<String, String>,
 }
 
 impl Settings {
@@ -70,14 +70,14 @@ impl Settings {
         Ok(())
     }
 
-    pub(crate) fn get_active_version(&self, component: &Component) -> Option<Version> {
-        self.active_versions
+    pub(crate) fn get_default_version(&self, component: &Component) -> Option<Version> {
+        self.default_versions
             .get(component.as_str())
             .and_then(|v| Version::parse(v).ok())
     }
 
-    pub(crate) fn set_active_version(&mut self, component: &Component, version: &Version) {
-        self.active_versions
+    pub(crate) fn set_default_version(&mut self, component: &Component, version: &Version) {
+        self.default_versions
             .insert(component.to_string(), version.to_string());
     }
 }
@@ -95,7 +95,7 @@ mod tests {
 
         // Add some test data
         let version = Version::new(1, 0, 0);
-        settings.set_active_version(&Component::CargoRiscZero, &version);
+        settings.set_default_version(&Component::CargoRiscZero, &version);
 
         // Save settings
         settings.save(&env).unwrap();
@@ -103,7 +103,7 @@ mod tests {
         // Load settings and verify
         let loaded = Settings::load(&env).unwrap();
         assert_eq!(
-            loaded.get_active_version(&Component::CargoRiscZero),
+            loaded.get_default_version(&Component::CargoRiscZero),
             Some(version)
         );
     }
@@ -111,6 +111,6 @@ mod tests {
     #[test]
     fn test_settings_defaults() {
         let settings = Settings::default();
-        assert!(settings.active_versions.is_empty());
+        assert!(settings.default_versions.is_empty());
     }
 }

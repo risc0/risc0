@@ -112,12 +112,12 @@ impl Registry {
         Ok(versions.into_iter().rev().collect())
     }
 
-    pub fn get_active_component_version(
+    pub fn get_default_component_version(
         &self,
         env: &Environment,
         component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
-        if let Some(version) = self.settings.get_active_version(component) {
+        if let Some(version) = self.settings.get_default_version(component) {
             if Paths::version_exists(env, component, &version)? {
                 let version_dir = Paths::get_version_dir(env, component, &version);
                 return Ok(Some((version, version_dir)));
@@ -126,7 +126,7 @@ impl Registry {
         Ok(None)
     }
 
-    pub fn set_active_component_version(
+    pub fn set_default_component_version(
         &mut self,
         env: &Environment,
         component: &Component,
@@ -138,10 +138,10 @@ impl Registry {
             )));
         }
 
-        self.settings.set_active_version(component, &version);
+        self.settings.set_default_version(component, &version);
         self.settings.save(env)?;
 
-        components::set_active(env, component, &version)?;
+        components::set_default(env, component, &version)?;
 
         Ok(())
     }
@@ -189,13 +189,13 @@ impl Registry {
 
         components::install(component, env, &self.base_urls, &version, force)?;
 
-        self.set_active_component_version(env, component, version.clone())?;
+        self.set_default_component_version(env, component, version.clone())?;
 
         if self
-            .get_active_component_version(env, &component_to_install)?
+            .get_default_component_version(env, &component_to_install)?
             .is_none()
         {
-            self.set_active_component_version(env, &component_to_install, version)?;
+            self.set_default_component_version(env, &component_to_install, version)?;
         }
 
         Ok(())
@@ -208,21 +208,24 @@ impl Registry {
         Ok(())
     }
 
-    fn find_new_active_version(&mut self, env: &Environment, component: &Component) -> Result<()> {
-        // Check if we uninstalled the active version
-        if self.get_active_component_version(env, component)?.is_none() {
+    fn find_new_default_version(&mut self, env: &Environment, component: &Component) -> Result<()> {
+        // Check if we uninstalled the default version
+        if self
+            .get_default_component_version(env, component)?
+            .is_none()
+        {
             let mut all_versions = Self::list_component_versions(env, component)?;
 
             all_versions.sort_by(|a, b| b.cmp(a));
 
-            // If we found any versions, set the highest one as active
+            // If we found any versions, set the highest one as default
             if let Some(highest_version) = all_versions.first() {
                 env.emit(RzupEvent::Debug {
                     message: format!(
-                        "Setting highest version {highest_version} as active for {component}",
+                        "Setting highest version {highest_version} as default for {component}",
                     ),
                 });
-                self.set_active_component_version(env, component, highest_version.clone())?;
+                self.set_default_component_version(env, component, highest_version.clone())?;
             }
         }
         Ok(())
@@ -236,11 +239,11 @@ impl Registry {
     ) -> Result<()> {
         if let Some(parent) = component.parent_component() {
             components::uninstall(&parent, env, &version)?;
-            self.find_new_active_version(env, &parent)?;
+            self.find_new_default_version(env, &parent)?;
         } else {
             components::uninstall(component, env, &version)?;
         }
-        self.find_new_active_version(env, component)?;
+        self.find_new_default_version(env, component)?;
 
         Ok(())
     }

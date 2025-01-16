@@ -154,16 +154,16 @@ impl Rzup {
         Registry::list_component_versions(&self.environment, component)
     }
 
-    /// Gets the currently active version of a component and its path.
+    /// Gets the currently default version of a component and its path.
     ///
     /// # Arguments
     /// * `component` - Component
-    pub fn get_active_version(
+    pub fn get_default_version(
         &self,
         component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
         self.registry
-            .get_active_component_version(&self.environment, component)
+            .get_default_component_version(&self.environment, component)
     }
 
     fn emit(&self, event: RzupEvent) {
@@ -182,14 +182,14 @@ impl Rzup {
         components::get_latest_version(component, &self.environment, self.registry.base_urls())
     }
 
-    /// Sets the active version for a component.
+    /// Sets the default version for a component.
     ///
     /// # Arguments
     /// * `component` - Component
-    /// * `version` - Version to set as active
-    pub fn set_active_version(&mut self, component: &Component, version: Version) -> Result<()> {
+    /// * `version` - Version to set as default
+    pub fn set_default_version(&mut self, component: &Component, version: Version) -> Result<()> {
         self.registry
-            .set_active_component_version(&self.environment, component, version)
+            .set_default_component_version(&self.environment, component, version)
     }
 
     /// Checks if a specific version of a component exists.
@@ -288,7 +288,7 @@ impl Rzup {
 
     pub fn build_rust_toolchain(&mut self, repo_url: &str, tag_or_commit: &str) -> Result<()> {
         let version = build::build_rust_toolchain(&self.environment, repo_url, tag_or_commit)?;
-        self.set_active_version(&Component::RustToolchain, version)?;
+        self.set_default_version(&Component::RustToolchain, version)?;
         Ok(())
     }
 }
@@ -491,11 +491,11 @@ mod tests {
         let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls());
         assert!(rzup
             .settings()
-            .get_active_version(&Component::RustToolchain)
+            .get_default_version(&Component::RustToolchain)
             .is_none());
         assert!(rzup
             .settings()
-            .get_active_version(&Component::CargoRiscZero)
+            .get_default_version(&Component::CargoRiscZero)
             .is_none());
     }
 
@@ -540,7 +540,7 @@ mod tests {
             .unwrap());
         assert_eq!(
             rzup.settings()
-                .get_active_version(&Component::CargoRiscZero)
+                .get_default_version(&Component::CargoRiscZero)
                 .unwrap(),
             cargo_risczero_version
         );
@@ -572,7 +572,7 @@ mod tests {
             .unwrap());
         assert_eq!(
             rzup.settings()
-                .get_active_version(&Component::R0Vm)
+                .get_default_version(&Component::R0Vm)
                 .unwrap(),
             cargo_risczero_version
         );
@@ -1001,7 +1001,7 @@ mod tests {
         );
     }
 
-    fn set_active_version_test(
+    fn set_default_version_test(
         component: Component,
         version1: Version,
         version2: Version,
@@ -1019,23 +1019,23 @@ mod tests {
         assert_symlinks(tmp_dir.path(), expected_symlinks2.clone());
 
         assert_eq!(
-            rzup.get_active_version(&component).unwrap().unwrap().0,
+            rzup.get_default_version(&component).unwrap().unwrap().0,
             version2
         );
 
-        rzup.set_active_version(&component, version1.clone())
+        rzup.set_default_version(&component, version1.clone())
             .unwrap();
         assert_symlinks(tmp_dir.path(), expected_symlinks1.clone());
 
         assert_eq!(
-            rzup.get_active_version(&component).unwrap().unwrap().0,
+            rzup.get_default_version(&component).unwrap().unwrap().0,
             version1
         );
     }
 
     #[test]
-    fn set_active_version_cargo_risczero() {
-        set_active_version_test(
+    fn set_default_version_cargo_risczero() {
+        set_default_version_test(
             Component::CargoRiscZero,
             Version::new(1, 0, 0),
             Version::new(1, 1, 0),
@@ -1053,8 +1053,8 @@ mod tests {
     }
 
     #[test]
-    fn set_active_version_r0vm() {
-        set_active_version_test(
+    fn set_default_version_r0vm() {
+        set_default_version_test(
             Component::R0Vm,
             Version::new(1, 0, 0),
             Version::new(1, 1, 0),
@@ -1084,8 +1084,8 @@ mod tests {
     }
 
     #[test]
-    fn set_active_version_rust() {
-        set_active_version_test(
+    fn set_default_version_rust() {
+        set_default_version_test(
             Component::RustToolchain,
             Version::new(1, 79, 0),
             Version::new(1, 81, 0),
@@ -1101,8 +1101,8 @@ mod tests {
     }
 
     #[test]
-    fn set_active_version_cpp() {
-        set_active_version_test(
+    fn set_default_version_cpp() {
+        set_default_version_test(
             Component::CppToolchain,
             Version::new(2024, 1, 5),
             Version::new(2024, 1, 6),
@@ -1118,7 +1118,7 @@ mod tests {
     }
 
     #[test]
-    fn active_version_after_uninstall() {
+    fn default_version_after_uninstall() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
         let cargo_risczero_version1 = Version::new(1, 0, 0);
@@ -1142,7 +1142,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            rzup.get_active_version(&Component::CargoRiscZero)
+            rzup.get_default_version(&Component::CargoRiscZero)
                 .unwrap()
                 .unwrap()
                 .0,
@@ -1403,7 +1403,7 @@ mod tests {
         );
 
         assert_eq!(
-            rzup.get_active_version(&Component::RustToolchain)
+            rzup.get_default_version(&Component::RustToolchain)
                 .unwrap()
                 .unwrap()
                 .0,

@@ -35,7 +35,7 @@ pub const INSTALL_HELP: &str = "Discussion:
     `--force` flag is provided, in which case it will delete the existing
     version first.
 
-    The active version of the component is updated to the version that was
+    The default version of the component is updated to the version that was
     just installed.";
 
 #[derive(Parser)]
@@ -99,7 +99,7 @@ impl InstallCommand {
 pub const SHOW_HELP: &str = "Discussion:
     Lists the installed components and their versions.
 
-    Active component versions are marked with a '*'.";
+    Default component versions are marked with a '*'.";
 
 #[derive(Parser)]
 pub(crate) struct ShowCommand;
@@ -114,17 +114,17 @@ impl ShowCommand {
             if !versions.is_empty() {
                 rzup.print(format!("\n{component}"));
 
-                let active_version = rzup.get_active_version(&component)?;
-                let current_version = rzup.settings().get_active_version(&component);
+                let default_version = rzup.get_default_version(&component)?;
+                let current_version = rzup.settings().get_default_version(&component);
 
                 let mut sorted_versions = versions.clone();
                 sorted_versions.sort_by(|a, b| b.cmp(a)); // sort newest to oldest
 
                 for version in sorted_versions {
-                    let is_active = active_version
+                    let is_default = default_version
                         .as_ref()
                         .map_or(false, |(v, _)| v == &version);
-                    let marker = if is_active { "* " } else { "  " };
+                    let marker = if is_default { "* " } else { "  " };
                     rzup.print(format!("{}{version}", marker.bold()));
                 }
 
@@ -135,7 +135,7 @@ impl ShowCommand {
                             "! Version {settings_version} specified in settings.toml is not installed",
                         ));
                         rzup.print(format!(
-                            "  Please use 'rzup use {component} <VERSION>' to switch active component",
+                            "  Please use 'rzup use {component} <VERSION>' to switch default component",
                         ));
                     }
                 }
@@ -150,13 +150,13 @@ impl ShowCommand {
     }
 }
 
-pub const USE_HELP: &str = "Discussion:
-    Sets the active version of a given component.
+pub const DEFAULT_HELP: &str = "Discussion:
+    Sets the default version of a given component.
 
     The given component must have been installed previously.";
 
 #[derive(Parser)]
-pub(crate) struct UseCommand {
+pub(crate) struct DefaultCommand {
     /// Name of component to activate
     #[arg(value_parser=component_parser())]
     name: String,
@@ -164,15 +164,15 @@ pub(crate) struct UseCommand {
     version: String,
 }
 
-impl UseCommand {
+impl DefaultCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
         let version = Version::parse(&self.version)
             .map_err(|_| RzupError::InvalidVersion(self.version.clone()))?;
         let component = self.name.parse()?;
         if rzup.version_exists(&component, &version)? {
-            rzup.set_active_version(&component, version.clone())?;
+            rzup.set_default_version(&component, version.clone())?;
             rzup.print(format!(
-                "Successfully set {component} version {version} as active"
+                "Successfully set {component} version {version} as default"
             ));
         } else {
             rzup.print(format!(
@@ -232,8 +232,8 @@ impl CheckCommand {
 pub const UNINSTALL_HELP: &str = "Discussion:
     Uninstalls the given version of a component by removing the files.
 
-    If it is the current active version for that component, the latest
-    remaining version is made active.";
+    If it is the current default version for that component, the latest
+    remaining version is made default.";
 
 #[derive(Parser)]
 pub(crate) struct UninstallCommand {
@@ -256,7 +256,7 @@ pub const BUILD_HELP: &str = "Discussion:
     Builds and installs the given component.
 
     Grabs the source code from GitHub, compiles it, installs it, and makes it
-    the active version. The resulting component version contains the commit hash.";
+    the default version. The resulting component version contains the commit hash.";
 
 #[derive(Parser)]
 pub(crate) struct BuildCommand {
