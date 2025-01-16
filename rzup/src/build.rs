@@ -32,7 +32,7 @@ pub fn run_command(
 ) -> Result<String> {
     let mut cmd = Command::new(program);
     cmd.args(args);
-    cmd.envs(env.into_iter().copied());
+    cmd.envs(env.iter().copied());
     if let Some(path) = current_dir {
         cmd.current_dir(path);
     }
@@ -47,7 +47,7 @@ pub fn run_command(
             String::from_utf8_lossy(&output.stderr)
         )));
     }
-    Ok(String::from_utf8(output.stdout).map_err(|e| RzupError::Other(e.to_string()))?)
+    String::from_utf8(output.stdout).map_err(|e| RzupError::Other(e.to_string()))
 }
 
 fn git_clone(src: &str, dest: &Path) -> Result<()> {
@@ -114,9 +114,9 @@ fn find_build_directories(build_dir: &Path) -> Result<(PathBuf, PathBuf)> {
             return Ok((dir1, dir2));
         }
     }
-    return Err(RzupError::Other(
+    Err(RzupError::Other(
         "failed to find Rust toolchain stage2 build directories".into(),
-    ));
+    ))
 }
 
 pub fn build_rust_toolchain(

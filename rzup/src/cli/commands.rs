@@ -197,7 +197,7 @@ impl CheckCommand {
         rzup.emit(RzupEvent::CheckUpdates { id: None });
 
         for result in results {
-            rzup.print(format!("{result}"));
+            rzup.print(result.to_string());
         }
 
         Ok(())
