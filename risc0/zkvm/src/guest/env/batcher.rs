@@ -61,7 +61,6 @@ impl Keccak2Batcher {
             sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
         }
         self.mmr.insert(claim_digest);
-
         self.reset();
     }
 
