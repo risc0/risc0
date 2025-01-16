@@ -194,11 +194,13 @@ impl KernelBuild {
 
         let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
 
+        let build = build.cuda(true).cudart(&cudart).debug(false);
+
+        if env::var("NVCC_CCBIN").is_ok() {
+            build.ccbin(false);
+        }
+
         build
-            .cuda(true)
-            .cudart(&cudart)
-            .debug(false)
-            .ccbin(false)
             .flag("-diag-suppress=177")
             .flag("-diag-suppress=2922")
             .flag("-Xcudafe")
