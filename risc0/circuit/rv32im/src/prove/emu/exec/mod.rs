@@ -17,7 +17,7 @@ mod tests;
 
 use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
-use anyhow::{bail, ensure, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use enum_map::{Enum, EnumMap};
 use num_bigint::BigUint;
@@ -440,6 +440,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
+
+        if into_guest_len > 0 && !into_guest_ptr.is_null() {
+            let end_addr = into_guest_ptr
+                .checked_add(into_guest_len as u32)
+                .ok_or_else(|| anyhow!("invalid guest address range"))?;
+            Self::check_guest_addr(end_addr)?;
+        }
+
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.peek_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
@@ -469,8 +477,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
         if into_guest_len > 0 && !into_guest_ptr.is_null() {
-            Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
-            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?
+            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?;
         }
 
         let (a0, a1) = syscall.regs;
@@ -488,8 +495,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     fn ecall_sha(&mut self) -> Result<bool> {
         tracing::trace!("[{}] ecall_sha", self.insn_cycles);
-        let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
-        let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
+        let state_out_ptr = self.load_aligned_guest_addr_from_register(REG_A0)?;
+        let state_in_ptr = self.load_aligned_guest_addr_from_register(REG_A1)?;
         let count = self.load_register(REG_A4)?;
 
         let state_in: [u8; DIGEST_BYTES] = self.load_array_from_guest(state_in_ptr)?;
@@ -499,8 +506,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
 
         if count > 0 {
-            let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
-            let mut block2_ptr = self.load_guest_addr_from_register(REG_A3)?;
+            let mut block1_ptr = self.load_aligned_guest_addr_from_register(REG_A2)?;
+            let mut block2_ptr = self.load_aligned_guest_addr_from_register(REG_A3)?;
 
             // tracing::debug!("ecall_sha: start state: {state:08x?}");
             let mut block = [0u32; BLOCK_WORDS];
@@ -540,10 +547,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     fn ecall_bigint(&mut self) -> Result<bool> {
         let op = self.load_register(REG_A1)?;
-        let z_ptr = self.load_guest_addr_from_register(REG_A0)?;
-        let x_ptr = self.load_guest_addr_from_register(REG_A2)?;
-        let y_ptr = self.load_guest_addr_from_register(REG_A3)?;
-        let n_ptr = self.load_guest_addr_from_register(REG_A4)?;
+        let z_ptr = self.load_aligned_guest_addr_from_register(REG_A0)?;
+        let x_ptr = self.load_aligned_guest_addr_from_register(REG_A2)?;
+        let y_ptr = self.load_aligned_guest_addr_from_register(REG_A3)?;
+        let n_ptr = self.load_aligned_guest_addr_from_register(REG_A4)?;
 
         let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<[u8; bigint::WIDTH_BYTES]> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
@@ -590,10 +597,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_bigint2(&mut self) -> Result<bool> {
-        let blob_ptr = self.load_guest_addr_from_register(REG_A0)?.waddr();
-        let nondet_program_ptr = self.load_guest_addr_from_register(REG_T1)?;
-        let verify_program_ptr = self.load_guest_addr_from_register(REG_T2)?;
-        let consts_ptr = self.load_guest_addr_from_register(REG_T3)?;
+        let blob_ptr = self.load_aligned_guest_addr_from_register(REG_A0)?.waddr();
+        let nondet_program_ptr = self.load_aligned_guest_addr_from_register(REG_T1)?;
+        let verify_program_ptr = self.load_aligned_guest_addr_from_register(REG_T2)?;
+        let consts_ptr = self.load_aligned_guest_addr_from_register(REG_T3)?;
 
         let nondet_program_size = self.load_u32_from_guest(blob_ptr.baddr())?;
         let verify_program_size = self.load_u32_from_guest((blob_ptr + 1u32).baddr())?;
@@ -622,6 +629,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             bail!("{addr:?} is an invalid guest address");
         }
         Ok(addr)
+    }
+
+    fn load_aligned_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
+        let addr = ByteAddr(self.load_register(idx)?);
+        if !addr.is_aligned() {
+            bail!("{addr:?} is not an aligned guest memory address");
+        }
+        Self::check_guest_addr(addr)
     }
 
     fn load_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
