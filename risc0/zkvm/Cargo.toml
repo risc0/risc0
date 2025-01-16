@@ -25,6 +25,10 @@ name = "fib"
 required-features = ["prove"]
 
 [[example]]
+name = "guest_verify"
+required-features = ["prove"]
+
+[[example]]
 name = "recursion"
 required-features = ["prove"]
 
@@ -127,6 +131,7 @@ client = [
   "dep:bytes",
   "dep:lazy-regex",
   "dep:risc0-build",
+  "dep:risc0-zkos-v1compat",
   "dep:prost",
   "dep:tempfile",
   "std",
@@ -171,7 +176,6 @@ prove = [
   "dep:prost",
   "dep:rand",
   "dep:rayon",
-  "dep:risc0-zkos-v1compat",
   "dep:rustc-demangle",
   "dep:tempfile",
   "dep:typetag",

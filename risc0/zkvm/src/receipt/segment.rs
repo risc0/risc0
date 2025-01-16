@@ -36,7 +36,7 @@ use crate::{sha, MaybePruned, ReceiptClaim};
 
 /// TODO(flaub)
 #[derive(
-    Clone, Copy, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq,
+    Clone, Copy, Debug, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq,
 )]
 pub enum SegmentVersion {
     /// TODO(flaub)

@@ -65,8 +65,10 @@ pub struct ExecutorResult {
 
 #[derive(Default)]
 struct SessionCycles {
-    user: u64,
     total: u64,
+    user: u64,
+    paging: u64,
+    reserved: u64,
 }
 
 pub struct SimpleSession {
@@ -161,7 +163,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 })?;
 
                 segment_counter += 1;
-                self.cycles.total += 1 << segment_po2;
+                let total_cycles = 1 << segment_po2;
+                let pager_cycles = self.pager.cycles as u64;
+                let user_cycles = self.user_cycles as u64;
+                self.cycles.total += total_cycles;
+                self.cycles.paging += pager_cycles;
+                self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
                 self.user_cycles = 0;
                 self.phys_cycles = 0;
                 self.pager.reset();
@@ -175,8 +182,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Risc0Machine::suspend(self)?;
 
         let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
-        let last_cycles = self.segment_cycles().next_power_of_two();
-        let last_po2 = log2_ceil(last_cycles as usize);
+        let final_cycles = self.segment_cycles().next_power_of_two();
+        let final_po2 = log2_ceil(final_cycles as usize);
 
         let final_claim = Rv32imV2Claim {
             pre_state: pre_digest,
@@ -195,12 +202,17 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             user_cycles: self.user_cycles,
             suspend_cycle: self.phys_cycles,
             paging_cycles: self.pager.cycles,
-            po2: last_po2 as u32,
+            po2: final_po2 as u32,
             index: segment_counter,
             segment_threshold,
         })?;
 
-        self.cycles.total += 1 << last_po2;
+        let final_cycles = final_cycles as u64;
+        let user_cycles = self.user_cycles as u64;
+        let pager_cycles = self.pager.cycles as u64;
+        self.cycles.total += final_cycles;
+        self.cycles.paging += pager_cycles;
+        self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
 
         let session_claim = Rv32imV2Claim {
             pre_state: initial_digest,
@@ -216,8 +228,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             post_image: self.pager.image.clone(),
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
-            paging_cycles: 0,   // TODO(flaub)
-            reserved_cycles: 0, // TODO(flaub)
+            paging_cycles: self.cycles.paging,
+            reserved_cycles: self.cycles.reserved,
             claim: session_claim,
         })
     }
@@ -231,8 +243,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.machine_mode = 0;
         self.user_cycles = 0;
         self.phys_cycles = 0;
-        self.cycles.user = 0;
-        self.cycles.total = 0;
+        self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
     }
 

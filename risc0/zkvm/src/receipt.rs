@@ -782,6 +782,7 @@ impl VerifierContext {
     }
 
     /// TODO(flaub)
+    #[stability::unstable]
     pub fn for_version(segment_version: SegmentVersion) -> Self {
         Self::from_max_po2(DEFAULT_MAX_PO2, segment_version)
     }

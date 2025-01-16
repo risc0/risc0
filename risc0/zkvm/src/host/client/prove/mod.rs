@@ -349,6 +349,7 @@ impl ProverOpts {
     }
 
     /// TODO(flaub)
+    #[stability::unstable]
     pub fn with_segment_version(self, segment_version: SegmentVersion) -> Self {
         Self {
             segment_version,
@@ -365,6 +366,7 @@ impl ProverOpts {
     }
 
     /// TODO(flaub)
+    #[stability::unstable]
     pub fn verifier_context(&self) -> VerifierContext {
         VerifierContext::default().with_segment_verifier_parameters(
             SegmentReceiptVerifierParameters::from_max_po2(

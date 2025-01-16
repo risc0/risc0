@@ -105,8 +105,7 @@ pub use {
             RECURSION_PO2,
         },
         server::{
-            exec::executor::ExecutorImpl,
-            exec::executor2::Executor2,
+            exec::{executor::ExecutorImpl, executor2::Executor2},
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -151,7 +150,7 @@ pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, Prove
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 #[cfg(feature = "unstable")]
-pub use self::host::server::prove::keccak::prove_keccak;
+pub use self::host::{client::prove::local::local_executor, server::prove::keccak::prove_keccak};
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {
@@ -211,7 +210,7 @@ fn metal_implies_prove() {
 }
 
 /// Compute and return the v2 ImageID of the specified ELF binary.
-#[cfg(feature = "prove")]
+#[cfg(feature = "client")]
 pub fn compute_image_id_v2(
     user_id: impl Into<risc0_zkp::core::digest::Digest>,
 ) -> Result<risc0_zkp::core::digest::Digest> {
@@ -222,6 +221,7 @@ pub fn compute_image_id_v2(
 
 /// TODO(flaub)
 #[cfg(feature = "std")]
+#[stability::unstable]
 pub fn risc0_rv32im_ver() -> Option<SegmentVersion> {
     let version = std::env::var("RISC0_RV32IM_VER").unwrap_or_default();
     match version.as_str() {

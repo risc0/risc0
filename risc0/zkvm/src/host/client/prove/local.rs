@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl, ProveInfo,
-    Receipt, SegmentInfo, SessionInfo, VerifierContext,
+    get_prover_server, host::server::session::NullSegmentRef, risc0_rv32im_ver, Executor2,
+    ExecutorEnv, ExecutorImpl, ProveInfo, Receipt, SegmentInfo, SegmentVersion, SessionInfo,
+    VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
@@ -74,4 +77,51 @@ impl Executor for LocalProver {
             receipt_claim: Some(receipt_claim),
         })
     }
+}
+
+struct LocalExecutor;
+
+impl Executor for LocalExecutor {
+    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+        let version = risc0_rv32im_ver().unwrap_or(SegmentVersion::V1);
+        let mut segments = Vec::new();
+        let session = match version {
+            SegmentVersion::V1 => {
+                ExecutorImpl::from_elf(env, elf)
+                    .unwrap()
+                    .run_with_callback(|segment| {
+                        segments.push(SegmentInfo {
+                            po2: segment.po2() as u32,
+                            cycles: segment.user_cycles(),
+                        });
+                        Ok(Box::new(NullSegmentRef))
+                    })
+            }
+            SegmentVersion::V2 => {
+                Executor2::from_elf(env, elf)
+                    .unwrap()
+                    .run_with_callback(|segment| {
+                        segments.push(SegmentInfo {
+                            po2: segment.po2() as u32,
+                            cycles: segment.user_cycles(),
+                        });
+                        Ok(Box::new(NullSegmentRef))
+                    })
+            }
+        }?;
+
+        let receipt_claim = session.claim()?;
+        Ok(SessionInfo {
+            segments,
+            journal: session.journal.unwrap_or_default(),
+            exit_code: session.exit_code,
+            receipt_claim: Some(receipt_claim),
+        })
+    }
+}
+
+/// TODO(flaub)
+#[stability::unstable]
+pub fn local_executor() -> Rc<dyn Executor> {
+    Rc::new(LocalExecutor)
 }
