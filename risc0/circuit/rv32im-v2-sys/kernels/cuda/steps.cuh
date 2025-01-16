@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ extern __device__ NondetExtRegStruct exec_ExtReg(ExecContext& ctx,
 extern __device__ NondetRegStruct exec_NondetBitReg(ExecContext& ctx,
                                                     Val arg0,
                                                     BoundLayout<NondetRegLayout> layout1);
-extern __device__ BitRegStruct exec_BitReg(ExecContext& ctx,
-                                           Val arg0,
-                                           BoundLayout<NondetRegLayout> layout1);
+extern __device__ NondetRegStruct exec_BitReg(ExecContext& ctx,
+                                              Val arg0,
+                                              BoundLayout<NondetRegLayout> layout1);
 extern __device__ NondetRegStruct exec_NondetTwitReg(ExecContext& ctx,
                                                      Val arg0,
                                                      BoundLayout<NondetRegLayout> layout1);
@@ -67,17 +67,17 @@ extern __device__ NondetRegStruct exec_NondetU8Reg(ExecContext& ctx,
                                                    BoundLayout<NondetU8RegLayout> layout1);
 extern __device__ U8RegStruct exec_U8Reg(ExecContext& ctx,
                                          Val arg0,
-                                         BoundLayout<U8RegLayout> layout1);
+                                         BoundLayout<NondetU8RegLayout> layout1);
 extern __device__ ArgU16Struct exec_ArgU16(ExecContext& ctx,
                                            Val arg0,
                                            Val arg1_0,
                                            BoundLayout<ArgU16Layout> layout2);
-extern __device__ NondetRegStruct exec_NondetU16Reg(ExecContext& ctx,
-                                                    Val arg0,
-                                                    BoundLayout<NondetU16RegLayout> layout1);
-extern __device__ U16RegStruct exec_U16Reg(ExecContext& ctx,
-                                           Val arg0,
-                                           BoundLayout<U16RegLayout> layout1);
+extern __device__ NondetU16RegStruct exec_NondetU16Reg(ExecContext& ctx,
+                                                       Val arg0,
+                                                       BoundLayout<NondetU16RegLayout> layout1);
+extern __device__ NondetU16RegStruct exec_U16Reg(ExecContext& ctx,
+                                                 Val arg0,
+                                                 BoundLayout<NondetU16RegLayout> layout1);
 extern __device__ ToBits_5_Struct exec_ToBits_5_(ExecContext& ctx,
                                                  Val arg0,
                                                  BoundLayout<ToBits_5_Layout> layout1);
@@ -453,9 +453,9 @@ extern __device__ InstOutputStruct exec_Control0(ExecContext& ctx,
                                                  InstInputStruct arg1_0,
                                                  BoundLayout<Control0Layout> layout2,
                                                  GlobalBuf global3);
-extern __device__ OneHot_4_Struct exec_OneHot_4_(ExecContext& ctx,
+extern __device__ OneHot_5_Struct exec_OneHot_5_(ExecContext& ctx,
                                                  Val arg0,
-                                                 BoundLayout<OneHot_4_Layout> layout1);
+                                                 BoundLayout<OneHot_5_Layout> layout1);
 extern __device__ ECallOutputStruct exec_MachineECall(ExecContext& ctx,
                                                       NondetRegStruct arg0,
                                                       InstInputStruct arg1_0,
@@ -466,6 +466,9 @@ extern __device__ ECallOutputStruct exec_ECallTerminate(ExecContext& ctx,
                                                         InstInputStruct arg1_0,
                                                         BoundLayout<ECallTerminateLayout> layout2,
                                                         GlobalBuf global3);
+extern __device__ OneHot_4_Struct exec_OneHot_4_(ExecContext& ctx,
+                                                 Val arg0,
+                                                 BoundLayout<OneHot_4_Layout> layout1);
 extern __device__ DecomposeLow2Struct exec_DecomposeLow2(ExecContext& ctx,
                                                          Val arg0,
                                                          BoundLayout<DecomposeLow2Layout> layout1);
@@ -478,6 +481,14 @@ extern __device__ ECallOutputStruct exec_ECallHostWrite(ExecContext& ctx,
                                                         NondetRegStruct arg0,
                                                         InstInputStruct arg1_0,
                                                         BoundLayout<ECallHostWriteLayout> layout2);
+extern __device__ ECallOutputStruct
+exec_ECallHostReadBytes(ExecContext& ctx,
+                        NondetRegStruct arg0,
+                        InstInputStruct arg1_0,
+                        Val arg2_0,
+                        Val arg3,
+                        Val arg4,
+                        BoundLayout<ECallHostReadBytesLayout> layout5);
 extern __device__ ECallOutputStruct
 exec_ECallHostReadWords(ExecContext& ctx,
                         NondetRegStruct arg0,
@@ -577,6 +588,9 @@ exec_PoseidonCheckOut(ExecContext& ctx,
                       NondetRegStruct arg0,
                       PoseidonStateStruct arg1_0,
                       BoundLayout<PoseidonCheckOutLayout> layout2);
+extern __device__ FieldToWordStruct exec_FieldToWord(ExecContext& ctx,
+                                                     Val arg0,
+                                                     BoundLayout<FieldToWordLayout> layout1);
 extern __device__ PoseidonStateStruct
 exec_PoseidonStoreOut(ExecContext& ctx,
                       NondetRegStruct arg0,
@@ -624,9 +638,67 @@ extern __device__ InstOutputStruct exec_Poseidon1(ExecContext& ctx,
                                                   NondetRegStruct arg0,
                                                   InstInputStruct arg1_0,
                                                   BoundLayout<Poseidon1Layout> layout2);
-extern __device__ OneHot_11_Struct exec_OneHot_11_(ExecContext& ctx,
+extern __device__ CarryExtractStruct exec_CarryExtract(ExecContext& ctx,
+                                                       Val arg0,
+                                                       BoundLayout<CarryExtractLayout> layout1);
+extern __device__ UnpackReg_32__16_Struct exec_UnpackReg_32__16_(
+    ExecContext& ctx, Val2Array arg0, BoundLayout<UnpackReg_32__16_Layout> layout1);
+extern __device__ UnpackReg_32__16_Struct
+exec_CarryAndExpand(ExecContext& ctx, Val2Array arg0, BoundLayout<CarryAndExpandLayout> layout1);
+extern __device__ ShaStateStruct back_ShaState(ExecContext& ctx,
+                                               Index distance0,
+                                               BoundLayout<ShaStateLayout> layout1);
+extern __device__ ShaStateStruct exec_ShaState(ExecContext& ctx,
+                                               Val32Array arg0,
+                                               Val32Array arg1_0,
+                                               Val32Array arg2_0,
+                                               Val arg3,
+                                               Val arg4,
+                                               Val arg5,
+                                               Val arg6,
+                                               Val arg7,
+                                               Val arg8,
+                                               Val arg9,
+                                               BoundLayout<ShaStateLayout> layout10);
+extern __device__ ShaStateStruct exec_ShaInvalid(ExecContext& ctx,
+                                                 BoundLayout<ShaStateLayout> layout0);
+extern __device__ ShaStateStruct exec_ShaEcall(ExecContext& ctx,
+                                               NondetRegStruct arg0,
+                                               BoundLayout<ShaEcallLayout> layout1);
+extern __device__ ShaStateStruct exec_ShaLoadState(ExecContext& ctx,
+                                                   NondetRegStruct arg0,
+                                                   ShaStateStruct arg1_0,
+                                                   BoundLayout<ShaLoadStateLayout> layout2);
+extern __device__ ShaStateStruct exec_ShaLoadData(ExecContext& ctx,
+                                                  NondetRegStruct arg0,
+                                                  ShaStateStruct arg1_0,
+                                                  ShaStateStruct arg2_0,
+                                                  ShaStateStruct arg3,
+                                                  ShaStateStruct arg4,
+                                                  BoundLayout<ShaLoadDataLayout> layout5);
+extern __device__ ShaStateStruct exec_ShaMix(ExecContext& ctx,
+                                             NondetRegStruct arg0,
+                                             ShaStateStruct arg1_0,
+                                             ShaStateStruct arg2_0,
+                                             ShaStateStruct arg3,
+                                             ShaStateStruct arg4,
+                                             ShaStateStruct arg5,
+                                             ShaStateStruct arg6,
+                                             ShaStateStruct arg7,
+                                             BoundLayout<ShaMixLayout> layout8);
+extern __device__ ShaStateStruct exec_ShaStoreState(ExecContext& ctx,
+                                                    NondetRegStruct arg0,
+                                                    ShaStateStruct arg1_0,
+                                                    ShaStateStruct arg2_0,
+                                                    ShaStateStruct arg3,
+                                                    BoundLayout<ShaStoreStateLayout> layout4);
+extern __device__ InstOutputStruct exec_Sha0(ExecContext& ctx,
+                                             NondetRegStruct arg0,
+                                             InstInputStruct arg1_0,
+                                             BoundLayout<Sha0Layout> layout2);
+extern __device__ OneHot_12_Struct exec_OneHot_12_(ExecContext& ctx,
                                                    Val arg0,
-                                                   BoundLayout<OneHot_11_Layout> layout1);
+                                                   BoundLayout<OneHot_12_Layout> layout1);
 extern __device__ TopStruct exec_Top(ExecContext& ctx,
                                      BoundLayout<TopLayout> layout0,
                                      GlobalBuf global1);

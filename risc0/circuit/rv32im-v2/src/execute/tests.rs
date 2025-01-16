@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_binfmt::ExitCode;
+use risc0_binfmt::{ExitCode, MemoryImage2};
 use test_log::test;
 
-use super::{image::MemoryImage2, testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES};
+use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES};
 
 // impl Syscall for BasicSyscall {
 //     fn syscall(
@@ -39,8 +39,8 @@ use super::{image::MemoryImage2, testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_C
 fn basic() {
     let program = testutil::basic();
     let expected_cycles = program.image.len();
-    let mut image = MemoryImage2::new(program);
-    let pre_image_id = *image.image_id();
+    let mut image = MemoryImage2::new_kernel(program);
+    let pre_image_id = image.image_id();
 
     println!("image_id: {pre_image_id}");
 
@@ -68,8 +68,8 @@ fn basic() {
 #[test]
 fn system_split() {
     let program = testutil::simple_loop(2000);
-    let mut image = MemoryImage2::new(program);
-    let pre_image_id = *image.image_id();
+    let mut image = MemoryImage2::new_kernel(program);
+    let pre_image_id = image.image_id();
 
     let result = testutil::execute(
         image,

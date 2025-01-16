@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
 use std::time::Instant;
 
 use clap::Parser;
+use risc0_binfmt::MemoryImage2;
 use risc0_circuit_rv32im_v2::{
     execute::{
-        platform::LOOKUP_TABLE_CYCLES, testutil, MemoryImage2, DEFAULT_SEGMENT_LIMIT_PO2,
-        MAX_INSN_CYCLES,
+        platform::LOOKUP_TABLE_CYCLES, testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
     },
     prove::segment_prover,
 };
@@ -59,7 +59,7 @@ fn main() {
     let iterations = (segment_cycles - RESERVED_CYCLES) / 2;
 
     let program = testutil::simple_loop(iterations as u32);
-    let image = MemoryImage2::new(program);
+    let image = MemoryImage2::new_kernel(program);
     let prover = segment_prover().unwrap();
 
     let result = testutil::execute(
@@ -100,7 +100,7 @@ fn main() {
         let start_time = Instant::now();
         let seal = prover.prove(segment).unwrap();
         if !args.skip_verification {
-            prover.verify(&seal).expect("Verification failed");
+            risc0_circuit_rv32im_v2::verify(&seal).expect("Verification failed");
         }
         let prove_time = start_time.elapsed().as_secs_f64();
 

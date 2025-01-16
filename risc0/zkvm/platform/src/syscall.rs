@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -136,7 +136,6 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
-    declare_syscall!(pub SYS_EXECUTE_ZKR);
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);

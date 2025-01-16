@@ -41,8 +41,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write,
+        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
@@ -326,23 +326,26 @@ fn main() {
         MultiTestSpec::OutOfBoundsEcall => unsafe {
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x0,
-                in("x11") 0x0,
-                in("x12") 0x0,
-                in("x13") 0x0,
-                in("x14") 10000,
+                in("t0") ecall::SHA,
+                in("a0") 0x0,
+                in("a1") 0x0,
+                in("a2") 0x0,
+                in("a3") 0x0,
+                in("a4") 10000,
             );
         },
         MultiTestSpec::TooManySha => unsafe {
+            let out_state = [0u32; DIGEST_WORDS];
+            let in_state = [0u32; DIGEST_WORDS];
+            let block = [0u32; 2 * DIGEST_WORDS];
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x400,
-                in("x11") 0x400,
-                in("x12") 0x400,
-                in("x13") 0x400,
-                in("x14") 10000,
+                in("t0") ecall::SHA,
+                in("a0") out_state.as_ptr(),
+                in("a1") in_state.as_ptr(),
+                in("a2") block.as_ptr(),
+                in("a3") block.as_ptr().add(DIGEST_WORDS),
+                in("a4") 10000,
             );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {
