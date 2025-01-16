@@ -114,15 +114,15 @@ impl Cli {
     }
 }
 
+const LOGO: &str = "
+    ██████  █▀▀▀██
+    ██████  █ ▄▀ █
+    ██████  ██▄▄▄█
+    ██████
+    ██████   RISC
+    ██████   ZERO";
+
 fn banner() -> String {
     let version = env!("CARGO_PKG_VERSION");
-    format!(
-        r#"
-rzup v{version}
-
-   {}"#,
-        r#"RISC
-   ZERO"#
-            .bold()
-    )
+    format!("rzup v{version}\n{}", LOGO.bold())
 }
