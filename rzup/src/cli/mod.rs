@@ -25,27 +25,41 @@ use ui::Ui;
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Install and update RISC Zero components
-    #[command(alias = "update")]
+    /// Install and update components
+    #[command(alias = "update", after_help = commands::INSTALL_HELP)]
     Install(InstallCommand),
-    /// Check for component updates
+    /// Check for new component versions
+    #[command(after_help = commands::CHECK_HELP)]
     Check(CheckCommand),
-    /// Use a component version
+    /// Set a component version as active
+    #[command(after_help = commands::USE_HELP)]
     Use(UseCommand),
     /// Show installed components
+    #[command(after_help = commands::SHOW_HELP)]
     Show(ShowCommand),
     /// Uninstall a component
-    #[command(hide = true)]
+    #[command(after_help = commands::UNINSTALL_HELP)]
     Uninstall(UninstallCommand),
     /// Build a component
+    #[command(after_help = commands::BUILD_HELP)]
     Build(BuildCommand),
 }
+
+pub const RZUP_HELP: &str = "Discussion:
+    Installs and manages software components distributed by Risc Zero.
+
+    Installed components are stored in the path specified by the `RISC0_HOME`
+    environment variable, or in `~/.risc0` if not set.
+
+    Rust software components symlink their binaries into ~/.cargo/bin/ when
+    made active.";
 
 #[derive(Parser)]
 #[command(name = "rzup", version)]
 #[command(
     long_about = None,
-    about = banner()
+    about = banner(),
+    after_help = RZUP_HELP,
 )]
 pub struct Cli {
     #[command(subcommand)]

@@ -26,9 +26,21 @@ fn component_parser() -> Vec<&'static str> {
     components
 }
 
+pub const INSTALL_HELP: &str = "Discussion:
+    Installs a component (or all components) of a particular version.
+
+    If no version is specified, the latest version is used.
+
+    Requires the given version to not be already installed, unless the
+    `--force` flag is provided, in which case it will delete the existing
+    version first.
+
+    The active version of the component is updated to the version that was
+    just installed.";
+
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
-    /// Name of component to install (e.g. rust). If not provided, installs all default components.
+    /// Name of component to install (e.g. rust). If not provided, installs all components.
     #[arg(value_parser=component_parser())]
     name: Option<String>,
     /// Version of the component to install (e.g. 1.0.0). If not provided, installs the latest version.
@@ -84,6 +96,11 @@ impl InstallCommand {
     }
 }
 
+pub const SHOW_HELP: &str = "Discussion:
+    Lists the installed components and their versions.
+
+    Active component versions are marked with a '*'.";
+
 #[derive(Parser)]
 pub(crate) struct ShowCommand;
 
@@ -133,6 +150,11 @@ impl ShowCommand {
     }
 }
 
+pub const USE_HELP: &str = "Discussion:
+    Sets the active version of a given component.
+
+    The given component must have been installed previously.";
+
 #[derive(Parser)]
 pub(crate) struct UseCommand {
     /// Name of component to activate
@@ -161,6 +183,9 @@ impl UseCommand {
         Ok(())
     }
 }
+
+pub const CHECK_HELP: &str = "Discussion:
+    Checks GitHub to see if the latest version of a component is installed or not.";
 
 #[derive(Parser)]
 pub(crate) struct CheckCommand;
@@ -204,6 +229,12 @@ impl CheckCommand {
     }
 }
 
+pub const UNINSTALL_HELP: &str = "Discussion:
+    Uninstalls the given version of a component by removing the files.
+
+    If it is the current active version for that component, the latest
+    remaining version is made active.";
+
 #[derive(Parser)]
 pub(crate) struct UninstallCommand {
     /// Name of component to uninstall
@@ -220,6 +251,12 @@ impl UninstallCommand {
         rzup.uninstall_component(&self.name.parse()?, version)
     }
 }
+
+pub const BUILD_HELP: &str = "Discussion:
+    Builds and installs the given component.
+
+    Grabs the source code from GitHub, compiles it, installs it, and makes it
+    the active version. The resulting component version contains the commit hash.";
 
 #[derive(Parser)]
 pub(crate) struct BuildCommand {
