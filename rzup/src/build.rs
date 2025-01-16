@@ -41,9 +41,11 @@ pub fn run_command(
         let cmd_str =
             Vec::from_iter(std::iter::once(program).chain(args.iter().copied())).join(" ");
         return Err(RzupError::Other(format!(
-            "Process `{cmd_str}` failed with status {}\n
+            "Process `{cmd_str}` failed with status {}\n\
+            stodout: {}\n\
             stderr: {}",
             &output.status,
+            String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr)
         )));
     }
