@@ -659,6 +659,10 @@ mod tests {
     }
 
     fn assert_files(path: &Path, mut expected_files: Vec<String>) {
+        // These files are expected to be here always more or less
+        expected_files.push(".risc0/settings.toml".into());
+        expected_files.push(".risc0/.rzup".into());
+
         let mut found_files = vec![];
         for entry in walkdir::WalkDir::new(path.join(".risc0")) {
             let entry = entry.unwrap();
@@ -859,7 +863,6 @@ mod tests {
             vec![
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin"
                     .into(),
-                ".risc0/settings.toml".into(),
             ],
             vec![(
                 ".cargo/bin/cargo-risczero".into(),
@@ -885,7 +888,6 @@ mod tests {
             86,
             vec![
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
-                ".risc0/settings.toml".into(),
             ],
             vec![
                 (
@@ -915,10 +917,7 @@ mod tests {
                 base_url = server.base_urls.risc0_github_base_url
             ),
             86,
-            vec![
-                ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
-                ".risc0/settings.toml".into(),
-            ],
+            vec![".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu/tar_contents.bin".into()],
             vec![(
                 ".rustup/toolchains/risc0".into(),
                 ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu".into(),
@@ -942,7 +941,6 @@ mod tests {
             128,
             vec![
                 ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
-                ".risc0/settings.toml".into(),
             ],
             vec![(
                 ".risc0/cpp".into(),
@@ -1416,7 +1414,6 @@ mod tests {
         assert_files(
             tmp_dir.path(),
             vec![
-                ".risc0/settings.toml".into(),
                 format!(".risc0/toolchains/v{version}-rust-x86_64-unknown-linux-gnu/bin/bar-fmt"),
                 format!(".risc0/toolchains/v{version}-rust-x86_64-unknown-linux-gnu/bin/cargo-fmt"),
                 format!(".risc0/toolchains/v{version}-rust-x86_64-unknown-linux-gnu/bin/rustc"),
@@ -1444,7 +1441,6 @@ mod tests {
         assert_files(
             tmp_dir.path(),
             vec![
-                ".risc0/settings.toml".into(),
                 format!(".risc0/toolchains/v{master}-rust-x86_64-unknown-linux-gnu/bin/bar-fmt"),
                 format!(".risc0/toolchains/v{master}-rust-x86_64-unknown-linux-gnu/bin/cargo-fmt"),
                 format!(".risc0/toolchains/v{master}-rust-x86_64-unknown-linux-gnu/bin/rustc"),

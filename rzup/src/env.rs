@@ -37,6 +37,13 @@ impl Environment {
             fs::create_dir_all(&self.risc0_dir)?;
         }
 
+        // This sentinel file is used by older version of the `risc0-build` crate, and without it
+        // it will error.
+        let rzup_sentinel = self.risc0_dir.join(".rzup");
+        if !rzup_sentinel.exists() {
+            std::fs::write(rzup_sentinel, "")?;
+        }
+
         if !self.tmp_dir.exists() {
             fs::create_dir_all(&self.tmp_dir)?;
         }
@@ -139,6 +146,7 @@ mod tests {
         let expected_rustup_toolchain_dir = home_dir.join(".rustup/toolchains");
 
         assert_eq!(env.risc0_dir, expected_risc0_dir);
+        assert!(env.risc0_dir.join(".rzup").is_file());
         assert_eq!(env.cargo_bin_dir, expected_cargo_bin_dir);
         assert_eq!(env.rustup_toolchain_dir, expected_rustup_toolchain_dir);
         assert_eq!(env.tmp_dir, expected_risc0_dir.join("tmp"));
