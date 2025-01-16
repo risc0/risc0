@@ -26,7 +26,7 @@ use crate::{
     },
     prove_registered_zkr,
     receipt::{
-        segment::{decode_receipt_claim_from_seal, SegmentVersion},
+        segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
@@ -223,7 +223,7 @@ impl ProverServer for ProverImpl {
             InnerSegment::V1(inner) => {
                 let seal = risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
                     .prove_segment(inner)?;
-                let mut claim = decode_receipt_claim_from_seal(&seal)?;
+                let mut claim = decode_receipt_claim_from_seal_v1(&seal)?;
                 claim.output = segment.output.clone().into();
                 (seal, claim, SegmentVersion::V1)
             }

@@ -20,7 +20,9 @@ pub mod execute;
 pub mod prove;
 mod zirgen;
 
-use anyhow::Result;
+use core::num::TryFromIntError;
+
+use anyhow::{anyhow, Result};
 use derive_more::Debug;
 use risc0_zkp::{
     adapter::CircuitInfo as _,
@@ -92,10 +94,15 @@ impl Rv32imV2Claim {
         let term_a1_low = global.map(|c| c.term_a1low).get_u32_from_elem()?;
         let shutdown_cycle = global.map(|c| c.shutdown_cycle).get_u32_from_elem()?;
 
+        fn try_as_u16(x: u32) -> Result<u16> {
+            x.try_into()
+                .map_err(|err: TryFromIntError| anyhow!("{err}"))
+        }
+
         let terminate_state = if is_terminate == 1 {
             Some(TerminateState {
-                a0: HighLowU16(term_a0_high as u16, term_a0_low as u16),
-                a1: HighLowU16(term_a1_high as u16, term_a1_low as u16),
+                a0: HighLowU16(try_as_u16(term_a0_high)?, try_as_u16(term_a0_low)?),
+                a1: HighLowU16(try_as_u16(term_a1_high)?, try_as_u16(term_a1_low)?),
             })
         } else {
             None

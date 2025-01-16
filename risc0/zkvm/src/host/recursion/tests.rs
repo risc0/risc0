@@ -28,8 +28,8 @@ use risc0_zkp::{
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
 };
-use rstest::*;
-use rstest_reuse::*;
+use rstest::rstest;
+use rstest_reuse::{apply, template};
 
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{

@@ -131,7 +131,7 @@ impl SegmentReceipt {
                     .get(&self.hashfn)
                     .ok_or(VerificationError::InvalidHashSuite)?;
                 risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
-                decode_receipt_claim_from_seal(&self.seal)?
+                decode_receipt_claim_from_seal_v1(&self.seal)?
             }
             SegmentVersion::V2 => {
                 risc0_circuit_rv32im_v2::verify(&self.seal)?;
@@ -245,7 +245,7 @@ fn decode_system_state_from_io<E: Elem + Into<u32>>(
     Ok(SystemState { pc, merkle_root })
 }
 
-pub(crate) fn decode_receipt_claim_from_seal(
+pub(crate) fn decode_receipt_claim_from_seal_v1(
     seal: &[u32],
 ) -> Result<ReceiptClaim, VerificationError> {
     let io: &[BabyBearElem] =

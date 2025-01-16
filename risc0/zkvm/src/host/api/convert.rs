@@ -25,7 +25,7 @@ use crate::{
     host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
         merkle::MerkleProof,
-        segment::{decode_receipt_claim_from_seal, SegmentVersion},
+        segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
         CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata,
         SegmentReceipt, SuccinctReceipt,
     },
@@ -432,7 +432,7 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
         let claim = value
             .claim
             .map(|m| m.try_into())
-            .unwrap_or_else(|| Ok(decode_receipt_claim_from_seal(&seal)?))?;
+            .unwrap_or_else(|| Ok(decode_receipt_claim_from_seal_v1(&seal)?))?;
 
         Ok(Self {
             claim,

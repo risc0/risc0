@@ -32,8 +32,8 @@ use risc0_zkvm_methods::{
     SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
-use rstest::*;
-use rstest_reuse::*;
+use rstest::rstest;
+use rstest_reuse::{apply, template};
 use sha2::{Digest as _, Sha256};
 
 use crate::{

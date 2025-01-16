@@ -21,8 +21,8 @@ use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
 };
 use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
-use rstest::*;
-use rstest_reuse::*;
+use rstest::rstest;
+use rstest_reuse::{apply, template};
 
 use super::get_prover_server;
 use crate::{
@@ -549,15 +549,12 @@ fn sys_input() {
 #[cfg(feature = "docker")]
 #[cfg(target_arch = "x86_64")]
 mod docker {
+    use risc0_zkvm_methods::VERIFY_ELF;
+
+    use super::*;
     use crate::{
-        get_prover_server,
-        host::server::prove::{DevModeProver, ProverServer},
-        ExecutorEnv, ExecutorImpl, ExitCode, FakeReceipt, InnerReceipt, ProverOpts, Receipt,
+        host::server::prove::dev_mode::DevModeProver, FakeReceipt, InnerReceipt, ProverServer as _,
         ReceiptKind,
-    };
-    use risc0_zkp::core::digest::Digest;
-    use risc0_zkvm_methods::{
-        multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF,
     };
 
     #[test_log::test]
@@ -637,7 +634,7 @@ mod docker {
     }
 
     fn exec_verify(receipt: &Receipt) {
-        let input: (Receipt, Digest) = (receipt.clone(), MULTI_TEST_ID.into());
+        let input: (_, _, Digest) = (SegmentVersion::V1, receipt.clone(), MULTI_TEST_ID.into());
         let env = ExecutorEnv::builder()
             .write(&input)
             .unwrap()
