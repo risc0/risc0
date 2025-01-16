@@ -17,6 +17,7 @@ use crate::error::{Result, RzupError};
 use crate::{Environment, RzupEvent};
 use reqwest::{blocking::Client, IntoUrl};
 use semver::Version;
+use serde::Deserialize;
 use std::{fmt, io, time::Duration};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -119,18 +120,26 @@ fn http_client_get(
     builder.send().map_err(|e| RzupError::Other(e.to_string()))
 }
 
-fn error_on_status(status: reqwest::StatusCode) -> Result<()> {
+#[derive(Deserialize)]
+struct RemoteResponse {
+    message: String,
+}
+
+fn error_on_status(response: reqwest::blocking::Response) -> Result<reqwest::blocking::Response> {
+    let status = response.status();
+
     if !status.is_success() {
-        match status {
-            reqwest::StatusCode::FORBIDDEN | reqwest::StatusCode::TOO_MANY_REQUESTS => {
-                Err(RzupError::RateLimited(
-                    "GitHub API rate limit exceeded. Please try again later.".to_string(),
-                ))
-            }
-            status => Err(RzupError::Other(format!("Unexpected response: {status}",))),
+        let host = response.url().host_str().expect("URL has a host");
+        let host = host.to_owned();
+        if let Ok(RemoteResponse { message }) = response.json() {
+            Err(RzupError::Other(format!("Remote error: {host}: {message}")))
+        } else {
+            Err(RzupError::Other(format!(
+                "Unexpected response: {host}: {status}"
+            )))
         }
     } else {
-        Ok(())
+        Ok(response)
     }
 }
 
@@ -140,7 +149,7 @@ fn check_for_not_found(url: impl IntoUrl, bearer_token: &Option<String>) -> Resu
     if status == reqwest::StatusCode::NOT_FOUND {
         return Ok(false);
     }
-    error_on_status(status)?;
+    error_on_status(response)?;
     Ok(true)
 }
 
@@ -149,13 +158,13 @@ fn download_json<RetT: serde::de::DeserializeOwned>(
     bearer_token: &Option<String>,
 ) -> Result<RetT> {
     let response = http_client_get(url, bearer_token)?;
-    error_on_status(response.status())?;
+    let response = error_on_status(response)?;
     response.json().map_err(|e| RzupError::Other(e.to_string()))
 }
 
 pub fn download_text(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<String> {
     let response = http_client_get(url, bearer_token)?;
-    error_on_status(response.status())?;
+    let response = error_on_status(response)?;
     response.text().map_err(|e| RzupError::Other(e.to_string()))
 }
 
@@ -164,7 +173,7 @@ fn download_bytes(
     bearer_token: &Option<String>,
 ) -> Result<reqwest::blocking::Response> {
     let response = http_client_get(url, bearer_token)?;
-    error_on_status(response.status())?;
+    let response = error_on_status(response)?;
     Ok(response)
 }
 
