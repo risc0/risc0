@@ -220,3 +220,24 @@ impl UninstallCommand {
         rzup.uninstall_component(&self.name.parse()?, version)
     }
 }
+
+#[derive(Parser)]
+pub(crate) struct BuildCommand {
+    /// Name of component to uninstall
+    #[arg(value_parser=component_parser())]
+    name: String,
+
+    /// Tag or commit of the component to uninstall
+    tag_or_commit: String,
+}
+
+impl BuildCommand {
+    pub(crate) fn execute(&self, rzup: &mut Rzup) -> Result<()> {
+        let component: Component = self.name.parse()?;
+        if component != Component::RustToolchain {
+            return Err(RzupError::Other(format!("cannot build {component}")));
+        }
+
+        rzup.build_rust_toolchain("https://github.com/risc0/rust.git", &self.tag_or_commit)
+    }
+}

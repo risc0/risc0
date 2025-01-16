@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+mod build;
 #[cfg(feature = "cli")]
 pub mod cli;
 mod components;
@@ -282,6 +283,12 @@ impl Rzup {
             version: "latest".to_string(),
         });
 
+        Ok(())
+    }
+
+    pub fn build_rust_toolchain(&mut self, repo_url: &str, tag_or_commit: &str) -> Result<()> {
+        let version = build::build_rust_toolchain(&self.environment, repo_url, tag_or_commit)?;
+        self.set_active_version(&Component::RustToolchain, version)?;
         Ok(())
     }
 }
@@ -1286,5 +1293,148 @@ mod tests {
             ],
         );
         assert!(!temp_dir.path().join("self_update_ran").exists());
+    }
+
+    fn write_script(path: &Path, contents: &str) {
+        use std::os::unix::fs::PermissionsExt as _;
+
+        std::fs::write(path, contents).unwrap();
+        let mut perms = std::fs::metadata(path).unwrap().permissions();
+        perms.set_mode(0o775);
+        std::fs::set_permissions(path, perms).unwrap();
+    }
+
+    fn create_fake_rust_repo(tmp_dir: &TempDir) -> (PathBuf, Version) {
+        let test_repo = tmp_dir.path().join("test-repo");
+        std::fs::create_dir(&test_repo).unwrap();
+        build::run_command("git", &["init"], Some(&test_repo), &[]).unwrap();
+
+        std::fs::create_dir(test_repo.join("src")).unwrap();
+        std::fs::write(test_repo.join("src/version"), "1.34.0").unwrap();
+        write_script(
+            &test_repo.join("x"),
+            "\
+            #!/bin/bash
+            mkdir -p build/foo/stage2/bin
+            mkdir -p build/foo/stage2-tools-bin
+            touch build/foo/stage2/bin/rustc
+            touch build/foo/stage2-tools-bin/cargo-fmt
+            ",
+        );
+
+        build::run_command("git", &["add", "."], Some(&test_repo), &[]).unwrap();
+        build::run_command(
+            "git",
+            &["commit", "-m", "initial commit"],
+            Some(&test_repo),
+            &[],
+        )
+        .unwrap();
+        build::run_command("git", &["tag", "foo"], Some(&test_repo), &[]).unwrap();
+
+        write_script(
+            &test_repo.join("x"),
+            "\
+            #!/bin/bash
+            mkdir -p build/foo/stage2/bin
+            mkdir -p build/foo/stage2-tools-bin
+            touch build/foo/stage2/bin/rustc
+            touch build/foo/stage2-tools-bin/cargo-fmt
+            touch build/foo/stage2-tools-bin/bar-fmt
+            ",
+        );
+
+        build::run_command("git", &["add", "."], Some(&test_repo), &[]).unwrap();
+        build::run_command("git", &["commit", "-m", "bar"], Some(&test_repo), &[]).unwrap();
+
+        let commit = build::git_short_rev_parse(&test_repo, "HEAD").unwrap();
+        let mut version = Version::new(1, 34, 0);
+        version.build = semver::BuildMetadata::new(&commit).unwrap();
+
+        (test_repo, version)
+    }
+
+    #[test]
+    fn build_rust_toolchain() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+
+        let (test_repo, version) = create_fake_rust_repo(&tmp_dir);
+
+        let repo_url = format!("file://{}", test_repo.display());
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.build_rust_toolchain(&repo_url, "master").unwrap();
+            },
+            vec![
+                RzupEvent::BuildingRustToolchain,
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "cloning git repository".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "./x build".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "./x build --stage 2".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "installing".into(),
+                },
+                RzupEvent::DoneBuildingRustToolchain {
+                    version: version.to_string(),
+                },
+            ],
+        );
+
+        assert_eq!(
+            rzup.get_active_version(&Component::RustToolchain)
+                .unwrap()
+                .unwrap()
+                .0,
+            version
+        );
+
+        std::fs::remove_dir_all(tmp_dir.path().join(".risc0/tmp")).unwrap();
+        assert_files(
+            tmp_dir.path(),
+            vec![
+                ".risc0/settings.toml".into(),
+                format!(".risc0/toolchains/v{version}-rust-x86_64-unknown-linux-gnu/bin/bar-fmt"),
+                format!(".risc0/toolchains/v{version}-rust-x86_64-unknown-linux-gnu/bin/cargo-fmt"),
+                format!(".risc0/toolchains/v{version}-rust-x86_64-unknown-linux-gnu/bin/rustc"),
+            ],
+        );
+    }
+
+    #[test]
+    fn build_rust_toolchain_twice_different_versions() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone());
+
+        let (test_repo, master) = create_fake_rust_repo(&tmp_dir);
+
+        let repo_url = format!("file://{}", test_repo.display());
+        rzup.build_rust_toolchain(&repo_url, "foo").unwrap();
+
+        let foo_commit = build::git_short_rev_parse(&test_repo, "foo").unwrap();
+        let mut foo = master.clone();
+        foo.build = semver::BuildMetadata::new(&foo_commit).unwrap();
+
+        rzup.build_rust_toolchain(&repo_url, "master").unwrap();
+
+        std::fs::remove_dir_all(tmp_dir.path().join(".risc0/tmp")).unwrap();
+        assert_files(
+            tmp_dir.path(),
+            vec![
+                ".risc0/settings.toml".into(),
+                format!(".risc0/toolchains/v{master}-rust-x86_64-unknown-linux-gnu/bin/bar-fmt"),
+                format!(".risc0/toolchains/v{master}-rust-x86_64-unknown-linux-gnu/bin/cargo-fmt"),
+                format!(".risc0/toolchains/v{master}-rust-x86_64-unknown-linux-gnu/bin/rustc"),
+                format!(".risc0/toolchains/v{foo}-rust-x86_64-unknown-linux-gnu/bin/cargo-fmt"),
+                format!(".risc0/toolchains/v{foo}-rust-x86_64-unknown-linux-gnu/bin/rustc"),
+            ],
+        );
     }
 }

@@ -47,6 +47,13 @@ pub enum RzupEvent {
         id: String,
         version: String,
     },
+    BuildingRustToolchain,
+    BuildingRustToolchainUpdate {
+        message: String,
+    },
+    DoneBuildingRustToolchain {
+        version: String,
+    },
     CheckUpdates {
         id: Option<String>, // none means finished checking
     },

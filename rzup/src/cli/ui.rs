@@ -70,6 +70,13 @@ impl Ui {
                 RzupEvent::CheckUpdates { id } => self.handle_checking_updates(id),
                 RzupEvent::Debug { message } => self.handle_debug(message),
                 RzupEvent::Print { message } => self.handle_print(message),
+                RzupEvent::BuildingRustToolchain => self.handle_building_rust_toolchain(),
+                RzupEvent::BuildingRustToolchainUpdate { message } => {
+                    self.handle_building_rust_toolchain_update(message)
+                }
+                RzupEvent::DoneBuildingRustToolchain { version } => {
+                    self.handle_done_building_rust_toolchain(version)
+                }
             }
         }
     }
@@ -115,6 +122,19 @@ impl Ui {
         }
 
         self.start_progress(format!("Installing {id} version {version}"));
+    }
+
+    fn handle_building_rust_toolchain(&mut self) {
+        self.start_progress("Building Rust toolchain".into());
+    }
+
+    fn handle_building_rust_toolchain_update(&mut self, message: String) {
+        self.status
+            .set_message(format!("Building Rust toolchain: {message}"));
+    }
+
+    fn handle_done_building_rust_toolchain(&mut self, version: String) {
+        self.complete_progress(&format!("✓ Built Rust toolchain version {version}"));
     }
 
     fn handle_install(&mut self, id: String, version: String) {

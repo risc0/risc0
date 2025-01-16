@@ -20,7 +20,7 @@ use crate::Rzup;
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 use commands::UninstallCommand;
-use commands::{CheckCommand, InstallCommand, ShowCommand, UseCommand};
+use commands::{BuildCommand, CheckCommand, InstallCommand, ShowCommand, UseCommand};
 use ui::Ui;
 
 #[derive(Subcommand)]
@@ -37,6 +37,8 @@ enum Commands {
     /// Uninstall a component
     #[command(hide = true)]
     Uninstall(UninstallCommand),
+    /// Build a component
+    Build(BuildCommand),
 }
 
 #[derive(Parser)]
@@ -77,6 +79,7 @@ impl Cli {
                 Commands::Use(cmd) => cmd.execute(rzup),
                 Commands::Check(cmd) => cmd.execute(rzup),
                 Commands::Uninstall(cmd) => cmd.execute(rzup),
+                Commands::Build(cmd) => cmd.execute(rzup),
             };
 
             // This has side-effect of dropping the channel
