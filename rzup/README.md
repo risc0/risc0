@@ -146,5 +146,6 @@ rzup stores its installations in:
 - Default: Linux/macOS: `$HOME/.risc0/`
 - Custom: Set with the `RISC0_HOME` environment variable
 
-The `GITHUB_TOKEN` environment variable is read, and if it is set the given token is used when
-communicating with GitHub. This is can be useful when dealing with rate limiting.
+When communicating with GitHub, it tries using authentication. This can be useful to get around
+rate-limiting. It attempts to get a token from the `GITHUB_TOKEN` environment variable, then from
+~/.config/gh/hosts.yml.

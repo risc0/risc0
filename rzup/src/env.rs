@@ -11,12 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use crate::distribution::Platform;
 use crate::error::Result;
 use crate::RzupError;
 use crate::RzupEvent;
-use std::fs;
 
-use crate::distribution::Platform;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 type VarResult<T> = std::result::Result<T, std::env::VarError>;
@@ -30,6 +30,62 @@ pub struct Environment {
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
     platform: Platform,
     github_token: Option<String>,
+}
+
+fn get_github_token_from_hosts_yml(home_dir: &Path) -> Result<String> {
+    let host_yml_path = home_dir.join(".config/gh/hosts.yml");
+    let yaml_docs =
+        yaml_rust2::YamlLoader::load_from_str(&std::fs::read_to_string(&host_yml_path)?)
+            .map_err(|e| RzupError::Other(e.to_string()))?;
+    if yaml_docs.len() != 1 {
+        return Err(RzupError::Other("unexpected YAML".into()));
+    }
+    let hosts = &yaml_docs[0];
+    hosts["github.com"]["oauth_token"]
+        .as_str()
+        .map(|s| s.to_owned())
+        .ok_or_else(|| RzupError::Other("unexpcted YAML".into()))
+}
+
+#[cfg(test)]
+const TEST_HOSTS_YML: &str = "
+github.com:
+    oauth_token: mysecret
+    user: foo
+    git_protocol: https
+
+example.com:
+    oauth_token: othersecret
+    user: bar
+    other_key: baz
+";
+
+#[test]
+fn get_github_token_from_hosts_yml_test() {
+    let tmp_dir = tempfile::tempdir().unwrap();
+
+    // file missing
+    get_github_token_from_hosts_yml(tmp_dir.path()).unwrap_err();
+
+    let hosts_yml_path = tmp_dir.path().join(".config/gh/hosts.yml");
+    std::fs::create_dir_all(hosts_yml_path.parent().unwrap()).unwrap();
+
+    // file has garbage
+    std::fs::write(&hosts_yml_path, "garbage").unwrap();
+    get_github_token_from_hosts_yml(tmp_dir.path()).unwrap_err();
+
+    // file has unexpected YAML
+    std::fs::write(&hosts_yml_path, "other:\n    foo: bar").unwrap();
+    get_github_token_from_hosts_yml(tmp_dir.path()).unwrap_err();
+
+    // file has different unexpected YAML
+    std::fs::write(&hosts_yml_path, "github.com:\n    foo: bar").unwrap();
+    get_github_token_from_hosts_yml(tmp_dir.path()).unwrap_err();
+
+    // success
+    std::fs::write(&hosts_yml_path, TEST_HOSTS_YML).unwrap();
+    let token = get_github_token_from_hosts_yml(tmp_dir.path()).unwrap();
+    assert_eq!(token, "mysecret");
 }
 
 impl Environment {
@@ -90,7 +146,9 @@ impl Environment {
             home_dir.join(".risc0")
         };
 
-        let github_token = env_accessor("GITHUB_TOKEN").ok();
+        let github_token = env_accessor("GITHUB_TOKEN")
+            .or_else(|_| get_github_token_from_hosts_yml(&home_dir))
+            .ok();
 
         let env = Self::with_paths_and_token(risc0_dir, home_dir, github_token)?;
         env.emit(RzupEvent::Debug {
