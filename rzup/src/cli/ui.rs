@@ -142,11 +142,21 @@ impl Ui {
     }
 
     fn handle_install_complete(&mut self, id: String, version: String) {
-        self.complete_progress(&format!("✓ Installed {id} version {version}"));
+        self.complete_progress(&format!(
+            "\
+            ✓ Installed {id} version {version}\n\
+            ✓ Setting {id} version {version} as default\
+            "
+        ));
     }
 
     fn handle_already_installed(&mut self, id: String, version: String) {
-        self.complete_progress(&format!("! Version {version} of {id} is already installed",));
+        self.complete_progress(&format!(
+            "\
+            ! Version {version} of {id} is already installed\n\
+            ✓ Setting {id} version {version} as default\
+            ",
+        ));
     }
 
     fn handle_uninstall(&mut self, id: String, version: String) {
