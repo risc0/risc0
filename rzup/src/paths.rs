@@ -137,9 +137,13 @@ mod tests {
 
     fn setup_test_env() -> (TempDir, Environment) {
         let tmp_dir = TempDir::new().unwrap();
-        let env =
-            Environment::with_paths_and_token(tmp_dir.path().join(".risc0"), tmp_dir.path(), None)
-                .unwrap();
+        let env = Environment::with_paths_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
+            None,
+        )
+        .unwrap();
         (tmp_dir, env)
     }
 

@@ -90,9 +90,13 @@ mod tests {
     #[test]
     fn test_settings_save_and_load() {
         let tmp_dir = TempDir::new().unwrap();
-        let env =
-            Environment::with_paths_and_token(tmp_dir.path().join(".risc0"), tmp_dir.path(), None)
-                .unwrap();
+        let env = Environment::with_paths_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
+            None,
+        )
+        .unwrap();
         let mut settings = Settings::default();
 
         // Add some test data

@@ -207,10 +207,14 @@ mod tests {
     use semver::Version;
 
     fn test_rust_toolchain_install(base_urls: BaseUrls) {
-        let tmp_dir1 = tempfile::tempdir().unwrap();
-        let tmp_dir2 = tempfile::tempdir().unwrap();
-        let env =
-            Environment::with_paths_and_token(tmp_dir1.path(), tmp_dir2.path(), None).unwrap();
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let env = Environment::with_paths_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
+            None,
+        )
+        .unwrap();
         let component = Component::RustToolchain;
 
         let version = Version::new(1, 81, 0);
@@ -225,10 +229,14 @@ mod tests {
     http_test_harness!(test_rust_toolchain_install);
 
     fn test_cpp_toolchain_install(base_urls: BaseUrls) {
-        let tmp_dir1 = tempfile::tempdir().unwrap();
-        let tmp_dir2 = tempfile::tempdir().unwrap();
-        let env =
-            Environment::with_paths_and_token(tmp_dir1.path(), tmp_dir2.path(), None).unwrap();
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let env = Environment::with_paths_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
+            None,
+        )
+        .unwrap();
         let component = Component::CppToolchain;
 
         let version = Version::new(2024, 1, 5);
@@ -243,10 +251,14 @@ mod tests {
     http_test_harness!(test_cpp_toolchain_install);
 
     fn test_cargo_risczero_install(base_urls: BaseUrls) {
-        let tmp_dir1 = tempfile::tempdir().unwrap();
-        let tmp_dir2 = tempfile::tempdir().unwrap();
-        let env =
-            Environment::with_paths_and_token(tmp_dir1.path(), tmp_dir2.path(), None).unwrap();
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let env = Environment::with_paths_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
+            None,
+        )
+        .unwrap();
         let component = Component::CargoRiscZero;
 
         let version = Version::new(1, 0, 0);

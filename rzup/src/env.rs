@@ -111,13 +111,14 @@ impl Environment {
 
     pub fn with_paths_and_token(
         risc0_dir: impl Into<PathBuf>,
-        home_dir: impl AsRef<Path>,
+        rustup_dir: impl AsRef<Path>,
+        cargo_dir: impl AsRef<Path>,
         github_token: Option<String>,
     ) -> Result<Self> {
         let risc0_dir = risc0_dir.into();
         let tmp_dir = risc0_dir.join("tmp");
-        let cargo_bin_dir = home_dir.as_ref().join(".cargo/bin");
-        let rustup_toolchain_dir = home_dir.as_ref().join(".rustup/toolchains");
+        let cargo_bin_dir = cargo_dir.as_ref().join("bin");
+        let rustup_toolchain_dir = rustup_dir.as_ref().join("toolchains");
         let settings_file = risc0_dir.join("settings.toml");
         let platform = Platform::detect()?;
 
@@ -141,17 +142,23 @@ impl Environment {
             RzupError::Environment("Could not determine home directory".to_string())
         })?;
 
-        let risc0_dir = if let Ok(dir) = env_accessor("RISC0_HOME") {
-            PathBuf::from(dir)
-        } else {
-            home_dir.join(".risc0")
-        };
+        let risc0_dir = env_accessor("RISC0_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| home_dir.join(".risc0"));
+
+        let rustup_dir = env_accessor("RUSTUP_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| home_dir.join(".rustup"));
+
+        let cargo_dir = env_accessor("CARGO_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| home_dir.join(".cargo"));
 
         let github_token = env_accessor("GITHUB_TOKEN")
             .or_else(|_| get_github_token_from_hosts_yml(&home_dir))
             .ok();
 
-        let env = Self::with_paths_and_token(risc0_dir, home_dir, github_token)?;
+        let env = Self::with_paths_and_token(risc0_dir, rustup_dir, cargo_dir, github_token)?;
         env.emit(RzupEvent::Debug {
             message: format!("Initialized environment at {}", env.risc0_dir().display()),
         });
@@ -256,31 +263,47 @@ mod tests {
 
     #[test]
     fn test_custom_root() {
-        let tmp_dir1 = tempfile::tempdir().unwrap();
-        let tmp_dir2 = tempfile::tempdir().unwrap();
-        let env =
-            Environment::with_paths_and_token(tmp_dir1.path(), tmp_dir2.path(), Some("foo".into()))
-                .unwrap();
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let env = Environment::with_paths_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
+            Some("foo".into()),
+        )
+        .unwrap();
 
-        assert_eq!(env.risc0_dir, tmp_dir1.path());
-        assert_eq!(env.cargo_bin_dir, tmp_dir2.path().join(".cargo/bin"));
-        assert_eq!(env.tmp_dir, tmp_dir1.path().join("tmp"));
-        assert_eq!(env.settings_file, tmp_dir1.path().join("settings.toml"));
+        assert_eq!(env.risc0_dir, tmp_dir.path().join(".risc0"));
+        assert_eq!(env.cargo_bin_dir, tmp_dir.path().join(".cargo/bin"));
+        assert_eq!(
+            env.rustup_toolchain_dir,
+            tmp_dir.path().join(".rustup/toolchains")
+        );
+        assert_eq!(env.tmp_dir, tmp_dir.path().join(".risc0/tmp"));
+        assert_eq!(
+            env.settings_file,
+            tmp_dir.path().join(".risc0/settings.toml")
+        );
         assert_eq!(env.github_token, Some("foo".into()));
     }
 
     #[test]
-    fn test_environment_with_risc0_home_and_github_token() {
+    fn test_environment_with_environment_variables_provided() {
         let tmp_dir = tempfile::tempdir().unwrap();
-        let r0_tmp_dir = tmp_dir.path().join("risc0");
+        let risc0_dir = tmp_dir.path().join("my-risc0");
+        let rustup_dir = tmp_dir.path().join("my-rustup");
+        let cargo_dir = tmp_dir.path().join("my-cargo");
 
         let env = Environment::new(|key| match key {
-            "RISC0_HOME" => Ok(r0_tmp_dir.to_string_lossy().into()),
+            "RISC0_HOME" => Ok(risc0_dir.to_string_lossy().into()),
+            "RUSTUP_HOME" => Ok(rustup_dir.to_string_lossy().into()),
+            "CARGO_HOME" => Ok(cargo_dir.to_string_lossy().into()),
             "GITHUB_TOKEN" => Ok("foobar".into()),
             other => panic!("unexpected read of {other:?} environment variable"),
         })
         .unwrap();
-        assert_eq!(env.risc0_dir, r0_tmp_dir);
+        assert_eq!(env.risc0_dir, risc0_dir);
+        assert_eq!(env.rustup_toolchain_dir, rustup_dir.join("toolchains"));
+        assert_eq!(env.cargo_bin_dir, cargo_dir.join("bin"));
         assert_eq!(env.github_token, Some("foobar".into()));
     }
 }

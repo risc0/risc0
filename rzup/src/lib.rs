@@ -78,16 +78,19 @@ impl Rzup {
     ///
     /// # Arguments
     /// * `risc0_dir` - The root directory path for storing components and settings
-    /// * `home_dir` - The path to the user's home directory
+    /// * `rustup_dir` - The path to rustup's home directory (usually ~/.rustup)
+    /// * `cargo_dir` - The path to cargo's home directory (usually ~/.cargo)
     /// * `base_urls` - The base URLs used to communicate with GitHub
     /// * `github_token` - The token to use when communicating with GitHub
     pub fn with_paths_urls_and_token(
         risc0_dir: impl Into<PathBuf>,
-        home_dir: impl AsRef<Path>,
+        rustup_dir: impl AsRef<Path>,
+        cargo_dir: impl AsRef<Path>,
         base_urls: BaseUrls,
         github_token: Option<String>,
     ) -> Result<Self> {
-        let environment = Environment::with_paths_and_token(risc0_dir, home_dir, github_token)?;
+        let environment =
+            Environment::with_paths_and_token(risc0_dir, rustup_dir, cargo_dir, github_token)?;
         let registry = Registry::new(&environment, base_urls)?;
 
         Ok(Self {
@@ -509,7 +512,8 @@ mod tests {
         let tmp_dir = TempDir::new().unwrap();
         let rzup = Rzup::with_paths_urls_and_token(
             tmp_dir.path().join(".risc0"),
-            tmp_dir.path(),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
             base_urls,
             github_token,
         )
