@@ -1,10 +1,10 @@
 [package]
-name = "ecdsa-methods"
+name = "p256-methods"
 version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-risc0-build = { path = "../../../risc0/build", features = ["unstable"] }
+risc0-build = { path = "../../../../risc0/build", features = ["unstable"] }
 
 [package.metadata.risc0]
 methods = ["guest"]

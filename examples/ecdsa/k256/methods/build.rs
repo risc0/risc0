@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ecdsa_methods::BENCHMARK_ELF;
-use risc0_zkvm::{default_executor, ExecutorEnv};
-
-// Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() {
-    let env = ExecutorEnv::builder().build().unwrap();
-    let exec = default_executor();
-    std::hint::black_box(exec.execute(env, BENCHMARK_ELF)).unwrap();
+    risc0_build::embed_methods();
 }
