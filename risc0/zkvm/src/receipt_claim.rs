@@ -280,6 +280,8 @@ impl BorshDeserialize for Unknown {
 
 /// Each UnionClaim can be used as an inner node in a Merkle tree, the root of
 /// which commits to a set of claims.
+/// TODOD: what about control root?
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnionClaim {
     // Digest of the "left" Assumption struct.
     //
@@ -287,17 +289,11 @@ pub struct UnionClaim {
     pub left: Digest,
     // Digest of the "right" Assumption struct.
     pub right: Digest,
-    // control root
-    pub control_root: Digest,
 }
 
 impl Digestible for UnionClaim {
     fn digest<S: Sha256>(&self) -> Digest {
-        tagged_struct::<S>(
-            "risc0.UnionClaim",
-            &[self.left, self.right, self.control_root],
-            &[],
-        )
+        tagged_struct::<S>("risc0.UnionClaim", &[self.left, self.right], &[])
     }
 }
 

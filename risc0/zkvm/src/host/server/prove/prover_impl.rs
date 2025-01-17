@@ -30,6 +30,7 @@ use crate::{
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
+    recursion::prove::union,
     risc0_rv32im_ver,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
@@ -131,6 +132,7 @@ impl ProverServer for ProverImpl {
             zkr_receipts.insert(assumption, receipt);
         }
 
+        let mut keccak_receipts = Vec::new();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
             let assumption = Assumption {
@@ -138,7 +140,14 @@ impl ProverServer for ProverImpl {
                 control_root: receipt.control_root()?,
             };
             tracing::debug!("adding keccak assumption: {assumption:#?}");
-            zkr_receipts.insert(assumption, receipt);
+            zkr_receipts.insert(assumption, receipt.clone());
+            keccak_receipts.push(receipt);
+        }
+        if keccak_receipts.len() == 2 {
+            let mut union_receipt = keccak_receipts[0].clone();
+            for receipt in &keccak_receipts[1..] {
+                union_receipt = union(&union_receipt, receipt)?.into_unknown();
+            }
         }
 
         // TODO: add test case for when a single session refers to the same assumption multiple times

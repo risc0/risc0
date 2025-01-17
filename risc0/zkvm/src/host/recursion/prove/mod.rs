@@ -46,7 +46,7 @@ use crate::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{Assumption, MaybePruned, Merge},
+    receipt_claim::{Assumption, MaybePruned, Merge, UnionClaim},
     sha::Digestible,
     ProverOpts, ReceiptClaim, SegmentVersion, Unknown,
 };
@@ -135,48 +135,41 @@ pub fn join(
     })
 }
 
-///// Run the union program to compress two succinct receipts into one.
-/////
-///// By repeated application of the union program, any number of succinct
-///// receipts can be compressed into a single receipt.
-//pub fn union(
-//    _a: &SuccinctReceipt<Unknown>,
-//    _b: &SuccinctReceipt<Unknown>,
-//) -> Result<SuccinctReceipt<ReceiptClaim>> {
-//    todo!()
-//    tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
-//    tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
-//
-//    let opts = ProverOpts::succinct();
-//    let mut prover = Prover::new_union(a, b, opts.clone())?;
-//    let receipt = prover.prover.run()?;
-//    let mut out_stream = VecDeque::<u32>::new();
-//    out_stream.extend(receipt.output.iter());
-//
-//    // Construct the expected claim that should have result from the join.
-//    let ab_claim = ReceiptClaim {
-//        pre: a.claim.as_value()?.pre.clone(),
-//        post: b.claim.as_value()?.post.clone(),
-//        exit_code: b.claim.as_value()?.exit_code,
-//        input: a.claim.as_value()?.input.clone(),
-//        output: b.claim.as_value()?.output.clone(),
-//    };
-//
-//    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
-//    tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
-//
-//    // Include an inclusion proof for control_id to allow verification against a root.
-//    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-//        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
-//    Ok(SuccinctReceipt {
-//        seal: receipt.seal,
-//        hashfn: opts.hashfn,
-//        control_id: prover.control_id,
-//        control_inclusion_proof,
-//        claim: claim_decoded.merge(&ab_claim)?.into(),
-//        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-//    })
-//}
+/// Run the union program to compress two succinct receipts into one.
+///
+/// By repeated application of the union program, any number of succinct
+/// receipts can be compressed into a single receipt.
+pub fn union(
+    a: &SuccinctReceipt<Unknown>,
+    b: &SuccinctReceipt<Unknown>,
+) -> Result<SuccinctReceipt<UnionClaim>> {
+    tracing::debug!("Proving union: a.claim = {:#?}", a.claim);
+    tracing::debug!("Proving union: b.claim = {:#?}", b.claim);
+
+    let opts = ProverOpts::succinct();
+    let mut prover = Prover::new_union(a, b, opts.clone())?;
+    let receipt = prover.prover.run()?;
+    let mut out_stream = VecDeque::<u32>::new();
+    out_stream.extend(receipt.output.iter());
+
+    // todo: order claim hash.
+    let claim = UnionClaim {
+        left: a.claim.digest(),
+        right: b.claim.digest(),
+    };
+
+    // Include an inclusion proof for control_id to allow verification against a root.
+    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
+        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: prover.control_id,
+        control_inclusion_proof,
+        claim: MaybePruned::Value(claim),
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
+}
 
 /// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
 /// receipt proving the validity of the assumption.
@@ -502,26 +495,39 @@ impl Prover {
     /// By repeated application of the union program, any number of succinct
     /// receipts can be compressed into a single receipt.
     pub fn new_union(
-        _a: &SuccinctReceipt<Unknown>,
-        _b: &SuccinctReceipt<Unknown>,
-        _opts: ProverOpts,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+        opts: ProverOpts,
     ) -> Result<Self> {
-        todo!()
-        //        ensure!(
-        //            a.hashfn == "poseidon2",
-        //            "union recursion program only supports poseidon2 hashfn; received {}",
-        //            a.hashfn
-        //        );
-        //        ensure!(
-        //            b.hashfn == "poseidon2",
-        //            "union recursion program only supports poseidon2 hashfn; received {}",
-        //            b.hashfn
-        //        );
-        //
-        //        let (program, control_id) = union(&opts.hashfn)?;
-        //        let mut prover = Prover::new(program, control_id, opts);
-        //
-        //        Ok(prover)
+        ensure!(
+            a.hashfn == "poseidon2",
+            "union recursion program only supports poseidon2 hashfn; received {}",
+            a.hashfn
+        );
+        ensure!(
+            b.hashfn == "poseidon2",
+            "union recursion program only supports poseidon2 hashfn; received {}",
+            b.hashfn
+        );
+
+        let (program, control_id) = zkr::union(&opts.hashfn)?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        // Determine the control root from the receipts themselves, and ensure they are equal. If
+        // the determined control root does not match what the downstream verifier expects, they
+        // will reject.
+        let merkle_root = a.control_root()?;
+        ensure!(
+            merkle_root == b.control_root()?,
+            "merkle roots for a and b do not match: {} != {}",
+            merkle_root,
+            b.control_root()?
+        );
+
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_succinct_receipt(a)?;
+        prover.add_succinct_receipt(b)?;
+        Ok(prover)
     }
 
     /// Initialize a recursion prover with the join program to compress two receipts of the same
@@ -548,9 +554,7 @@ impl Prover {
         let (program, control_id) = zkr::join(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        // Determine the control root from the receipts themselves, and ensure they are equal. If
-        // the determined control root does not match what the downstream verifier expects, they
-        // will reject.
+        // TODO: control roots could be different... does this need to be here?
         let merkle_root = a.control_root()?;
         ensure!(
             merkle_root == b.control_root()?,
@@ -723,6 +727,15 @@ impl Prover {
         a.claim.as_value()?.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
         self.add_input(bytemuck::cast_slice(&data_fp));
+        Ok(())
+    }
+
+    /// Add a receipt covering rv32im execution, and include the first level of ReceiptClaim.
+    fn add_succinct_receipt(&mut self, a: &SuccinctReceipt<Unknown>) -> Result<()> {
+        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
+        // TODO: Union program expects an additional boolean to tell it when the control root is zero.
+        //let zero_root = BabyBearElem::new(1);
+        //self.add_input(bytemuck::cast_slice(&[zero_root]));
         Ok(())
     }
 
