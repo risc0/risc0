@@ -23,6 +23,7 @@ use std::collections::HashMap;
 use std::fs;
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct Settings {
     #[serde(default)]
     default_versions: HashMap<String, String>,
@@ -48,7 +49,8 @@ impl Settings {
         let contents = fs::read_to_string(settings_path)
             .map_err(|e| RzupError::Environment(format!("Failed to read settings file: {e}")))?;
 
-        Ok(toml::from_str(&contents).expect("Failed to parse settings file"))
+        toml::from_str(&contents)
+            .map_err(|e| RzupError::Other(format!("invalid TOML in settings.toml file: {e}")))
     }
 
     pub(crate) fn save(&self, env: &Environment) -> Result<()> {
@@ -111,6 +113,33 @@ mod tests {
         assert_eq!(
             loaded.get_default_version(&Component::CargoRiscZero),
             Some(version)
+        );
+    }
+
+    #[test]
+    fn test_settings_load_invalid() {
+        let tmp_dir = TempDir::new().unwrap();
+        let env = Environment::with_paths_and_token(
+            tmp_dir.path().join(".risc0"),
+            tmp_dir.path().join(".rustup"),
+            tmp_dir.path().join(".cargo"),
+            None,
+        )
+        .unwrap();
+
+        std::fs::write(env.settings_path(), "foobar").unwrap();
+        let error_str = Settings::load(&env).unwrap_err().to_string();
+        assert!(
+            error_str.starts_with("invalid TOML in settings.toml file: TOML parse error at line 1"),
+            "actual = {error_str}"
+        );
+
+        std::fs::write(env.settings_path(), "[other]\na = 12").unwrap();
+        let error_str = Settings::load(&env).unwrap_err().to_string();
+        assert!(
+            error_str.starts_with("invalid TOML in settings.toml file: TOML parse error at line 1")
+                && error_str.contains("unknown field `other`, expected `default_versions`"),
+            "actual = {error_str}"
         );
     }
 
