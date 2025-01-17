@@ -145,17 +145,22 @@ pub fn union(
 ) -> Result<SuccinctReceipt<UnionClaim>> {
     tracing::debug!("Proving union: a.claim = {:#?}", a.claim);
     tracing::debug!("Proving union: b.claim = {:#?}", b.claim);
+    let (left, right) = if a.claim.digest() <= b.claim.digest() {
+        (a, b)
+    } else {
+        (b, a)
+    };
 
     let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_union(a, b, opts.clone())?;
+    let mut prover = Prover::new_union(left, right, opts.clone())?;
     let receipt = prover.prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
 
     // todo: order claim hash.
     let claim = UnionClaim {
-        left: a.claim.digest(),
-        right: b.claim.digest(),
+        left: left.claim.digest(),
+        right: right.claim.digest(),
     };
 
     // Include an inclusion proof for control_id to allow verification against a root.

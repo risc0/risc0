@@ -15,7 +15,7 @@
 use alloc::vec::Vec;
 use anyhow::{bail, Result};
 
-use crate::{SuccinctReceipt, Unknown};
+use crate::{recursion::prove::union, SuccinctReceipt, Unknown};
 
 #[derive(Debug, Default)]
 pub struct UnionMmr {
@@ -23,7 +23,7 @@ pub struct UnionMmr {
 }
 
 impl UnionMmr {
-    pub fn insert(&mut self, receipt: SuccinctReceipt<Unknown>) {
+    pub fn insert(&mut self, receipt: SuccinctReceipt<Unknown>) -> Result<()> {
         let mut to_add = Peak::new(receipt);
         loop {
             if self.peaks.is_empty() {
@@ -32,12 +32,13 @@ impl UnionMmr {
             }
             if to_add.height == self.peaks.last().unwrap().height {
                 let to_merge = self.peaks.pop().unwrap();
-                to_add = Peak::merge(to_add, to_merge);
+                to_add = Peak::merge(to_add, to_merge)?;
             } else {
                 break;
             }
         }
         self.peaks.push(to_add);
+        Ok(())
     }
 
     pub fn root(&self) -> Result<SuccinctReceipt<Unknown>> {
@@ -48,9 +49,9 @@ impl UnionMmr {
             return Ok(self.peaks[0].receipt.clone());
         }
 
-        let receipt = self.peaks[0].receipt.clone();
+        let mut receipt = self.peaks[0].receipt.clone();
         for peak in &self.peaks[1..] {
-            Peak::merge_item(&receipt, &peak.receipt)?;
+            Peak::merge_item(&mut receipt, &peak.receipt)?;
         }
         Ok(receipt)
     }
@@ -67,13 +68,18 @@ impl Peak {
         Self { receipt, height: 0 }
     }
 
-    pub(crate) fn merge(_a: Peak, _b: Peak) -> Self {
-        todo!() // make sure we call union with correct order
+    pub(crate) fn merge(a: Peak, b: Peak) -> Result<Self> {
+        Ok(Peak {
+            receipt: union(&a.receipt, &b.receipt)?.into_unknown(),
+            height: a.height + 1,
+        })
     }
+
     pub(crate) fn merge_item(
-        _a: &SuccinctReceipt<Unknown>,
-        _b: &SuccinctReceipt<Unknown>,
+        a: &mut SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
     ) -> Result<()> {
-        todo!()
+        *a = union(a, b)?.into_unknown();
+        Ok(())
     }
 }

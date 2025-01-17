@@ -141,7 +141,7 @@ impl ProverServer for ProverImpl {
             };
             tracing::debug!("adding keccak assumption: {assumption:#?}");
             zkr_receipts.insert(assumption, receipt.clone());
-            keccak_receipts.insert(receipt);
+            keccak_receipts.insert(receipt)?;
         }
 
         let root_receipt: SuccinctReceipt<Unknown> = keccak_receipts.root()?;
