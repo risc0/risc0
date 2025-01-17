@@ -1069,17 +1069,21 @@ mod tests {
     }
 
     fn set_default_version_test(
+        rzup: &mut Rzup,
+        tmp_dir: &TempDir,
         component: Component,
         version1: Version,
         version2: Version,
         expected_symlinks1: Vec<(String, String)>,
         expected_symlinks2: Vec<(String, String)>,
     ) {
-        let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
-
         rzup.install_component(&component, Some(version1.clone()), false)
             .unwrap();
+
+        assert_eq!(
+            rzup.get_default_version(&component).unwrap().unwrap().0,
+            version1
+        );
 
         rzup.install_component(&component, Some(version2.clone()), false)
             .unwrap();
@@ -1102,7 +1106,12 @@ mod tests {
 
     #[test]
     fn set_default_version_cargo_risczero() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+
         set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
             Component::CargoRiscZero,
             Version::new(1, 0, 0),
             Version::new(1, 1, 0),
@@ -1121,7 +1130,12 @@ mod tests {
 
     #[test]
     fn set_default_version_r0vm() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+
         set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
             Component::R0Vm,
             Version::new(1, 0, 0),
             Version::new(1, 1, 0),
@@ -1151,8 +1165,62 @@ mod tests {
     }
 
     #[test]
-    fn set_default_version_rust() {
+    fn set_default_version_r0vm_after_cargo_risczero_installed() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+
+        rzup.install_component(
+            &Component::CargoRiscZero,
+            Some(Version::new(1, 0, 0)),
+            false, /* force */
+        )
+        .unwrap();
+        rzup.install_component(
+            &Component::CargoRiscZero,
+            Some(Version::new(1, 1, 0)),
+            false, /* force */
+        )
+        .unwrap();
+
         set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
+            Component::R0Vm,
+            Version::new(1, 0, 0),
+            Version::new(1, 1, 0),
+            vec![
+                (
+                    ".cargo/bin/cargo-risczero".into(),
+                    ".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                        .into(),
+                ),
+                (
+                    ".cargo/bin/r0vm".into(),
+                    ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/r0vm".into(),
+                )
+            ],
+            vec![
+                (
+                    ".cargo/bin/cargo-risczero".into(),
+                    ".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                        .into(),
+                ),
+                (
+                    ".cargo/bin/r0vm".into(),
+                    ".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu/r0vm".into(),
+                )
+            ],
+        );
+    }
+
+    #[test]
+    fn set_default_version_rust() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+
+        set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
             Component::RustToolchain,
             Version::new(1, 79, 0),
             Version::new(1, 81, 0),
@@ -1169,7 +1237,12 @@ mod tests {
 
     #[test]
     fn set_default_version_cpp() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+
         set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
             Component::CppToolchain,
             Version::new(2024, 1, 5),
             Version::new(2024, 1, 6),

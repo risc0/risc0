@@ -184,6 +184,7 @@ impl Registry {
                 id: component.to_string(),
                 version: version.to_string(),
             });
+            self.set_default_component_version(env, component, version.clone())?;
             return Ok(());
         }
 
