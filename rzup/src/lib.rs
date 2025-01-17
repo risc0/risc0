@@ -25,7 +25,6 @@ mod settings;
 
 pub mod error;
 
-use components::Component;
 use env::Environment;
 use events::RzupEvent;
 use paths::Paths;
@@ -34,6 +33,7 @@ use semver::Version;
 use settings::Settings;
 use std::path::{Path, PathBuf};
 
+pub use components::Component;
 pub use error::{Result, RzupError};
 
 #[derive(Clone, Debug)]
