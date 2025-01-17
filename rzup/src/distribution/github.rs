@@ -19,7 +19,6 @@ use crate::distribution::{
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
-use fs2::FileExt;
 use semver::Version;
 use serde::Deserialize;
 use std::path::PathBuf;
@@ -254,59 +253,41 @@ impl<'a> GithubRelease<'a> {
 
         let platform = env.platform();
         let archive_name = self.get_archive_name(component, platform)?;
-        let lock_path = env
-            .tmp_dir()
-            .join(format!("{}.lock", archive_name.display()));
 
-        let download_url = self.download_url(component, version, platform)?;
+        let _lock_file = env.flock(
+            &archive_name.to_string_lossy(),
+            &format!("downloading {component} version {version}"),
+        )?;
 
-        // create and lock the file
-        let lock_file = std::fs::OpenOptions::new()
+        let download_path = env.tmp_dir().join(archive_name);
+        let mut download_file = std::fs::OpenOptions::new()
             .write(true)
             .create(true)
             .truncate(true)
-            .open(&lock_path)?;
+            .open(&download_path)?;
 
-        lock_file.try_lock_exclusive().map_err(|_| {
-            RzupError::Other(format!(
-                "Another process is currently downloading {component} version {version}",
-            ))
-        })?;
+        let download_url = self.download_url(component, version, platform)?;
+        let mut resp = download_bytes(&download_url, env.github_token())?;
 
-        let download_result = (|| {
-            let download_path = env.tmp_dir().join(archive_name);
-            let mut download_file = std::fs::OpenOptions::new()
-                .write(true)
-                .create(true)
-                .truncate(true)
-                .open(&download_path)?;
+        env.emit(RzupEvent::DownloadStarted {
+            id: component.to_string(),
+            version: version.to_string(),
+            url: download_url.clone(),
+            len: resp.content_length(),
+        });
 
-            let mut resp = download_bytes(&download_url, env.github_token())?;
-
-            env.emit(RzupEvent::DownloadStarted {
-                id: component.to_string(),
-                version: version.to_string(),
-                url: download_url.clone(),
-                len: resp.content_length(),
-            });
-
-            resp.copy_to(&mut ProgressWriter::new(
-                component.to_string(),
-                env,
-                &mut download_file,
-            ))
-            .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
-            Ok(())
-        })();
+        resp.copy_to(&mut ProgressWriter::new(
+            component.to_string(),
+            env,
+            &mut download_file,
+        ))
+        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
 
         env.emit(RzupEvent::DownloadCompleted {
             id: component.to_string(),
             version: version.to_string(),
         });
 
-        // clean up lock file
-        std::fs::remove_file(lock_path)?;
-
-        download_result
+        Ok(())
     }
 }

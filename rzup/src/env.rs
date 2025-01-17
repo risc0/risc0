@@ -16,6 +16,7 @@ use crate::error::Result;
 use crate::RzupError;
 use crate::RzupEvent;
 
+use fs2::FileExt as _;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -196,6 +197,36 @@ impl Environment {
 
     pub fn github_token(&self) -> &Option<String> {
         &self.github_token
+    }
+
+    pub fn flock(&self, name: &str, conflict_message: &str) -> Result<LockFile> {
+        let lock_path = self.tmp_dir().join(format!("{name}.lock"));
+
+        let lock_file = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(&lock_path)?;
+
+        lock_file.try_lock_exclusive().map_err(|_| {
+            RzupError::Other(format!("Another process is currently {conflict_message}"))
+        })?;
+
+        Ok(LockFile {
+            _file: lock_file,
+            path: lock_path,
+        })
+    }
+}
+
+pub struct LockFile {
+    _file: std::fs::File,
+    path: PathBuf,
+}
+
+impl Drop for LockFile {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_file(&self.path);
     }
 }
 

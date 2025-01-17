@@ -17,8 +17,8 @@ use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::events::RzupEvent;
 use crate::paths::Paths;
-use semver::Version;
 
+use semver::Version;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -173,6 +173,8 @@ pub fn build_rust_toolchain(
     tag_or_commit: &str,
 ) -> Result<Version> {
     env.emit(RzupEvent::BuildingRustToolchain);
+
+    let _lock_file = env.flock("rust-toolchain-build", "building a Rust toolchain")?;
 
     env.emit(RzupEvent::BuildingRustToolchainUpdate {
         message: "cloning git repository".into(),
