@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 mod build;
-#[cfg(feature = "cli")]
 pub mod cli;
 mod components;
 mod distribution;
