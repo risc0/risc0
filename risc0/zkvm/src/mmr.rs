@@ -54,7 +54,6 @@ impl Mmr {
             digest = UnionClaim {
                 left: digest,
                 right: peak.digest,
-                control_root: Digest::ZERO,
             }
             .digest();
         }
@@ -78,7 +77,6 @@ impl Peak {
         let digest = UnionClaim {
             left: left.digest,
             right: right.digest,
-            control_root: Digest::ZERO,
         }
         .digest();
         Self {
