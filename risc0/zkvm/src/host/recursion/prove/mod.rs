@@ -554,7 +554,9 @@ impl Prover {
         let (program, control_id) = zkr::join(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        // TODO: control roots could be different... does this need to be here?
+        // Determine the control root from the receipts themselves, and ensure they are equal. If
+        // the determined control root does not match what the downstream verifier expects, they
+        // will reject.
         let merkle_root = a.control_root()?;
         ensure!(
             merkle_root == b.control_root()?,

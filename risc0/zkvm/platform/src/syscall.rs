@@ -818,12 +818,7 @@ pub unsafe extern "C" fn sys_verify_integrity(
     }
 }
 
-/// Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
-///
-/// A cooperative prover will only return if there is a verifying proof
-/// associated with that claim digest, and will always return a result code
-/// of 0 to register a0. The caller must encode the claim_digest into a
-/// public assumptions list for inclusion in the guest output.
+/// TODO: Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
 ///
 /// # Safety
 ///
