@@ -177,7 +177,10 @@ pub fn set_default(env: &Environment, component: &Component, version: &Version) 
         Component::RustToolchain => {
             symlink(&version_dir, &env.rustup_toolchain_dir().join("risc0"))?
         }
-        Component::CppToolchain => symlink(&version_dir, &env.risc0_dir().join("cpp"))?,
+        Component::CppToolchain => symlink(
+            &version_dir.join("riscv32im-linux-x86_64"),
+            &env.risc0_dir().join("cpp"),
+        )?,
     };
     Ok(())
 }

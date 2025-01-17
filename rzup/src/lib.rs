@@ -982,7 +982,8 @@ mod tests {
             ],
             vec![(
                 ".risc0/cpp".into(),
-                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu".into(),
+                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu/riscv32im-linux-x86_64"
+                    .into(),
             )],
             false, /* use_github_token */
         )
@@ -1247,11 +1248,13 @@ mod tests {
             Version::new(2024, 1, 6),
             vec![(
                 ".risc0/cpp".into(),
-                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu".into(),
+                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu/riscv32im-linux-x86_64"
+                    .into(),
             )],
             vec![(
                 ".risc0/cpp".into(),
-                ".risc0/toolchains/v2024.1.6-cpp-x86_64-unknown-linux-gnu".into(),
+                ".risc0/toolchains/v2024.1.6-cpp-x86_64-unknown-linux-gnu/riscv32im-linux-x86_64"
+                    .into(),
             )],
         );
     }
