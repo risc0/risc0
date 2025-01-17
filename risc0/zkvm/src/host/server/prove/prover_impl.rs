@@ -22,7 +22,7 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, session::InnerSegment},
+        server::{exec::executor2::Executor2, prove::union_mmr::UnionMmr, session::InnerSegment},
     },
     prove_registered_zkr,
     receipt::{
@@ -132,6 +132,7 @@ impl ProverServer for ProverImpl {
             zkr_receipts.insert(assumption, receipt);
         }
 
+        let mut keccak_receipts: UnionMmr = UnionMmr::default();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
             let assumption = Assumption {
@@ -140,8 +141,17 @@ impl ProverServer for ProverImpl {
             };
             tracing::debug!("adding keccak assumption: {assumption:#?}");
             zkr_receipts.insert(assumption, receipt.clone());
+            keccak_receipts.insert(receipt);
         }
-        // TODO: call union here
+
+        let root_receipt: SuccinctReceipt<Unknown> = keccak_receipts.root()?;
+        zkr_receipts.insert(
+            Assumption {
+                claim: root_receipt.claim.digest(),
+                control_root: root_receipt.control_root()?,
+            },
+            root_receipt,
+        );
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
         let inner_assumption_receipts: Vec<_> = session_assumption_receipts

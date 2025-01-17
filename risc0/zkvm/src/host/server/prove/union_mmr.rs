@@ -14,21 +14,20 @@
 
 use alloc::vec::Vec;
 use anyhow::{bail, Result};
-use risc0_zkp::core::digest::Digest;
 
-use crate::{receipt_claim::UnionClaim, sha::Digestible};
+use crate::{SuccinctReceipt, Unknown};
 
 #[derive(Debug, Default)]
-pub struct Mmr {
+pub struct UnionMmr {
     peaks: Vec<Peak>,
 }
 
-impl Mmr {
-    pub fn insert(&mut self, digest: Digest) {
-        let mut to_add = Peak::new(digest);
+impl UnionMmr {
+    pub fn insert(&mut self, receipt: SuccinctReceipt<Unknown>) {
+        let mut to_add = Peak::new(receipt);
         loop {
-            // We're at the end. This means that we've accumulated everything in `to_add`
             if self.peaks.is_empty() {
+                // at the point a peak has been accumulated to `to_add`
                 break;
             }
             if to_add.height == self.peaks.last().unwrap().height {
@@ -41,47 +40,40 @@ impl Mmr {
         self.peaks.push(to_add);
     }
 
-    pub fn root(&self) -> Result<Digest> {
+    pub fn root(&self) -> Result<SuccinctReceipt<Unknown>> {
         if self.peaks.is_empty() {
             bail!("no elements");
         }
         if self.peaks.len() == 1 {
-            return Ok(self.peaks[0].digest);
+            return Ok(self.peaks[0].receipt.clone());
         }
 
-        let mut digest = self.peaks[0].digest;
+        let receipt = self.peaks[0].receipt.clone();
         for peak in &self.peaks[1..] {
-            digest = UnionClaim {
-                left: digest,
-                right: peak.digest,
-            }
-            .digest();
+            Peak::merge_item(&receipt, &peak.receipt)?;
         }
-        Ok(digest)
+        Ok(receipt)
     }
 }
 
 #[derive(Debug)]
 struct Peak {
     height: u32,
-    digest: Digest,
+    receipt: SuccinctReceipt<Unknown>,
 }
 
 impl Peak {
-    pub(crate) fn new(digest: Digest) -> Self {
-        Self { digest, height: 0 }
+    pub(crate) fn new(receipt: SuccinctReceipt<Unknown>) -> Self {
+        Self { receipt, height: 0 }
     }
 
-    // assumes that both inputs have same height
-    pub(crate) fn merge(left: Peak, right: Peak) -> Self {
-        let digest = UnionClaim {
-            left: left.digest,
-            right: right.digest,
-        }
-        .digest();
-        Self {
-            digest,
-            height: left.height + 1,
-        }
+    pub(crate) fn merge(_a: Peak, _b: Peak) -> Self {
+        todo!() // make sure we call union with correct order
+    }
+    pub(crate) fn merge_item(
+        _a: &SuccinctReceipt<Unknown>,
+        _b: &SuccinctReceipt<Unknown>,
+    ) -> Result<()> {
+        todo!()
     }
 }
