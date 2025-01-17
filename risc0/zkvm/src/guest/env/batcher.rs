@@ -50,7 +50,7 @@ impl Keccak2Batcher {
         }
     }
 
-    pub fn finalize(&mut self) {
+    pub fn flush(&mut self) {
         if !self.input_exists() {
             // no input so there's nothing to do
             return;
@@ -64,11 +64,11 @@ impl Keccak2Batcher {
         self.reset();
     }
 
-    pub fn final_finalize(&mut self) {
-        self.finalize();
+    pub fn finalize(&mut self) {
+        self.flush();
         if !self.inputs.is_empty() {
             let claim_digest = self.mmr.root().unwrap();
-            crate::guest::env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
+            crate::guest::env::verify_assumption2(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
         }
     }
 

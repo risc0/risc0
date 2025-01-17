@@ -107,6 +107,9 @@ pub use self::{
     write::{FdWriter, Write},
 };
 
+#[cfg(feature = "unstable")]
+pub use self::verify::verify_assumption2;
+
 /// This module is intended for internal testing only.
 #[doc(hidden)]
 pub mod testing {
@@ -154,7 +157,7 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     #[allow(static_mut_refs)]
     unsafe {
         #[cfg(feature = "unstable")]
-        KECCAK2_BATCHER.take().unwrap().final_finalize();
+        KECCAK2_BATCHER.take().unwrap().finalize();
 
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
