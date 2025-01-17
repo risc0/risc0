@@ -1,6 +1,6 @@
 # ECDSA Example
 
-This example demonstrates how to verify an ECDSA signature inside the zkVM.
+This example demonstrates how to verify an ECDSA signature inside the zkVM using secp256k1 signatures.
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ Signature verification can be combined with other application logic for powerful
 [anonymous group signatures][1], [applying transformations to authenticated data][2], and [fully succinct
 transaction ledgers][3].
 
-## Guest Acceleration
+## Precompile Patch
 
 ECDSA verification is relatively expensive in the zkVM guest. Using the [RustCrypto] `k256` crate
 with RISC Zero v0.15, it takes about 5M zkVM cycles[^1] to verify a signature.
@@ -39,6 +39,8 @@ other cryptographic primitives as well. Additionally, the [changes][5] made to `
 example of how to use the big integer accelerator circuit to speed up other cryptographic operations
 (e.g. P-256, or RSA).
 
+For more information on how to use the precompile, see the [precompile documentation][6].
+
 [^1]: About 126s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
 
 [^2]: About 17s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
@@ -50,3 +52,4 @@ example of how to use the big integer accelerator circuit to speed up other cryp
 [3]: https://minaprotocol.com/
 [4]: methods/guest/Cargo.toml
 [5]: https://github.com/risc0/RustCrypto-elliptic-curves/pull/1
+[6]: https://dev.risczero.com/api/zkvm/precompiles
