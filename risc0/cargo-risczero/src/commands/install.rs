@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ use risc0_build::risc0_data;
 
 /// `cargo risczero install`
 #[derive(Parser)]
-pub struct Install {
+pub struct InstallCommand {
     #[arg(long)]
     version: Option<String>,
 }
@@ -62,7 +62,7 @@ struct GithubAsset {
 const TOKEN_MSG: &str =
     "Setting the GITHUB_TOKEN environment variable is supported to avoid IP throttling by GitHub.";
 
-impl Install {
+impl InstallCommand {
     pub fn run(&self) -> Result<()> {
         let root_dir = risc0_data()?;
         let lockfile_path = root_dir.join("rustup-lock");
