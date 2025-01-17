@@ -24,6 +24,9 @@ pub enum RzupError {
     #[error("Invalid version: {0}")]
     InvalidVersion(String),
 
+    #[error("Version not found: {0}")]
+    VersionNotFound(semver::Version),
+
     #[error("IO error: {0}")]
     Io(String),
 

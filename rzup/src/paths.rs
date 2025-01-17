@@ -35,21 +35,6 @@ impl Paths {
         base_path.join(format!("v{version}-{component}-{}", env.platform()))
     }
 
-    pub fn get_bin_dir(env: &Environment, component: &Component, version: &Version) -> PathBuf {
-        let version_dir = Self::get_version_dir(env, component, version);
-        version_dir.join("bin")
-    }
-
-    pub fn get_bin_path(
-        env: &Environment,
-        component: &Component,
-        version: &Version,
-        bin: &str,
-    ) -> PathBuf {
-        let bin_dir = Self::get_bin_dir(env, component, version);
-        bin_dir.join(bin)
-    }
-
     pub fn version_exists(
         env: &Environment,
         component: &Component,
