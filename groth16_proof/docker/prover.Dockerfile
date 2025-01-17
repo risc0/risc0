@@ -1,75 +1,79 @@
 # syntax=docker/dockerfile:1.7
-FROM rust:1.74.0 AS dependencies
 
-WORKDIR /src/
+# Stage 1: Build and install Circom
+FROM rust:1.84-bookworm AS circom
 
-# APT deps
-RUN apt -qq update && \
-  apt install -y -q apt-transport-https build-essential clang cmake curl gnupg libgmp-dev libsodium-dev m4 nasm nlohmann-json3-dev npm
+# Set the working directory
+WORKDIR /usr/src/
 
-WORKDIR /src/
+# Clone and build Circom version 2.1.9 from a specific commit
+ADD https://github.com/iden3/circom.git#2eaaa6dface934356972b34cab64b25d382e59de circom
+RUN (cd circom; cargo install --path circom)
 
-# Build and install circom
-RUN git clone https://github.com/iden3/circom.git && \
-  cd circom && \
-  git checkout e60c4ab8a0b55672f0f42fbc68a74203bdb6a700 && \
-  cargo install --path circom
+# Add the required circuit files
+COPY groth16/risc0.circom groth16/risc0.circom
+COPY groth16/stark_verify.circom groth16/stark_verify.circom
 
-ENV CC=clang
-ENV CXX=clang++
+# Compile the circuit using Circom
+RUN (cd groth16; circom --r1cs --c stark_verify.circom)
 
-# Build rapidsnark
-RUN git clone https://github.com/iden3/rapidsnark.git && \
-  cd rapidsnark && \
-  git checkout 547bbda73bea739639578855b3ca35845e0e55bf
+# Stage 2: Compile the witness generator from scratch
+FROM gcc:14.2-bookworm AS witgen
 
-WORKDIR /src/rapidsnark/
-# Copied from: https://github.com/iden3/rapidsnark/blob/main/tasksfile.js
-# to bypass the taskfile dep in NPM being dropped
-RUN git submodule init && \
-  git submodule update && \
-  mkdir -p build && \
-  (cd depends/ffiasm && npm install) && \
-  cd build/ && \
-  node ../depends/ffiasm/src/buildzqfield.js -q 21888242871839275222246405745257275088696311157297823662689037894645226208583 -n Fq && \
-  node ../depends/ffiasm/src/buildzqfield.js -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr && \
-  nasm -felf64 fq.asm && \
-  nasm -felf64 fr.asm && \
-  g++ -I. -I../src -I../depends/ffiasm/c -I../depends/json/single_include ../src/main_prover.cpp ../src/binfile_utils.cpp ../src/zkey_utils.cpp ../src/wtns_utils.cpp ../src/logger.cpp ../depends/ffiasm/c/misc.cpp ../depends/ffiasm/c/naf.cpp ../depends/ffiasm/c/splitparstr.cpp ../depends/ffiasm/c/alt_bn128.cpp fq.cpp fq.o fr.cpp fr.o -o prover -fmax-errors=5 -std=c++17 -pthread -lgmp -lsodium -O3 -fopenmp &&\
-  cp ./prover /usr/local/sbin/rapidsnark
+WORKDIR /usr/src/
 
-# Cache ahead of the larger build process
-FROM dependencies AS builder
+# Install necessary build dependencies
+RUN apt-get update -q -y && apt-get install -q -y libgmp-dev nasm nlohmann-json3-dev
 
-WORKDIR /src/
-COPY groth16/risc0.circom ./groth16/risc0.circom
-COPY groth16/stark_verify.circom ./groth16/stark_verify.circom
+# Build the witness generator with no optimization (-O0)
+COPY --from=circom /usr/src/groth16/stark_verify_cpp/ stark_verify_cpp/
+RUN echo "stark_verify.o: stark_verify.cpp \$(DEPS_HPP)\n\t\$(CC) -c $< \$(CFLAGS) -O0" >> stark_verify_cpp/Makefile && \
+  (cd stark_verify_cpp; make)
 
-# Build the witness generation
-RUN (cd groth16; circom --c stark_verify.circom) && \
-  sed -i 's/g++/clang++/' groth16/stark_verify_cpp/Makefile && \
-  sed -i 's/O3/O0/' groth16/stark_verify_cpp/Makefile && \
-  (cd groth16/stark_verify_cpp; make)
+# Stage 3: Build the Gnark prover
+FROM golang:1.23-bookworm AS gnark
 
-# Download the proving key
-RUN wget https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-05-17.1/stark_verify_final.zkey.gz -O groth16/stark_verify_final.zkey.gz && \
-  (cd groth16; gzip -df stark_verify_final.zkey.gz)
+WORKDIR /usr/src/gnark
 
-# Create a final clean image with all the dependencies to perform stark->snark
-FROM ubuntu:jammy-20231211.1@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS prover
+# Download the proving key and copy the generated constraint system
+ADD --checksum=sha256:69c6056451ea814b37e30ccbc44639dbaafef73540cbfbff6ec7e68e2d325735 \
+  https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-05-17.1/stark_verify_final.zkey.gz groth16/stark_verify_final.zkey.gz
+COPY --from=circom /usr/src/groth16/stark_verify.r1cs groth16/stark_verify.r1cs
 
-RUN apt update -qq && \
-  apt install -y libsodium23 nodejs npm && \
-  npm install -g snarkjs@0.7.3
+# Pre-download Go modules for cache efficiency
+COPY circom-compat/go.mod circom-compat/go.sum ./
+RUN go mod download && go mod verify
 
+# Copy all Go source code
+COPY circom-compat/. ./
+
+# Build the Gnark prover with CGO disabled for static linking
+ENV CGO_ENABLED=0
+RUN go build ./cmd/prover
+
+# Convert files to Gnark format using a custom converter tool
+RUN go run ./cmd/converter --dump groth16/stark_verify.r1cs groth16/stark_verify_final.zkey.gz
+
+# Final Stage: Create a minimal image to run the prover and witness generator
+FROM debian:bookworm-slim
+
+# Install necessary runtime dependencies
+RUN apt-get update -q -y && apt-get install -q -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
+
+# Copy the prover binary and related files from previous stages
+COPY --from=gnark /usr/src/gnark/prover /usr/local/bin/prover
+COPY --from=gnark /usr/src/gnark/groth16/stark_verify.cs /app/stark_verify.cs
+COPY --from=gnark /usr/src/gnark/groth16/stark_verify_final.pk.dmp /app/stark_verify_final.pk.dmp
+
+# Copy the witness generator and data files from the witgen stage
+COPY --from=witgen /usr/local/lib64/libstdc++.so.6.0.33 /lib/x86_64-linux-gnu/libstdc++.so.6
+COPY --from=witgen /usr/src/stark_verify_cpp/stark_verify /usr/local/bin/stark_verify
+COPY --from=witgen /usr/src/stark_verify_cpp/stark_verify.dat /app/stark_verify.dat
+
+# Install entrypoint script and set executable permissions
 COPY scripts/prover.sh /app/prover.sh
-COPY --from=builder /usr/local/sbin/rapidsnark /usr/local/sbin/rapidsnark
-COPY --from=builder /src/groth16/stark_verify_cpp/stark_verify /app/stark_verify
-COPY --from=builder /src/groth16/stark_verify_cpp/stark_verify.dat /app/stark_verify.dat
-COPY --from=builder /src/groth16/stark_verify_final.zkey /app/stark_verify_final.zkey
+RUN chmod +x /app/prover.sh
 
 WORKDIR /app
-RUN chmod +x prover.sh
-RUN ulimit -s unlimited
 
 ENTRYPOINT ["/app/prover.sh"]
