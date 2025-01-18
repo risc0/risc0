@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ impl Executor for LocalProver {
         let mut segments = Vec::new();
         let session = exec.run_with_callback(|segment| {
             segments.push(SegmentInfo {
-                po2: segment.inner.po2 as u32,
-                cycles: segment.inner.insn_cycles as u32,
+                po2: segment.po2() as u32,
+                cycles: segment.user_cycles(),
             });
             Ok(Box::new(NullSegmentRef))
         })?;

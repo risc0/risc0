@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,6 +52,10 @@ impl ByteAddr {
     pub fn wrapping_add(self, rhs: u32) -> Self {
         Self(self.0.wrapping_add(rhs))
     }
+
+    pub fn checked_add(self, rhs: u32) -> Option<Self> {
+        self.0.checked_add(rhs).map(Self)
+    }
 }
 
 impl WordAddr {
@@ -65,6 +69,10 @@ impl WordAddr {
 
     pub fn page_idx(&self) -> u32 {
         self.0 / PAGE_WORDS as u32
+    }
+
+    pub fn checked_add(self, rhs: u32) -> Option<Self> {
+        self.0.checked_add(rhs).map(Self)
     }
 }
 

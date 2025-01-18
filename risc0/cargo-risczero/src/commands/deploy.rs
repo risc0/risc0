@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ use cargo_metadata::MetadataCommand;
 use clap::Parser;
 use risc0_build::{BuildStatus, GuestOptions};
 
-use crate::{commands::build_guest, utils};
+use crate::utils;
 
 /// `cargo risczero deploy`
 ///
@@ -52,8 +52,10 @@ impl DeployCommand {
 
     fn deploy(&self, client: Client) -> Result<()> {
         // Ensure we have an up to date artifact before deploying
-        if let BuildStatus::Skipped = build_guest::build(
+        let src_dir = std::env::current_dir().unwrap();
+        if let BuildStatus::Skipped = risc0_build::docker_build(
             &self.manifest_path,
+            &src_dir,
             &GuestOptions {
                 features: self.features.clone(),
                 ..Default::default()
