@@ -22,11 +22,12 @@ extern crate alloc;
 use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
+    vec::Vec,
 };
 use core::arch::asm;
 
 use getrandom::getrandom;
-use risc0_circuit_keccak::KeccakState;
+use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
@@ -567,6 +568,24 @@ fn main() {
                     0xd5f9328619cd99f7
                 ]
             );
+        }
+        MultiTestSpec::KeccakUnion => {
+            fn generate_input(po2: usize, _proof_count: usize) -> Vec<KeccakState> {
+                let mut state = KeccakState::default();
+                let mut pows = 987654321_u64;
+                for part in state.as_mut_slice() {
+                    *part = pows;
+                    pows = pows.wrapping_mul(123456789);
+                }
+
+                let cycles = 1 << po2;
+                let count = cycles / 200; // roughly 200 cycles per keccakf
+                vec![state; count + 10]
+            }
+
+            for mut state in generate_input(KECCAK_DEFAULT_PO2, 2) {
+                env::risc0_keccak_update(&mut state);
+            }
         }
     }
 }

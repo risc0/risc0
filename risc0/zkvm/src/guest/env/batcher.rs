@@ -46,7 +46,7 @@ impl Keccak2Batcher {
         sha_single_keccak(&mut self.claim_state, keccak_state);
         if status == 1 {
             // we've reached the limit. Create a proof request.
-            self.finalize();
+            self.flush();
         }
     }
 

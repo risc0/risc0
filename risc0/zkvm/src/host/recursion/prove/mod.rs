@@ -741,8 +741,8 @@ impl Prover {
     fn add_succinct_receipt(&mut self, a: &SuccinctReceipt<Unknown>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         // TODO: Union program expects an additional boolean to tell it when the control root is zero.
-        //let zero_root = BabyBearElem::new(1);
-        //self.add_input(bytemuck::cast_slice(&[zero_root]));
+        let zero_root = BabyBearElem::new(1);
+        self.add_input(bytemuck::cast_slice(&[zero_root]));
         Ok(())
     }
 
