@@ -15,7 +15,8 @@ use crate::distribution::github::GithubRelease;
 use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::paths::Paths;
-use crate::{BaseUrls, RzupEvent};
+use crate::BaseUrls;
+use crate::RzupEvent;
 use semver::Version;
 use std::fmt;
 use std::path::Path;
@@ -72,6 +73,7 @@ impl FromStr for Component {
     }
 }
 
+#[cfg(feature = "install")]
 fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) -> Result<()> {
     use flate2::bufread::GzDecoder;
     use std::fs::File;
@@ -105,6 +107,11 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
         }
     }
     Ok(())
+}
+
+#[cfg(not(feature = "install"))]
+fn extract_archive(_env: &Environment, _archive_path: &Path, _target_dir: &Path) -> Result<()> {
+    Err(RzupError::Other("not built with install support".into()))
 }
 
 pub fn install(
@@ -153,6 +160,7 @@ pub fn install(
     Ok(())
 }
 
+#[cfg(feature = "install")]
 fn symlink(original: &Path, link: &Path) -> Result<()> {
     if std::fs::symlink_metadata(link).is_ok() {
         std::fs::remove_file(link)?;
@@ -162,6 +170,11 @@ fn symlink(original: &Path, link: &Path) -> Result<()> {
     }
     std::os::unix::fs::symlink(original, link)
         .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
+}
+
+#[cfg(not(feature = "install"))]
+fn symlink(_original: &Path, _link: &Path) -> Result<()> {
+    Err(RzupError::Other("not built with install support".into()))
 }
 
 pub fn set_default(env: &Environment, component: &Component, version: &Version) -> Result<()> {

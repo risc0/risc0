@@ -13,12 +13,14 @@
 // limitations under the License.
 pub mod github;
 
+#[cfg_attr(not(feature = "install"), path = "erroring_http.rs")]
+mod http;
+
+pub use self::http::*;
 use crate::error::{Result, RzupError};
 use crate::{Environment, RzupEvent};
-use reqwest::{blocking::Client, IntoUrl};
 use semver::Version;
-use serde::Deserialize;
-use std::{fmt, io, time::Duration};
+use std::{fmt, io};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Os {
@@ -100,81 +102,6 @@ fn parse_cpp_version_test() {
     assert!(parse_cpp_version("2025.a.01").is_err());
     assert!(parse_cpp_version("2025.01.01.04").is_err());
     assert!(parse_cpp_version("2025.01").is_err());
-}
-
-fn http_client_get(
-    url: impl IntoUrl,
-    bearer_token: &Option<String>,
-) -> Result<reqwest::blocking::Response> {
-    let client = Client::builder()
-        .timeout(Duration::from_secs(10))
-        .build()
-        .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
-
-    let mut builder = client.get(url).header("User-Agent", "rzup");
-
-    if let Some(token) = bearer_token {
-        builder = builder.header("Authorization", format!("Bearer {token}"));
-    }
-
-    builder.send().map_err(|e| RzupError::Other(e.to_string()))
-}
-
-#[derive(Deserialize)]
-struct RemoteResponse {
-    message: String,
-}
-
-fn error_on_status(response: reqwest::blocking::Response) -> Result<reqwest::blocking::Response> {
-    let status = response.status();
-
-    if !status.is_success() {
-        let host = response.url().host_str().expect("URL has a host");
-        let host = host.to_owned();
-        if let Ok(RemoteResponse { message }) = response.json() {
-            Err(RzupError::Other(format!("Remote error: {host}: {message}")))
-        } else {
-            Err(RzupError::Other(format!(
-                "Unexpected response: {host}: {status}"
-            )))
-        }
-    } else {
-        Ok(response)
-    }
-}
-
-fn check_for_not_found(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<bool> {
-    let response = http_client_get(url, bearer_token)?;
-    let status = response.status();
-    if status == reqwest::StatusCode::NOT_FOUND {
-        return Ok(false);
-    }
-    error_on_status(response)?;
-    Ok(true)
-}
-
-fn download_json<RetT: serde::de::DeserializeOwned>(
-    url: impl IntoUrl,
-    bearer_token: &Option<String>,
-) -> Result<RetT> {
-    let response = http_client_get(url, bearer_token)?;
-    let response = error_on_status(response)?;
-    response.json().map_err(|e| RzupError::Other(e.to_string()))
-}
-
-pub fn download_text(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<String> {
-    let response = http_client_get(url, bearer_token)?;
-    let response = error_on_status(response)?;
-    response.text().map_err(|e| RzupError::Other(e.to_string()))
-}
-
-fn download_bytes(
-    url: impl IntoUrl,
-    bearer_token: &Option<String>,
-) -> Result<reqwest::blocking::Response> {
-    let response = http_client_get(url, bearer_token)?;
-    let response = error_on_status(response)?;
-    Ok(response)
 }
 
 struct ProgressWriter<'a, WriterT> {

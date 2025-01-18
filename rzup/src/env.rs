@@ -16,9 +16,14 @@ use crate::error::Result;
 use crate::RzupError;
 use crate::RzupEvent;
 
-use fs2::FileExt as _;
 use std::fs;
 use std::path::{Path, PathBuf};
+
+fn home_dir() -> Option<PathBuf> {
+    std::env::var_os("HOME")
+        .and_then(|h| if h.is_empty() { None } else { Some(h) })
+        .map(PathBuf::from)
+}
 
 type VarResult<T> = std::result::Result<T, std::env::VarError>;
 
@@ -138,7 +143,7 @@ impl Environment {
     }
 
     pub fn new(mut env_accessor: impl FnMut(&str) -> VarResult<String>) -> Result<Self> {
-        let home_dir = dirs::home_dir().ok_or_else(|| {
+        let home_dir = home_dir().ok_or_else(|| {
             RzupError::Environment("Could not determine home directory".to_string())
         })?;
 
@@ -206,7 +211,10 @@ impl Environment {
         &self.github_token
     }
 
+    #[cfg(feature = "install")]
     pub fn flock(&self, name: &str, conflict_message: &str) -> Result<LockFile> {
+        use fs2::FileExt as _;
+
         let lock_path = self.tmp_dir().join(format!("{name}.lock"));
 
         let lock_file = std::fs::OpenOptions::new()
@@ -223,6 +231,11 @@ impl Environment {
             _file: lock_file,
             path: lock_path,
         })
+    }
+
+    #[cfg(not(feature = "install"))]
+    pub fn flock(&self, _name: &str, _conflict_message: &str) -> Result<LockFile> {
+        Err(RzupError::Other("not built with install support".into()))
     }
 }
 
@@ -248,7 +261,7 @@ mod tests {
     #[test]
     fn test_default_env() {
         let env = Environment::new(no_env).unwrap();
-        let home_dir = dirs::home_dir().unwrap();
+        let home_dir = home_dir().unwrap();
         let expected_risc0_dir = home_dir.join(".risc0");
         let expected_cargo_bin_dir = home_dir.join(".cargo/bin");
         let expected_rustup_toolchain_dir = home_dir.join(".rustup/toolchains");

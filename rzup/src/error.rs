@@ -54,11 +54,4 @@ impl From<semver::Error> for RzupError {
         Self::InvalidVersion(e.to_string())
     }
 }
-
-impl From<anyhow::Error> for RzupError {
-    fn from(e: anyhow::Error) -> Self {
-        RzupError::Other(e.to_string())
-    }
-}
-
 pub type Result<T> = std::result::Result<T, RzupError>;
