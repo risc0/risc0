@@ -490,6 +490,7 @@ pub mod module_type {
         Ok(HttpClient::builder()
             .default_headers(headers)
             .pool_max_idle_per_host(0)
+            .timeout(None)
             .build()?)
     }
 
