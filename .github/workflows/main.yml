@@ -445,7 +445,10 @@ jobs:
             --exclude fibonacci-methods \
             --exclude risc0-bigint2 \
             --exclude risc0-bigint2-methods \
+            --exclude risc0-circuit-rv32im-v2 \
+            --exclude risc0-circuit-rv32im-v2-sys \
             --exclude risc0-circuit-keccak-methods \
+            --exclude risc0-zkos-v1compat \
             --exclude risc0-zkvm-receipts \
             --exclude risc0-zkvm-methods
       - run: sccache --show-stats
