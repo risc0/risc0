@@ -52,7 +52,7 @@ pub enum MultiTestSpec {
     Halt(u8),
     KeccakUpdate,
     KeccakUpdate2,
-    KeccakUnion,
+    KeccakUnion(usize),
     LibM,
     Oom,
     OutOfBounds,

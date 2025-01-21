@@ -569,8 +569,8 @@ fn main() {
                 ]
             );
         }
-        MultiTestSpec::KeccakUnion => {
-            fn generate_input(po2: usize, _proof_count: usize) -> Vec<KeccakState> {
+        MultiTestSpec::KeccakUnion(proof_count) => {
+            fn generate_input(po2: usize, proof_count: usize) -> Vec<KeccakState> {
                 let mut state = KeccakState::default();
                 let mut pows = 987654321_u64;
                 for part in state.as_mut_slice() {
@@ -580,10 +580,10 @@ fn main() {
 
                 let cycles = 1 << po2;
                 let count = cycles / 200; // roughly 200 cycles per keccakf
-                vec![state; count + 10]
+                vec![state; count * proof_count]
             }
 
-            for mut state in generate_input(KECCAK_DEFAULT_PO2, 2) {
+            for mut state in generate_input(KECCAK_DEFAULT_PO2, proof_count) {
                 env::risc0_keccak_update(&mut state);
             }
         }

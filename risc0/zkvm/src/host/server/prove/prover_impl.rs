@@ -135,12 +135,7 @@ impl ProverServer for ProverImpl {
         let mut keccak_receipts: UnionMmr = UnionMmr::default();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
-            let assumption = Assumption {
-                claim: receipt.claim.digest(),
-                control_root: receipt.control_root()?,
-            };
-            tracing::debug!("adding keccak assumption: {assumption:#?}");
-            zkr_receipts.insert(assumption, receipt.clone());
+            tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
             keccak_receipts.insert(receipt)?;
         }
 
