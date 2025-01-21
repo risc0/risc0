@@ -119,6 +119,7 @@ impl Environment {
         rustup_dir: impl AsRef<Path>,
         cargo_dir: impl AsRef<Path>,
         github_token: Option<String>,
+        event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
         let risc0_dir = risc0_dir.into();
         let tmp_dir = risc0_dir.join("tmp");
@@ -127,7 +128,7 @@ impl Environment {
         let settings_file = risc0_dir.join("settings.toml");
         let platform = Platform::detect()?;
 
-        let env = Self {
+        let mut env = Self {
             risc0_dir,
             tmp_dir,
             cargo_bin_dir,
@@ -137,12 +138,16 @@ impl Environment {
             platform,
             github_token,
         };
+        env.set_event_handler(event_handler);
 
         env.ensure_directories()?;
         Ok(env)
     }
 
-    pub fn new(mut env_accessor: impl FnMut(&str) -> VarResult<String>) -> Result<Self> {
+    pub fn new(
+        mut env_accessor: impl FnMut(&str) -> VarResult<String>,
+        event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
+    ) -> Result<Self> {
         let home_dir = home_dir().ok_or_else(|| {
             RzupError::Environment("Could not determine home directory".to_string())
         })?;
@@ -163,18 +168,21 @@ impl Environment {
             .or_else(|_| get_github_token_from_hosts_yml(&home_dir))
             .ok();
 
-        let env = Self::with_paths_and_token(risc0_dir, rustup_dir, cargo_dir, github_token)?;
+        let env = Self::with_paths_and_token(
+            risc0_dir,
+            rustup_dir,
+            cargo_dir,
+            github_token,
+            event_handler,
+        )?;
         env.emit(RzupEvent::Debug {
             message: format!("Initialized environment at {}", env.risc0_dir().display()),
         });
         Ok(env)
     }
 
-    pub fn set_event_handler<F>(&mut self, handler: F)
-    where
-        F: Fn(RzupEvent) + Send + Sync + 'static,
-    {
-        self.event_handler = Some(Box::new(handler));
+    pub fn set_event_handler(&mut self, event_handler: impl Fn(RzupEvent) + Send + Sync + 'static) {
+        self.event_handler = Some(Box::new(event_handler));
     }
 
     pub fn emit(&self, event: RzupEvent) {
@@ -260,7 +268,7 @@ mod tests {
 
     #[test]
     fn test_default_env() {
-        let env = Environment::new(no_env).unwrap();
+        let env = Environment::new(no_env, |_| {}).unwrap();
         let home_dir = home_dir().unwrap();
         let expected_risc0_dir = home_dir.join(".risc0");
         let expected_cargo_bin_dir = home_dir.join(".cargo/bin");
@@ -282,6 +290,7 @@ mod tests {
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             Some("foo".into()),
+            |_| {},
         )
         .unwrap();
 
@@ -306,13 +315,16 @@ mod tests {
         let rustup_dir = tmp_dir.path().join("my-rustup");
         let cargo_dir = tmp_dir.path().join("my-cargo");
 
-        let env = Environment::new(|key| match key {
-            "RISC0_HOME" => Ok(risc0_dir.to_string_lossy().into()),
-            "RUSTUP_HOME" => Ok(rustup_dir.to_string_lossy().into()),
-            "CARGO_HOME" => Ok(cargo_dir.to_string_lossy().into()),
-            "GITHUB_TOKEN" => Ok("foobar".into()),
-            other => panic!("unexpected read of {other:?} environment variable"),
-        })
+        let env = Environment::new(
+            |key| match key {
+                "RISC0_HOME" => Ok(risc0_dir.to_string_lossy().into()),
+                "RUSTUP_HOME" => Ok(rustup_dir.to_string_lossy().into()),
+                "CARGO_HOME" => Ok(cargo_dir.to_string_lossy().into()),
+                "GITHUB_TOKEN" => Ok("foobar".into()),
+                other => panic!("unexpected read of {other:?} environment variable"),
+            },
+            |_| {},
+        )
         .unwrap();
         assert_eq!(env.risc0_dir, risc0_dir);
         assert_eq!(env.rustup_toolchain_dir, rustup_dir.join("toolchains"));

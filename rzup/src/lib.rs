@@ -62,10 +62,21 @@ pub struct Rzup {
 
 impl Rzup {
     /// Creates a new Rzup instance using default environment paths.
-    ///
-    /// This will initialize the registry, settings, and scan the environment for installed components.
     pub fn new() -> Result<Self> {
-        let environment = Environment::new(|s| std::env::var(s))?;
+        let environment = Environment::new(|s| std::env::var(s), |_| {})?;
+        let registry = Registry::new(&environment, Default::default())?;
+
+        Ok(Self {
+            environment,
+            registry,
+        })
+    }
+
+    /// Creates a new Rzup instance using default environment paths, and the given event handler.
+    pub fn new_with_event_handler(
+        event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
+    ) -> Result<Self> {
+        let environment = Environment::new(|s| std::env::var(s), event_handler)?;
         let registry = Registry::new(&environment, Default::default())?;
 
         Ok(Self {
@@ -88,9 +99,15 @@ impl Rzup {
         cargo_dir: impl AsRef<Path>,
         base_urls: BaseUrls,
         github_token: Option<String>,
+        event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
-        let environment =
-            Environment::with_paths_and_token(risc0_dir, rustup_dir, cargo_dir, github_token)?;
+        let environment = Environment::with_paths_and_token(
+            risc0_dir,
+            rustup_dir,
+            cargo_dir,
+            github_token,
+            event_handler,
+        )?;
         let registry = Registry::new(&environment, base_urls)?;
 
         Ok(Self {
@@ -103,12 +120,12 @@ impl Rzup {
     ///
     /// # Arguments
     /// * `handler` - Function that will be called for each event
-    #[cfg_attr(not(feature = "cli"), expect(dead_code))]
-    pub(crate) fn set_event_handler<F>(&mut self, handler: F)
-    where
-        F: Fn(RzupEvent) + Send + Sync + 'static,
-    {
-        self.environment.set_event_handler(handler);
+    #[cfg(test)]
+    pub(crate) fn set_event_handler(
+        &mut self,
+        event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
+    ) {
+        self.environment.set_event_handler(event_handler);
     }
 
     /// Installs all default components.
@@ -509,6 +526,7 @@ mod tests {
             tmp_dir.path().join(".cargo"),
             base_urls,
             github_token,
+            |_| {},
         )
         .unwrap();
         (tmp_dir, rzup)

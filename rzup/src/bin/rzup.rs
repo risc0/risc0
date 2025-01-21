@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use clap::Parser;
-use rzup::{cli::Cli, error::Result, Rzup};
+use rzup::{cli::Cli, error::Result};
 
 fn main() -> Result<()> {
-    let mut rzup = Rzup::new()?;
     let cli = Cli::parse();
-
-    cli.execute(&mut rzup)
+    cli.execute()
 }

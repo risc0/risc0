@@ -15,6 +15,7 @@ pub(crate) mod commands;
 pub(crate) mod ui;
 
 use crate::error::Result;
+use crate::events::RzupEvent;
 use crate::Rzup;
 
 use clap::{Parser, Subcommand};
@@ -72,34 +73,42 @@ pub struct Cli {
     quiet: bool,
 }
 
+fn spawn_ui<'scope, 'env>(
+    verbose: bool,
+    scope: &'scope std::thread::Scope<'scope, 'env>,
+) -> impl Fn(RzupEvent) + Send + Sync + 'static
+where
+    'env: 'scope,
+{
+    let (ui_send, ui_recv) = std::sync::mpsc::channel();
+    let ui = Ui::new(verbose);
+    scope.spawn(move || {
+        ui.run(ui_recv);
+    });
+
+    move |event| {
+        let _ = ui_send.send(event);
+    }
+}
+
 impl Cli {
-    pub fn execute(self, rzup: &mut Rzup) -> Result<()> {
+    pub fn execute(self) -> Result<()> {
         let result = std::thread::scope(|scope| {
-            if !self.quiet {
-                let (ui_send, ui_recv) = std::sync::mpsc::channel();
-                rzup.set_event_handler(move |event| {
-                    let _ = ui_send.send(event);
-                });
-
-                let ui = Ui::new(self.verbose);
-                scope.spawn(move || {
-                    ui.run(ui_recv);
-                });
-            }
-
-            let result = match self.command {
-                Commands::Install(cmd) => cmd.execute(rzup),
-                Commands::Show(cmd) => cmd.execute(rzup),
-                Commands::Default(cmd) => cmd.execute(rzup),
-                Commands::Check(cmd) => cmd.execute(rzup),
-                Commands::Uninstall(cmd) => cmd.execute(rzup),
-                Commands::Build(cmd) => cmd.execute(rzup),
+            let mut rzup = if !self.quiet {
+                let event_handler = spawn_ui(self.verbose, scope);
+                Rzup::new_with_event_handler(event_handler)?
+            } else {
+                Rzup::new()?
             };
 
-            // This has side-effect of dropping the channel
-            rzup.set_event_handler(|_| {});
-
-            result
+            match self.command {
+                Commands::Install(cmd) => cmd.execute(&mut rzup),
+                Commands::Show(cmd) => cmd.execute(&rzup),
+                Commands::Default(cmd) => cmd.execute(&mut rzup),
+                Commands::Check(cmd) => cmd.execute(&rzup),
+                Commands::Uninstall(cmd) => cmd.execute(&mut rzup),
+                Commands::Build(cmd) => cmd.execute(&mut rzup),
+            }
         });
 
         if let Err(e) = result {

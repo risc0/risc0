@@ -104,6 +104,7 @@ mod tests {
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
+            |_| {},
         )
         .unwrap();
         (tmp_dir, env)
