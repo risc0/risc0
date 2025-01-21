@@ -17,10 +17,9 @@ use std::time::Instant;
 use clap::Parser;
 use risc0_binfmt::MemoryImage2;
 use risc0_circuit_rv32im_v2::{
-    execute::{
-        platform::LOOKUP_TABLE_CYCLES, testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
-    },
+    execute::{platform::LOOKUP_TABLE_CYCLES, testutil, DEFAULT_SEGMENT_LIMIT_PO2},
     prove::segment_prover,
+    MAX_INSN_CYCLES,
 };
 use risc0_core::scope;
 
@@ -58,7 +57,7 @@ fn main() {
     assert!(segment_cycles > RESERVED_CYCLES);
     let iterations = (segment_cycles - RESERVED_CYCLES) / 2;
 
-    let program = testutil::simple_loop(iterations as u32);
+    let program = testutil::kernel::simple_loop(iterations as u32);
     let image = MemoryImage2::new_kernel(program);
     let prover = segment_prover().unwrap();
 
