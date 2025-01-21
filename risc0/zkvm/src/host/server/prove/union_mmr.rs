@@ -43,7 +43,7 @@ impl UnionMmr {
 
     pub fn root(&self) -> Result<SuccinctReceipt<Unknown>> {
         if self.peaks.is_empty() {
-            bail!("no elements");
+            bail!("no elements for host mmr");
         }
         if self.peaks.len() == 1 {
             return Ok(self.peaks[0].receipt.clone());

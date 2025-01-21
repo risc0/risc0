@@ -43,7 +43,7 @@ impl Mmr {
 
     pub fn root(&self) -> Result<Digest> {
         if self.peaks.is_empty() {
-            bail!("no elements");
+            bail!("no elements for guest mmr");
         }
         if self.peaks.len() == 1 {
             return Ok(self.peaks[0].digest);
