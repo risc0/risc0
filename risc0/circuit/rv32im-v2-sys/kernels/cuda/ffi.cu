@@ -306,21 +306,17 @@ __device__ ::cuda::std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx) {
 }
 
 __device__ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len) {
-  // printf("hostReadPrepare\n");
-  assert(false && "extern_hostReadPrepare");
-  // return ctx.stepHandler.readPrepare(fp.asUInt32(), len.asUInt32());
-  return 0;
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  uint32_t word = ctx.preflight.txns[txnIdx].word;
+  // printf("[%lu]: hostReadPrepare(txnIdx: %zu, word: 0x%08x)\n", ctx.cycle, txnIdx, word);
+  return word;
 }
 
 __device__ Val
 extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal) {
   // printf("hostWrite\n");
-  assert(false && "extern_hostWrite");
-  // uint32_t fd = fdVal.asUInt32();
-  // uint32_t addr = addrLow.asUInt32() | (addrHigh.asUInt32() << 16);
-  // uint32_t len = lenVal.asUInt32();
-  // return ctx.stepHandler.write(fd, addr, len);
-  return 0;
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  return ctx.preflight.txns[txnIdx].word;
 }
 
 __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
