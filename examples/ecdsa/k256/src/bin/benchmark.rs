@@ -12,26 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
+use k256_methods::BENCHMARK_ELF;
+use risc0_zkvm::{default_executor, ExecutorEnv};
 
-use risc0_build::GuestOptions;
-
+// Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() {
-    println!("cargo:rerun-if-env-changed=NUM_BIGINT_DIG");
-
-    let features = if std::env::var("NUM_BIGINT_DIG").is_ok() {
-        vec!["num-bigint-dig".to_string()]
-    } else {
-        vec!["num-bigint".to_string()]
-    };
-
-    let map = HashMap::from([(
-        "risc0-bigint2-guest",
-        GuestOptions {
-            features,
-            ..Default::default()
-        },
-    )]);
-
-    risc0_build::embed_methods_with_options(map);
+    let env = ExecutorEnv::builder().build().unwrap();
+    let exec = default_executor();
+    std::hint::black_box(exec.execute(env, BENCHMARK_ELF)).unwrap();
 }
