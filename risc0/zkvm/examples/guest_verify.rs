@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use risc0_zkvm::{
-    compute_image_id_v2, get_prover_server, local_executor, risc0_rv32im_ver, sha::Digest,
+    compute_image_id_v2, default_executor, get_prover_server, risc0_rv32im_ver, sha::Digest,
     ExecutorEnv, ExitCode, ProverOpts, Receipt, SegmentVersion,
 };
 use risc0_zkvm_methods::{
@@ -57,6 +57,6 @@ fn exec_verify(receipt: &Receipt) {
         .unwrap()
         .build()
         .unwrap();
-    let session = local_executor().execute(env, VERIFY_ELF).unwrap();
+    let session = default_executor().execute(env, VERIFY_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }

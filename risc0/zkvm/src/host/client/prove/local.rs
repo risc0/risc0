@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
-
 use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
@@ -60,29 +58,6 @@ impl Prover for LocalProver {
 
 impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
-        let mut exec = ExecutorImpl::from_elf(env, elf)?;
-        let mut segments = Vec::new();
-        let session = exec.run_with_callback(|segment| {
-            segments.push(SegmentInfo {
-                po2: segment.po2() as u32,
-                cycles: segment.user_cycles(),
-            });
-            Ok(Box::new(NullSegmentRef))
-        })?;
-        let receipt_claim = session.claim()?;
-        Ok(SessionInfo {
-            segments,
-            journal: session.journal.unwrap_or_default(),
-            exit_code: session.exit_code,
-            receipt_claim: Some(receipt_claim),
-        })
-    }
-}
-
-struct LocalExecutor;
-
-impl Executor for LocalExecutor {
-    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let version = risc0_rv32im_ver().unwrap_or(SegmentVersion::V1);
         let mut segments = Vec::new();
         let session = match version {
@@ -118,10 +93,4 @@ impl Executor for LocalExecutor {
             receipt_claim: Some(receipt_claim),
         })
     }
-}
-
-/// TODO(flaub)
-#[stability::unstable]
-pub fn local_executor() -> Rc<dyn Executor> {
-    Rc::new(LocalExecutor)
 }

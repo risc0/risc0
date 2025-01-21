@@ -108,7 +108,9 @@ pub struct Risc0Machine<'a> {
 
 impl<'a> Risc0Machine<'a> {
     pub fn step(emu: &mut Emulator, ctx: &'a mut dyn Risc0Context) -> Result<()> {
-        emu.step(&mut Risc0Machine { ctx })
+        emu.step(&mut Risc0Machine { ctx }).inspect_err(|_| {
+            emu.dump();
+        })
     }
 
     pub fn suspend(ctx: &'a mut dyn Risc0Context) -> Result<()> {
@@ -408,6 +410,10 @@ impl<'a> EmuContext for Risc0Machine<'a> {
     fn trap(&mut self, cause: Exception) -> Result<bool> {
         self.ctx.trap_rewind();
         if let Exception::Breakpoint = cause {
+            self.dump_registers(true)?;
+            self.dump_registers(false)?;
+        }
+        if let Exception::IllegalInstruction(_, _) = cause {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
         }

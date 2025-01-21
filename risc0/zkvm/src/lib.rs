@@ -150,7 +150,7 @@ pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, Prove
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 #[cfg(feature = "unstable")]
-pub use self::host::{client::prove::local::local_executor, server::prove::keccak::prove_keccak};
+pub use self::host::server::prove::keccak::prove_keccak;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {

@@ -37,6 +37,7 @@ num-derive = { version = "0.4.2", optional = true }
 num-traits = { version = "0.2.19", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
+ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-v2-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 
@@ -57,6 +58,7 @@ cuda = [
 default = ["prove"]
 execute = [
   "anyhow/backtrace",
+  "dep:ringbuffer",
   "dep:num-derive",
   "dep:num-traits",
   "risc0-core/perf",
