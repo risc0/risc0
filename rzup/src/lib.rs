@@ -424,10 +424,14 @@ mod tests {
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
+            "/risc0_github/risc0/releases/download/v1.0.0/\
+                cargo-risczero-aarch64-apple-darwin.tgz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
+                dummy_tar_xz_response(),
+            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-osx-arm64.tar.xz" =>
                 dummy_tar_xz_response(),
             "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
@@ -435,6 +439,8 @@ mod tests {
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
+            "/risc0_github/rust/releases/download/r0.1.81.0/\
+                rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
             "/gihub_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
             "/gihub_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.1.0/\
@@ -521,7 +527,11 @@ mod tests {
         }
     }
 
-    fn setup_test_env(base_urls: BaseUrls, github_token: Option<String>) -> (TempDir, Rzup) {
+    fn setup_test_env(
+        base_urls: BaseUrls,
+        github_token: Option<String>,
+        platform: Platform,
+    ) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
         let rzup = Rzup::with_paths_urls_token_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
@@ -529,7 +539,7 @@ mod tests {
             tmp_dir.path().join(".cargo"),
             base_urls,
             github_token,
-            Platform::new("x86_64", Os::Linux),
+            platform,
             |_| {},
         )
         .unwrap();
@@ -538,7 +548,11 @@ mod tests {
 
     #[test]
     fn test_rzup_initialization() {
-        let (_tmp_dir, rzup) = setup_test_env(invalid_base_urls(), None);
+        let (_tmp_dir, rzup) = setup_test_env(
+            invalid_base_urls(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
         assert!(rzup
             .settings()
             .get_default_version(&Component::RustToolchain)
@@ -550,7 +564,7 @@ mod tests {
     }
 
     fn test_install_and_uninstall_end_to_end(base_urls: BaseUrls) {
-        let (_tmp_dir, mut rzup) = setup_test_env(base_urls, None);
+        let (_tmp_dir, mut rzup) = setup_test_env(base_urls, None, Platform::detect().unwrap());
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         assert_eq!(
@@ -747,9 +761,10 @@ mod tests {
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
         use_github_token: bool,
+        platform: Platform,
     ) {
         let github_token = use_github_token.then_some("suchsecrettesttoken".into());
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token);
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, platform);
 
         run_and_assert_events(
             &mut rzup,
@@ -794,9 +809,10 @@ mod tests {
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
         use_github_token: bool,
+        platform: Platform,
     ) {
         let github_token = use_github_token.then_some("suchsecrettesttoken".into());
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token);
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, platform);
 
         rzup.install_component(&component, Some(version.clone()), false)
             .unwrap();
@@ -827,9 +843,10 @@ mod tests {
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
         use_github_token: bool,
+        platform: Platform,
     ) {
         let github_token = use_github_token.then_some("suchsecrettesttoken".into());
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token);
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, platform);
 
         rzup.install_component(&component, Some(version.clone()), false)
             .unwrap();
@@ -880,6 +897,7 @@ mod tests {
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
         use_github_token: bool,
+        platform: Platform,
     ) {
         fresh_install_test(
             base_urls.clone(),
@@ -891,6 +909,7 @@ mod tests {
             expected_files.clone(),
             expected_symlinks.clone(),
             use_github_token,
+            platform,
         );
 
         already_installed_test(
@@ -900,6 +919,7 @@ mod tests {
             expected_files.clone(),
             expected_symlinks.clone(),
             use_github_token,
+            platform,
         );
 
         already_installed_force_test(
@@ -912,11 +932,11 @@ mod tests {
             expected_files.clone(),
             expected_symlinks.clone(),
             use_github_token,
+            platform,
         );
     }
 
-    #[test]
-    fn install_cargo_risczero() {
+    fn test_install_cargo_risczero(platform: Platform, target_triple: &str) {
         let server = MockDistributionServer::new();
         install_test(
             server.base_urls.clone(),
@@ -925,25 +945,36 @@ mod tests {
             Version::new(1, 0, 0),
             format!(
                 "{base_url}/risc0/releases/download/v1.0.0/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz",
+                cargo-risczero-{target_triple}.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
             86,
-            vec![
-                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin"
-                    .into(),
-            ],
+            vec![format!(
+                ".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/tar_contents.bin"
+            )],
             vec![(
                 ".cargo/bin/cargo-risczero".into(),
-                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
-                    .into(),
+                format!(".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/cargo-risczero"),
             )],
             false, /* use_github_token */
+            platform,
         )
     }
 
     #[test]
-    fn install_r0vm() {
+    fn install_cargo_risczero_x86_64_linux() {
+        test_install_cargo_risczero(
+            Platform::new("x86_64", Os::Linux),
+            "x86_64-unknown-linux-gnu",
+        );
+    }
+
+    #[test]
+    fn install_cargo_risczero_aarch64_mac() {
+        test_install_cargo_risczero(Platform::new("aarch64", Os::MacOs), "aarch64-apple-darwin");
+    }
+
+    fn test_install_r0vm(platform: Platform, target_triple: &str) {
         let server = MockDistributionServer::new();
         install_test(
             server.base_urls.clone(),
@@ -952,30 +983,44 @@ mod tests {
             Version::new(1, 0, 0),
             format!(
                 "{base_url}/risc0/releases/download/v1.0.0/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz",
+                cargo-risczero-{target_triple}.tgz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
             86,
-            vec![
-                ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
-            ],
+            vec![format!(
+                ".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/tar_contents.bin"
+            )],
             vec![
                 (
                     ".cargo/bin/cargo-risczero".into(),
-                    ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
-                        .into(),
+                    format!(
+                        ".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/cargo-risczero"
+                    ),
                 ),
                 (
                     ".cargo/bin/r0vm".into(),
-                    ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/r0vm".into(),
-                )
+                    format!(".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/r0vm"),
+                ),
             ],
-            false /* use_github_token */
+            false, /* use_github_token */
+            platform,
         )
     }
 
     #[test]
-    fn install_rust() {
+    fn install_r0vm_x86_64_linux() {
+        test_install_r0vm(
+            Platform::new("x86_64", Os::Linux),
+            "x86_64-unknown-linux-gnu",
+        );
+    }
+
+    #[test]
+    fn install_r0vm_aarch64_mac() {
+        test_install_r0vm(Platform::new("aarch64", Os::MacOs), "aarch64-apple-darwin");
+    }
+
+    fn test_install_rust(platform: Platform, target_triple: &str) {
         let server = MockDistributionServer::new();
         install_test(
             server.base_urls.clone(),
@@ -984,21 +1029,36 @@ mod tests {
             Version::new(1, 81, 0),
             format!(
                 "{base_url}/rust/releases/download/r0.1.81.0/\
-                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz",
+                rust-toolchain-{target_triple}.tar.gz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
             86,
-            vec![".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu/tar_contents.bin".into()],
+            vec![format!(
+                ".risc0/toolchains/v1.81.0-rust-{target_triple}/tar_contents.bin"
+            )],
             vec![(
                 ".rustup/toolchains/risc0".into(),
-                ".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu".into(),
+                format!(".risc0/toolchains/v1.81.0-rust-{target_triple}"),
             )],
             false, /* use_github_token */
+            platform,
         )
     }
 
     #[test]
-    fn install_cpp() {
+    fn install_rust_x86_64_linux() {
+        test_install_rust(
+            Platform::new("x86_64", Os::Linux),
+            "x86_64-unknown-linux-gnu",
+        );
+    }
+
+    #[test]
+    fn install_rust_aarch64_mac() {
+        test_install_rust(Platform::new("aarch64", Os::MacOs), "aarch64-apple-darwin");
+    }
+
+    fn test_install_cpp(platform: Platform, target_double: &str, target_triple: &str) {
         let server = MockDistributionServer::new();
         install_test(
             server.base_urls.clone(),
@@ -1007,20 +1067,40 @@ mod tests {
             Version::new(2024, 1, 5),
             format!(
                 "{base_url}/toolchain/releases/download/2024.01.05/\
-                riscv32im-linux-x86_64.tar.xz",
+                riscv32im-{target_double}.tar.xz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
             128,
-            vec![
-                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu/tar_contents.bin".into(),
-            ],
+            vec![format!(
+                ".risc0/toolchains/v2024.1.5-cpp-{target_triple}/tar_contents.bin"
+            )],
             vec![(
                 ".risc0/cpp".into(),
-                ".risc0/toolchains/v2024.1.5-cpp-x86_64-unknown-linux-gnu/riscv32im-linux-x86_64"
-                    .into(),
+                format!(
+                    ".risc0/toolchains/v2024.1.5-cpp-{target_triple}/riscv32im-{target_double}"
+                ),
             )],
             false, /* use_github_token */
+            platform,
         )
+    }
+
+    #[test]
+    fn install_cpp_x86_64_linux() {
+        test_install_cpp(
+            Platform::new("x86_64", Os::Linux),
+            "linux-x86_64",
+            "x86_64-unknown-linux-gnu",
+        );
+    }
+
+    #[test]
+    fn install_cpp_aarch64_mac() {
+        test_install_cpp(
+            Platform::new("aarch64", Os::MacOs),
+            "osx-arm64",
+            "aarch64-apple-darwin",
+        );
     }
 
     #[test]
@@ -1047,12 +1127,17 @@ mod tests {
                     .into(),
             )],
             true, /* use_github_token */
+            Platform::new("x86_64", Os::Linux),
         )
     }
 
     fn test_list_multiple_versions(component: Component, version1: Version, version2: Version) {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         rzup.install_component(&component, Some(version1.clone()), false)
             .unwrap();
@@ -1141,7 +1226,11 @@ mod tests {
     #[test]
     fn set_default_version_cargo_risczero() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         set_default_version_test(
             &mut rzup,
@@ -1165,7 +1254,11 @@ mod tests {
     #[test]
     fn set_default_version_r0vm() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         set_default_version_test(
             &mut rzup,
@@ -1201,7 +1294,11 @@ mod tests {
     #[test]
     fn set_default_version_r0vm_after_cargo_risczero_installed() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         rzup.install_component(
             &Component::CargoRiscZero,
@@ -1250,7 +1347,11 @@ mod tests {
     #[test]
     fn set_default_version_rust() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         set_default_version_test(
             &mut rzup,
@@ -1272,7 +1373,11 @@ mod tests {
     #[test]
     fn set_default_version_cpp() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         set_default_version_test(
             &mut rzup,
@@ -1296,7 +1401,11 @@ mod tests {
     #[test]
     fn default_version_after_uninstall() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
         let cargo_risczero_version1 = Version::new(1, 0, 0);
         let cargo_risczero_version2 = Version::new(1, 1, 0);
 
@@ -1329,7 +1438,11 @@ mod tests {
     #[test]
     fn install_non_existent() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
         let cargo_risczero_version = Version::new(5, 0, 0);
 
         run_and_assert_events(
@@ -1368,7 +1481,11 @@ mod tests {
     #[test]
     fn uninstall_events() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         rzup.install_component(
@@ -1394,7 +1511,11 @@ mod tests {
     #[test]
     fn get_latest_version() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (_tmp_dir, rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         assert_eq!(
             rzup.get_latest_version(&Component::CargoRiscZero).unwrap(),
@@ -1412,7 +1533,11 @@ mod tests {
             ",
             temp_dir.path().display()
         ));
-        let (_, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (_, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         run_and_assert_events(
             &mut rzup,
@@ -1444,7 +1569,11 @@ mod tests {
             "
             .into(),
         );
-        let (_, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (_, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         run_and_assert_events(
             &mut rzup,
@@ -1535,7 +1664,11 @@ mod tests {
     #[test]
     fn build_rust_toolchain() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         let (test_repo, version) = create_fake_rust_repo(&tmp_dir);
 
@@ -1600,7 +1733,11 @@ mod tests {
     #[test]
     fn build_rust_toolchain_twice_different_versions() {
         let server = MockDistributionServer::new();
-        let (tmp_dir, mut rzup) = setup_test_env(server.base_urls.clone(), None);
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
 
         let (test_repo, master) = create_fake_rust_repo(&tmp_dir);
 

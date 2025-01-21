@@ -37,9 +37,10 @@ impl fmt::Display for Os {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Platform {
-    arch: &'static str,
-    os: Os,
+    pub(crate) arch: &'static str,
+    pub(crate) os: Os,
 }
 
 impl Platform {

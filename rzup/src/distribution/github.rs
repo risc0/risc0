@@ -11,10 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::components::Component;
+use crate::components::{
+    component_asset_name, component_repo_name, component_version_str, Component,
+};
 use crate::distribution::{
-    check_for_not_found, download_bytes, download_json, parse_cpp_version, Os, Platform,
-    ProgressWriter,
+    check_for_not_found, download_bytes, download_json, parse_cpp_version, Platform, ProgressWriter,
 };
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
@@ -70,102 +71,6 @@ fn parse_version_from_tag_name_test() {
     assert!(parse_version_from_tag_name(&Component::R0Vm, "v1.2").is_err());
     assert!(parse_version_from_tag_name(&Component::R0Vm, "v").is_err());
     assert!(parse_version_from_tag_name(&Component::R0Vm, "").is_err());
-}
-
-fn component_repo_name(component: &Component) -> &'static str {
-    match component {
-        Component::CargoRiscZero | Component::R0Vm => "risc0",
-        Component::RustToolchain => "rust",
-        Component::CppToolchain => "toolchain",
-    }
-}
-
-fn component_asset_name(
-    component: &Component,
-    platform: &Platform,
-) -> Result<(String, &'static str)> {
-    Ok(match component {
-        Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
-        Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
-        Component::CppToolchain => {
-            let triple = match (platform.arch, platform.os) {
-                ("x86_64", Os::Linux) => "riscv32im-linux-x86_64",
-                ("aarch64", Os::MacOs) => "riscv32im-osx-arm64",
-                (other, os) => {
-                    return Err(RzupError::UnsupportedPlatform(format!(
-                        "unknown architecture {other} for {os}"
-                    )))
-                }
-            };
-            (triple.to_string(), "tar.xz")
-        }
-        Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
-    })
-}
-
-#[test]
-fn component_asset_name_test() {
-    assert_eq!(
-        component_asset_name(
-            &Component::RustToolchain,
-            &Platform::new("x86_64", Os::Linux)
-        )
-        .unwrap(),
-        ("rust-toolchain-x86_64-unknown-linux-gnu".into(), "tar.gz")
-    );
-    assert_eq!(
-        component_asset_name(
-            &Component::CargoRiscZero,
-            &Platform::new("x86_64", Os::Linux)
-        )
-        .unwrap(),
-        ("cargo-risczero-x86_64-unknown-linux-gnu".into(), "tgz")
-    );
-    assert_eq!(
-        component_asset_name(
-            &Component::CppToolchain,
-            &Platform::new("x86_64", Os::Linux)
-        )
-        .unwrap(),
-        ("riscv32im-linux-x86_64".into(), "tar.xz")
-    );
-    assert_eq!(
-        component_asset_name(&Component::R0Vm, &Platform::new("x86_64", Os::Linux)).unwrap(),
-        ("r0vm-x86_64-unknown-linux-gnu".into(), "tgz")
-    );
-
-    assert_eq!(
-        component_asset_name(
-            &Component::CppToolchain,
-            &Platform::new("aarch64", Os::MacOs)
-        )
-        .unwrap(),
-        ("riscv32im-osx-arm64".into(), "tar.xz")
-    );
-    assert_eq!(
-        component_asset_name(
-            &Component::CppToolchain,
-            &Platform::new("x86_64", Os::MacOs)
-        )
-        .unwrap_err(),
-        RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
-    );
-}
-
-fn component_version_str(component: &Component, version: &Version) -> String {
-    match component {
-        // rust toolchain uses date-based versions with r0. prefix
-        Component::RustToolchain => {
-            format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
-        }
-        // cpp toolchain uses date-based versions
-        Component::CppToolchain => format!(
-            "{:04}.{:02}.{:02}",
-            version.major, version.minor, version.patch
-        ),
-        // cargo-risczero use v-prefixed versions
-        Component::CargoRiscZero | Component::R0Vm => format!("v{version}"),
-    }
 }
 
 #[derive(Deserialize)]
