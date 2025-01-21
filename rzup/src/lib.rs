@@ -17,7 +17,6 @@ pub mod cli;
 mod components;
 mod distribution;
 mod env;
-
 mod events;
 mod paths;
 mod registry;
@@ -25,6 +24,7 @@ mod settings;
 
 pub mod error;
 
+use distribution::Platform;
 use env::Environment;
 use events::RzupEvent;
 use paths::Paths;
@@ -93,19 +93,21 @@ impl Rzup {
     /// * `cargo_dir` - The path to cargo's home directory (usually ~/.cargo)
     /// * `base_urls` - The base URLs used to communicate with GitHub
     /// * `github_token` - The token to use when communicating with GitHub
-    pub fn with_paths_urls_and_token(
+    pub fn with_paths_urls_token_platform_and_event_handler(
         risc0_dir: impl Into<PathBuf>,
         rustup_dir: impl AsRef<Path>,
         cargo_dir: impl AsRef<Path>,
         base_urls: BaseUrls,
         github_token: Option<String>,
+        platform: Platform,
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
-        let environment = Environment::with_paths_and_token(
+        let environment = Environment::with_paths_token_platform_and_event_handler(
             risc0_dir,
             rustup_dir,
             cargo_dir,
             github_token,
+            platform,
             event_handler,
         )?;
         let registry = Registry::new(&environment, base_urls)?;
@@ -314,6 +316,7 @@ impl Rzup {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::distribution::Os;
     use std::convert::Infallible;
     use std::io::Write as _;
     use std::net::SocketAddr;
@@ -520,12 +523,13 @@ mod tests {
 
     fn setup_test_env(base_urls: BaseUrls, github_token: Option<String>) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
-        let rzup = Rzup::with_paths_urls_and_token(
+        let rzup = Rzup::with_paths_urls_token_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             base_urls,
             github_token,
+            Platform::new("x86_64", Os::Linux),
             |_| {},
         )
         .unwrap();

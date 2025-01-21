@@ -114,11 +114,12 @@ impl Environment {
         Ok(())
     }
 
-    pub fn with_paths_and_token(
+    pub fn with_paths_token_platform_and_event_handler(
         risc0_dir: impl Into<PathBuf>,
         rustup_dir: impl AsRef<Path>,
         cargo_dir: impl AsRef<Path>,
         github_token: Option<String>,
+        platform: Platform,
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
         let risc0_dir = risc0_dir.into();
@@ -126,7 +127,6 @@ impl Environment {
         let cargo_bin_dir = cargo_dir.as_ref().join("bin");
         let rustup_toolchain_dir = rustup_dir.as_ref().join("toolchains");
         let settings_file = risc0_dir.join("settings.toml");
-        let platform = Platform::detect()?;
 
         let mut env = Self {
             risc0_dir,
@@ -148,6 +148,8 @@ impl Environment {
         mut env_accessor: impl FnMut(&str) -> VarResult<String>,
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
+        let platform = Platform::detect()?;
+
         let home_dir = home_dir().ok_or_else(|| {
             RzupError::Environment("Could not determine home directory".to_string())
         })?;
@@ -168,11 +170,12 @@ impl Environment {
             .or_else(|_| get_github_token_from_hosts_yml(&home_dir))
             .ok();
 
-        let env = Self::with_paths_and_token(
+        let env = Self::with_paths_token_platform_and_event_handler(
             risc0_dir,
             rustup_dir,
             cargo_dir,
             github_token,
+            platform,
             event_handler,
         )?;
         env.emit(RzupEvent::Debug {
@@ -261,6 +264,7 @@ impl Drop for LockFile {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::distribution::Os;
 
     fn no_env(_: &str) -> VarResult<String> {
         Err(std::env::VarError::NotPresent)
@@ -285,11 +289,12 @@ mod tests {
     #[test]
     fn test_custom_root() {
         let tmp_dir = tempfile::tempdir().unwrap();
-        let env = Environment::with_paths_and_token(
+        let env = Environment::with_paths_token_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             Some("foo".into()),
+            Platform::new("x86_64", Os::Linux),
             |_| {},
         )
         .unwrap();

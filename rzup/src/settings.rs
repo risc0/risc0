@@ -95,15 +95,17 @@ impl Settings {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::distribution::{Os, Platform};
     use tempfile::TempDir;
 
     fn test_env() -> (TempDir, Environment) {
         let tmp_dir = TempDir::new().unwrap();
-        let env = Environment::with_paths_and_token(
+        let env = Environment::with_paths_token_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
+            Platform::new("x86_64", Os::Linux),
             |_| {},
         )
         .unwrap();

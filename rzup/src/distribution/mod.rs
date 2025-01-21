@@ -23,7 +23,7 @@ use semver::Version;
 use std::{fmt, io};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub enum Os {
+pub(crate) enum Os {
     MacOs,
     Linux,
 }
@@ -43,7 +43,7 @@ pub struct Platform {
 }
 
 impl Platform {
-    fn new(arch: &'static str, os: Os) -> Self {
+    pub(crate) fn new(arch: &'static str, os: Os) -> Self {
         Self { arch, os }
     }
 

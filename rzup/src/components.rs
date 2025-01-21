@@ -219,17 +219,20 @@ pub fn get_latest_version(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{components, env::Environment, http_test_harness, BaseUrls};
+    use crate::{
+        components, distribution::Platform, env::Environment, http_test_harness, BaseUrls,
+    };
     use semver::Version;
     use tempfile::TempDir;
 
     fn test_env() -> (TempDir, Environment) {
         let tmp_dir = tempfile::tempdir().unwrap();
-        let env = Environment::with_paths_and_token(
+        let env = Environment::with_paths_token_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
+            Platform::detect().unwrap(),
             |_| {},
         )
         .unwrap();
