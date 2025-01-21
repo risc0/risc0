@@ -160,8 +160,8 @@ where
 impl<'a, F: Field> VerifyParams<F> for Verifier<'a, F> {}
 
 impl<'a, F: Field> Verifier<'a, F> {
-    #[stability::unstable]
     /// Start a new verification session.
+    #[stability::unstable]
     pub fn new(taps: &'a TapSet<'a>, suite: &'a HashSuite<F>, seal: &'a [u32]) -> Self {
         trace_if_enabled!("Starting verify");
         Self {
@@ -194,9 +194,9 @@ impl<'a, F: Field> Verifier<'a, F> {
             .commit(&hashfn.hash_elem_slice(&circuit_info.encode()));
     }
 
-    #[stability::unstable]
     /// Read in the next merkle group in the seal.  `reg_group_id` should be the group ID
     /// as specified in the taps.
+    #[stability::unstable]
     pub fn verify_group(&mut self, reg_group_id: usize) -> Result<&Digest, VerificationError> {
         assert!(
             self.merkle_verifiers[reg_group_id].is_none(),
@@ -218,8 +218,8 @@ impl<'a, F: Field> Verifier<'a, F> {
         Ok(root)
     }
 
-    #[stability::unstable]
     /// Reads `elems` field elements of randomness from the IOP
+    #[stability::unstable]
     pub fn read_rng(&mut self, elems: usize) -> Vec<F::Elem> {
         let mix = (0..elems).map(|_| self.iop().random_elem()).collect();
         trace_if_enabled!("Got mix values from IOP: {mix:?}");
@@ -269,11 +269,11 @@ impl<'a, F: Field> Verifier<'a, F> {
         ret
     }
 
-    #[stability::unstable]
     /// Execute the IOP protocol to verify the validity polynomial
     /// such that all the constraints are satisfied.  This is
     /// currently only supported when called exactly once at the end
     /// of the verification.
+    #[stability::unstable]
     pub fn verify_validity(
         &mut self,
         validity_fn: impl Fn(&F::ExtElem, &[F::ExtElem]) -> F::ExtElem,
@@ -415,7 +415,7 @@ impl<'a, F: Field> Verifier<'a, F> {
         );
         let gen = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
         let hashfn = self.suite.hashfn.as_ref();
-        self.fri_verify( |idx| {
+        self.fri_verify(|idx| {
             let x = gen.pow(idx);
             let rows= self
                 .merkle_verifiers
