@@ -20,7 +20,7 @@ risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, features = ["prove"], optional = true }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods", optional = true }
-tempfile = "3.12"
+tempfile = "3.15"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 which = "7.0"
