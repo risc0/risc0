@@ -4809,10 +4809,8 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 name = "rzup"
 version = "0.3.0-alpha.1"
 dependencies = [
- "anyhow",
  "clap 4.5.23",
  "colored",
- "dirs",
  "flate2",
  "fs2",
  "http-body-util",
