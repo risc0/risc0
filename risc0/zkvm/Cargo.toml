@@ -114,7 +114,7 @@ puffin_http = "0.16"
 risc0-circuit-keccak-methods = { path = "../circuit/keccak/methods" }
 risc0-zkvm-methods = { path = "methods", features = ["std"] }
 serde_json = "1.0"
-serde_with = "3.11"
+serde_with = "3.12"
 tabled = "0.16"
 tar = "0.4"
 tempfile = "3"
