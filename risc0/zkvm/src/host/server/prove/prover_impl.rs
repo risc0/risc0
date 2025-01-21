@@ -144,14 +144,15 @@ impl ProverServer for ProverImpl {
             keccak_receipts.insert(receipt)?;
         }
 
-        let root_receipt: SuccinctReceipt<Unknown> = keccak_receipts.root()?;
-        zkr_receipts.insert(
-            Assumption {
-                claim: root_receipt.claim.digest(),
-                control_root: root_receipt.control_root()?,
-            },
-            root_receipt,
-        );
+        if let Ok(root_receipt) = keccak_receipts.root() {
+            zkr_receipts.insert(
+                Assumption {
+                    claim: root_receipt.claim.digest(),
+                    control_root: root_receipt.control_root()?,
+                },
+                root_receipt,
+            );
+        }
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
         let inner_assumption_receipts: Vec<_> = session_assumption_receipts
