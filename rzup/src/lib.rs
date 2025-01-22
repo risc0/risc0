@@ -382,13 +382,17 @@ mod tests {
                 .unwrap()
         }
 
-        fn dummy_tar_xz_response() -> HyperResponse {
+        fn dummy_tar_xz_response(sub_dir: &str) -> HyperResponse {
             let mut tar_bytes = vec![];
             let mut tar_builder = tar::Builder::new(&mut tar_bytes);
             let mut header = tar::Header::new_gnu();
             header.set_size(4);
             tar_builder
-                .append_data(&mut header, "tar_contents.bin", &[1, 2, 3, 4][..])
+                .append_data(
+                    &mut header,
+                    format!("{sub_dir}/tar_contents.bin"),
+                    &[1, 2, 3, 4][..],
+                )
                 .unwrap();
             tar_builder.finish().unwrap();
             drop(tar_builder);
@@ -429,12 +433,12 @@ mod tests {
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
-                dummy_tar_xz_response(),
+                dummy_tar_xz_response("riscv32im-linux-x86_64"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-osx-arm64.tar.xz" =>
-                dummy_tar_xz_response(),
+                dummy_tar_xz_response("riscv32im-osx-arm64"),
             "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
-                dummy_tar_xz_response(),
+                dummy_tar_xz_response("riscv32im-linux-x86_64"),
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
@@ -1063,6 +1067,14 @@ mod tests {
 
     fn test_install_cpp(platform: Platform, target_double: &str, target_triple: &str) {
         let server = MockDistributionServer::new();
+
+        // This is just the size of the archive we end up creating.
+        let download_size = if target_double == "linux-x86_64" {
+            152
+        } else {
+            148
+        };
+
         install_test(
             server.base_urls.clone(),
             Component::CppToolchain,
@@ -1073,9 +1085,10 @@ mod tests {
                 riscv32im-{target_double}.tar.xz",
                 base_url = server.base_urls.risc0_github_base_url
             ),
-            128,
+            download_size,
             vec![format!(
-                ".risc0/toolchains/v2024.1.5-cpp-{target_triple}/tar_contents.bin"
+                ".risc0/toolchains/v2024.1.5-cpp-{target_triple}/\
+                riscv32im-{target_double}/tar_contents.bin"
             )],
             vec![(
                 ".risc0/cpp".into(),
@@ -1580,6 +1593,58 @@ mod tests {
         assert_eq!(
             rzup.list_versions(&Component::RustToolchain).unwrap(),
             vec![Version::new(1, 81, 0), Version::new(1, 79, 0)]
+        );
+    }
+
+    #[test]
+    fn set_default_version_legacy_versions() {
+        let (tmp_dir, mut rzup) = setup_test_env(
+            invalid_base_urls(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let legacy_rust_dir =
+            PathBuf::from(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        std::fs::create_dir_all(tmp_dir.path().join(&legacy_rust_dir)).unwrap();
+
+        rzup.set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
+            .unwrap();
+
+        let legacy_cargo_risczero_dir =
+            PathBuf::from(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cargo_risczero_dir)).unwrap();
+
+        rzup.set_default_version(
+            &Component::CargoRiscZero,
+            Version::parse("1.2.1-rc.0").unwrap(),
+        )
+        .unwrap();
+
+        let legacy_cpp_dir =
+            PathBuf::from(".risc0/toolchains/2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu");
+        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cpp_dir)).unwrap();
+
+        rzup.set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
+            .unwrap();
+
+        assert_symlinks(
+            tmp_dir.path(),
+            vec![
+                (
+                    ".cargo/bin/cargo-risczero".into(),
+                    legacy_cargo_risczero_dir
+                        .join("cargo-risczero")
+                        .to_str()
+                        .unwrap()
+                        .into(),
+                ),
+                (
+                    ".rustup/toolchains/risc0".into(),
+                    legacy_rust_dir.to_str().unwrap().into(),
+                ),
+                (".risc0/cpp".into(), legacy_cpp_dir.to_str().unwrap().into()),
+            ],
         );
     }
 
