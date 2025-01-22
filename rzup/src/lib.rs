@@ -1895,7 +1895,13 @@ mod tests {
         build::run_command("git", &["add", "."], Some(&test_repo), &[]).unwrap();
         build::run_command(
             "git",
-            &["commit", "-m", "initial commit"],
+            &[
+                "commit",
+                "--author",
+                "Testy <testy@example.com>",
+                "--message",
+                "initial commit",
+            ],
             Some(&test_repo),
             &[],
         )
