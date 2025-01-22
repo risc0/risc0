@@ -633,6 +633,7 @@ dependencies = [
  "anyhow",
  "risc0-build",
  "risc0-zkvm",
+ "rzup",
  "tracing-subscriber 0.3.19",
 ]
 
