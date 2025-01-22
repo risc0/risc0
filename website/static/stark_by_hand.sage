@@ -1,3 +1,5 @@
+# if you have any issue running this script, you can contact me on X: https://x.com/0xteddav, I'll try to help :)
+
 F = GF(97)
 R.<x> = F[]
 

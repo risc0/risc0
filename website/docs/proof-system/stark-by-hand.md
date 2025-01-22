@@ -12,6 +12,7 @@ In this series of 12 brief lessons, we walk through a simplified numerical examp
 - [Google Sheet version](https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing)
 - [PDF Version](https://dev.risczero.com/STARK-by-hand.pdf) (PDF)
 - [Python Version](https://dev.risczero.com/didactic_stark.py)
+- [Sage Version](https://dev.risczero.com/stark_by_hand.sage)
 
 If you make sense of these 12 lessons, you'll have a solid handle on the mechanics of a zk-STARK (and we'd likely love to [hire you](https://jobs.ashbyhq.com/RiscZero)).
 
