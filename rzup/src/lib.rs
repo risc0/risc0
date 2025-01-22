@@ -1952,7 +1952,21 @@ mod tests {
         );
 
         build::run_command("git", &["add", "."], Some(&test_repo), &[]).unwrap();
-        build::run_command("git", &["commit", "-m", "bar"], Some(&test_repo), &[]).unwrap();
+        build::run_command(
+            "git",
+            &[
+                "-c",
+                "user.name=Testy",
+                "-c",
+                "user.email=testy@example.com",
+                "commit",
+                "--message",
+                "bar",
+            ],
+            Some(&test_repo),
+            &[],
+        )
+        .unwrap();
 
         let commit = build::git_short_rev_parse(&test_repo, "HEAD").unwrap();
         let mut version = Version::new(1, 34, 0);
