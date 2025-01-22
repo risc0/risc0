@@ -687,6 +687,40 @@ mod tests {
             rzup.get_version_dir(&Component::RustToolchain, &rust_version),
             Err(RzupError::VersionNotFound(rust_version.clone()))
         );
+
+        // C++
+        let cpp_version = Version::new(2024, 1, 5);
+        assert_eq!(
+            rzup.get_version_dir(&Component::CppToolchain, &cpp_version),
+            Err(RzupError::VersionNotFound(cpp_version.clone()))
+        );
+        rzup.install_component(&Component::CppToolchain, Some(cpp_version.clone()), false)
+            .unwrap();
+        assert!(rzup
+            .version_exists(&Component::CppToolchain, &cpp_version)
+            .unwrap());
+        assert_eq!(
+            rzup.list_versions(&Component::CppToolchain).unwrap(),
+            vec![Version::new(2024, 1, 5)]
+        );
+        assert!(rzup
+            .get_version_dir(&Component::CppToolchain, &cpp_version)
+            .is_ok());
+
+        // Test uninstallation
+        rzup.uninstall_component(&Component::CppToolchain, cpp_version.clone())
+            .unwrap();
+        assert!(!rzup
+            .version_exists(&Component::CppToolchain, &cpp_version)
+            .unwrap());
+        assert_eq!(
+            rzup.list_versions(&Component::CppToolchain).unwrap(),
+            vec![]
+        );
+        assert_eq!(
+            rzup.get_version_dir(&Component::CppToolchain, &cpp_version),
+            Err(RzupError::VersionNotFound(cpp_version.clone()))
+        );
     }
 
     http_test_harness!(test_install_and_uninstall_end_to_end);
@@ -764,6 +798,7 @@ mod tests {
         download_length: u64,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        expected_version_dir: &str,
         use_github_token: bool,
         platform: Platform,
     ) {
@@ -802,6 +837,16 @@ mod tests {
             ],
         );
 
+        let actual_version_dir = rzup.get_version_dir(&component, &version).unwrap();
+        assert_eq!(
+            actual_version_dir
+                .strip_prefix(tmp_dir.path())
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            expected_version_dir
+        );
+
         assert_symlinks(tmp_dir.path(), expected_symlinks);
         assert_files(tmp_dir.path(), expected_files);
     }
@@ -813,6 +858,7 @@ mod tests {
         version: Version,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        expected_version_dir: &str,
         use_github_token: bool,
         platform: Platform,
     ) {
@@ -834,6 +880,16 @@ mod tests {
             }],
         );
 
+        let actual_version_dir = rzup.get_version_dir(&component, &version).unwrap();
+        assert_eq!(
+            actual_version_dir
+                .strip_prefix(tmp_dir.path())
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            expected_version_dir
+        );
+
         assert_symlinks(tmp_dir.path(), expected_symlinks);
         assert_files(tmp_dir.path(), expected_files);
     }
@@ -848,6 +904,7 @@ mod tests {
         download_length: u64,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        expected_version_dir: &str,
         use_github_token: bool,
         platform: Platform,
     ) {
@@ -889,6 +946,16 @@ mod tests {
             ],
         );
 
+        let actual_version_dir = rzup.get_version_dir(&component, &version).unwrap();
+        assert_eq!(
+            actual_version_dir
+                .strip_prefix(tmp_dir.path())
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            expected_version_dir
+        );
+
         assert_symlinks(tmp_dir.path(), expected_symlinks);
         assert_files(tmp_dir.path(), expected_files);
     }
@@ -903,6 +970,7 @@ mod tests {
         download_length: u64,
         expected_files: Vec<String>,
         expected_symlinks: Vec<(String, String)>,
+        expected_version_dir: &str,
         use_github_token: bool,
         platform: Platform,
     ) {
@@ -915,6 +983,7 @@ mod tests {
             download_length,
             expected_files.clone(),
             expected_symlinks.clone(),
+            expected_version_dir,
             use_github_token,
             platform,
         );
@@ -925,6 +994,7 @@ mod tests {
             version.clone(),
             expected_files.clone(),
             expected_symlinks.clone(),
+            expected_version_dir,
             use_github_token,
             platform,
         );
@@ -938,6 +1008,7 @@ mod tests {
             download_length,
             expected_files.clone(),
             expected_symlinks.clone(),
+            expected_version_dir,
             use_github_token,
             platform,
         );
@@ -963,6 +1034,7 @@ mod tests {
                 ".cargo/bin/cargo-risczero".into(),
                 format!(".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/cargo-risczero"),
             )],
+            &format!(".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}"),
             false, /* use_github_token */
             platform,
         )
@@ -1009,6 +1081,7 @@ mod tests {
                     format!(".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}/r0vm"),
                 ),
             ],
+            &format!(".risc0/extensions/v1.0.0-cargo-risczero-{target_triple}"),
             false, /* use_github_token */
             platform,
         )
@@ -1047,6 +1120,7 @@ mod tests {
                 ".rustup/toolchains/risc0".into(),
                 format!(".risc0/toolchains/v1.81.0-rust-{target_triple}"),
             )],
+            &format!(".risc0/toolchains/v1.81.0-rust-{target_triple}"),
             false, /* use_github_token */
             platform,
         )
@@ -1096,6 +1170,7 @@ mod tests {
                     ".risc0/toolchains/v2024.1.5-cpp-{target_triple}/riscv32im-{target_double}"
                 ),
             )],
+            &format!(".risc0/toolchains/v2024.1.5-cpp-{target_triple}/riscv32im-{target_double}"),
             false, /* use_github_token */
             platform,
         )
@@ -1142,6 +1217,7 @@ mod tests {
                 ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
                     .into(),
             )],
+            ".risc0/extensions/v1.0.0-cargo-risczero-x86_64-unknown-linux-gnu",
             true, /* use_github_token */
             Platform::new("x86_64", Os::Linux),
         )

@@ -199,15 +199,7 @@ pub fn set_default(env: &Environment, component: &Component, version: &Version) 
             symlink(&version_dir, &env.rustup_toolchain_dir().join("risc0"))?
         }
         Component::CppToolchain => {
-            let (asset_name, _ext) =
-                component_asset_name(&Component::CppToolchain, env.platform())?;
-            let sub_dir = version_dir.join(asset_name);
-            if sub_dir.exists() {
-                symlink(&sub_dir, &env.risc0_dir().join("cpp"))?;
-            } else {
-                // legacy installations have the sub-directory removed
-                symlink(&version_dir, &env.risc0_dir().join("cpp"))?;
-            }
+            symlink(&version_dir, &env.risc0_dir().join("cpp"))?;
         }
     };
     Ok(())

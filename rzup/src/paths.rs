@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::components::Component;
+use crate::components::{component_asset_name, Component};
 use crate::distribution::parse_cpp_version;
 use crate::env::Environment;
 use crate::error::Result;
@@ -54,6 +54,16 @@ impl Paths {
             let dir_name = entry.file_name().to_string_lossy().to_string();
             if let Some(parsed_version) = Self::parse_version_from_path(&dir_name, component) {
                 if parsed_version == *version {
+                    // The C++ archive has a child directory we want to ignore, but legacy installs
+                    // don't have it
+                    if component == &Component::CppToolchain {
+                        let (asset_name, _) = component_asset_name(component, env.platform())?;
+                        let sub_dir = entry.path().join(asset_name);
+                        if sub_dir.exists() {
+                            return Ok(Some(sub_dir));
+                        }
+                    }
+
                     return Ok(Some(entry.path()));
                 }
             }
