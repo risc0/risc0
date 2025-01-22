@@ -1560,6 +1560,30 @@ mod tests {
     }
 
     #[test]
+    fn list_legacy_versions() {
+        let (tmp_dir, rzup) = setup_test_env(
+            invalid_base_urls(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let legacy_rust_dir1 = tmp_dir
+            .path()
+            .join(".risc0/toolchains/r0.1.79.0-risc0-rust-aarch64-apple-darwin");
+        std::fs::create_dir_all(&legacy_rust_dir1).unwrap();
+
+        let legacy_rust_dir2 = tmp_dir
+            .path()
+            .join(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        std::fs::create_dir_all(&legacy_rust_dir2).unwrap();
+
+        assert_eq!(
+            rzup.list_versions(&Component::RustToolchain).unwrap(),
+            vec![Version::new(1, 81, 0), Version::new(1, 79, 0)]
+        );
+    }
+
+    #[test]
     fn self_update() {
         let temp_dir = TempDir::new().unwrap();
         let server = MockDistributionServer::new_with_install_script(format!(
