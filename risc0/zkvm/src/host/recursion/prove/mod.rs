@@ -143,13 +143,13 @@ pub fn union(
     a: &SuccinctReceipt<Unknown>,
     b: &SuccinctReceipt<Unknown>,
 ) -> Result<SuccinctReceipt<UnionClaim>> {
-    tracing::debug!("Proving union: a.claim = {:#?}", a.claim);
-    tracing::debug!("Proving union: b.claim = {:#?}", b.claim);
     let (left, right) = if a.claim.digest() <= b.claim.digest() {
         (a, b)
     } else {
         (b, a)
     };
+    tracing::debug!("Proving union: left.claim  = {:#?}", left.claim);
+    tracing::debug!("Proving union: right.claim = {:#?}", right.claim);
 
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_union(left, right, opts.clone())?;
@@ -157,7 +157,6 @@ pub fn union(
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
 
-    // todo: order claim hash.
     let claim = UnionClaim {
         left: left.claim.digest(),
         right: right.claim.digest(),
@@ -737,12 +736,14 @@ impl Prover {
         Ok(())
     }
 
-    /// Add a receipt covering rv32im execution, and include the first level of ReceiptClaim.
-    fn add_succinct_receipt(&mut self, a: &SuccinctReceipt<Unknown>) -> Result<()> {
+    /// Add a receipt for a succinct receipt
+    fn add_succinct_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
+    where
+        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
-        // TODO: Union program expects an additional boolean to tell it when the control root is zero.
-        let zero_root = BabyBearElem::new(1);
-        self.add_input(bytemuck::cast_slice(&[zero_root]));
+        // Union program expects an additional boolean to indicate that control root is zero.
+        self.add_input(bytemuck::cast_slice(&[BabyBearElem::new(1u32)]));
         Ok(())
     }
 
