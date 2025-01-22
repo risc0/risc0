@@ -431,6 +431,8 @@ mod tests {
                 cargo-risczero-aarch64-apple-darwin.tgz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
+            "/risc0_github/rust/releases/download/r0.1.79.0/\
+                rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
             "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
