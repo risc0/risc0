@@ -179,7 +179,8 @@ fn symlink(_original: &Path, _link: &Path) -> Result<()> {
 
 pub fn set_default(env: &Environment, component: &Component, version: &Version) -> Result<()> {
     let installed_component = component.parent_component().unwrap_or(*component);
-    let version_dir = Paths::get_version_dir(env, &installed_component, version);
+    let version_dir = Paths::find_version_dir(env, &installed_component, version)?
+        .ok_or_else(|| RzupError::VersionNotFound(version.clone()))?;
 
     match component {
         Component::CargoRiscZero => symlink(

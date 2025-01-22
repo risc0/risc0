@@ -238,7 +238,7 @@ impl Rzup {
     /// * `version` - Version to check
     #[cfg_attr(not(feature = "cli"), expect(dead_code))]
     pub(crate) fn version_exists(&self, component: &Component, version: &Version) -> Result<bool> {
-        Paths::version_exists(&self.environment, component, version)
+        Ok(Paths::find_version_dir(&self.environment, component, version)?.is_some())
     }
 
     /// Gets the settings manager.
@@ -249,16 +249,15 @@ impl Rzup {
 
     /// Gets the version-specific directory path for a component.
     ///
+    /// Errors if the version isn't installed.
+    ///
     /// # Arguments
     /// * `component` - Component
     /// * `version` - Version to get directory for
     pub fn get_version_dir(&self, component: &Component, version: &Version) -> Result<PathBuf> {
         let component = component.parent_component().unwrap_or(*component);
-        let path = Paths::get_version_dir(&self.environment, &component, version);
-        if !path.exists() {
-            return Err(RzupError::VersionNotFound(version.clone()));
-        }
-        Ok(path)
+        Paths::find_version_dir(&self.environment, &component, version)?
+            .ok_or_else(|| RzupError::VersionNotFound(version.clone()))
     }
 
     /// Update rzup by downloading and re-running the installation script.
@@ -1524,6 +1523,39 @@ mod tests {
         assert_eq!(
             rzup.get_latest_version(&Component::CargoRiscZero).unwrap(),
             Version::new(1, 1, 0)
+        );
+    }
+
+    #[test]
+    fn get_legacy_versions() {
+        let (tmp_dir, rzup) = setup_test_env(
+            invalid_base_urls(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let legacy_rust_dir = tmp_dir
+            .path()
+            .join(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        std::fs::create_dir_all(&legacy_rust_dir).unwrap();
+
+        let legacy_cargo_risczero_dir = tmp_dir
+            .path()
+            .join(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+        std::fs::create_dir_all(&legacy_cargo_risczero_dir).unwrap();
+
+        assert_eq!(
+            rzup.get_version_dir(&Component::RustToolchain, &Version::new(1, 81, 0))
+                .unwrap(),
+            legacy_rust_dir
+        );
+        assert_eq!(
+            rzup.get_version_dir(
+                &Component::CargoRiscZero,
+                &Version::parse("1.2.1-rc.0").unwrap()
+            )
+            .unwrap(),
+            legacy_cargo_risczero_dir
         );
     }
 

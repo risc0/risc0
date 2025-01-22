@@ -118,9 +118,8 @@ impl Registry {
         component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
         if let Some(version) = self.settings.get_default_version(component) {
-            if Paths::version_exists(env, component, &version)? {
-                let version_dir = Paths::get_version_dir(env, component, &version);
-                return Ok(Some((version, version_dir)));
+            if let Some(path) = Paths::find_version_dir(env, component, &version)? {
+                return Ok(Some((version, path)));
             }
         }
         Ok(None)
@@ -132,7 +131,7 @@ impl Registry {
         component: &Component,
         version: Version,
     ) -> Result<()> {
-        if !Paths::version_exists(env, component, &version)? {
+        if Paths::find_version_dir(env, component, &version)?.is_none() {
             return Err(RzupError::InvalidVersion(format!(
                 "Version {version} is not installed",
             )));
@@ -179,7 +178,7 @@ impl Registry {
         let component_to_install = component.parent_component().unwrap_or(*component);
         let version = self.version_or_latest(env, &component_to_install, version)?;
 
-        if !force && Paths::version_exists(env, &component_to_install, &version)? {
+        if !force && Paths::find_version_dir(env, &component_to_install, &version)?.is_some() {
             env.emit(RzupEvent::ComponentAlreadyInstalled {
                 id: component.to_string(),
                 version: version.to_string(),
