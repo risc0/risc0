@@ -512,7 +512,7 @@ mod tests {
 
                 #[test]
                 fn [<$test_name _against_mock_server>]() {
-                    let server = crate::tests::MockDistributionServer::new();
+                    let server = $crate::tests::MockDistributionServer::new();
                     $test_name(server.base_urls.clone())
                 }
             }
@@ -717,7 +717,7 @@ mod tests {
             if entry.path_is_symlink() {
                 let entry_path = entry.path();
                 let entry_relative_path = entry_path.strip_prefix(path).unwrap();
-                let target_path = std::fs::read_link(&entry_path).unwrap();
+                let target_path = std::fs::read_link(entry_path).unwrap();
                 let target_relative_path = target_path.strip_prefix(path).unwrap();
                 found_symlinks.push((
                     entry_relative_path.to_str().unwrap().to_owned(),
@@ -751,6 +751,7 @@ mod tests {
         assert_eq!(found_files, expected_files);
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn fresh_install_test(
         base_urls: BaseUrls,
         component: Component,
@@ -802,6 +803,7 @@ mod tests {
         assert_files(tmp_dir.path(), expected_files);
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn already_installed_test(
         base_urls: BaseUrls,
         component: Component,
@@ -833,6 +835,7 @@ mod tests {
         assert_files(tmp_dir.path(), expected_files);
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn already_installed_force_test(
         base_urls: BaseUrls,
         component: Component,
@@ -887,6 +890,7 @@ mod tests {
         assert_files(tmp_dir.path(), expected_files);
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn install_test(
         base_urls: BaseUrls,
         component: Component,

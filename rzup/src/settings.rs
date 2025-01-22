@@ -177,7 +177,7 @@ mod tests {
         std::fs::write(env.settings_path(), "[other]\na = 12").unwrap();
         let settings: Settings = run_and_assert_events(
             &mut env,
-            |env| Settings::load(&env).unwrap(),
+            |env| Settings::load(env).unwrap(),
             vec![RzupEvent::Print {
                 message: "! Warning: settings.toml: unknown table `other`".into(),
             }],
