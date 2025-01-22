@@ -170,10 +170,17 @@ pub fn install(
 #[cfg(feature = "install")]
 fn symlink(original: &Path, link: &Path) -> Result<()> {
     if std::fs::symlink_metadata(link).is_ok() {
-        std::fs::remove_file(link)?;
+        std::fs::remove_file(link).map_err(|e| {
+            RzupError::Other(format!("Failed to remove symlink: {}: {e}", link.display()))
+        })?
     }
     if let Some(parent) = link.parent() {
-        std::fs::create_dir_all(parent)?;
+        std::fs::create_dir_all(parent).map_err(|e| {
+            RzupError::Other(format!(
+                "Failed to create directory: {}: {e}",
+                parent.display()
+            ))
+        })?
     }
     std::os::unix::fs::symlink(original, link)
         .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
