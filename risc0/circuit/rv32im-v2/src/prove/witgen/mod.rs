@@ -84,8 +84,8 @@ impl<H: Hal> WitnessGenerator<H> {
 
         for i in 0..DIGEST_WORDS {
             // state in
-            let low = segment.pre_digest.as_words()[i] & 0xffff;
-            let high = segment.pre_digest.as_words()[i] >> 16;
+            let low = segment.claim.pre_state.as_words()[i] & 0xffff;
+            let high = segment.claim.pre_state.as_words()[i] >> 16;
             global[LAYOUT_GLOBAL.state_in.values[i].low._super.offset] = low.into();
             global[LAYOUT_GLOBAL.state_in.values[i].high._super.offset] = high.into();
 
@@ -102,7 +102,12 @@ impl<H: Hal> WitnessGenerator<H> {
         }
 
         // is_terminate
-        global[LAYOUT_GLOBAL.is_terminate._super.offset] = 1u32.into();
+        let is_terminate = if segment.claim.terminate_state.is_some() {
+            1u32
+        } else {
+            0u32
+        };
+        global[LAYOUT_GLOBAL.is_terminate._super.offset] = is_terminate.into();
 
         // shutdown_cycle
         global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
@@ -128,7 +133,7 @@ impl<H: Hal> WitnessGenerator<H> {
             // tracing::trace!(
             //     "[{row}] pc: {:#010x}, state: {:?}",
             //     cycle.pc,
-            //     CycleState::from_u32(cycle.state).unwrap()
+            //     crate::execute::CycleState::from_u32(cycle.state).unwrap()
             // );
             match back {
                 Back::None => {}
@@ -210,12 +215,12 @@ impl Injector {
         const NEXT_PC_LOW: usize = LAYOUT_TOP.next_pc_low._super.offset;
         const NEXT_PC_HIGH: usize = LAYOUT_TOP.next_pc_high._super.offset;
         const NEXT_STATE: usize = LAYOUT_TOP.next_state_0._super.offset;
-        const MACHINE_MODE: usize = LAYOUT_TOP.next_machine_mode._super.offset;
+        const NEXT_MACHINE_MODE: usize = LAYOUT_TOP.next_machine_mode._super.offset;
         self.set(row, CYCLE_COL, row as u32);
         self.set(row, NEXT_PC_LOW, cycle.pc & 0xffff);
         self.set(row, NEXT_PC_HIGH, cycle.pc >> 16);
         self.set(row, NEXT_STATE, cycle.state);
-        self.set(row, MACHINE_MODE, cycle.machine_mode as u32);
+        self.set(row, NEXT_MACHINE_MODE, cycle.machine_mode as u32);
         self.index.push(self.offsets.len() as u32);
     }
 
