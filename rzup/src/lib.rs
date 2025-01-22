@@ -1743,6 +1743,31 @@ mod tests {
     }
 
     #[test]
+    fn set_default_version_legacy_version_has_dir_instead_of_symlink() {
+        let (tmp_dir, mut rzup) = setup_test_env(
+            invalid_base_urls(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let legacy_cpp_dir =
+            PathBuf::from(".risc0/toolchains/2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu");
+        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cpp_dir)).unwrap();
+
+        // I'm not sure why some machine would have a directory here instead of a symlink, but
+        // there was an automation machine in this state.
+        std::fs::create_dir(tmp_dir.path().join(".risc0/cpp")).unwrap();
+
+        rzup.set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
+            .unwrap();
+
+        assert_symlinks(
+            tmp_dir.path(),
+            vec![(".risc0/cpp".into(), legacy_cpp_dir.to_str().unwrap().into())],
+        );
+    }
+
+    #[test]
     fn uninstall_legacy_versions() {
         let (tmp_dir, mut rzup) = setup_test_env(
             invalid_base_urls(),

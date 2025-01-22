@@ -169,8 +169,13 @@ pub fn install(
 
 #[cfg(feature = "install")]
 fn symlink(original: &Path, link: &Path) -> Result<()> {
-    if std::fs::symlink_metadata(link).is_ok() {
-        std::fs::remove_file(link).map_err(|e| {
+    if let Ok(metadata) = std::fs::symlink_metadata(link) {
+        if metadata.is_dir() {
+            std::fs::remove_dir_all(link)
+        } else {
+            std::fs::remove_file(link)
+        }
+        .map_err(|e| {
             RzupError::Other(format!("Failed to remove symlink: {}: {e}", link.display()))
         })?
     }
