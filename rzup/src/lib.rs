@@ -1896,9 +1896,11 @@ mod tests {
         build::run_command(
             "git",
             &[
+                "-c",
+                "user.name=Testy",
+                "-c",
+                "user.email=testy@example.com",
                 "commit",
-                "--author",
-                "Testy <testy@example.com>",
                 "--message",
                 "initial commit",
             ],
