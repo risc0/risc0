@@ -137,6 +137,10 @@ impl Registry {
             )));
         }
 
+        env.emit(RzupEvent::Debug {
+            message: format!("Setting component {component} version: {version} as default",),
+        });
+
         self.settings.set_default_version(component, &version);
         self.settings.save(env)?;
 
@@ -170,21 +174,32 @@ impl Registry {
     ) -> Result<()> {
         env.emit(RzupEvent::Debug {
             message: format!(
-                "Installing component {component} (version: {:?}, force: {force})",
+                "Installing component {component} (version: {}, force: {force})",
                 version
+                    .as_ref()
+                    .map(|v| v.to_string())
+                    .unwrap_or("latest".into())
             ),
         });
 
         let component_to_install = component.parent_component().unwrap_or(*component);
         let version = self.version_or_latest(env, &component_to_install, version)?;
 
-        if !force && Paths::find_version_dir(env, &component_to_install, &version)?.is_some() {
-            env.emit(RzupEvent::ComponentAlreadyInstalled {
-                id: component.to_string(),
-                version: version.to_string(),
-            });
-            self.set_default_component_version(env, component, version.clone())?;
-            return Ok(());
+        if !force {
+            if let Some(path) = Paths::find_version_dir(env, &component_to_install, &version)? {
+                env.emit(RzupEvent::ComponentAlreadyInstalled {
+                    id: component.to_string(),
+                    version: version.to_string(),
+                });
+                env.emit(RzupEvent::Debug {
+                    message: format!(
+                        "Component {component} already installed at path {}",
+                        path.display()
+                    ),
+                });
+                self.set_default_component_version(env, component, version.clone())?;
+                return Ok(());
+            }
         }
 
         components::install(component, env, &self.base_urls, &version, force)?;

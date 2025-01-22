@@ -157,6 +157,13 @@ pub fn install(
         version: version.to_string(),
     });
 
+    env.emit(RzupEvent::Debug {
+        message: format!(
+            "Component {component} installed at path: {}",
+            version_dir.display()
+        ),
+    });
+
     Ok(())
 }
 
