@@ -24,7 +24,7 @@ use std::{
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_more::Debug;
-use num_bigint::BigUint;
+use ibig::UBig;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
@@ -872,31 +872,33 @@ impl<'a> BigInt2Witness<'a> {
 }
 
 impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self
             .preflight
             .peek_region(addr.waddr(), count / WORD_SIZE as u32)?;
-        Ok(BigUint::from_bytes_le(&bytes))
+        Ok(UBig::from_le_bytes(&bytes))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()> {
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         // tracing::debug!(
         //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
         // );
         let addr = addr.waddr();
-        let mut words = value.to_u32_digits();
+        let bytes = value.to_le_bytes();
         let word_count = count as usize / WORD_SIZE;
-        if words.len() < word_count {
-            words.resize(word_count, 0);
-        }
-        ensure!(words.len() == word_count);
-        for (i, word) in words.iter().enumerate() {
-            self.witness.insert(addr + i, *word);
+        for i in 0..word_count {
+            let offset = i * 4;
+            let mut word = 0 as u32;
+            if offset < bytes.len() {
+                let wordbytes = &bytes[offset .. offset+4];
+                word = u32::from_le_bytes(wordbytes.try_into().unwrap());
+            }
+            self.witness.insert(addr + i, word);
         }
         Ok(())
     }
