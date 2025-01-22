@@ -1570,34 +1570,50 @@ mod tests {
         );
     }
 
-    #[test]
-    fn uninstall_events() {
+    fn uninstall_test(component: Component, version: Version) {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(
+        let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
             Platform::new("x86_64", Os::Linux),
         );
-        let cargo_risczero_version = Version::new(1, 0, 0);
 
-        rzup.install_component(
-            &Component::CargoRiscZero,
-            Some(cargo_risczero_version.clone()),
-            false,
-        )
-        .unwrap();
+        rzup.install_component(&component, Some(version.clone()), false)
+            .unwrap();
 
         run_and_assert_events(
             &mut rzup,
             |rzup| {
-                rzup.uninstall_component(&Component::CargoRiscZero, cargo_risczero_version.clone())
+                rzup.uninstall_component(&component, version.clone())
                     .unwrap();
             },
             vec![RzupEvent::Uninstalled {
-                id: "cargo-risczero".into(),
-                version: "1.0.0".into(),
+                id: component.to_string(),
+                version: version.to_string(),
             }],
         );
+
+        assert_files(tmp_dir.path(), vec![]);
+    }
+
+    #[test]
+    fn uninstall_cargo_risczero() {
+        uninstall_test(Component::CargoRiscZero, Version::new(1, 0, 0));
+    }
+
+    #[test]
+    fn uninstall_r0vm() {
+        uninstall_test(Component::R0Vm, Version::new(1, 0, 0));
+    }
+
+    #[test]
+    fn uninstall_rust() {
+        uninstall_test(Component::RustToolchain, Version::new(1, 81, 0));
+    }
+
+    #[test]
+    fn uninstall_cpp() {
+        uninstall_test(Component::CppToolchain, Version::new(2024, 1, 5));
     }
 
     #[test]
@@ -1722,6 +1738,54 @@ mod tests {
                 (".risc0/cpp".into(), legacy_cpp_dir.to_str().unwrap().into()),
             ],
         );
+    }
+
+    #[test]
+    fn uninstall_legacy_versions() {
+        let (tmp_dir, mut rzup) = setup_test_env(
+            invalid_base_urls(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let legacy_rust_dir =
+            PathBuf::from(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        std::fs::create_dir_all(tmp_dir.path().join(&legacy_rust_dir)).unwrap();
+
+        rzup.set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
+            .unwrap();
+
+        rzup.uninstall_component(&Component::RustToolchain, Version::new(1, 81, 0))
+            .unwrap();
+        assert_files(tmp_dir.path(), vec![]);
+
+        let legacy_cargo_risczero_dir =
+            PathBuf::from(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cargo_risczero_dir)).unwrap();
+
+        rzup.set_default_version(
+            &Component::CargoRiscZero,
+            Version::parse("1.2.1-rc.0").unwrap(),
+        )
+        .unwrap();
+
+        rzup.uninstall_component(
+            &Component::CargoRiscZero,
+            Version::parse("1.2.1-rc.0").unwrap(),
+        )
+        .unwrap();
+        assert_files(tmp_dir.path(), vec![]);
+
+        let legacy_cpp_dir =
+            PathBuf::from(".risc0/toolchains/2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu");
+        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cpp_dir)).unwrap();
+
+        rzup.set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
+            .unwrap();
+
+        rzup.uninstall_component(&Component::CppToolchain, Version::new(2024, 1, 5))
+            .unwrap();
+        assert_files(tmp_dir.path(), vec![]);
     }
 
     #[test]

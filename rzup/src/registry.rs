@@ -258,6 +258,10 @@ impl Registry {
         } else {
             components::uninstall(component, env, &version)?;
         }
+        env.emit(RzupEvent::Uninstalled {
+            id: component.to_string(),
+            version: version.to_string(),
+        });
         self.find_new_default_version(env, component)?;
 
         Ok(())

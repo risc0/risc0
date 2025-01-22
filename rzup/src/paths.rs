@@ -35,7 +35,7 @@ impl Paths {
         base_path.join(format!("v{version}-{component}-{}", env.platform()))
     }
 
-    pub fn find_version_dir(
+    fn find_version_dir_inner(
         env: &Environment,
         component: &Component,
         version: &Version,
@@ -54,16 +54,6 @@ impl Paths {
             let dir_name = entry.file_name().to_string_lossy().to_string();
             if let Some(parsed_version) = Self::parse_version_from_path(&dir_name, component) {
                 if parsed_version == *version {
-                    // The C++ archive has a child directory we want to ignore, but legacy installs
-                    // don't have it
-                    if component == &Component::CppToolchain {
-                        let (asset_name, _) = component_asset_name(component, env.platform())?;
-                        let sub_dir = entry.path().join(asset_name);
-                        if sub_dir.exists() {
-                            return Ok(Some(sub_dir));
-                        }
-                    }
-
                     return Ok(Some(entry.path()));
                 }
             }
@@ -72,14 +62,33 @@ impl Paths {
         Ok(None)
     }
 
+    pub fn find_version_dir(
+        env: &Environment,
+        component: &Component,
+        version: &Version,
+    ) -> Result<Option<PathBuf>> {
+        let res = Self::find_version_dir_inner(env, component, version)?;
+        if let Some(path) = &res {
+            // The C++ archive has a child directory we want to ignore, but legacy installs
+            // don't have it
+            if component == &Component::CppToolchain {
+                let (asset_name, _) = component_asset_name(component, env.platform())?;
+                let sub_dir = path.join(asset_name);
+                if sub_dir.exists() {
+                    return Ok(Some(sub_dir));
+                }
+            }
+        }
+        Ok(res)
+    }
+
     pub fn cleanup_version(
         env: &Environment,
         component: &Component,
         version: &Version,
     ) -> Result<()> {
-        let version_dir = Self::get_version_dir(env, component, version);
-        if version_dir.exists() {
-            std::fs::remove_dir_all(&version_dir)?;
+        if let Some(version_dir) = Self::find_version_dir_inner(env, component, version)? {
+            std::fs::remove_dir_all(version_dir)?;
         }
 
         let component_dir = Self::get_component_dir(env, component);

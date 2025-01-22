@@ -207,10 +207,6 @@ pub fn set_default(env: &Environment, component: &Component, version: &Version) 
 
 pub fn uninstall(component: &Component, env: &Environment, version: &Version) -> Result<()> {
     Paths::cleanup_version(env, component, version)?;
-    env.emit(RzupEvent::Uninstalled {
-        id: component.to_string(),
-        version: version.to_string(),
-    });
     Ok(())
 }
 
