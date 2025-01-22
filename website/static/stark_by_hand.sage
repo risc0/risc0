@@ -89,36 +89,63 @@ deep_d3 = (d3 - d3bar) / ((x-z)*(x-a))
 alpha2 = F(21) # random
 deep_polys = [deep_d1, deep_d2, deep_d3, deep_c1, deep_c2, deep_c3, deep_v]
 f = R(sum(pow(alpha2, i) * p for (i,p) in enumerate(deep_polys)))
-print(f)
-f_trace = evaluate(f, True)
-# f_trace = [53,69,63,30,46,13,60,50,38,3,95,23,75,39,62,19,62,58,41,67,89,41,50,24,95,90,72,20,82,33,0,16]
-f_points = [(pow(w,i), v) for (i,v) in enumerate(f_trace)]
-f0 = R.lagrange_polynomial(f_points)
-print(f0) # 10*x^6 + 37*x^5 + 43*x^4 + 48*x^3 + 34*x^2 + 56*x + 19
+# f is the polynomial over the "zk domain", but we want it over the "normal" domain
+# so we "shift back" the polynomial by 5
+f0 = f(x * 5)
 
-# f is the polynomial over the "zk domain"
-# but we want it over the "normal" domain
-f0 = f(x * F(pow(5,1)))
-print(f0)
+# in the article, f0 is interpolated like this:
+# f_trace = evaluate(f, True) # [53,69,63,30,46,13,60,50,38,3,95,23,75,39,62,19,62,58,41,67,89,41,50,24,95,90,72,20,82,33,0,16]
+# f_points = [(pow(w,i), v) for (i,v) in enumerate(f_trace)]
+# f0 = R.lagrange_polynomial(f_points) # 10*x^6 + 37*x^5 + 43*x^4 + 48*x^3 + 34*x^2 + 56*x + 19
 
-# # 11: FRI
-# def split_polynomial(poly):
-#     x = poly.parent().gen()
-#     coeffs = poly.coefficients(sparse=False)
-#     deg = poly.degree()
-#     Pe = R(sum(coeffs[i] * x^(i//2) for i in range(0, deg + 1, 2)))
-#     Po = R(sum(coeffs[i] * x^((i-1)//2) for i in range(1, deg + 1, 2)))
-#     return Pe, Po
+# 11: FRI commit
+def split_polynomial(poly):
+    x = poly.parent().gen()
+    coeffs = poly.coefficients(sparse=False)
+    deg = poly.degree()
+    Pe = R(sum(coeffs[i] * x^(i//2) for i in range(0, deg + 1, 2)))
+    Po = R(sum(coeffs[i] * x^((i-1)//2) for i in range(1, deg + 1, 2)))
+    return Pe, Po
 
-# def round(poly, alpha):
-#     Pe, Po = split_polynomial(poly)
-#     # print("Even part Pe(x):", Pe)   
-#     # print("Odd part Po(x):", Po)
-#     # print("Random challenge α:", alpha)
-#     Pf = Pe + alpha * Po
-#     # print("Folded polynomial Pf(x):", Pf)
-#     return Pf
+def round(poly, alpha):
+    Pe, Po = split_polynomial(poly)
+    Pf = Pe + alpha * Po
+    # print("Even part Pe(x):", Pe)
+    # print("Odd part Po(x):", Po)
+    # print("Random challenge α:", alpha)
+    # print("Folded polynomial Pf(x):", Pf)
+    return Pf
 
-# f1 = round(f0, 12)
-# f2 = round(f1, 32)
-# f3 = round(f2, 64)
+r1 = 12
+r2 = 32
+r3 = 64
+
+f1 = round(f0, r1)
+f2 = round(f1, r2)
+f3 = round(f2, r3)
+
+# 12: FRI query
+g_index = 25 # random
+g = F(pow(5, g_index))
+g2 = pow(g, 2)
+g4 = pow(g, 4)
+
+# let's verify the equality
+f0_even = (f0(x) + f0(-x)) / 2
+f0_odd = (f0(x) - f0(-x)) / (2*x)
+assert f1(x^2) == f0_even + r1 * f0_odd
+
+g_f0 = f0(g)
+g_f0_minus = f0(-g)
+g_f1 = f1(g2)
+g_f1_minus = f1(-g2)
+g_f2 = f2(g4)
+g_f2_minus = f2(-g4)
+
+# verif_f1 = (((r1 + x) / (2*x)) * f0(x)) + ((r1 - x) / (2*(-x))) * f0(-x)
+verif_f1 = (((r1 + g) / (2*g)) * g_f0) + (((r1 - g) / (2*(-g))) * g_f0_minus)
+assert g_f1 == verif_f1
+
+# verif_f2 = (((r2 + x) / 2*x) * f1(x)) + ((r2 - x) / 2*(-x)) * f1(-x)
+verif_f2 = (((r2 + g2) / (2*g2)) * g_f1) + (((r2 - g2) / (2*(-g2))) * g_f1_minus)
+assert verif_f2 == g_f2
