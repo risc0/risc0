@@ -893,7 +893,7 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
         let word_count = count as usize / WORD_SIZE;
         for i in 0..word_count {
             let offset = i * 4;
-            let mut word = 0 as u32;
+            let mut word = 0_u32;
             if offset < bytes.len() {
                 let wordbytes = &bytes[offset..offset + 4];
                 word = u32::from_le_bytes(wordbytes.try_into().unwrap());
