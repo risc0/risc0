@@ -1902,7 +1902,7 @@ mod tests {
     fn create_fake_rust_repo(tmp_dir: &TempDir) -> (PathBuf, Version) {
         let test_repo = tmp_dir.path().join("test-repo");
         std::fs::create_dir(&test_repo).unwrap();
-        build::run_command("git", &["init"], Some(&test_repo), &[]).unwrap();
+        build::run_command("git", &["init", "-b", "master"], Some(&test_repo), &[]).unwrap();
 
         std::fs::create_dir(test_repo.join("src")).unwrap();
         std::fs::write(test_repo.join("src/version"), "1.34.0").unwrap();
