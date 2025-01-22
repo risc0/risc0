@@ -54,7 +54,6 @@ pub enum RzupEvent {
     DoneBuildingRustToolchain {
         version: String,
     },
-    #[cfg_attr(not(feature = "cli"), expect(dead_code))]
     CheckUpdates {
         id: Option<String>, // none means finished checking
     },
