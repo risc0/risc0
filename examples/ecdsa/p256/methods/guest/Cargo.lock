@@ -423,15 +423,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ecdsa-verify"
-version = "0.1.0"
-dependencies = [
- "hex-literal",
- "k256",
- "risc0-zkvm",
-]
-
-[[package]]
 name = "either"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -601,21 +592,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "k256"
-version = "0.13.3"
-source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?tag=k256/v0.13.3-risczero.1#ff5d67b095cfcc2569b7789f2079ed87ef2c7756"
-dependencies = [
- "bytemuck",
- "cfg-if",
- "ecdsa",
- "elliptic-curve",
- "once_cell",
- "risc0-bigint2",
- "serdect",
- "sha2",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.155"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -707,6 +683,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
+name = "p256"
+version = "0.13.2"
+source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?tag=p256/v0.13.2-risczero.0#cdbf06d8834da2f3581d02e05d042295106176da"
+dependencies = [
+ "bytemuck",
+ "ecdsa",
+ "elliptic-curve",
+ "primeorder",
+ "risc0-bigint2",
+ "serdect",
+ "sha2",
+]
+
+[[package]]
+name = "p256-verify"
+version = "0.1.0"
+dependencies = [
+ "hex-literal",
+ "p256",
+ "risc0-zkvm",
+]
+
+[[package]]
 name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -733,6 +732,17 @@ name = "ppv-lite86"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
+
+[[package]]
+name = "primeorder"
+version = "0.13.1"
+source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?tag=p256/v0.13.2-risczero.0#cdbf06d8834da2f3581d02e05d042295106176da"
+dependencies = [
+ "bytemuck",
+ "elliptic-curve",
+ "risc0-bigint2",
+ "serdect",
+]
 
 [[package]]
 name = "proc-macro-crate"
@@ -825,9 +835,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.2.0"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f4c185a3bfaee681eed5bfac1440128184bf0b6544c345fb4d7bd4317c909fb"
+checksum = "7549b31ad8d81afea787c807803a592bc73151926bbb951a6823e23d998c34f0"
 dependencies = [
  "include_bytes_aligned",
  "stability",
