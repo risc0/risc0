@@ -23,7 +23,7 @@ use std::{
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
-    control_id::BN254_IDENTITY_CONTROL_ID,
+    control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID},
     prove::{DigestKind, RecursionReceipt},
     CircuitImpl,
 };
@@ -148,8 +148,16 @@ pub fn union(
     } else {
         (b, a)
     };
-    tracing::debug!("Proving union: left.claim  = {:#?}", left.claim);
-    tracing::debug!("Proving union: right.claim = {:#?}", right.claim);
+    tracing::debug!(
+        "Proving union: left.claim  = {:#?}  left.control_root  = {:#?}",
+        left.claim,
+        left.control_root()?
+    );
+    tracing::debug!(
+        "Proving union: right.claim  = {:#?} right.control_root = {:#?}",
+        right.claim,
+        right.control_root()?
+    );
 
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_union(left, right, opts.clone())?;
@@ -517,18 +525,7 @@ impl Prover {
         let (program, control_id) = zkr::union(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        // Determine the control root from the receipts themselves, and ensure they are equal. If
-        // the determined control root does not match what the downstream verifier expects, they
-        // will reject.
-        let merkle_root = a.control_root()?;
-        ensure!(
-            merkle_root == b.control_root()?,
-            "merkle roots for a and b do not match: {} != {}",
-            merkle_root,
-            b.control_root()?
-        );
-
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_input_digest(&ALLOWED_CONTROL_ROOT, DigestKind::Poseidon2);
         prover.add_succinct_receipt(a)?;
         prover.add_succinct_receipt(b)?;
         Ok(prover)
@@ -743,7 +740,12 @@ impl Prover {
     {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         // Union program expects an additional boolean to indicate that control root is zero.
-        self.add_input(bytemuck::cast_slice(&[BabyBearElem::new(1u32)]));
+        let zero_root = BabyBearElem::new(
+            (a.control_root()?
+                == Digest::ZERO) //digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"))
+                as u32,
+        );
+        self.add_input(bytemuck::cast_slice(&[zero_root]));
         Ok(())
     }
 
