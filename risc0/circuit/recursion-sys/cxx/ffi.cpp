@@ -21,6 +21,10 @@
 
 using namespace risc0;
 
+#define ACCUM_ARGS_LEN 5
+#define EXEC_ARGS_LEN 3
+#define VERIFY_ARGS_LEN 3
+
 extern "C" const char* risc0_circuit_recursion_string_ptr(risc0_string* str) {
   return str->str.c_str();
 }
@@ -53,8 +57,11 @@ extern "C" uint32_t risc0_circuit_recursion_step_compute_accum(risc0_error* err,
                                                                size_t steps,
                                                                size_t cycle,
                                                                Fp** args_ptr,
-                                                               size_t /*args_len*/) {
+                                                               size_t args_len) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
+    if (args_len != ACCUM_ARGS_LEN) {
+      throw std::runtime_error("Invalid arguments length");
+    }
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::recursion::step_compute_accum(
                &bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
@@ -68,8 +75,11 @@ extern "C" uint32_t risc0_circuit_recursion_step_verify_accum(risc0_error* err,
                                                               size_t steps,
                                                               size_t cycle,
                                                               Fp** args_ptr,
-                                                              size_t /*args_len*/) {
+                                                              size_t args_len) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
+    if (args_len != ACCUM_ARGS_LEN) {
+      throw std::runtime_error("Invalid arguments length");
+    }
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::recursion::step_verify_accum(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
         .asRaw();
@@ -82,8 +92,11 @@ extern "C" uint32_t risc0_circuit_recursion_step_exec(risc0_error* err,
                                                       size_t steps,
                                                       size_t cycle,
                                                       Fp** args_ptr,
-                                                      size_t /*args_len*/) {
+                                                      size_t args_len) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
+    if (args_len != EXEC_ARGS_LEN) {
+      throw std::runtime_error("Invalid arguments length");
+    }
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::recursion::step_exec(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
         .asRaw();
@@ -96,8 +109,11 @@ extern "C" uint32_t risc0_circuit_recursion_step_verify_bytes(risc0_error* err,
                                                               size_t steps,
                                                               size_t cycle,
                                                               Fp** args_ptr,
-                                                              size_t /*args_len*/) {
+                                                              size_t args_len) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
+    if (args_len != VERIFY_ARGS_LEN) {
+      throw std::runtime_error("Invalid arguments length");
+    }
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::recursion::step_verify_bytes(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
         .asRaw();
@@ -110,8 +126,11 @@ extern "C" uint32_t risc0_circuit_recursion_step_verify_mem(risc0_error* err,
                                                             size_t steps,
                                                             size_t cycle,
                                                             Fp** args_ptr,
-                                                            size_t /*args_len*/) {
+                                                            size_t args_len) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
+    if (args_len != VERIFY_ARGS_LEN) {
+      throw std::runtime_error("Invalid arguments length");
+    }
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::recursion::step_verify_mem(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
         .asRaw();
