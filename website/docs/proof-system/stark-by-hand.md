@@ -221,7 +221,7 @@ $V'(x)  = \frac{V(x) - V(93)}{x - 93}$ where the Prover computes V(93) by runnin
 > The [FRI protocol](../reference-docs/about-fri.md) provides a mechanism for the Verifier to confirm the low-degree-ness of polynomials, with very little computation required of the Verifier.
 > In order to reduce this assertion of low-degree-ness to a single application of FRI, the Prover mixes the `DEEP polynomials` into a single FRI polynomial, using the DEEP Mixing parameter, $\alpha_2$.
 
-Letting $c'_1, c'_2, c'_3, d'_1, d'_2, d'_3$, and $V'$ denote the `DEEP polynomials`, we mix the `DEEP polynomials` to construct the FRI polynomial, $f_0(x) = \alpha_2 ^0c'_1(x) + \alpha_2 ^1 c'_2(x) + ... + \alpha_2 ^6V'(x)$
+Letting $d'_1, d'_2, d'_3, c'_1, c'_2, c'_3$, and $V'$ denote the `DEEP polynomials`, we mix the `DEEP polynomials` to construct the FRI polynomial: $f_0(x) = {\alpha_2}^0 d'_1(x) + {\alpha_2}^1 d'_2(x) + {\alpha_2}^2 d'_3(x) + {\alpha_2}^3 c'_1(x) + {\alpha_2}^4 c'_2(x) + {\alpha_2}^5 c'_3(x) + {\alpha_2}^6 V'(x)$
 
 ![Lesson 11: Mixing for FRI](assets/fibonacci-10.png)
 
