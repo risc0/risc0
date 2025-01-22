@@ -22,7 +22,7 @@ use clap::{Parser, Subcommand};
 use colored::Colorize;
 use commands::UninstallCommand;
 use commands::{BuildCommand, CheckCommand, DefaultCommand, InstallCommand, ShowCommand};
-use ui::Ui;
+use ui::{TerminalUi, TextUi};
 
 #[derive(Subcommand)]
 enum Commands {
@@ -80,11 +80,21 @@ fn spawn_ui<'scope, 'env>(
 where
     'env: 'scope,
 {
+    use is_terminal::IsTerminal as _;
+
     let (ui_send, ui_recv) = std::sync::mpsc::channel();
-    let ui = Ui::new(verbose);
-    scope.spawn(move || {
-        ui.run(ui_recv);
-    });
+
+    if std::io::stdout().is_terminal() {
+        let ui = TerminalUi::new(verbose);
+        scope.spawn(move || {
+            ui.run(ui_recv);
+        });
+    } else {
+        let ui = TextUi::new(verbose);
+        scope.spawn(move || {
+            ui.run(ui_recv);
+        });
+    }
 
     move |event| {
         let _ = ui_send.send(event);
