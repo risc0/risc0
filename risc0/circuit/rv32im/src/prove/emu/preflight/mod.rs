@@ -895,7 +895,7 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
             let offset = i * 4;
             let mut word = 0 as u32;
             if offset < bytes.len() {
-                let wordbytes = &bytes[offset .. offset+4];
+                let wordbytes = &bytes[offset..offset + 4];
                 word = u32::from_le_bytes(wordbytes.try_into().unwrap());
             }
             self.witness.insert(addr + i, word);

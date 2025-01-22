@@ -16,8 +16,8 @@ use std::io::Read;
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
-use ibig::{ibig, IBig, ubig, UBig};
 use ibig::modular::ModuloRing;
+use ibig::{ibig, ubig, IBig, UBig};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
@@ -207,7 +207,10 @@ impl Program {
                     let (lhs, rhs) = operands(op, op_index, &regs);
                     let urhs = UBig::try_from(rhs)?;
                     let ring = ModuloRing::new(&urhs);
-                    let value = ring.from(lhs).inverse().ok_or_else(|| anyhow!("Can't divide by zero"))?;
+                    let value = ring
+                        .from(lhs)
+                        .inverse()
+                        .ok_or_else(|| anyhow!("Can't divide by zero"))?;
                     regs[op_index] = IBig::from(value.residue());
                 }
             }
