@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ pub use {
             RECURSION_PO2,
         },
         server::{
-            exec::executor::ExecutorImpl,
+            exec::{executor::ExecutorImpl, executor2::Executor2},
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -163,14 +163,16 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
+#[cfg(feature = "std")]
+pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
+
 pub use receipt::{
-    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext, DEFAULT_MAX_PO2,
+    segment::SegmentVersion, AssumptionReceipt, CompositeReceipt,
+    CompositeReceiptVerifierParameters, FakeReceipt, Groth16Receipt,
+    Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt, Journal, Receipt,
+    ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
+    SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
-//#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 use semver::Version;
 
@@ -205,4 +207,26 @@ pub fn is_dev_mode() -> bool {
 fn metal_implies_prove() {
     // we should be able to access prove feature items when metal has been enabled
     let _prover = get_prover_server(&ProverOpts::default());
+}
+
+/// Compute and return the v2 ImageID of the specified ELF binary.
+#[cfg(feature = "client")]
+pub fn compute_image_id_v2(
+    user_id: impl Into<risc0_zkp::core::digest::Digest>,
+) -> Result<risc0_zkp::core::digest::Digest> {
+    let kernel_id: risc0_zkp::core::digest::Digest =
+        risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID.try_into()?;
+    risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
+}
+
+/// TODO(flaub)
+#[cfg(feature = "std")]
+#[stability::unstable]
+pub fn risc0_rv32im_ver() -> Option<SegmentVersion> {
+    let version = std::env::var("RISC0_RV32IM_VER").unwrap_or_default();
+    match version.as_str() {
+        "1" => Some(SegmentVersion::V1),
+        "2" => Some(SegmentVersion::V2),
+        _ => None,
+    }
 }

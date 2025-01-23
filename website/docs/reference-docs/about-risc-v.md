@@ -11,7 +11,7 @@ This means that developers can write code in languages such as Rust, Go, and C, 
 ## Documentation
 
 The specification of rv32im is defined in [The RISC-V Instruction Set Manual, Volume I: User-Level ISA](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-20191213.pdf).
-A succinct summary of the architecture is available [here](https://github.com/jameslzhu/riscv-card/blob/master/riscv-card.pdf)
+A succinct summary of the architecture is available [here](https://github.com/jameslzhu/riscv-card/releases/download/latest/riscv-card.pdf)
 
 ## Suggested Reading and Videos
 

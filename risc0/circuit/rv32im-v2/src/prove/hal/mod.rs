@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,20 +48,20 @@ pub(crate) struct MetaBuffer<H: Hal> {
     pub buf: H::Buffer<H::Elem>,
     pub rows: usize,
     pub cols: usize,
-    pub checked_reads: bool,
+    pub checked: bool,
 }
 
 impl<H> MetaBuffer<H>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
 {
-    pub fn new(name: &'static str, hal: &H, rows: usize, cols: usize, checked_reads: bool) -> Self {
+    pub fn new(name: &'static str, hal: &H, rows: usize, cols: usize, checked: bool) -> Self {
         let buf = hal.alloc_elem_init(name, rows * cols, Val::INVALID);
         Self {
             buf,
             rows,
             cols,
-            checked_reads,
+            checked,
         }
     }
 
@@ -71,12 +71,11 @@ where
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum StepMode {
     Parallel,
-    #[cfg(test)]
     SeqForward,
-    #[cfg(test)]
     SeqReverse,
 }
 
@@ -135,6 +134,7 @@ where
             self.circuit_hal.as_ref(),
             segment,
             StepMode::Parallel,
+            // StepMode::SeqForward,
             rand_z,
         )?;
 
@@ -183,7 +183,7 @@ where
                     buf: self.hal.copy_from_elem("mix", mix.as_slice()),
                     rows: 1,
                     cols: REGCOUNT_MIX,
-                    checked_reads: true,
+                    checked: true,
                 };
 
                 let accum = scope!(

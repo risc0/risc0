@@ -44,7 +44,7 @@ pub struct RawPreflightCycle {
     pub user_cycle: u32,
     pub txn_idx: u32,
     pub paging_idx: u32,
-    pub diff_count: u32,
+    pub diff_count: [u32; 2],
 }
 
 #[repr(C)]
@@ -60,7 +60,7 @@ pub struct RawBuffer {
     pub buf: *const BabyBearElem,
     pub rows: usize,
     pub cols: usize,
-    pub checked_reads: bool,
+    pub checked: bool,
 }
 
 #[repr(C)]

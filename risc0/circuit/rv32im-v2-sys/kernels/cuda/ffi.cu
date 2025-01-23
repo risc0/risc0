@@ -16,12 +16,28 @@
 #include "steps.cuh"
 #include "witgen.h"
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#endif
+
 #include "vendor/nvtx3/nvtx3.hpp"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <cstdint>
 #include <cstdio>
 #include <cuda/std/array>
 #include <string.h>
+#include <thrust/execution_policy.h>
+#include <thrust/scan.h>
 
 namespace risc0::circuit::rv32im_v2::cuda {
 
@@ -30,26 +46,20 @@ struct ExecBuffers {
   Buffer data;
 };
 
-struct AccumBuffers {
-  Buffer data;
-  Buffer accum;
-  Buffer mix;
-};
-
-struct DeviceContext {
+struct DeviceExecContext {
   Buffer* data;
   Buffer* global;
   PreflightTrace* preflight;
   LookupTables* tables;
 };
 
-struct HostContext {
-  DeviceContext* ctx;
+struct HostExecContext {
+  DeviceExecContext* ctx;
   PreflightTrace d_preflight;
   LookupTables d_tables;
 
-  HostContext(ExecBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
-    CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceContext)));
+  HostExecContext(ExecBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
+    CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceExecContext)));
 
     CUDA_OK(cudaMalloc(&ctx->data, sizeof(Buffer)));
     CUDA_OK(cudaMemcpy(ctx->data, &buffers->data, sizeof(Buffer), cudaMemcpyHostToDevice));
@@ -86,7 +96,7 @@ struct HostContext {
     CUDA_OK(cudaMemcpy(ctx->tables, &d_tables, sizeof(LookupTables), cudaMemcpyHostToDevice));
   }
 
-  ~HostContext() {
+  ~HostExecContext() {
     cudaFree(d_tables.tableU16);
     cudaFree(d_tables.tableU8);
     cudaFree(ctx->tables);
@@ -94,6 +104,80 @@ struct HostContext {
     cudaFree(d_preflight.cycles);
     cudaFree(ctx->preflight);
     cudaFree(ctx->global);
+    cudaFree(ctx->data);
+    cudaFree(ctx);
+  }
+};
+
+struct AccumBuffers {
+  Buffer data;
+  Buffer accum;
+  Buffer mix;
+};
+
+struct DeviceAccumContext {
+  Buffer* data;
+  Buffer* accum;
+  Buffer* mix;
+  PreflightTrace* preflight;
+  LookupTables* tables;
+};
+
+struct HostAccumContext {
+  DeviceAccumContext* ctx;
+  PreflightTrace d_preflight;
+  LookupTables d_tables;
+
+  HostAccumContext(AccumBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
+    CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceAccumContext)));
+
+    CUDA_OK(cudaMalloc(&ctx->data, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->data, &buffers->data, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&ctx->accum, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->accum, &buffers->accum, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&ctx->mix, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->mix, &buffers->mix, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&d_preflight.cycles, cycles * sizeof(PreflightCycle)));
+    CUDA_OK(cudaMemcpy(d_preflight.cycles,
+                       preflight->cycles,
+                       cycles * sizeof(PreflightCycle),
+                       cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&d_preflight.txns, preflight->txnsLen * sizeof(MemoryTransaction)));
+    CUDA_OK(cudaMemcpy(d_preflight.txns,
+                       preflight->txns,
+                       preflight->txnsLen * sizeof(MemoryTransaction),
+                       cudaMemcpyHostToDevice));
+
+    d_preflight.txnsLen = preflight->txnsLen;
+    d_preflight.tableSplitCycle = preflight->tableSplitCycle;
+
+    CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
+    CUDA_OK(
+        cudaMemcpy(ctx->preflight, &d_preflight, sizeof(PreflightTrace), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&d_tables.tableU8, (1 << 8) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU8, 0, (1 << 8) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&d_tables.tableU16, (1 << 16) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU16, 0, (1 << 16) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&ctx->tables, sizeof(LookupTables)));
+    CUDA_OK(cudaMemcpy(ctx->tables, &d_tables, sizeof(LookupTables), cudaMemcpyHostToDevice));
+  }
+
+  ~HostAccumContext() {
+    cudaFree(d_tables.tableU16);
+    cudaFree(d_tables.tableU8);
+    cudaFree(ctx->tables);
+    cudaFree(d_preflight.txns);
+    cudaFree(d_preflight.cycles);
+    cudaFree(ctx->preflight);
+    cudaFree(ctx->mix);
+    cudaFree(ctx->accum);
     cudaFree(ctx->data);
     cudaFree(ctx);
   }
@@ -141,7 +225,7 @@ __device__ ::cuda::std::array<Val, 5> extern_getMemoryTxn(ExecContext& ctx, Val 
   //        txn.addr,
   //        txn.word);
 
-  if (txn.cycle != ctx.cycle) {
+  if (txn.cycle / 2 != ctx.cycle) {
     printf("txn.cycle: %u, ctx.cycle: %zu\n", txn.cycle, ctx.cycle);
     assert(false && "txn cycle mismatch");
   }
@@ -187,17 +271,13 @@ extern_memoryDelta(ExecContext& ctx, Val addr, Val cycle, Val dataLow, Val dataH
 
 __device__ uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle) {
   // printf("getDiffCount\n");
-  return ctx.preflight.cycles[cycle.asUInt32()].diffCount;
+  uint32_t cycleU32 = cycle.asUInt32();
+  return ctx.preflight.cycles[cycleU32 / 2].diffCount[cycleU32 % 2];
 }
 
 __device__ Val extern_isFirstCycle_0(ExecContext& ctx) {
   // printf("isFirstCycle\n");
   return ctx.cycle == 0;
-}
-
-__device__ Val extern_getCycle(ExecContext& ctx) {
-  // printf("getCycle\n");
-  return ctx.cycle;
 }
 
 __device__ ::cuda::std::array<Val, 4> extern_divide(
@@ -226,21 +306,17 @@ __device__ ::cuda::std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx) {
 }
 
 __device__ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len) {
-  // printf("hostReadPrepare\n");
-  assert(false && "extern_hostReadPrepare");
-  // return ctx.stepHandler.readPrepare(fp.asUInt32(), len.asUInt32());
-  return 0;
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  uint32_t word = ctx.preflight.txns[txnIdx].word;
+  // printf("[%lu]: hostReadPrepare(txnIdx: %zu, word: 0x%08x)\n", ctx.cycle, txnIdx, word);
+  return word;
 }
 
 __device__ Val
 extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal) {
   // printf("hostWrite\n");
-  assert(false && "extern_hostWrite");
-  // uint32_t fd = fdVal.asUInt32();
-  // uint32_t addr = addrLow.asUInt32() | (addrHigh.asUInt32() << 16);
-  // uint32_t len = lenVal.asUInt32();
-  // return ctx.stepHandler.write(fd, addr, len);
-  return 0;
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  return ctx.preflight.txns[txnIdx].word;
 }
 
 __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
@@ -259,7 +335,7 @@ __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
 //   step_TopAccum(ctx, &accum, &data, &mix);
 // }
 
-__device__ void nextStep(DeviceContext* ctx, uint32_t cycle) {
+__device__ void nextStep(DeviceExecContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
   ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
   MutableBufObj data(*ctx->data);
@@ -267,7 +343,7 @@ __device__ void nextStep(DeviceContext* ctx, uint32_t cycle) {
   step_Top(execCtx, &data, &global);
 }
 
-__global__ void par_stepExec(DeviceContext* ctx, uint32_t start, uint32_t count) {
+__global__ void par_stepExec(DeviceExecContext* ctx, uint32_t start, uint32_t count) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
@@ -275,7 +351,7 @@ __global__ void par_stepExec(DeviceContext* ctx, uint32_t start, uint32_t count)
   nextStep(ctx, start + cycle);
 }
 
-__global__ void rev_stepExec(DeviceContext* ctx, uint32_t split, uint32_t lastCycle) {
+__global__ void rev_stepExec(DeviceExecContext* ctx, uint32_t split, uint32_t lastCycle) {
   for (uint32_t cycle = split; cycle-- > 0;) {
     nextStep(ctx, cycle);
   }
@@ -284,9 +360,42 @@ __global__ void rev_stepExec(DeviceContext* ctx, uint32_t split, uint32_t lastCy
   }
 }
 
-__global__ void fwd_stepExec(DeviceContext* ctx, uint32_t count) {
+__global__ void fwd_stepExec(DeviceExecContext* ctx, uint32_t count) {
   for (uint32_t cycle = 0; cycle < count; cycle++) {
     nextStep(ctx, cycle);
+  }
+}
+
+__global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= count) {
+    return;
+  }
+
+  ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
+  MutableBufObj data(*ctx->data);
+  MutableBufObj accum(*ctx->accum, /*zeroBack=*/true);
+  GlobalBufObj mix(*ctx->mix);
+  step_TopAccum(execCtx, &accum, &data, &mix);
+}
+
+__global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= lastCycle) {
+    return;
+  }
+
+  Buffer& accum = *ctx->accum;
+
+  size_t back1 = (cycle + lastCycle - 1) % lastCycle;
+  Fp prev[4];
+  for (size_t k = 0; k < 4; k++) {
+    prev[k] = accum.get(back1, accum.cols - 4 + k);
+  }
+  for (size_t j = 0; j < accum.cols / 4 - 1; j++) {
+    for (size_t k = 0; k < 4; k++) {
+      accum.set(cycle, j * 4 + k, accum.get(cycle, j * 4 + k) + prev[k]);
+    }
   }
 }
 
@@ -305,7 +414,7 @@ const char* risc0_circuit_rv32im_v2_cuda_witgen(uint32_t mode,
                                                 PreflightTrace* preflight,
                                                 uint32_t lastCycle) {
   try {
-    HostContext ctx(buffers, preflight, lastCycle);
+    HostExecContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
     size_t split = preflight->tableSplitCycle;
 
@@ -347,12 +456,38 @@ const char* risc0_circuit_rv32im_v2_cuda_accum(AccumBuffers* buffers,
                                                PreflightTrace* preflight,
                                                uint32_t lastCycle) {
   try {
-    // LookupTables tables;
-    // for (size_t cycle = 0; cycle < lastCycle; cycle++) {
-    //   stepAccum(*buffers, *preflight, tables, cycle);
-    // }
+    HostAccumContext ctx(buffers, preflight, lastCycle);
+    CudaStream stream;
+    auto cfg = getSimpleConfig(lastCycle);
+
+    {
+      nvtx3::scoped_range range("phase1");
+      stepAccum<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
+
+    {
+      nvtx3::scoped_range range("phase2");
+      size_t rows = buffers->accum.rows;
+      for (size_t j = 0; j < 4; j++) {
+        size_t col = buffers->accum.cols - 4 + j;
+        Fp* itBegin = buffers->accum.buf + col * rows;
+        Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
+        thrust::inclusive_scan(thrust::device, itBegin, itEnd, itBegin);
+      }
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
+
+    {
+      nvtx3::scoped_range range("phase3");
+      finalizeAccum<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
+
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }

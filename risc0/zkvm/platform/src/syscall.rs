@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -136,7 +136,6 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
-    declare_syscall!(pub SYS_EXECUTE_ZKR);
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
@@ -739,52 +738,36 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 /// # Safety
 ///
 /// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
-#[cfg(feature = "export-syscalls")]
+#[cfg(all(feature = "export-syscalls", not(target_os = "zkvm")))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    #[cfg(target_os = "zkvm")]
-    extern "C" {
-        // This symbol is defined by the loader and marks the end
-        // of all elf sections, so this is where we start our
-        // heap.
-        //
-        // This is generated automatically by the linker; see
-        // https://lld.llvm.org/ELF/linker_script.html#sections-command
-        static _end: u8;
-    }
+    unimplemented!("sys_alloc_aligned called outside of target_os = zkvm");
+}
 
-    // Pointer to next heap address to use, or 0 if the heap has not yet been
-    // initialized.
-    static mut HEAP_POS: usize = 0;
+/// # Safety
+///
+/// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(all(
+    feature = "export-syscalls",
+    feature = "heap-embedded-alloc",
+    target_os = "zkvm"
+))]
+#[no_mangle]
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    unimplemented!("sys_alloc_aligned called when the bump allocator is disabled");
+}
 
-    // SAFETY: Single threaded, so nothing else can touch this while we're working.
-    let mut heap_pos = unsafe { HEAP_POS };
-
-    #[cfg(target_os = "zkvm")]
-    if heap_pos == 0 {
-        heap_pos = unsafe { (&_end) as *const u8 as usize };
-    }
-
-    // Honor requested alignment if larger than word size.
-    // Note: align is typically a power of two.
-    let align = usize::max(align, WORD_SIZE);
-
-    let offset = heap_pos & (align - 1);
-    if offset != 0 {
-        heap_pos += align - offset;
-    }
-
-    let ptr = heap_pos as *mut u8;
-    heap_pos += bytes;
-
-    // Check to make sure heap doesn't collide with SYSTEM memory.
-    if crate::memory::SYSTEM.start() < heap_pos {
-        const MSG: &[u8] = "Out of memory!".as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
-    }
-
-    unsafe { HEAP_POS = heap_pos };
-    ptr
+/// # Safety
+///
+/// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(all(
+    feature = "export-syscalls",
+    not(feature = "heap-embedded-alloc"),
+    target_os = "zkvm"
+))]
+#[no_mangle]
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    crate::heap::bump::alloc_aligned(bytes, align)
 }
 
 /// Send a ReceiptClaim digest to the host to request verification.

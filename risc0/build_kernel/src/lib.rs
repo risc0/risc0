@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -154,6 +154,7 @@ impl KernelBuild {
         println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDART_LINKAGE");
+        println!("cargo:rerun-if-env-changed=NVCC_CCBIN");
 
         for inc_dir in self.inc_dirs.iter() {
             rerun_if_changed(inc_dir);
@@ -197,6 +198,7 @@ impl KernelBuild {
             .cuda(true)
             .cudart(&cudart)
             .debug(false)
+            .ccbin(env::var("NVCC_CCBIN").is_err())
             .flag("-diag-suppress=177")
             .flag("-diag-suppress=2922")
             .flag("-Xcudafe")
