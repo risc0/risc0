@@ -246,18 +246,15 @@ pub fn component_asset_name(
     Ok(match component {
         Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
         Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
-        Component::CppToolchain => {
-            let triple = match (platform.arch, platform.os) {
-                ("x86_64", Os::Linux) => "riscv32im-linux-x86_64",
-                ("aarch64", Os::MacOs) => "riscv32im-osx-arm64",
-                (other, os) => {
-                    return Err(RzupError::UnsupportedPlatform(format!(
-                        "unknown architecture {other} for {os}"
-                    )))
-                }
-            };
-            (triple.to_string(), "tar.xz")
-        }
+        Component::CppToolchain => match (platform.arch, platform.os) {
+            ("x86_64", Os::Linux) => ("riscv32im-linux-x86_64".to_string(), "tar.xz"),
+            ("aarch64", Os::MacOs) => ("riscv32im-osx-arm64".to_string(), "tar.xz"),
+            (other, os) => {
+                return Err(RzupError::UnsupportedPlatform(format!(
+                    "unknown architecture {other} for {os}"
+                )))
+            }
+        },
         Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
     })
 }
