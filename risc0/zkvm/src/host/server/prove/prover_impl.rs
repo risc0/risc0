@@ -22,7 +22,11 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, prove::union_mmr::UnionMmr, session::InnerSegment},
+        server::{
+            exec::executor2::Executor2,
+            prove::union_mmr::{MerkleMountainAccumulator, UnionPeak},
+            session::InnerSegment,
+        },
     },
     prove_registered_zkr,
     receipt::{
@@ -30,7 +34,6 @@ use crate::{
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
-    recursion::prove::union,
     risc0_rv32im_ver,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
@@ -132,7 +135,8 @@ impl ProverServer for ProverImpl {
             zkr_receipts.insert(assumption, receipt);
         }
 
-        let mut keccak_receipts: UnionMmr = UnionMmr::default();
+        let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
+            MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
             tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
@@ -145,7 +149,7 @@ impl ProverServer for ProverImpl {
                     claim: root_receipt.claim.digest(),
                     control_root: root_receipt.control_root()?,
                 },
-                root_receipt,
+                root_receipt.clone(),
             );
         }
 

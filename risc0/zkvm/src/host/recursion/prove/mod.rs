@@ -23,7 +23,7 @@ use std::{
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
-    control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID},
+    control_id::BN254_IDENTITY_CONTROL_ID,
     prove::{DigestKind, RecursionReceipt},
     CircuitImpl,
 };

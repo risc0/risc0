@@ -109,7 +109,7 @@ fn prove_nothing_succinct(#[case] version: SegmentVersion) {
 #[apply(base)]
 fn keccak_union(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::KeccakUnion(4))
+        .write(&MultiTestSpec::KeccakUnion(3))
         .unwrap()
         .build()
         .unwrap();
