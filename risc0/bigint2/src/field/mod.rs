@@ -17,15 +17,22 @@ mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
 
-use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
+use crate::ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5};
 use crate::WORD_SIZE;
 
 pub const FIELD_256_WIDTH_WORDS: usize = 256 / (WORD_SIZE * 8);
+pub const EXT_DEGREE_2: usize = 2;
+pub const EXT_DEGREE_4: usize = 4;
 
 const MODADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "modadd_256.blob");
 const MODINV_256_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_256.blob");
 const MODMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_256.blob");
 const MODSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_256.blob");
+const EXTFIELD_DEG2_ADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_add_256.blob");
+const EXTFIELD_DEG2_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_mul_256.blob");
+const EXTFIELD_DEG4_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg4_mul_256.blob");
+const EXTFIELD_DEG2_SUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_sub_256.blob");
+const EXTFIELD_XXONE_MUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_xxone_mul_256.blob");
 
 // These "unchecked" modular arithmetic operations provide no guarantee that `result < modulus`
 // This can be acceptable when computing internal results during a series of finite field
@@ -158,4 +165,95 @@ pub fn modsub_256(
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
     assert!(crate::is_less(&result, &modulus));
+}
+
+pub fn extfield_deg2_add_256(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_4(
+            EXTFIELD_DEG2_ADD_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg2_mul_256(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    monic_irr: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_5(
+            EXTFIELD_DEG2_MUL_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            monic_irr.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg4_mul_256(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    monic_irr: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+) {
+    unsafe {
+        sys_bigint2_5(
+            EXTFIELD_DEG4_MUL_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            monic_irr.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg2_sub_256(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_4(
+            EXTFIELD_DEG2_SUB_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_xxone_mul_256(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    modsqr: &[u32; 2 * FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_5(
+            EXTFIELD_XXONE_MUL_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
+            modsqr.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
 }
