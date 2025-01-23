@@ -32,7 +32,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
         digest::{Digest, DIGEST_SHORTS},
-        hash::hash_suite_from_name,
+        hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::{CircuitHal, Hal},
@@ -521,11 +521,14 @@ impl Prover {
             "union recursion program only supports poseidon2 hashfn; received {}",
             b.hashfn
         );
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
+        let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
 
         let (program, control_id) = zkr::union(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&ALLOWED_CONTROL_ROOT, DigestKind::Poseidon2);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_succinct_receipt(a)?;
         prover.add_succinct_receipt(b)?;
         Ok(prover)
