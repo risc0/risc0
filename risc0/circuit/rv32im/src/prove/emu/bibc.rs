@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::Read;
+use std::{collections::HashMap, io::Read};
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -153,6 +153,7 @@ impl Program {
 
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
         let mut regs = vec![ibig!(0); self.ops.len()];
+        let mut rings = HashMap::<UBig, ModuloRing>::new();
         for (op_index, op) in self.ops.iter().enumerate() {
             tracing::debug!("[{op_index}]: {op:?}");
             match op.code {
@@ -206,7 +207,9 @@ impl Program {
                 OpCode::Inv => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
                     let urhs = UBig::try_from(rhs)?;
-                    let ring = ModuloRing::new(&urhs);
+                    let ring = rings
+                        .entry(urhs.clone())
+                        .or_insert_with(|| ModuloRing::new(&urhs));
                     let value = ring
                         .from(lhs)
                         .inverse()
