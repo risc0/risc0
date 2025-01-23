@@ -278,9 +278,8 @@ impl BorshDeserialize for Unknown {
     }
 }
 
-/// Each UnionClaim can be used as an inner node in a Merkle tree, the root of
-/// which commits to a set of claims.
-/// TODOD: what about control root?
+/// Each UnionClaim can be used as an inner node in a Merkle mountain
+/// accumulator, the root of which commits to a set of claims.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnionClaim {
     // Digest of the "left" Assumption struct.

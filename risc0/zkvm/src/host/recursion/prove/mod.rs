@@ -743,11 +743,7 @@ impl Prover {
     {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         // Union program expects an additional boolean to indicate that control root is zero.
-        let zero_root = BabyBearElem::new(
-            (a.control_root()?
-                == Digest::ZERO) //digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"))
-                as u32,
-        );
+        let zero_root = BabyBearElem::new((a.control_root()? == Digest::ZERO) as u32);
         self.add_input(bytemuck::cast_slice(&[zero_root]));
         Ok(())
     }
