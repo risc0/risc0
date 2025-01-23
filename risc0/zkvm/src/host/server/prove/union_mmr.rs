@@ -12,85 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::VecDeque;
-use anyhow::{bail, Result};
+use anyhow::Result;
 
-use crate::{recursion::prove::union, SuccinctReceipt, Unknown};
-
-#[derive(Debug)]
-pub struct MerkleMountainAccumulator<T: Peak> {
-    peaks: VecDeque<T>,
-}
-
-impl<T> MerkleMountainAccumulator<T>
-where
-    T: Peak,
-{
-    pub fn new() -> Self {
-        Self {
-            peaks: VecDeque::new(),
-        }
-    }
-    pub fn insert(&mut self, item: T::Item) -> Result<()> {
-        let mut to_add: T = T::new(item);
-        loop {
-            if self.peaks.is_empty() {
-                // at the point a peak has been accumulated to `to_add`
-                break;
-            }
-            if to_add.height() == self.peaks.back().unwrap().height() {
-                let to_merge = self.peaks.pop_back().unwrap();
-                to_add = *Peak::merge(to_add, to_merge)?;
-            } else {
-                break;
-            }
-        }
-        self.peaks.push_back(to_add);
-        Ok(())
-    }
-
-    pub fn root(mut self) -> Result<T::Item> {
-        if self.peaks.is_empty() {
-            bail!("no elements for host mmr");
-        }
-        if self.peaks.len() == 1 {
-            return Ok(self.peaks.pop_back().unwrap().item());
-        }
-
-        let mut item = self.peaks.pop_front().unwrap().item();
-        for peak in self.peaks.into_iter() {
-            T::merge_item(&mut item, peak.item())?;
-        }
-        Ok(item)
-    }
-}
-
+use crate::{mmr::Peak, recursion::prove::union, SuccinctReceipt, Unknown};
 #[derive(Debug)]
 pub struct UnionPeak {
-    height: u32,
     receipt: SuccinctReceipt<Unknown>,
-}
-
-pub trait Peak {
-    type Item;
-    fn new(item: Self::Item) -> Self;
-    fn new_with_height(item: Self::Item, height: u32) -> Self;
-    fn height(&self) -> u32;
-    fn item(self) -> Self::Item;
-    fn merge(a: Self, b: Self) -> Result<Box<Self>>
-    where
-        Self: Sized,
-    {
-        if a.height() != b.height() {
-            bail!("merge attempted on peaks of different heights")
-        }
-        let height = a.height();
-        let mut a: Self::Item = a.item();
-        Self::merge_item(&mut a, b.item())?;
-        Ok(Box::new(Self::new_with_height(a, height + 1)))
-    }
-
-    fn merge_item(a: &mut Self::Item, b: Self::Item) -> Result<()>;
+    height: u32,
 }
 
 impl Peak for UnionPeak {

@@ -18,13 +18,13 @@ use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
 
-use crate::mmr::Mmr;
+use crate::mmr::{GuestPeak, MerkleMountainAccumulator};
 
 /// This struct implements the batching of calls to the keccak accelerator.
 #[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
-    mmr: Mmr,
+    mmr: MerkleMountainAccumulator<GuestPeak>,
 }
 
 impl Keccak2Batcher {
@@ -35,7 +35,7 @@ impl Keccak2Batcher {
     pub fn new() -> Self {
         Self {
             claim_state: SHA256_INIT,
-            mmr: Mmr::default(),
+            mmr: MerkleMountainAccumulator::<GuestPeak>::new(),
         }
     }
 
@@ -60,11 +60,11 @@ impl Keccak2Batcher {
         unsafe {
             sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
         }
-        self.mmr.insert(claim_digest);
+        self.mmr.insert(claim_digest).unwrap(); // this is infallible for GuestPeak
         self.reset();
     }
 
-    pub fn finalize(&mut self) {
+    pub fn finalize(mut self) {
         self.flush();
         if !self.inputs.is_empty() {
             let claim_digest = self.mmr.root().unwrap();

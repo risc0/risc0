@@ -12,76 +12,112 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::vec::Vec;
+use crate::{receipt_claim::UnionClaim, sha::Digestible};
+use alloc::{boxed::Box, collections::VecDeque};
 use anyhow::{bail, Result};
 use risc0_zkp::core::digest::Digest;
 
-use crate::{receipt_claim::UnionClaim, sha::Digestible};
-
-#[derive(Debug, Default)]
-pub struct Mmr {
-    peaks: Vec<Peak>,
+#[derive(Debug)]
+pub struct MerkleMountainAccumulator<T: Peak> {
+    peaks: VecDeque<T>,
 }
 
-impl Mmr {
-    pub fn insert(&mut self, digest: Digest) {
-        let mut to_add = Peak::new(digest);
+impl<T> MerkleMountainAccumulator<T>
+where
+    T: Peak,
+{
+    pub fn new() -> Self {
+        Self {
+            peaks: VecDeque::new(),
+        }
+    }
+    pub fn insert(&mut self, item: T::Item) -> Result<()> {
+        let mut to_add: T = T::new(item);
         loop {
-            // We're at the end. This means that we've accumulated everything in `to_add`
             if self.peaks.is_empty() {
+                // at the point a peak has been accumulated to `to_add`
                 break;
             }
-            if to_add.height == self.peaks.last().unwrap().height {
-                let to_merge = self.peaks.pop().unwrap();
-                to_add = Peak::merge(to_add, to_merge);
+            if to_add.height() == self.peaks.back().unwrap().height() {
+                let to_merge = self.peaks.pop_back().unwrap();
+                to_add = *Peak::merge(to_add, to_merge)?;
             } else {
                 break;
             }
         }
-        self.peaks.push(to_add);
+        self.peaks.push_back(to_add);
+        Ok(())
     }
 
-    pub fn root(&self) -> Result<Digest> {
+    pub fn root(mut self) -> Result<T::Item> {
         if self.peaks.is_empty() {
-            bail!("no elements for guest mmr");
+            bail!("no elements for host mmr");
         }
         if self.peaks.len() == 1 {
-            return Ok(self.peaks[0].digest);
+            return Ok(self.peaks.pop_back().unwrap().item());
         }
 
-        let mut digest = self.peaks[0].digest;
-        for peak in &self.peaks[1..] {
-            digest = UnionClaim {
-                left: digest,
-                right: peak.digest,
-            }
-            .digest();
+        let mut item = self.peaks.pop_front().unwrap().item();
+        for peak in self.peaks.into_iter() {
+            T::merge_item(&mut item, peak.item())?;
         }
-        Ok(digest)
+        Ok(item)
     }
+}
+
+pub trait Peak {
+    type Item;
+    fn new(item: Self::Item) -> Self;
+    fn new_with_height(item: Self::Item, height: u32) -> Self;
+    fn height(&self) -> u32;
+    fn item(self) -> Self::Item;
+    fn merge(a: Self, b: Self) -> Result<Box<Self>>
+    where
+        Self: Sized,
+    {
+        if a.height() != b.height() {
+            bail!("merge attempted on peaks of different heights")
+        }
+        let height = a.height();
+        let mut a: Self::Item = a.item();
+        Self::merge_item(&mut a, b.item())?;
+        Ok(Box::new(Self::new_with_height(a, height + 1)))
+    }
+
+    fn merge_item(a: &mut Self::Item, b: Self::Item) -> Result<()>;
 }
 
 #[derive(Debug)]
-struct Peak {
-    height: u32,
+pub struct GuestPeak {
     digest: Digest,
+    height: u32,
 }
 
-impl Peak {
-    pub(crate) fn new(digest: Digest) -> Self {
-        Self { digest, height: 0 }
+impl Peak for GuestPeak {
+    type Item = Digest;
+
+    fn new(item: Self::Item) -> Self {
+        Self::new_with_height(item, 0)
     }
 
-    // assumes that both inputs have same height
-    pub(crate) fn merge(left: Peak, right: Peak) -> Self {
-        let digest = UnionClaim {
-            left: left.digest,
-            right: right.digest,
-        }
-        .digest();
+    fn new_with_height(item: Self::Item, height: u32) -> Self {
         Self {
-            digest,
-            height: left.height + 1,
+            digest: item,
+            height,
         }
+    }
+
+    fn height(&self) -> u32 {
+        self.height
+    }
+
+    fn item(self) -> Self::Item {
+        self.digest
+    }
+
+    fn merge_item(a: &mut Self::Item, b: Self::Item) -> Result<()> {
+        let (left, right) = if *a <= b { (*a, b) } else { (b, *a) };
+        *a = UnionClaim { left, right }.digest();
+        Ok(())
     }
 }

@@ -22,12 +22,9 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{
-            exec::executor2::Executor2,
-            prove::union_mmr::{MerkleMountainAccumulator, UnionPeak},
-            session::InnerSegment,
-        },
+        server::{exec::executor2::Executor2, prove::union_mmr::UnionPeak, session::InnerSegment},
     },
+    mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
     receipt::{
         segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
