@@ -99,8 +99,9 @@ impl TerminalUi {
         if let Some(len) = len {
             let download_progress = ProgressBar::new(len);
             download_progress.set_style(
-                ProgressStyle::with_template("{wide_bar} {binary_bytes}/{binary_total_bytes}")
-                    .unwrap(),
+                ProgressStyle::with_template("  [{bar}] {bytes}/{total_bytes}")
+                    .unwrap()
+                    .progress_chars("=> "),
             );
             self.download = Some(download_progress.clone());
             self.multi_progress.add(download_progress);

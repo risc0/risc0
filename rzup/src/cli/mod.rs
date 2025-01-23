@@ -133,13 +133,7 @@ impl Cli {
     }
 }
 
-const LOGO: &str = "
-    ██████  █▀▀▀██
-    ██████  █ ▄▀ █
-    ██████  ██▄▄▄█
-    ██████
-    ██████   RISC
-    ██████   ZERO";
+const LOGO: &str = "\n   RISC\n   ZERO";
 
 fn banner() -> String {
     let version = env!("CARGO_PKG_VERSION");
