@@ -1,4 +1,4 @@
-# SHA Example
+# Keccak Example
 
 This code demonstrates how to provably compute the keccak-256 hash of a string using RISC Zero.
 
