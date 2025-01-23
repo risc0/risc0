@@ -571,16 +571,15 @@ fn main() {
         }
         MultiTestSpec::KeccakUnion(proof_count) => {
             fn generate_input(po2: usize, proof_count: usize) -> Vec<KeccakState> {
-                let mut state = KeccakState::default();
-                let mut pows = 987654321_u64;
-                for part in state.as_mut_slice() {
-                    *part = pows;
-                    pows = pows.wrapping_mul(123456789);
-                }
+                let state = KeccakState::default();
 
                 let cycles = 1 << po2;
                 let count = cycles / 200; // roughly 200 cycles per keccakf
-                vec![state; count * proof_count]
+                let mut states = vec![state; count * proof_count];
+                getrandom(bytemuck::cast_slice_mut(states.as_flattened_mut()))
+                    .expect("random number generation failed");
+
+                states
             }
 
             for mut state in generate_input(KECCAK_DEFAULT_PO2, proof_count) {
