@@ -16,13 +16,9 @@ use core::ptr::addr_of;
 
 use alloc::vec;
 
-use risc0_circuit_keccak::{
-    KeccakState, KECCAK_CONTROL_ROOT,
-};
+use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
-use risc0_zkvm_platform::syscall::{
-    sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
-};
+use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
 
 /// This struct implements the batching of calls to the keccak accelerator.
 #[derive(Debug)]
@@ -60,10 +56,7 @@ impl Keccak2Batcher {
 
         let claim_digest = self.claim_digest();
         unsafe {
-            sys_prove_keccak(
-                claim_digest.as_ref(),
-                KECCAK_CONTROL_ROOT.as_ref(),
-            );
+            sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
         }
         crate::guest::env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
 

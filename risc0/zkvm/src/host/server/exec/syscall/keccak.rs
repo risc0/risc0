@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
+use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_circuit_keccak::{KECCAK_DEFAULT_PO2, KeccakState, max_keccak_inputs};
-use risc0_zkvm_platform::{syscall::reg_abi::*};
+use risc0_zkvm_platform::syscall::reg_abi::*;
 
 use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
 
