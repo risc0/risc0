@@ -184,7 +184,12 @@ impl Rzup {
     /// A newest-to-oldest list of installed component versions
     #[cfg_attr(not(feature = "cli"), expect(dead_code))]
     pub(crate) fn list_versions(&self, component: &Component) -> Result<Vec<Version>> {
-        Registry::list_component_versions(&self.environment, component)
+        Ok(
+            Registry::list_component_versions(&self.environment, component)?
+                .into_iter()
+                .map(|(v, _)| v)
+                .collect(),
+        )
     }
 
     /// Gets the currently default version of a component and its path.
@@ -1663,6 +1668,41 @@ mod tests {
             )
             .unwrap(),
             legacy_cargo_risczero_dir
+        );
+    }
+
+    #[test]
+    fn get_default_legacy_versions() {
+        let (tmp_dir, rzup) = setup_test_env(
+            invalid_base_urls(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let legacy_rust_dir = tmp_dir
+            .path()
+            .join(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        std::fs::create_dir_all(&legacy_rust_dir).unwrap();
+
+        let legacy_cargo_risczero_dir = tmp_dir
+            .path()
+            .join(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+        std::fs::create_dir_all(&legacy_cargo_risczero_dir).unwrap();
+
+        assert_eq!(
+            rzup.get_default_version(&Component::RustToolchain)
+                .unwrap()
+                .unwrap()
+                .0,
+            Version::new(1, 81, 0)
+        );
+
+        assert_eq!(
+            rzup.get_default_version(&Component::CargoRiscZero)
+                .unwrap()
+                .unwrap()
+                .0,
+            Version::parse("1.2.1-rc.0").unwrap()
         );
     }
 

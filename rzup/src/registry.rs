@@ -19,7 +19,8 @@ use crate::settings::Settings;
 use crate::{BaseUrls, RzupError, RzupEvent};
 
 use semver::Version;
-use std::collections::BTreeSet;
+use std::collections::BTreeMap;
+use std::path::PathBuf;
 
 fn parse_version_from_entry(
     env: &Environment,
@@ -78,8 +79,8 @@ impl Registry {
     pub fn list_component_versions(
         env: &Environment,
         component: &Component,
-    ) -> Result<Vec<Version>> {
-        let mut versions = BTreeSet::new();
+    ) -> Result<Vec<(Version, PathBuf)>> {
+        let mut versions: BTreeMap<Version, PathBuf> = BTreeMap::new();
 
         // Handle virtual components first
         if let Some(parent_id) = component.parent_component() {
@@ -104,7 +105,7 @@ impl Registry {
         for entry in std::fs::read_dir(component_dir)? {
             let entry = entry?;
             if let Some(version) = parse_version_from_entry(env, component, &entry)? {
-                versions.insert(version);
+                versions.insert(version, entry.path());
             }
         }
 
@@ -122,6 +123,13 @@ impl Registry {
                 return Ok(Some((version, path)));
             }
         }
+
+        // Components installed by old versions might leave us in a state where there is a
+        // component installed, but no active version
+        if let Some((version, path)) = self.find_highest_installed_version(env, component)? {
+            return Ok(Some((version, path)));
+        }
+
         Ok(None)
     }
 
@@ -207,7 +215,8 @@ impl Registry {
         self.set_default_component_version(env, component, version.clone())?;
 
         if self
-            .get_default_component_version(env, &component_to_install)?
+            .settings
+            .get_default_version(&component_to_install)
             .is_none()
         {
             self.set_default_component_version(env, &component_to_install, version)?;
@@ -223,24 +232,30 @@ impl Registry {
         Ok(())
     }
 
+    fn find_highest_installed_version(
+        &self,
+        env: &Environment,
+        component: &Component,
+    ) -> Result<Option<(Version, PathBuf)>> {
+        let all_versions = Self::list_component_versions(env, component)?;
+
+        // If we found any versions, set the highest one as default
+        if let Some((highest_version, path)) = all_versions.first() {
+            env.emit(RzupEvent::Debug {
+                message: format!(
+                    "Setting highest version {highest_version} as default for {component}",
+                ),
+            });
+            return Ok(Some((highest_version.clone(), path.clone())));
+        }
+        Ok(None)
+    }
+
     fn find_new_default_version(&mut self, env: &Environment, component: &Component) -> Result<()> {
         // Check if we uninstalled the default version
-        if self
-            .get_default_component_version(env, component)?
-            .is_none()
-        {
-            let mut all_versions = Self::list_component_versions(env, component)?;
-
-            all_versions.sort_by(|a, b| b.cmp(a));
-
-            // If we found any versions, set the highest one as default
-            if let Some(highest_version) = all_versions.first() {
-                env.emit(RzupEvent::Debug {
-                    message: format!(
-                        "Setting highest version {highest_version} as default for {component}",
-                    ),
-                });
-                self.set_default_component_version(env, component, highest_version.clone())?;
+        if self.settings.get_default_version(component).is_none() {
+            if let Some((new_version, _)) = self.find_highest_installed_version(env, component)? {
+                self.set_default_component_version(env, component, new_version)?;
             }
         }
         Ok(())
@@ -262,6 +277,7 @@ impl Registry {
             id: component.to_string(),
             version: version.to_string(),
         });
+
         self.find_new_default_version(env, component)?;
 
         Ok(())
