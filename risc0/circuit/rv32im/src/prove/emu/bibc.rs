@@ -173,7 +173,7 @@ impl Program {
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = io.load(op.arena(), op.offset(), count)?;
-                    regs[op_index] = IBig::from(value);
+                    regs[op_index] = value.into();
                 }
                 OpCode::Store => {
                     let typ = &self.types[op.result_type];
