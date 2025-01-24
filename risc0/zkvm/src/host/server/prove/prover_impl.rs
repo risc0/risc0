@@ -96,7 +96,7 @@ impl ProverServer for ProverImpl {
         // Merge the output, including journal digest and assumptions, into the last segment.
         segments
             .last_mut()
-            .ok_or(anyhow!("session is empty"))?
+            .ok_or_else(|| anyhow!("session is empty"))?
             .claim
             .output
             .merge_with(
@@ -113,9 +113,7 @@ impl ProverServer for ProverImpl {
 
         let verifier_parameters = ctx
             .composite_verifier_parameters()
-            .ok_or(anyhow!(
-                "composite receipt verifier parameters missing from context"
-            ))?
+            .ok_or_else(|| anyhow!("composite receipt verifier parameters missing from context"))?
             .digest();
 
         let mut zkr_receipts = HashMap::new();
@@ -149,9 +147,9 @@ impl ProverServer for ProverImpl {
             .map(|assumption_receipt| match assumption_receipt {
                 AssumptionReceipt::Proven(receipt) => Ok(receipt),
                 AssumptionReceipt::Unresolved(assumption) => {
-                    let receipt = zkr_receipts.get(&assumption).ok_or(anyhow!(
-                        "no receipt available for unresolved assumption: {assumption:#?}"
-                    ))?;
+                    let receipt = zkr_receipts.get(&assumption).ok_or_else(|| {
+                        anyhow!("no receipt available for unresolved assumption: {assumption:#?}")
+                    })?;
                     Ok(InnerAssumptionReceipt::Succinct(receipt.clone()))
                 }
             })
@@ -237,9 +235,7 @@ impl ProverServer for ProverImpl {
         let verifier_parameters = ctx
             .segment_verifier_parameters
             .as_ref()
-            .ok_or(anyhow!(
-                "segment receipt verifier parameters missing from context"
-            ))?
+            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
             .digest();
         let receipt = SegmentReceipt {
             seal,

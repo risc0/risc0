@@ -171,18 +171,14 @@ where
         .as_value_mut()
         .context("conditional receipt output is pruned")?
         .as_mut()
-        .ok_or(anyhow!(
-            "conditional receipt has empty output and no assumptions"
-        ))?
+        .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
         .assumptions
         .as_value_mut()
         .context("conditional receipt assumptions are pruned")?
         .0
         .drain(..1)
         .next()
-        .ok_or(anyhow!(
-            "cannot resolve assumption from receipt with no assumptions"
-        ))?;
+        .ok_or_else(|| anyhow!("cannot resolve assumption from receipt with no assumptions"))?;
 
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
@@ -541,7 +537,7 @@ impl Prover {
             .as_value()
             .context("cannot resolve conditional receipt with pruned output")?
             .as_ref()
-            .ok_or(anyhow!("cannot resolve conditional receipt with no output"))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
             .clone();
 
         // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
@@ -553,9 +549,7 @@ impl Prover {
         let head: Assumption = assumptions
             .0
             .first()
-            .ok_or(anyhow!(
-                "cannot resolve conditional receipt with no assumptions"
-            ))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
             .as_value()
             .context("cannot resolve conditional receipt with pruned head assumption")?
             .clone();
