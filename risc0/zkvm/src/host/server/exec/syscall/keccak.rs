@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_circuit_keccak::KeccakState;
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_zkvm_platform::{syscall::reg_abi::*, WORD_SIZE};
+use risc0_circuit_keccak::{KECCAK_DEFAULT_PO2, KeccakState, max_keccak_inputs};
+use risc0_zkvm_platform::{syscall::reg_abi::*};
 
 use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
 
@@ -24,7 +24,7 @@ use super::{Syscall, SyscallContext, SyscallKind};
 #[derive(Clone, Default)]
 pub(crate) struct SysKeccak {
     inputs: Vec<KeccakState>,
-    max_po2: u32,
+    max_po2: usize,
     max_inputs: usize,
 }
 
@@ -50,7 +50,12 @@ impl Syscall for SysKeccak {
 }
 
 impl SysKeccak {
-    pub fn new(max_po2: u32) -> Self {
+    pub fn new(max_po2: Option<u32>) -> Self {
+        let max_po2 = match max_po2 {
+            Some(po2) => po2 as usize,
+            None => KECCAK_DEFAULT_PO2,
+        };
+
         Self {
             inputs: vec![],
             max_po2,
@@ -98,8 +103,8 @@ impl SysKeccak {
         let proof_request = ProveKeccakRequest {
             claim_digest: claim,
             control_root,
-            input: self.inputs,
-            po2: self.max_po2,
+            input: bytemuck::cast_slice(self.inputs.as_slice()).to_vec(),
+            po2: self.max_po2 as usize,
         };
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
@@ -124,10 +129,10 @@ impl SysKeccak {
 
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::ProveKeccak];
         metric.count += 1;
-        metric.size += 1 << po2 as u64;
+        metric.size += 1 << self.max_po2 as u64;
 
         // reset
-        self.inputs.drop();
+        self.inputs.clear();
 
         Ok((0, 0))
     }

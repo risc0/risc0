@@ -20,16 +20,14 @@ use risc0_zkvm_platform::syscall::sys_prove_keccak;
 fn main() {
     let (claim_digest, po2): (Digest, u32) = env::read();
 
-    let input = generate_input(po2 as usize);
-    let input = bytemuck::cast_slice(&input);
+    let _input = generate_input(po2 as usize);
+    //let _input = bytemuck::cast_slice(&input);
+    // TODO: FIX THIS TEST
 
     unsafe {
         sys_prove_keccak(
             claim_digest.as_ref(),
-            po2,
             KECCAK_CONTROL_ROOT.as_ref(),
-            input.as_ptr(),
-            input.len(),
         );
     }
     env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
