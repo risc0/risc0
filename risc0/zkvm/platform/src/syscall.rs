@@ -931,9 +931,9 @@ pub unsafe extern "C" fn sys_keccak(
         nr::SYS_KECCAK,
         out_state as *mut u32,
         KECCACK_STATE_WORDS,
-        0 as u32,
+        0,
         in_state as u32,
-        0 as u32,
+        0,
     );
     a0 as i32
 }
@@ -959,10 +959,10 @@ pub unsafe extern "C" fn sys_prove_keccak(
 ) {
     let Return(a0, _) = unsafe {
         syscall_3(
-            nr::SYS_PROVE_KECCAK,
+            nr::SYS_KECCAK,
             null_mut(),
             0,
-            1 as u32,
+            1,
             claim_digest as u32,
             control_root as u32,
         )
