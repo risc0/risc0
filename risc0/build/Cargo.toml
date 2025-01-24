@@ -10,6 +10,7 @@ repository = { workspace = true }
 [dependencies]
 anyhow = "1.0"
 cargo_metadata = "0.19.1"
+derive_builder = "0.20.2"
 dirs = "5.0"
 docker-generate = "0.1"
 hex = "0.4"
@@ -20,7 +21,6 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = "1.0.134"
 stability = "0.2"
 tempfile = "3"
-typed-builder = "0.20"
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]

@@ -14,7 +14,7 @@
 
 use std::{collections::HashMap, env};
 
-use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
+use risc0_build::{embed_methods_with_options, DockerOptionsBuilder, GuestOptionsBuilder};
 
 fn main() {
     tracing_subscriber::fmt()
@@ -26,39 +26,29 @@ fn main() {
         return;
     }
 
-    let docker_opts = DockerOptions {
-        root_dir: Some("../../..".into()),
-        env: vec![],
-    };
+    let mut guest_opts = GuestOptionsBuilder::default();
 
-    let use_docker = if env::var("RISC0_USE_DOCKER").is_ok() {
-        Some(docker_opts)
-    } else {
-        None
-    };
+    if env::var("RISC0_USE_DOCKER").is_ok() {
+        let docker_opts = DockerOptionsBuilder::default()
+            .root_dir("../../..".into())
+            .build()
+            .unwrap();
+        guest_opts.use_docker(docker_opts);
+    }
 
     let map = HashMap::from([
-        (
-            "risc0-zkvm-methods-guest",
-            GuestOptions {
-                use_docker: use_docker.clone(),
-                ..Default::default()
-            },
-        ),
+        ("risc0-zkvm-methods-guest", guest_opts.build().unwrap()),
         (
             "risc0-zkvm-methods-std",
-            GuestOptions {
-                features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
-                ..Default::default()
-            },
+            GuestOptionsBuilder::default()
+                .features(vec![
+                    "test_feature1".to_string(),
+                    "test_feature2".to_string(),
+                ])
+                .build()
+                .unwrap(),
         ),
-        (
-            "risc0-zkvm-methods-cpp-crates",
-            GuestOptions {
-                use_docker,
-                ..Default::default()
-            },
-        ),
+        ("risc0-zkvm-methods-cpp-crates", guest_opts.build().unwrap()),
     ]);
 
     embed_methods_with_options(map);

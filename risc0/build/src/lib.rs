@@ -44,7 +44,10 @@ use serde::Deserialize;
 use self::{config::GuestInfo, docker::build_guest_package_docker};
 
 pub use self::{
-    config::{DockerOptions, GuestOptions},
+    config::{
+        DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
+        GuestOptionsBuilder, GuestOptionsBuilderError,
+    },
     docker::{docker_build, BuildStatus, TARGET_DIR},
 };
 
@@ -823,17 +826,8 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
             metadata: (&guest.pkg).into(),
         };
 
-        let methods: Vec<G> = if let Some(ref docker_opts) = guest.opts.use_docker {
-            let src_dir = docker_opts.root_dir();
-            let custom_env = docker_opts.env();
-            build_guest_package_docker(
-                &guest.pkg,
-                &src_dir,
-                &guest.target_dir,
-                &custom_env,
-                &guest_info,
-            )
-            .unwrap();
+        let methods: Vec<G> = if guest.opts.use_docker.is_some() {
+            build_guest_package_docker(&guest.pkg, &guest.target_dir, &guest_info).unwrap();
             guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
         } else {
             build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);
@@ -931,10 +925,8 @@ pub fn build_package(
 
     let profile = if is_debug() { "debug" } else { "release" };
 
-    if let Some(ref docker_opts) = options.use_docker {
-        let src_dir = docker_opts.root_dir();
-        let custom_env = docker_opts.env();
-        build_guest_package_docker(pkg, &src_dir, target_dir.as_ref(), &custom_env, &guest_info)?;
+    if options.use_docker.is_some() {
+        build_guest_package_docker(pkg, target_dir.as_ref(), &guest_info)?;
         Ok(guest_methods(pkg, &target_dir, &guest_info, "docker"))
     } else {
         build_guest_package(pkg, &target_dir, &guest_info);

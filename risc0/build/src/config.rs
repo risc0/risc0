@@ -15,21 +15,22 @@
 use std::{env, path::PathBuf};
 
 use cargo_metadata::Package;
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
-use typed_builder::TypedBuilder;
 
 /// Options for configuring a docker build environment.
-#[derive(Clone, Debug, Serialize, Deserialize, TypedBuilder)]
-#[builder(field_defaults(default))]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Builder)]
+#[builder(default)]
+#[non_exhaustive]
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///
     /// The current working directory is used if `None` is specified.
     #[builder(setter(strip_option))]
-    root_dir: Option<PathBuf>,
+    pub root_dir: Option<PathBuf>,
 
     /// Additional environment variables for the build container.
-    env: Vec<(String, String)>,
+    pub env: Vec<(String, String)>,
 }
 
 impl DockerOptions {
@@ -53,27 +54,30 @@ impl DockerOptions {
 /// [`crate::embed_methods_with_options`].
 ///
 /// ```
-/// use risc0_build::{DockerOptions, GuestOptions};
+/// use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
 ///
-/// let docker_options = DockerOptions::builder()
+/// let docker_options = DockerOptionsBuilder::default()
 ///     .root_dir("../../".into())
 ///     .env(vec![("ENV_VAR".to_string(), "value".to_string())])
-///     .build();
+///     .build()
+///     .unwrap();
 ///
-/// let guest_options = GuestOptions::builder()
+/// let guest_options = GuestOptionsBuilder::default()
 ///     .features(vec!["my-features".to_string()])
 ///     .use_docker(docker_options)
-///     .build();
+///     .build()
+///     .unwrap();
 /// ```
-#[derive(Default, Clone, Debug, TypedBuilder)]
-#[builder(field_defaults(default))]
+#[derive(Default, Clone, Debug, Builder)]
+#[builder(default)]
+#[non_exhaustive]
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
-    pub(crate) features: Vec<String>,
+    pub features: Vec<String>,
 
     /// Use a docker environment for building.
     #[builder(setter(strip_option))]
-    pub(crate) use_docker: Option<DockerOptions>,
+    pub use_docker: Option<DockerOptions>,
 }
 
 /// Metadata defining options to build a guest
