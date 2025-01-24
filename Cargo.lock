@@ -999,7 +999,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
- "thiserror 2.0.6",
+ "thiserror 2.0.8",
 ]
 
 [[package]]
@@ -4312,6 +4312,7 @@ dependencies = [
  "risc0-binfmt",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "rzup",
  "serde",
  "serde_json",
  "stability",
@@ -4667,6 +4668,7 @@ dependencies = [
  "rstest",
  "rstest_reuse",
  "rustc-demangle",
+ "rzup",
  "semver",
  "serde",
  "serde_json",
