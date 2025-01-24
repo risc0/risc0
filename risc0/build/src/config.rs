@@ -25,8 +25,8 @@ use serde::{Deserialize, Serialize};
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///
-    /// The current working directory is used if `None` is specified.
-    #[builder(setter(strip_option))]
+    /// The current working directory is used if this option is unspecified.
+    #[builder(setter(into, strip_option))]
     pub root_dir: Option<PathBuf>,
 
     /// Additional environment variables for the build container.
@@ -57,7 +57,7 @@ impl DockerOptions {
 /// use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
 ///
 /// let docker_options = DockerOptionsBuilder::default()
-///     .root_dir("../../".into())
+///     .root_dir("../../")
 ///     .env(vec![("ENV_VAR".to_string(), "value".to_string())])
 ///     .build()
 ///     .unwrap();

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,11 +29,12 @@ fn main() {
     let mut guest_opts = GuestOptionsBuilder::default();
 
     if env::var("RISC0_USE_DOCKER").is_ok() {
-        let docker_opts = DockerOptionsBuilder::default()
-            .root_dir("../../..".into())
-            .build()
-            .unwrap();
-        guest_opts.use_docker(docker_opts);
+        guest_opts.use_docker(
+            DockerOptionsBuilder::default()
+                .root_dir("../../..")
+                .build()
+                .unwrap(),
+        );
     }
 
     let map = HashMap::from([
