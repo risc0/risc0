@@ -104,7 +104,7 @@ impl SysKeccak {
             claim_digest: claim,
             control_root,
             input: bytemuck::cast_slice(self.inputs.as_slice()).to_vec(),
-            po2: self.max_po2 as usize,
+            po2: self.max_po2,
         };
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
