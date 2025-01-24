@@ -4477,7 +4477,6 @@ dependencies = [
  "ibig",
  "lazy-regex",
  "metal",
- "num-bigint 0.4.6",
  "num-derive",
  "num-traits",
  "rand",
