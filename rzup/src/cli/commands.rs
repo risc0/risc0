@@ -20,10 +20,15 @@ use clap::Parser;
 use colored::Colorize;
 use semver::Version;
 
-fn component_parser() -> Vec<&'static str> {
-    let mut components: Vec<_> = Component::iter().map(|c| c.as_str()).collect();
-    components.push("self");
-    components
+fn parser(cmd: &str) -> Vec<&'static str> {
+    match cmd {
+        "build" => vec![Component::RustToolchain.as_str()],
+        "default" => Component::iter().map(|c| c.as_str()).collect(),
+        _ => Component::iter()
+            .map(|c| c.as_str())
+            .chain(std::iter::once("self"))
+            .collect(),
+    }
 }
 
 pub const INSTALL_HELP: &str = "Discussion:
@@ -45,7 +50,7 @@ pub const INSTALL_HELP: &str = "Discussion:
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
     /// Name of component to install (e.g. rust). If not provided, installs all components.
-    #[arg(value_parser=component_parser())]
+    #[arg(value_parser=parser("install"))]
     name: Option<String>,
     /// Version of the component to install (e.g. 1.0.0). If not provided, installs the latest version.
     version: Option<String>,
@@ -162,7 +167,7 @@ pub const DEFAULT_HELP: &str = "Discussion:
 #[derive(Parser)]
 pub(crate) struct DefaultCommand {
     /// Name of component to activate
-    #[arg(value_parser=component_parser())]
+    #[arg(value_parser=parser("default"))]
     name: String,
     /// Version of component to activate
     version: String,
@@ -246,7 +251,7 @@ pub const UNINSTALL_HELP: &str = "Discussion:
 #[derive(Parser)]
 pub(crate) struct UninstallCommand {
     /// Name of component to uninstall
-    #[arg(value_parser=component_parser())]
+    #[arg(value_parser=parser("uninstall"))]
     name: String,
     /// Version of the component to uninstall
     version: String,
@@ -269,7 +274,7 @@ pub const BUILD_HELP: &str = "Discussion:
 #[derive(Parser)]
 pub(crate) struct BuildCommand {
     /// Name of component to uninstall
-    #[arg(value_parser=component_parser())]
+    #[arg(value_parser=parser("build"))]
     name: String,
 
     /// Tag or commit of the component to uninstall
