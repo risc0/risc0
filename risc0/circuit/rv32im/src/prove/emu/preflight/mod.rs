@@ -17,7 +17,6 @@ mod bigint2;
 mod tests;
 
 use std::{
-    cmp,
     collections::{HashMap, VecDeque},
     io::Cursor,
 };
@@ -890,15 +889,24 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
         //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
         // );
         let addr = addr.waddr();
-        let bytes = value.to_le_bytes();
+        let mut value_bytes = value.to_le_bytes();
+        // Word-align our byte array in case of a small value
+        while 0 != value_bytes.len() % 4 {
+            value_bytes.push(0);
+        }
         let word_count = count as usize / WORD_SIZE;
         for i in 0..word_count {
-            let offset = i * 4;
+            let byte_offset = i * 4;
             let mut word = 0_u32;
-            if offset < bytes.len() {
-                let end_offset = cmp::min(offset + 4, bytes.len());
-                let wordbytes = &bytes[offset..end_offset];
-                word = u32::from_le_bytes(wordbytes.try_into()?);
+            if byte_offset < value_bytes.len() {
+                assert!(byte_offset + 3 < value_bytes.len());
+                let word_bytes : [u8; 4] = [
+                    value_bytes[byte_offset + 0],
+                    value_bytes[byte_offset + 1],
+                    value_bytes[byte_offset + 2],
+                    value_bytes[byte_offset + 3],
+                ];
+                word = u32::from_le_bytes(word_bytes);
             }
             self.witness.insert(addr + i, word);
         }
