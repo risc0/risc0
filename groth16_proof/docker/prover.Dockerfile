@@ -18,16 +18,17 @@ COPY groth16/stark_verify.circom groth16/stark_verify.circom
 RUN (cd groth16; circom --r1cs --c stark_verify.circom)
 
 # Stage 2: Compile the witness generator from scratch
-FROM gcc:14.2-bookworm AS witgen
+FROM debian:bookworm AS witgen
 
 WORKDIR /usr/src/
 
 # Install necessary build dependencies
-RUN apt-get update -q -y && apt-get install -q -y libgmp-dev nasm nlohmann-json3-dev
+RUN apt-get update -q -y && apt-get install -q -y build-essential clang libgmp-dev nasm nlohmann-json3-dev
 
-# Build the witness generator with no optimization (-O0)
+# Build the witness generator with Clang instead of GCC and no optimization (-O0)
 COPY --from=circom /usr/src/groth16/stark_verify_cpp/ stark_verify_cpp/
-RUN echo "stark_verify.o: stark_verify.cpp \$(DEPS_HPP)\n\t\$(CC) -c $< \$(CFLAGS) -O0" >> stark_verify_cpp/Makefile && \
+RUN sed -i 's/g++/clang++/' stark_verify_cpp/Makefile && \
+  echo "stark_verify.o: stark_verify.cpp \$(DEPS_HPP)\n\t\$(CC) -c $< \$(CFLAGS) -O0" >> stark_verify_cpp/Makefile && \
   (cd stark_verify_cpp; make)
 
 # Stage 3: Build the Gnark prover
@@ -57,16 +58,12 @@ RUN go run ./cmd/converter --dump groth16/stark_verify.r1cs groth16/stark_verify
 # Final Stage: Create a minimal image to run the prover and witness generator
 FROM debian:bookworm-slim
 
-# Install necessary runtime dependencies
-RUN apt-get update -q -y && apt-get install -q -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
-
 # Copy the prover binary and related files from previous stages
 COPY --from=gnark /usr/src/gnark/prover /usr/local/bin/prover
 COPY --from=gnark /usr/src/gnark/groth16/stark_verify.cs /app/stark_verify.cs
 COPY --from=gnark /usr/src/gnark/groth16/stark_verify_final.pk.dmp /app/stark_verify_final.pk.dmp
 
 # Copy the witness generator and data files from the witgen stage
-COPY --from=witgen /usr/local/lib64/libstdc++.so.6.0.33 /lib/x86_64-linux-gnu/libstdc++.so.6
 COPY --from=witgen /usr/src/stark_verify_cpp/stark_verify /usr/local/bin/stark_verify
 COPY --from=witgen /usr/src/stark_verify_cpp/stark_verify.dat /app/stark_verify.dat
 
