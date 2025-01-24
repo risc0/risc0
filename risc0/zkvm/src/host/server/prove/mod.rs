@@ -19,7 +19,7 @@ pub(crate) mod keccak;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
-pub(crate) mod union_mmr;
+pub(crate) mod union_peak;
 
 use std::rc::Rc;
 
