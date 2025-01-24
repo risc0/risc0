@@ -901,7 +901,7 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
             if byte_offset < value_bytes.len() {
                 assert!(byte_offset + 3 < value_bytes.len());
                 let word_bytes: [u8; 4] = [
-                    value_bytes[byte_offset + 0],
+                    value_bytes[byte_offset],
                     value_bytes[byte_offset + 1],
                     value_bytes[byte_offset + 2],
                     value_bytes[byte_offset + 3],
