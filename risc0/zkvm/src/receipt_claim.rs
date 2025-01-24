@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
-use anyhow::{anyhow, ensure};
+use anyhow::{anyhow, bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
+use risc0_circuit_rv32im_v2::{HighLowU16, Rv32imV2Claim};
 use risc0_zkp::core::digest::Digest;
+use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -144,6 +146,54 @@ impl ReceiptClaim {
         write_sha_halfs(flat, &self.output.digest::<sha::Impl>());
         Ok(())
     }
+
+    pub(crate) fn decode_from_seal_v2(
+        seal: &[u32],
+        _po2: Option<u32>,
+    ) -> anyhow::Result<ReceiptClaim> {
+        let claim = Rv32imV2Claim::decode(seal)?;
+        tracing::debug!("claim: {claim:#?}");
+
+        // TODO(flaub): implement this once shutdownCycle is supported in rv32im-v2 circuit
+        // if let Some(po2) = po2 {
+        //     let segment_threshold = (1 << po2) - MAX_INSN_CYCLES;
+        //     ensure!(claim.shutdown_cycle.unwrap() == segment_threshold as u32);
+        // }
+
+        let exit_code = exit_code_from_rv32im_v2_claim(&claim)?;
+        let post_state = match exit_code {
+            ExitCode::Halted(_) => Digest::ZERO,
+            _ => claim.post_state,
+        };
+
+        Ok(ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: claim.pre_state,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: post_state,
+            }),
+            exit_code,
+            input: MaybePruned::Pruned(claim.input),
+            output: MaybePruned::Pruned(claim.output.unwrap_or_default()),
+        })
+    }
+}
+
+pub(crate) fn exit_code_from_rv32im_v2_claim(claim: &Rv32imV2Claim) -> anyhow::Result<ExitCode> {
+    let exit_code = if let Some(term) = claim.terminate_state {
+        let HighLowU16(user_exit, halt_type) = term.a0;
+        match halt_type as u32 {
+            halt::TERMINATE => ExitCode::Halted(user_exit as u32),
+            halt::PAUSE => ExitCode::Paused(user_exit as u32),
+            _ => bail!("Illegal halt type: {halt_type}"),
+        }
+    } else {
+        ExitCode::SystemSplit
+    };
+    Ok(exit_code)
 }
 
 impl Digestible for ReceiptClaim {

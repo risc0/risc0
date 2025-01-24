@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{guest::env, sha::Digest, Receipt};
+use risc0_zkvm::{guest::env, sha::Digest, Receipt, SegmentVersion, VerifierContext};
 
 fn main() {
-    let (receipt, image_id): (Receipt, Digest) = env::read();
-    receipt.verify(image_id).unwrap();
+    let (version, receipt, image_id): (SegmentVersion, Receipt, Digest) = env::read();
+    let ctx = VerifierContext::for_version(version);
+    receipt.verify_with_context(&ctx, image_id).unwrap();
 }
