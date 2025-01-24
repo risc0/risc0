@@ -891,16 +891,16 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
         let addr = addr.waddr();
         let mut value_bytes = value.to_le_bytes();
         // Word-align our byte array in case of a small value
-        while 0 != value_bytes.len() % 4 {
+        while 0 != value_bytes.len() % WORD_SIZE {
             value_bytes.push(0);
         }
         let word_count = count as usize / WORD_SIZE;
         for i in 0..word_count {
-            let byte_offset = i * 4;
+            let byte_offset = i * WORD_SIZE;
             let mut word = 0_u32;
             if byte_offset < value_bytes.len() {
-                assert!(byte_offset + 3 < value_bytes.len());
-                let word_bytes: [u8; 4] = [
+                assert!(byte_offset + WORD_SIZE <= value_bytes.len());
+                let word_bytes: [u8; WORD_SIZE] = [
                     value_bytes[byte_offset],
                     value_bytes[byte_offset + 1],
                     value_bytes[byte_offset + 2],
