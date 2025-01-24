@@ -468,18 +468,18 @@ pub(crate) fn get_r0vm_path() -> Result<PathBuf> {
     let mut version = get_version().map_err(|err| anyhow!(err))?;
     tracing::debug!("version: {version}");
 
-    let rzup = rzup::Rzup::new()?;
+    if let Ok(rzup) = rzup::Rzup::new() {
+        if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
+            return Ok(dir.join("r0vm"));
+        }
 
-    if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
-        return Ok(dir.join("r0vm"));
-    }
+        // Try again, but with these fields stripped
+        version.patch = 0;
+        version.build = Default::default();
 
-    // Try again, but with these fields stripped
-    version.patch = 0;
-    version.build = Default::default();
-
-    if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
-        return Ok(dir.join("r0vm"));
+        if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
+            return Ok(dir.join("r0vm"));
+        }
     }
 
     Ok("r0vm".into())
