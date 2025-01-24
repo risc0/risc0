@@ -16,17 +16,35 @@ use crate::{
     toolchain::Toolchain,
     utils::{find_active_toolchain_name, rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME},
 };
-use anyhow::Result;
+use anyhow::{Result, anyhow};
+use regex::Regex;
 
 pub fn handler(toolchain: Option<Toolchain>, name: Option<String>) -> Result<()> {
     match (toolchain, name) {
-        // Set Default
         (Some(toolchain), Some(name)) => {
-            // TODO: Use regex to match path rather than require specific name
-            let toolchain_path = rzup_home()?.join("toolchains").join(name);
+            let regex = Regex::new(&name).map_err(|e| anyhow!("Invalid regex pattern: {}", e))?;
+            let toolchains_dir = rzup_home()?.join("toolchains");
+            
+            let toolchain_path = if let Ok(entries) = std::fs::read_dir(&toolchains_dir) {
+                let mut matching_paths = entries.flatten()
+                    .filter(|entry| {
+                        entry.file_name()
+                            .to_str()
+                            .map(|name| regex.is_match(name))
+                            .unwrap_or(false)
+                    });
+                
+                if let Some(entry) = matching_paths.next() {
+                    toolchains_dir.join(entry.file_name())
+                } else {
+                    return Err(anyhow!("No toolchain matching pattern '{}' found", name));
+                }
+            } else {
+                return Err(anyhow!("Failed to read toolchains directory"));
+            };
+            
             toolchain.link(&toolchain_path)?;
         }
-        // Show specific default toolchain (rust/cpp)
         (Some(toolchain), None) => {
             let active_toolchain_name = match toolchain {
                 Toolchain::Rust => find_active_toolchain_name(RUSTUP_TOOLCHAIN_NAME)?,
@@ -34,7 +52,6 @@ pub fn handler(toolchain: Option<Toolchain>, name: Option<String>) -> Result<()>
             };
             eprintln!("{} (default)", active_toolchain_name);
         }
-        // Show all default (active) toolchains
         (None, _) => {
             let rust_toolchain_name = find_active_toolchain_name(RUSTUP_TOOLCHAIN_NAME)?;
             let cpp_toolchain_name = find_active_toolchain_name(CPP_TOOLCHAIN_NAME)?;
