@@ -17,11 +17,13 @@ use alloc::{boxed::Box, collections::VecDeque};
 use anyhow::{bail, Result};
 use risc0_zkp::core::digest::Digest;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct MerkleMountainAccumulator<T: Peak> {
     peaks: VecDeque<T>,
 }
 
+#[allow(dead_code)]
 impl<T> MerkleMountainAccumulator<T>
 where
     T: Peak,
@@ -65,6 +67,7 @@ where
     }
 }
 
+#[allow(dead_code)]
 pub trait Peak {
     type Item;
     fn new(item: Self::Item) -> Self;
