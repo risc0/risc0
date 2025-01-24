@@ -71,6 +71,11 @@ pub mod reg_abi {
     pub const REG_MAX: usize = 32; // maximum number of registers
 }
 
+pub mod keccak_mode {
+    pub const KECCAK_PERMUTE: u32 = 0;
+    pub const KECCAK_PROVE: u32 = 1;
+}
+
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
@@ -931,7 +936,7 @@ pub unsafe extern "C" fn sys_keccak(
         nr::SYS_KECCAK,
         out_state as *mut u32,
         KECCACK_STATE_WORDS,
-        0,
+        keccak_mode::KECCAK_PERMUTE,
         in_state as u32,
         0,
     );
@@ -962,7 +967,7 @@ pub unsafe extern "C" fn sys_prove_keccak(
             nr::SYS_KECCAK,
             null_mut(),
             0,
-            1,
+            keccak_mode::KECCAK_PROVE,
             claim_digest as u32,
             control_root as u32,
         )

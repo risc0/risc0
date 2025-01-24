@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
 use anyhow::{bail, Result};
 use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_zkvm_platform::syscall::reg_abi::*;
-
-use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
+use risc0_zkvm_platform::syscall::{
+    keccak_mode::{KECCAK_PERMUTE, KECCAK_PROVE},
+    reg_abi::*,
+};
 
 use super::{Syscall, SyscallContext, SyscallKind};
 
@@ -28,9 +30,6 @@ pub(crate) struct SysKeccak {
     max_inputs: usize,
 }
 
-const PERMUTE: u32 = 0;
-const PROVE: u32 = 1;
-
 impl Syscall for SysKeccak {
     fn syscall(
         &mut self,
@@ -39,9 +38,9 @@ impl Syscall for SysKeccak {
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         let mode = ctx.load_register(REG_A3);
-        if mode == PERMUTE {
+        if mode == KECCAK_PERMUTE {
             self.keccak_permute(ctx, to_guest)
-        } else if mode == PROVE {
+        } else if mode == KECCAK_PROVE {
             self.keccak_prove(ctx, to_guest)
         } else {
             bail!("sys_keccak: invalid mode: {mode}")
