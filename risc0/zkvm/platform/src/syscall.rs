@@ -923,16 +923,17 @@ pub unsafe extern "C" fn sys_prove_zkr(
 /// # Safety
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
-pub unsafe extern "C" fn sys_keccak -> i32(
+pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
 ) -> i32 {
-    let Return(a0, _) = syscall_5(
+    let Return(a0, _) = syscall_3(
         nr::SYS_KECCAK,
         out_state as *mut u32,
         KECCACK_STATE_WORDS,
         0 as u32,
         in_state as u32,
+        0 as u32,
     );
     a0 as i32
 }
@@ -957,7 +958,7 @@ pub unsafe extern "C" fn sys_prove_keccak(
     control_root: *const [u32; DIGEST_WORDS],
 ) {
     let Return(a0, _) = unsafe {
-        syscall_5(
+        syscall_3(
             nr::SYS_PROVE_KECCAK,
             null_mut(),
             0,

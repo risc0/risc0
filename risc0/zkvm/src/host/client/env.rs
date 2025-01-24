@@ -185,7 +185,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
                     KECCAK_PO2_RANGE
                 );
             }
-            inner.keccak_max_po2 = Some(po2_val)
+            inner.keccak_max_po2 = Some(po2);
         }
 
         Ok(inner)

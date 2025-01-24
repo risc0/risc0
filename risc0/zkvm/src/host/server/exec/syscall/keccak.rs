@@ -25,6 +25,7 @@ use super::{Syscall, SyscallContext, SyscallKind};
 pub(crate) struct SysKeccak {
     inputs: Vec<KeccakState>,
     max_po2: u32,
+    max_inputs: usize,
 }
 
 const PERMUTE: u32 = 1;
@@ -43,7 +44,7 @@ impl Syscall for SysKeccak {
         } else if mode == PROVE {
             self.keccak_prove(ctx, to_guest)
         } else {
-            bail!("invalid keccak mode: {mode}")
+            bail!("sys_keccak: invalid mode: {mode}")
         }
     }
 }
@@ -53,7 +54,12 @@ impl SysKeccak {
         Self {
             inputs: vec![],
             max_po2,
+            max_inputs: max_keccak_inputs(max_po2),
         }
+    }
+
+    fn is_full(&self) -> bool {
+        self.inputs.len() >= self.max_inputs
     }
 
     fn keccak_permute(
@@ -61,9 +67,14 @@ impl SysKeccak {
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        // if we are full at this point, it means that the guest forgot to call prove.
+        if self.is_full() {
+            bail!("keccak batch is full, prove must be called");
+        }
+
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let from_guest = &ctx.load_region(buf_ptr, 25 * 8)?;
-        let mut from_guest: [u64; 25] = bytemuck::cast_slice(from_guest).try_into()?;
+        let mut from_guest: KeccakState = bytemuck::cast_slice(from_guest).try_into()?;
         self.inputs.push(from_guest);
 
         keccak::f1600(&mut from_guest);
@@ -72,7 +83,8 @@ impl SysKeccak {
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Keccak];
         metric.count += 1;
 
-        Ok((0, 0))
+        // if full, the guest must call prove.
+        Ok((self.is_full() as u32, 0))
     }
 
     fn keccak_prove(
@@ -113,6 +125,9 @@ impl SysKeccak {
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::ProveKeccak];
         metric.count += 1;
         metric.size += 1 << po2 as u64;
+
+        // reset
+        self.inputs.drop();
 
         Ok((0, 0))
     }
