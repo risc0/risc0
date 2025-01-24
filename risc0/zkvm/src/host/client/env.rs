@@ -207,7 +207,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /// Set a segment limit, specified in powers of 2 cycles.
+    /// Set a segment limit for keccak proofs, specified in powers of 2 cycles.
     ///
     /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
     /// roughly linear with the segment size, so lowering this value by 1 will cut memory
@@ -216,8 +216,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
     /// either up or down, may result in better proving performance.
     ///
-    /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
-    /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
+    /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE]
     pub fn keccak_max_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.keccak_max_po2 = Some(limit);
         self
