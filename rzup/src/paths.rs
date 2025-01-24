@@ -45,21 +45,21 @@ impl Paths {
             return Ok(None);
         }
 
-        for entry in std::fs::read_dir(component_dir)? {
-            let entry = entry?;
-            if !entry.path().is_dir() {
-                continue;
-            }
-
-            let dir_name = entry.file_name().to_string_lossy().to_string();
-            if let Some(parsed_version) = Self::parse_version_from_path(&dir_name, component) {
+        let matching_path = std::fs::read_dir(component_dir)?
+            .filter_map(|entry| entry.ok())
+            .filter(|entry| !entry.metadata().unwrap().is_symlink())
+            .filter(|entry| entry.path().is_dir())
+            .find_map(|entry| {
+                let dir_name = entry.file_name().to_string_lossy().to_string();
+                let parsed_version = Self::parse_version_from_path(&dir_name, component)?;
                 if parsed_version == *version {
-                    return Ok(Some(entry.path()));
+                    Some(entry.path())
+                } else {
+                    None
                 }
-            }
-        }
+            });
 
-        Ok(None)
+        Ok(matching_path)
     }
 
     pub fn find_version_dir(
