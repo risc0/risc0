@@ -1252,6 +1252,7 @@ fn keccak_update2(#[case] version: TestVersion) {
         .write(&MultiTestSpec::KeccakUpdate2)
         .unwrap()
         .keccak_max_po2(15)
+        .unwrap()
         .build()
         .unwrap();
     let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();

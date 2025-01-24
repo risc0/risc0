@@ -220,12 +220,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
     pub fn keccak_max_po2(&mut self, limit: u32) -> Result<&mut Self> {
         if !KECCAK_PO2_RANGE.contains(&(limit as usize)) {
             bail!(
-                "invalid keccak po2 {po2}. Expected range: {:?}",
+                "invalid keccak po2 {limit}. Expected range: {:?}",
                 KECCAK_PO2_RANGE
             );
         }
         self.inner.keccak_max_po2 = Some(limit);
-        self
+        Ok(self)
     }
 
     /// Set a session limit, specified in number of cycles.

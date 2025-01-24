@@ -14,15 +14,15 @@
 
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_zkvm::{guest::env, sha::Digest};
-use risc0_zkvm_platform::syscall::sys_prove_keccak;
+use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak};
 
 // Computes and proves the result of a given keccak input transcript
 fn main() {
     let (claim_digest, po2): (Digest, u32) = env::read();
 
-    let _input = generate_input(po2 as usize);
-    //let _input = bytemuck::cast_slice(&input);
-    // TODO: FIX THIS TEST
+    for mut input in generate_input(po2 as usize) {
+        unsafe { sys_keccak(&input, &mut input) };
+    }
 
     unsafe {
         sys_prove_keccak(
