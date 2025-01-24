@@ -217,7 +217,13 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// either up or down, may result in better proving performance.
     ///
     /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE]
-    pub fn keccak_max_po2(&mut self, limit: u32) -> &mut Self {
+    pub fn keccak_max_po2(&mut self, limit: u32) -> Result<&mut Self> {
+        if !KECCAK_PO2_RANGE.contains(&(limit as usize)) {
+            bail!(
+                "invalid keccak po2 {po2}. Expected range: {:?}",
+                KECCAK_PO2_RANGE
+            );
+        }
         self.inner.keccak_max_po2 = Some(limit);
         self
     }
