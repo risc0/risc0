@@ -28,8 +28,8 @@ pub(crate) struct SysKeccak {
     max_inputs: usize,
 }
 
-const PERMUTE: u32 = 1;
-const PROVE: u32 = 2;
+const PERMUTE: u32 = 0;
+const PROVE: u32 = 1;
 
 impl Syscall for SysKeccak {
     fn syscall(
