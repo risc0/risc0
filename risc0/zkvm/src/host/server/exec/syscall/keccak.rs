@@ -50,7 +50,7 @@ impl Syscall for SysKeccak {
 
 impl SysKeccak {
     pub fn new(max_po2: Option<u32>) -> Self {
-        let max_po2 = max_po2.unwrap_or(KECCAK_DEFAULT_PO2);
+        let max_po2 = max_po2.unwrap_or(KECCAK_DEFAULT_PO2 as u32) as usize;
 
         Self {
             inputs: vec![],
