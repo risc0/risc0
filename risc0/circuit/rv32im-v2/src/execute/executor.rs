@@ -15,11 +15,13 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
-use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage2, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
     log2_ceil,
 };
+
+use crate::{Rv32imV2Claim, TerminateState};
 
 use super::{
     pager::PagedMemory,
@@ -41,7 +43,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     user_cycles: u32,
     phys_cycles: u32,
     pager: PagedMemory,
-    exit_code: Option<ExitCode>,
+    terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
     syscall_handler: &'a S,
@@ -53,21 +55,20 @@ pub struct Executor<'a, 'b, S: Syscall> {
 
 pub struct ExecutorResult {
     pub segments: u64,
-    pub exit_code: ExitCode,
     pub post_image: MemoryImage2,
     pub user_cycles: u64,
     pub total_cycles: u64,
-    pub pre_digest: Digest,
-    pub post_digest: Digest,
-    pub output_digest: Option<Digest>,
     pub paging_cycles: u64,
     pub reserved_cycles: u64,
+    pub claim: Rv32imV2Claim,
 }
 
 #[derive(Default)]
 struct SessionCycles {
-    user: u64,
     total: u64,
+    user: u64,
+    paging: u64,
+    reserved: u64,
 }
 
 pub struct SimpleSession {
@@ -89,7 +90,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             user_cycles: 0,
             phys_cycles: 0,
             pager: PagedMemory::new(image),
-            exit_code: None,
+            terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
             syscall_handler,
@@ -119,7 +120,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let initial_digest = self.pager.image.image_id();
         tracing::debug!("initial_digest: {initial_digest}");
 
-        while self.exit_code.is_none() {
+        while self.terminate_state.is_none() {
             if let Some(max_cycles) = max_cycles {
                 if self.cycles.user >= max_cycles {
                     bail!(
@@ -143,23 +144,31 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
                 callback(Segment {
                     partial_image,
-                    pre_digest,
-                    post_digest,
+                    claim: Rv32imV2Claim {
+                        pre_state: pre_digest,
+                        post_state: post_digest,
+                        input: self.input_digest,
+                        output: self.output_digest,
+                        terminate_state: self.terminate_state,
+                        shutdown_cycle: None,
+                    },
                     read_record: std::mem::take(&mut self.read_record),
                     write_record: std::mem::take(&mut self.write_record),
                     user_cycles: self.user_cycles,
                     suspend_cycle: self.phys_cycles,
                     paging_cycles: self.pager.cycles,
                     po2: segment_po2 as u32,
-                    exit_code: ExitCode::SystemSplit,
                     index: segment_counter,
-                    input_digest: self.input_digest,
-                    output_digest: self.output_digest,
                     segment_threshold,
                 })?;
 
                 segment_counter += 1;
-                self.cycles.total += 1 << segment_po2;
+                let total_cycles = 1 << segment_po2;
+                let pager_cycles = self.pager.cycles as u64;
+                let user_cycles = self.user_cycles as u64;
+                self.cycles.total += total_cycles;
+                self.cycles.paging += pager_cycles;
+                self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
                 self.user_cycles = 0;
                 self.phys_cycles = 0;
                 self.pager.reset();
@@ -173,54 +182,68 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Risc0Machine::suspend(self)?;
 
         let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
-        let last_cycles = self.segment_cycles().next_power_of_two();
-        let last_po2 = log2_ceil(last_cycles as usize);
-        let exit_code = self.exit_code.unwrap();
+        let final_cycles = self.segment_cycles().next_power_of_two();
+        let final_po2 = log2_ceil(final_cycles as usize);
+
+        let final_claim = Rv32imV2Claim {
+            pre_state: pre_digest,
+            post_state: post_digest,
+            input: self.input_digest,
+            output: self.output_digest,
+            terminate_state: self.terminate_state,
+            shutdown_cycle: None,
+        };
 
         callback(Segment {
             partial_image,
-            pre_digest,
-            post_digest,
+            claim: final_claim,
             read_record: std::mem::take(&mut self.read_record),
             write_record: std::mem::take(&mut self.write_record),
             user_cycles: self.user_cycles,
             suspend_cycle: self.phys_cycles,
             paging_cycles: self.pager.cycles,
-            po2: last_po2 as u32,
-            exit_code,
+            po2: final_po2 as u32,
             index: segment_counter,
-            input_digest: self.input_digest,
-            output_digest: self.output_digest,
             segment_threshold,
         })?;
 
-        self.cycles.total += 1 << last_po2;
+        let final_cycles = final_cycles as u64;
+        let user_cycles = self.user_cycles as u64;
+        let pager_cycles = self.pager.cycles as u64;
+        self.cycles.total += final_cycles;
+        self.cycles.paging += pager_cycles;
+        self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
+
+        let session_claim = Rv32imV2Claim {
+            pre_state: initial_digest,
+            post_state: post_digest,
+            input: self.input_digest,
+            output: self.output_digest,
+            terminate_state: self.terminate_state,
+            shutdown_cycle: None,
+        };
 
         Ok(ExecutorResult {
             segments: segment_counter + 1,
-            exit_code,
             post_image: self.pager.image.clone(),
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
-            pre_digest: initial_digest,
-            post_digest,
-            output_digest: self.output_digest,
-            paging_cycles: 0,   // TODO(flaub)
-            reserved_cycles: 0, // TODO(flaub)
+            paging_cycles: self.cycles.paging,
+            reserved_cycles: self.cycles.reserved,
+            claim: session_claim,
         })
     }
 
     fn reset(&mut self) {
         self.pager.reset();
-        self.exit_code = None;
+        self.terminate_state = None;
         self.read_record.clear();
         self.write_record.clear();
         self.output_digest = None;
         self.machine_mode = 0;
         self.user_cycles = 0;
         self.phys_cycles = 0;
-        self.cycles.user = 0;
-        self.cycles.total = 0;
+        self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
     }
 
@@ -312,24 +335,19 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         self.pager.store(addr, word)
     }
 
-    fn on_terminate(&mut self, a0: u32, _a1: u32) -> Result<()> {
-        const TERMINATE: u32 = 0;
-        const PAUSE: u32 = 1;
+    fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
+        self.user_cycles += 1;
+
+        self.terminate_state = Some(TerminateState {
+            a0: a0.into(),
+            a1: a1.into(),
+        });
+        tracing::debug!("{:?}", self.terminate_state);
 
         let output: Digest = self
             .peek_region(GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
             .as_slice()
             .try_into()?;
-
-        let halt_type = a0 & 0xff;
-        let user_exit = (a0 >> 8) & 0xff;
-
-        self.user_cycles += 1;
-        self.exit_code = match halt_type {
-            TERMINATE => Some(ExitCode::Halted(user_exit)),
-            PAUSE => Some(ExitCode::Paused(user_exit)),
-            _ => bail!("Illegal halt type: {halt_type}"),
-        };
         self.output_digest = Some(output);
 
         Ok(())

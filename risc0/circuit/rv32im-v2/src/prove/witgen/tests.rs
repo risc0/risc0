@@ -22,10 +22,11 @@ use test_log::test;
 use crate::{
     execute::{
         testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
-        DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES,
+        DEFAULT_SEGMENT_LIMIT_PO2,
     },
     prove::{hal::StepMode, witgen::WitnessGenerator},
     zirgen::circuit::{ExtVal, REGCOUNT_DATA},
+    MAX_INSN_CYCLES,
 };
 
 fn run_preflight(program: Program) {
@@ -50,12 +51,12 @@ fn run_preflight(program: Program) {
 
 #[test]
 fn basic() {
-    run_preflight(testutil::basic());
+    run_preflight(testutil::kernel::basic());
 }
 
 #[test]
 fn simple_loop() {
-    run_preflight(testutil::simple_loop(500000));
+    run_preflight(testutil::kernel::simple_loop(500000));
 }
 
 fn fwd_rev_ab_test(program: Program) {
@@ -125,10 +126,10 @@ fn fwd_rev_ab_test(program: Program) {
 
 #[test]
 fn fwd_rev_ab_basic() {
-    fwd_rev_ab_test(testutil::basic());
+    fwd_rev_ab_test(testutil::kernel::basic());
 }
 
 #[test]
 fn fwd_rev_ab_split() {
-    fwd_rev_ab_test(testutil::simple_loop(2000));
+    fwd_rev_ab_test(testutil::kernel::simple_loop(2000));
 }

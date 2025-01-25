@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    Groth16ReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
-    SuccinctReceiptVerifierParameters, VerifierContext,
+    segment::SegmentVersion, Groth16ReceiptVerifierParameters, SegmentReceipt,
+    SegmentReceiptVerifierParameters, SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{
     sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
@@ -246,8 +246,10 @@ impl CompositeReceipt {
 pub struct CompositeReceiptVerifierParameters {
     /// Verifier parameters related to [SegmentReceipt].
     pub segment: MaybePruned<SegmentReceiptVerifierParameters>,
+
     /// Verifier parameters related to [SuccinctReceipt][crate::SuccinctReceipt].
     pub succinct: MaybePruned<SuccinctReceiptVerifierParameters>,
+
     /// Verifier parameters related to [Groth16Receipt][crate::Groth16Receipt].
     pub groth16: MaybePruned<Groth16ReceiptVerifierParameters>,
 }
@@ -257,9 +259,12 @@ impl CompositeReceiptVerifierParameters {
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
     #[stability::unstable]
-    pub fn from_max_po2(po2_max: usize) -> Self {
+    pub fn from_max_po2(po2_max: usize, segment_version: SegmentVersion) -> Self {
         Self {
-            segment: MaybePruned::Value(SegmentReceiptVerifierParameters::from_max_po2(po2_max)),
+            segment: MaybePruned::Value(SegmentReceiptVerifierParameters::from_max_po2(
+                po2_max,
+                segment_version,
+            )),
             succinct: MaybePruned::Value(SuccinctReceiptVerifierParameters::from_max_po2(po2_max)),
             groth16: MaybePruned::Value(Groth16ReceiptVerifierParameters::from_max_po2(po2_max)),
         }
@@ -268,8 +273,8 @@ impl CompositeReceiptVerifierParameters {
     /// Construct verifier parameters that will accept receipts with control any of the default
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
-    pub fn all_po2s() -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    pub fn all_po2s(segment_version: SegmentVersion) -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
     }
 }
 
@@ -313,7 +318,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("d56767c98914dd6bdc45782fbe02eda0c3a3102ae28fdd70e7c55d701e5db42d")
+            digest!("c5dc781cca2023b2382a377b3abec7e0c6b4e8fe07f46f6e40f5ae467b72697a")
         );
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,12 +71,11 @@ where
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum StepMode {
     Parallel,
-    #[cfg(test)]
     SeqForward,
-    #[cfg(test)]
     SeqReverse,
 }
 
@@ -135,6 +134,7 @@ where
             self.circuit_hal.as_ref(),
             segment,
             StepMode::Parallel,
+            // StepMode::SeqForward,
             rand_z,
         )?;
 

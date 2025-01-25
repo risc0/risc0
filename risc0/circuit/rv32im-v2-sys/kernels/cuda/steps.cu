@@ -5629,9 +5629,9 @@ __device__ ECallOutputStruct exec_ECallTerminate(ExecContext& ctx,
   // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:44)
   EQZ((arg1_0.state - Val(9)), "ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:44)");
   // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:45)
-  GetDataStruct x5 = exec_MemoryRead(ctx, arg0, Val(1073725482), LAYOUT_LOOKUP(layout2, a0));
+  GetDataStruct x5 = exec_MemoryRead(ctx, arg0, Val(1073725450), LAYOUT_LOOKUP(layout2, a0));
   // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:46)
-  GetDataStruct x6 = exec_MemoryRead(ctx, arg0, Val(1073725483), LAYOUT_LOOKUP(layout2, a1));
+  GetDataStruct x6 = exec_MemoryRead(ctx, arg0, Val(1073725451), LAYOUT_LOOKUP(layout2, a1));
   // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:47)
   NondetRegStruct x7 = exec_Reg(ctx, x5._super.low, LAYOUT_LOOKUP(x4, termA0low));
   // ECallTerminate(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:48)
@@ -5706,38 +5706,36 @@ exec_ECallHostReadSetup(ExecContext& ctx,
   // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:72)
   GetDataStruct x5 = exec_MemoryRead(ctx, arg0, Val(1073725452), LAYOUT_LOOKUP(layout2, len));
   // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:74)
-  EQZ(x3._super.high, "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:74)");
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:76)
-  EQZ(x5._super.high, "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:76)");
+  EQZ(x5._super.high, "ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:74)");
   // HostReadPrepare(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:7)
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:78)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:76)
   Val x6 = INVOKE_EXTERN(ctx, hostReadPrepare, x3._super.low, x5._super.low);
   NondetU16RegStruct x7 = exec_NondetU16Reg(ctx, x6, LAYOUT_LOOKUP(layout2, newLen));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:80)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:78)
   Val x8 = (x5._super.low - x7._super._super);
   NondetU16RegStruct x9 = exec_U16Reg(ctx, x8, LAYOUT_LOOKUP(layout2, diff));
   // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:82)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:80)
   ValU32Struct x10 = ValU32Struct{.low = x7._super._super, .high = Val(0)};
   MemoryWriteStruct x11 =
       exec_MemoryWrite(ctx, arg0, Val(1073725450), x10, LAYOUT_LOOKUP(layout2, _0));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:84)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:82)
   DecomposeLow2Struct x12 =
       exec_DecomposeLow2(ctx, x4._super.low, LAYOUT_LOOKUP(layout2, ptrDecomp));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:85)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:83)
   Val x13 = (x4._super.high * Val(16384));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:86)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:84)
   DecomposeLow2Struct x14 =
       exec_DecomposeLow2(ctx, x7._super._super, LAYOUT_LOOKUP(layout2, lenDecomp));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:88)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:86)
   Val x15 = (x14.highZero._super * x14.low2Nonzero);
   NondetRegStruct x16 = exec_Reg(ctx, x15, LAYOUT_LOOKUP(layout2, len123));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:90)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:88)
   Val x17 = ((x16._super + x12.low2Nonzero) - (x16._super * x12.low2Nonzero));
   NondetRegStruct x18 = exec_Reg(ctx, x17, LAYOUT_LOOKUP(layout2, uneven));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:94)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:92)
   Val x19 = (x14.isZero._super * Val(40));
-  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:96)
+  // ECallHostReadSetup(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:94)
   Val x20 = (Val(1) - x14.isZero._super);
   Val x21 = ((x19 + ((x20 * x18._super) * Val(12))) + ((x20 * (Val(1) - x18._super)) * Val(13)));
   return ECallOutputStruct{.state = x21,
@@ -5749,28 +5747,28 @@ __device__ ECallOutputStruct exec_ECallHostWrite(ExecContext& ctx,
                                                  NondetRegStruct arg0,
                                                  InstInputStruct arg1_0,
                                                  BoundLayout<ECallHostWriteLayout> layout2) {
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:101)
+  EQZ((arg1_0.state - Val(11)), "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:101)");
   // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:103)
-  EQZ((arg1_0.state - Val(11)), "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:103)");
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:105)
   GetDataStruct x3 = exec_MemoryRead(ctx, arg0, Val(1073725450), LAYOUT_LOOKUP(layout2, fd));
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:106)
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:104)
   GetDataStruct x4 = exec_MemoryRead(ctx, arg0, Val(1073725451), LAYOUT_LOOKUP(layout2, ptr));
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:107)
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:105)
   GetDataStruct x5 = exec_MemoryRead(ctx, arg0, Val(1073725452), LAYOUT_LOOKUP(layout2, len));
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:108)
-  EQZ(x3._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:108)");
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:109)
-  EQZ(x5._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:109)");
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:106)
+  EQZ(x3._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:106)");
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:107)
+  EQZ(x5._super.high, "ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:107)");
   // HostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:10)
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:111)
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:109)
   Val x6 =
       INVOKE_EXTERN(ctx, hostWrite, x3._super.low, x4._super.low, x4._super.high, x5._super.low);
   NondetU16RegStruct x7 = exec_NondetU16Reg(ctx, x6, LAYOUT_LOOKUP(layout2, newLen));
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:113)
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:111)
   Val x8 = (x5._super.low - x7._super._super);
   NondetU16RegStruct x9 = exec_U16Reg(ctx, x8, LAYOUT_LOOKUP(layout2, diff));
   // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
-  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:115)
+  // ECallHostWrite(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:113)
   ValU32Struct x10 = ValU32Struct{.low = x7._super._super, .high = Val(0)};
   MemoryWriteStruct x11 =
       exec_MemoryWrite(ctx, arg0, Val(1073725450), x10, LAYOUT_LOOKUP(layout2, _0));
@@ -5784,85 +5782,85 @@ exec_ECallHostReadBytes(ExecContext& ctx,
                         Val arg3,
                         Val arg4,
                         BoundLayout<ECallHostReadBytesLayout> layout5) {
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:121)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:119)
   EQZ((arg1_0.state - Val(12)),
-      "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:121)");
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:123)
+      "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:119)");
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:121)
   Val x6 = (arg4 - Val(1));
   DecomposeLow2Struct x7 = exec_DecomposeLow2(ctx, x6, LAYOUT_LOOKUP(layout5, lenDecomp));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:125)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:123)
   Val x8 = (x7.highZero._super * x7.low2Nonzero);
   NondetRegStruct x9 = exec_Reg(ctx, x8, LAYOUT_LOOKUP(layout5, len123));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:127)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:125)
   NondetRegStruct x10 = exec_IsZero(ctx, (arg3 - Val(3)), LAYOUT_LOOKUP(layout5, nextPtrEven));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:128)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:126)
   Val x11 = (Val(1) - x10._super);
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:129)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:127)
   Val x12 = ((x10._super * (arg2_0 + Val(1))) + (x11 * arg2_0));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:132)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:130)
   Val x13 = ((x9._super + x11) - (x9._super * x11));
   NondetRegStruct x14 = exec_Reg(ctx, x13, LAYOUT_LOOKUP(layout5, uneven));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:134)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:132)
   NondetRegStruct x15 = exec_IsZero(ctx, x6, LAYOUT_LOOKUP(layout5, lenZero));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:136)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:134)
   NondetRegStruct x16 = exec_NondetBitReg(ctx, bitAnd(arg3, Val(1)), LAYOUT_LOOKUP(layout5, low0));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:137)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:135)
   NondetRegStruct x17 =
       exec_BitReg(ctx, ((arg3 - x16._super) * Val(1006632961)), LAYOUT_LOOKUP(layout5, low1));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:139)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:137)
   GetDataStruct x18 = exec_MemoryRead(ctx, arg0, arg2_0, LAYOUT_LOOKUP(layout5, origWord));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:141)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:139)
   MemoryWriteUnconstrainedStruct x19 =
       exec_MemoryWriteUnconstrained(ctx, arg0, arg2_0, LAYOUT_LOOKUP(layout5, _0));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:143)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:141)
   Val x20 = (Val(1) - x17._super);
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:142)
   Val x21 = (x18._super.low - x19.io.newTxn.dataLow._super);
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:143)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:141)
   ComponentStruct x22 = ComponentStruct{};
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:146)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)
   Val x23 = (x18._super.high - x19.io.newTxn.dataHigh._super);
   ComponentStruct x24;
   if (to_size_t(x17._super)) {
-    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)
-    EQZ(x21, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)");
+    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:142)
+    EQZ(x21, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:142)");
     x24 = x22;
   } else if (to_size_t(x20)) {
-    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:146)
-    EQZ(x23, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:146)");
+    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)
+    EQZ(x23, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:144)");
     x24 = x22;
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:149)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:147)
   Val x25 = (x17._super * x18._super.high);
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:150)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:148)
   Val x26 = (x17._super * x19.io.newTxn.dataHigh._super);
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:152)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:150)
   SplitWordStruct x27 =
       exec_SplitWord(ctx, (x25 + (x20 * x18._super.low)), LAYOUT_LOOKUP(layout5, oldBytes));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:153)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:151)
   SplitWordStruct x28 = exec_SplitWord(
       ctx, (x26 + (x20 * x19.io.newTxn.dataLow._super)), LAYOUT_LOOKUP(layout5, newBytes_0));
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:154)
   Val x29 = (x27.byte0._super - x28.byte0._super);
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:158)
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)
   Val x30 = (x27.byte1._super - x28.byte1._super);
   ComponentStruct x31;
   if (to_size_t(x16._super)) {
-    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)
-    EQZ(x29, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)");
+    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:154)
+    EQZ(x29, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:154)");
     x31 = x22;
   } else if (to_size_t((Val(1) - x16._super))) {
-    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:158)
-    EQZ(x30, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:158)");
+    // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)
+    EQZ(x30, "ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:156)");
     x31 = x22;
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
-  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:164)
-  Val x32 = (Val(1) - x15._super);
   // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:162)
+  Val x32 = (Val(1) - x15._super);
+  // ECallHostReadBytes(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:160)
   Val x33 = ((x15._super * Val(40)) + ((x32 * x14._super) * Val(12)));
   return ECallOutputStruct{.state = (x33 + ((x32 * (Val(1) - x14._super)) * Val(13))),
                            .s0 = x12,
@@ -5876,52 +5874,52 @@ exec_ECallHostReadWords(ExecContext& ctx,
                         Val arg2_0,
                         Val arg3,
                         BoundLayout<ECallHostReadWordsLayout> layout4) {
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:171)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:169)
   EQZ((arg1_0.state - Val(13)),
-      "ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:171)");
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:172)
+      "ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:169)");
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:170)
   DecomposeLow2Struct x5 = exec_DecomposeLow2(ctx, arg3, LAYOUT_LOOKUP(layout4, lenDecomp));
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:173)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:171)
   DecomposeLow2Struct x6 =
       exec_DecomposeLow2(ctx, x5.high._super._super, LAYOUT_LOOKUP(layout4, wordsDecomp));
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:175)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:173)
   Val x7 = (x6.low2Hot._super[1]._super + x6.low2Hot._super[2]._super);
   Val x8 = ((x7 + x6.low2Hot._super[3]._super) * x6.highZero._super);
   Val x9 = (Val(1) - x6.highZero._super);
   Val x10 = (x8 + x9);
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:176)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:174)
   Val x11 = (x6.low2Hot._super[2]._super + x6.low2Hot._super[3]._super);
   Val x12 = ((x11 * x6.highZero._super) + x9);
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:177)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:175)
   Val x13 = (x6.low2Hot._super[3]._super * x6.highZero._super);
   Val x14 = (x13 + x9);
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:180)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:178)
   Val x15 = (((x10 + x12) + x14) + x9);
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:181)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:179)
   ECallHostReadWords__0Struct4Array x16 =
       map(Val4Array{Val(0), Val(1), Val(2), Val(3)},
           LAYOUT_LOOKUP(layout4, _1),
           ([&](Val4Array::value_type x17,
                BoundLayout<ECallHostReadWords__0_SuperLayout4LayoutArray::value_type> x18) {
-            // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:182)
+            // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:180)
             Val x19 = (Val4Array{x10, x12, x14, x9}[to_size_t(x17)] * (arg2_0 + x17));
             Val x20 = (Val(1) - Val4Array{x10, x12, x14, x9}[to_size_t(x17)]);
             NondetRegStruct x21 =
                 exec_Reg(ctx, (x19 + (x20 * Val(1073725504))), LAYOUT_LOOKUP(x18, addr));
-            // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:183)
+            // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:181)
             MemoryWriteUnconstrainedStruct x22 =
                 exec_MemoryWriteUnconstrained(ctx, arg0, x21._super, LAYOUT_LOOKUP(x18, _0));
             return ECallHostReadWords__0Struct{};
           }));
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:185)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:183)
   Val x23 = (x5.high._super._super - x15);
   NondetRegStruct x24 = exec_IsZero(ctx, x23, LAYOUT_LOOKUP(layout4, newLenHighZero));
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:186)
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:184)
   Val x25 = (x24._super * (Val(1) - x5.low2Nonzero));
   NondetRegStruct x26 = exec_Reg(ctx, x25, LAYOUT_LOOKUP(layout4, lenZero));
-  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:191)
-  Val x27 = (Val(1) - x26._super);
   // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:189)
+  Val x27 = (Val(1) - x26._super);
+  // ECallHostReadWords(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:187)
   Val x28 = ((x26._super * Val(40)) + ((x27 * x24._super) * Val(12)));
   return ECallOutputStruct{.state = (x28 + ((x27 * (Val(1) - x24._super)) * Val(13))),
                            .s0 = (arg2_0 + x15),
@@ -5933,159 +5931,159 @@ __device__ InstOutputStruct exec_ECall0(ExecContext& ctx,
                                         InstInputStruct arg1_0,
                                         BoundLayout<ECall0Layout> layout2,
                                         GlobalBuf global3) {
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:201)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:199)
   DoCycleTableStruct x4 = exec_DoCycleTable(ctx, arg0, LAYOUT_LOOKUP(layout2, _0));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:200)
   AddrDecomposeBitsStruct x5 =
       exec_AddrDecomposeBits(ctx, arg1_0.pcU32, arg1_0.mode, LAYOUT_LOOKUP(layout2, pcAddr));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:203)
-  EQZ(x5.low2, "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:203)");
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:201)
+  EQZ(x5.low2, "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:201)");
   // ECallOutput(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:12)
   // IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:21)
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:211)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:209)
   ECallOutputStruct x6 =
       ECallOutputStruct{.state = Val(0), .s0 = Val(0), .s1 = Val(0), .s2 = Val(0)};
   ECallOutputStruct x7;
   if (to_size_t(arg1_0.minorOnehot._super[0]._super)) {
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:205)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:203)
     ECallOutputStruct x8 =
         exec_MachineECall(ctx, arg0, arg1_0, x5._super, LAYOUT_LOOKUP(layout2, output.arm0._super));
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra4.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra5.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra6.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra7.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra8.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra9.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra10.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra11.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra12.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm0._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm0._extra13.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x8;
   } else if (to_size_t(arg1_0.minorOnehot._super[1]._super)) {
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:206)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
     ECallOutputStruct x9 =
         exec_ECallTerminate(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, output.arm1._super), global3);
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra4.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra5.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra6.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra7.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra8.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra9.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra10.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra11.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra12.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm1._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm1._extra13.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x9;
   } else if (to_size_t(arg1_0.minorOnehot._super[2]._super)) {
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:207)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:205)
     ECallOutputStruct x10 =
         exec_ECallHostReadSetup(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, output.arm2._super));
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm2._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm2._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x10;
   } else if (to_size_t(arg1_0.minorOnehot._super[3]._super)) {
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:208)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:206)
     ECallOutputStruct x11 =
         exec_ECallHostWrite(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, output.arm3._super));
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra4.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm3._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm3._extra5.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x11;
   } else if (to_size_t(arg1_0.minorOnehot._super[4]._super)) {
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:209)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:207)
     NondetRegStruct x12 = back_Reg(ctx, 1, LAYOUT_LOOKUP(layout2, s0));
     NondetRegStruct x13 = back_Reg(ctx, 1, LAYOUT_LOOKUP(layout2, s1));
     NondetRegStruct x14 = back_Reg(ctx, 1, LAYOUT_LOOKUP(layout2, s2));
@@ -6096,213 +6094,213 @@ __device__ InstOutputStruct exec_ECall0(ExecContext& ctx,
                                                     x13._super,
                                                     x14._super,
                                                     LAYOUT_LOOKUP(layout2, output.arm4._super));
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra4.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra5.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra6.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra7.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm4._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm4._extra8.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x15;
   } else if (to_size_t(arg1_0.minorOnehot._super[5]._super)) {
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:210)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:208)
     NondetRegStruct x16 = back_Reg(ctx, 1, LAYOUT_LOOKUP(layout2, s0));
     NondetRegStruct x17 = back_Reg(ctx, 1, LAYOUT_LOOKUP(layout2, s2));
     ECallOutputStruct x18 = exec_ECallHostReadWords(
         ctx, arg0, arg1_0, x16._super, x17._super, LAYOUT_LOOKUP(layout2, output.arm5._super));
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra4.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm5._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm5._extra5.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x18;
   } else if (to_size_t(arg1_0.minorOnehot._super[6]._super)) {
     // IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:20)
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:211)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:209)
     EQZ(Val(2013265920),
         "loc(callsite( IllegalECall ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :20:6) at  "
-        "ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :211:18)))");
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+        "ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :209:18)))");
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra4.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra5.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra6.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra7.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra8.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra9.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra10.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra11.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra12.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra13.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra14.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra15.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra16.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra17.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra18.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm6._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm6._extra19.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x6;
   } else if (to_size_t(arg1_0.minorOnehot._super[7]._super)) {
     // IllegalECall(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:20)
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:212)
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:210)
     EQZ(Val(2013265920),
         "loc(callsite( IllegalECall ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :20:6) at  "
-        "ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :212:18)))");
-    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)
+        "ECall0 ( zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir :210:18)))");
+    // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra0.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra1.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra2.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra3.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra4.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra5.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra6.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra7.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra8.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra9.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra10.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra11.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra12.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra13.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra14.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra15.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra16.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra17.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra18.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     STORE(LAYOUT_LOOKUP(layout2, output.arm7._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, output.arm7._extra19.count._super), 0),
-        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:204)");
+        "ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:202)");
     x7 = x6;
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:214)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:212)
   NondetRegStruct x19 = exec_Reg(ctx, x7.s0, LAYOUT_LOOKUP(layout2, s0));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:215)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:213)
   NondetRegStruct x20 = exec_Reg(ctx, x7.s1, LAYOUT_LOOKUP(layout2, s1));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:216)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:214)
   NondetRegStruct x21 = exec_Reg(ctx, x7.s2, LAYOUT_LOOKUP(layout2, s2));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:217)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:215)
   NondetRegStruct x22 = exec_IsZero(ctx, (x7.state - Val(40)), LAYOUT_LOOKUP(layout2, isDecode));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:218)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:216)
   NondetRegStruct x23 = exec_IsZero(ctx, (x7.state - Val(16)), LAYOUT_LOOKUP(layout2, isP2Entry));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:219)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:217)
   NondetRegStruct x24 = exec_IsZero(ctx, (x7.state - Val(32)), LAYOUT_LOOKUP(layout2, isShaEcall));
-  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:220)
+  // ECall0(zirgen/circuit/rv32im/v2/dsl/inst_ecall.zir:218)
   Val x25 = ((x22._super + x23._super) + x24._super);
   // AddU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:27)
   Val x26 = (arg1_0.pcU32.low + (x25 * Val(4)));

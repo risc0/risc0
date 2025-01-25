@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,14 +33,14 @@
 namespace risc0::circuit::rv32im_v2::cpu {
 
 struct ExecBuffers {
-  Buffer global;
-  Buffer data;
+  Buffer<true> global;
+  Buffer<false> data;
 };
 
 struct AccumBuffers {
-  Buffer data;
-  Buffer accum;
-  Buffer mix;
+  Buffer<false> data;
+  Buffer<false> accum;
+  Buffer<true> mix;
 };
 
 #if defined(__clang__)
@@ -126,7 +126,7 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  MutableBufObj(Buffer& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
+  MutableBufObj(Buffer<false>& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
     if (zeroBack && back > 0) {
@@ -140,14 +140,14 @@ struct MutableBufObj : public BufferObj {
     return buf.set(ctx.cycle, col, val);
   }
 
-  Buffer& buf;
+  Buffer<false>& buf;
   bool zeroBack;
 };
 
 using MutableBuf = MutableBufObj*;
 
 struct GlobalBufObj : public BufferObj {
-  GlobalBufObj(Buffer& buf) : buf(buf) {}
+  GlobalBufObj(Buffer<true>& buf) : buf(buf) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
     assert(back == 0);
@@ -156,7 +156,7 @@ struct GlobalBufObj : public BufferObj {
 
   void store(ExecContext& ctx, size_t col, Val val) override { return buf.set(0, col, val); }
 
-  Buffer& buf;
+  Buffer<true>& buf;
 };
 
 using GlobalBuf = GlobalBufObj*;

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
+use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::platform::{REG_MAX, REG_ZERO, WORD_SIZE};
@@ -61,9 +62,10 @@ pub trait EmuContext {
     fn check_data_store(&self, addr: ByteAddr) -> bool;
 }
 
-#[derive(Default)]
+// #[derive(Default)]
 pub struct Emulator {
     table: FastDecodeTable,
+    ring: AllocRingBuffer<(ByteAddr, Instruction, DecodedInstruction)>,
 }
 
 #[derive(Debug)]
@@ -72,13 +74,13 @@ pub enum Exception {
     InstructionMisaligned = 0,
     InstructionFault,
     #[allow(dead_code)]
-    IllegalInstruction(u32),
+    IllegalInstruction(u32, u32),
     Breakpoint,
-    LoadMisaligned,
+    LoadAddressMisaligned,
     #[allow(dead_code)]
     LoadAccessFault(ByteAddr),
     #[allow(dead_code)]
-    StoreMisaligned(ByteAddr),
+    StoreAddressMisaligned(ByteAddr),
     StoreAccessFault,
     #[allow(dead_code)]
     InvalidEcallDispatch(u32),
@@ -366,6 +368,14 @@ impl Emulator {
     pub fn new() -> Self {
         Self {
             table: FastDecodeTable::new(),
+            ring: AllocRingBuffer::new(10),
+        }
+    }
+
+    pub fn dump(&self) {
+        tracing::debug!("Dumping last {} instructions:", self.ring.len());
+        for (pc, insn, decoded) in self.ring.iter() {
+            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(insn, decoded));
         }
     }
 
@@ -379,20 +389,21 @@ impl Emulator {
 
         let word = ctx.load_memory(pc.waddr())?;
         if word & 0x03 != 0x03 {
-            ctx.trap(Exception::IllegalInstruction(word))?;
+            ctx.trap(Exception::IllegalInstruction(word, 0))?;
             return Ok(());
         }
 
         let decoded = DecodedInstruction::new(word);
         let insn = self.table.lookup(&decoded);
         ctx.on_insn_decoded(&insn, &decoded)?;
+        self.ring.push((pc, insn, decoded.clone()));
 
         if match insn.category {
             InsnCategory::Compute => self.step_compute(ctx, insn.kind, &decoded)?,
             InsnCategory::Load => self.step_load(ctx, insn.kind, &decoded)?,
             InsnCategory::Store => self.step_store(ctx, insn.kind, &decoded)?,
             InsnCategory::System => self.step_system(ctx, insn.kind, &decoded)?,
-            InsnCategory::Invalid => ctx.trap(Exception::IllegalInstruction(word))?,
+            InsnCategory::Invalid => ctx.trap(Exception::IllegalInstruction(word, 1))?,
         } {
             ctx.on_normal_end(&insn, &decoded)?;
         };
@@ -546,7 +557,7 @@ impl Emulator {
             }
             InsnKind::Lh => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(Exception::LoadMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 let mut out = (data >> shift) & 0xffff;
                 if out & 0x8000 != 0 {
@@ -556,14 +567,14 @@ impl Emulator {
             }
             InsnKind::Lw => {
                 if addr.0 & 0x03 != 0 {
-                    return ctx.trap(Exception::LoadMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 data
             }
             InsnKind::LbU => (data >> shift) & 0xff,
             InsnKind::LhU => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(Exception::LoadMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 (data >> shift) & 0xffff
             }
@@ -596,7 +607,7 @@ impl Emulator {
             InsnKind::Sh => {
                 if addr.0 & 0x01 != 0 {
                     tracing::debug!("Misaligned SH");
-                    return ctx.trap(Exception::StoreMisaligned(addr));
+                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
                 }
                 data ^= data & (0xffff << shift);
                 data |= (rs2 & 0xffff) << shift;
@@ -604,7 +615,7 @@ impl Emulator {
             InsnKind::Sw => {
                 if addr.0 & 0x03 != 0 {
                     tracing::debug!("Misaligned SW");
-                    return ctx.trap(Exception::StoreMisaligned(addr));
+                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
                 }
                 data = rs2;
             }
@@ -625,7 +636,7 @@ impl Emulator {
             InsnKind::Eany => match decoded.rs2 {
                 0 => ctx.ecall(),
                 1 => ctx.trap(Exception::Breakpoint),
-                _ => ctx.trap(Exception::IllegalInstruction(decoded.insn)),
+                _ => ctx.trap(Exception::IllegalInstruction(decoded.insn, 2)),
             },
             InsnKind::Mret => ctx.mret(),
             _ => unreachable!(),

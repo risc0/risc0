@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::BTreeMap;
+
 use anyhow::{bail, Result};
 use risc0_binfmt::{MemoryImage2, Program};
 use risc0_core::scope;
@@ -32,8 +34,11 @@ pub const MIN_CYCLES_PO2: usize = log2_ceil(LOOKUP_TABLE_CYCLES + RESERVED_PAGIN
 pub struct NullSyscall;
 
 impl Syscall for NullSyscall {
-    fn host_read(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
-        unimplemented!()
+    fn host_read(&self, _ctx: &mut dyn SyscallContext, _fd: u32, buf: &mut [u8]) -> Result<u32> {
+        for (i, byte) in buf.iter_mut().enumerate() {
+            *byte = i as u8;
+        }
+        Ok(buf.len() as u32)
     }
 
     fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
@@ -71,68 +76,234 @@ pub fn execute<S: Syscall>(
     Ok(SimpleSession { segments, result })
 }
 
-/// Constructs a program from an iterator of instructions starting from an entrypoint.
-fn program_from_instructions(instructions: impl IntoIterator<Item = u32>) -> Program {
-    let entry = USER_START_ADDR + WORD_SIZE;
-    let entry = entry.0;
-    let mut pc = entry;
+pub mod user {
+    use super::*;
 
-    Program {
-        entry,
-        image: instructions
-            .into_iter()
-            .map(|instr| {
-                let result = (pc, instr);
-                pc += WORD_SIZE as u32;
-                result
-            })
-            .collect(),
+    pub fn basic() -> Program {
+        let mut asm = Assembler::new();
+        asm.li(REG_A1, 0x4000_0000);
+        asm.ecall();
+        asm.program()
+    }
+
+    pub fn simple_loop(count: u32) -> Program {
+        let mut asm = Assembler::new();
+        asm.addi(REG_A4, REG_ZERO, 0);
+        asm.li(REG_A5, count);
+        // loop:
+        asm.addi(REG_A4, REG_A4, 1);
+        asm.blt(REG_A4, REG_A5, -4 /*loop: */);
+        asm.lui(REG_A1, 0x1000);
+        asm.ecall();
+        asm.program()
     }
 }
 
-pub fn basic() -> Program {
-    program_from_instructions([
-        lui(REG_T1, 0x1234b),
-        lui(REG_T2, 0xf387e),
-        add(REG_T0, REG_T1, REG_T2),
-        lui(REG_A1, 0x4),
-        ecall(),
-    ])
+pub mod kernel {
+    use super::*;
+
+    pub fn basic() -> Program {
+        let mut asm = Assembler::new();
+        asm.host_terminate(0, 0);
+        asm.program()
+    }
+
+    pub fn simple_loop(count: u32) -> Program {
+        let mut asm = Assembler::new();
+        asm.addi(REG_A4, REG_ZERO, 0);
+        asm.li(REG_A5, count);
+        // loop:
+        asm.addi(REG_A4, REG_A4, 1);
+        asm.blt(REG_A4, REG_A5, -4 /*loop: */);
+        asm.host_terminate(0, 0);
+        asm.program()
+    }
+
+    pub fn multi_read() -> Program {
+        const LENGTHS: &[u32] = &[0, 1, 2, 3, 4, 5, 7, 13, 19, 40, 101];
+
+        let ptr = 0x0050_0000;
+
+        let mut asm = Assembler::new();
+        asm.li(REG_T0, ptr);
+        // Try all 4 alignments
+        for i in 0..4 {
+            // Try a variety of size
+            for &len in LENGTHS {
+                asm.host_ecall_read(0, ptr + i, len);
+                for k in 0..len {
+                    asm.lb(REG_T1, REG_T0, i + k);
+                    asm.li(REG_T2, k);
+                    asm.beq(REG_T1, REG_T2, 8);
+                    asm.die();
+                }
+            }
+        }
+
+        asm.host_terminate(0, 0);
+
+        asm.program()
+    }
 }
 
-pub fn simple_loop(count: u32) -> Program {
-    // loop.asm:
-    //
-    // .global _boot
-    // .text
-    //
-    // _boot:
-    //     li      a4,0
-    //     li      a5,100
-    // loop:
-    //     addi    a4,a4,1
-    //     blt     a4,a5,loop
-    //     lui     a1,0x1000
-    //     ecall
-    //
-    // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
+#[allow(unused)]
+mod consts {
+    pub(crate) const OP_BASE: u32 = 0b0110011;
+    pub(crate) const OP_IMM: u32 = 0b0010011;
+    pub(crate) const OP_LOAD: u32 = 0b0000011;
+    pub(crate) const OP_STORE: u32 = 0b0100011;
+    pub(crate) const OP_BRANCH: u32 = 0b1100011;
+    pub(crate) const OP_JAL: u32 = 0b1101111;
+    pub(crate) const OP_JALR: u32 = 0b1100111;
+    pub(crate) const OP_LUI: u32 = 0b0110111;
+    pub(crate) const OP_AUIPC: u32 = 0b0010111;
+    pub(crate) const OP_ENV: u32 = 0b1110011;
 
-    // sign extend low 12 bits
-    let low = ((count as i32) << 20) >> 20;
-    // upper 20 bits
-    let high = (count as i32 - low) >> 12;
-    tracing::debug!("{count:#010x}: ({high:#010x}, {low:#010x})");
+    pub(crate) const FUNCT3_EQ: u32 = 0x0;
+    pub(crate) const FUNCT3_NE: u32 = 0x1;
+    pub(crate) const FUNCT3_LT: u32 = 0x4;
+    pub(crate) const FUNCT3_GE: u32 = 0x5;
+    pub(crate) const FUNCT3_LTU: u32 = 0x6;
+    pub(crate) const FUNCT3_GEU: u32 = 0x7;
 
-    program_from_instructions([
-        addi(REG_A4, REG_ZERO, 0),
-        lui(REG_A5, high as u32),
-        addi(REG_A5, REG_A5, low as u32),
-        // loop:
-        addi(REG_A4, REG_A4, 1),
-        blt(REG_A4, REG_A5, -4 /*loop: */),
-        lui(REG_A1, 0x1000),
-        ecall(),
-    ])
+    pub(crate) const FUNCT3_BYTE: u32 = 0x0;
+    pub(crate) const FUNCT3_HALF: u32 = 0x1;
+    pub(crate) const FUNCT3_WORD: u32 = 0x2;
+    pub(crate) const FUNCT3_BYTEU: u32 = 0x4;
+    pub(crate) const FUNCT3_HALFU: u32 = 0x5;
+}
+
+use consts::*;
+
+struct Assembler {
+    text: Vec<u32>,
+    data: BTreeMap<u32, u32>,
+}
+
+#[allow(dead_code)]
+impl Assembler {
+    pub fn new() -> Self {
+        Self {
+            text: vec![],
+            data: BTreeMap::new(),
+        }
+    }
+
+    pub fn program(&self) -> Program {
+        let entry = USER_START_ADDR + WORD_SIZE;
+        let entry = entry.0;
+        let mut pc = entry;
+
+        let mut image: BTreeMap<_, _> = self
+            .text
+            .iter()
+            .map(|instr| {
+                let result = (pc, *instr);
+                pc += WORD_SIZE as u32;
+                result
+            })
+            .collect();
+
+        image.extend(self.data.iter());
+
+        Program { entry, image }
+    }
+
+    pub fn word(&mut self, addr: u32, word: u32) {
+        self.data.insert(addr, word);
+    }
+
+    pub fn add(&mut self, rd: usize, rs1: usize, rs2: usize) {
+        self.text.push(insn_r(
+            0x00, rs2 as u32, rs1 as u32, 0x0, rd as u32, OP_BASE,
+        ));
+    }
+
+    pub fn addi(&mut self, rd: usize, rs1: usize, imm: u32) {
+        self.text
+            .push(insn_i(imm, rs1 as u32, 0x0, rd as u32, OP_IMM));
+    }
+
+    pub fn blt(&mut self, rs1: usize, rs2: usize, offset: i32) {
+        self.text.push(insn_b(
+            offset as u32,
+            rs2 as u32,
+            rs1 as u32,
+            FUNCT3_LT,
+            OP_BRANCH,
+        ));
+    }
+
+    pub fn beq(&mut self, rs1: usize, rs2: usize, offset: i32) {
+        self.text.push(insn_b(
+            offset as u32,
+            rs2 as u32,
+            rs1 as u32,
+            FUNCT3_EQ,
+            OP_BRANCH,
+        ));
+    }
+
+    pub fn bne(&mut self, rs1: usize, rs2: usize, offset: i32) {
+        self.text.push(insn_b(
+            offset as u32,
+            rs2 as u32,
+            rs1 as u32,
+            FUNCT3_NE,
+            OP_BRANCH,
+        ));
+    }
+
+    pub fn ecall(&mut self) {
+        self.text.push(insn_i(0x0, 0x0, 0x0, 0x0, OP_ENV));
+    }
+
+    pub fn lui(&mut self, rd: usize, imm: u32) {
+        self.text.push(insn_u(imm, rd as u32, OP_LUI));
+    }
+
+    pub fn li(&mut self, rd: usize, imm: u32) {
+        if imm < (1 << 11) {
+            self.addi(rd, REG_ZERO, imm);
+        } else {
+            // sign extend low 12 bits
+            let low = ((imm as i32) << 20) >> 20;
+            // upper 20 bits
+            let high = (imm as i32 - low) >> 12;
+
+            self.lui(rd, high as u32);
+            self.addi(rd, rd, low as u32);
+        }
+    }
+
+    pub fn lb(&mut self, rd: usize, rs1: usize, imm: u32) {
+        self.text
+            .push(insn_i(imm, rs1 as u32, FUNCT3_BYTE, rd as u32, OP_LOAD));
+    }
+
+    pub fn lw(&mut self, rd: usize, rs1: usize, imm: u32) {
+        self.text
+            .push(insn_i(imm, rs1 as u32, FUNCT3_WORD, rd as u32, OP_LOAD));
+    }
+
+    pub fn host_ecall_read(&mut self, fd: u32, ptr: u32, len: u32) {
+        self.li(REG_A7, HOST_ECALL_READ);
+        self.li(REG_A0, fd);
+        self.li(REG_A1, ptr);
+        self.li(REG_A2, len);
+        self.ecall();
+    }
+
+    pub fn host_terminate(&mut self, a0: u32, a1: u32) {
+        self.li(REG_A7, HOST_ECALL_TERMINATE);
+        self.li(REG_A0, a0);
+        self.li(REG_A1, a1);
+        self.ecall();
+    }
+
+    pub fn die(&mut self) {
+        self.text.push(fence());
+    }
 }
 
 // 31        25 | 24  20 | 19  15 | 14  12 | 11        7 | 6    0 |
@@ -168,22 +339,6 @@ fn insn_u(imm: u32, rd: u32, opcode: u32) -> u32 {
     (imm << 12) | rd << 7 | opcode
 }
 
-fn add(rd: usize, rs1: usize, rs2: usize) -> u32 {
-    insn_r(0x00, rs2 as u32, rs1 as u32, 0x0, rd as u32, 0b0110011)
-}
-
-fn addi(rd: usize, rs1: usize, imm: u32) -> u32 {
-    insn_i(imm, rs1 as u32, 0x0, rd as u32, 0b0010011)
-}
-
-fn blt(rs1: usize, rs2: usize, offset: i32) -> u32 {
-    insn_b(offset as u32, rs2 as u32, rs1 as u32, 0x4, 0b1100011)
-}
-
-fn ecall() -> u32 {
-    insn_i(0x0, 0x0, 0x0, 0x0, 0b1110011)
-}
-
-fn lui(rd: usize, imm: u32) -> u32 {
-    insn_u(imm, rd as u32, 0b0110111)
+fn fence() -> u32 {
+    insn_i(0, 0, 0, 0, 0b0001111)
 }

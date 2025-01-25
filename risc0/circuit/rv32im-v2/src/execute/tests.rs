@@ -12,39 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_binfmt::{ExitCode, MemoryImage2};
+use risc0_binfmt::MemoryImage2;
+use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
-use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2, MAX_INSN_CYCLES};
+use crate::{TerminateState, MAX_INSN_CYCLES};
 
-// impl Syscall for BasicSyscall {
-//     fn syscall(
-//         &self,
-//         syscall: &str,
-//         ctx: &mut dyn SyscallContext,
-//         guest_buf: &mut [u32],
-//     ) -> Result<(u32, u32)> {
-//         self.state.borrow_mut().syscall = syscall.to_string();
-//         let buf_ptr = ByteAddr(ctx.peek_register(REG_A4)?);
-//         let buf_len = ctx.peek_register(REG_A5)?;
-//         self.state.borrow_mut().from_guest = ctx.peek_region(buf_ptr, buf_len)?;
-//         let guest_buf_bytes: &mut [u8] = bytemuck::cast_slice_mut(guest_buf);
-//         let into_guest = &self.state.borrow().into_guest;
-//         guest_buf_bytes[..into_guest.len()].clone_from_slice(into_guest);
-//         Ok((0, 0))
-//     }
-// }
+use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2};
 
 #[test]
 fn basic() {
-    let program = testutil::basic();
+    let program = testutil::kernel::basic();
     let expected_cycles = program.image.len();
     let mut image = MemoryImage2::new_kernel(program);
     let pre_image_id = image.image_id();
 
     println!("image_id: {pre_image_id}");
 
-    let result = testutil::execute(
+    let session = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         MAX_INSN_CYCLES,
@@ -54,24 +39,29 @@ fn basic() {
     )
     .unwrap();
 
-    let segments = result.segments;
+    let segments = session.segments;
     assert_eq!(segments.len(), 1);
     let segment = segments.first().unwrap();
-    assert_eq!(segment.pre_digest, pre_image_id);
-    assert_ne!(segment.post_digest, pre_image_id);
+    assert_eq!(segment.claim.pre_state, pre_image_id);
+    assert_ne!(segment.claim.post_state, pre_image_id);
+    assert_eq!(segment.claim.input, Digest::ZERO);
+    assert_eq!(segment.claim.output, Some(Digest::ZERO));
+    assert_eq!(
+        segment.claim.terminate_state,
+        Some(TerminateState::default())
+    );
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
     assert_eq!(segment.user_cycles, expected_cycles as u32);
-    assert_eq!(segment.exit_code, ExitCode::Halted(0));
 }
 
 #[test]
 fn system_split() {
-    let program = testutil::simple_loop(2000);
+    let program = testutil::kernel::simple_loop(2000);
     let mut image = MemoryImage2::new_kernel(program);
     let pre_image_id = image.image_id();
 
-    let result = testutil::execute(
+    let session = testutil::execute(
         image,
         testutil::MIN_CYCLES_PO2,
         100,
@@ -81,13 +71,23 @@ fn system_split() {
     )
     .unwrap();
 
-    let segments = result.segments;
+    let segments = session.segments;
     assert_eq!(segments.len(), 2);
-    assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].pre_digest, pre_image_id);
-    assert_ne!(segments[0].post_digest, pre_image_id);
+    assert_eq!(segments[0].claim.pre_state, pre_image_id);
+    assert_ne!(segments[0].claim.post_state, pre_image_id);
+    assert_eq!(segments[0].claim.input, Digest::ZERO);
+    assert_eq!(segments[0].claim.output, None);
+    assert_eq!(segments[0].claim.terminate_state, None);
+
+    assert_eq!(segments[1].claim.pre_state, segments[0].claim.post_state);
+    assert_ne!(segments[1].claim.post_state, segments[1].claim.pre_state);
+    assert_eq!(segments[1].claim.input, Digest::ZERO);
+    assert_eq!(segments[1].claim.output, Some(Digest::ZERO));
+    assert_eq!(
+        segments[1].claim.terminate_state,
+        Some(TerminateState::default())
+    );
+
     assert!(segments[0].read_record.is_empty());
     assert!(segments[0].write_record.is_empty());
-    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
-    assert_eq!(segments[1].pre_digest, segments[0].post_digest);
 }

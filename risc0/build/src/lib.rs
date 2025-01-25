@@ -26,6 +26,7 @@ use std::{
     collections::HashMap,
     default::Default,
     env,
+    ffi::OsStr,
     fmt::Write as _,
     fs::{self, File},
     io::{BufRead, BufReader, Write},
@@ -712,18 +713,30 @@ fn detect_toolchain(name: &str) {
 }
 
 fn get_out_dir() -> PathBuf {
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-    out_dir
-        .parent() // out
-        .unwrap()
-        .parent() // $crate
-        .unwrap()
-        .parent() // build
-        .unwrap()
-        .parent() // $profile
-        .unwrap()
-        .join("riscv-guest")
+    // This code is based on https://docs.rs/cxx-build/latest/src/cxx_build/target.rs.html#10-49
+
+    if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR").map(Into::<PathBuf>::into) {
+        if target_dir.is_absolute() {
+            return target_dir.join("riscv-guest");
+        }
+    }
+
+    let mut dir: PathBuf = env::var_os("OUT_DIR").unwrap().into();
+    loop {
+        if dir.join(".rustc_info.json").exists()
+            || dir.join("CACHEDIR.TAG").exists()
+            || dir.file_name() == Some(OsStr::new("target"))
+                && dir
+                    .parent()
+                    .is_some_and(|parent| parent.join("Cargo.toml").exists())
+        {
+            return dir.join("riscv-guest");
+        }
+        if dir.pop() {
+            continue;
+        }
+        panic!("Cannot find cargo target dir location")
+    }
 }
 
 fn get_guest_dir(host_pkg: impl AsRef<Path>, guest_pkg: impl AsRef<Path>) -> PathBuf {

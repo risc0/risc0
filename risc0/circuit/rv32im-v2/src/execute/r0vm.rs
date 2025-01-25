@@ -108,7 +108,9 @@ pub struct Risc0Machine<'a> {
 
 impl<'a> Risc0Machine<'a> {
     pub fn step(emu: &mut Emulator, ctx: &'a mut dyn Risc0Context) -> Result<()> {
-        emu.step(&mut Risc0Machine { ctx })
+        emu.step(&mut Risc0Machine { ctx }).inspect_err(|_| {
+            emu.dump();
+        })
     }
 
     pub fn suspend(ctx: &'a mut dyn Risc0Context) -> Result<()> {
@@ -162,8 +164,8 @@ impl<'a> Risc0Machine<'a> {
         tracing::trace!("ecall_terminate");
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::Terminate, 0, 0, 0)?;
-        let a0 = self.load_memory(USER_REGS_ADDR.waddr() + REG_A0)?;
-        let a1 = self.load_memory(USER_REGS_ADDR.waddr() + REG_A1)?;
+        let a0 = self.load_register(REG_A0)?;
+        let a1 = self.load_register(REG_A1)?;
         self.ctx.on_terminate(a0, a1)?;
         self.ctx
             .on_ecall_cycle(CycleState::Terminate, CycleState::Suspend, 0, 0, 0)?;
@@ -197,18 +199,29 @@ impl<'a> Risc0Machine<'a> {
 
         fn next_io_state(ptr: ByteAddr, rlen: u32) -> CycleState {
             if rlen == 0 {
-                return CycleState::Decode;
+                CycleState::Decode
+            } else if !ptr.is_aligned() || rlen < WORD_SIZE as u32 {
+                CycleState::HostReadBytes
+            } else {
+                CycleState::HostReadWords
             }
-            if !ptr.is_aligned() || rlen < WORD_SIZE as u32 {
-                return CycleState::HostReadBytes;
-            }
-            CycleState::HostReadWords
         }
 
-        let next_state = next_io_state(ptr, rlen);
-        self.ctx
-            .on_ecall_cycle(cur_state, next_state, ptr.waddr().0, ptr.subaddr(), rlen)?;
-        cur_state = next_state;
+        macro_rules! add_cycle {
+            ($ptr:expr, $rlen:expr) => {{
+                let next_state = next_io_state($ptr, $rlen);
+                self.ctx.on_ecall_cycle(
+                    cur_state,
+                    next_state,
+                    $ptr.waddr().0,
+                    $ptr.subaddr(),
+                    $rlen,
+                )?;
+                cur_state = next_state;
+            }};
+        }
+
+        add_cycle!(ptr, rlen);
 
         let mut i = 0;
 
@@ -218,6 +231,11 @@ impl<'a> Risc0Machine<'a> {
             ptr += 1u32;
             i += 1;
             rlen -= 1;
+            if rlen == 0 {
+                self.next_pc();
+            }
+
+            add_cycle!(ptr, rlen);
         }
 
         // HERE!
@@ -242,10 +260,7 @@ impl<'a> Risc0Machine<'a> {
                 self.next_pc();
             }
 
-            let next_state = next_io_state(ptr, rlen);
-            self.ctx
-                .on_ecall_cycle(cur_state, next_state, ptr.waddr().0, ptr.subaddr(), rlen)?;
-            cur_state = next_state;
+            add_cycle!(ptr, rlen);
         }
 
         while rlen > 0 {
@@ -259,10 +274,7 @@ impl<'a> Risc0Machine<'a> {
                 self.next_pc();
             }
 
-            let next_state = next_io_state(ptr, rlen);
-            self.ctx
-                .on_ecall_cycle(cur_state, next_state, ptr.waddr().0, ptr.subaddr(), rlen)?;
-            cur_state = next_state;
+            add_cycle!(ptr, rlen);
         }
 
         // Ok(true)
@@ -398,6 +410,10 @@ impl<'a> EmuContext for Risc0Machine<'a> {
     fn trap(&mut self, cause: Exception) -> Result<bool> {
         self.ctx.trap_rewind();
         if let Exception::Breakpoint = cause {
+            self.dump_registers(true)?;
+            self.dump_registers(false)?;
+        }
+        if let Exception::IllegalInstruction(_, _) = cause {
             self.dump_registers(true)?;
             self.dump_registers(false)?;
         }
