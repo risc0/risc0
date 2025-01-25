@@ -609,6 +609,7 @@ impl Client {
             read_fds: env.posix_io.borrow().read_fds(),
             write_fds: env.posix_io.borrow().write_fds(),
             segment_limit_po2: env.segment_limit_po2,
+            keccak_max_po2: env.keccak_max_po2,
             session_limit: env.session_limit,
             trace_events: (!env.trace.is_empty()).then_some(()),
             coprocessor: env.coprocessor.is_some(),
