@@ -4362,6 +4362,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "sha2",
+ "smallvec",
  "test-log",
  "tracing",
 ]

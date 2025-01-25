@@ -18,6 +18,7 @@ use anyhow::{anyhow, ensure, Result};
 use auto_ops::impl_op_ex;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive as _;
+use smallvec::SmallVec;
 
 use super::BIGINT2_WIDTH_BYTES;
 
@@ -50,7 +51,7 @@ pub(crate) struct Instruction {
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct BytePolynomial {
-    pub coeffs: Vec<i32>,
+    pub coeffs: SmallVec<[i32; 64]>,
 }
 
 pub(crate) struct ProgramState {
@@ -155,15 +156,21 @@ impl ProgramState {
 
 impl BytePolynomial {
     pub fn new(coeffs: Vec<i32>) -> Self {
-        Self { coeffs }
+        Self {
+            coeffs: SmallVec::from(coeffs),
+        }
     }
 
     fn one() -> Self {
-        Self { coeffs: vec![1] }
+        Self {
+            coeffs: smallvec::smallvec![1],
+        }
     }
 
     fn zero() -> Self {
-        Self { coeffs: vec![0] }
+        Self {
+            coeffs: smallvec::smallvec![0],
+        }
     }
 
     fn shift(&self) -> Self {
@@ -171,7 +178,7 @@ impl BytePolynomial {
         for _ in 0..BIGINT2_WIDTH_BYTES {
             ret.insert(0, 0);
         }
-        Self::new(ret)
+        Self { coeffs: ret }
     }
 
     fn eqz(&self) -> Result<()> {
@@ -210,7 +217,7 @@ fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
     for coeff in ret.iter_mut() {
         *coeff *= rhs;
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 impl_op_ex!(+|a: &BytePolynomial, b: &BytePolynomial| -> BytePolynomial { byte_poly_add(a, b) });
