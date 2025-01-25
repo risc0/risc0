@@ -1,0 +1,58 @@
+name: Groth16 proof CI
+
+on:
+  merge_group:
+  pull_request:
+    branches: [main, "release-*"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      check: ${{ steps.filter.outputs.check }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: risc0/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+        id: filter
+        with:
+          filters: |
+            check:
+              - .github/workflows/groth16_proof.yml
+              - groth16_proof/**
+
+  circom-compat:
+    if: needs.changes.outputs.check == 'true'
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+      - name: Install dependencies
+        run: go get .
+        working-directory: groth16_proof/circom-compat
+      - name: Build
+        run: go build -v ./...
+        working-directory: groth16_proof/circom-compat
+      - name: Test
+        run: |
+          go test ./...
+          go vet ./...
+        working-directory: groth16_proof/circom-compat
