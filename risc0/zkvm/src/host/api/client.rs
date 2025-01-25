@@ -817,7 +817,7 @@ impl Client {
         let slice_io = table
             .inner
             .get(name)
-            .ok_or(anyhow!("Unknown I/O channel name: {name}"))?;
+            .ok_or_else(|| anyhow!("Unknown I/O channel name: {name}"))?;
         let result = slice_io.borrow_mut().handle_io(name, from_guest)?;
         Ok(result)
     }
