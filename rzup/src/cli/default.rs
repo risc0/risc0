@@ -16,14 +16,21 @@ use crate::{
     toolchain::Toolchain,
     utils::{find_active_toolchain_name, rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME},
 };
-use anyhow::Result;
+use anyhow::{Result, anyhow};
+use regex::Regex;
 
 pub fn handler(toolchain: Option<Toolchain>, name: Option<String>) -> Result<()> {
     match (toolchain, name) {
         // Set Default
         (Some(toolchain), Some(name)) => {
-            // TODO: Use regex to match path rather than require specific name
-            let toolchain_path = rzup_home()?.join("toolchains").join(name);
+            let valid_name_pattern = Regex::new(r"^[a-zA-Z0-9_\-\.]+$")?;
+            if !valid_name_pattern.is_match(&name) {
+                return Err(anyhow!("Invalid toolchain name. Name should only contain alphanumeric characters, underscores, hyphens and dots."));
+            }
+            let toolchain_path = rzup_home()?.join("toolchains").join(&name);
+            if !toolchain_path.exists() {
+                return Err(anyhow!("Toolchain '{}' does not exist", name));
+            }
             toolchain.link(&toolchain_path)?;
         }
         // Show specific default toolchain (rust/cpp)
