@@ -413,7 +413,7 @@ impl CoprocessorCallback for Coprocessor {
 }
 
 mod keccak_po2 {
-    use std::{cell::RefCell, collections::HashMap, rc::Rc};
+    use std::{cell::RefCell, rc::Rc};
 
     use anyhow::Result;
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
@@ -456,14 +456,13 @@ mod keccak_po2 {
 
         let spec = &MultiTestSpec::KeccakUpdate2;
         let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
-        let mut vars = HashMap::new();
-        vars.insert("RISC0_KECCAK_PO2".to_string(), KECCAK_TEST_PO2.to_string());
 
         let env = ExecutorEnv::builder()
             .coprocessor_callback_ref(coprocessor.clone())
             .write(&spec)
             .unwrap()
-            .env_vars(vars)
+            .keccak_max_po2(KECCAK_TEST_PO2)
+            .unwrap()
             .build()
             .unwrap();
 
