@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,12 @@ mod merkle;
 mod read_iop;
 
 use alloc::{vec, vec::Vec};
-use core::{cell::RefCell, fmt, iter::zip};
+use core::{
+    cell::{RefCell, RefMut},
+    fmt,
+    iter::zip,
+    ops::DerefMut,
+};
 
 pub(crate) use merkle::MerkleTreeVerifier;
 pub use read_iop::ReadIOP;
@@ -34,6 +39,18 @@ use crate::{
     taps::TapSet,
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
+
+// If true, enable tracing of verifier internals.
+const VERIFY_TRACE_ENABLED: bool = false;
+
+macro_rules! trace_if_enabled {
+    ($($args:tt)*) => {
+        if VERIFY_TRACE_ENABLED {
+            #[cfg(not(target_os = "zkvm"))]
+            tracing::debug!($($args)*);
+        }
+    }
+}
 
 #[derive(PartialEq)]
 #[non_exhaustive]
@@ -126,221 +143,185 @@ trait VerifyParams<F: Field> {
     const CHECK_SIZE: usize = INV_RATE * F::ExtElem::EXT_SIZE;
 }
 
-struct TapCache<F: Field> {
-    taps: *const TapSet<'static>,
-    mix: F::ExtElem,
-    tap_mix_pows: Vec<F::ExtElem>,
-    check_mix_pows: Vec<F::ExtElem>,
-}
-
-pub(crate) struct Verifier<'a, F, C>
+#[stability::unstable]
+pub struct Verifier<'a, F>
 where
     F: Field,
 {
-    circuit: &'a C,
+    taps: &'a TapSet<'a>,
     suite: &'a HashSuite<F>,
-    po2: u32,
-    steps: usize,
-    out: Option<&'a [F::Elem]>,
-    mix: Vec<F::Elem>,
-    tap_cache: RefCell<Option<TapCache<F>>>,
+    iop: RefCell<ReadIOP<'a, F>>,
+    po2: usize,
+    tot_cycles: usize,
+    // Merkle tree verifiers, indexed by register group id
+    merkle_verifiers: Vec<Option<MerkleTreeVerifier<'a>>>,
 }
 
-impl<'a, F: Field, C> VerifyParams<F> for Verifier<'a, F, C> {}
+impl<'a, F: Field> VerifyParams<F> for Verifier<'a, F> {}
 
-impl<'a, F, C> Verifier<'a, F, C>
-where
-    F: Field,
-    C: CircuitCoreDef<F>,
-{
-    fn new(circuit: &'a C, suite: &'a HashSuite<F>) -> Self {
+impl<'a, F: Field> Verifier<'a, F> {
+    /// Start a new verification session.
+    #[stability::unstable]
+    pub fn new(taps: &'a TapSet<'a>, suite: &'a HashSuite<F>, seal: &'a [u32]) -> Self {
+        trace_if_enabled!("Starting verify");
         Self {
-            circuit,
+            taps,
             suite,
             po2: 0,
-            steps: 0,
-            out: None,
-            mix: Vec::new(),
-            tap_cache: RefCell::new(None),
+            tot_cycles: 0,
+            iop: RefCell::new(ReadIOP::new(seal, suite.rng.as_ref())),
+            // TODO: change this to core::iter::repeat_n once it's stablabized.
+            merkle_verifiers: core::iter::repeat_with(|| None)
+                .take(taps.num_groups())
+                .collect(),
         }
     }
 
-    // Compute the FRI verify taps sum.
+    #[stability::unstable]
+    pub fn iop(&self) -> RefMut<'_, ReadIOP<'a, F>> {
+        self.iop.borrow_mut()
+    }
+
+    #[stability::unstable]
+    pub fn commit_circuit_info(&mut self, circuit_info: &ProtocolInfo) {
+        trace_if_enabled!("Verifying protocol={PROOF_SYSTEM_INFO} circuit {circuit_info}");
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        let hashfn = self.suite.hashfn.as_ref();
+        self.iop()
+            .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+        self.iop()
+            .commit(&hashfn.hash_elem_slice(&circuit_info.encode()));
+    }
+
+    /// Read in the next merkle group in the seal.  `reg_group_id` should be the group ID
+    /// as specified in the taps.
+    #[stability::unstable]
+    pub fn verify_group(&mut self, reg_group_id: usize) -> Result<&Digest, VerificationError> {
+        assert!(
+            self.merkle_verifiers[reg_group_id].is_none(),
+            "Reg group id {reg_group_id} ({}) may only occur once",
+            self.taps.group_name(reg_group_id)
+        );
+        let group_size = self.taps.group_size(reg_group_id);
+        let domain = INV_RATE * self.tot_cycles;
+        let hashfn = self.suite.hashfn.as_ref();
+
+        let merkle =
+            MerkleTreeVerifier::new(self.iop().deref_mut(), hashfn, domain, group_size, QUERIES);
+        self.merkle_verifiers[reg_group_id] = Some(merkle);
+        let root = self.merkle_verifiers[reg_group_id].as_ref().unwrap().root();
+        trace_if_enabled!(
+            "{} (group id={reg_group_id}) root: {root:?}",
+            self.taps.group_name(reg_group_id)
+        );
+        Ok(root)
+    }
+
+    /// Reads `elems` field elements of randomness from the IOP
+    #[stability::unstable]
+    pub fn read_rng(&mut self, elems: usize) -> Vec<F::Elem> {
+        let mix = (0..elems).map(|_| self.iop().random_elem()).collect();
+        trace_if_enabled!("Got mix values from IOP: {mix:?}");
+        mix
+    }
+
     #[allow(clippy::too_many_arguments)]
+    // Compute the FRI verify taps sum.
     fn fri_eval_taps(
         &self,
-        taps: &TapSet<'static>,
-        mix: F::ExtElem,
         combo_u: &[F::ExtElem],
         check_row: &[F::Elem],
         back_one: F::Elem,
         x: F::Elem,
         z: F::ExtElem,
-        rows: [&[F::Elem]; 3],
+        rows: &[&[F::Elem]],
+        tap_mix_pows: &[F::ExtElem],
+        check_mix_pows: &[F::ExtElem],
     ) -> F::ExtElem {
-        let mut tot = vec![F::ExtElem::ZERO; taps.combos_size() + 1];
-        let combo_count = taps.combos_size();
+        let mut tot = vec![F::ExtElem::ZERO; self.taps.combos_size() + 1];
+        let combo_count = self.taps.combos_size();
         let x = F::ExtElem::from_subfield(&x);
 
-        let mut tap_cache = self.tap_cache.borrow_mut();
-        if let Some(ref c) = &mut *tap_cache {
-            if c.taps != taps || c.mix != mix {
-                // tracing::debug!("Resetting tap cache");
-                tap_cache.take();
-            }
-        }
-        if tap_cache.is_none() {
-            let mut cur_mix = F::ExtElem::ONE;
-            let mut tap_mix_pows = Vec::with_capacity(taps.reg_count());
-            for _reg in taps.regs() {
-                tap_mix_pows.push(cur_mix);
-                cur_mix *= mix;
-            }
-            assert_eq!(
-                tap_mix_pows.len(),
-                taps.reg_count(),
-                "Miscalculated capacity for tap_mix_pows"
-            );
-            let mut check_mix_pows = Vec::with_capacity(Self::CHECK_SIZE);
-            for _ in 0..Self::CHECK_SIZE {
-                check_mix_pows.push(cur_mix);
-                cur_mix *= mix;
-            }
-
-            tap_cache.replace(TapCache {
-                taps,
-                mix,
-                tap_mix_pows,
-                check_mix_pows,
-            });
-        }
-        let tap_cache = tap_cache.as_ref().unwrap();
-
-        for (reg, cur) in zip(taps.regs(), tap_cache.tap_mix_pows.iter()) {
+        for (reg, cur) in zip(self.taps.regs(), tap_mix_pows.iter()) {
             tot[reg.combo_id()] += *cur * rows[reg.group()][reg.offset()];
         }
-        for (i, cur) in zip(0..Self::CHECK_SIZE, tap_cache.check_mix_pows.iter()) {
+        for (i, cur) in zip(0..Self::CHECK_SIZE, check_mix_pows.iter()) {
             tot[combo_count] += *cur * check_row[i];
         }
         let mut ret = F::ExtElem::ZERO;
         for i in 0..combo_count {
             let num = tot[i]
                 - self.poly_eval(
-                    &combo_u[taps.combo_begin[i] as usize..taps.combo_begin[i + 1] as usize],
+                    &combo_u
+                        [self.taps.combo_begin[i] as usize..self.taps.combo_begin[i + 1] as usize],
                     x,
                 );
             let mut divisor = F::ExtElem::ONE;
-            for back in taps.get_combo(i).slice() {
+            for back in self.taps.get_combo(i).slice() {
                 divisor *= x - z * back_one.pow(*back as usize);
             }
             ret += num * divisor.inv();
         }
-        let check_num = tot[combo_count] - combo_u[taps.tot_combo_backs];
+        let check_num = tot[combo_count] - combo_u[self.taps.tot_combo_backs];
         let check_div = x - z.pow(INV_RATE);
         ret += check_num * check_div.inv();
         ret
     }
 
-    fn verify<CheckCodeFn>(
+    /// Execute the IOP protocol to verify the validity polynomial
+    /// such that all the constraints are satisfied.  This is
+    /// currently only supported when called exactly once at the end
+    /// of the verification.
+    #[stability::unstable]
+    pub fn verify_validity(
         &mut self,
-        seal: &'a [u32],
-        check_code: CheckCodeFn,
-    ) -> Result<(), VerificationError>
-    where
-        CheckCodeFn: Fn(u32, &Digest) -> Result<(), VerificationError>,
-    {
-        if seal.is_empty() {
-            return Err(VerificationError::ReceiptFormatError);
+        validity_fn: impl Fn(&F::ExtElem, &[F::ExtElem]) -> F::ExtElem,
+    ) -> Result<(), VerificationError> {
+        // Ensure that we were given verifiers for all tap groups
+        for (reg_group_id, verifier) in self.merkle_verifiers.iter().enumerate() {
+            if !verifier.is_some() {
+                panic!(
+                    "Missing merkle verifier for reg group {reg_group_id} ({})",
+                    self.taps.group_name(reg_group_id)
+                );
+            }
         }
-
-        let taps = self.circuit.get_taps();
-        let hashfn = self.suite.hashfn.as_ref();
-
-        // Make IOP
-        let mut iop = ReadIOP::new(seal, self.suite.rng.as_ref());
-
-        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
-        // about the proof system and circuit.
-        iop.commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
-        iop.commit(&hashfn.hash_elem_slice(&C::CIRCUIT_INFO.encode()));
-
-        // Read any execution state
-        self.execute(&mut iop);
-
-        // Get the size
-        assert!(self.po2 as usize <= MAX_CYCLES_PO2);
-        let size = 1 << self.po2;
-        let domain = INV_RATE * size;
-        // tracing::debug!("size = {size}, po2 = {po2}");
-
-        // Get taps and compute sizes
-        let code_size = taps.group_size(REGISTER_GROUP_CODE);
-        let data_size = taps.group_size(REGISTER_GROUP_DATA);
-        let accum_size = taps.group_size(REGISTER_GROUP_ACCUM);
-
-        // Get merkle root for the code merkle tree.
-        // The code merkle tree contains the control instructions for the zkVM.
-        #[cfg(not(target_os = "zkvm"))]
-        tracing::debug!("code_merkle");
-        let code_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, code_size, QUERIES);
-        // tracing::debug!("codeRoot = {}", code_merkle.root());
-        check_code(self.po2, code_merkle.root())?;
-
-        // Get merkle root for the data merkle tree.
-        // The data merkle tree contains the execution trace of the program being run,
-        // including memory accesses as well as the permutation of those memory
-        // accesses sorted by location used by PLONK.
-        #[cfg(not(target_os = "zkvm"))]
-        tracing::debug!("data_merkle");
-        let data_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, data_size, QUERIES);
-        // tracing::debug!("dataRoot = {}", data_merkle.root());
-
-        // Prep accumulation
-        #[cfg(not(target_os = "zkvm"))]
-        tracing::debug!("accumulate");
-        // Fill in accum mix
-        self.mix = (0..C::MIX_SIZE).map(|_| iop.random_elem()).collect();
-
-        // Get merkle root for the accum merkle tree.
-        // The accum merkle tree contains the accumulations for two permutation check
-        // arguments: Each permutation check consists of a pre-permutation
-        // accumulation and a post-permutation accumulation.
-        // The first permutation check uses memory-based values (see PLONK paper for
-        // details). This permutation is used to re-order memory accesses for
-        // quicker verification. The second permutation check uses bytes-based
-        // values (see PLOOKUP paper for details). This permutation is used to
-        // implement a look-up table.
-        #[cfg(not(target_os = "zkvm"))]
-        tracing::debug!("accum_merkle");
-        let accum_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, accum_size, QUERIES);
-        // tracing::debug!("accumRoot = {}", accum_merkle.root());
 
         // Get a pseudorandom value with which to mix the constraint polynomials.
         // See DEEP-ALI protocol from DEEP-FRI paper for details on constraint mixing.
-        let poly_mix = iop.random_ext_elem();
+        let poly_mix = self.iop().random_ext_elem();
+        trace_if_enabled!("Poly mix: {poly_mix:?}");
 
-        #[cfg(not(target_os = "zkvm"))]
-        tracing::debug!("check_merkle");
-        let check_merkle =
-            MerkleTreeVerifier::new(&mut iop, hashfn, domain, Self::CHECK_SIZE, QUERIES);
-        // tracing::debug!("checkRoot = {}", check_merkle.root());
+        let hashfn = self.suite.hashfn.as_ref();
+        let domain = INV_RATE * self.tot_cycles;
+        let check_merkle = MerkleTreeVerifier::new(
+            self.iop().deref_mut(),
+            hashfn,
+            domain,
+            Self::CHECK_SIZE,
+            QUERIES,
+        );
+        trace_if_enabled!("Check merkle root: {}", check_merkle.root());
 
         // Get a pseudorandom DEEP query point
         // See DEEP-ALI protocol from DEEP-FRI paper for details on DEEP query.
-        let z = iop.random_ext_elem();
-        // tracing::debug!("Z = {z:?}");
-        let back_one = F::Elem::ROU_REV[self.po2 as usize];
+        let z = self.iop().random_ext_elem();
+        trace_if_enabled!("Z = {z:?}");
+        let back_one = F::Elem::ROU_REV[self.po2];
 
         // Read the U coeffs (the interpolations of the taps) + commit their hash.
-        let num_taps = taps.tap_size();
-        let coeff_u = iop.read_field_elem_slice(num_taps + Self::CHECK_SIZE);
-        let hash_u = self.suite.hashfn.hash_ext_elem_slice(coeff_u);
-        iop.commit(&hash_u);
+        let num_taps = self.taps.tap_size();
+        let coeff_u = self
+            .iop()
+            .read_field_elem_slice(num_taps + Self::CHECK_SIZE);
+        let hash_u = hashfn.hash_ext_elem_slice(coeff_u);
+        self.iop().commit(&hash_u);
 
         // Now, convert U polynomials from coefficient form to evaluation form
         let mut cur_pos = 0;
         let mut eval_u = Vec::with_capacity(num_taps);
-        for reg in taps.regs() {
+        for reg in self.taps.regs() {
             for i in 0..reg.size() {
                 let x = z * back_one.pow(reg.back(i));
                 let fx = self.poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x);
@@ -354,15 +335,9 @@ where
         // I.e. the set of all constraints mixed by poly_mix
         #[cfg(not(target_os = "zkvm"))]
         tracing::debug!("> compute_polynomial");
-        // let result = self.compute_polynomial(&eval_u, poly_mix);
-        let result = self
-            .circuit
-            .poly_ext(&poly_mix, &eval_u, &[self.out.unwrap(), &self.mix])
-            .tot;
 
-        #[cfg(not(target_os = "zkvm"))]
-        tracing::debug!("< compute_polynomial");
-        // tracing::debug!("Result = {result:?}");
+        let result = validity_fn(&poly_mix, &eval_u);
+        trace_if_enabled!("Computed polynomial: {result:?}");
 
         // Now generate the check polynomial
         // TODO: This currently treats the extension degree as hardcoded at 4, with
@@ -389,28 +364,30 @@ where
                 * F::ExtElem::from_subelems([fp0, fp0, fp0, fp1]);
         }
         let three = F::Elem::from_u64(3);
-        check *= (F::ExtElem::from_subfield(&three) * z).pow(size) - F::ExtElem::ONE;
-        // tracing::debug!("Check = {check:?}");
+        check *= (F::ExtElem::from_subfield(&three) * z).pow(self.tot_cycles) - F::ExtElem::ONE;
+        trace_if_enabled!("Check = {check:?}");
         if check != result {
             return Err(VerificationError::InvalidProof);
         }
 
         // Set the mix value, pseudorandom value used for FRI batching
-        let mix = iop.random_ext_elem();
-        // tracing::debug!("mix = {mix:?}");
+        let mix = self.iop().random_ext_elem();
+        trace_if_enabled!("FRI mix = {mix:?}");
+
+        // Fill in
 
         // Make the mixed U polynomials.
         // combo_u has one element for each column with the same set of taps.
         // These columns share a denominator in the DEEP-ALI equation.
         // We group these terms together to reduce the number of inverses we
         // need to compute.
-        let mut combo_u: Vec<F::ExtElem> = vec![F::ExtElem::ZERO; taps.tot_combo_backs + 1];
+        let mut combo_u: Vec<F::ExtElem> = vec![F::ExtElem::ZERO; self.taps.tot_combo_backs + 1];
         let mut cur_mix = F::ExtElem::ONE;
         cur_pos = 0;
-        let mut tap_mix_pows = Vec::with_capacity(taps.reg_count());
-        for reg in taps.regs() {
+        let mut tap_mix_pows = Vec::with_capacity(self.taps.reg_count());
+        for reg in self.taps.regs() {
             for i in 0..reg.size() {
-                combo_u[taps.combo_begin[reg.combo_id()] as usize + i] +=
+                combo_u[self.taps.combo_begin[reg.combo_id()] as usize + i] +=
                     cur_mix * coeff_u[cur_pos + i];
             }
             tap_mix_pows.push(cur_mix);
@@ -419,14 +396,14 @@ where
         }
         assert_eq!(
             tap_mix_pows.len(),
-            taps.reg_count(),
+            self.taps.reg_count(),
             "Miscalculated capacity for tap_mix_pows"
         );
-        // tracing::debug!("cur_mix: {cur_mix:?}, cur_pos: {cur_pos}");
+        trace_if_enabled!("cur_mix: {cur_mix:?}, cur_pos: {cur_pos}");
         // Handle check group
         let mut check_mix_pows = Vec::with_capacity(Self::CHECK_SIZE);
         for _ in 0..Self::CHECK_SIZE {
-            combo_u[taps.tot_combo_backs] += cur_mix * coeff_u[cur_pos];
+            combo_u[self.taps.tot_combo_backs] += cur_mix * coeff_u[cur_pos];
             cur_pos += 1;
             check_mix_pows.push(cur_mix);
             cur_mix *= mix;
@@ -436,45 +413,47 @@ where
             Self::CHECK_SIZE,
             "Miscalculated capacity for check_mix_pows"
         );
-        // tracing::debug!("cur_mix: {cur_mix:?}");
-
         let gen = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
-        // tracing::debug!("FRI-verify, size = {size}");
-        self.fri_verify(&mut iop, size, |iop, idx| {
-            // tracing::debug!("fri_verify");
+        let hashfn = self.suite.hashfn.as_ref();
+        self.fri_verify(|idx| {
             let x = gen.pow(idx);
-            let rows = [
-                accum_merkle.verify(iop, hashfn, idx)?,
-                code_merkle.verify(iop, hashfn, idx)?,
-                data_merkle.verify(iop, hashfn, idx)?,
-            ];
-            let check_row = check_merkle.verify(iop, hashfn, idx)?;
-            let ret = self.fri_eval_taps(taps, mix, &combo_u, check_row, back_one, x, z, rows);
+            let rows= self
+                .merkle_verifiers
+                .iter()
+                .map(|merkle: &Option<MerkleTreeVerifier>| -> Result<&'a [F::Elem], VerificationError> {
+                    tracing::debug!("Verifying a merkle...");
+                    merkle.as_ref()
+                        .unwrap()
+                        .verify(self.iop().deref_mut(), hashfn, idx)
+                })
+                .collect::<Result<Vec<_>,_>>()?;
+            let check_row = check_merkle.verify(self.iop().deref_mut(),hashfn, idx)?;
+            let ret = self.fri_eval_taps(&combo_u, check_row, back_one, x, z, &rows, &tap_mix_pows, &check_mix_pows);
             Ok(ret)
         })?;
-        iop.verify_complete();
         Ok(())
     }
 
-    /// Read the globals (i.e. outputs) from the IOP, and mix them into the Fiat-Shamir state.
-    ///
-    /// NOTE: The globals are the only values known to the verifier, and constitute the public
-    /// statement of the prover. In many scenarios, they are the first values sent to the
-    /// verifier by the prover, and therefore should be committed at the start of verification.
-    fn execute(&mut self, iop: &mut ReadIOP<'a, F>) {
-        let slice = iop.read_field_elem_slice(C::OUTPUT_SIZE + 1);
-        iop.commit(&self.suite.hashfn.hash_elem_slice(slice));
+    /// Reads a slice of `size` field elements from the IOP along with
+    /// the po2 of the number of cycles the circuit ran for, and
+    /// commits to them.  This is typically used at the beginning of
+    /// the seal to encode the globals of the circuit.
+    #[stability::unstable]
+    pub fn read_slice_with_po2(&mut self, size: usize) -> (&'a [F::Elem], usize) {
+        let slice = self.iop().read_field_elem_slice(size + 1);
+        self.iop().commit(&self.suite.hashfn.hash_elem_slice(slice));
 
         // Extract the out buffer and po2 from slice while checking sizes.
-        let (out, &[po2_elem]) = slice.split_at(C::OUTPUT_SIZE) else {
+        let (out, &[po2_elem]) = slice.split_at(size) else {
             unreachable!()
         };
-        self.out = Some(out);
         let (&[po2], &[]) = po2_elem.to_u32_words().split_at(1) else {
             panic!("po2 elem is larger than u32");
         };
-        self.po2 = po2;
-        self.steps = 1usize.checked_shl(po2).unwrap();
+        self.po2 = po2 as usize;
+        assert!(self.po2 <= MAX_CYCLES_PO2);
+        self.tot_cycles = 1usize.checked_shl(po2).unwrap();
+        (out, self.po2)
     }
 
     /// Evaluate a polynomial whose coefficients are in the extension field at a
@@ -491,6 +470,10 @@ where
 }
 
 /// Verify a seal is valid for the given circuit, and code checking function.
+///
+/// This version of `verify` has a fixed IOP protocol that's used by
+/// multiple circuits.
+// Circuits that don't share this protocol may use [Verifier] directly once it's stabilized.
 pub fn verify<F, C, CheckCode>(
     circuit: &C,
     suite: &HashSuite<F>,
@@ -502,5 +485,54 @@ where
     C: CircuitCoreDef<F>,
     CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
 {
-    Verifier::<F, C>::new(circuit, suite).verify(seal, check_code)
+    if seal.is_empty() {
+        return Err(VerificationError::ReceiptFormatError);
+    }
+
+    let mut verifier = Verifier::<F>::new(circuit.get_taps(), suite, seal);
+    verifier.commit_circuit_info(&C::CIRCUIT_INFO);
+
+    // Read the globals (i.e. outputs) from the IOP, and mix them into the Fiat-Shamir state.
+    //
+    // NOTE: The globals are the only values known to the verifier, and constitute the public
+    // statement of the prover. In many scenarios, they are the first values sent to the
+    // verifier by the prover, and therefore should be committed at the start of verification.
+    let (out, po2) = verifier.read_slice_with_po2(C::OUTPUT_SIZE);
+
+    // Get merkle root for the code merkle tree.
+    // The code merkle tree contains the control instructions for the zkVM.
+    let code_root = verifier.verify_group(REGISTER_GROUP_CODE)?;
+
+    // Invoke the user-supplied verification function to ensure that
+    // the code root of the merkle tree is as expected.
+    check_code(po2 as u32, code_root)?;
+
+    // Get merkle root for the data merkle tree.
+    // The data merkle tree contains the execution trace of the program being run,
+    // including memory accesses as well as the permutation of those memory
+    // accesses sorted by location used by PLONK.
+    verifier.verify_group(REGISTER_GROUP_DATA)?;
+
+    // Fill in accum mix
+    let mix = verifier.read_rng(C::MIX_SIZE);
+
+    // Get merkle root for the accum merkle tree.
+    // The accum merkle tree contains the accumulations for two permutation check
+    // arguments: Each permutation check consists of a pre-permutation
+    // accumulation and a post-permutation accumulation.
+    // The first permutation check uses memory-based values (see PLONK paper for
+    // details). This permutation is used to re-order memory accesses for
+    // quicker verification. The second permutation check uses bytes-based
+    // values (see PLOOKUP paper for details). This permutation is used to
+    // implement a look-up table.
+    verifier.verify_group(REGISTER_GROUP_ACCUM)?;
+
+    // Verify the evaluation of the validity polynomial to make sure
+    // the constraints were not violated.
+    verifier
+        .verify_validity(|poly_mix, eval_u| circuit.poly_ext(poly_mix, eval_u, &[out, &mix]).tot)?;
+
+    // There should be nothing else in the IOP, so verify that's the case.
+    verifier.iop().verify_complete();
+    Ok(())
 }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashSet},
     io::Cursor,
     str::from_utf8,
     sync::Mutex,
@@ -23,6 +23,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{ExitCode, MemoryImage, MemoryImage2, Program};
 use risc0_circuit_rv32im::prove::emu::testutil;
+use risc0_circuit_rv32im_v2::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
@@ -31,8 +32,8 @@ use risc0_zkvm_methods::{
     SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
-use rstest::*;
-use rstest_reuse::*;
+use rstest::rstest;
+use rstest_reuse::{apply, template};
 use sha2::{Digest as _, Sha256};
 
 use crate::{
@@ -130,7 +131,7 @@ fn basic_v1() {
 
 #[test_log::test]
 fn basic_v2() {
-    let program = testutil::basic();
+    let program = risc0_circuit_rv32im_v2::execute::testutil::user::basic();
     let env = ExecutorEnv::default();
     let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX).unwrap();
     let mut image = MemoryImage2::with_kernel(program, kernel);
@@ -144,9 +145,14 @@ fn basic_v2() {
     let segment = session.segments.first().unwrap().resolve().unwrap();
 
     assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.inner.v2().exit_code, ExitCode::Halted(0));
-    assert_eq!(segment.inner.v2().pre_digest, pre_image_id);
-    assert_ne!(segment.inner.v2().post_digest, pre_image_id);
+    assert_eq!(segment.inner.v2().claim.pre_state, pre_image_id);
+    assert_ne!(segment.inner.v2().claim.post_state, pre_image_id);
+    assert_eq!(segment.inner.v2().claim.input, Digest::ZERO);
+    assert_eq!(segment.inner.v2().claim.output, Some(Digest::ZERO));
+    assert_eq!(
+        segment.inner.v2().claim.terminate_state,
+        Some(TerminateState::default())
+    );
     assert_eq!(segment.index, 0);
 }
 
@@ -197,7 +203,7 @@ fn system_split_v1() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::simple_loop(200);
+    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
     let mut image = MemoryImage2::new_kernel(program);
     let pre_image_id = image.image_id();
 
@@ -217,14 +223,28 @@ fn system_split_v2() {
         .collect();
 
     assert_eq!(segments.len(), 2);
-    assert_eq!(segments[0].inner.v2().exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].inner.v2().pre_digest, pre_image_id);
-    assert_ne!(segments[0].inner.v2().post_digest, pre_image_id);
-    assert_eq!(segments[1].inner.v2().exit_code, ExitCode::Halted(0));
+
+    assert_eq!(segments[0].inner.v2().claim.pre_state, pre_image_id);
+    assert_ne!(segments[0].inner.v2().claim.post_state, pre_image_id);
+    assert_eq!(segments[0].inner.v2().claim.input, Digest::ZERO);
+    assert_eq!(segments[0].inner.v2().claim.output, None);
+    assert_eq!(segments[0].inner.v2().claim.terminate_state, None);
+
     assert_eq!(
-        segments[1].inner.v2().pre_digest,
-        segments[0].inner.v2().post_digest
+        segments[1].inner.v2().claim.pre_state,
+        segments[0].inner.v2().claim.post_state
     );
+    assert_ne!(
+        segments[1].inner.v2().claim.post_state,
+        segments[1].inner.v2().claim.pre_state
+    );
+    assert_eq!(segments[1].inner.v2().claim.input, Digest::ZERO);
+    assert_eq!(segments[1].inner.v2().claim.output, Some(Digest::ZERO));
+    assert_eq!(
+        segments[1].inner.v2().claim.terminate_state,
+        Some(TerminateState::default())
+    );
+
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
 }
@@ -1082,7 +1102,7 @@ fn post_state_digest_randomization(#[case] version: TestVersion) {
             let inner = session.segments.last().unwrap().resolve().unwrap().inner;
             match version {
                 V1 => inner.v1().post_state.digest(),
-                V2 => inner.v2().post_digest,
+                V2 => inner.v2().claim.post_state,
             }
         })
         .collect();
@@ -1141,7 +1161,8 @@ fn post_state_digest_randomization(#[case] version: TestVersion) {
                         .unwrap()
                         .inner
                         .v2()
-                        .post_digest
+                        .claim
+                        .post_state
                 }
             }
         })
@@ -1227,12 +1248,11 @@ fn keccak_update(#[case] version: TestVersion) {
 
 #[apply(base)]
 fn keccak_update2(#[case] version: TestVersion) {
-    let mut vars = HashMap::new();
-    vars.insert("RISC0_KECCAK_PO2".to_string(), 15u32.to_string());
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUpdate2)
         .unwrap()
-        .env_vars(vars)
+        .keccak_max_po2(15)
+        .unwrap()
         .build()
         .unwrap();
     let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
