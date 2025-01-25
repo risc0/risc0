@@ -667,7 +667,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn load_region_from_guest(&mut self, base: ByteAddr, size: u32) -> Result<Vec<u8>> {
-        let mut region = Vec::new();
+        let mut region = Vec::with_capacity(size as usize);
         for i in 0..size {
             let addr = base + i;
             Self::check_guest_addr(addr)?;
