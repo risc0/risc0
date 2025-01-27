@@ -1228,6 +1228,7 @@ fn heap_alloc(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
         .write(&6_u32)
         .unwrap()
+        .env_var("ALL_FORKS", "testing")
         .build()
         .unwrap();
     let session = execute_elf(version, env, HEAP_ELF).unwrap();

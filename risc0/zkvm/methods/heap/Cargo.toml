@@ -11,6 +11,7 @@ risc0-zkvm = { path = "../..", default-features = false, features = [
   "heap-embedded-alloc",
   "std",
 ] }
+risc0-zkvm-platform = { path = "../../platform", default-features = false, features = ["sys-getenv"] }
 
 [profile.release]
 lto = true
