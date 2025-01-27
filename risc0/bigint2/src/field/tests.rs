@@ -18,7 +18,7 @@ extern crate num_bigint_dig as num_bigint;
 use num_bigint::BigUint;
 
 use risc0_bigint2_methods::{
-    EXTFIELDADD_ELF, EXTFIELDMUL_ELF, EXTFIELDSUB_ELF, EXTFIELD_DEG4_MUL_ELF,
+    EXTFIELD_DEG2_ADD_ELF, EXTFIELD_DEG2_MUL_ELF, EXTFIELD_DEG2_SUB_ELF, EXTFIELD_DEG4_MUL_ELF,
     EXTFIELD_XXONE_MUL_ELF, MODADD_ELF, MODINV_ELF, MODMUL_ELF, MODSUB_ELF,
 };
 use risc0_zkvm::{
@@ -190,7 +190,7 @@ fn extfieldadd() {
         .build()
         .unwrap();
     let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, EXTFIELDADD_ELF)
+    let session = ExecutorImpl::from_elf(env, EXTFIELD_DEG2_ADD_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -232,7 +232,7 @@ fn extfieldsub() {
         .build()
         .unwrap();
     let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, EXTFIELDSUB_ELF)
+    let session = ExecutorImpl::from_elf(env, EXTFIELD_DEG2_SUB_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -280,7 +280,7 @@ fn extfieldmul() {
         .build()
         .unwrap();
     let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, EXTFIELDMUL_ELF)
+    let session = ExecutorImpl::from_elf(env, EXTFIELD_DEG2_MUL_ELF)
         .unwrap()
         .run()
         .unwrap();

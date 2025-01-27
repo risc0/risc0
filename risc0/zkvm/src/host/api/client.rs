@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -609,6 +609,7 @@ impl Client {
             read_fds: env.posix_io.borrow().read_fds(),
             write_fds: env.posix_io.borrow().write_fds(),
             segment_limit_po2: env.segment_limit_po2,
+            keccak_max_po2: env.keccak_max_po2,
             session_limit: env.session_limit,
             trace_events: (!env.trace.is_empty()).then_some(()),
             coprocessor: env.coprocessor.is_some(),
@@ -816,7 +817,7 @@ impl Client {
         let slice_io = table
             .inner
             .get(name)
-            .ok_or(anyhow!("Unknown I/O channel name: {name}"))?;
+            .ok_or_else(|| anyhow!("Unknown I/O channel name: {name}"))?;
         let result = slice_io.borrow_mut().handle_io(name, from_guest)?;
         Ok(result)
     }
