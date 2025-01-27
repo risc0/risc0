@@ -180,7 +180,7 @@ impl MemoryImage2 {
         self.expand_if_zero(digest_idx);
         self.digests
             .get(&digest_idx)
-            .ok_or(anyhow!("Unavailable digest: {digest_idx}"))
+            .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
     }
 
     /// Set a digest

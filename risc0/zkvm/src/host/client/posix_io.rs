@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,14 +86,14 @@ impl<'a> PosixIo<'a> {
     pub fn get_reader(&self, fd: u32) -> Result<SharedRead<'a>> {
         self.read_fds
             .get(&fd)
-            .ok_or(anyhow!("Bad read file descriptor {fd}"))
+            .ok_or_else(|| anyhow!("Bad read file descriptor {fd}"))
             .cloned()
     }
 
     pub fn get_writer(&self, fd: u32) -> Result<SharedWrite<'a>> {
         self.write_fds
             .get(&fd)
-            .ok_or(anyhow!("Bad write file descriptor {fd}"))
+            .ok_or_else(|| anyhow!("Bad write file descriptor {fd}"))
             .cloned()
     }
 }
