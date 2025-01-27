@@ -52,52 +52,7 @@ pub use self::{
     docker::{docker_build, BuildStatus, TARGET_DIR},
 };
 
-/// This const represents a filename that is used in the use to indicate to in
-/// order to indicate to the client and the risc0-build crate that the new rust
-/// implementation of rzup is in use. The rust implementation of rzup will place
-/// a file with this name under `$RISC0_HOME`.
-pub const RUST_RZUP_INDICATOR: &str = ".rzup";
-
-const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
-
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
-
-/// Get the path used by cargo-risczero that stores downloaded toolchains
-pub fn risc0_data() -> Result<PathBuf> {
-    risc0_data_new().or_else(|_| risc0_data_compat())
-}
-
-// use the new location from rzup install.
-fn risc0_data_new() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = env::var("RISC0_HOME") {
-        dir.into()
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".risc0")
-    } else {
-        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
-    };
-
-    if !dir.join(RUST_RZUP_INDICATOR).exists() {
-        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
-    }
-
-    Ok(dir)
-}
-
-// check for backwards compatible cargo risczero install.
-fn risc0_data_compat() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = env::var("RISC0_DATA_DIR") {
-        dir.into()
-    } else if let Some(root) = dirs::data_dir() {
-        root.join("cargo-risczero")
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".cargo-risczero")
-    } else {
-        anyhow::bail!("Could not determine risc0 data dir. Set RISC0_DATA_DIR env var.");
-    };
-
-    Ok(dir)
-}
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -443,6 +398,26 @@ fn sanitized_cmd(tool: &str) -> Command {
     cmd
 }
 
+fn cpp_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::CppToolchain)
+        .unwrap()
+        .expect("Risc Zero C++ toolchain installed");
+    println!("Using C++ toolchain version {version}");
+    path
+}
+
+fn rust_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+        .expect("Risc Zero Rust toolchain installed");
+    println!("Using Rust toolchain version {version}");
+    path
+}
+
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
 #[stability::unstable]
@@ -453,15 +428,8 @@ pub fn cargo_command(subcmd: &str, rustc_flags: &[String]) -> Command {
 }
 
 pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Command {
-    let rustc = sanitized_cmd("rustup")
-        .args(["+risc0", "which", "rustc"])
-        .output()
-        .expect("rustup failed to find risc0 toolchain")
-        .stdout;
-
-    let rustc = String::from_utf8(rustc).unwrap();
-    let rustc = rustc.trim();
-    println!("Using rustc: {rustc}");
+    let rustc = rust_toolchain().join("bin/rustc");
+    println!("Using rustc: {}", rustc.display());
 
     let mut cmd = sanitized_cmd("cargo");
     let mut args = vec![subcmd, "--target", RISC0_TARGET_TRIPLE];
@@ -482,10 +450,7 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
 
     if !cpp_toolchain_override() {
-        let cc_path = risc0_data()
-            .unwrap()
-            .join("cpp/bin/riscv32-unknown-elf-gcc");
-        cmd.env("CC", cc_path)
+        cmd.env("CC", cpp_toolchain().join("bin/riscv32-unknown-elf-gcc"))
             .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
         // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
@@ -693,28 +658,6 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
     }
 }
 
-fn detect_toolchain(name: &str) {
-    let result = Command::new("rustup")
-        .args(["toolchain", "list", "--verbose"])
-        .stderr(Stdio::inherit())
-        .output()
-        .unwrap();
-    if !result.status.success() {
-        eprintln!("Failed to run: 'rustup toolchain list --verbose'");
-        std::process::exit(result.status.code().unwrap());
-    }
-
-    let stdout = String::from_utf8(result.stdout).unwrap();
-    if !stdout.lines().any(|line| line.trim().starts_with(name)) {
-        eprintln!("The 'risc0' toolchain could not be found.");
-        eprintln!("To install the risc0 toolchain, use rzup.");
-        eprintln!("For example:");
-        eprintln!("  curl -L https://risczero.com/install | bash");
-        eprintln!("  rzup install");
-        std::process::exit(-1);
-    }
-}
-
 fn get_out_dir() -> PathBuf {
     // This code is based on https://docs.rs/cxx-build/latest/src/cxx_build/target.rs.html#10-49
 
@@ -823,10 +766,6 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
     methods_file
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
-
-    if !is_skip_build() {
-        detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
-    }
 
     let profile = if is_debug() { "debug" } else { "release" };
 
