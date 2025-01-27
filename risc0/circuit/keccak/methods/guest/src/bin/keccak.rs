@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
 
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_zkvm::{guest::env, sha::Digest};
-use risc0_zkvm_platform::syscall::sys_prove_keccak;
+use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak};
 
 // Computes and proves the result of a given keccak input transcript
 fn main() {
     let (claim_digest, po2): (Digest, u32) = env::read();
 
-    let input = generate_input(po2 as usize);
-    let input = bytemuck::cast_slice(&input);
+    for mut input in generate_input(po2 as usize) {
+        unsafe { sys_keccak(&input, &mut input) };
+    }
 
     unsafe {
         sys_prove_keccak(
             claim_digest.as_ref(),
-            po2,
             KECCAK_CONTROL_ROOT.as_ref(),
-            input.as_ptr(),
-            input.len(),
         );
     }
     env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -583,7 +583,7 @@ impl Preflight {
         let syscall = self
             .syscalls
             .pop_front()
-            .ok_or(anyhow!("Missing syscall record"))?;
+            .ok_or_else(|| anyhow!("Missing syscall record"))?;
         let (a0, a1) = syscall.regs;
 
         let stray_words = into_guest_len % IO_CHUNK_WORDS;
@@ -828,7 +828,7 @@ impl Preflight {
                 let addr = addr + i;
                 let word = witness
                     .get(&addr)
-                    .ok_or(anyhow!("Missing bigint2 witness: {addr:?}"))?;
+                    .ok_or_else(|| anyhow!("Missing bigint2 witness: {addr:?}"))?;
                 for (j, byte) in word.to_le_bytes().iter().enumerate() {
                     ret[i * WORD_SIZE + j] = (*byte) as u32;
                 }
