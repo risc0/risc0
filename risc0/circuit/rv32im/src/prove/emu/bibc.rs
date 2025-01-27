@@ -197,19 +197,19 @@ impl Program {
                 OpCode::Rem => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
                     let value = lhs % rhs;
-                    regs[op_index] = value.clone();
+                    regs[op_index] = value;
                 }
                 OpCode::Quo => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
                     let value = lhs / rhs;
-                    regs[op_index] = value.clone();
+                    regs[op_index] = value;
                 }
                 OpCode::Inv => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
                     let value = lhs
                         .modinv(rhs)
                         .ok_or_else(|| anyhow!("Can't divide by zero"))?;
-                    regs[op_index] = value.clone();
+                    regs[op_index] = value;
                 }
             }
         }
