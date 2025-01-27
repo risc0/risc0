@@ -21,7 +21,6 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{anyhow, Result};
-use risc0_build::risc0_data;
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
@@ -458,17 +457,6 @@ pub fn default_executor() -> Rc<dyn Executor> {
     Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
 }
 
-fn try_r0vm_path(version: String) -> Option<PathBuf> {
-    let path = risc0_data().ok()?.join("r0vm").join(version).join("r0vm");
-    tracing::debug!("Checking for r0vm: {}", path.display());
-    if let Ok(path) = path.canonicalize() {
-        if path.is_file() {
-            return Some(path);
-        }
-    }
-    None
-}
-
 pub(crate) fn get_r0vm_path() -> Result<PathBuf> {
     if let Ok(path) = std::env::var("RISC0_SERVER_PATH") {
         let path = PathBuf::from(path);
@@ -477,16 +465,20 @@ pub(crate) fn get_r0vm_path() -> Result<PathBuf> {
         }
     }
 
-    let version = get_version().map_err(|err| anyhow!(err))?;
+    let mut version = get_version().map_err(|err| anyhow!(err))?;
     tracing::debug!("version: {version}");
 
-    if let Some(path) = try_r0vm_path(version.to_string()) {
-        return Ok(path);
-    }
+    if let Ok(rzup) = rzup::Rzup::new() {
+        if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
+            return Ok(dir.join("r0vm"));
+        }
 
-    if version.pre.is_empty() {
-        if let Some(path) = try_r0vm_path(format!("{}.{}", version.major, version.minor)) {
-            return Ok(path);
+        // Try again, but with these fields stripped
+        version.patch = 0;
+        version.build = Default::default();
+
+        if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
+            return Ok(dir.join("r0vm"));
         }
     }
 
