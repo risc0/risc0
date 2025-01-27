@@ -83,9 +83,10 @@ std::array<Val, 5> extern_getMemoryTxn(ExecContext& ctx, Val addrElem) {
   uint32_t addr = addrElem.asUInt32();
   size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx++;
   const MemoryTransaction& txn = ctx.preflight.txns[txnIdx];
-  // printf("getMemoryTxn(%lu, 0x%08x): txn(%u, 0x%08x, 0x%08x)\n",
+  // printf("getMemoryTxn(%lu, 0x%08x): txn(txnId: %zu, cycle: %u, addr: 0x%08x, word: 0x%08x)\n",
   //        ctx.cycle,
   //        addr,
+  //        txnIdx,
   //        txn.cycle,
   //        txn.addr,
   //        txn.word);
@@ -189,18 +190,16 @@ std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx) {
 }
 
 Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len) {
-  std::cout << "hostReadPrepare\n";
-  throw std::runtime_error("extern_hostReadPrepare");
-  // return ctx.stepHandler.readPrepare(fp.asUInt32(), len.asUInt32());
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  uint32_t word = ctx.preflight.txns[txnIdx].word;
+  // printf("[%lu]: hostReadPrepare(txnIdx: %zu, word: 0x%08x)\n", ctx.cycle, txnIdx, word);
+  return word;
 }
 
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal) {
   std::cout << "hostWrite\n";
-  throw std::runtime_error("extern_hostWrite");
-  // uint32_t fd = fdVal.asUInt32();
-  // uint32_t addr = addrLow.asUInt32() | (addrHigh.asUInt32() << 16);
-  // uint32_t len = lenVal.asUInt32();
-  // return ctx.stepHandler.write(fd, addr, len);
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  return ctx.preflight.txns[txnIdx].word;
 }
 
 std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
