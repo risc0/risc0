@@ -14,8 +14,6 @@
 
 use core::ptr::addr_of;
 
-use alloc::vec;
-
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
@@ -24,19 +22,20 @@ use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compres
 #[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
-    inputs: vec::Vec<KeccakState>,
 }
 
 impl Keccak2Batcher {
+    fn input_exists(&self) -> bool {
+        self.claim_state != SHA256_INIT
+    }
+
     pub fn new() -> Self {
         Self {
             claim_state: SHA256_INIT,
-            inputs: vec![],
         }
     }
 
     pub fn update(&mut self, keccak_state: &mut KeccakState) {
-        self.inputs.push(*keccak_state);
         sha_single_keccak(&mut self.claim_state, keccak_state);
         let status = unsafe { sys_keccak(keccak_state, keccak_state) };
         // at this point the keccak_state is output state resulting from keccak permutation.
@@ -48,9 +47,8 @@ impl Keccak2Batcher {
     }
 
     pub fn finalize(&mut self) {
-        if self.inputs.is_empty() {
+        if !self.input_exists() {
             // no input so there's nothing to do
-            self.reset();
             return;
         }
 
@@ -73,7 +71,6 @@ impl Keccak2Batcher {
 
     fn reset(&mut self) {
         self.claim_state = SHA256_INIT;
-        self.inputs.clear();
     }
 }
 
