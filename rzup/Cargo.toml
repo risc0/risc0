@@ -1,7 +1,7 @@
 [package]
 name = "rzup"
-description = "utility to install the RISC Zero toolchain"
-version = "0.2.3"
+description = "The RISC Zero version management library and CLI"
+version = "0.3.0-alpha.1"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -10,25 +10,37 @@ repository = { workspace = true }
 [package.metadata.release]
 release = false
 
+[[bin]]
+name = "rzup"
+path = "src/bin/rzup.rs"
+
+[features]
+default = ["cli", "install"]
+cli = ["dep:clap", "dep:indicatif", "dep:colored", "dep:is-terminal"]
+install = ["dep:reqwest", "dep:tar", "dep:xz", "dep:flate2", "dep:fs2"]
+
 [dependencies]
-anyhow = "1.0.93"
-cfg-if = "1.0.0"
-clap = { version = "4.5.22", features = ["derive"] }
-dirs = "5.0.1"
-downloader = { version = "0.2.8", default-features = false, features = ["rustls-tls"] }
-flate2 = "1.0.34"
-fs2 = "0.4.3"
-lazy_static = "1.5.0"
-regex = "1.11.1"
-reqwest = { version = "0.12", default-features = false, features = [
-  "json",
-  "rustls-tls"
-] }
-risc0-build = { path = "../risc0/build" }
+clap = { version = "4.5.23", features = ["derive"], optional = true }
+colored = { version = "2.2.0", optional = true }
+flate2 = { version = "1.0.35", optional = true }
+fs2 = { version = "0.4.3", optional = true }
+indicatif = { version = "0.17.9", optional = true }
+is-terminal = { version = "0.4.15", optional = true }
+reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tls", "blocking", "json"], optional = true }
+semver = "1.0.23"
 serde = { version = "1.0.215", features = ["derive"] }
-tar = "0.4.43"
-tempfile = "3.12.0"
-termcolor = "1.4.1"
-thiserror = "1.0.65"
-tokio = { version = "1.42.0", features = ["rt-multi-thread", "macros"] }
-xz = "0.1.0"
+strum = { version = "0.26.3", features = ["derive"] }
+tar = { version = "0.4.43", optional = true }
+tempfile = "3.14.0"
+thiserror = "2.0.6"
+toml = "0.8.19"
+xz = { version = "0.1.0", optional = true }
+yaml-rust2 = "0.9.0"
+
+[dev-dependencies]
+http-body-util = "0.1.2"
+hyper = { version = "1.5.1", features = ["server"] }
+hyper-util = "0.1.10"
+paste = "1.0.15"
+tokio = { version = "1.42.0", features = ["rt", "rt-multi-thread", "macros"] }
+walkdir = "2.5.0"
