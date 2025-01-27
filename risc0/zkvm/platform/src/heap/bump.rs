@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -85,7 +85,10 @@ pub(crate) unsafe fn alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
 
     // Check to make sure heap doesn't collide with SYSTEM memory.
     if GUEST_MAX_MEM < heap_pos {
-        const MSG: &[u8] = "Out of memory!".as_bytes();
+        const MSG: &[u8] = "Out of memory! You have been using the default bump allocator which \
+            does not reclaim memory. Enable the `heap-embedded-alloc` feature to \
+            reclaim memory. This will result in extra cycle cost."
+            .as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,7 +52,9 @@ impl Program {
         if entry >= max_mem || entry % WORD_SIZE as u32 != 0 {
             bail!("Invalid entrypoint");
         }
-        let segments = elf.segments().ok_or(anyhow!("Missing segment table"))?;
+        let segments = elf
+            .segments()
+            .ok_or_else(|| anyhow!("Missing segment table"))?;
         if segments.len() > 256 {
             bail!("Too many program headers");
         }

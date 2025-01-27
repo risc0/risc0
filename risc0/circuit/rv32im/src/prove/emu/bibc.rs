@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ impl Op {
         let bits = stream.read_u64::<LittleEndian>()?;
         let opcode = FromPrimitive::from_u32((bits & 0x0F) as u32);
         Ok(Self {
-            code: opcode.ok_or(anyhow!("Invalid BigInt2 bytecode"))?,
+            code: opcode.ok_or_else(|| anyhow!("Invalid BigInt2 bytecode"))?,
             result_type: ((bits >> 4) & 0x0FFF) as usize,
             a: ((bits >> 16) & 0x00FFFFFF) as usize,
             b: ((bits >> 40) & 0x00FFFFFF) as usize,
@@ -206,7 +206,9 @@ impl Program {
                 }
                 OpCode::Inv => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
-                    let value = lhs.modinv(rhs).ok_or(anyhow!("Can't divide by zero"))?;
+                    let value = lhs
+                        .modinv(rhs)
+                        .ok_or_else(|| anyhow!("Can't divide by zero"))?;
                     regs[op_index] = value.clone();
                 }
             }
