@@ -1176,6 +1176,7 @@ fn heap_alloc() {
     let env = ExecutorEnv::builder()
         .write(&6_u32)
         .unwrap()
+        .env_var("ALL_FORKS", "testing")
         .build()
         .unwrap();
     let session = ExecutorImpl::from_elf(env, HEAP_ELF)
