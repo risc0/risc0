@@ -192,7 +192,7 @@ fn lookup_pc(pc: u32, ctx: &ObjectContext) -> Vec<Frame> {
         } => unimplemented!(),
     };
     frames
-        .filter_map(|frame| Ok(decode_frame(frame)))
+        .map(|frame| Ok(decode_frame(frame).unwrap()))
         .collect()
         .unwrap()
 }
@@ -262,6 +262,7 @@ impl Profiler {
 
     /// Returns the frames name at the given pc.
     pub fn lookup_pc(&self, pc: u64) -> Vec<Frame> {
+        /*
         let frames = if let Some(symbol) = self.profile.function_lookup.get(&pc).cloned() {
             let mut dwarf_frames = lookup_pc(pc as u32, &self.ctx);
             dwarf_frames.reverse();
@@ -292,7 +293,29 @@ impl Profiler {
             // lookup_pc(pc as u32, &self.ctx)
             vec![]
         };
-        frames
+        frames*/
+
+        let mut dwarf_frames = lookup_pc(pc as u32, &self.ctx);
+
+        let symbol = self.profile.function_lookup.get(&pc).cloned();
+
+        // For inlined functions, remove the real function
+        if symbol.is_none() {
+            dwarf_frames.pop();
+        }
+        dwarf_frames.reverse();
+
+        if !dwarf_frames.is_empty() {
+            dwarf_frames
+        } else if let Some(symbol) = symbol {
+            vec![Frame {
+                name: demangle_name(symbol).replace('&', ""),
+                lineno: 0,
+                filename: "unknown".into(),
+            }]
+        } else {
+            vec![]
+        }
     }
 
     /// Walk the profile tree rooted at node_ref, adding all call stacks in the profile to the
@@ -302,6 +325,7 @@ impl Profiler {
         for (&pc, count) in &node.counts {
             let mut new_stack = base_stack.clone();
             let frames = self.lookup_pc(pc.into());
+
             if !frames.is_empty() {
                 new_stack.extend(frames);
             }
@@ -379,6 +403,8 @@ impl TraceCallback for Profiler {
                         .or_insert(cycles as usize);
                 }
 
+                let mut record_stack = false;
+
                 if let Some(op) = extract_call_stack_op(orig_insn) {
                     match op {
                         CallStackOp::Push => {
@@ -412,7 +438,18 @@ impl TraceCallback for Profiler {
                             self.pop_stack.push(orig_pc);
                         }
                     }
+                    record_stack = true;
+                }
 
+                if pc == 0x0020118c {
+                    self.call_stack_path.push(pc);
+                    record_stack = true;
+                } else if pc == 0x002011b0 {
+                    self.call_stack_path.pop();
+                    record_stack = true;
+                }
+
+                if record_stack {
                     let mut curr_node = Rc::clone(&self.root);
                     for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
                         if i == self.call_stack_path.len() - 1 {
