@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,13 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use clap::Parser;
+use rzup::{cli::Cli, error::Result};
 
-pub mod check;
-pub mod default;
-pub mod extension;
-pub mod help;
-pub mod install;
-pub mod self_;
-pub mod show;
-pub mod toolchain;
-pub mod update;
+fn main() -> Result<()> {
+    let cli = Cli::parse();
+    cli.execute()
+}

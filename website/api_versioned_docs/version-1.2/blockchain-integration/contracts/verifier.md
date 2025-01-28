@@ -188,6 +188,17 @@ You can find detailed information in the [version management design][version-man
 
 <br />
 
+### Linea Sepolia (59141)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x27983ee173aD10E171D17C9c5C14d5baFE997609`][router-59141-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4`][verifier-59141-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x61b97ad01416183bd5A4F039baaAb6b75bdC99E4`][estop-59141-etherscan]    |
+| TimelockController                         | [`0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4`][timelock-59141-etherscan] |
+
+<br />
+
 ### Polygon zkEVM Mainnet (1101)
 
 | Contract                                   | Address                                                                 |
@@ -196,8 +207,6 @@ You can find detailed information in the [version management design][version-man
 | [RiscZeroGroth16Verifier][verifier-src]    | [`0x8062Dc6C824F10e62E47FdC55A0ecD54C2641F2d`][verifier-1101-etherscan] |
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1`][estop-1101-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-1101-etherscan] |
-
-<br />
 
 [deployment.toml]: https://github.com/risc0/risc0-ethereum/tree/release-1.2/contracts/deployment.toml
 [estop-1-etherscan]: https://etherscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code
@@ -208,6 +217,7 @@ You can find detailed information in the [version management design][version-man
 [estop-42161-etherscan]: https://arbiscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code
 [estop-43113-etherscan]: https://testnet.snowtrace.io/address/0x47d697328D6A80b00D796cEd9f54468931Aa1ECe#code
 [estop-43114-etherscan]: https://snowtrace.io/address/0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1#code
+[estop-59141-etherscan]: https://sepolia.lineascan.build/address/0x61b97ad01416183bd5A4F039baaAb6b75bdC99E4#code
 [estop-59144-etherscan]: https://lineascan.build/address/0x6Fb722974D67A55091c70129Bd0Bb06ec025ce5D#code
 [estop-84532-etherscan]: https://sepolia.basescan.org/address/0x47d697328D6A80b00D796cEd9f54468931Aa1ECe#code
 [estop-421614-etherscan]: https://sepolia.arbiscan.io/address/0x47d697328D6A80b00D796cEd9f54468931Aa1ECe#code
@@ -226,6 +236,7 @@ You can find detailed information in the [version management design][version-man
 [router-42161-etherscan]: https://arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-43113-etherscan]: https://testnet.snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
 [router-43114-etherscan]: https://snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
+[router-59141-etherscan]: https://sepolia.lineascan.build/address/0x27983ee173aD10E171D17C9c5C14d5baFE997609#code
 [router-59144-etherscan]: https://lineascan.build/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-84532-etherscan]: https://sepolia.basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-421614-etherscan]: https://sepolia.arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
@@ -245,6 +256,7 @@ You can find detailed information in the [version management design][version-man
 [timelock-42161-etherscan]: https://arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-43113-etherscan]: https://testnet.snowtrace.io/address/0xDC986a09728F76110FF666eE7b20d99086501d15#code
 [timelock-43114-etherscan]: https://snowtrace.io/address/0xDC986a09728F76110FF666eE7b20d99086501d15#code
+[timelock-59141-etherscan]: https://sepolia.lineascan.build/address/0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4#code
 [timelock-59144-etherscan]: https://lineascan.build/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-84532-etherscan]: https://sepolia.basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-421614-etherscan]: https://sepolia.arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
@@ -258,6 +270,7 @@ You can find detailed information in the [version management design][version-man
 [verifier-42161-etherscan]: https://arbiscan.io/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code
 [verifier-43113-etherscan]: https://testnet.snowtrace.io/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code
 [verifier-43114-etherscan]: https://snowtrace.io/address/0x8062Dc6C824F10e62E47FdC55A0ecD54C2641F2d#code
+[verifier-59141-etherscan]: https://sepolia.lineascan.build/address/0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4#code
 [verifier-59144-etherscan]: https://lineascan.build/address/0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4#code
 [verifier-84532-etherscan]: https://sepolia.basescan.org/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code
 [verifier-421614-etherscan]: https://sepolia.arbiscan.io/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code
