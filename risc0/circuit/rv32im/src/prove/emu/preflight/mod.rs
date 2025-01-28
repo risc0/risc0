@@ -17,12 +17,11 @@ mod bigint2;
 mod tests;
 
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{BTreeMap, VecDeque},
     io::Cursor,
 };
 
 use anyhow::{anyhow, bail, ensure, Result};
-use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_more::Debug;
 use risc0_core::scope;
 use risc0_zkp::{
@@ -689,24 +688,29 @@ impl Preflight {
             }
         }
 
-        let n = U256::from_le_bytes(bytemuck::cast(n));
-        let x = U256::from_le_bytes(bytemuck::cast(x));
-        let y = U256::from_le_bytes(bytemuck::cast(y));
+        let n = Integer::from_digits(&n, Order::Lsf);
+        let x = Integer::from_digits(&x, Order::Lsf);
+        let y = Integer::from_digits(&y, Order::Lsf);
 
-        // Compute modular multiplication, or simply multiplication if n == 0.
-        let z: U256 = if n == U256::ZERO {
-            x.checked_mul(&y).unwrap()
+        // Perform multiplication or modular multiplication
+        let z = if n.is_zero() {
+            // If n == 0, just multiply
+            x * y
         } else {
-            let (w_lo, w_hi) = x.mul_wide(&y);
-            let w = w_hi.concat(&w_lo);
-            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
-            z.resize()
+            // Otherwise, compute (x * y) mod n
+            (x * y) % n
         };
 
-        tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
+        let z_bytes = z.to_digits::<u32>(rug::integer::Order::Lsf);
+        let z_words: Vec<_> = z_bytes
+            .into_iter()
+            .chain(std::iter::repeat(0))
+            .take(bigint::WIDTH_WORDS)
+            .collect();
+
+        // tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
 
         // Store result.
-        let z: [u32; bigint::WIDTH_WORDS] = bytemuck::cast(z.to_le_bytes());
         for i in 0..2 {
             self.load_bigint(REG_A2)?;
             self.load_bigint(REG_A3)?;
@@ -714,7 +718,7 @@ impl Preflight {
 
             let offset = i * BIGINT_IO_SIZE;
             for j in 0..BIGINT_IO_SIZE {
-                let word = z[offset + j].to_le();
+                let word = z_words[offset + j];
                 self.store_u32(z_ptr + offset + j, word)?;
             }
 
@@ -754,7 +758,7 @@ impl Preflight {
     fn bigint2_eval(
         &mut self,
         mut program_ptr: WordAddr,
-        witness: &HashMap<WordAddr, u32>,
+        witness: &BTreeMap<WordAddr, u32>,
     ) -> Result<()> {
         let mut state = ProgramState::new();
 
@@ -779,7 +783,7 @@ impl Preflight {
         &mut self,
         state: &mut ProgramState,
         insn: &Bi2Instruction,
-        witness: &HashMap<WordAddr, u32>,
+        witness: &BTreeMap<WordAddr, u32>,
     ) -> Result<()> {
         tracing::debug!("{insn:?}");
 
@@ -859,14 +863,14 @@ impl Preflight {
 
 struct BigInt2Witness<'a> {
     preflight: &'a mut Preflight,
-    pub witness: HashMap<WordAddr, u32>,
+    pub witness: BTreeMap<WordAddr, u32>,
 }
 
 impl<'a> BigInt2Witness<'a> {
     pub fn new(preflight: &'a mut Preflight) -> Self {
         Self {
             preflight,
-            witness: HashMap::new(),
+            witness: BTreeMap::new(),
         }
     }
 }

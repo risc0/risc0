@@ -18,7 +18,7 @@ use anyhow::{anyhow, ensure, Result};
 use auto_ops::impl_op_ex;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive as _;
-use smallvec::SmallVec;
+use smallvec::{smallvec, SmallVec};
 
 use super::BIGINT2_WIDTH_BYTES;
 
@@ -191,7 +191,7 @@ impl BytePolynomial {
 }
 
 fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = vec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
+    let mut ret = smallvec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
     for (i, coeff) in ret.iter_mut().enumerate() {
         if i < lhs.coeffs.len() {
             *coeff += lhs.coeffs[i];
@@ -200,17 +200,17 @@ fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
             *coeff += rhs.coeffs[i];
         }
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 fn byte_poly_mul(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = vec![0; lhs.coeffs.len() + rhs.coeffs.len()];
+    let mut ret = smallvec![0; lhs.coeffs.len() + rhs.coeffs.len()];
     for (i, lhs) in lhs.coeffs.iter().enumerate() {
         for (j, rhs) in rhs.coeffs.iter().enumerate() {
             ret[i + j] += lhs * rhs;
         }
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {

@@ -18,7 +18,6 @@ mod tests;
 use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
 use anyhow::{anyhow, bail, ensure, Result};
-use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use enum_map::{Enum, EnumMap};
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
@@ -552,42 +551,38 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let y_ptr = self.load_aligned_guest_addr_from_register(REG_A3)?;
         let n_ptr = self.load_aligned_guest_addr_from_register(REG_A4)?;
 
-        let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<[u8; bigint::WIDTH_BYTES]> {
+        let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<Integer> {
+            // TODO: Can we load as Vec<u8> and Integer::from_digits that?
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for (i, word) in arr.iter_mut().enumerate() {
                 *word = self
                     .load_u32_from_guest(ptr + (i * WORD_SIZE) as u32)?
                     .to_le();
             }
-            Ok(bytemuck::cast(arr))
+            Ok(Integer::from_digits(&arr, rug::integer::Order::Lsf))
         };
 
         if op != 0 {
             bail!("ecall_bigint: op must be set to 0");
         }
 
-        // Load inputs.
-        let x = U256::from_le_bytes(load_bigint_le_bytes(x_ptr)?);
-        let y = U256::from_le_bytes(load_bigint_le_bytes(y_ptr)?);
-        let n = U256::from_le_bytes(load_bigint_le_bytes(n_ptr)?);
+        // Load inputs
+        let x = load_bigint_le_bytes(x_ptr)?;
+        let y = load_bigint_le_bytes(y_ptr)?;
+        let n = load_bigint_le_bytes(n_ptr)?;
 
-        // Compute modular multiplication, or simply multiplication if n == 0.
-        let z: U256 = if n == U256::ZERO {
-            x.checked_mul(&y).unwrap()
-        } else {
-            let (w_lo, w_hi) = x.mul_wide(&y);
-            let w = w_hi.concat(&w_lo);
-            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
-            z.resize()
-        };
+        // Compute modular multiplication, or simply multiplication if n == 0
+        let z = if n == 0 { x * y } else { (x * y) % n };
 
-        // Store result.
-        for (i, word) in bytemuck::cast::<_, [u32; bigint::WIDTH_WORDS]>(z.to_le_bytes())
+        // Store result
+        let bytes = z.to_digits::<u8>(rug::integer::Order::Lsf);
+        let bytes: Vec<_> = bytes
             .into_iter()
-            .enumerate()
-        {
-            self.store_u32_into_guest(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
-        }
+            .chain(std::iter::repeat(0))
+            .take(bigint::WIDTH_BYTES)
+            .collect();
+
+        self.store_region_into_guest(z_ptr, &bytes)?;
 
         self.pending.ecall = Some(EcallKind::BigInt);
         self.pending.cycles += BIGINT_CYCLES;
@@ -710,11 +705,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             addr += 1u32;
         }
         Ok(String::from_utf8(buf)?)
-    }
-
-    fn store_u32_into_guest(&mut self, addr: ByteAddr, data: u32) -> Result<()> {
-        Self::check_guest_addr(addr)?;
-        self.store_memory(addr.waddr(), data)
     }
 
     fn store_region_into_guest(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
