@@ -20,7 +20,7 @@ serde = { version = "1.0", default-features = false, features = [
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
-smallvec = "1.13"
+smallvec = { version = "1.13", optional = true }
 
 [target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
 metal = { workspace = true }
@@ -78,6 +78,7 @@ prove = [
   "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
   "dep:sha2",
+  "dep:smallvec",
   "risc0-core/perf",
   "risc0-zkp/prove",
   "std",

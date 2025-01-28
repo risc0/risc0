@@ -81,6 +81,23 @@ impl PagedMemory {
             pending_actions: Vec::new(),
         }
     }
+    pub fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        let mut bytes = Vec::with_capacity(size as usize);
+        let page_idx = addr.waddr().page_idx();
+        let mut idx = self.page_table[page_idx as usize];
+
+        if idx == INVALID_IDX {
+            self.load_page(page_idx);
+            idx = self.page_table[page_idx as usize];
+        }
+
+        let page = &self.page_cache[idx as usize];
+        let offset = addr.0 % PAGE_SIZE as u32;
+        let bytes_to_read = size.min(PAGE_SIZE as u32 - offset);
+
+        bytes.extend_from_slice(&page.0[offset as usize..(offset + bytes_to_read) as usize]);
+        Ok(bytes)
+    }
 
     pub fn pre_peek(&self, addr: WordAddr) -> Result<u32> {
         let mut bytes = [0u8; WORD_SIZE];
@@ -285,7 +302,7 @@ impl PagedMemory {
 
 impl Page {
     fn load(&self, addr: WordAddr) -> u32 {
-        let word_addr = (addr.0 % PAGE_WORDS as u32) as usize;
+        let word_addr = (addr.0 & ((PAGE_WORDS - 1) as u32)) as usize;
         let byte_addr = word_addr * WORD_SIZE;
         let mut bytes = [0u8; WORD_SIZE];
         bytes.clone_from_slice(&self.0[byte_addr..byte_addr + WORD_SIZE]);
@@ -295,7 +312,7 @@ impl Page {
     }
 
     fn store(&mut self, addr: WordAddr, data: u32) {
-        let word_addr = (addr.0 % PAGE_WORDS as u32) as usize;
+        let word_addr = (addr.0 & ((PAGE_WORDS - 1) as u32)) as usize;
         let byte_addr = word_addr * WORD_SIZE;
         // tracing::trace!("store({addr:?}, 0x{data:08x})");
         self.0[byte_addr..byte_addr + WORD_SIZE].clone_from_slice(&data.to_le_bytes());

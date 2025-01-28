@@ -376,7 +376,7 @@ impl Preflight {
     }
 
     fn load_region(&mut self, base: WordAddr, u32_count: u32) -> Result<Vec<u8>> {
-        let mut region = Vec::new();
+        let mut region = Vec::with_capacity(u32_count as usize * WORD_SIZE);
         for i in 0..u32_count {
             let addr = base + i;
             let word = self.load_u32(addr)?;

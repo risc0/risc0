@@ -667,12 +667,27 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn load_region_from_guest(&mut self, base: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        Self::check_guest_addr(base)?;
+        Self::check_guest_addr(base + size)?;
+
         let mut region = Vec::with_capacity(size as usize);
-        for i in 0..size {
-            let addr = base + i;
-            Self::check_guest_addr(addr)?;
-            region.push(self.load_u8(addr)?);
+        let mut addr = base;
+        let mut remaining = size;
+
+        while remaining > 0 {
+            // Calculate bytes remaining in current page
+            let page_offset = addr.0 % PAGE_SIZE as u32;
+            let bytes_in_page = PAGE_SIZE as u32 - page_offset;
+            let bytes_to_read = remaining.min(bytes_in_page);
+
+            // Load bytes from current page
+            let mut page_bytes = self.pager.load_region(addr, bytes_to_read)?;
+            region.append(&mut page_bytes);
+
+            addr += bytes_to_read;
+            remaining -= bytes_to_read;
         }
+
         Ok(region)
     }
 

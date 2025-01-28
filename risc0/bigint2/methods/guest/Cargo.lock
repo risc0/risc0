@@ -791,7 +791,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
- "smallvec",
  "tracing",
 ]
 
