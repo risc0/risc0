@@ -17,7 +17,7 @@ use std::path::Path;
 use anyhow::Result;
 use cargo_metadata::Package;
 use clap::Parser;
-use risc0_build::{DockerOptions, GuestOptions, ImageIdKind};
+use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder, ImageIdKind};
 use risc0_zkvm::sha::Digest;
 
 /// `cargo risczero bake`
@@ -58,18 +58,15 @@ impl BakeCommand {
     }
 
     fn bake_target(&self, pkg: &Package, target_dir: &Path) -> Result<()> {
-        let use_docker = if self.docker {
-            Some(DockerOptions {
-                root_dir: Some(std::env::current_dir()?),
-            })
-        } else {
-            None
-        };
-
-        let options = GuestOptions {
-            features: self.features.features.clone(),
-            use_docker,
-        };
+        let mut guest_opts = GuestOptionsBuilder::default();
+        guest_opts.features(self.features.features.clone());
+        if self.docker {
+            guest_opts.use_docker(
+                DockerOptionsBuilder::default()
+                    .root_dir(std::env::current_dir()?)
+                    .build()?,
+            );
+        }
 
         let elfs_dir = pkg
             .manifest_path
@@ -78,7 +75,7 @@ impl BakeCommand {
             .unwrap()
             .join("elfs");
 
-        let guests = risc0_build::build_package(pkg, target_dir, options)?;
+        let guests = risc0_build::build_package(pkg, target_dir, guest_opts.build()?)?;
         for guest in guests {
             let guest_path = guest.path.to_string();
             let src_path = Path::new(&guest_path);
