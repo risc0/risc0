@@ -34,7 +34,7 @@ it the [pprof] tool.
 Run the Fibonacci profiling example with:
 
 ```bash
-RISC0_PPROF_OUT=./profile.pb RISC0_DEV_MODE=1 RISC0_INFO=1 cargo run
+RISC0_PPROF_OUT=./profile.pb RUST_LOG=info RISC0_DEV_MODE=1 RISC0_INFO=1 cargo run
 ```
 
 The above command will run the Fibonacci computation for 1000 iterations and
