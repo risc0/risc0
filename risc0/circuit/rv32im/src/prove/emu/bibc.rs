@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::Read;
+use std::{collections::HashMap, io::Read};
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
-use num_bigint::{BigInt, BigUint, Sign};
+use ibig::modular::ModuloRing;
+use ibig::{ibig, ubig, IBig, UBig};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
@@ -65,9 +66,9 @@ pub(crate) struct Program {
 }
 
 pub(crate) trait BigIntIO {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint>;
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig>;
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()>;
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()>;
 }
 
 impl Op {
@@ -151,35 +152,34 @@ impl Program {
     }
 
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
-        let mut regs = vec![BigInt::ZERO; self.ops.len()];
+        let mut regs = vec![ibig!(0); self.ops.len()];
+        let mut rings = HashMap::<UBig, ModuloRing>::new();
         for (op_index, op) in self.ops.iter().enumerate() {
             tracing::debug!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
                     let offset = op.a;
                     let words = op.b;
-                    let mut value = BigUint::from(0_u64);
+                    let mut value = ubig!(0);
                     for i in 0..words {
                         let word: u64 = self.constants[offset + i];
-                        let mut tmp = BigUint::from(word);
+                        let mut tmp = UBig::from(word);
                         tmp <<= i * 64;
                         value |= &tmp;
                     }
-                    regs[op_index] = BigInt::from_biguint(Sign::Plus, value);
+                    regs[op_index] = IBig::from(value);
                 }
                 OpCode::Load => {
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = io.load(op.arena(), op.offset(), count)?;
-                    regs[op_index] = BigInt::from_biguint(Sign::Plus, value);
+                    regs[op_index] = value.into();
                 }
                 OpCode::Store => {
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = &regs[op.b];
-                    let value = value.to_biguint().ok_or_else(|| {
-                        anyhow!("Negative output produced during bigint2 acceleration")
-                    })?;
+                    let value = UBig::try_from(value)?;
                     io.store(op.arena(), op.offset(), count, &value)?;
                 }
                 OpCode::Add => {
@@ -206,10 +206,15 @@ impl Program {
                 }
                 OpCode::Inv => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
-                    let value = lhs
-                        .modinv(rhs)
+                    let urhs = UBig::try_from(rhs)?;
+                    let ring = rings
+                        .entry(urhs.clone())
+                        .or_insert_with(|| ModuloRing::new(&urhs));
+                    let value = ring
+                        .from(lhs)
+                        .inverse()
                         .ok_or_else(|| anyhow!("Can't divide by zero"))?;
-                    regs[op_index] = value.clone();
+                    regs[op_index] = IBig::from(value.residue());
                 }
             }
         }
@@ -217,7 +222,7 @@ impl Program {
     }
 }
 
-fn operands<'p>(op: &Op, op_index: usize, regs: &'p [BigInt]) -> (&'p BigInt, &'p BigInt) {
+fn operands<'p>(op: &Op, op_index: usize, regs: &'p [IBig]) -> (&'p IBig, &'p IBig) {
     assert!(op.a < op_index);
     assert!(op.b < op_index);
     (&regs[op.a], &regs[op.b])
