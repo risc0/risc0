@@ -22,7 +22,7 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, prove::union_mmr::UnionPeak, session::InnerSegment},
+        server::{exec::executor2::Executor2, prove::union_peak::UnionPeak, session::InnerSegment},
     },
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,

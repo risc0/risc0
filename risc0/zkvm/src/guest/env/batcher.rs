@@ -66,7 +66,7 @@ impl Keccak2Batcher {
 
     pub fn finalize(mut self) {
         self.flush();
-        if !self.inputs.is_empty() {
+        if self.input_exists() {
             let claim_digest = self.mmr.root().unwrap();
             crate::guest::env::verify_assumption2(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
         }

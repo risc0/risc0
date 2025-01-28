@@ -34,8 +34,7 @@ use rstest_reuse::{apply, template};
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
     compute_image_id_v2, default_prover, get_prover_server,
-    host::server::exec::executor2::Executor2,
-    host::server::prove::union_mmr::UnionPeak,
+    host::server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
     mmr::MerkleMountainAccumulator,
     receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
