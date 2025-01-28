@@ -17,7 +17,7 @@ use std::collections::BTreeSet;
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
-use risc0_binfmt::{ByteAddr, ExitCode, WordAddr};
+use risc0_binfmt::{ByteAddr, WordAddr};
 use risc0_circuit_rv32im_v2_sys::{RawMemoryTransaction, RawPreflightCycle};
 use risc0_core::scope;
 use risc0_zkp::core::digest::DIGEST_WORDS;
@@ -29,7 +29,7 @@ use crate::{
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{Risc0Context, Risc0Machine},
-        rv32im::{DecodedInstruction, Emulator, InsnKind, Instruction},
+        rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
         sha2::Sha2State,
     },
@@ -87,7 +87,6 @@ impl Segment {
         preflight.body()?;
         preflight.write_pages()?;
         preflight.generate_tables()?;
-        preflight.padding()?;
         preflight.wrap_memory_txns()?;
         preflight.update_p2_zcheck()?;
 
@@ -160,6 +159,13 @@ impl<'a> Preflight<'a> {
         while self.phys_cycles < self.segment.suspend_cycle {
             Risc0Machine::step(&mut emu, self)?;
         }
+        tracing::debug!(
+            "suspend(cycle: {}:{}, pc: {:?}, mode: {})",
+            self.trace.cycles.len(),
+            self.phys_cycles,
+            self.pc,
+            self.machine_mode
+        );
         Risc0Machine::suspend(self)
     }
 
@@ -185,20 +191,6 @@ impl<'a> Preflight<'a> {
     pub fn generate_tables(&mut self) -> Result<()> {
         self.trace.table_split_cycle = self.trace.cycles.len() as u32;
         self.fini()
-    }
-
-    pub fn padding(&mut self) -> Result<()> {
-        let last_cycle = 1 << self.segment.po2;
-        for _ in self.trace.cycles.len()..last_cycle {
-            self.add_cycle_special(
-                CycleState::ControlDone,
-                CycleState::ControlDone,
-                0,
-                0,
-                Back::None,
-            );
-        }
-        Ok(())
     }
 
     // Now, go back and update memory transactions to wrap around
@@ -282,7 +274,7 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
-        if !matches!(self.segment.exit_code, ExitCode::Halted(_)) {
+        if self.segment.claim.terminate_state.is_none() {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
                 bail!("Stopping segment too early");
@@ -298,6 +290,16 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+        let last_cycle = 1 << self.segment.po2;
+        for _ in self.trace.cycles.len()..last_cycle {
+            self.add_cycle_special(
+                CycleState::ControlDone,
+                CycleState::ControlDone,
+                0,
+                0,
+                Back::None,
+            );
+        }
         Ok(())
     }
 
@@ -359,7 +361,6 @@ impl<'a> Preflight<'a> {
     }
 
     fn add_cycle_insn(&mut self, state: CycleState, pc: u32, insn: InsnKind) {
-        tracing::trace!("[{}]: {pc:#010x}> {insn:?}", self.trace.cycles.len());
         match insn {
             InsnKind::Eany => {
                 // Technically we need to switch on the machine mode *entering* the EANY
@@ -407,10 +408,10 @@ impl<'a> Preflight<'a> {
         paging_idx: u32,
         back: Back,
     ) {
-        let cur_state = cur_state as u32;
-        let major = (7 + cur_state / 8) as u8;
-        let minor = (cur_state % 8) as u8;
-        // tracing::trace!("add_cycle_special(cur_state: {cur_state}, next_state: {next_state}, major: {major}, minor: {minor})");
+        let raw_cur_state = cur_state as u32;
+        let major = (7 + raw_cur_state / 8) as u8;
+        let minor = (raw_cur_state % 8) as u8;
+        // tracing::trace!("add_cycle_special(cur_state: {cur_state:?}, next_state: {next_state:?}, major: {major}, minor: {minor})");
         self.add_cycle(next_state, pc, major, minor, paging_idx, back);
     }
 }
@@ -433,6 +434,7 @@ impl<'a> Risc0Context for Preflight<'a> {
     }
 
     fn set_machine_mode(&mut self, mode: u32) {
+        tracing::trace!("[{}] set_machine_mode({mode})", self.trace.cycles.len());
         self.machine_mode = mode;
     }
 
@@ -478,7 +480,13 @@ impl<'a> Risc0Context for Preflight<'a> {
         Ok(())
     }
 
-    fn on_insn_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
+    fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
+        tracing::trace!(
+            "[{}]: {:?}> {}",
+            self.trace.cycles.len(),
+            self.pc,
+            disasm(insn, decoded)
+        );
         self.add_cycle_insn(CycleState::Decode, self.pc.0, insn.kind);
         self.user_cycle += 1;
         self.phys_cycles += 1;
@@ -501,19 +509,21 @@ impl<'a> Risc0Context for Preflight<'a> {
         let word = if addr >= MERKLE_TREE_START_ADDR {
             self.page_memory
                 .get(&addr)
-                .ok_or(anyhow!("Invalid load from page memory"))?
+                .ok_or_else(|| anyhow!("Invalid load from page memory"))?
         } else {
             self.pager.load(addr)?
         };
         self.orig_words.get_mut(&addr).get_or_insert(word);
         let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
-        self.trace.txns.push(RawMemoryTransaction {
+        let txn = RawMemoryTransaction {
             addr: addr.0,
             cycle,
             word,
             prev_cycle,
             prev_word: word,
-        });
+        };
+        // tracing::trace!("txn: {txn:?}");
+        self.trace.txns.push(txn);
         Ok(word)
     }
 
@@ -522,20 +532,22 @@ impl<'a> Risc0Context for Preflight<'a> {
         let prev_word = if addr >= MEMORY_END_ADDR {
             self.page_memory
                 .insert(&addr, word)
-                .ok_or(anyhow!("Invalid store to page memory"))?
+                .ok_or_else(|| anyhow!("Invalid store to page memory"))?
         } else {
             let prev_word = self.pager.load(addr)?;
             self.pager.store(addr, word)?;
             prev_word
         };
         let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
-        self.trace.txns.push(RawMemoryTransaction {
+        let txn = RawMemoryTransaction {
             addr: addr.0,
             cycle,
             word,
             prev_cycle,
             prev_word,
-        });
+        };
+        // tracing::trace!("txn: {txn:?}");
+        self.trace.txns.push(txn);
         Ok(())
     }
 

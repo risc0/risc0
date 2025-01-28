@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ impl PageTableInfo {
             let num_pages = remain / page_size;
             remain = num_pages
                 .checked_mul(DIGEST_BYTES as u32)
-                .ok_or(anyhow!("Invalid page_size specified"))?;
+                .ok_or_else(|| anyhow!("Invalid page_size specified"))?;
             layers.push(remain);
             page_table_size += remain;
         }

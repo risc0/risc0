@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ use std::{
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_more::Debug;
-use num_bigint::BigUint;
+use ibig::UBig;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
@@ -583,7 +583,7 @@ impl Preflight {
         let syscall = self
             .syscalls
             .pop_front()
-            .ok_or(anyhow!("Missing syscall record"))?;
+            .ok_or_else(|| anyhow!("Missing syscall record"))?;
         let (a0, a1) = syscall.regs;
 
         let stray_words = into_guest_len % IO_CHUNK_WORDS;
@@ -828,7 +828,7 @@ impl Preflight {
                 let addr = addr + i;
                 let word = witness
                     .get(&addr)
-                    .ok_or(anyhow!("Missing bigint2 witness: {addr:?}"))?;
+                    .ok_or_else(|| anyhow!("Missing bigint2 witness: {addr:?}"))?;
                 for (j, byte) in word.to_le_bytes().iter().enumerate() {
                     ret[i * WORD_SIZE + j] = (*byte) as u32;
                 }
@@ -872,31 +872,43 @@ impl<'a> BigInt2Witness<'a> {
 }
 
 impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self
             .preflight
             .peek_region(addr.waddr(), count / WORD_SIZE as u32)?;
-        Ok(BigUint::from_bytes_le(&bytes))
+        Ok(UBig::from_le_bytes(&bytes))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()> {
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         // tracing::debug!(
         //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
         // );
         let addr = addr.waddr();
-        let mut words = value.to_u32_digits();
-        let word_count = count as usize / WORD_SIZE;
-        if words.len() < word_count {
-            words.resize(word_count, 0);
+        let mut value_bytes = value.to_le_bytes();
+        // Word-align our byte array in case of a small value
+        while 0 != value_bytes.len() % WORD_SIZE {
+            value_bytes.push(0);
         }
-        ensure!(words.len() == word_count);
-        for (i, word) in words.iter().enumerate() {
-            self.witness.insert(addr + i, *word);
+        let word_count = count as usize / WORD_SIZE;
+        for i in 0..word_count {
+            let byte_offset = i * WORD_SIZE;
+            let mut word = 0_u32;
+            if byte_offset < value_bytes.len() {
+                assert!(byte_offset + WORD_SIZE <= value_bytes.len());
+                let word_bytes: [u8; WORD_SIZE] = [
+                    value_bytes[byte_offset],
+                    value_bytes[byte_offset + 1],
+                    value_bytes[byte_offset + 2],
+                    value_bytes[byte_offset + 3],
+                ];
+                word = u32::from_le_bytes(word_bytes);
+            }
+            self.witness.insert(addr + i, word);
         }
         Ok(())
     }

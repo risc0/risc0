@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{anyhow, Result};
-use risc0_build::risc0_data;
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
@@ -33,8 +32,10 @@ use {self::bonsai::BonsaiProver, crate::is_dev_mode};
 use self::external::ExternalProver;
 
 use crate::{
-    get_version, host::prove_info::ProveInfo, receipt::DEFAULT_MAX_PO2, ExecutorEnv, Receipt,
-    SessionInfo, VerifierContext,
+    get_version,
+    host::prove_info::ProveInfo,
+    receipt::{segment::SegmentVersion, DEFAULT_MAX_PO2},
+    ExecutorEnv, Receipt, SegmentReceiptVerifierParameters, SessionInfo, VerifierContext,
 };
 
 /// A Prover can execute a given ELF binary and produce a
@@ -98,7 +99,7 @@ pub trait Prover {
     ) -> Result<ProveInfo> {
         self.prove_with_ctx(
             env,
-            &VerifierContext::from_max_po2(opts.max_segment_po2),
+            &VerifierContext::from_max_po2(opts.max_segment_po2, opts.segment_version),
             elf,
             opts,
         )
@@ -154,7 +155,7 @@ pub trait Executor {
 }
 
 /// Options to configure a [Prover].
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ProverOpts {
     /// Identifier of the hash function to use for the STARK proving protocol.
@@ -178,10 +179,13 @@ pub struct ProverOpts {
 
     /// Maximum cycle count, as a power of two (po2) that these prover options support.
     pub(crate) max_segment_po2: usize,
+
+    /// TODO(flaub)
+    pub segment_version: SegmentVersion,
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
-#[derive(Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ReceiptKind {
     /// Request that a [CompositeReceipt][crate::CompositeReceipt] be generated.
@@ -215,6 +219,7 @@ impl Default for ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 }
@@ -236,6 +241,7 @@ impl ProverOpts {
                 .unwrap()
                 .collect(),
             max_segment_po2: po2_max,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -255,6 +261,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: risc0_circuit_rv32im::control_ids("sha-256", DEFAULT_MAX_PO2).collect(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -267,6 +274,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -279,6 +287,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -293,6 +302,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            segment_version: SegmentVersion::V1,
         }
     }
 
@@ -337,12 +347,32 @@ impl ProverOpts {
         }
     }
 
+    /// TODO(flaub)
+    #[stability::unstable]
+    pub fn with_segment_version(self, segment_version: SegmentVersion) -> Self {
+        Self {
+            segment_version,
+            ..self
+        }
+    }
+
     #[cfg(feature = "prove")]
     pub(crate) fn hash_suite(
         &self,
     ) -> Result<risc0_zkp::core::hash::HashSuite<risc0_zkp::field::baby_bear::BabyBear>> {
         risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
             .ok_or_else(|| anyhow::anyhow!("unsupported hash suite: {}", self.hashfn))
+    }
+
+    /// TODO(flaub)
+    #[stability::unstable]
+    pub fn verifier_context(&self) -> VerifierContext {
+        VerifierContext::default().with_segment_verifier_parameters(
+            SegmentReceiptVerifierParameters::from_max_po2(
+                self.max_segment_po2,
+                self.segment_version,
+            ),
+        )
     }
 }
 
@@ -427,17 +457,6 @@ pub fn default_executor() -> Rc<dyn Executor> {
     Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
 }
 
-fn try_r0vm_path(version: String) -> Option<PathBuf> {
-    let path = risc0_data().ok()?.join("r0vm").join(version).join("r0vm");
-    tracing::debug!("Checking for r0vm: {}", path.display());
-    if let Ok(path) = path.canonicalize() {
-        if path.is_file() {
-            return Some(path);
-        }
-    }
-    None
-}
-
 pub(crate) fn get_r0vm_path() -> Result<PathBuf> {
     if let Ok(path) = std::env::var("RISC0_SERVER_PATH") {
         let path = PathBuf::from(path);
@@ -446,16 +465,20 @@ pub(crate) fn get_r0vm_path() -> Result<PathBuf> {
         }
     }
 
-    let version = get_version().map_err(|err| anyhow!(err))?;
+    let mut version = get_version().map_err(|err| anyhow!(err))?;
     tracing::debug!("version: {version}");
 
-    if let Some(path) = try_r0vm_path(version.to_string()) {
-        return Ok(path);
-    }
+    if let Ok(rzup) = rzup::Rzup::new() {
+        if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
+            return Ok(dir.join("r0vm"));
+        }
 
-    if version.pre.is_empty() {
-        if let Some(path) = try_r0vm_path(format!("{}.{}", version.major, version.minor)) {
-            return Ok(path);
+        // Try again, but with these fields stripped
+        version.patch = 0;
+        version.build = Default::default();
+
+        if let Ok(dir) = rzup.get_version_dir(&rzup::Component::R0Vm, &version) {
+            return Ok(dir.join("r0vm"));
         }
     }
 

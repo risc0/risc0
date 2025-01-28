@@ -25,6 +25,10 @@ name = "fib"
 required-features = ["prove"]
 
 [[example]]
+name = "guest_verify"
+required-features = ["prove"]
+
+[[example]]
 name = "recursion"
 required-features = ["prove"]
 
@@ -78,6 +82,7 @@ redis = { version = "0.27.2", default-features = false, features = [
 risc0-build = { workspace = true, optional = true }
 risc0-zkos-v1compat = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
+rzup = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
 typetag = { version = "0.2", optional = true }
@@ -110,7 +115,7 @@ puffin_http = "0.16"
 risc0-circuit-keccak-methods = { path = "../circuit/keccak/methods" }
 risc0-zkvm-methods = { path = "methods", features = ["std"] }
 serde_json = "1.0"
-serde_with = "3.11"
+serde_with = "3.12"
 tabled = "0.16"
 tar = "0.4"
 tempfile = "3"
@@ -127,6 +132,8 @@ client = [
   "dep:bytes",
   "dep:lazy-regex",
   "dep:risc0-build",
+  "dep:risc0-zkos-v1compat",
+  "dep:rzup",
   "dep:prost",
   "dep:tempfile",
   "std",
@@ -171,7 +178,6 @@ prove = [
   "dep:prost",
   "dep:rand",
   "dep:rayon",
-  "dep:risc0-zkos-v1compat",
   "dep:rustc-demangle",
   "dep:tempfile",
   "dep:typetag",
