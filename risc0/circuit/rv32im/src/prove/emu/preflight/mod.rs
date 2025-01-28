@@ -24,7 +24,6 @@ use std::{
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_more::Debug;
-use num_bigint::BigUint;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
@@ -38,6 +37,7 @@ use risc0_zkvm_platform::{
     syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     WORD_SIZE,
 };
+use rug::{integer::Order, Integer};
 use sha2::digest::generic_array::GenericArray;
 
 use self::bigint2::{
@@ -872,24 +872,24 @@ impl<'a> BigInt2Witness<'a> {
 }
 
 impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Integer> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self
             .preflight
             .peek_region(addr.waddr(), count / WORD_SIZE as u32)?;
-        Ok(BigUint::from_bytes_le(&bytes))
+        Ok(Integer::from_digits(&bytes, Order::LsfLe))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Integer) -> Result<()> {
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         // tracing::debug!(
         //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
         // );
         let addr = addr.waddr();
-        let mut words = value.to_u32_digits();
+        let mut words = value.to_digits(Order::LsfLe);
         let word_count = count as usize / WORD_SIZE;
         if words.len() < word_count {
             words.resize(word_count, 0);

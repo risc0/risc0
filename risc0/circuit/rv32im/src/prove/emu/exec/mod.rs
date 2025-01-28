@@ -20,7 +20,6 @@ use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use enum_map::{Enum, EnumMap};
-use num_bigint::BigUint;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -36,6 +35,7 @@ use risc0_zkvm_platform::{
     syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     PAGE_SIZE, WORD_SIZE,
 };
+use rug::{integer::Order, Integer};
 use sha2::digest::generic_array::GenericArray;
 
 use super::{
@@ -741,19 +741,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 }
 
 impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Integer> {
         tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
-        Ok(BigUint::from_bytes_le(&bytes))
+        Ok(Integer::from_digits(&bytes, Order::LsfLe))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Integer) -> Result<()> {
         tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let mut bytes = value.to_bytes_le();
+        let mut bytes = value.to_digits(Order::LsfLe);
         if bytes.len() < count as usize {
             bytes.resize(count as usize, 0);
         }
