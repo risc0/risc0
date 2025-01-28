@@ -2,6 +2,12 @@
 
 ## Next (upcoming release)
 
+## [v1.2.2 (2025-01-27)](https://github.com/risc0/risc0/releases/tag/v1.2.2)
+
+### Fixes
+
+Fix panic when using embedded allocator with system allocator and add more details to guest OOM message.
+
 ## [v1.2.1 (2025-01-15)](https://github.com/risc0/risc0/releases/tag/v1.2.1)
 
 ### 🔥 Performance Improvements
