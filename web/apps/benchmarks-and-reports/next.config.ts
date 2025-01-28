@@ -1,12 +1,11 @@
 import "./src/env";
 
-import withBundleAnalyzer from "@next/bundle-analyzer";
 import { nextConfigBase } from "@risc0/ui/config/next.config.base.js";
 import deepmerge from "deepmerge";
 import type { NextConfig } from "next";
 import { latestVersion } from "./src/versions.js";
 
-let config: NextConfig = deepmerge(nextConfigBase, {
+const config: NextConfig = deepmerge(nextConfigBase, {
   experimental: {
     ppr: false, // DO NOT USE PPR, breaks everything, don't bother with it
   },
@@ -36,11 +35,5 @@ let config: NextConfig = deepmerge(nextConfigBase, {
     ];
   },
 });
-
-if (process.env.ANALYZE === "true") {
-  config = withBundleAnalyzer({
-    enabled: true,
-  })(config);
-}
 
 export default config;

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ use crate::{
     },
     receipt_claim::{Assumption, MaybePruned, Merge},
     sha::Digestible,
-    ProverOpts, ReceiptClaim, Unknown,
+    ProverOpts, ReceiptClaim, SegmentVersion, Unknown,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -75,7 +75,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
     let mut prover = Prover::new_lift(segment_receipt, opts.clone())?;
 
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
@@ -107,7 +107,7 @@ pub fn join(
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_join(a, b, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
 
     // Construct the expected claim that should have result from the join.
@@ -171,23 +171,19 @@ where
         .as_value_mut()
         .context("conditional receipt output is pruned")?
         .as_mut()
-        .ok_or(anyhow!(
-            "conditional receipt has empty output and no assumptions"
-        ))?
+        .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
         .assumptions
         .as_value_mut()
         .context("conditional receipt assumptions are pruned")?
         .0
         .drain(..1)
         .next()
-        .ok_or(anyhow!(
-            "cannot resolve assumption from receipt with no assumptions"
-        ))?;
+        .ok_or_else(|| anyhow!("cannot resolve assumption from receipt with no assumptions"))?;
 
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
 
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
@@ -218,7 +214,7 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 
     let mut prover = Prover::new_identity(a, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
     let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&a.claim)?;
 
@@ -336,7 +332,7 @@ pub fn test_zkr(
     let receipt = prover.run()?;
 
     // Read the claim digest from the second of the global output slots.
-    let claim_digest = risc0_binfmt::read_sha_halfs(&mut VecDeque::from_iter(
+    let claim_digest = read_sha_halfs(&mut VecDeque::from_iter(
         bytemuck::checked::cast_slice::<_, BabyBearElem>(
             &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
         )
@@ -418,26 +414,41 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
+        let out_size = match segment.segment_version {
+            SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE,
+            SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::OUTPUT_SIZE,
+        };
+
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.
         let mut iop = ReadIOP::new(&segment.seal, inner_hash_suite.rng.as_ref());
-        iop.read_field_elem_slice::<BabyBearElem>(risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE);
+        iop.read_field_elem_slice::<BabyBearElem>(out_size);
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift(po2, &opts.hashfn)?;
+        let (program, control_id) = match segment.segment_version {
+            SegmentVersion::V1 => zkr::lift(po2, &opts.hashfn)?,
+            SegmentVersion::V2 => zkr::lift_rv32im_v2(po2, &opts.hashfn)?,
+        };
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
-        // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
-        let which = po2 - MIN_CYCLES_PO2;
-        let inner_control_id = POSEIDON2_CONTROL_IDS[which];
-        prover.add_seal(
-            &segment.seal,
-            &inner_control_id,
-            &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
-        )?;
+        match segment.segment_version {
+            SegmentVersion::V1 => {
+                // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
+                let which = po2 - MIN_CYCLES_PO2;
+                let inner_control_id = POSEIDON2_CONTROL_IDS[which];
+                prover.add_seal(
+                    &segment.seal,
+                    &inner_control_id,
+                    &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
+                )?;
+            }
+            SegmentVersion::V2 => {
+                prover.add_input(&segment.seal);
+            }
+        }
 
         Ok(prover)
     }
@@ -526,7 +537,7 @@ impl Prover {
             .as_value()
             .context("cannot resolve conditional receipt with pruned output")?
             .as_ref()
-            .ok_or(anyhow!("cannot resolve conditional receipt with no output"))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
             .clone();
 
         // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
@@ -538,9 +549,7 @@ impl Prover {
         let head: Assumption = assumptions
             .0
             .first()
-            .ok_or(anyhow!(
-                "cannot resolve conditional receipt with no assumptions"
-            ))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
             .as_value()
             .context("cannot resolve conditional receipt with pruned head assumption")?
             .clone();

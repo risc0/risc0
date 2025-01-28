@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 pub(crate) mod paged_map;
 pub(crate) mod poseidon2;
 pub(crate) mod preflight;
+pub(crate) mod sha2;
 #[cfg(test)]
 mod tests;
 
@@ -22,14 +23,18 @@ use std::iter::zip;
 
 use anyhow::{Context, Result};
 use preflight::PreflightTrace;
+use risc0_binfmt::WordAddr;
 use risc0_circuit_rv32im_v2_sys::RawPreflightCycle;
 use risc0_core::scope;
 use risc0_zkp::{core::digest::DIGEST_WORDS, field::Elem as _, hal::Hal};
 
-use self::{poseidon2::Poseidon2State, preflight::Back};
+use self::preflight::Back;
 use super::hal::{CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
-    execute::{addr::WordAddr, platform::MERKLE_TREE_END_ADDR, segment::Segment},
+    execute::{
+        platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State, segment::Segment,
+        sha2::Sha2State,
+    },
     zirgen::circuit::{
         CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_CODE, REGCOUNT_DATA,
         REGCOUNT_GLOBAL,
@@ -79,8 +84,8 @@ impl<H: Hal> WitnessGenerator<H> {
 
         for i in 0..DIGEST_WORDS {
             // state in
-            let low = segment.pre_digest.as_words()[i] & 0xffff;
-            let high = segment.pre_digest.as_words()[i] >> 16;
+            let low = segment.claim.pre_state.as_words()[i] & 0xffff;
+            let high = segment.claim.pre_state.as_words()[i] >> 16;
             global[LAYOUT_GLOBAL.state_in.values[i].low._super.offset] = low.into();
             global[LAYOUT_GLOBAL.state_in.values[i].high._super.offset] = high.into();
 
@@ -97,13 +102,21 @@ impl<H: Hal> WitnessGenerator<H> {
         }
 
         // is_terminate
-        global[LAYOUT_GLOBAL.is_terminate._super.offset] = 1u32.into();
+        let is_terminate = if segment.claim.terminate_state.is_some() {
+            1u32
+        } else {
+            0u32
+        };
+        global[LAYOUT_GLOBAL.is_terminate._super.offset] = is_terminate.into();
+
+        // shutdown_cycle
+        global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
 
         let global = MetaBuffer {
             buf: hal.copy_from_elem("global", &global),
             rows: 1,
             cols: REGCOUNT_GLOBAL,
-            checked_reads: true,
+            checked: true,
         };
 
         let code = MetaBuffer::new("code", hal, cycles, REGCOUNT_CODE, false);
@@ -120,7 +133,7 @@ impl<H: Hal> WitnessGenerator<H> {
             // tracing::trace!(
             //     "[{row}] pc: {:#010x}, state: {:?}",
             //     cycle.pc,
-            //     CycleState::from_u32(cycle.state).unwrap()
+            //     crate::execute::CycleState::from_u32(cycle.state).unwrap()
             // );
             match back {
                 Back::None => {}
@@ -135,6 +148,14 @@ impl<H: Hal> WitnessGenerator<H> {
                 Back::Poseidon2(p2_state) => {
                     for (col, value) in zip(Poseidon2State::offsets(), p2_state.as_array()) {
                         injector.set(row, col, value);
+                    }
+                }
+                Back::Sha2(sha2_state) => {
+                    for (col, value) in zip(Sha2State::fp_offsets(), sha2_state.fp_array()) {
+                        injector.set(row, col, value);
+                    }
+                    for (col, value) in zip(Sha2State::u32_offsets(), sha2_state.u32_array()) {
+                        injector.set_u32_bits(row, col, value);
                     }
                 }
             }
@@ -190,14 +211,16 @@ impl Injector {
     }
 
     fn set_cycle(&mut self, row: usize, cycle: &RawPreflightCycle) {
+        const CYCLE_COL: usize = LAYOUT_TOP.cycle._super.offset;
         const NEXT_PC_LOW: usize = LAYOUT_TOP.next_pc_low._super.offset;
         const NEXT_PC_HIGH: usize = LAYOUT_TOP.next_pc_high._super.offset;
         const NEXT_STATE: usize = LAYOUT_TOP.next_state_0._super.offset;
-        const MACHINE_MODE: usize = LAYOUT_TOP.next_machine_mode._super.offset;
+        const NEXT_MACHINE_MODE: usize = LAYOUT_TOP.next_machine_mode._super.offset;
+        self.set(row, CYCLE_COL, row as u32);
         self.set(row, NEXT_PC_LOW, cycle.pc & 0xffff);
         self.set(row, NEXT_PC_HIGH, cycle.pc >> 16);
         self.set(row, NEXT_STATE, cycle.state);
-        self.set(row, MACHINE_MODE, cycle.machine_mode as u32);
+        self.set(row, NEXT_MACHINE_MODE, cycle.machine_mode as u32);
         self.index.push(self.offsets.len() as u32);
     }
 
@@ -206,12 +229,18 @@ impl Injector {
         self.offsets.push(idx as u32);
         self.values.push(value.into());
     }
-}
 
-fn node_idx_to_addr(idx: u32) -> WordAddr {
-    MERKLE_TREE_END_ADDR - idx * DIGEST_WORDS as u32
+    fn set_u32_bits(&mut self, row: usize, col: usize, value: u32) {
+        for i in 0..32 {
+            self.set(row, col + i, (value >> i) & 1);
+        }
+    }
 }
 
 fn node_addr_to_idx(addr: WordAddr) -> u32 {
     (MERKLE_TREE_END_ADDR - addr).0 / DIGEST_WORDS as u32
+}
+
+fn node_idx_to_addr(idx: u32) -> WordAddr {
+    MERKLE_TREE_END_ADDR - idx * DIGEST_WORDS as u32
 }

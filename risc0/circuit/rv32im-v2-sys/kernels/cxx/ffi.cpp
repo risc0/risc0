@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,22 @@
 #include "steps.h"
 #include "witgen.h"
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#endif
+
+#include "vendor/nvtx3/nvtx3.hpp"
 #include "vendor/poolstl.hpp"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <array>
 #include <assert.h>
@@ -28,6 +43,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <string.h>
 #include <vector>
 
@@ -67,14 +83,15 @@ std::array<Val, 5> extern_getMemoryTxn(ExecContext& ctx, Val addrElem) {
   uint32_t addr = addrElem.asUInt32();
   size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx++;
   const MemoryTransaction& txn = ctx.preflight.txns[txnIdx];
-  // printf("getMemoryTxn(%lu, 0x%08x): txn(%u, 0x%08x, 0x%08x)\n",
+  // printf("getMemoryTxn(%lu, 0x%08x): txn(txnId: %zu, cycle: %u, addr: 0x%08x, word: 0x%08x)\n",
   //        ctx.cycle,
   //        addr,
+  //        txnIdx,
   //        txn.cycle,
   //        txn.addr,
   //        txn.word);
 
-  if (txn.cycle != ctx.cycle) {
+  if (txn.cycle / 2 != ctx.cycle) {
     printf("txn.cycle: %u, ctx.cycle: %zu\n", txn.cycle, ctx.cycle);
     throw std::runtime_error("txn cycle mismatch");
   }
@@ -121,15 +138,12 @@ void extern_memoryDelta(
 
 uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle) {
   // printf("getDiffCount\n");
-  return ctx.preflight.cycles[cycle.asUInt32()].diffCount;
+  uint32_t cycleU32 = cycle.asUInt32();
+  return ctx.preflight.cycles[cycleU32 / 2].diffCount[cycleU32 % 2];
 }
 
 Val extern_isFirstCycle_0(ExecContext& ctx) {
   return ctx.cycle == 0;
-}
-
-Val extern_getCycle(ExecContext& ctx) {
-  return ctx.cycle;
 }
 
 std::ostream& hex_word(std::ostream& os, uint32_t word) {
@@ -176,20 +190,16 @@ std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx) {
 }
 
 Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len) {
-  std::cout << "hostReadPrepare\n";
-  throw std::runtime_error("extern_hostReadPrepare");
-  // return ctx.stepHandler.readPrepare(fp.asUInt32(), len.asUInt32());
-  // return 0;
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  uint32_t word = ctx.preflight.txns[txnIdx].word;
+  // printf("[%lu]: hostReadPrepare(txnIdx: %zu, word: 0x%08x)\n", ctx.cycle, txnIdx, word);
+  return word;
 }
 
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal) {
   std::cout << "hostWrite\n";
-  throw std::runtime_error("extern_hostWrite");
-  // uint32_t fd = fdVal.asUInt32();
-  // uint32_t addr = addrLow.asUInt32() | (addrHigh.asUInt32() << 16);
-  // uint32_t len = lenVal.asUInt32();
-  // return ctx.stepHandler.write(fd, addr, len);
-  // return 0;
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  return ctx.preflight.txns[txnIdx].word;
 }
 
 std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
@@ -200,6 +210,7 @@ std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
 }
 
 void stepExec(ExecBuffers& buffers, PreflightTrace& preflight, LookupTables& tables, size_t cycle) {
+  // printf("stepExec: %zu\n", cycle);
   ExecContext ctx(preflight, tables, cycle);
   MutableBufObj data(buffers.data);
   GlobalBufObj global(buffers.global);
@@ -212,9 +223,15 @@ void stepAccum(AccumBuffers& buffers,
                size_t cycle) {
   ExecContext ctx(preflight, tables, cycle);
   MutableBufObj data(buffers.data);
-  MutableBufObj accum(buffers.accum);
+  MutableBufObj accum(buffers.accum, /*zeroBack=*/true);
   GlobalBufObj mix(buffers.mix);
   step_TopAccum(ctx, &accum, &data, &mix);
+  // printf("stepAccum: %zu -> [%u, %u, %u, %u]\n",
+  //        cycle,
+  //        buffers.accum.get(cycle, buffers.accum.cols - 4).asUInt32(),
+  //        buffers.accum.get(cycle, buffers.accum.cols - 3).asUInt32(),
+  //        buffers.accum.get(cycle, buffers.accum.cols - 2).asUInt32(),
+  //        buffers.accum.get(cycle, buffers.accum.cols - 1).asUInt32());
 }
 
 } // namespace risc0::circuit::rv32im_v2::cpu
@@ -225,6 +242,7 @@ constexpr size_t kStepModeSeqReverse = 2;
 
 extern "C" {
 
+using namespace risc0;
 using namespace risc0::circuit::rv32im_v2::cpu;
 
 const char* risc0_circuit_rv32im_v2_cpu_witgen(uint32_t mode,
@@ -255,11 +273,9 @@ const char* risc0_circuit_rv32im_v2_cpu_witgen(uint32_t mode,
       break;
     case kStepModeSeqReverse: {
       for (size_t i = split; i-- > 0;) {
-        // printf("stepExec: %zu\n", i);
         stepExec(*buffers, *preflight, tables, i);
       }
       for (size_t i = lastCycle; i-- > split;) {
-        // printf("stepExec: %zu\n", i);
         stepExec(*buffers, *preflight, tables, i);
       }
     } break;
@@ -277,8 +293,48 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
                                               uint32_t lastCycle) {
   try {
     LookupTables tables;
-    for (size_t cycle = 0; cycle < lastCycle; cycle++) {
-      stepAccum(*buffers, *preflight, tables, cycle);
+
+    {
+      nvtx3::scoped_range range("phase1");
+      auto begin = poolstl::iota_iter<uint32_t>(0);
+      auto end = poolstl::iota_iter<uint32_t>(lastCycle);
+      std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+        stepAccum(*buffers, *preflight, tables, cycle);
+      });
+    }
+
+    buffers->accum.checked = false;
+
+    {
+      // prefix-sum
+      nvtx3::scoped_range range("phase2");
+      size_t rows = buffers->accum.rows;
+      for (size_t j = 0; j < 4; j++) {
+        size_t col = buffers->accum.cols - 4 + j;
+        Fp* itBegin = buffers->accum.buf + col * rows;
+        Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
+        // NOTE: poolstl does not support parallel inclusive_scan
+        std::inclusive_scan(itBegin, itEnd, itBegin);
+      }
+    }
+
+    {
+      // apply totals
+      nvtx3::scoped_range range("phase3");
+      auto begin = poolstl::iota_iter<uint32_t>(0);
+      auto end = poolstl::iota_iter<uint32_t>(lastCycle);
+      std::for_each(poolstl::par, begin, end, [&](uint32_t row) {
+        size_t back1 = (row + lastCycle - 1) % lastCycle;
+        std::array<Fp, 4> prev;
+        for (size_t k = 0; k < 4; k++) {
+          prev[k] = buffers->accum.get(back1, buffers->accum.cols - 4 + k);
+        }
+        for (size_t j = 0; j < buffers->accum.cols / 4 - 1; j++) {
+          for (size_t k = 0; k < 4; k++) {
+            buffers->accum.set(row, j * 4 + k, buffers->accum.get(row, j * 4 + k) + prev[k]);
+          }
+        }
+      });
     }
   } catch (const std::exception& err) {
     return strdup(err.what());

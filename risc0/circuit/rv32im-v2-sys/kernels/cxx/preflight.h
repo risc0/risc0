@@ -36,7 +36,7 @@ struct PreflightCycle {
   uint32_t userCycle;
   uint32_t txnIdx;
   uint32_t pagingIdx;
-  uint32_t diffCount;
+  uint32_t diffCount[2];
 };
 
 struct PreflightTrace {

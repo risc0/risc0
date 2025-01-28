@@ -56,9 +56,14 @@ export function DatasheetTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
-
   const titleString = Children.toArray(title)
-    .map((child) => (isValidElement(child) ? child.props.children : child))
+    .map((child) => {
+      if (isValidElement(child)) {
+        // Type assertion since we know child is a ReactElement when isValidElement is true
+        return (child as { props: { children: string } }).props.children;
+      }
+      return child;
+    })
     .join("");
 
   return (

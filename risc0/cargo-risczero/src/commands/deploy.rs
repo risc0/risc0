@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ use anyhow::{Context, Result};
 use bonsai_sdk::blocking::Client;
 use cargo_metadata::MetadataCommand;
 use clap::Parser;
-use risc0_build::{BuildStatus, GuestOptions};
+use risc0_build::{BuildStatus, DockerOptionsBuilder, GuestOptionsBuilder};
 
-use crate::{commands::build_guest, utils};
+use crate::utils;
 
 /// `cargo risczero deploy`
 ///
@@ -52,12 +52,12 @@ impl DeployCommand {
 
     fn deploy(&self, client: Client) -> Result<()> {
         // Ensure we have an up to date artifact before deploying
-        if let BuildStatus::Skipped = build_guest::build(
+        if let BuildStatus::Skipped = risc0_build::docker_build(
             &self.manifest_path,
-            &GuestOptions {
-                features: self.features.clone(),
-                ..Default::default()
-            },
+            &GuestOptionsBuilder::default()
+                .features(self.features.clone())
+                .use_docker(DockerOptionsBuilder::default().build()?)
+                .build()?,
         )? {
             eprintln!("Build skipped, nothing to deploy.");
             return Ok(());

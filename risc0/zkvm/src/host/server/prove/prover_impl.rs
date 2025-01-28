@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
-use risc0_circuit_rv32im::prove::segment_prover;
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
@@ -23,15 +22,19 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
+        server::{exec::executor2::Executor2, session::InnerSegment},
     },
     prove_registered_zkr,
     receipt::{
-        segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
+        InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
+    risc0_rv32im_ver,
     sha::Digestible,
-    Assumption, AssumptionReceipt, CompositeReceipt, InnerAssumptionReceipt, Output, ProverOpts,
-    Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
+    InnerAssumptionReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -41,12 +44,33 @@ pub struct ProverImpl {
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts) -> Self {
+    pub fn new(mut opts: ProverOpts) -> Self {
+        if let Some(version) = risc0_rv32im_ver() {
+            opts = opts.with_segment_version(version);
+        }
         Self { opts }
     }
 }
 
 impl ProverServer for ProverImpl {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+        let ctx = self.opts.verifier_context();
+        self.prove_with_ctx(env, &ctx, elf)
+    }
+
+    fn prove_with_ctx(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        elf: &[u8],
+    ) -> Result<ProveInfo> {
+        let session = match self.opts.segment_version {
+            SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)?.run()?,
+            SegmentVersion::V2 => Executor2::from_elf(env, elf)?.run()?,
+        };
+        self.prove_session(ctx, &session)
+    }
+
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         tracing::debug!(
             "prove_session: exit_code = {:?}, journal = {:?}, segments: {}",
@@ -72,7 +96,7 @@ impl ProverServer for ProverImpl {
         // Merge the output, including journal digest and assumptions, into the last segment.
         segments
             .last_mut()
-            .ok_or(anyhow!("session is empty"))?
+            .ok_or_else(|| anyhow!("session is empty"))?
             .claim
             .output
             .merge_with(
@@ -89,9 +113,7 @@ impl ProverServer for ProverImpl {
 
         let verifier_parameters = ctx
             .composite_verifier_parameters()
-            .ok_or(anyhow!(
-                "composite receipt verifier parameters missing from context"
-            ))?
+            .ok_or_else(|| anyhow!("composite receipt verifier parameters missing from context"))?
             .digest();
 
         let mut zkr_receipts = HashMap::new();
@@ -125,9 +147,9 @@ impl ProverServer for ProverImpl {
             .map(|assumption_receipt| match assumption_receipt {
                 AssumptionReceipt::Proven(receipt) => Ok(receipt),
                 AssumptionReceipt::Unresolved(assumption) => {
-                    let receipt = zkr_receipts.get(&assumption).ok_or(anyhow!(
-                        "no receipt available for unresolved assumption: {assumption:#?}"
-                    ))?;
+                    let receipt = zkr_receipts.get(&assumption).ok_or_else(|| {
+                        anyhow!("no receipt available for unresolved assumption: {assumption:#?}")
+                    })?;
                     Ok(InnerAssumptionReceipt::Succinct(receipt.clone()))
                 }
             })
@@ -195,18 +217,25 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let segment_prover = segment_prover(&self.opts.hashfn)?;
-        let seal = segment_prover.prove_segment(&segment.inner)?;
-
-        let mut claim = decode_receipt_claim_from_seal(&seal)?;
-        claim.output = segment.output.clone().into();
+        let (seal, claim, segment_version) = match &segment.inner {
+            InnerSegment::V1(inner) => {
+                let seal = risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
+                    .prove_segment(inner)?;
+                let mut claim = decode_receipt_claim_from_seal_v1(&seal)?;
+                claim.output = segment.output.clone().into();
+                (seal, claim, SegmentVersion::V1)
+            }
+            InnerSegment::V2(segment) => {
+                let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(segment)?;
+                let claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.po2))?;
+                (seal, claim, SegmentVersion::V2)
+            }
+        };
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
             .as_ref()
-            .ok_or(anyhow!(
-                "segment receipt verifier parameters missing from context"
-            ))?
+            .ok_or_else(|| anyhow!("segment receipt verifier parameters missing from context"))?
             .digest();
         let receipt = SegmentReceipt {
             seal,
@@ -214,6 +243,7 @@ impl ProverServer for ProverImpl {
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
+            segment_version,
         };
         receipt.verify_integrity_with_context(ctx)?;
 

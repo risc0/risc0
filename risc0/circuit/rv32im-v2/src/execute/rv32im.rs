@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
 // limitations under the License.
 
 use anyhow::Result;
+use ringbuffer::{AllocRingBuffer, RingBuffer};
+use risc0_binfmt::{ByteAddr, WordAddr};
 
-use super::{
-    addr::{ByteAddr, WordAddr},
-    platform::WORD_SIZE,
-};
+use super::platform::{REG_MAX, REG_ZERO, WORD_SIZE};
 
 pub trait EmuContext {
     // Handle environment call
@@ -27,7 +26,7 @@ pub trait EmuContext {
     fn mret(&mut self) -> Result<bool>;
 
     // Handle a trap
-    fn trap(&mut self, cause: TrapCause) -> Result<bool>;
+    fn trap(&mut self, cause: Exception) -> Result<bool>;
 
     // Callback when instructions are decoded
     fn on_insn_decoded(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
@@ -54,33 +53,28 @@ pub trait EmuContext {
     fn store_memory(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
     // Check access for instruction load
-    fn check_insn_load(&self, _addr: ByteAddr) -> bool {
-        true
-    }
+    fn check_insn_load(&self, addr: ByteAddr) -> bool;
 
     // Check access for data load
-    fn check_data_load(&self, _addr: ByteAddr) -> bool {
-        true
-    }
+    fn check_data_load(&self, addr: ByteAddr) -> bool;
 
     // Check access for data store
-    fn check_data_store(&self, _addr: ByteAddr) -> bool {
-        true
-    }
+    fn check_data_store(&self, addr: ByteAddr) -> bool;
 }
 
-#[derive(Default)]
+// #[derive(Default)]
 pub struct Emulator {
     table: FastDecodeTable,
+    ring: AllocRingBuffer<(ByteAddr, Instruction, DecodedInstruction)>,
 }
 
 #[derive(Debug)]
 #[repr(u32)]
-pub enum TrapCause {
-    InstructionAddressMisaligned = 0,
-    InstructionAccessFault,
+pub enum Exception {
+    InstructionMisaligned = 0,
+    InstructionFault,
     #[allow(dead_code)]
-    IllegalInstruction(u32),
+    IllegalInstruction(u32, u32),
     Breakpoint,
     LoadAddressMisaligned,
     #[allow(dead_code)]
@@ -88,10 +82,13 @@ pub enum TrapCause {
     #[allow(dead_code)]
     StoreAddressMisaligned(ByteAddr),
     StoreAccessFault,
-    EnvironmentCallFromUserMode,
+    #[allow(dead_code)]
+    InvalidEcallDispatch(u32),
+    #[allow(dead_code)]
+    UserEnvCall(ByteAddr),
 }
 
-impl TrapCause {
+impl Exception {
     pub fn as_u32(&self) -> u32 {
         unsafe { *(self as *const Self as *const u32) }
     }
@@ -321,7 +318,7 @@ impl Default for FastDecodeTable {
 
 impl FastDecodeTable {
     fn new() -> Self {
-        let mut table: FastInstructionTable = [InsnKind::Invalid as u8; 1 << 10];
+        let mut table: FastInstructionTable = [0; 1 << 10];
         for (isa_idx, insn) in RV32IM_ISA.iter().enumerate() {
             Self::add_insn(&mut table, insn, isa_idx);
         }
@@ -371,6 +368,14 @@ impl Emulator {
     pub fn new() -> Self {
         Self {
             table: FastDecodeTable::new(),
+            ring: AllocRingBuffer::new(10),
+        }
+    }
+
+    pub fn dump(&self) {
+        tracing::debug!("Dumping last {} instructions:", self.ring.len());
+        for (pc, insn, decoded) in self.ring.iter() {
+            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(insn, decoded));
         }
     }
 
@@ -378,26 +383,27 @@ impl Emulator {
         let pc = ctx.get_pc();
 
         if !ctx.check_insn_load(pc) {
-            ctx.trap(TrapCause::InstructionAccessFault)?;
+            ctx.trap(Exception::InstructionFault)?;
             return Ok(());
         }
 
         let word = ctx.load_memory(pc.waddr())?;
         if word & 0x03 != 0x03 {
-            ctx.trap(TrapCause::IllegalInstruction(word))?;
+            ctx.trap(Exception::IllegalInstruction(word, 0))?;
             return Ok(());
         }
 
         let decoded = DecodedInstruction::new(word);
         let insn = self.table.lookup(&decoded);
         ctx.on_insn_decoded(&insn, &decoded)?;
+        self.ring.push((pc, insn, decoded.clone()));
 
         if match insn.category {
             InsnCategory::Compute => self.step_compute(ctx, insn.kind, &decoded)?,
             InsnCategory::Load => self.step_load(ctx, insn.kind, &decoded)?,
             InsnCategory::Store => self.step_store(ctx, insn.kind, &decoded)?,
             InsnCategory::System => self.step_system(ctx, insn.kind, &decoded)?,
-            InsnCategory::Invalid => ctx.trap(TrapCause::IllegalInstruction(word))?,
+            InsnCategory::Invalid => ctx.trap(Exception::IllegalInstruction(word, 1))?,
         } {
             ctx.on_normal_end(&insn, &decoded)?;
         };
@@ -521,7 +527,7 @@ impl Emulator {
             _ => unreachable!(),
         };
         if !new_pc.is_aligned() {
-            return ctx.trap(TrapCause::InstructionAddressMisaligned);
+            return ctx.trap(Exception::InstructionMisaligned);
         }
         ctx.store_register(rd as usize, out)?;
         ctx.set_pc(new_pc);
@@ -537,7 +543,7 @@ impl Emulator {
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
-            return ctx.trap(TrapCause::LoadAccessFault(addr));
+            return ctx.trap(Exception::LoadAccessFault(addr));
         }
         let data = ctx.load_memory(addr.waddr())?;
         let shift = 8 * (addr.0 & 3);
@@ -551,7 +557,7 @@ impl Emulator {
             }
             InsnKind::Lh => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(TrapCause::LoadAddressMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 let mut out = (data >> shift) & 0xffff;
                 if out & 0x8000 != 0 {
@@ -561,14 +567,14 @@ impl Emulator {
             }
             InsnKind::Lw => {
                 if addr.0 & 0x03 != 0 {
-                    return ctx.trap(TrapCause::LoadAddressMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 data
             }
             InsnKind::LbU => (data >> shift) & 0xff,
             InsnKind::LhU => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(TrapCause::LoadAddressMisaligned);
+                    return ctx.trap(Exception::LoadAddressMisaligned);
                 }
                 (data >> shift) & 0xffff
             }
@@ -590,7 +596,7 @@ impl Emulator {
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_s()));
         let shift = 8 * (addr.0 & 3);
         if !ctx.check_data_store(addr) {
-            return ctx.trap(TrapCause::StoreAccessFault);
+            return ctx.trap(Exception::StoreAccessFault);
         }
         let mut data = ctx.load_memory(addr.waddr())?;
         match kind {
@@ -601,7 +607,7 @@ impl Emulator {
             InsnKind::Sh => {
                 if addr.0 & 0x01 != 0 {
                     tracing::debug!("Misaligned SH");
-                    return ctx.trap(TrapCause::StoreAddressMisaligned(addr));
+                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
                 }
                 data ^= data & (0xffff << shift);
                 data |= (rs2 & 0xffff) << shift;
@@ -609,7 +615,7 @@ impl Emulator {
             InsnKind::Sw => {
                 if addr.0 & 0x03 != 0 {
                     tracing::debug!("Misaligned SW");
-                    return ctx.trap(TrapCause::StoreAddressMisaligned(addr));
+                    return ctx.trap(Exception::StoreAddressMisaligned(addr));
                 }
                 data = rs2;
             }
@@ -629,8 +635,8 @@ impl Emulator {
         match kind {
             InsnKind::Eany => match decoded.rs2 {
                 0 => ctx.ecall(),
-                1 => ctx.trap(TrapCause::Breakpoint),
-                _ => ctx.trap(TrapCause::IllegalInstruction(decoded.insn)),
+                1 => ctx.trap(Exception::Breakpoint),
+                _ => ctx.trap(Exception::IllegalInstruction(decoded.insn, 2)),
             },
             InsnKind::Mret => ctx.mret(),
             _ => unreachable!(),
@@ -642,70 +648,84 @@ fn sign_extend_u32(x: u32) -> i64 {
     (x as i32) as i64
 }
 
+struct Register(u32);
+
+const REG_ALIASES: [&str; REG_MAX] = [
+    "zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2", "s0", "s1", "a0", "a1", "a2", "a3", "a4",
+    "a5", "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "t3", "t4",
+    "t5", "t6",
+];
+
+impl std::fmt::Display for Register {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", REG_ALIASES[self.0 as usize])
+    }
+}
+
 pub fn disasm(insn: &Instruction, decoded: &DecodedInstruction) -> String {
-    let (rd, rs1, rs2) = (decoded.rd, decoded.rs1, decoded.rs2);
+    let (rd, rs1, rs2) = (
+        Register(decoded.rd),
+        Register(decoded.rs1),
+        Register(decoded.rs2),
+    );
     match insn.kind {
         InsnKind::Invalid => "illegal".to_string(),
-        InsnKind::Add => format!("add x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Sub => format!("sub x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Xor => format!("xor x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Or => format!("or x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::And => format!("and x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Sll => format!("sll x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Srl => format!("srl x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Sra => format!("sra x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Slt => format!("slt x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::SltU => format!("sltu x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::AddI => format!("addi x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::XorI => format!("xori x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::OrI => format!("ori x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::AndI => format!("andi x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SllI => format!("slli x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SrlI => format!("srli x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SraI => format!("srai x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SltI => format!("slti x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::SltIU => format!("sltiu x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::Beq => format!("beq x{rs1}, x{rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Bne => format!("bne x{rs1}, x{rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Blt => format!("blt x{rs1}, x{rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Bge => format!("bge x{rs1}, x{rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::BltU => format!("bltu x{rs1}, x{rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::BgeU => format!("bgeu x{rs1}, x{rs2}, {}", decoded.imm_b() as i32),
-        InsnKind::Jal => format!("jal x{rd}, {}", decoded.imm_j() as i32),
-        InsnKind::JalR => format!("jalr x{rd}, x{rs1}, {}", decoded.imm_i() as i32),
-        InsnKind::Lui => format!("lui x{rd}, {:#010x}", decoded.imm_u() >> 12),
-        InsnKind::Auipc => format!("auipc x{rd}, {:#010x}", decoded.imm_u() >> 12),
-        InsnKind::Mul => format!("mul x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::MulH => format!("mulh x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::MulHSU => format!("mulhsu x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::MulHU => format!("mulhu x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Div => format!("div x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::DivU => format!("divu x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Rem => format!("rem x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::RemU => format!("remu x{rd}, x{rs1}, x{rs2}"),
-        InsnKind::Lb => format!("lb x{rd}, {}(x{rs1})", decoded.imm_i() as i32),
-        InsnKind::Lh => format!("lh x{rd}, {}(x{rs1})", decoded.imm_i() as i32),
-        InsnKind::Lw => format!("lw x{rd}, {}(x{rs1})", decoded.imm_i() as i32),
-        InsnKind::LbU => format!("lbu x{rd}, {}(x{rs1})", decoded.imm_i() as i32),
-        InsnKind::LhU => format!("lhu x{rd}, {}(x{rs1})", decoded.imm_i() as i32),
-        InsnKind::Sb => format!("sb x{rs2}, {}(x{rs1})", decoded.imm_i() as i32),
-        InsnKind::Sh => format!("sh x{rs2}, {}(x{rs1})", decoded.imm_i() as i32),
-        InsnKind::Sw => format!("sw x{rs2}, {}(x{rs1})", decoded.imm_i() as i32),
+        InsnKind::Add => format!("add {rd}, {rs1}, {rs2}"),
+        InsnKind::Sub => format!("sub {rd}, {rs1}, {rs2}"),
+        InsnKind::Xor => format!("xor {rd}, {rs1}, {rs2}"),
+        InsnKind::Or => format!("or {rd}, {rs1}, {rs2}"),
+        InsnKind::And => format!("and {rd}, {rs1}, {rs2}"),
+        InsnKind::Sll => format!("sll {rd}, {rs1}, {rs2}"),
+        InsnKind::Srl => format!("srl {rd}, {rs1}, {rs2}"),
+        InsnKind::Sra => format!("sra {rd}, {rs1}, {rs2}"),
+        InsnKind::Slt => format!("slt {rd}, {rs1}, {rs2}"),
+        InsnKind::SltU => format!("sltu {rd}, {rs1}, {rs2}"),
+        InsnKind::AddI => {
+            if rs1.0 == REG_ZERO as u32 {
+                format!("li {rd}, {}", decoded.imm_i() as i32)
+            } else {
+                format!("addi {rd}, {rs1}, {}", decoded.imm_i() as i32)
+            }
+        }
+        InsnKind::XorI => format!("xori {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::OrI => format!("ori {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::AndI => format!("andi {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::SllI => format!("slli {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::SrlI => format!("srli {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::SraI => format!("srai {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::SltI => format!("slti {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::SltIU => format!("sltiu {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::Beq => format!("beq {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        InsnKind::Bne => format!("bne {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        InsnKind::Blt => format!("blt {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        InsnKind::Bge => format!("bge {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        InsnKind::BltU => format!("bltu {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        InsnKind::BgeU => format!("bgeu {rs1}, {rs2}, {}", decoded.imm_b() as i32),
+        InsnKind::Jal => format!("jal {rd}, {}", decoded.imm_j() as i32),
+        InsnKind::JalR => format!("jalr {rd}, {rs1}, {}", decoded.imm_i() as i32),
+        InsnKind::Lui => format!("lui {rd}, {:#010x}", decoded.imm_u() >> 12),
+        InsnKind::Auipc => format!("auipc {rd}, {:#010x}", decoded.imm_u() >> 12),
+        InsnKind::Mul => format!("mul {rd}, {rs1}, {rs2}"),
+        InsnKind::MulH => format!("mulh {rd}, {rs1}, {rs2}"),
+        InsnKind::MulHSU => format!("mulhsu {rd}, {rs1}, {rs2}"),
+        InsnKind::MulHU => format!("mulhu {rd}, {rs1}, {rs2}"),
+        InsnKind::Div => format!("div {rd}, {rs1}, {rs2}"),
+        InsnKind::DivU => format!("divu {rd}, {rs1}, {rs2}"),
+        InsnKind::Rem => format!("rem {rd}, {rs1}, {rs2}"),
+        InsnKind::RemU => format!("remu {rd}, {rs1}, {rs2}"),
+        InsnKind::Lb => format!("lb {rd}, {}({rs1})", decoded.imm_i() as i32),
+        InsnKind::Lh => format!("lh {rd}, {}({rs1})", decoded.imm_i() as i32),
+        InsnKind::Lw => format!("lw {rd}, {}({rs1})", decoded.imm_i() as i32),
+        InsnKind::LbU => format!("lbu {rd}, {}({rs1})", decoded.imm_i() as i32),
+        InsnKind::LhU => format!("lhu {rd}, {}({rs1})", decoded.imm_i() as i32),
+        InsnKind::Sb => format!("sb {rs2}, {}({rs1})", decoded.imm_s() as i32),
+        InsnKind::Sh => format!("sh {rs2}, {}({rs1})", decoded.imm_s() as i32),
+        InsnKind::Sw => format!("sw {rs2}, {}({rs1})", decoded.imm_s() as i32),
         InsnKind::Eany => match decoded.rs2 {
             0 => "ecall".to_string(),
             1 => "ebreak".to_string(),
             _ => "illegal eany".to_string(),
         },
         InsnKind::Mret => "mret".to_string(),
-    }
-}
-
-impl InsnKind {
-    pub fn major(&self) -> u8 {
-        (*self as u32 / 8) as u8
-    }
-
-    pub fn minor(&self) -> u8 {
-        (*self as u32 % 8) as u8
     }
 }
