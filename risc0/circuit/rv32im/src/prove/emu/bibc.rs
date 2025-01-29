@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::ops::Shl;
 use std::io::Read;
 
 use anyhow::{anyhow, Result};
@@ -165,7 +164,7 @@ impl Program {
                     let mut value = Natural::from(0_u64);
                     for i in 0..words {
                         let word: u64 = self.constants[offset + i];
-                        value |= Natural::from(word.shl(i * 64));
+                        value |= Natural::from(word) << (i * 64);
                     }
                     regs[op_index] = Integer::from(value);
                 }

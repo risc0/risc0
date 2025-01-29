@@ -882,7 +882,9 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let bytes = self.preflight.load_region(addr.into(), count)?;
+        let bytes = self
+            .preflight
+            .peek_region(addr.waddr(), count / WORD_SIZE as u32)?;
         Ok(bytes_le_to_bigint(&bytes))
     }
 
