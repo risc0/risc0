@@ -23,6 +23,7 @@ use std::{
 
 use anyhow::{anyhow, bail, ensure, Result};
 use derive_more::Debug;
+use malachite::Natural;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
@@ -36,7 +37,6 @@ use risc0_zkvm_platform::{
     syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     WORD_SIZE,
 };
-use rug::{integer::Order, Integer};
 use sha2::digest::generic_array::GenericArray;
 
 use self::bigint2::{
@@ -688,12 +688,12 @@ impl Preflight {
             }
         }
 
-        let n = Integer::from_digits(&n, Order::Lsf);
-        let x = Integer::from_digits(&x, Order::Lsf);
-        let y = Integer::from_digits(&y, Order::Lsf);
+        let n = Natural::from_limbs_asc(&n);
+        let x = Natural::from_limbs_asc(&x);
+        let y = Natural::from_limbs_asc(&y);
 
         // Perform multiplication or modular multiplication
-        let z = if n.is_zero() {
+        let z = if n == 0 {
             // If n == 0, just multiply
             x * y
         } else {
@@ -701,12 +701,13 @@ impl Preflight {
             (x * y) % n
         };
 
-        let z_bytes = z.to_digits::<u32>(rug::integer::Order::Lsf);
-        let z_words: Vec<_> = z_bytes
-            .into_iter()
-            .chain(std::iter::repeat(0))
-            .take(bigint::WIDTH_WORDS)
-            .collect();
+        let out_limbs = z.into_limbs_asc();
+        let mut z_words = [0u32; bigint::WIDTH_WORDS];
+        // resize the z to bigint width
+        for i in 0..bigint::WIDTH_WORDS {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            z_words[i] = limb.to_le();
+        }
 
         // tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
 
@@ -876,32 +877,35 @@ impl<'a> BigInt2Witness<'a> {
 }
 
 impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Integer> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let bytes = self
-            .preflight
-            .peek_region(addr.waddr(), count / WORD_SIZE as u32)?;
-        Ok(Integer::from_digits(&bytes, Order::LsfLe))
+
+        let mut arr = [0u32; bigint::WIDTH_WORDS];
+        assert!(count <= bigint::WIDTH_WORDS as u32);
+        for i in 0..count {
+            arr[i as usize] = self
+                .preflight
+                .load_u32((addr + (i * WORD_SIZE as u32)).into())?
+                .to_le();
+        }
+        Ok(Natural::from_limbs_asc(&arr))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Integer) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         // tracing::debug!(
         //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
         // );
         let addr = addr.waddr();
-        let mut words = value.to_digits(Order::LsfLe);
-        let word_count = count as usize / WORD_SIZE;
-        if words.len() < word_count {
-            words.resize(word_count, 0);
+        let out_limbs = value.to_limbs_asc();
+        for i in 0..count as usize {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            self.witness.insert(addr + i, limb.to_le());
         }
-        ensure!(words.len() == word_count);
-        for (i, word) in words.iter().enumerate() {
-            self.witness.insert(addr + i, *word);
-        }
+
         Ok(())
     }
 }

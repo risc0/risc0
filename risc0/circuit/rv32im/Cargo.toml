@@ -37,6 +37,7 @@ derive_more = { version = "1.0", features = ["debug"], optional = true }
 enum-map = { version = "2.7.3", optional = true }
 lazy-regex = { version = "3.3", optional = true }
 rug = { version = "1.27.0", optional = true, default-features = false, features = ["integer", "std"] }
+malachite = { version = "0.4", optional = true, default-features = false, features = ["naturals_and_integers", "32_bit_limbs"] }
 num-derive = { version = "0.4", optional = true }
 num-traits = { version = "0.2", optional = true }
 rand = { version = "0.8", optional = true }
@@ -70,6 +71,7 @@ prove = [
   "dep:enum-map",
   "dep:lazy-regex",
   "dep:rug",
+  "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",
   "dep:rand",

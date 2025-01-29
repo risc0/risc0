@@ -17,9 +17,12 @@ use std::io::Read;
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
+use malachite::{
+    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
+    Natural,
+};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
-use rug::{Assign, Integer};
 
 #[derive(Debug)]
 pub(crate) struct Type {
@@ -66,9 +69,9 @@ pub(crate) struct Program {
 }
 
 pub(crate) trait BigIntIO {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Integer>;
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural>;
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Integer) -> Result<()>;
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()>;
 }
 
 impl Op {
@@ -152,17 +155,17 @@ impl Program {
     }
 
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
-        let mut regs = vec![Integer::ZERO; self.ops.len()];
+        let mut regs = vec![Natural::ZERO; self.ops.len()];
         for (op_index, op) in self.ops.iter().enumerate() {
             tracing::debug!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
                     let offset = op.a;
                     let words = op.b;
-                    let mut value = Integer::from(0_u64);
+                    let mut value = Natural::from(0_u64);
                     for i in 0..words {
                         let word: u64 = self.constants[offset + i];
-                        value |= word.shl(i * 64);
+                        value |= Natural::from(word.shl(i * 64));
                     }
                     regs[op_index] = value;
                 }
@@ -180,27 +183,29 @@ impl Program {
                 }
                 OpCode::Add => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
-                    dst.assign(lhs + rhs);
+                    *dst = lhs + rhs;
                 }
                 OpCode::Sub => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
-                    dst.assign(lhs - rhs);
+                    *dst = lhs - rhs;
                 }
                 OpCode::Mul => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
-                    dst.assign(lhs * rhs);
+                    *dst = lhs * rhs;
                 }
                 OpCode::Rem => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
-                    dst.assign(lhs % rhs);
+                    *dst = lhs % rhs;
                 }
                 OpCode::Quo => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
-                    dst.assign(lhs / rhs);
+                    *dst = lhs / rhs;
                 }
                 OpCode::Inv => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
-                    dst.assign(lhs.clone().invert(rhs).unwrap()); // TODO unwrap and clone
+                    *dst = lhs
+                        .mod_inverse(rhs)
+                        .ok_or_else(|| anyhow!("divide by zero"))?;
                 }
             }
         }
@@ -208,35 +213,19 @@ impl Program {
     }
 }
 
-// fn operands<'p>(op: &Op, op_index: usize, regs: &'p [Integer]) -> (&'p Integer, &'p Integer) {
-//     assert!(op.a < op_index);
-//     assert!(op.b < op_index);
-//     (&regs[op.a], &regs[op.b])
-// }
-
 fn operands_mut<'a>(
     op: &Op,
     op_index: usize,
-    regs: &'a mut [Integer],
-) -> (&'a Integer, &'a Integer, &'a mut Integer) {
+    regs: &'a mut [Natural],
+) -> (&'a Natural, &'a Natural, &'a mut Natural) {
     assert!(op.a < op_index);
     assert!(op.b < op_index);
-    // op_index must be strictly greater than a and b.
-
-    // 1) Split the slice at `op_index`.
-    //    - `prefix` is `[0..op_index]` (indices 0 through op_index-1).
-    //    - `suffix` is `[op_index..]` (indices op_index through end).
     let (prefix, suffix) = regs.split_at_mut(op_index);
 
-    // 2) `prefix` can be borrowed immutably for `lhs` and `rhs`.
     let lhs = &prefix[op.a];
     let rhs = &prefix[op.b];
 
-    // 3) `suffix` starts exactly at `op_index`, so `suffix[0]` is `regs[op_index]`.
     let dst = &mut suffix[0];
 
-    // 4) Now we have disjoint references:
-    //    - `lhs`, `rhs` from the prefix (immutable)
-    //    - `dst` from the suffix (mutable)
     (lhs, rhs, dst)
 }

@@ -19,6 +19,7 @@ use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
 use anyhow::{anyhow, bail, ensure, Result};
 use enum_map::{Enum, EnumMap};
+use malachite::Natural;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -34,7 +35,6 @@ use risc0_zkvm_platform::{
     syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     PAGE_SIZE, WORD_SIZE,
 };
-use rug::{integer::Order, Integer};
 use sha2::digest::generic_array::GenericArray;
 
 use super::{
@@ -551,15 +551,15 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let y_ptr = self.load_aligned_guest_addr_from_register(REG_A3)?;
         let n_ptr = self.load_aligned_guest_addr_from_register(REG_A4)?;
 
-        let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<Integer> {
-            // TODO: Can we load as Vec<u8> and Integer::from_digits that?
+        let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<Natural> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for (i, word) in arr.iter_mut().enumerate() {
                 *word = self
                     .load_u32_from_guest(ptr + (i * WORD_SIZE) as u32)?
                     .to_le();
             }
-            Ok(Integer::from_digits(&arr, rug::integer::Order::Lsf))
+
+            Ok(Natural::from_limbs_asc(&arr))
         };
 
         if op != 0 {
@@ -574,15 +574,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         // Compute modular multiplication, or simply multiplication if n == 0
         let z = if n == 0 { x * y } else { (x * y) % n };
 
-        // Store result
-        let bytes = z.to_digits::<u8>(rug::integer::Order::Lsf);
-        let bytes: Vec<_> = bytes
-            .into_iter()
-            .chain(std::iter::repeat(0))
-            .take(bigint::WIDTH_BYTES)
-            .collect();
-
-        self.store_region_into_guest(z_ptr, &bytes)?;
+        let out_limbs = z.into_limbs_asc();
+        for i in 0..bigint::WIDTH_WORDS {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            self.store_memory((z_ptr + (i as u32 * 4)).into(), limb.to_le())?;
+        }
 
         self.pending.ecall = Some(EcallKind::BigInt);
         self.pending.cycles += BIGINT_CYCLES;
@@ -745,25 +741,59 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
+fn bytes_le_to_natural(bytes: &[u8]) -> Natural {
+    let mut limbs = Vec::with_capacity((bytes.len() + 3) / 4);
+
+    for chunk in bytes.chunks(4) {
+        let mut arr = [0u8; 4];
+        arr[..chunk.len()].copy_from_slice(chunk);
+        limbs.push(u32::from_le_bytes(arr));
+    }
+
+    Natural::from_limbs_asc(&limbs)
+}
+
+fn natural_to_bytes_le(value: &Natural) -> Vec<u8> {
+    let limbs = value.to_limbs_asc();
+    let mut out = Vec::with_capacity(limbs.len() * 4);
+
+    for limb in limbs {
+        out.extend_from_slice(&limb.to_le_bytes());
+    }
+    out
+}
+
 impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Integer> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
-        Ok(Integer::from_digits(&bytes, Order::LsfLe))
+        Ok(bytes_le_to_natural(&bytes))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Integer) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
         tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let mut bytes = value.to_digits(Order::LsfLe);
-        if bytes.len() < count as usize {
+        let mut bytes = natural_to_bytes_le(value);
+
+        if bytes.len() > count as usize {
+            bytes.truncate(count as usize);
+        } else if bytes.len() < count as usize {
             bytes.resize(count as usize, 0);
         }
-        ensure!(bytes.len() == count as usize);
-        self.store_region_into_guest(addr, &bytes)
+
+        ensure!(
+            bytes.len() == count as usize,
+            "Expected exactly {} bytes, got {}",
+            count,
+            bytes.len()
+        );
+
+        self.store_region_into_guest(addr, &bytes)?;
+
+        Ok(())
     }
 }
 
