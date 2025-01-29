@@ -14,11 +14,15 @@
 
 use core::ops::Shl;
 use std::io::Read;
+use std::ops::Rem;
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
 use malachite::{
-    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
+    num::{
+        arithmetic::traits::{ModInverse, SaturatingSub},
+        basic::traits::Zero,
+    },
     Natural,
 };
 use num_derive::FromPrimitive;
@@ -187,7 +191,7 @@ impl Program {
                 }
                 OpCode::Sub => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
-                    *dst = lhs - rhs;
+                    *dst = lhs.saturating_sub(rhs);
                 }
                 OpCode::Mul => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
@@ -204,6 +208,7 @@ impl Program {
                 OpCode::Inv => {
                     let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
                     *dst = lhs
+                        .rem(rhs)
                         .mod_inverse(rhs)
                         .ok_or_else(|| anyhow!("divide by zero"))?;
                 }
