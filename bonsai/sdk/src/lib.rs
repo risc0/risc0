@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -146,6 +146,7 @@ use duplicate::duplicate_item;
 use reqwest::header;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+use std::time::Duration;
 use thiserror::Error;
 
 /// HTTP header key for the API key
@@ -156,6 +157,10 @@ pub const VERSION_HEADER: &str = "x-risc0-version";
 pub const API_URL_ENVVAR: &str = "BONSAI_API_URL";
 /// Environment variable name for the API key
 pub const API_KEY_ENVVAR: &str = "BONSAI_API_KEY";
+/// Environment variable name for the timeout, either a number in ms or "none" for no timeout
+pub const TIMEOUT_ENVVAR: &str = "BONSAI_TIMEOUT_MS";
+/// Default timeout in ms if env var is not set
+const DEFAULT_TIMEOUT: u64 = 30000;
 
 /// Bonsai Alpha SDK error classes
 #[derive(Debug, Error)]
@@ -487,10 +492,18 @@ pub mod module_type {
         headers.insert(API_KEY_HEADER, header::HeaderValue::from_str(api_key)?);
         headers.insert(VERSION_HEADER, header::HeaderValue::from_str(version)?);
 
+        let timeout = match std::env::var(TIMEOUT_ENVVAR).as_deref() {
+            Ok("none") => None,
+            Ok(val) => Some(Duration::from_millis(
+                val.parse().unwrap_or(DEFAULT_TIMEOUT),
+            )),
+            Err(_) => Some(Duration::from_millis(DEFAULT_TIMEOUT)),
+        };
+
         Ok(HttpClient::builder()
             .default_headers(headers)
             .pool_max_idle_per_host(0)
-            .timeout(None)
+            .timeout(timeout)
             .build()?)
     }
 
