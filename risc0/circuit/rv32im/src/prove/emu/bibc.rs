@@ -162,12 +162,12 @@ impl Program {
                 OpCode::Const => {
                     let offset = op.a;
                     let words = op.b;
-                    let mut value = Integer::from(0_u64);
+                    let mut value = Natural::from(0_u64);
                     for i in 0..words {
                         let word: u64 = self.constants[offset + i];
-                        value |= Integer::from(word.shl(i * 64));
+                        value |= Natural::from(word.shl(i * 64));
                     }
-                    regs[op_index] = value;
+                    regs[op_index] = Integer::from(value);
                 }
                 OpCode::Load => {
                     let typ = &self.types[op.result_type];
