@@ -48,7 +48,7 @@ impl Syscall for SysVerify2 {
             .try_into()
             .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
 
-        tracing::debug!(
+        tracing::info!(
             "SYS_VERIFY_INTEGRITY2: ({}, {})",
             claim_digest,
             control_root

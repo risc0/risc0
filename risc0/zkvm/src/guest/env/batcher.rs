@@ -15,6 +15,7 @@
 use core::ptr::addr_of;
 
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
+use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
 
@@ -67,7 +68,7 @@ impl Keccak2Batcher {
     pub fn finalize(mut self) {
         self.flush();
         if let Ok(claim_digest) = self.mmr.root() {
-            crate::guest::env::verify_assumption2(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
+            crate::guest::env::verify_assumption2(claim_digest, ALLOWED_CONTROL_ROOT).unwrap();
         }
     }
 

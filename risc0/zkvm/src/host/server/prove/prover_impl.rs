@@ -136,18 +136,18 @@ impl ProverServer for ProverImpl {
             MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
-            tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
+            tracing::info!("adding keccak assumption: {}", receipt.claim.digest());
             keccak_receipts.insert(receipt)?;
         }
 
         if let Ok(root_receipt) = keccak_receipts.root() {
-            zkr_receipts.insert(
-                Assumption {
-                    claim: root_receipt.claim.digest(),
-                    control_root: root_receipt.control_root()?,
-                },
-                root_receipt.clone(),
-            );
+            let assumption = Assumption {
+                claim: root_receipt.claim.digest(),
+                control_root: root_receipt.control_root()?,
+            };
+
+            tracing::info!("keccak root assumption: {:?}", assumption);
+            zkr_receipts.insert(assumption, root_receipt.clone());
         }
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
