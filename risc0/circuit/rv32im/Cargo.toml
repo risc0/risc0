@@ -34,8 +34,8 @@ crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
 derive_more = { version = "1.0", features = ["debug"], optional = true }
 enum-map = { version = "2.7.3", optional = true }
+ibig = { version = "0.3.6" }
 lazy-regex = { version = "3.3", optional = true }
-num-bigint = { version = "0.4.6", optional = true, default-features = false }
 num-derive = { version = "0.4", optional = true }
 num-traits = { version = "0.2", optional = true }
 rand = { version = "0.8", optional = true }
@@ -68,7 +68,6 @@ prove = [
   "dep:derive_more",
   "dep:enum-map",
   "dep:lazy-regex",
-  "dep:num-bigint",
   "dep:num-derive",
   "dep:num-traits",
   "dep:rand",

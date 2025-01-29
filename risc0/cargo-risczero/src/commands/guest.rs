@@ -173,7 +173,7 @@ impl GuestCommand {
             child
                 .stdout
                 .take()
-                .ok_or(anyhow!("failed to read from cmd stdout"))?,
+                .ok_or_else(|| anyhow!("failed to read from cmd stdout"))?,
         );
         let mut tests: Vec<String> = Vec::new();
         for message in Message::parse_stream(reader) {

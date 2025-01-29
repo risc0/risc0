@@ -801,6 +801,9 @@ fn build_env<'a>(
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
+    if let Some(keccak_max_po2) = request.keccak_max_po2 {
+        env_builder.keccak_max_po2(keccak_max_po2)?;
+    }
     env_builder.session_limit(request.session_limit);
     if request.trace_events.is_some() {
         let proxy = TraceProxy::new(conn.clone());

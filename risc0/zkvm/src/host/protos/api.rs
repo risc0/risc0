@@ -393,6 +393,8 @@ pub struct ExecutorEnv {
     pub segment_path: ::prost::alloc::string::String,
     #[prost(bool, tag = "13")]
     pub coprocessor: bool,
+    #[prost(uint32, optional, tag = "14")]
+    pub keccak_max_po2: ::core::option::Option<u32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
