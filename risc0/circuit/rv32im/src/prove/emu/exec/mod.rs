@@ -741,7 +741,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-fn bytes_le_to_natural(bytes: &[u8]) -> Natural {
+pub(crate) fn bytes_le_to_bigint(bytes: &[u8]) -> Natural {
     let mut limbs = Vec::with_capacity((bytes.len() + 3) / 4);
 
     for chunk in bytes.chunks(4) {
@@ -753,7 +753,7 @@ fn bytes_le_to_natural(bytes: &[u8]) -> Natural {
     Natural::from_limbs_asc(&limbs)
 }
 
-fn natural_to_bytes_le(value: &Natural) -> Vec<u8> {
+pub(crate) fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
     let limbs = value.to_limbs_asc();
     let mut out = Vec::with_capacity(limbs.len() * 4);
 
@@ -769,14 +769,16 @@ impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
-        Ok(bytes_le_to_natural(&bytes))
+        let val = bytes_le_to_bigint(&bytes);
+        tracing::debug!("load: {val}");
+        Ok(val)
     }
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
         tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let mut bytes = natural_to_bytes_le(value);
+        let mut bytes = bigint_to_bytes_le(value);
 
         if bytes.len() > count as usize {
             bytes.truncate(count as usize);

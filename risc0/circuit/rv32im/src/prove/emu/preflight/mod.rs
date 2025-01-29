@@ -44,6 +44,7 @@ use self::bigint2::{
 };
 use super::{
     bibc,
+    exec::bytes_le_to_bigint,
     mux::{Major, TopMux},
     pager::{PagedMemory, PAGE_WORDS},
     rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, Instruction, TrapCause},
@@ -881,16 +882,8 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-
-        let mut arr = [0u32; bigint::WIDTH_WORDS];
-        assert!(count <= bigint::WIDTH_WORDS as u32);
-        for i in 0..count {
-            arr[i as usize] = self
-                .preflight
-                .load_u32((addr + (i * WORD_SIZE as u32)).into())?
-                .to_le();
-        }
-        Ok(Natural::from_limbs_asc(&arr))
+        let bytes = self.preflight.load_region(addr.into(), count)?;
+        Ok(bytes_le_to_bigint(&bytes))
     }
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
@@ -899,6 +892,7 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
         // tracing::debug!(
         //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
         // );
+
         let addr = addr.waddr();
         let out_limbs = value.to_limbs_asc();
         for i in 0..count as usize {
