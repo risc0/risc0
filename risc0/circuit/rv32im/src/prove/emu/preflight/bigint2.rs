@@ -120,14 +120,14 @@ impl ProgramState {
                 self.poly = BytePolynomial::zero();
             }
             PolyOp::Carry1 => {
-                let neg_poly = BytePolynomial::new(vec![-128; BIGINT2_WIDTH_BYTES]);
+                let neg_poly = BytePolynomial::new(&[-128; BIGINT2_WIDTH_BYTES]);
                 self.poly = &self.poly + (delta_poly + neg_poly) * 64 * 256;
             }
             PolyOp::Carry2 => {
                 self.poly = &self.poly + delta_poly * 256;
             }
             PolyOp::EqZero => {
-                let bp = BytePolynomial::new(vec![-256, 1]);
+                let bp = BytePolynomial::new(&[-256, 1]);
                 self.total = &self.total + bp * &new_poly;
                 self.total.eqz()?;
                 self.reset();
@@ -155,9 +155,9 @@ impl ProgramState {
 }
 
 impl BytePolynomial {
-    pub fn new(coeffs: Vec<i32>) -> Self {
+    pub fn new(coeffs: &[i32]) -> Self {
         Self {
-            coeffs: SmallVec::from(coeffs),
+            coeffs: SmallVec::from_slice(coeffs),
         }
     }
 

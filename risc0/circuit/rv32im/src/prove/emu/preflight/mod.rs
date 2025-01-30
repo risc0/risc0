@@ -844,7 +844,8 @@ impl Preflight {
             }
         }
 
-        let delta_poly = BytePolynomial::new(ret.iter().map(|x| *x as i32).collect());
+        let delta_poly =
+            BytePolynomial::new(bytemuck::cast::<_, [i32; BIGINT2_WIDTH_BYTES]>(ret).as_slice());
         state.update(insn, &delta_poly)?;
 
         if insn.mem_op != MemoryOp::Read {
