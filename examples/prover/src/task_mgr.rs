@@ -133,6 +133,8 @@ impl TaskManager {
                     kind: JobKind::Receipt(Box::new(receipt.clone())),
                 }
             }
+            Command::Keccak => todo!(),
+            Command::Union => todo!(),
         };
         self.pool.execute_to(self.job_tx.clone(), job);
     }

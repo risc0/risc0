@@ -24,6 +24,8 @@ pub enum PlannerErr {
 pub enum Command {
     Finalize,
     Join,
+    Keccak,
+    Union,
     Segment,
 }
 
@@ -47,6 +49,16 @@ impl Task {
         }
     }
 
+    pub fn new_keccak(task_number: usize, segment_idx: u32) -> Self {
+        Task {
+            task_number,
+            task_height: 0,
+            command: Command::Keccak,
+            depends_on: Vec::new(),
+            segment_idx: Some(segment_idx),
+        }
+    }
+
     pub fn new_join(task_number: usize, task_height: u32, left: usize, right: usize) -> Self {
         Task {
             task_number,
@@ -63,6 +75,16 @@ impl Task {
             task_height,
             command: Command::Finalize,
             depends_on: vec![depends_on],
+            segment_idx: None,
+        }
+    }
+
+    pub fn new_union(task_number: usize, task_height: u32, left: usize, right: usize) -> Self {
+        Task {
+            task_number,
+            task_height,
+            command: Command::Union,
+            depends_on: vec![left, right],
             segment_idx: None,
         }
     }
@@ -178,6 +200,14 @@ impl Planner {
         task_number
     }
 
+    fn enqueue_union(&mut self, _left: usize, _right: usize) -> usize {
+        todo!()
+    }
+
+    pub fn enqueue_keccak(&mut self, _segment_idx: u32) -> Result<usize, PlannerErr> {
+        todo!()
+    }
+
     fn next_task_number(&self) -> usize {
         self.task_count()
     }
@@ -213,6 +243,8 @@ impl std::fmt::Debug for Planner {
                 Command::Segment => {
                     write!(f, "{:?} Segment", task.task_number)?;
                 }
+                Command::Keccak => todo!(),
+                Command::Union => todo!(),
             }
         }
 
