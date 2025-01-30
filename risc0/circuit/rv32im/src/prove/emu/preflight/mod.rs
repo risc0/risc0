@@ -897,7 +897,7 @@ impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
 
         let addr = addr.waddr();
         let out_limbs = value.to_limbs_asc();
-        for i in 0..count as usize {
+        for i in 0..count as usize / WORD_SIZE {
             let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
             self.witness.insert(addr + i, limb.to_le());
         }
