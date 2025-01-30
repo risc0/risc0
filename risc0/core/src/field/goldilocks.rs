@@ -57,7 +57,6 @@ impl Default for Elem {
 /// 1. Start with all 64-bits of ones
 /// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros: `(2^64 - 2^32)`
 /// 3. Add one to get `2^64 - 2^32 + 1`
-
 const P: u64 = (0xffffffff_ffffffff << 32) + 1;
 
 impl field::Elem for Elem {
