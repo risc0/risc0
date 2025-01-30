@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::io::Read;
+use std::ops::Rem;
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -206,6 +207,7 @@ impl Program {
                     let rhs = rhs.unsigned_abs_ref();
 
                     *dst = lhs
+                        .rem(rhs)
                         .mod_inverse(rhs)
                         .ok_or_else(|| anyhow!("divide by zero"))?
                         .into();
