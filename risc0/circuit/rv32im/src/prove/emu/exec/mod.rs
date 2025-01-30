@@ -20,7 +20,7 @@ use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use enum_map::{Enum, EnumMap};
-use num_bigint::BigUint;
+use ibig::UBig;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -741,19 +741,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 }
 
 impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
         tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
-        Ok(BigUint::from_bytes_le(&bytes))
+        Ok(UBig::from_le_bytes(&bytes))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()> {
         tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let mut bytes = value.to_bytes_le();
+        let mut bytes = value.to_le_bytes();
         if bytes.len() < count as usize {
             bytes.resize(count as usize, 0);
         }

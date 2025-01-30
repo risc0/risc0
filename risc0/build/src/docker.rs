@@ -44,13 +44,10 @@ pub enum BuildStatus {
 }
 
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(
-    manifest_path: &Path,
-    src_dir: &Path,
-    guest_opts: &GuestOptions,
-) -> Result<BuildStatus> {
+pub fn docker_build(manifest_path: &Path, guest_opts: &GuestOptions) -> Result<BuildStatus> {
     let manifest_dir = manifest_path.parent().unwrap().canonicalize().unwrap();
     let pkg = get_package(manifest_dir);
+    let src_dir = guest_opts.use_docker.clone().unwrap_or_default().root_dir();
     let guest_opts = guest_opts.clone();
     let guest_info = GuestInfo {
         options: guest_opts.clone(),
@@ -58,12 +55,11 @@ pub fn docker_build(
     };
     let pkg_name = pkg.name.replace('-', "_");
     let target_dir = src_dir.join(TARGET_DIR).join(pkg_name);
-    build_guest_package_docker(&pkg, src_dir, &target_dir, &guest_info)
+    build_guest_package_docker(&pkg, &target_dir, &guest_info)
 }
 
 pub(crate) fn build_guest_package_docker(
     pkg: &Package,
-    src_dir: impl AsRef<Path>,
     target_dir: impl AsRef<Path>,
     guest_info: &GuestInfo,
 ) -> Result<BuildStatus> {
@@ -72,7 +68,13 @@ pub(crate) fn build_guest_package_docker(
         return Ok(BuildStatus::Skipped);
     }
 
-    let src_dir = src_dir.as_ref().canonicalize()?;
+    let src_dir = guest_info
+        .options
+        .use_docker
+        .clone()
+        .unwrap_or_default()
+        .root_dir()
+        .canonicalize()?;
 
     eprintln!("Docker context: {src_dir:?}");
     eprintln!(
@@ -158,7 +160,15 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
         )])
-        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
+        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
+
+    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
+    let docker_env = docker_opts.env();
+    if !docker_env.is_empty() {
+        build = build.env(&docker_env);
+    }
+
+    build = build
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)
@@ -213,7 +223,7 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use crate::{build_package, GuestListEntry};
+    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
 
     use super::*;
 
@@ -224,13 +234,15 @@ mod test {
         let manifest_path = Path::new(manifest_path);
         let manifest_dir = manifest_path.parent().unwrap().canonicalize().unwrap();
         let pkg = get_package(manifest_dir);
-        let options = GuestOptions {
-            features: vec![],
-            use_docker: Some(crate::DockerOptions {
-                root_dir: Some(src_dir),
-            }),
-        };
-        build_package(&pkg, target_dir, options).unwrap()
+        let docker_opts = DockerOptionsBuilder::default()
+            .root_dir(src_dir)
+            .build()
+            .unwrap();
+        let guest_opts = GuestOptionsBuilder::default()
+            .use_docker(docker_opts)
+            .build()
+            .unwrap();
+        build_package(&pkg, target_dir, guest_opts).unwrap()
     }
 
     fn compare_image_id(guest_list: &[GuestListEntry], name: &str, expected: &str) {
@@ -251,7 +263,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "d92d109df21512f96ffbdfff877ea79bcde3121229a9771bbe0dfc95a6ed5570",
+            "6f52b77974aeef81fa57bd91926cdaebc11a0288506a68dcb73444b563e702b4",
         );
     }
 }

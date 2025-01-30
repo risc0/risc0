@@ -12,28 +12,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::PathBuf;
+use std::{env, path::PathBuf};
 
 use cargo_metadata::Package;
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
 /// Options for configuring a docker build environment.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Builder)]
+#[builder(default)]
+#[non_exhaustive]
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///
-    /// The current working directory is used if `None` is specified.
+    /// The current working directory is used if this option is unspecified.
+    #[builder(setter(into, strip_option))]
     pub root_dir: Option<PathBuf>,
+
+    /// Additional environment variables for the build container.
+    pub env: Vec<(String, String)>,
+}
+
+impl DockerOptions {
+    /// Get the configured root dir, or current working directory if None.
+    pub fn root_dir(&self) -> PathBuf {
+        self.root_dir
+            .clone()
+            .unwrap_or_else(|| env::current_dir().unwrap())
+    }
+
+    /// Get the configured custom environment variables.
+    pub fn env(&self) -> Vec<(&str, &str)> {
+        self.env
+            .iter()
+            .map(|(key, val)| (key.as_str(), val.as_str()))
+            .collect()
+    }
 }
 
 /// Options defining how to embed a guest package in
 /// [`crate::embed_methods_with_options`].
-#[derive(Default, Clone)]
+///
+/// ```
+/// use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
+///
+/// let docker_options = DockerOptionsBuilder::default()
+///     .root_dir("../../")
+///     .env(vec![("ENV_VAR".to_string(), "value".to_string())])
+///     .build()
+///     .unwrap();
+///
+/// let guest_options = GuestOptionsBuilder::default()
+///     .features(vec!["my-features".to_string()])
+///     .use_docker(docker_options)
+///     .build()
+///     .unwrap();
+/// ```
+#[derive(Default, Clone, Debug, Builder)]
+#[builder(default)]
+#[non_exhaustive]
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
 
     /// Use a docker environment for building.
+    #[builder(setter(strip_option))]
     pub use_docker: Option<DockerOptions>,
 }
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashSet},
     io::Cursor,
     str::from_utf8,
     sync::Mutex,
@@ -1228,6 +1228,7 @@ fn heap_alloc(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
         .write(&6_u32)
         .unwrap()
+        .env_var("ALL_FORKS", "testing")
         .build()
         .unwrap();
     let session = execute_elf(version, env, HEAP_ELF).unwrap();
@@ -1248,12 +1249,11 @@ fn keccak_update(#[case] version: TestVersion) {
 
 #[apply(base)]
 fn keccak_update2(#[case] version: TestVersion) {
-    let mut vars = HashMap::new();
-    vars.insert("RISC0_KECCAK_PO2".to_string(), 15u32.to_string());
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUpdate2)
         .unwrap()
-        .env_vars(vars)
+        .keccak_max_po2(15)
+        .unwrap()
         .build()
         .unwrap();
     let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();

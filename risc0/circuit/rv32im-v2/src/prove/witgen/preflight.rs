@@ -509,7 +509,7 @@ impl<'a> Risc0Context for Preflight<'a> {
         let word = if addr >= MERKLE_TREE_START_ADDR {
             self.page_memory
                 .get(&addr)
-                .ok_or(anyhow!("Invalid load from page memory"))?
+                .ok_or_else(|| anyhow!("Invalid load from page memory"))?
         } else {
             self.pager.load(addr)?
         };
@@ -532,7 +532,7 @@ impl<'a> Risc0Context for Preflight<'a> {
         let prev_word = if addr >= MEMORY_END_ADDR {
             self.page_memory
                 .insert(&addr, word)
-                .ok_or(anyhow!("Invalid store to page memory"))?
+                .ok_or_else(|| anyhow!("Invalid store to page memory"))?
         } else {
             let prev_word = self.pager.load(addr)?;
             self.pager.store(addr, word)?;
