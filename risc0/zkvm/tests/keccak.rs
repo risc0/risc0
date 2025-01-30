@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ use risc0_zkp::{
 };
 use risc0_zkvm::{get_prover_server, recursion::MerkleGroup, ExecutorEnv, ProverOpts};
 
-fn run_test(po2: usize, claim_digest: Digest) {
-    let to_guest: (Digest, u32) = (claim_digest, po2 as u32);
+fn run_test(po2: u32, claim_digest: Digest) {
+    let to_guest: (Digest, u32) = (claim_digest, po2);
 
     let env = ExecutorEnv::builder()
         .write(&to_guest)
+        .unwrap()
+        .keccak_max_po2(po2)
         .unwrap()
         .build()
         .unwrap();
@@ -55,7 +57,7 @@ fn run_test(po2: usize, claim_digest: Digest) {
 fn keccak_po2_16() {
     run_test(
         16,
-        digest!("822a0c0b9cd04788833b9366addf8343c27563733ec1f3fc4ca405915e1ae162"),
+        digest!("b83c10da0c23587bf318cbcec2c2ac0260dbd6c0fa6905df639f8f6056f0d56c"),
     );
 }
 
@@ -64,7 +66,7 @@ fn keccak_po2_16() {
 fn keccak_po2_17() {
     run_test(
         17,
-        digest!("a1b1e7b58b6e1ab761bd4f55cc763d9eef886b26e0942e4a3916d0c465f3d962"),
+        digest!("a920de1111b7fa680c29f0dbd8eea64a3b9e2994de1b242e30f53fd8cd727ba2"),
     );
 }
 

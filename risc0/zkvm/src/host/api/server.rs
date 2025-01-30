@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -801,6 +801,9 @@ fn build_env<'a>(
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
+    if let Some(keccak_max_po2) = request.keccak_max_po2 {
+        env_builder.keccak_max_po2(keccak_max_po2)?;
+    }
     env_builder.session_limit(request.session_limit);
     if request.trace_events.is_some() {
         let proxy = TraceProxy::new(conn.clone());
@@ -1022,8 +1025,8 @@ fn send_segment_done_msg(
 ) -> Result<()> {
     let segment = Some(pb::api::SegmentInfo {
         index: segment.index,
-        po2: segment.inner.po2 as u32,
-        cycles: segment.inner.insn_cycles as u32,
+        po2: segment.po2() as u32,
+        cycles: segment.user_cycles(),
         segment: some_asset,
     });
 

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ use std::{
     collections::HashMap,
     default::Default,
     env,
+    ffi::OsStr,
+    fmt::Write as _,
     fs::{self, File},
     io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
@@ -34,65 +36,23 @@ use std::{
 
 use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
-use risc0_binfmt::compute_image_id;
-use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
+use config::GuestMetadata;
+use risc0_binfmt::KERNEL_START_ADDR;
+use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-use self::{
-    config::{GuestBuildOptions, GuestMetadata},
-    docker::build_guest_package_docker,
-};
+use self::{config::GuestInfo, docker::build_guest_package_docker};
 
 pub use self::{
-    config::{DockerOptions, GuestOptions},
+    config::{
+        DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
+        GuestOptionsBuilder, GuestOptionsBuilderError,
+    },
     docker::{docker_build, BuildStatus, TARGET_DIR},
 };
 
-/// This const represents a filename that is used in the use to indicate to in
-/// order to indicate to the client and the risc0-build crate that the new rust
-/// implementation of rzup is in use. The rust implementation of rzup will place
-/// a file with this name under `$RISC0_HOME`.
-pub const RUST_RZUP_INDICATOR: &str = ".rzup";
-
-const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
-
-/// Get the path used by cargo-risczero that stores downloaded toolchains
-pub fn risc0_data() -> Result<PathBuf> {
-    risc0_data_new().or_else(|_| risc0_data_compat())
-}
-
-// use the new location from rzup install.
-fn risc0_data_new() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = std::env::var("RISC0_HOME") {
-        dir.into()
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".risc0")
-    } else {
-        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
-    };
-
-    if !dir.join(RUST_RZUP_INDICATOR).exists() {
-        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
-    }
-
-    Ok(dir)
-}
-
-// check for backwards compatible cargo risczero install.
-fn risc0_data_compat() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
-        dir.into()
-    } else if let Some(root) = dirs::data_dir() {
-        root.join("cargo-risczero")
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".cargo-risczero")
-    } else {
-        anyhow::bail!("Could not determine risc0 data dir. Set RISC0_DATA_DIR env var.");
-    };
-
-    Ok(dir)
-}
+const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -107,7 +67,7 @@ impl Risc0Metadata {
 }
 
 trait GuestBuilder: Sized {
-    fn build(name: &str, elf_path: &str) -> Result<Self>;
+    fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self>;
     fn codegen_consts(&self) -> String;
     #[cfg(feature = "guest-list")]
     fn codegen_list_entry(&self) -> String;
@@ -123,7 +83,7 @@ pub struct MinGuestListEntry {
 }
 
 impl GuestBuilder for MinGuestListEntry {
-    fn build(name: &str, elf_path: &str) -> Result<Self> {
+    fn build(_guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self> {
         Ok(Self {
             name: Cow::Owned(name.to_owned()),
             path: Cow::Owned(elf_path.to_owned()),
@@ -157,6 +117,16 @@ impl GuestBuilder for MinGuestListEntry {
     }
 }
 
+/// TODO(flaub)
+#[derive(Debug, Clone)]
+pub enum ImageIdKind {
+    /// TODO(flaub)
+    User(Digest),
+
+    /// TODO(flaub)
+    Kernel(Digest),
+}
+
 /// Represents an item in the generated list of compiled guest binaries
 #[derive(Debug, Clone)]
 pub struct GuestListEntry {
@@ -166,18 +136,21 @@ pub struct GuestListEntry {
     /// The compiled ELF guest binary
     pub elf: Cow<'static, [u8]>,
 
-    /// The image id of the guest
-    pub image_id: [u32; DIGEST_WORDS],
+    /// The image id of the guest program.
+    pub image_id: Digest,
+
+    /// The v2 image id of the guest program.
+    pub v2_image_id: ImageIdKind,
 
     /// The path to the ELF binary
     pub path: Cow<'static, str>,
 }
 
-fn r0vm_image_id(path: &str) -> Result<Digest> {
+fn r0vm_image_id(path: &str, flag: &str) -> Result<Digest> {
     use hex::FromHex;
     let output = Command::new("r0vm")
         .env_remove("RUST_LOG")
-        .args(["--elf", path, "--id"])
+        .args(["--elf", path, flag])
         .output()?;
     if output.status.success() {
         let stdout = String::from_utf8(output.stdout)?;
@@ -189,28 +162,65 @@ fn r0vm_image_id(path: &str) -> Result<Digest> {
     }
 }
 
+fn compute_image_id_v1(elf: &[u8], elf_path: &str) -> Result<Digest> {
+    Ok(match r0vm_image_id(elf_path, "--id") {
+        Ok(image_id) => image_id,
+        Err(err) => {
+            tty_println(&format!("failed to get image ID using r0vm: {err}"));
+            risc0_binfmt::compute_image_id(elf)?
+        }
+    })
+}
+
+fn compute_image_id_v2(elf: &[u8], elf_path: &str, is_kernel: bool) -> Result<Digest> {
+    let flag = if is_kernel {
+        "--kernel-id"
+    } else {
+        "--user-id"
+    };
+    Ok(match r0vm_image_id(elf_path, flag) {
+        Ok(image_id) => image_id,
+        Err(err) => {
+            tty_println(&format!("failed to get image ID using r0vm: {err}"));
+
+            if is_kernel {
+                risc0_binfmt::compute_kernel_id_v2(elf)?
+            } else {
+                risc0_binfmt::compute_user_id_v2(elf)?
+            }
+        }
+    })
+}
+
 impl GuestBuilder for GuestListEntry {
     /// Builds the [GuestListEntry] by reading the ELF from disk, and calculating the associated
     /// image ID.
-    fn build(name: &str, elf_path: &str) -> Result<Self> {
-        let (elf, image_id) = if !is_skip_build() {
-            let elf = std::fs::read(elf_path)?;
-            let image_id = match r0vm_image_id(elf_path) {
-                Ok(image_id) => image_id,
-                Err(err) => {
-                    tty_println(&format!("failed to get image ID using r0vm: {err}"));
-                    compute_image_id(&elf)?
-                }
-            };
-            (elf, image_id)
+    fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self> {
+        let mut elf = vec![];
+        let mut image_id = Digest::default();
+
+        let is_kernel = guest_info.metadata.kernel;
+        let mut v2_image_id = if is_kernel {
+            ImageIdKind::Kernel(Digest::default())
         } else {
-            (vec![], Digest::default())
+            ImageIdKind::User(Digest::default())
         };
+
+        if !is_skip_build() {
+            elf = std::fs::read(elf_path)?;
+            if is_kernel {
+                v2_image_id = ImageIdKind::Kernel(compute_image_id_v2(&elf, elf_path, is_kernel)?);
+            } else {
+                image_id = compute_image_id_v1(&elf, elf_path)?;
+                v2_image_id = ImageIdKind::User(compute_image_id_v2(&elf, elf_path, is_kernel)?);
+            }
+        }
 
         Ok(Self {
             name: Cow::Owned(name.to_owned()),
             elf: Cow::Owned(elf),
-            image_id: image_id.into(),
+            image_id,
+            v2_image_id,
             path: Cow::Owned(elf_path.to_owned()),
         })
     }
@@ -224,22 +234,32 @@ impl GuestBuilder for GuestListEntry {
         }
 
         let upper = self.name.to_uppercase().replace('-', "_");
-        let image_id = self.image_id;
-        let elf_path = &self.path;
+        let image_id = self.image_id.as_words();
 
-        let elf_value = if is_skip_build() {
+        let elf = if is_skip_build() {
             "&[]".to_string()
         } else {
-            format!(r#"include_bytes!("{elf_path}")"#)
+            format!("include_bytes!({:?})", self.path)
         };
 
-        format!(
-            r##"
-pub const {upper}_ELF: &[u8] = {elf_value};
-pub const {upper}_ID: [u32; 8] = {image_id:?};
-pub const {upper}_PATH: &str = "{elf_path}";
-"##
+        let mut str = String::new();
+
+        writeln!(&mut str, "pub const {upper}_ELF: &[u8] = {elf};").unwrap();
+        writeln!(&mut str, "pub const {upper}_PATH: &str = {:?};", self.path).unwrap();
+        writeln!(&mut str, "pub const {upper}_ID: [u32; 8] = {image_id:?};").unwrap();
+
+        let (part, v2_image_id) = match self.v2_image_id {
+            ImageIdKind::User(digest) => ("USER", digest),
+            ImageIdKind::Kernel(digest) => ("KERNEL", digest),
+        };
+        let v2_image_id = v2_image_id.as_words();
+        writeln!(
+            &mut str,
+            "pub const {upper}_V2_{part}_ID: [u32; 8] = {v2_image_id:?};",
         )
+        .unwrap();
+
+        str
     }
 
     #[cfg(feature = "guest-list")]
@@ -260,7 +280,8 @@ pub const {upper}_PATH: &str = "{elf_path}";
 /// Returns the given cargo Package from the metadata in the Cargo.toml manifest
 /// within the provided `manifest_dir`.
 pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
-    let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
+    let manifest_dir = manifest_dir.as_ref();
+    let manifest_path = manifest_dir.join("Cargo.toml");
     let manifest_meta = MetadataCommand::new()
         .manifest_path(&manifest_path)
         .no_deps()
@@ -275,17 +296,11 @@ pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
         })
         .collect();
     if matching.is_empty() {
-        eprintln!(
-            "ERROR: No package found in {}",
-            manifest_dir.as_ref().display()
-        );
+        eprintln!("ERROR: No package found in {manifest_dir:?}");
         std::process::exit(-1);
     }
     if matching.len() > 1 {
-        eprintln!(
-            "ERROR: Multiple packages found in {}",
-            manifest_dir.as_ref().display()
-        );
+        eprintln!("ERROR: Multiple packages found in {manifest_dir:?}",);
         std::process::exit(-1);
     }
     matching.pop().unwrap()
@@ -329,60 +344,39 @@ fn is_skip_build() -> bool {
 }
 
 fn get_env_var(name: &str) -> String {
-    println!("cargo:rerun-if-env-changed={name}");
-    env::var(name).unwrap_or_default()
+    let ret = env::var(name).unwrap_or_default();
+    if let Some(pkg) = env::var_os("CARGO_PKG_NAME") {
+        if pkg != "cargo-risczero" {
+            println!("cargo:rerun-if-env-changed={name}");
+        }
+    }
+    ret
 }
 
 /// Returns all methods associated with the given guest crate.
 fn guest_methods<G: GuestBuilder>(
     pkg: &Package,
     target_dir: impl AsRef<Path>,
-    guest_features: &[String],
+    guest_info: &GuestInfo,
+    profile: &str,
 ) -> Vec<G> {
-    let profile = if is_debug() { "debug" } else { "release" };
     pkg.targets
         .iter()
-        .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
+        .filter(|target| target.is_bin())
         .filter(|target| {
             target
                 .required_features
                 .iter()
-                .all(|required_feature| guest_features.contains(required_feature))
+                .all(|required_feature| guest_info.options.features.contains(required_feature))
         })
         .map(|target| {
             G::build(
+                guest_info,
                 &target.name,
                 target_dir
                     .as_ref()
-                    .join("riscv32im-risc0-zkvm-elf")
+                    .join(RISC0_TARGET_TRIPLE)
                     .join(profile)
-                    .join(&target.name)
-                    .to_str()
-                    .context("elf path contains invalid unicode")
-                    .unwrap(),
-            )
-            .unwrap()
-        })
-        .collect()
-}
-
-/// Returns all methods associated with the given guest crate.
-fn guest_methods_docker<P, G>(pkg: &Package, target_dir: P) -> Vec<G>
-where
-    P: AsRef<Path>,
-    G: GuestBuilder,
-{
-    pkg.targets
-        .iter()
-        .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
-        .map(|target| {
-            G::build(
-                &target.name,
-                target_dir
-                    .as_ref()
-                    .join("riscv32im-risc0-zkvm-elf")
-                    .join("docker")
-                    .join(pkg.name.replace('-', "_"))
                     .join(&target.name)
                     .to_str()
                     .context("elf path contains invalid unicode")
@@ -404,23 +398,43 @@ fn sanitized_cmd(tool: &str) -> Command {
     cmd
 }
 
+fn cpp_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::CppToolchain)
+        .unwrap()
+        .expect("Risc Zero C++ toolchain installed");
+    println!("Using C++ toolchain version {version}");
+    path
+}
+
+fn rust_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+        .expect("Risc Zero Rust toolchain installed");
+    println!("Using Rust toolchain version {version}");
+    path
+}
+
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
-pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
-    let rustc = sanitized_cmd("rustup")
-        .args(["+risc0", "which", "rustc"])
-        .output()
-        .expect("rustup failed to find risc0 toolchain")
-        .stdout;
+#[stability::unstable]
+pub fn cargo_command(subcmd: &str, rustc_flags: &[String]) -> Command {
+    let mut guest_info = GuestInfo::default();
+    guest_info.metadata.rustc_flags = Some(rustc_flags.to_vec());
+    cargo_command_internal(subcmd, &guest_info)
+}
 
-    let rustc = String::from_utf8(rustc).unwrap();
-    let rustc = rustc.trim();
-    println!("Using rustc: {rustc}");
+pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Command {
+    let rustc = rust_toolchain().join("bin/rustc");
+    println!("Using rustc: {}", rustc.display());
 
     let mut cmd = sanitized_cmd("cargo");
-    let mut args = vec![subcmd, "--target", "riscv32im-risc0-zkvm-elf"];
+    let mut args = vec![subcmd, "--target", RISC0_TARGET_TRIPLE];
 
-    if std::env::var("RISC0_BUILD_LOCKED").is_ok() {
+    if !get_env_var("RISC0_BUILD_LOCKED").is_empty() {
         args.push("--locked");
     }
 
@@ -433,15 +447,10 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
         cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
-    println!("Building guest package: cargo {}", args.join(" "));
-
-    let encoded_rust_flags = encode_rust_flags(rust_flags);
+    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
 
     if !cpp_toolchain_override() {
-        let cc_path = risc0_data()
-            .unwrap()
-            .join("cpp/bin/riscv32-unknown-elf-gcc");
-        cmd.env("CC", cc_path)
+        cmd.env("CC", cpp_toolchain().join("bin/riscv32-unknown-elf-gcc"))
             .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
         // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
@@ -458,10 +467,17 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 }
 
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
-pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
+pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
+    let rustc_flags = guest_meta.rustc_flags.clone().unwrap_or_default();
+    let rustc_flags: Vec<_> = rustc_flags.iter().map(|s| s.as_str()).collect();
+    let text_addr = if guest_meta.kernel {
+        KERNEL_START_ADDR.0
+    } else {
+        memory::TEXT_START
+    };
     [
         // Append other rust flags
-        rustc_flags,
+        rustc_flags.as_slice(),
         &[
             // Replace atomic ops with nonatomic versions since the guest is single threaded.
             "-C",
@@ -472,7 +488,7 @@ pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
             // https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_mono/ld.html#SEC3
             // for details.
             "-C",
-            &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START),
+            &format!("link-arg=-Ttext={text_addr:#010x}"),
             // Apparently not having an entry point is only a linker warning(!), so
             // error out in this case.
             "-C",
@@ -488,8 +504,8 @@ pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
 fn cpp_toolchain_override() -> bool {
     // detect if there's an attempt to override the Cpp toolchain.
     // Overriding the toolchain useful for troubleshooting crates.
-    std::env::var("CC_riscv32im_risc0_zkvm_elf").is_ok()
-        || std::env::var("CFLAGS_riscv32im_risc0_zkvm_elf").is_ok()
+    !get_env_var("CC_riscv32im_risc0_zkvm_elf").is_empty()
+        || !get_env_var("CFLAGS_riscv32im_risc0_zkvm_elf").is_empty()
 }
 
 /// Builds a static library providing a rust runtime.
@@ -514,7 +530,8 @@ pub fn build_rust_runtime_with_features(features: &[&str]) -> String {
 fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     let guest_dir = get_guest_dir("static-lib", guest_pkg);
 
-    let mut cmd = cargo_command("rustc", &[]);
+    let guest_info = GuestInfo::default();
+    let mut cmd = cargo_command_internal("rustc", &guest_info);
 
     if !is_debug() {
         cmd.arg("--release");
@@ -594,35 +611,17 @@ fn tty_println(msg: &str) {
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(
-    pkg: &Package,
-    target_dir: P,
-    guest_opts: &GuestBuildOptions,
-    runtime_lib: Option<&str>,
-) where
-    P: AsRef<Path>,
-{
+fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: &GuestInfo) {
     if is_skip_build() {
         return;
     }
 
-    fs::create_dir_all(target_dir.as_ref()).unwrap();
+    let target_dir = target_dir.as_ref();
+    fs::create_dir_all(target_dir).unwrap();
 
-    let runtime_rust_flags = runtime_lib
-        .map(|lib| vec![String::from("-C"), format!("link_arg={}", lib)])
-        .unwrap_or_default();
-    let rust_flags: Vec<_> = [
-        runtime_rust_flags
-            .iter()
-            .map(|s| s.as_str())
-            .collect::<Vec<_>>(),
-        guest_opts.rustc_flags.iter().map(|s| s.as_str()).collect(),
-    ]
-    .concat();
+    let mut cmd = cargo_command_internal("build", guest_info);
 
-    let mut cmd = cargo_command("build", &rust_flags);
-
-    let features_str = guest_opts.features.join(",");
+    let features_str = guest_info.options.features.join(",");
     if !features_str.is_empty() {
         cmd.args(["--features", &features_str]);
     }
@@ -631,7 +630,7 @@ fn build_guest_package<P>(
         "--manifest-path",
         pkg.manifest_path.as_str(),
         "--target-dir",
-        target_dir.as_ref().to_str().unwrap(),
+        target_dir.to_str().unwrap(),
     ]);
 
     if !is_debug() {
@@ -645,7 +644,7 @@ fn build_guest_package<P>(
     let stderr = child.stderr.take().unwrap();
 
     tty_println(&format!(
-        "{}: Starting build for riscv32im-risc0-zkvm-elf",
+        "{}: Starting build for {RISC0_TARGET_TRIPLE}",
         pkg.name
     ));
 
@@ -659,44 +658,34 @@ fn build_guest_package<P>(
     }
 }
 
-fn detect_toolchain(name: &str) {
-    let result = Command::new("rustup")
-        .args(["toolchain", "list", "--verbose"])
-        .stderr(Stdio::inherit())
-        .output()
-        .unwrap();
-    if !result.status.success() {
-        eprintln!("Failed to run: 'rustup toolchain list --verbose'");
-        std::process::exit(result.status.code().unwrap());
-    }
-
-    let stdout = String::from_utf8(result.stdout).unwrap();
-    if !stdout.lines().any(|line| line.trim().starts_with(name)) {
-        eprintln!("The 'risc0' toolchain could not be found.");
-        eprintln!("To install the risc0 toolchain, use rzup.");
-        eprintln!("For example:");
-        eprintln!("  curl -L https://risczero.com/install | bash");
-        eprintln!("  rzup install");
-        std::process::exit(-1);
-    }
-}
-
 fn get_out_dir() -> PathBuf {
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-    out_dir
-        .parent() // out
-        .unwrap()
-        .parent() // $crate
-        .unwrap()
-        .parent() // build
-        .unwrap()
-        .parent() // $profile
-        .unwrap()
-        .join("riscv-guest")
+    // This code is based on https://docs.rs/cxx-build/latest/src/cxx_build/target.rs.html#10-49
+
+    if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR").map(Into::<PathBuf>::into) {
+        if target_dir.is_absolute() {
+            return target_dir.join("riscv-guest");
+        }
+    }
+
+    let mut dir: PathBuf = env::var_os("OUT_DIR").unwrap().into();
+    loop {
+        if dir.join(".rustc_info.json").exists()
+            || dir.join("CACHEDIR.TAG").exists()
+            || dir.file_name() == Some(OsStr::new("target"))
+                && dir
+                    .parent()
+                    .is_some_and(|parent| parent.join("Cargo.toml").exists())
+        {
+            return dir.join("riscv-guest");
+        }
+        if dir.pop() {
+            continue;
+        }
+        panic!("Cannot find cargo target dir location")
+    }
 }
 
-fn get_guest_dir<H: AsRef<Path>, G: AsRef<Path>>(host_pkg: H, guest_pkg: G) -> PathBuf {
+fn get_guest_dir(host_pkg: impl AsRef<Path>, guest_pkg: impl AsRef<Path>) -> PathBuf {
     get_out_dir().join(host_pkg).join(guest_pkg)
 }
 
@@ -723,18 +712,47 @@ pub fn embed_method_metadata_with_options(
     do_embed_methods(guest_pkg_to_options)
 }
 
+struct GuestPackageWithOptions {
+    name: String,
+    pkg: Package,
+    opts: GuestOptions,
+    target_dir: PathBuf,
+}
+
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
-fn do_embed_methods<G: GuestBuilder>(
-    mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
-) -> Vec<G> {
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-
+fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>) -> Vec<G> {
     // Read the cargo metadata for info from `[package.metadata.risc0]`.
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
+
+    let mut pkg_opts = vec![];
+    for guest_pkg in guest_packages {
+        let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
+        let opts = guest_opts
+            .remove(guest_pkg.name.as_str())
+            .unwrap_or_default();
+        pkg_opts.push(GuestPackageWithOptions {
+            name: format!("{}.{}", pkg.name, guest_pkg.name),
+            pkg: guest_pkg,
+            opts,
+            target_dir: guest_dir,
+        });
+    }
+
+    // If the user provided options for a package that wasn't built, abort.
+    if let Some(package) = guest_opts.keys().next() {
+        panic!("Error: guest options were provided for package {package:?} but the package was not built.");
+    }
+
+    build_methods(&pkg_opts)
+}
+
+fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) -> Vec<G> {
+    let out_dir_env = env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
+
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
@@ -749,36 +767,23 @@ fn do_embed_methods<G: GuestBuilder>(
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
 
-    if !is_skip_build() {
-        detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
-    }
+    let profile = if is_debug() { "debug" } else { "release" };
 
     let mut guest_list = vec![];
-    for guest_pkg in guest_packages {
-        println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
+    for guest in guest_packages {
+        println!("Building guest package: {}", guest.name);
 
-        let guest_embed_opts = guest_pkg_to_options
-            .remove(guest_pkg.name.as_str())
-            .unwrap_or_default();
-        let guest_build_opts = GuestBuildOptions::from(guest_embed_opts)
-            .with_metadata(GuestMetadata::from(&guest_pkg));
+        let guest_info = GuestInfo {
+            options: guest.opts.clone(),
+            metadata: (&guest.pkg).into(),
+        };
 
-        let methods: Vec<G> = if let Some(ref docker_opts) = guest_build_opts.use_docker {
-            let src_dir = docker_opts
-                .root_dir
-                .clone()
-                .unwrap_or_else(|| std::env::current_dir().unwrap());
-            build_guest_package_docker(
-                guest_pkg.manifest_path.as_std_path(),
-                &src_dir,
-                &guest_build_opts,
-            )
-            .unwrap();
-            guest_methods_docker(&guest_pkg, get_out_dir())
+        let methods: Vec<G> = if guest.opts.use_docker.is_some() {
+            build_guest_package_docker(&guest.pkg, &guest.target_dir, &guest_info).unwrap();
+            guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
         } else {
-            let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
-            build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
-            guest_methods(&guest_pkg, &guest_dir, &guest_build_opts.features)
+            build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);
+            guest_methods(&guest.pkg, &guest.target_dir, &guest_info, profile)
         };
 
         for method in methods {
@@ -790,14 +795,6 @@ fn do_embed_methods<G: GuestBuilder>(
             guest_list_codegen.push(method.codegen_list_entry());
             guest_list.push(method);
         }
-    }
-
-    // If the user provided options for a package that wasn't built, abort.
-    if let Some(package) = guest_pkg_to_options.keys().next() {
-        panic!(
-            "Error: guest options were provided for package '{}' but the package was not built.",
-            package
-        );
     }
 
     #[cfg(feature = "guest-list")]
@@ -819,6 +816,8 @@ fn do_embed_methods<G: GuestBuilder>(
     // Since we generate methods.rs each time we run, it will always
     // be changed.
     println!("cargo:rerun-if-changed={}", methods_path.display());
+    println!("cargo:rerun-if-env-changed=RISC0_GUEST_LOGFILE");
+
     guest_list
 }
 
@@ -842,4 +841,47 @@ fn do_embed_methods<G: GuestBuilder>(
 /// "MY_METHOD_ID" and "MY_METHOD_ELF" respectively.
 pub fn embed_methods() -> Vec<GuestListEntry> {
     embed_methods_with_options(HashMap::new())
+}
+
+/// Embed the current crate's binary targets built for RISC-V.
+pub fn embed_self() -> Vec<GuestListEntry> {
+    if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
+        // Guest shouldn't recursively depend on itself.
+        return vec![];
+    }
+
+    let pkg = current_package();
+    let target_dir = get_out_dir().join(&pkg.name);
+    let pkgs = vec![GuestPackageWithOptions {
+        name: pkg.name.clone(),
+        pkg,
+        opts: GuestOptions::default(),
+        target_dir,
+    }];
+
+    build_methods(&pkgs)
+}
+
+/// TODO(flaub)
+pub fn build_package(
+    pkg: &Package,
+    target_dir: impl AsRef<Path>,
+    options: GuestOptions,
+) -> Result<Vec<GuestListEntry>> {
+    println!("Building guest package: {}", pkg.name);
+
+    let guest_info = GuestInfo {
+        options: options.clone(),
+        metadata: pkg.into(),
+    };
+
+    let profile = if is_debug() { "debug" } else { "release" };
+
+    if options.use_docker.is_some() {
+        build_guest_package_docker(pkg, target_dir.as_ref(), &guest_info)?;
+        Ok(guest_methods(pkg, &target_dir, &guest_info, "docker"))
+    } else {
+        build_guest_package(pkg, &target_dir, &guest_info);
+        Ok(guest_methods(pkg, &target_dir, &guest_info, profile))
+    }
 }

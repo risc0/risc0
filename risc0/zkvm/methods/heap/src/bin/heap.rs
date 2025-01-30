@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,18 @@
 use risc0_zkvm::guest::env;
 
 fn main() {
+    let x: u32 = if std::env::var("ALL_FORKS") == Ok(String::from("1")) {
+        1
+    } else {
+        0
+    };
+
+    risc0_zkvm::guest::env::commit(&x);
+
     let iterations: u32 = env::read();
     for _ in 0..iterations {
         env::log("alloc");
-        let tmp = vec![0; 10 * 1024 * 1024];
+        let tmp = vec![0; 10 * 1024];
         println!("{:#?}", tmp.as_ptr());
     }
 }

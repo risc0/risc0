@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,46 +13,89 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, MemoryImage2};
 use risc0_circuit_rv32im::prove::emu::testutil;
+use risc0_circuit_rv32im_v2::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{
+    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
+};
 use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
-use test_log::test;
+use rstest::rstest;
+use rstest_reuse::{apply, template};
 
 use super::get_prover_server;
 use crate::{
-    host::server::testutils,
+    compute_image_id_v2,
+    host::server::{exec::executor2::Executor2, testutils},
+    receipt::segment::SegmentVersion,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, Session, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
+    VerifierContext,
 };
 
-fn prove_session_fast(session: &Session) -> Receipt {
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    prover
-        .prove_session(&VerifierContext::default(), session)
-        .unwrap()
-        .receipt
+use SegmentVersion::{V1, V2};
+
+#[template]
+#[rstest]
+#[case(V1)]
+#[case(V2)]
+#[test_log::test]
+fn base(#[case] version: SegmentVersion) {}
+
+fn execute_elf(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
+    match version {
+        V1 => ExecutorImpl::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+        V2 => Executor2::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+    }
 }
 
-fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
+fn prove_session(version: SegmentVersion, session: &Session) -> Result<Receipt> {
+    let opts = ProverOpts::fast().with_segment_version(version);
+    let ctx = opts.verifier_context();
+    let prover = get_prover_server(&opts)?;
+    Ok(prover.prove_session(&ctx, session)?.receipt)
+}
+
+fn prove_elf(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
+    let opts = ProverOpts::fast().with_segment_version(version);
+    Ok(get_prover_server(&opts)?.prove(env, elf)?.receipt)
+}
+
+fn prove_elf_succinct(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
+    let opts = ProverOpts::succinct().with_segment_version(version);
+    Ok(get_prover_server(&opts)?.prove(env, elf)?.receipt)
+}
+
+fn prove_nothing(version: SegmentVersion) -> Result<ProveInfo> {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
         .build()
         .unwrap();
-    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
+    let opts = ProverOpts::composite().with_segment_version(version);
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
 
-#[test]
-fn prove_nothing_succinct() {
+fn multi_test_id(version: SegmentVersion) -> Digest {
+    match version {
+        V1 => MULTI_TEST_ID.into(),
+        V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+    }
+}
+
+#[apply(base)]
+fn prove_nothing_succinct(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
         .build()
         .unwrap();
-    let opts = ProverOpts::succinct();
+    let opts = ProverOpts::succinct().with_segment_version(version);
     get_prover_server(&opts)
         .unwrap()
         .prove(env, MULTI_TEST_ELF)
@@ -63,46 +106,48 @@ fn prove_nothing_succinct() {
         .unwrap(); // ensure that we got a succinct receipt.
 }
 
-#[test]
-fn hashfn_poseidon2() {
-    prove_nothing("poseidon2").unwrap();
+#[apply(base)]
+fn basic(#[case] version: SegmentVersion) {
+    prove_nothing(version).unwrap();
 }
 
-#[test]
-fn receipt_serde() {
-    let receipt = prove_nothing("sha-256").unwrap().receipt;
+#[apply(base)]
+fn receipt_serde(#[case] version: SegmentVersion) {
+    let receipt = prove_nothing(version).unwrap().receipt;
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: Receipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
-    decoded.verify(MULTI_TEST_ID).unwrap();
+    let ctx = VerifierContext::for_version(version);
+    decoded
+        .verify_with_context(&ctx, multi_test_id(version))
+        .unwrap();
 }
 
-#[test]
-fn check_image_id() {
-    let receipt = prove_nothing("sha-256").unwrap().receipt;
-    let mut image_id: Digest = MULTI_TEST_ID.into();
+#[apply(base)]
+fn check_image_id(#[case] version: SegmentVersion) {
+    let receipt = prove_nothing(version).unwrap().receipt;
+    let mut image_id = multi_test_id(version);
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
+    let ctx = VerifierContext::for_version(version);
     assert!(matches!(
-        receipt.verify(image_id).unwrap_err(),
+        receipt.verify_with_context(&ctx, image_id).unwrap_err(),
         VerificationError::ClaimDigestMismatch { .. }
     ));
 }
 
-#[test]
-fn sha_basics() {
-    fn run_sha(msg: &str) -> String {
+#[apply(base)]
+fn sha_basics(#[case] version: SegmentVersion) {
+    let run_sha = |msg: &str| -> String {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::ShaDigest { data: msg.into() })
             .unwrap()
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-        let session = exec.run().unwrap();
-        let receipt = prove_session_fast(&session);
+        let receipt = prove_elf(version, env, MULTI_TEST_ELF).unwrap();
         hex::encode(Digest::try_from(receipt.journal.bytes).unwrap())
-    }
+    };
 
     assert_eq!(
         run_sha(""),
@@ -122,8 +167,8 @@ fn sha_basics() {
     );
 }
 
-#[test]
-fn sha_iter() {
+#[apply(base)]
+fn sha_iter(#[case] version: SegmentVersion) {
     let input = MultiTestSpec::ShaDigestIter {
         data: Vec::from([0u8; 32]),
         num_iter: 1500,
@@ -133,9 +178,7 @@ fn sha_iter() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let receipt = prove_session_fast(&session);
+    let receipt = prove_elf(version, env, MULTI_TEST_ELF).unwrap();
     let digest = Digest::try_from(receipt.journal.bytes).unwrap();
     assert_eq!(
         hex::encode(digest),
@@ -143,7 +186,7 @@ fn sha_iter() {
     )
 }
 
-#[test]
+#[test_log::test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
@@ -161,71 +204,60 @@ fn bigint_accel() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let receipt = prove_session_fast(&session);
+        let receipt = prove_session(V1, &session).unwrap();
         let expected = case.expected();
         let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
         assert_eq!(receipt.journal.bytes, expected);
     }
 }
 
-#[test]
-fn memory_io() {
-    fn run_memio(pairs: &[(usize, usize)]) -> Result<ExitCode> {
-        let input = MultiTestSpec::ReadWriteMem {
-            values: pairs
-                .iter()
-                .cloned()
-                .map(|(addr, value)| (addr as u32, value as u32))
-                .collect(),
-        };
-        let env = ExecutorEnv::builder()
-            .write(&input)
-            .unwrap()
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
-        let session = exec.run()?;
-        let receipt = prove_session_fast(&session);
-        receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.claim()?.as_value()?.exit_code)
-    }
+// Pick a memory position in the middle of the memory space, which is unlikely
+// to be touched by either the stack or heap:
+const POS: usize = crate::align_up(
+    (memory::TEXT_START + memory::STACK_TOP) as usize / 2,
+    WORD_SIZE,
+);
 
-    // Pick a memory position in the middle of the memory space, which is unlikely
-    // to be touched by either the stack or heap:
-    const POS: usize = crate::align_up(
-        (memory::TEXT_START + memory::STACK_TOP) as usize / 2,
-        WORD_SIZE,
-    );
-
-    // Double writes are fine
+#[rstest]
+// Double writes are fine
+#[case(&[(POS, 1), (POS, 1)])]
+// Writes at different addresses are fine
+#[case(&[(POS, 1), (POS + 4, 2)])]
+// Aligned write is fine
+#[case(&[(POS, 1)])]
+// Aligned read is fine
+#[case(&[(POS, 0)])]
+// Unaligned write is bad
+#[should_panic(expected = "StoreAddressMisaligned")]
+#[case(&[(POS + 1001, 1)])]
+// Unaligned read is bad
+#[should_panic(expected = "LoadAddressMisaligned")]
+#[case(&[(POS + 1, 0)])]
+#[test_log::test]
+fn memory_io(#[case] pairs: &[(usize, usize)], #[values(V1, V2)] version: SegmentVersion) {
+    let input = MultiTestSpec::ReadWriteMem {
+        values: pairs
+            .iter()
+            .cloned()
+            .map(|(addr, value)| (addr as u32, value as u32))
+            .collect(),
+    };
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let receipt = prove_elf(version, env, MULTI_TEST_ELF).unwrap();
+    let ctx = VerifierContext::for_version(version);
+    receipt.verify_integrity_with_context(&ctx).unwrap();
     assert_eq!(
-        run_memio(&[(POS, 1), (POS, 1)]).unwrap(),
+        receipt.claim().unwrap().as_value().unwrap().exit_code,
         ExitCode::Halted(0)
     );
-
-    // Writes at different addresses are fine
-    assert_eq!(
-        run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap(),
-        ExitCode::Halted(0)
-    );
-
-    // Aligned write is fine
-    assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
-
-    // Unaligned write is bad
-    let err = run_memio(&[(POS + 1001, 1)]).err().unwrap().to_string();
-    assert!(err.contains("StoreAddressMisaligned"), "{err}");
-
-    // Aligned read is fine
-    assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
-
-    // Unaligned read is bad
-    let err = run_memio(&[(POS + 1, 0)]).err().unwrap().to_string();
-    assert!(err.contains("LoadAddressMisaligned"), "{err}");
 }
 
-#[test]
-fn session_events() {
+#[apply(base)]
+fn session_events(#[case] version: SegmentVersion) {
     use std::{cell::RefCell, rc::Rc};
 
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
@@ -247,8 +279,7 @@ fn session_events() {
         }
     }
 
-    let mut exec = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
-    let mut session = exec.run().unwrap();
+    let mut session = execute_elf(version, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
     let on_pre_prove_segment_flag = Rc::new(RefCell::new(false));
     let on_post_prove_segment_flag = Rc::new(RefCell::new(false));
     let logger = Logger {
@@ -256,7 +287,7 @@ fn session_events() {
         on_post_prove_segment_flag: on_post_prove_segment_flag.clone(),
     };
     session.add_hook(logger);
-    prove_session_fast(&session);
+    prove_session(version, &session).unwrap();
     assert_eq!(session.hooks.len(), 1);
     assert!(on_pre_prove_segment_flag.take());
     assert!(on_post_prove_segment_flag.take());
@@ -267,10 +298,26 @@ fn session_events() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
-    use super::prove_session_fast;
-    use crate::{ExecutorEnv, ExecutorImpl};
+    use super::*;
+    use crate::ExecutorEnv;
 
-    fn run_test(test_name: &str) {
+    fn execute_elf(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
+        match version {
+            V1 => ExecutorImpl::from_elf(env, elf)
+                .unwrap()
+                .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+            V2 => Executor2::from_kernel_elf(env, elf)
+                .unwrap()
+                .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+        }
+    }
+
+    fn prove_elf(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
+        let session = execute_elf(version, env, elf)?;
+        prove_session(version, &session)
+    }
+
+    fn run_test(version: SegmentVersion, test_name: &str) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
@@ -293,18 +340,15 @@ mod riscv {
             entry.read_to_end(&mut elf).unwrap();
 
             let env = ExecutorEnv::default();
-            let mut exec = ExecutorImpl::from_elf(env, &elf).unwrap();
-            let session = exec.run().unwrap();
-
-            prove_session_fast(&session);
+            prove_elf(version, env, &elf).unwrap();
         }
     }
 
     macro_rules! test_case {
         ($func_name:ident) => {
-            #[test_log::test]
-            fn $func_name() {
-                run_test(stringify!($func_name));
+            #[apply(base)]
+            fn $func_name(#[case] version: SegmentVersion) {
+                run_test(version, stringify!($func_name));
             }
         };
     }
@@ -357,7 +401,7 @@ mod riscv {
     test_case!(xori);
 }
 
-#[test]
+#[test_log::test]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseResume(0))
@@ -370,7 +414,7 @@ fn pause_resume() {
     let session = exec.run().unwrap();
     assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(0));
-    let receipt = prove_session_fast(&session);
+    let receipt = prove_session(V1, &session).unwrap();
     let segments = &receipt.inner.composite().unwrap().segments;
     assert_eq!(segments.len(), 1);
     assert_eq!(segments[0].index, 0);
@@ -378,10 +422,10 @@ fn pause_resume() {
     // Run until sys_halt
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    prove_session_fast(&session);
+    prove_session(V1, &session).unwrap();
 }
 
-#[test]
+#[test_log::test]
 fn pause_exit_nonzero() {
     let user_exit_code = 1;
     let env = ExecutorEnv::builder()
@@ -395,16 +439,16 @@ fn pause_exit_nonzero() {
     let session = exec.run().unwrap();
     assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(user_exit_code as u32));
-    prove_session_fast(&session);
+    prove_session(V1, &session).unwrap();
 
     // Run until sys_halt
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    prove_session_fast(&session);
+    prove_session(V1, &session).unwrap();
 }
 
-#[test]
-fn continuation() {
+#[test_log::test]
+fn continuation_v1() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
     let program = testutil::simple_loop();
@@ -425,11 +469,11 @@ fn continuation() {
 
     let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
-        assert_eq!(segment.inner.exit_code, ExitCode::SystemSplit);
+        assert_eq!(segment.inner.v1().exit_code, ExitCode::SystemSplit);
     }
-    assert_eq!(final_segment.inner.exit_code, ExitCode::Halted(0));
+    assert_eq!(final_segment.inner.v1().exit_code, ExitCode::Halted(0));
 
-    let receipt = prove_session_fast(&session);
+    let receipt = prove_session(V1, &session).unwrap();
     for (idx, receipt) in receipt
         .inner
         .composite()
@@ -442,7 +486,48 @@ fn continuation() {
     }
 }
 
-#[test]
+#[test_log::test]
+fn continuation_v2() {
+    const COUNT: usize = 2; // Number of total chunks to aim for.
+
+    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
+    let image = MemoryImage2::new_kernel(program);
+
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(13) // 8k cycles
+        .build()
+        .unwrap();
+    let session = Executor2::new(env, image).unwrap().run().unwrap();
+    let segments: Vec<_> = session
+        .segments
+        .iter()
+        .map(|x| x.resolve().unwrap())
+        .collect();
+    assert_eq!(segments.len(), COUNT);
+
+    let (final_segment, segments) = segments.split_last().unwrap();
+    for segment in segments {
+        assert_eq!(segment.inner.v2().claim.terminate_state, None);
+    }
+    assert_eq!(
+        final_segment.inner.v2().claim.terminate_state,
+        Some(TerminateState::default())
+    );
+
+    let receipt = prove_session(V2, &session).unwrap();
+    for (idx, receipt) in receipt
+        .inner
+        .composite()
+        .unwrap()
+        .segments
+        .iter()
+        .enumerate()
+    {
+        assert_eq!(receipt.index, idx as u32);
+    }
+}
+
+#[test_log::test]
 fn sys_input() {
     use hex::FromHex;
     let digest =
@@ -458,24 +543,21 @@ fn sys_input() {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    prove_session_fast(&session);
+    prove_session(V1, &session).unwrap();
 }
 
 #[cfg(feature = "docker")]
 #[cfg(target_arch = "x86_64")]
 mod docker {
+    use risc0_zkvm_methods::VERIFY_ELF;
+
+    use super::*;
     use crate::{
-        get_prover_server,
-        host::server::prove::{DevModeProver, ProverServer},
-        ExecutorEnv, ExecutorImpl, ExitCode, FakeReceipt, InnerReceipt, ProverOpts, Receipt,
+        host::server::prove::dev_mode::DevModeProver, FakeReceipt, InnerReceipt, ProverServer as _,
         ReceiptKind,
     };
-    use risc0_zkp::core::digest::Digest;
-    use risc0_zkvm_methods::{
-        multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF,
-    };
 
-    #[test]
+    #[test_log::test]
     fn stark2snark() {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::DoNothing)
@@ -552,7 +634,7 @@ mod docker {
     }
 
     fn exec_verify(receipt: &Receipt) {
-        let input: (Receipt, Digest) = (receipt.clone(), MULTI_TEST_ID.into());
+        let input: (_, _, Digest) = (SegmentVersion::V1, receipt.clone(), MULTI_TEST_ID.into());
         let env = ExecutorEnv::builder()
             .write(&input)
             .unwrap()
@@ -566,7 +648,7 @@ mod docker {
         println!("{:?}", session.stats());
     }
 
-    #[test]
+    #[test_log::test]
     fn verify_in_guest() {
         let composite_receipt_sha256 = generate_receipt(ProverOpts::fast());
         exec_verify(&composite_receipt_sha256);
@@ -585,7 +667,7 @@ mod docker {
         groth16_receipt.inner.groth16().unwrap();
     }
 
-    #[test]
+    #[test_log::test]
     fn prover_stark2snark() {
         // composite receipts
         let composite_receipt = &generate_receipt(ProverOpts::composite());
@@ -613,35 +695,24 @@ mod docker {
 mod sys_verify {
     use std::{cell::RefCell, rc::Rc, sync::OnceLock};
 
-    use risc0_zkp::core::{digest::digest, hash::poseidon2::Poseidon2HashSuite};
-    use risc0_zkvm_methods::{
-        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-    };
-    use test_log::test;
+    use risc0_zkp::{core::hash::poseidon2::Poseidon2HashSuite, digest};
+    use risc0_zkvm_methods::{HELLO_COMMIT_ELF, HELLO_COMMIT_ID, HELLO_COMMIT_V2_USER_ID};
 
-    use super::get_prover_server;
+    use super::*;
     use crate::{
-        receipt_claim::Unknown,
         recursion::{prove::zkr, test_zkr, MerkleGroup},
         register_zkr,
-        serde::to_vec,
-        sha::Digestible,
-        Assumption, CoprocessorCallback, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
-        ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, RECURSION_PO2,
+        sha::Digestible as _,
+        Assumption, CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest, SuccinctReceipt,
+        Unknown, RECURSION_PO2,
     };
 
-    fn prove_hello_commit() -> Receipt {
-        get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-            .unwrap()
-            .receipt
-    }
+    fn prove_halt(version: SegmentVersion, exit_code: u8) -> Receipt {
+        let opts = ProverOpts::fast()
+            .with_prove_guest_errors(true)
+            .with_segment_version(version);
 
-    fn prove_halt(exit_code: u8) -> Receipt {
-        let opts = ProverOpts::fast().with_prove_guest_errors(true);
-
-        let env = ExecutorEnvBuilder::default()
+        let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::Halt(exit_code))
             .unwrap()
             .build()
@@ -654,12 +725,12 @@ mod sys_verify {
 
         // Double check that the receipt verifies with the expected image ID and exit code.
         halt_receipt
-            .verify_integrity_with_context(&Default::default())
+            .verify_integrity_with_context(&VerifierContext::for_version(version))
             .unwrap();
         let halt_claim = halt_receipt.claim().unwrap();
         assert_eq!(
             halt_claim.as_value().unwrap().pre.digest(),
-            MULTI_TEST_ID.into()
+            multi_test_id(version)
         );
         assert_eq!(
             halt_claim.as_value().unwrap().exit_code,
@@ -684,16 +755,31 @@ mod sys_verify {
         test_zkr(&control_root, &digest2, RECURSION_PO2).unwrap()
     }
 
-    fn hello_commit_receipt() -> &'static Receipt {
-        static ONCE: OnceLock<Receipt> = OnceLock::new();
-        ONCE.get_or_init(prove_hello_commit)
+    fn hello_commit_id(version: SegmentVersion) -> Digest {
+        match version {
+            V1 => HELLO_COMMIT_ID.into(),
+            V2 => compute_image_id_v2(HELLO_COMMIT_V2_USER_ID).unwrap(),
+        }
     }
 
-    #[test]
-    fn sys_verify_1() {
+    fn hello_commit_receipt(version: SegmentVersion) -> &'static Receipt {
+        static ONCE: OnceLock<(Receipt, Receipt)> = OnceLock::new();
+        let (v1, v2) = ONCE.get_or_init(|| {
+            let v1 = prove_elf(V1, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            let v2 = prove_elf(V2, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            (v1, v2)
+        });
+        match version {
+            V1 => v1,
+            V2 => v2,
+        }
+    }
+
+    #[apply(base)]
+    fn sys_verify_1(#[case] version: SegmentVersion) {
         let spec = MultiTestSpec::SysVerify(vec![(
-            HELLO_COMMIT_ID.into(),
-            hello_commit_receipt().journal.bytes.clone(),
+            hello_commit_id(version),
+            hello_commit_receipt(version).journal.bytes.clone(),
         )]);
 
         // Test that providing the proven assumption results in an unconditional
@@ -701,23 +787,24 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_receipt().clone())
+            .add_assumption(hello_commit_receipt(version).clone())
             .build()
             .unwrap();
-        get_prover_server(&ProverOpts::fast())
+
+        prove_elf(version, env, MULTI_TEST_ELF)
             .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .receipt
-            .verify(MULTI_TEST_ID)
+            .verify_with_context(
+                &VerifierContext::for_version(version),
+                multi_test_id(version),
+            )
             .unwrap();
     }
 
-    #[test]
-    fn sys_verify_2() {
+    #[apply(base)]
+    fn sys_verify_2(#[case] version: SegmentVersion) {
         let spec = MultiTestSpec::SysVerify(vec![(
-            HELLO_COMMIT_ID.into(),
-            hello_commit_receipt().journal.bytes.clone(),
+            hello_commit_id(version),
+            hello_commit_receipt(version).journal.bytes.clone(),
         )]);
 
         // Test that proving without a provided assumption results in an execution
@@ -727,17 +814,14 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+        assert!(prove_elf(version, env, MULTI_TEST_ELF).is_err());
     }
 
-    #[test]
-    fn sys_verify_3() {
+    #[apply(base)]
+    fn sys_verify_3(#[case] version: SegmentVersion) {
         let spec = MultiTestSpec::SysVerify(vec![(
-            HELLO_COMMIT_ID.into(),
-            hello_commit_receipt().journal.bytes.clone(),
+            hello_commit_id(version),
+            hello_commit_receipt(version).journal.bytes.clone(),
         )]);
 
         // Test that providing an unresolved assumption results in a conditional
@@ -745,15 +829,12 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_receipt().claim().unwrap())
+            .add_assumption(hello_commit_receipt(version).claim().unwrap())
             .build()
             .unwrap();
 
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+        assert!(prove_elf(version, env, MULTI_TEST_ELF).is_err());
 
         // TODO(#982) With conditional receipts, implement the following cases.
         // verify with proven corroboration in verifier success.
@@ -762,11 +843,17 @@ mod sys_verify {
         // verify with wrong resolution results in verifier error.
     }
 
-    #[test]
-    fn sys_verify_integrity() {
+    #[apply(base)]
+    fn sys_verify_integrity(#[case] version: SegmentVersion) {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
-                .unwrap(),
+            claim_words: to_vec(
+                &hello_commit_receipt(version)
+                    .claim()
+                    .unwrap()
+                    .as_value()
+                    .unwrap(),
+            )
+            .unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -774,15 +861,15 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_receipt().clone())
+            .add_assumption(hello_commit_receipt(version).clone())
             .build()
             .unwrap();
-        get_prover_server(&ProverOpts::fast())
+        prove_elf(version, env, MULTI_TEST_ELF)
             .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .receipt
-            .verify(MULTI_TEST_ID)
+            .verify_with_context(
+                &VerifierContext::for_version(version),
+                multi_test_id(version),
+            )
             .unwrap();
 
         // Test that proving without a provided assumption results in an execution
@@ -792,31 +879,25 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+        assert!(prove_elf(version, env, MULTI_TEST_ELF).is_err());
 
         // Test that providing an unresolved assumption results in a conditional
         // receipt.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_receipt().claim().unwrap())
+            .add_assumption(hello_commit_receipt(version).claim().unwrap())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+        assert!(prove_elf(version, env, MULTI_TEST_ELF).is_err());
     }
 
-    #[test]
-    fn sys_verify_integrity_halt_1() {
+    #[apply(base)]
+    fn sys_verify_integrity_halt_1(#[case] version: SegmentVersion) {
         // Generate a receipt for an execution ending in a guest error indicated
         // by ExitCode::Halted(1).
-        let halt_receipt = prove_halt(1);
+        let halt_receipt = prove_halt(version, 1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(halt_receipt.claim().unwrap().as_value().unwrap()).unwrap(),
@@ -829,17 +910,17 @@ mod sys_verify {
             .add_assumption(halt_receipt)
             .build()
             .unwrap();
-        get_prover_server(&ProverOpts::fast())
+        prove_elf(version, env, MULTI_TEST_ELF)
             .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .receipt
-            .verify(MULTI_TEST_ID)
+            .verify_with_context(
+                &VerifierContext::for_version(version),
+                multi_test_id(version),
+            )
             .unwrap();
     }
 
-    #[test]
-    fn sys_verify_assumption() {
+    #[apply(base)]
+    fn sys_verify_assumption(#[case] version: SegmentVersion) {
         let test_circuit_receipt = prove_test_recursion_circuit();
         let test_circuit_assumption = Assumption {
             claim: test_circuit_receipt.claim.digest(),
@@ -856,12 +937,13 @@ mod sys_verify {
             .add_assumption(test_circuit_receipt.clone())
             .build()
             .unwrap();
-        let receipt = get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .receipt;
-        receipt.verify(MULTI_TEST_ID).unwrap();
+        let receipt = prove_elf(version, env, MULTI_TEST_ELF).unwrap();
+        receipt
+            .verify_with_context(
+                &VerifierContext::for_version(version),
+                multi_test_id(version),
+            )
+            .unwrap();
         // Double-check that the result is a composite receipt.
         receipt.inner.composite().unwrap();
 
@@ -872,12 +954,13 @@ mod sys_verify {
             .add_assumption(test_circuit_receipt.clone())
             .build()
             .unwrap();
-        let receipt = get_prover_server(&ProverOpts::succinct())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .receipt;
-        receipt.verify(MULTI_TEST_ID).unwrap();
+        let receipt = prove_elf_succinct(version, env, MULTI_TEST_ELF).unwrap();
+        receipt
+            .verify_with_context(
+                &VerifierContext::for_version(version),
+                multi_test_id(version),
+            )
+            .unwrap();
         // Double-check that the result is a succinct receipt.
         receipt.inner.succinct().unwrap();
 
@@ -888,14 +971,11 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+        assert!(prove_elf(version, env, MULTI_TEST_ELF).is_err());
     }
 
-    #[test]
-    fn sys_prove_zkr() {
+    #[apply(base)]
+    fn sys_prove_zkr(#[case] version: SegmentVersion) {
         // Random Poseidon2 "digest" to act as the "control root".
         let suite = Poseidon2HashSuite::new_suite();
         let (program, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
@@ -925,13 +1005,16 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        let opts = ProverOpts::succinct().with_control_ids(control_tree.leaves);
-        let receipt = get_prover_server(&opts)
+        let opts = ProverOpts::succinct()
+            .with_control_ids(control_tree.leaves)
+            .with_segment_version(version);
+        get_prover_server(&opts)
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
-            .receipt;
-        receipt.verify(MULTI_TEST_ID).unwrap();
+            .receipt
+            .verify(multi_test_id(version))
+            .unwrap();
     }
 
     struct Coprocessor {
@@ -960,8 +1043,8 @@ mod sys_verify {
         }
     }
 
-    #[test]
-    fn sys_prove_zkr_noop() {
+    #[apply(base)]
+    fn sys_prove_zkr_noop(#[case] version: SegmentVersion) {
         let suite = Poseidon2HashSuite::new_suite();
         let (_, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
         let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
@@ -994,10 +1077,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
         // Because we added an already proven assumption, there should be no
@@ -1007,7 +1087,7 @@ mod sys_verify {
     }
 }
 
-#[test]
+#[test_log::test]
 fn run_unconstrained() -> Result<()> {
     const RUN_UNCONSTRAINED_PO2: u32 = 17;
     const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
@@ -1024,7 +1104,7 @@ fn run_unconstrained() -> Result<()> {
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
-        let receipt = prove_session_fast(&session);
+        let receipt = prove_session(V1, &session).unwrap();
         let segments = &receipt.inner.composite().unwrap().segments;
 
         if unconstrained {
@@ -1054,7 +1134,7 @@ mod soundness {
         prove::soundness,
     };
 
-    #[test]
+    #[test_log::test]
     fn proven() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1065,7 +1145,7 @@ mod soundness {
         assert_eq!(security, 41.66407);
     }
 
-    #[test]
+    #[test_log::test]
     fn conjectured_strict() {
         let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
@@ -1076,7 +1156,7 @@ mod soundness {
         assert_eq!(security, 74.88997);
     }
 
-    #[test]
+    #[test_log::test]
     fn toy_model() {
         let cycles: usize = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;

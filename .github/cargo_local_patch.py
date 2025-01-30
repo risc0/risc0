@@ -102,9 +102,10 @@ if __name__ == "__main__":
         "risc0-zkvm-platform": "risc0/risc0/zkvm/platform",
         "risc0-ethereum-contracts": "risc0-ethereum/contracts",
         "risc0-build-ethereum": "risc0-ethereum/build",
-        "risc0-forge-ffi": "risc0-ethereum/ffi",
-        "risc0-steel": "risc0-ethereum/steel",
-        "risc0-aggregation": "risc0-ethereum/aggregation",
+        "risc0-forge-ffi": "risc0-ethereum/crates/ffi",
+        "risc0-steel": "risc0-ethereum/crates/steel",
+        "risc0-op-steel": "risc0-ethereum/crates/op-steel",
+        "risc0-aggregation": "risc0-ethereum/crates/aggregation",
     }
 
     main(os.path.normpath(args.directory), dep_path_mapping)

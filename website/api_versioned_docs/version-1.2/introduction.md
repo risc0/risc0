@@ -19,7 +19,7 @@ allowing a skeptical third party to verify correct execution — and the verifie
 doesn't need to repeat the original computation or even see the inputs to the
 program!
 
-**Ready to start building?** <br/>
+**Ready to start building?** <br />
 Check out our [Getting Started][docs-getting-started] page.
 
 [docs-getting-started]: ./getting-started.md

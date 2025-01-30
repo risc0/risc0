@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,6 +71,11 @@ pub mod reg_abi {
     pub const REG_MAX: usize = 32; // maximum number of registers
 }
 
+pub mod keccak_mode {
+    pub const KECCAK_PERMUTE: u32 = 0;
+    pub const KECCAK_PROVE: u32 = 1;
+}
+
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
@@ -136,12 +141,10 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
-    declare_syscall!(pub SYS_EXECUTE_ZKR);
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_KECCAK);
-    declare_syscall!(pub SYS_KECCAK_PERMUTE);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
@@ -625,7 +628,11 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
 // Some environment variable names are considered safe by default to use in the guest, provided by
 // the host, and are included in this list. It may be useful to allow guest developers to register
 // additional variable names as part of their guest program.
-const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE"];
+const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[
+    b"RUST_BACKTRACE",
+    b"RUST_LIB_BACKTRACE",
+    b"RISC0_KECCAK_PO2",
+];
 
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
@@ -661,7 +668,7 @@ pub unsafe extern "C" fn sys_getenv(
             }
         }
         if !allowed {
-            const MSG_1: &[u8] = "sys_getenv not enabaled for var".as_bytes();
+            const MSG_1: &[u8] = "sys_getenv not enabled for var".as_bytes();
             unsafe { sys_log(MSG_1.as_ptr(), MSG_1.len()) };
             unsafe { sys_log(varname, varname_len) };
             const MSG_2: &[u8] = "sys_getenv is disabled; can be enabled with the sys-getenv feature flag on risc0-zkvm-platform".as_bytes();
@@ -736,52 +743,37 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 /// # Safety
 ///
 /// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
-#[cfg(feature = "export-syscalls")]
+#[cfg(all(feature = "export-syscalls", not(target_os = "zkvm")))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    #[cfg(target_os = "zkvm")]
-    extern "C" {
-        // This symbol is defined by the loader and marks the end
-        // of all elf sections, so this is where we start our
-        // heap.
-        //
-        // This is generated automatically by the linker; see
-        // https://lld.llvm.org/ELF/linker_script.html#sections-command
-        static _end: u8;
-    }
+    unimplemented!("sys_alloc_aligned called outside of target_os = zkvm");
+}
 
-    // Pointer to next heap address to use, or 0 if the heap has not yet been
-    // initialized.
-    static mut HEAP_POS: usize = 0;
+/// # Safety
+///
+/// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(all(
+    feature = "export-syscalls",
+    feature = "heap-embedded-alloc",
+    target_os = "zkvm"
+))]
+#[no_mangle]
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    use core::alloc::GlobalAlloc;
+    crate::heap::embedded::HEAP.alloc(core::alloc::Layout::from_size_align(bytes, align).unwrap())
+}
 
-    // SAFETY: Single threaded, so nothing else can touch this while we're working.
-    let mut heap_pos = unsafe { HEAP_POS };
-
-    #[cfg(target_os = "zkvm")]
-    if heap_pos == 0 {
-        heap_pos = unsafe { (&_end) as *const u8 as usize };
-    }
-
-    // Honor requested alignment if larger than word size.
-    // Note: align is typically a power of two.
-    let align = usize::max(align, WORD_SIZE);
-
-    let offset = heap_pos & (align - 1);
-    if offset != 0 {
-        heap_pos += align - offset;
-    }
-
-    let ptr = heap_pos as *mut u8;
-    heap_pos += bytes;
-
-    // Check to make sure heap doesn't collide with SYSTEM memory.
-    if crate::memory::SYSTEM.start() < heap_pos {
-        const MSG: &[u8] = "Out of memory!".as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
-    }
-
-    unsafe { HEAP_POS = heap_pos };
-    ptr
+/// # Safety
+///
+/// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(all(
+    feature = "export-syscalls",
+    not(feature = "heap-embedded-alloc"),
+    target_os = "zkvm"
+))]
+#[no_mangle]
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    crate::heap::bump::alloc_aligned(bytes, align)
 }
 
 /// Send a ReceiptClaim digest to the host to request verification.
@@ -932,42 +924,26 @@ pub unsafe extern "C" fn sys_prove_zkr(
     }
 }
 
-/// Get a keccak hash from the host with the given input data - should be
-/// invoked during `hasher.finalize(...)`
-///
-/// # Safety
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
-pub unsafe extern "C" fn sys_keccak(
-    input_ptr: *const u8,
-    len: usize,
-    out_state: *mut [u32; DIGEST_WORDS],
-) {
-    syscall_2(
-        nr::SYS_KECCAK,
-        out_state as *mut u32,
-        DIGEST_WORDS,
-        input_ptr as u32,
-        len as u32,
-    );
-}
-
 /// Permute the keccak state on the host
 ///
 /// # Safety
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
-pub unsafe extern "C" fn sys_keccak_permute(
+pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
-) {
-    syscall_1(
-        nr::SYS_KECCAK_PERMUTE,
+) -> i32 {
+    let Return(a0, _) = syscall_3(
+        nr::SYS_KECCAK,
         out_state as *mut u32,
         KECCACK_STATE_WORDS,
+        keccak_mode::KECCAK_PERMUTE,
         in_state as u32,
+        0,
     );
+    a0 as i32
 }
+
 /// Executes the keccak circuit, and then executes the lift predicate
 /// in the recursion circuit.
 ///
@@ -985,21 +961,16 @@ pub unsafe extern "C" fn sys_keccak_permute(
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_keccak(
     claim_digest: *const [u32; DIGEST_WORDS],
-    po2: usize,
     control_root: *const [u32; DIGEST_WORDS],
-    input: *const u32,
-    input_len: usize,
 ) {
     let Return(a0, _) = unsafe {
-        syscall_5(
-            nr::SYS_PROVE_KECCAK,
+        syscall_3(
+            nr::SYS_KECCAK,
             null_mut(),
             0,
+            keccak_mode::KECCAK_PROVE,
             claim_digest as u32,
-            po2 as u32,
             control_root as u32,
-            input as u32,
-            input_len as u32,
         )
     };
 

@@ -54,14 +54,7 @@ You can find detailed information in the [version management design][version-man
 
 ### Contract Addresses
 
-> NOTE: The tables below are generated from the \[`deployment.toml`]\[deployment.toml] file in the risc0-ethereum repository.
-
-:::warning
-Following our [version management design and security policy][version-management], the 1.2 verifier contracts will not be available through the mainnet routers until December 11th, 2024.
-The 1.2 verifiers are available through the router on testnet immediately.
-:::
-
-<!-- GENERATED CONTENT BEGIN -->
+> NOTE: The tables below are generated from the [`deployment.toml`][deployment.toml] file in the risc0-ethereum repository.
 
 ### Ethereum Mainnet (1)
 
@@ -72,7 +65,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-1-etherscan]    |
 | TimelockController                         | [`0x0b144E07A0826182B6b59788c34b32Bfa86Fb711`][timelock-1-etherscan] |
 
-<br/>
+<br />
 
 ### Ethereum Sepolia (11155111)
 
@@ -83,7 +76,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-11155111-etherscan]    |
 | TimelockController                         | [`0xB4E3306129208cC8e6E75157f75f62eAe0B920a0`][timelock-11155111-etherscan] |
 
-<br/>
+<br />
 
 ### Ethereum Holesky (17000)
 
@@ -94,7 +87,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-17000-etherscan]    |
 | TimelockController                         | [`0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319`][timelock-17000-etherscan] |
 
-<br/>
+<br />
 
 ### Arbitrum Mainnet (42161)
 
@@ -105,7 +98,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-42161-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-42161-etherscan] |
 
-<br/>
+<br />
 
 ### Arbitrum Sepolia (421614)
 
@@ -116,7 +109,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-421614-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-421614-etherscan] |
 
-<br/>
+<br />
 
 ### Avalanche Mainnet (43114)
 
@@ -127,7 +120,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1`][estop-43114-etherscan]    |
 | TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43114-etherscan] |
 
-<br/>
+<br />
 
 ### Avalanche Fuji (43113)
 
@@ -138,7 +131,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-43113-etherscan]    |
 | TimelockController                         | [`0xDC986a09728F76110FF666eE7b20d99086501d15`][timelock-43113-etherscan] |
 
-<br/>
+<br />
 
 ### Base Mainnet (8453)
 
@@ -149,7 +142,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-8453-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-8453-etherscan] |
 
-<br/>
+<br />
 
 ### Base Sepolia (84532)
 
@@ -160,7 +153,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-84532-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-84532-etherscan] |
 
-<br/>
+<br />
 
 ### Optimism Mainnet (10)
 
@@ -171,7 +164,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805`][estop-10-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-10-etherscan] |
 
-<br/>
+<br />
 
 ### Optimism Sepolia (11155420)
 
@@ -182,7 +175,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x47d697328D6A80b00D796cEd9f54468931Aa1ECe`][estop-11155420-etherscan]    |
 | TimelockController                         | [`0x2DEfEA335392bb62d01f74e338697C7B31De254C`][timelock-11155420-etherscan] |
 
-<br/>
+<br />
 
 ### Linea Mainnet (59144)
 
@@ -193,7 +186,18 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x6Fb722974D67A55091c70129Bd0Bb06ec025ce5D`][estop-59144-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-59144-etherscan] |
 
-<br/>
+<br />
+
+### Linea Sepolia (59141)
+
+| Contract                                   | Address                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| [RiscZeroVerifierRouter][router-src]       | [`0x27983ee173aD10E171D17C9c5C14d5baFE997609`][router-59141-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4`][verifier-59141-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x61b97ad01416183bd5A4F039baaAb6b75bdC99E4`][estop-59141-etherscan]    |
+| TimelockController                         | [`0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4`][timelock-59141-etherscan] |
+
+<br />
 
 ### Polygon zkEVM Mainnet (1101)
 
@@ -204,10 +208,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 | [RiscZeroVerifierEmergencyStop][estop-src] | [`0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1`][estop-1101-etherscan]    |
 | TimelockController                         | [`0xdc986a09728f76110ff666ee7b20d99086501d15`][timelock-1101-etherscan] |
 
-<br/>
-
-<!-- GENERATED CONTENT END-->
-
+[deployment.toml]: https://github.com/risc0/risc0-ethereum/tree/release-1.2/contracts/deployment.toml
 [estop-1-etherscan]: https://etherscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code
 [estop-10-etherscan]: https://optimistic.etherscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code
 [estop-1101-etherscan]: https://zkevm.polygonscan.com/address/0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1#code
@@ -216,6 +217,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 [estop-42161-etherscan]: https://arbiscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code
 [estop-43113-etherscan]: https://testnet.snowtrace.io/address/0x47d697328D6A80b00D796cEd9f54468931Aa1ECe#code
 [estop-43114-etherscan]: https://snowtrace.io/address/0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1#code
+[estop-59141-etherscan]: https://sepolia.lineascan.build/address/0x61b97ad01416183bd5A4F039baaAb6b75bdC99E4#code
 [estop-59144-etherscan]: https://lineascan.build/address/0x6Fb722974D67A55091c70129Bd0Bb06ec025ce5D#code
 [estop-84532-etherscan]: https://sepolia.basescan.org/address/0x47d697328D6A80b00D796cEd9f54468931Aa1ECe#code
 [estop-421614-etherscan]: https://sepolia.arbiscan.io/address/0x47d697328D6A80b00D796cEd9f54468931Aa1ECe#code
@@ -234,6 +236,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 [router-42161-etherscan]: https://arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-43113-etherscan]: https://testnet.snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
 [router-43114-etherscan]: https://snowtrace.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
+[router-59141-etherscan]: https://sepolia.lineascan.build/address/0x27983ee173aD10E171D17C9c5C14d5baFE997609#code
 [router-59144-etherscan]: https://lineascan.build/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-84532-etherscan]: https://sepolia.basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-421614-etherscan]: https://sepolia.arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
@@ -253,6 +256,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 [timelock-42161-etherscan]: https://arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-43113-etherscan]: https://testnet.snowtrace.io/address/0xDC986a09728F76110FF666eE7b20d99086501d15#code
 [timelock-43114-etherscan]: https://snowtrace.io/address/0xDC986a09728F76110FF666eE7b20d99086501d15#code
+[timelock-59141-etherscan]: https://sepolia.lineascan.build/address/0xBDaEd5bbf8016AfD05Fc4659572e5fEb5854aAD4#code
 [timelock-59144-etherscan]: https://lineascan.build/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-84532-etherscan]: https://sepolia.basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-421614-etherscan]: https://sepolia.arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
@@ -266,6 +270,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 [verifier-42161-etherscan]: https://arbiscan.io/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code
 [verifier-43113-etherscan]: https://testnet.snowtrace.io/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code
 [verifier-43114-etherscan]: https://snowtrace.io/address/0x8062Dc6C824F10e62E47FdC55A0ecD54C2641F2d#code
+[verifier-59141-etherscan]: https://sepolia.lineascan.build/address/0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4#code
 [verifier-59144-etherscan]: https://lineascan.build/address/0x8C8b557C6EBDA8E6D62E7b54B7B5Ed8cFa8B48B4#code
 [verifier-84532-etherscan]: https://sepolia.basescan.org/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code
 [verifier-421614-etherscan]: https://sepolia.arbiscan.io/address/0xAC292cF957Dd5BA174cdA13b05C16aFC71700327#code

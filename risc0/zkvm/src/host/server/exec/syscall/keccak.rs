@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
+use anyhow::{bail, Result};
+use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
-use sha3::{Digest, Keccak256};
+use risc0_zkvm_platform::syscall::{
+    keccak_mode::{KECCAK_PERMUTE, KECCAK_PROVE},
+    reg_abi::*,
+};
 
-use super::{Syscall, SyscallContext};
+use super::{Syscall, SyscallContext, SyscallKind};
 
 #[derive(Clone, Default)]
-pub(crate) struct SysKeccak;
+pub(crate) struct SysKeccak {
+    inputs: Vec<KeccakState>,
+    max_po2: usize,
+    max_inputs: usize,
+}
 
 impl Syscall for SysKeccak {
     fn syscall(
@@ -27,13 +36,99 @@ impl Syscall for SysKeccak {
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
-    ) -> anyhow::Result<(u32, u32)> {
-        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+    ) -> Result<(u32, u32)> {
+        let mode = ctx.load_register(REG_A3);
+        if mode == KECCAK_PERMUTE {
+            self.keccak_permute(ctx, to_guest)
+        } else if mode == KECCAK_PROVE {
+            self.keccak_prove(ctx, to_guest)
+        } else {
+            bail!("sys_keccak: invalid mode: {mode}")
+        }
+    }
+}
 
-        let output = Keccak256::digest(from_guest);
-        bytemuck::cast_slice_mut(to_guest).clone_from_slice(output.as_slice());
+impl SysKeccak {
+    pub fn new(max_po2: Option<u32>) -> Self {
+        let max_po2 = max_po2.unwrap_or(KECCAK_DEFAULT_PO2 as u32) as usize;
+
+        Self {
+            inputs: vec![],
+            max_po2,
+            max_inputs: max_keccak_inputs(max_po2),
+        }
+    }
+
+    fn is_full(&self) -> bool {
+        self.inputs.len() >= self.max_inputs
+    }
+
+    fn keccak_permute(
+        &mut self,
+        ctx: &mut dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        // if we are full at this point, it means that the guest forgot to call prove.
+        if self.is_full() {
+            bail!("keccak batch is full, prove must be called");
+        }
+
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
+        let from_guest = &ctx.load_region(buf_ptr, 25 * 8)?;
+        let mut from_guest: KeccakState = bytemuck::cast_slice(from_guest).try_into()?;
+        self.inputs.push(from_guest);
+
+        keccak::f1600(&mut from_guest);
+        to_guest.clone_from_slice(bytemuck::cast_slice(&from_guest));
+
+        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Keccak];
+        metric.count += 1;
+
+        // if full, the guest must call prove.
+        Ok((self.is_full() as u32, 0))
+    }
+
+    fn keccak_prove(
+        &mut self,
+        ctx: &mut dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let claim = ctx.load_digest_from_register(REG_A4)?;
+        let control_root = ctx.load_digest_from_register(REG_A5)?;
+
+        let proof_request = ProveKeccakRequest {
+            claim_digest: claim,
+            control_root,
+            input: bytemuck::cast_slice(self.inputs.as_slice()).to_vec(),
+            po2: self.max_po2,
+        };
+
+        if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
+            coprocessor.borrow_mut().prove_keccak(proof_request)?;
+        } else {
+            ctx.syscall_table()
+                .pending_keccaks
+                .borrow_mut()
+                .push(proof_request);
+        }
+
+        let assumption = Assumption {
+            claim,
+            control_root,
+        };
+
+        ctx.syscall_table()
+            .assumptions
+            .borrow_mut()
+            .0
+            .push(AssumptionReceipt::Unresolved(assumption));
+
+        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::ProveKeccak];
+        metric.count += 1;
+        metric.size += 1 << self.max_po2 as u64;
+
+        // reset
+        self.inputs.clear();
 
         Ok((0, 0))
     }

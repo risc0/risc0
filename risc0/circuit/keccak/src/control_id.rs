@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
 pub const KECCAK_CONTROL_IDS: &[Digest] = &[
-    digest!("610d232218fa810090df341268059e6d34de95531ed47742770bf3278680cc6d"), // keccak_lift po2=14
-    digest!("72ac292e7bac750a3543b84d0994ba34a471025fe68fd710595383555566271a"), // keccak_lift po2=15
-    digest!("0d1c2772c28cca62aa8568112406502d1d7c3241cbc6d9442159c60f73451560"), // keccak_lift po2=16
-    digest!("d67ee915cfecf608336cad09b34700682c55d634768444646b7d8c1ab2c33048"), // keccak_lift po2=17
+    digest!("b5e20304debb1c76ddc7cc24c0896e0996342410f5fd5a31b29b760b417b9249"), // keccak_lift po2=14
+    digest!("7d31542da30bc20b365a3c522fe8ad63ea598c449294614ec832873b58866208"), // keccak_lift po2=15
+    digest!("e858da37c6c8b23713971545e5fd300d9c709a329eac5f398526c635fbadb82d"), // keccak_lift po2=16
+    digest!("35363a33a0c9712cead6df6b176f13767629bd5a33c8ad502093a0432d78e85e"), // keccak_lift po2=17
+    digest!("dced06736d196f03d7cff00b4d4daa0e1a71b129cbf5d361d050694a76ea3a2a"), // keccak_lift po2=18
 ];
 
 pub const KECCAK_CONTROL_ROOT: Digest =
-    digest!("78322a078cb5942768766c2501752163b5f2791573ad1a0b4c42f85cd3dc275a");
+    digest!("7043d4446a258212a16d2e4d427ae262f1a982739307a77496f27d6291603360");

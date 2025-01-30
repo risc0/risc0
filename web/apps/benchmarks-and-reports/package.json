@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "analyze": "ANALYZE=true next build",
     "build": "next build",
     "dev": "next dev --turbo",
     "start": "next start",
@@ -12,6 +11,6 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "shared": "*"
+    "shared": "workspace:*"
   }
 }

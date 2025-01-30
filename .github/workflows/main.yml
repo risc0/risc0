@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.81.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.81.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
@@ -245,9 +245,9 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: build workspace
-        run: cargo test -F $FEATURE -F prove -F redis --workspace --timings --no-run --exclude doc-test
+        run: cargo test -F $FEATURE -F prove -F redis -F unstable --workspace --timings --no-run --exclude doc-test
       - name: test workspace
-        run: cargo test -F $FEATURE -F prove -F redis --workspace --timings --exclude doc-test
+        run: cargo test -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
@@ -445,7 +445,10 @@ jobs:
             --exclude fibonacci-methods \
             --exclude risc0-bigint2 \
             --exclude risc0-bigint2-methods \
+            --exclude risc0-circuit-rv32im-v2 \
+            --exclude risc0-circuit-rv32im-v2-sys \
             --exclude risc0-circuit-keccak-methods \
+            --exclude risc0-zkos-v1compat \
             --exclude risc0-zkvm-receipts \
             --exclude risc0-zkvm-methods
       - run: sccache --show-stats

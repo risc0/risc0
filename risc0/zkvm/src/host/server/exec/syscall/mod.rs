@@ -19,12 +19,10 @@ mod cycle_count;
 mod fork;
 mod getenv;
 mod keccak;
-mod keccak_permute;
 mod log;
 mod panic;
 mod pipe;
 mod posix_io;
-mod prove_keccak;
 mod prove_zkr;
 mod random;
 mod slice_io;
@@ -33,13 +31,13 @@ mod verify;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::{anyhow, Result};
+use enum_map::{Enum, EnumMap};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     nr::{
-        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_KECCAK, SYS_KECCAK_PERMUTE,
-        SYS_LOG, SYS_PANIC, SYS_PIPE, SYS_PROVE_KECCAK, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ,
-        SYS_VERIFY_INTEGRITY, SYS_WRITE,
+        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_KECCAK, SYS_LOG, SYS_PANIC,
+        SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
     },
     SyscallName, DIGEST_BYTES,
 };
@@ -54,9 +52,8 @@ use crate::{
 
 use self::{
     args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, keccak::SysKeccak,
-    keccak_permute::SysKeccakPermute, log::SysLog, panic::SysPanic, pipe::SysPipe,
-    posix_io::SysRead, posix_io::SysWrite, prove_keccak::SysProveKeccak, prove_zkr::SysProveZkr,
-    random::SysRandom, slice_io::SysSliceIo, verify::SysVerify,
+    log::SysLog, panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite,
+    prove_zkr::SysProveZkr, random::SysRandom, slice_io::SysSliceIo, verify::SysVerify,
 };
 
 /// A host-side implementation of a system call.
@@ -113,6 +110,21 @@ pub(crate) trait SyscallContext<'a> {
 
 pub(crate) type AssumptionUsage = Vec<(Assumption, AssumptionReceipt)>;
 
+#[derive(Clone, Debug, Enum)]
+pub(crate) enum SyscallKind {
+    Keccak,
+    ProveKeccak,
+    Read,
+    VerifyIntegrity,
+    Write,
+}
+
+#[derive(Clone, Debug, Default)]
+pub(crate) struct SyscallMetric {
+    pub count: u64,
+    pub size: u64,
+}
+
 #[derive(Clone)]
 pub(crate) struct SyscallTable<'a> {
     pub(crate) inner: HashMap<String, Rc<RefCell<dyn Syscall + 'a>>>,
@@ -122,6 +134,7 @@ pub(crate) struct SyscallTable<'a> {
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
     pub(crate) pending_zkrs: Rc<RefCell<Vec<ProveZkrRequest>>>,
     pub(crate) pending_keccaks: Rc<RefCell<Vec<ProveKeccakRequest>>>,
+    pub(crate) metrics: Rc<RefCell<EnumMap<SyscallKind, SyscallMetric>>>,
 }
 
 impl<'a> SyscallTable<'a> {
@@ -134,6 +147,7 @@ impl<'a> SyscallTable<'a> {
             coprocessor: env.coprocessor.clone(),
             pending_zkrs: Default::default(),
             pending_keccaks: Default::default(),
+            metrics: Default::default(),
         }
     }
 
@@ -145,13 +159,11 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
             .with_syscall(SYS_FORK, SysFork)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
-            .with_syscall(SYS_KECCAK, SysKeccak)
-            .with_syscall(SYS_KECCAK_PERMUTE, SysKeccakPermute)
+            .with_syscall(SYS_KECCAK, SysKeccak::new(env.keccak_max_po2))
             .with_syscall(SYS_LOG, SysLog)
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_PIPE, SysPipe::default())
             .with_syscall(SYS_PROVE_ZKR, SysProveZkr)
-            .with_syscall(SYS_PROVE_KECCAK, SysProveKeccak)
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_READ, SysRead)
             .with_syscall(SYS_VERIFY_INTEGRITY, SysVerify)
