@@ -16,7 +16,7 @@ use alloc::{collections::BTreeSet, string::String, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
 use risc0_circuit_rv32im::{
     layout::{SystemStateLayout, OUT_LAYOUT},

@@ -17,7 +17,7 @@ extern crate alloc;
 use alloc::{collections::VecDeque, vec::Vec};
 use core::fmt;
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 

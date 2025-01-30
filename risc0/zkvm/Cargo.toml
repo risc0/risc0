@@ -34,7 +34,8 @@ required-features = ["prove"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-borsh = { version = "1.5", default-features = false, features = ["derive"] }
+borsh = { version = "1.5", default-features = false }
+borsh-derive = { version = "1.5", default-features = false }
 bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
