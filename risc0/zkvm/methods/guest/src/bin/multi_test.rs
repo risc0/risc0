@@ -22,7 +22,6 @@ extern crate alloc;
 use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
-    vec::Vec,
 };
 use core::arch::asm;
 
@@ -570,19 +569,12 @@ fn main() {
             );
         }
         MultiTestSpec::KeccakUnion(proof_count) => {
-            fn generate_input(po2: usize, proof_count: usize) -> Vec<KeccakState> {
-                let state = KeccakState::default();
+            let cycles = 1 << KECCAK_DEFAULT_PO2;
+            let count = cycles / 200 * proof_count;
 
-                let cycles = 1 << po2;
-                let count = cycles / 200; // roughly 200 cycles per keccakf
-                let mut states = vec![state; count * proof_count];
-                getrandom(bytemuck::cast_slice_mut(states.as_flattened_mut()))
-                    .expect("random number generation failed");
+            let mut state = KeccakState::default();
 
-                states
-            }
-
-            for mut state in generate_input(KECCAK_DEFAULT_PO2, proof_count) {
+            for _i in 0..count {
                 env::risc0_keccak_update(&mut state);
             }
         }

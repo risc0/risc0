@@ -162,8 +162,6 @@ pub fn union(
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_union(left, right, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
-    out_stream.extend(receipt.output.iter());
 
     let claim = UnionClaim {
         left: left.claim.digest(),
