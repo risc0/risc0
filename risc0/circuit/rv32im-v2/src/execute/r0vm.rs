@@ -145,6 +145,7 @@ impl<'a> Risc0Machine<'a> {
             HOST_ECALL_WRITE => self.ecall_write(),
             HOST_ECALL_POSEIDON2 => self.ecall_poseidon2(),
             HOST_ECALL_SHA2 => self.ecall_sha2(),
+            HOST_ECALL_BIGINT => self.ecall_bigint(),
             _ => unimplemented!(),
         }
     }
@@ -277,7 +278,6 @@ impl<'a> Risc0Machine<'a> {
             add_cycle!(ptr, rlen);
         }
 
-        // Ok(true)
         Ok(false)
     }
 
@@ -300,7 +300,6 @@ impl<'a> Risc0Machine<'a> {
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::HostWrite, CycleState::Decode, 0, 0, 0)?;
-        // Ok(true)
         Ok(false)
     }
 
@@ -310,7 +309,6 @@ impl<'a> Risc0Machine<'a> {
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0)?;
         Poseidon2::ecall(self.ctx)?;
-        // Ok(true)
         Ok(false)
     }
 
@@ -320,6 +318,15 @@ impl<'a> Risc0Machine<'a> {
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::ShaEcall, 0, 0, 0)?;
         sha2::ecall(self.ctx)?;
+        Ok(false)
+    }
+
+    fn ecall_bigint(&mut self) -> Result<bool> {
+        tracing::debug!("ecall_bigint");
+        self.next_pc();
+        self.ctx
+            .on_ecall_cycle(CycleState::MachineEcall, CycleState::BigIntEcall, 0, 0, 0)?;
+        // bigint::ecall(self.ctx)?;
         Ok(false)
     }
 

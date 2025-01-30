@@ -55,6 +55,8 @@ pub(crate) struct PreflightTrace {
     pub cycles: Vec<RawPreflightCycle>,
     #[debug("{}", txns.len())]
     pub txns: Vec<RawMemoryTransaction>,
+    #[debug("{}", extras.len())]
+    pub extras: Vec<u32>,
     #[debug("{}", backs.len())]
     pub backs: Vec<Back>,
     pub table_split_cycle: u32,
@@ -342,6 +344,7 @@ impl<'a> Preflight<'a> {
         paging_idx: u32,
         back: Back,
     ) {
+        // let extra_idx = self.trace.extras.len();
         let cycle = RawPreflightCycle {
             state: state as u32,
             pc,
@@ -352,6 +355,7 @@ impl<'a> Preflight<'a> {
             user_cycle: self.user_cycle,
             txn_idx: self.txn_idx,
             paging_idx,
+            extra_idx: 0,
             diff_count: [0, 0],
         };
         // tracing::trace!("[{}]: {cycle:?}", self.trace.cycles.len());

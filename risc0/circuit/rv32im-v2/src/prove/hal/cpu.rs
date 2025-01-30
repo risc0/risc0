@@ -77,7 +77,9 @@ impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            extras: preflight.extras.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            extras_len: preflight.extras.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
@@ -92,6 +94,7 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
         preflight: &PreflightTrace,
         data: &MetaBuffer<CpuHal>,
         accum: &MetaBuffer<CpuHal>,
+        global: &MetaBuffer<CpuHal>,
         mix: &MetaBuffer<CpuHal>,
     ) -> Result<()> {
         scope!("accumulate");
@@ -99,6 +102,7 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
         tracing::debug!("accumulate: {cycles}");
         let data_buf = data.buf.as_slice();
         let accum_buf = accum.buf.as_slice();
+        let global_buf = global.buf.as_slice();
         let mix_buf = mix.buf.as_slice();
         let buffers = RawAccumBuffers {
             data: RawBuffer {
@@ -113,6 +117,12 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
                 cols: accum.cols,
                 checked: accum.checked,
             },
+            global: RawBuffer {
+                buf: global_buf.as_ptr(),
+                rows: global.rows,
+                cols: global.cols,
+                checked: global.checked,
+            },
             mix: RawBuffer {
                 buf: mix_buf.as_ptr(),
                 rows: mix.rows,
@@ -123,7 +133,9 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            extras: preflight.extras.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            extras_len: preflight.extras.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {

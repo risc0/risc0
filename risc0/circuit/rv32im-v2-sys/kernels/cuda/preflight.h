@@ -36,13 +36,16 @@ struct PreflightCycle {
   uint32_t userCycle;
   uint32_t txnIdx;
   uint32_t pagingIdx;
+  uint32_t extraIdx;
   uint32_t diffCount[2];
 };
 
 struct PreflightTrace {
   PreflightCycle* cycles;
   MemoryTransaction* txns;
+  uint32_t* extras;
   uint32_t txnsLen;
+  uint32_t extrasLen;
   uint32_t tableSplitCycle;
 };
 
