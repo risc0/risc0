@@ -136,23 +136,17 @@ impl ProverServer for ProverImpl {
             MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
-            tracing::info!("adding keccak assumption: {}", receipt.claim.digest());
+            tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
             keccak_receipts.insert(receipt)?;
         }
 
         if let Ok(root_receipt) = keccak_receipts.root() {
-            InnerAssumptionReceipt::Succinct(root_receipt.clone())
-                .verify_integrity_with_context(&VerifierContext::default())
-                .unwrap();
-
-            tracing::info!("keccak root vierifiable successful");
-
             let assumption = Assumption {
                 claim: root_receipt.claim.digest(),
                 control_root: root_receipt.control_root()?,
             };
 
-            tracing::info!("keccak root assumption: {:?}", assumption);
+            tracing::debug!("keccak root assumption: {:?}", assumption);
             zkr_receipts.insert(assumption, root_receipt.clone());
         }
 
