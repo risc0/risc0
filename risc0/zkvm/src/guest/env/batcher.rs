@@ -19,7 +19,10 @@ use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
 
-use crate::mmr::{GuestPeak, MerkleMountainAccumulator};
+use crate::{
+    mmr::{GuestPeak, MerkleMountainAccumulator},
+    Assumption,
+};
 
 /// This struct implements the batching of calls to the keccak accelerator.
 #[derive(Debug)]
@@ -61,14 +64,20 @@ impl Keccak2Batcher {
         unsafe {
             sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
         }
-        self.mmr.insert(claim_digest).unwrap(); // this is infallible for GuestPeak
+        self.mmr
+            .insert(Assumption {
+                claim: claim_digest,
+                control_root: KECCAK_CONTROL_ROOT,
+            })
+            .unwrap(); // this is infallible for GuestPeak
         self.reset();
     }
 
     pub fn finalize(mut self) {
         self.flush();
-        if let Ok(claim_digest) = self.mmr.root() {
-            crate::guest::env::verify_assumption2(claim_digest, ALLOWED_CONTROL_ROOT).unwrap();
+        if let Ok(root_assumption) = self.mmr.root() {
+            crate::guest::env::verify_assumption2(root_assumption.claim, ALLOWED_CONTROL_ROOT)
+                .unwrap();
         }
     }
 

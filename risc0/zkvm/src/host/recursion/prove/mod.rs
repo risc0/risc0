@@ -143,29 +143,33 @@ pub fn union(
     a: &SuccinctReceipt<Unknown>,
     b: &SuccinctReceipt<Unknown>,
 ) -> Result<SuccinctReceipt<UnionClaim>> {
-    let (left, right) = if a.claim.digest() <= b.claim.digest() {
-        (a, b)
-    } else {
-        (b, a)
-    };
-    tracing::debug!(
-        "Proving union: left.claim  = {:#?}  left.control_root  = {:#?}",
-        left.claim,
-        left.control_root()?
-    );
-    tracing::debug!(
-        "Proving union: right.claim  = {:#?} right.control_root = {:#?}",
-        right.claim,
-        right.control_root()?
-    );
+    let a_assumption = Assumption {
+        claim: a.claim.digest(),
+        control_root: a.control_root()?,
+    }
+    .digest();
+    let b_assumption = Assumption {
+        claim: b.claim.digest(),
+        control_root: b.control_root()?,
+    }
+    .digest();
+
+    let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
+        if a_assumption <= b_assumption {
+            ((a_assumption, a), (b_assumption, b))
+        } else {
+            ((b_assumption, b), (a_assumption, a))
+        };
+    tracing::debug!("Proving union: left assumption = {:#?}", left_assumption);
+    tracing::debug!("Proving union: right assumption = {:#?}", right_assumption);
 
     let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_union(left, right, opts.clone())?;
+    let mut prover = Prover::new_union(left_receipt, right_receipt, opts.clone())?;
     let receipt = prover.prover.run()?;
 
     let claim = UnionClaim {
-        left: left.claim.digest(),
-        right: right.claim.digest(),
+        left: left_assumption,
+        right: right_assumption,
     };
 
     // Include an inclusion proof for control_id to allow verification against a root.

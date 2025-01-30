@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{receipt_claim::UnionClaim, sha::Digestible};
+use crate::{receipt_claim::UnionClaim, sha::Digestible, Assumption};
 use alloc::{boxed::Box, collections::VecDeque};
 use anyhow::{bail, Result};
-use risc0_zkp::core::digest::Digest;
+use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -92,12 +92,12 @@ pub trait Peak {
 
 #[derive(Debug)]
 pub struct GuestPeak {
-    digest: Digest,
+    digest: Assumption,
     height: u32,
 }
 
 impl Peak for GuestPeak {
-    type Item = Digest;
+    type Item = Assumption;
 
     fn new(item: Self::Item) -> Self {
         Self::new_with_height(item, 0)
@@ -119,8 +119,18 @@ impl Peak for GuestPeak {
     }
 
     fn merge_item(a: &mut Self::Item, b: Self::Item) -> Result<()> {
-        let (left, right) = if *a <= b { (*a, b) } else { (b, *a) };
-        *a = UnionClaim { left, right }.digest();
+        let a_assumption = a.digest();
+        let b_assumption = b.digest();
+
+        let (left, right) = if a_assumption <= b_assumption {
+            (a_assumption, b_assumption)
+        } else {
+            (b_assumption, a_assumption)
+        };
+        *a = Assumption {
+            claim: UnionClaim { left, right }.digest(),
+            control_root: ALLOWED_CONTROL_ROOT,
+        };
         Ok(())
     }
 }

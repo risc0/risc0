@@ -141,6 +141,12 @@ impl ProverServer for ProverImpl {
         }
 
         if let Ok(root_receipt) = keccak_receipts.root() {
+            InnerAssumptionReceipt::Succinct(root_receipt.clone())
+                .verify_integrity_with_context(&VerifierContext::default())
+                .unwrap();
+
+            tracing::info!("keccak root vierifiable successful");
+
             let assumption = Assumption {
                 claim: root_receipt.claim.digest(),
                 control_root: root_receipt.control_root()?,
