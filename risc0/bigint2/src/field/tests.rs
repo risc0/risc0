@@ -19,7 +19,8 @@ use num_bigint::BigUint;
 
 use risc0_bigint2_methods::{
     EXTFIELD_DEG2_ADD_ELF, EXTFIELD_DEG2_MUL_ELF, EXTFIELD_DEG2_SUB_ELF, EXTFIELD_DEG4_MUL_ELF,
-    EXTFIELD_XXONE_MUL_ELF, MODADD_ELF, MODINV_ELF, MODMUL_ELF, MODSUB_ELF,
+    EXTFIELD_XXONE_MUL_ELF, MODADD_256_ELF, MODADD_384_ELF, MODINV_256_ELF, MODINV_384_ELF,
+    MODMUL_256_ELF, MODMUL_384_ELF, MODSUB_256_ELF, MODSUB_384_ELF,
 };
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
@@ -28,7 +29,7 @@ use std::time::Instant;
 use test_log::test;
 
 #[test]
-fn modadd() {
+fn modadd_256() {
     const LHS: &[u8] = b"04";
     const RHS: &[u8] = b"07";
     const MODULUS: &[u8] = b"03";
@@ -45,7 +46,7 @@ fn modadd() {
         .build()
         .unwrap();
     let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, MODADD_ELF)
+    let session = ExecutorImpl::from_elf(env, MODADD_256_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -63,7 +64,42 @@ fn modadd() {
 }
 
 #[test]
-fn modinv() {
+fn modadd_384() {
+    const LHS: &[u8] = b"04";
+    const RHS: &[u8] = b"07";
+    const MODULUS: &[u8] = b"03";
+    const EXPECTED: &[u8] = b"02";
+
+    let lhs = BigUint::parse_bytes(LHS, 16).unwrap();
+    let rhs = BigUint::parse_bytes(RHS, 16).unwrap();
+    let modulus = BigUint::parse_bytes(MODULUS, 16).unwrap();
+    let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
+
+    let env = ExecutorEnv::builder()
+        .write(&(lhs, rhs, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
+    let now = Instant::now();
+    let session = ExecutorImpl::from_elf(env, MODADD_384_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let result: BigUint = session.journal.as_ref().unwrap().decode().unwrap();
+    assert_eq!(result, expected);
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+}
+
+#[test]
+fn modinv_256() {
     const INP: &[u8] = b"02";
     const MODULUS: &[u8] = b"05";
     const EXPECTED: &[u8] = b"03";
@@ -78,7 +114,7 @@ fn modinv() {
         .build()
         .unwrap();
     let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, MODINV_ELF)
+    let session = ExecutorImpl::from_elf(env, MODINV_256_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -96,7 +132,40 @@ fn modinv() {
 }
 
 #[test]
-fn modmul() {
+fn modinv_384() {
+    const INP: &[u8] = b"02";
+    const MODULUS: &[u8] = b"05";
+    const EXPECTED: &[u8] = b"03";
+
+    let inp = BigUint::parse_bytes(INP, 16).unwrap();
+    let modulus = BigUint::parse_bytes(MODULUS, 16).unwrap();
+    let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
+
+    let env = ExecutorEnv::builder()
+        .write(&(inp, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
+    let now = Instant::now();
+    let session = ExecutorImpl::from_elf(env, MODINV_384_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let result: BigUint = session.journal.as_ref().unwrap().decode().unwrap();
+    assert_eq!(result, expected);
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+}
+
+#[test]
+fn modmul_256() {
     const LHS: &[u8] = b"04";
     const RHS: &[u8] = b"07";
     const MODULUS: &[u8] = b"05";
@@ -113,7 +182,7 @@ fn modmul() {
         .build()
         .unwrap();
     let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, MODMUL_ELF)
+    let session = ExecutorImpl::from_elf(env, MODMUL_256_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -131,7 +200,42 @@ fn modmul() {
 }
 
 #[test]
-fn modsub() {
+fn modmul_384() {
+    const LHS: &[u8] = b"04";
+    const RHS: &[u8] = b"07";
+    const MODULUS: &[u8] = b"05";
+    const EXPECTED: &[u8] = b"03";
+
+    let lhs = BigUint::parse_bytes(LHS, 16).unwrap();
+    let rhs = BigUint::parse_bytes(RHS, 16).unwrap();
+    let modulus = BigUint::parse_bytes(MODULUS, 16).unwrap();
+    let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
+
+    let env = ExecutorEnv::builder()
+        .write(&(lhs, rhs, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
+    let now = Instant::now();
+    let session = ExecutorImpl::from_elf(env, MODMUL_384_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let result: BigUint = session.journal.as_ref().unwrap().decode().unwrap();
+    assert_eq!(result, expected);
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+}
+
+#[test]
+fn modsub_256() {
     const LHS: &[u8] = b"04";
     const RHS: &[u8] = b"07";
     const MODULUS: &[u8] = b"05";
@@ -148,7 +252,42 @@ fn modsub() {
         .build()
         .unwrap();
     let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, MODSUB_ELF)
+    let session = ExecutorImpl::from_elf(env, MODSUB_256_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let result: BigUint = session.journal.as_ref().unwrap().decode().unwrap();
+    assert_eq!(result, expected);
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+}
+
+#[test]
+fn modsub_384() {
+    const LHS: &[u8] = b"04";
+    const RHS: &[u8] = b"07";
+    const MODULUS: &[u8] = b"05";
+    const EXPECTED: &[u8] = b"02";
+
+    let lhs = BigUint::parse_bytes(LHS, 16).unwrap();
+    let rhs = BigUint::parse_bytes(RHS, 16).unwrap();
+    let modulus = BigUint::parse_bytes(MODULUS, 16).unwrap();
+    let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
+
+    let env = ExecutorEnv::builder()
+        .write(&(lhs, rhs, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
+    let now = Instant::now();
+    let session = ExecutorImpl::from_elf(env, MODSUB_384_ELF)
         .unwrap()
         .run()
         .unwrap();
