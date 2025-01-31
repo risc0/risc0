@@ -16,13 +16,13 @@
 #include "fp.h"
 #include "fpext.h"
 
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
-#include <array>
 #include <exception>
-#include <string.h>
 #include <mutex>
+#include <string.h>
 
 using namespace risc0;
 
@@ -33,19 +33,36 @@ using BCPtr = const uint8_t*;
 
 constexpr size_t kInvRate = 4;
 
-template <size_t N> inline size_t readBits(BCPtr& bc, const char* label) {
-  assert((N % 8) == 0);
-  size_t bytes = N / 8;
-  size_t result = 0;
+struct EncodedProg {
+  const uint32_t* curPos = nullptr;
 
-  for (size_t i = 0; i != bytes; i++) {
-    result += (*bc++) << (i * 8);
-  }
-  if (kDebug) {
-    printf(" decoded %luu%lu (%s)\n", result, N, label);
-  }
-  return result;
+  uint32_t decode() { return *curPos++; }
+};
+
+template <typename T> T tempLoad(Fp* buf, size_t offset);
+
+template <> Fp tempLoad<Fp>(Fp* buf, size_t offset) {
+  return buf[offset];
 }
+
+template <> FpExt tempLoad<FpExt>(Fp* buf, size_t offset) {
+  return FpExt(buf[offset], buf[offset + 1], buf[offset + 2], buf[offset + 3]);
+}
+
+template <typename T> void tempStore(Fp* buf, size_t offset, T val);
+
+template <> void tempStore<Fp>(Fp* buf, size_t offset, Fp val) {
+  buf[offset] = val;
+}
+template <> void tempStore<FpExt>(Fp* buf, size_t offset, FpExt val) {
+  buf[offset] = val.elems[0];
+  buf[offset + 1] = val.elems[1];
+  buf[offset + 2] = val.elems[2];
+  buf[offset + 3] = val.elems[3];
+}
+
+template <typename ConcreteType> struct EncodedProgBase : public EncodedProg {
+};
 
 void printDebug(const char* label, Fp fpVal) {
   printf(" %3s:  %u\n", label, fpVal.asUInt32());
@@ -69,11 +86,6 @@ template <typename T> void debugOut(T val) {
   printDebug("out", val);
 }
 
-template<typename T, size_t N> T& getFromTemp(T (&tempBuf)[N], size_t idx) {
-  assert(idx < N);
-  return tempBuf[idx];
-}
-
 namespace impl {
 
 using MutableBuf = Fp*;
@@ -84,10 +96,13 @@ using Val = Fp;
 using Index = size_t;
 using MixState = FpExt;
 
-#define zllGet(BUF, OFFSET, BACK) ((BUF)[(OFFSET) * steps + ((cycle - kInvRate * (BACK)) & mask)]);
+inline constexpr size_t getBackOrZero() { return 0; }
+inline constexpr size_t getBackOrZero(size_t back) { return back; }
+
+#define zllGet(BUF, OFFSET, BACK...) ((BUF)[(OFFSET) * steps + ((cycle - kInvRate * (getBackOrZero(BACK))) & mask)]);
 #define zllGetGlobal(BUF, OFFSET) ((BUF)[(OFFSET)])
-#define zllAndEqz(IN, VAL, MIX_POW) zllAndEqzImpl(IN, VAL, MIX_POW, polyMix2)
-#define zllAndCond(IN, COND, INNER, MIX_POW) zllAndCondImpl(IN, COND, INNER, MIX_POW, polyMix2)
+#define zllAndEqz(IN, VAL, MIX_POW) zllAndEqzImpl(IN, VAL, MIX_POW, polyMix)
+#define zllAndCond(IN, COND, INNER, MIX_POW) zllAndCondImpl(IN, COND, INNER, MIX_POW, polyMix)
 
 Fp zllConst(size_t a) {
   return Fp(a);
@@ -109,12 +124,13 @@ FpExt zllAndEqzImpl(FpExt inMix, FpExt val, size_t mixPowIndex, const FpExt* pol
   return inMix + val * polyMix[mixPowIndex];
 }
 
-FpExt zllAndCondImpl(FpExt inMix, Fp cond, FpExt innerMix, size_t mixPowIndex, const FpExt* polyMix) {
+FpExt zllAndCondImpl(
+    FpExt inMix, Fp cond, FpExt innerMix, size_t mixPowIndex, const FpExt* polyMix) {
   return inMix + cond * innerMix * polyMix[mixPowIndex];
 }
 
-FpExt
-zllAndCondImpl(FpExt inMix, FpExt cond, FpExt innerMix, size_t mixPowIndex, const FpExt* polyMix) {
+FpExt zllAndCondImpl(
+    FpExt inMix, FpExt cond, FpExt innerMix, size_t mixPowIndex, const FpExt* polyMix) {
   return inMix + cond * innerMix * polyMix[mixPowIndex];
 }
 
@@ -129,7 +145,7 @@ extern "C" const char* risc0_circuit_keccak_cpu_poly_fp(
   try {
     Fp* data = args[0];
     Fp* out = args[1];
-    *result = impl::keccak(cycle, steps, data, out, poly_mix);
+    *result = impl::execByteCode<impl::Keccak>(cycle, steps, data, out, poly_mix);
   } catch (const std::exception& err) {
     return strdup(err.what());
   }

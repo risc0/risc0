@@ -18,22 +18,22 @@
 namespace risc0::circuit::keccak::cpu {
 void step_Top_11(ExecContext& ctx,MutableBuf arg0)   {
 // Reg(<preamble>:4)
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// KeccackNextRound(zirgen/circuit/keccak2/top.zir:410)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:459)
-// Top(zirgen/circuit/keccak2/top.zir:481)
-set(ctx,arg0, 12, Val(3));
 // ControlState(zirgen/circuit/keccak2/top.zir:402)
-set(ctx,arg0, 13, Val(0));
+// KeccackNextRound(zirgen/circuit/keccak2/top.zir:411)
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:460)
+// Top(zirgen/circuit/keccak2/top.zir:482)
+set(ctx,arg0, 12, Val(3));
 // ControlState(zirgen/circuit/keccak2/top.zir:403)
-set(ctx,arg0, 14, Val(0));
+set(ctx,arg0, 13, Val(0));
 // ControlState(zirgen/circuit/keccak2/top.zir:404)
+set(ctx,arg0, 14, Val(0));
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
 set(ctx,arg0, 15, Val(0));
 return ;
 }
 void step_Top_27(ExecContext& ctx,MutableBuf arg0)   {
 // TopState(zirgen/circuit/keccak2/top.zir:40)
-// Top(zirgen/circuit/keccak2/top.zir:492)
+// Top(zirgen/circuit/keccak2/top.zir:493)
 Val x1 = get(ctx,arg0, 816, 1);
 Val x2 = get(ctx,arg0, 817, 1);
 Val x3 = get(ctx,arg0, 818, 1);
@@ -134,11 +134,11 @@ Val x97 = get(ctx,arg0, 912, 1);
 Val x98 = get(ctx,arg0, 913, 1);
 Val x99 = get(ctx,arg0, 914, 1);
 Val x100 = get(ctx,arg0, 915, 1);
-// ControlState(zirgen/circuit/keccak2/top.zir:402)
-// Top(zirgen/circuit/keccak2/top.zir:477)
+// ControlState(zirgen/circuit/keccak2/top.zir:403)
+// Top(zirgen/circuit/keccak2/top.zir:478)
 Val x101 = get(ctx,arg0, 13, 0);
-// ExpandCycle(zirgen/circuit/keccak2/top.zir:347)
-// Top(zirgen/circuit/keccak2/top.zir:492)
+// ExpandCycle(zirgen/circuit/keccak2/top.zir:348)
+// Top(zirgen/circuit/keccak2/top.zir:493)
 Val x102 = (Val(1) - x101);
 Val x103 = ((x3 * x101) + (x1 * x102));
 Val x104 = ((x4 * x101) + (x2 * x102));
@@ -191,8 +191,8 @@ Val x150 = ((x96 * x101) + (x94 * x102));
 Val x151 = ((x99 * x101) + (x97 * x102));
 Val x152 = ((x100 * x101) + (x98 * x102));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
-// ExpandCycle(zirgen/circuit/keccak2/top.zir:346)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
+// ExpandCycle(zirgen/circuit/keccak2/top.zir:347)
 set(ctx,arg0, 16, bitAnd(x103, Val(1)));
 set(ctx,arg0, 17, (bitAnd(x103, Val(2)) * Val(1006632961)));
 set(ctx,arg0, 18, (bitAnd(x103, Val(4)) * Val(1509949441)));
@@ -995,7 +995,7 @@ set(ctx,arg0, 814, (bitAnd(x152, Val(16384)) * Val(2013143041)));
 set(ctx,arg0, 815, (bitAnd(x152, Val(32768)) * Val(2013204481)));
 // Reg(<preamble>:4)
 // TopState(zirgen/circuit/keccak2/top.zir:36)
-// ExpandCycle(zirgen/circuit/keccak2/top.zir:361)
+// ExpandCycle(zirgen/circuit/keccak2/top.zir:362)
 set(ctx,arg0, 16, get(ctx,arg0, 16, 0));
 set(ctx,arg0, 17, get(ctx,arg0, 17, 0));
 set(ctx,arg0, 18, get(ctx,arg0, 18, 0));
@@ -1918,7 +1918,7 @@ return ;
 }
 void step_Top_43(ExecContext& ctx,MutableBuf arg0)   {
 // TopState(zirgen/circuit/keccak2/top.zir:36)
-// Top(zirgen/circuit/keccak2/top.zir:499)
+// Top(zirgen/circuit/keccak2/top.zir:500)
 Val x1 = get(ctx,arg0, 695, 2);
 Val x2 = get(ctx,arg0, 706, 2);
 Val x3 = get(ctx,arg0, 691, 2);
@@ -1943,7 +1943,7 @@ Val x9 = get(ctx,arg0, 692, 2);
 Val x10 = (x8 * Val(2));
 Val x11 = ((x8 + x9) - (x10 * x9));
 Val x12 = (x7 * Val(2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x13 = (((x7 + x11) - (x12 * x11)) * Val(2));
@@ -1961,7 +1961,7 @@ Val x17 = get(ctx,arg0, 693, 2);
 Val x18 = (x16 * Val(2));
 Val x19 = ((x16 + x17) - (x18 * x17));
 Val x20 = (x15 * Val(2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x21 = (((x15 + x19) - (x20 * x19)) * Val(4));
@@ -1978,7 +1978,7 @@ Val x24 = get(ctx,arg0, 694, 2);
 Val x25 = (x23 * Val(2));
 Val x26 = ((x23 + x24) - (x25 * x24));
 Val x27 = (x22 * Val(2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x28 = (((x22 + x26) - (x27 * x26)) * Val(8));
@@ -1994,7 +1994,7 @@ Val x30 = get(ctx,arg0, 710, 2);
 Val x31 = (x30 * Val(2));
 Val x32 = ((x30 + x1) - (x31 * x1));
 Val x33 = (x29 * Val(2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x34 = (((x29 + x32) - (x33 * x32)) * Val(16));
@@ -2011,7 +2011,7 @@ Val x37 = get(ctx,arg0, 711, 2);
 Val x38 = (x37 * Val(2));
 Val x39 = ((x37 + x7) - (x38 * x7));
 Val x40 = (x36 * Val(2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x41 = (((x36 + x39) - (x40 * x39)) * Val(32));
@@ -2027,7 +2027,7 @@ Val x43 = get(ctx,arg0, 712, 2);
 Val x44 = (x43 * Val(2));
 Val x45 = ((x43 + x15) - (x44 * x15));
 Val x46 = (x42 * Val(2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x47 = (((x42 + x45) - (x46 * x45)) * Val(64));
@@ -2043,7 +2043,7 @@ Val x49 = get(ctx,arg0, 713, 2);
 Val x50 = (x49 * Val(2));
 Val x51 = ((x49 + x22) - (x50 * x22));
 Val x52 = (x48 * Val(2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x53 = (((x48 + x51) - (x52 * x51)) * Val(128));
@@ -2084,7 +2084,7 @@ Val x66 = get(ctx,arg0, 716, 2);
 Val x67 = (x66 * Val(2));
 Val x68 = ((x66 + x42) - (x67 * x42));
 Val x69 = ((x65 + x68) - ((x65 * Val(2)) * x68));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x70 = (((x54 + (x59 * Val(256))) + (x64 * Val(512))) + (x69 * Val(1024)));
@@ -2098,7 +2098,7 @@ Val x71 = get(ctx,arg0, 717, 2);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x72 = (x71 * Val(2));
 Val x73 = ((x71 + x48) - (x72 * x48));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x74 = (((x2 + x73) - (x4 * x73)) * Val(2048));
@@ -2112,7 +2112,7 @@ Val x75 = get(ctx,arg0, 718, 2);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x76 = (x75 * Val(2));
 Val x77 = ((x75 + x55) - (x76 * x55));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x78 = (((x8 + x77) - (x10 * x77)) * Val(4096));
@@ -2126,7 +2126,7 @@ Val x79 = get(ctx,arg0, 719, 2);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x80 = (x79 * Val(2));
 Val x81 = ((x79 + x60) - (x80 * x60));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x82 = (((x16 + x81) - (x18 * x81)) * Val(8192));
@@ -2141,7 +2141,7 @@ Val x84 = get(ctx,arg0, 688, 2);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x85 = (x84 * Val(2));
 Val x86 = ((x84 + x65) - (x85 * x65));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x87 = (((x23 + x86) - (x25 * x86)) * Val(16384));
@@ -2155,7 +2155,7 @@ Val x88 = get(ctx,arg0, 689, 2);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x89 = (x88 * Val(2));
 Val x90 = ((x88 + x2) - (x89 * x2));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x91 = (((x30 + x90) - (x31 * x90)) * Val(32768));
@@ -2199,7 +2199,7 @@ Val x105 = get(ctx,arg0, 604, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x106 = (x104 * Val(2));
 Val x107 = ((x104 + x105) - (x106 * x105));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x108 = (((x93 + x107) - (x95 * x107)) * Val(4));
@@ -2215,7 +2215,7 @@ Val x110 = get(ctx,arg0, 605, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x111 = (x109 * Val(2));
 Val x112 = ((x109 + x110) - (x111 * x110));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x113 = (((x99 + x112) - (x101 * x112)) * Val(8));
@@ -2232,7 +2232,7 @@ Val x116 = get(ctx,arg0, 606, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x117 = (x115 * Val(2));
 Val x118 = ((x115 + x116) - (x117 * x116));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x119 = (((x104 + x118) - (x106 * x118)) * Val(16));
@@ -2248,7 +2248,7 @@ Val x121 = get(ctx,arg0, 607, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x122 = (x120 * Val(2));
 Val x123 = ((x120 + x121) - (x122 * x121));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x124 = (((x109 + x123) - (x111 * x123)) * Val(32));
@@ -2264,7 +2264,7 @@ Val x126 = get(ctx,arg0, 608, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x127 = (x125 * Val(2));
 Val x128 = ((x125 + x126) - (x127 * x126));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x129 = (((x115 + x128) - (x117 * x128)) * Val(64));
@@ -2280,7 +2280,7 @@ Val x131 = get(ctx,arg0, 618, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x132 = (x131 * Val(2));
 Val x133 = ((x131 + x92) - (x132 * x92));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x134 = (((x120 + x133) - (x122 * x133)) * Val(128));
@@ -2295,7 +2295,7 @@ Val x135 = get(ctx,arg0, 619, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x136 = (x135 * Val(2));
 Val x137 = ((x135 + x98) - (x136 * x98));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x138 = (((x125 + x137) - (x127 * x137)) * Val(256));
@@ -2310,7 +2310,7 @@ Val x139 = get(ctx,arg0, 620, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x140 = (x139 * Val(2));
 Val x141 = ((x139 + x93) - (x140 * x93));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x142 = (((x131 + x141) - (x132 * x141)) * Val(512));
@@ -2326,7 +2326,7 @@ Val x144 = get(ctx,arg0, 621, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x145 = (x144 * Val(2));
 Val x146 = ((x144 + x99) - (x145 * x99));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x147 = (((x135 + x146) - (x136 * x146)) * Val(1024));
@@ -2341,7 +2341,7 @@ Val x148 = get(ctx,arg0, 622, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x149 = (x148 * Val(2));
 Val x150 = ((x148 + x104) - (x149 * x104));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x151 = (((x139 + x150) - (x140 * x150)) * Val(2048));
@@ -2356,7 +2356,7 @@ Val x152 = get(ctx,arg0, 623, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x153 = (x152 * Val(2));
 Val x154 = ((x152 + x109) - (x153 * x109));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x155 = (((x144 + x154) - (x145 * x154)) * Val(4096));
@@ -2372,7 +2372,7 @@ Val x157 = get(ctx,arg0, 592, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x158 = (x157 * Val(2));
 Val x159 = ((x157 + x115) - (x158 * x115));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x160 = (((x148 + x159) - (x149 * x159)) * Val(8192));
@@ -2380,7 +2380,7 @@ Val x160 = (((x148 + x159) - (x149 * x159)) * Val(8192));
 // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:194)
 Val x161 = get(ctx,arg0, 593, 0);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 // DoShaStep(zirgen/circuit/keccak2/top.zir:139)
@@ -2391,7 +2391,7 @@ Val x162 = (x161 * Val(2));
 // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x163 = ((x161 + x120) - (x162 * x120));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x164 = (((x152 + x163) - (x153 * x163)) * Val(16384));
@@ -2406,7 +2406,7 @@ Val x165 = get(ctx,arg0, 594, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x166 = (x165 * Val(2));
 Val x167 = ((x165 + x125) - (x166 * x125));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x168 = (((x157 + x167) - (x158 * x167)) * Val(32768));
@@ -2457,7 +2457,7 @@ Val x192 = (x191 * Val(2));
 Val x193 = ((x191 + x8) - (x192 * x8));
 Val x194 = (x3 * Val(2));
 Val x195 = ((x3 + x16) - (x194 * x16));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x196 = (((x43 + x195) - (x44 * x195)) * Val(2));
@@ -2467,7 +2467,7 @@ Val x197 = (((x37 + x193) - (x38 * x193)) + x196);
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x198 = (x9 * Val(2));
 Val x199 = ((x9 + x23) - (x198 * x23));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x200 = (((x49 + x199) - (x50 * x199)) * Val(4));
@@ -2476,7 +2476,7 @@ Val x200 = (((x49 + x199) - (x50 * x199)) * Val(4));
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x201 = (x17 * Val(2));
 Val x202 = ((x17 + x30) - (x201 * x30));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x203 = (((x56 + x202) - (x57 * x202)) * Val(8));
@@ -2485,7 +2485,7 @@ Val x203 = (((x56 + x202) - (x57 * x202)) * Val(8));
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x204 = (x24 * Val(2));
 Val x205 = ((x24 + x37) - (x204 * x37));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x206 = (((x61 + x205) - (x62 * x205)) * Val(16));
@@ -2494,7 +2494,7 @@ Val x207 = (((x197 + x200) + x203) + x206);
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x208 = ((x1 + x43) - (x6 * x43));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x209 = (((x66 + x208) - (x67 * x208)) * Val(32));
@@ -2502,7 +2502,7 @@ Val x209 = (((x66 + x208) - (x67 * x208)) * Val(32));
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x210 = ((x7 + x49) - (x12 * x49));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x211 = (((x71 + x210) - (x72 * x210)) * Val(64));
@@ -2510,7 +2510,7 @@ Val x211 = (((x71 + x210) - (x72 * x210)) * Val(64));
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x212 = ((x15 + x56) - (x20 * x56));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x213 = (((x75 + x212) - (x76 * x212)) * Val(128));
@@ -2519,7 +2519,7 @@ Val x214 = (((x207 + x209) + x211) + x213);
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x215 = ((x22 + x61) - (x27 * x61));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x216 = (((x79 + x215) - (x80 * x215)) * Val(256));
@@ -2527,7 +2527,7 @@ Val x216 = (((x79 + x215) - (x80 * x215)) * Val(256));
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x217 = ((x29 + x66) - (x33 * x66));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x218 = (((x84 + x217) - (x85 * x217)) * Val(512));
@@ -2535,7 +2535,7 @@ Val x218 = (((x84 + x217) - (x85 * x217)) * Val(512));
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x219 = ((x36 + x71) - (x40 * x71));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x220 = (((x88 + x219) - (x89 * x219)) * Val(1024));
@@ -2544,7 +2544,7 @@ Val x221 = (((x214 + x216) + x218) + x220);
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x222 = ((x42 + x75) - (x46 * x75));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x223 = (((x191 + x222) - (x192 * x222)) * Val(2048));
@@ -2552,7 +2552,7 @@ Val x223 = (((x191 + x222) - (x192 * x222)) * Val(2048));
 // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
 Val x224 = ((x48 + x79) - (x52 * x79));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x225 = (((x3 + x224) - (x194 * x224)) * Val(4096));
@@ -2582,7 +2582,7 @@ Val x233 = get(ctx,arg0, 596, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x234 = (x233 * Val(2));
 Val x235 = ((x233 + x135) - (x234 * x135));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x236 = (((x165 + x235) - (x166 * x235)) * Val(2));
@@ -2598,7 +2598,7 @@ Val x238 = get(ctx,arg0, 597, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x239 = (x238 * Val(2));
 Val x240 = ((x238 + x139) - (x239 * x139));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x241 = (((x230 + x240) - (x231 * x240)) * Val(4));
@@ -2613,7 +2613,7 @@ Val x242 = get(ctx,arg0, 598, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x243 = (x242 * Val(2));
 Val x244 = ((x242 + x144) - (x243 * x144));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x245 = (((x233 + x244) - (x234 * x244)) * Val(8));
@@ -2628,7 +2628,7 @@ Val x246 = get(ctx,arg0, 599, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x247 = (x246 * Val(2));
 Val x248 = ((x246 + x148) - (x247 * x148));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x249 = (((x238 + x248) - (x239 * x248)) * Val(16));
@@ -2644,7 +2644,7 @@ Val x251 = get(ctx,arg0, 600, 0);
 // ShaCycle(zirgen/circuit/keccak2/top.zir:196)
 Val x252 = (x251 * Val(2));
 Val x253 = ((x251 + x152) - (x252 * x152));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x254 = (((x242 + x253) - (x243 * x253)) * Val(32));
@@ -2652,7 +2652,7 @@ Val x254 = (((x242 + x253) - (x243 * x253)) * Val(32));
 // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:194)
 Val x255 = get(ctx,arg0, 601, 0);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
@@ -2666,7 +2666,7 @@ Val x258 = (((x250 + x254) + x256) + x257);
 Val x259 = ((x255 + x100) - ((x255 * Val(2)) * x100));
 Val x260 = ((x94 + x105) - ((x94 * Val(2)) * x105));
 Val x261 = ((x100 + x110) - ((x100 * Val(2)) * x110));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x262 = (((x258 + (x259 * Val(256))) + (x260 * Val(512))) + (x261 * Val(1024)));
@@ -2676,7 +2676,7 @@ Val x262 = (((x258 + (x259 * Val(256))) + (x260 * Val(512))) + (x261 * Val(1024)
 Val x263 = ((x105 + x116) - ((x105 * Val(2)) * x116));
 Val x264 = ((x110 + x121) - ((x110 * Val(2)) * x121));
 Val x265 = ((x116 + x126) - ((x116 * Val(2)) * x126));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x266 = (((x262 + (x263 * Val(2048))) + (x264 * Val(4096))) + (x265 * Val(8192)));
@@ -2685,7 +2685,7 @@ Val x266 = (((x262 + (x263 * Val(2048))) + (x264 * Val(4096))) + (x265 * Val(819
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
 Val x267 = ((x121 + x92) - ((x121 * Val(2)) * x92));
 Val x268 = ((x126 + x98) - ((x126 * Val(2)) * x98));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
 Val x269 = (get(ctx,arg0, 672, 2) + (get(ctx,arg0, 673, 2) * Val(2)));
@@ -2724,7 +2724,7 @@ Val x289 = ((get(ctx,arg0, 1014, 0) * Val(4)) + (get(ctx,arg0, 1013, 0) * Val(2)
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x290 = (x287 - ((x289 + get(ctx,arg0, 1012, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 656, bitAnd(x190, Val(1)));
 set(ctx,arg0, 657, (bitAnd(x190, Val(2)) * Val(1006632961)));

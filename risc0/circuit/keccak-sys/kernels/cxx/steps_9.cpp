@@ -18,21 +18,21 @@
 namespace risc0::circuit::keccak::cpu {
 void step_Top_8(ExecContext& ctx,MutableBuf arg0)   {
 // Reg(<preamble>:4)
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:456)
-// Top(zirgen/circuit/keccak2/top.zir:481)
-set(ctx,arg0, 12, Val(6));
 // ControlState(zirgen/circuit/keccak2/top.zir:402)
-set(ctx,arg0, 13, Val(0));
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:457)
+// Top(zirgen/circuit/keccak2/top.zir:482)
+set(ctx,arg0, 12, Val(6));
 // ControlState(zirgen/circuit/keccak2/top.zir:403)
-set(ctx,arg0, 14, Val(0));
+set(ctx,arg0, 13, Val(0));
 // ControlState(zirgen/circuit/keccak2/top.zir:404)
+set(ctx,arg0, 14, Val(0));
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
 set(ctx,arg0, 15, get(ctx,arg0, 15, 1));
 return ;
 }
 void step_Top_24(ExecContext& ctx,MutableBuf arg0)   {
 if (to_size_t(get(ctx,arg0, 0, 1))) {
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:446)
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:447)
 step_Top_1(ctx,arg0);
 }
 if (to_size_t(get(ctx,arg0, 1, 1))) {
@@ -75,7 +75,7 @@ void step_Top_40(ExecContext& ctx,MutableBuf arg0)   {
 // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
 // LoadWin(zirgen/circuit/keccak2/top.zir:164)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:191)
-// Top(zirgen/circuit/keccak2/top.zir:499)
+// Top(zirgen/circuit/keccak2/top.zir:500)
 Val x1 = get(ctx,arg0, 1090, 0);
 Val x2 = get(ctx,arg0, 1091, 0);
 // LoadWin(zirgen/circuit/keccak2/top.zir:167)

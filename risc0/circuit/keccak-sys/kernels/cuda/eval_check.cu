@@ -34,26 +34,40 @@ __constant__ FpExt poly_mix[kNumPolyMixPows];
 
 constexpr size_t kInvRate = 4;
 
-template <size_t N> __device__ __inline__ size_t readBits(const uint8_t* &bc, const char* label) {
-  assert((N % 8) == 0);
-  size_t bytes = N / 8;
-  size_t result = 0;
+struct EncodedProg {
+  const uint32_t* __restrict__ curPos = nullptr;
 
-  for (size_t i = 0; i != bytes; i++) {
-    result += (*bc++) << (i * 8);
-  }
-  if (kDebug) {
-    printf(" decoded %lu (%s)\n", result, label);
-  }
-  return result;
+  __device__ __inline__ uint32_t decode() { return *curPos++; }
+};
+
+template <typename T> T tempLoad(Fp* buf, size_t offset);
+
+template <> __device__ __inline__ Fp tempLoad<Fp>(Fp* buf, size_t offset) {
+  return buf[offset];
 }
 
-template <typename T, size_t N> __device__ __inline__ T& getFromTemp(T (&tempBuf)[N], size_t idx) {
-  assert(idx < N);
-  return tempBuf[idx];
+template <> __device__ __inline__ FpExt tempLoad<FpExt>(Fp* buf, size_t offset) {
+  return FpExt(buf[offset], buf[offset + 1], buf[offset + 2], buf[offset + 3]);
 }
 
-#define zllGet(BUF, OFFSET, BACK) ((BUF)[(OFFSET) * steps + ((cycle - kInvRate * (BACK)) & mask)]);
+template <typename T> __device__ __inline__ void tempStore(Fp* buf, size_t offset, T val);
+
+template <> __device__ __inline__ void tempStore<Fp>(Fp* buf, size_t offset, Fp val) {
+  buf[offset] = val;
+}
+template <> __device__ __inline__ void tempStore<FpExt>(Fp* buf, size_t offset, FpExt val) {
+  buf[offset] = val[0];
+  buf[offset + 1] = val[1];
+  buf[offset + 2] = val[2];
+  buf[offset + 3] = val[3];
+}
+
+template <typename ConcreteType> struct EncodedProgBase : public EncodedProg {};
+
+__device__ __inline__ constexpr size_t getBackOrZero() { return 0; }
+__device__ __inline__ constexpr size_t getBackOrZero(size_t back) { return back; }
+
+#define zllGet(BUF, OFFSET, BACK...) ((BUF)[(OFFSET) * steps + ((cycle - kInvRate * (getBackOrZero(BACK))) & mask)]);
 #define zllGetGlobal(BUF, OFFSET) ((BUF)[(OFFSET)])
 #define debugIn(X) (X)
 #define debugOut(X)                                                                                \
@@ -91,7 +105,10 @@ zllAndCond(FpExt inMix, FpExt cond, FpExt innerMix, size_t mixPowIndex) {
 
 #include "eval_check_bc.cu.inc"
 
-__global__ void eval_check(Fp* check,
+
+__global__ void
+__launch_bounds__(256, 6)
+eval_check(Fp* check,
                            const Fp* ctrl,
                            const Fp* data,
                            const Fp* accum,
@@ -100,25 +117,17 @@ __global__ void eval_check(Fp* check,
                            const Fp rou,
                            uint32_t po2,
                            uint32_t domain) {
-  uint32_t cudaCycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (kDebug) {
-    if (cudaCycle != 0)
-      return;
-  }
-  for (uint32_t cycle = cudaCycle; cycle != domain; ++cudaCycle) {
-    if (cycle < domain) {
-      FpExt tot = keccak(cycle, domain, data, out, poly_mix);
-      Fp x = pow(rou, cycle);
-      Fp y = pow(Fp(3) * x, 1 << po2);
-      FpExt ret = tot * inv(y - Fp(1));
-      check[domain * 0 + cycle] = ret[0];
-      check[domain * 1 + cycle] = ret[1];
-      check[domain * 2 + cycle] = ret[2];
-      check[domain * 3 + cycle] = ret[3];
-    }
-    if (!kDebug)
-      break;
-  }
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= domain)
+    return;
+  FpExt tot = execByteCode<Keccak>(cycle, domain, data, out, poly_mix);
+  Fp x = pow(rou, cycle);
+  Fp y = pow(Fp(3) * x, 1 << po2);
+  FpExt ret = tot * inv(y - Fp(1));
+  check[domain * 0 + cycle] = ret[0];
+  check[domain * 1 + cycle] = ret[1];
+  check[domain * 2 + cycle] = ret[2];
+  check[domain * 3 + cycle] = ret[3];
 }
 
 } // namespace risc0::circuit::keccak::cuda
