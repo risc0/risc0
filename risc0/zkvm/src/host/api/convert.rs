@@ -746,6 +746,17 @@ impl From<UnionClaim> for pb::core::UnionClaim {
     }
 }
 
+impl TryFrom<pb::core::UnionClaim> for UnionClaim {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::UnionClaim) -> Result<Self> {
+        Ok(Self {
+            left: value.left.ok_or(malformed_err())?.try_into()?,
+            right: value.right.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
 impl From<ReceiptClaim> for pb::core::ReceiptClaim {
     fn from(value: ReceiptClaim) -> Self {
         Self {
