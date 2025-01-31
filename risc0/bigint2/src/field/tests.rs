@@ -15,8 +15,9 @@
 #[cfg(feature = "num-bigint-dig")]
 extern crate num_bigint_dig as num_bigint;
 
-use num_bigint::BigUint;
+use std::time::Instant;
 
+use num_bigint::BigUint;
 use risc0_bigint2_methods::{
     EXTFIELD_DEG2_ADD_ELF, EXTFIELD_DEG2_MUL_ELF, EXTFIELD_DEG2_SUB_ELF, EXTFIELD_DEG4_MUL_ELF,
     EXTFIELD_XXONE_MUL_ELF, MODADD_ELF, MODINV_ELF, MODMUL_ELF, MODSUB_ELF,
@@ -24,7 +25,6 @@ use risc0_bigint2_methods::{
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
 };
-use std::time::Instant;
 use test_log::test;
 
 #[test]

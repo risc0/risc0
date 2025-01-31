@@ -422,7 +422,7 @@ impl Preflight {
 
         let info = &self.pager.image.info;
         let addr = ByteAddr(info.get_page_addr(page_idx)).waddr();
-        tracing::debug!(
+        tracing::trace!(
             "page_fault(0x{page_idx:05x}, {is_read}, {is_done}, {:?})",
             addr.baddr()
         );
@@ -602,7 +602,7 @@ impl Preflight {
 
         self.syscall_fini(a0, a1)?;
 
-        tracing::debug!(
+        tracing::trace!(
             "[{cycle}] ecall_software: {}",
             self.trace.body.cycles.len() - cycle
         );
@@ -631,7 +631,7 @@ impl Preflight {
             false,
         )?;
 
-        tracing::debug!(
+        tracing::trace!(
             "[{cycle}] ecall_sha: {}",
             self.trace.body.cycles.len() - cycle
         );
@@ -652,7 +652,7 @@ impl Preflight {
         const BIGINT_IO_SIZE: usize = 4;
 
         let cycle = self.trace.body.cycles.len();
-        tracing::debug!("[{cycle}] ecall_bigint");
+        tracing::trace!("[{cycle}] ecall_bigint");
 
         self.load_register(REG_T0)?;
         self.load_register(REG_A1)?;
@@ -662,7 +662,7 @@ impl Preflight {
         let x_ptr = ByteAddr(self.load_register(REG_A2)?).waddr();
         let y_ptr = ByteAddr(self.load_register(REG_A3)?).waddr();
         let n_ptr = ByteAddr(self.load_register(REG_A4)?).waddr();
-        tracing::debug!("bigint(z: {z_ptr:?}, x: {x_ptr:?}, y: {y_ptr:?}, n {n_ptr:?}");
+        tracing::trace!("bigint(z: {z_ptr:?}, x: {x_ptr:?}, y: {y_ptr:?}, n {n_ptr:?}");
         self.load_bigint(REG_A2)?;
         self.load_bigint(REG_A3)?;
         self.load_bigint(REG_A4)?;
@@ -703,7 +703,7 @@ impl Preflight {
             z.resize()
         };
 
-        tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
+        tracing::trace!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
 
         // Store result.
         let z: [u32; bigint::WIDTH_WORDS] = bytemuck::cast(z.to_le_bytes());
@@ -727,7 +727,7 @@ impl Preflight {
 
     fn ecall_bigint2(&mut self) -> Result<bool> {
         let cycle = self.trace.body.cycles.len();
-        tracing::debug!("[{cycle}] ecall_bigint2");
+        tracing::trace!("[{cycle}] ecall_bigint2");
 
         self.load_register(REG_T0)?;
         let verify_program_ptr = ByteAddr(self.load_register(REG_T2)?).waddr();
@@ -823,6 +823,7 @@ impl Preflight {
             for (i, byte) in bytes.iter().enumerate() {
                 ret[i] = (*byte) as u32;
             }
+            tracing::debug!("Read> witness: {ret:02x?}");
         } else if !addr.is_null() {
             for i in 0..BIGINT2_WIDTH_WORDS {
                 let addr = addr + i;
@@ -836,6 +837,7 @@ impl Preflight {
                     self.store_u32(addr, *word)?;
                 }
             }
+            tracing::debug!("Write> witness: {ret:02x?}");
         }
 
         let delta_poly = BytePolynomial::new(ret.iter().map(|x| *x as i32).collect());

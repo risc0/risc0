@@ -77,9 +77,9 @@ impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
-            extras: preflight.extras.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
-            extras_len: preflight.extras.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
@@ -133,9 +133,9 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
-            extras: preflight.extras.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
-            extras_len: preflight.extras.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {

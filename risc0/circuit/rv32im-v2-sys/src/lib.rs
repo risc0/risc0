@@ -44,7 +44,7 @@ pub struct RawPreflightCycle {
     pub user_cycle: u32,
     pub txn_idx: u32,
     pub paging_idx: u32,
-    pub extra_idx: u32,
+    pub bigint_idx: u32,
     pub diff_count: [u32; 2],
 }
 
@@ -52,9 +52,9 @@ pub struct RawPreflightCycle {
 pub struct RawPreflightTrace {
     pub cycles: *const RawPreflightCycle,
     pub txns: *const RawMemoryTransaction,
-    pub extras: *const u32,
+    pub bigint_bytes: *const u8,
     pub txns_len: u32,
-    pub extras_len: u32,
+    pub bigint_bytes_len: u32,
     pub table_split_cycle: u32,
 }
 

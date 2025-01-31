@@ -211,9 +211,9 @@ std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
 
 std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
   std::array<Val, 16> ret;
-  size_t extraIdx = ctx.preflight.cycles[ctx.cycle].extraIdx;
+  size_t bigintIdx = ctx.preflight.cycles[ctx.cycle].bigintIdx;
   for (size_t i = 0; i < 16; i++) {
-    ret[i] = ctx.preflight.extras[extraIdx + i];
+    ret[i] = ctx.preflight.bigintBytes[bigintIdx + i];
   }
   return ret;
 }

@@ -14,23 +14,26 @@ num-bigint-dig = { version = "0.8", default-features = false, optional = true }
 stability = "0.2"
 
 [dev-dependencies]
-tracing = "0.1"
-
-[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+anyhow = "1.0"
 clap = { version = "4.5", features = ["derive"] }
+num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
+num-bigint-dig = { version = "0.8", default-features = false, features = [
+  "serde",
+] }
+num-traits = "0.2.18"
 puffin = "0.19"
 puffin_http = "0.16"
 risc0-bigint2-methods = { path = "methods" }
-risc0-zkvm = { workspace = true, features = ["prove"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+risc0-zkvm = { workspace = true, features = ["prove", "unstable"] }
+rstest = "0.23.0"
+rstest_reuse = "0.7.0"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
-num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
-num-bigint-dig = { version = "0.8", default-features = false, features = ["serde"] }
-anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
-default = []
+default = ["unstable"]
 num-bigint-dig = ["dep:num-bigint-dig"]
 num-bigint = ["dep:num-bigint"]
 unstable = []

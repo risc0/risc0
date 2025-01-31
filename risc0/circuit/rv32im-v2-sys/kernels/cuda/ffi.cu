@@ -79,14 +79,14 @@ struct HostExecContext {
                        preflight->txnsLen * sizeof(MemoryTransaction),
                        cudaMemcpyHostToDevice));
 
-    CUDA_OK(cudaMalloc(&d_preflight.extras, preflight->extrasLen * sizeof(uint32_t)));
-    CUDA_OK(cudaMemcpy(d_preflight.extras,
-                       preflight->extras,
-                       preflight->extrasLen * sizeof(uint32_t),
+    CUDA_OK(cudaMalloc(&d_preflight.bigintBytes, preflight->bigintBytesLen * sizeof(uint32_t)));
+    CUDA_OK(cudaMemcpy(d_preflight.bigintBytes,
+                       preflight->bigintBytes,
+                       preflight->bigintBytesLen * sizeof(uint32_t),
                        cudaMemcpyHostToDevice));
 
     d_preflight.txnsLen = preflight->txnsLen;
-    d_preflight.extrasLen = preflight->extrasLen;
+    d_preflight.bigintBytesLen = preflight->bigintBytesLen;
     d_preflight.tableSplitCycle = preflight->tableSplitCycle;
 
     CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
@@ -107,7 +107,7 @@ struct HostExecContext {
     cudaFree(d_tables.tableU16);
     cudaFree(d_tables.tableU8);
     cudaFree(ctx->tables);
-    cudaFree(d_preflight.extras);
+    cudaFree(d_preflight.bigintBytes);
     cudaFree(d_preflight.txns);
     cudaFree(d_preflight.cycles);
     cudaFree(ctx->preflight);
@@ -342,9 +342,9 @@ __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
 
 __device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
   ::cuda::std::array<Val, 16> ret;
-  size_t extraIdx = ctx.preflight.cycles[ctx.cycle].extraIdx;
+  size_t bigintIdx = ctx.preflight.cycles[ctx.cycle].bigintIdx;
   for (size_t i = 0; i < 16; i++) {
-    ret[i] = ctx.preflight.extras[extraIdx + i];
+    ret[i] = ctx.preflight.bigintBytes[bigintIdx + i];
   }
   return ret;
 }
