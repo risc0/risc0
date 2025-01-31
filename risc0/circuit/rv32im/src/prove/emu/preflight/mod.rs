@@ -823,7 +823,6 @@ impl Preflight {
             for (i, byte) in bytes.iter().enumerate() {
                 ret[i] = (*byte) as u32;
             }
-            tracing::debug!("Read> witness: {ret:02x?}");
         } else if !addr.is_null() {
             for i in 0..BIGINT2_WIDTH_WORDS {
                 let addr = addr + i;
@@ -837,7 +836,6 @@ impl Preflight {
                     self.store_u32(addr, *word)?;
                 }
             }
-            tracing::debug!("Write> witness: {ret:02x?}");
         }
 
         let delta_poly = BytePolynomial::new(ret.iter().map(|x| *x as i32).collect());
