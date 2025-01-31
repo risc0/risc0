@@ -80,21 +80,22 @@ pub(crate) unsafe fn alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
         heap_pos += align - offset;
     }
 
-    let ptr = heap_pos as *mut u8;
-    heap_pos += bytes;
-
     // Check to make sure heap doesn't collide with SYSTEM memory.
-    if GUEST_MAX_MEM < heap_pos {
-        const MSG: &[u8] = "Out of memory! You have been using the default bump allocator which \
-            does not reclaim memory. Enable the `heap-embedded-alloc` feature to \
-            reclaim memory. This will result in extra cycle cost."
-            .as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    match heap_pos.checked_add(bytes) {
+        Some(new_heap_pos) if new_heap_pos <= GUEST_MAX_MEM => {
+            // SAFETY: Single threaded, and non-premptive so modification is safe.
+            unsafe { HEAP_POS = new_heap_pos };
+        }
+        _ => {
+            const MSG: &[u8] = "Out of memory! You have been using the default bump allocator \
+                which does not reclaim memory. Enable the `heap-embedded-alloc` feature to \
+                reclaim memory. This will result in extra cycle cost."
+                .as_bytes();
+            unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+        }
     }
 
-    // SAFETY: Single threaded, and non-premptive so modification is safe.
-    unsafe { HEAP_POS = heap_pos };
-    ptr
+    heap_pos as *mut u8
 }
 
 /// Initialize the bump allocator with the memory allocations defined in the [memory][crate::memory] module.
