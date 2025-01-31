@@ -17,7 +17,7 @@ use std::{
     sync::mpsc::{Receiver, Sender},
 };
 
-use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, Unknown};
+use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, UnionClaim, Unknown};
 use workerpool::Pool;
 
 use crate::{
@@ -34,6 +34,8 @@ pub enum JobKind {
     Keccak(ProveKeccakRequest),
     Receipt(Box<SuccinctReceipt<ReceiptClaim>>),
     KeccakReceipt(Box<SuccinctReceipt<Unknown>>),
+    Union(Box<(SuccinctReceipt<Unknown>, SuccinctReceipt<Unknown>)>),
+    UnionReceipt(Box<SuccinctReceipt<UnionClaim>>),
 }
 
 pub struct Job {

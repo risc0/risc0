@@ -14,7 +14,7 @@
 
 use risc0_zkvm::{
     ApiClient, Asset, AssetRequest, ProveKeccakRequest, ProverOpts, ReceiptClaim, SuccinctReceipt,
-    Unknown,
+    UnionClaim, Unknown,
 };
 
 use crate::task_mgr::{Job, JobKind};
@@ -48,6 +48,14 @@ impl workerpool::Worker for Worker {
             JobKind::KeccakReceipt(receipt) => Job {
                 task: job.task,
                 kind: JobKind::KeccakReceipt(receipt),
+            },
+            JobKind::Union(pair) => Job {
+                task: job.task,
+                kind: JobKind::UnionReceipt(Box::new(self.union(pair.0, pair.1))),
+            },
+            JobKind::UnionReceipt(receipt) => Job {
+                task: job.task,
+                kind: JobKind::UnionReceipt(receipt),
             },
         })
         .unwrap_or_else(|_| {
@@ -96,7 +104,7 @@ impl Worker {
         &self,
         left: SuccinctReceipt<Unknown>,
         right: SuccinctReceipt<Unknown>,
-    ) -> SuccinctReceipt<Unknown> {
+    ) -> SuccinctReceipt<UnionClaim> {
         let opts = ProverOpts::default();
         let client = ApiClient::from_env().unwrap();
         let left_asset = left.try_into().unwrap();

@@ -92,7 +92,8 @@ pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
-    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim, Unknown,
+    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    UnionClaim, Unknown,
 };
 
 #[cfg(not(target_os = "zkvm"))]

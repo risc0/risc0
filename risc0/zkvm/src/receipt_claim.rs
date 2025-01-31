@@ -282,11 +282,11 @@ impl BorshDeserialize for Unknown {
 /// accumulator, the root of which commits to a set of claims.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnionClaim {
-    // Digest of the "left" Assumption struct.
-    //
-    // The left should always be lesser of the two when interpreting the digest as a big-endian number.
+    /// Digest of the "left" Assumption struct.
+    ///
+    /// The left should always be lesser of the two when interpreting the digest as a big-endian number.
     pub left: Digest,
-    // Digest of the "right" Assumption struct.
+    /// Digest of the "right" Assumption struct.
     pub right: Digest,
 }
 
