@@ -22,7 +22,6 @@ mod worker;
 
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use alloc::task;
 use anyhow::Result;
 use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
 use risc0_zkp::digest;
@@ -31,7 +30,9 @@ use risc0_zkvm::{
     ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
 
-use self::{plan::Planner, task_mgr::TaskManager};
+use crate::plan::Planner;
+
+use self::{plan::Rv32imPlanner, task_mgr::TaskManager};
 
 fn main() {
     prover_example();
@@ -40,11 +41,11 @@ fn main() {
 struct Coprocessor<'a> {
     pub(crate) receipts: HashMap<Digest, SuccinctReceipt<Unknown>>,
     pub(crate) _task_manager: &'a RefCell<TaskManager>,
-    pub(crate) _planner: &'a RefCell<Planner>,
+    pub(crate) _planner: &'a RefCell<Rv32imPlanner>,
 }
 
 impl<'a> Coprocessor<'a> {
-    fn new(_task_manager: &'a RefCell<TaskManager>, _planner: &'a RefCell<Planner>) -> Self {
+    fn new(_task_manager: &'a RefCell<TaskManager>, _planner: &'a RefCell<Rv32imPlanner>) -> Self {
         Self {
             receipts: HashMap::new(),
             _task_manager,
@@ -62,14 +63,16 @@ impl<'a> CoprocessorCallback for Coprocessor<'a> {
         Ok(())
     }
 
-    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {}
+    fn prove_keccak(&mut self, _proof_request: ProveKeccakRequest) -> Result<()> {
+        todo!();
+    }
 }
 
 fn prover_example() {
     println!("Submitting proof request...");
 
     let task_manager = RefCell::new(TaskManager::new());
-    let planner = RefCell::new(Planner::default());
+    let planner = RefCell::new(Rv32imPlanner::default());
 
     let coprocessor = Rc::new(RefCell::new(Coprocessor::new(&task_manager, &planner)));
 

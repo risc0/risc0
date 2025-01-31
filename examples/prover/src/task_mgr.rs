@@ -27,6 +27,7 @@ use crate::{
 
 type TaskNumber = usize;
 
+#[allow(dead_code)]
 pub enum JobKind {
     Segment(Asset),
     Join(Box<(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>)>),
