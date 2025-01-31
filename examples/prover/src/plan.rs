@@ -23,6 +23,7 @@ pub enum PlannerErr {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Command {
     Finalize,
+    FinalizeProofSet,
     Join,
     Keccak,
     Union,
@@ -79,14 +80,16 @@ impl Task {
         }
     }
 
-    pub fn new_union(task_number: usize, task_height: u32, left: usize, right: usize) -> Self {
-        Task {
-            task_number,
-            task_height,
-            command: Command::Union,
-            depends_on: vec![left, right],
-            segment_idx: None,
-        }
+    pub fn new_finalize_proof_set(
+        _task_number: usize,
+        _task_height: u32,
+        _depends_on: usize,
+    ) -> Self {
+        todo!();
+    }
+
+    pub fn new_union(_task_number: usize, _task_height: u32, _left: usize, _right: usize) -> Self {
+        todo!();
     }
 }
 
@@ -200,14 +203,6 @@ impl Planner {
         task_number
     }
 
-    fn enqueue_union(&mut self, _left: usize, _right: usize) -> usize {
-        todo!()
-    }
-
-    pub fn enqueue_keccak(&mut self, _segment_idx: u32) -> Result<usize, PlannerErr> {
-        todo!()
-    }
-
     fn next_task_number(&self) -> usize {
         self.task_count()
     }
@@ -235,6 +230,7 @@ impl std::fmt::Debug for Planner {
                     write!(f, "{:?} Finalize", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
                 }
+                Command::FinalizeProofSet => todo!(),
                 Command::Join => {
                     write!(f, "{:?} Join", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));

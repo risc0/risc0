@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{ApiClient, Asset, AssetRequest, ProverOpts, ReceiptClaim, SuccinctReceipt};
+use risc0_zkvm::{
+    ApiClient, Asset, AssetRequest, ProveKeccakRequest, ProverOpts, ReceiptClaim, SuccinctReceipt,
+    Unknown,
+};
 
 use crate::task_mgr::{Job, JobKind};
 
@@ -25,16 +28,27 @@ impl workerpool::Worker for Worker {
 
     fn execute(&mut self, job: Job) -> Job {
         println!("{:?}", job.task);
-        std::panic::catch_unwind(|| {
-            let receipt = match job.kind {
-                JobKind::Segment(segment) => self.prove_and_lift(segment),
-                JobKind::Join(pair) => self.join(pair.0, pair.1),
-                JobKind::Receipt(receipt) => *receipt,
-            };
-            Job {
+        std::panic::catch_unwind(|| match job.kind {
+            JobKind::Segment(segment) => Job {
                 task: job.task,
-                kind: JobKind::Receipt(Box::new(receipt)),
-            }
+                kind: JobKind::Receipt(Box::new(self.prove_and_lift(segment))),
+            },
+            JobKind::Join(pair) => Job {
+                task: job.task,
+                kind: JobKind::Receipt(Box::new(self.join(pair.0, pair.1))),
+            },
+            JobKind::Receipt(receipt) => Job {
+                task: job.task,
+                kind: JobKind::Receipt(Box::new(*receipt)),
+            },
+            JobKind::Keccak(proof_request) => Job {
+                task: job.task,
+                kind: JobKind::KeccakReceipt(Box::new(self.keccak(proof_request))),
+            },
+            JobKind::KeccakReceipt(receipt) => Job {
+                task: job.task,
+                kind: JobKind::KeccakReceipt(receipt),
+            },
         })
         .unwrap_or_else(|_| {
             std::process::abort();
@@ -68,6 +82,13 @@ impl Worker {
         let right_asset = right.try_into().unwrap();
         client
             .join(&opts, left_asset, right_asset, AssetRequest::Inline)
+            .unwrap()
+    }
+
+    fn keccak(&self, proof_request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
+        let client = ApiClient::from_env().unwrap();
+        client
+            .prove_keccak(proof_request, AssetRequest::Inline)
             .unwrap()
     }
 }

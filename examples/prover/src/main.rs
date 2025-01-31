@@ -22,13 +22,13 @@ mod worker;
 
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use alloc::task;
 use anyhow::Result;
 use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
 use risc0_zkp::digest;
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    MaybePruned, ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt,
-    Unknown,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
 
 use self::{plan::Planner, task_mgr::TaskManager};
@@ -62,17 +62,7 @@ impl<'a> CoprocessorCallback for Coprocessor<'a> {
         Ok(())
     }
 
-    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
-        let client = ApiClient::from_env().unwrap();
-        let receipt = client.prove_keccak(proof_request, AssetRequest::Inline)?;
-        let claim_digest = match receipt.claim {
-            // unknown is always pruned so if we get to this branch, something went wrong...
-            MaybePruned::Value(_) => unimplemented!(),
-            MaybePruned::Pruned(claim_digest) => claim_digest,
-        };
-        self.receipts.insert(claim_digest, receipt);
-        Ok(())
-    }
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {}
 }
 
 fn prover_example() {

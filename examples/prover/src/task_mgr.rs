@@ -17,7 +17,7 @@ use std::{
     sync::mpsc::{Receiver, Sender},
 };
 
-use risc0_zkvm::{Asset, ReceiptClaim, SuccinctReceipt};
+use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, Unknown};
 use workerpool::Pool;
 
 use crate::{
@@ -30,7 +30,9 @@ type TaskNumber = usize;
 pub enum JobKind {
     Segment(Asset),
     Join(Box<(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>)>),
+    Keccak(ProveKeccakRequest),
     Receipt(Box<SuccinctReceipt<ReceiptClaim>>),
+    KeccakReceipt(Box<SuccinctReceipt<Unknown>>),
 }
 
 pub struct Job {
@@ -133,6 +135,7 @@ impl TaskManager {
                     kind: JobKind::Receipt(Box::new(receipt.clone())),
                 }
             }
+            Command::FinalizeProofSet => todo!(),
             Command::Keccak => todo!(),
             Command::Union => todo!(),
         };
