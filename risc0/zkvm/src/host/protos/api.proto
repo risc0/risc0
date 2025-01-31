@@ -18,6 +18,7 @@ message ServerRequest {
     VerifyRequest verify = 9;
     ProveZkrRequest prove_zkr = 10;
     ProveKeccakRequest prove_keccak = 11;
+    UnionRequest union = 12;
   }
 }
 
@@ -132,6 +133,24 @@ message JoinReply {
 }
 
 message JoinResult {
+  Asset receipt = 1;
+}
+
+message UnionRequest {
+  ProverOpts opts = 1;
+  Asset left_receipt = 2;
+  Asset right_receipt = 3;
+  AssetRequest receipt_out = 4;
+}
+
+message UnionReply {
+  oneof kind {
+    UnionResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message UnionResult {
   Asset receipt = 1;
 }
 
@@ -386,6 +405,7 @@ service Server {
   rpc resolve(ResolveRequest) returns (ResolveReply);
   rpc compress(CompressRequest) returns (CompressReply);
   rpc verify(VerifyRequest) returns (GenericReply);
+  rpc union(UnionRequest) returns (UnionReply);
 }
 
 service ExecuteCallback {

@@ -92,6 +92,8 @@ impl RootMessage for pb::api::IdentityP254Request {}
 impl RootMessage for pb::api::IdentityP254Reply {}
 impl RootMessage for pb::api::CompressRequest {}
 impl RootMessage for pb::api::CompressReply {}
+impl RootMessage for pb::api::UnionRequest {}
+impl RootMessage for pb::api::UnionReply {}
 
 fn lock_err() -> IoError {
     IoError::new(IoErrorKind::WouldBlock, "Failed to lock connection mutex")

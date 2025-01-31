@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,29 +27,34 @@ use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
 use risc0_zkp::digest;
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    MaybePruned, ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt,
-    Unknown,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
 
-use self::{plan::Planner, task_mgr::TaskManager};
+use crate::plan::Planner;
+
+use self::{plan::Rv32imPlanner, task_mgr::TaskManager};
 
 fn main() {
     prover_example();
 }
 
-struct Coprocessor {
+struct Coprocessor<'a> {
     pub(crate) receipts: HashMap<Digest, SuccinctReceipt<Unknown>>,
+    pub(crate) _task_manager: &'a RefCell<TaskManager>,
+    pub(crate) _planner: &'a RefCell<Rv32imPlanner>,
 }
 
-impl Coprocessor {
-    fn new() -> Self {
+impl<'a> Coprocessor<'a> {
+    fn new(_task_manager: &'a RefCell<TaskManager>, _planner: &'a RefCell<Rv32imPlanner>) -> Self {
         Self {
             receipts: HashMap::new(),
+            _task_manager,
+            _planner,
         }
     }
 }
 
-impl CoprocessorCallback for Coprocessor {
+impl<'a> CoprocessorCallback for Coprocessor<'a> {
     fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
         let client = ApiClient::from_env().unwrap();
         let claim_digest = proof_request.claim_digest;
@@ -58,30 +63,23 @@ impl CoprocessorCallback for Coprocessor {
         Ok(())
     }
 
-    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
-        let client = ApiClient::from_env().unwrap();
-        let receipt = client.prove_keccak(proof_request, AssetRequest::Inline)?;
-        let claim_digest = match receipt.claim {
-            // unknown is always pruned so if we get to this branch, something went wrong...
-            MaybePruned::Value(_) => unimplemented!(),
-            MaybePruned::Pruned(claim_digest) => claim_digest,
-        };
-        self.receipts.insert(claim_digest, receipt);
-        Ok(())
+    fn prove_keccak(&mut self, _proof_request: ProveKeccakRequest) -> Result<()> {
+        todo!();
     }
 }
 
 fn prover_example() {
     println!("Submitting proof request...");
 
-    let mut task_manager = TaskManager::new();
-    let mut planner = Planner::default();
+    let task_manager = RefCell::new(TaskManager::new());
+    let planner = RefCell::new(Rv32imPlanner::default());
+
+    let coprocessor = Rc::new(RefCell::new(Coprocessor::new(&task_manager, &planner)));
 
     let po2 = 16;
     let claim_digest = digest!("b83c10da0c23587bf318cbcec2c2ac0260dbd6c0fa6905df639f8f6056f0d56c");
     let to_guest: (Digest, u32) = (claim_digest, po2);
 
-    let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
     let env = ExecutorEnv::builder()
         .write(&to_guest)
         .unwrap()
@@ -98,10 +96,10 @@ fn prover_example() {
             AssetRequest::Inline,
             |info, segment| {
                 println!("{info:?}");
-                planner.enqueue_segment(segment_idx).unwrap();
-                task_manager.add_segment(segment_idx, segment);
-                while let Some(task) = planner.next_task() {
-                    task_manager.add_task(task.clone());
+                planner.borrow_mut().enqueue_segment(segment_idx).unwrap();
+                task_manager.borrow_mut().add_segment(segment_idx, segment);
+                while let Some(task) = planner.borrow_mut().next_task() {
+                    task_manager.borrow_mut().add_task(task.clone());
                 }
                 segment_idx += 1;
                 Ok(())
@@ -109,16 +107,16 @@ fn prover_example() {
         )
         .unwrap();
 
-    planner.finish().unwrap();
+    planner.borrow_mut().finish().unwrap();
 
     println!("Plan:");
     println!("{planner:?}");
 
-    while let Some(task) = planner.next_task() {
-        task_manager.add_task(task.clone());
+    while let Some(task) = planner.borrow_mut().next_task() {
+        task_manager.borrow_mut().add_task(task.clone());
     }
 
-    let conditional_receipt = task_manager.run();
+    let conditional_receipt = task_manager.borrow_mut().run();
 
     let output = conditional_receipt
         .claim

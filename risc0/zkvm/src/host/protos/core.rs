@@ -150,6 +150,14 @@ pub struct ReceiptClaim {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnionClaim {
+    #[prost(message, optional, tag = "1")]
+    pub left: ::core::option::Option<super::base::Digest>,
+    #[prost(message, optional, tag = "2")]
+    pub right: ::core::option::Option<super::base::Digest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MaybePruned {
     #[prost(oneof = "maybe_pruned::Kind", tags = "1, 2")]
     pub kind: ::core::option::Option<maybe_pruned::Kind>,

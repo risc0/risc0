@@ -68,6 +68,9 @@ pub struct Session {
     /// The list of assumptions made by the guest and resolved by the host.
     pub assumptions: Vec<(Assumption, AssumptionReceipt)>,
 
+    /// The list of assumptions made by the guest and resolved by the host in an mmr.
+    pub mmr_assumptions: Vec<AssumptionReceipt>,
+
     /// The hooks to be called during the proving phase.
     pub hooks: Vec<Box<dyn SessionEvents>>,
 
@@ -200,6 +203,7 @@ impl Session {
         journal: Option<Vec<u8>>,
         exit_code: ExitCode,
         assumptions: Vec<(Assumption, AssumptionReceipt)>,
+        mmr_assumptions: Vec<AssumptionReceipt>,
         user_cycles: u64,
         paging_cycles: u64,
         reserved_cycles: u64,
@@ -217,6 +221,7 @@ impl Session {
             journal: journal.map(Journal::new),
             exit_code,
             assumptions,
+            mmr_assumptions,
             hooks: Vec::new(),
             user_cycles,
             paging_cycles,

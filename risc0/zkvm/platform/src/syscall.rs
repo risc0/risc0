@@ -153,6 +153,7 @@ pub mod nr {
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
+    declare_syscall!(pub SYS_VERIFY_INTEGRITY2);
     declare_syscall!(pub SYS_WRITE);
 }
 
@@ -817,6 +818,41 @@ pub unsafe extern "C" fn sys_verify_integrity(
     }
 }
 
+/// TODO: Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
+///
+/// # Safety
+///
+/// `claim_digest` must be aligned and dereferenceable.
+/// `control_root` must be aligned and dereferenceable.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_verify_integrity2(
+    claim_digest: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
+) {
+    let mut to_host = [0u32; DIGEST_WORDS * 2];
+    to_host[..DIGEST_WORDS].copy_from_slice(claim_digest.as_ref().unwrap_unchecked());
+    to_host[DIGEST_WORDS..].copy_from_slice(control_root.as_ref().unwrap_unchecked());
+
+    let Return(a0, _) = unsafe {
+        // Send the claim_digest to the host via software ecall.
+        syscall_2(
+            nr::SYS_VERIFY_INTEGRITY2,
+            null_mut(),
+            0,
+            to_host.as_ptr() as u32,
+            (DIGEST_BYTES * 2) as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // This should always be the case. This check is included for
+    // forwards-compatibility.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_verify_integrity2 returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+}
 // Make sure we only get one of these since it's stateful.
 #[cfg(not(feature = "export-syscalls"))]
 extern "C" {

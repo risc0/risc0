@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ use core::{convert::Infallible, fmt};
 use bytemuck::Pod;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::sys_verify_integrity;
+#[cfg(feature = "unstable")]
+use risc0_zkvm_platform::syscall::sys_verify_integrity2;
 
 use crate::{sha::Digestible, Assumption, MaybePruned, PrunedValueError, ReceiptClaim};
 
@@ -167,6 +169,24 @@ impl std::error::Error for VerifyIntegrityError {}
 pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
     unsafe {
         sys_verify_integrity(claim.as_ref(), control_root.as_ref());
+        #[allow(static_mut_refs)]
+        ASSUMPTIONS_DIGEST.add(
+            Assumption {
+                claim,
+                control_root,
+            }
+            .into(),
+        );
+    }
+
+    Ok(())
+}
+
+/// TODO
+#[cfg(feature = "unstable")]
+pub fn verify_assumption2(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
+    unsafe {
+        sys_verify_integrity2(claim.as_ref(), control_root.as_ref());
         #[allow(static_mut_refs)]
         ASSUMPTIONS_DIGEST.add(
             Assumption {

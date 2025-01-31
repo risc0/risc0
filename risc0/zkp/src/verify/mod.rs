@@ -421,7 +421,6 @@ impl<'a, F: Field> Verifier<'a, F> {
                 .merkle_verifiers
                 .iter()
                 .map(|merkle: &Option<MerkleTreeVerifier>| -> Result<&'a [F::Elem], VerificationError> {
-                    tracing::debug!("Verifying a merkle...");
                     merkle.as_ref()
                         .unwrap()
                         .verify(self.iop().deref_mut(), hashfn, idx)

@@ -4,7 +4,7 @@
 pub struct ServerRequest {
     #[prost(
         oneof = "server_request::Kind",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12"
     )]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
@@ -35,6 +35,8 @@ pub mod server_request {
         ProveZkr(super::ProveZkrRequest),
         #[prost(message, tag = "11")]
         ProveKeccak(super::ProveKeccakRequest),
+        #[prost(message, tag = "12")]
+        Union(super::UnionRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -250,6 +252,41 @@ pub mod join_reply {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct JoinResult {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnionRequest {
+    #[prost(message, optional, tag = "1")]
+    pub opts: ::core::option::Option<ProverOpts>,
+    #[prost(message, optional, tag = "2")]
+    pub left_receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "3")]
+    pub right_receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "4")]
+    pub receipt_out: ::core::option::Option<AssetRequest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnionReply {
+    #[prost(oneof = "union_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<union_reply::Kind>,
+}
+/// Nested message and enum types in `UnionReply`.
+pub mod union_reply {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        Ok(super::UnionResult),
+        #[prost(message, tag = "2")]
+        Error(super::GenericError),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnionResult {
     #[prost(message, optional, tag = "1")]
     pub receipt: ::core::option::Option<Asset>,
 }

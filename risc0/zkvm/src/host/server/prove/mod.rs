@@ -19,6 +19,7 @@ pub(crate) mod keccak;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
+pub(crate) mod union_peak;
 
 use std::rc::Rc;
 
@@ -34,7 +35,7 @@ use crate::{
         CompositeReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::Unknown,
+    receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
     stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
     Segment, Session, VerifierContext,
@@ -88,6 +89,13 @@ pub trait ProverServer: private::Sealed {
         a: &SuccinctReceipt<ReceiptClaim>,
         b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    /// Unite two [SuccinctReceipt] into a [SuccinctReceipt]
+    fn union(
+        &self,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<UnionClaim>>;
 
     /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a [SuccinctReceipt]
     /// proving the validity of the assumption.

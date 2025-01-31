@@ -107,6 +107,9 @@ pub use self::{
     write::{FdWriter, Write},
 };
 
+#[cfg(feature = "unstable")]
+pub use self::verify::verify_assumption2;
+
 /// This module is intended for internal testing only.
 #[doc(hidden)]
 pub mod testing {
