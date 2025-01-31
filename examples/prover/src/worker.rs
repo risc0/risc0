@@ -91,4 +91,18 @@ impl Worker {
             .prove_keccak(proof_request, AssetRequest::Inline)
             .unwrap()
     }
+
+    fn union(
+        &self,
+        left: SuccinctReceipt<Unknown>,
+        right: SuccinctReceipt<Unknown>,
+    ) -> SuccinctReceipt<Unknown> {
+        let opts = ProverOpts::default();
+        let client = ApiClient::from_env().unwrap();
+        let left_asset = left.try_into().unwrap();
+        let right_asset = right.try_into().unwrap();
+        client
+            .union(&opts, left_asset, right_asset, AssetRequest::Inline)
+            .unwrap()
+    }
 }

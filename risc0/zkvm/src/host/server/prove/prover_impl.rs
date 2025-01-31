@@ -30,7 +30,8 @@ use crate::{
         segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::{MaybePruned, Merge, Unknown},
+    receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
+    recursion::prove::union,
     risc0_rv32im_ver,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
@@ -292,6 +293,14 @@ impl ProverServer for ProverImpl {
         request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
         prove_keccak(request)
+    }
+
+    fn union(
+        &self,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<UnionClaim>> {
+        union(a, b)
     }
 }
 
