@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::time::Instant;
+
 use risc0_bigint2_methods::{EC_ADD_ELF, EC_DOUBLE_ELF, EC_MUL_ELF};
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
 };
-use std::time::Instant;
 use test_log::test;
 
 use crate::ec::secp256k1::SECP256K1_PRIME;
@@ -233,7 +234,7 @@ fn ec_add_identity_plus_point() {
 
 #[test]
 fn ec_add_point_plus_negative() {
-    let point: Option<[[u32; 8]; 2]> = Some([
+    let point: [[u32; 8]; 2] = [
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
             0x79be667e,
@@ -242,10 +243,10 @@ fn ec_add_point_plus_negative() {
             0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
             0x483ada77,
         ],
-    ]);
-    let x = point.unwrap()[0];
+    ];
+    let x = point[0];
     let neg_y = {
-        let mut y = point.unwrap()[1];
+        let mut y = point[1];
         for i in 0..8 {
             // Ignoring carries for this test case.
             y[i] = SECP256K1_PRIME[i] - y[i];
@@ -255,7 +256,7 @@ fn ec_add_point_plus_negative() {
     let neg_point: Option<[[u32; 8]; 2]> = Some([x, neg_y]);
 
     let env = ExecutorEnv::builder()
-        .write(&(point, neg_point))
+        .write(&(Some(point), neg_point))
         .unwrap()
         .build()
         .unwrap();

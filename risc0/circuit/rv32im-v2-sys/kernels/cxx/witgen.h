@@ -40,6 +40,7 @@ struct ExecBuffers {
 struct AccumBuffers {
   Buffer<false> data;
   Buffer<false> accum;
+  Buffer<true> global;
   Buffer<true> mix;
 };
 
@@ -281,6 +282,7 @@ std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx);
 Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len);
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal);
 std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx);
+std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx);
 
 // Setup the basic field stuff
 #define SET_FIELD(x) /**/

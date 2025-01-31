@@ -17,8 +17,10 @@ mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
 
-use crate::ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5};
-use crate::WORD_SIZE;
+use crate::{
+    ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5},
+    WORD_SIZE,
+};
 
 pub const FIELD_256_WIDTH_WORDS: usize = 256 / (WORD_SIZE * 8);
 pub const EXT_DEGREE_2: usize = 2;
@@ -47,10 +49,10 @@ pub fn modadd_256_unchecked(
     unsafe {
         sys_bigint2_4(
             MODADD_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -63,9 +65,9 @@ pub fn modinv_256_unchecked(
     unsafe {
         sys_bigint2_3(
             MODINV_256_BLOB.as_ptr(),
-            inp.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            inp.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -79,10 +81,10 @@ pub fn modmul_256_unchecked(
     unsafe {
         sys_bigint2_4(
             MODMUL_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -96,10 +98,10 @@ pub fn modsub_256_unchecked(
     unsafe {
         sys_bigint2_4(
             MODSUB_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -112,11 +114,11 @@ pub fn modadd_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modadd_256_unchecked(&lhs, &rhs, &modulus, result);
+    modadd_256_unchecked(lhs, rhs, modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    assert!(crate::is_less(&result, &modulus));
+    assert!(crate::is_less(result, modulus));
 }
 
 /// Compute the multiplicative inverse of `inp` mod `modulus`
@@ -134,11 +136,11 @@ pub fn modinv_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modinv_256_unchecked(&inp, &modulus, result);
+    modinv_256_unchecked(inp, modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    assert!(crate::is_less(&result, &modulus));
+    assert!(crate::is_less(result, modulus));
 }
 
 pub fn modmul_256(
@@ -147,11 +149,11 @@ pub fn modmul_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modmul_256_unchecked(&lhs, &rhs, &modulus, result);
+    modmul_256_unchecked(lhs, rhs, modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    assert!(crate::is_less(&result, &modulus));
+    assert!(crate::is_less(result, modulus));
 }
 
 pub fn modsub_256(
@@ -160,11 +162,11 @@ pub fn modsub_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modsub_256_unchecked(&lhs, &rhs, &modulus, result);
+    modsub_256_unchecked(lhs, rhs, modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    assert!(crate::is_less(&result, &modulus));
+    assert!(crate::is_less(result, modulus));
 }
 
 pub fn extfield_deg2_add_256(
@@ -178,7 +180,7 @@ pub fn extfield_deg2_add_256(
             EXTFIELD_DEG2_ADD_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
+            modulus.as_ptr(),
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -197,7 +199,7 @@ pub fn extfield_deg2_mul_256(
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
             monic_irr.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
+            modulus.as_ptr(),
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -216,7 +218,7 @@ pub fn extfield_deg4_mul_256(
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
             monic_irr.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
+            modulus.as_ptr(),
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -233,7 +235,7 @@ pub fn extfield_deg2_sub_256(
             EXTFIELD_DEG2_SUB_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
+            modulus.as_ptr(),
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -251,8 +253,8 @@ pub fn extfield_xxone_mul_256(
             EXTFIELD_XXONE_MUL_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            modsqr.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            modsqr.as_ptr(),
             result.as_mut_ptr() as *mut u32,
         );
     }

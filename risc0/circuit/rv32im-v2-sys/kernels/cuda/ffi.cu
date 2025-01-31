@@ -79,7 +79,14 @@ struct HostExecContext {
                        preflight->txnsLen * sizeof(MemoryTransaction),
                        cudaMemcpyHostToDevice));
 
+    CUDA_OK(cudaMalloc(&d_preflight.bigintBytes, preflight->bigintBytesLen * sizeof(uint32_t)));
+    CUDA_OK(cudaMemcpy(d_preflight.bigintBytes,
+                       preflight->bigintBytes,
+                       preflight->bigintBytesLen * sizeof(uint32_t),
+                       cudaMemcpyHostToDevice));
+
     d_preflight.txnsLen = preflight->txnsLen;
+    d_preflight.bigintBytesLen = preflight->bigintBytesLen;
     d_preflight.tableSplitCycle = preflight->tableSplitCycle;
 
     CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
@@ -100,6 +107,7 @@ struct HostExecContext {
     cudaFree(d_tables.tableU16);
     cudaFree(d_tables.tableU8);
     cudaFree(ctx->tables);
+    cudaFree(d_preflight.bigintBytes);
     cudaFree(d_preflight.txns);
     cudaFree(d_preflight.cycles);
     cudaFree(ctx->preflight);
@@ -112,12 +120,14 @@ struct HostExecContext {
 struct AccumBuffers {
   Buffer data;
   Buffer accum;
+  Buffer global;
   Buffer mix;
 };
 
 struct DeviceAccumContext {
   Buffer* data;
   Buffer* accum;
+  Buffer* global;
   Buffer* mix;
   PreflightTrace* preflight;
   LookupTables* tables;
@@ -136,6 +146,9 @@ struct HostAccumContext {
 
     CUDA_OK(cudaMalloc(&ctx->accum, sizeof(Buffer)));
     CUDA_OK(cudaMemcpy(ctx->accum, &buffers->accum, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&ctx->global, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->global, &buffers->global, sizeof(Buffer), cudaMemcpyHostToDevice));
 
     CUDA_OK(cudaMalloc(&ctx->mix, sizeof(Buffer)));
     CUDA_OK(cudaMemcpy(ctx->mix, &buffers->mix, sizeof(Buffer), cudaMemcpyHostToDevice));
@@ -177,6 +190,7 @@ struct HostAccumContext {
     cudaFree(d_preflight.cycles);
     cudaFree(ctx->preflight);
     cudaFree(ctx->mix);
+    cudaFree(ctx->global);
     cudaFree(ctx->accum);
     cudaFree(ctx->data);
     cudaFree(ctx);
@@ -326,6 +340,15 @@ __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
   return {pagingIdx, machineMode};
 }
 
+__device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
+  ::cuda::std::array<Val, 16> ret;
+  size_t bigintIdx = ctx.preflight.cycles[ctx.cycle].bigintIdx;
+  for (size_t i = 0; i < 16; i++) {
+    ret[i] = ctx.preflight.bigintBytes[bigintIdx + i];
+  }
+  return ret;
+}
+
 // __device__ void
 // stepAccum(AccumBuffers& buffers, PreflightTrace& preflight, LookupTables& tables, size_t cycle) {
 //   ExecContext ctx(preflight, tables, cycle);
@@ -376,6 +399,8 @@ __global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
   MutableBufObj data(*ctx->data);
   MutableBufObj accum(*ctx->accum, /*zeroBack=*/true);
   GlobalBufObj mix(*ctx->mix);
+  // GlobalBufObj global(*ctx->global);
+  // step_TopAccum(execCtx, &accum, &data, &global, &mix);
   step_TopAccum(execCtx, &accum, &data, &mix);
 }
 

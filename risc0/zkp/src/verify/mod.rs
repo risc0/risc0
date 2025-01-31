@@ -41,7 +41,7 @@ use crate::{
 };
 
 // If true, enable tracing of verifier internals.
-const VERIFY_TRACE_ENABLED: bool = false;
+const VERIFY_TRACE_ENABLED: bool = true;
 
 macro_rules! trace_if_enabled {
     ($($args:tt)*) => {
@@ -367,6 +367,7 @@ impl<'a, F: Field> Verifier<'a, F> {
         check *= (F::ExtElem::from_subfield(&three) * z).pow(self.tot_cycles) - F::ExtElem::ONE;
         trace_if_enabled!("Check = {check:?}");
         if check != result {
+            tracing::debug!("check != result");
             return Err(VerificationError::InvalidProof);
         }
 
@@ -421,7 +422,6 @@ impl<'a, F: Field> Verifier<'a, F> {
                 .merkle_verifiers
                 .iter()
                 .map(|merkle: &Option<MerkleTreeVerifier>| -> Result<&'a [F::Elem], VerificationError> {
-                    tracing::debug!("Verifying a merkle...");
                     merkle.as_ref()
                         .unwrap()
                         .verify(self.iop().deref_mut(), hashfn, idx)

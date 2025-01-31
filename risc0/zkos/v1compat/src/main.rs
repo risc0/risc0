@@ -18,7 +18,7 @@
 #[cfg(not(target_os = "zkvm"))]
 fn main() {}
 
-#[cfg(target_os = "zkvm")]
+// #[cfg(target_os = "zkvm")]
 mod zkvm {
     use core::{
         arch::{asm, global_asm},

@@ -91,7 +91,9 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
@@ -106,6 +108,7 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
         preflight: &PreflightTrace,
         data: &MetaBuffer<CudaHal<CH>>,
         accum: &MetaBuffer<CudaHal<CH>>,
+        global: &MetaBuffer<CudaHal<CH>>,
         mix: &MetaBuffer<CudaHal<CH>>,
     ) -> Result<()> {
         scope!("accumulate");
@@ -128,6 +131,12 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
                 // changes can be made during phase2 and phase3 of accumulation.
                 checked: false,
             },
+            global: RawBuffer {
+                buf: global.buf.as_device_ptr().as_ptr() as *const Val,
+                rows: global.rows,
+                cols: global.cols,
+                checked: global.checked,
+            },
             mix: RawBuffer {
                 buf: mix.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: mix.rows,
@@ -138,7 +147,9 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {

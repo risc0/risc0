@@ -25,7 +25,10 @@ use risc0_zkp::{
 };
 
 use crate::{
-    execute::{platform::*, r0vm::Risc0Context},
+    execute::{
+        platform::*,
+        r0vm::{LoadOp, Risc0Context},
+    },
     zirgen::circuit::ExtVal,
 };
 
@@ -97,7 +100,7 @@ impl Poseidon2State {
             // tracing::trace!("has_state");
             self.step(ctx, &mut cur_state, CycleState::PoseidonLoadState, 0);
             for i in 0..DIGEST_WORDS {
-                self.inner[DIGEST_WORDS * 2 + i] = ctx.load_u32(state_addr + i)?;
+                self.inner[DIGEST_WORDS * 2 + i] = ctx.load_u32(LoadOp::Record, state_addr + i)?;
             }
         }
 
@@ -111,17 +114,18 @@ impl Poseidon2State {
 
             if self.is_elem != 0 {
                 for i in 0..DIGEST_WORDS {
-                    self.inner[i] = ctx.load_u32(buf_in_addr.postfix_inc())?;
+                    self.inner[i] = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
                 }
                 self.buf_in_addr = buf_in_addr.0;
                 self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 1);
                 for i in 0..DIGEST_WORDS {
-                    self.inner[DIGEST_WORDS + i] = ctx.load_u32(buf_in_addr.postfix_inc())?;
+                    self.inner[DIGEST_WORDS + i] =
+                        ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
                 }
                 self.buf_in_addr = buf_in_addr.0;
             } else {
                 for i in 0..DIGEST_WORDS {
-                    let word = ctx.load_u32(buf_in_addr.postfix_inc())?;
+                    let word = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
                     self.inner[2 * i] = word & 0xffff;
                     self.inner[2 * i + 1] = word >> 16;
                 }
@@ -149,7 +153,7 @@ impl Poseidon2State {
         if self.check_out != 0 {
             for i in 0..DIGEST_WORDS {
                 let addr = buf_out_addr + i;
-                let word = ctx.load_u32(addr)?;
+                let word = ctx.load_u32(LoadOp::Record, addr)?;
                 let cell = self.inner[i];
                 if word != cell {
                     tracing::warn!(
@@ -283,10 +287,10 @@ pub(crate) struct Poseidon2;
 impl Poseidon2 {
     pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
         tracing::trace!("ecall");
-        let state_addr = ctx.load_machine_register(REG_A0)?;
-        let buf_in_addr = ctx.load_machine_register(REG_A1)?;
-        let buf_out_addr = ctx.load_machine_register(REG_A2)?;
-        let bits_count = ctx.load_machine_register(REG_A3)?;
+        let state_addr = ctx.load_machine_register(LoadOp::Record, REG_A0)?;
+        let buf_in_addr = ctx.load_machine_register(LoadOp::Record, REG_A1)?;
+        let buf_out_addr = ctx.load_machine_register(LoadOp::Record, REG_A2)?;
+        let bits_count = ctx.load_machine_register(LoadOp::Record, REG_A3)?;
         let mut p2 = Poseidon2State::new_ecall(state_addr, buf_in_addr, buf_out_addr, bits_count);
         p2.rest(ctx, CycleState::Decode)
     }

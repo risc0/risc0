@@ -8,9 +8,9 @@ struct OneHot_8_Layout {
 struct InstInputLayout {
   OneHot_8_Layout minorOnehot;
 };
-using NondetRegLayout12LayoutArray = std::array<NondetRegLayout, 12>;
-struct OneHot_12_Layout {
-  NondetRegLayout12LayoutArray _super;
+using NondetRegLayout13LayoutArray = std::array<NondetRegLayout, 13>;
+struct OneHot_13_Layout {
+  NondetRegLayout13LayoutArray _super;
 };
 struct ArgU16Layout {
   NondetRegLayout count;
@@ -1424,13 +1424,14 @@ struct _Arguments_ECall0OutputLayout {
   ArgU16Layout4LayoutArray argU16;
   ArgU8Layout4LayoutArray argU8;
 };
-struct OneHot_5_Layout {
-  NondetRegLayout5LayoutArray _super;
+using NondetRegLayout6LayoutArray = std::array<NondetRegLayout, 6>;
+struct OneHot_6_Layout {
+  NondetRegLayout6LayoutArray _super;
 };
 struct MachineECallLayout {
   MemoryReadLayout loadInst;
   MemoryReadLayout dispatchIdx;
-  OneHot_5_Layout dispatch;
+  OneHot_6_Layout dispatch;
 };
 struct ECall0OutputArm0Layout {
   MachineECallLayout _super;
@@ -1632,6 +1633,7 @@ struct ECall0Layout {
   IsZeroLayout isDecode;
   IsZeroLayout isP2Entry;
   IsZeroLayout isShaEcall;
+  IsZeroLayout isBigIntEcall;
   NormalizeU32Layout addPC;
 };
 using NondetRegLayout24LayoutArray = std::array<NondetRegLayout, 24>;
@@ -2066,10 +2068,6 @@ struct PoseidonPaging_SuperLayout {
   PoseidonStateLayout arm4;
   PoseidonStateLayout arm5;
 };
-using NondetRegLayout6LayoutArray = std::array<NondetRegLayout, 6>;
-struct OneHot_6_Layout {
-  NondetRegLayout6LayoutArray _super;
-};
 struct IsU24Layout {
   NondetU16RegLayout low16;
   NondetU8RegLayout _0;
@@ -2416,8 +2414,394 @@ struct Sha0Layout {
   _Arguments_Sha0StateLayout _arguments_Sha0State;
   Sha0StateLayout stateRedef;
 };
+struct BigIntStateLayout {
+  NondetRegLayout isEcall;
+  NondetRegLayout pc;
+  NondetRegLayout polyOp;
+  NondetRegLayout coeff;
+  NondetRegLayout16LayoutArray bytes;
+  NondetRegLayout nextState;
+};
+using MemoryArgLayout12LayoutArray = std::array<MemoryArgLayout, 12>;
+using CycleArgLayout6LayoutArray = std::array<CycleArgLayout, 6>;
+using ArgU8Layout18LayoutArray = std::array<ArgU8Layout, 18>;
+struct _Arguments_BigInt0StateLayout {
+  MemoryArgLayout12LayoutArray memoryArg;
+  CycleArgLayout6LayoutArray cycleArg;
+  ArgU8Layout18LayoutArray argU8;
+};
+struct BigIntEcallLayout {
+  BigIntStateLayout _super;
+  ReadAddrLayout pc;
+};
+struct BigInt0StateArm0Layout {
+  BigIntEcallLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  CycleArgLayout _extra10;
+  CycleArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+  ArgU8Layout _extra15;
+  ArgU8Layout _extra16;
+  ArgU8Layout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
+  ArgU8Layout _extra20;
+  ArgU8Layout _extra21;
+  ArgU8Layout _extra22;
+  ArgU8Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
+  ArgU8Layout _extra26;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
+  ArgU8Layout _extra29;
+  ArgU8Layout _extra30;
+  ArgU8Layout _extra31;
+  ArgU8Layout _extra32;
+};
+struct _Arguments_BigIntStepBytesLayout {
+  ArgU8Layout16LayoutArray argU8;
+  MemoryArgLayout8LayoutArray memoryArg;
+  CycleArgLayout4LayoutArray cycleArg;
+};
+struct SplitU32Layout {
+  SplitWordLayout low;
+  SplitWordLayout high;
+};
+struct BigIntReadWords_SuperLayout {
+  SplitU32Layout _super;
+  MemoryReadLayout _0;
+};
+using BigIntReadWords_SuperLayout4LayoutArray = std::array<BigIntReadWords_SuperLayout, 4>;
+struct BigIntReadLayout {
+  BigIntReadWords_SuperLayout4LayoutArray words;
+};
+using NondetU8RegLayout16LayoutArray = std::array<NondetU8RegLayout, 16>;
+struct BigIntWitnessLayout {
+  NondetU8RegLayout16LayoutArray _super;
+  NondetRegLayout _0;
+  NondetRegLayout _1;
+  NondetRegLayout _2;
+  NondetRegLayout _3;
+  NondetRegLayout _4;
+  NondetRegLayout _5;
+  NondetRegLayout _6;
+  NondetRegLayout _7;
+  NondetRegLayout _8;
+  NondetRegLayout _9;
+  NondetRegLayout _10;
+  NondetRegLayout _11;
+  NondetRegLayout _12;
+  NondetRegLayout _13;
+  NondetRegLayout _14;
+  NondetRegLayout _15;
+  NondetRegLayout16LayoutArray nondet;
+};
+struct BigIntWrite__0_SuperLayout {
+  MemoryWriteLayout _0;
+};
+using BigIntWrite__0_SuperLayout4LayoutArray = std::array<BigIntWrite__0_SuperLayout, 4>;
+struct BigIntWriteLayout {
+  BigIntWitnessLayout _super;
+  BigIntWrite__0_SuperLayout4LayoutArray _1;
+};
+struct BigIntStepBytesArm2Layout {
+  BigIntWitnessLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  CycleArgLayout _extra8;
+  CycleArgLayout _extra9;
+  CycleArgLayout _extra10;
+  CycleArgLayout _extra11;
+};
+struct BigIntStepBytesLayout {
+  BigIntReadLayout arm0;
+  BigIntWriteLayout arm1;
+  BigIntStepBytesArm2Layout arm2;
+};
+struct BigIntStepLayout {
+  BigIntStateLayout _super;
+  MemoryReadLayout loadInst_0;
+  SplitWordLayout instHigh;
+  NondetRegLayout polyOp;
+  NondetRegLayout memOp;
+  NondetRegLayout5LayoutArray regBits;
+  NondetRegLayout3LayoutArray coeffBits;
+  ReadAddrLayout _2;
+  OneHot_3_Layout memOpOneHot;
+  _Arguments_BigIntStepBytesLayout _arguments_BigIntStepBytes;
+  BigIntStepBytesLayout bytes;
+  IsZeroLayout _3;
+};
+struct BigInt0StateArm2Layout {
+  BigIntStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  MemoryArgLayout _extra10;
+  MemoryArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+  CycleArgLayout _extra15;
+  CycleArgLayout _extra16;
+  CycleArgLayout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
+  ArgU8Layout _extra20;
+  ArgU8Layout _extra21;
+  ArgU8Layout _extra22;
+  ArgU8Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
+  ArgU8Layout _extra26;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
+  ArgU8Layout _extra29;
+  ArgU8Layout _extra30;
+  ArgU8Layout _extra31;
+  ArgU8Layout _extra32;
+  ArgU8Layout _extra33;
+  ArgU8Layout _extra34;
+  ArgU8Layout _extra35;
+};
+struct BigInt0StateArm3Layout {
+  BigIntStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  MemoryArgLayout _extra10;
+  MemoryArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+  CycleArgLayout _extra15;
+  CycleArgLayout _extra16;
+  CycleArgLayout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
+  ArgU8Layout _extra20;
+  ArgU8Layout _extra21;
+  ArgU8Layout _extra22;
+  ArgU8Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
+  ArgU8Layout _extra26;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
+  ArgU8Layout _extra29;
+  ArgU8Layout _extra30;
+  ArgU8Layout _extra31;
+  ArgU8Layout _extra32;
+  ArgU8Layout _extra33;
+  ArgU8Layout _extra34;
+  ArgU8Layout _extra35;
+};
+struct BigInt0StateArm4Layout {
+  BigIntStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  MemoryArgLayout _extra10;
+  MemoryArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+  CycleArgLayout _extra15;
+  CycleArgLayout _extra16;
+  CycleArgLayout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
+  ArgU8Layout _extra20;
+  ArgU8Layout _extra21;
+  ArgU8Layout _extra22;
+  ArgU8Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
+  ArgU8Layout _extra26;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
+  ArgU8Layout _extra29;
+  ArgU8Layout _extra30;
+  ArgU8Layout _extra31;
+  ArgU8Layout _extra32;
+  ArgU8Layout _extra33;
+  ArgU8Layout _extra34;
+  ArgU8Layout _extra35;
+};
+struct BigInt0StateArm5Layout {
+  BigIntStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  MemoryArgLayout _extra10;
+  MemoryArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+  CycleArgLayout _extra15;
+  CycleArgLayout _extra16;
+  CycleArgLayout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
+  ArgU8Layout _extra20;
+  ArgU8Layout _extra21;
+  ArgU8Layout _extra22;
+  ArgU8Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
+  ArgU8Layout _extra26;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
+  ArgU8Layout _extra29;
+  ArgU8Layout _extra30;
+  ArgU8Layout _extra31;
+  ArgU8Layout _extra32;
+  ArgU8Layout _extra33;
+  ArgU8Layout _extra34;
+  ArgU8Layout _extra35;
+};
+struct BigInt0StateArm6Layout {
+  BigIntStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  MemoryArgLayout _extra10;
+  MemoryArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+  CycleArgLayout _extra15;
+  CycleArgLayout _extra16;
+  CycleArgLayout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
+  ArgU8Layout _extra20;
+  ArgU8Layout _extra21;
+  ArgU8Layout _extra22;
+  ArgU8Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
+  ArgU8Layout _extra26;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
+  ArgU8Layout _extra29;
+  ArgU8Layout _extra30;
+  ArgU8Layout _extra31;
+  ArgU8Layout _extra32;
+  ArgU8Layout _extra33;
+  ArgU8Layout _extra34;
+  ArgU8Layout _extra35;
+};
+struct BigInt0StateArm7Layout {
+  BigIntStateLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  MemoryArgLayout _extra2;
+  MemoryArgLayout _extra3;
+  MemoryArgLayout _extra4;
+  MemoryArgLayout _extra5;
+  MemoryArgLayout _extra6;
+  MemoryArgLayout _extra7;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
+  MemoryArgLayout _extra10;
+  MemoryArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
+  CycleArgLayout _extra14;
+  CycleArgLayout _extra15;
+  CycleArgLayout _extra16;
+  CycleArgLayout _extra17;
+  ArgU8Layout _extra18;
+  ArgU8Layout _extra19;
+  ArgU8Layout _extra20;
+  ArgU8Layout _extra21;
+  ArgU8Layout _extra22;
+  ArgU8Layout _extra23;
+  ArgU8Layout _extra24;
+  ArgU8Layout _extra25;
+  ArgU8Layout _extra26;
+  ArgU8Layout _extra27;
+  ArgU8Layout _extra28;
+  ArgU8Layout _extra29;
+  ArgU8Layout _extra30;
+  ArgU8Layout _extra31;
+  ArgU8Layout _extra32;
+  ArgU8Layout _extra33;
+  ArgU8Layout _extra34;
+  ArgU8Layout _extra35;
+};
+struct BigInt0StateLayout {
+  BigIntStateLayout _super;
+  BigInt0StateArm0Layout arm0;
+  BigIntStepLayout arm1;
+  BigInt0StateArm2Layout arm2;
+  BigInt0StateArm3Layout arm3;
+  BigInt0StateArm4Layout arm4;
+  BigInt0StateArm5Layout arm5;
+  BigInt0StateArm6Layout arm6;
+  BigInt0StateArm7Layout arm7;
+};
+struct BigInt0Layout {
+  BigIntStateLayout state;
+  _Arguments_BigInt0StateLayout _arguments_BigInt0State;
+  BigInt0StateLayout stateRedef;
+};
 struct TopInstResultLayout {
-  NondetRegLayout12LayoutArray _selector;
+  NondetRegLayout13LayoutArray _selector;
   Misc0Layout arm0;
   Misc1Layout arm1;
   Misc2Layout arm2;
@@ -2430,6 +2814,7 @@ struct TopInstResultLayout {
   Poseidon0Layout arm9;
   Poseidon1Layout arm10;
   Sha0Layout arm11;
+  BigInt0Layout arm12;
 };
 struct TopCycleLayout {
   NondetRegLayout _super;
@@ -2447,7 +2832,7 @@ struct TopLayout {
   NondetRegLayout major;
   NondetRegLayout minor;
   InstInputLayout instInput;
-  OneHot_12_Layout majorOnehot;
+  OneHot_13_Layout majorOnehot;
   TopInstResultLayout instResult;
 };
 struct DigestRegValues_SuperLayout {
@@ -2517,8 +2902,6 @@ struct FakeTwitRegStruct {
 struct ArgU8Struct {
   NondetRegStruct count;
   NondetRegStruct val;
-};
-struct U8RegStruct {
 };
 struct ArgU16Struct {
   NondetRegStruct count;
@@ -2671,7 +3054,7 @@ struct DivideReturnStruct {
   ValU32Struct quot;
   ValU32Struct rem;
 };
-struct InstOutputStruct {
+struct InstOutputBaseStruct {
   ValU32Struct newPc;
   Val newState;
   Val newMode;
@@ -2739,8 +3122,11 @@ struct ControlTable_SuperArm1_Super__0Struct {
 };
 using ControlTable_SuperArm0_Super__0Struct16Array = std::array<ControlTable_SuperArm0_Super__0Struct, 16>;
 using ControlTable_SuperArm1_Super__0Struct16Array = std::array<ControlTable_SuperArm1_Super__0Struct, 16>;
-struct OneHot_5_Struct {
-  NondetRegStruct5Array _super;
+using Val6Array = std::array<Val, 6>;
+using NondetRegStruct6Array = std::array<NondetRegStruct, 6>;
+struct OneHot_6_Struct {
+  NondetRegStruct6Array _super;
+  NondetRegStruct6Array bits;
 };
 struct ECallOutputStruct {
   Val state;
@@ -2831,12 +3217,6 @@ struct PoseidonStoreState__0Struct {
 using PoseidonStoreState__0Struct8Array = std::array<PoseidonStoreState__0Struct, 8>;
 struct IsU24Struct {
 };
-using Val6Array = std::array<Val, 6>;
-using NondetRegStruct6Array = std::array<NondetRegStruct, 6>;
-struct OneHot_6_Struct {
-  NondetRegStruct6Array _super;
-  NondetRegStruct6Array bits;
-};
 struct CarryExtractStruct {
   Val carry;
   Val out;
@@ -2875,10 +3255,49 @@ struct ShaStateStruct {
   ShaStateEStruct32Array e;
   ShaStateWStruct32Array w;
 };
-using Val12Array = std::array<Val, 12>;
-using NondetRegStruct12Array = std::array<NondetRegStruct, 12>;
-struct OneHot_12_Struct {
-  NondetRegStruct12Array _super;
+struct BigIntStateStruct {
+  NondetRegStruct isEcall;
+  NondetRegStruct pc;
+  NondetRegStruct polyOp;
+  NondetRegStruct coeff;
+  NondetRegStruct16Array bytes;
+  NondetRegStruct nextState;
+};
+struct SplitU32Struct {
+  NondetRegStruct4Array bytes;
+};
+using SplitU32Struct4Array = std::array<SplitU32Struct, 4>;
+struct BigIntReadStruct {
+  NondetRegStruct16Array _super;
+};
+struct BigIntExternReturnStruct {
+  Val x00;
+  Val x01;
+  Val x02;
+  Val x03;
+  Val x04;
+  Val x05;
+  Val x06;
+  Val x07;
+  Val x08;
+  Val x09;
+  Val x10;
+  Val x11;
+  Val x12;
+  Val x13;
+  Val x14;
+  Val x15;
+};
+struct BigIntWitnessStruct {
+  NondetRegStruct16Array _super;
+};
+struct BigIntWrite__0Struct {
+};
+using BigIntWrite__0Struct4Array = std::array<BigIntWrite__0Struct, 4>;
+using Val13Array = std::array<Val, 13>;
+using NondetRegStruct13Array = std::array<NondetRegStruct, 13>;
+struct OneHot_13_Struct {
+  NondetRegStruct13Array _super;
 };
 struct TopStruct {
 };

@@ -209,6 +209,15 @@ std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
   return {pagingIdx, machineMode};
 }
 
+std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
+  std::array<Val, 16> ret;
+  size_t bigintIdx = ctx.preflight.cycles[ctx.cycle].bigintIdx;
+  for (size_t i = 0; i < 16; i++) {
+    ret[i] = ctx.preflight.bigintBytes[bigintIdx + i];
+  }
+  return ret;
+}
+
 void stepExec(ExecBuffers& buffers, PreflightTrace& preflight, LookupTables& tables, size_t cycle) {
   // printf("stepExec: %zu\n", cycle);
   ExecContext ctx(preflight, tables, cycle);
@@ -225,6 +234,8 @@ void stepAccum(AccumBuffers& buffers,
   MutableBufObj data(buffers.data);
   MutableBufObj accum(buffers.accum, /*zeroBack=*/true);
   GlobalBufObj mix(buffers.mix);
+  // GlobalBufObj global(buffers.global);
+  // step_TopAccum(ctx, &accum, &data, &global, &mix);
   step_TopAccum(ctx, &accum, &data, &mix);
   // printf("stepAccum: %zu -> [%u, %u, %u, %u]\n",
   //        cycle,

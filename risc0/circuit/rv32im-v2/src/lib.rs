@@ -39,11 +39,12 @@ pub use self::zirgen::CircuitImpl;
 pub const MAX_INSN_CYCLES: usize = 2000; // TODO(flaub): calculate actual value
 
 pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
-    let hash_suite = Poseidon2HashSuite::new_suite();
+    tracing::debug!("verify");
 
     // We don't have a `code' buffer to verify.
     let check_code_fn = |_: u32, _: &Digest| Ok(());
 
+    let hash_suite = Poseidon2HashSuite::new_suite();
     risc0_zkp::verify::verify(&CircuitImpl, &hash_suite, seal, check_code_fn)
 }
 

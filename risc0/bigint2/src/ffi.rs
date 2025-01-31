@@ -45,15 +45,4 @@ extern "C" {
         a5: *const u32,
         a6: *const u32,
     );
-
-    pub fn sys_bigint2_7(
-        blob_ptr: *const u8,
-        a1: *const u32,
-        a2: *const u32,
-        a3: *const u32,
-        a4: *const u32,
-        a5: *const u32,
-        a6: *const u32,
-        a7: *const u32,
-    );
 }

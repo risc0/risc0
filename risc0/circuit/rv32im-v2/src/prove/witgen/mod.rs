@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod bigint;
 pub(crate) mod paged_map;
 pub(crate) mod poseidon2;
 pub(crate) mod preflight;
@@ -32,8 +33,8 @@ use self::preflight::Back;
 use super::hal::{CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
     execute::{
-        platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State, segment::Segment,
-        sha2::Sha2State,
+        bigint::BigIntState, platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State,
+        segment::Segment, sha2::Sha2State,
     },
     zirgen::circuit::{
         CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_CODE, REGCOUNT_DATA,
@@ -156,6 +157,11 @@ impl<H: Hal> WitnessGenerator<H> {
                     }
                     for (col, value) in zip(Sha2State::u32_offsets(), sha2_state.u32_array()) {
                         injector.set_u32_bits(row, col, value);
+                    }
+                }
+                Back::BigInt(state) => {
+                    for (col, value) in zip(BigIntState::offsets(), state.as_array()) {
+                        injector.set(row, col, value);
                     }
                 }
             }
