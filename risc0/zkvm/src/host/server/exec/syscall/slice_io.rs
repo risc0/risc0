@@ -48,7 +48,7 @@ impl<'a> SysSliceIo<'a> {
 /// calls. The first call returns (nelem, _) indicating how many
 /// elements are to be sent back to the guest, and the second call
 /// actually returns the elements after the guest allocates space.
-impl<'a> Syscall for SysSliceIo<'a> {
+impl Syscall for SysSliceIo<'_> {
     fn syscall(
         &mut self,
         syscall: &str,

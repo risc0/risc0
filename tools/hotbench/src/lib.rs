@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ fn make_filename_safe(string: &str) -> String {
     )
 }
 
-impl<'a> Bencher<'a> {
+impl Bencher<'_> {
     #[inline(never)]
     pub fn iter<I, O, S, R>(&self, items: usize, mut setup: S, mut routine: R)
     where

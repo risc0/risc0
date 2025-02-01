@@ -17,7 +17,6 @@
 use risc0_zkp::taps::{TapData, TapSet};
 
 #[allow(missing_docs)]
-
 pub const TAPSET: &TapSet = &TapSet::<'static> {
     taps: &[
         TapData {

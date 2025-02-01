@@ -416,7 +416,7 @@ impl<'a> Preflight<'a> {
     }
 }
 
-impl<'a> Risc0Context for Preflight<'a> {
+impl Risc0Context for Preflight<'_> {
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
