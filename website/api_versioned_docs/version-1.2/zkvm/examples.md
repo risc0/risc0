@@ -13,7 +13,6 @@
   account, without revealing the exploit
 - **[ECDSA signature verification][example-ecdsa]**: prove the validity of an
   ECDSA signature
-- **[zkEVM][example-zkevm]**: demo of running EVM engine on the Risc Zero zkVM
 
 ## Running the Examples
 
@@ -57,7 +56,6 @@ cargo run --release
 [example-hello]: https://github.com/risc0/risc0/tree/release-1.2/examples/hello-world
 [example-json]: https://github.com/risc0/risc0/tree/release-1.2/examples/json
 [example-waldo]: https://github.com/risc0/risc0/tree/release-1.2/examples/waldo
-[example-zkevm]: https://github.com/risc0/risc0/tree/release-1.2/examples/zkevm-demo
 [examples-dir]: https://github.com/risc0/risc0/tree/release-1.2/examples
 [install]: ./install.md
 [releases]: https://github.com/risc0/risc0/releases
