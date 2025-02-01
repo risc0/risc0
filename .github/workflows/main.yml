@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.81.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.83.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
@@ -388,14 +388,14 @@ jobs:
       - uses: ./.github/actions/rustup
         with:
           # Building with docs.rs config requires the nightly toolchain.
-          toolchain: nightly-2024-09-04
+          toolchain: nightly-2024-11-26
       - uses: ./.github/actions/sccache
         with:
           key: macOS-nightly
-      - run: cargo +nightly-2024-09-04 doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +nightly-2024-09-04 doc -p risc0-zkp -Fprove,std --no-deps
-      - run: cargo +nightly-2024-09-04 doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +nightly-2024-09-04 doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo +nightly-2024-11-26 doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo +nightly-2024-11-26 doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +nightly-2024-11-26 doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +nightly-2024-11-26 doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:

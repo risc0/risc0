@@ -86,7 +86,7 @@ impl<'a, F: Field> Handler<'a, F> {
     }
 }
 
-impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
+impl<F: Field> CircuitStepHandler<F::Elem> for Handler<'_, F> {
     /// Performs an extern call
     fn call(
         &mut self,

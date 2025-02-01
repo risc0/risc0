@@ -461,7 +461,7 @@ impl<'a> ParallelHandler<'a> {
     }
 }
 
-impl<'a> CircuitStepHandler<BabyBearElem> for ParallelHandler<'a> {
+impl CircuitStepHandler<BabyBearElem> for ParallelHandler<'_> {
     fn sort(&mut self, _: &str) {
         todo!()
     }

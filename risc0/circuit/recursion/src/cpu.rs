@@ -42,7 +42,7 @@ impl<'a, C: PolyFp<BabyBear>> CpuCircuitHal<'a, C> {
     }
 }
 
-impl<'a, C, H> CircuitHal<H> for CpuCircuitHal<'a, C>
+impl<C, H> CircuitHal<H> for CpuCircuitHal<'_, C>
 where
     C: PolyFp<BabyBear> + Sync + CircuitStep<BabyBearElem>,
     H: Hal<

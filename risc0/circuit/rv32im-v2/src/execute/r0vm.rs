@@ -388,7 +388,7 @@ impl<'a> Risc0Machine<'a> {
     }
 }
 
-impl<'a> EmuContext for Risc0Machine<'a> {
+impl EmuContext for Risc0Machine<'_> {
     fn ecall(&mut self) -> Result<bool> {
         if self.is_machine_mode() {
             self.machine_ecall()
