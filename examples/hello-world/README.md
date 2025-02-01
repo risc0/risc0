@@ -29,7 +29,7 @@ blockchains or not, RISC Zero offers the most flexible and mature
 ecosystem for developing applications that involve ZKPs.
 
 You can run the zkVM locally and your secrets will never leave your own machine,
-or you can upload your program & inputs to [Bonsai] for remote proving.
+or you can upload your programs & inputs to [Bonsai] for remote proving.
 
 ## Project Organization
 
