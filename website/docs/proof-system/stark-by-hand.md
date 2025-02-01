@@ -12,6 +12,7 @@ In this series of 12 brief lessons, we walk through a simplified numerical examp
 - [Google Sheet version](https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing)
 - [PDF Version](https://dev.risczero.com/STARK-by-hand.pdf) (PDF)
 - [Python Version](https://dev.risczero.com/didactic_stark.py)
+- [Sage Version](https://dev.risczero.com/stark_by_hand.sage)
 
 If you make sense of these 12 lessons, you'll have a solid handle on the mechanics of a zk-STARK (and we'd likely love to [hire you](https://jobs.ashbyhq.com/RiscZero)).
 
@@ -221,7 +222,7 @@ $V'(x)  = \frac{V(x) - V(93)}{x - 93}$ where the Prover computes V(93) by runnin
 > The [FRI protocol](../reference-docs/about-fri.md) provides a mechanism for the Verifier to confirm the low-degree-ness of polynomials, with very little computation required of the Verifier.
 > In order to reduce this assertion of low-degree-ness to a single application of FRI, the Prover mixes the `DEEP polynomials` into a single FRI polynomial, using the DEEP Mixing parameter, $\alpha_2$.
 
-Letting $c'_1, c'_2, c'_3, d'_1, d'_2, d'_3$, and $V'$ denote the `DEEP polynomials`, we mix the `DEEP polynomials` to construct the FRI polynomial, $f_0(x) = \alpha_2 ^0c'_1(x) + \alpha_2 ^1 c'_2(x) + ... + \alpha_2 ^6V'(x)$
+Letting $d'_1, d'_2, d'_3, c'_1, c'_2, c'_3$, and $V'$ denote the `DEEP polynomials`, we mix the `DEEP polynomials` to construct the FRI polynomial: $f_0(x) = {\alpha_2}^0 d'_1(x) + {\alpha_2}^1 d'_2(x) + {\alpha_2}^2 d'_3(x) + {\alpha_2}^3 c'_1(x) + {\alpha_2}^4 c'_2(x) + {\alpha_2}^5 c'_3(x) + {\alpha_2}^6 V'(x)$
 
 ![Lesson 11: Mixing for FRI](assets/fibonacci-10.png)
 
