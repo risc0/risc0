@@ -23,7 +23,7 @@ use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, bail, ensure};
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
@@ -266,13 +266,13 @@ impl Digestible for Unknown {
     }
 }
 
-impl BorshSerialize for Unknown {
+impl borsh::BorshSerialize for Unknown {
     fn serialize<W>(&self, _: &mut W) -> core::result::Result<(), borsh::io::Error> {
         unreachable!("unreachable")
     }
 }
 
-impl BorshDeserialize for Unknown {
+impl borsh::BorshDeserialize for Unknown {
     fn deserialize_reader<R>(_: &mut R) -> core::result::Result<Self, borsh::io::Error> {
         unreachable!("unreachable")
     }

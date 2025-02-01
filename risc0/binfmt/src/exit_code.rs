@@ -14,7 +14,7 @@
 
 use core::fmt;
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 
 /// Exit condition indicated by the zkVM at the end of the guest execution.

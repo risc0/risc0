@@ -18,7 +18,7 @@
 use alloc::{format, vec::Vec};
 use core::fmt::{Debug, Display, Formatter};
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
 use serde::{Deserialize, Serialize};

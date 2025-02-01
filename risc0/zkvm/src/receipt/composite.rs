@@ -16,7 +16,7 @@ use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{

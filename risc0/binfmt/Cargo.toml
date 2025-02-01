@@ -14,7 +14,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-borsh = { version = "1.5", default-features = false, features = ["derive"] }
+borsh = { version = "1.5", default-features = false }
+borsh-derive = { version = "1.5", default-features = false }
 derive_more = { version = "1.0", default-features = false, features = [
   "add",
   "add_assign",

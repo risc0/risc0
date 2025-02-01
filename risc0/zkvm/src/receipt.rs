@@ -24,7 +24,7 @@ use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{

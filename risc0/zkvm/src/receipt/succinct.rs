@@ -21,7 +21,7 @@ use alloc::{
 use core::fmt::Debug;
 
 use anyhow::bail;
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh_derive::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{
     control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
