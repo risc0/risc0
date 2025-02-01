@@ -71,3 +71,4 @@ prove = [
   "std",
 ]
 std = ["anyhow/std"]
+unstable = []
