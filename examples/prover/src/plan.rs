@@ -318,3 +318,110 @@ impl std::fmt::Debug for Rv32imPlanner {
         Ok(())
     }
 }
+
+#[derive(Clone, Default)]
+pub struct KeccakPlanner {
+    /// All of the tasks in this plan
+    tasks: Vec<Task>,
+
+    /// List of current "peaks." Sorted in order of decreasing height.
+    ///
+    /// A task is a "peak" if (1) it is either a Keccak or Union command AND (2) no other join tasks depend on it.
+    peaks: Vec<usize>,
+
+    /// Iterator position. Used by `self.next_task()`.
+    consumer_position: usize,
+
+    /// Last task in the plan. Set by `self.finish()`.
+    last_task: Option<usize>,
+}
+
+impl Planner for KeccakPlanner {
+    fn tasks(&self) -> Vec<Task> {
+        self.tasks.clone() // TODO return ref?
+    }
+
+    fn push_task(&mut self, task: Task) {
+        self.tasks.push(task);
+    }
+
+    fn peaks(&self) -> Vec<usize> {
+        self.peaks.clone() // TODO return ref?
+    }
+
+    fn pop_peaks(&mut self) -> Option<usize> {
+        self.peaks.pop()
+    }
+
+    fn push_peaks(&mut self, peak: usize) {
+        self.peaks.push(peak)
+    }
+
+    fn consumer_position(&self) -> usize {
+        self.consumer_position
+    }
+
+    fn advance_consumer_position(&mut self, pos: usize) {
+        self.consumer_position += pos;
+    }
+
+    fn last_task(&self) -> Option<usize> {
+        self.last_task
+    }
+
+    fn set_last_task(&mut self, task: Option<usize>) {
+        self.last_task = task;
+    }
+
+    fn new_segment(task_number: usize, segment_idx: u32) -> Task {
+        Task::new_keccak(task_number, segment_idx)
+    }
+
+    fn new_join(task_number: usize, task_height: u32, left: usize, right: usize) -> Task {
+        Task::new_union(task_number, task_height, left, right)
+    }
+
+    fn new_finalize(task_number: usize, task_height: u32, depends_on: usize) -> Task {
+        Task::new_finalize_proof_set(task_number, task_height, depends_on)
+    }
+}
+
+impl std::fmt::Debug for KeccakPlanner {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut stack = Vec::new();
+
+        if self.last_task.is_none() {
+            writeln!(f, "Still in planning phases ...")?;
+        } else {
+            stack.push((0, self.last_task.unwrap()));
+        }
+
+        while let Some((indent, cursor)) = stack.pop() {
+            if indent > 0 {
+                write!(f, "\n{}", " ".repeat(indent))?;
+            }
+
+            let task = self.get_task(cursor);
+
+            match task.command {
+                Command::Finalize => {
+                    write!(f, "{:?} Finalize", task.task_number)?;
+                    stack.push((indent + 2, task.depends_on[0]));
+                }
+                Command::FinalizeProofSet => todo!(),
+                Command::Join => {
+                    write!(f, "{:?} Join", task.task_number)?;
+                    stack.push((indent + 2, task.depends_on[0]));
+                    stack.push((indent + 2, task.depends_on[1]));
+                }
+                Command::Segment => {
+                    write!(f, "{:?} Segment", task.task_number)?;
+                }
+                Command::Keccak => todo!(),
+                Command::Union => todo!(),
+            }
+        }
+
+        Ok(())
+    }
+}

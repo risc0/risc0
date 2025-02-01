@@ -23,33 +23,34 @@ mod worker;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
-use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
-use risc0_zkp::digest;
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
     ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
 use crate::plan::Planner;
 
-use self::{plan::Rv32imPlanner, task_mgr::TaskManager};
+use self::{plan::KeccakPlanner, plan::Rv32imPlanner, task_mgr::TaskManager};
 
 fn main() {
     prover_example();
 }
 
 struct Coprocessor<'a> {
+    next_proof_idx: u32,
     pub(crate) receipts: HashMap<Digest, SuccinctReceipt<Unknown>>,
-    pub(crate) _task_manager: &'a RefCell<TaskManager>,
-    pub(crate) _planner: &'a RefCell<Rv32imPlanner>,
+    pub(crate) task_manager: &'a RefCell<TaskManager>,
+    pub(crate) planner: &'a RefCell<KeccakPlanner>,
 }
 
 impl<'a> Coprocessor<'a> {
-    fn new(_task_manager: &'a RefCell<TaskManager>, _planner: &'a RefCell<Rv32imPlanner>) -> Self {
+    fn new(_task_manager: &'a RefCell<TaskManager>, _planner: &'a RefCell<KeccakPlanner>) -> Self {
         Self {
+            next_proof_idx: 0,
             receipts: HashMap::new(),
-            _task_manager,
-            _planner,
+            task_manager,
+            planner,
         }
     }
 }
@@ -63,8 +64,23 @@ impl<'a> CoprocessorCallback for Coprocessor<'a> {
         Ok(())
     }
 
-    fn prove_keccak(&mut self, _proof_request: ProveKeccakRequest) -> Result<()> {
-        todo!();
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        println!(
+            "keccak proof request: idx({}) claim: {}",
+            self.next_proof_idx, proof_request.claim_digest
+        );
+        self.planner
+            .borrow_mut()
+            .enqueue_segment(self.next_proof_idx)
+            .unwrap();
+        self.task_manager
+            .borrow_mut()
+            .add_keccak_request(self.next_proof_idx, proof_request);
+        while let Some(task) = self.planner.borrow_mut().next_task() {
+            self.task_manager.borrow_mut().add_task(task.clone());
+        }
+        self.next_proof_idx += 1;
+        Ok(())
     }
 }
 
@@ -72,16 +88,16 @@ fn prover_example() {
     println!("Submitting proof request...");
 
     let task_manager = RefCell::new(TaskManager::new());
-    let planner = RefCell::new(Rv32imPlanner::default());
+    let mut planner = Rv32imPlanner::default();
+    let keccak_planner = RefCell::new(KeccakPlanner::default());
 
-    let coprocessor = Rc::new(RefCell::new(Coprocessor::new(&task_manager, &planner)));
-
-    let po2 = 16;
-    let claim_digest = digest!("b83c10da0c23587bf318cbcec2c2ac0260dbd6c0fa6905df639f8f6056f0d56c");
-    let to_guest: (Digest, u32) = (claim_digest, po2);
+    let coprocessor = Rc::new(RefCell::new(Coprocessor::new(
+        &task_manager,
+        &keccak_planner,
+    )));
 
     let env = ExecutorEnv::builder()
-        .write(&to_guest)
+        .write(&MultiTestSpec::KeccakUnion(2))
         .unwrap()
         .coprocessor_callback_ref(coprocessor.clone())
         .build()
@@ -92,13 +108,13 @@ fn prover_example() {
     let session = client
         .execute(
             &env,
-            Asset::Inline(KECCAK_ELF.into()),
+            Asset::Inline(MULTI_TEST_ELF.into()),
             AssetRequest::Inline,
             |info, segment| {
                 println!("{info:?}");
-                planner.borrow_mut().enqueue_segment(segment_idx).unwrap();
+                planner.enqueue_segment(segment_idx).unwrap();
                 task_manager.borrow_mut().add_segment(segment_idx, segment);
-                while let Some(task) = planner.borrow_mut().next_task() {
+                while let Some(task) = planner.next_task() {
                     task_manager.borrow_mut().add_task(task.clone());
                 }
                 segment_idx += 1;
@@ -107,12 +123,12 @@ fn prover_example() {
         )
         .unwrap();
 
-    planner.borrow_mut().finish().unwrap();
+    planner.finish().unwrap();
 
     println!("Plan:");
     println!("{planner:?}");
 
-    while let Some(task) = planner.borrow_mut().next_task() {
+    while let Some(task) = planner.next_task() {
         task_manager.borrow_mut().add_task(task.clone());
     }
 
@@ -151,7 +167,7 @@ fn prover_example() {
         session.journal.bytes.clone(),
     );
     let asset = receipt.try_into().unwrap();
-    client.verify(asset, KECCAK_ID).unwrap();
+    client.verify(asset, MULTI_TEST_ID).unwrap();
     println!("Receipt verified!");
 }
 
