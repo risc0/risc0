@@ -18,7 +18,7 @@ use anyhow::{Context, Result};
 use bonsai_sdk::blocking::Client;
 use cargo_metadata::MetadataCommand;
 use clap::Parser;
-use risc0_build::{BuildStatus, GuestOptions};
+use risc0_build::{BuildStatus, DockerOptionsBuilder, GuestOptionsBuilder};
 
 use crate::utils;
 
@@ -52,14 +52,12 @@ impl DeployCommand {
 
     fn deploy(&self, client: Client) -> Result<()> {
         // Ensure we have an up to date artifact before deploying
-        let src_dir = std::env::current_dir().unwrap();
         if let BuildStatus::Skipped = risc0_build::docker_build(
             &self.manifest_path,
-            &src_dir,
-            &GuestOptions {
-                features: self.features.clone(),
-                ..Default::default()
-            },
+            &GuestOptionsBuilder::default()
+                .features(self.features.clone())
+                .use_docker(DockerOptionsBuilder::default().build()?)
+                .build()?,
         )? {
             eprintln!("Build skipped, nothing to deploy.");
             return Ok(());

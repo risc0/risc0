@@ -759,7 +759,8 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 ))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    unimplemented!("sys_alloc_aligned called when the bump allocator is disabled");
+    use core::alloc::GlobalAlloc;
+    crate::heap::embedded::HEAP.alloc(core::alloc::Layout::from_size_align(bytes, align).unwrap())
 }
 
 /// # Safety

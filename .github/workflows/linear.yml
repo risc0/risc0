@@ -19,7 +19,8 @@ jobs:
   create-linear-issue-pr:
     runs-on: ubuntu-latest
     steps:
-      - name: Find or create a Linear Issue
+      - name: Find or create a Linear Issue (Internal PRs)
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         uses: risc0/action-find-or-create-linear-issue@risc0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
