@@ -29,7 +29,7 @@ For general references, we recommend the following:
 
 - [ZK Podcast episode](https://www.youtube.com/watch?v=n6_nicI4ckM\&t=2629s) with the authors of the PLONK paper
 - [Vitalik's PLONK intro](https://vitalik.eth.limo/general/2019/09/22/plonk.html)
-- [@0xtaetaehoho's PLONK Skilltree](https://twitter.com/0xtaetaehoho/status/1618979438913527814)
+- [@0xtaetaehoho's PLONK Skilltree](https://x.com/0xtaetaehoho/status/1618979438913527814)
 
 ### Moderately Technical
 

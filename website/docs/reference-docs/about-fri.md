@@ -40,7 +40,7 @@ The RISC Zero ZKP system uses the original FRI protocol.
 ### Explanatory References
 
 - RISC Zero Study Club [Slides](https://drive.google.com/file/d/1TuufbM8py2mGDkjMUg5FWZzw8VqNri4O/view?usp=share_link) & [Video Recording](https://www.youtube.com/watch?v=j35yz22OVGE)
-- [FRI Sequence Diagram](https://twitter.com/EllipticHector/status/1641842245337743367)
+- [FRI Sequence Diagram](https://x.com/EllipticHector/status/1641842245337743367)
 - [A summary on the FRI low degree test (Ulrich Haböck, Orbis Labs, 2022)](https://eprint.iacr.org/2022/1216.pdf) (PDF)
 - [Low Degree Testing](https://medium.com/starkware/low-degree-testing-f7614f5172db), part 3 of the STARK Math series
 - [Vitalik's FRI article](https://vitalik.eth.limo/general/2017/11/22/starks_part_2.html)

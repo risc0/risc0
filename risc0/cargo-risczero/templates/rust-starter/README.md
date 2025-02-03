@@ -106,6 +106,6 @@ We'd love to hear from you on [Discord][discord] or [Twitter][twitter].
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [rust-toolchain]: rust-toolchain.toml
 [rustup]: https://rustup.rs
-[twitter]: https://twitter.com/risczero
+[twitter]: https://.com/risczero
 [zkhack-iii]: https://www.youtube.com/watch?v=Yg_BGqj_6lg&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5
 [zkvm-overview]: https://dev.risczero.com/zkvm

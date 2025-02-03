@@ -57,7 +57,7 @@ We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony
 [audits-readme]: https://github.com/risc0/rz-security/blob/main/audits/README.md
 [DefinitelySetup]: https://github.com/privacy-scaling-explorations/DefinitelySetup
 [install-circom]: https://docs.circom.io/getting-started/installation
-[kobi-bad-ceremony-list]: https://twitter.com/kobigurk/status/1782502969453494530
+[kobi-bad-ceremony-list]: https://x.com/kobigurk/status/1782502969453494530
 [p0tion]: https://github.com/privacy-scaling-explorations/p0tion
 [p0tion-config]: https://github.com/risc0/risc0/blob/d4e427283027c28b38b8eda1562e8e0e68d1b0e2/compact_proof/groth16/p0tionConfig.json
 [powers-of-tau-hez-23]: https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_23.ptau

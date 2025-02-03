@@ -215,7 +215,7 @@ export default async function createConfigAsync() {
                 },
                 {
                   label: "Twitter",
-                  href: "https://twitter.com/risczero",
+                  href: "https://x.com/risczero",
                 },
                 {
                   label: "YouTube",

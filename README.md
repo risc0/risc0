@@ -191,6 +191,6 @@ This project is licensed under the Apache2 license. See [LICENSE](LICENSE).
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
 [security-model]: https://dev.risczero.com/api/security-model
 [twitter-badge]: https://img.shields.io/twitter/follow/risczero
-[twitter-url]: https://twitter.com/risczero
+[twitter-url]: https://x.com/risczero
 [zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
 [zksummit10-talk]: https://www.youtube.com/watch?v=wkIBN2CGJdc

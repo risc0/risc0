@@ -137,7 +137,7 @@ list][mailing-list] to get our latest announcements.
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [rust-libraries]: https://github.com/risc0/risc0#rust-libraries
 [startup]: https://risczero.com/news/series-a
-[twitter]: https://twitter.com/risczero
+[twitter]: https://x.com/risczero
 [waldo]: https://risczero.com/news/waldo
 [YouTube]: https://www.youtube.com/@risczero
 [zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
