@@ -1703,20 +1703,38 @@ mod tests {
     }
 
     #[test]
-    fn get_legacy_versions_old_rzup() {
+    fn get_legacy_versions_old_rzup_apple_aarch64() {
         get_legacy_versions(
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-aarch64-apple-darwin",
+        );
+    }
+
+    #[test]
+    fn get_legacy_versions_old_rzup_linux_x86() {
+        get_legacy_versions(
+            "r0.1.81.0-risc0-rust-x86_64-unknown-linux-gnu",
             "v1.2.1-rc.0-cargo-risczero",
             "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
         );
     }
 
     #[test]
-    fn get_legacy_versions_cargo_risczero_install() {
+    fn get_legacy_versions_cargo_risczero_install_apple_aarch64() {
         get_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.81.0",
             "v1.2.1-rc.0-cargo-risczero",
             "c_aarch64-apple-darwin_2024.01.05",
+        );
+    }
+
+    #[test]
+    fn get_legacy_versions_cargo_risczero_install_linux_x86() {
+        get_legacy_versions(
+            "rust_x86_64-unknown-linux-gnu_r0.1.81.0",
+            "v1.2.1-rc.0-cargo-risczero",
+            "c_x86_64-unknown-linux-gnu_2024.01.05",
         );
     }
 
@@ -1756,20 +1774,38 @@ mod tests {
     }
 
     #[test]
-    fn get_default_legacy_versions_old_rzup() {
+    fn get_default_legacy_versions_old_rzup_apple_aarch64() {
         get_default_legacy_versions(
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-aarch64-apple-darwin",
+        );
+    }
+
+    #[test]
+    fn get_default_legacy_versions_old_rzup_linux_x86() {
+        get_default_legacy_versions(
+            "r0.1.81.0-risc0-rust-x86_64-unknown-linux-gnu",
             "v1.2.1-rc.0-cargo-risczero",
             "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
         );
     }
 
     #[test]
-    fn get_default_legacy_versions_cargo_risczero_install() {
+    fn get_default_legacy_versions_cargo_risczero_install_apple_aarch64() {
         get_default_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.81.0",
             "v1.2.1-rc.0-cargo-risczero",
             "c_aarch64-apple-darwin_2024.01.05",
+        );
+    }
+
+    #[test]
+    fn get_default_legacy_versions_cargo_risczero_install_linux_x86() {
+        get_default_legacy_versions(
+            "rust_x86_64-unknown-linux-gnu_r0.1.81.0",
+            "v1.2.1-rc.0-cargo-risczero",
+            "c_x86_64-unknown-linux-gnu_2024.01.05",
         );
     }
 
@@ -1793,7 +1829,7 @@ mod tests {
     }
 
     #[test]
-    fn list_legacy_versions_old_rzup() {
+    fn list_legacy_versions_old_rzup_apple_aarch64() {
         list_legacy_versions(
             "r0.1.79.0-risc0-rust-aarch64-apple-darwin",
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
@@ -1802,10 +1838,28 @@ mod tests {
     }
 
     #[test]
-    fn list_legacy_versions_cargo_risczero_install() {
+    fn list_legacy_versions_old_rzup_linux_x86() {
+        list_legacy_versions(
+            "r0.1.79.0-risc0-rust-x86_64-unknown-linux-gnu",
+            "r0.1.81.0-risc0-rust-x86_64-unknown-linux-gnu",
+            vec![Version::new(1, 81, 0), Version::new(1, 79, 0)],
+        );
+    }
+
+    #[test]
+    fn list_legacy_versions_cargo_risczero_install_aaple_aarch64() {
         list_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.79.0",
             "rust_aarch64-apple-darwin_r0.1.81.0",
+            vec![Version::new(1, 81, 0), Version::new(1, 79, 0)],
+        );
+    }
+
+    #[test]
+    fn list_legacy_versions_cargo_risczero_install_linux_x86() {
+        list_legacy_versions(
+            "rust_x86_64-unknown-linux-gnu_r0.1.79.0",
+            "rust_x86_64-unknown-linux-gnu_r0.1.81.0",
             vec![Version::new(1, 81, 0), Version::new(1, 79, 0)],
         );
     }
@@ -1868,20 +1922,38 @@ mod tests {
     }
 
     #[test]
-    fn set_default_version_legacy_versions_old_rzup() {
+    fn set_default_version_legacy_versions_old_rzup_apple_aarch64() {
         set_default_version_legacy_versions(
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-aarch64-apple-darwin",
+        );
+    }
+
+    #[test]
+    fn set_default_version_legacy_versions_old_rzup_linux_x86() {
+        set_default_version_legacy_versions(
+            "r0.1.81.0-risc0-rust-x86_64-unknown-linux-gnu",
             "v1.2.1-rc.0-cargo-risczero",
             "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
         );
     }
 
     #[test]
-    fn set_default_version_legacy_versions_cargo_risczero_install() {
+    fn set_default_version_legacy_versions_cargo_risczero_install_apple_aarch64() {
         set_default_version_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.81.0",
             "v1.2.1-rc.0-cargo-risczero",
             "c_aarch64-apple-darwin_2024.01.05",
+        );
+    }
+
+    #[test]
+    fn set_default_version_legacy_versions_cargo_risczero_install_linux_x86() {
+        set_default_version_legacy_versions(
+            "rust_x86_64-unknown-linux-gnu_r0.1.81.0",
+            "v1.2.1-rc.0-cargo-risczero",
+            "c_x86_64-unknown-linux-gnu_2024.01.05",
         );
     }
 
@@ -1952,20 +2024,38 @@ mod tests {
     }
 
     #[test]
-    fn uninstall_legacy_versions_old_rzup() {
+    fn uninstall_legacy_versions_old_rzup_apple_aarch64() {
         uninstall_legacy_versions(
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-aarch64-apple-darwin",
+        )
+    }
+
+    #[test]
+    fn uninstall_legacy_versions_old_rzup_linux_x86() {
+        uninstall_legacy_versions(
+            "r0.1.81.0-risc0-rust-x86_64-unknown-linux-gnu",
             "v1.2.1-rc.0-cargo-risczero",
             "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
         )
     }
 
     #[test]
-    fn uninstall_legacy_versions_cargo_risczero_install() {
+    fn uninstall_legacy_versions_cargo_risczero_install_apple_aarch64() {
         uninstall_legacy_versions(
             "rust_aarch64-apple-darwin_r0.1.81.0",
             "v1.2.1-rc.0-cargo-risczero",
             "c_aarch64-apple-darwin_2024.01.05",
+        )
+    }
+
+    #[test]
+    fn uninstall_legacy_versions_cargo_risczero_install_linux_x86() {
+        uninstall_legacy_versions(
+            "rust_x86_64-unknown-linux-gnu_r0.1.81.0",
+            "v1.2.1-rc.0-cargo-risczero",
+            "c_x86_64-unknown-linux-gnu_2024.01.05",
         )
     }
 
