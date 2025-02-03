@@ -49,7 +49,7 @@ Use this command any time you'd like to check your progress.
 
 ## Step 2 (Host): Share Private Data as Input with the Guest
 
-The zkVM (or a prover) runs on the host. The host code is located in `hello-world/src/main.rs` and `hello-world/src/lib.rs`. 
+The zkVM (or a [prover]) runs on the [host]. The host code is located in `hello-world/src/main.rs` and `hello-world/src/lib.rs`. 
 
 The host creates an executor environment `ExecutorEnv` before constructing a prover. This executor environment is responsible for managing guest-readable memory. The host makes the value `input` available to the guest program before execution by adding `input` to the executor environment. 
 
