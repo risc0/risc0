@@ -83,16 +83,24 @@ impl Task {
         }
     }
 
-    pub fn new_finalize_proof_set(
-        _task_number: usize,
-        _task_height: u32,
-        _depends_on: usize,
-    ) -> Self {
-        todo!();
+    pub fn new_finalize_proof_set(task_number: usize, task_height: u32, depends_on: usize) -> Self {
+        Task {
+            task_number,
+            task_height,
+            command: Command::FinalizeProofSet,
+            depends_on: vec![depends_on],
+            segment_idx: None,
+        }
     }
 
-    pub fn new_union(_task_number: usize, _task_height: u32, _left: usize, _right: usize) -> Self {
-        todo!();
+    pub fn new_union(task_number: usize, task_height: u32, left: usize, right: usize) -> Self {
+        Task {
+            task_number,
+            task_height,
+            command: Command::Union,
+            depends_on: vec![left, right],
+            segment_idx: None,
+        }
     }
 }
 
@@ -201,7 +209,7 @@ pub trait Planner {
                 Ordering::Greater => unreachable!(),
             }
         }
-        self.peaks().push(new_peak);
+        self.push_peaks(new_peak);
 
         Ok(task_number)
     }
@@ -408,7 +416,10 @@ impl std::fmt::Debug for KeccakPlanner {
                     write!(f, "{:?} Finalize", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
                 }
-                Command::FinalizeProofSet => todo!(),
+                Command::FinalizeProofSet => {
+                    write!(f, "{:?} FinalizeProofSet", task.task_number)?;
+                    stack.push((indent + 2, task.depends_on[0]));
+                }
                 Command::Join => {
                     write!(f, "{:?} Join", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
@@ -417,8 +428,14 @@ impl std::fmt::Debug for KeccakPlanner {
                 Command::Segment => {
                     write!(f, "{:?} Segment", task.task_number)?;
                 }
-                Command::Keccak => todo!(),
-                Command::Union => todo!(),
+                Command::Keccak => {
+                    write!(f, "{:?} Keccak", task.task_number)?;
+                }
+                Command::Union => {
+                    write!(f, "{:?} Union", task.task_number)?;
+                    stack.push((indent + 2, task.depends_on[0]));
+                    stack.push((indent + 2, task.depends_on[1]));
+                }
             }
         }
 

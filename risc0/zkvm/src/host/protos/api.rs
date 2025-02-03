@@ -189,6 +189,29 @@ pub struct ProveKeccakResult {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FinalizeKeccakRequest {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FinalizeKeccakReply {
+    #[prost(oneof = "finalize_keccak_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<finalize_keccak_reply::Kind>,
+}
+/// Nested message and enum types in `FinalizeKeccakReply`.
+pub mod finalize_keccak_reply {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        Ok(super::FinalizeKeccakResult),
+        #[prost(message, tag = "2")]
+        Error(super::GenericError),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FinalizeKeccakResult {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LiftRequest {
     #[prost(message, optional, tag = "1")]
     pub opts: ::core::option::Option<ProverOpts>,
@@ -405,8 +428,10 @@ pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars:
-        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    pub env_vars: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]
@@ -691,7 +716,7 @@ pub mod trace_event {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CoprocessorRequest {
-    #[prost(oneof = "coprocessor_request::Kind", tags = "1, 2")]
+    #[prost(oneof = "coprocessor_request::Kind", tags = "1, 2, 3")]
     pub kind: ::core::option::Option<coprocessor_request::Kind>,
 }
 /// Nested message and enum types in `CoprocessorRequest`.
@@ -703,6 +728,8 @@ pub mod coprocessor_request {
         ProveZkr(super::ProveZkrRequest),
         #[prost(message, tag = "2")]
         ProveKeccak(super::ProveKeccakRequest),
+        #[prost(message, tag = "3")]
+        FinalizeKeccak(super::FinalizeKeccakRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

@@ -27,7 +27,7 @@ use crate::plan::{Command, Task};
 
 type TaskNumber = usize;
 
-#[allow(dead_code)]
+#[derive(Debug)]
 pub enum JobKind<ReceiptType, SegmentType>
 where
     ReceiptType: Clone,
@@ -38,6 +38,7 @@ where
     Receipt(Box<ReceiptType>),
 }
 
+#[derive(Debug)]
 pub struct Job<ReceiptType, SegmentType>
 where
     ReceiptType: Clone,
@@ -95,6 +96,7 @@ impl Job<SuccinctReceipt<ReceiptClaim>, Asset> {
 
 impl Job<SuccinctReceipt<Unknown>, ProveKeccakRequest> {
     pub fn execute(self) -> Self {
+        println!("executing...");
         match self.kind {
             JobKind::Segment(proof_request) => Job {
                 task: self.task.clone(),
@@ -104,10 +106,13 @@ impl Job<SuccinctReceipt<Unknown>, ProveKeccakRequest> {
                 task: self.task.clone(),
                 kind: JobKind::Receipt(Box::new(Self::union(pair.0, pair.1))),
             },
-            JobKind::Receipt(receipt) => Job {
-                task: self.task.clone(),
-                kind: JobKind::Receipt(Box::new(*receipt)),
-            },
+            JobKind::Receipt(receipt) => {
+                println!("matched with receipt");
+                Job {
+                    task: self.task.clone(),
+                    kind: JobKind::Receipt(Box::new(*receipt)),
+                }
+            }
         }
     }
 
@@ -197,12 +202,14 @@ where
             for next_task in ready_tasks {
                 self.pending_tasks.remove(&next_task.task_number);
                 self.run_task(next_task);
+                println!("    ---- finished task");
             }
             if job.task.command == Command::Finalize {
                 root_receipt = Some(receipt);
                 break;
             }
         }
+        println!("run complete");
         *root_receipt.unwrap()
     }
 
@@ -218,6 +225,7 @@ where
     }
 
     fn run_task(&self, task: Task) {
+        println!("running task: {:?}", task);
         let job = match task.command {
             Command::Segment => {
                 let segment = self.segments.get(&task.segment_idx.unwrap()).unwrap();

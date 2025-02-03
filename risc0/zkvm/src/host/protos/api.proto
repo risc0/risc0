@@ -101,6 +101,19 @@ message ProveKeccakResult {
   Asset receipt = 1;
 }
 
+message FinalizeKeccakRequest {
+}
+
+message FinalizeKeccakReply {
+  oneof kind {
+    FinalizeKeccakResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message FinalizeKeccakResult {
+}
+
 message LiftRequest {
   ProverOpts opts = 1;
   Asset receipt = 2;
@@ -361,6 +374,7 @@ message CoprocessorRequest {
   oneof kind {
     ProveZkrRequest prove_zkr = 1;
     ProveKeccakRequest prove_keccak = 2;
+    FinalizeKeccakRequest finalize_keccak = 3;
   }
 }
 

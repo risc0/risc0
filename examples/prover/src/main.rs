@@ -90,6 +90,11 @@ impl<'a> CoprocessorCallback for Coprocessor<'a> {
         self.next_proof_idx += 1;
         Ok(())
     }
+
+    fn finalize_keccak(&mut self) -> Result<()> {
+        self.planner.borrow_mut().finish().unwrap();
+        Ok(())
+    }
 }
 
 fn prover_example() {
@@ -110,7 +115,7 @@ fn prover_example() {
     )));
 
     let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::KeccakUnion(2))
+        .write(&MultiTestSpec::KeccakUnion(3))
         .unwrap()
         .coprocessor_callback_ref(coprocessor.clone())
         .build()
@@ -124,7 +129,7 @@ fn prover_example() {
             Asset::Inline(MULTI_TEST_ELF.into()),
             AssetRequest::Inline,
             |info, segment| {
-                println!("{info:?}");
+                println!("info: {info:?}");
                 planner.enqueue_segment(segment_idx).unwrap();
                 task_manager.add_segment(segment_idx, segment);
                 while let Some(task) = planner.next_task() {
@@ -141,11 +146,22 @@ fn prover_example() {
     println!("Plan:");
     println!("{planner:?}");
 
+    println!("Keccak Plan:");
+    println!("{:?}", keccak_planner.borrow());
+
     while let Some(task) = planner.next_task() {
         task_manager.add_task(task.clone());
     }
 
+    while let Some(task) = keccak_planner.borrow_mut().next_task() {
+        keccak_task_manager.borrow_mut().add_task(task.clone());
+    }
+
     let conditional_receipt = task_manager.run();
+    println!("rv32im complete");
+
+    let unioned_receipt = keccak_task_manager.borrow_mut().run();
+    println!("Keccak complete {:#?}", unioned_receipt.claim);
 
     let output = conditional_receipt
         .claim

@@ -895,6 +895,11 @@ impl Client {
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_keccak(proof_request)
             }
+            pb::api::coprocessor_request::Kind::FinalizeKeccak(_) => {
+                let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
+                let mut coprocessor = coprocessor.borrow_mut();
+                coprocessor.finalize_keccak()
+            }
         }
     }
 }

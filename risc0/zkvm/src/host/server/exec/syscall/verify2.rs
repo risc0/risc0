@@ -54,6 +54,10 @@ impl Syscall for SysVerify2 {
             control_root
         );
 
+        if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
+            coprocessor.borrow_mut().finalize_keccak()?;
+        }
+
         let assumption = Assumption {
             claim: claim_digest,
             control_root,
