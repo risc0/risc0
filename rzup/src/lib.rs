@@ -1638,22 +1638,20 @@ mod tests {
         );
     }
 
-    #[test]
-    fn get_legacy_versions() {
+    fn get_legacy_versions(rust_dir_name: &str, cargo_risczero_dir_name: &str) {
         let (tmp_dir, rzup) = setup_test_env(
             invalid_base_urls(),
             None,
             Platform::new("x86_64", Os::Linux),
         );
 
-        let legacy_rust_dir = tmp_dir
-            .path()
-            .join(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        let legacy_rust_dir = tmp_dir.path().join(".risc0/toolchains").join(rust_dir_name);
         std::fs::create_dir_all(&legacy_rust_dir).unwrap();
 
         let legacy_cargo_risczero_dir = tmp_dir
             .path()
-            .join(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+            .join(".risc0/extensions")
+            .join(cargo_risczero_dir_name);
         std::fs::create_dir_all(&legacy_cargo_risczero_dir).unwrap();
 
         assert_eq!(
@@ -1672,21 +1670,27 @@ mod tests {
     }
 
     #[test]
-    fn get_default_legacy_versions() {
+    fn get_legacy_versions_old_rzup() {
+        get_legacy_versions(
+            "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+        );
+    }
+
+    fn get_default_legacy_versions(rust_dir_name: &str, cargo_risczero_dir_name: &str) {
         let (tmp_dir, rzup) = setup_test_env(
             invalid_base_urls(),
             None,
             Platform::new("x86_64", Os::Linux),
         );
 
-        let legacy_rust_dir = tmp_dir
-            .path()
-            .join(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        let legacy_rust_dir = tmp_dir.path().join(".risc0/toolchains").join(rust_dir_name);
         std::fs::create_dir_all(&legacy_rust_dir).unwrap();
 
         let legacy_cargo_risczero_dir = tmp_dir
             .path()
-            .join(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+            .join(".risc0/extensions")
+            .join(cargo_risczero_dir_name);
         std::fs::create_dir_all(&legacy_cargo_risczero_dir).unwrap();
 
         assert_eq!(
@@ -1707,46 +1711,60 @@ mod tests {
     }
 
     #[test]
-    fn list_legacy_versions() {
+    fn get_default_legacy_versions_old_rzup() {
+        get_default_legacy_versions(
+            "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+        );
+    }
+
+    fn list_legacy_versions(dir1: &str, dir2: &str, expected_versions: Vec<Version>) {
         let (tmp_dir, rzup) = setup_test_env(
             invalid_base_urls(),
             None,
             Platform::new("x86_64", Os::Linux),
         );
 
-        let legacy_rust_dir1 = tmp_dir
-            .path()
-            .join(".risc0/toolchains/r0.1.79.0-risc0-rust-aarch64-apple-darwin");
+        let legacy_rust_dir1 = tmp_dir.path().join(".risc0/toolchains").join(dir1);
         std::fs::create_dir_all(&legacy_rust_dir1).unwrap();
 
-        let legacy_rust_dir2 = tmp_dir
-            .path()
-            .join(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        let legacy_rust_dir2 = tmp_dir.path().join(".risc0/toolchains").join(dir2);
         std::fs::create_dir_all(&legacy_rust_dir2).unwrap();
 
         assert_eq!(
             rzup.list_versions(&Component::RustToolchain).unwrap(),
-            vec![Version::new(1, 81, 0), Version::new(1, 79, 0)]
+            expected_versions
         );
     }
 
     #[test]
-    fn set_default_version_legacy_versions() {
+    fn list_legacy_versions_old_rzup() {
+        list_legacy_versions(
+            "r0.1.79.0-risc0-rust-aarch64-apple-darwin",
+            "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            vec![Version::new(1, 81, 0), Version::new(1, 79, 0)],
+        );
+    }
+
+    fn set_default_version_legacy_versions(
+        rust_dir_name: &str,
+        cargo_risczero_dir_name: &str,
+        cpp_dir_name: &str,
+    ) {
         let (tmp_dir, mut rzup) = setup_test_env(
             invalid_base_urls(),
             None,
             Platform::new("x86_64", Os::Linux),
         );
 
-        let legacy_rust_dir =
-            PathBuf::from(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        let legacy_rust_dir = Path::new(".risc0/toolchains").join(rust_dir_name);
         std::fs::create_dir_all(tmp_dir.path().join(&legacy_rust_dir)).unwrap();
 
         rzup.set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
             .unwrap();
 
         let legacy_cargo_risczero_dir =
-            PathBuf::from(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+            Path::new(".risc0/extensions").join(cargo_risczero_dir_name);
         std::fs::create_dir_all(tmp_dir.path().join(&legacy_cargo_risczero_dir)).unwrap();
 
         rzup.set_default_version(
@@ -1755,8 +1773,7 @@ mod tests {
         )
         .unwrap();
 
-        let legacy_cpp_dir =
-            PathBuf::from(".risc0/toolchains/2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu");
+        let legacy_cpp_dir = Path::new(".risc0/toolchains").join(cpp_dir_name);
         std::fs::create_dir_all(tmp_dir.path().join(&legacy_cpp_dir)).unwrap();
 
         rzup.set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
@@ -1779,6 +1796,15 @@ mod tests {
                 ),
                 (".risc0/cpp".into(), legacy_cpp_dir.to_str().unwrap().into()),
             ],
+        );
+    }
+
+    #[test]
+    fn set_default_version_legacy_versions_old_rzup() {
+        set_default_version_legacy_versions(
+            "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
         );
     }
 
@@ -1807,16 +1833,18 @@ mod tests {
         );
     }
 
-    #[test]
-    fn uninstall_legacy_versions() {
+    fn uninstall_legacy_versions(
+        rust_dir_name: &str,
+        cargo_risczero_dir_name: &str,
+        cpp_dir_name: &str,
+    ) {
         let (tmp_dir, mut rzup) = setup_test_env(
             invalid_base_urls(),
             None,
             Platform::new("x86_64", Os::Linux),
         );
 
-        let legacy_rust_dir =
-            PathBuf::from(".risc0/toolchains/r0.1.81.0-risc0-rust-aarch64-apple-darwin");
+        let legacy_rust_dir = Path::new(".risc0/toolchains").join(rust_dir_name);
         std::fs::create_dir_all(tmp_dir.path().join(&legacy_rust_dir)).unwrap();
 
         rzup.set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
@@ -1827,7 +1855,7 @@ mod tests {
         assert_files(tmp_dir.path(), vec![]);
 
         let legacy_cargo_risczero_dir =
-            PathBuf::from(".risc0/extensions/v1.2.1-rc.0-cargo-risczero");
+            Path::new(".risc0/extensions").join(cargo_risczero_dir_name);
         std::fs::create_dir_all(tmp_dir.path().join(&legacy_cargo_risczero_dir)).unwrap();
 
         rzup.set_default_version(
@@ -1843,8 +1871,7 @@ mod tests {
         .unwrap();
         assert_files(tmp_dir.path(), vec![]);
 
-        let legacy_cpp_dir =
-            PathBuf::from(".risc0/toolchains/2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu");
+        let legacy_cpp_dir = Path::new(".risc0/toolchains").join(cpp_dir_name);
         std::fs::create_dir_all(tmp_dir.path().join(&legacy_cpp_dir)).unwrap();
 
         rzup.set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
@@ -1853,6 +1880,15 @@ mod tests {
         rzup.uninstall_component(&Component::CppToolchain, Version::new(2024, 1, 5))
             .unwrap();
         assert_files(tmp_dir.path(), vec![]);
+    }
+
+    #[test]
+    fn uninstall_legacy_versions_old_rzup() {
+        uninstall_legacy_versions(
+            "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
+        )
     }
 
     #[test]
