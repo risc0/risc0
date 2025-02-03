@@ -1638,34 +1638,67 @@ mod tests {
         );
     }
 
-    fn get_legacy_versions(rust_dir_name: &str, cargo_risczero_dir_name: &str) {
-        let (tmp_dir, rzup) = setup_test_env(
-            invalid_base_urls(),
-            None,
-            Platform::new("x86_64", Os::Linux),
-        );
+    struct LegacyVersionsFixture {
+        rzup: Rzup,
+        tmp_dir: TempDir,
+        legacy_rust_dir: PathBuf,
+        legacy_cargo_risczero_dir: PathBuf,
+        legacy_cpp_dir: PathBuf,
+    }
 
-        let legacy_rust_dir = tmp_dir.path().join(".risc0/toolchains").join(rust_dir_name);
-        std::fs::create_dir_all(&legacy_rust_dir).unwrap();
+    impl LegacyVersionsFixture {
+        fn new(rust_dir_name: &str, cargo_risczero_dir_name: &str, cpp_dir_name: &str) -> Self {
+            let (tmp_dir, rzup) = setup_test_env(
+                invalid_base_urls(),
+                None,
+                Platform::new("x86_64", Os::Linux),
+            );
 
-        let legacy_cargo_risczero_dir = tmp_dir
-            .path()
-            .join(".risc0/extensions")
-            .join(cargo_risczero_dir_name);
-        std::fs::create_dir_all(&legacy_cargo_risczero_dir).unwrap();
+            let legacy_rust_dir = tmp_dir.path().join(".risc0/toolchains").join(rust_dir_name);
+            std::fs::create_dir_all(&legacy_rust_dir).unwrap();
+
+            let legacy_cargo_risczero_dir = tmp_dir
+                .path()
+                .join(".risc0/extensions")
+                .join(cargo_risczero_dir_name);
+            std::fs::create_dir_all(&legacy_cargo_risczero_dir).unwrap();
+
+            let legacy_cpp_dir = tmp_dir.path().join(".risc0/toolchains").join(cpp_dir_name);
+            std::fs::create_dir_all(&legacy_cpp_dir).unwrap();
+
+            Self {
+                rzup,
+                tmp_dir,
+                legacy_rust_dir,
+                legacy_cargo_risczero_dir,
+                legacy_cpp_dir,
+            }
+        }
+    }
+
+    fn get_legacy_versions(rust_dir_name: &str, cargo_risczero_dir_name: &str, cpp_dir_name: &str) {
+        let fix = LegacyVersionsFixture::new(rust_dir_name, cargo_risczero_dir_name, cpp_dir_name);
 
         assert_eq!(
-            rzup.get_version_dir(&Component::RustToolchain, &Version::new(1, 81, 0))
+            fix.rzup
+                .get_version_dir(&Component::RustToolchain, &Version::new(1, 81, 0))
                 .unwrap(),
-            legacy_rust_dir
+            fix.legacy_rust_dir
         );
         assert_eq!(
-            rzup.get_version_dir(
-                &Component::CargoRiscZero,
-                &Version::parse("1.2.1-rc.0").unwrap()
-            )
-            .unwrap(),
-            legacy_cargo_risczero_dir
+            fix.rzup
+                .get_version_dir(
+                    &Component::CargoRiscZero,
+                    &Version::parse("1.2.1-rc.0").unwrap()
+                )
+                .unwrap(),
+            fix.legacy_cargo_risczero_dir
+        );
+        assert_eq!(
+            fix.rzup
+                .get_version_dir(&Component::CppToolchain, &Version::new(2024, 1, 5))
+                .unwrap(),
+            fix.legacy_cpp_dir
         );
     }
 
@@ -1674,27 +1707,20 @@ mod tests {
         get_legacy_versions(
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
             "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
         );
     }
 
-    fn get_default_legacy_versions(rust_dir_name: &str, cargo_risczero_dir_name: &str) {
-        let (tmp_dir, rzup) = setup_test_env(
-            invalid_base_urls(),
-            None,
-            Platform::new("x86_64", Os::Linux),
-        );
-
-        let legacy_rust_dir = tmp_dir.path().join(".risc0/toolchains").join(rust_dir_name);
-        std::fs::create_dir_all(&legacy_rust_dir).unwrap();
-
-        let legacy_cargo_risczero_dir = tmp_dir
-            .path()
-            .join(".risc0/extensions")
-            .join(cargo_risczero_dir_name);
-        std::fs::create_dir_all(&legacy_cargo_risczero_dir).unwrap();
+    fn get_default_legacy_versions(
+        rust_dir_name: &str,
+        cargo_risczero_dir_name: &str,
+        cpp_dir_name: &str,
+    ) {
+        let fix = LegacyVersionsFixture::new(rust_dir_name, cargo_risczero_dir_name, cpp_dir_name);
 
         assert_eq!(
-            rzup.get_default_version(&Component::RustToolchain)
+            fix.rzup
+                .get_default_version(&Component::RustToolchain)
                 .unwrap()
                 .unwrap()
                 .0,
@@ -1702,11 +1728,21 @@ mod tests {
         );
 
         assert_eq!(
-            rzup.get_default_version(&Component::CargoRiscZero)
+            fix.rzup
+                .get_default_version(&Component::CargoRiscZero)
                 .unwrap()
                 .unwrap()
                 .0,
             Version::parse("1.2.1-rc.0").unwrap()
+        );
+
+        assert_eq!(
+            fix.rzup
+                .get_default_version(&Component::CppToolchain)
+                .unwrap()
+                .unwrap()
+                .0,
+            Version::new(2024, 1, 5)
         );
     }
 
@@ -1715,6 +1751,7 @@ mod tests {
         get_default_legacy_versions(
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
             "v1.2.1-rc.0-cargo-risczero",
+            "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
         );
     }
 
@@ -1751,40 +1788,31 @@ mod tests {
         cargo_risczero_dir_name: &str,
         cpp_dir_name: &str,
     ) {
-        let (tmp_dir, mut rzup) = setup_test_env(
-            invalid_base_urls(),
-            None,
-            Platform::new("x86_64", Os::Linux),
-        );
-
-        let legacy_rust_dir = Path::new(".risc0/toolchains").join(rust_dir_name);
-        std::fs::create_dir_all(tmp_dir.path().join(&legacy_rust_dir)).unwrap();
-
-        rzup.set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
+        let mut fix =
+            LegacyVersionsFixture::new(rust_dir_name, cargo_risczero_dir_name, cpp_dir_name);
+        fix.rzup
+            .set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
             .unwrap();
 
-        let legacy_cargo_risczero_dir =
-            Path::new(".risc0/extensions").join(cargo_risczero_dir_name);
-        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cargo_risczero_dir)).unwrap();
+        fix.rzup
+            .set_default_version(
+                &Component::CargoRiscZero,
+                Version::parse("1.2.1-rc.0").unwrap(),
+            )
+            .unwrap();
 
-        rzup.set_default_version(
-            &Component::CargoRiscZero,
-            Version::parse("1.2.1-rc.0").unwrap(),
-        )
-        .unwrap();
-
-        let legacy_cpp_dir = Path::new(".risc0/toolchains").join(cpp_dir_name);
-        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cpp_dir)).unwrap();
-
-        rzup.set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
+        fix.rzup
+            .set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
             .unwrap();
 
         assert_symlinks(
-            tmp_dir.path(),
+            fix.tmp_dir.path(),
             vec![
                 (
                     ".cargo/bin/cargo-risczero".into(),
-                    legacy_cargo_risczero_dir
+                    fix.legacy_cargo_risczero_dir
+                        .strip_prefix(fix.tmp_dir.path())
+                        .unwrap()
                         .join("cargo-risczero")
                         .to_str()
                         .unwrap()
@@ -1792,9 +1820,22 @@ mod tests {
                 ),
                 (
                     ".rustup/toolchains/risc0".into(),
-                    legacy_rust_dir.to_str().unwrap().into(),
+                    fix.legacy_rust_dir
+                        .strip_prefix(fix.tmp_dir.path())
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .into(),
                 ),
-                (".risc0/cpp".into(), legacy_cpp_dir.to_str().unwrap().into()),
+                (
+                    ".risc0/cpp".into(),
+                    fix.legacy_cpp_dir
+                        .strip_prefix(fix.tmp_dir.path())
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .into(),
+                ),
             ],
         );
     }
@@ -1838,48 +1879,40 @@ mod tests {
         cargo_risczero_dir_name: &str,
         cpp_dir_name: &str,
     ) {
-        let (tmp_dir, mut rzup) = setup_test_env(
-            invalid_base_urls(),
-            None,
-            Platform::new("x86_64", Os::Linux),
-        );
+        let mut fix =
+            LegacyVersionsFixture::new(rust_dir_name, cargo_risczero_dir_name, cpp_dir_name);
 
-        let legacy_rust_dir = Path::new(".risc0/toolchains").join(rust_dir_name);
-        std::fs::create_dir_all(tmp_dir.path().join(&legacy_rust_dir)).unwrap();
-
-        rzup.set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
+        fix.rzup
+            .set_default_version(&Component::RustToolchain, Version::new(1, 81, 0))
             .unwrap();
 
-        rzup.uninstall_component(&Component::RustToolchain, Version::new(1, 81, 0))
-            .unwrap();
-        assert_files(tmp_dir.path(), vec![]);
-
-        let legacy_cargo_risczero_dir =
-            Path::new(".risc0/extensions").join(cargo_risczero_dir_name);
-        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cargo_risczero_dir)).unwrap();
-
-        rzup.set_default_version(
-            &Component::CargoRiscZero,
-            Version::parse("1.2.1-rc.0").unwrap(),
-        )
-        .unwrap();
-
-        rzup.uninstall_component(
-            &Component::CargoRiscZero,
-            Version::parse("1.2.1-rc.0").unwrap(),
-        )
-        .unwrap();
-        assert_files(tmp_dir.path(), vec![]);
-
-        let legacy_cpp_dir = Path::new(".risc0/toolchains").join(cpp_dir_name);
-        std::fs::create_dir_all(tmp_dir.path().join(&legacy_cpp_dir)).unwrap();
-
-        rzup.set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
+        fix.rzup
+            .uninstall_component(&Component::RustToolchain, Version::new(1, 81, 0))
             .unwrap();
 
-        rzup.uninstall_component(&Component::CppToolchain, Version::new(2024, 1, 5))
+        fix.rzup
+            .set_default_version(
+                &Component::CargoRiscZero,
+                Version::parse("1.2.1-rc.0").unwrap(),
+            )
             .unwrap();
-        assert_files(tmp_dir.path(), vec![]);
+
+        fix.rzup
+            .uninstall_component(
+                &Component::CargoRiscZero,
+                Version::parse("1.2.1-rc.0").unwrap(),
+            )
+            .unwrap();
+
+        fix.rzup
+            .set_default_version(&Component::CppToolchain, Version::new(2024, 1, 5))
+            .unwrap();
+
+        fix.rzup
+            .uninstall_component(&Component::CppToolchain, Version::new(2024, 1, 5))
+            .unwrap();
+
+        assert_files(fix.tmp_dir.path(), vec![]);
     }
 
     #[test]
