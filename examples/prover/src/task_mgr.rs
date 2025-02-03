@@ -241,9 +241,28 @@ where
                     kind: JobKind::Receipt(Box::new(receipt.clone())),
                 }
             }
-            Command::FinalizeProofSet => todo!(),
-            Command::Keccak => todo!(),
-            Command::Union => todo!(),
+            Command::FinalizeProofSet => {
+                let receipt = self.receipts.get(&task.depends_on[0]).unwrap();
+                Job {
+                    task,
+                    kind: JobKind::Receipt(Box::new(receipt.clone())),
+                }
+            }
+            Command::Keccak => {
+                let segment = self.segments.get(&task.segment_idx.unwrap()).unwrap();
+                Job {
+                    task,
+                    kind: JobKind::Segment(segment.clone()),
+                }
+            }
+            Command::Union => {
+                let left = self.receipts.get(&task.depends_on[0]).unwrap();
+                let right = self.receipts.get(&task.depends_on[1]).unwrap();
+                Job {
+                    task,
+                    kind: JobKind::Join(Box::new((left.clone(), right.clone()))),
+                }
+            }
         };
         self.pool.execute_to(self.job_tx.clone(), job);
     }
