@@ -17,43 +17,146 @@ use std::{
     sync::mpsc::{Receiver, Sender},
 };
 
-use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, UnionClaim, Unknown};
+use risc0_zkvm::{
+    ApiClient, Asset, AssetRequest, ProveKeccakRequest, ProverOpts, ReceiptClaim, SuccinctReceipt,
+    Unknown,
+};
 use workerpool::Pool;
 
-use crate::{
-    plan::{Command, Task},
-    worker::Worker,
-};
+use crate::plan::{Command, Task};
 
 type TaskNumber = usize;
 
 #[allow(dead_code)]
-pub enum JobKind {
-    Segment(Asset),
-    Join(Box<(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>)>),
-    Keccak(ProveKeccakRequest),
-    Receipt(Box<SuccinctReceipt<ReceiptClaim>>),
-    KeccakReceipt(Box<SuccinctReceipt<Unknown>>),
-    Union(Box<(SuccinctReceipt<Unknown>, SuccinctReceipt<Unknown>)>),
-    UnionReceipt(Box<SuccinctReceipt<UnionClaim>>),
+pub enum JobKind<ReceiptType, SegmentType>
+where
+    ReceiptType: Clone,
+    SegmentType: Clone,
+{
+    Segment(SegmentType),
+    Join(Box<(ReceiptType, ReceiptType)>),
+    Receipt(Box<ReceiptType>),
 }
 
-pub struct Job {
+pub struct Job<ReceiptType, SegmentType>
+where
+    ReceiptType: Clone,
+    SegmentType: Clone,
+{
     pub task: Task,
-    pub kind: JobKind,
+    pub kind: JobKind<ReceiptType, SegmentType>,
 }
 
-pub struct TaskManager {
-    segments: HashMap<u32, Asset>,
-    receipts: HashMap<TaskNumber, SuccinctReceipt<ReceiptClaim>>,
+impl Job<SuccinctReceipt<ReceiptClaim>, Asset> {
+    pub fn execute(self) -> Self {
+        match self.kind {
+            JobKind::Segment(segment) => Job {
+                task: self.task.clone(),
+                kind: JobKind::Receipt(Box::new(Self::prove_and_lift(segment))),
+            },
+            JobKind::Join(pair) => Job {
+                task: self.task.clone(),
+                kind: JobKind::Receipt(Box::new(Self::join(pair.0, pair.1))),
+            },
+            JobKind::Receipt(receipt) => Job {
+                task: self.task.clone(),
+                kind: JobKind::Receipt(Box::new(*receipt)),
+            },
+        }
+    }
+
+    fn prove_and_lift(segment: Asset) -> SuccinctReceipt<ReceiptClaim> {
+        let opts = ProverOpts::default();
+        let client = ApiClient::from_env().unwrap();
+
+        let segment_receipt = client
+            .prove_segment(&opts, segment, AssetRequest::Inline)
+            .unwrap();
+
+        let segment_receipt_asset = segment_receipt.try_into().unwrap();
+        client
+            .lift(&opts, segment_receipt_asset, AssetRequest::Inline)
+            .unwrap()
+    }
+
+    fn join(
+        left: SuccinctReceipt<ReceiptClaim>,
+        right: SuccinctReceipt<ReceiptClaim>,
+    ) -> SuccinctReceipt<ReceiptClaim> {
+        let opts = ProverOpts::default();
+        let client = ApiClient::from_env().unwrap();
+        let left_asset = left.try_into().unwrap();
+        let right_asset = right.try_into().unwrap();
+        client
+            .join(&opts, left_asset, right_asset, AssetRequest::Inline)
+            .unwrap()
+    }
+}
+
+impl Job<SuccinctReceipt<Unknown>, ProveKeccakRequest> {
+    pub fn execute(self) -> Self {
+        match self.kind {
+            JobKind::Segment(proof_request) => Job {
+                task: self.task.clone(),
+                kind: JobKind::Receipt(Box::new(Self::keccak(proof_request))),
+            },
+            JobKind::Join(pair) => Job {
+                task: self.task.clone(),
+                kind: JobKind::Receipt(Box::new(Self::union(pair.0, pair.1))),
+            },
+            JobKind::Receipt(receipt) => Job {
+                task: self.task.clone(),
+                kind: JobKind::Receipt(Box::new(*receipt)),
+            },
+        }
+    }
+
+    fn keccak(proof_request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
+        let client = ApiClient::from_env().unwrap();
+        client
+            .prove_keccak(proof_request, AssetRequest::Inline)
+            .unwrap()
+    }
+
+    fn union(
+        left: SuccinctReceipt<Unknown>,
+        right: SuccinctReceipt<Unknown>,
+    ) -> SuccinctReceipt<Unknown> {
+        let opts = ProverOpts::default();
+        let client = ApiClient::from_env().unwrap();
+        let left_asset = left.try_into().unwrap();
+        let right_asset = right.try_into().unwrap();
+        client
+            .union(&opts, left_asset, right_asset, AssetRequest::Inline)
+            .unwrap()
+            .into_unknown()
+    }
+}
+
+pub struct TaskManager<ReceiptType, SegmentType, WorkerType>
+where
+    ReceiptType: Clone,
+    SegmentType: Clone,
+    WorkerType: workerpool::Worker,
+{
+    segments: HashMap<u32, SegmentType>,
+    receipts: HashMap<TaskNumber, ReceiptType>,
     pending_tasks: BTreeMap<TaskNumber, Task>,
     completed: HashSet<TaskNumber>,
-    pool: Pool<Worker>,
-    job_tx: Sender<Job>,
-    job_rx: Receiver<Job>,
+    pool: Pool<WorkerType>,
+    job_tx: Sender<Job<ReceiptType, SegmentType>>,
+    job_rx: Receiver<Job<ReceiptType, SegmentType>>,
 }
 
-impl TaskManager {
+impl<ReceiptType, SegmentType, WorkerType> TaskManager<ReceiptType, SegmentType, WorkerType>
+where
+    ReceiptType: Clone,
+    SegmentType: Clone,
+    WorkerType: workerpool::Worker<
+        Input = Job<ReceiptType, SegmentType>,
+        Output = Job<ReceiptType, SegmentType>,
+    >,
+{
     pub fn new() -> Self {
         let (job_tx, job_rx) = std::sync::mpsc::channel();
         Self {
@@ -67,7 +170,7 @@ impl TaskManager {
         }
     }
 
-    pub fn add_segment(&mut self, idx: u32, segment: Asset) {
+    pub fn add_segment(&mut self, idx: u32, segment: SegmentType) {
         self.segments.insert(idx, segment);
     }
 
@@ -80,7 +183,7 @@ impl TaskManager {
         }
     }
 
-    pub fn run(&mut self) -> SuccinctReceipt<ReceiptClaim> {
+    pub fn run(&mut self) -> ReceiptType {
         let mut root_receipt = None;
         for job in self.job_rx.iter() {
             let job_id = job.task.task_number;

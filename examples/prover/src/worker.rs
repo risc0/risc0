@@ -12,105 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    ApiClient, Asset, AssetRequest, ProveKeccakRequest, ProverOpts, ReceiptClaim, SuccinctReceipt,
-    UnionClaim, Unknown,
-};
+use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, Unknown};
 
-use crate::task_mgr::{Job, JobKind};
+use crate::task_mgr::Job;
 
 #[derive(Default)]
 pub struct Worker;
 
 impl workerpool::Worker for Worker {
-    type Input = Job;
-    type Output = Job;
+    type Input = Job<SuccinctReceipt<ReceiptClaim>, Asset>;
+    type Output = Job<SuccinctReceipt<ReceiptClaim>, Asset>;
 
-    fn execute(&mut self, job: Job) -> Job {
+    fn execute(&mut self, job: Self::Input) -> Self::Output {
         println!("{:?}", job.task);
-        std::panic::catch_unwind(|| match job.kind {
-            JobKind::Segment(segment) => Job {
-                task: job.task,
-                kind: JobKind::Receipt(Box::new(self.prove_and_lift(segment))),
-            },
-            JobKind::Join(pair) => Job {
-                task: job.task,
-                kind: JobKind::Receipt(Box::new(self.join(pair.0, pair.1))),
-            },
-            JobKind::Receipt(receipt) => Job {
-                task: job.task,
-                kind: JobKind::Receipt(Box::new(*receipt)),
-            },
-            JobKind::Keccak(proof_request) => Job {
-                task: job.task,
-                kind: JobKind::KeccakReceipt(Box::new(self.keccak(proof_request))),
-            },
-            JobKind::KeccakReceipt(receipt) => Job {
-                task: job.task,
-                kind: JobKind::KeccakReceipt(receipt),
-            },
-            JobKind::Union(pair) => Job {
-                task: job.task,
-                kind: JobKind::UnionReceipt(Box::new(self.union(pair.0, pair.1))),
-            },
-            JobKind::UnionReceipt(receipt) => Job {
-                task: job.task,
-                kind: JobKind::UnionReceipt(receipt),
-            },
-        })
-        .unwrap_or_else(|_| {
+        std::panic::catch_unwind(|| job.execute()).unwrap_or_else(|_| {
             std::process::abort();
         })
     }
 }
 
-impl Worker {
-    fn prove_and_lift(&self, segment: Asset) -> SuccinctReceipt<ReceiptClaim> {
-        let opts = ProverOpts::default();
-        let client = ApiClient::from_env().unwrap();
+#[derive(Default)]
+pub struct KeccakWorker;
 
-        let segment_receipt = client
-            .prove_segment(&opts, segment, AssetRequest::Inline)
-            .unwrap();
+impl workerpool::Worker for KeccakWorker {
+    type Input = Job<SuccinctReceipt<Unknown>, ProveKeccakRequest>;
+    type Output = Job<SuccinctReceipt<Unknown>, ProveKeccakRequest>;
 
-        let segment_receipt_asset = segment_receipt.try_into().unwrap();
-        client
-            .lift(&opts, segment_receipt_asset, AssetRequest::Inline)
-            .unwrap()
-    }
-
-    fn join(
-        &self,
-        left: SuccinctReceipt<ReceiptClaim>,
-        right: SuccinctReceipt<ReceiptClaim>,
-    ) -> SuccinctReceipt<ReceiptClaim> {
-        let opts = ProverOpts::default();
-        let client = ApiClient::from_env().unwrap();
-        let left_asset = left.try_into().unwrap();
-        let right_asset = right.try_into().unwrap();
-        client
-            .join(&opts, left_asset, right_asset, AssetRequest::Inline)
-            .unwrap()
-    }
-
-    fn keccak(&self, proof_request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
-        let client = ApiClient::from_env().unwrap();
-        client
-            .prove_keccak(proof_request, AssetRequest::Inline)
-            .unwrap()
-    }
-
-    fn union(
-        &self,
-        left: SuccinctReceipt<Unknown>,
-        right: SuccinctReceipt<Unknown>,
-    ) -> SuccinctReceipt<UnionClaim> {
-        let opts = ProverOpts::default();
-        let client = ApiClient::from_env().unwrap();
-        let left_asset = left.try_into().unwrap();
-        let right_asset = right.try_into().unwrap();
-        client
-            .union(&opts, left_asset, right_asset, AssetRequest::Inline)
-            .unwrap()
+    fn execute(&mut self, job: Self::Input) -> Self::Output {
+        println!("{:?}", job.task);
+        std::panic::catch_unwind(|| job.execute()).unwrap_or_else(|_| {
+            std::process::abort();
+        })
     }
 }
