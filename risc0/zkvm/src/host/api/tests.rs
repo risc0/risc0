@@ -410,6 +410,10 @@ impl CoprocessorCallback for Coprocessor {
         self.receipt = Some(receipt);
         Ok(())
     }
+
+    fn finalize_keccak(&mut self) -> Result<()> {
+        Ok(())
+    }
 }
 
 mod keccak_po2 {
@@ -446,6 +450,10 @@ mod keccak_po2 {
             let client = TestClient::new();
             let receipt = client.prove_keccak(proof_request);
             self.receipt = Some(receipt);
+            Ok(())
+        }
+
+        fn finalize_keccak(&mut self) -> Result<()> {
             Ok(())
         }
     }

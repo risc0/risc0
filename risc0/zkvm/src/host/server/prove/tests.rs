@@ -1055,6 +1055,10 @@ mod sys_verify {
             self.keccak_requests.push(proof_request);
             Ok(())
         }
+
+        fn finalize_keccak(&mut self) -> Result<()> {
+            Ok(())
+        }
     }
 
     #[apply(base)]
