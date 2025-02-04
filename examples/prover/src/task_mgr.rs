@@ -17,10 +17,7 @@ use std::{
     sync::mpsc::{Receiver, Sender},
 };
 
-use risc0_zkvm::{
-    ApiClient, Asset, AssetRequest, ProveKeccakRequest, ProverOpts, ReceiptClaim, SuccinctReceipt,
-    Unknown,
-};
+use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, Unknown};
 use workerpool::Pool;
 
 use crate::{
@@ -43,110 +40,6 @@ pub struct Job {
     pub task: Task,
     pub kind: JobKind,
 }
-
-impl Job {
-    pub fn execute(self) -> Self {
-        match self.kind {
-            JobKind::Segment(segment) => Job {
-                task: self.task.clone(),
-                kind: JobKind::Receipt(Box::new(Self::prove_and_lift(segment))),
-            },
-            JobKind::Join(pair) => Job {
-                task: self.task.clone(),
-                kind: JobKind::Receipt(Box::new(Self::join(pair.0, pair.1))),
-            },
-            JobKind::Receipt(receipt) => Job {
-                task: self.task.clone(),
-                kind: JobKind::Receipt(Box::new(*receipt)),
-            },
-            JobKind::KeccakSegment(proof_request) => Job {
-                task: self.task.clone(),
-                kind: JobKind::ZkrReceipt(Box::new(Self::keccak(proof_request))),
-            },
-            JobKind::ZkrReceipt(receipt) => Job {
-                task: self.task.clone(),
-                kind: JobKind::ZkrReceipt(Box::new(*receipt)),
-            },
-            JobKind::Union(pair) => Job {
-                task: self.task.clone(),
-                kind: JobKind::ZkrReceipt(Box::new(Self::union(pair.0, pair.1))),
-            },
-        }
-    }
-
-    fn prove_and_lift(segment: Asset) -> SuccinctReceipt<ReceiptClaim> {
-        let opts = ProverOpts::default();
-        let client = ApiClient::from_env().unwrap();
-
-        let segment_receipt = client
-            .prove_segment(&opts, segment, AssetRequest::Inline)
-            .unwrap();
-
-        let segment_receipt_asset = segment_receipt.try_into().unwrap();
-        client
-            .lift(&opts, segment_receipt_asset, AssetRequest::Inline)
-            .unwrap()
-    }
-
-    fn join(
-        left: SuccinctReceipt<ReceiptClaim>,
-        right: SuccinctReceipt<ReceiptClaim>,
-    ) -> SuccinctReceipt<ReceiptClaim> {
-        let opts = ProverOpts::default();
-        let client = ApiClient::from_env().unwrap();
-        let left_asset = left.try_into().unwrap();
-        let right_asset = right.try_into().unwrap();
-        client
-            .join(&opts, left_asset, right_asset, AssetRequest::Inline)
-            .unwrap()
-    }
-
-    fn keccak(proof_request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
-        let client = ApiClient::from_env().unwrap();
-        client
-            .prove_keccak(proof_request, AssetRequest::Inline)
-            .unwrap()
-    }
-
-    fn union(
-        left: SuccinctReceipt<Unknown>,
-        right: SuccinctReceipt<Unknown>,
-    ) -> SuccinctReceipt<Unknown> {
-        let opts = ProverOpts::default();
-        let client = ApiClient::from_env().unwrap();
-        let left_asset = left.try_into().unwrap();
-        let right_asset = right.try_into().unwrap();
-        client
-            .union(&opts, left_asset, right_asset, AssetRequest::Inline)
-            .unwrap()
-            .into_unknown()
-    }
-}
-
-//impl Job<SuccinctReceipt<Unknown>, ProveKeccakRequest> {
-//    pub fn execute(self) -> Self {
-//        println!("executing...");
-//        match self.kind {
-//            JobKind::Segment(proof_request) => Job {
-//                task: self.task.clone(),
-//                kind: JobKind::Receipt(Box::new(Self::keccak(proof_request))),
-//            },
-//            JobKind::Join(pair) => Job {
-//                task: self.task.clone(),
-//                kind: JobKind::Receipt(Box::new(Self::union(pair.0, pair.1))),
-//            },
-//            JobKind::Receipt(receipt) => {
-//                println!("matched with receipt");
-//                Job {
-//                    task: self.task.clone(),
-//                    kind: JobKind::Receipt(Box::new(*receipt)),
-//                }
-//            }
-//        }
-//    }
-//
-
-//}
 
 pub struct TaskManager {
     segments: HashMap<u32, Asset>,
