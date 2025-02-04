@@ -122,6 +122,7 @@ fn prover_example() {
 
     planner.borrow_mut().finish().unwrap();
 
+    println!("Plan:");
     println!("{:?}", planner.borrow());
 
     while let Some(task) = planner.borrow_mut().next_task() {

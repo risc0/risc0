@@ -122,18 +122,7 @@ pub struct Planner {
     /// Last task in the plan. Set by `self.finish()`.
     last_task: Option<usize>,
 }
-//enum LeafProofKind {
-//RV32,
-//KECCAK,
-//}
 impl Planner {
-    //    fn enqueue_leaf_proof(
-    //        &mut self,
-    //        segment_idx: u32,
-    //        leaf_proof_kind: LeafProofKind,
-    //    ) -> Result<usize, PlannerErr> {
-    //    }
-
     pub fn enqueue_segment(&mut self, segment_idx: u32) -> Result<usize, PlannerErr> {
         if self.last_task.is_some() {
             return Err(PlannerErr::PlanFinalized);
