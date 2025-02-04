@@ -32,6 +32,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
+circuit_debug = ["risc0-zkvm/circuit_debug"]
 cuda = ["risc0-zkvm/cuda"]
 default = ["unstable"]
 num-bigint-dig = ["dep:num-bigint-dig"]

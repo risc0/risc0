@@ -147,7 +147,7 @@ impl BigInt {
                     *coeff /= 256;
                     carry = *coeff;
                 }
-                tracing::debug!("carry propagate complete");
+                tracing::trace!("carry propagate complete");
             }
 
             let base_point = 128 * 256 * 64;

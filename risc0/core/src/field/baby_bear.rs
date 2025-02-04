@@ -75,7 +75,7 @@ impl Default for Elem {
 }
 
 impl fmt::Debug for Elem {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", decode(self.0))
     }
 }

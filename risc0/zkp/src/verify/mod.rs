@@ -306,7 +306,15 @@ impl<'a, F: Field> Verifier<'a, F> {
 
         // Get a pseudorandom DEEP query point
         // See DEEP-ALI protocol from DEEP-FRI paper for details on DEEP query.
-        let z = self.iop().random_ext_elem();
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "circuit_debug")] {
+                let z_slice = self.iop().read_field_elem_slice(F::ExtElem::EXT_SIZE);
+                let z = F::ExtElem::from_subelems(z_slice.iter().cloned());
+            } else {
+                let z = self.iop().random_ext_elem();
+            }
+        }
+
         trace_if_enabled!("Z = {z:?}");
         let back_one = F::Elem::ROU_REV[self.po2];
 

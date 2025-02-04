@@ -19,7 +19,6 @@ pub(crate) mod cuda;
 use std::rc::Rc;
 
 use anyhow::Result;
-use rand::thread_rng;
 use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO},
@@ -127,14 +126,20 @@ where
     fn prove(&self, segment: &Segment) -> Result<Seal> {
         scope!("prove");
 
-        let mut rng = thread_rng();
-        let rand_z = ExtVal::random(&mut rng);
-
-        let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
-            StepMode::SeqForward
-        } else {
-            StepMode::Parallel
-        };
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "circuit_debug")] {
+                let rand_z = ExtVal::ONE;
+                let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
+                    StepMode::SeqForward
+                } else {
+                    StepMode::Parallel
+                };
+            } else {
+                let mut rng = rand::thread_rng();
+                let rand_z = ExtVal::random(&mut rng);
+                let mode = StepMode::Parallel;
+            }
+        }
 
         let witgen = WitnessGenerator::new(
             self.hal.as_ref(),

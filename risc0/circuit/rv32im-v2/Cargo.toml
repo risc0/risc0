@@ -52,6 +52,7 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
+circuit_debug = ["risc0-zkp/circuit_debug"]
 cuda = [
   "prove",
   "risc0-circuit-rv32im-v2-sys/cuda",
@@ -59,6 +60,7 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 default = ["prove"]
+entropy_finder = []
 execute = [
   "anyhow/backtrace",
   "dep:auto_ops",

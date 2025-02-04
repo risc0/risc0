@@ -186,6 +186,31 @@ impl<H: Hal> WitnessGenerator<H> {
             hal.eltwise_zeroize_elem(&data.buf);
         });
 
+        // #[cfg(feature = "entropy_finder")]
+        // if let Ok(dump_path) = std::env::var("DATA_DUMP") {
+        //     let raw = data.buf.to_vec();
+
+        //     let old = if std::fs::exists(&dump_path).unwrap() {
+        //         Some(std::fs::read(&dump_path).unwrap())
+        //     } else {
+        //         None
+        //     };
+
+        //     std::fs::write(dump_path, bytemuck::cast_slice(&raw)).unwrap();
+        //     if let Some(old) = old {
+        //         let old = bytemuck::cast_slice(&old);
+        //         for cycle in 0..cycles {
+        //             for col in 0..REGCOUNT_DATA {
+        //                 assert_eq!(
+        //                     H::Elem::new_raw(old[col * cycles + cycle]),
+        //                     raw[col * cycles + cycle],
+        //                     "cycle: {cycle}, col: {col}",
+        //                 );
+        //             }
+        //         }
+        //     }
+        // }
+
         Ok(Self {
             cycles,
             global,

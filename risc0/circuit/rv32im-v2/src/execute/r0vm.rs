@@ -210,7 +210,6 @@ impl<'a> Risc0Machine<'a> {
     }
 
     fn ecall_read(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_read");
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostReadSetup, 0, 0, 0)?;
         let mut cur_state = CycleState::HostReadSetup;
@@ -226,6 +225,7 @@ impl<'a> Risc0Machine<'a> {
         if len > 0 {
             guest_addr(ptr.0)?;
         }
+        tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
         self.store_register(REG_A0, rlen)?;
