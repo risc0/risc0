@@ -113,8 +113,16 @@ impl Paths {
         }
 
         if dir_name.starts_with("r0.") && component == &Component::RustToolchain {
-            // Handle legacy rust format
+            // Handle legacy rust format from older versions of rzup
             Version::parse(dir_name.strip_prefix("r0.")?.split('-').next()?).ok()
+        } else if dir_name.starts_with("rust_") && component == &Component::RustToolchain {
+            // Handle legacy rust format from cargo riszero install
+            let version_str = dir_name.split('_').next_back()?;
+            Version::parse(version_str.strip_prefix("r0.")?).ok()
+        } else if dir_name.starts_with("c_") && component == &Component::CppToolchain {
+            // Handle legacy cpp format from cargo risczero install
+            let version_str = dir_name.split('_').next_back()?;
+            parse_cpp_version(version_str).ok()
         } else if component == &Component::CppToolchain && !dir_name.starts_with('v') {
             // Handle legacy cpp format (YYYY.MM.DD-risc0-cpp-...)
             parse_cpp_version(dir_name.split('-').next()?).ok()
@@ -174,10 +182,19 @@ mod tests {
     }
 
     #[test]
-    fn test_get_and_parse_legacy_rust_version() {
+    fn test_get_and_parse_legacy_rust_version_old_rzup() {
         test_version_dir_parse_and_find(
             Component::RustToolchain,
             "r0.1.81.0-risc0-rust-aarch64-apple-darwin",
+            Version::new(1, 81, 0),
+        );
+    }
+
+    #[test]
+    fn test_get_and_parse_legacy_rust_version_cargo_risczero_install() {
+        test_version_dir_parse_and_find(
+            Component::RustToolchain,
+            "rust_aarch64-apple-darwin_r0.1.81.0",
             Version::new(1, 81, 0),
         );
     }
@@ -188,6 +205,24 @@ mod tests {
             Component::CargoRiscZero,
             "v1.2.1-rc.0-cargo-risczero",
             Version::parse("1.2.1-rc.0").unwrap(),
+        );
+    }
+
+    #[test]
+    fn test_get_and_parse_legacy_cpp_version_old_rzup() {
+        test_version_dir_parse_and_find(
+            Component::CppToolchain,
+            "2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu",
+            Version::new(2024, 1, 5),
+        );
+    }
+
+    #[test]
+    fn test_get_and_parse_legacy_cpp_version_cargo_risczero_install() {
+        test_version_dir_parse_and_find(
+            Component::CppToolchain,
+            "c_aarch64-apple-darwin_2024.01.05",
+            Version::new(2024, 1, 5),
         );
     }
 

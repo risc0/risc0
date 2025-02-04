@@ -33,10 +33,6 @@ fn parse_version_from_entry(
 
     let dir_name = entry.file_name().to_string_lossy().to_string();
 
-    if !dir_name.contains(component.as_str()) {
-        return Ok(None);
-    }
-
     match Paths::parse_version_from_path(&dir_name, component) {
         Some(version) => {
             env.emit(RzupEvent::Debug {
