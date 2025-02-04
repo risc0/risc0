@@ -204,7 +204,9 @@ where
                 self.run_task(next_task);
                 println!("    ---- finished task");
             }
-            if job.task.command == Command::Finalize {
+            if job.task.command == Command::Finalize
+                || job.task.command == Command::FinalizeProofSet
+            {
                 root_receipt = Some(receipt);
                 break;
             }

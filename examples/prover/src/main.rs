@@ -23,6 +23,7 @@ mod worker;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
+use risc0_zkvm::sha::Digestible;
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
     ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SuccinctReceipt,
@@ -162,6 +163,10 @@ fn prover_example() {
 
     let unioned_receipt = keccak_task_manager.borrow_mut().run();
     println!("Keccak complete {:#?}", unioned_receipt.claim);
+    coprocessor
+        .borrow_mut()
+        .receipts
+        .insert(unioned_receipt.claim.digest(), unioned_receipt);
 
     let output = conditional_receipt
         .claim
