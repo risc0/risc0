@@ -20,18 +20,16 @@ pub enum PlannerErr {
     PlanFinalized,
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Command {
     Finalize,
     FinalizeProofSet,
     Join,
+    Segment,
     Keccak,
     Union,
-    Segment,
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct Task {
     pub task_number: usize,
@@ -41,7 +39,6 @@ pub struct Task {
     pub segment_idx: Option<u32>,
 }
 
-#[allow(dead_code)]
 impl Task {
     pub fn new_segment(task_number: usize, segment_idx: u32) -> Self {
         Task {
@@ -73,6 +70,16 @@ impl Task {
         }
     }
 
+    pub fn new_union(task_number: usize, task_height: u32, left: usize, right: usize) -> Self {
+        Task {
+            task_number,
+            task_height,
+            command: Command::Union,
+            depends_on: vec![left, right],
+            segment_idx: None,
+        }
+    }
+
     pub fn new_finalize(task_number: usize, task_height: u32, depends_on: usize) -> Self {
         Task {
             task_number,
@@ -92,20 +99,10 @@ impl Task {
             segment_idx: None,
         }
     }
-
-    pub fn new_union(task_number: usize, task_height: u32, left: usize, right: usize) -> Self {
-        Task {
-            task_number,
-            task_height,
-            command: Command::Union,
-            depends_on: vec![left, right],
-            segment_idx: None,
-        }
-    }
 }
 
 #[derive(Clone, Default)]
-pub struct Rv32imPlanner {
+pub struct Planner {
     /// All of the tasks in this plan
     tasks: Vec<Task>,
 
@@ -114,154 +111,149 @@ pub struct Rv32imPlanner {
     /// A task is a "peak" if (1) it is either a Segment or Join command AND (2) no other join tasks depend on it.
     peaks: Vec<usize>,
 
+    /// List of current "peaks." Sorted in order of decreasing height.
+    ///
+    /// A task is a "peak" if (1) it is either a Segment or Join command AND (2) no other join tasks depend on it.
+    keccak_peaks: Vec<usize>,
+
     /// Iterator position. Used by `self.next_task()`.
     consumer_position: usize,
 
     /// Last task in the plan. Set by `self.finish()`.
     last_task: Option<usize>,
 }
+//enum LeafProofKind {
+//RV32,
+//KECCAK,
+//}
+impl Planner {
+    //    fn enqueue_leaf_proof(
+    //        &mut self,
+    //        segment_idx: u32,
+    //        leaf_proof_kind: LeafProofKind,
+    //    ) -> Result<usize, PlannerErr> {
+    //    }
 
-impl Planner for Rv32imPlanner {
-    fn tasks(&self) -> Vec<Task> {
-        self.tasks.clone() // TODO return ref?
-    }
-
-    fn push_task(&mut self, task: Task) {
-        self.tasks.push(task);
-    }
-
-    fn peaks(&self) -> Vec<usize> {
-        self.peaks.clone() // TODO return ref?
-    }
-
-    fn pop_peaks(&mut self) -> Option<usize> {
-        self.peaks.pop()
-    }
-
-    fn push_peaks(&mut self, peak: usize) {
-        self.peaks.push(peak)
-    }
-
-    fn consumer_position(&self) -> usize {
-        self.consumer_position
-    }
-
-    fn advance_consumer_position(&mut self, pos: usize) {
-        self.consumer_position += pos;
-    }
-
-    fn last_task(&self) -> Option<usize> {
-        self.last_task
-    }
-
-    fn set_last_task(&mut self, task: Option<usize>) {
-        self.last_task = task;
-    }
-
-    fn new_segment(task_number: usize, segment_idx: u32) -> Task {
-        Task::new_segment(task_number, segment_idx)
-    }
-
-    fn new_join(task_number: usize, task_height: u32, left: usize, right: usize) -> Task {
-        Task::new_join(task_number, task_height, left, right)
-    }
-
-    fn new_finalize(task_number: usize, task_height: u32, depends_on: usize) -> Task {
-        Task::new_finalize(task_number, task_height, depends_on)
-    }
-}
-
-pub trait Planner {
-    fn tasks(&self) -> Vec<Task>;
-    fn push_task(&mut self, task: Task);
-
-    fn peaks(&self) -> Vec<usize>;
-    fn pop_peaks(&mut self) -> Option<usize>;
-    fn push_peaks(&mut self, peak: usize);
-
-    fn consumer_position(&self) -> usize;
-    fn advance_consumer_position(&mut self, pos: usize);
-
-    fn last_task(&self) -> Option<usize>;
-    fn set_last_task(&mut self, task: Option<usize>);
-
-    fn new_segment(task_number: usize, segment_idx: u32) -> Task;
-
-    fn enqueue_segment(&mut self, segment_idx: u32) -> Result<usize, PlannerErr> {
-        if self.last_task().is_some() {
+    pub fn enqueue_segment(&mut self, segment_idx: u32) -> Result<usize, PlannerErr> {
+        if self.last_task.is_some() {
             return Err(PlannerErr::PlanFinalized);
         }
 
         let task_number = self.next_task_number();
-        self.push_task(Self::new_segment(task_number, segment_idx));
+        self.tasks.push(Task::new_segment(task_number, segment_idx));
 
         let mut new_peak = task_number;
-        while let Some(smallest_peak) = self.peaks().last().copied() {
+        while let Some(smallest_peak) = self.peaks.last().copied() {
             let new_height = self.get_task(new_peak).task_height;
             let smallest_peak_height = self.get_task(smallest_peak).task_height;
 
+            println!("new height: {new_height} smallest peak height: {smallest_peak_height}");
             match new_height.cmp(&smallest_peak_height) {
                 Ordering::Less => break,
                 Ordering::Equal => {
-                    self.pop_peaks();
+                    self.peaks.pop();
                     new_peak = self.enqueue_join(smallest_peak, new_peak);
                 }
                 Ordering::Greater => unreachable!(),
             }
         }
-        self.push_peaks(new_peak);
+        self.peaks.push(new_peak);
 
         Ok(task_number)
     }
 
-    fn finish(&mut self) -> Result<usize, PlannerErr> {
+    pub fn enqueue_keccak(&mut self, segment_idx: u32) -> Result<usize, PlannerErr> {
+        if self.last_task.is_some() {
+            return Err(PlannerErr::PlanFinalized);
+        }
+
+        let task_number = self.next_task_number();
+        self.tasks.push(Task::new_keccak(task_number, segment_idx));
+
+        let mut new_peak = task_number;
+        while let Some(smallest_peak) = self.keccak_peaks.last().copied() {
+            let new_height = self.get_task(new_peak).task_height;
+            let smallest_peak_height = self.get_task(smallest_peak).task_height;
+
+            println!("new height: {new_height} smallest peak height: {smallest_peak_height}");
+            match new_height.cmp(&smallest_peak_height) {
+                Ordering::Less => break,
+                Ordering::Equal => {
+                    self.keccak_peaks.pop();
+                    new_peak = self.enqueue_union(smallest_peak, new_peak);
+                }
+                Ordering::Greater => unreachable!(),
+            }
+        }
+        self.keccak_peaks.push(new_peak);
+
+        Ok(task_number)
+    }
+
+    pub fn finish(&mut self) -> Result<usize, PlannerErr> {
         // Return error if plan has not yet started
-        if self.peaks().is_empty() {
+        if self.peaks.is_empty() {
             return Err(PlannerErr::PlanNotStartedString);
         }
 
         // Finish the plan (if it's not yet finished)
-        if self.last_task().is_none() {
+        if self.last_task.is_none() {
             // Join remaining peaks
-            while 2 <= self.peaks().len() {
-                let peak_0 = self.pop_peaks().unwrap();
-                let peak_1 = self.pop_peaks().unwrap();
+            while 2 <= self.peaks.len() {
+                let peak_0 = self.peaks.pop().unwrap();
+                let peak_1 = self.peaks.pop().unwrap();
 
                 let peak_3 = self.enqueue_join(peak_1, peak_0);
-                self.push_peaks(peak_3);
+                self.peaks.push(peak_3);
             }
 
             // Add the Finalize task
-            let task = Some(self.enqueue_finalize(self.peaks()[0]));
-            self.set_last_task(task);
+            self.last_task = Some(self.enqueue_finalize(self.peaks[0]));
         }
 
-        Ok(self.last_task().unwrap())
+        Ok(self.last_task.unwrap())
     }
 
-    fn task_count(&self) -> usize {
-        self.tasks().len()
+    pub fn finish_keccak(&mut self) -> Result<usize, PlannerErr> {
+        // Return error if plan has not yet started
+        if self.keccak_peaks.is_empty() {
+            return Err(PlannerErr::PlanNotStartedString);
+        }
+
+        // Join remaining peaks
+        while 2 <= self.keccak_peaks.len() {
+            let peak_0 = self.keccak_peaks.pop().unwrap();
+            let peak_1 = self.keccak_peaks.pop().unwrap();
+
+            let peak_3 = self.enqueue_union(peak_1, peak_0);
+            self.keccak_peaks.push(peak_3);
+        }
+
+        // Add the Finalize task
+        Ok(self.enqueue_finalize_keccak(self.keccak_peaks[0]))
     }
 
-    fn get_task(&self, task_number: usize) -> Task {
-        if task_number < self.tasks().len() {
-            self.tasks()[task_number].to_owned()
+    pub fn task_count(&self) -> usize {
+        self.tasks.len()
+    }
+
+    pub fn get_task(&self, task_number: usize) -> &Task {
+        if task_number < self.tasks.len() {
+            &self.tasks[task_number]
         } else {
             panic!("Invalid task number {task_number}");
         }
     }
 
-    fn next_task(&mut self) -> Option<Task> {
-        if self.consumer_position() < self.task_count() {
-            let out = self.tasks()[self.consumer_position()].to_owned();
-            self.advance_consumer_position(1);
+    pub fn next_task(&mut self) -> Option<&Task> {
+        if self.consumer_position < self.task_count() {
+            let out = &self.tasks[self.consumer_position];
+            self.consumer_position += 1;
             Some(out)
         } else {
             None
         }
     }
-
-    fn new_join(task_number: usize, task_height: u32, left: usize, right: usize) -> Task;
 
     fn enqueue_join(&mut self, left: usize, right: usize) -> usize {
         let task_number = self.next_task_number();
@@ -269,16 +261,38 @@ pub trait Planner {
             self.get_task(left).task_height,
             self.get_task(right).task_height,
         );
-        self.push_task(Self::new_join(task_number, task_height, left, right));
+        self.tasks
+            .push(Task::new_join(task_number, task_height, left, right));
         task_number
     }
 
-    fn new_finalize(task_number: usize, task_height: u32, depends_on: usize) -> Task;
+    fn enqueue_union(&mut self, left: usize, right: usize) -> usize {
+        let task_number = self.next_task_number();
+        let task_height = 1 + u32::max(
+            self.get_task(left).task_height,
+            self.get_task(right).task_height,
+        );
+        self.tasks
+            .push(Task::new_union(task_number, task_height, left, right));
+        task_number
+    }
 
     fn enqueue_finalize(&mut self, depends_on: usize) -> usize {
         let task_number = self.next_task_number();
         let task_height = 1 + self.get_task(depends_on).task_height;
-        self.push_task(Self::new_finalize(task_number, task_height, depends_on));
+        self.tasks
+            .push(Task::new_finalize(task_number, task_height, depends_on));
+        task_number
+    }
+
+    fn enqueue_finalize_keccak(&mut self, depends_on: usize) -> usize {
+        let task_number = self.next_task_number();
+        let task_height = 1 + self.get_task(depends_on).task_height;
+        self.tasks.push(Task::new_finalize_proof_set(
+            task_number,
+            task_height,
+            depends_on,
+        ));
         task_number
     }
 
@@ -287,7 +301,7 @@ pub trait Planner {
     }
 }
 
-impl std::fmt::Debug for Rv32imPlanner {
+impl std::fmt::Debug for Planner {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let mut stack = Vec::new();
 
@@ -309,7 +323,6 @@ impl std::fmt::Debug for Rv32imPlanner {
                     write!(f, "{:?} Finalize", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
                 }
-                Command::FinalizeProofSet => todo!(),
                 Command::Join => {
                     write!(f, "{:?} Join", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
@@ -317,116 +330,10 @@ impl std::fmt::Debug for Rv32imPlanner {
                 }
                 Command::Segment => {
                     write!(f, "{:?} Segment", task.task_number)?;
-                }
-                Command::Keccak => todo!(),
-                Command::Union => todo!(),
-            }
-        }
-
-        Ok(())
-    }
-}
-
-#[derive(Clone, Default)]
-pub struct KeccakPlanner {
-    /// All of the tasks in this plan
-    tasks: Vec<Task>,
-
-    /// List of current "peaks." Sorted in order of decreasing height.
-    ///
-    /// A task is a "peak" if (1) it is either a Keccak or Union command AND (2) no other join tasks depend on it.
-    peaks: Vec<usize>,
-
-    /// Iterator position. Used by `self.next_task()`.
-    consumer_position: usize,
-
-    /// Last task in the plan. Set by `self.finish()`.
-    last_task: Option<usize>,
-}
-
-impl Planner for KeccakPlanner {
-    fn tasks(&self) -> Vec<Task> {
-        self.tasks.clone() // TODO return ref?
-    }
-
-    fn push_task(&mut self, task: Task) {
-        self.tasks.push(task);
-    }
-
-    fn peaks(&self) -> Vec<usize> {
-        self.peaks.clone() // TODO return ref?
-    }
-
-    fn pop_peaks(&mut self) -> Option<usize> {
-        self.peaks.pop()
-    }
-
-    fn push_peaks(&mut self, peak: usize) {
-        self.peaks.push(peak)
-    }
-
-    fn consumer_position(&self) -> usize {
-        self.consumer_position
-    }
-
-    fn advance_consumer_position(&mut self, pos: usize) {
-        self.consumer_position += pos;
-    }
-
-    fn last_task(&self) -> Option<usize> {
-        self.last_task
-    }
-
-    fn set_last_task(&mut self, task: Option<usize>) {
-        self.last_task = task;
-    }
-
-    fn new_segment(task_number: usize, segment_idx: u32) -> Task {
-        Task::new_keccak(task_number, segment_idx)
-    }
-
-    fn new_join(task_number: usize, task_height: u32, left: usize, right: usize) -> Task {
-        Task::new_union(task_number, task_height, left, right)
-    }
-
-    fn new_finalize(task_number: usize, task_height: u32, depends_on: usize) -> Task {
-        Task::new_finalize_proof_set(task_number, task_height, depends_on)
-    }
-}
-
-impl std::fmt::Debug for KeccakPlanner {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let mut stack = Vec::new();
-
-        if self.last_task.is_none() {
-            writeln!(f, "Still in planning phases ...")?;
-        } else {
-            stack.push((0, self.last_task.unwrap()));
-        }
-
-        while let Some((indent, cursor)) = stack.pop() {
-            if indent > 0 {
-                write!(f, "\n{}", " ".repeat(indent))?;
-            }
-
-            let task = self.get_task(cursor);
-
-            match task.command {
-                Command::Finalize => {
-                    write!(f, "{:?} Finalize", task.task_number)?;
-                    stack.push((indent + 2, task.depends_on[0]));
                 }
                 Command::FinalizeProofSet => {
-                    write!(f, "{:?} FinalizeProofSet", task.task_number)?;
+                    write!(f, "{:?} Finalize Proof Set", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
-                }
-                Command::Join => {
-                    write!(f, "{:?} Join", task.task_number)?;
-                    stack.push((indent + 2, task.depends_on[0]));
-                    stack.push((indent + 2, task.depends_on[1]));
-                }
-                Command::Segment => {
-                    write!(f, "{:?} Segment", task.task_number)?;
                 }
                 Command::Keccak => {
                     write!(f, "{:?} Keccak", task.task_number)?;

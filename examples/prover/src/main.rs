@@ -23,18 +23,15 @@ mod worker;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
-use risc0_zkvm::sha::Digestible;
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SuccinctReceipt,
-    Unknown,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use worker::KeccakWorker;
 
-use crate::{plan::Planner, worker::Worker};
+use crate::plan::Planner;
 
-use self::{plan::KeccakPlanner, plan::Rv32imPlanner, task_mgr::TaskManager};
+use self::task_mgr::TaskManager;
 
 fn main() {
     prover_example();
@@ -43,18 +40,12 @@ fn main() {
 struct Coprocessor<'a> {
     next_proof_idx: u32,
     pub(crate) receipts: HashMap<Digest, SuccinctReceipt<Unknown>>,
-    pub(crate) task_manager:
-        &'a RefCell<TaskManager<SuccinctReceipt<Unknown>, ProveKeccakRequest, KeccakWorker>>,
-    pub(crate) planner: &'a RefCell<KeccakPlanner>,
+    pub(crate) task_manager: &'a RefCell<TaskManager>,
+    pub(crate) planner: &'a RefCell<Planner>,
 }
 
 impl<'a> Coprocessor<'a> {
-    fn new(
-        task_manager: &'a RefCell<
-            TaskManager<SuccinctReceipt<Unknown>, ProveKeccakRequest, KeccakWorker>,
-        >,
-        planner: &'a RefCell<KeccakPlanner>,
-    ) -> Self {
+    fn new(task_manager: &'a RefCell<TaskManager>, planner: &'a RefCell<Planner>) -> Self {
         Self {
             next_proof_idx: 0,
             receipts: HashMap::new(),
@@ -74,17 +65,13 @@ impl<'a> CoprocessorCallback for Coprocessor<'a> {
     }
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
-        println!(
-            "keccak proof request: idx({}) claim: {}",
-            self.next_proof_idx, proof_request.claim_digest
-        );
         self.planner
             .borrow_mut()
-            .enqueue_segment(self.next_proof_idx)
+            .enqueue_keccak(self.next_proof_idx)
             .unwrap();
         self.task_manager
             .borrow_mut()
-            .add_segment(self.next_proof_idx, proof_request);
+            .add_keccak_segment(self.next_proof_idx, proof_request);
         while let Some(task) = self.planner.borrow_mut().next_task() {
             self.task_manager.borrow_mut().add_task(task.clone());
         }
@@ -93,7 +80,7 @@ impl<'a> CoprocessorCallback for Coprocessor<'a> {
     }
 
     fn finalize_keccak(&mut self) -> Result<()> {
-        self.planner.borrow_mut().finish().unwrap();
+        self.planner.borrow_mut().finish_keccak().unwrap();
         Ok(())
     }
 }
@@ -101,19 +88,10 @@ impl<'a> CoprocessorCallback for Coprocessor<'a> {
 fn prover_example() {
     println!("Submitting proof request...");
 
-    let mut task_manager = TaskManager::<SuccinctReceipt<ReceiptClaim>, Asset, Worker>::new();
-    let mut planner = Rv32imPlanner::default();
-    let keccak_planner = RefCell::new(KeccakPlanner::default());
-    let keccak_task_manager = RefCell::new(TaskManager::<
-        SuccinctReceipt<Unknown>,
-        ProveKeccakRequest,
-        KeccakWorker,
-    >::new());
+    let task_manager = RefCell::new(TaskManager::new());
+    let planner = RefCell::new(Planner::default());
 
-    let coprocessor = Rc::new(RefCell::new(Coprocessor::new(
-        &keccak_task_manager,
-        &keccak_planner,
-    )));
+    let coprocessor = Rc::new(RefCell::new(Coprocessor::new(&task_manager, &planner)));
 
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUnion(3))
@@ -130,11 +108,11 @@ fn prover_example() {
             Asset::Inline(MULTI_TEST_ELF.into()),
             AssetRequest::Inline,
             |info, segment| {
-                println!("info: {info:?}");
-                planner.enqueue_segment(segment_idx).unwrap();
-                task_manager.add_segment(segment_idx, segment);
-                while let Some(task) = planner.next_task() {
-                    task_manager.add_task(task.clone());
+                println!("{info:?}");
+                planner.borrow_mut().enqueue_segment(segment_idx).unwrap();
+                task_manager.borrow_mut().add_segment(segment_idx, segment);
+                while let Some(task) = planner.borrow_mut().next_task() {
+                    task_manager.borrow_mut().add_task(task.clone());
                 }
                 segment_idx += 1;
                 Ok(())
@@ -142,31 +120,27 @@ fn prover_example() {
         )
         .unwrap();
 
-    planner.finish().unwrap();
+    planner.borrow_mut().finish().unwrap();
 
-    println!("Plan:");
-    println!("{planner:?}");
+    println!("{:?}", planner.borrow());
 
-    println!("Keccak Plan:");
-    println!("{:?}", keccak_planner.borrow());
-
-    while let Some(task) = planner.next_task() {
-        task_manager.add_task(task.clone());
+    while let Some(task) = planner.borrow_mut().next_task() {
+        task_manager.borrow_mut().add_task(task.clone());
     }
 
-    while let Some(task) = keccak_planner.borrow_mut().next_task() {
-        keccak_task_manager.borrow_mut().add_task(task.clone());
+    let (mut conditional_receipt, keccak_receipt) = task_manager.borrow_mut().run();
+
+    if let Some(keccak_receipt) = keccak_receipt {
+        println!("resolving...");
+        conditional_receipt = client
+            .resolve(
+                &ProverOpts::default(),
+                conditional_receipt.try_into().unwrap(),
+                keccak_receipt.try_into().unwrap(),
+                AssetRequest::Inline,
+            )
+            .unwrap();
     }
-
-    let conditional_receipt = task_manager.run();
-    println!("rv32im complete");
-
-    let unioned_receipt = keccak_task_manager.borrow_mut().run();
-    println!("Keccak complete {:#?}", unioned_receipt.claim);
-    coprocessor
-        .borrow_mut()
-        .receipts
-        .insert(unioned_receipt.claim.digest(), unioned_receipt);
 
     let output = conditional_receipt
         .claim

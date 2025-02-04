@@ -12,31 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, Unknown};
-
 use crate::task_mgr::Job;
 
 #[derive(Default)]
 pub struct Worker;
 
 impl workerpool::Worker for Worker {
-    type Input = Job<SuccinctReceipt<ReceiptClaim>, Asset>;
-    type Output = Job<SuccinctReceipt<ReceiptClaim>, Asset>;
-
-    fn execute(&mut self, job: Self::Input) -> Self::Output {
-        println!("{:?}", job.task);
-        std::panic::catch_unwind(|| job.execute()).unwrap_or_else(|_| {
-            std::process::abort();
-        })
-    }
-}
-
-#[derive(Default)]
-pub struct KeccakWorker;
-
-impl workerpool::Worker for KeccakWorker {
-    type Input = Job<SuccinctReceipt<Unknown>, ProveKeccakRequest>;
-    type Output = Job<SuccinctReceipt<Unknown>, ProveKeccakRequest>;
+    type Input = Job;
+    type Output = Job;
 
     fn execute(&mut self, job: Self::Input) -> Self::Output {
         println!("{:?}", job.task);

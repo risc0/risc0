@@ -23,32 +23,28 @@ use risc0_zkvm::{
 };
 use workerpool::Pool;
 
-use crate::plan::{Command, Task};
+use crate::{
+    plan::{Command, Task},
+    worker::Worker,
+};
 
 type TaskNumber = usize;
 
-#[derive(Debug)]
-pub enum JobKind<ReceiptType, SegmentType>
-where
-    ReceiptType: Clone,
-    SegmentType: Clone,
-{
-    Segment(SegmentType),
-    Join(Box<(ReceiptType, ReceiptType)>),
-    Receipt(Box<ReceiptType>),
+pub enum JobKind {
+    Segment(Asset),
+    Join(Box<(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>)>),
+    Receipt(Box<SuccinctReceipt<ReceiptClaim>>),
+    KeccakSegment(ProveKeccakRequest),
+    ZkrReceipt(Box<SuccinctReceipt<Unknown>>),
+    Union(Box<(SuccinctReceipt<Unknown>, SuccinctReceipt<Unknown>)>),
 }
 
-#[derive(Debug)]
-pub struct Job<ReceiptType, SegmentType>
-where
-    ReceiptType: Clone,
-    SegmentType: Clone,
-{
+pub struct Job {
     pub task: Task,
-    pub kind: JobKind<ReceiptType, SegmentType>,
+    pub kind: JobKind,
 }
 
-impl Job<SuccinctReceipt<ReceiptClaim>, Asset> {
+impl Job {
     pub fn execute(self) -> Self {
         match self.kind {
             JobKind::Segment(segment) => Job {
@@ -62,6 +58,18 @@ impl Job<SuccinctReceipt<ReceiptClaim>, Asset> {
             JobKind::Receipt(receipt) => Job {
                 task: self.task.clone(),
                 kind: JobKind::Receipt(Box::new(*receipt)),
+            },
+            JobKind::KeccakSegment(proof_request) => Job {
+                task: self.task.clone(),
+                kind: JobKind::ZkrReceipt(Box::new(Self::keccak(proof_request))),
+            },
+            JobKind::ZkrReceipt(receipt) => Job {
+                task: self.task.clone(),
+                kind: JobKind::ZkrReceipt(Box::new(*receipt)),
+            },
+            JobKind::Union(pair) => Job {
+                task: self.task.clone(),
+                kind: JobKind::ZkrReceipt(Box::new(Self::union(pair.0, pair.1))),
             },
         }
     }
@@ -92,29 +100,6 @@ impl Job<SuccinctReceipt<ReceiptClaim>, Asset> {
             .join(&opts, left_asset, right_asset, AssetRequest::Inline)
             .unwrap()
     }
-}
-
-impl Job<SuccinctReceipt<Unknown>, ProveKeccakRequest> {
-    pub fn execute(self) -> Self {
-        println!("executing...");
-        match self.kind {
-            JobKind::Segment(proof_request) => Job {
-                task: self.task.clone(),
-                kind: JobKind::Receipt(Box::new(Self::keccak(proof_request))),
-            },
-            JobKind::Join(pair) => Job {
-                task: self.task.clone(),
-                kind: JobKind::Receipt(Box::new(Self::union(pair.0, pair.1))),
-            },
-            JobKind::Receipt(receipt) => {
-                println!("matched with receipt");
-                Job {
-                    task: self.task.clone(),
-                    kind: JobKind::Receipt(Box::new(*receipt)),
-                }
-            }
-        }
-    }
 
     fn keccak(proof_request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
         let client = ApiClient::from_env().unwrap();
@@ -138,35 +123,51 @@ impl Job<SuccinctReceipt<Unknown>, ProveKeccakRequest> {
     }
 }
 
-pub struct TaskManager<ReceiptType, SegmentType, WorkerType>
-where
-    ReceiptType: Clone,
-    SegmentType: Clone,
-    WorkerType: workerpool::Worker,
-{
-    segments: HashMap<u32, SegmentType>,
-    receipts: HashMap<TaskNumber, ReceiptType>,
+//impl Job<SuccinctReceipt<Unknown>, ProveKeccakRequest> {
+//    pub fn execute(self) -> Self {
+//        println!("executing...");
+//        match self.kind {
+//            JobKind::Segment(proof_request) => Job {
+//                task: self.task.clone(),
+//                kind: JobKind::Receipt(Box::new(Self::keccak(proof_request))),
+//            },
+//            JobKind::Join(pair) => Job {
+//                task: self.task.clone(),
+//                kind: JobKind::Receipt(Box::new(Self::union(pair.0, pair.1))),
+//            },
+//            JobKind::Receipt(receipt) => {
+//                println!("matched with receipt");
+//                Job {
+//                    task: self.task.clone(),
+//                    kind: JobKind::Receipt(Box::new(*receipt)),
+//                }
+//            }
+//        }
+//    }
+//
+
+//}
+
+pub struct TaskManager {
+    segments: HashMap<u32, Asset>,
+    keccak_segments: HashMap<u32, ProveKeccakRequest>,
+    receipts: HashMap<TaskNumber, SuccinctReceipt<ReceiptClaim>>,
+    zkr_receipts: HashMap<TaskNumber, SuccinctReceipt<Unknown>>,
     pending_tasks: BTreeMap<TaskNumber, Task>,
     completed: HashSet<TaskNumber>,
-    pool: Pool<WorkerType>,
-    job_tx: Sender<Job<ReceiptType, SegmentType>>,
-    job_rx: Receiver<Job<ReceiptType, SegmentType>>,
+    pool: Pool<Worker>,
+    job_tx: Sender<Job>,
+    job_rx: Receiver<Job>,
 }
 
-impl<ReceiptType, SegmentType, WorkerType> TaskManager<ReceiptType, SegmentType, WorkerType>
-where
-    ReceiptType: Clone,
-    SegmentType: Clone,
-    WorkerType: workerpool::Worker<
-        Input = Job<ReceiptType, SegmentType>,
-        Output = Job<ReceiptType, SegmentType>,
-    >,
-{
+impl TaskManager {
     pub fn new() -> Self {
         let (job_tx, job_rx) = std::sync::mpsc::channel();
         Self {
             segments: HashMap::new(),
+            keccak_segments: HashMap::new(),
             receipts: HashMap::new(),
+            zkr_receipts: HashMap::new(),
             pending_tasks: BTreeMap::new(),
             completed: HashSet::new(),
             pool: Pool::new(1),
@@ -175,8 +176,12 @@ where
         }
     }
 
-    pub fn add_segment(&mut self, idx: u32, segment: SegmentType) {
+    pub fn add_segment(&mut self, idx: u32, segment: Asset) {
         self.segments.insert(idx, segment);
+    }
+
+    pub fn add_keccak_segment(&mut self, idx: u32, segment: ProveKeccakRequest) {
+        self.keccak_segments.insert(idx, segment);
     }
 
     pub fn add_task(&mut self, task: Task) {
@@ -188,31 +193,40 @@ where
         }
     }
 
-    pub fn run(&mut self) -> ReceiptType {
+    pub fn run(
+        &mut self,
+    ) -> (
+        SuccinctReceipt<ReceiptClaim>,
+        Option<SuccinctReceipt<Unknown>>,
+    ) {
         let mut root_receipt = None;
+        let mut root_zkr_receipt = None;
         for job in self.job_rx.iter() {
             let job_id = job.task.task_number;
-            let receipt = match job.kind {
-                JobKind::Receipt(receipt) => receipt.clone(),
+            match job.kind {
+                JobKind::Receipt(receipt) => {
+                    self.receipts.insert(job_id, *receipt.clone());
+                    root_receipt = Some(receipt);
+                }
+                JobKind::ZkrReceipt(receipt) => {
+                    self.zkr_receipts.insert(job_id, *receipt.clone());
+                    // the very last receipt will be the root keccak receipt
+                    root_zkr_receipt = Some(*receipt);
+                }
                 _ => unreachable!(),
             };
-            self.receipts.insert(job_id, *receipt.clone());
             self.completed.insert(job_id);
             let ready_tasks = self.collect_ready_tasks();
             for next_task in ready_tasks {
                 self.pending_tasks.remove(&next_task.task_number);
                 self.run_task(next_task);
-                println!("    ---- finished task");
             }
-            if job.task.command == Command::Finalize
-                || job.task.command == Command::FinalizeProofSet
-            {
-                root_receipt = Some(receipt);
+            if job.task.command == Command::Finalize {
                 break;
             }
         }
         println!("run complete");
-        *root_receipt.unwrap()
+        (*root_receipt.unwrap(), root_zkr_receipt)
     }
 
     fn collect_ready_tasks(&self) -> Vec<Task> {
@@ -252,25 +266,28 @@ where
                 }
             }
             Command::FinalizeProofSet => {
-                let receipt = self.receipts.get(&task.depends_on[0]).unwrap();
+                let receipt = self.zkr_receipts.get(&task.depends_on[0]).unwrap();
                 Job {
                     task,
-                    kind: JobKind::Receipt(Box::new(receipt.clone())),
+                    kind: JobKind::ZkrReceipt(Box::new(receipt.clone())),
                 }
             }
             Command::Keccak => {
-                let segment = self.segments.get(&task.segment_idx.unwrap()).unwrap();
+                let keccak_segment = self
+                    .keccak_segments
+                    .get(&task.segment_idx.unwrap())
+                    .unwrap();
                 Job {
                     task,
-                    kind: JobKind::Segment(segment.clone()),
+                    kind: JobKind::KeccakSegment(keccak_segment.clone()),
                 }
             }
             Command::Union => {
-                let left = self.receipts.get(&task.depends_on[0]).unwrap();
-                let right = self.receipts.get(&task.depends_on[1]).unwrap();
+                let left = self.zkr_receipts.get(&task.depends_on[0]).unwrap();
+                let right = self.zkr_receipts.get(&task.depends_on[1]).unwrap();
                 Job {
                     task,
-                    kind: JobKind::Join(Box::new((left.clone(), right.clone()))),
+                    kind: JobKind::Union(Box::new((left.clone(), right.clone()))),
                 }
             }
         };
