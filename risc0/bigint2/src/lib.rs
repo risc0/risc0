@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(test)]
+#[cfg(feature = "num-bigint-dig")]
+extern crate num_bigint_dig as num_bigint;
+
 #[cfg(feature = "unstable")]
 pub mod ec;
 #[cfg(feature = "unstable")]
@@ -117,5 +121,18 @@ impl<const WIDTH: usize> ToBigInt2Buffer<WIDTH> for num_bigint_dig::BigUint {
 
     fn from_u32_array(array: [u32; WIDTH]) -> Self {
         Self::from_slice(&array)
+    }
+}
+
+#[cfg(test)]
+struct BigUintWrap(num_bigint::BigUint);
+
+#[cfg(test)]
+impl std::str::FromStr for BigUintWrap {
+    type Err = num_bigint::ParseBigIntError;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        use num_traits::Num as _;
+        Ok(BigUintWrap(num_bigint::BigUint::from_str_radix(s, 16)?))
     }
 }

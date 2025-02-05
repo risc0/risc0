@@ -12,28 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(feature = "num-bigint-dig")]
-extern crate num_bigint_dig as num_bigint;
-
-use std::str::FromStr;
-
-use num_bigint::{BigUint, ParseBigIntError};
-use num_traits::Num as _;
+use num_bigint::BigUint;
 use risc0_bigint2_methods::RSA_ELF;
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ExitCode, ProverOpts, SegmentVersion};
 use rstest::rstest;
-
 use SegmentVersion::{V1, V2};
 
-struct BigUintWrap(BigUint);
-
-impl FromStr for BigUintWrap {
-    type Err = ParseBigIntError;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        Ok(BigUintWrap(BigUint::from_str_radix(s, 16)?))
-    }
-}
+use crate::BigUintWrap;
 
 #[rstest]
 #[case(
