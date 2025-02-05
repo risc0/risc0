@@ -240,7 +240,7 @@ struct ContextAdapter<'a, 'b> {
     syscall_table: SyscallTable<'a>,
 }
 
-impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
+impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
     fn get_pc(&self) -> u32 {
         self.ctx.get_pc()
     }
@@ -270,7 +270,7 @@ impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
     }
 }
 
-impl<'a> NewSyscall for ExecutorImpl<'a> {
+impl NewSyscall for ExecutorImpl<'_> {
     fn syscall(
         &self,
         syscall: &str,

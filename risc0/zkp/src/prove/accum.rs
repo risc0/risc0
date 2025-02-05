@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ impl<'a, F: Field> Handler<'a, F> {
     }
 }
 
-impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
+impl<F: Field> CircuitStepHandler<F::Elem> for Handler<'_, F> {
     /// Performs an extern call
     fn call(
         &mut self,

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ pub fn slice_io_from_fn<'a>(
     Rc::new(RefCell::new(FnWrapper { callback }))
 }
 
-impl<'a> SliceIo for FnWrapper<'a> {
+impl SliceIo for FnWrapper<'_> {
     fn handle_io(&mut self, _syscall: &str, from_guest: Bytes) -> Result<Bytes> {
         let callback = self.callback.borrow_mut();
         callback(from_guest)
@@ -67,7 +67,7 @@ impl<'a> SliceIoTable<'a> {
     }
 }
 
-impl<'a> SliceIo for Rc<RefCell<dyn SliceIo + 'a>> {
+impl SliceIo for Rc<RefCell<dyn SliceIo + '_>> {
     fn handle_io(&mut self, syscall: &str, from_guest: Bytes) -> Result<Bytes> {
         self.borrow_mut().handle_io(syscall, from_guest)
     }
