@@ -189,27 +189,30 @@ pub struct ProveKeccakResult {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FinalizeKeccakRequest {}
+pub struct FinalizeProofSetRequest {
+    #[prost(message, optional, tag = "1")]
+    pub control_root: ::core::option::Option<super::base::Digest>,
+}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FinalizeKeccakReply {
-    #[prost(oneof = "finalize_keccak_reply::Kind", tags = "1, 2")]
-    pub kind: ::core::option::Option<finalize_keccak_reply::Kind>,
+pub struct FinalizeProofSetReply {
+    #[prost(oneof = "finalize_proof_set_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<finalize_proof_set_reply::Kind>,
 }
-/// Nested message and enum types in `FinalizeKeccakReply`.
-pub mod finalize_keccak_reply {
+/// Nested message and enum types in `FinalizeProofSetReply`.
+pub mod finalize_proof_set_reply {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
         #[prost(message, tag = "1")]
-        Ok(super::FinalizeKeccakResult),
+        Ok(super::FinalizeProofSetResult),
         #[prost(message, tag = "2")]
         Error(super::GenericError),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FinalizeKeccakResult {}
+pub struct FinalizeProofSetResult {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LiftRequest {
@@ -727,7 +730,7 @@ pub mod coprocessor_request {
         #[prost(message, tag = "2")]
         ProveKeccak(super::ProveKeccakRequest),
         #[prost(message, tag = "3")]
-        FinalizeKeccak(super::FinalizeKeccakRequest),
+        FinalizeProofSet(super::FinalizeProofSetRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

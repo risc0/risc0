@@ -55,7 +55,7 @@ impl Syscall for SysVerify2 {
         );
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
-            coprocessor.borrow_mut().finalize_keccak()?;
+            coprocessor.borrow_mut().finalize_proof_set(control_root)?;
         }
 
         let assumption = Assumption {

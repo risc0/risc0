@@ -105,7 +105,7 @@ pub trait CoprocessorCallback {
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 
     /// Proofs for this sequence
-    fn finalize_keccak(&mut self) -> Result<()>;
+    fn finalize_proof_set(&mut self, control_root: Digest) -> Result<()>;
 }
 
 pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;

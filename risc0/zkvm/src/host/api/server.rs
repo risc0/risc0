@@ -258,14 +258,16 @@ impl CoprocessorCallback for CoprocessorProxy {
         }
     }
 
-    fn finalize_keccak(&mut self) -> Result<()> {
+    fn finalize_proof_set(&mut self, control_root: Digest) -> Result<()> {
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
                     kind: Some(pb::api::on_io_request::Kind::Coprocessor(
                         pb::api::CoprocessorRequest {
-                            kind: Some(pb::api::coprocessor_request::Kind::FinalizeKeccak({
-                                pb::api::FinalizeKeccakRequest {}
+                            kind: Some(pb::api::coprocessor_request::Kind::FinalizeProofSet({
+                                pb::api::FinalizeProofSetRequest {
+                                    control_root: Some(control_root.into()),
+                                }
                             })),
                         },
                     )),

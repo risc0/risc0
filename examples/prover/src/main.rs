@@ -79,7 +79,7 @@ impl CoprocessorCallback for Coprocessor<'_> {
         Ok(())
     }
 
-    fn finalize_keccak(&mut self) -> Result<()> {
+    fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
         self.planner.borrow_mut().finish_keccak().unwrap();
         Ok(())
     }

@@ -1056,7 +1056,7 @@ mod sys_verify {
             Ok(())
         }
 
-        fn finalize_keccak(&mut self) -> Result<()> {
+        fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
             Ok(())
         }
     }
