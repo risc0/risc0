@@ -55,7 +55,7 @@ impl<'a> Coprocessor<'a> {
     }
 }
 
-impl<'a> CoprocessorCallback for Coprocessor<'a> {
+impl CoprocessorCallback for Coprocessor<'_> {
     fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
         let client = ApiClient::from_env().unwrap();
         let claim_digest = proof_request.claim_digest;
