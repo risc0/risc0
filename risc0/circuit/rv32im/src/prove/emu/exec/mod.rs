@@ -15,7 +15,7 @@
 #[cfg(test)]
 mod tests;
 
-use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
+use std::{array, cell::RefCell, cmp::Ordering, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
 use anyhow::{anyhow, bail, ensure, Result};
 use enum_map::{Enum, EnumMap};
@@ -396,7 +396,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
+impl<S: Syscall> Executor<'_, '_, S> {
     fn ecall_halt(&mut self) -> Result<bool> {
         let a0 = self.load_register(REG_A0)?;
         let output_ptr = self.load_guest_addr_from_register(REG_A1)?;
@@ -763,7 +763,7 @@ pub(crate) fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
     out
 }
 
-impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
+impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
@@ -780,11 +780,10 @@ impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let mut bytes = bigint_to_bytes_le(value);
 
-        if bytes.len() > count as usize {
-            bytes.truncate(count as usize);
-        } else if bytes.len() < count as usize {
-            bytes.resize(count as usize, 0);
-        }
+        match bytes.len().cmp(&(count as usize)) {
+            Ordering::Greater => bytes.truncate(count as usize),
+            _ => bytes.resize(count as usize, 0),
+        };
 
         ensure!(
             bytes.len() == count as usize,
@@ -799,7 +798,7 @@ impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
+impl<S: Syscall> EmuContext for Executor<'_, '_, S> {
     fn ecall(&mut self) -> Result<bool> {
         match self.load_register(REG_T0)? {
             ecall::HALT => self.ecall_halt(),
@@ -887,7 +886,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
+impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
     fn get_cycle(&self) -> u64 {
         self.cycles.user
     }

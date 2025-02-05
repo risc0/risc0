@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ impl<'a, C: PolyFp<BabyBear>> CpuCircuitHal<'a, C> {
     }
 }
 
-impl<'a, C, H> CircuitHal<H> for CpuCircuitHal<'a, C>
+impl<C, H> CircuitHal<H> for CpuCircuitHal<'_, C>
 where
     C: PolyFp<BabyBear> + Sync + CircuitStep<BabyBearElem>,
     H: Hal<

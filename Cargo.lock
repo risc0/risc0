@@ -4741,6 +4741,7 @@ dependencies = [
  "rand",
  "rayon",
  "redis",
+ "risc0-bigint2-methods",
  "risc0-binfmt",
  "risc0-build",
  "risc0-circuit-keccak",

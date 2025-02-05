@@ -878,7 +878,7 @@ impl<'a> BigInt2Witness<'a> {
     }
 }
 
-impl<'a> bibc::BigIntIO for BigInt2Witness<'a> {
+impl bibc::BigIntIO for BigInt2Witness<'_> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
