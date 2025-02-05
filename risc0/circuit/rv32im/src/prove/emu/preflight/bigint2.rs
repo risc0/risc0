@@ -176,9 +176,6 @@ impl BytePolynomial {
     fn shift(&self) -> Self {
         let mut ret = self.coeffs.clone();
         ret.insert_many(0, [0; BIGINT2_WIDTH_BYTES]);
-        // for _ in 0..BIGINT2_WIDTH_BYTES {
-        //     ret.insert(0, 0);
-        // }
         Self { coeffs: ret }
     }
 
