@@ -6,8 +6,9 @@ edition = "2021"
 default-run = "bn254-example"  # TODO?
 
 [dependencies]
-substrate-bn = "0.6.0"
 bn254-methods = { path = "methods" }
+substrate-bn = "0.6.0"
+hex = "0.4.3"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
 # [features]

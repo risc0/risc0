@@ -17,18 +17,18 @@ use risc0_zkvm::guest::env;
 
 fn main() {
     // TODO: switch away from example inputs
-    let (example_in1, example_in2): (u32, u32) =
+    let (example_in1, example_in2): (Vec<u8>, Vec<u8>) =
         env::read();
 
     // TODO: Do something real
     let mut result1 = Fq::one();
     let mut result2 = Fq::one();
 
-    for i in 0..example_in1 {
+    for i in 0..example_in1[0] {
         result1 = result1 + result1;
     }
 
-    for j in 0..example_in2 {
+    for j in 0..example_in2[0] {
         result2 = result2 + result2;
     }
 

@@ -18,7 +18,11 @@ use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 
 fn todo_do_a_thing() -> Receipt { // TODO
     // TODO: actually handle real inputs
-    let input = (1u32, 3u32);
+    let in1 = hex::decode("01").expect("valid hex");
+    let in2 = hex::decode("03").expect("valid hex");
+    // let in1 = 1u32;
+    // let in2 = 3u32;
+    let input = (in1, in2);
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
