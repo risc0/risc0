@@ -2796,6 +2796,7 @@ struct BigInt0StateLayout {
   BigInt0StateArm7Layout arm7;
 };
 struct BigInt0Layout {
+  DoCycleTableLayout _0;
   BigIntStateLayout state;
   _Arguments_BigInt0StateLayout _arguments_BigInt0State;
   BigInt0StateLayout stateRedef;

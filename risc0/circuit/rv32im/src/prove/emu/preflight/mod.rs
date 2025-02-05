@@ -781,7 +781,7 @@ impl Preflight {
         insn: &Bi2Instruction,
         witness: &HashMap<WordAddr, u32>,
     ) -> Result<()> {
-        tracing::debug!("{insn:?}");
+        tracing::trace!("{insn:?}");
 
         let mut ret = [0; BIGINT2_WIDTH_BYTES];
 
@@ -801,7 +801,7 @@ impl Preflight {
                     *coeff /= 256;
                     carry = *coeff;
                 }
-                tracing::debug!("carry propagate complete");
+                tracing::trace!("carry propagate complete");
             }
 
             let base_point = 128 * 256 * 64;

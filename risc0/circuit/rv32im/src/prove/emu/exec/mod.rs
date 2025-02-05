@@ -743,7 +743,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
 impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
-        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+        tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
@@ -751,7 +751,7 @@ impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
     }
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()> {
-        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+        tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let mut bytes = value.to_le_bytes();

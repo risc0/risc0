@@ -25,6 +25,8 @@ use crate::{
     },
 };
 
+const TRACE_ENABLED: bool = false;
+
 pub struct MachineContext<'a> {
     trace: &'a PreflightTrace,
     pub raw_trace: Box<RawPreflightTrace>,
@@ -168,12 +170,9 @@ impl<'a> MachineContext<'a> {
             .copied()
             .collect();
 
-        let is_trace = match tracing::level_filters::LevelFilter::current()
-            .eq(&tracing::level_filters::LevelFilter::TRACE)
-        {
-            true => 1,
-            false => 0,
-        };
+        let is_trace = tracing::level_filters::LevelFilter::current()
+            == tracing::level_filters::LevelFilter::TRACE
+            && TRACE_ENABLED;
 
         let raw_trace = Box::new(RawPreflightTrace {
             cycles: _raw_cycles.as_ptr(),
@@ -182,7 +181,7 @@ impl<'a> MachineContext<'a> {
             num_cycles: _raw_cycles.len() as u32,
             num_txns: _raw_txns.len() as u32,
             num_extras: _raw_extras.len() as u32,
-            is_trace,
+            is_trace: is_trace as u32,
         });
 
         Self {

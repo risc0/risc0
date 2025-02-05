@@ -155,7 +155,7 @@ impl Program {
         let mut regs = vec![ibig!(0); self.ops.len()];
         let mut rings = HashMap::<UBig, ModuloRing>::new();
         for (op_index, op) in self.ops.iter().enumerate() {
-            tracing::debug!("[{op_index}]: {op:?}");
+            tracing::trace!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
                     let offset = op.a;

@@ -7886,6 +7886,7 @@ impl risc0_zkp::layout::Component for BigInt0StateLayout {
     }
 }
 pub struct BigInt0Layout {
+    pub _0: &'static DoCycleTableLayout,
     pub state: &'static BigIntStateLayout,
     pub _arguments_big_int0_state: &'static _Arguments_BigInt0StateLayout,
     pub state_redef: &'static BigInt0StateLayout,
@@ -7896,6 +7897,7 @@ impl risc0_zkp::layout::Component for BigInt0Layout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_0", self._0)?;
         v.visit_component("state", self.state)?;
         v.visit_component("_arguments_big_int0_state", self._arguments_big_int0_state)?;
         v.visit_component("state_redef", self.state_redef)?;

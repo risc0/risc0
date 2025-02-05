@@ -30,7 +30,7 @@ pub const REGISTER_GROUP_CODE: usize = 1;
 pub const REGISTER_GROUP_DATA: usize = 2;
 
 // If true, enable tracing of adapter internals.
-const ADAPTER_TRACE_ENABLED: bool = false;
+const ADAPTER_TRACE_ENABLED: bool = true;
 
 macro_rules! trace_if_enabled {
     ($($args:tt)*) => {
@@ -209,102 +209,6 @@ pub enum PolyExtStep {
     True,
     AndEqz(Var, Var),
     AndCond(Var, Var, Var),
-    Shift,
-}
-
-impl PolyExtStep {
-    pub fn step<F: Field>(
-        &self,
-        fp_vars: &mut Vec<F::ExtElem>,
-        mix_vars: &mut Vec<MixState<F::ExtElem>>,
-        mix: &F::ExtElem,
-        u: &[F::ExtElem],
-        args: &[&[F::Elem]],
-    ) {
-        match self {
-            PolyExtStep::Const(value) => {
-                let elem = F::Elem::from_u64(*value as u64);
-                trace_if_enabled!("[{}] {self:?} -> {elem:?}", fp_vars.len());
-                fp_vars.push(F::ExtElem::from_subfield(&elem));
-            }
-            PolyExtStep::ConstExt(x0, x1, x2, x3) => {
-                let elem = F::ExtElem::from_subelems([
-                    F::Elem::from_u64(*x0 as u64),
-                    F::Elem::from_u64(*x1 as u64),
-                    F::Elem::from_u64(*x2 as u64),
-                    F::Elem::from_u64(*x3 as u64),
-                ]);
-                trace_if_enabled!("[{}] {self:?} -> {elem:?}", fp_vars.len());
-                fp_vars.push(elem);
-            }
-            PolyExtStep::Get(tap) => {
-                let val = u[*tap];
-                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
-                fp_vars.push(val);
-            }
-            PolyExtStep::GetGlobal(base, offset) => {
-                let val = F::ExtElem::from_subfield(&args[*base][*offset]);
-                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
-                fp_vars.push(val);
-            }
-            PolyExtStep::Add(x1, x2) => {
-                let val = fp_vars[*x1] + fp_vars[*x2];
-                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
-                fp_vars.push(val);
-            }
-            PolyExtStep::Sub(x1, x2) => {
-                let val = fp_vars[*x1] - fp_vars[*x2];
-                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
-                fp_vars.push(val);
-            }
-            PolyExtStep::Mul(x1, x2) => {
-                let val = fp_vars[*x1] * fp_vars[*x2];
-                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
-                fp_vars.push(val);
-            }
-            PolyExtStep::Shift => {
-                // Return [0, 1, ...] to allow construction of
-                // values in the extension field
-                let val = F::ExtElem::from_subelems(
-                    [F::Elem::ZERO, F::Elem::ONE]
-                        .into_iter()
-                        .chain(core::iter::repeat(F::Elem::ZERO))
-                        .take(F::ExtElem::EXT_SIZE),
-                );
-                trace_if_enabled!("[{}] {self:?} -> {val:?}", mix_vars.len());
-                fp_vars.push(val);
-            }
-            PolyExtStep::True => {
-                let mix_val = MixState {
-                    tot: F::ExtElem::ZERO,
-                    mul: F::ExtElem::ONE,
-                };
-                trace_if_enabled!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
-                mix_vars.push(mix_val);
-            }
-            PolyExtStep::AndEqz(x, val) => {
-                let x = mix_vars[*x];
-                let val = fp_vars[*val];
-                let mix_val = MixState {
-                    tot: x.tot + x.mul * val,
-                    mul: x.mul * *mix,
-                };
-                trace_if_enabled!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
-                mix_vars.push(mix_val);
-            }
-            PolyExtStep::AndCond(x, cond, inner) => {
-                let x = mix_vars[*x];
-                let cond = fp_vars[*cond];
-                let inner = mix_vars[*inner];
-                let mix_val = MixState {
-                    tot: x.tot + cond * inner.tot * x.mul,
-                    mul: x.mul * inner.mul,
-                };
-                trace_if_enabled!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
-                mix_vars.push(mix_val);
-            }
-        }
-    }
 }
 
 impl PolyExtStepDef {
@@ -314,21 +218,235 @@ impl PolyExtStepDef {
         u: &[F::ExtElem],
         args: &[&[F::Elem]],
     ) -> MixState<F::ExtElem> {
-        let mut fp_vars = Vec::with_capacity(self.block.len() - (self.ret + 1));
-        let mut mix_vars = Vec::with_capacity(self.ret + 1);
-        for op in self.block.iter() {
-            op.step::<F>(&mut fp_vars, &mut mix_vars, mix, u, args);
+        PolyExtExecutor::<F>::new(self).run(mix, u, args)
+    }
+}
+
+struct PolyExtExecutor<'a, F: Field> {
+    def: &'a PolyExtStepDef,
+    fp_expected: usize,
+    mix_expected: usize,
+    fp_vars: Vec<F::ExtElem>,
+    #[cfg(feature = "circuit_debug")]
+    fp_index: Vec<usize>,
+    mix_vars: Vec<MixState<F::ExtElem>>,
+    #[cfg(feature = "circuit_debug")]
+    mix_index: Vec<usize>,
+}
+
+impl<'a, F: Field> PolyExtExecutor<'a, F> {
+    pub fn new(def: &'a PolyExtStepDef) -> Self {
+        let fp_expected = def.block.len() - (def.ret + 1);
+        let mix_expected = def.ret + 1;
+        Self {
+            def,
+            fp_expected,
+            mix_expected,
+            fp_vars: Vec::with_capacity(fp_expected),
+            #[cfg(feature = "circuit_debug")]
+            fp_index: Vec::with_capacity(fp_expected),
+            mix_vars: Vec::with_capacity(mix_expected),
+            #[cfg(feature = "circuit_debug")]
+            mix_index: Vec::with_capacity(mix_expected),
+        }
+    }
+
+    pub fn run(
+        &mut self,
+        mix: &F::ExtElem,
+        u: &[F::ExtElem],
+        args: &[&[F::Elem]],
+    ) -> MixState<F::ExtElem> {
+        for (idx, op) in self.def.block.iter().enumerate() {
+            self.step(idx, op, mix, u, args);
         }
         assert_eq!(
-            fp_vars.len(),
-            self.block.len() - (self.ret + 1),
+            self.fp_vars.len(),
+            self.fp_expected,
             "Miscalculated capacity for fp_vars"
         );
         assert_eq!(
-            mix_vars.len(),
-            self.ret + 1,
+            self.mix_vars.len(),
+            self.mix_expected,
             "Miscalculated capacity for mix_vars"
         );
-        mix_vars[self.ret]
+
+        #[cfg(feature = "circuit_debug")]
+        self.debug(self.def.ret);
+
+        self.mix_vars[self.def.ret]
+    }
+
+    #[cfg(feature = "circuit_debug")]
+    fn debug(&mut self, next: Var) {
+        let op_index = self.mix_index[next];
+        let op = &self.def.block[op_index];
+        tracing::debug!("chain: [m:{next}] {op:?}");
+        match op {
+            PolyExtStep::True => {
+                tracing::debug!("PolyExtStep::True");
+            }
+            PolyExtStep::AndEqz(chain, inner) => {
+                let inner_val = self.fp_vars[*inner];
+                // inner should be zero
+                if inner_val != F::ExtElem::ZERO {
+                    // this is the first expression that is broken
+                    tracing::debug!("expr: {}", self.debug_expr(*inner));
+                    let inner_idx = self.fp_index[*inner];
+                    let op = &self.def.block[inner_idx];
+                    panic!("eqz failure: [f:{}] {op:?}", *inner);
+                }
+                self.debug(*chain);
+            }
+            PolyExtStep::AndCond(chain, cond, inner) => {
+                let cond = self.fp_vars[*cond];
+                if cond != F::ExtElem::ZERO {
+                    tracing::debug!("true conditional");
+                    // conditional is true
+                    let inner_val = self.fp_vars[*inner];
+                    // inner should be zero
+                    if inner_val != F::ExtElem::ZERO {
+                        tracing::debug!("inner != 0");
+                        // follow inner to find out where it went bad
+                        self.debug(*inner);
+                    } else {
+                        // follow chain
+                        self.debug(*chain)
+                    }
+                } else {
+                    // conditional is false, follow chain
+                    self.debug(*chain)
+                }
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    #[cfg(feature = "circuit_debug")]
+    fn debug_expr(&self, next: Var) -> String {
+        let op_index = self.fp_index[next];
+        let op = &self.def.block[op_index];
+        match op {
+            PolyExtStep::Const(x) => format!("{x:?}"),
+            PolyExtStep::ConstExt(x0, x1, x2, x3) => format!("({x0:?}, {x1:?}, {x2:?}, {x3:?})"),
+            PolyExtStep::Get(x) => format!("Get({x})"),
+            PolyExtStep::GetGlobal(arg, x) => format!("GetGlobal({arg}, {x})"),
+            PolyExtStep::Add(x, y) => {
+                format!("({} + {})", self.debug_expr(*x), self.debug_expr(*y))
+            }
+            PolyExtStep::Sub(x, y) => {
+                format!("({} - {})", self.debug_expr(*x), self.debug_expr(*y))
+            }
+            PolyExtStep::Mul(x, y) => {
+                format!("({} * {})", self.debug_expr(*x), self.debug_expr(*y))
+            }
+            _ => String::new(),
+        }
+    }
+
+    fn fp_index(&self) -> usize {
+        self.fp_vars.len()
+    }
+
+    fn mix_index(&self) -> usize {
+        self.mix_vars.len()
+    }
+
+    fn push_fp(&mut self, _idx: usize, val: F::ExtElem) {
+        #[cfg(feature = "circuit_debug")]
+        self.fp_index.push(_idx);
+        self.fp_vars.push(val);
+    }
+
+    fn push_mix(&mut self, _idx: usize, mix: MixState<F::ExtElem>) {
+        #[cfg(feature = "circuit_debug")]
+        self.mix_index.push(_idx);
+        self.mix_vars.push(mix);
+    }
+
+    fn step(
+        &mut self,
+        idx: usize,
+        op: &PolyExtStep,
+        mix: &F::ExtElem,
+        u: &[F::ExtElem],
+        args: &[&[F::Elem]],
+    ) {
+        match op {
+            PolyExtStep::Const(value) => {
+                let val = F::Elem::from_u64(*value as u64);
+                trace_if_enabled!("[f:{}] {op:?} -> {val:?}", self.fp_index());
+                self.push_fp(idx, val.into());
+            }
+            PolyExtStep::ConstExt(x0, x1, x2, x3) => {
+                let val = F::ExtElem::from_subelems([
+                    F::Elem::from_u64(*x0 as u64),
+                    F::Elem::from_u64(*x1 as u64),
+                    F::Elem::from_u64(*x2 as u64),
+                    F::Elem::from_u64(*x3 as u64),
+                ]);
+                trace_if_enabled!("[f:{}] {op:?} -> {val:?}", self.fp_index());
+                self.push_fp(idx, val);
+            }
+            PolyExtStep::Get(tap) => {
+                let val = u[*tap];
+                trace_if_enabled!("[f:{}] {op:?} -> {val:?}", self.fp_index());
+                self.push_fp(idx, val);
+            }
+            PolyExtStep::GetGlobal(base, offset) => {
+                let val = F::ExtElem::from_subfield(&args[*base][*offset]);
+                trace_if_enabled!("[f:{}] {op:?} -> {val:?}", self.fp_index());
+                self.push_fp(idx, val);
+            }
+            PolyExtStep::Add(x1, x2) => {
+                let val = self.fp_vars[*x1] + self.fp_vars[*x2];
+                trace_if_enabled!("[f:{}] {op:?} -> {val:?}", self.fp_index());
+                self.push_fp(idx, val);
+            }
+            PolyExtStep::Sub(x1, x2) => {
+                let val = self.fp_vars[*x1] - self.fp_vars[*x2];
+                trace_if_enabled!("[f:{}] {op:?} -> {val:?}", self.fp_index());
+                self.push_fp(idx, val);
+            }
+            PolyExtStep::Mul(x1, x2) => {
+                let val = self.fp_vars[*x1] * self.fp_vars[*x2];
+                trace_if_enabled!("[f:{}] {op:?} -> {val:?}", self.fp_index());
+                self.push_fp(idx, val);
+            }
+            PolyExtStep::True => {
+                let mix_val = MixState {
+                    tot: F::ExtElem::ZERO,
+                    mul: F::ExtElem::ONE,
+                };
+                trace_if_enabled!("[m:{}] {op:?}", self.mix_index());
+                self.push_mix(idx, mix_val);
+            }
+            PolyExtStep::AndEqz(chain, inner) => {
+                let chain = self.mix_vars[*chain];
+                let inner = self.fp_vars[*inner];
+                let mix_val = MixState {
+                    tot: chain.tot + chain.mul * inner,
+                    mul: chain.mul * *mix,
+                };
+                trace_if_enabled!("[m:{}] {op:?}, inner: {inner:?}", self.mix_index());
+                self.push_mix(idx, mix_val);
+            }
+            PolyExtStep::AndCond(chain, cond, inner) => {
+                let chain = self.mix_vars[*chain];
+                let cond = self.fp_vars[*cond];
+                let inner = self.mix_vars[*inner];
+                let mix_val = MixState {
+                    tot: chain.tot + cond * inner.tot * chain.mul,
+                    mul: chain.mul * inner.mul,
+                };
+                trace_if_enabled!(
+                    "[m:{}] {op:?}, cond: {}, inner: {}",
+                    self.mix_index(),
+                    cond != F::ExtElem::ZERO,
+                    inner.tot != F::ExtElem::ZERO,
+                );
+                self.push_mix(idx, mix_val);
+            }
+        }
     }
 }

@@ -27,6 +27,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <vector>
 
@@ -94,8 +95,9 @@ inline Val inRange(Val low, Val mid, Val high) {
 
 inline void eqz(Val a, const char* loc) {
   if (a.asUInt32()) {
-    printf("eqz failure at: %s\n", loc);
-    throw std::runtime_error("eqz failure");
+    std::stringstream ss;
+    ss << "eqz failure at: " << loc;
+    throw std::runtime_error(ss.str());
   }
 }
 
