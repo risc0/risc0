@@ -211,7 +211,7 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> EmuContext for ChildExecutor<'a, 'b> {
+impl EmuContext for ChildExecutor<'_, '_> {
     fn ecall(&mut self) -> Result<bool> {
         match EmuContext::load_register(self, REG_T0)? {
             ecall::SOFTWARE => self.ecall_software(),
@@ -299,7 +299,7 @@ impl<'a, 'b> EmuContext for ChildExecutor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> SyscallContext<'a> for ChildExecutor<'a, 'b> {
+impl<'a> SyscallContext<'a> for ChildExecutor<'a, '_> {
     fn get_pc(&self) -> u32 {
         self.pc.0
     }

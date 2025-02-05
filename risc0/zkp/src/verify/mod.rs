@@ -157,7 +157,7 @@ where
     merkle_verifiers: Vec<Option<MerkleTreeVerifier<'a>>>,
 }
 
-impl<'a, F: Field> VerifyParams<F> for Verifier<'a, F> {}
+impl<F: Field> VerifyParams<F> for Verifier<'_, F> {}
 
 impl<'a, F: Field> Verifier<'a, F> {
     /// Start a new verification session.

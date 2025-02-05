@@ -261,7 +261,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
+impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
@@ -380,7 +380,7 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
+impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
         if idx >= REG_MAX {
             bail!("invalid register: x{idx}");

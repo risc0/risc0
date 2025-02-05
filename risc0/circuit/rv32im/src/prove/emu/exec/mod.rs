@@ -397,7 +397,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
+impl<S: Syscall> Executor<'_, '_, S> {
     fn ecall_halt(&mut self) -> Result<bool> {
         let a0 = self.load_register(REG_A0)?;
         let output_ptr = self.load_guest_addr_from_register(REG_A1)?;
@@ -741,7 +741,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
+impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
         tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
@@ -763,7 +763,7 @@ impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
+impl<S: Syscall> EmuContext for Executor<'_, '_, S> {
     fn ecall(&mut self) -> Result<bool> {
         match self.load_register(REG_T0)? {
             ecall::HALT => self.ecall_halt(),
@@ -851,7 +851,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
+impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
     fn get_cycle(&self) -> u64 {
         self.cycles.user
     }
