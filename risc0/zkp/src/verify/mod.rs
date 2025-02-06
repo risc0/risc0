@@ -41,7 +41,7 @@ use crate::{
 };
 
 // If true, enable tracing of verifier internals.
-const VERIFY_TRACE_ENABLED: bool = true;
+const VERIFY_TRACE_ENABLED: bool = false;
 
 macro_rules! trace_if_enabled {
     ($($args:tt)*) => {

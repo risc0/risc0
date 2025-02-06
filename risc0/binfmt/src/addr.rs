@@ -153,10 +153,10 @@ impl core::ops::Add<u32> for ByteAddr {
 }
 
 impl core::ops::Add<i32> for ByteAddr {
-    type Output = Option<ByteAddr>;
+    type Output = ByteAddr;
 
     fn add(self, rhs: i32) -> Self::Output {
-        self.0.checked_add_signed(rhs).map(Self)
+        Self(self.0.checked_add_signed(rhs).unwrap())
     }
 }
 

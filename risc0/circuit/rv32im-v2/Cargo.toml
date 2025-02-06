@@ -60,7 +60,7 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 default = ["prove"]
-entropy_finder = []
+# entropy_finder = []
 execute = [
   "anyhow/backtrace",
   "dep:auto_ops",
