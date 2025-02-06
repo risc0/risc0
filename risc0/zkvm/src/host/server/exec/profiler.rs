@@ -496,9 +496,13 @@ impl Profiler {
     ) -> Result<(), anyhow::Error> {
         match op {
             CallStackOp::Push => {
-                self.call_stack_path.push(FunctionStart::Real { pc });
-                self.pop_stack.push(orig_pc);
-                *update_stack = true;
+                // Sometimes we confuse a jump and a function call. See if we are jumping to the
+                // start of a function or not to disambiguate.
+                if self.profile.symbol_table.contains_key(&(pc as u64)) {
+                    self.call_stack_path.push(FunctionStart::Real { pc });
+                    self.pop_stack.push(orig_pc);
+                    *update_stack = true;
+                }
             }
             CallStackOp::Pop => loop {
                 while matches!(self.call_stack_path.last(), Some(FunctionStart::Inline(_))) {
