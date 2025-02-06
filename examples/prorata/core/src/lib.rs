@@ -92,13 +92,10 @@ impl fmt::Display for AllocationQueryResult {
 /// amount - total amount to distribute
 /// recipients - list of recipients with their share of the total amount
 pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> {
-    // Sort recipients in descending order of ownership share to provide
-    // consistent behavior regardless of input order.
-    // TODO: In the case of ties in ownership share this is not sufficient to
-    // give consistent behavior regardless of input order. Show an example of
-    // testing with a tool like proptest to detect before fixing.
+    // Sort recipients in descending order of ownership share and then by name to provide
+    // consistent behavior regardless of input order, even in case of ties.
     let mut recipients = recipients;
-    recipients.sort_by(|a, b| b.share.cmp(&a.share));
+    recipients.sort_by(|a, b| b.share.cmp(&a.share).then(a.name.cmp(&b.name)));
 
     // Compute an allocation for each recipient.
     let total_share: Decimal = recipients.iter().map(|r| r.share).sum();
@@ -146,6 +143,7 @@ pub fn allocate_for(
 #[cfg(test)]
 mod tests {
     use rust_decimal_macros::dec;
+    use proptest::prelude::*;
 
     use super::*;
 
@@ -268,6 +266,56 @@ mod tests {
         let deserialized: Recipient = bincode::deserialize(&serialized).unwrap();
         assert_eq!(deserialized.name, "A");
         assert_eq!(deserialized.share, dec!(0.5));
+    }
+
+    proptest! {
+        #[test]
+        fn test_allocation_stability_with_equal_shares(
+            amount in 100u32..10000u32,
+            name1 in "[A-Z][a-z]{1,10}",
+            name2 in "[A-Z][a-z]{1,10}",
+        ) {
+            let amount = Decimal::new(amount.into(), 0);
+            let share = dec!(0.5);
+
+            // Create two sets of recipients with the same shares but different order
+            let recipients1 = vec![
+                Recipient {
+                    name: name1.clone(),
+                    share,
+                },
+                Recipient {
+                    name: name2.clone(),
+                    share,
+                },
+            ];
+
+            let recipients2 = vec![
+                Recipient {
+                    name: name2,
+                    share,
+                },
+                Recipient {
+                    name: name1,
+                    share,
+                },
+            ];
+
+            let allocations1 = allocate(amount, recipients1);
+            let allocations2 = allocate(amount, recipients2);
+
+            // Verify that allocations are identical regardless of input order
+            assert_eq!(allocations1[0].name, allocations2[0].name);
+            assert_eq!(allocations1[1].name, allocations2[1].name);
+            assert_eq!(allocations1[0].amount, allocations2[0].amount);
+            assert_eq!(allocations1[1].amount, allocations2[1].amount);
+
+            // Verify that total allocation remains correct
+            let sum1: Decimal = allocations1.iter().map(|a| a.amount).sum();
+            let sum2: Decimal = allocations2.iter().map(|a| a.amount).sum();
+            assert_eq!(sum1, amount);
+            assert_eq!(sum2, amount);
+        }
     }
 
     // TODO: Add better test cases for allocate() to test rounding, stability,
