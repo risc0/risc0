@@ -746,28 +746,43 @@ impl ProfileBuilder {
     /// Dereferences strings, etc. in the protobuf for testing purposes.
     /// Returns a tuple of (frames, program counter, cycles)
     #[cfg(test)]
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
-        self.profile.sample.iter().flat_map(move |sample| {
-            sample.location_id.iter().map(move |id| {
-                let loc = &self.profile.location[*id as usize - 1];
-                (
-                    loc.line
-                        .iter()
-                        .map(|line| {
-                            let func = &self.profile.function[line.function_id as usize - 1];
-                            Frame {
-                                name: self.profile.string_table[func.name as usize].clone(),
-                                lineno: line.line,
-                                filename: self.profile.string_table[func.filename as usize].clone(),
-                            }
-                        })
-                        .collect(),
-                    loc.address as usize,
-                    sample.value[0] as usize,
-                )
-            })
+    pub(crate) fn iter(&self) -> impl Iterator<Item = TestSample> + '_ {
+        self.profile.sample.iter().map(move |sample| TestSample {
+            frames: sample
+                .location_id
+                .iter()
+                .map(|id| {
+                    let loc = &self.profile.location[*id as usize - 1];
+                    let line = &loc.line[0];
+                    let func = &self.profile.function[line.function_id as usize - 1];
+                    FrameWithAddress {
+                        frame: Frame {
+                            name: self.profile.string_table[func.name as usize].clone(),
+                            lineno: line.line,
+                            filename: self.profile.string_table[func.filename as usize].clone(),
+                        },
+                        address: loc.address as usize,
+                    }
+                })
+                .collect(),
+            count: sample.value[0] as usize,
         })
     }
+}
+
+#[cfg(test)]
+#[derive(Debug)]
+pub struct FrameWithAddress {
+    pub frame: Frame,
+    pub address: usize,
+}
+
+/// A profile sample that has been converted into a format easy for testing
+#[cfg(test)]
+#[derive(Debug)]
+pub struct TestSample {
+    pub frames: Vec<FrameWithAddress>,
+    pub count: usize,
 }
 
 struct LocationKey {
