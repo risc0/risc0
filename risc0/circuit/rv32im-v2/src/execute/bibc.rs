@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, io::Read};
+use std::{io::Read, ops::Rem};
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
-use ibig::modular::ModuloRing;
-use ibig::{ibig, ubig, IBig, UBig};
+use malachite::{
+    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
+    Integer, Natural,
+};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
@@ -66,9 +68,9 @@ pub(crate) struct Program {
 }
 
 pub(crate) trait BigIntIO {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig>;
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural>;
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()>;
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()>;
 }
 
 impl Op {
@@ -152,22 +154,19 @@ impl Program {
     }
 
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
-        let mut regs = vec![ibig!(0); self.ops.len()];
-        let mut rings = HashMap::<UBig, ModuloRing>::new();
+        let mut regs = vec![Integer::ZERO; self.ops.len()];
         for (op_index, op) in self.ops.iter().enumerate() {
             tracing::trace!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
                     let offset = op.a;
                     let words = op.b;
-                    let mut value = ubig!(0);
+                    let mut value = Natural::from(0_u64);
                     for i in 0..words {
                         let word: u64 = self.constants[offset + i];
-                        let mut tmp = UBig::from(word);
-                        tmp <<= i * 64;
-                        value |= &tmp;
+                        value |= Natural::from(word) << (i * 64);
                     }
-                    regs[op_index] = IBig::from(value);
+                    regs[op_index] = Integer::from(value);
                 }
                 OpCode::Load => {
                     let typ = &self.types[op.result_type];
@@ -179,42 +178,38 @@ impl Program {
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = &regs[op.b];
-                    let value = UBig::try_from(value)?;
-                    io.store(op.arena(), op.offset(), count, &value)?;
+                    io.store(op.arena(), op.offset(), count, value.unsigned_abs_ref())?;
                 }
                 OpCode::Add => {
-                    let (lhs, rhs) = operands(op, op_index, &regs);
-                    regs[op_index] = lhs + rhs;
+                    let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
+                    *dst = lhs + rhs;
                 }
                 OpCode::Sub => {
-                    let (lhs, rhs) = operands(op, op_index, &regs);
-                    regs[op_index] = lhs - rhs;
+                    let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
+                    *dst = lhs - rhs;
                 }
                 OpCode::Mul => {
-                    let (lhs, rhs) = operands(op, op_index, &regs);
-                    regs[op_index] = lhs * rhs;
+                    let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
+                    *dst = lhs * rhs;
                 }
                 OpCode::Rem => {
-                    let (lhs, rhs) = operands(op, op_index, &regs);
-                    let value = lhs % rhs;
-                    regs[op_index] = value.clone();
+                    let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
+                    *dst = lhs % rhs;
                 }
                 OpCode::Quo => {
-                    let (lhs, rhs) = operands(op, op_index, &regs);
-                    let value = lhs / rhs;
-                    regs[op_index] = value.clone();
+                    let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
+                    *dst = lhs / rhs;
                 }
                 OpCode::Inv => {
-                    let (lhs, rhs) = operands(op, op_index, &regs);
-                    let urhs = UBig::try_from(rhs)?;
-                    let ring = rings
-                        .entry(urhs.clone())
-                        .or_insert_with(|| ModuloRing::new(&urhs));
-                    let value = ring
-                        .from(lhs)
-                        .inverse()
-                        .ok_or_else(|| anyhow!("Can't divide by zero"))?;
-                    regs[op_index] = IBig::from(value.residue());
+                    let (lhs, rhs, dst) = operands_mut(op, op_index, &mut regs);
+                    let lhs = lhs.unsigned_abs_ref();
+                    let rhs = rhs.unsigned_abs_ref();
+
+                    *dst = lhs
+                        .rem(rhs)
+                        .mod_inverse(rhs)
+                        .ok_or_else(|| anyhow!("divide by zero"))?
+                        .into();
                 }
             }
         }
@@ -222,8 +217,19 @@ impl Program {
     }
 }
 
-fn operands<'p>(op: &Op, op_index: usize, regs: &'p [IBig]) -> (&'p IBig, &'p IBig) {
+fn operands_mut<'a>(
+    op: &Op,
+    op_index: usize,
+    regs: &'a mut [Integer],
+) -> (&'a Integer, &'a Integer, &'a mut Integer) {
     assert!(op.a < op_index);
     assert!(op.b < op_index);
-    (&regs[op.a], &regs[op.b])
+    let (prefix, suffix) = regs.split_at_mut(op_index);
+
+    let lhs = &prefix[op.a];
+    let rhs = &prefix[op.b];
+
+    let dst = &mut suffix[0];
+
+    (lhs, rhs, dst)
 }

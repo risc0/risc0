@@ -163,13 +163,13 @@ impl BytePolynomial {
 
     fn one() -> Self {
         Self {
-            coeffs: smallvec::smallvec![1],
+            coeffs: smallvec![1],
         }
     }
 
     fn zero() -> Self {
         Self {
-            coeffs: smallvec::smallvec![0],
+            coeffs: smallvec![0],
         }
     }
 

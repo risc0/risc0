@@ -693,6 +693,8 @@ impl Preflight {
         let x = Natural::from_limbs_asc(&x);
         let y = Natural::from_limbs_asc(&y);
 
+        tracing::trace!("n: {n:?}, x: {x:?}, y: {y:?}");
+
         // Perform multiplication or modular multiplication
         let z = if n == 0 {
             // If n == 0, just multiply
@@ -702,6 +704,8 @@ impl Preflight {
             (x * y) % n
         };
 
+        tracing::trace!("z: {z:?}");
+
         let out_limbs = z.into_limbs_asc();
         let mut z_words = [0u32; bigint::WIDTH_WORDS];
         // resize the z to bigint width
@@ -709,8 +713,6 @@ impl Preflight {
             let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
             z_words[i] = limb.to_le();
         }
-
-        tracing::trace!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
 
         // Store result.
         for i in 0..2 {

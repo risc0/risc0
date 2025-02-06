@@ -1712,18 +1712,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ibig"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1fcc7f316b2c079dde77564a1360639c1a956a23fa96122732e416cb10717bb"
-dependencies = [
- "cfg-if",
- "num-traits",
- "rand",
- "static_assertions",
-]
-
-[[package]]
 name = "icu_collections"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3046,7 +3034,7 @@ dependencies = [
  "byteorder",
  "cfg-if",
  "derive_more 1.0.0",
- "ibig",
+ "malachite",
  "num-derive",
  "num-traits",
  "paste",
@@ -3059,6 +3047,7 @@ dependencies = [
  "risc0-sys",
  "risc0-zkp",
  "serde",
+ "smallvec",
  "tracing",
 ]
 

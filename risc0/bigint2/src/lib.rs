@@ -125,9 +125,11 @@ impl<const WIDTH: usize> ToBigInt2Buffer<WIDTH> for num_bigint_dig::BigUint {
 }
 
 #[cfg(test)]
+#[cfg(feature = "unstable")]
 struct BigUintWrap(num_bigint::BigUint);
 
 #[cfg(test)]
+#[cfg(feature = "unstable")]
 impl std::str::FromStr for BigUintWrap {
     type Err = num_bigint::ParseBigIntError;
 

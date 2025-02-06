@@ -17,10 +17,11 @@ use std::{cmp::max, collections::HashMap, io::Cursor};
 use anyhow::{anyhow, bail, ensure, Result};
 use auto_ops::impl_op_ex;
 use derive_more::Debug;
-use ibig::UBig;
+use malachite::Natural;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::WordAddr;
+use smallvec::{smallvec, SmallVec};
 
 use super::{
     bibc::{self, BigIntIO},
@@ -42,7 +43,7 @@ type BigIntWitness = HashMap<WordAddr, BigIntBytes>;
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct BytePolynomial {
-    pub coeffs: Vec<i32>,
+    pub coeffs: SmallVec<[i32; 64]>,
 }
 
 #[derive(Debug)]
@@ -182,7 +183,8 @@ impl BigInt {
             }
         }
 
-        let delta_poly = BytePolynomial::new(self.state.bytes.iter().map(|x| *x as i32).collect());
+        let parts: Vec<_> = self.state.bytes.iter().map(|x| *x as i32).collect();
+        let delta_poly = BytePolynomial::new(&parts);
         self.program.step(&insn, &delta_poly)?;
 
         self.state.is_ecall = false;
@@ -213,8 +215,30 @@ impl<'a> BigIntIOImpl<'a> {
     }
 }
 
+fn bytes_le_to_bigint(bytes: &[u8]) -> Natural {
+    let mut limbs = Vec::with_capacity((bytes.len() + 3) / 4);
+
+    for chunk in bytes.chunks(4) {
+        let mut arr = [0u8; 4];
+        arr[..chunk.len()].copy_from_slice(chunk);
+        limbs.push(u32::from_le_bytes(arr));
+    }
+
+    Natural::from_limbs_asc(&limbs)
+}
+
+fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
+    let limbs = value.to_limbs_asc();
+    let mut out = Vec::with_capacity(limbs.len() * 4);
+
+    for limb in limbs {
+        out.extend_from_slice(&limb.to_le_bytes());
+    }
+    out
+}
+
 impl BigIntIO for BigIntIOImpl<'_> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = self
             .ctx
@@ -223,10 +247,11 @@ impl BigIntIO for BigIntIOImpl<'_> {
         let bytes = self
             .ctx
             .load_region(LoadOp::Load, addr.baddr(), count as usize)?;
-        Ok(UBig::from_le_bytes(&bytes))
+        let val = bytes_le_to_bigint(&bytes);
+        Ok(val)
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
         let base = self
             .ctx
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
@@ -234,7 +259,7 @@ impl BigIntIO for BigIntIOImpl<'_> {
         tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})");
 
         let mut witness = vec![0u8; count as usize];
-        let bytes = value.to_le_bytes();
+        let bytes = bigint_to_bytes_le(value);
         witness[..bytes.len()].copy_from_slice(&bytes);
         let chunks = witness.chunks_exact(BIGINT_WIDTH_BYTES);
         assert_eq!(chunks.len(), count as usize / BIGINT_WIDTH_BYTES);
@@ -340,14 +365,14 @@ impl BytePolyProgram {
                 self.poly = BytePolynomial::zero();
             }
             PolyOp::Carry1 => {
-                let neg_poly = BytePolynomial::new(vec![-128; BIGINT_WIDTH_BYTES]);
+                let neg_poly = BytePolynomial::new(&[-128; BIGINT_WIDTH_BYTES]);
                 self.poly = &self.poly + (delta_poly + neg_poly) * 64 * 256;
             }
             PolyOp::Carry2 => {
                 self.poly = &self.poly + delta_poly * 256;
             }
             PolyOp::EqZero => {
-                let bp = BytePolynomial::new(vec![-256, 1]);
+                let bp = BytePolynomial::new(&[-256, 1]);
                 self.total = &self.total + bp * &new_poly;
                 self.total.eqz()?;
                 self.reset();
@@ -375,16 +400,22 @@ impl BytePolyProgram {
 }
 
 impl BytePolynomial {
-    pub fn new(coeffs: Vec<i32>) -> Self {
-        Self { coeffs }
+    pub fn new(coeffs: &[i32]) -> Self {
+        Self {
+            coeffs: SmallVec::from_slice(coeffs),
+        }
     }
 
     fn one() -> Self {
-        Self { coeffs: vec![1] }
+        Self {
+            coeffs: smallvec![1],
+        }
     }
 
     fn zero() -> Self {
-        Self { coeffs: vec![0] }
+        Self {
+            coeffs: smallvec![0],
+        }
     }
 
     fn shift(&self) -> Self {
@@ -392,7 +423,7 @@ impl BytePolynomial {
         for _ in 0..BIGINT_WIDTH_BYTES {
             ret.insert(0, 0);
         }
-        Self::new(ret)
+        Self::new(&ret)
     }
 
     fn eqz(&self) -> Result<()> {
@@ -404,7 +435,7 @@ impl BytePolynomial {
 }
 
 fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = vec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
+    let mut ret = smallvec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
     for (i, coeff) in ret.iter_mut().enumerate() {
         if i < lhs.coeffs.len() {
             *coeff += lhs.coeffs[i];
@@ -413,17 +444,17 @@ fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
             *coeff += rhs.coeffs[i];
         }
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 fn byte_poly_mul(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = vec![0; lhs.coeffs.len() + rhs.coeffs.len()];
+    let mut ret = smallvec![0; lhs.coeffs.len() + rhs.coeffs.len()];
     for (i, lhs) in lhs.coeffs.iter().enumerate() {
         for (j, rhs) in rhs.coeffs.iter().enumerate() {
             ret[i + j] += lhs * rhs;
         }
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
@@ -431,7 +462,7 @@ fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
     for coeff in ret.iter_mut() {
         *coeff *= rhs;
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 impl_op_ex!(+|a: &BytePolynomial, b: &BytePolynomial| -> BytePolynomial { byte_poly_add(a, b) });
