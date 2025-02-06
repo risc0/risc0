@@ -22,7 +22,7 @@ use risc0_circuit_rv32im_sys::ffi::{
     risc0_circuit_string_free, risc0_circuit_string_ptr, RawAccumContext, RawError,
 };
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_zkp::{adapter::PolyFp, hal::cpu::SyncSlice};
+use risc0_zkp::{adapter::PolyFp, field::Elem, hal::cpu::SyncSlice};
 
 use crate::CircuitImpl;
 
@@ -45,13 +45,27 @@ impl PolyFp<BabyBear> for CircuitImpl {
         args: &[&[BabyBearElem]],
     ) -> BabyBearExtElem {
         let args: Vec<*const BabyBearElem> = args.iter().map(|x| (*x).as_ptr()).collect();
-        unsafe { risc0_circuit_rv32im_poly_fp(cycle, steps, mix.as_ptr(), args.as_ptr()) }
+        self.ffi_wrap(|err| unsafe {
+            let mut result = BabyBearExtElem::ZERO;
+            risc0_circuit_rv32im_poly_fp(
+                err,
+                cycle,
+                steps,
+                mix.as_ptr(),
+                args.as_ptr(),
+                &mut result,
+            );
+            result
+        })
+        .unwrap()
     }
 }
 
 impl CircuitImpl {
-    pub fn alloc_accum_ctx(&self, steps: usize) -> SyncAccumContext {
-        SyncAccumContext(unsafe { risc0_circuit_rv32im_accum_context_alloc(steps) })
+    pub fn alloc_accum_ctx(&self, steps: usize, is_par_safe: &[u8]) -> SyncAccumContext {
+        SyncAccumContext(unsafe {
+            risc0_circuit_rv32im_accum_context_alloc(steps, is_par_safe.as_ptr())
+        })
     }
 
     pub fn par_step_compute_accum(
@@ -62,13 +76,13 @@ impl CircuitImpl {
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
-        self.wrap_ffi(|err| unsafe {
+        self.ffi_wrap(|err| unsafe {
             risc0_circuit_rv32im_step_compute_accum(err, ctx.0, steps, cycle, args.as_ptr())
         })
     }
 
     pub fn calc_prefix_products(&self, ctx: &SyncAccumContext) -> Result<()> {
-        self.wrap_ffi(|err| unsafe { risc0_circuit_rv32im_calc_prefix_products(err, ctx.0) })
+        self.ffi_wrap(|err| unsafe { risc0_circuit_rv32im_calc_prefix_products(err, ctx.0) })
     }
 
     pub fn par_step_verify_accum(
@@ -79,12 +93,12 @@ impl CircuitImpl {
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
-        self.wrap_ffi(|err| unsafe {
+        self.ffi_wrap(|err| unsafe {
             risc0_circuit_rv32im_step_verify_accum(err, ctx.0, steps, cycle, args.as_ptr())
         })
     }
 
-    fn wrap_ffi<R, F: Fn(*mut RawError) -> R>(&self, inner: F) -> Result<R> {
+    fn ffi_wrap<R, F: Fn(*mut RawError) -> R>(&self, inner: F) -> Result<R> {
         let mut err = RawError::default();
         let result = inner(&mut err);
         if err.msg.is_null() {

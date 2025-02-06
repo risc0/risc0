@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,14 @@
 
 pub mod zkr;
 
-use std::{collections::VecDeque, fmt::Debug};
+use std::{
+    collections::{BTreeMap, VecDeque},
+    fmt::Debug,
+    sync::Mutex,
+};
 
-use anyhow::{anyhow, ensure, Context, Result};
+use anyhow::{anyhow, bail, ensure, Context, Result};
+use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
     control_id::BN254_IDENTITY_CONTROL_ID,
     prove::{DigestKind, RecursionReceipt},
@@ -25,7 +30,10 @@ use risc0_circuit_recursion::{
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::{digest::Digest, hash::hash_suite_from_name},
+    core::{
+        digest::{Digest, DIGEST_SHORTS},
+        hash::hash_suite_from_name,
+    },
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::{CircuitHal, Hal},
     verify::ReadIOP,
@@ -40,13 +48,20 @@ use crate::{
     },
     receipt_claim::{Assumption, MaybePruned, Merge},
     sha::Digestible,
-    ProverOpts, ReceiptClaim,
+    ProverOpts, ReceiptClaim, SegmentVersion, Unknown,
 };
 
 use risc0_circuit_recursion::prove::Program;
 
 /// Number of rows to use for the recursion circuit witness as a power of 2.
 pub const RECURSION_PO2: usize = 18;
+
+pub(crate) type ZkrRegistryEntry = Box<dyn Fn() -> Result<Program> + Send + 'static>;
+
+pub(crate) type ZkrRegistry = BTreeMap<Digest, ZkrRegistryEntry>;
+
+/// A registry to look up programs by control ID.
+pub(crate) static ZKR_REGISTRY: Mutex<ZkrRegistry> = Mutex::new(BTreeMap::new());
 
 /// Run the lift program to transform an rv32im segment receipt into a recursion receipt.
 ///
@@ -60,7 +75,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
     let mut prover = Prover::new_lift(segment_receipt, opts.clone())?;
 
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
@@ -92,7 +107,7 @@ pub fn join(
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_join(a, b, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
 
     // Construct the expected claim that should have result from the join.
@@ -156,23 +171,19 @@ where
         .as_value_mut()
         .context("conditional receipt output is pruned")?
         .as_mut()
-        .ok_or(anyhow!(
-            "conditional receipt has empty output and no assumptions"
-        ))?
+        .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
         .assumptions
         .as_value_mut()
         .context("conditional receipt assumptions are pruned")?
         .0
         .drain(..1)
         .next()
-        .ok_or(anyhow!(
-            "cannot resolve assumption from receipt with no assumptions"
-        ))?;
+        .ok_or_else(|| anyhow!("cannot resolve assumption from receipt with no assumptions"))?;
 
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
 
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
@@ -203,7 +214,7 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 
     let mut prover = Prover::new_identity(a, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream = VecDeque::<u32>::new();
+    let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
     let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&a.claim)?;
 
@@ -228,12 +239,80 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     })
 }
 
+/// Prove the specified program identified by the `control_id` using the specified `input`.
+pub fn prove_zkr(
+    program: Program,
+    control_id: &Digest,
+    allowed_control_ids: Vec<Digest>,
+    input: &[u8],
+) -> Result<SuccinctReceipt<Unknown>> {
+    let opts = ProverOpts::succinct().with_control_ids(allowed_control_ids);
+    let mut prover = Prover::new(program, *control_id, opts.clone());
+    prover.add_input(bytemuck::cast_slice(input));
+
+    tracing::debug!("Running prover");
+    let receipt = prover.run()?;
+
+    tracing::trace!("zkr receipt: {receipt:?}");
+
+    // Read the claim digest from the second of the global output slots.
+    let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(
+        bytemuck::checked::cast_slice::<_, BabyBearElem>(
+            &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
+        )
+        .iter()
+        .copied()
+        .map(u32::from),
+    ))?;
+
+    let hashfn = opts.hash_suite()?.hashfn;
+    let control_inclusion_proof =
+        MerkleGroup::new(opts.control_ids.clone())?.get_proof(control_id, hashfn.as_ref())?;
+
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: *control_id,
+        control_inclusion_proof,
+        claim: MaybePruned::<Unknown>::Pruned(claim_digest),
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
+}
+
+/// Prove the specified program identified by the `control_id` using the specified `input`.
+pub fn prove_registered_zkr(
+    control_id: &Digest,
+    allowed_control_ids: Vec<Digest>,
+    input: &[u8],
+) -> Result<SuccinctReceipt<Unknown>> {
+    let zkr = get_registered_zkr(control_id)?;
+    prove_zkr(zkr, control_id, allowed_control_ids, input)
+}
+
+/// Registers a function to retrieve a recursion program (zkr) based on a control id.
+pub fn register_zkr(
+    control_id: &Digest,
+    get_program_fn: impl Fn() -> Result<Program> + Send + 'static,
+) -> Option<ZkrRegistryEntry> {
+    let mut registry = ZKR_REGISTRY.lock().unwrap();
+    registry.insert(*control_id, Box::new(get_program_fn))
+}
+
+/// Returns a registered ZKR program, or an error if not found.
+pub fn get_registered_zkr(control_id: &Digest) -> Result<Program> {
+    let registry = ZKR_REGISTRY.lock().unwrap();
+    registry
+        .get(control_id)
+        .map(|f| f())
+        .unwrap_or_else(|| bail!("Control id {control_id} unregistered"))
+}
+
 /// Prove the test_recursion_circuit. This is useful for testing purposes.
 ///
 /// digest1 will be passed through to the first of the output globals, as the "inner control root".
 /// digest1 and digest2 will be used to calculate a "claim digest", placed in the second output.
 #[cfg(test)]
-pub fn test_recursion_circuit(
+pub fn test_zkr(
     digest1: &Digest,
     digest2: &Digest,
     po2: usize,
@@ -253,8 +332,7 @@ pub fn test_recursion_circuit(
     let receipt = prover.run()?;
 
     // Read the claim digest from the second of the global output slots.
-    const DIGEST_SHORTS: usize = crate::sha::DIGEST_WORDS * 2;
-    let claim_digest = risc0_binfmt::read_sha_halfs(&mut VecDeque::from_iter(
+    let claim_digest = read_sha_halfs(&mut VecDeque::from_iter(
         bytemuck::checked::cast_slice::<_, BabyBearElem>(
             &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
         )
@@ -291,7 +369,7 @@ pub struct Prover {
 }
 
 impl Prover {
-    fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
+    pub(crate) fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
         Self {
             prover: risc0_circuit_recursion::prove::Prover::new(program, &opts.hashfn),
             control_id,
@@ -336,26 +414,41 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
+        let out_size = match segment.segment_version {
+            SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE,
+            SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::OUTPUT_SIZE,
+        };
+
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.
         let mut iop = ReadIOP::new(&segment.seal, inner_hash_suite.rng.as_ref());
-        iop.read_field_elem_slice::<BabyBearElem>(risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE);
+        iop.read_field_elem_slice::<BabyBearElem>(out_size);
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift(po2, &opts.hashfn)?;
+        let (program, control_id) = match segment.segment_version {
+            SegmentVersion::V1 => zkr::lift(po2, &opts.hashfn)?,
+            SegmentVersion::V2 => zkr::lift_rv32im_v2(po2, &opts.hashfn)?,
+        };
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
-        // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
-        let which = po2 - MIN_CYCLES_PO2;
-        let inner_control_id = POSEIDON2_CONTROL_IDS[which];
-        prover.add_seal(
-            &segment.seal,
-            &inner_control_id,
-            &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
-        )?;
+        match segment.segment_version {
+            SegmentVersion::V1 => {
+                // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
+                let which = po2 - MIN_CYCLES_PO2;
+                let inner_control_id = POSEIDON2_CONTROL_IDS[which];
+                prover.add_seal(
+                    &segment.seal,
+                    &inner_control_id,
+                    &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
+                )?;
+            }
+            SegmentVersion::V2 => {
+                prover.add_input(&segment.seal);
+            }
+        }
 
         Ok(prover)
     }
@@ -444,7 +537,7 @@ impl Prover {
             .as_value()
             .context("cannot resolve conditional receipt with pruned output")?
             .as_ref()
-            .ok_or(anyhow!("cannot resolve conditional receipt with no output"))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
             .clone();
 
         // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
@@ -456,9 +549,7 @@ impl Prover {
         let head: Assumption = assumptions
             .0
             .first()
-            .ok_or(anyhow!(
-                "cannot resolve conditional receipt with no assumptions"
-            ))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
             .as_value()
             .context("cannot resolve conditional receipt with pruned head assumption")?
             .clone();
@@ -505,7 +596,7 @@ impl Prover {
         Ok(prover)
     }
 
-    fn add_input(&mut self, input: &[u32]) {
+    pub(crate) fn add_input(&mut self, input: &[u32]) {
         self.prover.add_input(input)
     }
 

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 
 use clap::Parser;
+use risc0_circuit_keccak::{prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
 use risc0_circuit_recursion::zkr::{get_all_zkrs, get_zkr};
 use risc0_zkp::{
     core::{
@@ -38,6 +39,7 @@ pub struct Bootstrap;
 
 const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
+const CONTROL_ID_PATH_KECCAK: &str = "risc0/circuit/keccak/src/control_id.rs";
 
 const MIN_LIFT_PO2: usize = 14;
 
@@ -67,6 +69,14 @@ impl Bootstrap {
     pub fn run(&self) {
         let poseidon2_control_ids = Self::generate_rv32im_control_ids();
         Self::generate_recursion_control_ids(poseidon2_control_ids);
+        Self::bootstrap_keccak();
+    }
+
+    fn rustfmt(path: &str) {
+        Command::new("rustfmt")
+            .arg(path)
+            .status()
+            .expect("failed to format {path}");
     }
 
     fn generate_rv32im_control_ids() -> Vec<(String, Digest)> {
@@ -94,10 +104,7 @@ impl Bootstrap {
         std::fs::write(CONTROL_ID_PATH_RV32IM, contents).unwrap();
 
         // Use rustfmt to format the file.
-        Command::new("rustfmt")
-            .arg(CONTROL_ID_PATH_RV32IM)
-            .status()
-            .expect("failed to format {CONTROL_ID_PATH_RV32IM}");
+        Self::rustfmt(CONTROL_ID_PATH_RV32IM);
 
         // Return the control IDs that should be included in the allowed control IDs that are used
         // by default in segment receipt verification, and in forming the control root.
@@ -111,14 +118,26 @@ impl Bootstrap {
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
         // enabled by using a custom VerifierContext.
-        let allowed_zkr_names: HashSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
-            .map(str::to_string)
-            .into_iter()
-            .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
-            .collect();
+        let allowed_zkr_names: HashSet<String> =
+            ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
+                .map(str::to_string)
+                .into_iter()
+                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
+                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+                .collect();
 
-        tracing::info!("unzipping recursion programs (zkrs)");
+        tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
+
+        tracing::info!("Unzipping recursion programs (zkrs)");
         let zkrs = get_all_zkrs().unwrap();
+
+        tracing::info!(
+            "Unzipped zkrs list is {:#?}",
+            zkrs.iter()
+                .map(|(name, _)| name)
+                .cloned()
+                .collect::<Vec<_>>()
+        );
 
         let poseidon2_control_ids =
             Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
@@ -134,6 +153,7 @@ impl Bootstrap {
                     .map(|(name, digest)| (format!("recursion {name}"), *digest)),
             )
             .collect();
+        tracing::info!("Calculate allowed_control_ids {allowed_control_ids:#?}");
 
         // Calculate a Merkle root for the allowed control IDs and add it to the file.
         let merkle_group = MerkleGroup::new(
@@ -143,6 +163,7 @@ impl Bootstrap {
                 .collect(),
         )
         .unwrap();
+
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_control_root = merkle_group.calc_root(hashfn);
@@ -166,10 +187,7 @@ impl Bootstrap {
         std::fs::write(CONTROL_ID_PATH_RECURSION, contents).unwrap();
 
         // Use rustfmt to format the file.
-        Command::new("rustfmt")
-            .arg(CONTROL_ID_PATH_RECURSION)
-            .status()
-            .expect("failed to format {CONTROL_ID_PATH_RECURSION}");
+        Self::rustfmt(CONTROL_ID_PATH_RECURSION);
     }
 
     pub fn generate_recursion_control_ids_with_hash(
@@ -195,5 +213,41 @@ impl Bootstrap {
         let encoded_program = get_zkr("identity.zkr").unwrap();
         let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
         program.compute_control_id(Poseidon254HashSuite::new_suite())
+    }
+
+    fn bootstrap_keccak() {
+        let control_ids = Self::generate_keccak_control_ids();
+        let control_root = Self::generate_keccak_control_root(
+            control_ids.iter().map(|(_name, digest)| *digest).collect(),
+        );
+        let contents = format!(
+            include_str!("templates/control_id_keccak.rs"),
+            Self::format_control_ids(control_ids),
+            control_root
+        );
+        std::fs::write(CONTROL_ID_PATH_KECCAK, contents).unwrap();
+
+        // Use rustfmt to format the file.
+        Self::rustfmt(CONTROL_ID_PATH_KECCAK);
+    }
+
+    fn generate_keccak_control_ids() -> Vec<(String, Digest)> {
+        let mut ret = vec![];
+        for po2 in KECCAK_PO2_RANGE {
+            let program = get_keccak_zkr(po2).unwrap();
+            let hash_suite = Poseidon2HashSuite::new_suite();
+            ret.push((
+                format!("keccak_lift po2={po2}"),
+                program.compute_control_id(hash_suite),
+            ))
+        }
+        ret
+    }
+
+    fn generate_keccak_control_root(control_ids: Vec<Digest>) -> Digest {
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        let hashfn = hash_suite.hashfn.as_ref();
+        let group = MerkleGroup::new(control_ids).unwrap();
+        group.calc_root(hashfn)
     }
 }

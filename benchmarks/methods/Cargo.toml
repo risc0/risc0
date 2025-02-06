@@ -7,4 +7,4 @@ edition = "2021"
 methods = ["guest"]
 
 [build-dependencies]
-risc0-build = { workspace = true }
+risc0-build = { workspace = true, features = ["unstable"] }

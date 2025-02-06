@@ -17,7 +17,6 @@ export function Benchmarks() {
         dataSet: Map<string, FormattedDataSetEntry[]>;
       }[]
     >();
-  const [selectedPlatform, setSelectedPlatform] = useState<string>();
   const [names, setNames] = useState<string[]>();
   const [ready, setReady] = useState<boolean>(false);
 
@@ -28,9 +27,8 @@ export function Benchmarks() {
       return;
     }
 
-    setLastUpdate(new Date(data.lastUpdate).toLocaleString());
+    setLastUpdate(new Date(data.lastUpdate).toUTCString());
     setNames(Object.keys(data.entries));
-    setSelectedPlatform(Object.keys(data.entries)[0]);
   }, [ready]);
 
   useEffect(() => {
@@ -65,12 +63,7 @@ export function Benchmarks() {
 
       <Separator className="mt-2" />
 
-      <BenchmarksContent
-        benchSet={benchSet}
-        names={names}
-        selectedPlatform={selectedPlatform}
-        setSelectedPlatform={setSelectedPlatform}
-      />
+      <BenchmarksContent benchSet={benchSet} names={names} />
 
       <FooterAscii text="Benchmarks" />
 

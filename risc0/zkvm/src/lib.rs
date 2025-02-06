@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@
 //! | client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
 //! | cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 //! | disable-dev-mode | all except rv32im |            | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
-//! | metal            | macos             | prove, std | Enables Metal GPU acceleration for the prover.                                                                                                               |
+//! | metal            | macos             | prove, std | Deprecated - Metal GPU acceleration for the prover is now enabled by default on Apple Silicon.                                                               |
 //! | prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 //! | std              | all               |            | Support for the Rust stdlib.                                                                                                                                 |
 //!
@@ -91,16 +91,21 @@ pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
-    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim, Unknown,
 };
-#[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub use {
     self::host::{
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
-        recursion::RECURSION_PO2,
+        recursion::{
+            prove::{prove_registered_zkr, prove_zkr, register_zkr},
+            RECURSION_PO2,
+        },
         server::{
-            exec::{compose::register_zkr, executor::ExecutorImpl},
+            exec::{executor::ExecutorImpl, executor2::Executor2},
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -113,22 +118,40 @@ pub use {
         docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
     },
 };
-#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "bonsai")]
+pub use self::host::client::prove::bonsai::BonsaiProver;
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
 pub use {
     self::host::{
         api::{
-            client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo,
+            client::Client as ApiClient, Asset, AssetRequest, Connector, RedisParams, SegmentInfo,
+            SessionInfo,
         },
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
-                bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-                Executor, Prover, ProverOpts, ReceiptKind,
+                default_executor, default_prover, external::ExternalProver, Executor, Prover,
+                ProverOpts, ReceiptKind,
             },
         },
     },
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+#[cfg(feature = "unstable")]
+pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+#[cfg(feature = "unstable")]
+pub use self::host::server::prove::keccak::prove_keccak;
+
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
@@ -140,14 +163,16 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
+#[cfg(feature = "std")]
+pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
+
 pub use receipt::{
-    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext, DEFAULT_MAX_PO2,
+    segment::SegmentVersion, AssumptionReceipt, CompositeReceipt,
+    CompositeReceiptVerifierParameters, FakeReceipt, Groth16Receipt,
+    Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt, Journal, Receipt,
+    ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
+    SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
-//#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 use semver::Version;
 
@@ -182,4 +207,26 @@ pub fn is_dev_mode() -> bool {
 fn metal_implies_prove() {
     // we should be able to access prove feature items when metal has been enabled
     let _prover = get_prover_server(&ProverOpts::default());
+}
+
+/// Compute and return the v2 ImageID of the specified ELF binary.
+#[cfg(feature = "client")]
+pub fn compute_image_id_v2(
+    user_id: impl Into<risc0_zkp::core::digest::Digest>,
+) -> Result<risc0_zkp::core::digest::Digest> {
+    let kernel_id: risc0_zkp::core::digest::Digest =
+        risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID.try_into()?;
+    risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
+}
+
+/// TODO(flaub)
+#[cfg(feature = "std")]
+#[stability::unstable]
+pub fn risc0_rv32im_ver() -> Option<SegmentVersion> {
+    let version = std::env::var("RISC0_RV32IM_VER").unwrap_or_default();
+    match version.as_str() {
+        "1" => Some(SegmentVersion::V1),
+        "2" => Some(SegmentVersion::V2),
+        _ => None,
+    }
 }

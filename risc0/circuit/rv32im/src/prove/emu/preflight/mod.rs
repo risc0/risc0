@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,37 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod bigint2;
 #[cfg(test)]
 mod tests;
 
-use std::collections::VecDeque;
+use std::{
+    collections::{BTreeMap, VecDeque},
+    io::Cursor,
+};
 
 use anyhow::{anyhow, bail, ensure, Result};
-use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
-use derive_debug::Dbg;
+use derive_more::Debug;
+use malachite::Natural;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
         digest::{Digest, DIGEST_WORDS},
         hash::sha::{BLOCK_WORDS, SHA256_INIT},
     },
+    hal::AccumPreflight,
     ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
-    syscall::{
-        bigint, ecall, halt,
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
-        IO_CHUNK_WORDS,
-    },
+    syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     WORD_SIZE,
 };
 use sha2::digest::generic_array::GenericArray;
 
+use self::bigint2::{
+    BytePolynomial, Instruction as Bi2Instruction, MemoryOp, PolyOp, ProgramState,
+};
 use super::{
+    bibc,
+    exec::bytes_le_to_bigint,
     mux::{Major, TopMux},
     pager::{PagedMemory, PAGE_WORDS},
     rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, Instruction, TrapCause},
-    ByteAddr, WordAddr, SHA_INIT, SHA_MAIN_FINI, SHA_MAIN_MIX, SYSTEM_START,
+    ByteAddr, WordAddr, BIGINT2_WIDTH_BYTES, BIGINT2_WIDTH_WORDS, SHA_INIT, SHA_MAIN_FINI,
+    SHA_MAIN_MIX, SYSTEM_START,
 };
 use crate::prove::{
     engine::loader::{
@@ -76,11 +83,11 @@ pub struct PreflightCycle {
     pub extra_idx: usize,
 }
 
-#[derive(Clone, Dbg, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MemoryTransaction {
     pub cycle: usize,
     pub addr: WordAddr,
-    #[dbg(fmt = "0x{:08x}")]
+    #[debug("${data:#010x}")]
     pub data: u32,
 }
 
@@ -97,6 +104,7 @@ pub struct PreflightStage {
 pub struct PreflightTrace {
     pub pre: PreflightStage,
     pub body: PreflightStage,
+    pub accum: AccumPreflight,
 }
 
 struct Preflight {
@@ -173,13 +181,13 @@ impl Preflight {
 
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
         let data = self.pager.load(addr);
-        // tracing::trace!("load_u32({addr:?}) -> 0x{data:08x}");
+        // tracing::trace!("load_u32({addr:?}) -> {data:#010x}");
         self.add_txn(false, addr, data);
         Ok(data)
     }
 
     fn store_u32(&mut self, addr: WordAddr, data: u32) -> Result<()> {
-        // tracing::trace!("store_u32({addr:?}, 0x{data:08x})");
+        // tracing::trace!("store_u32({addr:?}, {data:#010x})");
         self.pager.store(addr, data)
     }
 
@@ -353,6 +361,30 @@ impl Preflight {
         let data = self.pager.peek(addr)?;
         // tracing::trace!("peek({addr:?}) -> 0x{data:08x}");
         Ok(data)
+    }
+
+    fn peek_region(&self, base: WordAddr, u32_count: u32) -> Result<Vec<u8>> {
+        let mut region = Vec::new();
+        for i in 0..u32_count {
+            let addr = base + i;
+            let word = self.peek(addr)?;
+            for byte in word.to_le_bytes() {
+                region.push(byte);
+            }
+        }
+        Ok(region)
+    }
+
+    fn load_region(&mut self, base: WordAddr, u32_count: u32) -> Result<Vec<u8>> {
+        let mut region = Vec::with_capacity(u32_count as usize * WORD_SIZE);
+        for i in 0..u32_count {
+            let addr = base + i;
+            let word = self.load_u32(addr)?;
+            for byte in word.to_le_bytes() {
+                region.push(byte);
+            }
+        }
+        Ok(region)
     }
 
     fn record_load(&mut self, pre: bool, addr: WordAddr) -> Result<()> {
@@ -551,7 +583,7 @@ impl Preflight {
         let syscall = self
             .syscalls
             .pop_front()
-            .ok_or(anyhow!("Missing syscall record"))?;
+            .ok_or_else(|| anyhow!("Missing syscall record"))?;
         let (a0, a1) = syscall.regs;
 
         let stray_words = into_guest_len % IO_CHUNK_WORDS;
@@ -608,7 +640,7 @@ impl Preflight {
         Ok(true)
     }
 
-    fn peek_bigint(&mut self, idx: usize) -> Result<()> {
+    fn load_bigint(&mut self, idx: usize) -> Result<()> {
         let ptr = ByteAddr(self.load_register(idx)?).waddr();
         for i in 0..bigint::WIDTH_WORDS {
             self.load_u32(ptr + i)?;
@@ -631,9 +663,9 @@ impl Preflight {
         let y_ptr = ByteAddr(self.load_register(REG_A3)?).waddr();
         let n_ptr = ByteAddr(self.load_register(REG_A4)?).waddr();
         tracing::debug!("bigint(z: {z_ptr:?}, x: {x_ptr:?}, y: {y_ptr:?}, n {n_ptr:?}");
-        self.peek_bigint(REG_A2)?;
-        self.peek_bigint(REG_A3)?;
-        self.peek_bigint(REG_A4)?;
+        self.load_bigint(REG_A2)?;
+        self.load_bigint(REG_A3)?;
+        self.load_bigint(REG_A4)?;
         self.add_cycle(false, TopMux::Body(Major::BigInt, 0));
 
         let mut n = [0u32; bigint::WIDTH_WORDS];
@@ -650,39 +682,45 @@ impl Preflight {
                     let word = self.load_u32(ptr + offset + j)?;
                     arr[offset + j] = word.to_le();
                 }
-                self.peek_bigint(REG_A2)?;
-                self.peek_bigint(REG_A3)?;
-                self.peek_bigint(REG_A4)?;
+                self.load_bigint(REG_A2)?;
+                self.load_bigint(REG_A3)?;
+                self.load_bigint(REG_A4)?;
                 self.add_cycle(false, TopMux::Body(Major::BigInt, 0));
             }
         }
 
-        let n = U256::from_le_bytes(bytemuck::cast(n));
-        let x = U256::from_le_bytes(bytemuck::cast(x));
-        let y = U256::from_le_bytes(bytemuck::cast(y));
+        let n = Natural::from_limbs_asc(&n);
+        let x = Natural::from_limbs_asc(&x);
+        let y = Natural::from_limbs_asc(&y);
 
-        // Compute modular multiplication, or simply multiplication if n == 0.
-        let z: U256 = if n == U256::ZERO {
-            x.checked_mul(&y).unwrap()
+        // Perform multiplication or modular multiplication
+        let z = if n == 0 {
+            // If n == 0, just multiply
+            x * y
         } else {
-            let (w_lo, w_hi) = x.mul_wide(&y);
-            let w = w_hi.concat(&w_lo);
-            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
-            z.resize()
+            // Otherwise, compute (x * y) mod n
+            (x * y) % n
         };
 
-        tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
+        let out_limbs = z.into_limbs_asc();
+        let mut z_words = [0u32; bigint::WIDTH_WORDS];
+        // resize the z to bigint width
+        for i in 0..bigint::WIDTH_WORDS {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            z_words[i] = limb.to_le();
+        }
+
+        // tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
 
         // Store result.
-        let z: [u32; bigint::WIDTH_WORDS] = bytemuck::cast(z.to_le_bytes());
         for i in 0..2 {
-            self.peek_bigint(REG_A2)?;
-            self.peek_bigint(REG_A3)?;
-            self.peek_bigint(REG_A4)?;
+            self.load_bigint(REG_A2)?;
+            self.load_bigint(REG_A3)?;
+            self.load_bigint(REG_A4)?;
 
             let offset = i * BIGINT_IO_SIZE;
             for j in 0..BIGINT_IO_SIZE {
-                let word = z[offset + j].to_le();
+                let word = z_words[offset + j];
                 self.store_u32(z_ptr + offset + j, word)?;
             }
 
@@ -691,6 +729,181 @@ impl Preflight {
 
         self.pc += WORD_SIZE;
         Ok(true)
+    }
+
+    fn ecall_bigint2(&mut self) -> Result<bool> {
+        let cycle = self.trace.body.cycles.len();
+        tracing::debug!("[{cycle}] ecall_bigint2");
+
+        self.load_register(REG_T0)?;
+        let verify_program_ptr = ByteAddr(self.load_register(REG_T2)?).waddr();
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+
+        let blob_ptr = ByteAddr(self.peek_register(REG_A0)?).waddr();
+        let nondet_program_ptr = ByteAddr(self.peek_register(REG_T1)?).waddr();
+        let nondet_program_size = self.peek(blob_ptr)?;
+
+        let verify_program_bytes = self.peek_region(nondet_program_ptr, nondet_program_size)?;
+        let mut cursor = Cursor::new(verify_program_bytes);
+        let program = bibc::Program::decode(&mut cursor)?;
+
+        let mut io = BigInt2Witness::new(self);
+        program.eval(&mut io)?;
+
+        let witness = std::mem::take(&mut io.witness);
+        self.bigint2_eval(verify_program_ptr, &witness)?;
+
+        self.pc += WORD_SIZE;
+        Ok(true)
+    }
+
+    fn bigint2_eval(
+        &mut self,
+        mut program_ptr: WordAddr,
+        witness: &BTreeMap<WordAddr, u32>,
+    ) -> Result<()> {
+        let mut state = ProgramState::new();
+
+        // first cycle
+        self.bigint2_cycle(&mut state, &Bi2Instruction::first(), witness)?;
+
+        // program loop
+        loop {
+            let insn = Bi2Instruction::decode(self.load_u32(program_ptr)?)?;
+            self.bigint2_cycle(&mut state, &insn, witness)?;
+            if insn.poly_op == PolyOp::End {
+                break;
+            }
+
+            program_ptr += 1u32;
+        }
+
+        Ok(())
+    }
+
+    fn bigint2_cycle(
+        &mut self,
+        state: &mut ProgramState,
+        insn: &Bi2Instruction,
+        witness: &BTreeMap<WordAddr, u32>,
+    ) -> Result<()> {
+        tracing::debug!("{insn:?}");
+
+        let mut ret = [0; BIGINT2_WIDTH_BYTES];
+
+        let base = ByteAddr(self.load_register(insn.reg as usize)?).waddr();
+        let addr = base + insn.offset * BIGINT2_WIDTH_WORDS as u32;
+
+        if insn.mem_op == MemoryOp::Nop && insn.poly_op != PolyOp::End {
+            if !state.in_carry {
+                state.in_carry = true;
+                state.total_carry = state.total.clone();
+                let mut carry = 0;
+
+                // Do carry propagation
+                for coeff in state.total_carry.coeffs.iter_mut() {
+                    *coeff += carry;
+                    ensure!(*coeff % 256 == 0, "bad carry");
+                    *coeff /= 256;
+                    carry = *coeff;
+                }
+                tracing::debug!("carry propagate complete");
+            }
+
+            let base_point = 128 * 256 * 64;
+            for (i, ret) in ret.iter_mut().enumerate() {
+                let offset = insn.offset as usize;
+                let coeff = state.total_carry.coeffs[offset * BIGINT2_WIDTH_BYTES + i] as u32;
+                let value = coeff.wrapping_add(base_point);
+                match insn.poly_op {
+                    PolyOp::Carry1 => *ret = (value >> 14) & 0xff,
+                    PolyOp::Carry2 => *ret = (value >> 8) & 0x3f,
+                    PolyOp::Shift | PolyOp::EqZero => *ret = value & 0xff,
+                    _ => {
+                        bail!("Invalid poly_op in bigint2 program")
+                    }
+                }
+            }
+        } else if insn.mem_op == MemoryOp::Read {
+            let bytes = self.load_region(addr, BIGINT2_WIDTH_WORDS as u32)?;
+            for (i, byte) in bytes.iter().enumerate() {
+                ret[i] = (*byte) as u32;
+            }
+        } else if !addr.is_null() {
+            for i in 0..BIGINT2_WIDTH_WORDS {
+                let addr = addr + i;
+                let word = witness
+                    .get(&addr)
+                    .ok_or_else(|| anyhow!("Missing bigint2 witness: {addr:?}"))?;
+                for (j, byte) in word.to_le_bytes().iter().enumerate() {
+                    ret[i * WORD_SIZE + j] = (*byte) as u32;
+                }
+                if insn.mem_op == MemoryOp::Write {
+                    self.store_u32(addr, *word)?;
+                }
+            }
+        }
+
+        let delta_poly =
+            BytePolynomial::new(bytemuck::cast::<_, [i32; BIGINT2_WIDTH_BYTES]>(ret).as_slice());
+        state.update(insn, &delta_poly)?;
+
+        if insn.mem_op != MemoryOp::Read {
+            for i in 0..BIGINT2_WIDTH_WORDS {
+                let word = ret[i * WORD_SIZE]
+                    | (ret[i * WORD_SIZE + 1] << 8)
+                    | (ret[i * WORD_SIZE + 2] << 16)
+                    | (ret[i * WORD_SIZE + 3] << 24);
+                self.add_extra(false, word);
+            }
+        }
+
+        self.add_cycle(false, TopMux::Body(Major::BigInt2, 0));
+
+        Ok(())
+    }
+}
+
+struct BigInt2Witness<'a> {
+    preflight: &'a mut Preflight,
+    pub witness: BTreeMap<WordAddr, u32>,
+}
+
+impl<'a> BigInt2Witness<'a> {
+    pub fn new(preflight: &'a mut Preflight) -> Self {
+        Self {
+            preflight,
+            witness: BTreeMap::new(),
+        }
+    }
+}
+
+impl bibc::BigIntIO for BigInt2Witness<'_> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
+        // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+        let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
+        let bytes = self
+            .preflight
+            .peek_region(addr.waddr(), count / WORD_SIZE as u32)?;
+        Ok(bytes_le_to_bigint(&bytes))
+    }
+
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
+        let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
+        // tracing::debug!(
+        //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
+        // );
+
+        let addr = addr.waddr();
+        let out_limbs = value.to_limbs_asc();
+        for i in 0..count as usize / WORD_SIZE {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            self.witness.insert(addr + i, limb.to_le());
+        }
+
+        Ok(())
     }
 }
 
@@ -704,6 +917,7 @@ impl EmuContext for Preflight {
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
+            ecall::BIGINT2 => self.ecall_bigint2(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }
@@ -799,6 +1013,30 @@ impl Segment {
             preflight.pager.commit_step();
         }
         preflight.post_steps()?;
+
+        fn is_par_safe(mux: &TopMux) -> u8 {
+            if *mux == TopMux::Body(Major::BigInt2, 0) {
+                0
+            } else {
+                1
+            }
+        }
+
+        preflight.trace.accum.is_par_safe = preflight
+            .trace
+            .pre
+            .cycles
+            .iter()
+            .map(|x| is_par_safe(&x.mux))
+            .chain(
+                preflight
+                    .trace
+                    .body
+                    .cycles
+                    .iter()
+                    .map(|x| is_par_safe(&x.mux)),
+            )
+            .collect();
 
         Ok(preflight.trace)
     }

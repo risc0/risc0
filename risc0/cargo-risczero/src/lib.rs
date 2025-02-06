@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,64 +18,66 @@
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 mod commands;
-mod toolchain;
 mod utils;
 
-#[cfg(feature = "experimental")]
-pub use self::commands::build::BuildSubcommand;
+use clap::{Args, Parser, Subcommand};
 
-use clap::{Parser, Subcommand};
-
-#[cfg(feature = "experimental")]
-use self::commands::build::BuildCommand;
 use self::commands::{
-    build_guest::BuildGuest, build_toolchain::BuildToolchain, datasheet::Datasheet,
-    deploy::DeployCommand, install::Install, new::NewCommand, verify::VerifyCommand,
+    bake::BakeCommand, build::BuildCommand, build_toolchain::BuildToolchainCommand,
+    datasheet::DatasheetCommand, deploy::DeployCommand, install::InstallCommand, new::NewCommand,
+    verify::VerifyCommand,
 };
 
 #[derive(Parser)]
 #[command(name = "cargo", bin_name = "cargo")]
 /// Main cargo command
-pub enum Cargo {
+pub enum CargoCli {
     /// The `risczero` command
-    Risczero(Risczero),
+    Risczero(RisczeroArgs),
 }
 
-#[derive(clap::Args)]
+#[derive(Args)]
 #[command(author, version, about, long_about = None)]
 #[non_exhaustive]
 /// `cargo risczero`
-pub struct Risczero {
+pub struct RisczeroArgs {
     #[clap(subcommand)]
     /// Which `risczero` command to run
-    pub command: RisczeroCmd,
+    pub command: Commands,
 }
 
 #[derive(Subcommand)]
 #[non_exhaustive]
 /// Primary commands  of `cargo risczero`.
-pub enum RisczeroCmd {
+pub enum Commands {
+    /// Bake guest code.
+    Bake(BakeCommand),
+
     /// Build guest code.
-    Build(BuildGuest),
+    Build(BuildCommand),
+
     /// Build the riscv32im-risc0-zkvm-elf toolchain.
-    BuildToolchain(BuildToolchain),
-    /// Install the riscv32im-risc0-zkvm-elf toolchain.
-    Install(Install),
+    BuildToolchain(BuildToolchainCommand),
+
     /// Perform a benchmark to evaluate zkVM performance for this machine's
     /// hardware.
-    Datasheet(Datasheet),
-    /// Creates a new risczero starter project.
-    New(NewCommand),
+    Datasheet(DatasheetCommand),
+
     /// Uploads the guest code to Bonsai.
     Deploy(DeployCommand),
+
+    /// Guest commands
+    #[cfg(feature = "experimental")]
+    Guest(commands::guest::GuestCommand),
+
+    /// Install the riscv32im-risc0-zkvm-elf toolchain.
+    Install(InstallCommand),
+
+    /// Creates a new risczero starter project.
+    New(NewCommand),
+
     /// Verifies if a receipt is valid.
     Verify(VerifyCommand),
-    /// Build a crate for RISC Zero.
-    #[cfg(feature = "experimental")]
-    BuildCrate(BuildCommand),
-    /// Build and test a crate for RISC Zero.
-    #[cfg(feature = "experimental")]
-    Test(BuildCommand),
 }
 
 #[cfg(test)]
@@ -86,6 +88,6 @@ mod tests {
 
     #[test]
     fn verify_app() {
-        Cargo::command().debug_assert();
+        CargoCli::command().debug_assert();
     }
 }

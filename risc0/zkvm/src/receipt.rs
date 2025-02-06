@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 pub use self::{
     composite::{CompositeReceipt, CompositeReceiptVerifierParameters},
-    segment::{SegmentReceipt, SegmentReceiptVerifierParameters},
+    segment::{SegmentReceipt, SegmentReceiptVerifierParameters, SegmentVersion},
     succinct::{SuccinctReceipt, SuccinctReceiptVerifierParameters},
 };
 
@@ -329,7 +329,7 @@ impl InnerReceipt {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Groth16(inner) => inner.verify_integrity(),
+            Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity(),
         }
@@ -493,16 +493,6 @@ impl AssumptionReceipt {
             Self::Unresolved(assumption) => Ok(assumption.claim),
         }
     }
-
-    #[cfg(feature = "prove")]
-    pub(crate) fn into_receipt(self) -> Result<InnerAssumptionReceipt> {
-        match self {
-            Self::Proven(receipt) => Ok(receipt),
-            Self::Unresolved(_) => Err(anyhow::anyhow!(
-                "no receipt available for unresolved assumption"
-            )),
-        }
-    }
 }
 
 impl From<Receipt> for AssumptionReceipt {
@@ -600,7 +590,7 @@ impl InnerAssumptionReceipt {
         tracing::debug!("InnerAssumptionReceipt::verify_integrity_with_context");
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Groth16(inner) => inner.verify_integrity(),
+            Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity(),
         }
@@ -723,11 +713,12 @@ impl VerifierContext {
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
     #[stability::unstable]
-    pub fn from_max_po2(po2_max: usize) -> Self {
+    pub fn from_max_po2(po2_max: usize, segment_version: SegmentVersion) -> Self {
         Self {
             suites: Self::default_hash_suites(),
             segment_verifier_parameters: Some(SegmentReceiptVerifierParameters::from_max_po2(
                 po2_max,
+                segment_version,
             )),
             succinct_verifier_parameters: Some(SuccinctReceiptVerifierParameters::from_max_po2(
                 po2_max,
@@ -741,8 +732,8 @@ impl VerifierContext {
     /// Construct a verifier context that will accept receipts with control any of the default
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
-    pub fn all_po2s() -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    pub fn all_po2s(segment_version: SegmentVersion) -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
     }
 
     /// Return [VerifierContext] with the given map of hash suites.
@@ -788,6 +779,12 @@ impl VerifierContext {
             succinct: self.succinct_verifier_parameters.as_ref()?.clone().into(),
             groth16: self.groth16_verifier_parameters.as_ref()?.clone().into(),
         })
+    }
+
+    /// TODO(flaub)
+    #[stability::unstable]
+    pub fn for_version(segment_version: SegmentVersion) -> Self {
+        Self::from_max_po2(DEFAULT_MAX_PO2, segment_version)
     }
 }
 

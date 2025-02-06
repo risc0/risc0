@@ -7,6 +7,14 @@ export const VERSIONS = [
     value: "main", // value is the branch name on github
   },
   {
+    label: "1.2",
+    value: "release-1.2", // value is the branch name on github
+  },
+  {
+    label: "1.1",
+    value: "release-1.1", // value is the branch name on github
+  },
+  {
     label: "1.0",
     value: "release-1.0", // value is the branch name on github
   },
@@ -16,4 +24,4 @@ export const VERSIONS = [
   },
 ];
 
-export const latestVersion = "release-1.0";
+export const latestVersion = "release-1.2";

@@ -53,6 +53,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
         // Use the zero digest as the control root, which indicates that the assumption is a zkVM
         // assumption to be verified with the same control root as the current execution.
         sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        #[allow(static_mut_refs)]
         ASSUMPTIONS_DIGEST.add(
             Assumption {
                 claim: claim_digest,
@@ -65,12 +66,13 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
     Ok(())
 }
 
-/// Verify that there exists a valid receipt with the specified [crate::ReceiptClaim].
+/// Verify that there exists a valid receipt with the specified [ReceiptClaim][crate::ReceiptClaim].
 ///
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
-/// [crate::ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
-/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
-/// potentially distinct guests can be combined into one. This feature is know as [composition].
+/// [ReceiptClaim][crate::ReceiptClaim]. Any party verifying the receipt produced by this execution
+/// can then be sure that the receipt verified by this call is also valid. In this way, multiple
+/// receipts from  potentially distinct guests can be combined into one. This feature is known as
+/// [composition].
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
@@ -96,6 +98,7 @@ pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError
         // Use the zero digest as the control root, which indicates that the assumption is a zkVM
         // assumption to be verified with the same control root as the current execution.
         sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        #[allow(static_mut_refs)]
         ASSUMPTIONS_DIGEST.add(
             Assumption {
                 claim: claim_digest,
@@ -164,6 +167,7 @@ impl std::error::Error for VerifyIntegrityError {}
 pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
     unsafe {
         sys_verify_integrity(claim.as_ref(), control_root.as_ref());
+        #[allow(static_mut_refs)]
         ASSUMPTIONS_DIGEST.add(
             Assumption {
                 claim,

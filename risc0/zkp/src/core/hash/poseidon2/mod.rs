@@ -26,10 +26,13 @@ use risc0_core::field::{
     Elem, ExtElem,
 };
 
-use self::consts::{M_INT_DIAG_HZN, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS};
-pub use self::{consts::CELLS, rng::Poseidon2Rng};
 use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::{Digest, DIGEST_WORDS};
+
+pub use self::{
+    consts::{CELLS, M_INT_DIAG_HZN, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS},
+    rng::Poseidon2Rng,
+};
 
 /// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
 pub const CELLS_RATE: usize = 16;
@@ -160,7 +163,6 @@ fn multiply_by_m_ext(cells: &mut [BabyBearElem; CELLS]) {
         ];
         let out = multiply_by_4x4_circulant(&chunk_array);
         for j in 0..4 {
-            // let to_add = BabyBearElem::new_raw(1) * out[j];
             tmp_sums[j] += out[j];
             cells[i * 4 + j] += out[j];
         }
@@ -172,13 +174,13 @@ fn multiply_by_m_ext(cells: &mut [BabyBearElem; CELLS]) {
 
 fn full_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
     add_round_constants_full(cells, round);
-    if round == 0 {
-        tracing::trace!("After constants in full round 0: {cells:?}");
-    }
+    // if round == 0 {
+    //     tracing::trace!("After constants in full round 0: {cells:?}");
+    // }
 
     do_full_sboxes(cells);
     multiply_by_m_ext(cells);
-    tracing::trace!("After mExt in full round {round}: {cells:?}");
+    // tracing::trace!("After mExt in full round {round}: {cells:?}");
 }
 
 fn partial_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
@@ -193,7 +195,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
 
     // First linear layer.
     multiply_by_m_ext(cells);
-    tracing::trace!("After initial mExt: {cells:?}");
+    // tracing::trace!("After initial mExt: {cells:?}");
 
     // Do initial full rounds
     for _i in 0..ROUNDS_HALF_FULL {
@@ -205,7 +207,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
         partial_round(cells, round);
         round += 1;
     }
-    tracing::trace!("After partial rounds: {cells:?}");
+    // tracing::trace!("After partial rounds: {cells:?}");
     // Do remaining full rounds
     for _i in 0..ROUNDS_HALF_FULL {
         full_round(cells, round);

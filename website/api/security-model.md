@@ -60,11 +60,11 @@ The first question is about the **soundness** of the protocol, and the second qu
 
 Soundness is often quantified in terms of "[bits]" — our [on-chain verifier contracts][Verifier Contract] target 97 bits of security.
 
-| Prover                | Cryptographic Assumptions                                                                                                                     | Bits of Security | Quantum Safe? |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------- |
-| RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 97               | Yes           |
-| Recursion Prover      | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 99               | Yes           |
-| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption <br/> - Integrity of Groth16 Trusted Setup Ceremony | 99+              | No            |
+| Prover                | Cryptographic Assumptions                                                                                                                       | Bits of Security | Quantum Safe? |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------- |
+| RISC-V Prover         | - Random Oracle Model <br /> - Toy Problem Conjecture                                                                                           | 97               | Yes           |
+| Recursion Prover      | - Random Oracle Model <br /> - Toy Problem Conjecture                                                                                           | 99               | Yes           |
+| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br /> - Knowledge of Exponent assumption <br /> - Integrity of Groth16 Trusted Setup Ceremony | 99+              | No            |
 
 The Toy Problem conjecture, specified in detail in the [ethSTARK documentation], says that the best known attack on STARK proof systems is the best possible attack.
 
@@ -98,11 +98,11 @@ This primitive has been heavily battle-tested; it has been included as a precomp
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-[10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
 [05/20/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/circuits/hexens_v1c_stark2snark_20240520.pdf
 [06/05/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/contracts/hexens_verifiercontract_20240605.pdf
+[10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
-[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
+[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [deterministically]: /terminology#deterministic-builds

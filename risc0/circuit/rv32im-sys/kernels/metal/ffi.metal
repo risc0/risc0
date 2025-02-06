@@ -14,6 +14,8 @@
 
 #include "kernels.h"
 
+#include "context.h"
+
 kernel void k_step_exec(device void* ctx,
                         const device uint32_t& steps,
                         uint32_t cycle [[thread_position_in_grid]],
@@ -55,7 +57,13 @@ kernel void k_step_compute_accum(device void* ctx,
                                  device Fp* arg2,
                                  device Fp* arg3,
                                  device Fp* arg4) {
-  step_compute_accum(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+  device AccumContext* actx = static_cast<device AccumContext*>(ctx);
+  if (cycle == 0 || actx->isParSafe[cycle]) {
+    step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
+    while (cycle < steps && !actx->isParSafe[cycle]) {
+      step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
+    }
+  }
 }
 
 kernel void k_step_verify_accum(device void* ctx,

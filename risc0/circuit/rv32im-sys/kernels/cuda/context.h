@@ -21,7 +21,7 @@
 #include <thrust/tuple.h>
 
 constexpr size_t kBabyBearExtSize = 4;
-constexpr size_t kMaxRamRowsPerCycle = 5;
+constexpr size_t kMaxRamRowsPerCycle = 6;
 constexpr size_t kMaxBytePairsPerCycle = 21;
 constexpr uint32_t kInvalidPattern = 0xffffffff;
 
@@ -88,4 +88,5 @@ struct MachineContext {
 struct AccumContext {
   FpExt* ram;
   FpExt* bytes;
+  uint8_t* isParSafe;
 };

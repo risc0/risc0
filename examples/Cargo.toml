@@ -11,13 +11,15 @@ members = [
   "composition",
   "digital-signature",
   "digital-signature/core",
-  "ecdsa",
+  "ecdsa/k256",
+  "ecdsa/p256",
   "groth16-verifier",
   "hello-world",
   "json",
   "json/core",
   "jwt-validator",
   "jwt-validator/core",
+  "keccak",
   "password-checker",
   "password-checker/core",
   "profiling",
@@ -34,8 +36,6 @@ members = [
   "wordle",
   "wordle/core",
   "xgboost",
-  "zkevm-demo",
-  "zkevm-demo/core",
 ]
 
 # Always optimize; otherwise tests take excessively long.

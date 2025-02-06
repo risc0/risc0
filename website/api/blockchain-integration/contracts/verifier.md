@@ -31,19 +31,26 @@ In this example, the `IS_EVEN` zkVM program verifies that the number, `x`, is ev
 By verifying a receipt with the [image ID][term-image-id] of that program, it is guaranteed that the stored number will always be even.
 RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally impossible to produce a verifying receipt for an odd number.
 
-## Deployed Verifiers
+## Verifier Implementations
 
 All of our deployed verifier contracts implement the [IRiscZeroVerifier][IRiscZeroVerifier] interface.
-It is recommended that you use the [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol], described below.
 
-### Verifier Router
+We deploy a base verifier implementation, the emergency stop wrapper, and the router as part of our [version management design][version-management].
+It is recommended that most applications use [RiscZeroVerifierRouter](#verifier-router).
+In some cases, your application may wish to make calls directly to either the emergency stop wrapper, or the base implementation.
+
+:::tip
+It is recommended that you use the [RiscZeroVerifierRouter](#verifier-router)
+:::
+
+## Verifier Router
 
 Calls to `RiscZeroVerifierRouter.verify()` will be routed to the appropriate base verifier contract depending on which version of the zkVM was used to generate the receipt.
 By using the `RiscZeroVerifierRouter`, your contract can accept multiple types of receipts, including batch-verified receipts and receipts generated with future improvements to the zkVM and proofs system.
 
 RISC Zero deploys and manages the `RiscZeroVerifierRouter` contract listed below.
 This contract will have verifiers added for each release of the zkVM, and will have verifiers removed in the case of security vulnerabilities.
-You can find detailed information in the [version management design][VersionManagement], including information about how to manage your own copy of the smart contracts, if your application requires it.
+You can find detailed information in the [version management design][version-management], including information about how to manage your own copy of the smart contracts, if your application requires it.
 
 ### Contract Addresses
 
@@ -52,17 +59,16 @@ Contracts are not deployed for unreleased versions.
 You can use the [deployed contracts for a released version][doc-released-contracts].
 :::
 
-<!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
+{/* TODO: Move this example into risc0-ethereum such that it will be under the same version management */}
 
 [doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
-[RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierRouter.sol
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
-[VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
+[version-management]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/version-management-design.md

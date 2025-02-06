@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@ use alloc::{
 use core::arch::asm;
 
 use getrandom::getrandom;
-use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
+use risc0_circuit_keccak::KeccakState;
+use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
-        env::{self, FdReader, FdWriter, Read as _, Write as _},
+        env::{self, testing::sha_single_keccak, FdReader, FdWriter, Read as _, Write as _},
         memory_barrier, sha,
     },
-    sha::{Digest, Sha256},
+    sha::{Digest, Sha256, SHA256_INIT},
     Assumption, ReceiptClaim,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
@@ -40,13 +41,41 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_execute_zkr, sys_exit, sys_fork, sys_log, sys_pipe, sys_read,
-        sys_read_words, sys_write,
+        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
 
 risc0_zkvm::entry!(main);
+
+const KECCAK_UPDATE: KeccakState = [
+    0xF1258F7940E1DDE7,
+    0x84D5CCF933C0478A,
+    0xD598261EA65AA9EE,
+    0xBD1547306F80494D,
+    0x8B284E056253D057,
+    0xFF97A42D7F8E6FD4,
+    0x90FEE5A0A44647C4,
+    0x8C5BDA0CD6192E76,
+    0xAD30A6F71B19059C,
+    0x30935AB7D08FFC64,
+    0xEB5AA93F2317D635,
+    0xA9A6E6260D712103,
+    0x81A57C16DBCF555F,
+    0x43B831CD0347C826,
+    0x01F22F1A11A5569F,
+    0x05E5635A21D9AE61,
+    0x64BEFEF28CC970F2,
+    0x613670957BC46611,
+    0xB87C5A554FD00ECB,
+    0x8C3EE88A1CCF32C8,
+    0x940C7922AE3A2614,
+    0x1841F924A2C509E4,
+    0x16F53526E70465C2,
+    0x75F644E97F30A13B,
+    0xEAF1FF7B5CECA249,
+];
 
 #[inline(never)]
 #[no_mangle]
@@ -297,23 +326,26 @@ fn main() {
         MultiTestSpec::OutOfBoundsEcall => unsafe {
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x0,
-                in("x11") 0x0,
-                in("x12") 0x0,
-                in("x13") 0x0,
-                in("x14") 10000,
+                in("t0") ecall::SHA,
+                in("a0") 0x0,
+                in("a1") 0x0,
+                in("a2") 0x0,
+                in("a3") 0x0,
+                in("a4") 10000,
             );
         },
         MultiTestSpec::TooManySha => unsafe {
+            let out_state = [0u32; DIGEST_WORDS];
+            let in_state = [0u32; DIGEST_WORDS];
+            let block = [0u32; 2 * DIGEST_WORDS];
             asm!(
                 "ecall",
-                in("x5") 3,
-                in("x10") 0x400,
-                in("x11") 0x400,
-                in("x12") 0x400,
-                in("x13") 0x400,
-                in("x14") 10000,
+                in("t0") ecall::SHA,
+                in("a0") out_state.as_ptr(),
+                in("a1") in_state.as_ptr(),
+                in("a2") block.as_ptr(),
+                in("a3") block.as_ptr().add(DIGEST_WORDS),
+                in("a4") 10000,
             );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {
@@ -412,17 +444,129 @@ fn main() {
                 env::log("Done running control");
             }
         }
-        MultiTestSpec::SysExecuteZkr {
+        MultiTestSpec::SysProveZkr {
             control_id,
             input,
             claim_digest,
             control_root,
         } => {
             unsafe {
-                sys_execute_zkr(control_id.as_ref(), input.as_ptr(), input.len());
+                sys_prove_zkr(
+                    claim_digest.as_ref(),
+                    control_id.as_ref(),
+                    control_root.as_ref(),
+                    input.as_ptr(),
+                    input.len(),
+                );
             }
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::SysKeccak => {
+            // Test vectors are from KeccakCodePackage
+            let mut state = KeccakState::default();
+
+            unsafe { sys_keccak(&state, &mut state) };
+
+            assert_eq!(state, KECCAK_UPDATE);
+
+            unsafe { sys_keccak(&state, &mut state) };
+
+            assert_eq!(
+                state,
+                [
+                    0x2D5C954DF96ECB3C,
+                    0x6A332CD07057B56D,
+                    0x093D8D1270D76B6C,
+                    0x8A20D9B25569D094,
+                    0x4F9C4F99E5E7F156,
+                    0xF957B9A2DA65FB38,
+                    0x85773DAE1275AF0D,
+                    0xFAF4F247C3D810F7,
+                    0x1F1B9EE6F79A8759,
+                    0xE4FECC0FEE98B425,
+                    0x68CE61B6B9CE68A1,
+                    0xDEEA66C4BA8F974F,
+                    0x33C43D836EAFB1F5,
+                    0xE00654042719DBD9,
+                    0x7CF8A9F009831265,
+                    0xFD5449A6BF174743,
+                    0x97DDAD33D8994B40,
+                    0x48EAD5FC5D0BE774,
+                    0xE3B8C8EE55B7B03C,
+                    0x91A0226E649E42E9,
+                    0x900E3129E7BADD7B,
+                    0x202A9EC5FAA3CCE8,
+                    0x5B3402464E1C3DB6,
+                    0x609F4E62A44C1059,
+                    0x20D06CD26A8FBF5C,
+                ]
+            );
+        }
+        MultiTestSpec::ShaSingleKeccak => {
+            let mut sha_state = SHA256_INIT;
+            let mut keccak_state = KeccakState::default();
+            unsafe { sys_keccak(&keccak_state, &mut keccak_state) };
+            sha_single_keccak(&mut sha_state, &keccak_state);
+            assert_eq!(
+                sha_state,
+                digest!("60ad7130b65fa874a29b3f44aeb6f46bb57cc45aa7f4a9a8db8ab4d378a66f06")
+            );
+
+            sha_single_keccak(&mut sha_state, &keccak_state);
+            assert_eq!(
+                sha_state,
+                digest!("d72929ecbe90afdba8444f4b4e4dae6a3cb0465f67ee5dc12321a390dc7911b3")
+            );
+        }
+        MultiTestSpec::KeccakUpdate => {
+            let mut state = KeccakState::default();
+            env::risc0_keccak_update(&mut state);
+            assert_eq!(state, KECCAK_UPDATE);
+        }
+        MultiTestSpec::KeccakUpdate2 => {
+            fn test_input() -> KeccakState {
+                let mut state = KeccakState::default();
+                let mut pows = 987654321_u64;
+                for part in state.as_mut_slice() {
+                    *part = pows;
+                    pows = pows.wrapping_mul(123456789);
+                }
+                state
+            }
+            let mut state = test_input();
+
+            env::risc0_keccak_update(&mut state);
+            assert_eq!(
+                state,
+                [
+                    0xd79e8c6b59a6985b,
+                    0xbd19ccee63a9d40,
+                    0xa0a6df6a1793fd20,
+                    0x6f5e7d6a579ba02d,
+                    0x6ff99cb37183ea75,
+                    0x4a7736b846248f01,
+                    0xed6d5dac353f6586,
+                    0xa59ea1c9373e19f7,
+                    0x2a82c3bd8daf69db,
+                    0x7e49515cc085cfcb,
+                    0xf65fb55c8584c54c,
+                    0xf89d733d89b147df,
+                    0xeb85471d7cbcad68,
+                    0x2786372c23d217c,
+                    0xac0b725dc2443591,
+                    0x1cad0517091d449d,
+                    0x6afd9494cb125e27,
+                    0x74fb209306e9daa0,
+                    0x352c0570fa607115,
+                    0xc1b2b78e8fd1ab23,
+                    0x661c47f949651c0d,
+                    0x91bdd8d5e378e77a,
+                    0xdbaf74e7812a697b,
+                    0xe4458a47859ad246,
+                    0xd5f9328619cd99f7
+                ]
+            );
         }
     }
 }

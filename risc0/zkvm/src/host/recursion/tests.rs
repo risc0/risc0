@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,28 +14,44 @@
 
 use std::collections::VecDeque;
 
+use anyhow::Result;
 use risc0_binfmt::tagged_struct;
-use risc0_circuit_recursion::CircuitImpl;
+use risc0_circuit_recursion::{
+    prove::{poseidon254_hal_pair, poseidon2_hal_pair},
+    CircuitImpl,
+};
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::digest::{digest, Digest, DIGEST_WORDS},
+    core::digest::{digest, Digest, DIGEST_SHORTS},
     field::baby_bear::BabyBearElem,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use test_log::test;
+use risc0_zkvm_methods::{
+    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
+};
+use rstest::rstest;
+use rstest_reuse::{apply, template};
 
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
-    default_prover, get_prover_server,
+    compute_image_id_v2, default_prover, get_prover_server,
+    host::server::exec::executor2::Executor2,
     receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
-    ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session,
-    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
-    RECURSION_PO2,
+    ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, SegmentVersion,
+    Session, SimpleSegmentRef, SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext,
+    ALLOWED_CONTROL_ROOT, RECURSION_PO2,
 };
-use risc0_circuit_recursion::prove::{poseidon254_hal_pair, poseidon2_hal_pair};
 
-#[test]
+use SegmentVersion::{V1, V2};
+
+#[template]
+#[rstest]
+#[case(V1)]
+#[case(V2)]
+#[test_log::test]
+fn base(#[case] version: SegmentVersion) {}
+
+#[test_log::test]
 fn test_recursion_poseidon254() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -59,7 +75,6 @@ fn test_recursion_poseidon254() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
@@ -69,7 +84,7 @@ fn test_recursion_poseidon254() {
     assert_eq!(output_digest, expected_claim);
 }
 
-#[test]
+#[test_log::test]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -96,7 +111,6 @@ fn test_recursion_poseidon2() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
@@ -137,7 +151,7 @@ fn test_recursion_poseidon2() {
         .unwrap();
 }
 
-#[test]
+#[test_log::test]
 #[should_panic(expected = "assertion failed: elem.is_reduced()")]
 fn test_poseidon2_sanitized_inputs() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
@@ -162,7 +176,21 @@ fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
     Digest::try_from(words.as_slice()).unwrap()
 }
 
-fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
+fn execute_elf(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
+    match version {
+        V1 => ExecutorImpl::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+        V2 => Executor2::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+    }
+}
+
+fn generate_busy_loop_segments(
+    version: SegmentVersion,
+    hashfn: &str,
+) -> (Session, Vec<SegmentReceipt>) {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
     let env = ExecutorEnv::builder()
@@ -173,14 +201,14 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
         .unwrap();
 
     tracing::info!("Executing rv32im");
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-
-    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
+    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
+    let opts = ProverOpts::composite()
+        .with_hashfn(hashfn.to_string())
+        .with_segment_version(version);
     let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving rv32im");
-    let ctx = VerifierContext::default();
+    let ctx = opts.verifier_context();
     let segment_receipts = session
         .segments
         .iter()
@@ -192,15 +220,22 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     (session, segment_receipts)
 }
 
-#[test]
-fn test_recursion_lift_join_identity_e2e() {
+fn multi_test_id(version: SegmentVersion) -> Digest {
+    match version {
+        V1 => MULTI_TEST_ID.into(),
+        V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+    }
+}
+
+#[apply(base)]
+fn test_recursion_lift_join_identity_e2e(#[case] version: SegmentVersion) {
     // Prove the base case
-    let (session, segments) = generate_busy_loop_segments("poseidon2");
+    let (session, segments) = generate_busy_loop_segments(version, "poseidon2");
 
     // Lift and join them all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
     tracing::info!("Lift claim = {:?}", rollup.claim);
-    let ctx = VerifierContext::default();
+    let ctx = VerifierContext::for_version(version);
     for receipt in &segments[1..] {
         let rec_receipt = lift(receipt).unwrap();
         tracing::info!("Lift claim = {:?}", rec_receipt.claim);
@@ -224,12 +259,13 @@ fn test_recursion_lift_join_identity_e2e() {
         InnerReceipt::Succinct(rollup),
         session.journal.unwrap().bytes,
     );
-    rollup_receipt.verify(MULTI_TEST_ID).unwrap();
+    rollup_receipt.verify(multi_test_id(version)).unwrap();
 }
 
-#[test]
-fn test_recursion_identity_sha256() {
-    let default_prover = get_prover_server(&ProverOpts::succinct()).unwrap();
+#[apply(base)]
+fn test_recursion_identity_sha256(#[case] version: SegmentVersion) {
+    let default_prover =
+        get_prover_server(&ProverOpts::succinct().with_segment_version(version)).unwrap();
 
     tracing::info!("Proving: echo 'hello'");
     let env = ExecutorEnv::builder()
@@ -292,9 +328,10 @@ fn test_recursion_identity_sha256() {
         .unwrap();
 }
 
-#[test]
-fn test_recursion_lift_resolve_e2e() {
-    let opts = ProverOpts::default();
+#[apply(base)]
+fn test_recursion_lift_resolve_e2e(#[case] version: SegmentVersion) {
+    let image_id = multi_test_id(version);
+    let opts = ProverOpts::default().with_segment_version(version);
     let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving: echo 'execution A'");
@@ -323,8 +360,8 @@ fn test_recursion_lift_resolve_e2e() {
         .add_assumption(assumption_receipt_a.clone())
         .add_assumption(assumption_receipt_b.clone())
         .write(&MultiTestSpec::SysVerify(vec![
-            (MULTI_TEST_ID.into(), b"execution A".to_vec()),
-            (MULTI_TEST_ID.into(), b"execution B".to_vec()),
+            (image_id, b"execution A".to_vec()),
+            (image_id, b"execution B".to_vec()),
         ]))
         .unwrap()
         .build()
@@ -343,24 +380,25 @@ fn test_recursion_lift_resolve_e2e() {
         composition_receipt.clone().journal.bytes,
     );
 
-    receipt.verify(MULTI_TEST_ID).unwrap();
+    receipt.verify(image_id).unwrap();
 
     // These tests take a long time. Since we have the composition receipt, test the prover trait's compress function
     let prover = default_prover();
 
-    let succinct_receipt = prover
-        .compress(&ProverOpts::default(), &composition_receipt)
+    let succinct_receipt = prover.compress(&opts, &composition_receipt).unwrap();
+    let ctx = VerifierContext::for_version(version);
+    succinct_receipt
+        .verify_with_context(&ctx, image_id)
         .unwrap();
-    succinct_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
-#[test]
+#[test_log::test]
 fn test_recursion_circuit() {
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-    super::test_recursion_circuit(&digest, &digest, RECURSION_PO2).unwrap();
+    super::test_zkr(&digest, &digest, RECURSION_PO2).unwrap();
 }
 
-#[test]
+#[test_log::test]
 fn test_po2_16() {
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
@@ -372,7 +410,7 @@ fn test_po2_16() {
     let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
     let control_root = control_tree.calc_root(suite.hashfn.as_ref());
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-    let receipt = super::test_recursion_circuit(&control_root, &digest, po2).unwrap();
+    let receipt = super::test_zkr(&control_root, &digest, po2).unwrap();
     let ctx = VerifierContext::empty()
         .with_suites(VerifierContext::default_hash_suites())
         .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
@@ -384,13 +422,13 @@ fn test_po2_16() {
     receipt.verify_integrity_with_context(&ctx).unwrap();
 }
 
-#[test]
+#[test_log::test]
 fn stable_root() {
     // This tests that none of the control IDs have changed unexpectedly.
     // If you have _intentionally_ changed control IDs, update this hash.
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("8b6dcf11d463ac455361b41fb3ed053febb817491bdea00fdb340e45013b852e")
+        digest!("ffe166017b1ab460995b45510524c60e3756344feff2414f44cda25c33a78058")
     );
 }

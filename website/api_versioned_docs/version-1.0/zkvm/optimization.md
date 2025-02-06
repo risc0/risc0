@@ -11,7 +11,7 @@ new approach.
 
 ## Background
 
-### What is the zkVM, really?
+### What Is the zkVM, Really?
 
 **The zkVM is essentially a CPU.**
 
@@ -21,7 +21,7 @@ implementation of an [x86] or [ARM] architecture. This biggest difference is
 that the zkVM is implemented with [arithmetic circuits], in software, instead of
 circuitry made from silicon and copper.
 
-### What is a "cycle"?
+### What Is a "Cycle"?
 
 Both in the zkVM and on physical CPUs, the cost of an operation is measured in
 "clock cycles".
@@ -34,7 +34,7 @@ a "cycle".
 **Proving times for the zkVM are directly related to the number of cycles in an
 execution.**
 
-## General techniques and advice
+## General Techniques and Advice
 
 **Start by applying general techniques and best practices for optimizing your
 code.**
@@ -44,7 +44,7 @@ covers a range of topics important to performance, and gives applicable advice
 for optimization. If you are new to optimization, or new to Rust, we recommend
 you read this guide.
 
-### Don't assume, measure.
+### Don't Assume, Measure.
 
 Performance is complex, in the zkVM as on a physical CPU.
 Don't assume you know what the bottlenecks are. Measure and experiment.
@@ -55,7 +55,7 @@ generally referred to as [Amdahl's Law][amdhal], and practically it means you
 shouldn't waste your time optimizing something that's not the taking a
 significant portion of execution time.
 
-### Measuring by printing to console
+### Measuring by Printing to Console
 
 Starting simple, measure by adding an `eprintln!` line to your guest code to
 measure how long an operation takes, and how many times it is called.
@@ -65,7 +65,7 @@ cycles that have occurred in your program.
 
 As an example:
 
-<!-- NOTE: Ignored since we do not yet have a way to test guest code in docs -->
+{/* NOTE: Ignored since we do not yet have a way to test guest code in docs */}
 
 ```rust no_run title="methods/guest/src/main.rs"
 # use risc0_zkvm::guest::env;
@@ -161,7 +161,7 @@ effect in the zkVM.
 See the [table in the appendix][appendix] for more information about cycle
 counts per operation.
 
-### Memory access costs one cycle, except when it doesn't
+### Memory Access Costs One Cycle, Except When It Doesn't
 
 [RISC-V operations] require data to be loaded from memory to [registers] before
 it can acted on (e.g. used as input to an `add`). It must also be written back
@@ -192,24 +192,27 @@ host; as a CPU would use a hard drive.
 
 The first time a page is accessed in a segment, it needs to be **paged-in**,
 loading it from the host. Confirming the page is correct, the guest verifies a
-Merkle inclusion proof for the page against the image ID. These hashing
-operations required take a number of cycles.
-
-**A page-in operation takes between 1094 and 5130 cycles; 1130 cycles on
-average.**
-
-The very first page-in takes longer, 5130 cycles, because it needs to traverse
-up the page table (i.e. Merkle tree) all the way to the root, which is equal to
-the image ID. Once a path is verified, it doesn't need to be hashed again, so
-most page-in operations only need to hash the leaf (i.e. data) page. If a
-program were to iterate over memory in sequence, it would cost on average 1130
-cycles per page, or 1.35 cycles per byte.
+Merkle inclusion proof for the page against the image ID. Note as well that the
+address of the program counter must be paged-in, as instructions are loaded
+from memory. These hashing operations required take a number of cycles.
 
 In order to support continuation after the segment ends (i.e. the zkVM
 "hibernates"), it needs to **page-out** pages that were modified. Paging-out
 takes the same number of operations as paging-in, so for the first time any
-given page is written to in a segment, there is a page-out cost of 1094 to 5130
-cycles.
+given page is written to in a segment, it is marked as "dirty". At the end
+of segment execution, every dirty page must be "paged-out" at a cost of 1094 to
+5130 cycles. An exception to this rule is the last segment, where no paging out
+occurs, since there will be no continuation from the last segment.
+
+**A page-in or page-out operation takes between 1094 and 5130 cycles; 1130
+cycles on average.**
+
+The very first page-in or page-out takes longer, 5130 cycles, because it needs
+to traverse up the page table (i.e. Merkle tree) all the way to the root, which
+is equal to the image ID. Once a path is verified, it doesn't need to be hashed
+again, so most page-in operations only need to hash the leaf (i.e. data) page.
+If a program were to iterate over memory in sequence, it would cost on average
+1130 cycles per page, or 1.35 cycles per byte.
 
 If, after profiling your application, you learn page-in and page-out operations
 are a significant overhead, you can optimize your application by reducing it's
@@ -218,7 +221,7 @@ locality and L1/2 cache usage. Using fewer pages, using the same page repeatedly
 instead of a random access pattern, and condensing the range of addresses
 accessed can all help reduce paging overhead. It's best to experiment.
 
-### The zkVM does not have native floating point operations
+### The Zkvm Does Not Have Native Floating Point Operations
 
 The RISC Zero zkVM does not implement the RISC-V floating point instructions. As
 a result, all floating point operations are emulated in software. In contrast to
@@ -227,7 +230,7 @@ integer operations that take 1-2 cycles, floating point operations can take
 
 **When possible, use integers instead of floating point numbers.**
 
-### Unaligned data access is significantly more expensive
+### Unaligned Data Access Is Significantly More Expensive
 
 CPUs define a standard size of data for operation; and this is referred to as a
 word. In RISC-V 32-bit ISA, the size of a word is 32 bits (4 bytes). Memory is
@@ -245,7 +248,7 @@ If you are defining structs that containing small primitive typed fields (e.g.
 paying extra care to the [alignment of those fields][alignment]. Additionally,
 if you are slicing into byte arrays, try to do so at word-aligned indices.
 
-### When reading data as raw bytes, use `env::read_slice`
+### When Reading Data as Raw Bytes, Use `env::read_slice`
 
 When reading input into the guest, [`env::read`] is the main API to use. It
 automatically deserializes the input bytes into structs, like in this [snippet
@@ -304,7 +307,7 @@ let env = ExecutorEnv::builder()
         .unwrap();
 ```
 
-### When you only need part of the input data, try Merklizing it
+### When You Only Need Part of the Input Data, Try Merklizing It
 
 Some programs only need part of the whole available data. [Where's
 Waldo][example-waldo] is an example of this. The full input is an image, but
@@ -318,7 +321,7 @@ the computation, consider splitting it into some notion of a chunks and building
 it as a Merkle tree. You can use the [code for Where's Waldo][waldo-merkle] as a
 starting point.
 
-### Cryptography in the guest can utilize accelerator circuits
+### Cryptography in the Guest Can Utilize Accelerator Circuits
 
 RISC Zero's riscv32im implementation includes a number of special purpose
 operations, including two "accelerators" for cryptographic functions: SHA-256
@@ -326,15 +329,15 @@ and [256-bit modular multiplication][bigint]. By implementing these operations
 directly in the "hardware" of the zkVM, programs that use these accelerators
 execute faster and can be proven with significantly less resources [^2].
 
-For more information about cryptography acceleration, [cryptography
-acceleration][acceleration].
+For more information about cryptography precompiles, [cryptography
+precompiles][precompiles].
 
 Using the accelerator, a SHA-256 compress operation typically takes 68 cycles
 per 64-byte block and 6 cycles to initialize. A 256-bit modular multiply takes
 10 cycles. This includes basic memory operation cycles, but does not include
 page-in or page-out operations that are triggered.
 
-### Memory access is synchronous
+### Memory Access Is Synchronous
 
 On a physical CPU, memory access is asynchronous to register operations; meaning
 arithmetic or logic operations on registers can run while the CPU is waiting for
@@ -347,7 +350,7 @@ In the zkVM, all memory operations are synchronous, regardless of if the data is
 currently paged-in. **Memory prefetching does not help (but can hurt) zkVM guest
 performance.**
 
-### All execution is single-threaded
+### All Execution Is Single-Threaded
 
 The zkVM has one core and one thread of execution. As a result, there is no need
 or use for multi-threading. **Using `async` routines, locking, or atomic
@@ -382,7 +385,7 @@ CUDA runtime needs to be installed. When building the zkVM from source, a
 compatible version of the CUDA toolkit needs to be installed on the build
 machine, and the `cuda` feature enabled.
 
-## TL;DR and quick wins
+## TL;DR and Quick Wins
 
 - [Profile your applications][profiling] to find where cycles are being spent.
 - Try different [compiler settings][profiles]
@@ -391,7 +394,7 @@ machine, and the `cuda` feature enabled.
   - Try setting `codegen-units = 1`.
 - When you need a map, use `BTreeMap` instead of `HashMap`.
 - When you need to hash data, use the [accelerated implementation of
-  SHA-256][acceleration].
+  SHA-256][precompiles].
 - Look for places where you are copying or (de)serializing data when not
   necessary.
 
@@ -412,21 +415,21 @@ cycle counts added.
 | JALR rd,rs1,offset  | Jump and Link Register             | rd ← pc + length(inst)pc ← (rs1 + offset) ∧ -2 | 1                                               |
 | BEQ rs1,rs2,offset  | Branch Equal                       | if rs1 = rs2 then pc ← pc + offset             | 1                                               |
 | BNE rs1,rs2,offset  | Branch Not Equal                   | if rs1 ≠ rs2 then pc ← pc + offset             | 1                                               |
-| BLT rs1,rs2,offset  | Branch Less Than                   | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BLT rs1,rs2,offset  | Branch Less Than                   | if rs1 \< rs2 then pc ← pc + offset            | 1                                               |
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 \< rs2 then pc ← pc + offset            | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
-| SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
-| SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
+| SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) \< sx(imm)                        | 1                                               |
+| SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) \< ux(imm)                        | 1                                               |
 | XORI rd,rs1,imm     | Xor Immediate                      | rd ← ux(rs1) ⊕ ux(imm)                         | 2                                               |
 | ORI rd,rs1,imm      | Or Immediate                       | rd ← ux(rs1) ∨ ux(imm)                         | 2                                               |
 | ANDI rd,rs1,imm     | And Immediate                      | rd ← ux(rs1) ∧ ux(imm)                         | 2                                               |
@@ -436,8 +439,8 @@ cycle counts added.
 | ADD rd,rs1,rs2      | Add                                | rd ← sx(rs1) + sx(rs2)                         | 1                                               |
 | SUB rd,rs1,rs2      | Subtract                           | rd ← sx(rs1) - sx(rs2)                         | 1                                               |
 | SLL rd,rs1,rs2      | Shift Left Logical                 | rd ← ux(rs1) « rs2                             | 1                                               |
-| SLT rd,rs1,rs2      | Set Less Than                      | rd ← sx(rs1) < sx(rs2)                         | 1                                               |
-| SLTU rd,rs1,rs2     | Set Less Than Unsigned             | rd ← ux(rs1) < ux(rs2)                         | 1                                               |
+| SLT rd,rs1,rs2      | Set Less Than                      | rd ← sx(rs1) \< sx(rs2)                        | 1                                               |
+| SLTU rd,rs1,rs2     | Set Less Than Unsigned             | rd ← ux(rs1) \< ux(rs2)                        | 1                                               |
 | XOR rd,rs1,rs2      | Xor                                | rd ← ux(rs1) ⊕ ux(rs2)                         | 2                                               |
 | SRL rd,rs1,rs2      | Shift Right Logical                | rd ← ux(rs1) » rs2                             | 2                                               |
 | SRA rd,rs1,rs2      | Shift Right Arithmetic             | rd ← sx(rs1) » rs2                             | 2                                               |
@@ -468,17 +471,16 @@ below.
 
 ---
 
-[^1]:
-    Here "sampling" is in quotes because the profiler actually captures the call
+[^1]: Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-    <!-- -->
+
+    1. It would be cost prohibitive to do so for all but quite short program
+       executions.
+    2. Introducing such heavy profiling would actually alter the performance
+       characteristics in significant ways.
+
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
@@ -487,11 +489,10 @@ below.
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
-[`counts`]: https://github.com/nnethercote/counts/
+[`counts`]: https://github.com/nnethercote/counts
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest/env/fn.read.html
-[acceleration]: ./acceleration.md
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [algorithm]: https://briansmith.org/ecc-inversion-addition-chains-01
 [alignment]: https://doc.rust-lang.org/reference/type-layout.html#the-alignment-modifiers
@@ -500,7 +501,7 @@ below.
 [arithmetic circuits]: /reference-docs/about-arithmetic-circuits
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
-[CBOR]: https://cbor.io/
+[CBOR]: https://cbor.io
 [continuation segments]: https://www.risczero.com/news/continuations
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
@@ -514,19 +515,20 @@ below.
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
-[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
+[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles
 [os-page]: https://en.wikipedia.org/wiki/Page_%28computer_memory%29
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
-[perf-book]: https://nnethercote.github.io/perf-book/
+[perf-book]: https://nnethercote.github.io/perf-book
 [pprof]: https://github.com/google/pprof
+[precompiles]: ./precompiles.md
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
 [RISC-V architecture]: /reference-docs/about-risc-v
-[RISC-V operations]: https://marks.page/riscv/
-[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+[RISC-V operations]: https://marks.page/riscv
+[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
+[snippet-bonsai-governance]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/examples/governance/methods/guest/src/bin/finalize_votes.rs#L86-L87
 [snippet-password-checker]: https://github.com/risc0/risc0/blob/release-1.0/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
 [waldo-merkle]: https://github.com/risc0/risc0/blob/release-1.0/examples/waldo/core/src/merkle.rs

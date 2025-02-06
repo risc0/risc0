@@ -33,5 +33,5 @@ where `$BROWSER` is one of
 - `firefox`
 - `safari`
 
-[Node.js]: https://nodejs.dev/en/learn/how-to-install-nodejs/
+[Node.js]: https://nodejs.org/en/learn/getting-started/how-to-install-nodejs
 [Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,151 +30,256 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("17d75c070f373f333bbbaf33a688bb74fc05670435cd5d6378d37b608448e300"), // rv32im po2=19
     digest!("f3cf1217485c403cea526b1e52e70835c31bdc6e3016ee12916f6c6561fc0977"), // rv32im po2=20
     digest!("4043ce1426811d4f0e6a9c27256d052513c95739e9b80c74f628f313c739b75c"), // rv32im po2=21
-    digest!("0e51536ec08ac01e42de3d2a0b2a552d8ff2c75e4ef2b5285eed23582a13ef5d"), // recursion identity.zkr
-    digest!("d7b56f6ef29d18203ac26960eb21160d60da6f1975124261fbe38d1364fa0e6b"), // recursion join.zkr
-    digest!("1131f74f290f9d52f9aa2e7343b0445dff1765597a1e1849ed5f3f0afaba9f4e"), // recursion lift_14.zkr
-    digest!("fa847f14bcdf7b75e75305209d29130bd07eb8387fe0f041e0d49c093a7b2564"), // recursion lift_15.zkr
-    digest!("27c51b1abd46313679ed653a53945c7790832f5dd1906032c02916185b51fb06"), // recursion lift_16.zkr
-    digest!("dbbe1a1ba268e716507e33528c843c3a63868f42bd236e71114d740b98f3690b"), // recursion lift_17.zkr
-    digest!("618a6e1264419228270fdd7236f0232f715e98697a46f532a3d5d96251a7fe75"), // recursion lift_18.zkr
-    digest!("c607b103592326302802cf1ff1c6ee5dab7f112e85c6106b4085e55c46535f1d"), // recursion lift_19.zkr
-    digest!("deca5917ab949d3769a17415d4b5753d0a49f818af600815ad92c85067322217"), // recursion lift_20.zkr
-    digest!("cc4245191072ea38989b65721112584cd548385f0eda402d76c70e0e718e0f73"), // recursion lift_21.zkr
-    digest!("18386311e4b86b527f3d966de55df3271f7e52209c037b607a41a62c8b4c9f61"), // recursion resolve.zkr
+    digest!("0d79bc33b4760b4783cbb96fdc87724c7e0c463eb0ba1b2705d39f43c698bd2d"), // recursion identity.zkr
+    digest!("7a8f24092c34ed3eb81b3d0a0b796c588c615d3488ef9e61c21dbd1e4b83ea6e"), // recursion join.zkr
+    digest!("2f609032975d7931e9d569484cdb5c1e8758af6f6d24c91968e8171b4e48652a"), // recursion lift_14.zkr
+    digest!("53b94f649b8fef3283c730425bf9be1618b82a76e270bd44b351f16eda68d00d"), // recursion lift_15.zkr
+    digest!("919c664b394f6b3e7500d151204ede5e6afd4d1a3724925ca341971e93cffc46"), // recursion lift_16.zkr
+    digest!("bc52395cbfbbdc6783e19443161c0a559496a017aeb6370232a5313125032175"), // recursion lift_17.zkr
+    digest!("442f0a4cef957609ab5ee447a279351e6dc212734cbc6e3e5bbf8b086f1a7818"), // recursion lift_18.zkr
+    digest!("d621555070b62e383b8e16511aa8b244cb442656c5c396302fe75816c477b902"), // recursion lift_19.zkr
+    digest!("66f12c252c978962a100976c69ea6a4dfb2b4a2a504d6d5c60fb8e2fff6f4b61"), // recursion lift_20.zkr
+    digest!("88a6322eccb8f141087c48174211df1d0e071603ebfefb69f0099836569e384a"), // recursion lift_21.zkr
+    digest!("389f762ad8de0008fd9dd0317854321cb671cf33f6918233b4fce02766385814"), // recursion lift_rv32im_v2_14.zkr
+    digest!("edfbe875e0794d18f210e55cf417c120bff7451f88ae21761026417329ef5a48"), // recursion lift_rv32im_v2_15.zkr
+    digest!("1ce9b474c53ea03b49164b54061201638dbc812df6a45b403a181c2fd6ad1620"), // recursion lift_rv32im_v2_16.zkr
+    digest!("4dd13e2811db420cc82646124c6db373d1f3107367f5c057073752451a786365"), // recursion lift_rv32im_v2_17.zkr
+    digest!("f2facb5268d0102055be3c69b6a746106ba713334108472f80776f004f50f876"), // recursion lift_rv32im_v2_18.zkr
+    digest!("18d8b94849312250b13c493abaf54705b797663e5a241f68060a39622180c21b"), // recursion lift_rv32im_v2_19.zkr
+    digest!("dbb3510f153c041ad2ec94670c14aa0b683e195e77ba1709a41ae30bd668bc76"), // recursion lift_rv32im_v2_20.zkr
+    digest!("86393706163b9e6e4a4d7a00a4cd08485fe4b861a8486a49628da121e6351e43"), // recursion lift_rv32im_v2_21.zkr
+    digest!("53a7b23d07f99e5d5685e85874f5181e8486aa267a0ae607ffe9ba47c8bdda4a"), // recursion resolve.zkr
+    digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"), // recursion union.zkr
 ];
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("8b6dcf11d463ac455361b41fb3ed053febb817491bdea00fdb340e45013b852e");
+    digest!("ffe166017b1ab460995b45510524c60e3756344feff2414f44cda25c33a78058");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
-    digest!("4e160df1e119ac0e3d658755a9edf38c8feb307b34bc10b57f4538dbe122a005");
+    digest!("c07a65145c3cb48b6101962ea607a4dd93c753bb26975cb47feb00d3666e4404");
 
 /// Control IDs for included recursion programs (ZKRs), using Poseidon2 over BabyBear.
-pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [
+pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 27] = [
     (
         "identity.zkr",
-        digest!("0e51536ec08ac01e42de3d2a0b2a552d8ff2c75e4ef2b5285eed23582a13ef5d"),
+        digest!("0d79bc33b4760b4783cbb96fdc87724c7e0c463eb0ba1b2705d39f43c698bd2d"),
     ),
     (
         "join.zkr",
-        digest!("d7b56f6ef29d18203ac26960eb21160d60da6f1975124261fbe38d1364fa0e6b"),
+        digest!("7a8f24092c34ed3eb81b3d0a0b796c588c615d3488ef9e61c21dbd1e4b83ea6e"),
     ),
     (
         "lift_14.zkr",
-        digest!("1131f74f290f9d52f9aa2e7343b0445dff1765597a1e1849ed5f3f0afaba9f4e"),
+        digest!("2f609032975d7931e9d569484cdb5c1e8758af6f6d24c91968e8171b4e48652a"),
     ),
     (
         "lift_15.zkr",
-        digest!("fa847f14bcdf7b75e75305209d29130bd07eb8387fe0f041e0d49c093a7b2564"),
+        digest!("53b94f649b8fef3283c730425bf9be1618b82a76e270bd44b351f16eda68d00d"),
     ),
     (
         "lift_16.zkr",
-        digest!("27c51b1abd46313679ed653a53945c7790832f5dd1906032c02916185b51fb06"),
+        digest!("919c664b394f6b3e7500d151204ede5e6afd4d1a3724925ca341971e93cffc46"),
     ),
     (
         "lift_17.zkr",
-        digest!("dbbe1a1ba268e716507e33528c843c3a63868f42bd236e71114d740b98f3690b"),
+        digest!("bc52395cbfbbdc6783e19443161c0a559496a017aeb6370232a5313125032175"),
     ),
     (
         "lift_18.zkr",
-        digest!("618a6e1264419228270fdd7236f0232f715e98697a46f532a3d5d96251a7fe75"),
+        digest!("442f0a4cef957609ab5ee447a279351e6dc212734cbc6e3e5bbf8b086f1a7818"),
     ),
     (
         "lift_19.zkr",
-        digest!("c607b103592326302802cf1ff1c6ee5dab7f112e85c6106b4085e55c46535f1d"),
+        digest!("d621555070b62e383b8e16511aa8b244cb442656c5c396302fe75816c477b902"),
     ),
     (
         "lift_20.zkr",
-        digest!("deca5917ab949d3769a17415d4b5753d0a49f818af600815ad92c85067322217"),
+        digest!("66f12c252c978962a100976c69ea6a4dfb2b4a2a504d6d5c60fb8e2fff6f4b61"),
     ),
     (
         "lift_21.zkr",
-        digest!("cc4245191072ea38989b65721112584cd548385f0eda402d76c70e0e718e0f73"),
+        digest!("88a6322eccb8f141087c48174211df1d0e071603ebfefb69f0099836569e384a"),
     ),
     (
         "lift_22.zkr",
-        digest!("dd6cd51e766f484d625df405e74e11067283c1269dbdae21bc6a031b1daa952e"),
+        digest!("bb71f46d8931c80fbcf10f3b5314b93cb7b8061d4658c55000c2c26967b58a0c"),
     ),
     (
         "lift_23.zkr",
-        digest!("4726ab732cc10d26e233aa6c82a32001f2d83a1878e5da7531017b737054dc6d"),
+        digest!("34a4dd0eb8f410674c09c0419c8bf62ef768a476ccd8e84f5809534e0b0e0065"),
     ),
     (
         "lift_24.zkr",
-        digest!("8ea32467c6445926da67365554e3b64be92a5076d071ff0632f45b294787253f"),
+        digest!("d8c1dd073822ac1da582bd52bed7ee35f106326dcb7a191d66df420016339571"),
+    ),
+    (
+        "lift_rv32im_v2_14.zkr",
+        digest!("389f762ad8de0008fd9dd0317854321cb671cf33f6918233b4fce02766385814"),
+    ),
+    (
+        "lift_rv32im_v2_15.zkr",
+        digest!("edfbe875e0794d18f210e55cf417c120bff7451f88ae21761026417329ef5a48"),
+    ),
+    (
+        "lift_rv32im_v2_16.zkr",
+        digest!("1ce9b474c53ea03b49164b54061201638dbc812df6a45b403a181c2fd6ad1620"),
+    ),
+    (
+        "lift_rv32im_v2_17.zkr",
+        digest!("4dd13e2811db420cc82646124c6db373d1f3107367f5c057073752451a786365"),
+    ),
+    (
+        "lift_rv32im_v2_18.zkr",
+        digest!("f2facb5268d0102055be3c69b6a746106ba713334108472f80776f004f50f876"),
+    ),
+    (
+        "lift_rv32im_v2_19.zkr",
+        digest!("18d8b94849312250b13c493abaf54705b797663e5a241f68060a39622180c21b"),
+    ),
+    (
+        "lift_rv32im_v2_20.zkr",
+        digest!("dbb3510f153c041ad2ec94670c14aa0b683e195e77ba1709a41ae30bd668bc76"),
+    ),
+    (
+        "lift_rv32im_v2_21.zkr",
+        digest!("86393706163b9e6e4a4d7a00a4cd08485fe4b861a8486a49628da121e6351e43"),
+    ),
+    (
+        "lift_rv32im_v2_22.zkr",
+        digest!("b429735c463d7d2e81bf1661a9305b30361ccf221a62154974171f60f37d396d"),
+    ),
+    (
+        "lift_rv32im_v2_23.zkr",
+        digest!("e58e4c240ea1ea1d57625d33737cb675968b60175752e1061603ab27202e962d"),
+    ),
+    (
+        "lift_rv32im_v2_24.zkr",
+        digest!("e74f3107acb32a0c433b2b15e788a22653eee412a21f0d4388ca2a1bc760f64d"),
     ),
     (
         "resolve.zkr",
-        digest!("18386311e4b86b527f3d966de55df3271f7e52209c037b607a41a62c8b4c9f61"),
+        digest!("53a7b23d07f99e5d5685e85874f5181e8486aa267a0ae607ffe9ba47c8bdda4a"),
     ),
     (
         "test_recursion_circuit.zkr",
         digest!("6d55102aa73086602f7039412200124bdec91f0c497c606f9aa09040403e030b"),
     ),
+    (
+        "union.zkr",
+        digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"),
+    ),
 ];
 
 /// Control IDs for included recursion programs (ZKRs), using SHA-256.
-pub const SHA256_CONTROL_IDS: [(&str, Digest); 15] = [
+pub const SHA256_CONTROL_IDS: [(&str, Digest); 27] = [
     (
         "identity.zkr",
-        digest!("837e1f68eed165e971fed56ed1d67d6a3d2ccf47bae684f2c48f3f5fd8a012a4"),
+        digest!("d7ecd18c7d06fc468166147cf20869aa10f32e097a0c166146a5a62dd2d975ea"),
     ),
     (
         "join.zkr",
-        digest!("3f05e906f54f94f11681350590b7b232af6b2686f57e24c4f1d8fce5ee6e6e08"),
+        digest!("dc44002689aa7852410ad1c840388d66b8b9a2f6d0c4fb6b3ac6ec2ea17d9855"),
     ),
     (
         "lift_14.zkr",
-        digest!("4ac8c994cce686f1f34b58a02306d5f4dc3b23f541b12e356b35cba2329cda38"),
+        digest!("d164a42f8bb7c70049e4873871fab98d88d04f1914b25a1370a7a877b7ff2ca3"),
     ),
     (
         "lift_15.zkr",
-        digest!("0f5a3e976ea0708785937f7b56aa60eb11d8e74b275ec1bd335912545952b68f"),
+        digest!("f2ffb9a1c43b01741e01a2d07d5f65ffe0ce231c70ddb128094f2a22f073c33c"),
     ),
     (
         "lift_16.zkr",
-        digest!("539d5e95f78508c153991d01b2b5b21694184380d0f15bb7b0d5e38a3cf9ca44"),
+        digest!("8843478fd585afc7cf84c8905ce16ed8cadbb61c45248619f9b252900e5167c8"),
     ),
     (
         "lift_17.zkr",
-        digest!("a5f05912ab428681e340d874964e8f51e02cf1a6f1470e00b93185a436b65a1f"),
+        digest!("4a54533e7ef8b620ca102ed763ebc94e969fd608d669623d466d43775dbec7a1"),
     ),
     (
         "lift_18.zkr",
-        digest!("bb856ca8c5605b3eb0f62a9ef33210420bb68c65506f3c25b20d9834c24e9aa3"),
+        digest!("954ffa89a80c010191f3ade9ca63c1f4f9689410df02faa801dc1b98ac557cfb"),
     ),
     (
         "lift_19.zkr",
-        digest!("a0acd1c590a1658523a4a1029189bd7ca24f96e9b3784e277e3ccaa87027a1e6"),
+        digest!("87150aa1b6b0fc92b68d9238d0c2a83a17da3d5d3775fd23b2517e0d7fd7697b"),
     ),
     (
         "lift_20.zkr",
-        digest!("c3af6e7b961dac1fa6aa5a011cd1609660149454fed7b619e3ef6d40163239f9"),
+        digest!("00676bedc32cc1e0dd7e490be83f4be39f379beedc35983ace0782061d65d73d"),
     ),
     (
         "lift_21.zkr",
-        digest!("49905762e43368cdf1347ccc9eb3c5867322156f2a8239f45f379dc8cfee3739"),
+        digest!("10d8d3a1eee1dec7c6cc0553222ab8ac9b6bfeb0bd1553e097fb29a3ef22a606"),
     ),
     (
         "lift_22.zkr",
-        digest!("0269b381b8cc63762251921c3c63d2f3e2ac84d320480626efae4f7960c10fe4"),
+        digest!("fcbe182cb5a235fc28d43ba1137908609958587e18060aa712be08d5833a8af3"),
     ),
     (
         "lift_23.zkr",
-        digest!("7952502886f18c76c7db510749f666b0103ad0eb4942ab9afc575ee38812dba4"),
+        digest!("f3f8278b8f56e0c2292cf7d0b395405dcf67760638e4ad901b3df406303c90b9"),
     ),
     (
         "lift_24.zkr",
-        digest!("a575522c04912c0f0b69b40943e1f18505a2c327baaba4af987115eccd935a46"),
+        digest!("a827fd3663ab862331c47b1ba985fde346c13851535b1d80693b6367771644a7"),
+    ),
+    (
+        "lift_rv32im_v2_14.zkr",
+        digest!("26eb18409abe9fc5a7d731536180296035e49c5e3224bdaa2022ac202aad00ba"),
+    ),
+    (
+        "lift_rv32im_v2_15.zkr",
+        digest!("04e30be04917cbba10da7cd1f6e093f1b9616277fc3217482e96d9c8eba86af7"),
+    ),
+    (
+        "lift_rv32im_v2_16.zkr",
+        digest!("162ab46d469335997e47b5ff4b5422959feb85597e0448d911b2ef3373ec776c"),
+    ),
+    (
+        "lift_rv32im_v2_17.zkr",
+        digest!("9a6fe02fbe22a7ebb23077dbae25066171097bc730e1c6fd25dd443bf9879946"),
+    ),
+    (
+        "lift_rv32im_v2_18.zkr",
+        digest!("2db2b20129795e3a5de7377e868f5093bc89521ed24c3c79d422199505cdc628"),
+    ),
+    (
+        "lift_rv32im_v2_19.zkr",
+        digest!("d33d6fd01d4b185918842e8bd791a884f21aa53baa148c4a31632c6a8685f83a"),
+    ),
+    (
+        "lift_rv32im_v2_20.zkr",
+        digest!("6a3282de57e30ba4b68cbb97219bd971fa6cb399477350b4a115f3c7d91e7a1e"),
+    ),
+    (
+        "lift_rv32im_v2_21.zkr",
+        digest!("a08a094177b4593d928b543bea879be6d1f651043f5d04a1f2e47746ff0bdfa2"),
+    ),
+    (
+        "lift_rv32im_v2_22.zkr",
+        digest!("b74809f70d7aceda4e1af64bc37aa3b6311045bac2a2ecfc7cfdf43046ac1ca9"),
+    ),
+    (
+        "lift_rv32im_v2_23.zkr",
+        digest!("4b1a5eaf6b1609ef4a6f4d2d4d943a337b80c27f32b673795fde7169011526c4"),
+    ),
+    (
+        "lift_rv32im_v2_24.zkr",
+        digest!("95d66f644f20e4fd8e04c41f59c9214a5e9302b0292d02a00a56331964b8eaae"),
     ),
     (
         "resolve.zkr",
-        digest!("37e7b3ff1e380743cbd33650426cc339b5f545d5256acc07717a18d59328d220"),
+        digest!("ecc34946284eb02d1e119ef0878ae65ba5e855d6e0b5db4e462a694007b2a0f4"),
     ),
     (
         "test_recursion_circuit.zkr",
         digest!("3c7b9195e051f01d9dc21d96a1dd26c7035bc225511a715cf8c7ba83f8df7687"),
+    ),
+    (
+        "union.zkr",
+        digest!("44bfa51c5030508d7eddc1b1489145a6e519842f7283098a17f13fe9113497dc"),
     ),
 ];

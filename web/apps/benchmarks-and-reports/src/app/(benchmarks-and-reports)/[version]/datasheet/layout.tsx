@@ -2,7 +2,6 @@ import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@risc0/ui/popover";
 import { Separator } from "@risc0/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@risc0/ui/tooltip";
 import { InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
@@ -23,14 +22,16 @@ function CodeBadge({ children }: PropsWithChildren) {
   );
 }
 
-export default function DatasheetLayout({
-  children,
-  params,
-}: PropsWithChildren<{
-  params: {
-    version: Version;
-  };
-}>) {
+export default async function DatasheetLayout(
+  props: PropsWithChildren<{
+    params: Promise<{
+      version: Version;
+    }>;
+  }>,
+) {
+  const params = await props.params;
+  const { children } = props;
+
   redirectIfWrongVersion(params.version);
 
   return (

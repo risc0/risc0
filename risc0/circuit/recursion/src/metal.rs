@@ -24,7 +24,7 @@ use risc0_zkp::{
     },
     hal::{
         metal::{BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHash},
-        Buffer as _, CircuitHal,
+        AccumPreflight, Buffer as _, CircuitHal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -111,6 +111,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
 
     fn accumulate(
         &self,
+        _preflight: &AccumPreflight,
         ctrl: &MetalBuffer<BabyBearElem>,
         io: &MetalBuffer<BabyBearElem>,
         data: &MetalBuffer<BabyBearElem>,

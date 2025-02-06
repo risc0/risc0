@@ -31,11 +31,17 @@
     "canonicalize",
     "posix",
     "repr",
-    "risczero",
+    "risczero"
   ],
   "files.eol": "\n",
   "git.ignoreLimitWarning": true,
   "files.associations": {
+    "*.h.inc": "cpp",
+    "*.cpp.inc": "cpp",
+    "*.cu": "cuda",
+    "*.cuh.inc": "cuda",
+    "*.cu.inc": "cuda",
+    "*.rs.inc": "rust",
     "*.sh": "shellscript",
     "*.py": "python",
     "*.cl": "c",
@@ -87,6 +93,8 @@
     "Cargo.toml",
     "benchmarks/Cargo.toml",
     "examples/Cargo.toml",
+    "risc0/bigint2/methods/guest/Cargo.toml",
+    "risc0/cargo-risczero/tests/test_crate/Cargo.toml",
     "risc0/zkvm/methods/guest/Cargo.toml",
     "risc0/zkvm/methods/std/Cargo.toml",
     "tools/crates-validator/Cargo.toml"

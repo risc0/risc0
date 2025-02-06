@@ -51,5 +51,5 @@ We have [extensive resources](../zkvm/zkvm-overview.md) on writing zkVM code. Ma
 [journal]: /terminology#journal
 [proves]: /terminology#validity-proof
 [receipt]: /terminology#receipt
-[Rust]: https://www.rust-lang.org/
+[Rust]: https://www.rust-lang.org
 [verify]: /terminology#verify

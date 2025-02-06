@@ -22,7 +22,7 @@
 
 #include <cstring>
 #include <cuda_runtime.h>
-#include <stdexcept>
+#include <exception>
 #include <thrust/execution_policy.h>
 #include <thrust/host_vector.h>
 #include <thrust/sort.h>
@@ -33,11 +33,7 @@ constexpr size_t kStepModeSeqReverse = 2;
 
 namespace {
 
-using CodeReg = size_t;
-using OutReg = size_t;
-using DataReg = size_t;
-using MixReg = size_t;
-using AccumReg = size_t;
+using Reg = size_t;
 
 #include "layout.cu.inc"
 
@@ -271,7 +267,7 @@ __global__ void inject_backs_ram(MachineContext* ctx, uint32_t steps, uint32_t c
     assert(idx != 0);
 
     const RamArgumentRow& back1 = ctx->ramRows[idx - 1];
-    constexpr auto header = kLayout.mux.body.header;
+    constexpr auto header = kDataLayout.mux.body.header;
     constexpr auto a = header.element;
     constexpr auto v = header.verifier;
     data[a.addr * steps + cycle - 1] = back1.addr;                 // a->addr
@@ -418,8 +414,10 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
 
       run_stage<StepVerifyBytes>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
     }
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }
@@ -436,7 +434,13 @@ __global__ void par_step_compute_accum(AccumContext* ctx,
   if (cycle >= count) {
     return;
   }
-  step_compute_accum(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+
+  if (cycle == 0 || ctx->isParSafe[cycle]) {
+    step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
+    while (cycle < count && !ctx->isParSafe[cycle]) {
+      step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
+    }
+  }
 }
 
 const char* risc0_circuit_rv32im_cuda_step_compute_accum(AccumContext* ctx,
@@ -456,8 +460,10 @@ const char* risc0_circuit_rv32im_cuda_step_compute_accum(AccumContext* ctx,
     par_step_compute_accum<<<cfg.grid, cfg.block, 0, stream>>>(
         ctx, steps, count, ctrl, io, data, mix, accum);
     CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }
@@ -493,8 +499,10 @@ const char* risc0_circuit_rv32im_cuda_step_verify_accum(AccumContext* ctx,
     par_step_verify_accum<<<cfg.grid, cfg.block, 0, stream>>>(
         ctx, steps, count, ctrl, io, data, mix, accum);
     CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }

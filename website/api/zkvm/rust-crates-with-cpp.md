@@ -12,13 +12,13 @@ The C++ toolchain is installed alongside the Rust toolchain. [Here are the insta
 ## How to Build and Run These Crates
 
 RISC Zero has a GCC-based C++ toolchain to enable these crates to build and run
-on the RISC Zero zkVM. The toolchain can be installed by running `cargo risczero
-install`. This command will download the guest Rust toolchain as well as a C++
-toolchain that compiles C++ to riscv32im. After installing the toolchain, these
-crates can be built and run on the zkVM like any other Rust crate. Under the
-hood, the `risc0-build` crate will use the downloaded toolchain while building
-the guest crate. The C++ toolchain is typically used by the `build.rs` file of
-crates that use C++ code.
+on the RISC Zero zkVM. The toolchain can be installed by running `rzup install`.
+This command will download the guest Rust toolchain as well as a C++ toolchain
+that compiles C++ to riscv32im. After installing the toolchain, these crates can
+be built and run on the zkVM like any other Rust crate. Under the hood, the
+`risc0-build` crate will use the downloaded toolchain while building the guest
+crate. The C++ toolchain is typically used by the `build.rs` file of crates that
+use C++ code.
 
 ## Overriding the C++ toolchain
 
@@ -52,6 +52,6 @@ to work with any guest rust toolchain. We will provide more information on
 versioning and compatibility in the future.
 
 [BLST]: https://github.com/supranational/blst
-[install]: ./install.md#install
-[risc0-gh-issues]: https://github.com/risc0/risc0/issues/
+[install]: ./install.md
+[risc0-gh-issues]: https://github.com/risc0/risc0/issues
 [zkvm_spec]: ./zkvm-specification.md#the-zkvm-execution-model

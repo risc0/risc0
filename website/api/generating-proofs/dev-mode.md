@@ -34,5 +34,5 @@ For further reference, take a look at the table below.
 | `RISC0_DEV_MODE=false` or unset | Default project behavior | Default project behavior |
 
 [fake]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/enum.InnerReceipt.html#variant.Fake
-[feature flag]: https://github.com/risc0/risc0/#feature-flags
+[feature flag]: https://github.com/risc0/risc0#feature-flags
 [journal]: /terminology#journal

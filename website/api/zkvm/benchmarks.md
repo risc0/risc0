@@ -10,7 +10,7 @@ context for the [cycle count] size data.
 
 ## Generating your own datasheet
 
-You can generate a datsheet yourself to get performance data for your exact
+You can generate a datasheet yourself to get performance data for your exact
 system, or if you want benchmarks for a different RISC Zero zkVM version than
 used in the datasheet.
 
@@ -54,7 +54,7 @@ the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
 appropriate feature flag.
 
 [cycle count]: /terminology#clock-cycles
-[datasheet]: https://benchmarks.risczero.com/main/datasheet
+[datasheet]: https://reports.risczero.com/main/datasheet
 [execution]: /terminology#execute
 [install]: ./install.md
 [prover]: /terminology#prover

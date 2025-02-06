@@ -65,11 +65,60 @@
   background-color: var(--ifm-hover-overlay);
 }
 
-[data-theme="dark"] .label-container,
+main {
+  padding-bottom: 8rem;
+}
+
+.navbar {
+  box-shadow: none;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+[data-theme="dark"] footer img,
 [data-theme="dark"] .navbar__logo {
   filter: invert(1);
 }
 
+.footer {
+  text-align: right;
+  border-top: 1px solid var(--ifm-toc-border-color);
+}
+
+.footer .container {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+.footer__title {
+  display: none;
+}
+
+.footer__links {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0;
+}
+
+.footer__col {
+  max-width: 220px;
+}
+
+#mermaid-svg-id {
+  height: 100%;
+  width: 100%;
+}
+
+.mermaid-graph {
+  cursor: grab;
+}
+
+.mermaid-graph:active {
+  cursor: grabbing !important;
+}
+
+/* small screens */
 @media (max-width: 996px) {
   .navbar__items--right > div:has(.DocSearch-Button) {
     position: relative;
@@ -78,5 +127,22 @@
 
   .navbar__item:has(.docsVersionDropdown) {
     display: block; /* so the version picker always shows up, even on small screens */
+  }
+
+  footer {
+    text-align: center;
+  }
+
+  .footer__col {
+    max-width: unset;
+  }
+
+  footer .container {
+    flex-direction: column;
+  }
+
+  .footer__links {
+    display: flex;
+    justify-content: center;
   }
 }

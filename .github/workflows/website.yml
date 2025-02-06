@@ -75,7 +75,7 @@ jobs:
       - name: 🍞 Setup Bun
         uses: risc0/setup-bun@v1.2.1
         with:
-          bun-version: 1.1.21
+          bun-version: 1.1.34
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -91,7 +91,7 @@ jobs:
   doc-test-main:
     if: needs.changes.outputs.doc-test-main == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu]
+    runs-on: [self-hosted, prod, Linux, X64, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -102,7 +102,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0-2
+          RISC0_RUST_TOOLCHAIN_VERSION: 1.81.0
           RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
       - name: build
@@ -117,7 +117,7 @@ jobs:
   doc-test-stable:
     if: needs.changes.outputs.doc-test-stable == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu]
+    runs-on: [self-hosted, prod, Linux, X64, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -127,14 +127,14 @@ jobs:
       - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
           crate: cargo-binstall
-          version: "1.4"
+          version: "1.10.16"
       - run: cargo binstall -y --force cargo-risczero@1.0
       # note: this uses an older version of risc0-build in the release-1.0 branch
       # Leave the old toolchain installation for now...
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+          RISC0_TOOLCHAIN_VERSION: r0.1.81.0
 
       - name: build
         run: cargo test --release --no-run

@@ -8,24 +8,24 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@risc0/ui/breadcrumb";
-import { useLocalStorage } from "@risc0/ui/hooks/use-local-storage";
-import { useMounted } from "@risc0/ui/hooks/use-mounted";
+import { useIsMounted } from "@risc0/ui/hooks/use-is-mounted";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { Fragment } from "react";
 import type { Version } from "~/types/version";
+import { useVersion } from "../_hooks/use-version";
 
 // Routes you don't want to show up in the breadcrumb
-const HIDDEN_BREADCRUMB_ROUTES = ["applications-benchmarks"];
+const HIDDEN_BREADCRUMB_ROUTES = ["applications-benchmarks", "benchmarks"];
 
 export function Breadcrumbs() {
   const pathname = usePathname();
   const { version } = useParams<{ version: Version }>();
   const paths = pathname.split("/").filter(Boolean);
-  const mounted = useMounted();
-  const [versionLocalStorage] = useLocalStorage<string | undefined>("version", undefined);
+  const isMounted = useIsMounted();
+  const { version: versionLocalStorage } = useVersion();
 
   if (version) {
     paths.shift(); // remove version number from URL
@@ -45,7 +45,7 @@ export function Breadcrumbs() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={mounted ? `/${version ?? versionLocalStorage ?? ""}` : "/"}>Home</Link>
+              <Link href={isMounted ? `/${version ?? versionLocalStorage ?? ""}` : "/"}>Home</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator>

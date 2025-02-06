@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use risc0_zkp::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         map_pow, Elem, ExtElem, RootsOfUnity,
     },
-    hal::{cpu::CpuBuffer, CircuitHal, Hal},
+    hal::{cpu::CpuBuffer, AccumPreflight, CircuitHal, Hal},
     prove::accum::{Accum, Handler},
     INV_RATE, ZK_CYCLES,
 };
@@ -42,7 +42,7 @@ impl<'a, C: PolyFp<BabyBear>> CpuCircuitHal<'a, C> {
     }
 }
 
-impl<'a, C, H> CircuitHal<H> for CpuCircuitHal<'a, C>
+impl<C, H> CircuitHal<H> for CpuCircuitHal<'_, C>
 where
     C: PolyFp<BabyBear> + Sync + CircuitStep<BabyBearElem>,
     H: Hal<
@@ -84,7 +84,7 @@ where
         let check = unsafe { std::slice::from_raw_parts(check.as_ptr(), check.len()) };
         let poly_mix_pows = poly_mix_pows.as_slice();
 
-        let args: &[&[BabyBearElem]] = &[&code, &out, &data, &mix, &accum];
+        let args: &[&[BabyBearElem]] = &[code, out, data, mix, accum];
 
         (0..domain).into_par_iter().for_each(|cycle| {
             let tot = self.circuit.poly_fp(cycle, domain, poly_mix_pows, args);
@@ -106,6 +106,7 @@ where
 
     fn accumulate(
         &self,
+        _preflight: &AccumPreflight,
         ctrl: &CpuBuffer<BabyBearElem>,
         io: &CpuBuffer<BabyBearElem>,
         data: &CpuBuffer<BabyBearElem>,

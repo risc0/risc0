@@ -21,33 +21,33 @@ To build a zkVM application, we need our guest program to be able to:
 
 To support various use cases, there are a number of functions that can be called from the guest for reading/writing/committing. For a complete list, see the [`guest` module] documentation; we include a brief list which should be sufficient for building your first application:
 
-- **Reading inputs** <br/>
+- **Reading inputs** <br />
   [`env::read`], [`env::read_slice`], and [`env::stdin`]
-- **Writing private outputs to [host]**<br/>
+- **Writing private outputs to [host]**<br />
   [`env::write`], [`env::write_slice`], [`env::stdout`], [`env::stderr`]
-- **Committing public outputs to [journal]**<br/>
+- **Committing public outputs to [journal]**<br />
   `env::commit`, `env::commit_slice`
 
 ## Tools for Debugging & Optimization
 
 There are also a number of functions available to support with debugging and performance analysis. As above, we refer to the [`guest` module] for a full list, but include some highlights here:
 
-- **Count Cycles** <br/>
+- **Count Cycles** <br />
   [`env::get_cycle_count`]
-- **Print a debug message**<br/>
+- **Print a debug message**<br />
   [`env::log`]
 
-For more information on optimization & performance, see our pages on [Cryptography Acceleration](./acceleration.md) and [Benchmarking](../benchmarks.md).
+For more information on optimization & performance, see our pages on [Cryptography Precompiles](./precompiles.md) and [Benchmarking](../benchmarks.md).
 
 ## Boilerplate before `main()`
 
 In our [template] and [examples], there's a bit of boilerplate code before `main()`. In this section, we explain what each of those lines is doing:
 
-- `#![no_std]` <br/>
+- `#![no_std]` <br />
   The guest code should be as lightweight as possible for performance reasons. So, since we aren't using `std`, we exclude it.
-- `#![no_main]` <br/>
+- `#![no_main]` <br />
   The guest code is never launched as a standalone Rust executable, so we specify `#![no_main]`.
-- `risc0_zkvm_guest::entry!(main);` <br/>
+- `risc0_zkvm_guest::entry!(main);` <br />
   We must make the guest code available for the host to launch, and to do that we must specify which function to call when the host starts executing this guest code. We use the `risc0_zkvm_guest::entry!` macro to indicate the initial guest function to call, which in this case is `main`.
 
 ## Happy Building!
@@ -68,9 +68,9 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [`env::write`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.write.html
 [`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
-[Bonsai]: ../../bonsai/
+[Bonsai]: ../../bonsai
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples
 [guest]: /terminology#guest
 [guest code]: /terminology#guest
 [Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
@@ -78,6 +78,6 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [journal]: /terminology#journal
 [template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
 [these docs]: https://github.com/risc0/risc0/issues/new/choose
-[zkVM]: ../
-[zkVM Application]: ../
+[zkVM]: ..
+[zkVM Application]: ..
 [zkVM Quick Start]: ../quickstart.md

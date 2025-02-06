@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
-use anyhow::{anyhow, ensure};
+use anyhow::{anyhow, bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
+use risc0_circuit_rv32im_v2::{HighLowU16, Rv32imV2Claim};
 use risc0_zkp::core::digest::Digest;
+use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -66,7 +68,7 @@ pub struct ReceiptClaim {
 }
 
 impl ReceiptClaim {
-    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded normally (i.e.
+    /// Construct a [ReceiptClaim] representing a zkVM execution that ended normally (i.e.
     /// Halted(0)) with the given image ID and journal.
     pub fn ok(
         image_id: impl Into<Digest>,
@@ -88,7 +90,7 @@ impl ReceiptClaim {
         }
     }
 
-    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded in a normal paused
+    /// Construct a [ReceiptClaim] representing a zkVM execution that ended in a normal paused
     /// state (i.e. Paused(0)) with the given image ID and journal.
     pub fn paused(
         image_id: impl Into<Digest>,
@@ -144,6 +146,54 @@ impl ReceiptClaim {
         write_sha_halfs(flat, &self.output.digest::<sha::Impl>());
         Ok(())
     }
+
+    pub(crate) fn decode_from_seal_v2(
+        seal: &[u32],
+        _po2: Option<u32>,
+    ) -> anyhow::Result<ReceiptClaim> {
+        let claim = Rv32imV2Claim::decode(seal)?;
+        tracing::debug!("claim: {claim:#?}");
+
+        // TODO(flaub): implement this once shutdownCycle is supported in rv32im-v2 circuit
+        // if let Some(po2) = po2 {
+        //     let segment_threshold = (1 << po2) - MAX_INSN_CYCLES;
+        //     ensure!(claim.shutdown_cycle.unwrap() == segment_threshold as u32);
+        // }
+
+        let exit_code = exit_code_from_rv32im_v2_claim(&claim)?;
+        let post_state = match exit_code {
+            ExitCode::Halted(_) => Digest::ZERO,
+            _ => claim.post_state,
+        };
+
+        Ok(ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: claim.pre_state,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: post_state,
+            }),
+            exit_code,
+            input: MaybePruned::Pruned(claim.input),
+            output: MaybePruned::Pruned(claim.output.unwrap_or_default()),
+        })
+    }
+}
+
+pub(crate) fn exit_code_from_rv32im_v2_claim(claim: &Rv32imV2Claim) -> anyhow::Result<ExitCode> {
+    let exit_code = if let Some(term) = claim.terminate_state {
+        let HighLowU16(user_exit, halt_type) = term.a0;
+        match halt_type as u32 {
+            halt::TERMINATE => ExitCode::Halted(user_exit as u32),
+            halt::PAUSE => ExitCode::Paused(user_exit as u32),
+            _ => bail!("Illegal halt type: {halt_type}"),
+        }
+    } else {
+        ExitCode::SystemSplit
+    };
+    Ok(exit_code)
 }
 
 impl Digestible for ReceiptClaim {
@@ -201,7 +251,7 @@ impl std::error::Error for DecodeError {}
 /// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
 /// only the digest of the claim is needed, and the full claim value cannot be determined by the
 /// compiler. This allows for a collection of receipts to be created even when the underlying
-/// claims are of heterogeneous types (e.g. Vec<SuccinctReceipt<Unknown>>).
+/// claims are of heterogeneous types (e.g. `Vec<SuccinctReceipt<Unknown>>`).
 ///
 /// Note that this is an uninhabited type, similar to the [never type].
 ///
@@ -284,7 +334,9 @@ impl Digestible for Output {
 /// and remove the assumption.
 ///
 /// [assumption]: https://dev.risczero.com/terminology#assumption
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize)]
+#[derive(
+    Clone, Debug, Serialize, Deserialize, Eq, Hash, PartialEq, BorshSerialize, BorshDeserialize,
+)]
 pub struct Assumption {
     /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
     /// be the digest of the claim for a different circuit such as an accelerator.

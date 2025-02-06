@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <cstring>
 #include <cuda_runtime.h>
 #include <stdexcept>
@@ -90,8 +91,10 @@ const char* launchKernel(void (*kernel)(ExpTypes...),
     config.stream = stream;
     CUDA_OK(cudaLaunchKernelEx(&config, kernel, std::forward<ActTypes>(args)...));
     CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }

@@ -16,16 +16,17 @@
 mod runtime {
     use std::{env, fs, io, path::Path};
 
-    use risc0_build::build_rust_runtime;
+    use risc0_build::build_rust_runtime_with_features;
     use zip::{write::SimpleFileOptions, CompressionMethod, ZipWriter};
 
-    pub fn build_and_zip_runtime() {
-        // Build the risc0-zkvm-platform.a file and place it in a zip archive for
-        // inclusion in the cargo-risczero binary.
+    pub(crate) fn build_and_zip_test_runtime() {
+        // Build the risc0-zkvm-platform.a file and place it in a zip archive for inclusion in the
+        // cargo-risczero binary. This is used to build test binaries for cargo risczero test
         let out_dir_env = env::var_os("OUT_DIR").unwrap();
         let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
 
-        let rust_runtime = build_rust_runtime();
+        let rust_runtime =
+            build_rust_runtime_with_features(&["getrandom", "sys-getenv", "sys-args", "unstable"]);
         let f = fs::File::create(out_dir.join("cargo-risczero.zip")).unwrap();
         let mut zip = ZipWriter::new(f);
         let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
@@ -43,6 +44,6 @@ fn main() {
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
-        runtime::build_and_zip_runtime();
+        runtime::build_and_zip_test_runtime();
     }
 }

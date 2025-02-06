@@ -12,12 +12,12 @@ Bonsai is highly parallelized and highly performant. To get a taste of what you 
 Whether you're looking to take heavy computations off-chain or need to generate proofs for your trustless, verifiable software, Bonsai can help.
 Check out our [Bonsai Quick Start] page, and start building!
 
-**Please note that Bonsai is still in early development. <br/>
+**Please note that Bonsai is still in early development. <br />
 [Request access here], and do not use Bonsai in production.**
 
 ![Bonsai ETH Relay overview](/img/eth-relay-diagram.jpg)
 
-<!-- revise diagram with "you create"/"bonsai creates" colors -->
+{/* revise diagram with "you create"/"bonsai creates" colors */}
 
 The diagram above shows how to use Bonsai via an Ethereum smart contract.
 In this diagram, all you are responsible for as a developer using Bonsai are:
@@ -76,7 +76,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonfire Wallet]: https://ethglobal.com/showcase/bonfire-wallet-n1dzp
 [Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [Bonsai Quick Start]: ../bonsai/quickstart.md
-[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
+[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance#readme
 [litepaper]: /litepaper

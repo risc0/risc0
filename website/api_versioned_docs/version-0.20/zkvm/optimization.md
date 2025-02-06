@@ -65,7 +65,7 @@ cycles that have occurred in your program.
 
 As an example:
 
-<!-- NOTE: Ignored since we do not yet have a way to test guest code in docs -->
+{/* NOTE: Ignored since we do not yet have a way to test guest code in docs */}
 
 ```rust no_run title="methods/guest/src/main.rs"
 # use risc0_zkvm::guest::env;
@@ -326,8 +326,8 @@ and [256-bit modular multiplication][bigint]. By implementing these operations
 directly in the "hardware" of the zkVM, programs that use these accelerators
 execute faster and can be proven with significantly less resources [^3].
 
-For more information about cryptography acceleration, [cryptography
-acceleration][acceleration].
+For more information about cryptography precompiles, [cryptography
+precompiles][precompiles].
 
 Using the accelerator, a SHA-256 compress operation typically takes 68 cycles
 per 64-byte block and 6 cycles to initialize. A 256-bit modular multiply takes
@@ -391,7 +391,7 @@ machine, and the `cuda` feature enabled.
   - Try setting `codegen-units = 1`.
 - When you need a map, use `BTreeMap` instead of `HashMap`.
 - When you need to hash data, use the [accelerated implementation of
-  SHA-256][acceleration].
+  SHA-256][precompiles].
 - Look for places where you are copying or (de)serializing data when not
   necessary.
 
@@ -412,9 +412,9 @@ cycle counts added.
 | JALR rd,rs1,offset  | Jump and Link Register             | rd ← pc + length(inst)pc ← (rs1 + offset) ∧ -2 | 1                                               |
 | BEQ rs1,rs2,offset  | Branch Equal                       | if rs1 = rs2 then pc ← pc + offset             | 1                                               |
 | BNE rs1,rs2,offset  | Branch Not Equal                   | if rs1 ≠ rs2 then pc ← pc + offset             | 1                                               |
-| BLT rs1,rs2,offset  | Branch Less Than                   | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BLT rs1,rs2,offset  | Branch Less Than                   | if rs1 \< rs2 then pc ← pc + offset            | 1                                               |
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 \< rs2 then pc ← pc + offset            | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
 | LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
 | LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
@@ -425,8 +425,8 @@ cycle counts added.
 | SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
 | SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
-| SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
-| SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
+| SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) \< sx(imm)                        | 1                                               |
+| SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) \< ux(imm)                        | 1                                               |
 | XORI rd,rs1,imm     | Xor Immediate                      | rd ← ux(rs1) ⊕ ux(imm)                         | 2                                               |
 | ORI rd,rs1,imm      | Or Immediate                       | rd ← ux(rs1) ∨ ux(imm)                         | 2                                               |
 | ANDI rd,rs1,imm     | And Immediate                      | rd ← ux(rs1) ∧ ux(imm)                         | 2                                               |
@@ -436,8 +436,8 @@ cycle counts added.
 | ADD rd,rs1,rs2      | Add                                | rd ← sx(rs1) + sx(rs2)                         | 1                                               |
 | SUB rd,rs1,rs2      | Subtract                           | rd ← sx(rs1) - sx(rs2)                         | 1                                               |
 | SLL rd,rs1,rs2      | Shift Left Logical                 | rd ← ux(rs1) « rs2                             | 1                                               |
-| SLT rd,rs1,rs2      | Set Less Than                      | rd ← sx(rs1) < sx(rs2)                         | 1                                               |
-| SLTU rd,rs1,rs2     | Set Less Than Unsigned             | rd ← ux(rs1) < ux(rs2)                         | 1                                               |
+| SLT rd,rs1,rs2      | Set Less Than                      | rd ← sx(rs1) \< sx(rs2)                        | 1                                               |
+| SLTU rd,rs1,rs2     | Set Less Than Unsigned             | rd ← ux(rs1) \< ux(rs2)                        | 1                                               |
 | XOR rd,rs1,rs2      | Xor                                | rd ← ux(rs1) ⊕ ux(rs2)                         | 2                                               |
 | SRL rd,rs1,rs2      | Shift Right Logical                | rd ← ux(rs1) » rs2                             | 2                                               |
 | SRA rd,rs1,rs2      | Shift Right Arithmetic             | rd ← sx(rs1) » rs2                             | 2                                               |
@@ -468,17 +468,16 @@ below.
 
 ---
 
-[^1]:
-    Here "sampling" is in quotes because the profiler actually captures the call
+[^1]: Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-    <!-- -->
+
+    1. It would be cost prohibitive to do so for all but quite short program
+       executions.
+    2. Introducing such heavy profiling would actually alter the performance
+       characteristics in significant ways.
+
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
@@ -490,11 +489,10 @@ below.
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
-[`counts`]: https://github.com/nnethercote/counts/
+[`counts`]: https://github.com/nnethercote/counts
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read.html
-[acceleration]: ./acceleration.md
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [algorithm]: https://briansmith.org/ecc-inversion-addition-chains-01
 [alignment]: https://doc.rust-lang.org/reference/type-layout.html#the-alignment-modifiers
@@ -503,7 +501,7 @@ below.
 [arithmetic circuits]: /reference-docs/about-arithmetic-circuits
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
-[CBOR]: https://cbor.io/
+[CBOR]: https://cbor.io
 [continuation segments]: https://www.risczero.com/news/continuations
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
@@ -518,17 +516,18 @@ below.
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
-[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
+[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles
 [os-page]: https://en.wikipedia.org/wiki/Page_%28computer_memory%29
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
-[perf-book]: https://nnethercote.github.io/perf-book/
+[perf-book]: https://nnethercote.github.io/perf-book
 [pprof]: https://github.com/google/pprof
+[precompiles]: ./precompiles.md
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
 [RISC-V architecture]: /reference-docs/about-risc-v
-[RISC-V operations]: https://marks.page/riscv/
-[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+[RISC-V operations]: https://marks.page/riscv
+[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
 [snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
 [snippet-password-checker]: https://github.com/risc0/risc0/blob/release-0.20/examples/password-checker/methods/guest/src/main.rs#L24

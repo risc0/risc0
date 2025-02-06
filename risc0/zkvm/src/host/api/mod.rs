@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ pub(crate) mod server;
 mod tests;
 
 use std::{
-    io::{Read, Write},
+    cell::RefCell,
+    io::{Error as IoError, ErrorKind as IoErrorKind, Read, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command},
     sync::{
         atomic::{AtomicBool, Ordering},
         mpsc::channel,
-        Arc,
+        Arc, Mutex,
     },
     thread,
     time::Duration,
@@ -40,7 +41,7 @@ use lazy_regex::regex_captures;
 use prost::Message;
 use semver::Version;
 
-use crate::{get_version, ExitCode, Journal};
+use crate::{get_version, ExitCode, Journal, ReceiptClaim};
 
 mod pb {
     pub(crate) mod api {
@@ -59,15 +60,17 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 trait RootMessage: Message {}
 
 pub trait Connection {
-    fn stream(&self) -> &TcpStream;
+    fn stream(&mut self) -> &mut TcpStream;
     fn close(&mut self) -> Result<i32>;
-    #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection>>;
 }
 
+#[derive(Clone)]
 pub struct ConnectionWrapper {
-    inner: Box<dyn Connection>,
-    buf: Vec<u8>,
+    inner: Arc<Mutex<dyn Connection + Send>>,
+}
+
+thread_local! {
+    static LOCAL_BUF: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
 }
 
 impl RootMessage for pb::api::HelloRequest {}
@@ -76,7 +79,9 @@ impl RootMessage for pb::api::ServerRequest {}
 impl RootMessage for pb::api::ServerReply {}
 impl RootMessage for pb::api::GenericReply {}
 impl RootMessage for pb::api::OnIoReply {}
+impl RootMessage for pb::api::ProveKeccakReply {}
 impl RootMessage for pb::api::ProveSegmentReply {}
+impl RootMessage for pb::api::ProveZkrReply {}
 impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}
 impl RootMessage for pb::api::JoinRequest {}
@@ -88,39 +93,56 @@ impl RootMessage for pb::api::IdentityP254Reply {}
 impl RootMessage for pb::api::CompressRequest {}
 impl RootMessage for pb::api::CompressReply {}
 
+fn lock_err() -> IoError {
+    IoError::new(IoErrorKind::WouldBlock, "Failed to lock connection mutex")
+}
+
 impl ConnectionWrapper {
-    fn new(inner: Box<dyn Connection>) -> Self {
-        Self {
-            inner,
-            buf: Vec::new(),
-        }
+    fn new(inner: Arc<Mutex<dyn Connection + Send>>) -> Self {
+        Self { inner }
     }
 
     fn send<T: RootMessage>(&mut self, msg: T) -> Result<()> {
-        let len = msg.encoded_len();
-        self.buf.clear();
-        self.buf.put_u32_le(len as u32);
-        msg.encode(&mut self.buf)?;
-        Ok(self.inner.stream().write_all(&self.buf)?)
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        self.inner_send(guard.stream(), msg)
     }
 
     fn recv<T: Default + RootMessage>(&mut self) -> Result<T> {
-        let mut stream = self.inner.stream();
-        self.buf.resize(4, 0);
-        stream.read_exact(&mut self.buf)?;
-        let len = self.buf.as_slice().get_u32_le() as usize;
-        self.buf.resize(len, 0);
-        stream.read_exact(&mut self.buf)?;
-        Ok(T::decode(self.buf.as_slice())?)
-    }
-
-    fn close(&mut self) -> Result<i32> {
-        self.inner.close()
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        self.inner_recv(guard.stream())
     }
 
     #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Self> {
-        Ok(Self::new(self.inner.try_clone()?))
+    fn send_recv<S: RootMessage, R: Default + RootMessage>(&mut self, msg: S) -> Result<R> {
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        let stream = guard.stream();
+        self.inner_send(stream, msg)?;
+        self.inner_recv(stream)
+    }
+
+    fn close(&mut self) -> Result<i32> {
+        self.inner.lock().map_err(|_| lock_err())?.close()
+    }
+
+    fn inner_send<T: RootMessage>(&self, stream: &mut TcpStream, msg: T) -> Result<()> {
+        let len = msg.encoded_len();
+        LOCAL_BUF.with_borrow_mut(|buf| {
+            buf.clear();
+            buf.put_u32_le(len as u32);
+            msg.encode(buf)?;
+            Ok(stream.write_all(buf)?)
+        })
+    }
+
+    fn inner_recv<T: Default + RootMessage>(&self, stream: &mut TcpStream) -> Result<T> {
+        LOCAL_BUF.with_borrow_mut(|buf| {
+            buf.resize(4, 0);
+            stream.read_exact(buf).context("rx len failed")?;
+            let len = buf.as_slice().get_u32_le() as usize;
+            buf.resize(len, 0);
+            stream.read_exact(buf).context("rx payload failed")?;
+            T::decode(buf.as_slice()).context("rx decode failed")
+        })
     }
 }
 
@@ -172,6 +194,24 @@ impl ParentProcessConnector {
         })
     }
 
+    pub fn new_wide_version<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let server_version = get_server_version(&server_path)?;
+
+        if !client::check_server_version_wide(&client_version, &server_version) {
+            let msg = format!(
+                "Your installation of r0vm differs by a major version:\n\
+            {client_version} vs {server_version} only minor, patch / pre-releases supported"
+            );
+            tracing::warn!("{msg}");
+            bail!(msg);
+        }
+        Ok(Self {
+            server_path: server_path.as_ref().to_path_buf(),
+            listener: TcpListener::bind("127.0.0.1:0")?,
+        })
+    }
+
     fn spawn_fail(&self) -> String {
         format!(
             "Could not launch zkvm: \"{}\". \n
@@ -187,7 +227,7 @@ fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
         .output()?;
     let cmd_output = String::from_utf8(output.stdout)?;
     let (_, version_str) = regex_captures!(r".* (.*)\n$", &cmd_output)
-        .ok_or(anyhow!("failed to parse server version number"))?;
+        .ok_or_else(|| anyhow!("failed to parse server version number"))?;
     Version::parse(version_str).map_err(|e| anyhow!(e))
 }
 
@@ -215,16 +255,15 @@ impl Connector for ParentProcessConnector {
         });
 
         let stream = rx.recv_timeout(CONNECT_TIMEOUT);
-        let stream = stream.map_err(|err| {
+        let stream = stream.inspect_err(|_| {
             shutdown.store(true, Ordering::Relaxed);
             let _ = TcpStream::connect(addr);
             handle.join().unwrap();
-            err
         })?;
 
-        Ok(ConnectionWrapper::new(Box::new(
+        Ok(ConnectionWrapper::new(Arc::new(Mutex::new(
             ParentProcessConnection::new(child, stream),
-        )))
+        ))))
     }
 }
 
@@ -247,7 +286,9 @@ impl Connector for TcpConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         tracing::debug!("connect");
         let stream = TcpStream::connect(&self.addr)?;
-        Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
+        Ok(ConnectionWrapper::new(Arc::new(Mutex::new(
+            TcpConnection::new(stream),
+        ))))
     }
 }
 
@@ -268,18 +309,13 @@ impl ParentProcessConnection {
 }
 
 impl Connection for ParentProcessConnection {
-    fn stream(&self) -> &TcpStream {
-        &self.stream
+    fn stream(&mut self) -> &mut TcpStream {
+        &mut self.stream
     }
 
     fn close(&mut self) -> Result<i32> {
         let status = self.child.wait()?;
         Ok(status.code().unwrap_or_default())
-    }
-
-    #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
-        unimplemented!()
     }
 }
 
@@ -292,16 +328,12 @@ impl TcpConnection {
 
 #[cfg(feature = "prove")]
 impl Connection for TcpConnection {
-    fn stream(&self) -> &TcpStream {
-        &self.stream
+    fn stream(&mut self) -> &mut TcpStream {
+        &mut self.stream
     }
 
     fn close(&mut self) -> Result<i32> {
         Ok(0)
-    }
-
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
-        Ok(Box::new(Self::new(self.stream.try_clone()?)))
     }
 }
 
@@ -311,9 +343,10 @@ fn malformed_err() -> anyhow::Error {
 
 impl pb::api::Asset {
     fn as_bytes(&self) -> Result<Bytes> {
-        let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
+        let bytes = match self.kind.as_ref().ok_or_else(malformed_err)? {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
+            pb::api::asset::Kind::Redis(_) => bail!("as_bytes not supported for redis"),
         };
         Ok(bytes.into())
     }
@@ -327,6 +360,22 @@ pub enum Asset {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    Redis(String),
+}
+
+/// Determines the parameters for AssetRequest::Redis
+#[derive(Clone)]
+pub struct RedisParams {
+    /// The url of the redis instance
+    pub url: String,
+
+    /// The key used to write to redis
+    pub key: String,
+
+    /// time to live (expiration) for the key being set
+    pub ttl: u64,
 }
 
 /// Determines the format of an asset request.
@@ -337,6 +386,9 @@ pub enum AssetRequest {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    Redis(RedisParams),
 }
 
 /// Provides information about the result of execution.
@@ -350,6 +402,10 @@ pub struct SessionInfo {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
+    /// proven if this session is passed to the Prover.
+    pub receipt_claim: Option<ReceiptClaim>,
 }
 
 impl SessionInfo {
@@ -377,6 +433,7 @@ impl Asset {
         Ok(match self {
             Asset::Inline(bytes) => bytes.clone(),
             Asset::Path(path) => std::fs::read(path)?.into(),
+            Asset::Redis(_) => bail!("as_bytes not supported for Asset::Redis"),
         })
     }
 }

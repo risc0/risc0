@@ -34,7 +34,7 @@ FROM node AS ceremony
 WORKDIR /ceremony
 
 # install snarkjs globally
-RUN npm install -g snarkjs@0.7.4
+RUN npm install -g snarkjs@0.7.5
 
 COPY scripts/run_ceremony.sh .
 COPY --from=builder /src/groth16/stark_verify.r1cs /ceremony/stark_verify.r1cs

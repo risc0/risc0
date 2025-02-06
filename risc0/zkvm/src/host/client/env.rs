@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,16 +24,15 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
+use risc0_circuit_keccak::KECCAK_PO2_RANGE;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
-#[cfg(feature = "prove")]
-use crate::Assumption;
 use crate::{
     host::client::{
         posix_io::PosixIo,
@@ -47,16 +46,6 @@ use crate::{
 #[derive(Default)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
-}
-
-/// Container for assumptions in the executor environment.
-#[derive(Debug, Default)]
-pub(crate) struct AssumptionReceipts {
-    pub(crate) cached: Vec<AssumptionReceipt>,
-    // An ordered list of assumptions accessed during execution, along a receipt if available. Each
-    // time an assumption is used, it is cloned and pushed to the head of the list.
-    #[cfg(feature = "prove")]
-    pub(crate) accessed: Vec<(Assumption, AssumptionReceipt)>,
 }
 
 #[allow(dead_code)]
@@ -75,6 +64,52 @@ impl SegmentPath {
     }
 }
 
+/// A ZKR proof request.
+#[stability::unstable]
+pub struct ProveZkrRequest {
+    /// The digest of the claim that this ZKR program is expected to produce.
+    pub claim_digest: Digest,
+
+    /// The control ID uniquely identifies the ZKR program to be proven.
+    pub control_id: Digest,
+
+    /// The input that the ZKR program should operate on.
+    pub input: Vec<u8>,
+}
+
+/// A Keccak proof request.
+#[stability::unstable]
+pub struct ProveKeccakRequest {
+    /// The digest of the claim that this keccak input is expected to produce.
+    pub claim_digest: Digest,
+
+    /// The requested size of the keccak proof, in powers of 2.
+    pub po2: usize,
+
+    /// The control root which identifies a particular keccak circuit revision.
+    pub control_root: Digest,
+
+    /// Input transcript to provide to the keccak circuit.
+    pub input: Vec<u8>,
+}
+
+/// A trait that supports the ability to be notified of proof requests
+/// on-demand.
+#[stability::unstable]
+pub trait CoprocessorCallback {
+    /// Request that a ZKR proof is produced.
+    fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
+
+    /// Request that a keccak proof is produced.
+    fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
+}
+
+pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;
+
+/// Container for assumptions in the executor environment.
+#[derive(Default)]
+pub(crate) struct AssumptionReceipts(pub(crate) Vec<AssumptionReceipt>);
+
 /// The [Executor][crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
@@ -83,6 +118,7 @@ impl SegmentPath {
 pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) args: Vec<String>,
+    pub(crate) keccak_max_po2: Option<u32>,
     pub(crate) segment_limit_po2: Option<u32>,
     pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
@@ -93,6 +129,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) segment_path: Option<SegmentPath>,
     pub(crate) pprof_out: Option<PathBuf>,
     pub(crate) input_digest: Option<Digest>,
+    pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -140,16 +177,55 @@ impl<'a> ExecutorEnvBuilder<'a> {
             }
         }
 
+        if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
+            let po2 = po2.parse::<u32>()?;
+            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+                bail!(
+                    "invalid keccak po2 {po2}. Expected range: {:?}",
+                    KECCAK_PO2_RANGE
+                );
+            }
+            inner.keccak_max_po2 = Some(po2);
+        }
+
         Ok(inner)
     }
 
     /// Set a segment limit, specified in powers of 2 cycles.
+    ///
+    /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
+    /// roughly linear with the segment size, so lowering this value by 1 will cut memory
+    /// consumpton by about half.
+    ///
+    /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
+    /// either up or down, may result in better proving performance.
     ///
     /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
     /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.segment_limit_po2 = Some(limit);
         self
+    }
+
+    /// Set a segment limit for keccak proofs, specified in powers of 2 cycles.
+    ///
+    /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
+    /// roughly linear with the segment size, so lowering this value by 1 will cut memory
+    /// consumpton by about half.
+    ///
+    /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
+    /// either up or down, may result in better proving performance.
+    ///
+    /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE]
+    pub fn keccak_max_po2(&mut self, limit: u32) -> Result<&mut Self> {
+        if !KECCAK_PO2_RANGE.contains(&(limit as usize)) {
+            bail!(
+                "invalid keccak po2 {limit}. Expected range: {:?}",
+                KECCAK_PO2_RANGE
+            );
+        }
+        self.inner.keccak_max_po2 = Some(limit);
+        Ok(self)
     }
 
     /// Set a session limit, specified in number of cycles.
@@ -360,7 +436,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self.inner
             .assumptions
             .borrow_mut()
-            .cached
+            .0
             .push(assumption.into());
         self
     }
@@ -386,6 +462,20 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Set the input digest.
     pub fn input_digest(&mut self, digest: Digest) -> &mut Self {
         self.inner.input_digest = Some(digest);
+        self
+    }
+
+    /// Add a callback for coprocessor requests.
+    #[stability::unstable]
+    pub fn coprocessor_callback(&mut self, callback: impl CoprocessorCallback + 'a) -> &mut Self {
+        self.inner.coprocessor = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Add a callback for coprocessor requests.
+    #[stability::unstable]
+    pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
+        self.inner.coprocessor = Some(callback);
         self
     }
 }

@@ -8,7 +8,7 @@ export function DatasheetSkeleton() {
         <Skeleton className="h-8 w-[155px]" />
       </div>
 
-      <Skeleton className="h-[224.5px] w-full" />
+      <Skeleton className="h-[594.5px] w-full" />
     </div>
   ));
 }

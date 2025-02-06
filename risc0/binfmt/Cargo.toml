@@ -15,6 +15,11 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 borsh = { version = "1.5", default-features = false, features = ["derive"] }
+derive_more = { version = "1.0", default-features = false, features = [
+  "add",
+  "add_assign",
+  "debug",
+] }
 elf = { version = "0.7", default-features = false }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
@@ -32,6 +37,7 @@ all-features = true
 default = ["std"]
 std = [
   "anyhow/std",
+  "derive_more/std",
   "elf/std",
   "risc0-zkp/std",
   "serde/std",

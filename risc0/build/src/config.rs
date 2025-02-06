@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{env, path::PathBuf};
+
 use cargo_metadata::Package;
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 /// Options for configuring a docker build environment.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Builder)]
+#[builder(default)]
+#[non_exhaustive]
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///
-    /// The current working directory is used if `None` is specified.
+    /// The current working directory is used if this option is unspecified.
+    #[builder(setter(into, strip_option))]
     pub root_dir: Option<PathBuf>,
+
+    /// Additional environment variables for the build container.
+    pub env: Vec<(String, String)>,
+}
+
+impl DockerOptions {
+    /// Get the configured root dir, or current working directory if None.
+    pub fn root_dir(&self) -> PathBuf {
+        self.root_dir
+            .clone()
+            .unwrap_or_else(|| env::current_dir().unwrap())
+    }
+
+    /// Get the configured custom environment variables.
+    pub fn env(&self) -> Vec<(&str, &str)> {
+        self.env
+            .iter()
+            .map(|(key, val)| (key.as_str(), val.as_str()))
+            .collect()
+    }
 }
 
 /// Options defining how to embed a guest package in
 /// [`crate::embed_methods_with_options`].
-#[derive(Default, Clone)]
+///
+/// ```
+/// use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
+///
+/// let docker_options = DockerOptionsBuilder::default()
+///     .root_dir("../../")
+///     .env(vec![("ENV_VAR".to_string(), "value".to_string())])
+///     .build()
+///     .unwrap();
+///
+/// let guest_options = GuestOptionsBuilder::default()
+///     .features(vec!["my-features".to_string()])
+///     .use_docker(docker_options)
+///     .build()
+///     .unwrap();
+/// ```
+#[derive(Default, Clone, Debug, Builder)]
+#[builder(default)]
+#[non_exhaustive]
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
 
     /// Use a docker environment for building.
+    #[builder(setter(strip_option))]
     pub use_docker: Option<DockerOptions>,
 }
 
@@ -42,11 +86,15 @@ pub(crate) struct GuestMetadata {
     /// Configuration flags to build the guest with.
     #[serde(rename = "rustc-flags")]
     pub(crate) rustc_flags: Option<Vec<String>>,
+
+    /// Indicates whether the guest program is a kernel.
+    #[serde(default)]
+    pub(crate) kernel: bool,
 }
 
 impl From<&Package> for GuestMetadata {
-    fn from(value: &Package) -> Self {
-        let Some(obj) = value.metadata.get("risc0") else {
+    fn from(pkg: &Package) -> Self {
+        let Some(obj) = pkg.metadata.get("risc0") else {
             return Default::default();
         };
         serde_json::from_value(obj.clone()).unwrap()
@@ -56,30 +104,10 @@ impl From<&Package> for GuestMetadata {
 /// Extended options defining how to embed a guest package in
 /// [`crate::embed_methods_with_options`].
 #[derive(Default, Clone)]
-pub(crate) struct GuestBuildOptions {
-    /// Features for cargo to build the guest with.
-    pub(crate) features: Vec<String>,
+pub(crate) struct GuestInfo {
+    /// Options specified by build script or library usage.
+    pub(crate) options: GuestOptions,
 
-    /// Use a docker environment for building.
-    pub(crate) use_docker: Option<DockerOptions>,
-
-    /// Configuration flags to build the guest with.
-    pub(crate) rustc_flags: Vec<String>,
-}
-
-impl From<GuestOptions> for GuestBuildOptions {
-    fn from(value: GuestOptions) -> Self {
-        Self {
-            features: value.features,
-            use_docker: value.use_docker,
-            ..Default::default()
-        }
-    }
-}
-
-impl GuestBuildOptions {
-    pub(crate) fn with_metadata(mut self, metadata: GuestMetadata) -> Self {
-        self.rustc_flags = metadata.rustc_flags.unwrap_or_default();
-        self
-    }
+    /// Metadata specified in guest crate `Cargo.toml`.
+    pub(crate) metadata: GuestMetadata,
 }

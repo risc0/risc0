@@ -8,7 +8,7 @@ In order to prove code using Bonsai, you need to write the code you want proven.
 
 ![Bonsai ETH Relay overview](/img/eth-relay-diagram.jpg)
 
-<!-- TODO: Modify the diagram to highlight the right zkVM portion. -->
+{/* TODO: Modify the diagram to highlight the right zkVM portion. */}
 
 The zkVM is used as an internal component of Bonsai. It is what runs your program off-chain using inputs from your smart contract call, and it is what [proves] your code was [executed] in a way anyone can [verify]. Bonsai runs most of the zkVM for you: all you need to provide is the code you want proven, which we call the zkVM [guest program].
 
@@ -41,7 +41,7 @@ We have [extensive resources](../zkvm) on writing zkVM code. Many of these resou
 - zkVM docs frequently refer to the [guest] and [host]. With Bonsai, you only write code for the [guest]; Bonsai itself runs the [host]. A partial exception is providing inputs and receiving the [receipt], which is handled by the [host] without Bonsai, whereas with the Bonsai ETH Relay your smart contract must handle these duties.
 - You might see our zkVM documentation refer to executors, sessions, and segments. These code-level concepts are related to [continuations](https://www.risczero.com/news/continuations), a feature that lets us design our zkVM program proof work to be parallelizable and not limited by the size of the program to be proven. Bonsai takes advantage of this feature to parallelize proofs about off-chain computation. If you're reading about these in zkVM documentation, you're almost certainly looking at host-side details that you don't need in order to write provable code.
 
-[Bonsai]: ../bonsai/
+[Bonsai]: ../bonsai
 [Bonsai Quick Start]: quickstart.md
 [committing]: /terminology#commit
 [Discord]: https://discord.gg/risczero
@@ -53,5 +53,5 @@ We have [extensive resources](../zkvm) on writing zkVM code. Many of these resou
 [journal]: /terminology#journal
 [proves]: /terminology#validity-proof
 [receipt]: /terminology#receipt
-[Rust]: https://www.rust-lang.org/
+[Rust]: https://www.rust-lang.org
 [verify]: /terminology#verify

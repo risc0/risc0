@@ -47,7 +47,7 @@
 //! ```
 
 pub use risc0_zkp::core::{
-    digest::{Digest, DIGEST_BYTES, DIGEST_WORDS},
+    digest::{Digest, DIGEST_BYTES, DIGEST_SHORTS, DIGEST_WORDS},
     hash::sha::{Block, Sha256, BLOCK_BYTES, BLOCK_WORDS, SHA256_INIT, WORD_SIZE},
 };
 

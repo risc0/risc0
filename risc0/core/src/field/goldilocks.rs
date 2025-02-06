@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ impl Default for Elem {
 /// 1. Start with all 64-bits of ones
 /// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros: `(2^64 - 2^32)`
 /// 3. Add one to get `2^64 - 2^32 + 1`
-
 const P: u64 = (0xffffffff_ffffffff << 32) + 1;
 
 impl field::Elem for Elem {
@@ -500,12 +499,39 @@ impl ops::Add for ExtElem {
     }
 }
 
+impl ops::Add<Elem> for ExtElem {
+    type Output = Self;
+    /// Addition for Goldilocks [Elem]
+    fn add(self, rhs: Elem) -> Self {
+        let mut lhs = self;
+        lhs += rhs;
+        lhs
+    }
+}
+
+impl ops::Add<ExtElem> for Elem {
+    type Output = ExtElem;
+    /// Addition for Goldilocks [Elem]
+    fn add(self, rhs: ExtElem) -> ExtElem {
+        let mut lhs = ExtElem::from(self);
+        lhs += rhs;
+        lhs
+    }
+}
+
 impl ops::AddAssign for ExtElem {
     /// Simple addition case for Goldilocks [ExtElem]
     fn add_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] += rhs.0[i];
         }
+    }
+}
+
+impl ops::AddAssign<Elem> for ExtElem {
+    /// Simple addition case for Goldilocks [Elem]
+    fn add_assign(&mut self, rhs: Elem) {
+        self.0[0] += rhs;
     }
 }
 
@@ -520,12 +546,41 @@ impl ops::Sub for ExtElem {
     }
 }
 
+impl ops::Sub<Elem> for ExtElem {
+    type Output = Self;
+
+    /// Subtraction for Goldilocks [Elem]
+    fn sub(self, rhs: Elem) -> Self {
+        let mut lhs = self;
+        lhs -= rhs;
+        lhs
+    }
+}
+
+impl ops::Sub<ExtElem> for Elem {
+    type Output = ExtElem;
+
+    /// Subtraction for Goldilocks [Elem]
+    fn sub(self, rhs: ExtElem) -> ExtElem {
+        let mut lhs = ExtElem::from(self);
+        lhs -= rhs;
+        lhs
+    }
+}
+
 impl ops::SubAssign for ExtElem {
     /// Simple subtraction case for Goldilocks [ExtElem]
     fn sub_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] -= rhs.0[i];
         }
+    }
+}
+
+impl ops::SubAssign<Elem> for ExtElem {
+    /// Simple subtraction case for Goldilocks [Elem]
+    fn sub_assign(&mut self, rhs: Elem) {
+        self.0[0] -= rhs;
     }
 }
 
@@ -618,6 +673,11 @@ mod tests {
     #[test]
     pub fn field_ops() {
         field::tests::test_field_ops::<Elem>(P);
+    }
+
+    #[test]
+    pub fn ext_field_ops() {
+        field::tests::test_ext_field_ops::<ExtElem>();
     }
 
     #[test]

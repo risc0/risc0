@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 //! Run the zkVM guest and prove its results.
 
 mod dev_mode;
+pub(crate) mod keccak;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
@@ -22,7 +23,6 @@ mod tests;
 use std::rc::Rc;
 
 use anyhow::{anyhow, bail, ensure, Result};
-use risc0_circuit_rv32im::prove::segment_prover;
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::hal::{CircuitHal, Hal};
 
@@ -40,9 +40,22 @@ use crate::{
     Segment, Session, VerifierContext,
 };
 
+mod private {
+    use super::{dev_mode::DevModeProver, prover_impl::ProverImpl};
+
+    pub trait Sealed {}
+    impl Sealed for ProverImpl {}
+    impl Sealed for DevModeProver {}
+}
+
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
 /// [Receipt][crate::Receipt] that can be used to verify correct computation.
-pub trait ProverServer {
+pub trait ProverServer: private::Sealed {
+    /// Prove the specified keccak request
+    #[cfg(feature = "unstable")]
+    fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
+        -> Result<SuccinctReceipt<Unknown>>;
+
     /// Prove the specified ELF binary.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(env, &VerifierContext::default(), elf)
@@ -117,9 +130,9 @@ pub trait ProverServer {
                     }))
                 },
             )?
-            .ok_or(anyhow!(
-                "malformed composite receipt has no continuation segment receipts"
-            ))?;
+            .ok_or_else(|| {
+                anyhow!("malformed composite receipt has no continuation segment receipts")
+            })?;
 
         // Compress assumptions and resolve them to get the final succinct receipt.
         receipt.assumption_receipts.iter().try_fold(
@@ -237,6 +250,5 @@ pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         return Ok(Rc::new(DevModeProver));
     }
 
-    let prover = segment_prover(&opts.hashfn)?;
-    Ok(Rc::new(ProverImpl::new(opts.clone(), prover)))
+    Ok(Rc::new(ProverImpl::new(opts.clone())))
 }

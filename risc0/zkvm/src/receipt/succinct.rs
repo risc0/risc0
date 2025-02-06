@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
 // limitations under the License.
 
 use alloc::{
-    collections::BTreeSet,
-    collections::VecDeque,
+    collections::{BTreeSet, VecDeque},
     format,
     string::{String, ToString},
     vec::Vec,
@@ -237,11 +236,13 @@ pub(crate) fn allowed_control_ids(
     // Recursion programs (ZKRs) that are to be included in the allowed set.
     // NOTE: Although the rv32im circuit has control IDs down to po2 13, lift predicates are only
     // generated for po2 14 and above, hence the magic 14 below.
-    let allowed_zkr_names: BTreeSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
-        .map(str::to_string)
-        .into_iter()
-        .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
-        .collect();
+    let allowed_zkr_names: BTreeSet<String> =
+        ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
+            .map(str::to_string)
+            .into_iter()
+            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
+            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+            .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
         "sha-256" => SHA256_CONTROL_IDS,
@@ -358,7 +359,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("71023badfee05b76de871c5cc5a95cbedf50395e3634ffb9f3192950b16a77ae")
+            digest!("1f01febccc956b6d16d310b37844527eb5ee4a91e35776db29786e04a579a55f")
         );
     }
 

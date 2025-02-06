@@ -48,7 +48,7 @@ You can build your example and run the prover locally with:
 cargo run --release
 ```
 
-> **Congratulations!** <br/>_That's all it takes to build and run a minimal RISC Zero application._
+> **Congratulations!** <br />_That's all it takes to build and run a minimal RISC Zero application._
 
 ## Local & Remote Proving
 
@@ -75,5 +75,5 @@ Options such as GPU acceleration and skipping the proof generation are documente
 [Hello World tutorial]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world/tutorial.md
 [request access]: https://bonsai.xyz/apply
 [starter-template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
-[zkVM]: ../zkvm/
-[zkVM demo applications]: https://github.com/risc0/risc0/tree/release-0.18/examples/
+[zkVM]: ../zkvm
+[zkVM demo applications]: https://github.com/risc0/risc0/tree/release-0.18/examples

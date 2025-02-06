@@ -55,11 +55,11 @@ The first question is about the **soundness** of the protocol, and the second qu
 
 Soundness is often quantified in terms of "[bits]" — our system currently targets 98 bits of security.
 
-| Prover                | Cryptographic Assumptions                                                                 | Bits of Security | Quantum Safe? |
-| --------------------- | ----------------------------------------------------------------------------------------- | ---------------- | ------------- |
-| RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                      | 98               | Yes           |
-| Recursion Prover      | - Random Oracle Model <br/> - Toy Problem Conjecture                                      | 99               | Yes           |
-| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption | 99+              | No            |
+| Prover                | Cryptographic Assumptions                                                                  | Bits of Security | Quantum Safe? |
+| --------------------- | ------------------------------------------------------------------------------------------ | ---------------- | ------------- |
+| RISC-V Prover         | - Random Oracle Model <br /> - Toy Problem Conjecture                                      | 98               | Yes           |
+| Recursion Prover      | - Random Oracle Model <br /> - Toy Problem Conjecture                                      | 99               | Yes           |
+| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br /> - Knowledge of Exponent assumption | 99+              | No            |
 
 The Toy Problem conjecture, specified in detail in the [ethSTARK documentation], says that the best known attack on STARK proof systems is the best possible attack.
 
@@ -91,7 +91,7 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
+[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [deterministically]: /terminology#deterministic-builds
@@ -105,5 +105,5 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [RISC Zero zkVM]: ./zkvm
 [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: pathname:///proof-system-in-detail.pdf
 [security calculator]: https://github.com/risc0/risc0/pull/1661
-[this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
+[this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [Verifier Contract]: ./blockchain-integration/contracts/verifier.md

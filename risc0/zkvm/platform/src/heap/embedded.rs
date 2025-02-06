@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use critical_section::RawRestoreState;
-use embedded_alloc::Heap;
+use embedded_alloc::LlffHeap as Heap;
 
 #[global_allocator]
 pub static HEAP: Heap = Heap::empty();
@@ -31,7 +31,12 @@ unsafe impl critical_section::Impl for CriticalSection {
     }
 }
 
-pub fn init() {
+/// Initialize the embedded-alloc allocator with the memory allocations defined in the [memory][crate::memory] module.
+///
+/// # Safety
+///
+/// This function must be called exactly once.
+pub unsafe fn init() {
     extern "C" {
         static _end: u8;
     }

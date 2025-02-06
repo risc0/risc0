@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
 use std::{fs, path::Path, process::Command};
 
 use anyhow::{bail, Context, Result};
-use cargo_metadata::MetadataCommand;
+use cargo_metadata::Package;
 use docker_generate::DockerFile;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
-use crate::config::GuestBuildOptions;
-use crate::{encode_rust_flags, get_env_var, GuestOptions};
+use crate::{
+    config::GuestInfo, encode_rust_flags, get_env_var, get_package, GuestOptions,
+    RISC0_TARGET_TRIPLE,
+};
 
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
@@ -44,37 +44,43 @@ pub enum BuildStatus {
 }
 
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(
-    manifest_path: &Path,
-    src_dir: &Path,
-    guest_opts: &GuestOptions,
-) -> Result<BuildStatus> {
-    build_guest_package_docker(manifest_path, src_dir, &guest_opts.clone().into())
+pub fn docker_build(manifest_path: &Path, guest_opts: &GuestOptions) -> Result<BuildStatus> {
+    let manifest_dir = manifest_path.parent().unwrap().canonicalize().unwrap();
+    let pkg = get_package(manifest_dir);
+    let src_dir = guest_opts.use_docker.clone().unwrap_or_default().root_dir();
+    let guest_opts = guest_opts.clone();
+    let guest_info = GuestInfo {
+        options: guest_opts.clone(),
+        metadata: (&pkg).into(),
+    };
+    let pkg_name = pkg.name.replace('-', "_");
+    let target_dir = src_dir.join(TARGET_DIR).join(pkg_name);
+    build_guest_package_docker(&pkg, &target_dir, &guest_info)
 }
 
 pub(crate) fn build_guest_package_docker(
-    manifest_path: &Path,
-    src_dir: &Path,
-    guest_opts: &GuestBuildOptions,
+    pkg: &Package,
+    target_dir: impl AsRef<Path>,
+    guest_info: &GuestInfo,
 ) -> Result<BuildStatus> {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
         eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
         return Ok(BuildStatus::Skipped);
     }
 
-    let manifest_path = manifest_path
-        .canonicalize()
-        .context(format!("manifest_path: {manifest_path:?}"))?;
-    let src_dir = src_dir.canonicalize().context("src_dir")?;
-    let meta = MetadataCommand::new()
-        .manifest_path(&manifest_path)
-        .exec()
-        .context("Manifest not found")?;
-    let root_pkg = meta.root_package().context("Failed to parse Cargo.toml")?;
-    let pkg_name = &root_pkg.name;
+    let src_dir = guest_info
+        .options
+        .use_docker
+        .clone()
+        .unwrap_or_default()
+        .root_dir()
+        .canonicalize()?;
 
     eprintln!("Docker context: {src_dir:?}");
-    eprintln!("Building ELF binaries in {pkg_name} for riscv32im-risc0-zkvm-elf target...");
+    eprintln!(
+        "Building ELF binaries in {} for {RISC0_TARGET_TRIPLE} target...",
+        pkg.name
+    );
 
     if !Command::new("docker")
         .arg("--version")
@@ -85,26 +91,19 @@ pub(crate) fn build_guest_package_docker(
         bail!("`docker --version` failed");
     }
 
-    if let Err(err) = check_cargo_lock(&manifest_path) {
+    let manifest_path = pkg.manifest_path.as_std_path();
+    if let Err(err) = check_cargo_lock(manifest_path) {
         eprintln!("{err}");
     }
 
-    let pkg_name = pkg_name.replace('-', "_");
     {
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
-        create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), guest_opts)?;
-        build(&src_dir, temp_path)?;
-    }
-    println!("ELFs ready at:");
-
-    let target_dir = src_dir.join(TARGET_DIR);
-    for target in root_pkg.targets.iter().filter(|t| t.is_bin()) {
-        let elf_path = target_dir.join(&pkg_name).join(&target.name);
-        let image_id = compute_image_id(&elf_path)?;
-        let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
-        println!("ImageID: {} - {:?}", image_id, rel_elf_path);
+        create_dockerfile(rel_manifest_path, temp_path, guest_info)?;
+        let target_dir = target_dir.as_ref();
+        let target_dir = target_dir.join(RISC0_TARGET_TRIPLE).join("docker");
+        build(&src_dir, temp_path, &target_dir)?;
     }
 
     Ok(BuildStatus::Success)
@@ -113,33 +112,22 @@ pub(crate) fn build_guest_package_docker(
 /// Create the dockerfile.
 ///
 /// Overwrites if a dockerfile already exists.
-fn create_dockerfile(
-    manifest_path: &Path,
-    temp_dir: &Path,
-    pkg_name: &str,
-    guest_opts: &GuestBuildOptions,
-) -> Result<()> {
+fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestInfo) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
-    let encoded_rust_flags = encode_rust_flags(
-        &guest_opts
-            .rustc_flags
-            .iter()
-            .map(|s| s.as_str())
-            .collect::<Vec<_>>(),
-    );
+    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
     let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
 
     let common_args = vec![
         "--locked",
         "--target",
-        "riscv32im-risc0-zkvm-elf",
+        RISC0_TARGET_TRIPLE,
         "--manifest-path",
         "$CARGO_MANIFEST_PATH",
     ];
 
     let mut build_args = common_args.clone();
-    let features_str = guest_opts.features.join(",");
-    if !guest_opts.features.is_empty() {
+    let features_str = guest_info.options.features.join(",");
+    if !guest_info.options.features.is_empty() {
         build_args.push("--features");
         build_args.push(&features_str);
     }
@@ -154,27 +142,43 @@ fn create_dockerfile(
     .concat()
     .join(" ");
 
-    let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-2")
+    let mut build = DockerFile::new()
+        .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[("CARGO_TARGET_DIR", "target")]);
+
+    #[cfg(feature = "unstable")]
+    {
+        build = build.env(&[("RISC0_FEATURE_bigint2", "")]);
+    }
+
+    build = build
+        .env(&[(
+            "CC_riscv32im_risc0_zkvm_elf",
+            "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
+        )])
+        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
+
+    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
+    let docker_env = docker_opts.env();
+    if !docker_env.is_empty() {
+        build = build.env(&docker_env);
+    }
+
+    build = build
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)
         .run(&build_cmd);
 
-    let out_dir = format!("/{pkg_name}");
+    let src_dir = format!("/src/target/{RISC0_TARGET_TRIPLE}/release");
     let binary = DockerFile::new()
         .comment("export stage")
         .from_alias("export", "scratch")
-        .copy_from(
-            "build",
-            "/src/target/riscv32im-risc0-zkvm-elf/release",
-            out_dir.as_str(),
-        );
+        .copy_from("build", &src_dir, "/");
 
     let file = DockerFile::new().dockerfile(build).dockerfile(binary);
     fs::write(temp_dir.join("Dockerfile"), file.to_string())?;
@@ -186,12 +190,10 @@ fn create_dockerfile(
 /// Build the dockerfile and outputs the ELF.
 ///
 /// Overwrites if an ELF with the same name already exists.
-fn build(src_dir: &Path, temp_dir: &Path) -> Result<()> {
-    let target_dir = src_dir.join(TARGET_DIR);
-    let target_dir = target_dir.to_str().unwrap();
+fn build(src_dir: &Path, temp_dir: &Path, target_dir: &Path) -> Result<()> {
     if Command::new("docker")
         .arg("build")
-        .arg(format!("--output={target_dir}"))
+        .arg(format!("--output={}", target_dir.to_str().unwrap()))
         .arg("-f")
         .arg(temp_dir.join("Dockerfile"))
         .arg(src_dir)
@@ -217,37 +219,35 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Compute the image ID for a given ELF.
-fn compute_image_id(elf_path: &Path) -> Result<String> {
-    let elf = fs::read(elf_path)?;
-    let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).context("unable to load elf")?;
-    let image =
-        MemoryImage::new(&program, PAGE_SIZE as u32).context("unable to create memory image")?;
-    Ok(image.compute_id().to_string())
-}
-
 // requires Docker to be installed
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use super::{build_guest_package_docker, TARGET_DIR};
-    use crate::config::GuestBuildOptions;
-    use std::path::Path;
+    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
+
+    use super::*;
 
     const SRC_DIR: &str = "../..";
 
-    fn build(manifest_path: &str) {
-        let src_dir = Path::new(SRC_DIR);
+    fn build(target_dir: &Path, manifest_path: &str) -> Vec<GuestListEntry> {
+        let src_dir = Path::new(SRC_DIR).to_path_buf();
         let manifest_path = Path::new(manifest_path);
-        build_guest_package_docker(manifest_path, src_dir, &GuestBuildOptions::default()).unwrap();
+        let manifest_dir = manifest_path.parent().unwrap().canonicalize().unwrap();
+        let pkg = get_package(manifest_dir);
+        let docker_opts = DockerOptionsBuilder::default()
+            .root_dir(src_dir)
+            .build()
+            .unwrap();
+        let guest_opts = GuestOptionsBuilder::default()
+            .use_docker(docker_opts)
+            .build()
+            .unwrap();
+        build_package(&pkg, target_dir, guest_opts).unwrap()
     }
 
-    fn compare_image_id(bin_path: &str, expected: &str) {
-        let src_dir = Path::new(SRC_DIR);
-        let target_dir = src_dir.join(TARGET_DIR);
-        let elf_path = target_dir.join(bin_path);
-        let actual = super::compute_image_id(&elf_path).unwrap();
-        assert_eq!(expected, actual);
+    fn compare_image_id(guest_list: &[GuestListEntry], name: &str, expected: &str) {
+        let guest = guest_list.iter().find(|x| x.name == name).unwrap();
+        assert_eq!(expected, guest.image_id.to_string());
     }
 
     // Test build reproducibility for risc0_zkvm_methods_guest.
@@ -257,10 +257,13 @@ mod test {
     // `cargo run --bin cargo-risczero -- risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml`
     #[test]
     fn test_reproducible_methods_guest() {
-        build("../../risc0/zkvm/methods/guest/Cargo.toml");
+        let temp_dir = tempdir().unwrap();
+        let temp_path = temp_dir.path();
+        let guest_list = build(temp_path, "../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
-            "risc0_zkvm_methods_guest/hello_commit",
-            "a239070d89948e4fcae489ef664c21bd2c15f430e1e1937792339a289b792ce0",
+            &guest_list,
+            "hello_commit",
+            "f2d2a1e709bf06e0a4da1bd3dd7f350444a48d1a090e6ad6db9effc8f8666bc7",
         );
     }
 }

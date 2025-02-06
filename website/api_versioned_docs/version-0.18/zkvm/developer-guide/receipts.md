@@ -12,13 +12,13 @@ When you execute your [zkVM application], the output of your application is incl
 The [receipt] serves as a succinct [validity proof] for the [execution] of your application.
 Receipts can be passed to third parties and [verified] in order to cryptographically attest to the validity of your application's output.
 
-<!-- The following text is duplicated from the definition of "receipt" on the terminology page.-->
+{/* The following text is duplicated from the definition of "receipt" on the terminology page. */}
 
 The receipt consists of a [journal] and a [seal].
 The journal attests to the public outputs of the program, and
 the seal is the opaque blob that cryptographically attests to the validity of the receipt.
 
-<!-- End receipt definition. -->
+{/* End receipt definition. */}
 
 ## How are receipts used?
 
@@ -59,7 +59,7 @@ If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples
 [execution]: /terminology#execution-trace
 [guest program]: /terminology#guest-program
 [Image ID]: /terminology#image-id
@@ -73,5 +73,5 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [verified]: /terminology#verify
 [verify]: /terminology#verify
 [Verifying]: /terminology#verify
-[zkVM application]: ../
+[zkVM application]: ..
 [zkVM Quick Start]: ../quickstart.md
