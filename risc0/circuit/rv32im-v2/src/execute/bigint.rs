@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cmp::max;
-use std::{collections::HashMap, io::Cursor};
+use std::{cmp::max, collections::HashMap, io::Cursor};
 
 use anyhow::{anyhow, bail, ensure, Result};
 use auto_ops::impl_op_ex;
