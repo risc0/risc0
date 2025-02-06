@@ -214,7 +214,7 @@ impl<'a> BigIntIOImpl<'a> {
     }
 }
 
-impl<'a> BigIntIO for BigIntIOImpl<'a> {
+impl BigIntIO for BigIntIOImpl<'_> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
         tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = self
