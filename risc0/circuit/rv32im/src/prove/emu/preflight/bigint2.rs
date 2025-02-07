@@ -18,6 +18,7 @@ use anyhow::{anyhow, ensure, Result};
 use auto_ops::impl_op_ex;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive as _;
+use smallvec::{smallvec, SmallVec};
 
 use super::BIGINT2_WIDTH_BYTES;
 
@@ -50,7 +51,7 @@ pub(crate) struct Instruction {
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct BytePolynomial {
-    pub coeffs: Vec<i32>,
+    pub coeffs: SmallVec<[i32; 64]>,
 }
 
 pub(crate) struct ProgramState {
@@ -119,14 +120,14 @@ impl ProgramState {
                 self.poly = BytePolynomial::zero();
             }
             PolyOp::Carry1 => {
-                let neg_poly = BytePolynomial::new(vec![-128; BIGINT2_WIDTH_BYTES]);
+                let neg_poly = BytePolynomial::new(&[-128; BIGINT2_WIDTH_BYTES]);
                 self.poly = &self.poly + (delta_poly + neg_poly) * 64 * 256;
             }
             PolyOp::Carry2 => {
                 self.poly = &self.poly + delta_poly * 256;
             }
             PolyOp::EqZero => {
-                let bp = BytePolynomial::new(vec![-256, 1]);
+                let bp = BytePolynomial::new(&[-256, 1]);
                 self.total = &self.total + bp * &new_poly;
                 self.total.eqz()?;
                 self.reset();
@@ -154,24 +155,28 @@ impl ProgramState {
 }
 
 impl BytePolynomial {
-    pub fn new(coeffs: Vec<i32>) -> Self {
-        Self { coeffs }
+    pub fn new(coeffs: &[i32]) -> Self {
+        Self {
+            coeffs: SmallVec::from_slice(coeffs),
+        }
     }
 
     fn one() -> Self {
-        Self { coeffs: vec![1] }
+        Self {
+            coeffs: smallvec::smallvec![1],
+        }
     }
 
     fn zero() -> Self {
-        Self { coeffs: vec![0] }
+        Self {
+            coeffs: smallvec::smallvec![0],
+        }
     }
 
     fn shift(&self) -> Self {
         let mut ret = self.coeffs.clone();
-        for _ in 0..BIGINT2_WIDTH_BYTES {
-            ret.insert(0, 0);
-        }
-        Self::new(ret)
+        ret.insert_many(0, [0; BIGINT2_WIDTH_BYTES]);
+        Self { coeffs: ret }
     }
 
     fn eqz(&self) -> Result<()> {
@@ -183,7 +188,7 @@ impl BytePolynomial {
 }
 
 fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = vec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
+    let mut ret = smallvec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
     for (i, coeff) in ret.iter_mut().enumerate() {
         if i < lhs.coeffs.len() {
             *coeff += lhs.coeffs[i];
@@ -192,17 +197,17 @@ fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
             *coeff += rhs.coeffs[i];
         }
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 fn byte_poly_mul(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = vec![0; lhs.coeffs.len() + rhs.coeffs.len()];
+    let mut ret = smallvec![0; lhs.coeffs.len() + rhs.coeffs.len()];
     for (i, lhs) in lhs.coeffs.iter().enumerate() {
         for (j, rhs) in rhs.coeffs.iter().enumerate() {
             ret[i + j] += lhs * rhs;
         }
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
@@ -210,7 +215,7 @@ fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
     for coeff in ret.iter_mut() {
         *coeff *= rhs;
     }
-    BytePolynomial::new(ret)
+    BytePolynomial { coeffs: ret }
 }
 
 impl_op_ex!(+|a: &BytePolynomial, b: &BytePolynomial| -> BytePolynomial { byte_poly_add(a, b) });

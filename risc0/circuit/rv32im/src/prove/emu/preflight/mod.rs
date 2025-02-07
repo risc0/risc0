@@ -17,14 +17,13 @@ mod bigint2;
 mod tests;
 
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{BTreeMap, VecDeque},
     io::Cursor,
 };
 
 use anyhow::{anyhow, bail, ensure, Result};
-use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_more::Debug;
-use ibig::UBig;
+use malachite::Natural;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
@@ -45,6 +44,7 @@ use self::bigint2::{
 };
 use super::{
     bibc,
+    exec::bytes_le_to_bigint,
     mux::{Major, TopMux},
     pager::{PagedMemory, PAGE_WORDS},
     rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, Instruction, TrapCause},
@@ -376,7 +376,7 @@ impl Preflight {
     }
 
     fn load_region(&mut self, base: WordAddr, u32_count: u32) -> Result<Vec<u8>> {
-        let mut region = Vec::new();
+        let mut region = Vec::with_capacity(u32_count as usize * WORD_SIZE);
         for i in 0..u32_count {
             let addr = base + i;
             let word = self.load_u32(addr)?;
@@ -689,24 +689,30 @@ impl Preflight {
             }
         }
 
-        let n = U256::from_le_bytes(bytemuck::cast(n));
-        let x = U256::from_le_bytes(bytemuck::cast(x));
-        let y = U256::from_le_bytes(bytemuck::cast(y));
+        let n = Natural::from_limbs_asc(&n);
+        let x = Natural::from_limbs_asc(&x);
+        let y = Natural::from_limbs_asc(&y);
 
-        // Compute modular multiplication, or simply multiplication if n == 0.
-        let z: U256 = if n == U256::ZERO {
-            x.checked_mul(&y).unwrap()
+        // Perform multiplication or modular multiplication
+        let z = if n == 0 {
+            // If n == 0, just multiply
+            x * y
         } else {
-            let (w_lo, w_hi) = x.mul_wide(&y);
-            let w = w_hi.concat(&w_lo);
-            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
-            z.resize()
+            // Otherwise, compute (x * y) mod n
+            (x * y) % n
         };
 
-        tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
+        let out_limbs = z.into_limbs_asc();
+        let mut z_words = [0u32; bigint::WIDTH_WORDS];
+        // resize the z to bigint width
+        for i in 0..bigint::WIDTH_WORDS {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            z_words[i] = limb.to_le();
+        }
+
+        // tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
 
         // Store result.
-        let z: [u32; bigint::WIDTH_WORDS] = bytemuck::cast(z.to_le_bytes());
         for i in 0..2 {
             self.load_bigint(REG_A2)?;
             self.load_bigint(REG_A3)?;
@@ -714,7 +720,7 @@ impl Preflight {
 
             let offset = i * BIGINT_IO_SIZE;
             for j in 0..BIGINT_IO_SIZE {
-                let word = z[offset + j].to_le();
+                let word = z_words[offset + j];
                 self.store_u32(z_ptr + offset + j, word)?;
             }
 
@@ -754,7 +760,7 @@ impl Preflight {
     fn bigint2_eval(
         &mut self,
         mut program_ptr: WordAddr,
-        witness: &HashMap<WordAddr, u32>,
+        witness: &BTreeMap<WordAddr, u32>,
     ) -> Result<()> {
         let mut state = ProgramState::new();
 
@@ -779,7 +785,7 @@ impl Preflight {
         &mut self,
         state: &mut ProgramState,
         insn: &Bi2Instruction,
-        witness: &HashMap<WordAddr, u32>,
+        witness: &BTreeMap<WordAddr, u32>,
     ) -> Result<()> {
         tracing::debug!("{insn:?}");
 
@@ -838,7 +844,8 @@ impl Preflight {
             }
         }
 
-        let delta_poly = BytePolynomial::new(ret.iter().map(|x| *x as i32).collect());
+        let delta_poly =
+            BytePolynomial::new(bytemuck::cast::<_, [i32; BIGINT2_WIDTH_BYTES]>(ret).as_slice());
         state.update(insn, &delta_poly)?;
 
         if insn.mem_op != MemoryOp::Read {
@@ -859,57 +866,43 @@ impl Preflight {
 
 struct BigInt2Witness<'a> {
     preflight: &'a mut Preflight,
-    pub witness: HashMap<WordAddr, u32>,
+    pub witness: BTreeMap<WordAddr, u32>,
 }
 
 impl<'a> BigInt2Witness<'a> {
     pub fn new(preflight: &'a mut Preflight) -> Self {
         Self {
             preflight,
-            witness: HashMap::new(),
+            witness: BTreeMap::new(),
         }
     }
 }
 
 impl bibc::BigIntIO for BigInt2Witness<'_> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<UBig> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         // tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self
             .preflight
             .peek_region(addr.waddr(), count / WORD_SIZE as u32)?;
-        Ok(UBig::from_le_bytes(&bytes))
+        Ok(bytes_le_to_bigint(&bytes))
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &UBig) -> Result<()> {
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
         let base = ByteAddr(self.preflight.peek_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         // tracing::debug!(
         //     "store(arena: {arena}, offset: {offset}, count: {count}, value: {value}, base: {base:?}, addr: {addr:?})"
         // );
+
         let addr = addr.waddr();
-        let mut value_bytes = value.to_le_bytes();
-        // Word-align our byte array in case of a small value
-        while 0 != value_bytes.len() % WORD_SIZE {
-            value_bytes.push(0);
+        let out_limbs = value.to_limbs_asc();
+        for i in 0..count as usize / WORD_SIZE {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            self.witness.insert(addr + i, limb.to_le());
         }
-        let word_count = count as usize / WORD_SIZE;
-        for i in 0..word_count {
-            let byte_offset = i * WORD_SIZE;
-            let mut word = 0_u32;
-            if byte_offset < value_bytes.len() {
-                assert!(byte_offset + WORD_SIZE <= value_bytes.len());
-                let word_bytes: [u8; WORD_SIZE] = [
-                    value_bytes[byte_offset],
-                    value_bytes[byte_offset + 1],
-                    value_bytes[byte_offset + 2],
-                    value_bytes[byte_offset + 3],
-                ];
-                word = u32::from_le_bytes(word_bytes);
-            }
-            self.witness.insert(addr + i, word);
-        }
+
         Ok(())
     }
 }

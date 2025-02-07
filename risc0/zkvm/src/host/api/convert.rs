@@ -161,6 +161,16 @@ impl From<TraceEvent> for pb::api::TraceEvent {
                     },
                 )),
             },
+            TraceEvent::PageIn { cycles } => Self {
+                kind: Some(pb::api::trace_event::Kind::PageIn(
+                    pb::api::trace_event::PageIn { cycles },
+                )),
+            },
+            TraceEvent::PageOut { cycles } => Self {
+                kind: Some(pb::api::trace_event::Kind::PageOut(
+                    pb::api::trace_event::PageOut { cycles },
+                )),
+            },
         }
     }
 }
@@ -182,6 +192,12 @@ impl TryFrom<pb::api::TraceEvent> for TraceEvent {
             pb::api::trace_event::Kind::MemorySet(event) => TraceEvent::MemorySet {
                 addr: event.addr,
                 region: event.region,
+            },
+            pb::api::trace_event::Kind::PageIn(event) => TraceEvent::PageIn {
+                cycles: event.cycles,
+            },
+            pb::api::trace_event::Kind::PageOut(event) => TraceEvent::PageOut {
+                cycles: event.cycles,
             },
         })
     }
