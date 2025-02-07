@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,6 +47,12 @@ pub enum TraceEvent {
         /// Data that's been written
         region: Vec<u8>,
     },
+
+    /// A page is read for the first time in a segment
+    PageIn { cycles: u64 },
+
+    /// A page has been written to for the first time in a segment
+    PageOut { cycles: u64 },
 }
 
 /// A callback used to collect [TraceEvent]s.
@@ -70,6 +76,8 @@ impl core::fmt::Debug for TraceEvent {
             Self::MemorySet { addr, region } => {
                 write!(f, "MemorySet(0x{addr:08X}, {region:#04X?})")
             }
+            Self::PageIn { cycles } => write!(f, "PageIn({cycles})"),
+            Self::PageOut { cycles } => write!(f, "PageOut({cycles})"),
         }
     }
 }
