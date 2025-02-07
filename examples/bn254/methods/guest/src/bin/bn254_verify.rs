@@ -12,32 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use substrate_bn::Fq;
+use substrate_bn::{AffineG1, AffineG2, Fq, Fq2, G1, G2, Gt, pairing_batch};
 use risc0_zkvm::guest::env;
 
 fn main() {
     // TODO: switch away from example inputs
-    let (example_in1, example_in2): (Vec<u8>, Vec<u8>) =
-        env::read();
-
-    // TODO: Do something real
-    let mut result1 = Fq::one();
-    let mut result2 = Fq::one();
-
-    for i in 0..example_in1[0] {
-        result1 = result1 + result1;
+    let inp: Vec<(Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>)> = env::read();
+    let mut pairs = Vec::new();
+    for entry in inp {
+        let g1x = Fq::from_slice(&entry.0).expect("Normalized Fq expected for g1x");
+        let g1y = Fq::from_slice(&entry.1).expect("Normalized Fq expected for g1y");
+        let g2x_i = Fq::from_slice(&entry.2).expect("Normalized Fq expected for g2x_r");
+        let g2x_r = Fq::from_slice(&entry.3).expect("Normalized Fq expected for g2x_i");
+        let g2x = Fq2::new(g2x_r, g2x_i);
+        let g2y_i = Fq::from_slice(&entry.4).expect("Normalized Fq expected for g2y_r");
+        let g2y_r = Fq::from_slice(&entry.5).expect("Normalized Fq expected for g2y_i");
+        let g2y = Fq2::new(g2y_r, g2y_i);
+        let g1 = G1::from(AffineG1::new(g1x, g1y).expect("Point on G1 expected"));
+        let g2 = G2::from(AffineG2::new(g2x, g2y).expect("Point on G2 expected"));
+        break;
     }
-
-    for j in 0..example_in2[0] {
-        result2 = result2 + result2;
-    }
-
-    let mut output1 = [0u8; 32];
-    let mut output2 = [0u8; 32];
-
-    result1.to_big_endian(&mut output1);
-    result2.to_big_endian(&mut output2);
-
-    // TODO: Commit something real
-    env::commit(&(output1, output2));
+    let result = pairing_batch(&pairs);
+    
+    env::commit(&(result == Gt::one()));
 }
