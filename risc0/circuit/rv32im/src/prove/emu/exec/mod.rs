@@ -40,7 +40,7 @@ use sha2::digest::generic_array::GenericArray;
 use super::{
     addr::{ByteAddr, WordAddr},
     bibc,
-    pager::PagedMemory,
+    pager::{self, PagedMemory},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
     BIGINT2_WIDTH_BYTES, BIGINT_CYCLES, SYSTEM_START,
 };
@@ -380,7 +380,22 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
         self.output_digest = self.pending.output_digest.take();
         self.exit_code = self.pending.exit_code.take();
-        self.pager.commit_step();
+        let page_actions = self.pager.commit_step();
+
+        for trace in &self.trace {
+            for action in &page_actions {
+                let event = match action {
+                    pager::Action::PageRead(_, cycles) => TraceEvent::PageIn {
+                        cycles: *cycles as u64,
+                    },
+                    pager::Action::PageWrite(_, cycles, _) => TraceEvent::PageOut {
+                        cycles: *cycles as u64,
+                    },
+                    _ => continue,
+                };
+                trace.borrow_mut().trace_callback(event)?;
+            }
+        }
 
         Ok(())
     }

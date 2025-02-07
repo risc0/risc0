@@ -96,9 +96,25 @@ fn extract_call_stack_op(insn: u32) -> Option<CallStackOp> {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+enum ZkVmFunction {
+    PageIn,
+    PageOut,
+}
+
+impl fmt::Display for ZkVmFunction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::PageIn => write!(f, "[PageIn]"),
+            Self::PageOut => write!(f, "[PageOut]"),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 enum FunctionStart {
     Real { pc: u32 },
     Inline(InlineFunction),
+    ZkVm(ZkVmFunction),
 }
 
 impl FunctionStart {
@@ -106,6 +122,7 @@ impl FunctionStart {
         match self {
             Self::Real { pc } => *pc,
             Self::Inline(InlineFunction { low_pc, .. }) => *low_pc as u32,
+            Self::ZkVm(_) => 0,
         }
     }
 }
@@ -124,6 +141,7 @@ impl fmt::Display for FunctionStart {
                     "[inline function: 0x{abstract_origin:x} (0x{low_pc:x}..0x{high_pc:x}]"
                 )
             }
+            Self::ZkVm(func) => write!(f, "{func}"),
         }
     }
 }
@@ -331,6 +349,11 @@ impl Profiler {
             FunctionStart::Inline(InlineFunction {
                 abstract_origin, ..
             }) => self.lookup_inline_function(abstract_origin as u32),
+            FunctionStart::ZkVm(f) => Some(Frame {
+                name: f.to_string(),
+                lineno: 0,
+                filename: String::default(),
+            }),
         }
     }
 
@@ -419,6 +442,31 @@ impl Profiler {
         tracing::debug!("{}", self.root.borrow().fmt(0, self));
         self.walk_stacks(root_ref, Vec::new());
         self.profile.profile.encode_to_vec()
+    }
+
+    fn add_zkvm_frame(&mut self, function: ZkVmFunction, cycles: u64) {
+        if !self.call_stack_path.is_empty() {
+            let current_node = self
+                .current_node
+                .as_ref()
+                .expect("current_node should always be Some after initialization");
+            let current_key = self
+                .current_key
+                .expect("current_key should always be Some after initialization");
+
+            let node = current_node
+                .borrow_mut()
+                .calls
+                .entry(current_key)
+                .or_insert_with(|| Rc::new(RefCell::new(CallNode::default())))
+                .clone();
+
+            node.borrow_mut()
+                .counts
+                .entry(FunctionStart::ZkVm(function))
+                .and_modify(|e| *e += cycles as usize)
+                .or_insert(cycles as usize);
+        }
     }
 
     fn add_cycles_to_current_stack(&mut self, cycles: u64) {
@@ -592,6 +640,8 @@ impl TraceCallback for Profiler {
             }
             TraceEvent::RegisterSet { .. } => (),
             TraceEvent::MemorySet { .. } => (),
+            TraceEvent::PageIn { cycles } => self.add_zkvm_frame(ZkVmFunction::PageIn, cycles),
+            TraceEvent::PageOut { cycles } => self.add_zkvm_frame(ZkVmFunction::PageOut, cycles),
         }
         Ok(())
     }
