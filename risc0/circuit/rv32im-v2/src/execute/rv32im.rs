@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
+use derive_more::Debug;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
@@ -74,6 +75,7 @@ pub enum Exception {
     InstructionMisaligned = 0,
     InstructionFault,
     #[allow(dead_code)]
+    #[debug("IllegalInstruction({_0:#010x}, {_1})")]
     IllegalInstruction(u32, u32),
     Breakpoint,
     LoadAddressMisaligned,
