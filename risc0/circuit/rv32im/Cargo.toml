@@ -35,7 +35,7 @@ crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
 derive_more = { version = "1.0", features = ["debug"], optional = true }
 enum-map = { version = "2.7.3", optional = true }
-lazy-regex = { version = "3.3", optional = true }
+lazy-regex = { version = "3.4", optional = true }
 malachite = { version = "0.4", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",

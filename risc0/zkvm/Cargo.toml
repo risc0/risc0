@@ -70,7 +70,7 @@ bytes = { version = "1.7", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 enum-map = { version = "2.7.3", optional = true }
 keccak = { version = "0.1.5", optional = true }
-lazy-regex = { version = "3.3", optional = true }
+lazy-regex = { version = "3.4", optional = true }
 num-bigint = { version = "0.4", default-features = false, optional = true }
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.13", optional = true }
