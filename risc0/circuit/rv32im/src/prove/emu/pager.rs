@@ -55,7 +55,7 @@ pub struct PageFaults {
 }
 
 #[derive(Clone, Debug)]
-enum Action {
+pub enum Action {
     PageRead(u32, usize),
     PageWrite(u32, usize, bool),
     Store(WordAddr, u32),
@@ -214,8 +214,8 @@ impl PagedMemory {
         }
     }
 
-    pub fn commit_step(&mut self) {
-        self.pending_actions.clear();
+    pub fn commit_step(&mut self) -> Vec<Action> {
+        take(&mut self.pending_actions)
     }
 
     pub fn clear(&mut self) {
