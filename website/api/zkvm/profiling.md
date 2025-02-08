@@ -42,7 +42,7 @@ RISC0_PPROF_OUT=./profile.pb RUST_LOG=info RISC0_DEV_MODE=1 RISC0_INFO=1 cargo r
 The above command will run the Fibonacci computation for 1000 iterations and
 write the profiling output to `profile.pb`. Use the environment variable
 `RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
-We recommend running profiling in [dev mode][devmode] to avoid unneccesary proving time.
+We recommend running profiling in [dev mode][devmode] to avoid unnecessary proving time.
 
 ### Step 3: Visualization
 

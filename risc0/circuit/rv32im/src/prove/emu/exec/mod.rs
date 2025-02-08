@@ -40,7 +40,7 @@ use sha2::digest::generic_array::GenericArray;
 use super::{
     addr::{ByteAddr, WordAddr},
     bibc,
-    pager::PagedMemory,
+    pager::{self, PagedMemory},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
     BIGINT2_WIDTH_BYTES, BIGINT_CYCLES, SYSTEM_START,
 };
@@ -380,7 +380,22 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
         self.output_digest = self.pending.output_digest.take();
         self.exit_code = self.pending.exit_code.take();
-        self.pager.commit_step();
+        let page_actions = self.pager.commit_step();
+
+        for trace in &self.trace {
+            for action in &page_actions {
+                let event = match action {
+                    pager::Action::PageRead(_, cycles) => TraceEvent::PageIn {
+                        cycles: *cycles as u64,
+                    },
+                    pager::Action::PageWrite(_, cycles, _) => TraceEvent::PageOut {
+                        cycles: *cycles as u64,
+                    },
+                    _ => continue,
+                };
+                trace.borrow_mut().trace_callback(event)?;
+            }
+        }
 
         Ok(())
     }
@@ -607,6 +622,7 @@ impl<S: Syscall> Executor<'_, '_, S> {
         self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
 
         let cycles = verify_program_size as usize + 1;
+        tracing::debug!("bigint2 cycles: {cycles}");
 
         self.pending.ecall = Some(EcallKind::BigInt2);
         self.pending.cycles += cycles;
@@ -765,7 +781,7 @@ pub(crate) fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
 
 impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
-        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+        tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
@@ -775,7 +791,7 @@ impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
     }
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
-        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+        tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let mut bytes = bigint_to_bytes_le(value);

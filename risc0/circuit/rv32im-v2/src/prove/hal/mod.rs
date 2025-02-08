@@ -19,7 +19,6 @@ pub(crate) mod cuda;
 use std::rc::Rc;
 
 use anyhow::Result;
-use rand::thread_rng;
 use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO},
@@ -95,6 +94,7 @@ pub(crate) trait CircuitAccumulator<H: Hal> {
         preflight: &PreflightTrace,
         data: &MetaBuffer<H>,
         accum: &MetaBuffer<H>,
+        global: &MetaBuffer<H>,
         mix: &MetaBuffer<H>,
     ) -> Result<()>;
 }
@@ -126,15 +126,26 @@ where
     fn prove(&self, segment: &Segment) -> Result<Seal> {
         scope!("prove");
 
-        let mut rng = thread_rng();
-        let rand_z = ExtVal::random(&mut rng);
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "circuit_debug")] {
+                let rand_z = ExtVal::ONE;
+                let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
+                    StepMode::SeqForward
+                } else {
+                    StepMode::Parallel
+                };
+            } else {
+                let mut rng = rand::thread_rng();
+                let rand_z = ExtVal::random(&mut rng);
+                let mode = StepMode::Parallel;
+            }
+        }
 
         let witgen = WitnessGenerator::new(
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),
             segment,
-            StepMode::Parallel,
-            // StepMode::SeqForward,
+            mode,
             rand_z,
         )?;
 
@@ -197,8 +208,13 @@ where
                     )
                 );
 
-                self.circuit_hal
-                    .step_accum(&witgen.trace, &witgen.data, &accum, &mix)?;
+                self.circuit_hal.step_accum(
+                    &witgen.trace,
+                    &witgen.data,
+                    &accum,
+                    &witgen.global,
+                    &mix,
+                )?;
 
                 scope!("zeroize(accum)", {
                     self.hal.eltwise_zeroize_elem(&accum.buf);

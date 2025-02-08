@@ -3029,9 +3029,12 @@ name = "risc0-circuit-rv32im-v2"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "auto_ops",
  "bytemuck",
+ "byteorder",
  "cfg-if",
  "derive_more 1.0.0",
+ "malachite",
  "num-derive",
  "num-traits",
  "paste",
@@ -3044,6 +3047,7 @@ dependencies = [
  "risc0-sys",
  "risc0-zkp",
  "serde",
+ "smallvec",
  "tracing",
 ]
 
