@@ -24,10 +24,11 @@ use risc0_zkp::core::{
 use crate::{Rv32imV2Claim, TerminateState};
 
 use super::{
+    bigint::BigIntState,
     pager::PagedMemory,
     platform::*,
     poseidon2::Poseidon2State,
-    r0vm::{Risc0Context, Risc0Machine},
+    r0vm::{LoadOp, Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
     sha2::Sha2State,
@@ -184,6 +185,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
         let final_cycles = self.segment_cycles().next_power_of_two();
         let final_po2 = log2_ceil(final_cycles as usize);
+        let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
 
         let final_claim = Rv32imV2Claim {
             pre_state: pre_digest,
@@ -316,12 +318,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
-    fn peek_u32(&mut self, addr: WordAddr) -> Result<u32> {
-        self.pager.peek(addr)
-    }
-
-    fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
-        let word = self.pager.load(addr)?;
+    fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
+        let word = match op {
+            LoadOp::Peek => self.pager.peek(addr)?,
+            LoadOp::Load | LoadOp::Record => self.pager.load(addr)?,
+        };
         // tracing::trace!("load_mem({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
     }
@@ -345,7 +346,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         tracing::debug!("{:?}", self.terminate_state);
 
         let output: Digest = self
-            .peek_region(GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
+            .load_region(LoadOp::Peek, GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
             .as_slice()
             .try_into()?;
         self.output_digest = Some(output);
@@ -370,8 +371,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         self.phys_cycles += 1;
     }
 
-    fn on_poseidon2_cycle(&mut self, cur_state: CycleState, _p2: &Poseidon2State) {
-        tracing::trace!("on_poseidon2_cycle: {cur_state:?}");
+    fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
+        self.phys_cycles += 1;
+    }
+
+    fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
         self.phys_cycles += 1;
     }
 }
@@ -381,19 +385,22 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
         if idx >= REG_MAX {
             bail!("invalid register: x{idx}");
         }
-        Risc0Context::peek_u32(self, USER_REGS_ADDR.waddr() + idx)
+        self.load_register(LoadOp::Peek, USER_REGS_ADDR.waddr(), idx)
     }
 
     fn peek_u32(&mut self, addr: ByteAddr) -> Result<u32> {
         // let addr = Self::check_guest_addr(addr)?;
-        Risc0Context::peek_u32(self, addr.waddr())
+        self.load_u32(LoadOp::Peek, addr.waddr())
     }
 
     fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
         // let addr = Self::check_guest_addr(addr)?;
-        let word = Risc0Context::peek_u32(self, addr.waddr())?;
-        let bytes = word.to_le_bytes();
-        Ok(bytes[addr.subaddr() as usize])
+        self.load_u8(LoadOp::Peek, addr)
+    }
+
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+        // let addr = Self::check_guest_addr(addr)?;
+        self.load_region(LoadOp::Peek, addr, size)
     }
 
     fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {

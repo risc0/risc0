@@ -50,7 +50,7 @@ fn get_github_token_from_hosts_yml(home_dir: &Path) -> Result<String> {
     hosts["github.com"]["oauth_token"]
         .as_str()
         .map(|s| s.to_owned())
-        .ok_or_else(|| RzupError::Other("unexpcted YAML".into()))
+        .ok_or_else(|| RzupError::Other("unexpected YAML".into()))
 }
 
 #[cfg(test)]

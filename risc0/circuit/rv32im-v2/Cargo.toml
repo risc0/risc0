@@ -32,7 +32,13 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
+auto_ops = { version = "0.3", optional = true }
+byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
+malachite = { version = "0.4", optional = true, default-features = false, features = [
+  "naturals_and_integers",
+  "32_bit_limbs",
+] }
 num-derive = { version = "0.4.2", optional = true }
 num-traits = { version = "0.2.19", optional = true }
 rand = { version = "0.8", optional = true }
@@ -40,6 +46,7 @@ rayon = { version = "1.5", optional = true }
 ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-v2-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
+smallvec = { version = "1.13", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
@@ -49,6 +56,7 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
+circuit_debug = ["risc0-zkp/circuit_debug"]
 cuda = [
   "prove",
   "risc0-circuit-rv32im-v2-sys/cuda",
@@ -56,11 +64,16 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 default = ["prove"]
+# entropy_finder = []
 execute = [
   "anyhow/backtrace",
-  "dep:ringbuffer",
+  "dep:auto_ops",
+  "dep:byteorder",
+  "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",
+  "dep:ringbuffer",
+  "dep:smallvec",
   "risc0-core/perf",
   "std",
 ]
