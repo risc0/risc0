@@ -22,7 +22,8 @@ pub mod embedded;
 pub fn used() -> usize {
     cfg_if::cfg_if! {
         if #[cfg(feature = "heap-embedded-alloc")] {
-            embedded::HEAP.used()
+            0
+            //embedded::HEAP.used()
         } else {
             bump::used()
         }
@@ -33,7 +34,8 @@ pub fn used() -> usize {
 pub fn free() -> usize {
     cfg_if::cfg_if! {
         if #[cfg(feature = "heap-embedded-alloc")] {
-            embedded::HEAP.free()
+            0
+            //embedded::HEAP.free()
         } else {
             bump::free()
         }
