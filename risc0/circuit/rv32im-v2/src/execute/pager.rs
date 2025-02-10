@@ -76,22 +76,24 @@ pub(crate) struct PagedMemory {
 }
 
 impl PagedMemory {
-    pub(crate) fn new(image: MemoryImage2) -> Self {
+    pub(crate) fn new(mut image: MemoryImage2) -> Self {
+        let mut machine_registers = [0; REG_MAX];
+        let mut user_registers = [0; REG_MAX];
+        let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
+        let page = image.get_page(page_idx).unwrap();
+        for idx in 0..REG_MAX {
+            machine_registers[idx] = page.load(MACHINE_REGS_ADDR.waddr() + idx);
+            user_registers[idx] = page.load(USER_REGS_ADDR.waddr() + idx);
+        }
+
         Self {
             image,
             page_table: vec![INVALID_IDX; NUM_PAGES],
             page_cache: Vec::new(),
             page_states: BTreeMap::new(),
             cycles: RESERVED_PAGING_CYCLES,
-            user_registers: Default::default(),
-            machine_registers: Default::default(),
-        }
-    }
-
-    fn read_registers(&mut self) {
-        for idx in 0..REG_MAX {
-            self.machine_registers[idx] = self.load_ram(MACHINE_REGS_ADDR.waddr() + idx).unwrap();
-            self.user_registers[idx] = self.load_ram(USER_REGS_ADDR.waddr() + idx).unwrap()
+            user_registers,
+            machine_registers,
         }
     }
 
@@ -100,7 +102,6 @@ impl PagedMemory {
         self.page_cache.clear();
         self.page_states.clear();
         self.cycles = RESERVED_PAGING_CYCLES;
-        self.read_registers();
     }
 
     fn try_load_register(&self, addr: WordAddr) -> Option<u32> {
