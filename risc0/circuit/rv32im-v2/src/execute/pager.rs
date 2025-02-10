@@ -53,6 +53,8 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
 
 const INVALID_IDX: u32 = u32::MAX;
 const NUM_PAGES: usize = 4 * 1024 * 1024;
+const USER_REG_IDX: usize = 0;
+const MACHINE_REG_IDX: usize = 1;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub(crate) enum PageState {
@@ -71,17 +73,34 @@ pub(crate) struct PagedMemory {
     #[debug("{page_states:#x?}")]
     pub(crate) page_states: BTreeMap<u32, PageState>,
     pub cycles: u32,
+    reg_files: [[u32; REG_MAX]; 2],
 }
 
 impl PagedMemory {
     pub(crate) fn new(image: MemoryImage2) -> Self {
-        Self {
+        let mut pager = Self {
             image,
             page_table: vec![INVALID_IDX; NUM_PAGES],
             page_cache: Vec::new(),
             page_states: BTreeMap::new(),
             cycles: RESERVED_PAGING_CYCLES,
+            reg_files: [[0; REG_MAX]; 2],
+        };
+        // Load all the registers from the image
+        for reg_file_idx in 0..2 {
+            let addr_base = if reg_file_idx == USER_REG_IDX {
+                USER_REGS_ADDR.waddr()
+            } else {
+                MACHINE_REGS_ADDR.waddr()
+            };
+
+            for reg_idx in 0..REG_MAX {
+                let addr = addr_base + (reg_idx * WORD_SIZE);
+                // TODO(mothran) unwrap()
+                pager.reg_files[reg_file_idx][reg_idx] = pager.load_mem(addr).unwrap();
+            }
         }
+        pager
     }
 
     pub(crate) fn reset(&mut self) {
@@ -91,10 +110,41 @@ impl PagedMemory {
         self.cycles = RESERVED_PAGING_CYCLES;
     }
 
-    pub(crate) fn peek(&mut self, addr: WordAddr) -> Result<u32> {
-        if addr >= MEMORY_END_ADDR {
-            bail!("Invalid peek address: {addr:?}");
+    fn load_reg(&self, addr: WordAddr) -> Result<u32> {
+        let (reg_file_idx, reg_idx) = if addr >= USER_REGS_ADDR.waddr() {
+            let reg_idx = addr - USER_REGS_ADDR.waddr();
+            (USER_REG_IDX, reg_idx.0 as usize)
+        } else {
+            let reg_idx = addr - MACHINE_REGS_ADDR.waddr();
+            (MACHINE_REG_IDX, reg_idx.0 as usize)
+        };
+
+        if reg_idx >= REG_MAX {
+            bail!("Invalid user reg: {reg_idx}");
         }
+        Ok(self.reg_files[reg_file_idx][reg_idx])
+    }
+
+    fn store_reg(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        let (reg_file_idx, reg_idx) = if addr >= USER_REGS_ADDR.waddr() {
+            let reg_idx = addr - USER_REGS_ADDR.waddr();
+            (USER_REG_IDX, reg_idx.0 as usize)
+        } else {
+            let reg_idx = addr - MACHINE_REGS_ADDR.waddr();
+            (MACHINE_REG_IDX, reg_idx.0 as usize)
+        };
+
+        if reg_idx >= REG_MAX {
+            bail!("Invalid user reg: {reg_idx}");
+        }
+        self.reg_files[reg_file_idx][reg_idx] = word;
+        Ok(())
+
+        // if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
+        // }
+    }
+
+    fn peek_mem(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         let cache_idx = self.page_table[page_idx as usize];
         if cache_idx == INVALID_IDX {
@@ -103,6 +153,17 @@ impl PagedMemory {
         } else {
             // Loaded, get from cache
             Ok(self.page_cache[cache_idx as usize].load(addr))
+        }
+    }
+
+    pub(crate) fn peek(&mut self, addr: WordAddr) -> Result<u32> {
+        if addr >= MEMORY_END_ADDR {
+            bail!("Invalid peek address: {addr:?}");
+        }
+        if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
+            self.load_reg(addr)
+        } else {
+            self.peek_mem(addr)
         }
     }
 
@@ -117,10 +178,7 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
-        if addr >= MEMORY_END_ADDR {
-            bail!("Invalid load address: {addr:?}");
-        }
+    fn load_mem(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         let node_idx = node_idx(page_idx);
         // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
@@ -133,10 +191,18 @@ impl PagedMemory {
         Ok(self.page_cache[cache_idx as usize].load(addr))
     }
 
-    pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+    pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
         if addr >= MEMORY_END_ADDR {
-            bail!("Invalid store address: {addr:?}");
+            bail!("Invalid load address: {addr:?}");
         }
+        if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
+            self.load_reg(addr)
+        } else {
+            self.load_mem(addr)
+        }
+    }
+
+    fn store_mem(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let page_idx = addr.page_idx();
         // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
         let node_idx = node_idx(page_idx);
@@ -159,12 +225,27 @@ impl PagedMemory {
         Ok(())
     }
 
+    pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        if addr >= MEMORY_END_ADDR {
+            bail!("Invalid store address: {addr:?}");
+        }
+        if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
+            self.store_reg(addr, word)
+        } else {
+            self.store_mem(addr, word)
+        }
+    }
+
     pub(crate) fn commit(&mut self) -> Result<(Digest, MemoryImage2, Digest)> {
         // tracing::trace!("commit: {self:#?}");
 
         let pre_state = self.image.image_id();
 
         let mut image = MemoryImage2::default();
+
+        // Mark the register page as dirty
+        let reg_page_idx = node_idx(MACHINE_REGS_ADDR.waddr().page_idx());
+        self.page_states.insert(reg_page_idx, PageState::Dirty);
 
         // Gather the original pages
         for (&node_idx, &page_state) in self.page_states.iter() {
