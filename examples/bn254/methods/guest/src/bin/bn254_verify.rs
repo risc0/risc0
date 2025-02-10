@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use substrate_bn::{AffineG1, AffineG2, Fq, Fq2, G1, G2, Gt, pairing_batch};
+use substrate_bn::{AffineG1, AffineG2, Fq, Fq2, Fr, G1, G2, Gt, pairing_batch};
 use risc0_zkvm::guest::env;
 
 fn main() {
@@ -30,6 +30,12 @@ fn main() {
         let g2y = Fq2::new(g2y_r, g2y_i);
         let g1 = G1::from(AffineG1::new(g1x, g1y).expect("Point on G1 expected"));
         let g2 = G2::from(AffineG2::new(g2x, g2y).expect("Point on G2 expected"));
+        // TODO
+        let two_fr = Fr::one() + Fr::one();
+        let two_inv_fr = two_fr.inverse().expect("two is invertible");
+        let g1 = g1 * two_fr;
+        let g2 = g2 * two_inv_fr;
+        // / TODO
         break;
     }
     let result = pairing_batch(&pairs);
