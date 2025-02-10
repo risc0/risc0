@@ -285,19 +285,25 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
         self.cycles.user += 1;
-        tracing::trace!(
-            "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-            self.user_cycles + 1,
-            self.segment_cycles() + 1,
-            self.pc,
-            decoded.insn,
-            disasm(insn, decoded)
-        );
-        self.trace(TraceEvent::InstructionStart {
-            cycle,
-            pc: self.pc.0,
-            insn: decoded.insn,
-        })
+        if tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
+                self.user_cycles + 1,
+                self.segment_cycles() + 1,
+                self.pc,
+                decoded.insn,
+                disasm(insn, decoded)
+            );
+        }
+        if !self.trace.is_empty() {
+            self.trace(TraceEvent::InstructionStart {
+                cycle,
+                pc: self.pc.0,
+                insn: decoded.insn,
+            })
+        } else {
+            Ok(())
+        }
     }
 
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
@@ -329,10 +335,12 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
-        self.trace(TraceEvent::MemorySet {
-            addr: addr.baddr().0,
-            region: word.to_be_bytes().to_vec(),
-        })?;
+        if !self.trace.is_empty() {
+            self.trace(TraceEvent::MemorySet {
+                addr: addr.baddr().0,
+                region: word.to_be_bytes().to_vec(),
+            })?;
+        }
         self.pager.store(addr, word)
     }
 

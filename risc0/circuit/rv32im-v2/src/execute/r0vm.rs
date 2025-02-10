@@ -138,25 +138,25 @@ fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
         .ok_or_else(|| anyhow!("{addr:?} is an unaligned address"))
 }
 
-pub struct Risc0Machine<'a> {
-    ctx: &'a mut dyn Risc0Context,
+pub struct Risc0Machine<'a, T: Risc0Context> {
+    ctx: &'a mut T,
 }
 
-impl<'a> Risc0Machine<'a> {
-    pub fn step(emu: &mut Emulator, ctx: &'a mut dyn Risc0Context) -> Result<()> {
+impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
+    pub fn step(emu: &mut Emulator, ctx: &'a mut T) -> Result<()> {
         emu.step(&mut Risc0Machine { ctx }).inspect_err(|_| {
             emu.dump();
         })
     }
 
-    pub fn suspend(ctx: &'a mut dyn Risc0Context) -> Result<()> {
+    pub fn suspend(ctx: &'a mut T) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         this.store_memory(SUSPEND_PC_ADDR.waddr(), this.ctx.get_pc().0)?;
         this.store_memory(SUSPEND_MODE_ADDR.waddr(), this.ctx.get_machine_mode())?;
         this.ctx.suspend()
     }
 
-    pub fn resume(ctx: &'a mut dyn Risc0Context) -> Result<()> {
+    pub fn resume(ctx: &'a mut T) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
@@ -413,7 +413,7 @@ impl<'a> Risc0Machine<'a> {
     }
 }
 
-impl EmuContext for Risc0Machine<'_> {
+impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
     fn ecall(&mut self) -> Result<bool> {
         if self.is_machine_mode() {
             self.machine_ecall()
