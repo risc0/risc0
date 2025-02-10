@@ -32,18 +32,11 @@ fn main() {
         let g2 = G2::from(AffineG2::new(g2x, g2y).expect("Point on G2 expected"));
         // TODO
         let scalar = Fr::from_slice(&entry.6).expect("Scalar factor expected");
-        // assert_eq!(scalar, Fr::one());
         let scalar_inv = scalar.inverse().expect("Scalar is invertible");
-        // assert_eq!(scalar_inv, Fr::one());
         let g1 = g1 * scalar;
-        // let g1_alt = g1 * scalar;
-        // assert_eq!(g1, g1_alt);
         let g2 = g2 * scalar_inv;
-        // let g2_alt = g2 * scalar_inv;
-        // assert_eq!(g2, g2_alt);
         // / TODO
         pairs.push((g1, g2));
-        // pairs.push((g1_alt, g2_alt));
         // break;  // TODO
     }
     let result = pairing_batch(&pairs);
