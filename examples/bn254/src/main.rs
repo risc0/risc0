@@ -31,8 +31,8 @@ fn todo_do_a_thing() -> Receipt { // TODO
     let b_g2x_r = hex::decode("1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed").expect("valid hex");
     let b_g2y_i = hex::decode("090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b").expect("valid hex");
     let b_g2y_r = hex::decode("12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa").expect("valid hex");
-    let a_factor = hex::decode("0000000000000000000000000000000000000000000000000000000000000002").expect("valid hex");
-    let b_factor = hex::decode("0000000000000000000000000000000000000000000000000000000000000002").expect("valid hex");
+    let a_factor = hex::decode("0000000000000000000000000000000000000000000000000000000000000001").expect("valid hex");
+    let b_factor = hex::decode("0000000000000000000000000000000000000000000000000000000000000001").expect("valid hex");
     let input = vec!(
         (a_g1x, a_g1y, a_g2x_i, a_g2x_r, a_g2y_i, a_g2y_r, a_factor),
         (b_g1x, b_g1y, b_g2x_i, b_g2x_r, b_g2y_i, b_g2y_r, b_factor),
