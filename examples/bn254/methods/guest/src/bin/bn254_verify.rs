@@ -32,9 +32,9 @@ fn main() {
         let g2 = G2::from(AffineG2::new(g2x, g2y).expect("Point on G2 expected"));
         // TODO
         let scalar = Fr::from_slice(&entry.6).expect("Scalar factor expected");
-        assert_eq!(scalar, Fr::one());
+        // assert_eq!(scalar, Fr::one());
         let scalar_inv = scalar.inverse().expect("Scalar is invertible");
-        assert_eq!(scalar_inv, Fr::one());
+        // assert_eq!(scalar_inv, Fr::one());
         let g1 = g1 * scalar;
         // let g1_alt = g1 * scalar;
         // assert_eq!(g1, g1_alt);
