@@ -95,7 +95,7 @@ impl PagedMemory {
             };
 
             for reg_idx in 0..REG_MAX {
-                let addr = addr_base + (reg_idx * WORD_SIZE);
+                let addr = addr_base + reg_idx;
                 // TODO(mothran) unwrap()
                 pager.reg_files[reg_file_idx][reg_idx] = pager.load_mem(addr).unwrap();
             }
@@ -243,9 +243,21 @@ impl PagedMemory {
 
         let mut image = MemoryImage2::default();
 
-        // Mark the register page as dirty
-        let reg_page_idx = node_idx(MACHINE_REGS_ADDR.waddr().page_idx());
-        self.page_states.insert(reg_page_idx, PageState::Dirty);
+        // Flush the registers to the memory
+        for reg_file_idx in 0..2 {
+            let addr_base = if reg_file_idx == USER_REG_IDX {
+                USER_REGS_ADDR.waddr()
+            } else {
+                MACHINE_REGS_ADDR.waddr()
+            };
+
+            for reg_idx in 0..REG_MAX {
+                let addr = addr_base + reg_idx;
+                // TODO(mothran) unwrap()
+                self.store_mem(addr, self.reg_files[reg_file_idx][reg_idx])
+                    .unwrap();
+            }
+        }
 
         // Gather the original pages
         for (&node_idx, &page_state) in self.page_states.iter() {
