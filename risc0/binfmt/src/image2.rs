@@ -309,6 +309,15 @@ impl Page {
         // tracing::trace!("store({addr:?}, {byte_addr:#05x}, {word:#010x})");
         self.0[byte_addr..byte_addr + WORD_SIZE].clone_from_slice(&word.to_le_bytes());
     }
+
+    /// Store a slice of u32 words starting at the given address
+    pub fn store_range(&mut self, addr: WordAddr, words: &[u32]) {
+        let mut byte_addr = addr.page_subaddr().baddr().0 as usize;
+        for word in words {
+            self.0[byte_addr..byte_addr + WORD_SIZE].clone_from_slice(&word.to_le_bytes());
+            byte_addr += WORD_SIZE;
+        }
+    }
 }
 
 pub(crate) struct DigestPair {

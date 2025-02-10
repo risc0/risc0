@@ -225,6 +225,52 @@ impl PagedMemory {
         Ok(())
     }
 
+    pub(crate) fn store_mem_region(&mut self, addr: WordAddr, words: &[u32]) -> Result<()> {
+        if words.is_empty() {
+            return Ok(());
+        }
+
+        let mut current_addr = addr;
+        let mut word_offset = 0;
+
+        while word_offset < words.len() {
+            let page_idx = current_addr.page_idx();
+            let node_idx = node_idx(page_idx);
+
+            // Load page if needed and handle state
+            let state = if let Some(state) = self.page_states.get(&node_idx) {
+                *state
+            } else {
+                self.load_page(page_idx)?;
+                PageState::Loaded
+            };
+
+            // Mark page as dirty if needed
+            if state == PageState::Loaded {
+                self.cycles += PAGE_CYCLES;
+                self.fixup_costs(node_idx, PageState::Dirty);
+                self.page_states.insert(node_idx, PageState::Dirty);
+            }
+
+            // Calculate how many words we can write in this page
+            let words_until_page_end = PAGE_WORDS - current_addr.page_subaddr().0 as usize;
+            let words_remaining = words.len() - word_offset;
+            let words_to_write = words_until_page_end.min(words_remaining);
+
+            // Store the words using store_range
+            let cache_idx = self.page_table[page_idx as usize] as usize;
+            self.page_cache.get_mut(cache_idx).unwrap().store_range(
+                current_addr,
+                &words[word_offset..word_offset + words_to_write],
+            );
+
+            word_offset += words_to_write;
+            current_addr += words_to_write as u32;
+        }
+
+        Ok(())
+    }
+
     pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         if addr >= MEMORY_END_ADDR {
             bail!("Invalid store address: {addr:?}");
@@ -240,24 +286,15 @@ impl PagedMemory {
         // tracing::trace!("commit: {self:#?}");
 
         let pre_state = self.image.image_id();
-
         let mut image = MemoryImage2::default();
 
-        // Flush the registers to the memory
-        for reg_file_idx in 0..2 {
-            let addr_base = if reg_file_idx == USER_REG_IDX {
-                USER_REGS_ADDR.waddr()
-            } else {
-                MACHINE_REGS_ADDR.waddr()
-            };
+        // Copy register values first to avoid borrow conflicts
+        let machine_regs = self.reg_files[MACHINE_REG_IDX];
+        let user_regs = self.reg_files[USER_REG_IDX];
 
-            for reg_idx in 0..REG_MAX {
-                let addr = addr_base + reg_idx;
-                // TODO(mothran) unwrap()
-                self.store_mem(addr, self.reg_files[reg_file_idx][reg_idx])
-                    .unwrap();
-            }
-        }
+        // Flush the registers to the memory
+        self.store_mem_region(MACHINE_REGS_ADDR.waddr(), &machine_regs)?;
+        self.store_mem_region(USER_REGS_ADDR.waddr(), &user_regs)?;
 
         // Gather the original pages
         for (&node_idx, &page_state) in self.page_states.iter() {
