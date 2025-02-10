@@ -38,7 +38,7 @@ fn main() {
         let g1 = g1 * scalar;
         // let g1_alt = g1 * scalar;
         // assert_eq!(g1, g1_alt);
-        let g2 = g2 * scalar;
+        let g2 = g2 * scalar_inv;
         // let g2_alt = g2 * scalar_inv;
         // assert_eq!(g2, g2_alt);
         // / TODO
