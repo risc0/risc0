@@ -53,8 +53,6 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
 
 const INVALID_IDX: u32 = u32::MAX;
 const NUM_PAGES: usize = 4 * 1024 * 1024;
-const USER_REG_IDX: usize = 0;
-const MACHINE_REG_IDX: usize = 1;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub(crate) enum PageState {
@@ -73,34 +71,28 @@ pub(crate) struct PagedMemory {
     #[debug("{page_states:#x?}")]
     pub(crate) page_states: BTreeMap<u32, PageState>,
     pub cycles: u32,
-    reg_files: [[u32; REG_MAX]; 2],
+    user_registers: [u32; REG_MAX],
+    machine_registers: [u32; REG_MAX],
 }
 
 impl PagedMemory {
     pub(crate) fn new(image: MemoryImage2) -> Self {
-        let mut pager = Self {
+        Self {
             image,
             page_table: vec![INVALID_IDX; NUM_PAGES],
             page_cache: Vec::new(),
             page_states: BTreeMap::new(),
             cycles: RESERVED_PAGING_CYCLES,
-            reg_files: [[0; REG_MAX]; 2],
-        };
-        // Load all the registers from the image
-        for reg_file_idx in 0..2 {
-            let addr_base = if reg_file_idx == USER_REG_IDX {
-                USER_REGS_ADDR.waddr()
-            } else {
-                MACHINE_REGS_ADDR.waddr()
-            };
-
-            for reg_idx in 0..REG_MAX {
-                let addr = addr_base + reg_idx;
-                // TODO(mothran) unwrap()
-                pager.reg_files[reg_file_idx][reg_idx] = pager.load_mem(addr).unwrap();
-            }
+            user_registers: Default::default(),
+            machine_registers: Default::default(),
         }
-        pager
+    }
+
+    fn read_registers(&mut self) {
+        for idx in 0..REG_MAX {
+            self.machine_registers[idx] = self.load_ram(MACHINE_REGS_ADDR.waddr() + idx).unwrap();
+            self.user_registers[idx] = self.load_ram(USER_REGS_ADDR.waddr() + idx).unwrap()
+        }
     }
 
     pub(crate) fn reset(&mut self) {
@@ -108,43 +100,36 @@ impl PagedMemory {
         self.page_cache.clear();
         self.page_states.clear();
         self.cycles = RESERVED_PAGING_CYCLES;
+        self.read_registers();
     }
 
-    fn load_reg(&self, addr: WordAddr) -> Result<u32> {
-        let (reg_file_idx, reg_idx) = if addr >= USER_REGS_ADDR.waddr() {
+    fn try_load_register(&self, addr: WordAddr) -> Option<u32> {
+        if addr >= USER_REGS_ADDR.waddr() && addr < USER_REGS_ADDR.waddr() + REG_MAX {
             let reg_idx = addr - USER_REGS_ADDR.waddr();
-            (USER_REG_IDX, reg_idx.0 as usize)
-        } else {
+            Some(self.user_registers[reg_idx.0 as usize])
+        } else if addr >= MACHINE_REGS_ADDR.waddr() && addr < MACHINE_REGS_ADDR.waddr() + REG_MAX {
             let reg_idx = addr - MACHINE_REGS_ADDR.waddr();
-            (MACHINE_REG_IDX, reg_idx.0 as usize)
-        };
-
-        if reg_idx >= REG_MAX {
-            bail!("Invalid user reg: {reg_idx}");
+            Some(self.machine_registers[reg_idx.0 as usize])
+        } else {
+            None
         }
-        Ok(self.reg_files[reg_file_idx][reg_idx])
     }
 
-    fn store_reg(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        let (reg_file_idx, reg_idx) = if addr >= USER_REGS_ADDR.waddr() {
+    fn try_store_register(&mut self, addr: WordAddr, word: u32) -> bool {
+        if addr >= USER_REGS_ADDR.waddr() && addr < USER_REGS_ADDR.waddr() + REG_MAX {
             let reg_idx = addr - USER_REGS_ADDR.waddr();
-            (USER_REG_IDX, reg_idx.0 as usize)
-        } else {
+            self.user_registers[reg_idx.0 as usize] = word;
+            true
+        } else if addr >= MACHINE_REGS_ADDR.waddr() && addr < MACHINE_REGS_ADDR.waddr() + REG_MAX {
             let reg_idx = addr - MACHINE_REGS_ADDR.waddr();
-            (MACHINE_REG_IDX, reg_idx.0 as usize)
-        };
-
-        if reg_idx >= REG_MAX {
-            bail!("Invalid user reg: {reg_idx}");
+            self.machine_registers[reg_idx.0 as usize] = word;
+            true
+        } else {
+            false
         }
-        self.reg_files[reg_file_idx][reg_idx] = word;
-        Ok(())
-
-        // if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
-        // }
     }
 
-    fn peek_mem(&mut self, addr: WordAddr) -> Result<u32> {
+    fn peek_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         let cache_idx = self.page_table[page_idx as usize];
         if cache_idx == INVALID_IDX {
@@ -160,10 +145,10 @@ impl PagedMemory {
         if addr >= MEMORY_END_ADDR {
             bail!("Invalid peek address: {addr:?}");
         }
-        if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
-            self.load_reg(addr)
-        } else {
-            self.peek_mem(addr)
+
+        match self.try_load_register(addr) {
+            Some(word) => Ok(word),
+            None => self.peek_ram(addr),
         }
     }
 
@@ -178,7 +163,7 @@ impl PagedMemory {
         }
     }
 
-    fn load_mem(&mut self, addr: WordAddr) -> Result<u32> {
+    fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         let node_idx = node_idx(page_idx);
         // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
@@ -195,16 +180,34 @@ impl PagedMemory {
         if addr >= MEMORY_END_ADDR {
             bail!("Invalid load address: {addr:?}");
         }
-        if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
-            self.load_reg(addr)
-        } else {
-            self.load_mem(addr)
+
+        match self.try_load_register(addr) {
+            Some(word) => Ok(word),
+            None => self.load_ram(addr),
         }
     }
 
-    fn store_mem(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        let page_idx = addr.page_idx();
+    fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
+        let page_idx = addr.page_idx();
+        let page = self.page_for_writing(page_idx)?;
+        page.store(addr, word);
+        Ok(())
+    }
+
+    pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        if addr >= MEMORY_END_ADDR {
+            bail!("Invalid store address: {addr:?}");
+        }
+
+        if self.try_store_register(addr, word) {
+            Ok(())
+        } else {
+            self.store_ram(addr, word)
+        }
+    }
+
+    fn page_for_writing(&mut self, page_idx: u32) -> Result<&mut Page> {
         let node_idx = node_idx(page_idx);
         let state = if let Some(state) = self.page_states.get(&node_idx) {
             *state
@@ -218,83 +221,30 @@ impl PagedMemory {
             self.page_states.insert(node_idx, PageState::Dirty);
         }
         let cache_idx = self.page_table[page_idx as usize] as usize;
-        self.page_cache
-            .get_mut(cache_idx)
-            .unwrap()
-            .store(addr, word);
-        Ok(())
+        Ok(self.page_cache.get_mut(cache_idx).unwrap())
     }
 
-    pub(crate) fn store_mem_region(&mut self, addr: WordAddr, words: &[u32]) -> Result<()> {
-        if words.is_empty() {
-            return Ok(());
-        }
-
-        let mut current_addr = addr;
-        let mut word_offset = 0;
-
-        while word_offset < words.len() {
-            let page_idx = current_addr.page_idx();
-            let node_idx = node_idx(page_idx);
-
-            // Load page if needed and handle state
-            let state = if let Some(state) = self.page_states.get(&node_idx) {
-                *state
-            } else {
-                self.load_page(page_idx)?;
-                PageState::Loaded
-            };
-
-            // Mark page as dirty if needed
-            if state == PageState::Loaded {
-                self.cycles += PAGE_CYCLES;
-                self.fixup_costs(node_idx, PageState::Dirty);
-                self.page_states.insert(node_idx, PageState::Dirty);
-            }
-
-            // Calculate how many words we can write in this page
-            let words_until_page_end = PAGE_WORDS - current_addr.page_subaddr().0 as usize;
-            let words_remaining = words.len() - word_offset;
-            let words_to_write = words_until_page_end.min(words_remaining);
-
-            // Store the words using store_range
-            let cache_idx = self.page_table[page_idx as usize] as usize;
-            self.page_cache.get_mut(cache_idx).unwrap().store_range(
-                current_addr,
-                &words[word_offset..word_offset + words_to_write],
-            );
-
-            word_offset += words_to_write;
-            current_addr += words_to_write as u32;
-        }
-
-        Ok(())
-    }
-
-    pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        if addr >= MEMORY_END_ADDR {
-            bail!("Invalid store address: {addr:?}");
-        }
-        if addr >= MACHINE_REGS_ADDR.waddr() && addr < SAFE_WRITE_ADDR.waddr() {
-            self.store_reg(addr, word)
-        } else {
-            self.store_mem(addr, word)
+    fn write_registers(&mut self) {
+        // Copy register values first to avoid borrow conflicts
+        let user_registers = self.user_registers;
+        let machine_registers = self.machine_registers;
+        // This works because we can assume that user and machine register files
+        // live in the same page.
+        let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
+        let page = self.page_for_writing(page_idx).unwrap();
+        for idx in 0..REG_MAX {
+            page.store(MACHINE_REGS_ADDR.waddr() + idx, machine_registers[idx]);
+            page.store(USER_REGS_ADDR.waddr() + idx, user_registers[idx]);
         }
     }
 
     pub(crate) fn commit(&mut self) -> Result<(Digest, MemoryImage2, Digest)> {
         // tracing::trace!("commit: {self:#?}");
 
+        self.write_registers();
+
         let pre_state = self.image.image_id();
         let mut image = MemoryImage2::default();
-
-        // Copy register values first to avoid borrow conflicts
-        let machine_regs = self.reg_files[MACHINE_REG_IDX];
-        let user_regs = self.reg_files[USER_REG_IDX];
-
-        // Flush the registers to the memory
-        self.store_mem_region(MACHINE_REGS_ADDR.waddr(), &machine_regs)?;
-        self.store_mem_region(USER_REGS_ADDR.waddr(), &user_regs)?;
 
         // Gather the original pages
         for (&node_idx, &page_state) in self.page_states.iter() {
