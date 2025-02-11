@@ -15,6 +15,10 @@
 use std::{path::PathBuf, process::Command};
 
 fn main() {
+    if std::env::var("RISC0_SKIP_BUILD").is_ok() {
+        return;
+    }
+
     install_r0vm(
         "1.1.3",
         &[
