@@ -16,9 +16,10 @@ use std::{str::FromStr, time::Instant};
 
 use num_bigint::BigUint;
 use risc0_bigint2_methods::{
-    EXTFIELD_DEG2_ADD_ELF, EXTFIELD_DEG2_MUL_ELF, EXTFIELD_DEG2_SUB_ELF, EXTFIELD_DEG4_MUL_ELF,
-    EXTFIELD_XXONE_MUL_ELF, MODADD_256_ELF, MODADD_384_ELF, MODINV_256_ELF, MODINV_384_ELF,
-    MODMUL_256_ELF, MODMUL_384_ELF, MODSUB_256_ELF, MODSUB_384_ELF,
+    EXTFIELD_DEG2_ADD_256_ELF, EXTFIELD_DEG2_ADD_384_ELF, EXTFIELD_DEG2_MUL_ELF,
+    EXTFIELD_DEG2_SUB_256_ELF, EXTFIELD_DEG2_SUB_384_ELF, EXTFIELD_DEG4_MUL_ELF,
+    EXTFIELD_XXONE_MUL_256_ELF, EXTFIELD_XXONE_MUL_384_ELF, MODADD_256_ELF, MODADD_384_ELF,
+    MODINV_256_ELF, MODINV_384_ELF, MODMUL_256_ELF, MODMUL_384_ELF, MODSUB_256_ELF, MODSUB_384_ELF,
 };
 use risc0_zkvm::{
     get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, ProverOpts, SegmentVersion,
@@ -174,7 +175,7 @@ fn modsub_384(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn extfieldadd(#[values(V1, V2)] version: SegmentVersion) {
+fn extfieldadd_256(#[values(V1, V2)] version: SegmentVersion) {
     let lhs0 = BigUintWrap::from_str("04").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
     let rhs0 = BigUintWrap::from_str("03").unwrap();
@@ -187,13 +188,32 @@ fn extfieldadd(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_DEG2_ADD_ELF);
+    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_DEG2_ADD_256_ELF);
     assert_eq!(result, (expected0.0, expected1.0));
 }
 
 #[rstest]
 #[test_log::test]
-fn extfieldsub(#[values(V1, V2)] version: SegmentVersion) {
+fn extfieldadd_384(#[values(V1, V2)] version: SegmentVersion) {
+    let lhs0 = BigUintWrap::from_str("04").unwrap();
+    let lhs1 = BigUintWrap::from_str("06").unwrap();
+    let rhs0 = BigUintWrap::from_str("03").unwrap();
+    let rhs1 = BigUintWrap::from_str("04").unwrap();
+    let prime = BigUintWrap::from_str("07").unwrap();
+    let expected0 = BigUintWrap::from_str("00").unwrap();
+    let expected1 = BigUintWrap::from_str("03").unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&(lhs0.0, lhs1.0, rhs0.0, rhs1.0, prime.0))
+        .unwrap()
+        .build()
+        .unwrap();
+    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_DEG2_ADD_384_ELF);
+    assert_eq!(result, (expected0.0, expected1.0));
+}
+
+#[rstest]
+#[test_log::test]
+fn extfieldsub_256(#[values(V1, V2)] version: SegmentVersion) {
     let lhs0 = BigUintWrap::from_str("02").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
     let rhs0 = BigUintWrap::from_str("03").unwrap();
@@ -207,7 +227,27 @@ fn extfieldsub(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_DEG2_SUB_ELF);
+    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_DEG2_SUB_256_ELF);
+    assert_eq!(result, expected);
+}
+
+#[rstest]
+#[test_log::test]
+fn extfieldsub_384(#[values(V1, V2)] version: SegmentVersion) {
+    let lhs0 = BigUintWrap::from_str("02").unwrap();
+    let lhs1 = BigUintWrap::from_str("06").unwrap();
+    let rhs0 = BigUintWrap::from_str("03").unwrap();
+    let rhs1 = BigUintWrap::from_str("02").unwrap();
+    let prime = BigUintWrap::from_str("07").unwrap();
+    let expected0 = BigUintWrap::from_str("06").unwrap();
+    let expected1 = BigUintWrap::from_str("04").unwrap();
+    let expected = (expected0.0, expected1.0);
+    let env = ExecutorEnv::builder()
+        .write(&(lhs0.0, lhs1.0, rhs0.0, rhs1.0, prime.0))
+        .unwrap()
+        .build()
+        .unwrap();
+    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_DEG2_SUB_384_ELF);
     assert_eq!(result, expected);
 }
 
@@ -246,7 +286,7 @@ fn extfieldmul(#[values(V1, V2)] version: SegmentVersion) {
 // TOOD(flaub): fix for v2
 #[rstest]
 #[test_log::test]
-fn extfield_xxone_mul(#[values(V1)] version: SegmentVersion) {
+fn extfield_xxone_mul_256(#[values(V1)] version: SegmentVersion) {
     // (5x+5)(2x+2) mod (xx+1) =
     //   10xx+10x+10x+10 = 10xx+20x+10 = 10(xx+1)-10 + 6x+3 = 6x+0
     let lhs0 = BigUintWrap::from_str("05").unwrap();
@@ -264,7 +304,32 @@ fn extfield_xxone_mul(#[values(V1)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_XXONE_MUL_ELF);
+    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_XXONE_MUL_256_ELF);
+    assert_eq!(result, expected);
+}
+
+// TOOD(flaub): fix for v2
+#[rstest]
+#[test_log::test]
+fn extfield_xxone_mul_384(#[values(V1)] version: SegmentVersion) {
+    // (5x+5)(2x+2) mod (xx+1) =
+    //   10xx+10x+10x+10 = 10xx+20x+10 = 10(xx+1)-10 + 6x+3 = 6x+0
+    let lhs0 = BigUintWrap::from_str("05").unwrap();
+    let lhs1 = BigUintWrap::from_str("05").unwrap();
+    let rhs0 = BigUintWrap::from_str("02").unwrap();
+    let rhs1 = BigUintWrap::from_str("02").unwrap();
+    let prime = BigUintWrap::from_str("07").unwrap();
+    let primesqr = BigUintWrap::from_str("31").unwrap();
+    let expected0 = BigUintWrap::from_str("00").unwrap();
+    let expected1 = BigUintWrap::from_str("06").unwrap();
+    let expected = (expected0.0, expected1.0);
+
+    let env = ExecutorEnv::builder()
+        .write(&(lhs0.0, lhs1.0, rhs0.0, rhs1.0, prime.0, primesqr.0))
+        .unwrap()
+        .build()
+        .unwrap();
+    let result: (BigUint, BigUint) = run_test(version, env, EXTFIELD_XXONE_MUL_384_ELF);
     assert_eq!(result, expected);
 }
 
