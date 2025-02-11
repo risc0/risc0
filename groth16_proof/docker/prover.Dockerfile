@@ -48,9 +48,15 @@ RUN go mod download && go mod verify
 # Copy all Go source code
 COPY circom-compat/. ./
 
+RUN go get github.com/ingonyama-zk/icicle-gnark/v3
+RUN chmod +x $(go env GOMODCACHE)/github.com/ingonyama-zk/icicle-gnark/v3@v3.2.2/wrappers/golang/build.sh
+RUN apt-get update -q -y && apt-get install -q -y build-essential clang libgmp-dev nasm cmake
+RUN which cmake
+RUN (cd $(go env GOMODCACHE)/github.com/ingonyama-zk/icicle-gnark/v3@v3.2.2/wrappers/golang/; ./build.sh -curve=bn254)
+
 # Build the Gnark prover with CGO disabled for static linking
 ENV CGO_ENABLED=0
-RUN go build ./cmd/prover
+RUN go build -tags=icicle ./cmd/prover
 
 # Convert files to Gnark format using a custom converter tool
 RUN go run ./cmd/converter --dump groth16/stark_verify.r1cs groth16/stark_verify_final.zkey.gz
