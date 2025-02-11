@@ -962,7 +962,12 @@ fn fault(#[case] version: TestVersion) {
 
 #[test_log::test]
 fn profiler() {
-    let mut profiler = Profiler::new(MULTI_TEST_ELF, Some("multi_test.elf")).unwrap();
+    let mut profiler = Profiler::new(
+        MULTI_TEST_ELF,
+        Some("multi_test.elf"),
+        true, /* enable_inline_functions */
+    )
+    .unwrap();
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Profiler)
         .unwrap()
