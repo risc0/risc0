@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -264,6 +264,7 @@ __device__ ::cuda::std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx);
 __device__ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len);
 __device__ Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal);
 __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx);
+__device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx);
 
 template <typename T> __device__ void extern_log(ExecContext& ctx, const char* message, T vals) {
   // printf("%s\n", message);

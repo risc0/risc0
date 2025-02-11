@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ struct SeqAccess<'a, 'de, R: WordRead + 'de> {
     len: usize,
 }
 
-impl<'de, 'a, R: WordRead + 'de> serde::de::SeqAccess<'de> for SeqAccess<'a, 'de, R> {
+impl<'de, R: WordRead + 'de> serde::de::SeqAccess<'de> for SeqAccess<'_, 'de, R> {
     type Error = Error;
 
     fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>>
@@ -122,7 +122,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::de::SeqAccess<'de> for SeqAccess<'a, 'de
     }
 }
 
-impl<'de, 'a, R: WordRead + 'de> serde::de::VariantAccess<'de> for &'a mut Deserializer<'de, R> {
+impl<'de, R: WordRead + 'de> serde::de::VariantAccess<'de> for &'_ mut Deserializer<'de, R> {
     type Error = Error;
 
     fn unit_variant(self) -> Result<()> {
@@ -146,7 +146,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::de::VariantAccess<'de> for &'a mut Deser
     }
 }
 
-impl<'de, 'a, R: WordRead + 'de> serde::de::EnumAccess<'de> for &'a mut Deserializer<'de, R> {
+impl<'de, R: WordRead + 'de> serde::de::EnumAccess<'de> for &'_ mut Deserializer<'de, R> {
     type Error = Error;
     type Variant = Self;
 
@@ -210,7 +210,7 @@ impl<'de, R: WordRead + 'de> Deserializer<'de, R> {
     }
 }
 
-impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializer<'de, R> {
+impl<'de, R: WordRead + 'de> serde::Deserializer<'de> for &'_ mut Deserializer<'de, R> {
     type Error = Error;
 
     fn is_human_readable(&self) -> bool {

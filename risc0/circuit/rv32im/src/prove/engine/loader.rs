@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,13 +73,9 @@ pub static SHA_K: [u32; SHA_K_SIZE] = [
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ];
 
-const fn div_ceil(a: usize, b: usize) -> usize {
-    (a + b - 1) / b
-}
-
 const fn setup_count(regs: usize) -> usize {
     let pairs = regs / 4;
-    div_ceil(32 * 1024, pairs)
+    ((32 * 1024) as usize).div_ceil(pairs)
 }
 
 /// These are the registers of the control group.
@@ -215,7 +211,7 @@ impl<'a> TripleWordIter<'a> {
     }
 }
 
-impl<'a> Iterator for TripleWordIter<'a> {
+impl Iterator for TripleWordIter<'_> {
     type Item = TripleWord;
 
     fn next(&mut self) -> Option<Self::Item> {

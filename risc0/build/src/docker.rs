@@ -35,7 +35,7 @@ const DOCKER_IGNORE: &str = r#"
 /// The target directory for the ELF binaries.
 pub const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
-/// Indicates weather the build was successful or skipped.
+/// Indicates whether the build was successful or skipped.
 pub enum BuildStatus {
     /// The build was successful.
     Success,
@@ -263,7 +263,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "6f52b77974aeef81fa57bd91926cdaebc11a0288506a68dcb73444b563e702b4",
+            "2e05907fb031403752a5a485607e3a1415b2294e334a72dd59b1f103b62a4ef8",
         );
     }
 }

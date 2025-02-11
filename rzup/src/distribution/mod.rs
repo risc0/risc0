@@ -117,7 +117,7 @@ impl<'a, WriterT> ProgressWriter<'a, WriterT> {
     }
 }
 
-impl<'a, WriterT: io::Write> io::Write for ProgressWriter<'a, WriterT> {
+impl<WriterT: io::Write> io::Write for ProgressWriter<'_, WriterT> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         let written = self.writer.write(buf)?;
         self.env.emit(RzupEvent::DownloadProgress {
