@@ -34,7 +34,8 @@ use rstest_reuse::{apply, template};
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
     compute_image_id_v2, default_prover, get_prover_server,
-    host::server::exec::executor2::Executor2,
+    host::server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
+    mmr::MerkleMountainAccumulator,
     receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
     ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, SegmentVersion,
@@ -431,4 +432,29 @@ fn stable_root() {
         ALLOWED_CONTROL_ROOT,
         digest!("d640cb16af201a715881c24d3e884718d56fa752fb5da55f2547f5295403d650")
     );
+}
+
+#[test]
+fn union() {
+    let default_prover = get_prover_server(&ProverOpts::succinct()).unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let default_receipt: SuccinctReceipt<Unknown> = default_prover
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .receipt
+        .inner
+        .succinct()
+        .unwrap()
+        .clone()
+        .into_unknown();
+
+    let mut mmr = MerkleMountainAccumulator::<UnionPeak>::new();
+    for receipt in vec![default_receipt; 5] {
+        mmr.insert(receipt).unwrap();
+    }
+    let _ = mmr.root().unwrap();
 }

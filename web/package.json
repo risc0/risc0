@@ -30,7 +30,7 @@
     "@types/node": "22.10.6",
     "@vitejs/plugin-react-swc": "3.7.2",
     "happy-dom": "16.6.0",
-    "vitest": "2.1.8"
+    "vitest": "2.1.9"
   },
   "packageManager": "bun@1.1.43"
 }

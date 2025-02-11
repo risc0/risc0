@@ -20,7 +20,7 @@ use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::Unknown,
+    receipt_claim::{UnionClaim, Unknown},
     risc0_rv32im_ver, Assumption, AssumptionReceipt, Executor2, ExecutorEnv, ExecutorImpl,
     InnerAssumptionReceipt, MaybePruned, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment,
     SegmentVersion, Session, VerifierContext,
@@ -175,5 +175,13 @@ impl ProverServer for DevModeProver {
             }),
             receipt.journal.bytes.clone(),
         ))
+    }
+
+    fn union(
+        &self,
+        _a: &SuccinctReceipt<Unknown>,
+        _b: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<UnionClaim>> {
+        unimplemented!("This is unsupported for dev mode.")
     }
 }
