@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod bigint;
 pub(crate) mod paged_map;
 pub(crate) mod poseidon2;
 pub(crate) mod preflight;
@@ -32,8 +33,8 @@ use self::preflight::Back;
 use super::hal::{CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
     execute::{
-        platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State, segment::Segment,
-        sha2::Sha2State,
+        bigint::BigIntState, platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State,
+        segment::Segment, sha2::Sha2State,
     },
     zirgen::circuit::{
         CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_CODE, REGCOUNT_DATA,
@@ -158,6 +159,11 @@ impl<H: Hal> WitnessGenerator<H> {
                         injector.set_u32_bits(row, col, value);
                     }
                 }
+                Back::BigInt(state) => {
+                    for (col, value) in zip(BigIntState::offsets(), state.as_array()) {
+                        injector.set(row, col, value);
+                    }
+                }
             }
             injector.set_cycle(row, cycle);
         }
@@ -179,6 +185,31 @@ impl<H: Hal> WitnessGenerator<H> {
             hal.eltwise_zeroize_elem(&code.buf);
             hal.eltwise_zeroize_elem(&data.buf);
         });
+
+        // #[cfg(feature = "entropy_finder")]
+        // if let Ok(dump_path) = std::env::var("DATA_DUMP") {
+        //     let raw = data.buf.to_vec();
+
+        //     let old = if std::fs::exists(&dump_path).unwrap() {
+        //         Some(std::fs::read(&dump_path).unwrap())
+        //     } else {
+        //         None
+        //     };
+
+        //     std::fs::write(dump_path, bytemuck::cast_slice(&raw)).unwrap();
+        //     if let Some(old) = old {
+        //         let old = bytemuck::cast_slice(&old);
+        //         for cycle in 0..cycles {
+        //             for col in 0..REGCOUNT_DATA {
+        //                 assert_eq!(
+        //                     H::Elem::new_raw(old[col * cycles + cycle]),
+        //                     raw[col * cycles + cycle],
+        //                     "cycle: {cycle}, col: {col}",
+        //                 );
+        //             }
+        //         }
+        //     }
+        // }
 
         Ok(Self {
             cycles,

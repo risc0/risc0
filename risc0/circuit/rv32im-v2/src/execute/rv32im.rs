@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
+use derive_more::Debug;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
@@ -74,6 +75,7 @@ pub enum Exception {
     InstructionMisaligned = 0,
     InstructionFault,
     #[allow(dead_code)]
+    #[debug("IllegalInstruction({_0:#010x}, {_1})")]
     IllegalInstruction(u32, u32),
     Breakpoint,
     LoadAddressMisaligned,
@@ -396,7 +398,10 @@ impl Emulator {
         let decoded = DecodedInstruction::new(word);
         let insn = self.table.lookup(&decoded);
         ctx.on_insn_decoded(&insn, &decoded)?;
-        self.ring.push((pc, insn, decoded.clone()));
+        // Only store the ring buffer if we are gonna print it
+        if tracing::enabled!(tracing::Level::DEBUG) {
+            self.ring.push((pc, insn, decoded.clone()));
+        }
 
         if match insn.category {
             InsnCategory::Compute => self.step_compute(ctx, insn.kind, &decoded)?,

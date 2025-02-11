@@ -1497,41 +1497,144 @@ mod tests {
         );
     }
 
+    fn default_version_after_uninstall(
+        tmp_dir: &TempDir,
+        rzup: &mut Rzup,
+        component: Component,
+        version1: Version,
+        version2: Version,
+        uninstall_with_rm: bool,
+        expected_path: &Path,
+    ) {
+        rzup.install_component(&component, Some(version2.clone()), false)
+            .unwrap();
+
+        rzup.install_component(&component, Some(version1.clone()), false)
+            .unwrap();
+
+        if uninstall_with_rm {
+            let mut version_dir = rzup.get_version_dir(&component, &version1).unwrap();
+            // Remove C++ sub-dir component
+            if component == Component::CppToolchain {
+                version_dir.pop();
+            }
+            std::fs::remove_dir_all(version_dir).unwrap()
+        } else {
+            rzup.uninstall_component(&component, version1.clone())
+                .unwrap();
+
+            // ensure we updated the settings.toml
+            let settings: settings::Settings = toml::from_str(
+                &std::fs::read_to_string(tmp_dir.path().join(".risc0/settings.toml")).unwrap(),
+            )
+            .unwrap();
+            let mut expected = settings::Settings::default();
+            expected.set_default_version(&component, &version2);
+            if let Some(parent) = component.parent_component() {
+                expected.set_default_version(&parent, &version2);
+            }
+            assert_eq!(settings, expected);
+        }
+
+        let (default_version, path) = rzup.get_default_version(&component).unwrap().unwrap();
+        assert_eq!(default_version, version2);
+        assert_eq!(path, expected_path);
+    }
+
     #[test]
-    fn default_version_after_uninstall() {
+    fn default_version_after_uninstall_cargo_risczero() {
         let server = MockDistributionServer::new();
-        let (_tmp_dir, mut rzup) = setup_test_env(
+        let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
             Platform::new("x86_64", Os::Linux),
         );
-        let cargo_risczero_version1 = Version::new(1, 0, 0);
-        let cargo_risczero_version2 = Version::new(1, 1, 0);
 
-        rzup.install_component(
-            &Component::CargoRiscZero,
-            Some(cargo_risczero_version2.clone()),
-            false,
-        )
-        .unwrap();
+        for uninstall_with_rm in [true, false] {
+            default_version_after_uninstall(
+                &tmp_dir,
+                &mut rzup,
+                Component::CargoRiscZero,
+                Version::new(1, 0, 0),
+                Version::new(1, 1, 0),
+                uninstall_with_rm,
+                &tmp_dir
+                    .path()
+                    .join(".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu"),
+            );
+        }
+    }
 
-        rzup.install_component(
-            &Component::CargoRiscZero,
-            Some(cargo_risczero_version1.clone()),
-            false,
-        )
-        .unwrap();
-
-        rzup.uninstall_component(&Component::CargoRiscZero, cargo_risczero_version1.clone())
-            .unwrap();
-
-        assert_eq!(
-            rzup.get_default_version(&Component::CargoRiscZero)
-                .unwrap()
-                .unwrap()
-                .0,
-            cargo_risczero_version2
+    #[test]
+    fn default_version_after_uninstall_r0vm() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
         );
+
+        for uninstall_with_rm in [true, false] {
+            default_version_after_uninstall(
+                &tmp_dir,
+                &mut rzup,
+                Component::R0Vm,
+                Version::new(1, 0, 0),
+                Version::new(1, 1, 0),
+                uninstall_with_rm,
+                &tmp_dir
+                    .path()
+                    .join(".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu"),
+            );
+        }
+    }
+
+    #[test]
+    fn default_version_after_uninstall_rust() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        for uninstall_with_rm in [true, false] {
+            default_version_after_uninstall(
+                &tmp_dir,
+                &mut rzup,
+                Component::RustToolchain,
+                Version::new(1, 79, 0),
+                Version::new(1, 81, 0),
+                uninstall_with_rm,
+                &tmp_dir
+                    .path()
+                    .join(".risc0/toolchains/v1.81.0-rust-x86_64-unknown-linux-gnu"),
+            );
+        }
+    }
+
+    #[test]
+    fn default_version_after_uninstall_cpp() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        for uninstall_with_rm in [true, false] {
+            default_version_after_uninstall(
+                &tmp_dir,
+                &mut rzup,
+                Component::CppToolchain,
+                Version::new(2024, 1, 5),
+                Version::new(2024, 1, 6),
+                uninstall_with_rm,
+                &tmp_dir.path().join(
+                    ".risc0/toolchains/v2024.1.6-cpp-x86_64-unknown-linux-gnu/riscv32im-linux-x86_64",
+                ),
+            );
+        }
     }
 
     #[test]
