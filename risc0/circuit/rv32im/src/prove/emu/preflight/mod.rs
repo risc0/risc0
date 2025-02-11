@@ -422,7 +422,7 @@ impl Preflight {
 
         let info = &self.pager.image.info;
         let addr = ByteAddr(info.get_page_addr(page_idx)).waddr();
-        tracing::debug!(
+        tracing::trace!(
             "page_fault(0x{page_idx:05x}, {is_read}, {is_done}, {:?})",
             addr.baddr()
         );
@@ -602,7 +602,7 @@ impl Preflight {
 
         self.syscall_fini(a0, a1)?;
 
-        tracing::debug!(
+        tracing::trace!(
             "[{cycle}] ecall_software: {}",
             self.trace.body.cycles.len() - cycle
         );
@@ -631,7 +631,7 @@ impl Preflight {
             false,
         )?;
 
-        tracing::debug!(
+        tracing::trace!(
             "[{cycle}] ecall_sha: {}",
             self.trace.body.cycles.len() - cycle
         );
@@ -652,7 +652,7 @@ impl Preflight {
         const BIGINT_IO_SIZE: usize = 4;
 
         let cycle = self.trace.body.cycles.len();
-        tracing::debug!("[{cycle}] ecall_bigint");
+        tracing::trace!("[{cycle}] ecall_bigint");
 
         self.load_register(REG_T0)?;
         self.load_register(REG_A1)?;
@@ -662,7 +662,7 @@ impl Preflight {
         let x_ptr = ByteAddr(self.load_register(REG_A2)?).waddr();
         let y_ptr = ByteAddr(self.load_register(REG_A3)?).waddr();
         let n_ptr = ByteAddr(self.load_register(REG_A4)?).waddr();
-        tracing::debug!("bigint(z: {z_ptr:?}, x: {x_ptr:?}, y: {y_ptr:?}, n {n_ptr:?}");
+        tracing::trace!("bigint(z: {z_ptr:?}, x: {x_ptr:?}, y: {y_ptr:?}, n {n_ptr:?}");
         self.load_bigint(REG_A2)?;
         self.load_bigint(REG_A3)?;
         self.load_bigint(REG_A4)?;
@@ -693,6 +693,8 @@ impl Preflight {
         let x = Natural::from_limbs_asc(&x);
         let y = Natural::from_limbs_asc(&y);
 
+        tracing::trace!("n: {n:?}, x: {x:?}, y: {y:?}");
+
         // Perform multiplication or modular multiplication
         let z = if n == 0 {
             // If n == 0, just multiply
@@ -702,6 +704,8 @@ impl Preflight {
             (x * y) % n
         };
 
+        tracing::trace!("z: {z:?}");
+
         let out_limbs = z.into_limbs_asc();
         let mut z_words = [0u32; bigint::WIDTH_WORDS];
         // resize the z to bigint width
@@ -709,8 +713,6 @@ impl Preflight {
             let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
             z_words[i] = limb.to_le();
         }
-
-        // tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
 
         // Store result.
         for i in 0..2 {
@@ -733,7 +735,7 @@ impl Preflight {
 
     fn ecall_bigint2(&mut self) -> Result<bool> {
         let cycle = self.trace.body.cycles.len();
-        tracing::debug!("[{cycle}] ecall_bigint2");
+        tracing::trace!("[{cycle}] ecall_bigint2");
 
         self.load_register(REG_T0)?;
         let verify_program_ptr = ByteAddr(self.load_register(REG_T2)?).waddr();
@@ -787,7 +789,7 @@ impl Preflight {
         insn: &Bi2Instruction,
         witness: &BTreeMap<WordAddr, u32>,
     ) -> Result<()> {
-        tracing::debug!("{insn:?}");
+        tracing::trace!("{insn:?}");
 
         let mut ret = [0; BIGINT2_WIDTH_BYTES];
 
@@ -807,7 +809,7 @@ impl Preflight {
                     *coeff /= 256;
                     carry = *coeff;
                 }
-                tracing::debug!("carry propagate complete");
+                tracing::trace!("carry propagate complete");
             }
 
             let base_point = 128 * 256 * 64;

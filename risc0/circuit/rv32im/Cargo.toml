@@ -36,7 +36,10 @@ cust = { version = "0.3", optional = true }
 derive_more = { version = "1.0", features = ["debug"], optional = true }
 enum-map = { version = "2.7.3", optional = true }
 lazy-regex = { version = "3.3", optional = true }
-malachite = { version = "0.4", optional = true, default-features = false, features = ["naturals_and_integers", "32_bit_limbs"] }
+malachite = { version = "0.4", optional = true, default-features = false, features = [
+  "naturals_and_integers",
+  "32_bit_limbs",
+] }
 num-derive = { version = "0.4", optional = true }
 num-traits = { version = "0.2", optional = true }
 rand = { version = "0.8", optional = true }

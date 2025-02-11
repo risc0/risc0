@@ -56,19 +56,19 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
 
 /// Used memory on the heap, in bytes. Note that the bump allocator never frees memory.
 pub fn used() -> usize {
-    // SAFETY: Single threaded, and non-premptive so access is safe.
+    // SAFETY: Single threaded, and non-preemptive so access is safe.
     unsafe { HEAP_POS - HEAP_START }
 }
 
 /// Free memory on the heap, in bytes.
 pub fn free() -> usize {
-    // SAFETY: Single threaded, and non-premptive so access is safe. HEAP_POS will always be
+    // SAFETY: Single threaded, and non-preemptive so access is safe. HEAP_POS will always be
     // less than the start of system memory.
     GUEST_MAX_MEM - unsafe { HEAP_POS }
 }
 
 pub(crate) unsafe fn alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    // SAFETY: Single threaded, and non-premptive so access is safe.
+    // SAFETY: Single threaded, and non-preemptive so access is safe.
     let mut heap_pos = unsafe { HEAP_POS };
 
     // Honor requested alignment if larger than word size.
@@ -83,7 +83,7 @@ pub(crate) unsafe fn alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     // Check to make sure heap doesn't collide with SYSTEM memory.
     match heap_pos.checked_add(bytes) {
         Some(new_heap_pos) if new_heap_pos <= GUEST_MAX_MEM => {
-            // SAFETY: Single threaded, and non-premptive so modification is safe.
+            // SAFETY: Single threaded, and non-preemptive so modification is safe.
             unsafe { HEAP_POS = new_heap_pos };
         }
         _ => {

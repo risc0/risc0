@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::Read;
-use std::ops::Rem;
+use std::{io::Read, ops::Rem};
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -157,7 +156,7 @@ impl Program {
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
         let mut regs = vec![Integer::ZERO; self.ops.len()];
         for (op_index, op) in self.ops.iter().enumerate() {
-            tracing::debug!("[{op_index}]: {op:?}");
+            tracing::trace!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
                     let offset = op.a;

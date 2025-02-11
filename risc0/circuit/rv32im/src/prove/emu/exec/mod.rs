@@ -622,6 +622,7 @@ impl<S: Syscall> Executor<'_, '_, S> {
         self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
 
         let cycles = verify_program_size as usize + 1;
+        tracing::debug!("bigint2 cycles: {cycles}");
 
         self.pending.ecall = Some(EcallKind::BigInt2);
         self.pending.cycles += cycles;
@@ -780,7 +781,7 @@ pub(crate) fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
 
 impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
-        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+        tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
@@ -790,7 +791,7 @@ impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
     }
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
-        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+        tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let mut bytes = bigint_to_bytes_le(value);
