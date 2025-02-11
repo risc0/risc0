@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashSet},
     io::Cursor,
     str::from_utf8,
     sync::Mutex,
@@ -39,7 +39,7 @@ use sha2::{Digest as _, Sha256};
 use crate::{
     host::server::exec::{
         executor2::Executor2,
-        profiler::{Frame, Profiler},
+        profiler::Profiler,
         syscall::{Syscall, SyscallContext},
     },
     serde::to_vec,
@@ -976,75 +976,126 @@ fn profiler() {
 
     let profile = profiler.finalize();
 
-    // Gather up anything containing our profile_test functions.
-    // If the test doesn't pass, we don't want to display the
-    // whole profiling structure.
-    let occurrences: Vec<_> = profile
+    let test_samples: Vec<_> = profile
         .iter()
-        .filter(|(frames, _addr, _count)| frames.iter().any(|fr| fr.name.contains("profile_test")))
+        .filter(|sample| {
+            sample
+                .frames
+                .iter()
+                .any(|fr| fr.frame.name.contains("profile_test"))
+                && sample.frames[0].frame.name != "[PageIn]"
+                && sample.frames[0].frame.name != "[PageOut]"
+        })
         .collect();
 
-    assert!(
-        !occurrences.is_empty(),
-        "{:#?}",
-        Vec::from_iter(profile.iter())
+    let mut named_stacks_and_counts = BTreeMap::new();
+
+    for sample in &test_samples {
+        let frames = Vec::from_iter(sample.frames.iter().map(|fr| fr.frame.name.clone()));
+        *named_stacks_and_counts.entry(frames).or_default() += sample.count;
+    }
+
+    // Check the stacks
+    assert_eq!(
+        Vec::from_iter(named_stacks_and_counts.into_iter()),
+        vec![
+            (
+                vec![
+                    "profile_test_func1".into(),
+                    "multi_test::main".into(),
+                    "main".into(),
+                    "__start".into()
+                ],
+                2 // auicpc + jr
+            ),
+            (
+                vec![
+                    "profile_test_func2".into(),
+                    "profile_test_func1".into(),
+                    "multi_test::main".into(),
+                    "main".into(),
+                    "__start".into(),
+                ],
+                1 // nop
+            ),
+            (
+                vec![
+                    "profile_test_func3".into(),
+                    "profile_test_func1".into(),
+                    "multi_test::main".into(),
+                    "main".into(),
+                    "__start".into(),
+                ],
+                1 // nop
+            ),
+            (
+                vec![
+                    "profile_test_func3".into(),
+                    "profile_test_func5".into(),
+                    "profile_test_func1".into(),
+                    "multi_test::main".into(),
+                    "main".into(),
+                    "__start".into(),
+                ],
+                10 // nop * 10
+            ),
+            (
+                vec![
+                    "profile_test_func4".into(),
+                    "profile_test_func1".into(),
+                    "multi_test::main".into(),
+                    "main".into(),
+                    "__start".into(),
+                ],
+                4 // la, jr, nop
+            ),
+            (
+                vec![
+                    "profile_test_func5".into(),
+                    "profile_test_func1".into(),
+                    "multi_test::main".into(),
+                    "main".into(),
+                    "__start".into(),
+                ],
+                1 // ret
+            ),
+        ]
     );
+
+    // Check the file names and line numbers
+    for sample in &test_samples {
+        for frame in &sample.frames {
+            let frame = &frame.frame;
+            if frame.name.contains("profile_test_func") {
+                assert!(
+                    frame
+                        .filename
+                        .ends_with("/zkvm/methods/guest/src/bin/multi_test/profiler.rs"),
+                    "{}",
+                    frame.filename
+                );
+                assert!(frame.lineno != 0);
+            }
+        }
+    }
 
     let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
 
-    // stitch frames together
-    let (fr, addr) = occurrences.into_iter().fold(
-        (Vec::new(), 0),
-        |(mut acc_frames, _), (frames, addr, _count)| {
-            acc_frames.extend(frames);
-            (acc_frames, addr)
-        },
-    );
+    // Check that the addresses for these two functions point to the right place
+    for func_name in ["profile_test_func2", "profile_test_func3"] {
+        let test_func = test_samples
+            .iter()
+            .find(|sample| sample.frames[0].frame.name == func_name)
+            .unwrap();
 
-    let check = |fr: &Vec<Frame>, addr: usize| -> bool {
-        match fr.as_slice() {
-            [fr1 @ Frame {
-                name: name1,
-                filename: fn1,
-                ..
-            }, fr2 @ Frame {
-                name: name2,
-                filename: fn2,
-                ..
-            }] => {
-                println!("Inspecting frames:\n{fr1:?}\n{fr2:?}\n");
-                if name1 != "profile_test_func2" || name2 != "profile_test_func1" {
-                    println!("Names did not match: {}, {}", name1, name2);
-                    return false;
-                }
-                if !fn1.ends_with("multi_test.rs") || !fn2.ends_with("multi_test.rs") {
-                    println!("Filenames did not match: {}, {}", fn1, fn2);
-                    return false;
-                }
-                // Check to make sure we hit the "nop" instruction
-                match elf_mem.get(&(addr as u32)) {
-                    None => {
-                        println!("Addr {addr} not present in elf");
-                        return false;
-                    }
-                    Some(0x00_00_00_13) => (),
-                    Some(inst) => {
-                        println!("Looking for 'nop'; got 0x{inst:08x}");
-                        return false;
-                    }
-                }
+        let addr = test_func.frames[0].address;
+        let inst = *elf_mem
+            .get(&(addr as u32))
+            .unwrap_or_else(|| panic!("0x{addr:x} found in elf"));
 
-                // All checks passed; this is the occurrence we were looking for.
-                true
-            }
-            _ => {
-                println!("{:#?}", fr);
-                false
-            }
-        }
-    };
-
-    assert!(check(&fr, addr), "{fr:#?} {addr}");
+        // check its nop
+        assert_eq!(inst, 0x00_00_00_13, "found 0x{inst:08x} instead of nop");
+    }
 }
 
 #[apply(base)]
@@ -1228,6 +1279,7 @@ fn heap_alloc(#[case] version: TestVersion) {
     let env = ExecutorEnv::builder()
         .write(&6_u32)
         .unwrap()
+        .env_var("ALL_FORKS", "testing")
         .build()
         .unwrap();
     let session = execute_elf(version, env, HEAP_ELF).unwrap();
@@ -1248,12 +1300,11 @@ fn keccak_update(#[case] version: TestVersion) {
 
 #[apply(base)]
 fn keccak_update2(#[case] version: TestVersion) {
-    let mut vars = HashMap::new();
-    vars.insert("RISC0_KECCAK_PO2".to_string(), 15u32.to_string());
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUpdate2)
         .unwrap()
-        .env_vars(vars)
+        .keccak_max_po2(15)
+        .unwrap()
         .build()
         .unwrap();
     let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();

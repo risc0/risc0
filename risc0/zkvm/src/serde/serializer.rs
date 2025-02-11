@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ impl<W: WordWrite> Serializer<W> {
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::Serializer for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
     type SerializeSeq = Self;
@@ -315,7 +315,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::SerializeSeq for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::SerializeSeq for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -331,7 +331,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeSeq for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::SerializeTuple for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::SerializeTuple for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -347,7 +347,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeTuple for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::SerializeTupleStruct for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::SerializeTupleStruct for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -363,7 +363,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeTupleStruct for &'a mut Serializer<W
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::SerializeTupleVariant for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::SerializeTupleVariant for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -379,7 +379,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeTupleVariant for &'a mut Serializer<
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::SerializeMap for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::SerializeMap for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -402,7 +402,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeMap for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::SerializeStruct for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::SerializeStruct for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -418,7 +418,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeStruct for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: WordWrite> serde::ser::SerializeStructVariant for &'a mut Serializer<W> {
+impl<W: WordWrite> serde::ser::SerializeStructVariant for &'_ mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ impl Prover for BonsaiProver {
                 // Download the receipt, containing the output
                 let receipt_url = res
                     .receipt_url
-                    .ok_or(anyhow!("API error, missing receipt on completed session"))?;
+                    .ok_or_else(|| anyhow!("API error, missing receipt on completed session"))?;
 
                 let stats = res
                     .stats

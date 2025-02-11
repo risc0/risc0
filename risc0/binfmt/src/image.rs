@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -103,14 +103,9 @@ fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     .digest::<Impl>()
 }
 
-/// Compute `ceil(a / b)` via truncated integer division.
-const fn div_ceil(a: u32, b: u32) -> u32 {
-    (a + b - 1) / b
-}
-
 /// Round `a` up to the nearest multiple of `b`.
 const fn round_up(a: u32, b: u32) -> u32 {
-    div_ceil(a, b) * b
+    a.div_ceil(b) * b
 }
 
 impl Default for PageTableInfo {
@@ -136,7 +131,7 @@ impl PageTableInfo {
             let num_pages = remain / page_size;
             remain = num_pages
                 .checked_mul(DIGEST_BYTES as u32)
-                .ok_or(anyhow!("Invalid page_size specified"))?;
+                .ok_or_else(|| anyhow!("Invalid page_size specified"))?;
             layers.push(remain);
             page_table_size += remain;
         }

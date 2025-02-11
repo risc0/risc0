@@ -130,9 +130,9 @@ pub trait ProverServer: private::Sealed {
                     }))
                 },
             )?
-            .ok_or(anyhow!(
-                "malformed composite receipt has no continuation segment receipts"
-            ))?;
+            .ok_or_else(|| {
+                anyhow!("malformed composite receipt has no continuation segment receipts")
+            })?;
 
         // Compress assumptions and resolve them to get the final succinct receipt.
         receipt.assumption_receipts.iter().try_fold(

@@ -71,6 +71,11 @@ pub mod reg_abi {
     pub const REG_MAX: usize = 32; // maximum number of registers
 }
 
+pub mod keccak_mode {
+    pub const KECCAK_PERMUTE: u32 = 0;
+    pub const KECCAK_PROVE: u32 = 1;
+}
+
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
@@ -754,7 +759,8 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 ))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    unimplemented!("sys_alloc_aligned called when the bump allocator is disabled");
+    use core::alloc::GlobalAlloc;
+    crate::heap::embedded::HEAP.alloc(core::alloc::Layout::from_size_align(bytes, align).unwrap())
 }
 
 /// # Safety
@@ -926,14 +932,18 @@ pub unsafe extern "C" fn sys_prove_zkr(
 pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
-) {
-    syscall_1(
+) -> i32 {
+    let Return(a0, _) = syscall_3(
         nr::SYS_KECCAK,
         out_state as *mut u32,
         KECCACK_STATE_WORDS,
+        keccak_mode::KECCAK_PERMUTE,
         in_state as u32,
+        0,
     );
+    a0 as i32
 }
+
 /// Executes the keccak circuit, and then executes the lift predicate
 /// in the recursion circuit.
 ///
@@ -951,21 +961,16 @@ pub unsafe extern "C" fn sys_keccak(
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_keccak(
     claim_digest: *const [u32; DIGEST_WORDS],
-    po2: u32,
     control_root: *const [u32; DIGEST_WORDS],
-    input: *const u32,
-    input_len: usize,
 ) {
     let Return(a0, _) = unsafe {
-        syscall_5(
-            nr::SYS_PROVE_KECCAK,
+        syscall_3(
+            nr::SYS_KECCAK,
             null_mut(),
             0,
+            keccak_mode::KECCAK_PROVE,
             claim_digest as u32,
-            po2,
             control_root as u32,
-            input as u32,
-            input_len as u32,
         )
     };
 
@@ -992,9 +997,7 @@ macro_rules! impl_sys_bigint2 {
             $(, $a3: ident
                 $(, $a4: ident
                     $(, $a5: ident
-                        $(, $a6: ident
-                            $(, $a7: ident )?
-                        )?
+                        $(, $a6: ident)?
                     )?
                 )?
             )?
@@ -1012,9 +1015,7 @@ macro_rules! impl_sys_bigint2 {
                 $(, $a3: *const u32
                     $(, $a4: *const u32
                         $(, $a5: *const u32
-                            $(, $a6: *const u32
-                                $(, $a7: *const u32)?
-                            )?
+                            $(, $a6: *const u32)?
                         )?
                     )?
                 )?
@@ -1043,9 +1044,7 @@ macro_rules! impl_sys_bigint2 {
                         $(in("a3") $a3,
                             $(in("a4") $a4,
                                 $(in("a5") $a5,
-                                    $(in("a6") $a6,
-                                        $(in("a7") $a7,)?
-                                    )?
+                                    $(in("a6") $a6)?
                                 )?
                             )?
                         )?
@@ -1065,4 +1064,3 @@ impl_sys_bigint2!(sys_bigint2_3, a1, a2, a3);
 impl_sys_bigint2!(sys_bigint2_4, a1, a2, a3, a4);
 impl_sys_bigint2!(sys_bigint2_5, a1, a2, a3, a4, a5);
 impl_sys_bigint2!(sys_bigint2_6, a1, a2, a3, a4, a5, a6);
-impl_sys_bigint2!(sys_bigint2_7, a1, a2, a3, a4, a5, a6, a7);

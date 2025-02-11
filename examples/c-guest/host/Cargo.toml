@@ -10,3 +10,4 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]
 risc0-build = { path = "../../../risc0/build/" }
+rzup = { path = "../../../rzup", default-features = false }

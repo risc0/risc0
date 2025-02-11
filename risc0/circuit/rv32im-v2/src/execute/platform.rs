@@ -86,6 +86,7 @@ pub const HOST_ECALL_READ: u32 = 1;
 pub const HOST_ECALL_WRITE: u32 = 2;
 pub const HOST_ECALL_POSEIDON2: u32 = 3;
 pub const HOST_ECALL_SHA2: u32 = 4;
+pub const HOST_ECALL_BIGINT: u32 = 5;
 
 pub const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 pub const PFLAG_CHECK_OUT: u32 = 0x4000_0000;
@@ -118,7 +119,9 @@ pub enum CycleState {
     ShaLoadData = 34,
     ShaMix = 35,
     ShaStoreState = 36,
-    Decode = 40,
+    BigIntEcall = 40,
+    BigIntStep = 41,
+    Decode = 48,
 }
 
 pub const SYSCALL_MAX: u32 = 512;
@@ -149,6 +152,8 @@ pub mod major {
     pub const ECALL0: u8 = 8;
     pub const POSEIDON0: u8 = 9;
     pub const POSEIDON1: u8 = 10;
+    pub const SHA0: u8 = 11;
+    pub const BIGINT0: u8 = 12;
 }
 
 pub mod control_minor {

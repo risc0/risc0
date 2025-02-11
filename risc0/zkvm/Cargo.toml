@@ -82,6 +82,7 @@ redis = { version = "0.27.2", default-features = false, features = [
 risc0-build = { workspace = true, optional = true }
 risc0-zkos-v1compat = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
+rzup = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
 typetag = { version = "0.2", optional = true }
@@ -94,6 +95,7 @@ clap = { version = "4.5", features = ["derive"] }
 mini-redis = { version = "0.4.1", default-features = false }
 postcard = { version = "1.1", features = ["alloc"] }
 rand = "0.8"
+risc0-bigint2-methods = { path = "../bigint2/methods" }
 rmp-serde = "1.3"
 rstest = "0.23.0"
 rstest_reuse = "0.7.0"
@@ -126,12 +128,17 @@ rustdoc-args = ["--cfg", "docsrs"]
 features = ["client", "prove", "getrandom", "std", "unstable"]
 
 [features]
+circuit_debug = [
+  "risc0-circuit-rv32im-v2/circuit_debug",
+  "risc0-zkp/circuit_debug",
+]
 client = [
   "dep:bincode",
   "dep:bytes",
   "dep:lazy-regex",
   "dep:risc0-build",
   "dep:risc0-zkos-v1compat",
+  "dep:rzup",
   "dep:prost",
   "dep:tempfile",
   "std",
