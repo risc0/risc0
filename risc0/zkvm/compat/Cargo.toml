@@ -3,6 +3,9 @@ name = "risc0-zkvm-compat-tests"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.release]
+release = false
+
 [dependencies]
 anyhow = "1.0.95"
 risc0-r0vm = { workspace = true }
