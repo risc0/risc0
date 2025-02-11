@@ -37,7 +37,7 @@ use crate::{
     recursion::identity_p254,
     AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
     Receipt, ReceiptClaim, Segment, SegmentReceipt, Session, SuccinctReceipt, TraceCallback,
-    TraceEvent, VerifierContext,
+    TraceEvent, Unknown, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -257,6 +257,35 @@ impl CoprocessorCallback for CoprocessorProxy {
             pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
         }
     }
+
+    fn finalize_proof_set(&mut self, control_root: Digest) -> Result<()> {
+        let request = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
+                        pb::api::CoprocessorRequest {
+                            kind: Some(pb::api::coprocessor_request::Kind::FinalizeProofSet({
+                                pb::api::FinalizeProofSetRequest {
+                                    control_root: Some(control_root.into()),
+                                }
+                            })),
+                        },
+                    )),
+                })),
+            })),
+        };
+        tracing::trace!("tx: {request:?}");
+        self.conn.send(request)?;
+
+        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        tracing::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
+    }
 }
 
 impl Server {
@@ -328,6 +357,7 @@ impl Server {
             pb::api::server_request::Kind::ProveKeccak(request) => {
                 self.on_prove_keccak(conn, request)
             }
+            pb::api::server_request::Kind::Union(request) => self.on_union(conn, request),
         }
     }
 
@@ -621,6 +651,44 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::JoinReply {
             kind: Some(pb::api::join_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
+            })),
+        });
+
+        // tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_union(&self, mut conn: ConnectionWrapper, request: pb::api::UnionRequest) -> Result<()> {
+        fn inner(request: pb::api::UnionRequest) -> Result<pb::api::UnionReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
+            let left_receipt_bytes = request.left_receipt.ok_or(malformed_err())?.as_bytes()?;
+            let left_succinct_receipt: SuccinctReceipt<Unknown> =
+                bincode::deserialize(&left_receipt_bytes)?;
+            let right_receipt_bytes = request.right_receipt.ok_or(malformed_err())?.as_bytes()?;
+            let right_succinct_receipt: SuccinctReceipt<Unknown> =
+                bincode::deserialize(&right_receipt_bytes)?;
+
+            let prover = get_prover_server(&opts)?;
+            let receipt = prover.union(&left_succinct_receipt, &right_succinct_receipt)?;
+
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                succinct_receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::UnionReply {
+                kind: Some(pb::api::union_reply::Kind::Ok(pb::api::UnionResult {
+                    receipt: Some(asset),
+                })),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::UnionReply {
+            kind: Some(pb::api::union_reply::Kind::Error(pb::api::GenericError {
                 reason: err.to_string(),
             })),
         });

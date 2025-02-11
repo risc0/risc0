@@ -30,6 +30,7 @@ use crate::{
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt_claim::UnionClaim,
     ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
@@ -361,6 +362,51 @@ impl Client {
                 receipt_pb.try_into()
             }
             pb::api::join_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Run the union program to compress any two [SuccinctReceipt]s into one.
+    ///
+    /// By repeated application of the union program, any number of receipts can
+    /// be compressed into a single receipt.
+    pub fn union(
+        &self,
+        opts: &ProverOpts,
+        a_receipt: Asset,
+        b_receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt<UnionClaim>> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Union(
+                pb::api::UnionRequest {
+                    opts: Some(opts.clone().into()),
+                    left_receipt: Some(a_receipt.try_into()?),
+                    right_receipt: Some(b_receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        // tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::UnionReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::union_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::union_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -850,6 +896,15 @@ impl Client {
                 let coprocessor = env.coprocessor.clone().ok_or_else(malformed_err)?;
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_keccak(proof_request)
+            }
+            pb::api::coprocessor_request::Kind::FinalizeProofSet(finalize_request) => {
+                let control_root: Digest = match finalize_request.control_root {
+                    Some(control_root) => control_root.try_into()?,
+                    None => return Err(malformed_err()),
+                };
+                let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
+                let mut coprocessor = coprocessor.borrow_mut();
+                coprocessor.finalize_proof_set(control_root)
             }
         }
     }

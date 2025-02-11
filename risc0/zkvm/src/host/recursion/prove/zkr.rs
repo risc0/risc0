@@ -70,3 +70,7 @@ pub fn resolve(hashfn: &str) -> Result<(Program, Digest)> {
 pub fn identity(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("identity.zkr", hashfn)
 }
+
+pub fn union(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("union.zkr", hashfn)
+}
