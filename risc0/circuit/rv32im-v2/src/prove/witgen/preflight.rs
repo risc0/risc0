@@ -24,11 +24,12 @@ use risc0_zkp::core::digest::DIGEST_WORDS;
 
 use crate::{
     execute::{
+        bigint::{BigIntBytes, BigIntState},
         node_idx,
         pager::{page_idx, PageState, PagedMemory},
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
-        r0vm::{Risc0Context, Risc0Machine},
+        r0vm::{LoadOp, Risc0Context, Risc0Machine},
         rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
         sha2::Sha2State,
@@ -47,6 +48,8 @@ pub(crate) enum Back {
     Poseidon2(Poseidon2State),
     #[debug("Sha2")]
     Sha2(Sha2State),
+    #[debug("BigInt")]
+    BigInt(BigIntState),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -55,6 +58,8 @@ pub(crate) struct PreflightTrace {
     pub cycles: Vec<RawPreflightCycle>,
     #[debug("{}", txns.len())]
     pub txns: Vec<RawMemoryTransaction>,
+    #[debug("{}", bigint_bytes.len())]
+    pub bigint_bytes: Vec<u8>,
     #[debug("{}", backs.len())]
     pub backs: Vec<Back>,
     pub table_split_cycle: u32,
@@ -71,6 +76,7 @@ pub(crate) struct Preflight<'a> {
     cur_read: usize,
     user_cycle: u32,
     txn_idx: u32,
+    bigint_idx: u32,
     phys_cycles: u32,
     orig_words: PagedMap,
     prev_cycle: PagedMap,
@@ -126,6 +132,7 @@ impl<'a> Preflight<'a> {
             cur_write: 0,
             cur_read: 0,
             txn_idx: 0,
+            bigint_idx: 0,
             user_cycle: 0,
             phys_cycles: 0,
             orig_words: Default::default(),
@@ -306,7 +313,7 @@ impl<'a> Preflight<'a> {
     fn read_root(&mut self) -> Result<()> {
         let addr = get_digest_addr(1);
         for i in 0..DIGEST_WORDS {
-            self.load_u32(addr + i)?;
+            self.load_u32(LoadOp::Record, addr + i)?;
         }
         self.add_cycle_special(
             CycleState::LoadRoot,
@@ -321,7 +328,7 @@ impl<'a> Preflight<'a> {
     fn write_root(&mut self) -> Result<()> {
         let addr = get_digest_addr(1);
         for i in 0..DIGEST_WORDS {
-            self.load_u32(addr + i)?;
+            self.load_u32(LoadOp::Record, addr + i)?;
         }
         self.add_cycle_special(
             CycleState::StoreRoot,
@@ -352,12 +359,18 @@ impl<'a> Preflight<'a> {
             user_cycle: self.user_cycle,
             txn_idx: self.txn_idx,
             paging_idx,
+            bigint_idx: self.bigint_idx,
             diff_count: [0, 0],
         };
         // tracing::trace!("[{}]: {cycle:?}", self.trace.cycles.len());
         self.trace.cycles.push(cycle);
         self.trace.backs.push(back);
         self.txn_idx = self.trace.txns.len() as u32;
+        self.bigint_idx = self.trace.bigint_bytes.len() as u32;
+    }
+
+    fn add_witness(&mut self, bytes: &BigIntBytes) {
+        self.trace.bigint_bytes.extend_from_slice(bytes);
     }
 
     fn add_cycle_insn(&mut self, state: CycleState, pc: u32, insn: InsnKind) {
@@ -416,7 +429,7 @@ impl<'a> Preflight<'a> {
     }
 }
 
-impl<'a> Risc0Context for Preflight<'a> {
+impl Risc0Context for Preflight<'_> {
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
@@ -463,7 +476,7 @@ impl<'a> Risc0Context for Preflight<'a> {
         self.pc = ByteAddr(0);
         self.add_cycle_special(CycleState::Suspend, CycleState::Suspend, 0, 0, Back::None);
         for i in 0..DIGEST_WORDS {
-            self.load_u32(GLOBAL_OUTPUT_ADDR.waddr() + i)?;
+            self.load_u32(LoadOp::Record, GLOBAL_OUTPUT_ADDR.waddr() + i)?;
         }
         self.machine_mode = 3;
         self.add_cycle_special(
@@ -497,33 +510,34 @@ impl<'a> Risc0Context for Preflight<'a> {
         self.trace.txns.truncate(self.txn_idx as usize);
     }
 
-    fn peek_u32(&mut self, _addr: WordAddr) -> Result<u32> {
-        // no-op is OK
-        Ok(0)
-    }
-
     // Pass memory ops to pager + record
-    fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
+    fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
+        if op == LoadOp::Peek {
+            return self.pager.peek(addr);
+        }
+
         // tracing::trace!("load_u32: {addr:?}");
         let cycle = (2 * self.trace.cycles.len()) as u32;
         let word = if addr >= MERKLE_TREE_START_ADDR {
             self.page_memory
                 .get(&addr)
-                .ok_or(anyhow!("Invalid load from page memory"))?
+                .ok_or_else(|| anyhow!("Invalid load from page memory"))?
         } else {
             self.pager.load(addr)?
         };
-        self.orig_words.get_mut(&addr).get_or_insert(word);
-        let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
-        let txn = RawMemoryTransaction {
-            addr: addr.0,
-            cycle,
-            word,
-            prev_cycle,
-            prev_word: word,
-        };
-        // tracing::trace!("txn: {txn:?}");
-        self.trace.txns.push(txn);
+        if op == LoadOp::Record {
+            self.orig_words.get_mut(&addr).get_or_insert(word);
+            let prev_cycle = self.prev_cycle.insert_default(&addr, cycle, u32::MAX);
+            let txn = RawMemoryTransaction {
+                addr: addr.0,
+                cycle,
+                word,
+                prev_cycle,
+                prev_word: word,
+            };
+            // tracing::trace!("txn: {txn:?}");
+            self.trace.txns.push(txn);
+        }
         Ok(word)
     }
 
@@ -532,7 +546,7 @@ impl<'a> Risc0Context for Preflight<'a> {
         let prev_word = if addr >= MEMORY_END_ADDR {
             self.page_memory
                 .insert(&addr, word)
-                .ok_or(anyhow!("Invalid store to page memory"))?
+                .ok_or_else(|| anyhow!("Invalid store to page memory"))?
         } else {
             let prev_word = self.pager.load(addr)?;
             self.pager.store(addr, word)?;
@@ -609,6 +623,18 @@ impl<'a> Risc0Context for Preflight<'a> {
             self.pc.0,
             node_addr_to_idx(WordAddr(p2.buf_out_addr)),
             Back::Poseidon2(p2.clone()),
+        );
+        self.phys_cycles += 1;
+    }
+
+    fn on_bigint_cycle(&mut self, cur_state: CycleState, bigint: &BigIntState) {
+        self.add_witness(&bigint.bytes);
+        self.add_cycle_special(
+            cur_state,
+            bigint.next_state,
+            self.pc.0,
+            0, //paging_idx
+            Back::BigInt(bigint.clone()),
         );
         self.phys_cycles += 1;
     }

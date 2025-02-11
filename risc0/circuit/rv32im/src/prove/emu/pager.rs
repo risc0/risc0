@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ pub struct PageFaults {
 }
 
 #[derive(Clone, Debug)]
-enum Action {
+pub enum Action {
     PageRead(u32, usize),
     PageWrite(u32, usize, bool),
     Store(WordAddr, u32),
@@ -80,6 +80,22 @@ impl PagedMemory {
             cycles: 0,
             pending_actions: Vec::new(),
         }
+    }
+    pub fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        let page_idx = addr.waddr().page_idx();
+        let mut idx = self.page_table[page_idx as usize];
+
+        if idx == INVALID_IDX {
+            self.load_page(page_idx);
+            idx = self.page_table[page_idx as usize];
+        }
+
+        let page = &self.page_cache[idx as usize];
+        let offset = addr.0 % PAGE_SIZE as u32;
+        let bytes_to_read = size.min(PAGE_SIZE as u32 - offset);
+
+        let bytes = page.0[offset as usize..(offset + bytes_to_read) as usize].to_vec();
+        Ok(bytes)
     }
 
     pub fn pre_peek(&self, addr: WordAddr) -> Result<u32> {
@@ -198,8 +214,8 @@ impl PagedMemory {
         }
     }
 
-    pub fn commit_step(&mut self) {
-        self.pending_actions.clear();
+    pub fn commit_step(&mut self) -> Vec<Action> {
+        take(&mut self.pending_actions)
     }
 
     pub fn clear(&mut self) {

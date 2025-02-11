@@ -174,6 +174,8 @@ pub use receipt::{
     SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
 
+pub use ::serde::de::DeserializeOwned;
+
 use semver::Version;
 
 /// Reports the current version of this crate.

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -227,7 +227,7 @@ fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
         .output()?;
     let cmd_output = String::from_utf8(output.stdout)?;
     let (_, version_str) = regex_captures!(r".* (.*)\n$", &cmd_output)
-        .ok_or(anyhow!("failed to parse server version number"))?;
+        .ok_or_else(|| anyhow!("failed to parse server version number"))?;
     Version::parse(version_str).map_err(|e| anyhow!(e))
 }
 
@@ -343,7 +343,7 @@ fn malformed_err() -> anyhow::Error {
 
 impl pb::api::Asset {
     fn as_bytes(&self) -> Result<Bytes> {
-        let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
+        let bytes = match self.kind.as_ref().ok_or_else(malformed_err)? {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
             pb::api::asset::Kind::Redis(_) => bail!("as_bytes not supported for redis"),
@@ -443,5 +443,5 @@ fn invalid_path() -> anyhow::Error {
 }
 
 fn path_to_string<P: AsRef<Path>>(path: P) -> Result<String> {
-    Ok(path.as_ref().to_str().ok_or(invalid_path())?.to_string())
+    Ok(path.as_ref().to_str().ok_or_else(invalid_path)?.to_string())
 }

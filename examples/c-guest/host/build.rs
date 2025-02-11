@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, process::Command};
+use std::{fs, path::PathBuf, process::Command};
 
-use risc0_build::risc0_data;
+fn cpp_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::CppToolchain)
+        .unwrap()
+        .expect("Risc Zero C++ toolchain installed");
+    println!("Using C++ toolchain version {version}");
+    path
+}
+
+fn rust_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+        .expect("Risc Zero Rust toolchain installed");
+    println!("Using Rust toolchain version {version}");
+    path
+}
 
 fn main() {
     if std::env::var("RISC0_SKIP_BUILD").is_ok() {
         return;
     }
 
-    let toolchain_path = risc0_data().unwrap();
-    let gcc_path = toolchain_path
-        .join("cpp")
-        .join("bin")
-        .join("riscv32-unknown-elf-gcc");
+    let gcc_path = cpp_toolchain().join("bin/riscv32-unknown-elf-gcc");
 
     let guest_dir = fs::canonicalize(env!("CARGO_MANIFEST_DIR"))
         .unwrap()
@@ -38,9 +52,9 @@ fn main() {
     println!("cargo:rerun-if-changed={}", guest_dir.display());
 
     // Build static lib of platform to link against.
-    Command::new("cargo")
+    let cargo = rust_toolchain().join("bin/cargo");
+    Command::new(cargo)
         .args([
-            "+risc0",
             "rustc",
             "-p",
             "zkvm-platform",

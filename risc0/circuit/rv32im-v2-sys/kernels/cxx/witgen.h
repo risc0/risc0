@@ -27,6 +27,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <vector>
 
@@ -40,6 +41,7 @@ struct ExecBuffers {
 struct AccumBuffers {
   Buffer<false> data;
   Buffer<false> accum;
+  Buffer<true> global;
   Buffer<true> mix;
 };
 
@@ -93,8 +95,9 @@ inline Val inRange(Val low, Val mid, Val high) {
 
 inline void eqz(Val a, const char* loc) {
   if (a.asUInt32()) {
-    printf("eqz failure at: %s\n", loc);
-    throw std::runtime_error("eqz failure");
+    std::stringstream ss;
+    ss << "eqz failure at: " << loc;
+    throw std::runtime_error(ss.str());
   }
 }
 
@@ -281,6 +284,7 @@ std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx);
 Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len);
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal);
 std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx);
+std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx);
 
 // Setup the basic field stuff
 #define SET_FIELD(x) /**/

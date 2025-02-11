@@ -37,7 +37,7 @@ pub fn get_control_id(po2: usize) -> &'static Digest {
     &KECCAK_CONTROL_IDS[po2 - KECCAK_PO2_RANGE.min().unwrap()]
 }
 
-pub fn max_keccak_inputs(po2: u32) -> usize {
+pub fn max_keccak_inputs(po2: usize) -> usize {
     let max_keccak_cycles: usize = 1 << po2;
     max_keccak_cycles / KECCAK_PERMUTE_CYCLES
 }

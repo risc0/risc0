@@ -15,6 +15,14 @@
 use risc0_zkvm::guest::env;
 
 fn main() {
+    let x: u32 = if std::env::var("ALL_FORKS") == Ok(String::from("1")) {
+        1
+    } else {
+        0
+    };
+
+    risc0_zkvm::guest::env::commit(&x);
+
     let iterations: u32 = env::read();
     for _ in 0..iterations {
         env::log("alloc");

@@ -14,7 +14,7 @@
 
 use anyhow::Result;
 use clap::Parser;
-use risc0_build::{DockerOptions, GuestOptions};
+use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
 
 /// `cargo risczero build`
 ///
@@ -33,26 +33,22 @@ pub struct BuildCommand {
 
 impl BuildCommand {
     pub fn run(&self) -> Result<()> {
-        let src_dir = std::env::current_dir()?;
-
         let mut meta_cmd = self.manifest.metadata();
         let meta_cmd = self.features.forward_metadata(&mut meta_cmd);
         let meta = meta_cmd.exec()?;
 
         let target_dir = meta.target_directory.as_std_path();
 
-        let options = GuestOptions {
-            features: self.features.features.clone(),
-            use_docker: Some(DockerOptions {
-                root_dir: Some(src_dir.clone()),
-            }),
-        };
+        let guest_opts = GuestOptionsBuilder::default()
+            .features(self.features.features.clone())
+            .use_docker(DockerOptionsBuilder::default().build()?)
+            .build()?;
 
         let mut guest_list = vec![];
         let (included, _excluded) = self.workspace.partition_packages(&meta);
         for pkg in included {
             if pkg.targets.iter().any(|x| x.is_bin()) {
-                let mut guests = risc0_build::build_package(pkg, target_dir, options.clone())?;
+                let mut guests = risc0_build::build_package(pkg, target_dir, guest_opts.clone())?;
                 guest_list.append(&mut guests);
             }
         }
