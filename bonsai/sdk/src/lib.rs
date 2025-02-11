@@ -499,12 +499,22 @@ pub mod module_type {
             )),
             Err(_) => Some(Duration::from_millis(DEFAULT_TIMEOUT)),
         };
-
-        Ok(HttpClient::builder()
-            .default_headers(headers)
-            .pool_max_idle_per_host(0)
-            .timeout(timeout)
-            .build()?)
+        #[cfg(feature = "non_blocking")]
+        {
+            Ok(HttpClient::builder()
+                .default_headers(headers)
+                .pool_max_idle_per_host(0)
+                .timeout(timeout.unwrap_or(Duration::from_millis(DEFAULT_TIMEOUT)))
+                .build()?)
+        }
+        #[cfg(not(feature = "non_blocking"))]
+        {
+            Ok(HttpClient::builder()
+                .default_headers(headers)
+                .pool_max_idle_per_host(0)
+                .timeout(timeout)
+                .build()?)
+        }
     }
 
     impl Client {
