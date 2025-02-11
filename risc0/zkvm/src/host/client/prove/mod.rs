@@ -350,6 +350,11 @@ impl ProverOpts {
     /// TODO(flaub)
     #[stability::unstable]
     pub fn with_segment_version(self, segment_version: SegmentVersion) -> Self {
+        if segment_version == SegmentVersion::V2 {
+            unimplemented!(
+                "v2 is currently under development and will be ready in a future zkvm release"
+            )
+        }
         Self {
             segment_version,
             ..self

@@ -227,10 +227,5 @@ pub fn compute_image_id_v2(
 #[cfg(feature = "std")]
 #[stability::unstable]
 pub fn risc0_rv32im_ver() -> Option<SegmentVersion> {
-    let version = std::env::var("RISC0_RV32IM_VER").unwrap_or_default();
-    match version.as_str() {
-        "1" => Some(SegmentVersion::V1),
-        "2" => Some(SegmentVersion::V2),
-        _ => None,
-    }
+    Some(SegmentVersion::V1)
 }
