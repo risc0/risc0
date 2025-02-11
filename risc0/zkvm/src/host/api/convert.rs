@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
-    host::client::env::ProveKeccakRequest,
-    host::client::env::ProveZkrRequest,
+    host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
-        merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
-        FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt,
-        SuccinctReceipt,
+        merkle::MerkleProof,
+        segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
+        CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata,
+        SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::Unknown,
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
@@ -110,7 +110,7 @@ impl TryFrom<pb::api::Asset> for Asset {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::api::Asset) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::api::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::api::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
             pb::api::asset::Kind::Redis(key) => Asset::Redis(key),
@@ -122,7 +122,7 @@ impl TryFrom<pb::api::AssetRequest> for AssetRequest {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::api::AssetRequest) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::api::asset_request::Kind::Inline(()) => AssetRequest::Inline,
             pb::api::asset_request::Kind::Path(path) => {
                 AssetRequest::Path(std::path::PathBuf::from(path))
@@ -161,6 +161,16 @@ impl From<TraceEvent> for pb::api::TraceEvent {
                     },
                 )),
             },
+            TraceEvent::PageIn { cycles } => Self {
+                kind: Some(pb::api::trace_event::Kind::PageIn(
+                    pb::api::trace_event::PageIn { cycles },
+                )),
+            },
+            TraceEvent::PageOut { cycles } => Self {
+                kind: Some(pb::api::trace_event::Kind::PageOut(
+                    pb::api::trace_event::PageOut { cycles },
+                )),
+            },
         }
     }
 }
@@ -169,7 +179,7 @@ impl TryFrom<pb::api::TraceEvent> for TraceEvent {
     type Error = anyhow::Error;
 
     fn try_from(event: pb::api::TraceEvent) -> Result<Self> {
-        Ok(match event.kind.ok_or(malformed_err())? {
+        Ok(match event.kind.ok_or_else(malformed_err)? {
             pb::api::trace_event::Kind::InsnStart(event) => TraceEvent::InstructionStart {
                 cycle: event.cycle,
                 pc: event.pc,
@@ -182,6 +192,12 @@ impl TryFrom<pb::api::TraceEvent> for TraceEvent {
             pb::api::trace_event::Kind::MemorySet(event) => TraceEvent::MemorySet {
                 addr: event.addr,
                 region: event.region,
+            },
+            pb::api::trace_event::Kind::PageIn(event) => TraceEvent::PageIn {
+                cycles: event.cycles,
+            },
+            pb::api::trace_event::Kind::PageOut(event) => TraceEvent::PageOut {
+                cycles: event.cycles,
             },
         })
     }
@@ -204,7 +220,7 @@ impl TryFrom<pb::base::ExitCode> for ExitCode {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::base::ExitCode) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::base::exit_code::Kind::Halted(code) => Self::Halted(code),
             pb::base::exit_code::Kind::Paused(code) => Self::Paused(code),
             pb::base::exit_code::Kind::SystemSplit(_) => Self::SystemSplit,
@@ -260,6 +276,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .map_err(|_| malformed_err())?,
+            segment_version: SegmentVersion::V1,
         })
     }
 }
@@ -343,8 +360,8 @@ impl TryFrom<pb::core::ProveInfo> for ProveInfo {
 
     fn try_from(value: pb::core::ProveInfo) -> Result<Self> {
         Ok(Self {
-            receipt: value.receipt.ok_or(malformed_err())?.try_into()?,
-            stats: value.stats.ok_or(malformed_err())?.try_into()?,
+            receipt: value.receipt.ok_or_else(malformed_err)?.try_into()?,
+            stats: value.stats.ok_or_else(malformed_err)?.try_into()?,
         })
     }
 }
@@ -364,14 +381,14 @@ impl TryFrom<pb::core::Receipt> for Receipt {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::Receipt) -> Result<Self> {
-        let version = value.version.ok_or(malformed_err())?.value;
+        let version = value.version.ok_or_else(malformed_err)?.value;
         if version > ver::RECEIPT.value {
             bail!("Incompatible Receipt version: {version}");
         }
         Ok(Self {
-            inner: value.inner.ok_or(malformed_err())?.try_into()?,
+            inner: value.inner.ok_or_else(malformed_err)?.try_into()?,
             journal: Journal::new(value.journal),
-            metadata: value.metadata.ok_or(malformed_err())?.try_into()?,
+            metadata: value.metadata.ok_or_else(malformed_err)?.try_into()?,
         })
     }
 }
@@ -391,7 +408,7 @@ impl TryFrom<pb::core::ReceiptMetadata> for ReceiptMetadata {
         Ok(Self {
             verifier_parameters: value
                 .verifier_parameters
-                .ok_or(malformed_err())?
+                .ok_or_else(malformed_err)?
                 .try_into()?,
         })
     }
@@ -416,7 +433,7 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
     fn try_from(value: pb::core::SegmentReceipt) -> Result<Self> {
         const WORD_SIZE: usize = std::mem::size_of::<u32>();
 
-        let version = value.version.ok_or(malformed_err())?.value;
+        let version = value.version.ok_or_else(malformed_err)?.value;
         if version > ver::SEGMENT_RECEIPT.value {
             bail!("Incompatible SegmentReceipt version: {version}");
         }
@@ -431,7 +448,7 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
         let claim = value
             .claim
             .map(|m| m.try_into())
-            .unwrap_or_else(|| Ok(decode_receipt_claim_from_seal(&seal)?))?;
+            .unwrap_or_else(|| Ok(decode_receipt_claim_from_seal_v1(&seal)?))?;
 
         Ok(Self {
             claim,
@@ -440,8 +457,9 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             hashfn: value.hashfn,
             verifier_parameters: value
                 .verifier_parameters
-                .ok_or(malformed_err())?
+                .ok_or_else(malformed_err)?
                 .try_into()?,
+            segment_version: SegmentVersion::V1,
         })
     }
 }
@@ -474,7 +492,7 @@ where
     fn try_from(value: pb::core::SuccinctReceipt) -> Result<Self> {
         const WORD_SIZE: usize = std::mem::size_of::<u32>();
 
-        let version = value.version.ok_or(malformed_err())?.value;
+        let version = value.version.ok_or_else(malformed_err)?.value;
         if version > ver::SUCCINCT_RECEIPT.value {
             bail!("Incompatible SuccinctReceipt version: {version}");
         }
@@ -486,16 +504,16 @@ where
         }
         Ok(Self {
             seal,
-            control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
+            control_id: value.control_id.ok_or_else(malformed_err)?.try_into()?,
             control_inclusion_proof: value
                 .control_inclusion_proof
-                .ok_or(malformed_err())?
+                .ok_or_else(malformed_err)?
                 .try_into()?,
-            claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            claim: value.claim.ok_or_else(malformed_err)?.try_into()?,
             hashfn: value.hashfn,
             verifier_parameters: value
                 .verifier_parameters
-                .ok_or(malformed_err())?
+                .ok_or_else(malformed_err)?
                 .try_into()?,
         })
     }
@@ -548,17 +566,17 @@ where
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::Groth16Receipt) -> Result<Self> {
-        let version = value.version.ok_or(malformed_err())?.value;
+        let version = value.version.ok_or_else(malformed_err)?.value;
         if version > ver::GROTH16_RECEIPT.value {
             bail!("Incompatible Groth16Receipt version: {version}");
         }
 
         Ok(Self {
             seal: value.seal,
-            claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            claim: value.claim.ok_or_else(malformed_err)?.try_into()?,
             verifier_parameters: value
                 .verifier_parameters
-                .ok_or(malformed_err())?
+                .ok_or_else(malformed_err)?
                 .try_into()?,
         })
     }
@@ -591,7 +609,7 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
             pb::core::inner_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
@@ -631,7 +649,7 @@ impl TryFrom<pb::core::InnerReceipt> for InnerAssumptionReceipt {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
             pb::core::inner_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
@@ -661,7 +679,7 @@ where
 
     fn try_from(value: pb::core::FakeReceipt) -> Result<Self> {
         Ok(Self {
-            claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            claim: value.claim.ok_or_else(malformed_err)?.try_into()?,
         })
     }
 }
@@ -697,7 +715,7 @@ impl TryFrom<pb::core::CompositeReceipt> for CompositeReceipt {
                 .collect::<Result<Vec<_>>>()?,
             verifier_parameters: value
                 .verifier_parameters
-                .ok_or(malformed_err())?
+                .ok_or_else(malformed_err)?
                 .try_into()?,
         })
     }
@@ -760,9 +778,9 @@ impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
 
     fn try_from(value: pb::core::ReceiptClaim) -> Result<Self> {
         Ok(Self {
-            pre: value.pre.ok_or(malformed_err())?.try_into()?,
-            post: value.post.ok_or(malformed_err())?.try_into()?,
-            exit_code: value.exit_code.ok_or(malformed_err())?.try_into()?,
+            pre: value.pre.ok_or_else(malformed_err)?.try_into()?,
+            post: value.post.ok_or_else(malformed_err)?.try_into()?,
+            exit_code: value.exit_code.ok_or_else(malformed_err)?.try_into()?,
             // Translate Option<MaybePruned<Input>> to MaybePruned<Option<Input>>.
             input: match value.input {
                 None => MaybePruned::Value(None),
@@ -808,7 +826,7 @@ impl TryFrom<pb::core::SystemState> for SystemState {
     fn try_from(value: pb::core::SystemState) -> Result<Self> {
         Ok(Self {
             pc: value.pc,
-            merkle_root: value.merkle_root.ok_or(malformed_err())?.try_into()?,
+            merkle_root: value.merkle_root.ok_or_else(malformed_err)?.try_into()?,
         })
     }
 }
@@ -859,8 +877,8 @@ impl TryFrom<pb::core::Output> for Output {
 
     fn try_from(value: pb::core::Output) -> Result<Self> {
         Ok(Self {
-            journal: value.journal.ok_or(malformed_err())?.try_into()?,
-            assumptions: value.assumptions.ok_or(malformed_err())?.try_into()?,
+            journal: value.journal.ok_or_else(malformed_err)?.try_into()?,
+            assumptions: value.assumptions.ok_or_else(malformed_err)?.try_into()?,
         })
     }
 }
@@ -888,8 +906,8 @@ impl TryFrom<pb::core::Assumption> for Assumption {
 
     fn try_from(value: pb::core::Assumption) -> Result<Self> {
         Ok(Self {
-            claim: value.claim.ok_or(malformed_err())?.try_into()?,
-            control_root: value.control_root.ok_or(malformed_err())?.try_into()?,
+            claim: value.claim.ok_or_else(malformed_err)?.try_into()?,
+            control_root: value.control_root.ok_or_else(malformed_err)?.try_into()?,
         })
     }
 }
@@ -954,7 +972,7 @@ where
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::core::maybe_pruned::Kind::Value(inner) => {
                 Self::Value(T::Message::decode(inner.as_slice())?.try_into()?)
             }
@@ -982,7 +1000,7 @@ impl TryFrom<pb::core::MaybePruned> for MaybePruned<Vec<u8>> {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::core::maybe_pruned::Kind::Value(inner) => {
                 Self::Value(<Vec<u8> as Message>::decode(inner.as_slice())?)
             }
@@ -1009,7 +1027,7 @@ impl TryFrom<pb::core::MaybePruned> for MaybePruned<Unknown> {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
+        Ok(match value.kind.ok_or_else(malformed_err)? {
             pb::core::maybe_pruned::Kind::Value(_) => Err(malformed_err())?,
             pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
         })
@@ -1021,8 +1039,8 @@ impl TryFrom<pb::api::ProveZkrRequest> for ProveZkrRequest {
 
     fn try_from(value: pb::api::ProveZkrRequest) -> Result<Self> {
         Ok(Self {
-            claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
-            control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
+            claim_digest: value.claim_digest.ok_or_else(malformed_err)?.try_into()?,
+            control_id: value.control_id.ok_or_else(malformed_err)?.try_into()?,
             input: value.input,
         })
     }
@@ -1033,9 +1051,9 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
 
     fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
         Ok(Self {
-            claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
+            claim_digest: value.claim_digest.ok_or_else(malformed_err)?.try_into()?,
             po2: value.po2 as usize,
-            control_root: value.control_root.ok_or(malformed_err())?.try_into()?,
+            control_root: value.control_root.ok_or_else(malformed_err)?.try_into()?,
             input: value.input,
         })
     }

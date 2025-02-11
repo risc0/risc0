@@ -28,7 +28,7 @@ function CustomTooltip({ active, payload }) {
         <div className="line-clamp-4">{data.commitMessage}</div>
         <br />
         <div className="text-[11px]">
-          {`Commited on ${new Date(data.commitTimestamp).toUTCString()} by`}{" "}
+          {`Committed on ${new Date(data.commitTimestamp).toUTCString()} by`}{" "}
           <Badge className="rounded-[4px] px-0.5 py-0" variant="secondary">
             @{data.committer}
           </Badge>

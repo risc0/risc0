@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ fn download_zkr() {
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "ffc503386276f809137161f18d2f3ddcba3bb4b2d8b5d893b2c5d94b35afaf47";
+    const SHA256_HASH: &str = "a1a9a1938e3143aecd995b8f20a93f3e1efb31d8b276dfa59acb9401bd2b36be";
 
     fn check_sha2(path: &Path) -> bool {
         let data = fs::read(path).unwrap();

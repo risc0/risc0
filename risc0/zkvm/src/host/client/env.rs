@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
+use risc0_circuit_keccak::KECCAK_PO2_RANGE;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
@@ -117,6 +118,7 @@ pub(crate) struct AssumptionReceipts(pub(crate) Vec<AssumptionReceipt>);
 pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) args: Vec<String>,
+    pub(crate) keccak_max_po2: Option<u32>,
     pub(crate) segment_limit_po2: Option<u32>,
     pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
@@ -175,6 +177,17 @@ impl<'a> ExecutorEnvBuilder<'a> {
             }
         }
 
+        if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
+            let po2 = po2.parse::<u32>()?;
+            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+                bail!(
+                    "invalid keccak po2 {po2}. Expected range: {:?}",
+                    KECCAK_PO2_RANGE
+                );
+            }
+            inner.keccak_max_po2 = Some(po2);
+        }
+
         Ok(inner)
     }
 
@@ -192,6 +205,27 @@ impl<'a> ExecutorEnvBuilder<'a> {
     pub fn segment_limit_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.segment_limit_po2 = Some(limit);
         self
+    }
+
+    /// Set a segment limit for keccak proofs, specified in powers of 2 cycles.
+    ///
+    /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
+    /// roughly linear with the segment size, so lowering this value by 1 will cut memory
+    /// consumpton by about half.
+    ///
+    /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
+    /// either up or down, may result in better proving performance.
+    ///
+    /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE]
+    pub fn keccak_max_po2(&mut self, limit: u32) -> Result<&mut Self> {
+        if !KECCAK_PO2_RANGE.contains(&(limit as usize)) {
+            bail!(
+                "invalid keccak po2 {limit}. Expected range: {:?}",
+                KECCAK_PO2_RANGE
+            );
+        }
+        self.inner.keccak_max_po2 = Some(limit);
+        Ok(self)
     }
 
     /// Set a session limit, specified in number of cycles.

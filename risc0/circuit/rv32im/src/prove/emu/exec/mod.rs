@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
 #[cfg(test)]
 mod tests;
 
-use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
+use std::{array, cell::RefCell, cmp::Ordering, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
-use anyhow::{bail, ensure, Result};
-use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
+use anyhow::{anyhow, bail, ensure, Result};
 use enum_map::{Enum, EnumMap};
-use num_bigint::BigUint;
+use malachite::Natural;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -41,7 +40,7 @@ use sha2::digest::generic_array::GenericArray;
 use super::{
     addr::{ByteAddr, WordAddr},
     bibc,
-    pager::PagedMemory,
+    pager::{self, PagedMemory},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
     BIGINT2_WIDTH_BYTES, BIGINT_CYCLES, SYSTEM_START,
 };
@@ -246,7 +245,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             if let Some(max_cycles) = max_cycles {
                 if self.cycles.user >= max_cycles {
-                    bail!("Session limit exceeded");
+                    bail!(
+                        "Session limit exceeded: {} >= {max_cycles}",
+                        self.cycles.user
+                    );
                 }
             }
 
@@ -378,7 +380,22 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
         self.output_digest = self.pending.output_digest.take();
         self.exit_code = self.pending.exit_code.take();
-        self.pager.commit_step();
+        let page_actions = self.pager.commit_step();
+
+        for trace in &self.trace {
+            for action in &page_actions {
+                let event = match action {
+                    pager::Action::PageRead(_, cycles) => TraceEvent::PageIn {
+                        cycles: *cycles as u64,
+                    },
+                    pager::Action::PageWrite(_, cycles, _) => TraceEvent::PageOut {
+                        cycles: *cycles as u64,
+                    },
+                    _ => continue,
+                };
+                trace.borrow_mut().trace_callback(event)?;
+            }
+        }
 
         Ok(())
     }
@@ -394,7 +411,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
+impl<S: Syscall> Executor<'_, '_, S> {
     fn ecall_halt(&mut self) -> Result<bool> {
         let a0 = self.load_register(REG_A0)?;
         let output_ptr = self.load_guest_addr_from_register(REG_A1)?;
@@ -431,12 +448,20 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
-        tracing::debug!("[{}] ecall_software", self.insn_cycles);
+        tracing::trace!("[{}] ecall_software", self.insn_cycles);
         let into_guest_ptr = ByteAddr(self.load_register(REG_A0)?);
         let into_guest_len = self.load_register(REG_A1)? as usize;
         if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
+
+        if into_guest_len > 0 && !into_guest_ptr.is_null() {
+            let end_addr = into_guest_ptr
+                .checked_add(into_guest_len as u32)
+                .ok_or_else(|| anyhow!("invalid guest address range"))?;
+            Self::check_guest_addr(end_addr)?;
+        }
+
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.peek_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
@@ -466,8 +491,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
         if into_guest_len > 0 && !into_guest_ptr.is_null() {
-            Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
-            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?
+            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?;
         }
 
         let (a0, a1) = syscall.regs;
@@ -484,9 +508,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        tracing::debug!("[{}] ecall_sha", self.insn_cycles);
-        let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
-        let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
+        tracing::trace!("[{}] ecall_sha", self.insn_cycles);
+        let state_out_ptr = self.load_aligned_guest_addr_from_register(REG_A0)?;
+        let state_in_ptr = self.load_aligned_guest_addr_from_register(REG_A1)?;
         let count = self.load_register(REG_A4)?;
 
         let state_in: [u8; DIGEST_BYTES] = self.load_array_from_guest(state_in_ptr)?;
@@ -496,8 +520,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
 
         if count > 0 {
-            let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
-            let mut block2_ptr = self.load_guest_addr_from_register(REG_A3)?;
+            let mut block1_ptr = self.load_aligned_guest_addr_from_register(REG_A2)?;
+            let mut block2_ptr = self.load_aligned_guest_addr_from_register(REG_A3)?;
 
             // tracing::debug!("ecall_sha: start state: {state:08x?}");
             let mut block = [0u32; BLOCK_WORDS];
@@ -537,46 +561,38 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     fn ecall_bigint(&mut self) -> Result<bool> {
         let op = self.load_register(REG_A1)?;
-        let z_ptr = self.load_guest_addr_from_register(REG_A0)?;
-        let x_ptr = self.load_guest_addr_from_register(REG_A2)?;
-        let y_ptr = self.load_guest_addr_from_register(REG_A3)?;
-        let n_ptr = self.load_guest_addr_from_register(REG_A4)?;
+        let z_ptr = self.load_aligned_guest_addr_from_register(REG_A0)?;
+        let x_ptr = self.load_aligned_guest_addr_from_register(REG_A2)?;
+        let y_ptr = self.load_aligned_guest_addr_from_register(REG_A3)?;
+        let n_ptr = self.load_aligned_guest_addr_from_register(REG_A4)?;
 
-        let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<[u8; bigint::WIDTH_BYTES]> {
+        let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<Natural> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for (i, word) in arr.iter_mut().enumerate() {
                 *word = self
                     .load_u32_from_guest(ptr + (i * WORD_SIZE) as u32)?
                     .to_le();
             }
-            Ok(bytemuck::cast(arr))
+
+            Ok(Natural::from_limbs_asc(&arr))
         };
 
         if op != 0 {
             bail!("ecall_bigint: op must be set to 0");
         }
 
-        // Load inputs.
-        let x = U256::from_le_bytes(load_bigint_le_bytes(x_ptr)?);
-        let y = U256::from_le_bytes(load_bigint_le_bytes(y_ptr)?);
-        let n = U256::from_le_bytes(load_bigint_le_bytes(n_ptr)?);
+        // Load inputs
+        let x = load_bigint_le_bytes(x_ptr)?;
+        let y = load_bigint_le_bytes(y_ptr)?;
+        let n = load_bigint_le_bytes(n_ptr)?;
 
-        // Compute modular multiplication, or simply multiplication if n == 0.
-        let z: U256 = if n == U256::ZERO {
-            x.checked_mul(&y).unwrap()
-        } else {
-            let (w_lo, w_hi) = x.mul_wide(&y);
-            let w = w_hi.concat(&w_lo);
-            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
-            z.resize()
-        };
+        // Compute modular multiplication, or simply multiplication if n == 0
+        let z = if n == 0 { x * y } else { (x * y) % n };
 
-        // Store result.
-        for (i, word) in bytemuck::cast::<_, [u32; bigint::WIDTH_WORDS]>(z.to_le_bytes())
-            .into_iter()
-            .enumerate()
-        {
-            self.store_u32_into_guest(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
+        let out_limbs = z.into_limbs_asc();
+        for i in 0..bigint::WIDTH_WORDS {
+            let limb = if i < out_limbs.len() { out_limbs[i] } else { 0 };
+            self.store_memory((z_ptr + (i as u32 * 4)).into(), limb.to_le())?;
         }
 
         self.pending.ecall = Some(EcallKind::BigInt);
@@ -587,10 +603,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_bigint2(&mut self) -> Result<bool> {
-        let blob_ptr = self.load_guest_addr_from_register(REG_A0)?.waddr();
-        let nondet_program_ptr = self.load_guest_addr_from_register(REG_T1)?;
-        let verify_program_ptr = self.load_guest_addr_from_register(REG_T2)?;
-        let consts_ptr = self.load_guest_addr_from_register(REG_T3)?;
+        let blob_ptr = self.load_aligned_guest_addr_from_register(REG_A0)?.waddr();
+        let nondet_program_ptr = self.load_aligned_guest_addr_from_register(REG_T1)?;
+        let verify_program_ptr = self.load_aligned_guest_addr_from_register(REG_T2)?;
+        let consts_ptr = self.load_aligned_guest_addr_from_register(REG_T3)?;
 
         let nondet_program_size = self.load_u32_from_guest(blob_ptr.baddr())?;
         let verify_program_size = self.load_u32_from_guest((blob_ptr + 1u32).baddr())?;
@@ -606,6 +622,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
 
         let cycles = verify_program_size as usize + 1;
+        tracing::debug!("bigint2 cycles: {cycles}");
 
         self.pending.ecall = Some(EcallKind::BigInt2);
         self.pending.cycles += cycles;
@@ -619,6 +636,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             bail!("{addr:?} is an invalid guest address");
         }
         Ok(addr)
+    }
+
+    fn load_aligned_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
+        let addr = ByteAddr(self.load_register(idx)?);
+        if !addr.is_aligned() {
+            bail!("{addr:?} is not an aligned guest memory address");
+        }
+        Self::check_guest_addr(addr)
     }
 
     fn load_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
@@ -649,12 +674,27 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn load_region_from_guest(&mut self, base: ByteAddr, size: u32) -> Result<Vec<u8>> {
-        let mut region = Vec::new();
-        for i in 0..size {
-            let addr = base + i;
-            Self::check_guest_addr(addr)?;
-            region.push(self.load_u8(addr)?);
+        Self::check_guest_addr(base)?;
+        Self::check_guest_addr(base + size)?;
+
+        let mut region = Vec::with_capacity(size as usize);
+        let mut addr = base;
+        let mut remaining = size;
+
+        while remaining > 0 {
+            // Calculate bytes remaining in current page
+            let page_offset = addr.0 % PAGE_SIZE as u32;
+            let bytes_in_page = PAGE_SIZE as u32 - page_offset;
+            let bytes_to_read = remaining.min(bytes_in_page);
+
+            // Load bytes from current page
+            let mut page_bytes = self.pager.load_region(addr, bytes_to_read)?;
+            region.append(&mut page_bytes);
+
+            addr += bytes_to_read;
+            remaining -= bytes_to_read;
         }
+
         Ok(region)
     }
 
@@ -677,11 +717,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             addr += 1u32;
         }
         Ok(String::from_utf8(buf)?)
-    }
-
-    fn store_u32_into_guest(&mut self, addr: ByteAddr, data: u32) -> Result<()> {
-        Self::check_guest_addr(addr)?;
-        self.store_memory(addr.waddr(), data)
     }
 
     fn store_region_into_guest(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
@@ -722,29 +757,64 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
-    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
-        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+pub(crate) fn bytes_le_to_bigint(bytes: &[u8]) -> Natural {
+    let mut limbs = Vec::with_capacity((bytes.len() + 3) / 4);
+
+    for chunk in bytes.chunks(4) {
+        let mut arr = [0u8; 4];
+        arr[..chunk.len()].copy_from_slice(chunk);
+        limbs.push(u32::from_le_bytes(arr));
+    }
+
+    Natural::from_limbs_asc(&limbs)
+}
+
+pub(crate) fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
+    let limbs = value.to_limbs_asc();
+    let mut out = Vec::with_capacity(limbs.len() * 4);
+
+    for limb in limbs {
+        out.extend_from_slice(&limb.to_le_bytes());
+    }
+    out
+}
+
+impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
+        tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
-        Ok(BigUint::from_bytes_le(&bytes))
+        let val = bytes_le_to_bigint(&bytes);
+        tracing::debug!("load: {val}");
+        Ok(val)
     }
 
-    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
-        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
+        tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let mut bytes = value.to_bytes_le();
-        if bytes.len() < count as usize {
-            bytes.resize(count as usize, 0);
-        }
-        ensure!(bytes.len() == count as usize);
-        self.store_region_into_guest(addr, &bytes)
+        let mut bytes = bigint_to_bytes_le(value);
+
+        match bytes.len().cmp(&(count as usize)) {
+            Ordering::Greater => bytes.truncate(count as usize),
+            _ => bytes.resize(count as usize, 0),
+        };
+
+        ensure!(
+            bytes.len() == count as usize,
+            "Expected exactly {} bytes, got {}",
+            count,
+            bytes.len()
+        );
+
+        self.store_region_into_guest(addr, &bytes)?;
+
+        Ok(())
     }
 }
 
-impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
+impl<S: Syscall> EmuContext for Executor<'_, '_, S> {
     fn ecall(&mut self) -> Result<bool> {
         match self.load_register(REG_T0)? {
             ecall::HALT => self.ecall_halt(),
@@ -832,7 +902,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
+impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
     fn get_cycle(&self) -> u64 {
         self.cycles.user
     }

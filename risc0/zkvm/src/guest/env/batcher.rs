@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,59 +14,47 @@
 
 use core::ptr::addr_of;
 
-use alloc::vec;
-
-use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2};
+use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
 
-const KECCAK_PERMUTE_CYCLES: usize = 200;
-const MAX_KECCAK_CYCLES: usize = 1 << KECCAK_DEFAULT_PO2;
-const MAX_KECCAK_INPUTS: usize = MAX_KECCAK_CYCLES / KECCAK_PERMUTE_CYCLES;
-
 /// This struct implements the batching of calls to the keccak accelerator.
+#[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
-    inputs: Vec<KeccakState>,
 }
 
 impl Keccak2Batcher {
-    pub const fn init() -> Self {
+    fn input_exists(&self) -> bool {
+        self.claim_state != SHA256_INIT
+    }
+
+    pub fn new() -> Self {
         Self {
             claim_state: SHA256_INIT,
-            inputs: vec![],
         }
     }
 
     pub fn update(&mut self, keccak_state: &mut KeccakState) {
         sha_single_keccak(&mut self.claim_state, keccak_state);
-        unsafe { sys_keccak(keccak_state, keccak_state) };
+        let status = unsafe { sys_keccak(keccak_state, keccak_state) };
+        // at this point the keccak_state is output state resulting from keccak permutation.
         sha_single_keccak(&mut self.claim_state, keccak_state);
-        self.inputs.push(*keccak_state);
-        if self.inputs.len() == MAX_KECCAK_INPUTS {
+        if status == 1 {
             // we've reached the limit. Create a proof request.
             self.finalize();
         }
     }
 
     pub fn finalize(&mut self) {
-        if self.inputs.is_empty() {
+        if !self.input_exists() {
             // no input so there's nothing to do
-            self.reset();
             return;
         }
 
-        let input: &[u32] = bytemuck::cast_slice(self.inputs.as_flattened());
         let claim_digest = self.claim_digest();
-
         unsafe {
-            sys_prove_keccak(
-                claim_digest.as_ref(),
-                KECCAK_DEFAULT_PO2,
-                KECCAK_CONTROL_ROOT.as_ref(),
-                input.as_ptr(),
-                input.len(),
-            );
+            sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
         }
         crate::guest::env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
 
@@ -83,7 +71,6 @@ impl Keccak2Batcher {
 
     fn reset(&mut self) {
         self.claim_state = SHA256_INIT;
-        self.inputs.clear();
     }
 }
 

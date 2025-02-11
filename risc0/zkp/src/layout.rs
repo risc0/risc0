@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 use alloc::{collections::BTreeMap, string::String, vec::Vec};
 #[cfg(not(feature = "std"))]
 use alloc::{format, string::ToString};
-use anyhow::Result;
 use core::fmt::{Debug, Formatter, Write};
-pub use paste::paste;
+
+use anyhow::Result;
 use risc0_core::field::Elem;
+
+use crate::core::digest::Digest;
 
 /// A reference to a register in a layout
 pub struct Reg {
@@ -106,6 +108,24 @@ impl<'a, E: Elem + Into<u32>, C: Component> Tree<'a, E, C> {
             .collect()
     }
 
+    /// Interprets the contents of this tree as a list of shorts.
+    pub fn get_shorts(&self) -> Result<Vec<u16>> {
+        self.get_u32s()?
+            .into_iter()
+            .map(|val| u16::try_from(val).map_err(anyhow::Error::msg))
+            .collect()
+    }
+
+    /// Interprets the contents of this tree as a digest based on a list of shorts.
+    pub fn get_digest_from_shorts(&self) -> Result<Digest> {
+        let bytes: Vec<_> = self
+            .get_shorts()?
+            .into_iter()
+            .flat_map(|short| short.to_le_bytes())
+            .collect();
+        Digest::try_from(bytes.as_slice()).map_err(anyhow::Error::msg)
+    }
+
     /// Returns the contents of this tree as a u32; elements are expected to be
     /// 4 bytes.
     pub fn get_u32_from_bytes(&self) -> Result<u32> {
@@ -135,7 +155,7 @@ pub fn get_u32<E: Copy + Into<u32>>(buf: &[E], reg: &Reg) -> u32 {
     (*get_elem(buf, reg)).into()
 }
 
-impl<'a, E: Elem + Into<u32>, C: Component> Debug for Tree<'a, E, C> {
+impl<E: Elem + Into<u32>, C: Component> Debug for Tree<'_, E, C> {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         let mut p = TreePrinter::new(self.buf, Vec::new(), "top");
         self.component.walk(&mut p)?;
@@ -169,7 +189,7 @@ impl<'a, E: Elem> TreePrinter<'a, E> {
     }
 }
 
-impl<'a, E: Elem + Into<u32>> Visitor for TreePrinter<'a, E> {
+impl<E: Elem + Into<u32>> Visitor for TreePrinter<'_, E> {
     fn visit_component(&mut self, name: &str, component: &impl Component) -> core::fmt::Result {
         match component.ty_name() {
             "U32Reg" => {
@@ -255,10 +275,11 @@ impl<'a, E: Elem> TreeGather<'a, E> {
     }
 }
 
-impl<'a, E: Elem + Into<u32>> Visitor for TreeGather<'a, E> {
+impl<E: Elem + Into<u32>> Visitor for TreeGather<'_, E> {
     fn visit_component(&mut self, _name: &str, component: &impl Component) -> core::fmt::Result {
         component.walk(self)
     }
+
     fn visit_reg(&mut self, offset: usize) -> core::fmt::Result {
         if let Some(val) = self.buf.get(offset) {
             self.vals.push((*val).into())

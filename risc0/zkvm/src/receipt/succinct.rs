@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
 // limitations under the License.
 
 use alloc::{
-    collections::BTreeSet,
-    collections::VecDeque,
+    collections::{BTreeSet, VecDeque},
     format,
     string::{String, ToString},
     vec::Vec,
@@ -242,6 +241,7 @@ pub(crate) fn allowed_control_ids(
             .map(str::to_string)
             .into_iter()
             .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
+            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
             .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
@@ -359,7 +359,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("21a829e931cda9f34723dc77d947efe264771fea83bc495b3903014d0fe50d57")
+            digest!("18c556e570b13cb96fdf30088cdad28325636122cf4a45089f4a3079773df539")
         );
     }
 

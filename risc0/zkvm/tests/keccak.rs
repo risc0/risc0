@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ use risc0_zkp::{
 };
 use risc0_zkvm::{get_prover_server, recursion::MerkleGroup, ExecutorEnv, ProverOpts};
 
-fn run_test(po2: usize, claim_digest: Digest) {
-    let to_guest: (Digest, u32) = (claim_digest, po2 as u32);
+fn run_test(po2: u32, claim_digest: Digest) {
+    let to_guest: (Digest, u32) = (claim_digest, po2);
 
     let env = ExecutorEnv::builder()
         .write(&to_guest)
+        .unwrap()
+        .keccak_max_po2(po2)
         .unwrap()
         .build()
         .unwrap();

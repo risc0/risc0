@@ -155,7 +155,7 @@ kernel void multi_ntt_rev_step(device Fp* io,
   uint32_t cOff = threadIdx.z + blockIdx.z * blockDim.z;
   uint32_t cStep = blockDim.z * gridDim.z;
 
-  // Compute the intial multiplier for the sOff: pow(rou[s], sOff)
+  // Compute the initial multiplier for the sOff: pow(rou[s], sOff)
   Fp curMul(1);
   uint32_t curRou = sBits;
   uint32_t powX = sOff;

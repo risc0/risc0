@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright 2024 RISC Zero, Inc.
+
+# Copyright 2025 RISC Zero, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,200 +16,227 @@
 
 set -euo pipefail
 
-RZUP_URL="${RZUP_URL:-https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup}"
+readonly VERSION="1.0.0"
+readonly RZUP_URL="${RZUP_URL:-https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup}"
+readonly ENV_PATH="${ENV_PATH:-prod}"
+readonly RZUP_BIN_DIR="${HOME}/.risc0/bin"
 
-# Override the download path with the ENV_PATH environment variable (i.e. stage)
-ENV_PATH=${ENV_PATH:-prod}
+TEMP_DIR=""
+PROFILE_PATH=""
+QUIET=0
+DEBUG=0
 
-QUIET=no
+readonly RED=$'\033[0;31m'
+readonly GREEN=$'\033[0;32m'
+readonly BLUE=$'\033[0;34m'
+readonly YELLOW=$'\033[1;33m'
+readonly BOLD=$'\033[1m'
+readonly RESET=$'\033[0m'
 
-RZUP_BIN_DIR="${HOME}/.risc0/bin"
+cleanup() {
+    if [[ -n "${TEMP_DIR}" && -d "${TEMP_DIR}" ]]; then
+        rm -rf "${TEMP_DIR}"
+    fi
+}
+trap cleanup EXIT
+trap 'error "Installation interrupted. Cleaning up..." 1' INT TERM
 
-usage() {
-  cat <<EOF
-install
+info() {
+    if ((QUIET == 0)); then
+        printf "${BLUE}→${RESET} %s\n" "$1" >&2
+    fi
+}
 
-The installer for rzup, from RISC Zero.
+success() {
+    if ((QUIET == 0)); then
+        printf "${GREEN}✓${RESET} %s\n" "$1" >&2
+    fi
+}
 
-Usage: install [OPTIONS]
+error() {
+    printf "${RED}✗${RESET} %s\n" "$1" >&2
+    exit "${2:-1}"
+}
+
+debug() {
+    if ((DEBUG == 1)); then
+        printf "${YELLOW}debug${RESET} %s\n" "$1" >&2
+    fi
+}
+
+show_help() {
+    cat <<EOF
+${BOLD}rzup installer v${VERSION}${RESET}
+
+Usage: install [options]
 
 Options:
-  -v, --verbose
-          Enable verbose output
-  -q, --quiet
-          Disable progress output
-  -h, --help
-          Print help
+  -q, --quiet     Suppress output
+  -d, --debug     Enable debug output
+  -h, --help      Show this help message
+  -v, --version   Show version information
+
+Environment variables:
+  RZUP_URL    Override the default download URL
+  ENV_PATH    Set environment path (default: prod)
 EOF
 }
 
-cleanup() {
-  [ -n "${_dir:-}" ] && [ -d "$_dir" ] && rm -rf "$_dir"
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -v|--version)
+                echo "rzup installer v${VERSION}"
+                exit 0
+                ;;
+            -q|--quiet)
+                QUIET=1
+                shift
+                ;;
+            -d|--debug)
+                DEBUG=1
+                shift
+                ;;
+            *)
+                error "Unknown option: $1"
+                ;;
+        esac
+    done
 }
 
-trap cleanup EXIT
+check_requirements() {
+    local missing=()
 
-main() {
-  downloader --check
-  need_cmd uname
-  need_cmd mktemp
-  need_cmd chmod
-  need_cmd mkdir
-  need_cmd rm
-  need_cmd rmdir
-  need_cmd mv
+    # check for rust installation
+    if ! command -v rustc >/dev/null 2>&1; then
+        missing+=("rustc")
+    fi
 
-  check_rust_installed
-  get_architecture
+    # use curl or wget
+    if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
+        missing+=("curl/wget")
+    fi
 
-  _arch="$RETVAL"
-  assert_nz "$_arch" "arch"
-
-  _url="${RZUP_URL}/${ENV_PATH}/${_arch}/rzup"
-  _dir="$(ensure mktemp -d)"
-  _file="${_dir}/rzup"
-
-  [ -f "$RZUP_BIN_DIR/rzup" ] && rm "$RZUP_BIN_DIR/rzup"
-
-  for arg in "$@"; do
-    case "$arg" in
-    --help)
-      usage
-      exit 0
-      ;;
-    -q | --quiet) QUIET=yes ;;
-    *) ;;
-    esac
-  done
-
-  info 'Downloading installer'
-
-  ensure mkdir -p "$_dir"
-  ensure downloader "$_url" "$_file"
-  ensure chmod u+x "$_file"
-  [ ! -x "$_file" ] && err "Cannot execute $_file"
-
-  ensure mkdir -p "$RZUP_BIN_DIR"
-  ensure mv "$_file" "$RZUP_BIN_DIR"
-
-  info "rzup has been installed to $RZUP_BIN_DIR"
-
-  detect_shell
-
-  # add rzup to PATH if it isn't already present
-  if [[ ":$PATH:" != *":${RZUP_BIN_DIR}:"* ]]; then
-      info "Adding rzup to PATH in ${PROFILE}"
-      {
-          echo
-          echo "export PATH=\"\$PATH:$RZUP_BIN_DIR\""
-      } >> "$PROFILE"
-      source "$PROFILE"
-  else
-      info "rzup found in PATH"
-  fi
-
-  info "🎉 rzup installed!"
-  echo "Run the following command to install the zkVM:"
-  echo "  rzup install"
-}
-
-check_rust_installed() {
-  check_cmd rustc || err "Rust is not installed. Please install Rust from https://rustup.rs/ and run this script again."
+    if ((${#missing[@]} > 0)); then
+        error "Missing required tools: ${missing[*]}"
+    fi
 }
 
 get_architecture() {
-  _ostype="$(uname -s)"
-  _cputype="$(uname -m)"
+    local os
+    local cpu
 
-  case "$_ostype" in
-  Linux) _ostype=linux ;;
-  Darwin) _ostype=darwin ;;
-  *) err "Unsupported OS type: $_ostype" ;;
-  esac
+    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    cpu=$(uname -m)
 
-  case "$_cputype" in
-  x86_64 | amd64) _cputype=x86_64 ;;
-  aarch64 | arm64) _cputype=arm64 ;;
-  *) err "Unsupported CPU type: $_cputype" ;;
-  esac
-
-  case "$_cputype $_ostype" in
-  "x86_64 linux") _arch=Linux-X64 ;;
-  "arm64 darwin" ) _arch=macOS-ARM64 ;;
-   *) err "Unsupported CPU arch pairing: $_cputype $_ostype" ;;
-  esac
-
-  RETVAL="$_arch"
-}
-
-detect_shell() {
-  case $SHELL in
-  */zsh)
-    PROFILE="${ZDOTDIR:-"$HOME"}/.zshrc"
-    PREF_SHELL='zsh'
-    ;;
-  */bash)
-    PROFILE="$HOME/.bashrc"
-    PREF_SHELL='bash'
-    ;;
-  */fish)
-    PROFILE="$HOME/.config/fish/config.fish"
-    PREF_SHELL='fish'
-    ;;
-  */ash)
-    PROFILE="$HOME/.profile"
-    PREF_SHELL='ash'
-    ;;
-  *)
-    err "Could not detect shell. Please manually add ${RZUP_BIN_DIR} to your PATH."
-    ;;
-  esac
-  info "Detected your preferred shell as ${PREF_SHELL}"
-}
-
-info() {
-  [ "$QUIET" = "no" ] && printf 'info: %s\n' "$1" >&2
-}
-
-err() {
-  printf 'error: %s\n' "$1" >&2
-  exit 1
-}
-
-warn() {
-  printf 'warn: %s\n' "$1" >&2
-}
-
-need_cmd() {
-  check_cmd "$1" || err "Command not found: $1"
-}
-
-check_cmd() {
-  command -v "$1" >/dev/null 2>&1
-}
-
-assert_nz() {
-  [ -z "$1" ] && err "$2"
-}
-
-ensure() {
-  "$@" || err "Command failed: $*"
-}
-
-downloader() {
-  if [ "$1" = --check ]; then
-    check_cmd curl || check_cmd wget || err "Need 'curl' or 'wget' (neither found)"
-  else
-    _url="$1"
-    _file="$2"
-    if check_cmd curl; then
-      curl --silent --show-error --fail --location "$_url" --output "$_file" || err "Failed to download with curl"
-    elif check_cmd wget; then
-      wget --quiet --output-document="$2" "$1" || err "Failed to download with wget"
+    if [[ "$os" == "linux" && "$cpu" =~ ^(x86_64|amd64)$ ]]; then
+        echo "Linux-X64"
+    elif [[ "$os" == "darwin" && "$cpu" == "arm64" ]]; then
+        echo "macOS-ARM64"
     else
-      err "Need 'curl' or 'wget' (neither command found)"
+        error "Unsupported architecture: $os/$cpu"
     fi
-  fi
 }
 
-main "$@" || exit 1
+download_file() {
+    local url="$1"
+    local output="$2"
+    local temp_output="${output}.tmp"
+
+    # use curl if available, otherwise wget
+    if command -v curl >/dev/null 2>&1; then
+        if ((QUIET == 1)); then
+            curl -fsSL "$url" -o "$temp_output" || error "Download failed"
+        else
+            curl -fL --progress-bar "$url" -o "$temp_output" || error "Download failed"
+        fi
+    else
+        if ((QUIET == 1)); then
+            wget -q "$url" -O "$temp_output" || error "Download failed"
+        else
+            wget --show-progress "$url" -O "$temp_output" || error "Download failed"
+        fi
+    fi
+
+    if [[ ! -s "$temp_output" ]]; then
+        error "Downloaded file is empty"
+    fi
+
+    mv "$temp_output" "$output"
+}
+
+setup_shell_profile() {
+    case "${SHELL:-}" in
+        */zsh)  PROFILE_PATH="${ZDOTDIR:-$HOME}/.zshrc" ;;
+        */bash) PROFILE_PATH="$HOME/.bashrc" ;;
+        */fish) PROFILE_PATH="$HOME/.config/fish/config.fish" ;;
+        *)      PROFILE_PATH="$HOME/.profile" ;;
+    esac
+
+    if [[ ! -f "$PROFILE_PATH" ]]; then
+        touch "$PROFILE_PATH"
+    fi
+
+    if ! grep -q "$RZUP_BIN_DIR" "$PROFILE_PATH" 2>/dev/null; then
+        {
+            echo ""
+            echo "export PATH=\"\$PATH:$RZUP_BIN_DIR\""
+        } >> "$PROFILE_PATH"
+        success "Updated shell profile"
+    fi
+}
+
+install_rzup() {
+    info "Starting rzup installation..."
+
+    local arch
+    arch=$(get_architecture)
+    debug "Detected architecture: $arch"
+
+    local download_url="${RZUP_URL}/${ENV_PATH}/${arch}/rzup"
+    debug "Using download URL: $download_url"
+
+    mkdir -p "$RZUP_BIN_DIR" || error "Failed to create installation directory"
+    debug "Created installation directory: $RZUP_BIN_DIR"
+
+    TEMP_DIR=$(mktemp -d) || error "Failed to create temporary directory"
+    local temp_file="${TEMP_DIR}/rzup"
+    debug "Temporary binary location: $temp_file"
+
+    info "Downloading rzup..."
+    download_file "$download_url" "$temp_file"
+
+    chmod +x "$temp_file" || error "Failed to make rzup executable"
+
+    debug "Moving rzup binary from $temp_file to $RZUP_BIN_DIR/rzup"
+    mv "$temp_file" "$RZUP_BIN_DIR/rzup" || error "Failed to install rzup"
+
+    info "Configuring shell..."
+    setup_shell_profile
+
+    success "Installation complete! rzup is installed in $RZUP_BIN_DIR"
+
+    if ((QUIET == 0)); then
+        cat <<EOF
+
+${GREEN}To get started:${RESET}
+1. Restart your shell or run:
+   ${BOLD}source "$PROFILE_PATH"${RESET}
+2. Verify the installation:
+   ${BOLD}rzup --help${RESET}
+
+EOF
+    fi
+}
+
+main() {
+    parse_args "$@"
+    check_requirements
+    install_rzup
+}
+
+main "$@"

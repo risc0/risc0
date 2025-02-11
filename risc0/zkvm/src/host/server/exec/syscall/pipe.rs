@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ impl Syscall for SysPipe {
         (to_guest[0], to_guest[1]) = posix_io
             .borrow_mut()
             .alloc_pipe(pipe)
-            .ok_or(anyhow!("Could not allocate pipe"))?;
+            .ok_or_else(|| anyhow!("Could not allocate pipe"))?;
         Ok((0, 0))
     }
 }

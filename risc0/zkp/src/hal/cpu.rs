@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ pub struct SyncSlice<'a, T: Default + Clone> {
 //
 // The user of the SyncSlice is responsible for ensuring that no
 // two threads access the same elements at the same time.
-unsafe impl<'a, T: Default + Clone> Sync for SyncSlice<'a, T> {}
+unsafe impl<T: Default + Clone> Sync for SyncSlice<'_, T> {}
 
 impl<'a, T: Default + Clone> SyncSlice<'a, T> {
     pub fn new(mut buf: MappedRwLockWriteGuard<'a, [T]>) -> Self {
@@ -533,7 +533,7 @@ impl<F: Field> Hal for CpuHal<F> {
         let mut output = output.as_slice_mut();
         let input = input.as_slice();
 
-        // TODO: parallelize
+        // TODO(flaub): parallelize
         for idx in 0..count {
             let mut tot = Self::ExtElem::ZERO;
             let mut cur_mix = Self::ExtElem::ONE;

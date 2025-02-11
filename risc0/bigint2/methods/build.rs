@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 use std::collections::HashMap;
 
-use risc0_build::GuestOptions;
+use risc0_build::GuestOptionsBuilder;
 
 fn main() {
     println!("cargo:rerun-if-env-changed=NUM_BIGINT_DIG");
@@ -27,10 +27,10 @@ fn main() {
 
     let map = HashMap::from([(
         "risc0-bigint2-guest",
-        GuestOptions {
-            features,
-            ..Default::default()
-        },
+        GuestOptionsBuilder::default()
+            .features(features)
+            .build()
+            .unwrap(),
     )]);
 
     risc0_build::embed_methods_with_options(map);

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, io::Write, rc::Rc, sync::Arc, time::Instant};
+use std::{cell::RefCell, rc::Rc, sync::Arc, time::Instant};
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{MemoryImage, Program};
@@ -29,13 +29,14 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::client::env::SegmentPath, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment,
-    SegmentRef, Session,
+    host::{client::env::SegmentPath, server::session::InnerSegment},
+    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef, Session,
 };
 
 use super::{
-    profiler::Profiler,
+    profiler::{self, Profiler},
     syscall::{SyscallContext, SyscallTable},
+    Journal,
 };
 
 // The Executor provides an implementation for the execution phase.
@@ -81,7 +82,11 @@ impl<'a> ExecutorImpl<'a> {
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
 
         let profiler = if env.pprof_out.is_some() {
-            let profiler = Rc::new(RefCell::new(Profiler::new(elf, None)?));
+            let profiler = Rc::new(RefCell::new(Profiler::new(
+                elf,
+                None,
+                profiler::read_enable_inline_functions_env_var(),
+            )?));
             env.trace.push(profiler.clone());
             Some(profiler)
         } else {
@@ -174,7 +179,7 @@ impl<'a> ExecutorImpl<'a> {
 
             let segment = Segment {
                 index: inner.index as u32,
-                inner,
+                inner: InnerSegment::V1(inner),
                 output,
             };
             let segment_ref = callback(segment)?;
@@ -214,7 +219,6 @@ impl<'a> ExecutorImpl<'a> {
             self.env.input_digest.unwrap_or_default(),
             session_journal,
             result.exit_code,
-            result.post_image,
             assumptions,
             result.user_cycles,
             result.paging_cycles,
@@ -240,7 +244,7 @@ struct ContextAdapter<'a, 'b> {
     syscall_table: SyscallTable<'a>,
 }
 
-impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
+impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
     fn get_pc(&self) -> u32 {
         self.ctx.get_pc()
     }
@@ -270,7 +274,7 @@ impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
     }
 }
 
-impl<'a> NewSyscall for ExecutorImpl<'a> {
+impl NewSyscall for ExecutorImpl<'_> {
     fn syscall(
         &self,
         syscall: &str,
@@ -286,21 +290,5 @@ impl<'a> NewSyscall for ExecutorImpl<'a> {
             .context(format!("Unknown syscall: {syscall:?}"))?
             .borrow_mut()
             .syscall(syscall, &mut ctx, into_guest)
-    }
-}
-
-// Capture the journal output in a buffer that we can access afterwards.
-#[derive(Clone, Default)]
-struct Journal {
-    buf: Rc<RefCell<Vec<u8>>>,
-}
-
-impl Write for Journal {
-    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
-        self.buf.borrow_mut().write(bytes)
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        self.buf.borrow_mut().flush()
     }
 }
