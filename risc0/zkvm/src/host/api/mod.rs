@@ -159,10 +159,17 @@ struct ParentProcessConnector {
 
 impl ParentProcessConnector {
     pub fn new<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        Ok(Self {
+            server_path: server_path.as_ref().to_path_buf(),
+            listener: TcpListener::bind("127.0.0.1:0")?,
+        })
+    }
+
+    pub fn new_narrow_version<P: AsRef<Path>>(server_path: P) -> Result<Self> {
         // Check the version of the client and server to ensure that they're compatible
         let client_version = get_version().map_err(|err| anyhow!(err))?;
         let server_version = get_server_version(&server_path)?;
-        if !client::check_server_version(&client_version, &server_version) {
+        if !client::Compat::Narrow.check(&client_version, &server_version) {
             let server_suggestion = if client_version.pre.is_empty() {
                 format!(
                     "1. Install r0vm server version {}.{}\n",
@@ -188,17 +195,14 @@ impl ParentProcessConnector {
             bail!(msg);
         }
 
-        Ok(Self {
-            server_path: server_path.as_ref().to_path_buf(),
-            listener: TcpListener::bind("127.0.0.1:0")?,
-        })
+        Self::new(server_path)
     }
 
     pub fn new_wide_version<P: AsRef<Path>>(server_path: P) -> Result<Self> {
         let client_version = get_version().map_err(|err| anyhow!(err))?;
         let server_version = get_server_version(&server_path)?;
 
-        if !client::check_server_version_wide(&client_version, &server_version) {
+        if !client::Compat::Wide.check(&client_version, &server_version) {
             let msg = format!(
                 "Your installation of r0vm differs by a major version:\n\
             {client_version} vs {server_version} only minor, patch / pre-releases supported"
@@ -206,10 +210,8 @@ impl ParentProcessConnector {
             tracing::warn!("{msg}");
             bail!(msg);
         }
-        Ok(Self {
-            server_path: server_path.as_ref().to_path_buf(),
-            listener: TcpListener::bind("127.0.0.1:0")?,
-        })
+
+        Self::new(server_path)
     }
 
     fn spawn_fail(&self) -> String {
@@ -337,13 +339,17 @@ impl Connection for TcpConnection {
     }
 }
 
-fn malformed_err() -> anyhow::Error {
-    anyhow!("Malformed error")
+fn malformed_err(field: &str) -> anyhow::Error {
+    anyhow!("Malformed error: {field}")
 }
 
 impl pb::api::Asset {
     fn as_bytes(&self) -> Result<Bytes> {
-        let bytes = match self.kind.as_ref().ok_or_else(malformed_err)? {
+        let bytes = match self
+            .kind
+            .as_ref()
+            .ok_or_else(|| malformed_err("Asset.kind"))?
+        {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
             pb::api::asset::Kind::Redis(_) => bail!("as_bytes not supported for redis"),

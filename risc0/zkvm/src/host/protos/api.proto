@@ -39,6 +39,7 @@ message HelloResult {
 message ExecuteRequest {
   ExecutorEnv env = 1;
   AssetRequest segments_out = 2;
+  base.CompatVersion segment_version = 3;
 }
 
 message ProveRequest {
