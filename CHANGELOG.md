@@ -2,6 +2,12 @@
 
 ## Next (upcoming release)
 
+## [v1.2.3 (2025-02-10)](https://github.com/risc0/risc0/releases/tag/v1.2.3)
+
+### Features
+
+allocator: use `tlsf` algorithm to reduce guest-side cycle counts.
+
 ## [v1.2.2 (2025-01-27)](https://github.com/risc0/risc0/releases/tag/v1.2.2)
 
 ### Fixes
