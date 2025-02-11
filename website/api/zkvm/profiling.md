@@ -89,6 +89,14 @@ implementations. Refer to the [pprof docs][pprof] for more information about the
 web interface.
 :::
 
+## Inline Functions
+
+Your compiler may end up inlining a lot of functions which can make it difficult to see what is
+going on in the profile sometimes. If you have compiled your program with debug symbols you can
+enable inline function tracking in the profiler by setting
+`RISC0_PPROF_ENABLE_INLINE_FUNCTIONS=yes`. This will make the profile more detailed, but it comes at
+a cost of slowing down the profiler.
+
 [^1]: Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few

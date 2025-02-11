@@ -45,7 +45,7 @@ use crate::{
 };
 
 use super::{
-    profiler::Profiler,
+    profiler::{self, Profiler},
     syscall::{SyscallContext, SyscallTable},
     Journal,
 };
@@ -92,7 +92,11 @@ impl<'a> Executor2<'a> {
         let image = MemoryImage2::with_kernel(program, kernel);
 
         let profiler = if env.pprof_out.is_some() {
-            let profiler = Rc::new(RefCell::new(Profiler::new(user_elf, None)?));
+            let profiler = Rc::new(RefCell::new(Profiler::new(
+                user_elf,
+                None,
+                profiler::read_enable_inline_functions_env_var(),
+            )?));
             env.trace.push(profiler.clone());
             Some(profiler)
         } else {
