@@ -1033,9 +1033,7 @@ macro_rules! impl_sys_bigint2 {
             $(, $a3: ident
                 $(, $a4: ident
                     $(, $a5: ident
-                        $(, $a6: ident
-                            $(, $a7: ident )?
-                        )?
+                        $(, $a6: ident)?
                     )?
                 )?
             )?
@@ -1053,9 +1051,7 @@ macro_rules! impl_sys_bigint2 {
                 $(, $a3: *const u32
                     $(, $a4: *const u32
                         $(, $a5: *const u32
-                            $(, $a6: *const u32
-                                $(, $a7: *const u32)?
-                            )?
+                            $(, $a6: *const u32)?
                         )?
                     )?
                 )?
@@ -1084,9 +1080,7 @@ macro_rules! impl_sys_bigint2 {
                         $(in("a3") $a3,
                             $(in("a4") $a4,
                                 $(in("a5") $a5,
-                                    $(in("a6") $a6,
-                                        $(in("a7") $a7,)?
-                                    )?
+                                    $(in("a6") $a6)?
                                 )?
                             )?
                         )?
@@ -1106,4 +1100,3 @@ impl_sys_bigint2!(sys_bigint2_3, a1, a2, a3);
 impl_sys_bigint2!(sys_bigint2_4, a1, a2, a3, a4);
 impl_sys_bigint2!(sys_bigint2_5, a1, a2, a3, a4, a5);
 impl_sys_bigint2!(sys_bigint2_6, a1, a2, a3, a4, a5, a6);
-impl_sys_bigint2!(sys_bigint2_7, a1, a2, a3, a4, a5, a6, a7);

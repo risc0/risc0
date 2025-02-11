@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -141,12 +141,19 @@ impl<'a, H: Hal> Prover<'a, H> {
         );
 
         #[cfg(feature = "circuit_debug")]
+        let mut bad_z = None;
+
+        #[cfg(feature = "circuit_debug")]
         check_poly.view(|check_out| {
             for i in (0..domain).step_by(4) {
                 if check_out[i] != H::Elem::ZERO {
-                    tracing::debug!("check[{}] =  {:?}", i, check_out[i]);
+                    tracing::debug!("check[{i}] = 0x{:08x?}", check_out[i].to_u32_words()[0]);
+                    bad_z.get_or_insert(H::ExtElem::from_subfield(
+                        &H::Elem::ROU_FWD[self.po2].pow(i / 4),
+                    ));
                 }
             }
+            // assert!(bad_z.is_none());
         });
 
         // Convert to coefficients.  Some tricky business here with the fact that
@@ -173,14 +180,19 @@ impl<'a, H: Hal> Prover<'a, H> {
         tracing::debug!("checkGroup: {}", check_group.merkle.root());
 
         // Now pick a value for Z, which is used as the DEEP-ALI query point.
-        let z = self.iop.random_ext_elem();
-        // #ifdef CIRCUIT_DEBUG
-        //   if (badZ != FpExt(0)) {
-        //     Z = badZ;
-        //   }
-        //   iop.write(&Z, 1);
-        // #endif
-        //   LOG(1, "Z = " << Z);
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "circuit_debug")] {
+                let z = if let Some(bad_z) = bad_z {
+                    self.iop.write_field_elem_slice(bad_z.subelems());
+                    bad_z
+                } else {
+                    self.iop.random_ext_elem()
+                };
+            } else {
+                let z = self.iop.random_ext_elem();
+            }
+        }
+        tracing::debug!("Z = {z:?}");
 
         // Get rev rou for size
         let back_one = H::ExtElem::from_subfield(&H::Elem::ROU_REV[self.po2]);

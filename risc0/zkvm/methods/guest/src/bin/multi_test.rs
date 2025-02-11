@@ -17,6 +17,9 @@
 #![no_main]
 #![no_std]
 
+#[path = "multi_test/profiler.rs"]
+mod profiler;
+
 extern crate alloc;
 
 use alloc::{
@@ -77,18 +80,6 @@ const KECCAK_UPDATE: KeccakState = [
     0xEAF1FF7B5CECA249,
 ];
 
-#[inline(never)]
-#[no_mangle]
-fn profile_test_func1() {
-    profile_test_func2()
-}
-
-#[inline(always)]
-#[no_mangle]
-fn profile_test_func2() {
-    unsafe { asm!("nop") }
-}
-
 fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
@@ -131,7 +122,7 @@ fn main() {
         },
         MultiTestSpec::Profiler => {
             // Call an external function to make sure it's detected during profiling.
-            profile_test_func1()
+            profiler::profile_test_func1()
         }
         MultiTestSpec::Panic => {
             panic!("MultiTestSpec::Panic invoked");

@@ -2613,18 +2613,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ibig"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1fcc7f316b2c079dde77564a1360639c1a956a23fa96122732e416cb10717bb"
-dependencies = [
- "cfg-if",
- "num-traits",
- "rand",
- "static_assertions",
-]
-
-[[package]]
 name = "icu_collections"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3115,6 +3103,64 @@ dependencies = [
  "cc",
  "libc",
  "pkg-config",
+]
+
+[[package]]
+name = "malachite"
+version = "0.4.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a6ecab92657eb234bfe98abd0b17920772c6b14ce69256950142e2eb36d000b"
+dependencies = [
+ "malachite-base",
+ "malachite-float",
+ "malachite-nz",
+ "malachite-q",
+]
+
+[[package]]
+name = "malachite-base"
+version = "0.4.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "06f6d078bb4dad5b76f6a85737e6c9113667d199612a73eef375c56e75d5d4d5"
+dependencies = [
+ "hashbrown 0.14.5",
+ "itertools 0.11.0",
+ "libm",
+ "ryu",
+]
+
+[[package]]
+name = "malachite-float"
+version = "0.4.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2204711bdc85cb6d01e0296f79a0811750eea7b98fc2fff941264b5744ee5601"
+dependencies = [
+ "itertools 0.11.0",
+ "malachite-base",
+ "malachite-nz",
+ "malachite-q",
+]
+
+[[package]]
+name = "malachite-nz"
+version = "0.4.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad61a09cde72dcdb8b2baaf3e71430c5bd94fb6753da89f17301a459f3e466db"
+dependencies = [
+ "itertools 0.11.0",
+ "libm",
+ "malachite-base",
+]
+
+[[package]]
+name = "malachite-q"
+version = "0.4.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be4a9dfffb87667ae94e8320213d3f5419e3e37311bc6bf8f4d2ab9b44f3a535"
+dependencies = [
+ "itertools 0.11.0",
+ "malachite-base",
+ "malachite-nz",
 ]
 
 [[package]]
@@ -4309,10 +4355,13 @@ dependencies = [
  "include_bytes_aligned",
  "num-bigint 0.4.6",
  "num-bigint-dig",
+ "num-traits",
  "puffin",
  "puffin_http",
  "risc0-bigint2-methods",
  "risc0-zkvm",
+ "rstest",
+ "rstest_reuse",
  "stability",
  "test-log",
  "tracing",
@@ -4474,8 +4523,8 @@ dependencies = [
  "cust",
  "derive_more 1.0.0",
  "enum-map",
- "ibig",
  "lazy-regex",
+ "malachite",
  "metal",
  "num-derive",
  "num-traits",
@@ -4489,6 +4538,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "sha2",
+ "smallvec",
  "test-log",
  "tracing",
 ]
@@ -4509,11 +4559,14 @@ name = "risc0-circuit-rv32im-v2"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "auto_ops",
  "bytemuck",
+ "byteorder",
  "cfg-if",
  "clap 4.5.23",
  "derive_more 1.0.0",
  "flate2",
+ "malachite",
  "num-derive",
  "num-traits",
  "paste",
@@ -4526,6 +4579,7 @@ dependencies = [
  "risc0-sys",
  "risc0-zkp",
  "serde",
+ "smallvec",
  "tar",
  "test-log",
  "tracing",

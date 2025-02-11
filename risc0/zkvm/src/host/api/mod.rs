@@ -445,5 +445,5 @@ fn invalid_path() -> anyhow::Error {
 }
 
 fn path_to_string<P: AsRef<Path>>(path: P) -> Result<String> {
-    Ok(path.as_ref().to_str().ok_or(invalid_path())?.to_string())
+    Ok(path.as_ref().to_str().ok_or_else(invalid_path)?.to_string())
 }

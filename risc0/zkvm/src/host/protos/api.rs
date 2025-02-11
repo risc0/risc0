@@ -670,7 +670,7 @@ pub mod posix_cmd {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TraceEvent {
-    #[prost(oneof = "trace_event::Kind", tags = "1, 2, 3")]
+    #[prost(oneof = "trace_event::Kind", tags = "1, 2, 3, 4, 5")]
     pub kind: ::core::option::Option<trace_event::Kind>,
 }
 /// Nested message and enum types in `TraceEvent`.
@@ -704,6 +704,18 @@ pub mod trace_event {
         pub region: ::prost::alloc::vec::Vec<u8>,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct PageIn {
+        #[prost(uint64, tag = "1")]
+        pub cycles: u64,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct PageOut {
+        #[prost(uint64, tag = "1")]
+        pub cycles: u64,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
         #[prost(message, tag = "1")]
@@ -712,6 +724,10 @@ pub mod trace_event {
         RegisterSet(RegisterSet),
         #[prost(message, tag = "3")]
         MemorySet(MemorySet),
+        #[prost(message, tag = "4")]
+        PageIn(PageIn),
+        #[prost(message, tag = "5")]
+        PageOut(PageOut),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

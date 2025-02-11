@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod bibc;
+pub(crate) mod bigint;
 mod executor;
 pub(crate) mod pager;
 pub mod platform;
