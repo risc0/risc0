@@ -22,8 +22,7 @@ pub mod embedded;
 pub fn used() -> usize {
     cfg_if::cfg_if! {
         if #[cfg(feature = "heap-embedded-alloc")] {
-            0
-            //embedded::HEAP.used()
+            unimplemented!("used is currently unsupported when enabling the allocator")
         } else {
             bump::used()
         }
@@ -34,8 +33,7 @@ pub fn used() -> usize {
 pub fn free() -> usize {
     cfg_if::cfg_if! {
         if #[cfg(feature = "heap-embedded-alloc")] {
-            0
-            //embedded::HEAP.free()
+            unimplemented!("free is currently unsupported when enabling the allocator")
         } else {
             bump::free()
         }
