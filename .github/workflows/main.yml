@@ -264,10 +264,10 @@ jobs:
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
       - name: run fibonacci benchmark
-        run: cargo run -F $FEATURE -- fibonacci
+        run: cargo run --locked -F $FEATURE -- fibonacci
         working-directory: benchmarks
       - name: run datasheet generator
-        run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
+        run: cargo run --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
       - name: check benches
         run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
