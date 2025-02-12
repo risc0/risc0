@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,14 +44,17 @@ pub struct RawPreflightCycle {
     pub user_cycle: u32,
     pub txn_idx: u32,
     pub paging_idx: u32,
-    pub diff_count: u32,
+    pub bigint_idx: u32,
+    pub diff_count: [u32; 2],
 }
 
 #[repr(C)]
 pub struct RawPreflightTrace {
     pub cycles: *const RawPreflightCycle,
     pub txns: *const RawMemoryTransaction,
+    pub bigint_bytes: *const u8,
     pub txns_len: u32,
+    pub bigint_bytes_len: u32,
     pub table_split_cycle: u32,
 }
 
@@ -60,7 +63,7 @@ pub struct RawBuffer {
     pub buf: *const BabyBearElem,
     pub rows: usize,
     pub cols: usize,
-    pub checked_reads: bool,
+    pub checked: bool,
 }
 
 #[repr(C)]
@@ -73,6 +76,7 @@ pub struct RawExecBuffers {
 pub struct RawAccumBuffers {
     pub data: RawBuffer,
     pub accum: RawBuffer,
+    pub global: RawBuffer,
     pub mix: RawBuffer,
 }
 

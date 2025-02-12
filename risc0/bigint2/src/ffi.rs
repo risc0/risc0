@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,16 +44,5 @@ extern "C" {
         a4: *const u32,
         a5: *const u32,
         a6: *const u32,
-    );
-
-    pub fn sys_bigint2_7(
-        blob_ptr: *const u8,
-        a1: *const u32,
-        a2: *const u32,
-        a3: *const u32,
-        a4: *const u32,
-        a5: *const u32,
-        a6: *const u32,
-        a7: *const u32,
     );
 }

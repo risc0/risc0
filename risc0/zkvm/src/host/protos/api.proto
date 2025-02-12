@@ -18,6 +18,7 @@ message ServerRequest {
     VerifyRequest verify = 9;
     ProveZkrRequest prove_zkr = 10;
     ProveKeccakRequest prove_keccak = 11;
+    UnionRequest union = 12;
   }
 }
 
@@ -39,6 +40,7 @@ message HelloResult {
 message ExecuteRequest {
   ExecutorEnv env = 1;
   AssetRequest segments_out = 2;
+  base.CompatVersion segment_version = 3;
 }
 
 message ProveRequest {
@@ -100,6 +102,20 @@ message ProveKeccakResult {
   Asset receipt = 1;
 }
 
+message FinalizeProofSetRequest {
+  base.Digest control_root = 1;
+}
+
+message FinalizeProofSetReply {
+  oneof kind {
+    FinalizeProofSetResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message FinalizeProofSetResult {
+}
+
 message LiftRequest {
   ProverOpts opts = 1;
   Asset receipt = 2;
@@ -132,6 +148,24 @@ message JoinReply {
 }
 
 message JoinResult {
+  Asset receipt = 1;
+}
+
+message UnionRequest {
+  ProverOpts opts = 1;
+  Asset left_receipt = 2;
+  Asset right_receipt = 3;
+  AssetRequest receipt_out = 4;
+}
+
+message UnionReply {
+  oneof kind {
+    UnionResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message UnionResult {
   Asset receipt = 1;
 }
 
@@ -207,6 +241,7 @@ message ExecutorEnv {
   repeated AssumptionReceipt assumptions = 11;
   string segment_path = 12;
   bool coprocessor = 13;
+  optional uint32 keccak_max_po2 = 14;
 }
 
 message AssumptionReceipt {
@@ -330,10 +365,20 @@ message TraceEvent {
     bytes region = 3;
   }
 
+  message PageIn {
+    uint64 cycles = 1;
+  }
+
+  message PageOut {
+    uint64 cycles = 1;
+  }
+
   oneof kind {
     InstructionStart insn_start = 1;
     RegisterSet register_set = 2;
     MemorySet memory_set = 3;
+    PageIn page_in = 4;
+    PageOut page_out = 5;
   }
 }
 
@@ -341,6 +386,7 @@ message CoprocessorRequest {
   oneof kind {
     ProveZkrRequest prove_zkr = 1;
     ProveKeccakRequest prove_keccak = 2;
+    FinalizeProofSetRequest finalize_proof_set = 3;
   }
 }
 
@@ -385,6 +431,7 @@ service Server {
   rpc resolve(ResolveRequest) returns (ResolveReply);
   rpc compress(CompressRequest) returns (CompressReply);
   rpc verify(VerifyRequest) returns (GenericReply);
+  rpc union(UnionRequest) returns (UnionReply);
 }
 
 service ExecuteCallback {

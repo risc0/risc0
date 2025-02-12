@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ use super::CircuitImpl;
 
 impl CircuitInfo for CircuitImpl {
     #[rustfmt::skip]
-    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(*b"ZIRGEN_TEST_____");
+    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(*b"KECCAK:v1_______");
 
     #[rustfmt::skip]
     const OUTPUT_SIZE: usize = 16;

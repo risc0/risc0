@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,13 +51,14 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  __device__ MutableBufObj(Buffer& buf) : buf(buf) {}
+  __device__ MutableBufObj(Buffer& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
 
   __device__ Val load(ExecContext& ctx, size_t col, size_t back) override {
-    if (back > ctx.cycle) {
+    if (zeroBack && back > 0) {
       return 0;
     }
-    return buf.get(ctx.cycle - back, col);
+    size_t backRow = (buf.rows + ctx.cycle - back) % buf.rows;
+    return buf.get(backRow, col);
   }
 
   __device__ void store(ExecContext& ctx, size_t col, Val val) override {
@@ -65,6 +66,7 @@ struct MutableBufObj : public BufferObj {
   }
 
   Buffer& buf;
+  bool zeroBack;
 };
 
 using MutableBuf = MutableBufObj*;
@@ -255,7 +257,6 @@ __device__ void
 extern_memoryDelta(ExecContext& ctx, Val addr, Val cycle, Val dataLow, Val dataHigh, Val count);
 __device__ uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle);
 __device__ Val extern_isFirstCycle_0(ExecContext& ctx);
-__device__ Val extern_getCycle(ExecContext& ctx);
 __device__ ::cuda::std::array<Val, 4> extern_divide(
     ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType);
 __device__ void extern_print(ExecContext& ctx, Val v);
@@ -263,6 +264,7 @@ __device__ ::cuda::std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx);
 __device__ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len);
 __device__ Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal);
 __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx);
+__device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx);
 
 template <typename T> __device__ void extern_log(ExecContext& ctx, const char* message, T vals) {
   // printf("%s\n", message);

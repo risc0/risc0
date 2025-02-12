@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ use std::{
     sync::mpsc::{Receiver, Sender},
 };
 
-use risc0_zkvm::{Asset, ReceiptClaim, SuccinctReceipt};
+use risc0_zkvm::{Asset, ProveKeccakRequest, ReceiptClaim, SuccinctReceipt, Unknown};
 use workerpool::Pool;
 
 use crate::{
@@ -31,6 +31,9 @@ pub enum JobKind {
     Segment(Asset),
     Join(Box<(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>)>),
     Receipt(Box<SuccinctReceipt<ReceiptClaim>>),
+    KeccakSegment(ProveKeccakRequest),
+    ZkrReceipt(Box<SuccinctReceipt<Unknown>>),
+    Union(Box<(SuccinctReceipt<Unknown>, SuccinctReceipt<Unknown>)>),
 }
 
 pub struct Job {
@@ -40,7 +43,9 @@ pub struct Job {
 
 pub struct TaskManager {
     segments: HashMap<u32, Asset>,
+    keccak_segments: HashMap<u32, ProveKeccakRequest>,
     receipts: HashMap<TaskNumber, SuccinctReceipt<ReceiptClaim>>,
+    zkr_receipts: HashMap<TaskNumber, SuccinctReceipt<Unknown>>,
     pending_tasks: BTreeMap<TaskNumber, Task>,
     completed: HashSet<TaskNumber>,
     pool: Pool<Worker>,
@@ -53,7 +58,9 @@ impl TaskManager {
         let (job_tx, job_rx) = std::sync::mpsc::channel();
         Self {
             segments: HashMap::new(),
+            keccak_segments: HashMap::new(),
             receipts: HashMap::new(),
+            zkr_receipts: HashMap::new(),
             pending_tasks: BTreeMap::new(),
             completed: HashSet::new(),
             pool: Pool::new(1),
@@ -66,6 +73,10 @@ impl TaskManager {
         self.segments.insert(idx, segment);
     }
 
+    pub fn add_keccak_segment(&mut self, idx: u32, segment: ProveKeccakRequest) {
+        self.keccak_segments.insert(idx, segment);
+    }
+
     pub fn add_task(&mut self, task: Task) {
         let deps = HashSet::from_iter(task.depends_on.iter().cloned());
         if self.completed.is_superset(&deps) {
@@ -75,15 +86,28 @@ impl TaskManager {
         }
     }
 
-    pub fn run(&mut self) -> SuccinctReceipt<ReceiptClaim> {
+    pub fn run(
+        &mut self,
+    ) -> (
+        SuccinctReceipt<ReceiptClaim>,
+        Option<SuccinctReceipt<Unknown>>,
+    ) {
         let mut root_receipt = None;
+        let mut root_zkr_receipt = None;
         for job in self.job_rx.iter() {
             let job_id = job.task.task_number;
-            let receipt = match job.kind {
-                JobKind::Receipt(receipt) => receipt.clone(),
+            match job.kind {
+                JobKind::Receipt(receipt) => {
+                    self.receipts.insert(job_id, *receipt.clone());
+                    root_receipt = Some(receipt);
+                }
+                JobKind::ZkrReceipt(receipt) => {
+                    self.zkr_receipts.insert(job_id, *receipt.clone());
+                    // the very last receipt will be the root keccak receipt
+                    root_zkr_receipt = Some(*receipt);
+                }
                 _ => unreachable!(),
             };
-            self.receipts.insert(job_id, *receipt.clone());
             self.completed.insert(job_id);
             let ready_tasks = self.collect_ready_tasks();
             for next_task in ready_tasks {
@@ -91,11 +115,11 @@ impl TaskManager {
                 self.run_task(next_task);
             }
             if job.task.command == Command::Finalize {
-                root_receipt = Some(receipt);
                 break;
             }
         }
-        *root_receipt.unwrap()
+        println!("run complete");
+        (*root_receipt.unwrap(), root_zkr_receipt)
     }
 
     fn collect_ready_tasks(&self) -> Vec<Task> {
@@ -110,6 +134,7 @@ impl TaskManager {
     }
 
     fn run_task(&self, task: Task) {
+        println!("running task: {:?}", task);
         let job = match task.command {
             Command::Segment => {
                 let segment = self.segments.get(&task.segment_idx.unwrap()).unwrap();
@@ -131,6 +156,31 @@ impl TaskManager {
                 Job {
                     task,
                     kind: JobKind::Receipt(Box::new(receipt.clone())),
+                }
+            }
+            Command::FinalizeProofSet => {
+                let receipt = self.zkr_receipts.get(&task.depends_on[0]).unwrap();
+                Job {
+                    task,
+                    kind: JobKind::ZkrReceipt(Box::new(receipt.clone())),
+                }
+            }
+            Command::Keccak => {
+                let keccak_segment = self
+                    .keccak_segments
+                    .get(&task.segment_idx.unwrap())
+                    .unwrap();
+                Job {
+                    task,
+                    kind: JobKind::KeccakSegment(keccak_segment.clone()),
+                }
+            }
+            Command::Union => {
+                let left = self.zkr_receipts.get(&task.depends_on[0]).unwrap();
+                let right = self.zkr_receipts.get(&task.depends_on[1]).unwrap();
+                Job {
+                    task,
+                    kind: JobKind::Union(Box::new((left.clone(), right.clone()))),
                 }
             }
         };

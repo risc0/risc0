@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,20 +13,17 @@
 // limitations under the License.
 
 use derive_more::Debug;
-use risc0_binfmt::ExitCode;
-use risc0_zkp::core::digest::Digest;
+use risc0_binfmt::MemoryImage2;
 use serde::{Deserialize, Serialize};
 
-use super::image::MemoryImage2;
+use crate::Rv32imV2Claim;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Segment {
     /// Initial sparse memory state for the segment
     pub partial_image: MemoryImage2,
 
-    pub pre_digest: Digest,
-
-    pub post_digest: Digest,
+    pub claim: Rv32imV2Claim,
 
     /// Recorded host->guest IO, one entry per read
     #[debug(skip)]
@@ -44,13 +41,9 @@ pub struct Segment {
     /// Total paging cycles
     pub paging_cycles: u32,
 
+    pub segment_threshold: u32,
+
     pub po2: u32,
 
-    pub exit_code: ExitCode,
-
     pub index: u64,
-
-    pub input_digest: Digest,
-
-    pub output_digest: Option<Digest>,
 }

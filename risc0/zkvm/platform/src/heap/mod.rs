@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,44 @@
 // limitations under the License.
 
 #[cfg(not(feature = "heap-embedded-alloc"))]
-mod bump;
+pub(crate) mod bump;
 
 #[cfg(feature = "heap-embedded-alloc")]
 pub mod embedded;
+
+/// Estimate of used memory on the heap, in bytes.
+pub fn used() -> usize {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "heap-embedded-alloc")] {
+            0
+        } else {
+            bump::used()
+        }
+    }
+}
+
+/// Estimate of free memory on the heap, in bytes.
+pub fn free() -> usize {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "heap-embedded-alloc")] {
+            0
+        } else {
+            bump::free()
+        }
+    }
+}
+
+/// Initialize the heap with the memory allocations defined in the [memory][crate::memory] module.
+///
+/// # Safety
+///
+/// This function must be called exactly once, before the heap is used.
+pub unsafe fn init() {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "heap-embedded-alloc")] {
+            embedded::init();
+        } else {
+            bump::init();
+        }
+    }
+}

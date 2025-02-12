@@ -59,3 +59,4 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
+unstable = []

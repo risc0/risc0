@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_binfmt::Program;
+use risc0_binfmt::{MemoryImage2, Program};
 use test_log::test;
 
 use super::segment_prover;
-use crate::execute::{image::MemoryImage2, testutil, DEFAULT_SEGMENT_LIMIT_PO2};
+use crate::{
+    execute::{testutil, DEFAULT_SEGMENT_LIMIT_PO2},
+    MAX_INSN_CYCLES,
+};
 
 fn run_program(program: Program) {
-    let image = MemoryImage2::new(program);
+    let image = MemoryImage2::new_kernel(program);
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,
@@ -33,12 +37,17 @@ fn run_program(program: Program) {
 
     let prover = segment_prover().unwrap();
     let seal = prover.prove(segment).unwrap();
-    prover.verify(&seal).unwrap();
+    crate::verify(&seal).unwrap();
 }
 
 #[test]
 fn basic() {
-    run_program(testutil::basic());
+    run_program(testutil::kernel::basic());
+}
+
+#[test]
+fn multi_read() {
+    run_program(testutil::kernel::multi_read());
 }
 
 // These tests come from:

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ use std::{
 use anyhow::Result;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkp::{
+    core::digest::Digest,
     core::hash::{poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite},
     digest,
 };
@@ -410,12 +411,17 @@ impl CoprocessorCallback for Coprocessor {
         self.receipt = Some(receipt);
         Ok(())
     }
+
+    fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
+        Ok(())
+    }
 }
 
 mod keccak_po2 {
-    use std::{cell::RefCell, collections::HashMap, rc::Rc};
+    use std::{cell::RefCell, rc::Rc};
 
     use anyhow::Result;
+    use risc0_zkp::core::digest::Digest;
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
     use test_log::test;
 
@@ -448,6 +454,10 @@ mod keccak_po2 {
             self.receipt = Some(receipt);
             Ok(())
         }
+
+        fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
+            Ok(())
+        }
     }
 
     #[test]
@@ -456,14 +466,13 @@ mod keccak_po2 {
 
         let spec = &MultiTestSpec::KeccakUpdate2;
         let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
-        let mut vars = HashMap::new();
-        vars.insert("RISC0_KECCAK_PO2".to_string(), KECCAK_TEST_PO2.to_string());
 
         let env = ExecutorEnv::builder()
             .coprocessor_callback_ref(coprocessor.clone())
             .write(&spec)
             .unwrap()
-            .env_vars(vars)
+            .keccak_max_po2(KECCAK_TEST_PO2)
+            .unwrap()
             .build()
             .unwrap();
 

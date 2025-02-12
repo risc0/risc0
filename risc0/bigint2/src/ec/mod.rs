@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod secp256k1;
 #[cfg(test)]
 mod tests;
 
@@ -19,13 +20,12 @@ use include_bytes_aligned::include_bytes_aligned;
 
 use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
 
-const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
-const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
+pub use secp256k1::Secp256k1Curve;
 
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
-mod secp256k1;
-pub use secp256k1::Secp256k1Curve;
+const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
+const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
 
 /// Generic static curve configuration.
 pub trait Curve<const WIDTH: usize> {

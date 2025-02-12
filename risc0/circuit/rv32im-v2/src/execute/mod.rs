@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub(crate) mod addr;
+pub(crate) mod bibc;
+pub(crate) mod bigint;
 mod executor;
-pub(crate) mod image;
 pub(crate) mod pager;
 pub mod platform;
+pub(crate) mod poseidon2;
 pub(crate) mod r0vm;
 pub(crate) mod rv32im;
 pub(crate) mod segment;
+pub(crate) mod sha2;
 mod syscall;
 #[cfg(test)]
 mod tests;
 pub mod testutil;
 mod trace;
 
-use self::platform::MEMORY_PAGES;
-
 pub use self::{
     executor::{Executor, ExecutorResult, SimpleSession},
-    image::MemoryImage2,
+    platform::*,
+    segment::Segment,
+    syscall::{Syscall, SyscallContext},
 };
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;

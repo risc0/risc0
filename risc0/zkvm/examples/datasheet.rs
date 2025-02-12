@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ use std::{
 
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
+use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
+use risc0_circuit_rv32im::prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
+    get_prover_server, risc0_rv32im_ver, Executor2, ExecutorEnv, ExecutorImpl, ProverOpts,
+    ReceiptKind, Segment, SegmentVersion, Session, SimpleSegmentRef, VerifierContext,
     RECURSION_PO2,
 };
 use serde::Serialize;
@@ -34,7 +37,7 @@ const LOOP_ELF: &[u8] = include_bytes!("loop.bin");
 
 /// Powers-of-two for cycles, paired with the number of loop iterations used to
 /// achieve that many cycles.
-const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
+const CYCLES_PO2_ITERS_V1: &[(u32, u32)] = &[
     (15, 1),               // 15, 32K
     (16, 1024 * 8),        // 16, 64K
     (17, 1024 * 32),       // 17, 128K
@@ -47,9 +50,23 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
     (24, 1024 * 256 * 31), // 24, 16M
 ];
 
-const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
+const MIN_CYCLES_PO2_V1: usize = CYCLES_PO2_ITERS_V1[0].0 as usize;
 
-const ITERATIONS_1M_CYCLES: u32 = 1024 * 512 - 10;
+const CYCLES_PO2_ITERS_V2: &[(u32, u32)] = &[
+    (14, 1),               // 14, 16K
+    (15, 1024 * 8),        // 15, 32K
+    (16, 1024 * 16),       // 16, 64K
+    (17, 1024 * 32),       // 17, 128K
+    (18, 1024 * 96),       // 18, 256K
+    (19, 1024 * 128),      // 19, 512K
+    (20, 1024 * 256),      // 20, 1M
+    (21, 1024 * 256 * 3),  // 21, 2M
+    (22, 1024 * 256 * 7),  // 22, 4M
+    (23, 1024 * 256 * 15), // 23, 8M
+    (24, 1024 * 256 * 31), // 24, 16M
+];
+
+const MIN_CYCLES_PO2_V2: usize = CYCLES_PO2_ITERS_V2[0].0 as usize;
 
 #[serde_as]
 #[derive(Debug, Serialize, Tabled)]
@@ -93,14 +110,47 @@ struct Args {
     max_po2: usize,
 }
 
+fn min_cycles_po2() -> usize {
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => MIN_CYCLES_PO2_V2,
+        _ => MIN_CYCLES_PO2_V1,
+    }
+}
+
+fn cycles_po2_iters() -> &'static [(u32, u32)] {
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => CYCLES_PO2_ITERS_V2,
+        _ => CYCLES_PO2_ITERS_V1,
+    }
+}
+
+fn iterations_1m_cycles() -> u32 {
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => 1024 * 512 - 45,
+        _ => 1024 * 512 - 10,
+    }
+}
+
 fn po2_in_range(s: &str) -> Result<usize, String> {
     let po2: usize = s.parse().map_err(|_| format!("`{s}` must be an integer"))?;
-    if (MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&po2) {
+    if (min_cycles_po2()..=MAX_CYCLES_PO2).contains(&po2) {
         Ok(po2)
     } else {
         Err(format!(
-            "po2 must be in range: {MIN_CYCLES_PO2}-{MAX_CYCLES_PO2}",
+            "po2 must be in range: {}-{MAX_CYCLES_PO2}",
+            min_cycles_po2()
         ))
+    }
+}
+
+fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
+    match risc0_rv32im_ver() {
+        Some(SegmentVersion::V2) => Executor2::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
+        _ => ExecutorImpl::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
     }
 }
 
@@ -116,7 +166,12 @@ enum Command {
     StarkToSnark,
     #[cfg(all(target_arch = "x86_64", feature = "docker"))]
     Groth16,
+    #[command(name = "bigint2")]
+    BigInt2,
 }
+
+/// This is the number of user cycles we expect for our "execute" benchmarks.
+const EXPECTED_EXECUTE_USER_CYCLES: u64 = (1 << DEFAULT_SEGMENT_LIMIT_PO2 as u64) - 1;
 
 #[derive(Default)]
 struct Datasheet {
@@ -160,21 +215,23 @@ impl Datasheet {
             Command::StarkToSnark => self.stark2snark(),
             #[cfg(all(target_arch = "x86_64", feature = "docker"))]
             Command::Groth16 => self.groth16(),
+            Command::BigInt2 => self.bigint2(),
         }
     }
 
     fn execute(&mut self) {
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .write_slice(&iterations_1m_cycles().to_le_bytes())
             .build()
             .unwrap();
 
-        let mut exec = ExecutorImpl::from_elf(env, LOOP_ELF).unwrap();
-
         let start = Instant::now();
-        let session = exec.run().unwrap();
+        let session = execute_elf(env, LOOP_ELF).unwrap();
         let duration = start.elapsed();
-        assert_eq!(session.user_cycles, (1 << 20) - 1);
+        assert_eq!(
+            session.user_cycles, EXPECTED_EXECUTE_USER_CYCLES,
+            "actual vs expected"
+        );
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
@@ -193,9 +250,9 @@ impl Datasheet {
             let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
             let prover = get_prover_server(&opts).unwrap();
 
-            for (po2, iterations) in CYCLES_PO2_ITERS
+            for (po2, iterations) in cycles_po2_iters()
                 .iter()
-                .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
+                .take(args.max_po2 - min_cycles_po2() + 1)
             {
                 let expected = 1 << po2;
                 println!("rv32im/{hashfn}: {expected}");
@@ -213,7 +270,7 @@ impl Datasheet {
                 let duration = start.elapsed();
 
                 let ram = tracker().lock().unwrap().peak as u64;
-                assert_eq!(info.stats.total_cycles, expected);
+                assert_eq!(info.stats.total_cycles, expected, "actual vs expected");
                 let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
                 let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
 
@@ -233,17 +290,17 @@ impl Datasheet {
     fn lift(&mut self) {
         println!("lift");
 
-        let opts = ProverOpts::all_po2s();
+        let opts = ProverOpts::all_po2s()
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::all_po2s();
 
         let env = ExecutorEnv::builder()
             .write_slice(&0u32.to_le_bytes())
             .build()
             .unwrap();
 
-        let mut exec = ExecutorImpl::from_elf(env, LOOP_ELF).unwrap();
-        let session = exec.run().unwrap();
+        let session = execute_elf(env, LOOP_ELF).unwrap();
         let segment = session.segments[0].resolve().unwrap();
         let receipt = prover.prove_segment(&ctx, &segment).unwrap();
 
@@ -272,19 +329,19 @@ impl Datasheet {
     fn join(&mut self) {
         println!("join");
 
-        let opts = ProverOpts::all_po2s();
+        let opts = ProverOpts::all_po2s()
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::all_po2s();
 
-        let (po2, iters) = CYCLES_PO2_ITERS[1];
+        let (po2, iters) = cycles_po2_iters()[1];
 
         let env = ExecutorEnv::builder()
             .write_slice(&iters.to_le_bytes())
             .segment_limit_po2(po2 - 1)
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, LOOP_ELF).unwrap();
-        let session = exec.run().unwrap();
+        let session = execute_elf(env, LOOP_ELF).unwrap();
         assert!(
             session.segments.len() >= 2,
             "cycles: {}",
@@ -321,7 +378,9 @@ impl Datasheet {
     fn succinct(&mut self) {
         println!("succinct");
 
-        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
+        let opts = ProverOpts::all_po2s()
+            .with_receipt_kind(ReceiptKind::Succinct)
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
@@ -354,7 +413,9 @@ impl Datasheet {
     fn identity_p254(&mut self) {
         println!("identity_p254");
 
-        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
+        let opts = ProverOpts::all_po2s()
+            .with_receipt_kind(ReceiptKind::Succinct)
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -391,7 +452,9 @@ impl Datasheet {
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
-        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
+        let opts = ProverOpts::all_po2s()
+            .with_receipt_kind(ReceiptKind::Succinct)
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -427,7 +490,9 @@ impl Datasheet {
     fn groth16(&mut self) {
         println!("groth16");
 
-        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Groth16);
+        let opts = ProverOpts::all_po2s()
+            .with_receipt_kind(ReceiptKind::Groth16)
+            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
@@ -457,6 +522,65 @@ impl Datasheet {
         });
     }
 
+    fn bigint2_execute(&mut self) -> Session {
+        println!("bigint2_execute");
+
+        let env = ExecutorEnv::builder().build().unwrap();
+
+        let start = Instant::now();
+        let session = execute_elf(env, BIGINT2_ELF).unwrap();
+        let duration = start.elapsed();
+
+        // We want this to be comparable to the other execute benchmarks
+        assert!(session.user_cycles - EXPECTED_EXECUTE_USER_CYCLES < 10_000);
+
+        let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
+        self.results.push(PerformanceData {
+            name: "bigint2_execute".into(),
+            hashfn: "N/A".into(),
+            cycles: session.user_cycles,
+            duration,
+            ram: 0,
+            seal: 0,
+            throughput,
+        });
+
+        session
+    }
+
+    fn bigint2_prove_segment(&mut self, session: &Session, segment: &Segment) {
+        println!("bigint2_prove_segment");
+
+        let opts = ProverOpts::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let vctx = VerifierContext::default();
+
+        tracker().lock().unwrap().reset();
+
+        let start = Instant::now();
+        prover.prove_segment(&vctx, segment).unwrap();
+
+        let duration = start.elapsed();
+        let ram = tracker().lock().unwrap().peak as u64;
+
+        let throughput = (session.total_cycles as f64) / duration.as_secs_f64();
+        self.results.push(PerformanceData {
+            name: "bigint2_prove_segment".into(),
+            hashfn: opts.hashfn,
+            cycles: session.total_cycles,
+            duration,
+            ram,
+            seal: 0,
+            throughput,
+        });
+    }
+
+    fn bigint2(&mut self) {
+        let session = self.bigint2_execute();
+        let segment = session.segments[0].resolve().unwrap();
+        self.bigint2_prove_segment(&session, &segment);
+    }
+
     fn warmup(&self) {
         #[cfg(any(feature = "cuda", feature = "metal"))]
         {
@@ -475,6 +599,10 @@ impl Datasheet {
 }
 
 fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     Datasheet::default().run(Args::parse());
 }
 

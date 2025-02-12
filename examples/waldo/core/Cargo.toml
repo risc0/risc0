@@ -10,14 +10,13 @@ divrem = "1.0"
 elsa = "1.7"
 image = { version = "0.24", default-features = false }
 merkle_light = "0.4"
-merkle_light_derive = "0.4"
 risc0-zkvm = { path = "../../../risc0/zkvm", default-features = false }
 serde = "1.0"
-
-[target.'cfg(not(target_os = "zkvm"))'.dependencies]
-risc0-zkvm = { path = "../../../risc0/zkvm" }
 
 [dev-dependencies]
 hex = "0.4"
 rand = "0.8"
 sha2 = "0.10"
+
+[features]
+default = ["risc0-zkvm/default"]

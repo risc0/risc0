@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(unused)]
-
 use num_derive::FromPrimitive;
-
-use super::addr::{ByteAddr, WordAddr};
+use risc0_binfmt::{ByteAddr, WordAddr};
 
 pub const WORD_SIZE: usize = 4;
 pub const PAGE_BYTES: usize = 1024;
-pub const MEMORY_BYTES: usize = 1 << 32; // TODO: this only works on 64-bit machines
-pub const MEMORY_PAGES: usize = MEMORY_BYTES / PAGE_BYTES;
+pub const MEMORY_BYTES: u64 = 1 << 32;
+pub const MEMORY_PAGES: usize = (MEMORY_BYTES / PAGE_BYTES as u64) as usize;
 pub const MERKLE_TREE_DEPTH: usize = MEMORY_PAGES.ilog2() as usize;
 pub const LOOKUP_TABLE_CYCLES: usize = ((1 << 8) + (1 << 16)) / 16;
 
@@ -88,6 +85,8 @@ pub const HOST_ECALL_TERMINATE: u32 = 0;
 pub const HOST_ECALL_READ: u32 = 1;
 pub const HOST_ECALL_WRITE: u32 = 2;
 pub const HOST_ECALL_POSEIDON2: u32 = 3;
+pub const HOST_ECALL_SHA2: u32 = 4;
+pub const HOST_ECALL_BIGINT: u32 = 5;
 
 pub const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 pub const PFLAG_CHECK_OUT: u32 = 0x4000_0000;
@@ -115,20 +114,28 @@ pub enum CycleState {
     PoseidonStoreState = 23,
     PoseidonExtRound = 24,
     PoseidonIntRound = 25,
-    Decode = 32,
+    ShaEcall = 32,
+    ShaLoadState = 33,
+    ShaLoadData = 34,
+    ShaMix = 35,
+    ShaStoreState = 36,
+    BigIntEcall = 40,
+    BigIntStep = 41,
+    Decode = 48,
 }
 
 pub const SYSCALL_MAX: u32 = 512;
 
 pub const MAX_IO_BYTES: u32 = 1024;
 pub const MAX_IO_WORDS: u32 = 4;
+pub const MAX_SHA_COUNT: u32 = 10;
 
 /// Returns whether `addr` is within user memory bounds.
 pub fn is_user_memory(addr: ByteAddr) -> bool {
     addr >= USER_START_ADDR && addr < USER_END_ADDR
 }
 
-/// Returns whether `addr` is within user memory bounds.
+/// Returns whether `addr` is within kernel memory bounds.
 pub fn is_kernel_memory(addr: ByteAddr) -> bool {
     addr >= KERNEL_START_ADDR && addr < KERNEL_END_ADDR
 }
@@ -145,6 +152,8 @@ pub mod major {
     pub const ECALL0: u8 = 8;
     pub const POSEIDON0: u8 = 9;
     pub const POSEIDON1: u8 = 10;
+    pub const SHA0: u8 = 11;
+    pub const BIGINT0: u8 = 12;
 }
 
 pub mod control_minor {

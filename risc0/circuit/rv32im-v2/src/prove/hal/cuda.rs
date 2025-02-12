@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_rv32im_v2_sys::{
-    risc0_circuit_rv32im_v2_cpu_accum, risc0_circuit_rv32im_v2_cuda_eval_check,
+    risc0_circuit_rv32im_v2_cuda_accum, risc0_circuit_rv32im_v2_cuda_eval_check,
     risc0_circuit_rv32im_v2_cuda_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers,
     RawPreflightTrace,
 };
@@ -78,20 +78,22 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
                 buf: global_ptr.as_ptr() as *const Val,
                 rows: global.rows,
                 cols: global.cols,
-                checked_reads: global.checked_reads,
+                checked: global.checked,
             },
             data: RawBuffer {
                 buf: data_ptr.as_ptr() as *const Val,
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
         };
 
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
@@ -106,6 +108,7 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
         preflight: &PreflightTrace,
         data: &MetaBuffer<CudaHal<CH>>,
         accum: &MetaBuffer<CudaHal<CH>>,
+        global: &MetaBuffer<CudaHal<CH>>,
         mix: &MetaBuffer<CudaHal<CH>>,
     ) -> Result<()> {
         scope!("accumulate");
@@ -113,48 +116,45 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
         let cycles = preflight.cycles.len();
         tracing::debug!("accumulate: {cycles}");
 
-        let data_vec = data.buf.to_vec();
-        let accum_vec = accum.buf.to_vec();
-        let mix_vec = mix.buf.to_vec();
         let buffers = RawAccumBuffers {
             data: RawBuffer {
-                buf: data_vec.as_ptr(),
+                buf: data.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
             accum: RawBuffer {
-                buf: accum_vec.as_ptr(),
+                buf: accum.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: accum.rows,
                 cols: accum.cols,
-                checked_reads: accum.checked_reads,
+                // Disable checked reads/writes for CUDA so that in-place
+                // changes can be made during phase2 and phase3 of accumulation.
+                checked: false,
+            },
+            global: RawBuffer {
+                buf: global.buf.as_device_ptr().as_ptr() as *const Val,
+                rows: global.rows,
+                cols: global.cols,
+                checked: global.checked,
             },
             mix: RawBuffer {
-                buf: mix_vec.as_ptr(),
+                buf: mix.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: mix.rows,
                 cols: mix.cols,
-                checked_reads: mix.checked_reads,
+                checked: mix.checked,
             },
         };
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
-        let result = ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_v2_cpu_accum(&buffers, &preflight, cycles as u32)
-        });
-        data.buf.view_mut(|view| {
-            view.copy_from_slice(&data_vec);
-        });
-        accum.buf.view_mut(|view| {
-            view.copy_from_slice(&accum_vec);
-        });
-        mix.buf.view_mut(|view| {
-            view.copy_from_slice(&mix_vec);
-        });
-        result
+        ffi_wrap(|| unsafe {
+            risc0_circuit_rv32im_v2_cuda_accum(&buffers, &preflight, cycles as u32)
+        })
     }
 }
 
@@ -253,8 +253,8 @@ mod tests {
 
     use super::*;
     use crate::{
-        prove::{hal::cpu::CpuCircuitHal, CircuitImpl},
-        zirgen::taps::TAPSET,
+        prove::hal::cpu::CpuCircuitHal,
+        zirgen::{taps::TAPSET, CircuitImpl},
     };
 
     pub struct EvalCheckParams {

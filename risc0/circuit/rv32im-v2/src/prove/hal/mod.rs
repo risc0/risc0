@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ pub(crate) mod cuda;
 use std::rc::Rc;
 
 use anyhow::Result;
-use rand::thread_rng;
 use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO},
@@ -48,20 +47,20 @@ pub(crate) struct MetaBuffer<H: Hal> {
     pub buf: H::Buffer<H::Elem>,
     pub rows: usize,
     pub cols: usize,
-    pub checked_reads: bool,
+    pub checked: bool,
 }
 
 impl<H> MetaBuffer<H>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
 {
-    pub fn new(name: &'static str, hal: &H, rows: usize, cols: usize, checked_reads: bool) -> Self {
+    pub fn new(name: &'static str, hal: &H, rows: usize, cols: usize, checked: bool) -> Self {
         let buf = hal.alloc_elem_init(name, rows * cols, Val::INVALID);
         Self {
             buf,
             rows,
             cols,
-            checked_reads,
+            checked,
         }
     }
 
@@ -71,12 +70,11 @@ where
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum StepMode {
     Parallel,
-    #[cfg(test)]
     SeqForward,
-    #[cfg(test)]
     SeqReverse,
 }
 
@@ -96,6 +94,7 @@ pub(crate) trait CircuitAccumulator<H: Hal> {
         preflight: &PreflightTrace,
         data: &MetaBuffer<H>,
         accum: &MetaBuffer<H>,
+        global: &MetaBuffer<H>,
         mix: &MetaBuffer<H>,
     ) -> Result<()>;
 }
@@ -127,14 +126,26 @@ where
     fn prove(&self, segment: &Segment) -> Result<Seal> {
         scope!("prove");
 
-        let mut rng = thread_rng();
-        let rand_z = ExtVal::random(&mut rng);
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "circuit_debug")] {
+                let rand_z = ExtVal::ONE;
+                let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
+                    StepMode::SeqForward
+                } else {
+                    StepMode::Parallel
+                };
+            } else {
+                let mut rng = rand::thread_rng();
+                let rand_z = ExtVal::random(&mut rng);
+                let mode = StepMode::Parallel;
+            }
+        }
 
         let witgen = WitnessGenerator::new(
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),
             segment,
-            StepMode::Parallel,
+            mode,
             rand_z,
         )?;
 
@@ -183,7 +194,7 @@ where
                     buf: self.hal.copy_from_elem("mix", mix.as_slice()),
                     rows: 1,
                     cols: REGCOUNT_MIX,
-                    checked_reads: true,
+                    checked: true,
                 };
 
                 let accum = scope!(
@@ -197,8 +208,13 @@ where
                     )
                 );
 
-                self.circuit_hal
-                    .step_accum(&witgen.trace, &witgen.data, &accum, &mix)?;
+                self.circuit_hal.step_accum(
+                    &witgen.trace,
+                    &witgen.data,
+                    &accum,
+                    &witgen.global,
+                    &mix,
+                )?;
 
                 scope!("zeroize(accum)", {
                     self.hal.eltwise_zeroize_elem(&accum.buf);

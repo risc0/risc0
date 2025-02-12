@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,19 +65,21 @@ impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
                 buf: global_buf.as_ptr(),
                 rows: global.rows,
                 cols: global.cols,
-                checked_reads: global.checked_reads,
+                checked: global.checked,
             },
             data: RawBuffer {
                 buf: data_buf.as_ptr(),
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
         };
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
@@ -92,6 +94,7 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
         preflight: &PreflightTrace,
         data: &MetaBuffer<CpuHal>,
         accum: &MetaBuffer<CpuHal>,
+        global: &MetaBuffer<CpuHal>,
         mix: &MetaBuffer<CpuHal>,
     ) -> Result<()> {
         scope!("accumulate");
@@ -99,31 +102,40 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
         tracing::debug!("accumulate: {cycles}");
         let data_buf = data.buf.as_slice();
         let accum_buf = accum.buf.as_slice();
+        let global_buf = global.buf.as_slice();
         let mix_buf = mix.buf.as_slice();
         let buffers = RawAccumBuffers {
             data: RawBuffer {
                 buf: data_buf.as_ptr(),
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
             accum: RawBuffer {
                 buf: accum_buf.as_ptr(),
                 rows: accum.rows,
                 cols: accum.cols,
-                checked_reads: accum.checked_reads,
+                checked: accum.checked,
+            },
+            global: RawBuffer {
+                buf: global_buf.as_ptr(),
+                rows: global.rows,
+                cols: global.cols,
+                checked: global.checked,
             },
             mix: RawBuffer {
                 buf: mix_buf.as_ptr(),
                 rows: mix.rows,
                 cols: mix.cols,
-                checked_reads: mix.checked_reads,
+                checked: mix.checked,
             },
         };
         let preflight = RawPreflightTrace {
             cycles: preflight.cycles.as_ptr(),
             txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
             txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {

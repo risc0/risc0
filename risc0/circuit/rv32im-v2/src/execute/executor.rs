@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,28 +15,36 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
-use risc0_binfmt::ExitCode;
-use risc0_zkp::core::{digest::Digest, log2_ceil};
+use risc0_binfmt::{ByteAddr, MemoryImage2, WordAddr};
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_BYTES},
+    log2_ceil,
+};
+
+use crate::{Rv32imV2Claim, TerminateState};
 
 use super::{
-    addr::{ByteAddr, WordAddr},
-    image::MemoryImage2,
+    bigint::BigIntState,
     pager::PagedMemory,
-    platform::{CycleState, LOOKUP_TABLE_CYCLES},
-    r0vm::{Risc0Context, Risc0Machine},
+    platform::*,
+    poseidon2::Poseidon2State,
+    r0vm::{LoadOp, Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
+    sha2::Sha2State,
     syscall::Syscall,
     trace::{TraceCallback, TraceEvent},
+    SyscallContext,
 };
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
+    user_pc: ByteAddr,
     machine_mode: u32,
     user_cycles: u32,
     phys_cycles: u32,
     pager: PagedMemory,
-    exit_code: Option<ExitCode>,
+    terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
     syscall_handler: &'a S,
@@ -48,19 +56,20 @@ pub struct Executor<'a, 'b, S: Syscall> {
 
 pub struct ExecutorResult {
     pub segments: u64,
-    pub exit_code: ExitCode,
     pub post_image: MemoryImage2,
     pub user_cycles: u64,
     pub total_cycles: u64,
-    pub pre_digest: Digest,
-    pub post_digest: Digest,
-    pub output_digest: Option<Digest>,
+    pub paging_cycles: u64,
+    pub reserved_cycles: u64,
+    pub claim: Rv32imV2Claim,
 }
 
 #[derive(Default)]
 struct SessionCycles {
-    user: u64,
     total: u64,
+    user: u64,
+    paging: u64,
+    reserved: u64,
 }
 
 pub struct SimpleSession {
@@ -77,11 +86,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     ) -> Self {
         Self {
             pc: ByteAddr(0),
+            user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
             phys_cycles: 0,
             pager: PagedMemory::new(image),
-            exit_code: None,
+            terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
             syscall_handler,
@@ -95,47 +105,71 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn run<F: FnMut(Segment) -> Result<()>>(
         &mut self,
         segment_po2: usize,
+        max_insn_cycles: usize,
         max_cycles: Option<u64>,
         mut callback: F,
     ) -> Result<ExecutorResult> {
-        let segment_limit = 1 << segment_po2;
-        let mut segment_counter = 0u64;
+        let segment_limit: u32 = 1 << segment_po2;
+        assert!(max_insn_cycles < segment_limit as usize);
+        let segment_threshold = segment_limit - max_insn_cycles as u32;
+        let mut segment_counter = 0;
 
         self.reset();
 
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
-        let initial_digest = *self.pager.image.image_id();
+        let initial_digest = self.pager.image.image_id();
+        tracing::debug!("initial_digest: {initial_digest}");
 
-        while self.exit_code.is_none() {
+        while self.terminate_state.is_none() {
             if let Some(max_cycles) = max_cycles {
                 if self.cycles.user >= max_cycles {
-                    bail!("Session limit exceeded");
+                    bail!(
+                        "Session limit exceeded: {} >= {max_cycles}",
+                        self.cycles.user
+                    );
                 }
             }
 
-            if self.segment_cycles() >= segment_limit {
+            if self.segment_cycles() >= segment_threshold {
+                tracing::debug!(
+                    "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {} >= {segment_threshold}",
+                    self.phys_cycles,
+                    self.pager.cycles,
+                    self.segment_cycles()
+                );
+
+                assert!(self.segment_cycles() < segment_limit);
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
                 callback(Segment {
                     partial_image,
-                    pre_digest,
-                    post_digest,
+                    claim: Rv32imV2Claim {
+                        pre_state: pre_digest,
+                        post_state: post_digest,
+                        input: self.input_digest,
+                        output: self.output_digest,
+                        terminate_state: self.terminate_state,
+                        shutdown_cycle: None,
+                    },
                     read_record: std::mem::take(&mut self.read_record),
                     write_record: std::mem::take(&mut self.write_record),
                     user_cycles: self.user_cycles,
                     suspend_cycle: self.phys_cycles,
                     paging_cycles: self.pager.cycles,
                     po2: segment_po2 as u32,
-                    exit_code: ExitCode::SystemSplit,
                     index: segment_counter,
-                    input_digest: self.input_digest,
-                    output_digest: self.output_digest,
+                    segment_threshold,
                 })?;
 
                 segment_counter += 1;
-                self.cycles.total += 1 << segment_po2;
+                let total_cycles = 1 << segment_po2;
+                let pager_cycles = self.pager.cycles as u64;
+                let user_cycles = self.user_cycles as u64;
+                self.cycles.total += total_cycles;
+                self.cycles.paging += pager_cycles;
+                self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
                 self.user_cycles = 0;
                 self.phys_cycles = 0;
                 self.pager.reset();
@@ -149,50 +183,69 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Risc0Machine::suspend(self)?;
 
         let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
-        let last_po2 = log2_ceil(self.segment_cycles().next_power_of_two() as usize);
-        let exit_code = self.exit_code.unwrap();
+        let final_cycles = self.segment_cycles().next_power_of_two();
+        let final_po2 = log2_ceil(final_cycles as usize);
+        let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
+
+        let final_claim = Rv32imV2Claim {
+            pre_state: pre_digest,
+            post_state: post_digest,
+            input: self.input_digest,
+            output: self.output_digest,
+            terminate_state: self.terminate_state,
+            shutdown_cycle: None,
+        };
 
         callback(Segment {
             partial_image,
-            pre_digest,
-            post_digest,
+            claim: final_claim,
             read_record: std::mem::take(&mut self.read_record),
             write_record: std::mem::take(&mut self.write_record),
             user_cycles: self.user_cycles,
             suspend_cycle: self.phys_cycles,
             paging_cycles: self.pager.cycles,
-            po2: last_po2 as u32,
-            exit_code,
+            po2: final_po2 as u32,
             index: segment_counter,
-            input_digest: self.input_digest,
-            output_digest: self.output_digest,
+            segment_threshold,
         })?;
 
-        self.cycles.total += 1 << last_po2;
+        let final_cycles = final_cycles as u64;
+        let user_cycles = self.user_cycles as u64;
+        let pager_cycles = self.pager.cycles as u64;
+        self.cycles.total += final_cycles;
+        self.cycles.paging += pager_cycles;
+        self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
+
+        let session_claim = Rv32imV2Claim {
+            pre_state: initial_digest,
+            post_state: post_digest,
+            input: self.input_digest,
+            output: self.output_digest,
+            terminate_state: self.terminate_state,
+            shutdown_cycle: None,
+        };
 
         Ok(ExecutorResult {
             segments: segment_counter + 1,
-            exit_code,
             post_image: self.pager.image.clone(),
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
-            pre_digest: initial_digest,
-            post_digest,
-            output_digest: self.output_digest,
+            paging_cycles: self.cycles.paging,
+            reserved_cycles: self.cycles.reserved,
+            claim: session_claim,
         })
     }
 
     fn reset(&mut self) {
         self.pager.reset();
-        self.exit_code = None;
+        self.terminate_state = None;
         self.read_record.clear();
         self.write_record.clear();
         self.output_digest = None;
         self.machine_mode = 0;
         self.user_cycles = 0;
         self.phys_cycles = 0;
-        self.cycles.user = 0;
-        self.cycles.total = 0;
+        self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
     }
 
@@ -208,13 +261,17 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
+impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
 
     fn set_pc(&mut self, addr: ByteAddr) {
         self.pc = addr;
+    }
+
+    fn set_user_pc(&mut self, addr: ByteAddr) {
+        self.user_pc = addr;
     }
 
     fn get_machine_mode(&self) -> u32 {
@@ -228,19 +285,25 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
         self.cycles.user += 1;
-        tracing::trace!(
-            "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-            self.user_cycles + 1,
-            self.segment_cycles() + 1,
-            self.pc,
-            decoded.insn,
-            disasm(insn, decoded)
-        );
-        self.trace(TraceEvent::InstructionStart {
-            cycle,
-            pc: self.pc.0,
-            insn: decoded.insn,
-        })
+        if tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
+                self.user_cycles + 1,
+                self.segment_cycles() + 1,
+                self.pc,
+                decoded.insn,
+                disasm(insn, decoded)
+            );
+        }
+        if !self.trace.is_empty() {
+            self.trace(TraceEvent::InstructionStart {
+                cycle,
+                pc: self.pc.0,
+                insn: decoded.insn,
+            })
+        } else {
+            Ok(())
+        }
     }
 
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
@@ -261,40 +324,102 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         Ok(())
     }
 
-    fn peek_u32(&mut self, addr: WordAddr) -> Result<u32> {
-        self.pager.peek(addr)
-    }
-
-    fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
-        let word = self.pager.load(addr)?;
+    fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
+        let word = match op {
+            LoadOp::Peek => self.pager.peek(addr)?,
+            LoadOp::Load | LoadOp::Record => self.pager.load(addr)?,
+        };
         // tracing::trace!("load_mem({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
-        self.trace(TraceEvent::MemorySet {
-            addr: addr.baddr().0,
-            region: word.to_be_bytes().to_vec(),
-        })?;
+        if !self.trace.is_empty() {
+            self.trace(TraceEvent::MemorySet {
+                addr: addr.baddr().0,
+                region: word.to_be_bytes().to_vec(),
+            })?;
+        }
         self.pager.store(addr, word)
     }
 
-    fn on_terminate(&mut self, a0: u32, _a1: u32) {
+    fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
         self.user_cycles += 1;
-        self.exit_code = Some(ExitCode::Halted(a0));
+
+        self.terminate_state = Some(TerminateState {
+            a0: a0.into(),
+            a1: a1.into(),
+        });
+        tracing::debug!("{:?}", self.terminate_state);
+
+        let output: Digest = self
+            .load_region(LoadOp::Peek, GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
+            .as_slice()
+            .try_into()?;
+        self.output_digest = Some(output);
+
+        Ok(())
     }
 
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_read(fd, buf)?;
+        let rlen = self.syscall_handler.host_read(self, fd, buf)?;
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
         Ok(rlen)
     }
 
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_write(fd, buf)?;
+        let rlen = self.syscall_handler.host_write(self, fd, buf)?;
         self.write_record.push(rlen);
         Ok(rlen)
+    }
+
+    fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
+        self.phys_cycles += 1;
+    }
+
+    fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
+        self.phys_cycles += 1;
+    }
+
+    fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
+        self.phys_cycles += 1;
+    }
+}
+
+impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
+    fn peek_register(&mut self, idx: usize) -> Result<u32> {
+        if idx >= REG_MAX {
+            bail!("invalid register: x{idx}");
+        }
+        self.load_register(LoadOp::Peek, USER_REGS_ADDR.waddr(), idx)
+    }
+
+    fn peek_u32(&mut self, addr: ByteAddr) -> Result<u32> {
+        // let addr = Self::check_guest_addr(addr)?;
+        self.load_u32(LoadOp::Peek, addr.waddr())
+    }
+
+    fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
+        // let addr = Self::check_guest_addr(addr)?;
+        self.load_u8(LoadOp::Peek, addr)
+    }
+
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+        // let addr = Self::check_guest_addr(addr)?;
+        self.load_region(LoadOp::Peek, addr, size)
+    }
+
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        self.pager.peek_page(page_idx)
+    }
+
+    fn get_cycle(&self) -> u64 {
+        self.cycles.user
+    }
+
+    fn get_pc(&self) -> u32 {
+        self.user_pc.0
     }
 }

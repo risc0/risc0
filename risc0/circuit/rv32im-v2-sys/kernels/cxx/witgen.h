@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,20 +27,22 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <vector>
 
 namespace risc0::circuit::rv32im_v2::cpu {
 
 struct ExecBuffers {
-  Buffer global;
-  Buffer data;
+  Buffer<true> global;
+  Buffer<false> data;
 };
 
 struct AccumBuffers {
-  Buffer data;
-  Buffer accum;
-  Buffer mix;
+  Buffer<false> data;
+  Buffer<false> accum;
+  Buffer<true> global;
+  Buffer<true> mix;
 };
 
 #if defined(__clang__)
@@ -93,8 +95,9 @@ inline Val inRange(Val low, Val mid, Val high) {
 
 inline void eqz(Val a, const char* loc) {
   if (a.asUInt32()) {
-    printf("eqz failure at: %s\n", loc);
-    throw std::runtime_error("eqz failure");
+    std::stringstream ss;
+    ss << "eqz failure at: " << loc;
+    throw std::runtime_error(ss.str());
   }
 }
 
@@ -126,26 +129,28 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  MutableBufObj(Buffer& buf) : buf(buf) {}
+  MutableBufObj(Buffer<false>& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
-    if (back > ctx.cycle) {
+    if (zeroBack && back > 0) {
       return 0;
     }
-    return buf.get(ctx.cycle - back, col);
+    size_t backRow = (buf.rows + ctx.cycle - back) % buf.rows;
+    return buf.get(backRow, col);
   }
 
   void store(ExecContext& ctx, size_t col, Val val) override {
     return buf.set(ctx.cycle, col, val);
   }
 
-  Buffer& buf;
+  Buffer<false>& buf;
+  bool zeroBack;
 };
 
 using MutableBuf = MutableBufObj*;
 
 struct GlobalBufObj : public BufferObj {
-  GlobalBufObj(Buffer& buf) : buf(buf) {}
+  GlobalBufObj(Buffer<true>& buf) : buf(buf) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
     assert(back == 0);
@@ -154,7 +159,7 @@ struct GlobalBufObj : public BufferObj {
 
   void store(ExecContext& ctx, size_t col, Val val) override { return buf.set(0, col, val); }
 
-  Buffer& buf;
+  Buffer<true>& buf;
 };
 
 using GlobalBuf = GlobalBufObj*;
@@ -271,7 +276,6 @@ void extern_memoryDelta(
     ExecContext& ctx, Val addr, Val cycle, Val dataLow, Val dataHigh, Val count);
 uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle);
 Val extern_isFirstCycle_0(ExecContext& ctx);
-Val extern_getCycle(ExecContext& ctx);
 void extern_log(ExecContext& ctx, const std::string& message, std::vector<Val> vals);
 std::array<Val, 4> extern_divide(
     ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType);
@@ -280,6 +284,7 @@ std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx);
 Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len);
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal);
 std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx);
+std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx);
 
 // Setup the basic field stuff
 #define SET_FIELD(x) /**/

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ use super::pager::PAGE_WORDS;
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct ByteAddr(pub u32);
 
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialOrd, Ord, Hash, PartialEq)]
 pub struct WordAddr(pub u32);
 
 impl From<ByteAddr> for WordAddr {
@@ -52,6 +52,10 @@ impl ByteAddr {
     pub fn wrapping_add(self, rhs: u32) -> Self {
         Self(self.0.wrapping_add(rhs))
     }
+
+    pub fn checked_add(self, rhs: u32) -> Option<Self> {
+        self.0.checked_add(rhs).map(Self)
+    }
 }
 
 impl WordAddr {
@@ -65,6 +69,10 @@ impl WordAddr {
 
     pub fn page_idx(&self) -> u32 {
         self.0 / PAGE_WORDS as u32
+    }
+
+    pub fn checked_add(self, rhs: u32) -> Option<Self> {
+        self.0.checked_add(rhs).map(Self)
     }
 }
 

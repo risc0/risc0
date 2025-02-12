@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use std::collections::HashMap;
+
+use anyhow::{anyhow, bail, Result};
+use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::Unknown,
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
-    VerifierContext,
+    receipt_claim::{UnionClaim, Unknown},
+    risc0_rv32im_ver, Assumption, AssumptionReceipt, Executor2, ExecutorEnv, ExecutorImpl,
+    InnerAssumptionReceipt, MaybePruned, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment,
+    SegmentVersion, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -64,10 +68,47 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        let claim = session.claim()?;
+        let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
+            session.assumptions.iter().cloned().unzip();
+
+        let mut keccak_assumptions = HashMap::new();
+
+        for proof_request in session.pending_keccaks.iter() {
+            let claim = compute_keccak_digest(&proof_request.input);
+            let assumption = Assumption {
+                claim,
+                control_root: KECCAK_CONTROL_ROOT,
+            };
+            tracing::debug!("adding keccak assumption: {assumption:#?}");
+            keccak_assumptions.insert(assumption, claim);
+        }
+
+        // TODO: add test case for when a single session refers to the same assumption multiple times
+        let inner_assumption_receipts: Vec<_> = session_assumption_receipts
+            .into_iter()
+            .map(|assumption_receipt| match assumption_receipt {
+                AssumptionReceipt::Proven(receipt) => Ok(receipt),
+                AssumptionReceipt::Unresolved(assumption) => {
+                    let claim = keccak_assumptions.get(&assumption).ok_or_else(|| {
+                        anyhow!("no receipt available for unresolved assumption: {assumption:#?}")
+                    })?;
+                    Ok(InnerAssumptionReceipt::Fake(FakeReceipt {
+                        claim: MaybePruned::Pruned(*claim),
+                    }))
+                }
+            })
+            .collect::<Result<_>>()?;
+
+        let assumption_receipts: Vec<_> = inner_assumption_receipts
+            .iter()
+            .map(|inner| AssumptionReceipt::Proven(inner.clone()))
+            .collect();
+
+        let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
+
         let receipt = Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
-                claim: claim.into(),
+                claim: session_claim.into(),
             }),
             session.journal.clone().unwrap_or_default().bytes,
         );
@@ -85,8 +126,14 @@ impl ProverServer for DevModeProver {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let mut exec = ExecutorImpl::from_elf(env, elf)?;
-        let session = exec.run_with_callback(null_callback)?;
+        let session = match risc0_rv32im_ver() {
+            Some(SegmentVersion::V2) => Executor2::from_elf(env, elf)
+                .unwrap()
+                .run_with_callback(null_callback)?,
+            _ => ExecutorImpl::from_elf(env, elf)
+                .unwrap()
+                .run_with_callback(null_callback)?,
+        };
         self.prove_session(ctx, &session)
     }
 
@@ -128,5 +175,13 @@ impl ProverServer for DevModeProver {
             }),
             receipt.journal.bytes.clone(),
         ))
+    }
+
+    fn union(
+        &self,
+        _a: &SuccinctReceipt<Unknown>,
+        _b: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<UnionClaim>> {
+        unimplemented!("This is unsupported for dev mode.")
     }
 }

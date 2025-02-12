@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
 
-use crate::ffi::sys_bigint2_3;
-use crate::WORD_SIZE;
+use crate::{ffi::sys_bigint2_3, WORD_SIZE};
 
 pub const RSA_4096_WIDTH_WORDS: usize = 4096 / (WORD_SIZE * 8);
 
@@ -40,5 +39,5 @@ pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut RsaArray) 
     // of the modulus, e.g. they could return `4` (instead of `1`) as the answer to `1^65537 % 3`,
     // since `4 - 1 = 3`.
     // Therefore, we check that we are in the honest case.
-    assert!(crate::is_less(&result, &modulus));
+    assert!(crate::is_less(result, modulus));
 }
