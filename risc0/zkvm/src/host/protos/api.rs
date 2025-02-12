@@ -75,6 +75,8 @@ pub struct ExecuteRequest {
     pub env: ::core::option::Option<ExecutorEnv>,
     #[prost(message, optional, tag = "2")]
     pub segments_out: ::core::option::Option<AssetRequest>,
+    #[prost(message, optional, tag = "3")]
+    pub segment_version: ::core::option::Option<super::base::CompatVersion>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
