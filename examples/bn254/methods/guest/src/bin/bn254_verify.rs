@@ -25,16 +25,7 @@ fn main() {
 
     // TODO: switch away from example inputs
     let inp: (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>) = env::read();
-    // let g1x = Fq::from_slice(&inp.0).expect("Normalized Fq expected for g1x");
-    // let g1y = Fq::from_slice(&inp.1).expect("Normalized Fq expected for g1y");
-    // let g2x_i = Fq::from_slice(&inp.2).expect("Normalized Fq expected for g2x_r");
-    // let g2x_r = Fq::from_slice(&inp.3).expect("Normalized Fq expected for g2x_i");
-    // let g2x = Fq2::new(g2x_r, g2x_i);
-    // let g2y_i = Fq::from_slice(&inp.4).expect("Normalized Fq expected for g2y_r");
-    // let g2y_r = Fq::from_slice(&inp.5).expect("Normalized Fq expected for g2y_i");
-    // let g2y = Fq2::new(g2y_r, g2y_i);
-    // let g1 = G1::from(AffineG1::new(g1x, g1y).expect("Point on G1 expected"));
-    // let g2 = G2::from(AffineG2::new(g2x, g2y).expect("Point on G2 expected"));
+
     let g1 = G1::from_compressed(&inp.0).expect("Point on G1 expected");
     let g2 = G2::from_compressed(&inp.1).expect("Point on G2 expected");
     let a_factor = Fr::from_slice(&inp.2).expect("Scalar factor expected");

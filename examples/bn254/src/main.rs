@@ -18,26 +18,24 @@ use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 // TODO: Temp
 // use substrate_bn::{arith::U256, Fq};
 
-fn todo_do_a_thing() -> Receipt { // TODO
+/// Prove and get the receipt for an example of (batch) pairing
+///
+/// This example demonstrates the core pairing functionality that could be used
+/// to make cryptographic operations like signature schemes; it is a toy example
+/// and should not be used directly except as an example.
+///
+/// The specific operation demonstrated is that, given base points g1 ∈ G1 and
+/// g2 ∈ G2 as well as random scalars a and b, the result of the batch pairing
+/// operation
+///    pair(a × g1, b × g2) * pair(g1, -ab × g2)
+/// is the identity.
+fn prove_pairing() -> Receipt {
+    // g1 and g2 are the generators from EIP-197
     let g1_compressed = hex::decode("020000000000000000000000000000000000000000000000000000000000000001").expect("valid hex");
-    let g2_compressed =    hex::decode("0A04D4BF3239F77CEE7B47C7245E9281B3E9C1182D6381A87BBF81F9F2A6254B731DF569CDA95E060BEE91BA69B3F2D103658A7AEA6B10E5BDC761E5715E7EE4BB").expect("valid hex");
-    // let g2_compressed = hex::decode("0A1800DEEF121F1E76426A00665E5C4479674322D4F75EDADD46DEBD5CD992F6ED198E9393920D483A7260BFB731FB5D25F1AA493335A9E71297E485B7AEF312C2").expect("valid hex");
-    // let g2_compressed = hex::decode("0a1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2").expect("valid hex");
-    // TODO: Different values
-    // let a_g1x = hex::decode("1c76476f4def4bb94541d57ebba1193381ffa7aa76ada664dd31c16024c43f59").expect("valid hex");
-    // let a_g1y = hex::decode("3034dd2920f673e204fee2811c678745fc819b55d3e9d294e45c9b03a76aef41").expect("valid hex");
-    // let a_g2x_i = hex::decode("209dd15ebff5d46c4bd888e51a93cf99a7329636c63514396b4a452003a35bf7").expect("valid hex");
-    // let a_g2x_r = hex::decode("04bf11ca01483bfa8b34b43561848d28905960114c8ac04049af4b6315a41678").expect("valid hex");
-    // let a_g2y_i = hex::decode("2bb8324af6cfc93537a2ad1a445cfd0ca2a71acd7ac41fadbf933c2a51be344d").expect("valid hex");
-    // let a_g2y_r = hex::decode("120a2a4cf30c1bf9845f20c6fe39e07ea2cce61f0c9bb048165fe5e4de877550").expect("valid hex");
-    // let b_g1x = hex::decode("111e129f1cf1097710d41c4ac70fcdfa5ba2023c6ff1cbeac322de49d1b6df7c").expect("valid hex");
-    // let b_g1y = hex::decode("2032c61a830e3c17286de9462bf242fca2883585b93870a73853face6a6bf411").expect("valid hex");
-    // let b_g2x_i = hex::decode("198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2").expect("valid hex");
-    // let b_g2x_r = hex::decode("1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed").expect("valid hex");
-    // let b_g2y_i = hex::decode("090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b").expect("valid hex");
-    // let b_g2y_r = hex::decode("12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa").expect("valid hex");
-    let a_factor = hex::decode("0000000000000000000000000000000000000000000000000000000000000002").expect("valid hex");
-    let b_factor = hex::decode("0000000000000000000000000000000000000000000000000000000000000002").expect("valid hex");
+    let g2_compressed = hex::decode("0A04D4BF3239F77CEE7B47C7245E9281B3E9C1182D6381A87BBF81F9F2A6254B731DF569CDA95E060BEE91BA69B3F2D103658A7AEA6B10E5BDC761E5715E7EE4BB").expect("valid hex");
+    // Factors are arbitrary and were chosen at random
+    let a_factor = hex::decode("9c0d02eaaf8e7e7ad09595ef6e3b896f8915124ba5bef9287f0997557580caeb").expect("valid hex");
+    let b_factor = hex::decode("db6764642f7bb1f415d93fcd5aace586161ec2e4305f0d6fb57dbabf1d141a5b").expect("valid hex");
     let input = (g1_compressed, g2_compressed, a_factor, b_factor);
 
     let env = ExecutorEnv::builder()
@@ -52,17 +50,9 @@ fn todo_do_a_thing() -> Receipt { // TODO
 }
 
 fn main() {
-    let receipt = todo_do_a_thing();
-
-    // Verify the receipt and then access the journal.
+    let receipt = prove_pairing();
     receipt.verify(BN254_VERIFY_ID).unwrap();
-    // TODO: Actually handle real outputs
-    // let (r1, r2): ([u8; 32], [u8; 32]) =
-    //     receipt.journal.decode().unwrap();
-    let is_one: bool = receipt.journal.decode().unwrap();
 
-    // println!(
-    //     "TODO some message related to journal {:?}, {:?}", r1, r2,
-    // );
-    println!("Pairing gave one? {}", is_one);
+    let is_one: bool = receipt.journal.decode().expect("Journal should contain a single `bool`");
+    println!("Pairing batch should give one; did it? {}", is_one);
 }
