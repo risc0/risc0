@@ -349,15 +349,6 @@ __device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
   return ret;
 }
 
-// __device__ void
-// stepAccum(AccumBuffers& buffers, PreflightTrace& preflight, LookupTables& tables, size_t cycle) {
-//   ExecContext ctx(preflight, tables, cycle);
-//   MutableBufObj data(ctx, buffers.data);
-//   MutableBufObj accum(ctx, buffers.accum);
-//   GlobalBufObj mix(ctx, buffers.mix);
-//   step_TopAccum(ctx, &accum, &data, &mix);
-// }
-
 __device__ void nextStep(DeviceExecContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
   ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
@@ -399,9 +390,8 @@ __global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
   MutableBufObj data(*ctx->data);
   MutableBufObj accum(*ctx->accum, /*zeroBack=*/true);
   GlobalBufObj mix(*ctx->mix);
-  // GlobalBufObj global(*ctx->global);
-  // step_TopAccum(execCtx, &accum, &data, &global, &mix);
-  step_TopAccum(execCtx, &accum, &data, &mix);
+  GlobalBufObj global(*ctx->global);
+  step_TopAccum(execCtx, &accum, &data, &global, &mix);
 }
 
 __global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {

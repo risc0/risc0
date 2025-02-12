@@ -232,11 +232,11 @@ void stepAccum(AccumBuffers& buffers,
                size_t cycle) {
   ExecContext ctx(preflight, tables, cycle);
   MutableBufObj data(buffers.data);
-  MutableBufObj accum(buffers.accum, /*zeroBack=*/true);
+  // MutableBufObj accum(buffers.accum, /*zeroBack=*/true);
+  MutableBufObj accum(buffers.accum, /*zeroBack=*/false);
   GlobalBufObj mix(buffers.mix);
-  // GlobalBufObj global(buffers.global);
-  // step_TopAccum(ctx, &accum, &data, &global, &mix);
-  step_TopAccum(ctx, &accum, &data, &mix);
+  GlobalBufObj global(buffers.global);
+  step_TopAccum(ctx, &accum, &data, &global, &mix);
   // printf("stepAccum: %zu -> [%u, %u, %u, %u]\n",
   //        cycle,
   //        buffers.accum.get(cycle, buffers.accum.cols - 4).asUInt32(),
@@ -305,48 +305,56 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
   try {
     LookupTables tables;
 
-    {
-      nvtx3::scoped_range range("phase1");
-      auto begin = poolstl::iota_iter<uint32_t>(0);
-      auto end = poolstl::iota_iter<uint32_t>(lastCycle);
-      std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
-        stepAccum(*buffers, *preflight, tables, cycle);
-      });
+    for (size_t i = 0; i < 4; i++) {
+      buffers->accum.set(lastCycle - 1, buffers->accum.cols - 4 + i, 0);
     }
 
-    buffers->accum.checked = false;
-
-    {
-      // prefix-sum
-      nvtx3::scoped_range range("phase2");
-      size_t rows = buffers->accum.rows;
-      for (size_t j = 0; j < 4; j++) {
-        size_t col = buffers->accum.cols - 4 + j;
-        Fp* itBegin = buffers->accum.buf + col * rows;
-        Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
-        // NOTE: poolstl does not support parallel inclusive_scan
-        std::inclusive_scan(itBegin, itEnd, itBegin);
-      }
+    for (size_t cycle = 0; cycle < lastCycle; cycle++) {
+      stepAccum(*buffers, *preflight, tables, cycle);
     }
 
-    {
-      // apply totals
-      nvtx3::scoped_range range("phase3");
-      auto begin = poolstl::iota_iter<uint32_t>(0);
-      auto end = poolstl::iota_iter<uint32_t>(lastCycle);
-      std::for_each(poolstl::par, begin, end, [&](uint32_t row) {
-        size_t back1 = (row + lastCycle - 1) % lastCycle;
-        std::array<Fp, 4> prev;
-        for (size_t k = 0; k < 4; k++) {
-          prev[k] = buffers->accum.get(back1, buffers->accum.cols - 4 + k);
-        }
-        for (size_t j = 0; j < buffers->accum.cols / 4 - 1; j++) {
-          for (size_t k = 0; k < 4; k++) {
-            buffers->accum.set(row, j * 4 + k, buffers->accum.get(row, j * 4 + k) + prev[k]);
-          }
-        }
-      });
-    }
+    // {
+    //   nvtx3::scoped_range range("phase1");
+    //   auto begin = poolstl::iota_iter<uint32_t>(0);
+    //   auto end = poolstl::iota_iter<uint32_t>(lastCycle);
+    //   std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+    //     stepAccum(*buffers, *preflight, tables, cycle);
+    //   });
+    // }
+
+    // buffers->accum.checked = false;
+
+    // {
+    //   // prefix-sum
+    //   nvtx3::scoped_range range("phase2");
+    //   size_t rows = buffers->accum.rows;
+    //   for (size_t j = 0; j < 4; j++) {
+    //     size_t col = buffers->accum.cols - 4 + j;
+    //     Fp* itBegin = buffers->accum.buf + col * rows;
+    //     Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
+    //     // NOTE: poolstl does not support parallel inclusive_scan
+    //     std::inclusive_scan(itBegin, itEnd, itBegin);
+    //   }
+    // }
+
+    // {
+    //   // apply totals
+    //   nvtx3::scoped_range range("phase3");
+    //   auto begin = poolstl::iota_iter<uint32_t>(0);
+    //   auto end = poolstl::iota_iter<uint32_t>(lastCycle);
+    //   std::for_each(poolstl::par, begin, end, [&](uint32_t row) {
+    //     size_t back1 = (row + lastCycle - 1) % lastCycle;
+    //     std::array<Fp, 4> prev;
+    //     for (size_t k = 0; k < 4; k++) {
+    //       prev[k] = buffers->accum.get(back1, buffers->accum.cols - 4 + k);
+    //     }
+    //     for (size_t j = 0; j < buffers->accum.cols / 4 - 1; j++) {
+    //       for (size_t k = 0; k < 4; k++) {
+    //         buffers->accum.set(row, j * 4 + k, buffers->accum.get(row, j * 4 + k) + prev[k]);
+    //       }
+    //     }
+    //   });
+    // }
   } catch (const std::exception& err) {
     return strdup(err.what());
   } catch (...) {

@@ -741,6 +741,59 @@ extern __device__ InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,
                                                     NondetRegStruct arg0,
                                                     InstInputStruct arg1_0,
                                                     BoundLayout<BigInt0Layout> layout2);
+extern __device__ BigIntAccumStateStruct back_BigIntAccumState(
+    ExecContext& ctx, Index distance0, BoundLayout<BigIntAccumStateLayout> layout1);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntAccumState(ExecContext& ctx,
+                      ExtVal arg0,
+                      ExtVal arg1_0,
+                      ExtVal arg2_0,
+                      BoundLayout<BigIntAccumStateLayout> layout3);
+extern __device__ OneHot_7_Struct exec_OneHot_7_(ExecContext& ctx,
+                                                 Val arg0,
+                                                 BoundLayout<OneHot_7_Layout> layout1);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntPolyOpNop(ExecContext& ctx, BoundLayout<BigIntAccumStateLayout> layout0);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntPolyOpShift(ExecContext& ctx,
+                       BigIntTopStateStruct arg0,
+                       BigIntAccumStateStruct arg1_0,
+                       ExtVal arg2_0,
+                       BoundLayout<BigIntAccumStateLayout> layout3);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntPolyOpSetTerm(ExecContext& ctx,
+                         BigIntTopStateStruct arg0,
+                         BigIntAccumStateStruct arg1_0,
+                         ExtVal arg2_0,
+                         BoundLayout<BigIntAccumStateLayout> layout3);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntPolyOpAddTotal(ExecContext& ctx,
+                          BigIntTopStateStruct arg0,
+                          BigIntAccumStateStruct arg1_0,
+                          ExtVal arg2_0,
+                          BoundLayout<BigIntPolyOpAddTotalLayout> layout3);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntPolyOpCarry1(ExecContext& ctx,
+                        BigIntTopStateStruct arg0,
+                        BigIntAccumStateStruct arg1_0,
+                        ExtVal arg2_0,
+                        BoundLayout<BigIntAccumStateLayout> layout3);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntPolyOpCarry2(ExecContext& ctx,
+                        BigIntTopStateStruct arg0,
+                        BigIntAccumStateStruct arg1_0,
+                        ExtVal arg2_0,
+                        BoundLayout<BigIntAccumStateLayout> layout3);
+extern __device__ BigIntAccumStateStruct
+exec_BigIntPolyOpEqz(ExecContext& ctx,
+                     BigIntTopStateStruct arg0,
+                     BigIntAccumStateStruct arg1_0,
+                     ExtVal arg2_0,
+                     BoundLayout<BigIntAccumStateLayout> layout3);
+extern __device__ BigIntAccumStruct exec_BigIntAccum(ExecContext& ctx,
+                                                     BigIntTopStateStruct arg0,
+                                                     ExtVal1Array arg1_0,
+                                                     BoundLayout<BigIntAccumLayout> layout2);
 extern __device__ OneHot_13_Struct exec_OneHot_13_(ExecContext& ctx,
                                                    Val arg0,
                                                    BoundLayout<OneHot_13_Layout> layout1);
@@ -748,11 +801,24 @@ extern __device__ TopStruct exec_Top(ExecContext& ctx,
                                      BoundLayout<TopLayout> layout0,
                                      GlobalBuf global1);
 extern __device__ void step_Top(ExecContext& ctx, MutableBuf data0, GlobalBuf global1);
+extern __device__ AccumStruct exec_Accum(ExecContext& ctx,
+                                         BigIntTopStateStruct arg0,
+                                         ExtVal1Array arg1_0,
+                                         BoundLayout<AccumLayout> layout2);
+extern __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
+                                                       BoundLayout<TopLayout> arg0,
+                                                       GlobalBuf global1);
+extern __device__ AccumStruct execUser_Accum(ExecContext& ctx,
+                                             BoundLayout<TopLayout> arg0,
+                                             ExtVal1Array arg1_0,
+                                             BoundLayout<AccumLayout> layout2,
+                                             GlobalBuf global3);
 extern __device__ ComponentStruct exec_TopAccum(ExecContext& ctx,
                                                 BoundLayout<TopLayout> arg0,
                                                 BoundLayout<LayoutAccumLayout> layout1,
-                                                GlobalBuf mix2);
-extern __device__ void
-step_TopAccum(ExecContext& ctx, MutableBuf accum0, MutableBuf data1, GlobalBuf mix2);
+                                                GlobalBuf global2,
+                                                GlobalBuf mix3);
+extern __device__ void step_TopAccum(
+    ExecContext& ctx, MutableBuf accum0, MutableBuf data1, GlobalBuf global2, GlobalBuf mix3);
 
 } // namespace risc0::circuit::rv32im_v2::cuda
