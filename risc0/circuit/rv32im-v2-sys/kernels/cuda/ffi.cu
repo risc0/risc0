@@ -41,6 +41,8 @@
 
 namespace risc0::circuit::rv32im_v2::cuda {
 
+constexpr size_t kUserAccumSplit = kLayout_TopAccum.columns[0].col;
+
 struct ExecBuffers {
   Buffer global;
   Buffer data;
@@ -388,7 +390,7 @@ __global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
 
   ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
   MutableBufObj data(*ctx->data);
-  MutableBufObj accum(*ctx->accum, /*zeroBack=*/true);
+  MutableBufObj accum(*ctx->accum, /*zeroBack=*/kUserAccumSplit);
   GlobalBufObj mix(*ctx->mix);
   GlobalBufObj global(*ctx->global);
   step_TopAccum(execCtx, &accum, &data, &global, &mix);
@@ -402,14 +404,16 @@ __global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
 
   Buffer& accum = *ctx->accum;
 
+  size_t machineColumns = (accum.cols - kUserAccumSplit) / 4;
   size_t back1 = (cycle + lastCycle - 1) % lastCycle;
   Fp prev[4];
   for (size_t k = 0; k < 4; k++) {
     prev[k] = accum.get(back1, accum.cols - 4 + k);
   }
-  for (size_t j = 0; j < accum.cols / 4 - 1; j++) {
+  for (size_t j = 0; j < machineColumns - 1; j++) {
     for (size_t k = 0; k < 4; k++) {
-      accum.set(cycle, j * 4 + k, accum.get(cycle, j * 4 + k) + prev[k]);
+      size_t col = kUserAccumSplit + j * 4 + k;
+      accum.set(cycle, col, accum.get(cycle, col) + prev[k]);
     }
   }
 }

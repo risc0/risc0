@@ -13,11 +13,15 @@
 // limitations under the License.
 
 use crate::{
-    execute::bigint::{BigIntState, BIGINT_STATE_COUNT},
-    zirgen::circuit::{BigIntStateLayout, LAYOUT_TOP},
+    execute::{
+        bigint::{BigIntState, BIGINT_ACCUM_STATE_COUNT, BIGINT_STATE_COUNT},
+        byte_poly::BigIntAccumState,
+    },
+    zirgen::circuit::{BigIntAccumStateLayout, BigIntStateLayout, LAYOUT_TOP, LAYOUT_TOP_ACCUM},
 };
 
 const BIGINT_STATE_LAYOUT: &BigIntStateLayout = LAYOUT_TOP.inst_result.arm12.state;
+const BIGINT_ACCUM_STATE_LAYOUT: &BigIntAccumStateLayout = LAYOUT_TOP_ACCUM.user._0.state;
 
 impl BigIntState {
     pub(crate) const fn offsets() -> [usize; BIGINT_STATE_COUNT] {
@@ -69,6 +73,46 @@ impl BigIntState {
             self.bytes[14] as u32,
             self.bytes[15] as u32,
             self.next_state as u32,
+        ]
+    }
+}
+
+impl BigIntAccumState {
+    pub(crate) const fn offsets() -> [usize; BIGINT_ACCUM_STATE_COUNT] {
+        [
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset,
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 1,
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 2,
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 3,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 1,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 2,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 3,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 1,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 2,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 3,
+        ]
+    }
+
+    pub(crate) fn as_array(&self) -> [u32; BIGINT_ACCUM_STATE_COUNT] {
+        let poly = self.poly.elems();
+        let term = self.term.elems();
+        let total = self.total.elems();
+
+        [
+            poly[0].into(),
+            poly[1].into(),
+            poly[2].into(),
+            poly[3].into(),
+            term[0].into(),
+            term[1].into(),
+            term[2].into(),
+            term[3].into(),
+            total[0].into(),
+            total[1].into(),
+            total[2].into(),
+            total[3].into(),
         ]
     }
 }
