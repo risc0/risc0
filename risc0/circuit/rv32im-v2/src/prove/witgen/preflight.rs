@@ -84,6 +84,15 @@ pub(crate) struct Preflight<'a> {
 }
 
 impl Segment {
+    pub fn preflight_test(&self) -> Result<()> {
+        use crate::zirgen::circuit::ExtVal;
+        use risc0_zkp::field::Elem;
+        let mut rng = rand::thread_rng();
+        let rand_z = ExtVal::random(&mut rng);
+        self.preflight(rand_z)?;
+        Ok(())
+    }
+
     pub(crate) fn preflight(&self, rand_z: ExtVal) -> Result<PreflightTrace> {
         scope!("preflight");
         tracing::debug!("preflight: {self:#?}");
@@ -143,6 +152,7 @@ impl<'a> Preflight<'a> {
 
     // Do page in
     pub fn read_pages(&mut self) -> Result<()> {
+        scope!("read pages");
         self.read_root()?;
         let activity = self.pager.loaded_pages();
         Poseidon2::read_start(self)?;
@@ -161,6 +171,7 @@ impl<'a> Preflight<'a> {
 
     // Run main execution
     pub fn body(&mut self) -> Result<()> {
+        scope!("body");
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
         while self.phys_cycles < self.segment.suspend_cycle {
@@ -178,6 +189,7 @@ impl<'a> Preflight<'a> {
 
     // Do page out
     pub fn write_pages(&mut self) -> Result<()> {
+        scope!("write pages");
         let activity = self.pager.dirty_pages();
         self.pager.commit()?;
         Poseidon2::write_start(self)?;
@@ -196,12 +208,14 @@ impl<'a> Preflight<'a> {
 
     // Do table reification
     pub fn generate_tables(&mut self) -> Result<()> {
+        scope!("generate tables");
         self.trace.table_split_cycle = self.trace.cycles.len() as u32;
         self.fini()
     }
 
     // Now, go back and update memory transactions to wrap around
     fn wrap_memory_txns(&mut self) -> Result<()> {
+        scope!("wrap memory txns");
         for txn in self.trace.txns.iter_mut() {
             // tracing::trace!("{txn:?}");
             let addr = WordAddr(txn.addr);
@@ -223,6 +237,7 @@ impl<'a> Preflight<'a> {
     }
 
     fn update_p2_zcheck(&mut self) -> Result<()> {
+        scope!("update p2 zcheck");
         let mut checksum = Checksum::new(&self.trace.rand_z);
         for (row, back) in self.trace.backs.iter_mut().enumerate() {
             if let Back::Poseidon2(p2_state) = back {

@@ -165,6 +165,7 @@ impl PagedMemory {
     }
 
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
+        //scope!("load ram");
         let page_idx = addr.page_idx();
         let node_idx = node_idx(page_idx);
         // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
