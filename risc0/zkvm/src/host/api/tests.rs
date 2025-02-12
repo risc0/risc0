@@ -25,6 +25,7 @@ use std::{
 use anyhow::Result;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkp::{
+    core::digest::Digest,
     core::hash::{poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite},
     digest,
 };
@@ -410,12 +411,17 @@ impl CoprocessorCallback for Coprocessor {
         self.receipt = Some(receipt);
         Ok(())
     }
+
+    fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
+        Ok(())
+    }
 }
 
 mod keccak_po2 {
     use std::{cell::RefCell, rc::Rc};
 
     use anyhow::Result;
+    use risc0_zkp::core::digest::Digest;
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
     use test_log::test;
 
@@ -446,6 +452,10 @@ mod keccak_po2 {
             let client = TestClient::new();
             let receipt = client.prove_keccak(proof_request);
             self.receipt = Some(receipt);
+            Ok(())
+        }
+
+        fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
             Ok(())
         }
     }

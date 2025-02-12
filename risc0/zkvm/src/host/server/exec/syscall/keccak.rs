@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
+use crate::host::client::env::ProveKeccakRequest;
 use anyhow::{bail, Result};
 use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
@@ -111,17 +111,6 @@ impl SysKeccak {
                 .borrow_mut()
                 .push(proof_request);
         }
-
-        let assumption = Assumption {
-            claim,
-            control_root,
-        };
-
-        ctx.syscall_table()
-            .assumptions
-            .borrow_mut()
-            .0
-            .push(AssumptionReceipt::Unresolved(assumption));
 
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::ProveKeccak];
         metric.count += 1;

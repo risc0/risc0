@@ -27,7 +27,7 @@ use crate::{
         merkle::MerkleProof, segment::SegmentVersion, CompositeReceipt, FakeReceipt,
         InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::Unknown,
+    receipt_claim::{UnionClaim, Unknown},
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
     ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
@@ -808,6 +808,30 @@ impl Name for pb::core::ReceiptClaim {
 
 impl AssociatedMessage for ReceiptClaim {
     type Message = pb::core::ReceiptClaim;
+}
+
+impl AssociatedMessage for UnionClaim {
+    type Message = pb::core::UnionClaim;
+}
+
+impl From<UnionClaim> for pb::core::UnionClaim {
+    fn from(value: UnionClaim) -> Self {
+        Self {
+            left: Some(value.left.into()),
+            right: Some(value.right.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::UnionClaim> for UnionClaim {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::UnionClaim) -> Result<Self> {
+        Ok(Self {
+            left: value.left.ok_or(malformed_err())?.try_into()?,
+            right: value.right.ok_or(malformed_err())?.try_into()?,
+        })
+    }
 }
 
 impl From<ReceiptClaim> for pb::core::ReceiptClaim {
