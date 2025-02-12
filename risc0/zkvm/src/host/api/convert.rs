@@ -828,8 +828,14 @@ impl TryFrom<pb::core::UnionClaim> for UnionClaim {
 
     fn try_from(value: pb::core::UnionClaim) -> Result<Self> {
         Ok(Self {
-            left: value.left.ok_or(malformed_err())?.try_into()?,
-            right: value.right.ok_or(malformed_err())?.try_into()?,
+            left: value
+                .left
+                .ok_or_else(|| malformed_err("UnionClaim.left"))?
+                .try_into()?,
+            right: value
+                .right
+                .ok_or_else(|| malformed_err("UnionClaim.right"))?
+                .try_into()?,
         })
     }
 }

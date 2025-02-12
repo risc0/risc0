@@ -730,11 +730,20 @@ impl Server {
 
     fn on_union(&self, mut conn: ConnectionWrapper, request: pb::api::UnionRequest) -> Result<()> {
         fn inner(request: pb::api::UnionRequest) -> Result<pb::api::UnionReply> {
-            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
-            let left_receipt_bytes = request.left_receipt.ok_or(malformed_err())?.as_bytes()?;
+            let opts: ProverOpts = request
+                .opts
+                .ok_or_else(|| malformed_err("UnionRequest.opts"))?
+                .try_into()?;
+            let left_receipt_bytes = request
+                .left_receipt
+                .ok_or_else(|| malformed_err("UnionRequest.left_receipt"))?
+                .as_bytes()?;
             let left_succinct_receipt: SuccinctReceipt<Unknown> =
                 bincode::deserialize(&left_receipt_bytes)?;
-            let right_receipt_bytes = request.right_receipt.ok_or(malformed_err())?.as_bytes()?;
+            let right_receipt_bytes = request
+                .right_receipt
+                .ok_or_else(|| malformed_err("UnionRequest.right_receipt"))?
+                .as_bytes()?;
             let right_succinct_receipt: SuccinctReceipt<Unknown> =
                 bincode::deserialize(&right_receipt_bytes)?;
 
@@ -744,7 +753,9 @@ impl Server {
             let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
+                &request
+                    .receipt_out
+                    .ok_or_else(|| malformed_err("UnionRequest.receipt_out"))?,
                 succinct_receipt_bytes.into(),
                 "receipt.zkp",
             )?;

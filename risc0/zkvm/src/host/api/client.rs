@@ -482,9 +482,12 @@ impl Client {
 
         let reply: pb::api::UnionReply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply.kind.ok_or_else(|| malformed_err("UnionReply.kind"))? {
             pb::api::union_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("UnionReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -1033,9 +1036,15 @@ impl Client {
             pb::api::coprocessor_request::Kind::FinalizeProofSet(finalize_request) => {
                 let control_root: Digest = match finalize_request.control_root {
                     Some(control_root) => control_root.try_into()?,
-                    None => return Err(malformed_err()),
+                    None => {
+                        return Err(malformed_err(
+                            "OnCoprocessorRequest.FinalizeProofSet.control_root",
+                        ))
+                    }
                 };
-                let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
+                let coprocessor = env.coprocessor.clone().ok_or_else(|| {
+                    malformed_err("OnCoprocessorRequest.FinalizeProofSet.coprocessor")
+                })?;
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.finalize_proof_set(control_root)
             }
