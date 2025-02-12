@@ -107,6 +107,20 @@ fn prove_nothing_succinct(#[case] version: SegmentVersion) {
 }
 
 #[apply(base)]
+fn keccak_union(#[case] version: SegmentVersion) {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::KeccakUnion(3))
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct().with_segment_version(version);
+    get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap();
+}
+
+#[apply(base)]
 fn basic(#[case] version: SegmentVersion) {
     prove_nothing(version).unwrap();
 }
@@ -1039,6 +1053,10 @@ mod sys_verify {
 
         fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> anyhow::Result<()> {
             self.keccak_requests.push(proof_request);
+            Ok(())
+        }
+
+        fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
             Ok(())
         }
     }

@@ -290,12 +290,30 @@ fn load_dwarf<'data, O: object::Object<'data>>(
     Ok(gimli::Dwarf::load(|id| load_section(id, file, endian))?)
 }
 
+pub fn read_enable_inline_functions_env_var() -> bool {
+    std::env::var("RISC0_PPROF_ENABLE_INLINE_FUNCTIONS")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some()
+}
+
 impl Profiler {
     /// Return a new profile from the given RISC-V ELF.
-    pub fn new(elf_data: &[u8], filename: Option<&str>) -> Result<Self> {
+    pub fn new(
+        elf_data: &[u8],
+        filename: Option<&str>,
+        enable_inline_functions: bool,
+    ) -> Result<Self> {
         let file = File::parse(elf_data)?;
         let dwarf = load_dwarf(&file)?;
-        let inline_function_table_result = InlineFunctionTable::build_from_dwarf(&dwarf);
+
+        let inline_function_table_result = if enable_inline_functions {
+            InlineFunctionTable::build_from_dwarf(&dwarf)
+        } else {
+            Err(anyhow!("inline functions disabled"))
+        };
+
         let ctx = ObjectContext::from_dwarf(dwarf)?;
         let root = Rc::new(RefCell::new(CallNode::default()));
         let mut profiler = Profiler {
@@ -336,7 +354,11 @@ impl Profiler {
                 profiler.profile.inline_function_table = inline_function_table
             }
             Err(error) => {
-                tracing::warn!("Error decoding DWARF data, inline functions not available: {error}")
+                if enable_inline_functions {
+                    tracing::warn!(
+                        "Error decoding DWARF data, inline functions not available: {error}"
+                    )
+                }
             }
         }
 

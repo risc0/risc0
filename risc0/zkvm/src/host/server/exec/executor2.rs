@@ -45,7 +45,7 @@ use crate::{
 };
 
 use super::{
-    profiler::Profiler,
+    profiler::{self, Profiler},
     syscall::{SyscallContext, SyscallTable},
     Journal,
 };
@@ -92,7 +92,11 @@ impl<'a> Executor2<'a> {
         let image = MemoryImage2::with_kernel(program, kernel);
 
         let profiler = if env.pprof_out.is_some() {
-            let profiler = Rc::new(RefCell::new(Profiler::new(user_elf, None)?));
+            let profiler = Rc::new(RefCell::new(Profiler::new(
+                user_elf,
+                None,
+                profiler::read_enable_inline_functions_env_var(),
+            )?));
             env.trace.push(profiler.clone());
             Some(profiler)
         } else {
@@ -229,6 +233,7 @@ impl<'a> Executor2<'a> {
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = self.syscall_table.assumptions_used.take();
+        let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
         let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
 
@@ -252,6 +257,7 @@ impl<'a> Executor2<'a> {
             journal: session_journal.map(crate::Journal::new),
             exit_code,
             assumptions,
+            mmr_assumptions,
             user_cycles: result.user_cycles,
             paging_cycles: result.paging_cycles,
             reserved_cycles: result.reserved_cycles,

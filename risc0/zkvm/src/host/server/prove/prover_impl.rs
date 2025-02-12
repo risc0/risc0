@@ -22,14 +22,16 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, session::InnerSegment},
+        server::{exec::executor2::Executor2, prove::union_peak::UnionPeak, session::InnerSegment},
     },
+    mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
     receipt::{
         segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::{MaybePruned, Merge, Unknown},
+    receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
+    recursion::prove::union,
     risc0_rv32im_ver,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
@@ -131,14 +133,22 @@ impl ProverServer for ProverImpl {
             zkr_receipts.insert(assumption, receipt);
         }
 
+        let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
+            MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
+            tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
+            keccak_receipts.insert(receipt)?;
+        }
+
+        if let Ok(root_receipt) = keccak_receipts.root() {
             let assumption = Assumption {
-                claim: receipt.claim.digest(),
-                control_root: receipt.control_root()?,
+                claim: root_receipt.claim.digest(),
+                control_root: root_receipt.control_root()?,
             };
-            tracing::debug!("adding keccak assumption: {assumption:#?}");
-            zkr_receipts.insert(assumption, receipt);
+
+            tracing::debug!("keccak root assumption: {:?}", assumption);
+            zkr_receipts.insert(assumption, root_receipt.clone());
         }
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
@@ -283,6 +293,14 @@ impl ProverServer for ProverImpl {
         request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
         prove_keccak(request)
+    }
+
+    fn union(
+        &self,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<UnionClaim>> {
+        union(a, b)
     }
 }
 

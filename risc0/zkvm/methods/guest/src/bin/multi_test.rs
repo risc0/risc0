@@ -29,7 +29,7 @@ use alloc::{
 use core::arch::asm;
 
 use getrandom::getrandom;
-use risc0_circuit_keccak::KeccakState;
+use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
@@ -558,6 +558,16 @@ fn main() {
                     0xd5f9328619cd99f7
                 ]
             );
+        }
+        MultiTestSpec::KeccakUnion(proof_count) => {
+            let cycles = 1 << KECCAK_DEFAULT_PO2;
+            let count = cycles / 200 * proof_count;
+
+            let mut state = KeccakState::default();
+
+            for _i in 0..count {
+                env::risc0_keccak_update(&mut state);
+            }
         }
     }
 }
