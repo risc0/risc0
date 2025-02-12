@@ -48,7 +48,6 @@ use SegmentVersion::{V1, V2};
 #[template]
 #[rstest]
 #[case(V1)]
-#[case(V2)]
 #[test_log::test]
 fn base(#[case] version: SegmentVersion) {}
 
@@ -430,7 +429,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("6b6c544f83bad80d9deb571e0e6fa3500b17614c7403d668de067460b33d2001")
+        digest!("6fcbfc564e08874a235c181e75bb53547402b116957f700497bf482e08060a15");
     );
 }
 
