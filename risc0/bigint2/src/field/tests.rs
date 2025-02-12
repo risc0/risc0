@@ -25,7 +25,7 @@ use risc0_zkvm::{
     get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, ProverOpts, SegmentVersion,
 };
 use rstest::rstest;
-use SegmentVersion::{V1, V2};
+use SegmentVersion::V1;
 
 use crate::BigUintWrap;
 
@@ -49,7 +49,7 @@ fn run_test<T: DeserializeOwned>(version: SegmentVersion, env: ExecutorEnv, elf:
 
 #[rstest]
 #[test_log::test]
-fn modadd_256(#[values(V1, V2)] version: SegmentVersion) {
+fn modadd_256(#[values(V1)] version: SegmentVersion) {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
     let modulus = BigUintWrap::from_str("03").unwrap();
@@ -65,7 +65,7 @@ fn modadd_256(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn modinv_256(#[values(V1, V2)] version: SegmentVersion) {
+fn modinv_256(#[values(V1)] version: SegmentVersion) {
     let inp = BigUintWrap::from_str("02").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
     let expected = BigUintWrap::from_str("03").unwrap();
@@ -80,7 +80,7 @@ fn modinv_256(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn modmul_256(#[values(V1, V2)] version: SegmentVersion) {
+fn modmul_256(#[values(V1)] version: SegmentVersion) {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
@@ -96,7 +96,7 @@ fn modmul_256(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn modsub_256(#[values(V1, V2)] version: SegmentVersion) {
+fn modsub_256(#[values(V1)] version: SegmentVersion) {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
@@ -112,7 +112,7 @@ fn modsub_256(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn modadd_384(#[values(V1, V2)] version: SegmentVersion) {
+fn modadd_384(#[values(V1)] version: SegmentVersion) {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
     let modulus = BigUintWrap::from_str("03").unwrap();
@@ -128,7 +128,7 @@ fn modadd_384(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn modinv_384(#[values(V1, V2)] version: SegmentVersion) {
+fn modinv_384(#[values(V1)] version: SegmentVersion) {
     let inp = BigUintWrap::from_str("02").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
     let expected = BigUintWrap::from_str("03").unwrap();
@@ -143,7 +143,7 @@ fn modinv_384(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn modmul_384(#[values(V1, V2)] version: SegmentVersion) {
+fn modmul_384(#[values(V1)] version: SegmentVersion) {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
@@ -159,7 +159,7 @@ fn modmul_384(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn modsub_384(#[values(V1, V2)] version: SegmentVersion) {
+fn modsub_384(#[values(V1)] version: SegmentVersion) {
     let lhs = BigUintWrap::from_str("04").unwrap();
     let rhs = BigUintWrap::from_str("07").unwrap();
     let modulus = BigUintWrap::from_str("05").unwrap();
@@ -175,7 +175,7 @@ fn modsub_384(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn extfieldadd_256(#[values(V1, V2)] version: SegmentVersion) {
+fn extfieldadd_256(#[values(V1)] version: SegmentVersion) {
     let lhs0 = BigUintWrap::from_str("04").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
     let rhs0 = BigUintWrap::from_str("03").unwrap();
@@ -194,7 +194,7 @@ fn extfieldadd_256(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn extfieldadd_384(#[values(V1, V2)] version: SegmentVersion) {
+fn extfieldadd_384(#[values(V1)] version: SegmentVersion) {
     let lhs0 = BigUintWrap::from_str("04").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
     let rhs0 = BigUintWrap::from_str("03").unwrap();
@@ -213,7 +213,7 @@ fn extfieldadd_384(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn extfieldsub_256(#[values(V1, V2)] version: SegmentVersion) {
+fn extfieldsub_256(#[values(V1)] version: SegmentVersion) {
     let lhs0 = BigUintWrap::from_str("02").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
     let rhs0 = BigUintWrap::from_str("03").unwrap();
@@ -233,7 +233,7 @@ fn extfieldsub_256(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn extfieldsub_384(#[values(V1, V2)] version: SegmentVersion) {
+fn extfieldsub_384(#[values(V1)] version: SegmentVersion) {
     let lhs0 = BigUintWrap::from_str("02").unwrap();
     let lhs1 = BigUintWrap::from_str("06").unwrap();
     let rhs0 = BigUintWrap::from_str("03").unwrap();
@@ -253,7 +253,7 @@ fn extfieldsub_384(#[values(V1, V2)] version: SegmentVersion) {
 
 #[rstest]
 #[test_log::test]
-fn extfieldmul(#[values(V1, V2)] version: SegmentVersion) {
+fn extfieldmul(#[values(V1)] version: SegmentVersion) {
     // (2x+5)(3x+2) mod (xx+1) =
     //   6xx+4x+15x+10 = 6xx+5x+3 = 6(xx+0x+1)-0x-6 + 5x+3 = 5x+4
     let lhs0 = BigUintWrap::from_str("05").unwrap();

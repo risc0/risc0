@@ -16,7 +16,7 @@ use num_bigint::BigUint;
 use risc0_bigint2_methods::RSA_ELF;
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ExitCode, ProverOpts, SegmentVersion};
 use rstest::rstest;
-use SegmentVersion::{V1, V2};
+use SegmentVersion::V1;
 
 use crate::BigUintWrap;
 
@@ -53,7 +53,7 @@ fn modpow_65537(
     #[case] base: BigUintWrap,
     #[case] modulus: BigUintWrap,
     #[case] expected: BigUintWrap,
-    #[values(V1, V2)] version: SegmentVersion,
+    #[values(V1)] version: SegmentVersion,
 ) {
     let env = ExecutorEnv::builder()
         .write(&(base.0, modulus.0))

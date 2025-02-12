@@ -780,7 +780,7 @@ mod sys_verify {
         static ONCE: OnceLock<Receipt> = OnceLock::new();
         let v1 =
             ONCE.get_or_init(|| prove_elf(V1, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap());
-        &v1
+        v1
     }
 
     #[apply(base)]
