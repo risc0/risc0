@@ -237,9 +237,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bn254-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "bn254-inner"
 version = "0.1.0"
 dependencies = [
+ "bn254-core",
  "risc0-zkvm",
  "substrate-bn",
 ]

@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,5 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use serde::{Deserialize, Serialize};
 
-// TODO: This would be nice to have, look at k256 for inspiration
+#[derive(Deserialize, Serialize)]
+pub struct Inputs {
+    pub g1_compressed: Vec<u8>,
+    pub g2_compressed: Vec<u8>,
+    pub a: Vec<u8>,
+    pub b: Vec<u8>,
+}

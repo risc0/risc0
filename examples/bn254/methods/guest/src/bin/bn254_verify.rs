@@ -12,24 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use substrate_bn::{AffineG1, AffineG2, Fq, Fq2, Fr, G1, G2, Gt, pairing_batch};
+use substrate_bn::{Fr, G1, G2, Gt, pairing_batch};
 use risc0_zkvm::guest::env;
 
 fn main() {
-    // TODO: Don't need this assert, just confirming
-    assert_eq!(G2::b() * (
-        (Fq2::one() + Fq2::one() + Fq2::one() + Fq2::one() + Fq2::one() + Fq2::one() + Fq2::one() + Fq2::one() + Fq2::one()) + Fq2::i()),
-        (Fq2::one() + Fq2::one() + Fq2::one())
-    );
-    // TODO above
+    let inp: bn254_core::Inputs = env::read();
 
-    // TODO: switch away from example inputs
-    let inp: (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>) = env::read();
-
-    let g1 = G1::from_compressed(&inp.0).expect("Point on G1 expected");
-    let g2 = G2::from_compressed(&inp.1).expect("Point on G2 expected");
-    let a_factor = Fr::from_slice(&inp.2).expect("Scalar factor expected");
-    let b_factor = Fr::from_slice(&inp.3).expect("Scalar factor expected");
+    let g1 = G1::from_compressed(&inp.g1_compressed).expect("Point on G1 expected");
+    let g2 = G2::from_compressed(&inp.g2_compressed).expect("Point on G2 expected");
+    let a_factor = Fr::from_slice(&inp.a).expect("Scalar factor expected");
+    let b_factor = Fr::from_slice(&inp.b).expect("Scalar factor expected");
 
     let mut pairs = Vec::new();
     pairs.push((g1 * a_factor, g2 * b_factor));

@@ -6,11 +6,10 @@ edition = "2021"
 [workspace]
 
 [dependencies]
+bn254-core = { path = "../../core" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std", "unstable"] }
 substrate-bn = "0.6.0"
 
 [patch.crates-io]
+# TODO: Set up something a bit more stable
 substrate-bn = { git = "https://github.com/risc0/paritytech-bn", rev = "5d25b59f48556d127ddb099e6bfd02ee7c98862f" }
-
-# [profile.release]
-# TODO

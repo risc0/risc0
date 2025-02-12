@@ -34,9 +34,9 @@ fn prove_pairing() -> Receipt {
     let g1_compressed = hex::decode("020000000000000000000000000000000000000000000000000000000000000001").expect("valid hex");
     let g2_compressed = hex::decode("0A04D4BF3239F77CEE7B47C7245E9281B3E9C1182D6381A87BBF81F9F2A6254B731DF569CDA95E060BEE91BA69B3F2D103658A7AEA6B10E5BDC761E5715E7EE4BB").expect("valid hex");
     // Factors are arbitrary and were chosen at random
-    let a_factor = hex::decode("9c0d02eaaf8e7e7ad09595ef6e3b896f8915124ba5bef9287f0997557580caeb").expect("valid hex");
-    let b_factor = hex::decode("db6764642f7bb1f415d93fcd5aace586161ec2e4305f0d6fb57dbabf1d141a5b").expect("valid hex");
-    let input = (g1_compressed, g2_compressed, a_factor, b_factor);
+    let a = hex::decode("9c0d02eaaf8e7e7ad09595ef6e3b896f8915124ba5bef9287f0997557580caeb").expect("valid hex");
+    let b = hex::decode("db6764642f7bb1f415d93fcd5aace586161ec2e4305f0d6fb57dbabf1d141a5b").expect("valid hex");
+    let input = bn254_core::Inputs{g1_compressed, g2_compressed, a, b};
 
     let env = ExecutorEnv::builder()
         .write(&input)

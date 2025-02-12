@@ -6,6 +6,7 @@ edition = "2021"
 default-run = "bn254-example"  # TODO?
 
 [dependencies]
+bn254-core = { path = "core" }
 bn254-methods = { path = "methods" }
 substrate-bn = "0.6.0"
 hex = "0.4.3"
