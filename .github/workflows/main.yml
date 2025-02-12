@@ -276,6 +276,7 @@ jobs:
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
+      - run: cargo check -p bonsai-sdk --all-features
       - run: sccache --show-stats
 
   examples:
