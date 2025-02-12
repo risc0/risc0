@@ -77,7 +77,7 @@ _ecall_table:
     fence # input
     j _ecall_software
     j _ecall_sha
-    fence # bigint
+    j _ecall_bigint
     fence # user
     j _ecall_bigint2
 
@@ -194,3 +194,13 @@ _ecall_bigint2:
 
     # return back to userspace
     mret
+
+_ecall_bigint:
+    # prepare a bigint ecall
+    lw a0, REG_A0 * WORD_SIZE (tp) # result
+    lw a1, REG_A1 * WORD_SIZE (tp) # op
+    lw a2, REG_A2 * WORD_SIZE (tp) # x
+    lw a3, REG_A3 * WORD_SIZE (tp) # y
+    lw a4, REG_A4 * WORD_SIZE (tp) # modulus
+
+    j ecall_bigint_v1compat
