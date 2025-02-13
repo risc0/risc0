@@ -2251,6 +2251,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "include_bytes_aligned"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ee796ad498c8d9a1d68e477df8f754ed784ef875de1414ebdaf169f70a6a784"
+
+[[package]]
 name = "indexmap"
 version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3885,6 +3891,7 @@ dependencies = [
 name = "risc0-zkos-v1compat"
 version = "0.1.0"
 dependencies = [
+ "include_bytes_aligned",
  "no_std_strings",
 ]
 

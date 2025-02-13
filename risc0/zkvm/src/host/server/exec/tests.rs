@@ -31,7 +31,11 @@ use risc0_zkvm_methods::{
     BLST_ELF, HEAP_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
     SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
-use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::{
+    fileno,
+    syscall::{bigint, nr::SYS_RANDOM},
+    PAGE_SIZE, WORD_SIZE,
+};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 use sha2::{Digest as _, Sha256};
@@ -328,7 +332,6 @@ fn rsa_compat(#[case] version: TestVersion) {
 
 #[rstest]
 #[case(V1)]
-#[ignore]
 #[case(V2)]
 #[test_log::test]
 fn bigint_accel(#[case] version: TestVersion) {
@@ -355,6 +358,29 @@ fn bigint_accel(#[case] version: TestVersion) {
             bytemuck::cast_slice::<u32, u8>(case.expected().as_slice())
         );
     }
+}
+
+#[rstest]
+#[ignore = "broken on V1"]
+#[case(V1)]
+#[case(V2)]
+#[test_log::test]
+fn bigint_accel_mod_zero_product_too_large(#[case] version: TestVersion) {
+    let input = MultiTestSpec::BigInt {
+        x: [u32::MAX; bigint::WIDTH_WORDS],
+        y: [u32::MAX; bigint::WIDTH_WORDS],
+        modulus: [0u32; bigint::WIDTH_WORDS],
+    };
+
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let error = execute_elf(version, env, MULTI_TEST_ELF)
+        .map(|_| ())
+        .unwrap_err();
+    assert!(error.to_string().contains("IllegalInstruction"), "{error}");
 }
 
 #[apply(base)]
