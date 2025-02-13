@@ -297,6 +297,10 @@ fn v1_trace_event_from_v2(event: trace_v2::TraceEvent) -> crate::TraceEvent {
         trace_v2::TraceEvent::MemorySet { addr, region } => {
             crate::TraceEvent::MemorySet { addr, region }
         }
+
+        trace_v2::TraceEvent::PageIn { cycles } => crate::TraceEvent::PageIn { cycles },
+
+        trace_v2::TraceEvent::PageOut { cycles } => crate::TraceEvent::PageOut { cycles },
     }
 }
 
