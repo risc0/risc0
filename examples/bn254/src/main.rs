@@ -15,8 +15,6 @@
 // use substrate_bn::Fq;
 use bn254_methods::{BN254_VERIFY_ELF, BN254_VERIFY_ID};
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
-// TODO: Temp
-// use substrate_bn::{arith::U256, Fq};
 
 /// Prove and get the receipt for an example of (batch) pairing
 ///
