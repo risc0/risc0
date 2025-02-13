@@ -41,6 +41,8 @@
 
 namespace risc0::circuit::rv32im_v2::cuda {
 
+constexpr size_t kUserAccumSplit = kLayout_TopAccum.columns[0].col;
+
 struct ExecBuffers {
   Buffer global;
   Buffer data;
@@ -349,15 +351,6 @@ __device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
   return ret;
 }
 
-// __device__ void
-// stepAccum(AccumBuffers& buffers, PreflightTrace& preflight, LookupTables& tables, size_t cycle) {
-//   ExecContext ctx(preflight, tables, cycle);
-//   MutableBufObj data(ctx, buffers.data);
-//   MutableBufObj accum(ctx, buffers.accum);
-//   GlobalBufObj mix(ctx, buffers.mix);
-//   step_TopAccum(ctx, &accum, &data, &mix);
-// }
-
 __device__ void nextStep(DeviceExecContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
   ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
@@ -397,11 +390,10 @@ __global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
 
   ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
   MutableBufObj data(*ctx->data);
-  MutableBufObj accum(*ctx->accum, /*zeroBack=*/true);
+  MutableBufObj accum(*ctx->accum, /*zeroBack=*/kUserAccumSplit);
   GlobalBufObj mix(*ctx->mix);
-  // GlobalBufObj global(*ctx->global);
-  // step_TopAccum(execCtx, &accum, &data, &global, &mix);
-  step_TopAccum(execCtx, &accum, &data, &mix);
+  GlobalBufObj global(*ctx->global);
+  step_TopAccum(execCtx, &accum, &data, &global, &mix);
 }
 
 __global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
@@ -412,14 +404,16 @@ __global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
 
   Buffer& accum = *ctx->accum;
 
+  size_t machineColumns = (accum.cols - kUserAccumSplit) / 4;
   size_t back1 = (cycle + lastCycle - 1) % lastCycle;
   Fp prev[4];
   for (size_t k = 0; k < 4; k++) {
     prev[k] = accum.get(back1, accum.cols - 4 + k);
   }
-  for (size_t j = 0; j < accum.cols / 4 - 1; j++) {
+  for (size_t j = 0; j < machineColumns - 1; j++) {
     for (size_t k = 0; k < 4; k++) {
-      accum.set(cycle, j * 4 + k, accum.get(cycle, j * 4 + k) + prev[k]);
+      size_t col = kUserAccumSplit + j * 4 + k;
+      accum.set(cycle, col, accum.get(cycle, col) + prev[k]);
     }
   }
 }

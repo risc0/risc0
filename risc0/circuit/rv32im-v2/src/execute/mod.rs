@@ -14,6 +14,7 @@
 
 pub(crate) mod bibc;
 pub(crate) mod bigint;
+pub(crate) mod byte_poly;
 mod executor;
 pub(crate) mod pager;
 pub mod platform;
@@ -26,7 +27,7 @@ mod syscall;
 #[cfg(test)]
 mod tests;
 pub mod testutil;
-mod trace;
+pub mod trace;
 
 pub use self::{
     executor::{Executor, ExecutorResult, SimpleSession},

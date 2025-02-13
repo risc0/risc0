@@ -1,6 +1,40 @@
 struct NondetRegLayout {
   Reg _super;
 };
+using NondetRegLayout7LayoutArray = std::array<NondetRegLayout, 7>;
+struct OneHot_7_Layout {
+  NondetRegLayout7LayoutArray _super;
+};
+struct NondetExtRegLayout {
+  Reg _super;
+};
+struct BigIntAccumStateLayout {
+  NondetExtRegLayout poly;
+  NondetExtRegLayout term;
+  NondetExtRegLayout total;
+};
+struct BigIntPolyOpAddTotalLayout {
+  BigIntAccumStateLayout _super;
+  NondetExtRegLayout tmp;
+};
+struct BigIntAccumStateLayout_0 {
+  BigIntAccumStateLayout _super;
+  BigIntAccumStateLayout arm0;
+  BigIntAccumStateLayout arm1;
+  BigIntAccumStateLayout arm2;
+  BigIntPolyOpAddTotalLayout arm3;
+  BigIntAccumStateLayout arm4;
+  BigIntAccumStateLayout arm5;
+  BigIntAccumStateLayout arm6;
+};
+struct BigIntAccumLayout {
+  OneHot_7_Layout polyOp;
+  BigIntAccumStateLayout state;
+  BigIntAccumStateLayout_0 stateRedef;
+};
+struct AccumLayout {
+  BigIntAccumLayout _0;
+};
 using NondetRegLayout8LayoutArray = std::array<NondetRegLayout, 8>;
 struct OneHot_8_Layout {
   NondetRegLayout8LayoutArray _super;
@@ -1637,9 +1671,6 @@ struct ECall0Layout {
   NormalizeU32Layout addPC;
 };
 using NondetRegLayout24LayoutArray = std::array<NondetRegLayout, 24>;
-struct NondetExtRegLayout {
-  Reg _super;
-};
 struct PoseidonStateLayout {
   NondetRegLayout hasState;
   NondetRegLayout stateAddr;
@@ -2859,15 +2890,18 @@ struct Arg_MemoryArgLayout {
 struct Arg_CycleArgLayout {
   Reg cycle;
 };
+using Reg1LayoutArray = std::array<Reg, 1>;
 struct _accumLayout {
   Arg_ArgU8Layout argU8;
   Arg_ArgU16Layout argU16;
   Arg_MemoryArgLayout memoryArg;
   Arg_CycleArgLayout cycleArg;
   Reg _offset;
+  Reg1LayoutArray _user;
 };
 using Reg20LayoutArray = std::array<Reg, 20>;
 struct LayoutAccumLayout {
+  AccumLayout user;
   Reg20LayoutArray columns;
 };
 struct TestSuccRunLayout {
@@ -3055,10 +3089,16 @@ struct DivideReturnStruct {
   ValU32Struct quot;
   ValU32Struct rem;
 };
+struct BigIntTopStateStruct {
+  Val polyOp;
+  Val coeff;
+  Val16Array witness;
+};
 struct InstOutputBaseStruct {
   ValU32Struct newPc;
   Val newState;
   Val newMode;
+  BigIntTopStateStruct topState;
 };
 struct MiscInputStruct {
   InstInputStruct _super;
@@ -3295,10 +3335,25 @@ struct BigIntWitnessStruct {
 struct BigIntWrite__0Struct {
 };
 using BigIntWrite__0Struct4Array = std::array<BigIntWrite__0Struct, 4>;
+struct BigIntAccumStateStruct {
+  NondetExtRegStruct poly;
+  NondetExtRegStruct term;
+  NondetExtRegStruct total;
+};
+using Val7Array = std::array<Val, 7>;
+using NondetRegStruct7Array = std::array<NondetRegStruct, 7>;
+struct OneHot_7_Struct {
+  NondetRegStruct7Array _super;
+};
+using ExtVal1Array = std::array<ExtVal, 1>;
+struct BigIntAccumStruct {
+};
 using Val13Array = std::array<Val, 13>;
 using NondetRegStruct13Array = std::array<NondetRegStruct, 13>;
 struct OneHot_13_Struct {
   NondetRegStruct13Array _super;
 };
 struct TopStruct {
+};
+struct AccumStruct {
 };

@@ -671,7 +671,7 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
 ///
 /// A default of 21 was selected to reach a target of 97 bits of security under our analysis. Using
 /// a po2 higher than 21 shows a degradation of 1 bit of security per po2, to 94 bits at po2 24.
-pub const DEFAULT_MAX_PO2: usize = 21;
+pub const DEFAULT_MAX_PO2: usize = 22;
 
 /// Context available to the verification process.
 #[non_exhaustive]
