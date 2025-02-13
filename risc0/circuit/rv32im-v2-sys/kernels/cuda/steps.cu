@@ -47,7 +47,7 @@ __device__ NondetExtRegStruct exec_NondetExtReg(ExecContext& ctx,
 __device__ NondetRegStruct back_Reg(ExecContext& ctx,
                                     Index distance0,
                                     BoundLayout<NondetRegLayout> layout1) {
-  // Reg(<preamble>:4)
+  // Reg(<preamble>:5)
   NondetRegStruct x2 = back_NondetReg(ctx, distance0, layout1);
   return x2;
 }
@@ -55,14 +55,14 @@ __device__ NondetRegStruct exec_Reg(ExecContext& ctx,
                                     Val arg0,
                                     BoundLayout<NondetRegLayout> layout1) {
   NondetRegStruct x2 = exec_NondetReg(ctx, arg0, layout1);
-  // Reg(<preamble>:5)
-  EQZ((arg0 - x2._super), "Reg(<preamble>:5)");
+  // Reg(<preamble>:6)
+  EQZ((arg0 - x2._super), "Reg(<preamble>:6)");
   return x2;
 }
 __device__ NondetExtRegStruct back_ExtReg(ExecContext& ctx,
                                           Index distance0,
                                           BoundLayout<NondetExtRegLayout> layout1) {
-  // ExtReg(<preamble>:10)
+  // ExtReg(<preamble>:12)
   NondetExtRegStruct x2 = back_NondetExtReg(ctx, distance0, layout1);
   return x2;
 }
@@ -70,8 +70,8 @@ __device__ NondetExtRegStruct exec_ExtReg(ExecContext& ctx,
                                           ExtVal arg0,
                                           BoundLayout<NondetExtRegLayout> layout1) {
   NondetExtRegStruct x2 = exec_NondetExtReg(ctx, arg0, layout1);
-  // ExtReg(<preamble>:11)
-  EQZ((x2._super - arg0), "loc(callsite(unknown at  ExtReg ( <preamble> :11:11)))");
+  // ExtReg(<preamble>:13)
+  EQZ((x2._super - arg0), "loc(callsite(unknown at  ExtReg ( <preamble> :13:11)))");
   return x2;
 }
 __device__ NondetRegStruct back_NondetBitReg(ExecContext& ctx,
@@ -236,7 +236,7 @@ __device__ ToBits_5_Struct exec_ToBits_5_(ExecContext& ctx,
       Val5Array{Val(0), Val(1), Val(2), Val(3), Val(4)},
       LAYOUT_LOOKUP(layout1, _super),
       ([&](Val5Array::value_type x3, BoundLayout<NondetRegLayout5LayoutArray::value_type> x4) {
-        // Div(<preamble>:16)
+        // Div(<preamble>:19)
         Val x5 = inv_0(Val30Array{Val(1),         Val(2),        Val(4),        Val(8),
                                   Val(16),        Val(32),       Val(64),       Val(128),
                                   Val(256),       Val(512),      Val(1024),     Val(2048),
@@ -245,7 +245,7 @@ __device__ ToBits_5_Struct exec_ToBits_5_(ExecContext& ctx,
                                   Val(1048576),   Val(2097152),  Val(4194304),  Val(8388608),
                                   Val(16777216),  Val(33554432), Val(67108864), Val(134217728),
                                   Val(268435456), Val(536870912)}[to_size_t(x3)]);
-        // Div(<preamble>:17)
+        // Div(<preamble>:20)
         EQZ(((x5 * Val30Array{Val(1),         Val(2),        Val(4),        Val(8),
                               Val(16),        Val(32),       Val(64),       Val(128),
                               Val(256),       Val(512),      Val(1024),     Val(2048),
@@ -255,7 +255,7 @@ __device__ ToBits_5_Struct exec_ToBits_5_(ExecContext& ctx,
                               Val(16777216),  Val(33554432), Val(67108864), Val(134217728),
                               Val(268435456), Val(536870912)}[to_size_t(x3)]) -
              Val(1)),
-            "loc(callsite( Div ( <preamble> :17:22) at  ToBits ( "
+            "loc(callsite( Div ( <preamble> :20:22) at  ToBits ( "
             "zirgen/circuit/rv32im/v2/dsl/po2.zir :22:43)))");
         NondetRegStruct x6 = exec_NondetBitReg(
             ctx,
@@ -322,7 +322,7 @@ __device__ NormalizeU32Struct exec_NormalizeU32(ExecContext& ctx,
   // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
   NondetU16RegStruct x2 =
       exec_NondetU16Reg(ctx, bitAnd(arg0.low, Val(65535)), LAYOUT_LOOKUP(layout1, low16));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:45)
   Val x3 = (bitAnd(arg0.low, Val(65536)) * Val(2013235201));
   NondetRegStruct x4 = exec_NondetBitReg(ctx, x3, LAYOUT_LOOKUP(layout1, lowCarry));
@@ -359,7 +359,7 @@ __device__ AddrDecomposeStruct exec_AddrDecompose(ExecContext& ctx,
   // AddrDecompose(zirgen/circuit/rv32im/v2/dsl/u32.zir:67)
   NondetRegStruct x7 = exec_IsZero(ctx, arg0.high, LAYOUT_LOOKUP(layout2, _0));
   EQZ(x7._super, "AddrDecompose(zirgen/circuit/rv32im/v2/dsl/u32.zir:67)");
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // AddrDecompose(zirgen/circuit/rv32im/v2/dsl/u32.zir:69)
   Val x8 = ((arg0.low - x3._super) * Val(1509949441));
   NondetU16RegStruct x9 = exec_NondetU16Reg(ctx, x8, LAYOUT_LOOKUP(layout2, med14));
@@ -375,7 +375,7 @@ __device__ AddrDecomposeBitsStruct exec_AddrDecomposeBits(
   // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:81)
   NondetRegStruct x3 =
       exec_NondetBitReg(ctx, bitAnd(arg0.low, Val(1)), LAYOUT_LOOKUP(layout2, low0));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:82)
   Val x4 = (bitAnd(arg0.low, Val(2)) * Val(1006632961));
   NondetRegStruct x5 = exec_NondetBitReg(ctx, x4, LAYOUT_LOOKUP(layout2, low1));
@@ -388,7 +388,7 @@ __device__ AddrDecomposeBitsStruct exec_AddrDecomposeBits(
   // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:87)
   NondetRegStruct x10_0 = exec_IsZero(ctx, arg0.high, LAYOUT_LOOKUP(layout2, _0));
   EQZ(x10_0._super, "AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:87)");
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:89)
   Val x11_0 = ((arg0.low - x6) * Val(1509949441));
   NondetU16RegStruct x12_0 = exec_NondetU16Reg(ctx, x11_0, LAYOUT_LOOKUP(layout2, med14));
@@ -431,14 +431,14 @@ exec_CmpLessThanUnsigned(ExecContext& ctx,
 __device__ NondetRegStruct exec_GetSignU32(ExecContext& ctx,
                                            ValU32Struct arg0,
                                            BoundLayout<GetSignU32Layout> layout1) {
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // GetSignU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:125)
   Val x2 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
   NondetRegStruct x3 = exec_NondetBitReg(ctx, x2, LAYOUT_LOOKUP(layout1, _super));
   // GetSignU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:126)
   Val x4 = (bitAnd(arg0.high, Val(32767)) * Val(2));
   NondetU16RegStruct x5 = exec_NondetU16Reg(ctx, x4, LAYOUT_LOOKUP(layout1, restTimesTwo));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // GetSignU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:127)
   Val x6 = (x5._super._super * Val(1006632961));
   Val x7 = ((x3._super * Val(32768)) + x6);
@@ -495,7 +495,7 @@ __device__ ToBits_16_Struct exec_ToBits_16_(ExecContext& ctx,
                  Val(15)},
       LAYOUT_LOOKUP(layout1, _super),
       ([&](Val16Array::value_type x3, BoundLayout<NondetRegLayout16LayoutArray::value_type> x4) {
-        // Div(<preamble>:16)
+        // Div(<preamble>:19)
         Val x5 = inv_0(Val30Array{Val(1),         Val(2),        Val(4),        Val(8),
                                   Val(16),        Val(32),       Val(64),       Val(128),
                                   Val(256),       Val(512),      Val(1024),     Val(2048),
@@ -504,7 +504,7 @@ __device__ ToBits_16_Struct exec_ToBits_16_(ExecContext& ctx,
                                   Val(1048576),   Val(2097152),  Val(4194304),  Val(8388608),
                                   Val(16777216),  Val(33554432), Val(67108864), Val(134217728),
                                   Val(268435456), Val(536870912)}[to_size_t(x3)]);
-        // Div(<preamble>:17)
+        // Div(<preamble>:20)
         EQZ(((x5 * Val30Array{Val(1),         Val(2),        Val(4),        Val(8),
                               Val(16),        Val(32),       Val(64),       Val(128),
                               Val(256),       Val(512),      Val(1024),     Val(2048),
@@ -514,7 +514,7 @@ __device__ ToBits_16_Struct exec_ToBits_16_(ExecContext& ctx,
                               Val(16777216),  Val(33554432), Val(67108864), Val(134217728),
                               Val(268435456), Val(536870912)}[to_size_t(x3)]) -
              Val(1)),
-            "loc(callsite( Div ( <preamble> :17:22) at  ToBits ( "
+            "loc(callsite( Div ( <preamble> :20:22) at  ToBits ( "
             "zirgen/circuit/rv32im/v2/dsl/po2.zir :22:43)))");
         NondetRegStruct x6 = exec_NondetBitReg(
             ctx,
@@ -647,62 +647,62 @@ __device__ ValU32Struct exec_BitwiseXor(ExecContext& ctx,
 __device__ DecoderStruct exec_Decoder(ExecContext& ctx,
                                       ValU32Struct arg0,
                                       BoundLayout<DecoderLayout> layout1) {
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:15)
   Val x2 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
   NondetRegStruct x3 = exec_NondetBitReg(ctx, x2, LAYOUT_LOOKUP(layout1, _f7_6));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:16)
   Val x4 = (bitAnd(arg0.high, Val(24576)) * Val(2013020161));
   NondetRegStruct x5 = exec_NondetTwitReg(ctx, x4, LAYOUT_LOOKUP(layout1, _f7_45));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:17)
   Val x6 = (bitAnd(arg0.high, Val(6144)) * Val(2012282881));
   NondetRegStruct x7 = exec_NondetTwitReg(ctx, x6, LAYOUT_LOOKUP(layout1, _f7_23));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:18)
   Val x8 = (bitAnd(arg0.high, Val(1536)) * Val(2009333761));
   NondetRegStruct x9 = exec_NondetTwitReg(ctx, x8, LAYOUT_LOOKUP(layout1, _f7_01));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:19)
   Val x10_0 = (bitAnd(arg0.high, Val(384)) * Val(1997537281));
   NondetRegStruct x11_0 = exec_NondetTwitReg(ctx, x10_0, LAYOUT_LOOKUP(layout1, _rs2_34));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:20)
   Val x12_0 = (bitAnd(arg0.high, Val(96)) * Val(1950351361));
   NondetRegStruct x13_0 = exec_NondetTwitReg(ctx, x12_0, LAYOUT_LOOKUP(layout1, _rs2_12));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:21)
   Val x14_0 = (bitAnd(arg0.high, Val(16)) * Val(1887436801));
   NondetRegStruct x15_0 = exec_NondetBitReg(ctx, x14_0, LAYOUT_LOOKUP(layout1, _rs2_0));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:22)
   Val x16 = (bitAnd(arg0.high, Val(12)) * Val(1509949441));
   NondetRegStruct x17 = exec_NondetTwitReg(ctx, x16, LAYOUT_LOOKUP(layout1, _rs1_34));
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:23)
   NondetRegStruct x18 =
       exec_NondetTwitReg(ctx, bitAnd(arg0.high, Val(3)), LAYOUT_LOOKUP(layout1, _rs1_12));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:24)
   Val x19 = (bitAnd(arg0.low, Val(32768)) * Val(2013204481));
   NondetRegStruct x20 = exec_NondetBitReg(ctx, x19, LAYOUT_LOOKUP(layout1, _rs1_0));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:25)
   Val x21 = (bitAnd(arg0.low, Val(16384)) * Val(2013143041));
   NondetRegStruct x22 = exec_NondetBitReg(ctx, x21, LAYOUT_LOOKUP(layout1, _f3_2));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:26)
   Val x23 = (bitAnd(arg0.low, Val(12288)) * Val(2012774401));
   NondetRegStruct x24 = exec_NondetTwitReg(ctx, x23, LAYOUT_LOOKUP(layout1, _f3_01));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:27)
   Val x25 = (bitAnd(arg0.low, Val(3072)) * Val(2011299841));
   NondetRegStruct x26 = exec_NondetTwitReg(ctx, x25, LAYOUT_LOOKUP(layout1, _rd_34));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:28)
   Val x27 = (bitAnd(arg0.low, Val(768)) * Val(2005401601));
   NondetRegStruct x28 = exec_NondetTwitReg(ctx, x27, LAYOUT_LOOKUP(layout1, _rd_12));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // Decoder(zirgen/circuit/rv32im/v2/dsl/decode.zir:29)
   Val x29 = (bitAnd(arg0.low, Val(128)) * Val(1997537281));
   NondetRegStruct x30 = exec_NondetBitReg(ctx, x29, LAYOUT_LOOKUP(layout1, _rd_0));
@@ -1134,22 +1134,22 @@ __device__ ExpandU32Struct exec_ExpandU32(ExecContext& ctx,
   // ExpandU32(zirgen/circuit/rv32im/v2/dsl/mult.zir:50)
   NondetRegStruct x3 =
       exec_NondetU8Reg(ctx, bitAnd(arg0.low, Val(255)), LAYOUT_LOOKUP(layout2, b0));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // ExpandU32(zirgen/circuit/rv32im/v2/dsl/mult.zir:51)
   Val x4 = (bitAnd(arg0.low, Val(65280)) * Val(2005401601));
   NondetRegStruct x5 = exec_NondetU8Reg(ctx, x4, LAYOUT_LOOKUP(layout2, b1));
   // ExpandU32(zirgen/circuit/rv32im/v2/dsl/mult.zir:52)
   NondetRegStruct x6 =
       exec_NondetU8Reg(ctx, bitAnd(arg0.high, Val(255)), LAYOUT_LOOKUP(layout2, b2));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // ExpandU32(zirgen/circuit/rv32im/v2/dsl/mult.zir:53)
   Val x7 = (bitAnd(arg0.high, Val(65280)) * Val(2005401601));
   NondetRegStruct x8 = exec_NondetU8Reg(ctx, x7, LAYOUT_LOOKUP(layout2, b3));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // ExpandU32(zirgen/circuit/rv32im/v2/dsl/mult.zir:59)
   Val x9 = (bitAnd(arg0.high, Val(32512)) * Val(1997537281));
   NondetRegStruct x10_0 = exec_NondetU8Reg(ctx, x9, LAYOUT_LOOKUP(layout2, b3Top7times2));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // ExpandU32(zirgen/circuit/rv32im/v2/dsl/mult.zir:60)
   Val x11_0 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
   NondetRegStruct x12_0 = exec_NondetBitReg(ctx, x11_0, LAYOUT_LOOKUP(layout2, topBit));
@@ -1195,14 +1195,14 @@ exec_MultiplyAccumulate(ExecContext& ctx,
   ExpandU32Struct x5 = exec_ExpandU32(ctx, arg0, arg3.aSigned, LAYOUT_LOOKUP(layout4, ax));
   // MultiplyAccumulate(zirgen/circuit/rv32im/v2/dsl/mult.zir:116)
   ExpandU32Struct x6 = exec_ExpandU32(ctx, arg1_0, arg3.bSigned, LAYOUT_LOOKUP(layout4, bx));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // MultiplyAccumulate(zirgen/circuit/rv32im/v2/dsl/mult.zir:118)
   Val x7 = (bitAnd(arg2_0.high, Val(32768)) * Val(2013204481));
   NondetRegStruct x8 = exec_NondetBitReg(ctx, x7, LAYOUT_LOOKUP(layout4, cSign));
   // MultiplyAccumulate(zirgen/circuit/rv32im/v2/dsl/mult.zir:119)
   Val x9 = (bitAnd(arg2_0.high, Val(32767)) * Val(2));
   NondetU16RegStruct x10_0 = exec_NondetU16Reg(ctx, x9, LAYOUT_LOOKUP(layout4, cRestTimes2));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // MultiplyAccumulate(zirgen/circuit/rv32im/v2/dsl/mult.zir:120)
   Val x11_0 = (x10_0._super._super * Val(1006632961));
   Val x12_0 = ((x8._super * Val(32768)) + x11_0);
@@ -1354,7 +1354,7 @@ __device__ DivideReturnStruct exec_DoDiv(ExecContext& ctx,
   // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:68)
   NondetRegStruct x23 =
       exec_IsZero(ctx, (arg1_0.low + arg1_0.high), LAYOUT_LOOKUP(layout4, isZero));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:70)
   Val x24 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
   NondetRegStruct x25 = exec_NondetBitReg(ctx, x24, LAYOUT_LOOKUP(layout4, topNum));
@@ -1450,7 +1450,7 @@ __device__ ValU32Struct exec_OpSRL(ExecContext& ctx,
 __device__ NondetRegStruct exec_TopBit(ExecContext& ctx,
                                        ValU32Struct arg0,
                                        BoundLayout<TopBitLayout> layout1) {
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
   Val x2 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
   NondetRegStruct x3 = exec_NondetBitReg(ctx, x2, LAYOUT_LOOKUP(layout1, _super));
@@ -1458,7 +1458,7 @@ __device__ NondetRegStruct exec_TopBit(ExecContext& ctx,
   Val x4 = (x3._super * Val(32768));
   Val x5 = ((arg0.high - x4) * Val(2));
   NondetU16RegStruct x6 = exec_NondetU16Reg(ctx, x5, LAYOUT_LOOKUP(layout1, rest));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:99)
   Val x7 = (x6._super._super * Val(1006632961));
   EQZ((arg0.high - (x7 + x4)), "TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:99)");
@@ -3514,7 +3514,7 @@ __device__ ValU32Struct exec_OpLH(ExecContext& ctx,
   // OpLH(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:100)
   NondetU16RegStruct x8 =
       exec_NondetU16Reg(ctx, (bitAnd(x6, Val(32767)) * Val(2)), LAYOUT_LOOKUP(layout1, low15x2));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // OpLH(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:101)
   Val x9 = (x8._super._super * Val(1006632961));
   Val x10_0 = ((x7._super * Val(32768)) + x9);
@@ -4846,7 +4846,7 @@ __device__ InstOutputBaseStruct exec_ControlDone(ExecContext& ctx,
   ComponentStruct x8 = ComponentStruct{};
   ComponentStruct x9;
   if (to_size_t((x5 * (Val(1) - x6._super)))) {
-    // Log(<preamble>:22)
+    // Log(<preamble>:26)
     // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:168)
     INVOKE_EXTERN(ctx, log, "Verifying end state", std::initializer_list<Val>{});
     // ControlDone(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:166)
@@ -7319,7 +7319,7 @@ __device__ ReadAddrStruct exec_ReadAddr(ExecContext& ctx,
       exec_MemoryRead(ctx, arg0, (arg1_0 + Val(1073725440)), LAYOUT_LOOKUP(layout2, addr32));
   // ReadAddr(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:79)
   Val x4 = (x3._super.high * Val(16384));
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   Val x5 = (x3._super.low * Val(1509949441));
   return ReadAddrStruct{._super = (x4 + x5)};
 }
@@ -7382,7 +7382,7 @@ __device__ PoseidonStateStruct exec_PoseidonPagingEntry(ExecContext& ctx,
                                                         NondetRegStruct arg0,
                                                         Val arg1_0,
                                                         BoundLayout<PoseidonStateLayout> layout2) {
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // PoseidonPagingEntry(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:110)
   Val x3 = (arg1_0 * Val(1342177281));
   // PoseidonPagingEntry(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:114)
@@ -8700,7 +8700,7 @@ __device__ PoseidonStateStruct exec_PoseidonPaging(ExecContext& ctx,
   // NodeAddrToIdx(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:336)
   // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:441)
   Val x4 = (Val(1140850688) - arg2_0.bufOutAddr._super);
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   Val x5 = (x4 * Val(1761607681));
   // nextPagingIdx(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:334)
   // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:442)
@@ -9671,7 +9671,7 @@ __device__ InstOutputBaseStruct exec_Poseidon1(ExecContext& ctx,
 __device__ CarryExtractStruct exec_CarryExtract(ExecContext& ctx,
                                                 Val arg0,
                                                 BoundLayout<CarryExtractLayout> layout1) {
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   // CarryExtract(zirgen/circuit/rv32im/v2/dsl/sha2.zir:34)
   Val x2 = (bitAnd(arg0, Val(983040)) * Val(2013235201));
   NondetRegStruct x3 = exec_NondetBitReg(ctx, bitAnd(x2, Val(1)), LAYOUT_LOOKUP(layout1, bit0));
@@ -9688,11 +9688,11 @@ __device__ CarryExtractStruct exec_CarryExtract(ExecContext& ctx,
 }
 __device__ UnpackReg_32__16_Struct exec_UnpackReg_32__16_(
     ExecContext& ctx, Val2Array arg0, BoundLayout<UnpackReg_32__16_Layout> layout1) {
-  // Div(<preamble>:15)
+  // Div(<preamble>:18)
   // UnpackNondet(zirgen/circuit/rv32im/v2/dsl/pack.zir:29)
   // UnpackReg(zirgen/circuit/rv32im/v2/dsl/pack.zir:34)
   DivStruct x2 = DivStruct{._super = bitAnd(arg0[0], Val(1))};
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   Val x3 = (bitAnd(arg0[0], Val(2)) * Val(1006632961));
   Val x4 = (bitAnd(arg0[0], Val(4)) * Val(1509949441));
   Val x5 = (bitAnd(arg0[0], Val(8)) * Val(1761607681));
@@ -9708,9 +9708,9 @@ __device__ UnpackReg_32__16_Struct exec_UnpackReg_32__16_(
   Val x15_0 = (bitAnd(arg0[0], Val(8192)) * Val(2013020161));
   Val x16 = (bitAnd(arg0[0], Val(16384)) * Val(2013143041));
   Val x17 = (bitAnd(arg0[0], Val(32768)) * Val(2013204481));
-  // Div(<preamble>:15)
+  // Div(<preamble>:18)
   DivStruct x18 = DivStruct{._super = bitAnd(arg0[1], Val(1))};
-  // Div(<preamble>:19)
+  // Div(<preamble>:22)
   Val x19 = (bitAnd(arg0[1], Val(2)) * Val(1006632961));
   Val x20 = (bitAnd(arg0[1], Val(4)) * Val(1509949441));
   Val x21 = (bitAnd(arg0[1], Val(8)) * Val(1761607681));
@@ -9974,7 +9974,7 @@ __device__ ShaStateStruct exec_ShaInvalid(ExecContext& ctx, BoundLayout<ShaState
 __device__ ShaStateStruct exec_ShaEcall(ExecContext& ctx,
                                         NondetRegStruct arg0,
                                         BoundLayout<ShaEcallLayout> layout1) {
-  // Log(<preamble>:22)
+  // Log(<preamble>:26)
   // ShaEcall(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:44)
   INVOKE_EXTERN(ctx, log, "SHA ECALL", std::initializer_list<Val>{});
   // ShaEcall(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:46)
@@ -9983,7 +9983,7 @@ __device__ ShaStateStruct exec_ShaEcall(ExecContext& ctx,
   ReadAddrStruct x3 = exec_ReadAddr(ctx, arg0, Val(11), LAYOUT_LOOKUP(layout1, stateOutAddr));
   // ShaEcall(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:48)
   ReadAddrStruct x4 = exec_ReadAddr(ctx, arg0, Val(12), LAYOUT_LOOKUP(layout1, dataAddr));
-  // Log(<preamble>:22)
+  // Log(<preamble>:26)
   // ShaEcall(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:49)
   INVOKE_EXTERN(ctx, log, "Data Addr: ", std::initializer_list<Val>{x4._super});
   // ShaEcall(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:50)
@@ -11975,7 +11975,7 @@ __device__ ShaStateStruct exec_ShaLoadData(ExecContext& ctx,
   // Add2(zirgen/circuit/rv32im/v2/dsl/sha2.zir:30)
   Val x870 = (x570 + ((x849 + x843) + x844));
   Val x871 = (x571 + ((x869 + x863) + x864));
-  // Log(<preamble>:22)
+  // Log(<preamble>:26)
   // ShaLoadData(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:140)
   INVOKE_EXTERN(ctx, log, "a = ", std::initializer_list<Val>{x828, x829});
   // ShaLoadData(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:141)
@@ -13352,7 +13352,7 @@ __device__ ShaStateStruct exec_ShaMix(ExecContext& ctx,
   // Add2(zirgen/circuit/rv32im/v2/dsl/sha2.zir:30)
   Val x1094 = (x794 + ((x1073 + x1067) + x1068));
   Val x1095 = (x795 + ((x1093 + x1087) + x1088));
-  // Log(<preamble>:22)
+  // Log(<preamble>:26)
   // ShaMix(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:168)
   INVOKE_EXTERN(ctx, log, "a = ", std::initializer_list<Val>{x1052, x1053});
   // ShaMix(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:169)
@@ -14220,7 +14220,7 @@ __device__ BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,
                                               BoundLayout<BigIntEcallLayout> layout1) {
   // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:50)
   ReadAddrStruct x2 = exec_ReadAddr(ctx, arg0, Val(7), LAYOUT_LOOKUP(layout1, pc));
-  // Log(<preamble>:22)
+  // Log(<preamble>:26)
   // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:51)
   INVOKE_EXTERN(ctx, log, "pc", std::initializer_list<Val>{x2._super});
   // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:53)
@@ -14412,7 +14412,7 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
                                              BoundLayout<BigIntStepLayout> layout2) {
   // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:125)
   Val x3 = (arg1_0.pc._super + Val(1));
-  // Log(<preamble>:22)
+  // Log(<preamble>:26)
   // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:126)
   INVOKE_EXTERN(ctx, log, "pc", std::initializer_list<Val>{x3});
   // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:129)
@@ -14443,11 +14443,11 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
           ([&](Val5Array::value_type x14_0,
                BoundLayout<NondetRegLayout5LayoutArray::value_type> x15_0) {
             Val x16 = bitAnd(x5.byte0._super, x12_0[to_size_t(x14_0)]);
-            // Div(<preamble>:16)
+            // Div(<preamble>:19)
             Val x17 = inv_0(x12_0[to_size_t(x14_0)]);
-            // Div(<preamble>:17)
+            // Div(<preamble>:20)
             EQZ(((x17 * x12_0[to_size_t(x14_0)]) - Val(1)),
-                "loc(callsite( Div ( <preamble> :17:22) at  BigIntStep ( "
+                "loc(callsite( Div ( <preamble> :20:22) at  BigIntStep ( "
                 "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :139:61)))");
             NondetRegStruct x18 = exec_NondetBitReg(ctx, (x17 * x16), x15_0);
             return x18;
@@ -14465,11 +14465,11 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
       LAYOUT_LOOKUP(layout2, coeffBits),
       ([&](Val3Array::value_type x26, BoundLayout<NondetRegLayout3LayoutArray::value_type> x27) {
         Val x28 = bitAnd(x5.byte0._super, x12_0[to_size_t((x26 + Val(5)))]);
-        // Div(<preamble>:16)
+        // Div(<preamble>:19)
         Val x29 = inv_0(x12_0[to_size_t((x26 + Val(5)))]);
-        // Div(<preamble>:17)
+        // Div(<preamble>:20)
         EQZ(((x29 * x12_0[to_size_t((x26 + Val(5)))]) - Val(1)),
-            "loc(callsite( Div ( <preamble> :17:22) at  BigIntStep ( "
+            "loc(callsite( Div ( <preamble> :20:22) at  BigIntStep ( "
             "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :142:67)))");
         NondetRegStruct x30 = exec_NondetBitReg(ctx, (x29 * x28), x27);
         return x30;
@@ -14608,7 +14608,7 @@ __device__ InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,
                                              NondetRegStruct arg0,
                                              InstInputStruct arg1_0,
                                              BoundLayout<BigInt0Layout> layout2) {
-  // Log(<preamble>:22)
+  // Log(<preamble>:26)
   // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:179)
   INVOKE_EXTERN(ctx, log, "BigInt0", std::initializer_list<Val>{});
   // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:180)
@@ -16200,7 +16200,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
   Val x3 = (Val(1) - LOAD(LAYOUT_LOOKUP(arg0, isFirstCycle._super), 0));
   NondetRegStruct x4;
   if (to_size_t(LOAD(LAYOUT_LOOKUP(arg0, isFirstCycle._super), 0))) {
-    // Reg(<preamble>:4)
+    // Reg(<preamble>:5)
     // Top(zirgen/circuit/rv32im/v2/dsl/top.zir:50)
     NondetRegStruct x5 =
         NondetRegStruct{._super = LOAD(LAYOUT_LOOKUP(arg0, cycleRedef.arm0._super), 0)};
@@ -20962,7 +20962,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       if (to_size_t(
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm0._super.pcZero._super._super),
                    0))) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonPagingEntry(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:119)
         // PoseidonEntry(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:133)
@@ -21251,7 +21251,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         23),
                     _super),
                 0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x531 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -21275,7 +21275,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                                             x523, x524, x525, x526, x527, x528, x529, x530},
             .zcheck = x531};
       } else if (to_size_t(x494)) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonEcall(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:105)
         // PoseidonEntry(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:135)
@@ -21564,7 +21564,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         23),
                     _super),
                 0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x567 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -21599,7 +21599,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 1),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // PoseidonLoadState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:156)
       // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:471)
@@ -21823,7 +21823,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                       LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm1._super._super.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x604 = NondetExtRegStruct{
           ._super = LOAD_EXT(
@@ -22965,7 +22965,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
         } else {
           assert(0 && "Reached unreachable mux arm");
         }
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonLoadInShort(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:194)
         NondetRegStruct x662 = NondetRegStruct{
@@ -23253,7 +23253,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         23),
                     _super),
                 0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x697 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -24391,7 +24391,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
         } else {
           assert(0 && "Reached unreachable mux arm");
         }
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonLoadInLow(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:211)
         NondetRegStruct x754 = NondetRegStruct{
@@ -24679,7 +24679,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         23),
                     _super),
                 0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x789 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -25817,7 +25817,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
         } else {
           assert(0 && "Reached unreachable mux arm");
         }
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonLoadInHigh(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:228)
         NondetRegStruct x846 = NondetRegStruct{
@@ -26105,7 +26105,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         23),
                     _super),
                 0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x881 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -26140,7 +26140,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 3),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // PoseidonInvalid(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:61)
       // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:473)
@@ -26356,7 +26356,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                            LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm3._super.inner), 23),
                        _super),
                    0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x918 = NondetExtRegStruct{
           ._super = LOAD_EXT(
@@ -26382,7 +26382,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 4),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:474)
       NondetRegStruct x919 = NondetRegStruct{
@@ -26597,7 +26597,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                            LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm4._super.inner), 23),
                        _super),
                    0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x954 = NondetExtRegStruct{
           ._super = LOAD_EXT(
@@ -26630,7 +26630,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       Val x956 = (Val(1) - x955.checkOut._super);
       PoseidonStateStruct x957;
       if (to_size_t(x955.checkOut._super)) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonCheckOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:276)
         NondetRegStruct x958 = NondetRegStruct{
@@ -26894,7 +26894,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                                                23),
                               _super),
                 0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x993 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -27097,7 +27097,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
         } else {
           assert(0 && "Reached unreachable mux arm");
         }
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:312)
         NondetRegStruct x1010 = NondetRegStruct{
@@ -27385,7 +27385,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         23),
                     _super),
                 0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x1045 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -27460,7 +27460,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                       0),
                   _super),
               0))) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:353)
         // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:456)
@@ -27745,7 +27745,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              23),
                          _super),
                      0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x1086 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -27776,7 +27776,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              1),
                          _super),
                      0))) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonPagingLoadPage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:375)
         // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:457)
@@ -28061,7 +28061,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              23),
                          _super),
                      0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x1122 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -28092,7 +28092,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              2),
                          _super),
                      0))) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonPagingLoadDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:389)
         // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:458)
@@ -28377,7 +28377,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              23),
                          _super),
                      0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x1158 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -28408,7 +28408,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              3),
                          _super),
                      0))) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonPagingStorePage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:423)
         // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:459)
@@ -28693,7 +28693,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              23),
                          _super),
                      0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x1194 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -28724,7 +28724,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              4),
                          _super),
                      0))) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:401)
         // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:460)
@@ -29009,7 +29009,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              23),
                          _super),
                      0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x1230 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -29040,7 +29040,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              5),
                          _super),
                      0))) {
-        // Reg(<preamble>:4)
+        // Reg(<preamble>:5)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
         // PoseidonPagingStoreDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:437)
         // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:461)
@@ -29325,7 +29325,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                              23),
                          _super),
                      0)};
-        // ExtReg(<preamble>:10)
+        // ExtReg(<preamble>:12)
         // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
         NondetExtRegStruct x1266 = NondetExtRegStruct{
             ._super = LOAD_EXT(
@@ -29507,7 +29507,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       } else {
         assert(0 && "Reached unreachable mux arm");
       }
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:326)
       NondetRegStruct x1284 = NondetRegStruct{
@@ -29730,7 +29730,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                       LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm7._super._super.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1319 = NondetExtRegStruct{
           ._super = LOAD_EXT(
@@ -29770,7 +29770,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
             LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 0),
                           _super),
             0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // PoseidonExtRound(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:253)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:487)
@@ -29987,7 +29987,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                            LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm0._super.inner), 23),
                        _super),
                    0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1357 = NondetExtRegStruct{
           ._super = LOAD_EXT(
@@ -30013,7 +30013,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 1),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // PoseidonIntRounds(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:258)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:488)
@@ -30229,7 +30229,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                            LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm1._super.inner), 23),
                        _super),
                    0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1393 = NondetExtRegStruct{
           ._super = LOAD_EXT(
@@ -30255,7 +30255,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 2),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // PoseidonInvalid(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:61)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:489)
@@ -30441,7 +30441,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                   LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm2.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1429 = NondetExtRegStruct{
           ._super =
@@ -30467,7 +30467,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 3),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:490)
       NondetRegStruct x1430 = NondetRegStruct{
@@ -30652,7 +30652,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                   LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm3.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1465 = NondetExtRegStruct{
           ._super =
@@ -30678,7 +30678,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 4),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:491)
       NondetRegStruct x1466 = NondetRegStruct{
@@ -30863,7 +30863,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                   LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm4.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1501 = NondetExtRegStruct{
           ._super =
@@ -30889,7 +30889,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 5),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:492)
       NondetRegStruct x1502 = NondetRegStruct{
@@ -31074,7 +31074,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                   LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm5.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1537 = NondetExtRegStruct{
           ._super =
@@ -31100,7 +31100,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 6),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:493)
       NondetRegStruct x1538 = NondetRegStruct{
@@ -31285,7 +31285,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                   LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm6.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1573 = NondetExtRegStruct{
           ._super =
@@ -31311,7 +31311,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 7),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
       // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:494)
       NondetRegStruct x1574 = NondetRegStruct{
@@ -31496,7 +31496,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                   LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm7.inner), 23),
                   _super),
               0)};
-      // ExtReg(<preamble>:10)
+      // ExtReg(<preamble>:12)
       // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:48)
       NondetExtRegStruct x1609 = NondetExtRegStruct{
           ._super =
@@ -31536,7 +31536,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
             LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 0),
                           _super),
             0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // ShaEcall(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:52)
       // Sha0(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:229)
@@ -32245,7 +32245,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       } else {
         assert(0 && "Reached unreachable mux arm");
       }
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // ShaLoadState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:114)
       NondetRegStruct x1719 = NondetRegStruct{
@@ -33022,7 +33022,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 2),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // ShaLoadData(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:144)
       // Sha0(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:231)
@@ -33800,7 +33800,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 3),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // ShaMix(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:172)
       // Sha0(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:232)
@@ -34610,7 +34610,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       } else {
         assert(0 && "Reached unreachable mux arm");
       }
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // ShaStoreState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:205)
       NondetRegStruct x2032 = NondetRegStruct{
@@ -35387,7 +35387,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 5),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // ShaInvalid(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:34)
       // Sha0(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:234)
@@ -36063,7 +36063,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 6),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // Sha0(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:235)
       NondetRegStruct x2238 = NondetRegStruct{
@@ -36738,7 +36738,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 7),
                             _super),
                         0))) {
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // ShaState(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:20)
       // Sha0(zirgen/circuit/rv32im/v2/dsl/inst_sha.zir:236)
       NondetRegStruct x2341 = NondetRegStruct{
@@ -37435,7 +37435,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.isEcall._super),
               0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2447 = NondetRegStruct{
           ._super = LOAD(
@@ -38129,7 +38129,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       NondetRegStruct x2520 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.isEcall._super), 0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2521 = NondetRegStruct{
           ._super =
@@ -38293,7 +38293,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       NondetRegStruct x2541 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.isEcall._super), 0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2542 = NondetRegStruct{
           ._super =
@@ -38456,7 +38456,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       NondetRegStruct x2562 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.isEcall._super), 0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2563 = NondetRegStruct{
           ._super =
@@ -38619,7 +38619,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       NondetRegStruct x2583 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.isEcall._super), 0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2584 = NondetRegStruct{
           ._super =
@@ -38782,7 +38782,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       NondetRegStruct x2604 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.isEcall._super), 0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2605 = NondetRegStruct{
           ._super =
@@ -38945,7 +38945,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       NondetRegStruct x2625 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.isEcall._super), 0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2626 = NondetRegStruct{
           ._super =
@@ -39108,7 +39108,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       NondetRegStruct x2646 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.isEcall._super), 0)};
-      // Reg(<preamble>:4)
+      // Reg(<preamble>:5)
       // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
       NondetRegStruct x2647 = NondetRegStruct{
           ._super =
