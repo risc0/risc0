@@ -126,7 +126,10 @@ impl<'a> Preflight<'a> {
                 ..Default::default()
             },
             segment,
-            pager: PagedMemory::new(segment.partial_image.clone()),
+            pager: PagedMemory::new(
+                segment.partial_image.clone(),
+                false, /* tracing_enabled */
+            ),
             pc: ByteAddr(0),
             machine_mode: 0,
             cur_write: 0,
