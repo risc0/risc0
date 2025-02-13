@@ -56,3 +56,8 @@ fn main() {
     let is_one: bool = receipt.journal.decode().expect("Journal should contain a single `bool`");
     println!("Pairing batch should give one; did it? {}", is_one);
 }
+
+#[test]
+fn test_pairing() {
+    assert!(prove_pairing().journal.decode::<bool>().unwrap(), "Pairing expected to give identity");
+}
