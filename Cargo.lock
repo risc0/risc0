@@ -1597,18 +1597,18 @@ dependencies = [
 
 [[package]]
 name = "derive_more"
-version = "1.0.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a9b99b9cbbe49445b21764dc0625032a89b145a2642e67603e1c936f5458d05"
+checksum = "093242cf7570c207c83073cf82f79706fe7b8317e98620a47d5be7c3d8497678"
 dependencies = [
  "derive_more-impl",
 ]
 
 [[package]]
 name = "derive_more-impl"
-version = "1.0.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb7330aeadfbe296029522e6c40f315320aba36fc43a5b3632f3795348f3bd22"
+checksum = "bda628edc44c4bb645fbe0f758797143e4e07926f7ebf4e9bdfbd3d2ce621df3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4381,7 +4381,7 @@ version = "1.3.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "elf",
  "risc0-zkp",
  "risc0-zkvm-methods",
@@ -4463,7 +4463,7 @@ version = "1.3.0-alpha.1"
 dependencies = [
  "cc",
  "cust",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "glob",
  "risc0-build-kernel",
  "risc0-core",
@@ -4521,7 +4521,7 @@ dependencies = [
  "crossbeam",
  "crypto-bigint",
  "cust",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "enum-map",
  "lazy-regex",
  "malachite",
@@ -4564,7 +4564,7 @@ dependencies = [
  "byteorder",
  "cfg-if",
  "clap 4.5.23",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "flate2",
  "malachite",
  "num-derive",
@@ -4592,7 +4592,7 @@ version = "0.1.0"
 dependencies = [
  "cc",
  "cust",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "glob",
  "risc0-build-kernel",
  "risc0-core",
@@ -4729,6 +4729,7 @@ dependencies = [
  "ciborium",
  "clap 4.5.23",
  "crypto-bigint",
+ "derive_more 2.0.1",
  "elf",
  "enum-iterator",
  "enum-map",
