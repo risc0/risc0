@@ -380,10 +380,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
         self.output_digest = self.pending.output_digest.take();
         self.exit_code = self.pending.exit_code.take();
-        let page_actions = self.pager.commit_step();
 
         for trace in &self.trace {
-            for action in &page_actions {
+            for action in self.pager.pending_actions() {
                 let event = match action {
                     pager::Action::PageRead(_, cycles) => TraceEvent::PageIn {
                         cycles: *cycles as u64,
@@ -396,6 +395,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 trace.borrow_mut().trace_callback(event)?;
             }
         }
+        self.pager.commit_step();
 
         Ok(())
     }
