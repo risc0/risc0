@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cmp::max, collections::HashMap, io::Cursor};
+use std::{collections::HashMap, io::Cursor};
 
 use anyhow::{anyhow, bail, ensure, Result};
-use auto_ops::impl_op_ex;
 use derive_more::Debug;
 use malachite::Natural;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::WordAddr;
-use smallvec::{smallvec, SmallVec};
 
 use super::{
     bibc::{self, BigIntIO},
+    byte_poly::BytePolyProgram,
     platform::*,
     r0vm::{LoadOp, Risc0Context},
     CycleState,
 };
 
 pub(crate) const BIGINT_STATE_COUNT: usize = 5 + 16;
+pub(crate) const BIGINT_ACCUM_STATE_COUNT: usize = 3 * 4;
 
 /// BigInt width, in words, handled by the BigInt accelerator circuit.
 pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;
@@ -40,20 +40,6 @@ pub(crate) const BIGINT_WIDTH_BYTES: usize = BIGINT_WIDTH_WORDS * WORD_SIZE;
 
 pub(crate) type BigIntBytes = [u8; BIGINT_WIDTH_BYTES];
 type BigIntWitness = HashMap<WordAddr, BigIntBytes>;
-
-#[derive(Clone, Debug, Default)]
-pub(crate) struct BytePolynomial {
-    pub coeffs: SmallVec<[i32; 64]>,
-}
-
-#[derive(Debug)]
-struct BytePolyProgram {
-    pub in_carry: bool,
-    pub poly: BytePolynomial,
-    pub term: BytePolynomial,
-    pub total: BytePolynomial,
-    pub total_carry: BytePolynomial,
-}
 
 #[derive(Clone, Debug)]
 pub(crate) struct BigIntState {
@@ -183,9 +169,7 @@ impl BigInt {
             }
         }
 
-        let parts: Vec<_> = self.state.bytes.iter().map(|x| *x as i32).collect();
-        let delta_poly = BytePolynomial::new(&parts);
-        self.program.step(&insn, &delta_poly)?;
+        self.program.step(&insn, &self.state.bytes)?;
 
         self.state.is_ecall = false;
         self.state.poly_op = insn.poly_op;
@@ -334,137 +318,3 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
 
     bigint.run(ctx, &witness)
 }
-
-impl BytePolyProgram {
-    pub fn new() -> Self {
-        Self {
-            in_carry: false,
-            poly: BytePolynomial::zero(),
-            term: BytePolynomial::one(),
-            total: BytePolynomial::zero(),
-            total_carry: BytePolynomial::default(),
-        }
-    }
-
-    pub fn step(&mut self, insn: &Instruction, delta_poly: &BytePolynomial) -> Result<()> {
-        let new_poly = &self.poly + delta_poly;
-        match insn.poly_op {
-            PolyOp::Reset => {
-                self.reset();
-            }
-            PolyOp::Shift => {
-                self.poly = new_poly.shift();
-            }
-            PolyOp::SetTerm => {
-                self.poly = BytePolynomial::zero();
-                self.term = new_poly.clone();
-            }
-            PolyOp::AddTotal => {
-                self.total = &self.total + &new_poly * &self.term * insn.coeff;
-                self.term = BytePolynomial::one();
-                self.poly = BytePolynomial::zero();
-            }
-            PolyOp::Carry1 => {
-                let neg_poly = BytePolynomial::new(&[-128; BIGINT_WIDTH_BYTES]);
-                self.poly = &self.poly + (delta_poly + neg_poly) * 64 * 256;
-            }
-            PolyOp::Carry2 => {
-                self.poly = &self.poly + delta_poly * 256;
-            }
-            PolyOp::EqZero => {
-                let bp = BytePolynomial::new(&[-256, 1]);
-                self.total = &self.total + bp * &new_poly;
-                self.total.eqz()?;
-                self.reset();
-                self.in_carry = false;
-            }
-        }
-
-        tracing::trace!(
-            "delta_poly[0]: {}, new_poly[0]: {}, poly[0]: {}, term[0]: {}, total[0]: {}",
-            delta_poly.coeffs[0],
-            new_poly.coeffs[0],
-            self.poly.coeffs[0],
-            self.term.coeffs[0],
-            self.total.coeffs[0],
-        );
-
-        Ok(())
-    }
-
-    fn reset(&mut self) {
-        self.poly = BytePolynomial::zero();
-        self.term = BytePolynomial::one();
-        self.total = BytePolynomial::zero();
-    }
-}
-
-impl BytePolynomial {
-    pub fn new(coeffs: &[i32]) -> Self {
-        Self {
-            coeffs: SmallVec::from_slice(coeffs),
-        }
-    }
-
-    fn one() -> Self {
-        Self {
-            coeffs: smallvec![1],
-        }
-    }
-
-    fn zero() -> Self {
-        Self {
-            coeffs: smallvec![0],
-        }
-    }
-
-    fn shift(&self) -> Self {
-        let mut ret = self.coeffs.clone();
-        for _ in 0..BIGINT_WIDTH_BYTES {
-            ret.insert(0, 0);
-        }
-        Self::new(&ret)
-    }
-
-    fn eqz(&self) -> Result<()> {
-        for &coeff in self.coeffs.iter() {
-            ensure!(coeff == 0, "Invalid eqz in bigint program");
-        }
-        Ok(())
-    }
-}
-
-fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = smallvec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
-    for (i, coeff) in ret.iter_mut().enumerate() {
-        if i < lhs.coeffs.len() {
-            *coeff += lhs.coeffs[i];
-        }
-        if i < rhs.coeffs.len() {
-            *coeff += rhs.coeffs[i];
-        }
-    }
-    BytePolynomial { coeffs: ret }
-}
-
-fn byte_poly_mul(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = smallvec![0; lhs.coeffs.len() + rhs.coeffs.len()];
-    for (i, lhs) in lhs.coeffs.iter().enumerate() {
-        for (j, rhs) in rhs.coeffs.iter().enumerate() {
-            ret[i + j] += lhs * rhs;
-        }
-    }
-    BytePolynomial { coeffs: ret }
-}
-
-fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
-    let mut ret = lhs.coeffs.clone();
-    for coeff in ret.iter_mut() {
-        *coeff *= rhs;
-    }
-    BytePolynomial { coeffs: ret }
-}
-
-impl_op_ex!(+|a: &BytePolynomial, b: &BytePolynomial| -> BytePolynomial { byte_poly_add(a, b) });
-impl_op_ex!(*|a: &BytePolynomial, b: &BytePolynomial| -> BytePolynomial { byte_poly_mul(a, b) });
-impl_op_ex!(*|a: &BytePolynomial, b: i32| -> BytePolynomial { byte_poly_mul_const(a, b) });

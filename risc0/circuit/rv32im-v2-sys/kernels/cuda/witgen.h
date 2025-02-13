@@ -51,10 +51,10 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  __device__ MutableBufObj(Buffer& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
+  __device__ MutableBufObj(Buffer& buf, size_t zeroBack = 0) : buf(buf), zeroBack(zeroBack) {}
 
   __device__ Val load(ExecContext& ctx, size_t col, size_t back) override {
-    if (zeroBack && back > 0) {
+    if (zeroBack && col > zeroBack && back > 0) {
       return 0;
     }
     size_t backRow = (buf.rows + ctx.cycle - back) % buf.rows;
@@ -66,7 +66,7 @@ struct MutableBufObj : public BufferObj {
   }
 
   Buffer& buf;
-  bool zeroBack;
+  size_t zeroBack;
 };
 
 using MutableBuf = MutableBufObj*;

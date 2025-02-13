@@ -178,6 +178,8 @@ pub use receipt::{
 
 pub use ::serde::de::DeserializeOwned;
 
+pub use risc0_zkp::core::digest::{digest, Digest};
+
 use semver::Version;
 
 /// Reports the current version of this crate.
