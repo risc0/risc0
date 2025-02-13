@@ -992,7 +992,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "substrate-bn"
 version = "0.6.0"
-source = "git+https://github.com/risc0/paritytech-bn?rev=5d25b59f48556d127ddb099e6bfd02ee7c98862f#5d25b59f48556d127ddb099e6bfd02ee7c98862f"
+source = "git+https://github.com/risc0/paritytech-bn?rev=5bbe07d68839732968e44bbff60ddc2391f1cefd#5bbe07d68839732968e44bbff60ddc2391f1cefd"
 dependencies = [
  "bytemuck",
  "byteorder",
