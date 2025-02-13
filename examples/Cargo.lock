@@ -508,6 +508,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "bls12_381-example"
+version = "0.1.0"
+dependencies = [
+ "bls12_381-methods",
+ "risc0-zkvm",
+]
+
+[[package]]
+name = "bls12_381-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "blst"
 version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
