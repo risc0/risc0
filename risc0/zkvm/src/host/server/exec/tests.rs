@@ -28,8 +28,8 @@ use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HEAP_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
-    SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
+    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF,
+    STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{
     fileno,
@@ -48,24 +48,19 @@ use crate::{
     },
     serde::to_vec,
     sha::{Digest, Digestible},
-    ExecutorEnv, ExecutorImpl, Session, SimpleSegmentRef,
+    ExecutorEnv, ExecutorImpl, SegmentVersion, Session, SimpleSegmentRef,
 };
 
-#[derive(Clone, Copy)]
-enum TestVersion {
-    V1,
-    V2,
-}
-use TestVersion::{V1, V2};
+use SegmentVersion::{V1, V2};
 
 #[template]
 #[rstest]
 #[case(V1)]
 #[case(V2)]
 #[test_log::test]
-fn base(#[case] version: TestVersion) {}
+fn base(#[case] version: SegmentVersion) {}
 
-fn execute_elf(version: TestVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
+fn execute_elf(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
     match version {
         V1 => ExecutorImpl::from_elf(env, elf)
             .unwrap()
@@ -76,12 +71,12 @@ fn execute_elf(version: TestVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Ses
     }
 }
 
-fn multi_test(version: TestVersion, spec: MultiTestSpec) {
+fn multi_test(version: SegmentVersion, spec: MultiTestSpec) {
     let session = multi_test_raw(version, spec).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
-fn multi_test_raw(version: TestVersion, spec: MultiTestSpec) -> Result<Session> {
+fn multi_test_raw(version: SegmentVersion, spec: MultiTestSpec) -> Result<Session> {
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()
@@ -91,7 +86,7 @@ fn multi_test_raw(version: TestVersion, spec: MultiTestSpec) -> Result<Session> 
 }
 
 #[apply(base)]
-fn cpp_test(#[case] version: TestVersion) {
+fn cpp_test(#[case] version: SegmentVersion) {
     let session = execute_elf(version, ExecutorEnv::default(), BLST_ELF).unwrap();
     let message: String = session.journal.unwrap().decode().unwrap();
     assert_eq!(message.as_str(), "blst is such a blast");
@@ -102,7 +97,7 @@ fn cpp_test(#[case] version: TestVersion) {
 #[ignore]
 #[case(V2)]
 #[should_panic(expected = "too small")]
-fn insufficient_segment_limit(#[case] version: TestVersion) {
+fn insufficient_segment_limit(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .segment_limit_po2(13) // 8K cycles
         .write(&MultiTestSpec::DoNothing)
@@ -254,12 +249,12 @@ fn system_split_v2() {
 }
 
 #[apply(base)]
-fn libm_build(#[case] version: TestVersion) {
+fn libm_build(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::LibM);
 }
 
 #[apply(base)]
-fn host_syscall(#[case] version: TestVersion) {
+fn host_syscall(#[case] version: SegmentVersion) {
     let expected: Vec<Bytes> = vec![
         "".into(),
         "H".into(),
@@ -288,7 +283,7 @@ fn host_syscall(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn host_syscall_words(#[case] version: TestVersion) {
+fn host_syscall_words(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::SyscallWords)
         .unwrap()
@@ -302,7 +297,7 @@ fn host_syscall_words(#[case] version: TestVersion) {
 // Make sure panics in the callback get propagated correctly.
 #[apply(base)]
 #[should_panic(expected = "I am panicking from here!")]
-fn host_syscall_callback_panic(#[case] version: TestVersion) {
+fn host_syscall_callback_panic(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Syscall { count: 5 })
         .unwrap()
@@ -316,17 +311,17 @@ fn host_syscall_callback_panic(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn sha_accel(#[case] version: TestVersion) {
+fn sha_accel(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::ShaConforms);
 }
 
 #[apply(base)]
-fn sha_cycle_count(#[case] version: TestVersion) {
+fn sha_cycle_count(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::ShaCycleCount);
 }
 
 #[apply(base)]
-fn rsa_compat(#[case] version: TestVersion) {
+fn rsa_compat(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::RsaCompat);
 }
 
@@ -334,7 +329,7 @@ fn rsa_compat(#[case] version: TestVersion) {
 #[case(V1)]
 #[case(V2)]
 #[test_log::test]
-fn bigint_accel(#[case] version: TestVersion) {
+fn bigint_accel(#[case] version: SegmentVersion) {
     use crate::host::server::testutils::generate_bigint_test_cases;
 
     let cases = generate_bigint_test_cases(&mut rand::thread_rng(), 10);
@@ -365,7 +360,7 @@ fn bigint_accel(#[case] version: TestVersion) {
 #[case(V1)]
 #[case(V2)]
 #[test_log::test]
-fn bigint_accel_mod_zero_product_too_large(#[case] version: TestVersion) {
+fn bigint_accel_mod_zero_product_too_large(#[case] version: SegmentVersion) {
     let input = MultiTestSpec::BigInt {
         x: [u32::MAX; bigint::WIDTH_WORDS],
         y: [u32::MAX; bigint::WIDTH_WORDS],
@@ -384,7 +379,7 @@ fn bigint_accel_mod_zero_product_too_large(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn env_stdio(#[case] version: TestVersion) {
+fn env_stdio(#[case] version: SegmentVersion) {
     const MSG: &str = "Hello world!  This is a test of standard input and output.";
     const FD: u32 = 123;
     let spec = to_vec(&MultiTestSpec::EchoStdout { nbytes: 9, fd: FD }).unwrap();
@@ -407,7 +402,7 @@ fn env_stdio(#[case] version: TestVersion) {
 // To make sure we don't miss any edge cases, this tries all permutations of
 // start alignment, end alignment, and 0, 1, or 2 whole words.
 #[apply(base)]
-fn posix_style_read(#[case] version: TestVersion) {
+fn posix_style_read(#[case] version: SegmentVersion) {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = (b'a'..=b'z')
@@ -492,7 +487,7 @@ fn posix_style_read(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn short_read_combinations(#[case] version: TestVersion) {
+fn short_read_combinations(#[case] version: SegmentVersion) {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = (b'a'..=b'l').collect();
@@ -541,7 +536,7 @@ fn short_read_combinations(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn unaligned_short_read(#[case] version: TestVersion) {
+fn unaligned_short_read(#[case] version: SegmentVersion) {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = vec![0; 9];
@@ -568,7 +563,7 @@ fn unaligned_short_read(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn large_io_words(#[case] version: TestVersion) {
+fn large_io_words(#[case] version: SegmentVersion) {
     const FD: u32 = 123;
     let buf: Vec<u32> = (0..400_000).collect();
     let expected = buf.clone();
@@ -591,7 +586,7 @@ fn large_io_words(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn large_io_bytes(#[case] version: TestVersion) {
+fn large_io_bytes(#[case] version: SegmentVersion) {
     const FD: u32 = 123;
     let buf: Vec<u32> = (0..400_000).collect();
     let nbytes = (buf.len() * WORD_SIZE) as u32;
@@ -616,13 +611,13 @@ mod sys_verify {
 
     use super::*;
 
-    fn exec_hello_commit(version: TestVersion) -> Session {
+    fn exec_hello_commit(version: SegmentVersion) -> Session {
         let session = execute_elf(version, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
         session
     }
 
-    fn exec_halt(version: TestVersion, exit_code: u8) -> Session {
+    fn exec_halt(version: SegmentVersion, exit_code: u8) -> Session {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::Halt(exit_code))
             .unwrap()
@@ -633,7 +628,7 @@ mod sys_verify {
         session
     }
 
-    fn exec_pause(version: TestVersion, exit_code: u8) -> Session {
+    fn exec_pause(version: SegmentVersion, exit_code: u8) -> Session {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::PauseResume(exit_code))
             .unwrap()
@@ -645,7 +640,7 @@ mod sys_verify {
     }
 
     #[apply(base)]
-    fn sys_verify(#[case] version: TestVersion) {
+    fn sys_verify(#[case] version: SegmentVersion) {
         use risc0_zkvm_methods::{HELLO_COMMIT_ID, HELLO_COMMIT_V2_USER_ID};
 
         let hello_commit_session = exec_hello_commit(version);
@@ -685,7 +680,7 @@ mod sys_verify {
     }
 
     #[apply(base)]
-    fn sys_verify_halt_codes(#[case] version: TestVersion) {
+    fn sys_verify_halt_codes(#[case] version: SegmentVersion) {
         use risc0_zkvm_methods::{MULTI_TEST_ID, MULTI_TEST_V2_USER_ID};
 
         let image_id: Digest = match version {
@@ -716,7 +711,7 @@ mod sys_verify {
     }
 
     #[apply(base)]
-    fn sys_verify_integrity(#[case] version: TestVersion) {
+    fn sys_verify_integrity(#[case] version: SegmentVersion) {
         let hello_commit_session = exec_hello_commit(version);
         let claim = hello_commit_session.claim().unwrap();
 
@@ -744,7 +739,7 @@ mod sys_verify {
     }
 
     #[apply(base)]
-    fn sys_verify_integrity_halt_codes(#[case] version: TestVersion) {
+    fn sys_verify_integrity_halt_codes(#[case] version: SegmentVersion) {
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(version, code);
@@ -766,7 +761,7 @@ mod sys_verify {
     }
 
     #[apply(base)]
-    fn sys_verify_integrity_pause_codes(#[case] version: TestVersion) {
+    fn sys_verify_integrity_pause_codes(#[case] version: SegmentVersion) {
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_halt_codes: code = {code}");
             let pause_session = exec_pause(version, code);
@@ -788,7 +783,7 @@ mod sys_verify {
     }
 
     #[apply(base)]
-    fn sys_verify_integrity_pruned_claim(#[case] version: TestVersion) {
+    fn sys_verify_integrity_pruned_claim(#[case] version: SegmentVersion) {
         let hello_commit_session = exec_hello_commit(version);
         let claim = hello_commit_session.claim().unwrap();
 
@@ -821,7 +816,7 @@ mod sys_verify {
 }
 
 #[apply(base)]
-fn large_sha(#[case] version: TestVersion) {
+fn large_sha(#[case] version: SegmentVersion) {
     let data = vec![0u8; 100_000];
     let expected = hex::encode(Sha256::digest(&data));
     let env = ExecutorEnv::builder()
@@ -835,7 +830,7 @@ fn large_sha(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn std_stdio(#[case] version: TestVersion) {
+fn std_stdio(#[case] version: SegmentVersion) {
     const STDIN: &str = "Hello world from stdin!\n";
     const EXPECTED_STDOUT: &str = "Hello world on stdout!\n";
     const EXPECTED_STDERR: &str = "Hello world on stderr!\n";
@@ -861,7 +856,7 @@ fn std_stdio(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn std_environment(#[case] version: TestVersion) {
+fn std_environment(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .env_var("TEST_MODE", "ENV_VARS")
         .env_var("ENV_VAR1", "val1")
@@ -889,7 +884,7 @@ ENV_VAR2=
 
 #[apply(base)]
 fn std_args(
-    #[case] version: TestVersion,
+    #[case] version: SegmentVersion,
     #[values(
         &[],
         &["grep", "-c", "foo bar", "-"])
@@ -908,7 +903,7 @@ fn std_args(
 }
 
 #[apply(base)]
-fn std_buf_read(#[case] version: TestVersion) {
+fn std_buf_read(#[case] version: SegmentVersion) {
     // Host-provided input is 7 bytes, while the guest requests to read 9.
     let input = b"1234567";
     let env = ExecutorEnv::builder()
@@ -926,38 +921,38 @@ fn std_buf_read(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn commit_hello_world(#[case] version: TestVersion) {
+fn commit_hello_world(#[case] version: SegmentVersion) {
     execute_elf(version, ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
 }
 
 #[apply(base)]
-fn random(#[case] version: TestVersion) {
+fn random(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::DoRandom);
 }
 
 #[apply(base)]
 #[should_panic(expected = "WARNING: `getrandom()` called from guest.")]
-fn getrandom_panic(#[case] version: TestVersion) {
+fn getrandom_panic(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::default();
     execute_elf(version, env, RAND_ELF).unwrap();
 }
 
 #[apply(base)]
 #[should_panic(expected = "Guest panicked: sys_getenv is disabled")]
-fn sys_getenv_panic(#[case] version: TestVersion) {
+fn sys_getenv_panic(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::default();
     execute_elf(version, env, SYS_ENV_ELF).unwrap();
 }
 
 #[apply(base)]
 #[should_panic(expected = "Guest panicked: sys_argc is disabled")]
-fn sys_args_panic(#[case] version: TestVersion) {
+fn sys_args_panic(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::default();
     execute_elf(version, env, SYS_ARGS_ELF).unwrap();
 }
 
 #[apply(base)]
-fn slice_io(#[case] version: TestVersion) {
+fn slice_io(#[case] version: SegmentVersion) {
     let run = |slice: &[u8]| {
         let env = ExecutorEnv::builder()
             .write_slice(&[slice.len() as u32])
@@ -975,13 +970,13 @@ fn slice_io(#[case] version: TestVersion) {
 
 // Check that a compliant host will return an error on panic.
 #[apply(base)]
-fn panic(#[case] version: TestVersion) {
+fn panic(#[case] version: SegmentVersion) {
     let err = multi_test_raw(version, MultiTestSpec::Panic).err().unwrap();
     assert!(err.to_string().contains("MultiTestSpec::Panic invoked"));
 }
 
 #[apply(base)]
-fn fault(#[case] version: TestVersion) {
+fn fault(#[case] version: SegmentVersion) {
     let err = multi_test_raw(version, MultiTestSpec::Fault).err().unwrap();
     assert!(err.to_string().contains("StoreAccessFault"));
 }
@@ -1130,13 +1125,29 @@ fn profiler() {
 }
 
 #[apply(base)]
-fn oom(#[case] version: TestVersion) {
+fn oom(#[case] version: SegmentVersion) {
     let err = multi_test_raw(version, MultiTestSpec::Oom).err().unwrap();
     assert!(err.to_string().contains("Out of memory"), "{err:?}");
 }
 
+#[rstest]
+#[should_panic(expected = "Guest panicked: Out of memory!")]
+#[case("heap_overflow_via_alloc")]
+#[should_panic(expected = "Guest panicked: Out of memory!")]
+#[case("heap_overflow_via_sys_alloc_aligned")]
+#[test_log::test]
+fn heap_overflow(#[case] name: &str, #[values(V1, V2)] version: SegmentVersion) {
+    let env = ExecutorEnv::builder()
+        .write(&name)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    execute_elf(version, env, HEAP_LIMITS_ELF).unwrap();
+}
+
 #[apply(base)]
-fn memory_access(#[case] version: TestVersion) {
+fn memory_access(#[case] version: SegmentVersion) {
     let access_memory = |addr: u32| -> Result<ExitCode> {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::OutOfBounds)
@@ -1173,7 +1184,7 @@ fn memory_access(#[case] version: TestVersion) {
 /// of the program) should be randomized on each execution to avoid potential
 /// leakage of private information.
 #[apply(base)]
-fn post_state_digest_randomization(#[case] version: TestVersion) {
+fn post_state_digest_randomization(#[case] version: SegmentVersion) {
     // Run a number of iterations of a guest and confirm all have the unique post
     // state digest.
     const ITERATIONS: usize = 10;
@@ -1253,12 +1264,12 @@ fn post_state_digest_randomization(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn aligned_alloc(#[case] version: TestVersion) {
+fn aligned_alloc(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::AlignedAlloc);
 }
 
 #[apply(base)]
-fn alloc_zeroed(#[case] version: TestVersion) {
+fn alloc_zeroed(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::AllocZeroed);
 }
 
@@ -1268,7 +1279,7 @@ fn alloc_zeroed(#[case] version: TestVersion) {
 #[case(V2)]
 #[test_log::test]
 #[should_panic(expected = "too small")]
-fn too_many_sha(#[case] version: TestVersion) {
+fn too_many_sha(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .segment_limit_po2(15) // 32K cycles
         .write(&MultiTestSpec::TooManySha)
@@ -1284,29 +1295,29 @@ fn too_many_sha(#[case] version: TestVersion) {
 #[should_panic(expected = "LoadAccessFault")]
 #[case(V2)]
 #[test_log::test]
-fn out_of_bounds_ecall(#[case] version: TestVersion) {
+fn out_of_bounds_ecall(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::OutOfBoundsEcall);
 }
 
 #[apply(base)]
-fn sys_fork(#[case] version: TestVersion) {
+fn sys_fork(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::SysFork);
 }
 
 #[apply(base)]
 #[should_panic(expected = "Unknown syscall")]
-fn sys_fork_fork_panic(#[case] version: TestVersion) {
+fn sys_fork_fork_panic(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::SysForkFork);
 }
 
 #[apply(base)]
 #[should_panic(expected = "Bad write file descriptor 3")]
-fn sys_fork_journal_panic(#[case] version: TestVersion) {
+fn sys_fork_journal_panic(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::SysForkJournalPanic);
 }
 
 #[apply(base)]
-fn heap_alloc(#[case] version: TestVersion) {
+fn heap_alloc(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .write(&6_u32)
         .unwrap()
@@ -1318,19 +1329,19 @@ fn heap_alloc(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn heap_bug_zkvm_527(#[case] version: TestVersion) {
+fn heap_bug_zkvm_527(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder().build().unwrap();
     let session = execute_elf(version, env, ZKVM_527_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 #[apply(base)]
-fn keccak_update(#[case] version: TestVersion) {
+fn keccak_update(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::KeccakUpdate);
 }
 
 #[apply(base)]
-fn keccak_update2(#[case] version: TestVersion) {
+fn keccak_update2(#[case] version: SegmentVersion) {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUpdate2)
         .unwrap()
@@ -1348,12 +1359,12 @@ fn keccak_update2(#[case] version: TestVersion) {
 }
 
 #[apply(base)]
-fn sha_single_keccak(#[case] version: TestVersion) {
+fn sha_single_keccak(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::ShaSingleKeccak);
 }
 
 #[apply(base)]
-fn sys_keccak(#[case] version: TestVersion) {
+fn sys_keccak(#[case] version: SegmentVersion) {
     multi_test(version, MultiTestSpec::SysKeccak);
 }
 
@@ -1450,7 +1461,7 @@ mod docker {
 #[test_log::test]
 fn session_limit(
     #[case] (loop_cycles_po2, segment_limit_po2, session_count_limit): (u32, u32, u64),
-    #[values(V1, V2)] version: TestVersion,
+    #[values(V1, V2)] version: SegmentVersion,
 ) {
     // run_session(version, params.0, params.1, params.2).unwrap();
     let session_cycles = (1 << segment_limit_po2) * session_count_limit;
