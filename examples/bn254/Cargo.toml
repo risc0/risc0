@@ -8,9 +8,9 @@ default-run = "bn254-example"
 [dependencies]
 bn254-core = { path = "core" }
 bn254-methods = { path = "methods" }
-substrate-bn = "0.6.0"
 hex = "0.4.3"
 risc0-zkvm = { path = "../../risc0/zkvm" }
+substrate-bn = "0.6.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
