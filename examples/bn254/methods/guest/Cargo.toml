@@ -13,4 +13,5 @@ substrate-bn = "0.6.0"
 [patch.crates-io]
 # TODO: Get a tag stabilized and use it
 # substrate-bn = { git = "https://github.com/risc0/paritytech-bn", rev = "5d25b59f48556d127ddb099e6bfd02ee7c98862f" }
-substrate-bn = { git = "https://github.com/risc0/paritytech-bn", rev = "5bbe07d68839732968e44bbff60ddc2391f1cefd" }
+# substrate-bn = { git = "https://github.com/risc0/paritytech-bn", rev = "5bbe07d68839732968e44bbff60ddc2391f1cefd" }
+substrate-bn = { path = "/Users/tzerrell/code/substrate_bn/bn" }
