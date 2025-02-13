@@ -92,6 +92,8 @@ impl RootMessage for pb::api::IdentityP254Request {}
 impl RootMessage for pb::api::IdentityP254Reply {}
 impl RootMessage for pb::api::CompressRequest {}
 impl RootMessage for pb::api::CompressReply {}
+impl RootMessage for pb::api::UnionRequest {}
+impl RootMessage for pb::api::UnionReply {}
 
 fn lock_err() -> IoError {
     IoError::new(IoErrorKind::WouldBlock, "Failed to lock connection mutex")
@@ -443,5 +445,5 @@ fn invalid_path() -> anyhow::Error {
 }
 
 fn path_to_string<P: AsRef<Path>>(path: P) -> Result<String> {
-    Ok(path.as_ref().to_str().ok_or(invalid_path())?.to_string())
+    Ok(path.as_ref().to_str().ok_or_else(invalid_path)?.to_string())
 }

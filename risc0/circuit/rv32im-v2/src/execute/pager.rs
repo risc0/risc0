@@ -71,16 +71,29 @@ pub(crate) struct PagedMemory {
     #[debug("{page_states:#x?}")]
     pub(crate) page_states: BTreeMap<u32, PageState>,
     pub cycles: u32,
+    user_registers: [u32; REG_MAX],
+    machine_registers: [u32; REG_MAX],
 }
 
 impl PagedMemory {
-    pub(crate) fn new(image: MemoryImage2) -> Self {
+    pub(crate) fn new(mut image: MemoryImage2) -> Self {
+        let mut machine_registers = [0; REG_MAX];
+        let mut user_registers = [0; REG_MAX];
+        let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
+        let page = image.get_page(page_idx).unwrap();
+        for idx in 0..REG_MAX {
+            machine_registers[idx] = page.load(MACHINE_REGS_ADDR.waddr() + idx);
+            user_registers[idx] = page.load(USER_REGS_ADDR.waddr() + idx);
+        }
+
         Self {
             image,
             page_table: vec![INVALID_IDX; NUM_PAGES],
             page_cache: Vec::new(),
             page_states: BTreeMap::new(),
             cycles: RESERVED_PAGING_CYCLES,
+            user_registers,
+            machine_registers,
         }
     }
 
@@ -91,10 +104,33 @@ impl PagedMemory {
         self.cycles = RESERVED_PAGING_CYCLES;
     }
 
-    pub(crate) fn peek(&mut self, addr: WordAddr) -> Result<u32> {
-        if addr >= MEMORY_END_ADDR {
-            bail!("Invalid peek address: {addr:?}");
+    fn try_load_register(&self, addr: WordAddr) -> Option<u32> {
+        if addr >= USER_REGS_ADDR.waddr() && addr < USER_REGS_ADDR.waddr() + REG_MAX {
+            let reg_idx = addr - USER_REGS_ADDR.waddr();
+            Some(self.user_registers[reg_idx.0 as usize])
+        } else if addr >= MACHINE_REGS_ADDR.waddr() && addr < MACHINE_REGS_ADDR.waddr() + REG_MAX {
+            let reg_idx = addr - MACHINE_REGS_ADDR.waddr();
+            Some(self.machine_registers[reg_idx.0 as usize])
+        } else {
+            None
         }
+    }
+
+    fn try_store_register(&mut self, addr: WordAddr, word: u32) -> bool {
+        if addr >= USER_REGS_ADDR.waddr() && addr < USER_REGS_ADDR.waddr() + REG_MAX {
+            let reg_idx = addr - USER_REGS_ADDR.waddr();
+            self.user_registers[reg_idx.0 as usize] = word;
+            true
+        } else if addr >= MACHINE_REGS_ADDR.waddr() && addr < MACHINE_REGS_ADDR.waddr() + REG_MAX {
+            let reg_idx = addr - MACHINE_REGS_ADDR.waddr();
+            self.machine_registers[reg_idx.0 as usize] = word;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn peek_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         let cache_idx = self.page_table[page_idx as usize];
         if cache_idx == INVALID_IDX {
@@ -103,6 +139,17 @@ impl PagedMemory {
         } else {
             // Loaded, get from cache
             Ok(self.page_cache[cache_idx as usize].load(addr))
+        }
+    }
+
+    pub(crate) fn peek(&mut self, addr: WordAddr) -> Result<u32> {
+        if addr >= MEMORY_END_ADDR {
+            bail!("Invalid peek address: {addr:?}");
+        }
+
+        match self.try_load_register(addr) {
+            Some(word) => Ok(word),
+            None => self.peek_ram(addr),
         }
     }
 
@@ -117,10 +164,7 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
-        if addr >= MEMORY_END_ADDR {
-            bail!("Invalid load address: {addr:?}");
-        }
+    fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         let node_idx = node_idx(page_idx);
         // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
@@ -133,12 +177,38 @@ impl PagedMemory {
         Ok(self.page_cache[cache_idx as usize].load(addr))
     }
 
+    pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
+        if addr >= MEMORY_END_ADDR {
+            bail!("Invalid load address: {addr:?}");
+        }
+
+        match self.try_load_register(addr) {
+            Some(word) => Ok(word),
+            None => self.load_ram(addr),
+        }
+    }
+
+    fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
+        let page_idx = addr.page_idx();
+        let page = self.page_for_writing(page_idx)?;
+        page.store(addr, word);
+        Ok(())
+    }
+
     pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         if addr >= MEMORY_END_ADDR {
             bail!("Invalid store address: {addr:?}");
         }
-        let page_idx = addr.page_idx();
-        // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
+
+        if self.try_store_register(addr, word) {
+            Ok(())
+        } else {
+            self.store_ram(addr, word)
+        }
+    }
+
+    fn page_for_writing(&mut self, page_idx: u32) -> Result<&mut Page> {
         let node_idx = node_idx(page_idx);
         let state = if let Some(state) = self.page_states.get(&node_idx) {
             *state
@@ -152,18 +222,29 @@ impl PagedMemory {
             self.page_states.insert(node_idx, PageState::Dirty);
         }
         let cache_idx = self.page_table[page_idx as usize] as usize;
-        self.page_cache
-            .get_mut(cache_idx)
-            .unwrap()
-            .store(addr, word);
-        Ok(())
+        Ok(self.page_cache.get_mut(cache_idx).unwrap())
+    }
+
+    fn write_registers(&mut self) {
+        // Copy register values first to avoid borrow conflicts
+        let user_registers = self.user_registers;
+        let machine_registers = self.machine_registers;
+        // This works because we can assume that user and machine register files
+        // live in the same page.
+        let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
+        let page = self.page_for_writing(page_idx).unwrap();
+        for idx in 0..REG_MAX {
+            page.store(MACHINE_REGS_ADDR.waddr() + idx, machine_registers[idx]);
+            page.store(USER_REGS_ADDR.waddr() + idx, user_registers[idx]);
+        }
     }
 
     pub(crate) fn commit(&mut self) -> Result<(Digest, MemoryImage2, Digest)> {
         // tracing::trace!("commit: {self:#?}");
 
-        let pre_state = self.image.image_id();
+        self.write_registers();
 
+        let pre_state = self.image.image_id();
         let mut image = MemoryImage2::default();
 
         // Gather the original pages

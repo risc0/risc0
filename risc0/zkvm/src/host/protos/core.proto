@@ -86,6 +86,11 @@ message ReceiptClaim {
   MaybePruned output = 5; // Option<MaybePruned<Output>>
 }
 
+message UnionClaim {
+  base.Digest left = 1;
+  base.Digest right = 2;
+}
+
 message MaybePruned {
   oneof kind {
     // Protobuf encoded bytes of the inner value.

@@ -13,7 +13,8 @@ on:
       risc0-foundry-template-branch:
         description: "risc0-foundry-template branch to checkout"
         required: false
-        default: 'main'
+        # TODO: Switch this back to main when the foundry template is using risc0-build 2
+        default: 'dev'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

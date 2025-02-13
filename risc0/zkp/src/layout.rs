@@ -155,7 +155,7 @@ pub fn get_u32<E: Copy + Into<u32>>(buf: &[E], reg: &Reg) -> u32 {
     (*get_elem(buf, reg)).into()
 }
 
-impl<'a, E: Elem + Into<u32>, C: Component> Debug for Tree<'a, E, C> {
+impl<E: Elem + Into<u32>, C: Component> Debug for Tree<'_, E, C> {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         let mut p = TreePrinter::new(self.buf, Vec::new(), "top");
         self.component.walk(&mut p)?;
@@ -189,7 +189,7 @@ impl<'a, E: Elem> TreePrinter<'a, E> {
     }
 }
 
-impl<'a, E: Elem + Into<u32>> Visitor for TreePrinter<'a, E> {
+impl<E: Elem + Into<u32>> Visitor for TreePrinter<'_, E> {
     fn visit_component(&mut self, name: &str, component: &impl Component) -> core::fmt::Result {
         match component.ty_name() {
             "U32Reg" => {
@@ -275,7 +275,7 @@ impl<'a, E: Elem> TreeGather<'a, E> {
     }
 }
 
-impl<'a, E: Elem + Into<u32>> Visitor for TreeGather<'a, E> {
+impl<E: Elem + Into<u32>> Visitor for TreeGather<'_, E> {
     fn visit_component(&mut self, _name: &str, component: &impl Component) -> core::fmt::Result {
         component.walk(self)
     }

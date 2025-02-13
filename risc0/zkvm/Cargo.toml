@@ -128,6 +128,10 @@ rustdoc-args = ["--cfg", "docsrs"]
 features = ["client", "prove", "getrandom", "std", "unstable"]
 
 [features]
+circuit_debug = [
+  "risc0-circuit-rv32im-v2/circuit_debug",
+  "risc0-zkp/circuit_debug",
+]
 client = [
   "dep:bincode",
   "dep:bytes",

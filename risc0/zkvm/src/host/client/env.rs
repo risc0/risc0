@@ -79,6 +79,7 @@ pub struct ProveZkrRequest {
 
 /// A Keccak proof request.
 #[stability::unstable]
+#[derive(Clone)]
 pub struct ProveKeccakRequest {
     /// The digest of the claim that this keccak input is expected to produce.
     pub claim_digest: Digest,
@@ -102,6 +103,9 @@ pub trait CoprocessorCallback {
 
     /// Request that a keccak proof is produced.
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
+
+    /// Proofs for this sequence
+    fn finalize_proof_set(&mut self, control_root: Digest) -> Result<()>;
 }
 
 pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;

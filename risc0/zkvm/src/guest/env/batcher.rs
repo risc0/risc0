@@ -15,13 +15,21 @@
 use core::ptr::addr_of;
 
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
+use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
+
+use crate::{
+    mmr::{GuestPeak, MerkleMountainAccumulator},
+    Assumption,
+};
 
 /// This struct implements the batching of calls to the keccak accelerator.
 #[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
+    mmr: MerkleMountainAccumulator<GuestPeak>,
+    proof_count: u32,
 }
 
 impl Keccak2Batcher {
@@ -32,6 +40,8 @@ impl Keccak2Batcher {
     pub fn new() -> Self {
         Self {
             claim_state: SHA256_INIT,
+            mmr: MerkleMountainAccumulator::<GuestPeak>::new(),
+            proof_count: 0,
         }
     }
 
@@ -42,11 +52,11 @@ impl Keccak2Batcher {
         sha_single_keccak(&mut self.claim_state, keccak_state);
         if status == 1 {
             // we've reached the limit. Create a proof request.
-            self.finalize();
+            self.flush();
         }
     }
 
-    pub fn finalize(&mut self) {
+    pub fn flush(&mut self) {
         if !self.input_exists() {
             // no input so there's nothing to do
             return;
@@ -56,9 +66,27 @@ impl Keccak2Batcher {
         unsafe {
             sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
         }
-        crate::guest::env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
-
+        self.proof_count += 1;
+        self.mmr
+            .insert(Assumption {
+                claim: claim_digest,
+                control_root: KECCAK_CONTROL_ROOT,
+            })
+            .unwrap(); // this is infallible for GuestPeak
         self.reset();
+    }
+
+    pub fn finalize(mut self) {
+        self.flush();
+        if let Ok(root_assumption) = self.mmr.root() {
+            // if proof_count == 0, self.mmr.root() will return an error.
+            let control_root = if self.proof_count == 1 {
+                KECCAK_CONTROL_ROOT
+            } else {
+                ALLOWED_CONTROL_ROOT
+            };
+            crate::guest::env::verify_assumption2(root_assumption.claim, control_root).unwrap();
+        }
     }
 
     fn claim_digest(&self) -> Digest {
