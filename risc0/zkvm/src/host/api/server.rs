@@ -230,6 +230,9 @@ impl CoprocessorCallback for CoprocessorProxy {
     }
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        // Note: safe to cast slice given alignment of KeccakState (8 bytes) is greater than
+        // the alignment of the input buffer.
+        let input = bytemuck::cast_slice(proof_request.input.as_slice()).to_vec();
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
@@ -240,7 +243,7 @@ impl CoprocessorCallback for CoprocessorProxy {
                                     claim_digest: Some(proof_request.claim_digest.into()),
                                     po2: proof_request.po2 as u32,
                                     control_root: Some(proof_request.control_root.into()),
-                                    input: proof_request.input.0,
+                                    input,
                                     receipt_out: None,
                                 }
                             })),

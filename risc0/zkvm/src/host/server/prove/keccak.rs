@@ -19,7 +19,7 @@ use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_keccak::{
     get_control_id,
     prove::{keccak_prover, zkr::get_keccak_zkr},
-    KeccakState, KECCAK_CONTROL_IDS,
+    KECCAK_CONTROL_IDS,
 };
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::core::digest::{Digest, DIGEST_SHORTS};
@@ -33,9 +33,8 @@ use crate::{
 pub fn prove_keccak(request: &ProveKeccakRequest) -> Result<SuccinctReceipt<Unknown>> {
     let zkr_input = {
         // Note: the input field type has alignment of 8 bytes, so it is safe to cast to KeccakState
-        let input: &[KeccakState] = bytemuck::cast_slice(&request.input.0);
         let prover = keccak_prover()?;
-        let seal = prover.prove(input, request.po2)?;
+        let seal = prover.prove(&request.input, request.po2)?;
 
         let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(
             bytemuck::checked::cast_slice::<_, BabyBearElem>(&seal[0..DIGEST_SHORTS])

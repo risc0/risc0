@@ -17,12 +17,13 @@ use std::{fmt::Debug, path::PathBuf};
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
 use risc0_binfmt::{SegmentVersion, SystemState};
+use risc0_circuit_keccak::KeccakState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
-    host::client::env::{KeccakInput, ProveKeccakRequest, ProveZkrRequest},
+    host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
         merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
         ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
@@ -1196,6 +1197,13 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
+        let input: Vec<KeccakState> = value
+            .input
+            .chunks_exact(std::mem::size_of::<KeccakState>())
+            .map(|chunk| bytemuck::try_pod_read_unaligned(chunk))
+            .collect::<Result<_, _>>()
+            .map_err(|e| anyhow!("Failed to convert input bytes to KeccakState: {}", e))?;
+
         Ok(Self {
             claim_digest: value
                 .claim_digest
@@ -1206,7 +1214,7 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
                 .control_root
                 .ok_or_else(|| malformed_err("ProveKeccakRequest.control_root"))?
                 .try_into()?,
-            input: KeccakInput(value.input),
+            input,
         })
     }
 }

@@ -27,7 +27,7 @@ use std::{
 use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
-use risc0_circuit_keccak::KECCAK_PO2_RANGE;
+use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
@@ -77,12 +77,6 @@ pub struct ProveZkrRequest {
     pub input: Vec<u8>,
 }
 
-/// Wrapper newtype to enforce alignment to allow casting to KeccakState, which is u64 aligned
-/// (8 bytes).
-#[repr(align(8))]
-#[derive(Clone)]
-pub struct KeccakInput(pub Vec<u8>);
-
 /// A Keccak proof request.
 #[stability::unstable]
 #[derive(Clone)]
@@ -97,7 +91,7 @@ pub struct ProveKeccakRequest {
     pub control_root: Digest,
 
     /// Input transcript to provide to the keccak circuit.
-    pub input: KeccakInput,
+    pub input: Vec<KeccakState>,
 }
 
 /// A trait that supports the ability to be notified of proof requests
