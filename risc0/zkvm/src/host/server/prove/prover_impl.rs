@@ -228,12 +228,11 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let (seal, claim, segment_version) = match &segment.inner {
+        let (seal, mut claim, segment_version) = match &segment.inner {
             InnerSegment::V1(inner) => {
                 let seal = risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
                     .prove_segment(inner)?;
-                let mut claim = decode_receipt_claim_from_seal_v1(&seal)?;
-                claim.output = segment.output.clone().into();
+                let claim = decode_receipt_claim_from_seal_v1(&seal)?;
                 (seal, claim, SegmentVersion::V1)
             }
             InnerSegment::V2(segment) => {
@@ -242,6 +241,7 @@ impl ProverServer for ProverImpl {
                 (seal, claim, SegmentVersion::V2)
             }
         };
+        claim.output = segment.output.clone().into();
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
