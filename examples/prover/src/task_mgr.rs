@@ -30,10 +30,10 @@ type TaskNumber = usize;
 pub enum JobKind {
     Segment(Asset),
     Join(Box<(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>)>),
-    Receipt(Box<SuccinctReceipt<ReceiptClaim>>),
-    KeccakSegment(ProveKeccakRequest),
-    ZkrReceipt(Box<SuccinctReceipt<Unknown>>),
+    FinalizeJoins(Box<SuccinctReceipt<ReceiptClaim>>),
+    Keccak(ProveKeccakRequest),
     Union(Box<(SuccinctReceipt<Unknown>, SuccinctReceipt<Unknown>)>),
+    FinalizeUnions(Box<SuccinctReceipt<Unknown>>),
 }
 
 pub struct Job {
@@ -44,8 +44,8 @@ pub struct Job {
 pub struct TaskManager {
     segments: HashMap<u32, Asset>,
     keccak_segments: HashMap<u32, ProveKeccakRequest>,
-    receipts: HashMap<TaskNumber, SuccinctReceipt<ReceiptClaim>>,
-    zkr_receipts: HashMap<TaskNumber, SuccinctReceipt<Unknown>>,
+    join_receipts: HashMap<TaskNumber, SuccinctReceipt<ReceiptClaim>>,
+    union_receipts: HashMap<TaskNumber, SuccinctReceipt<Unknown>>,
     pending_tasks: BTreeMap<TaskNumber, Task>,
     completed: HashSet<TaskNumber>,
     pool: Pool<Worker>,
@@ -59,8 +59,8 @@ impl TaskManager {
         Self {
             segments: HashMap::new(),
             keccak_segments: HashMap::new(),
-            receipts: HashMap::new(),
-            zkr_receipts: HashMap::new(),
+            join_receipts: HashMap::new(),
+            union_receipts: HashMap::new(),
             pending_tasks: BTreeMap::new(),
             completed: HashSet::new(),
             pool: Pool::new(1),
@@ -86,25 +86,25 @@ impl TaskManager {
         }
     }
 
-    pub fn run(
+    pub fn finish(
         &mut self,
     ) -> (
         SuccinctReceipt<ReceiptClaim>,
         Option<SuccinctReceipt<Unknown>>,
     ) {
-        let mut root_receipt = None;
-        let mut root_zkr_receipt = None;
+        let mut join_root_receipt = None;
+        let mut union_root_receipt = None;
         for job in self.job_rx.iter() {
             let job_id = job.task.task_number;
             match job.kind {
-                JobKind::Receipt(receipt) => {
-                    self.receipts.insert(job_id, *receipt.clone());
-                    root_receipt = Some(receipt);
+                JobKind::FinalizeJoins(receipt) => {
+                    self.join_receipts.insert(job_id, *receipt.clone());
+                    join_root_receipt = Some(receipt);
                 }
-                JobKind::ZkrReceipt(receipt) => {
-                    self.zkr_receipts.insert(job_id, *receipt.clone());
-                    // the very last receipt will be the root keccak receipt
-                    root_zkr_receipt = Some(*receipt);
+                JobKind::FinalizeUnions(receipt) => {
+                    self.union_receipts.insert(job_id, *receipt.clone());
+                    // the very last receipt will be the union root receipt
+                    union_root_receipt = Some(*receipt);
                 }
                 _ => unreachable!(),
             };
@@ -114,12 +114,11 @@ impl TaskManager {
                 self.pending_tasks.remove(&next_task.task_number);
                 self.run_task(next_task);
             }
-            if job.task.command == Command::Finalize {
+            if job.task.command == Command::FinalizeJoins {
                 break;
             }
         }
-        println!("run complete");
-        (*root_receipt.unwrap(), root_zkr_receipt)
+        (*join_root_receipt.unwrap(), union_root_receipt)
     }
 
     fn collect_ready_tasks(&self) -> Vec<Task> {
@@ -134,7 +133,6 @@ impl TaskManager {
     }
 
     fn run_task(&self, task: Task) {
-        println!("running task: {:?}", task);
         let job = match task.command {
             Command::Segment => {
                 let segment = self.segments.get(&task.segment_idx.unwrap()).unwrap();
@@ -144,25 +142,25 @@ impl TaskManager {
                 }
             }
             Command::Join => {
-                let left = self.receipts.get(&task.depends_on[0]).unwrap();
-                let right = self.receipts.get(&task.depends_on[1]).unwrap();
+                let left = self.join_receipts.get(&task.depends_on[0]).unwrap();
+                let right = self.join_receipts.get(&task.depends_on[1]).unwrap();
                 Job {
                     task,
                     kind: JobKind::Join(Box::new((left.clone(), right.clone()))),
                 }
             }
-            Command::Finalize => {
-                let receipt = self.receipts.get(&task.depends_on[0]).unwrap();
+            Command::FinalizeJoins => {
+                let receipt = self.join_receipts.get(&task.depends_on[0]).unwrap();
                 Job {
                     task,
-                    kind: JobKind::Receipt(Box::new(receipt.clone())),
+                    kind: JobKind::FinalizeJoins(Box::new(receipt.clone())),
                 }
             }
-            Command::FinalizeProofSet => {
-                let receipt = self.zkr_receipts.get(&task.depends_on[0]).unwrap();
+            Command::FinalizeUnions => {
+                let receipt = self.union_receipts.get(&task.depends_on[0]).unwrap();
                 Job {
                     task,
-                    kind: JobKind::ZkrReceipt(Box::new(receipt.clone())),
+                    kind: JobKind::FinalizeUnions(Box::new(receipt.clone())),
                 }
             }
             Command::Keccak => {
@@ -172,12 +170,12 @@ impl TaskManager {
                     .unwrap();
                 Job {
                     task,
-                    kind: JobKind::KeccakSegment(keccak_segment.clone()),
+                    kind: JobKind::Keccak(keccak_segment.clone()),
                 }
             }
             Command::Union => {
-                let left = self.zkr_receipts.get(&task.depends_on[0]).unwrap();
-                let right = self.zkr_receipts.get(&task.depends_on[1]).unwrap();
+                let left = self.union_receipts.get(&task.depends_on[0]).unwrap();
+                let right = self.union_receipts.get(&task.depends_on[1]).unwrap();
                 Job {
                     task,
                     kind: JobKind::Union(Box::new((left.clone(), right.clone()))),
