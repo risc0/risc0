@@ -19,4 +19,4 @@ prove = ["risc0-zkvm/prove"]
 
 [patch.crates-io]
 # TODO: Get a tag stabilized and use it
-substrate-bn = { git = "https://github.com/risc0/paritytech-bn", rev = "5bc9b486320e64a20a967568b5e9c0e6aee0307b" }
+substrate-bn = { git = "https://github.com/risc0/paritytech-bn", rev = "77f8a3f5d8576137a8c316d5781cdb724441b8fa" }
