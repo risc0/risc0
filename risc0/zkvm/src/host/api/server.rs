@@ -257,35 +257,6 @@ impl CoprocessorCallback for CoprocessorProxy {
             pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
         }
     }
-
-    fn finalize_proof_set(&mut self, control_root: Digest) -> Result<()> {
-        let request = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
-                        pb::api::CoprocessorRequest {
-                            kind: Some(pb::api::coprocessor_request::Kind::FinalizeProofSet({
-                                pb::api::FinalizeProofSetRequest {
-                                    control_root: Some(control_root.into()),
-                                }
-                            })),
-                        },
-                    )),
-                })),
-            })),
-        };
-        tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
-
-        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
-        match kind {
-            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
-            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
-        }
-    }
 }
 
 impl Server {

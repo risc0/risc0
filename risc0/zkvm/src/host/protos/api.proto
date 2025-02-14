@@ -101,20 +101,6 @@ message ProveKeccakResult {
   Asset receipt = 1;
 }
 
-message FinalizeProofSetRequest {
-  base.Digest control_root = 1;
-}
-
-message FinalizeProofSetReply {
-  oneof kind {
-    FinalizeProofSetResult ok = 1;
-    GenericError error = 2;
-  }
-}
-
-message FinalizeProofSetResult {
-}
-
 message LiftRequest {
   ProverOpts opts = 1;
   Asset receipt = 2;
@@ -385,7 +371,6 @@ message CoprocessorRequest {
   oneof kind {
     ProveZkrRequest prove_zkr = 1;
     ProveKeccakRequest prove_keccak = 2;
-    FinalizeProofSetRequest finalize_proof_set = 3;
   }
 }
 

@@ -22,12 +22,12 @@ pub enum PlannerErr {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Command {
-    Finalize,
-    FinalizeProofSet,
-    Join,
     Segment,
+    Join,
+    FinalizeJoins,
     Keccak,
     Union,
+    FinalizeUnions,
 }
 
 #[derive(Clone, Debug)]
@@ -80,21 +80,21 @@ impl Task {
         }
     }
 
-    pub fn new_finalize(task_number: usize, task_height: u32, depends_on: usize) -> Self {
+    pub fn new_finalize_joins(task_number: usize, task_height: u32, depends_on: usize) -> Self {
         Task {
             task_number,
             task_height,
-            command: Command::Finalize,
+            command: Command::FinalizeJoins,
             depends_on: vec![depends_on],
             segment_idx: None,
         }
     }
 
-    pub fn new_finalize_proof_set(task_number: usize, task_height: u32, depends_on: usize) -> Self {
+    pub fn new_finalize_unions(task_number: usize, task_height: u32, depends_on: usize) -> Self {
         Task {
             task_number,
             task_height,
-            command: Command::FinalizeProofSet,
+            command: Command::FinalizeUnions,
             depends_on: vec![depends_on],
             segment_idx: None,
         }
@@ -111,9 +111,9 @@ pub struct Planner {
     /// A task is a "peak" if (1) it is either a Segment or Join command AND (2) no other join tasks depend on it.
     peaks: Vec<usize>,
 
-    /// List of current "peaks." Sorted in order of decreasing height.
+    /// List of current "keccak_peaks." Sorted in order of decreasing height.
     ///
-    /// A task is a "peak" if (1) it is either a Segment or Join command AND (2) no other join tasks depend on it.
+    /// A task is a "keccak_peak" if (1) it is either a Keccak Segment or Union command AND (2) no other union tasks depend on it.
     keccak_peaks: Vec<usize>,
 
     /// Iterator position. Used by `self.next_task()`.
@@ -122,6 +122,7 @@ pub struct Planner {
     /// Last task in the plan. Set by `self.finish()`.
     last_task: Option<usize>,
 }
+
 impl Planner {
     pub fn enqueue_segment(&mut self, segment_idx: u32) -> Result<usize, PlannerErr> {
         if self.last_task.is_some() {
@@ -136,7 +137,9 @@ impl Planner {
             let new_height = self.get_task(new_peak).task_height;
             let smallest_peak_height = self.get_task(smallest_peak).task_height;
 
-            println!("new height: {new_height} smallest peak height: {smallest_peak_height}");
+            tracing::debug!(
+                "new height: {new_height} smallest peak height: {smallest_peak_height}"
+            );
             match new_height.cmp(&smallest_peak_height) {
                 Ordering::Less => break,
                 Ordering::Equal => {
@@ -164,7 +167,9 @@ impl Planner {
             let new_height = self.get_task(new_peak).task_height;
             let smallest_peak_height = self.get_task(smallest_peak).task_height;
 
-            println!("new height: {new_height} smallest peak height: {smallest_peak_height}");
+            tracing::debug!(
+                "new height: {new_height} smallest peak height: {smallest_peak_height}"
+            );
             match new_height.cmp(&smallest_peak_height) {
                 Ordering::Less => break,
                 Ordering::Equal => {
@@ -179,7 +184,13 @@ impl Planner {
         Ok(task_number)
     }
 
-    pub fn finish(&mut self) -> Result<usize, PlannerErr> {
+    pub fn finish(&mut self) -> Result<(), PlannerErr> {
+        self.finish_unions()?;
+        self.finish_joins()?;
+        Ok(())
+    }
+
+    fn finish_joins(&mut self) -> Result<usize, PlannerErr> {
         // Return error if plan has not yet started
         if self.peaks.is_empty() {
             return Err(PlannerErr::PlanNotStartedString);
@@ -203,7 +214,7 @@ impl Planner {
         Ok(self.last_task.unwrap())
     }
 
-    pub fn finish_keccak(&mut self) -> Result<usize, PlannerErr> {
+    fn finish_unions(&mut self) -> Result<usize, PlannerErr> {
         // Return error if plan has not yet started
         if self.keccak_peaks.is_empty() {
             return Err(PlannerErr::PlanNotStartedString);
@@ -269,15 +280,18 @@ impl Planner {
     fn enqueue_finalize(&mut self, depends_on: usize) -> usize {
         let task_number = self.next_task_number();
         let task_height = 1 + self.get_task(depends_on).task_height;
-        self.tasks
-            .push(Task::new_finalize(task_number, task_height, depends_on));
+        self.tasks.push(Task::new_finalize_joins(
+            task_number,
+            task_height,
+            depends_on,
+        ));
         task_number
     }
 
     fn enqueue_finalize_keccak(&mut self, depends_on: usize) -> usize {
         let task_number = self.next_task_number();
         let task_height = 1 + self.get_task(depends_on).task_height;
-        self.tasks.push(Task::new_finalize_proof_set(
+        self.tasks.push(Task::new_finalize_unions(
             task_number,
             task_height,
             depends_on,
@@ -308,8 +322,8 @@ impl std::fmt::Debug for Planner {
             let task = self.get_task(cursor);
 
             match task.command {
-                Command::Finalize => {
-                    write!(f, "{:?} Finalize", task.task_number)?;
+                Command::FinalizeJoins => {
+                    write!(f, "{:?} FinalizeJoins", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
                 }
                 Command::Join => {
@@ -320,8 +334,8 @@ impl std::fmt::Debug for Planner {
                 Command::Segment => {
                     write!(f, "{:?} Segment", task.task_number)?;
                 }
-                Command::FinalizeProofSet => {
-                    write!(f, "{:?} Finalize Proof Set", task.task_number)?;
+                Command::FinalizeUnions => {
+                    write!(f, "{:?} FinalizeUnions", task.task_number)?;
                     stack.push((indent + 2, task.depends_on[0]));
                 }
                 Command::Keccak => {
