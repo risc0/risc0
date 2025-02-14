@@ -213,16 +213,6 @@ fn metal_implies_prove() {
     let _prover = get_prover_server(&ProverOpts::default());
 }
 
-/// Compute and return the v2 ImageID of the specified ELF binary.
-#[cfg(feature = "client")]
-pub fn compute_image_id_v2(
-    user_id: impl Into<risc0_zkp::core::digest::Digest>,
-) -> Result<risc0_zkp::core::digest::Digest> {
-    let kernel_id: risc0_zkp::core::digest::Digest =
-        risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID.try_into()?;
-    risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
-}
-
 /// TODO(flaub)
 #[cfg(feature = "std")]
 #[stability::unstable]

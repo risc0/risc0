@@ -24,7 +24,6 @@ use bytes::Bytes;
 use risc0_binfmt::{ExitCode, MemoryImage, MemoryImage2, Program};
 use risc0_circuit_rv32im::prove::emu::testutil;
 use risc0_circuit_rv32im_v2::TerminateState;
-use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
@@ -57,7 +56,6 @@ use TestVersion::{V1, V2};
 #[template]
 #[rstest]
 #[case(V1)]
-#[case(V2)]
 #[test_log::test]
 fn base(#[case] version: TestVersion) {}
 
@@ -126,33 +124,6 @@ fn basic_v1() {
     assert_eq!(segment.inner.v1().exit_code, ExitCode::Halted(0));
     assert_eq!(segment.inner.v1().pre_state.digest(), pre_image_id);
     assert_ne!(segment.inner.v1().post_state.digest(), pre_image_id);
-    assert_eq!(segment.index, 0);
-}
-
-#[test_log::test]
-fn basic_v2() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::user::basic();
-    let env = ExecutorEnv::default();
-    let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX).unwrap();
-    let mut image = MemoryImage2::with_kernel(program, kernel);
-    let pre_image_id = image.image_id();
-
-    let mut exec = Executor2::new(env, image).unwrap();
-    let session = exec
-        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    let segment = session.segments.first().unwrap().resolve().unwrap();
-
-    assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.inner.v2().claim.pre_state, pre_image_id);
-    assert_ne!(segment.inner.v2().claim.post_state, pre_image_id);
-    assert_eq!(segment.inner.v2().claim.input, Digest::ZERO);
-    assert_eq!(segment.inner.v2().claim.output, Some(Digest::ZERO));
-    assert_eq!(
-        segment.inner.v2().claim.terminate_state,
-        Some(TerminateState::default())
-    );
     assert_eq!(segment.index, 0);
 }
 
@@ -586,7 +557,7 @@ fn large_io_bytes(#[case] version: TestVersion) {
 }
 
 mod sys_verify {
-    use crate::{compute_image_id_v2, MaybePruned, ReceiptClaim};
+    use crate::{MaybePruned, ReceiptClaim};
 
     use super::*;
 
@@ -620,13 +591,13 @@ mod sys_verify {
 
     #[apply(base)]
     fn sys_verify(#[case] version: TestVersion) {
-        use risc0_zkvm_methods::{HELLO_COMMIT_ID, HELLO_COMMIT_V2_USER_ID};
+        use risc0_zkvm_methods::HELLO_COMMIT_ID;
 
         let hello_commit_session = exec_hello_commit(version);
 
         let image_id: Digest = match version {
             V1 => HELLO_COMMIT_ID.into(),
-            V2 => compute_image_id_v2(HELLO_COMMIT_V2_USER_ID).unwrap(),
+            V2 => unimplemented!(),
         };
         tracing::debug!("image_id: {image_id}");
 
@@ -660,11 +631,11 @@ mod sys_verify {
 
     #[apply(base)]
     fn sys_verify_halt_codes(#[case] version: TestVersion) {
-        use risc0_zkvm_methods::{MULTI_TEST_ID, MULTI_TEST_V2_USER_ID};
+        use risc0_zkvm_methods::MULTI_TEST_ID;
 
         let image_id: Digest = match version {
             V1 => MULTI_TEST_ID.into(),
-            V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+            V2 => unimplemented!(),
         };
 
         for code in [0u8, 1, 2, 255] {
@@ -1255,8 +1226,6 @@ fn too_many_sha(#[case] version: TestVersion) {
 #[rstest]
 #[should_panic(expected = "is an invalid guest address")]
 #[case(V1)]
-#[should_panic(expected = "LoadAccessFault")]
-#[case(V2)]
 #[test_log::test]
 fn out_of_bounds_ecall(#[case] version: TestVersion) {
     multi_test(version, MultiTestSpec::OutOfBoundsEcall);
@@ -1424,7 +1393,7 @@ mod docker {
 #[test_log::test]
 fn session_limit(
     #[case] (loop_cycles_po2, segment_limit_po2, session_count_limit): (u32, u32, u64),
-    #[values(V1, V2)] version: TestVersion,
+    #[values(V1)] version: TestVersion,
 ) {
     // run_session(version, params.0, params.1, params.2).unwrap();
     let session_cycles = (1 << segment_limit_po2) * session_count_limit;

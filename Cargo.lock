@@ -4758,7 +4758,6 @@ dependencies = [
  "risc0-circuit-rv32im-v2",
  "risc0-core",
  "risc0-groth16",
- "risc0-zkos-v1compat",
  "risc0-zkp",
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",

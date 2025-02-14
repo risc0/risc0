@@ -80,7 +80,6 @@ redis = { version = "0.27.2", default-features = false, features = [
   "tls-native-tls",
 ], optional = true }
 risc0-build = { workspace = true, optional = true }
-risc0-zkos-v1compat = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
 rzup = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false }
@@ -137,7 +136,6 @@ client = [
   "dep:bytes",
   "dep:lazy-regex",
   "dep:risc0-build",
-  "dep:risc0-zkos-v1compat",
   "dep:rzup",
   "dep:prost",
   "dep:tempfile",

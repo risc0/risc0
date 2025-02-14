@@ -13,12 +13,10 @@
 // limitations under the License.
 
 use risc0_zkvm::{
-    compute_image_id_v2, default_executor, get_prover_server, risc0_rv32im_ver, sha::Digest,
-    ExecutorEnv, ExitCode, ProverOpts, Receipt, SegmentVersion,
+    default_executor, get_prover_server, risc0_rv32im_ver, sha::Digest, ExecutorEnv, ExitCode,
+    ProverOpts, Receipt, SegmentVersion,
 };
-use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID, VERIFY_ELF,
-};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF};
 
 fn main() {
     tracing_subscriber::fmt()
@@ -46,7 +44,7 @@ fn default_rv32im_version() -> SegmentVersion {
 fn multi_test_id() -> Digest {
     match default_rv32im_version() {
         SegmentVersion::V1 => MULTI_TEST_ID.into(),
-        SegmentVersion::V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+        SegmentVersion::V2 => unimplemented!(),
     }
 }
 

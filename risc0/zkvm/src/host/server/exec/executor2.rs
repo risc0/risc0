@@ -30,7 +30,6 @@ use risc0_circuit_rv32im_v2::{
     MAX_INSN_CYCLES,
 };
 use risc0_core::scope;
-use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
@@ -78,7 +77,7 @@ impl<'a> Executor2<'a> {
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        Self::from_user_kernel_elfs(env, elf, V1COMPAT_ELF)
+        Self::from_user_kernel_elfs(env, elf, &[])
     }
 
     /// TODO(flaub)
