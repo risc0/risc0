@@ -28,8 +28,8 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    segment::SegmentVersion, Groth16ReceiptVerifierParameters, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceiptVerifierParameters, VerifierContext,
+    Groth16ReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{
     sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
@@ -259,12 +259,9 @@ impl CompositeReceiptVerifierParameters {
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
     #[stability::unstable]
-    pub fn from_max_po2(po2_max: usize, segment_version: SegmentVersion) -> Self {
+    pub fn from_max_po2(po2_max: usize) -> Self {
         Self {
-            segment: MaybePruned::Value(SegmentReceiptVerifierParameters::from_max_po2(
-                po2_max,
-                segment_version,
-            )),
+            segment: MaybePruned::Value(SegmentReceiptVerifierParameters::from_max_po2(po2_max)),
             succinct: MaybePruned::Value(SuccinctReceiptVerifierParameters::from_max_po2(po2_max)),
             groth16: MaybePruned::Value(Groth16ReceiptVerifierParameters::from_max_po2(po2_max)),
         }
@@ -273,8 +270,8 @@ impl CompositeReceiptVerifierParameters {
     /// Construct verifier parameters that will accept receipts with control any of the default
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
-    pub fn all_po2s(segment_version: SegmentVersion) -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 }
 
@@ -318,7 +315,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("a48eb7c8637eb55cf44a59810504bfd5fea40bf355ec978952aafc844271dcad")
+            digest!("4eb38a1fd873cde1e494e8ebce3f32cfb03c8b2414257d47029b44dc2bce7f7c")
         );
     }
 }

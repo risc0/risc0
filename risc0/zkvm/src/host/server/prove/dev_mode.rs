@@ -21,9 +21,8 @@ use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::{UnionClaim, Unknown},
-    risc0_rv32im_ver, Assumption, AssumptionReceipt, Executor2, ExecutorEnv, ExecutorImpl,
-    InnerAssumptionReceipt, MaybePruned, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment,
-    SegmentVersion, Session, VerifierContext,
+    Assumption, AssumptionReceipt, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, MaybePruned,
+    ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -126,14 +125,8 @@ impl ProverServer for DevModeProver {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = match risc0_rv32im_ver() {
-            Some(SegmentVersion::V2) => Executor2::from_elf(env, elf)
-                .unwrap()
-                .run_with_callback(null_callback)?,
-            _ => ExecutorImpl::from_elf(env, elf)
-                .unwrap()
-                .run_with_callback(null_callback)?,
-        };
+        let mut exec = ExecutorImpl::from_elf(env, elf)?;
+        let session = exec.run_with_callback(null_callback)?;
         self.prove_session(ctx, &session)
     }
 

@@ -29,8 +29,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::{client::env::SegmentPath, server::session::InnerSegment},
-    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef, Session,
+    host::client::env::SegmentPath, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment,
+    SegmentRef, Session,
 };
 
 use super::{
@@ -179,7 +179,7 @@ impl<'a> ExecutorImpl<'a> {
 
             let segment = Segment {
                 index: inner.index as u32,
-                inner: InnerSegment::V1(inner),
+                inner,
                 output,
             };
             let segment_ref = callback(segment)?;

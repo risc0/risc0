@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,8 +46,14 @@ pub fn get_zkr(name: &str) -> Result<Vec<u32>> {
 pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
     let mut zip = zip::ZipArchive::new(std::io::Cursor::new(ZKR_ZIP)).unwrap();
     let files: Vec<String> = (0..zip.len())
-        .map(|idx| Ok(zip.by_index(idx)?.name().to_string()))
-        .collect::<Result<_>>()?;
+        .filter_map(|idx| {
+            if !zip.by_index(idx).ok()?.name().contains("v2") {
+                Some(zip.by_index(idx).ok()?.name().to_string())
+            } else {
+                None
+            }
+        })
+        .collect();
 
     files
         .into_iter()
