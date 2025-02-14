@@ -1225,7 +1225,7 @@ pub(crate) fn keccak_input_to_bytes(input: &[KeccakState]) -> Vec<u8> {
 pub(crate) fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<KeccakState>> {
     input
         .chunks_exact(std::mem::size_of::<KeccakState>())
-        .map(|chunk| bytemuck::try_pod_read_unaligned(chunk))
+        .map(bytemuck::try_pod_read_unaligned)
         .collect::<Result<_, _>>()
         .map_err(|e| anyhow!("Failed to convert input bytes to KeccakState: {}", e))
 }
