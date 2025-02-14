@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::host::client::env::ProveKeccakRequest;
+use crate::host::client::env::{KeccakInput, ProveKeccakRequest};
 use anyhow::{bail, Result};
 use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
@@ -99,7 +99,7 @@ impl SysKeccak {
         let proof_request = ProveKeccakRequest {
             claim_digest: claim,
             control_root,
-            input: bytemuck::cast_slice(self.inputs.as_slice()).to_vec(),
+            input: KeccakInput(bytemuck::cast_slice(self.inputs.as_slice()).to_vec()),
             po2: self.max_po2,
         };
 
