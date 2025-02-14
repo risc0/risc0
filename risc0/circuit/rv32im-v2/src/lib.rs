@@ -36,7 +36,7 @@ use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
 
 pub use self::zirgen::CircuitImpl;
 
-pub const MAX_INSN_CYCLES: usize = 2000; // TODO(flaub): calculate actual value
+pub const MAX_INSN_CYCLES: usize = 10000; // TODO(flaub): calculate actual value
 
 pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
     tracing::debug!("verify");
