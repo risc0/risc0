@@ -34,18 +34,6 @@ use serde::{Deserialize, Serialize};
 use super::{VerifierContext, DEFAULT_MAX_PO2};
 use crate::{sha, MaybePruned, ReceiptClaim};
 
-/// TODO(flaub)
-#[derive(
-    Clone, Copy, Debug, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq,
-)]
-pub enum SegmentVersion {
-    /// TODO(flaub)
-    V1,
-
-    /// TODO(flaub)
-    V2,
-}
-
 /// A receipt attesting to the execution of a Segment.
 ///
 /// A SegmentReceipt attests that a Segment was executed in a manner
@@ -78,8 +66,6 @@ pub struct SegmentReceipt {
 
     /// [ReceiptClaim] containing information about the execution that this receipt proves.
     pub claim: ReceiptClaim,
-
-    pub(crate) segment_version: SegmentVersion,
 }
 
 impl SegmentReceipt {
@@ -104,12 +90,8 @@ impl SegmentReceipt {
             });
         }
 
-        let expected = match self.segment_version {
-            SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-            SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO,
-        };
+        let expected = risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO;
         if params.circuit_info != expected {
-            tracing::debug!("version: {:?}", self.segment_version);
             return Err(VerificationError::CircuitInfoMismatch {
                 expected,
                 received: params.circuit_info,
@@ -117,27 +99,20 @@ impl SegmentReceipt {
         }
 
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        let decoded_claim = match self.segment_version {
-            SegmentVersion::V1 => {
-                let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-                    params.control_ids.contains(control_id).then_some(()).ok_or(
-                        VerificationError::ControlVerificationError {
-                            control_id: *control_id,
-                        },
-                    )
-                };
-                let suite = ctx
-                    .suites
-                    .get(&self.hashfn)
-                    .ok_or(VerificationError::InvalidHashSuite)?;
-                risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
-                decode_receipt_claim_from_seal_v1(&self.seal)?
-            }
-            SegmentVersion::V2 => {
-                risc0_circuit_rv32im_v2::verify(&self.seal)?;
-                ReceiptClaim::decode_from_seal_v2(&self.seal, None)
-                    .or(Err(VerificationError::ReceiptFormatError))?
-            }
+        let decoded_claim = {
+            let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
+                params.control_ids.contains(control_id).then_some(()).ok_or(
+                    VerificationError::ControlVerificationError {
+                        control_id: *control_id,
+                    },
+                )
+            };
+            let suite = ctx
+                .suites
+                .get(&self.hashfn)
+                .ok_or(VerificationError::InvalidHashSuite)?;
+            risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
+            decode_receipt_claim_from_seal_v1(&self.seal)?
         };
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
@@ -185,7 +160,7 @@ impl SegmentReceiptVerifierParameters {
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
     #[stability::unstable]
-    pub fn from_max_po2(max_po2: usize, segment_version: SegmentVersion) -> Self {
+    pub fn from_max_po2(max_po2: usize) -> Self {
         Self {
             control_ids: BTreeSet::from_iter(
                 ["poseidon2", "sha-256", "blake2b"]
@@ -193,18 +168,15 @@ impl SegmentReceiptVerifierParameters {
                     .flat_map(|hash_name| risc0_circuit_rv32im::control_ids(hash_name, max_po2)),
             ),
             proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: match segment_version {
-                SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-                SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO,
-            },
+            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
         }
     }
 
     /// Construct verifier parameters that will accept receipts with control any of the default
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
-    pub fn all_po2s(segment_version: SegmentVersion) -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 }
 
@@ -226,7 +198,7 @@ impl Digestible for SegmentReceiptVerifierParameters {
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self::from_max_po2(DEFAULT_MAX_PO2, SegmentVersion::V1)
+        Self::from_max_po2(DEFAULT_MAX_PO2)
     }
 }
 

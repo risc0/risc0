@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    default_executor, get_prover_server, risc0_rv32im_ver, sha::Digest, ExecutorEnv, ExitCode,
-    ProverOpts, Receipt, SegmentVersion,
-};
+use risc0_zkvm::{default_executor, get_prover_server, ExecutorEnv, ExitCode, ProverOpts, Receipt};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF};
 
 fn main() {
@@ -37,19 +34,8 @@ fn generate_receipt(opts: &ProverOpts) -> Receipt {
     prover.prove(env, MULTI_TEST_ELF).unwrap().receipt
 }
 
-fn default_rv32im_version() -> SegmentVersion {
-    risc0_rv32im_ver().unwrap_or(SegmentVersion::V1)
-}
-
-fn multi_test_id() -> Digest {
-    match default_rv32im_version() {
-        SegmentVersion::V1 => MULTI_TEST_ID.into(),
-        SegmentVersion::V2 => unimplemented!(),
-    }
-}
-
 fn exec_verify(receipt: &Receipt) {
-    let input = (default_rv32im_version(), receipt.clone(), multi_test_id());
+    let input = (receipt.clone(), MULTI_TEST_ID);
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()

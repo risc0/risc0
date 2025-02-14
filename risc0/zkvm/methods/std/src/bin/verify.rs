@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{guest::env, sha::Digest, Receipt, SegmentVersion, VerifierContext};
+use risc0_zkvm::{guest::env, sha::Digest, Receipt, VerifierContext};
 
 fn main() {
-    let (version, receipt, image_id): (SegmentVersion, Receipt, Digest) = env::read();
-    let ctx = VerifierContext::for_version(version);
+    let (receipt, image_id): (Receipt, Digest) = env::read();
+    let ctx = VerifierContext::default();
     receipt.verify_with_context(&ctx, image_id).unwrap();
 }

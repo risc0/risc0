@@ -14,9 +14,8 @@
 
 use num_bigint::BigUint;
 use risc0_bigint2_methods::RSA_ELF;
-use risc0_zkvm::{get_prover_server, ExecutorEnv, ExitCode, ProverOpts, SegmentVersion};
+use risc0_zkvm::{get_prover_server, ExecutorEnv, ExitCode, ProverOpts};
 use rstest::rstest;
-use SegmentVersion::V1;
 
 use crate::BigUintWrap;
 
@@ -53,14 +52,13 @@ fn modpow_65537(
     #[case] base: BigUintWrap,
     #[case] modulus: BigUintWrap,
     #[case] expected: BigUintWrap,
-    #[values(V1)] version: SegmentVersion,
 ) {
     let env = ExecutorEnv::builder()
         .write(&(base.0, modulus.0))
         .unwrap()
         .build()
         .unwrap();
-    let opts = ProverOpts::fast().with_segment_version(version);
+    let opts = ProverOpts::fast();
     let receipt = get_prover_server(&opts)
         .unwrap()
         .prove(env, RSA_ELF)

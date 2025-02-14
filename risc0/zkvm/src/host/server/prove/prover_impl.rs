@@ -22,17 +22,15 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, prove::union_peak::UnionPeak, session::InnerSegment},
+        server::prove::union_peak::UnionPeak,
     },
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
     receipt::{
-        segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
-        InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        segment::decode_receipt_claim_from_seal_v1, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
     recursion::prove::union,
-    risc0_rv32im_ver,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
     InnerAssumptionReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
@@ -46,18 +44,14 @@ pub struct ProverImpl {
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(mut opts: ProverOpts) -> Self {
-        if let Some(version) = risc0_rv32im_ver() {
-            opts = opts.with_segment_version(version);
-        }
+    pub fn new(opts: ProverOpts) -> Self {
         Self { opts }
     }
 }
 
 impl ProverServer for ProverImpl {
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-        let ctx = self.opts.verifier_context();
-        self.prove_with_ctx(env, &ctx, elf)
+        self.prove_with_ctx(env, &VerifierContext::default(), elf)
     }
 
     fn prove_with_ctx(
@@ -66,10 +60,7 @@ impl ProverServer for ProverImpl {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = match self.opts.segment_version {
-            SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)?.run()?,
-            SegmentVersion::V2 => Executor2::from_elf(env, elf)?.run()?,
-        };
+        let session = ExecutorImpl::from_elf(env, elf)?.run()?;
         self.prove_session(ctx, &session)
     }
 
@@ -227,19 +218,12 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let (seal, claim, segment_version) = match &segment.inner {
-            InnerSegment::V1(inner) => {
-                let seal = risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
-                    .prove_segment(inner)?;
-                let mut claim = decode_receipt_claim_from_seal_v1(&seal)?;
-                claim.output = segment.output.clone().into();
-                (seal, claim, SegmentVersion::V1)
-            }
-            InnerSegment::V2(segment) => {
-                let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(segment)?;
-                let claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.po2))?;
-                (seal, claim, SegmentVersion::V2)
-            }
+        let seal = risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
+            .prove_segment(&segment.inner)?;
+        let claim = {
+            let mut claim = decode_receipt_claim_from_seal_v1(&seal)?;
+            claim.output = segment.output.clone().into();
+            claim
         };
 
         let verifier_parameters = ctx
@@ -253,7 +237,6 @@ impl ProverServer for ProverImpl {
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
-            segment_version,
         };
         receipt.verify_integrity_with_context(ctx)?;
 

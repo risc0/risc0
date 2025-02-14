@@ -107,7 +107,7 @@ pub use {
             RECURSION_PO2,
         },
         server::{
-            exec::{executor::ExecutorImpl, executor2::Executor2},
+            exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -166,11 +166,10 @@ pub use {
 };
 
 pub use receipt::{
-    segment::SegmentVersion, AssumptionReceipt, CompositeReceipt,
-    CompositeReceiptVerifierParameters, FakeReceipt, Groth16Receipt,
-    Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt, Journal, Receipt,
-    ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
-    SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
+    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
+    Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
+    Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
 
 pub use ::serde::de::DeserializeOwned;
@@ -208,11 +207,4 @@ pub fn is_dev_mode() -> bool {
 fn metal_implies_prove() {
     // we should be able to access prove feature items when metal has been enabled
     let _prover = get_prover_server(&ProverOpts::default());
-}
-
-/// TODO(flaub)
-#[cfg(feature = "std")]
-#[stability::unstable]
-pub fn risc0_rv32im_ver() -> Option<SegmentVersion> {
-    Some(SegmentVersion::V1)
 }
