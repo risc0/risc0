@@ -16,8 +16,8 @@ use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    compute_image_id, compute_kernel_id_v2, compute_user_id_v2, get_prover_server, ApiServer,
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
+    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
+    ProverServer, VerifierContext,
 };
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
@@ -71,14 +71,6 @@ struct Cli {
     /// Compute the image_id for the specified ELF
     #[arg(long)]
     id: bool,
-
-    /// Compute the ImageID for the user portion of the specified ELF (using v2).
-    #[arg(long)]
-    user_id: bool,
-
-    /// Compute the ImageID for the kernel portion of the specified ELF (using v2).
-    #[arg(long)]
-    kernel_id: bool,
 }
 
 #[derive(Args)]
@@ -124,20 +116,6 @@ pub fn main() {
     if args.id {
         let elf = fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&elf).unwrap();
-        println!("{image_id}");
-        return;
-    }
-
-    if args.user_id {
-        let elf = fs::read(args.mode.elf.unwrap()).unwrap();
-        let image_id = compute_user_id_v2(&elf).unwrap();
-        println!("{image_id}");
-        return;
-    }
-
-    if args.kernel_id {
-        let elf = fs::read(args.mode.elf.unwrap()).unwrap();
-        let image_id = compute_kernel_id_v2(&elf).unwrap();
         println!("{image_id}");
         return;
     }

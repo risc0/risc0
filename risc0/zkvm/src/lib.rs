@@ -165,9 +165,6 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-#[cfg(feature = "std")]
-pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
-
 pub use receipt::{
     segment::SegmentVersion, AssumptionReceipt, CompositeReceipt,
     CompositeReceiptVerifierParameters, FakeReceipt, Groth16Receipt,
