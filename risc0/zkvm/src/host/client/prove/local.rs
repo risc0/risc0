@@ -16,9 +16,9 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, host::server::session::NullSegmentRef, risc0_rv32im_ver, Executor2,
-    ExecutorEnv, ExecutorImpl, ProveInfo, Receipt, SegmentInfo, SegmentVersion, SessionInfo,
-    VerifierContext,
+    get_prover_server, host::server::session::NullSegmentRef,
+    receipt::segment::default_segment_version, Executor2, ExecutorEnv, ExecutorImpl, ProveInfo,
+    Receipt, SegmentInfo, SegmentVersion, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
@@ -58,9 +58,8 @@ impl Prover for LocalProver {
 
 impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
-        let version = risc0_rv32im_ver().unwrap_or(SegmentVersion::V1);
         let mut segments = Vec::new();
-        let session = match version {
+        let session = match default_segment_version() {
             SegmentVersion::V1 => {
                 ExecutorImpl::from_elf(env, elf)
                     .unwrap()

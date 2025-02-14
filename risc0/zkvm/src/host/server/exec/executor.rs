@@ -128,6 +128,7 @@ impl<'a> ExecutorImpl<'a> {
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
         scope!("execute");
+        tracing::info!("Executing rv32im-v1 session");
 
         let journal = Journal::default();
         self.env

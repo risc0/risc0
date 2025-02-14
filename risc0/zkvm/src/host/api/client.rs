@@ -29,7 +29,9 @@ use crate::{
         api::SegmentInfo,
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
-    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt::{
+        segment::default_segment_version, AssumptionReceipt, SegmentReceipt, SuccinctReceipt,
+    },
     receipt_claim::UnionClaim,
     ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, SegmentVersion,
 };
@@ -150,13 +152,15 @@ impl Client {
     {
         let mut conn = self.connect()?;
 
+        let version = default_segment_version();
+
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Execute(
                 pb::api::ExecuteRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     segments_out: Some(segments_out.try_into()?),
                     segment_version: Some(pb::base::CompatVersion {
-                        value: SegmentVersion::V1 as u32,
+                        value: version as u32,
                     }),
                 },
             )),
@@ -1032,21 +1036,6 @@ impl Client {
                     .ok_or_else(|| malformed_err("OnCoprocessorRequest.ProveKeccak.coprocessor"))?;
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_keccak(proof_request)
-            }
-            pb::api::coprocessor_request::Kind::FinalizeProofSet(finalize_request) => {
-                let control_root: Digest = match finalize_request.control_root {
-                    Some(control_root) => control_root.try_into()?,
-                    None => {
-                        return Err(malformed_err(
-                            "OnCoprocessorRequest.FinalizeProofSet.control_root",
-                        ))
-                    }
-                };
-                let coprocessor = env.coprocessor.clone().ok_or_else(|| {
-                    malformed_err("OnCoprocessorRequest.FinalizeProofSet.coprocessor")
-                })?;
-                let mut coprocessor = coprocessor.borrow_mut();
-                coprocessor.finalize_proof_set(control_root)
             }
         }
     }

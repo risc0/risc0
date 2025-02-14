@@ -16,7 +16,7 @@ use std::{fmt::Debug, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
-use risc0_binfmt::SystemState;
+use risc0_binfmt::{SegmentVersion, SystemState};
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
@@ -24,8 +24,8 @@ use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams}
 use crate::{
     host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
-        merkle::MerkleProof, segment::SegmentVersion, CompositeReceipt, FakeReceipt,
-        InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
+        merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
+        ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{UnionClaim, Unknown},
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
@@ -266,6 +266,13 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
     type Error = anyhow::Error;
 
     fn try_from(opts: pb::api::ProverOpts) -> Result<Self> {
+        let segment_version = match opts.segment_version {
+            Some(0) => SegmentVersion::V1,
+            Some(1) => SegmentVersion::V2,
+            Some(version) => bail!("Incompatible SegmentReceipt version: {version}"),
+            None => SegmentVersion::V1,
+        };
+
         Ok(Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
@@ -284,7 +291,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
-            segment_version: SegmentVersion::V1,
+            segment_version,
         })
     }
 }
@@ -297,6 +304,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
             max_segment_po2: opts.max_segment_po2 as u64,
+            segment_version: Some(opts.segment_version as u32),
         }
     }
 }

@@ -50,7 +50,7 @@ pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 pub use self::{
     composite::{CompositeReceipt, CompositeReceiptVerifierParameters},
-    segment::{SegmentReceipt, SegmentReceiptVerifierParameters, SegmentVersion},
+    segment::{SegmentReceipt, SegmentReceiptVerifierParameters},
     succinct::{SuccinctReceipt, SuccinctReceiptVerifierParameters},
 };
 
@@ -174,6 +174,19 @@ impl Receipt {
 
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
+
+        #[cfg(feature = "std")]
+        let image_id = match risc0_binfmt::risc0_rv32im_ver() {
+            Some(risc0_binfmt::SegmentVersion::V1) => image_id.into(),
+            Some(risc0_binfmt::SegmentVersion::V2) => {
+                let image_id = crate::compute_image_id_v2(image_id);
+                match image_id {
+                    Ok(image_id) => image_id,
+                    Err(_) => return Err(VerificationError::ImageVerificationError),
+                }
+            }
+            None => image_id.into(),
+        };
 
         // Check that the claim on the verified receipt matches what was expected. Since we have
         // constrained all field in the ReceiptClaim, we can directly construct the expected digest
@@ -713,7 +726,7 @@ impl VerifierContext {
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
     #[stability::unstable]
-    pub fn from_max_po2(po2_max: usize, segment_version: SegmentVersion) -> Self {
+    pub fn from_max_po2(po2_max: usize, segment_version: risc0_binfmt::SegmentVersion) -> Self {
         Self {
             suites: Self::default_hash_suites(),
             segment_verifier_parameters: Some(SegmentReceiptVerifierParameters::from_max_po2(
@@ -732,7 +745,7 @@ impl VerifierContext {
     /// Construct a verifier context that will accept receipts with control any of the default
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
-    pub fn all_po2s(segment_version: SegmentVersion) -> Self {
+    pub fn all_po2s(segment_version: risc0_binfmt::SegmentVersion) -> Self {
         Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
     }
 
@@ -783,7 +796,7 @@ impl VerifierContext {
 
     /// TODO(flaub)
     #[stability::unstable]
-    pub fn for_version(segment_version: SegmentVersion) -> Self {
+    pub fn for_version(segment_version: risc0_binfmt::SegmentVersion) -> Self {
         Self::from_max_po2(DEFAULT_MAX_PO2, segment_version)
     }
 }

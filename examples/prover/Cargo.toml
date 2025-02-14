@@ -11,6 +11,7 @@ risc0-circuit-keccak = { path = "../../risc0/circuit/keccak/" }
 risc0-zkp = { path = "../../risc0/zkp" }
 risc0-zkvm = { path = "../../risc0/zkvm", features = ["unstable"] }
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods/" }
+tracing = "0.1.41"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 workerpool = "1.2"
 
