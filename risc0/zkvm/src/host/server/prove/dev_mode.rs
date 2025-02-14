@@ -127,10 +127,10 @@ impl ProverServer for DevModeProver {
         elf: &[u8],
     ) -> Result<ProveInfo> {
         let session = match risc0_rv32im_ver() {
-            Some(SegmentVersion::V2) => Executor2::from_elf(env, elf)
+            SegmentVersion::V2 => Executor2::from_elf(env, elf)
                 .unwrap()
                 .run_with_callback(null_callback)?,
-            _ => ExecutorImpl::from_elf(env, elf)
+            SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)
                 .unwrap()
                 .run_with_callback(null_callback)?,
         };

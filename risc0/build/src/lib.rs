@@ -243,8 +243,8 @@ impl GuestBuilder for GuestListEntry {
         let image_id_v2 = image_id_v2.as_words();
 
         let image_id = match risc0_rv32im_ver() {
-            Some(SegmentVersion::V2) => image_id_v2,
-            _ => image_id_v1,
+            SegmentVersion::V2 => image_id_v2,
+            SegmentVersion::V1 => image_id_v1,
         };
 
         let elf = if is_skip_build() {

@@ -107,11 +107,11 @@ pub enum SegmentVersion {
 
 /// TODO(flaub)
 #[cfg(feature = "std")]
-pub fn risc0_rv32im_ver() -> Option<SegmentVersion> {
+pub fn risc0_rv32im_ver() -> SegmentVersion {
     let version = std::env::var("RISC0_RV32IM_VER").unwrap_or_default();
     match version.as_str() {
-        "1" => Some(SegmentVersion::V1),
-        "2" => Some(SegmentVersion::V2),
-        _ => None,
+        "1" => SegmentVersion::V1,
+        "2" => SegmentVersion::V2,
+        _ => SegmentVersion::V1,
     }
 }

@@ -112,22 +112,22 @@ struct Args {
 
 fn min_cycles_po2() -> usize {
     match risc0_rv32im_ver() {
-        Some(SegmentVersion::V2) => MIN_CYCLES_PO2_V2,
-        _ => MIN_CYCLES_PO2_V1,
+        SegmentVersion::V2 => MIN_CYCLES_PO2_V2,
+        SegmentVersion::V1 => MIN_CYCLES_PO2_V1,
     }
 }
 
 fn cycles_po2_iters() -> &'static [(u32, u32)] {
     match risc0_rv32im_ver() {
-        Some(SegmentVersion::V2) => CYCLES_PO2_ITERS_V2,
-        _ => CYCLES_PO2_ITERS_V1,
+        SegmentVersion::V2 => CYCLES_PO2_ITERS_V2,
+        SegmentVersion::V1 => CYCLES_PO2_ITERS_V1,
     }
 }
 
 fn iterations_1m_cycles() -> u32 {
     match risc0_rv32im_ver() {
-        Some(SegmentVersion::V2) => 1024 * 512 - 45,
-        _ => 1024 * 512 - 10,
+        SegmentVersion::V2 => 1024 * 512 - 45,
+        SegmentVersion::V1 => 1024 * 512 - 10,
     }
 }
 
@@ -145,10 +145,10 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
     match risc0_rv32im_ver() {
-        Some(SegmentVersion::V2) => Executor2::from_elf(env, elf)
+        SegmentVersion::V2 => Executor2::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
-        _ => ExecutorImpl::from_elf(env, elf)
+        SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
     }

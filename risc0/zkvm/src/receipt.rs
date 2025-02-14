@@ -177,15 +177,14 @@ impl Receipt {
 
         #[cfg(feature = "std")]
         let image_id = match risc0_binfmt::risc0_rv32im_ver() {
-            Some(risc0_binfmt::SegmentVersion::V1) => image_id.into(),
-            Some(risc0_binfmt::SegmentVersion::V2) => {
+            risc0_binfmt::SegmentVersion::V1 => image_id.into(),
+            risc0_binfmt::SegmentVersion::V2 => {
                 let image_id = crate::compute_image_id_v2(image_id);
                 match image_id {
                     Ok(image_id) => image_id,
                     Err(_) => return Err(VerificationError::ImageVerificationError),
                 }
             }
-            None => image_id.into(),
         };
 
         // Check that the claim on the verified receipt matches what was expected. Since we have

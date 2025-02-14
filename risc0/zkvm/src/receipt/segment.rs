@@ -214,7 +214,7 @@ impl Digestible for SegmentReceiptVerifierParameters {
 
 pub(crate) fn default_segment_version() -> SegmentVersion {
     #[cfg(feature = "std")]
-    let version = risc0_binfmt::risc0_rv32im_ver().unwrap_or(SegmentVersion::V1);
+    let version = risc0_binfmt::risc0_rv32im_ver();
     #[cfg(not(feature = "std"))]
     let version = SegmentVersion::V1;
     version
