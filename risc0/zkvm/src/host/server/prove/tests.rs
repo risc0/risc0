@@ -946,10 +946,6 @@ mod sys_verify {
             self.keccak_requests.push(proof_request);
             Ok(())
         }
-
-        fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
-            Ok(())
-        }
     }
 
     #[apply(base)]
