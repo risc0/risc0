@@ -27,16 +27,14 @@ use crate::{
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
     receipt::{
-        segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
-        InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        segment::decode_receipt_claim_from_seal_v1, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
     recursion::prove::union,
-    risc0_rv32im_ver,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
-    InnerAssumptionReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
-    VerifierContext,
+    InnerAssumptionReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, SegmentVersion,
+    Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -46,10 +44,7 @@ pub struct ProverImpl {
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(mut opts: ProverOpts) -> Self {
-        if let Some(version) = risc0_rv32im_ver() {
-            opts = opts.with_segment_version(version);
-        }
+    pub fn new(opts: ProverOpts) -> Self {
         Self { opts }
     }
 }
@@ -67,8 +62,14 @@ impl ProverServer for ProverImpl {
         elf: &[u8],
     ) -> Result<ProveInfo> {
         let session = match self.opts.segment_version {
-            SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)?.run()?,
-            SegmentVersion::V2 => Executor2::from_elf(env, elf)?.run()?,
+            SegmentVersion::V1 => {
+                tracing::info!("Proving with SegmentVersion::V1");
+                ExecutorImpl::from_elf(env, elf)?.run()?
+            }
+            SegmentVersion::V2 => {
+                tracing::info!("Proving with SegmentVersion::V2");
+                Executor2::from_elf(env, elf)?.run()?
+            }
         };
         self.prove_session(ctx, &session)
     }

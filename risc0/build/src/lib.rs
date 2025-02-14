@@ -37,7 +37,7 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use risc0_binfmt::KERNEL_START_ADDR;
+use risc0_binfmt::{risc0_rv32im_ver, SegmentVersion, KERNEL_START_ADDR};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -234,7 +234,18 @@ impl GuestBuilder for GuestListEntry {
         }
 
         let upper = self.name.to_uppercase().replace('-', "_");
-        let image_id = self.image_id.as_words();
+
+        let image_id_v1 = self.image_id.as_words();
+        let image_id_v2 = match self.v2_image_id {
+            ImageIdKind::User(digest) => digest,
+            ImageIdKind::Kernel(digest) => digest,
+        };
+        let image_id_v2 = image_id_v2.as_words();
+
+        let image_id = match risc0_rv32im_ver() {
+            Some(SegmentVersion::V2) => image_id_v2,
+            _ => image_id_v1,
+        };
 
         let elf = if is_skip_build() {
             "&[]".to_string()
@@ -248,14 +259,14 @@ impl GuestBuilder for GuestListEntry {
         writeln!(&mut str, "pub const {upper}_PATH: &str = {:?};", self.path).unwrap();
         writeln!(&mut str, "pub const {upper}_ID: [u32; 8] = {image_id:?};").unwrap();
 
-        let (part, v2_image_id) = match self.v2_image_id {
-            ImageIdKind::User(digest) => ("USER", digest),
-            ImageIdKind::Kernel(digest) => ("KERNEL", digest),
-        };
-        let v2_image_id = v2_image_id.as_words();
         writeln!(
             &mut str,
-            "pub const {upper}_V2_{part}_ID: [u32; 8] = {v2_image_id:?};",
+            "pub const {upper}_ID_V1: [u32; 8] = {image_id_v1:?};",
+        )
+        .unwrap();
+        writeln!(
+            &mut str,
+            "pub const {upper}_ID_V2: [u32; 8] = {image_id_v2:?};",
         )
         .unwrap();
 

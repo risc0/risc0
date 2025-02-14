@@ -641,13 +641,13 @@ mod sys_verify {
 
     #[apply(base)]
     fn sys_verify(#[case] version: SegmentVersion) {
-        use risc0_zkvm_methods::{HELLO_COMMIT_ID, HELLO_COMMIT_V2_USER_ID};
+        use risc0_zkvm_methods::{HELLO_COMMIT_ID_V1, HELLO_COMMIT_ID_V2};
 
         let hello_commit_session = exec_hello_commit(version);
 
         let image_id: Digest = match version {
-            V1 => HELLO_COMMIT_ID.into(),
-            V2 => compute_image_id_v2(HELLO_COMMIT_V2_USER_ID).unwrap(),
+            V1 => HELLO_COMMIT_ID_V1.into(),
+            V2 => compute_image_id_v2(HELLO_COMMIT_ID_V2).unwrap(),
         };
         tracing::debug!("image_id: {image_id}");
 
@@ -681,11 +681,11 @@ mod sys_verify {
 
     #[apply(base)]
     fn sys_verify_halt_codes(#[case] version: SegmentVersion) {
-        use risc0_zkvm_methods::{MULTI_TEST_ID, MULTI_TEST_V2_USER_ID};
+        use risc0_zkvm_methods::{MULTI_TEST_ID_V1, MULTI_TEST_ID_V2};
 
         let image_id: Digest = match version {
-            V1 => MULTI_TEST_ID.into(),
-            V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+            V1 => MULTI_TEST_ID_V1.into(),
+            V2 => compute_image_id_v2(MULTI_TEST_ID_V2).unwrap(),
         };
 
         for code in [0u8, 1, 2, 255] {

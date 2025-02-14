@@ -290,8 +290,7 @@ impl Datasheet {
     fn lift(&mut self) {
         println!("lift");
 
-        let opts = ProverOpts::all_po2s()
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s();
         let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
 
@@ -329,8 +328,7 @@ impl Datasheet {
     fn join(&mut self) {
         println!("join");
 
-        let opts = ProverOpts::all_po2s()
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s();
         let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
 
@@ -378,9 +376,7 @@ impl Datasheet {
     fn succinct(&mut self) {
         println!("succinct");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
@@ -413,9 +409,7 @@ impl Datasheet {
     fn identity_p254(&mut self) {
         println!("identity_p254");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -452,9 +446,7 @@ impl Datasheet {
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -490,9 +482,7 @@ impl Datasheet {
     fn groth16(&mut self) {
         println!("groth16");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Groth16)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Groth16);
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
