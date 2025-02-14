@@ -61,6 +61,12 @@ pub(crate) enum PageState {
     Dirty,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum PageTraceEvent {
+    PageIn { cycles: u32 },
+    PageOut { cycles: u32 },
+}
+
 #[derive(Debug)]
 pub(crate) struct PagedMemory {
     pub image: MemoryImage2,
@@ -73,10 +79,12 @@ pub(crate) struct PagedMemory {
     pub cycles: u32,
     user_registers: [u32; REG_MAX],
     machine_registers: [u32; REG_MAX],
+    tracing_enabled: bool,
+    trace_events: Vec<PageTraceEvent>,
 }
 
 impl PagedMemory {
-    pub(crate) fn new(mut image: MemoryImage2) -> Self {
+    pub(crate) fn new(mut image: MemoryImage2, tracing_enabled: bool) -> Self {
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
@@ -94,6 +102,8 @@ impl PagedMemory {
             cycles: RESERVED_PAGING_CYCLES,
             user_registers,
             machine_registers,
+            tracing_enabled,
+            trace_events: vec![],
         }
     }
 
@@ -218,6 +228,7 @@ impl PagedMemory {
         };
         if state == PageState::Loaded {
             self.cycles += PAGE_CYCLES;
+            self.trace_page_out(PAGE_CYCLES);
             self.fixup_costs(node_idx, PageState::Dirty);
             self.page_states.insert(node_idx, PageState::Dirty);
         }
@@ -296,6 +307,7 @@ impl PagedMemory {
         self.page_table[page_idx as usize] = self.page_cache.len() as u32;
         self.page_cache.push(page);
         self.cycles += PAGE_CYCLES;
+        self.trace_page_in(PAGE_CYCLES);
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);
         Ok(())
     }
@@ -312,15 +324,37 @@ impl PagedMemory {
                     if state == PageState::Unloaded {
                         // tracing::trace!("fixup: {state:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
+                        self.trace_page_in(NODE_CYCLES);
                     }
                     if goal == PageState::Dirty {
                         // tracing::trace!("fixup: {goal:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
+                        self.trace_page_out(NODE_CYCLES);
                     }
                 }
                 self.page_states.insert(node_idx, goal);
             }
             node_idx /= 2;
+        }
+    }
+
+    pub(crate) fn trace_events(&self) -> &[PageTraceEvent] {
+        &self.trace_events
+    }
+
+    pub(crate) fn clear_trace_events(&mut self) {
+        self.trace_events.clear();
+    }
+
+    fn trace_page_in(&mut self, cycles: u32) {
+        if self.tracing_enabled {
+            self.trace_events.push(PageTraceEvent::PageIn { cycles });
+        }
+    }
+
+    fn trace_page_out(&mut self, cycles: u32) {
+        if self.tracing_enabled {
+            self.trace_events.push(PageTraceEvent::PageOut { cycles });
         }
     }
 }

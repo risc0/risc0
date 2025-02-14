@@ -24,7 +24,7 @@ use risc0_binfmt::{ByteAddr as ByteAddr2, ExitCode, MemoryImage2, Program, Syste
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_circuit_rv32im_v2::{
     execute::{
-        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        platform::WORD_SIZE, trace as trace_v2, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
     },
     MAX_INSN_CYCLES,
@@ -165,7 +165,7 @@ impl<'a> Executor2<'a> {
             self.image.clone(),
             self,
             self.env.input_digest,
-            vec![], // TODO(flaub)
+            convert_trace_callbacks(self.env.trace.clone()),
         );
 
         let start_time = Instant::now();
@@ -283,6 +283,40 @@ impl<'a> Executor2<'a> {
 
         Ok(session)
     }
+}
+
+fn v1_trace_event_from_v2(event: trace_v2::TraceEvent) -> crate::TraceEvent {
+    match event {
+        trace_v2::TraceEvent::InstructionStart { cycle, pc, insn } => {
+            crate::TraceEvent::InstructionStart { cycle, pc, insn }
+        }
+
+        trace_v2::TraceEvent::RegisterSet { idx, value } => {
+            crate::TraceEvent::RegisterSet { idx, value }
+        }
+
+        trace_v2::TraceEvent::MemorySet { addr, region } => {
+            crate::TraceEvent::MemorySet { addr, region }
+        }
+
+        trace_v2::TraceEvent::PageIn { cycles } => crate::TraceEvent::PageIn { cycles },
+
+        trace_v2::TraceEvent::PageOut { cycles } => crate::TraceEvent::PageOut { cycles },
+    }
+}
+
+fn convert_trace_callbacks<'a>(
+    trace: Vec<Rc<RefCell<dyn crate::TraceCallback + 'a>>>,
+) -> Vec<Rc<RefCell<dyn trace_v2::TraceCallback + 'a>>> {
+    trace
+        .into_iter()
+        .map(|cb| {
+            Rc::new(RefCell::new(move |event| {
+                cb.borrow_mut()
+                    .trace_callback(v1_trace_event_from_v2(event))
+            })) as Rc<RefCell<dyn trace_v2::TraceCallback + 'a>>
+        })
+        .collect()
 }
 
 struct ContextAdapter<'a, 'b> {
