@@ -32,7 +32,6 @@ use crate::{
 /// Generate a keccak proof that has been lifted.
 pub fn prove_keccak(request: &ProveKeccakRequest) -> Result<SuccinctReceipt<Unknown>> {
     let zkr_input = {
-        // Note: the input field type has alignment of 8 bytes, so it is safe to cast to KeccakState
         let prover = keccak_prover()?;
         let seal = prover.prove(&request.input, request.po2)?;
 
