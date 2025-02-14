@@ -24,7 +24,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
 use risc0_zkvm::{
-    sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
+    sha::{Digest, Digestible},
+    ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
     ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -34,6 +35,10 @@ use crate::plan::Planner;
 use self::task_mgr::TaskManager;
 
 fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     prover_example();
 }
 
@@ -76,11 +81,6 @@ impl CoprocessorCallback for Coprocessor<'_> {
             self.task_manager.borrow_mut().add_task(task.clone());
         }
         self.next_proof_idx += 1;
-        Ok(())
-    }
-
-    fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
-        self.planner.borrow_mut().finish_keccak().unwrap();
         Ok(())
     }
 }
@@ -129,18 +129,13 @@ fn prover_example() {
         task_manager.borrow_mut().add_task(task.clone());
     }
 
-    let (mut conditional_receipt, keccak_receipt) = task_manager.borrow_mut().run();
+    let opts = ProverOpts::default();
+    let (conditional_receipt, union_root) = task_manager.borrow_mut().finish();
 
-    if let Some(keccak_receipt) = keccak_receipt {
-        println!("resolving...");
-        conditional_receipt = client
-            .resolve(
-                &ProverOpts::default(),
-                conditional_receipt.try_into().unwrap(),
-                keccak_receipt.try_into().unwrap(),
-                AssetRequest::Inline,
-            )
-            .unwrap();
+    let coprocessor = coprocessor.borrow();
+    let mut all_receipts = coprocessor.receipts.clone();
+    if let Some(union_root) = union_root {
+        all_receipts.insert(union_root.claim.digest(), union_root);
     }
 
     let output = conditional_receipt
@@ -154,13 +149,12 @@ fn prover_example() {
         .unwrap();
     let assumptions = output.assumptions.as_value().unwrap();
 
-    let coprocessor = coprocessor.borrow();
     let mut succinct_receipt = conditional_receipt.clone();
     for assumption in assumptions.iter() {
         let assumption = assumption.as_value().unwrap();
-        println!("{assumption:?}");
-        let assumption_receipt = coprocessor.receipts.get(&assumption.claim).unwrap().clone();
-        let opts = ProverOpts::default();
+        println!("Resolve: {assumption:?}");
+
+        let assumption_receipt = all_receipts.get(&assumption.claim).unwrap().clone();
         succinct_receipt = client
             .resolve(
                 &opts,

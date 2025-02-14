@@ -32,27 +32,27 @@ impl workerpool::Worker for Worker {
         std::panic::catch_unwind(|| match job.kind {
             JobKind::Segment(segment) => Job {
                 task: job.task.clone(),
-                kind: JobKind::Receipt(Box::new(Self::prove_and_lift(segment))),
+                kind: JobKind::FinalizeJoins(Box::new(Self::prove_and_lift(segment))),
             },
             JobKind::Join(pair) => Job {
                 task: job.task.clone(),
-                kind: JobKind::Receipt(Box::new(Self::join(pair.0, pair.1))),
+                kind: JobKind::FinalizeJoins(Box::new(Self::join(pair.0, pair.1))),
             },
-            JobKind::Receipt(receipt) => Job {
+            JobKind::FinalizeJoins(receipt) => Job {
                 task: job.task.clone(),
-                kind: JobKind::Receipt(Box::new(*receipt)),
+                kind: JobKind::FinalizeJoins(Box::new(*receipt)),
             },
-            JobKind::KeccakSegment(proof_request) => Job {
+            JobKind::Keccak(proof_request) => Job {
                 task: job.task.clone(),
-                kind: JobKind::ZkrReceipt(Box::new(Self::keccak(proof_request))),
+                kind: JobKind::FinalizeUnions(Box::new(Self::keccak(proof_request))),
             },
-            JobKind::ZkrReceipt(receipt) => Job {
+            JobKind::FinalizeUnions(receipt) => Job {
                 task: job.task.clone(),
-                kind: JobKind::ZkrReceipt(Box::new(*receipt)),
+                kind: JobKind::FinalizeUnions(Box::new(*receipt)),
             },
             JobKind::Union(pair) => Job {
                 task: job.task.clone(),
-                kind: JobKind::ZkrReceipt(Box::new(Self::union(pair.0, pair.1))),
+                kind: JobKind::FinalizeUnions(Box::new(Self::union(pair.0, pair.1))),
             },
         })
         .unwrap_or_else(|_| {
