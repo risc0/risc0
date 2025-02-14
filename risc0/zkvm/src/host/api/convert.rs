@@ -1197,12 +1197,7 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
-        let input: Vec<KeccakState> = value
-            .input
-            .chunks_exact(std::mem::size_of::<KeccakState>())
-            .map(|chunk| bytemuck::try_pod_read_unaligned(chunk))
-            .collect::<Result<_, _>>()
-            .map_err(|e| anyhow!("Failed to convert input bytes to KeccakState: {}", e))?;
+        let input = try_keccak_bytes_to_input(&value.input)?;
 
         Ok(Self {
             claim_digest: value
@@ -1217,4 +1212,20 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
             input,
         })
     }
+}
+
+#[stability::unstable]
+pub(crate) fn keccak_input_to_bytes(input: &[KeccakState]) -> Vec<u8> {
+    // Note: safe to cast slice given alignment of KeccakState (8 bytes) is greater than
+    // the alignment of the u8 buffer.
+    bytemuck::cast_slice(input).to_vec()
+}
+
+#[stability::unstable]
+pub(crate) fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<KeccakState>> {
+    input
+        .chunks_exact(std::mem::size_of::<KeccakState>())
+        .map(|chunk| bytemuck::try_pod_read_unaligned(chunk))
+        .collect::<Result<_, _>>()
+        .map_err(|e| anyhow!("Failed to convert input bytes to KeccakState: {}", e))
 }

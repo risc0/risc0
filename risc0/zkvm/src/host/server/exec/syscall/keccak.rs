@@ -99,9 +99,7 @@ impl SysKeccak {
         let proof_request = ProveKeccakRequest {
             claim_digest: claim,
             control_root,
-            // Note: safe to cast slice given alignment of KeccakState (8 bytes) is greater than
-            // the alignment of the input buffer.
-            input: bytemuck::cast_slice(self.inputs.as_slice()).to_vec(),
+            input: self.inputs.clone(),
             po2: self.max_po2,
         };
 

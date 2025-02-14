@@ -27,6 +27,7 @@ use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, Tcp
 use crate::{
     get_prover_server, get_version,
     host::{
+        api::convert::keccak_input_to_bytes,
         client::{
             env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
@@ -230,9 +231,7 @@ impl CoprocessorCallback for CoprocessorProxy {
     }
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
-        // Note: safe to cast slice given alignment of KeccakState (8 bytes) is greater than
-        // the alignment of the input buffer.
-        let input = bytemuck::cast_slice(proof_request.input.as_slice()).to_vec();
+        let input = keccak_input_to_bytes(&proof_request.input);
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
