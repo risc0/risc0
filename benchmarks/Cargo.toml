@@ -22,6 +22,7 @@ rand = "0.8"
 rand_core = "0.6"
 risc0-benchmark-lib = { path = "shared" }
 risc0-benchmark-methods = { path = "methods" }
+risc0-binfmt = { path = "../risc0/binfmt" }
 risc0-zkvm = { path = "../risc0/zkvm", features = ["prove"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_with = "3.8"

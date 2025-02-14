@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ use std::{
 };
 
 use human_repr::{HumanCount, HumanDuration, HumanThroughput};
+use risc0_binfmt::risc0_rv32im_ver;
 use risc0_zkvm::{
-    get_prover_server, sha::Digest, ExecutorEnv, ExecutorImpl, ProverOpts, Session, VerifierContext,
+    get_prover_server, sha::Digest, Executor2, ExecutorEnv, ExecutorImpl, ProverOpts,
+    SegmentVersion, Session, VerifierContext,
 };
 use serde::Serialize;
 use serde_with::{serde_as, DurationNanoSeconds};
@@ -92,6 +94,25 @@ impl Metrics {
     }
 }
 
+fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> (Session, Duration) {
+    match risc0_rv32im_ver() {
+        SegmentVersion::V1 => {
+            let mut exec = ExecutorImpl::from_elf(env, elf).unwrap();
+            let start = Instant::now();
+            let session = exec.run().unwrap();
+            let elapsed = start.elapsed();
+            (session, elapsed)
+        }
+        SegmentVersion::V2 => {
+            let mut exec = Executor2::from_elf(env, elf).unwrap();
+            let start = Instant::now();
+            let session = exec.run().unwrap();
+            let elapsed = start.elapsed();
+            (session, elapsed)
+        }
+    }
+}
+
 pub struct Job {
     name: String,
     elf: Vec<u8>,
@@ -116,11 +137,7 @@ impl Job {
             .write_slice(&self.input)
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, &self.elf).unwrap();
-        let start = Instant::now();
-        let session = exec.run().unwrap();
-        let elapsed = start.elapsed();
-        (session, elapsed)
+        execute_elf(env, &self.elf)
     }
 
     fn run(&self) -> Metrics {

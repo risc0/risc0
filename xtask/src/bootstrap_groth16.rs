@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@ use std::{fs, path::Path, process::Command};
 
 use clap::Parser;
 use regex::Regex;
+use risc0_binfmt::risc0_rv32im_ver;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl,
-    Groth16ReceiptVerifierParameters, ProverOpts, Receipt, VerifierContext,
+    get_prover_server, sha::Digestible, Executor2, ExecutorEnv, ExecutorImpl,
+    Groth16ReceiptVerifierParameters, ProverOpts, Receipt, SegmentVersion, Session,
+    VerifierContext,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
@@ -184,6 +186,13 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
         .unwrap();
 }
 
+fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Session {
+    match risc0_rv32im_ver() {
+        SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf).unwrap().run().unwrap(),
+        SegmentVersion::V2 => Executor2::from_elf(env, elf).unwrap().run().unwrap(),
+    }
+}
+
 // Return a Groth16 `Receipt` and the imageID used to generate the proof.
 // Requires running Docker on an x86 architecture.
 fn generate_receipt() -> Receipt {
@@ -197,8 +206,7 @@ fn generate_receipt() -> Receipt {
 
     tracing::info!("execute");
 
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF);
 
     tracing::info!("prove");
     let prover = get_prover_server(&ProverOpts::groth16()).unwrap();

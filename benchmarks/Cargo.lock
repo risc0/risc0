@@ -2847,6 +2847,7 @@ dependencies = [
  "rand_core",
  "risc0-benchmark-lib",
  "risc0-benchmark-methods",
+ "risc0-binfmt",
  "risc0-zkvm",
  "serde",
  "serde_with",

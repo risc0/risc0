@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
 use hotbench::{benchmark_group, benchmark_main, BenchGroup};
+use risc0_binfmt::risc0_rv32im_ver;
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, Executor2, ExecutorEnv, ExecutorImpl, ProverOpts, SegmentVersion, Session,
+    VerifierContext, RECURSION_PO2,
 };
 use risc0_zkvm_methods::FIB_ELF;
 
-fn setup_exec(iterations: u32) -> ExecutorImpl<'static> {
-    let env = ExecutorEnv::builder()
-        .write_slice(&[iterations])
-        .build()
-        .unwrap();
-    ExecutorImpl::from_elf(env, FIB_ELF).unwrap()
+trait BenchExecutor {
+    fn run(&mut self) -> Result<Session>;
+}
+
+impl BenchExecutor for ExecutorImpl<'_> {
+    fn run(&mut self) -> Result<Session> {
+        self.run()
+    }
+}
+
+impl BenchExecutor for Executor2<'_> {
+    fn run(&mut self) -> Result<Session> {
+        self.run()
+    }
+}
+
+fn setup_exec(iterations: u32, segment_limit_po2: Option<u32>) -> Box<dyn BenchExecutor> {
+    let mut env_builder = ExecutorEnv::builder();
+    env_builder.write_slice(&[iterations]);
+    if let Some(limit) = segment_limit_po2 {
+        env_builder.segment_limit_po2(limit);
+    }
+
+    let env = env_builder.build().unwrap();
+    match risc0_rv32im_ver() {
+        SegmentVersion::V1 => {
+            Box::new(ExecutorImpl::from_elf(env, FIB_ELF).unwrap()) as Box<dyn BenchExecutor>
+        }
+        SegmentVersion::V2 => {
+            Box::new(Executor2::from_elf(env, FIB_ELF).unwrap()) as Box<dyn BenchExecutor>
+        }
+    }
 }
 
 fn execute(group: &mut BenchGroup) {
     group.bench("execute", |b| {
         let iterations = 100_000;
-        let session = setup_exec(iterations).run().unwrap();
+        let session = setup_exec(iterations, None /* segment_limit_po2 */)
+            .run()
+            .unwrap();
         b.iter(
             session.user_cycles as usize,
-            || setup_exec(iterations),
+            || setup_exec(iterations, None /* segment_limit_po2 */),
             |exec| exec.run(),
         )
     });
@@ -48,7 +79,7 @@ fn warmup(_group: &mut BenchGroup) {
         let opts = ProverOpts::default();
         let ctx = VerifierContext::default();
         let prover = get_prover_server(&opts).unwrap();
-        let session = setup_exec(1).run().unwrap();
+        let session = setup_exec(1, None /* segment_limit_po2 */).run().unwrap();
         let segment = session.segments[0].resolve().unwrap();
         let receipt = prover.prove_segment(&ctx, &segment).unwrap();
         prover.lift(&receipt).unwrap();
@@ -65,7 +96,9 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
         let prover = get_prover_server(&opts).unwrap();
         let ctx = VerifierContext::default();
 
-        let session = setup_exec(iterations).run().unwrap();
+        let session = setup_exec(iterations, None /* segment_limit_po2 */)
+            .run()
+            .unwrap();
         let segment = session.segments[0].resolve().unwrap();
 
         b.iter(
@@ -90,7 +123,7 @@ fn lift(group: &mut BenchGroup) {
         b.iter(
             1 << RECURSION_PO2,
             || {
-                let mut exec = setup_exec(100);
+                let mut exec = setup_exec(100, None /* segment_limit_po2 */);
                 let session = exec.run().unwrap();
                 let segment = session.segments[0].resolve().unwrap();
                 prover.prove_segment(&ctx, &segment).unwrap()
@@ -102,12 +135,7 @@ fn lift(group: &mut BenchGroup) {
 
 fn join(group: &mut BenchGroup) {
     group.bench("join", |b| {
-        let env = ExecutorEnv::builder()
-            .write_slice(&[3000])
-            .segment_limit_po2(16)
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
+        let mut exec = setup_exec(3000, Some(16) /* segment_limit_po2 */);
         let session = exec.run().unwrap();
         assert!(session.segments.len() >= 2);
 
@@ -137,10 +165,12 @@ fn total_composite(group: &mut BenchGroup) {
         let prover = get_prover_server(&opts).unwrap();
         let ctx = VerifierContext::default();
 
-        let session = setup_exec(iterations).run().unwrap();
+        let session = setup_exec(iterations, None /* segment_limit_po2 */)
+            .run()
+            .unwrap();
         b.iter(
             session.total_cycles as usize,
-            || setup_exec(iterations),
+            || setup_exec(iterations, None /* segment_limit_po2 */),
             |exec| {
                 let session = exec.run().unwrap();
                 prover.prove_session(&ctx, &session)
@@ -157,10 +187,12 @@ fn total_succinct(group: &mut BenchGroup) {
         let prover = get_prover_server(&opts).unwrap();
         let ctx = VerifierContext::default();
 
-        let session = setup_exec(iterations).run().unwrap();
+        let session = setup_exec(iterations, None /* segment_limit_po2 */)
+            .run()
+            .unwrap();
         b.iter(
             session.total_cycles as usize,
-            || setup_exec(iterations),
+            || setup_exec(iterations, None /* segment_limit_po2 */),
             |exec| {
                 let session = exec.run().unwrap();
                 let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;

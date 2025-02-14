@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde, ExecutorEnv, ExecutorImpl, ReceiptClaim};
+use risc0_binfmt::risc0_rv32im_ver;
+use risc0_zkvm::{
+    serde, Executor2, ExecutorEnv, ExecutorImpl, ReceiptClaim, SegmentVersion, Session,
+};
 use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF, BENCH_ID};
+
+fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Session {
+    match risc0_rv32im_ver() {
+        SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf).unwrap().run().unwrap(),
+        SegmentVersion::V2 => Executor2::from_elf(env, elf).unwrap().run().unwrap(),
+    }
+}
 
 fn run_guest(msg: &str, spec: BenchmarkSpec) {
     let env = ExecutorEnv::builder()
@@ -21,14 +31,12 @@ fn run_guest(msg: &str, spec: BenchmarkSpec) {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(env, BENCH_ELF);
     println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
 }
 
 fn run_guest_with(msg: &str, env: ExecutorEnv) {
-    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(env, BENCH_ELF);
     println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
 }
 
@@ -39,8 +47,7 @@ fn run_guest_framed(msg: &str, spec: BenchmarkSpec, payload: &[u8]) {
         .write_frame(payload)
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let session = execute_elf(env, BENCH_ELF);
     println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
 }
 

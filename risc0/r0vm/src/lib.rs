@@ -15,10 +15,43 @@
 use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
+use risc0_binfmt::risc0_rv32im_ver;
 use risc0_zkvm::{
     compute_image_id, compute_kernel_id_v2, compute_user_id_v2, get_prover_server, ApiServer,
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
+    Executor2, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, SegmentVersion, Session,
+    VerifierContext,
 };
+
+fn execute_elf(env: ExecutorEnv, args: &Cli) -> Session {
+    match risc0_rv32im_ver() {
+        SegmentVersion::V1 => {
+            let mut exec = if let Some(ref elf_path) = args.mode.elf {
+                let elf_contents = fs::read(elf_path).unwrap();
+                ExecutorImpl::from_elf(env, &elf_contents).unwrap()
+            } else if let Some(ref image_path) = args.mode.image {
+                let image_contents = fs::read(image_path).unwrap();
+                let image = bincode::deserialize(&image_contents).unwrap();
+                ExecutorImpl::new(env, image).unwrap()
+            } else {
+                unreachable!()
+            };
+            exec.run().unwrap()
+        }
+        SegmentVersion::V2 => {
+            let mut exec = if let Some(ref elf_path) = args.mode.elf {
+                let elf_contents = fs::read(elf_path).unwrap();
+                Executor2::from_elf(env, &elf_contents).unwrap()
+            } else if let Some(ref image_path) = args.mode.image {
+                let image_contents = fs::read(image_path).unwrap();
+                let image = bincode::deserialize(&image_contents).unwrap();
+                Executor2::new(env, image).unwrap()
+            } else {
+                unreachable!()
+            };
+            exec.run().unwrap()
+        }
+    }
+}
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -170,19 +203,7 @@ pub fn main() {
         builder.build().unwrap()
     };
 
-    let session = {
-        let mut exec = if let Some(ref elf_path) = args.mode.elf {
-            let elf_contents = fs::read(elf_path).unwrap();
-            ExecutorImpl::from_elf(env, &elf_contents).unwrap()
-        } else if let Some(ref image_path) = args.mode.image {
-            let image_contents = fs::read(image_path).unwrap();
-            let image = bincode::deserialize(&image_contents).unwrap();
-            ExecutorImpl::new(env, image).unwrap()
-        } else {
-            unreachable!()
-        };
-        exec.run().unwrap()
-    };
+    let session = execute_elf(env, &args);
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();
