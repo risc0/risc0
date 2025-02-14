@@ -17,7 +17,7 @@ use alloc::{collections::BTreeSet, string::String, vec::Vec};
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
+use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SegmentVersion, SystemState};
 use risc0_circuit_rv32im::{
     layout::{SystemStateLayout, OUT_LAYOUT},
     CIRCUIT,
@@ -33,18 +33,6 @@ use serde::{Deserialize, Serialize};
 
 use super::{VerifierContext, DEFAULT_MAX_PO2};
 use crate::{sha, MaybePruned, ReceiptClaim};
-
-/// TODO(flaub)
-#[derive(
-    Clone, Copy, Debug, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq,
-)]
-pub enum SegmentVersion {
-    /// TODO(flaub)
-    V1,
-
-    /// TODO(flaub)
-    V2,
-}
 
 /// A receipt attesting to the execution of a Segment.
 ///
@@ -224,10 +212,18 @@ impl Digestible for SegmentReceiptVerifierParameters {
     }
 }
 
+pub(crate) fn default_segment_version() -> SegmentVersion {
+    #[cfg(feature = "std")]
+    let version = risc0_binfmt::risc0_rv32im_ver().unwrap_or(SegmentVersion::V1);
+    #[cfg(not(feature = "std"))]
+    let version = SegmentVersion::V1;
+    version
+}
+
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self::from_max_po2(DEFAULT_MAX_PO2, SegmentVersion::V1)
+        Self::from_max_po2(DEFAULT_MAX_PO2, default_segment_version())
     }
 }
 

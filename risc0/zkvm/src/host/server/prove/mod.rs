@@ -37,8 +37,8 @@ use crate::{
     },
     receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
-    stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
-    Segment, Session, VerifierContext,
+    stark_to_snark, ExecutorEnv, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment, Session,
+    VerifierContext,
 };
 
 mod private {
@@ -68,11 +68,7 @@ pub trait ProverServer: private::Sealed {
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
-    ) -> Result<ProveInfo> {
-        let mut exec = ExecutorImpl::from_elf(env, elf)?;
-        let session = exec.run()?;
-        self.prove_session(ctx, &session)
-    }
+    ) -> Result<ProveInfo>;
 
     /// Prove the specified [Session].
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
