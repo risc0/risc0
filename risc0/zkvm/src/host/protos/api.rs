@@ -493,6 +493,8 @@ pub struct ProverOpts {
     pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
     #[prost(uint64, tag = "5")]
     pub max_segment_po2: u64,
+    #[prost(uint32, optional, tag = "6")]
+    pub segment_version: ::core::option::Option<u32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

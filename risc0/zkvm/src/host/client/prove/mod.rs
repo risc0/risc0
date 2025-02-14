@@ -21,6 +21,7 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{anyhow, Result};
+use risc0_binfmt::SegmentVersion;
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
@@ -34,7 +35,7 @@ use self::external::ExternalProver;
 use crate::{
     get_version,
     host::prove_info::ProveInfo,
-    receipt::{segment::SegmentVersion, DEFAULT_MAX_PO2},
+    receipt::{segment::default_segment_version, DEFAULT_MAX_PO2},
     ExecutorEnv, Receipt, SegmentReceiptVerifierParameters, SessionInfo, VerifierContext,
 };
 
@@ -77,12 +78,9 @@ pub trait Prover {
     /// Use this method unless you have need to configure the prover options or verifier context.
     /// Default [VerifierContext] and [ProverOpts] will be used.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-        self.prove_with_ctx(
-            env,
-            &VerifierContext::default(),
-            elf,
-            &ProverOpts::default(),
-        )
+        let opts = ProverOpts::default();
+        let ctx = opts.verifier_context();
+        self.prove_with_ctx(env, &ctx, elf, &opts)
     }
 
     /// Prove zkVM execution of the specified ELF binary and using the specified [ProverOpts].
@@ -97,12 +95,8 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        self.prove_with_ctx(
-            env,
-            &VerifierContext::from_max_po2(opts.max_segment_po2, opts.segment_version),
-            elf,
-            opts,
-        )
+        let ctx = opts.verifier_context();
+        self.prove_with_ctx(env, &ctx, elf, opts)
     }
 
     /// Prove zkVM execution of the specified ELF binary and using the specified [VerifierContext]
@@ -219,7 +213,7 @@ impl Default for ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: SegmentVersion::V1,
+            segment_version: default_segment_version(),
         }
     }
 }
@@ -241,7 +235,7 @@ impl ProverOpts {
                 .unwrap()
                 .collect(),
             max_segment_po2: po2_max,
-            segment_version: SegmentVersion::V1,
+            segment_version: default_segment_version(),
         }
     }
 
@@ -261,7 +255,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: risc0_circuit_rv32im::control_ids("sha-256", DEFAULT_MAX_PO2).collect(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: SegmentVersion::V1,
+            segment_version: default_segment_version(),
         }
     }
 
@@ -274,7 +268,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: SegmentVersion::V1,
+            segment_version: default_segment_version(),
         }
     }
 
@@ -287,7 +281,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: SegmentVersion::V1,
+            segment_version: default_segment_version(),
         }
     }
 
@@ -302,7 +296,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: SegmentVersion::V1,
+            segment_version: default_segment_version(),
         }
     }
 

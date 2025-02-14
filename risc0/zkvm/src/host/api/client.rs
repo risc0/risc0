@@ -29,7 +29,9 @@ use crate::{
         api::SegmentInfo,
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
-    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt::{
+        segment::default_segment_version, AssumptionReceipt, SegmentReceipt, SuccinctReceipt,
+    },
     receipt_claim::UnionClaim,
     ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, SegmentVersion,
 };
@@ -150,13 +152,15 @@ impl Client {
     {
         let mut conn = self.connect()?;
 
+        let version = default_segment_version();
+
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Execute(
                 pb::api::ExecuteRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     segments_out: Some(segments_out.try_into()?),
                     segment_version: Some(pb::base::CompatVersion {
-                        value: SegmentVersion::V1 as u32,
+                        value: version as u32,
                     }),
                 },
             )),
