@@ -64,7 +64,7 @@ fn main() {
         .journal
         .decode()
         .expect("Journal should contain a single `bool`");
-    println!("Pairing batch should give one; did it? {}", is_one);
+    println!("Pairing batch should give one; did it? {is_one}");
 }
 
 #[test]

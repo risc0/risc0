@@ -10,7 +10,7 @@ bn254-core = { path = "core" }
 bn254-methods = { path = "methods" }
 hex = "0.4.3"
 risc0-zkvm = { path = "../../risc0/zkvm" }
-substrate-bn = "0.6.0"
+substrate-bn = "=0.6.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
