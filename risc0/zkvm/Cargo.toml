@@ -48,8 +48,8 @@ risc0-circuit-rv32im = { workspace = true }
 risc0-circuit-rv32im-v2 = { workspace = true }
 risc0-core = { workspace = true }
 risc0-groth16 = { workspace = true }
-risc0-zkp = { workspace = true }
 risc0-zkos-v1compat = { workspace = true }
+risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true, features = [
   "rust-runtime",
   "export-getrandom",
