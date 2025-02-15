@@ -4461,7 +4461,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-methods"
-version = "0.1.0"
+version = "1.3.0-rc.1"
 dependencies = [
  "risc0-build",
 ]
