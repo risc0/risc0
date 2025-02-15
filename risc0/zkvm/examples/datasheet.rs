@@ -94,7 +94,7 @@ struct Args {
 }
 
 fn iterations_1m_cycles() -> u32 {
-    1024 * 512 - 45
+    1024 * 512 - 10
 }
 
 fn po2_in_range(s: &str) -> Result<usize, String> {
