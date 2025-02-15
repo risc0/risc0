@@ -43,11 +43,17 @@ each fork's repository on GitHub.
 | --------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------- | ----------------------- |
 | [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases) | 0.9.6              | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }` | [Yes]                   |
 
+### SUBSTRATE-BN
+
+| Crate                                                                    | Versions supported  | Patch Statement Example                                                                                   | Requires Unstable Flag? |
+| ------------------------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------- |
+| [`substrate-bn`](https://github.com/risc0/paritytech-bn/releases)        | 0.6.0               | `substrate-bn = { git = "https://github.com/risc0/paritytech-bn", tag = "v0.6.0-risczero.0" }`            | [Yes]                   |
+
 ### BLS12_381
 
 | Crate                                                                    | Versions supported  | Patch Statement Example                                                                                   | Requires Unstable Flag? |
 | ------------------------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------- |
-| [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases/)     | 0.8.0               | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "v0.8.0-risczero.0" }`          | Yes                     |
+| [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases/)     | 0.8.0               | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "v0.8.0-risczero.0" }`          | [Yes]                   |
 
 ### Other Patched Crates
 
