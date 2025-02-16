@@ -140,7 +140,7 @@ __device__ inline void eqz(ExecContext& ctx, Val a, const char* loc) {
 
 __device__ inline void eqz(ExecContext& ctx, ExtVal a, const char* loc) {
   for (size_t i = 0; i < EXT_SIZE; i++) {
-    eqz(a.elems[i], loc);
+    eqz(ctx, a.elems[i], loc);
   }
 }
 
