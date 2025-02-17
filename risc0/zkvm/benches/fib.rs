@@ -14,16 +14,16 @@
 
 use hotbench::{benchmark_group, benchmark_main, BenchGroup};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, Executor2, ExecutorEnv, ProverOpts, VerifierContext, RECURSION_PO2,
 };
 use risc0_zkvm_methods::FIB_ELF;
 
-fn setup_exec(iterations: u32) -> ExecutorImpl<'static> {
+fn setup_exec(iterations: u32) -> Executor2<'static> {
     let env = ExecutorEnv::builder()
         .write_slice(&[iterations])
         .build()
         .unwrap();
-    ExecutorImpl::from_elf(env, FIB_ELF).unwrap()
+    Executor2::from_elf(env, FIB_ELF).unwrap()
 }
 
 fn execute(group: &mut BenchGroup) {
@@ -107,7 +107,7 @@ fn join(group: &mut BenchGroup) {
             .segment_limit_po2(16)
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
+        let mut exec = Executor2::from_elf(env, FIB_ELF).unwrap();
         let session = exec.run().unwrap();
         assert!(session.segments.len() >= 2);
 

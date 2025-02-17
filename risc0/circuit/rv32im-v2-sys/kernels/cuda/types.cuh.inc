@@ -1664,6 +1664,7 @@ struct ECall0Layout {
   AddrDecomposeBitsLayout pcAddr;
   _Arguments_ECall0OutputLayout _arguments_ECall0Output;
   ECall0OutputLayout output;
+  IsZeroLayout isSuspend;
   IsZeroLayout isDecode;
   IsZeroLayout isP2Entry;
   IsZeroLayout isShaEcall;
@@ -2011,7 +2012,6 @@ struct PoseidonCheckOutLayout {
   PoseidonStateLayout _super;
   PoseidonCheckOut__0_SuperLayout8LayoutArray _1;
   IsZeroLayout isNormal;
-  NondetExtRegLayout extInv;
 };
 struct PoseidonDoOut_SuperArm0Layout {
   PoseidonCheckOutLayout _super;

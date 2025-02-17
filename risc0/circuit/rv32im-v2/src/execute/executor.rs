@@ -21,7 +21,10 @@ use risc0_zkp::core::{
     log2_ceil,
 };
 
-use crate::{Rv32imV2Claim, TerminateState};
+use crate::{
+    trace::{TraceCallback, TraceEvent},
+    Rv32imV2Claim, TerminateState,
+};
 
 use super::{
     bigint::BigIntState,
@@ -33,9 +36,14 @@ use super::{
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
-    trace::{TraceCallback, TraceEvent},
     SyscallContext,
 };
+
+#[derive(Clone, Debug, Default)]
+pub struct EcallMetric {
+    pub count: u64,
+    pub cycles: u64,
+}
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
@@ -139,7 +147,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.segment_cycles()
                 );
 
-                assert!(self.segment_cycles() < segment_limit);
+                assert!(
+                    self.segment_cycles() < segment_limit,
+                    "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                    self.pc
+                );
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;

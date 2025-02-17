@@ -88,7 +88,7 @@ pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SegmentVersion, SystemState};
+pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
@@ -107,7 +107,7 @@ pub use {
             RECURSION_PO2,
         },
         server::{
-            exec::{executor::ExecutorImpl, executor2::Executor2},
+            exec::executor2::Executor2,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -115,7 +115,7 @@ pub use {
             },
         },
     },
-    risc0_circuit_rv32im::prove::engine::loader::Loader,
+    // TODO: Loader
     risc0_groth16::{
         docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
     },
@@ -141,7 +141,7 @@ pub use {
             },
         },
     },
-    risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
+    risc0_circuit_rv32im_v2::trace::{TraceCallback, TraceEvent},
 };
 
 #[cfg(not(target_os = "zkvm"))]
@@ -161,12 +161,11 @@ pub use {
         recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
     },
     risc0_binfmt::compute_image_id,
-    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS,
     risc0_groth16::Seal as Groth16Seal,
 };
 
 #[cfg(feature = "std")]
-pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2, risc0_rv32im_ver};
+pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
 
 pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,

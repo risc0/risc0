@@ -4930,6 +4930,7 @@ pub struct ECall0Layout {
     pub pc_addr: &'static AddrDecomposeBitsLayout,
     pub _arguments_e_call0_output: &'static _Arguments_ECall0OutputLayout,
     pub output: &'static ECall0OutputLayout,
+    pub is_suspend: &'static IsZeroLayout,
     pub is_decode: &'static IsZeroLayout,
     pub is_p2_entry: &'static IsZeroLayout,
     pub is_sha_ecall: &'static IsZeroLayout,
@@ -4949,6 +4950,7 @@ impl risc0_zkp::layout::Component for ECall0Layout {
         v.visit_component("pc_addr", self.pc_addr)?;
         v.visit_component("_arguments_e_call0_output", self._arguments_e_call0_output)?;
         v.visit_component("output", self.output)?;
+        v.visit_component("is_suspend", self.is_suspend)?;
         v.visit_component("is_decode", self.is_decode)?;
         v.visit_component("is_p2_entry", self.is_p2_entry)?;
         v.visit_component("is_sha_ecall", self.is_sha_ecall)?;
@@ -5826,7 +5828,6 @@ pub struct PoseidonCheckOutLayout {
     pub _super: &'static PoseidonStateLayout,
     pub _1: &'static PoseidonCheckOut__0_SuperLayout8LayoutArray,
     pub is_normal: &'static IsZeroLayout,
-    pub ext_inv: &'static NondetExtRegLayout,
 }
 impl risc0_zkp::layout::Component for PoseidonCheckOutLayout {
     fn ty_name(&self) -> &'static str {
@@ -5837,7 +5838,6 @@ impl risc0_zkp::layout::Component for PoseidonCheckOutLayout {
         v.visit_component("_super", self._super)?;
         v.visit_component("_1", self._1)?;
         v.visit_component("is_normal", self.is_normal)?;
-        v.visit_component("ext_inv", self.ext_inv)?;
         Ok(())
     }
 }

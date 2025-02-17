@@ -176,16 +176,9 @@ impl Receipt {
         self.inner.verify_integrity_with_context(ctx)?;
 
         #[cfg(feature = "std")]
-        let image_id = match risc0_binfmt::risc0_rv32im_ver() {
-            Some(risc0_binfmt::SegmentVersion::V1) => image_id.into(),
-            Some(risc0_binfmt::SegmentVersion::V2) => {
-                let image_id = crate::compute_image_id_v2(image_id);
-                match image_id {
-                    Ok(image_id) => image_id,
-                    Err(_) => return Err(VerificationError::ImageVerificationError),
-                }
-            }
-            None => image_id.into(),
+        let image_id = match crate::compute_image_id_v2(image_id) {
+            Ok(image_id) => image_id,
+            Err(_) => return Err(VerificationError::ImageVerificationError),
         };
 
         // Check that the claim on the verified receipt matches what was expected. Since we have
@@ -726,13 +719,10 @@ impl VerifierContext {
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
     #[stability::unstable]
-    pub fn from_max_po2(po2_max: usize, segment_version: risc0_binfmt::SegmentVersion) -> Self {
+    pub fn from_max_po2(po2_max: usize) -> Self {
         Self {
             suites: Self::default_hash_suites(),
-            segment_verifier_parameters: Some(SegmentReceiptVerifierParameters::from_max_po2(
-                po2_max,
-                segment_version,
-            )),
+            segment_verifier_parameters: Some(SegmentReceiptVerifierParameters::default()),
             succinct_verifier_parameters: Some(SuccinctReceiptVerifierParameters::from_max_po2(
                 po2_max,
             )),
@@ -745,8 +735,8 @@ impl VerifierContext {
     /// Construct a verifier context that will accept receipts with control any of the default
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
-    pub fn all_po2s(segment_version: risc0_binfmt::SegmentVersion) -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 
     /// Return [VerifierContext] with the given map of hash suites.
@@ -796,8 +786,8 @@ impl VerifierContext {
 
     /// TODO(flaub)
     #[stability::unstable]
-    pub fn for_version(segment_version: risc0_binfmt::SegmentVersion) -> Self {
-        Self::from_max_po2(DEFAULT_MAX_PO2, segment_version)
+    pub fn for_version() -> Self {
+        Self::from_max_po2(DEFAULT_MAX_PO2)
     }
 }
 

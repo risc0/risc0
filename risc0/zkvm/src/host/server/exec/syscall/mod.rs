@@ -16,7 +16,7 @@
 
 mod args;
 mod cycle_count;
-mod fork;
+// mod fork;
 mod getenv;
 mod keccak;
 mod log;
@@ -33,12 +33,12 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::{anyhow, Result};
 use enum_map::{Enum, EnumMap};
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::ByteAddr;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     nr::{
-        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_KECCAK, SYS_LOG, SYS_PANIC,
-        SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_VERIFY_INTEGRITY2,
+        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_KECCAK, SYS_LOG, SYS_PANIC, SYS_PIPE,
+        SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_VERIFY_INTEGRITY2,
         SYS_WRITE,
     },
     SyscallName, DIGEST_BYTES,
@@ -53,10 +53,9 @@ use crate::{
 };
 
 use self::{
-    args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, keccak::SysKeccak,
-    log::SysLog, panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite,
-    prove_zkr::SysProveZkr, random::SysRandom, slice_io::SysSliceIo, verify::SysVerify,
-    verify2::SysVerify2,
+    args::SysArgs, cycle_count::SysCycleCount, getenv::SysGetenv, keccak::SysKeccak, log::SysLog,
+    panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite, prove_zkr::SysProveZkr,
+    random::SysRandom, slice_io::SysSliceIo, verify::SysVerify, verify2::SysVerify2,
 };
 
 /// A host-side implementation of a system call.
@@ -71,6 +70,7 @@ pub(crate) trait Syscall {
 }
 
 /// Access to memory and machine state for syscalls.
+#[allow(dead_code)]
 pub(crate) trait SyscallContext<'a> {
     /// Returns the current program counter.
     fn get_pc(&self) -> u32;
@@ -163,7 +163,7 @@ impl<'a> SyscallTable<'a> {
         this.with_syscall(SYS_ARGC, SysArgs(env.args.clone()))
             .with_syscall(SYS_ARGV, SysArgs(env.args.clone()))
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
-            .with_syscall(SYS_FORK, SysFork)
+            // .with_syscall(SYS_FORK, SysFork)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_KECCAK, SysKeccak::new(env.keccak_max_po2))
             .with_syscall(SYS_LOG, SysLog)

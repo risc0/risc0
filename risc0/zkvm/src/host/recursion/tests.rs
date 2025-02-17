@@ -25,11 +25,7 @@ use risc0_zkp::{
     core::digest::{digest, Digest, DIGEST_SHORTS},
     field::baby_bear::BabyBearElem,
 };
-use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID_V1, MULTI_TEST_ID_V2,
-};
-use rstest::rstest;
-use rstest_reuse::{apply, template};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
@@ -38,19 +34,10 @@ use crate::{
     mmr::MerkleMountainAccumulator,
     receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
-    ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, SegmentVersion,
-    Session, SimpleSegmentRef, SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext,
-    ALLOWED_CONTROL_ROOT, RECURSION_PO2,
+    ExecutorEnv, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, SimpleSegmentRef,
+    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
+    RECURSION_PO2,
 };
-
-use SegmentVersion::{V1, V2};
-
-#[template]
-#[rstest]
-#[case(V1)]
-#[case(V2)]
-#[test_log::test]
-fn base(#[case] version: SegmentVersion) {}
 
 #[test_log::test]
 fn test_recursion_poseidon254() {
@@ -177,21 +164,13 @@ fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
     Digest::try_from(words.as_slice()).unwrap()
 }
 
-fn execute_elf(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-    match version {
-        V1 => ExecutorImpl::from_elf(env, elf)
-            .unwrap()
-            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
-        V2 => Executor2::from_elf(env, elf)
-            .unwrap()
-            .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment)))),
-    }
+fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
+    Executor2::from_elf(env, elf)
+        .unwrap()
+        .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
 
-fn generate_busy_loop_segments(
-    version: SegmentVersion,
-    hashfn: &str,
-) -> (Session, Vec<SegmentReceipt>) {
+fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
     let env = ExecutorEnv::builder()
@@ -202,14 +181,12 @@ fn generate_busy_loop_segments(
         .unwrap();
 
     tracing::info!("Executing rv32im");
-    let session = execute_elf(version, env, MULTI_TEST_ELF).unwrap();
-    let opts = ProverOpts::composite()
-        .with_hashfn(hashfn.to_string())
-        .with_segment_version(version);
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
     let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving rv32im");
-    let ctx = opts.verifier_context();
+    let ctx = VerifierContext::default();
     let segment_receipts = session
         .segments
         .iter()
@@ -221,22 +198,15 @@ fn generate_busy_loop_segments(
     (session, segment_receipts)
 }
 
-fn multi_test_id(version: SegmentVersion) -> Digest {
-    match version {
-        V1 => MULTI_TEST_ID_V1.into(),
-        V2 => compute_image_id_v2(MULTI_TEST_ID_V2).unwrap(),
-    }
-}
-
-#[apply(base)]
-fn test_recursion_lift_join_identity_e2e(#[case] version: SegmentVersion) {
+#[test_log::test]
+fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
-    let (session, segments) = generate_busy_loop_segments(version, "poseidon2");
+    let (session, segments) = generate_busy_loop_segments("poseidon2");
 
     // Lift and join them all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
     tracing::info!("Lift claim = {:?}", rollup.claim);
-    let ctx = VerifierContext::for_version(version);
+    let ctx = VerifierContext::default();
     for receipt in &segments[1..] {
         let rec_receipt = lift(receipt).unwrap();
         tracing::info!("Lift claim = {:?}", rec_receipt.claim);
@@ -260,13 +230,12 @@ fn test_recursion_lift_join_identity_e2e(#[case] version: SegmentVersion) {
         InnerReceipt::Succinct(rollup),
         session.journal.unwrap().bytes,
     );
-    rollup_receipt.verify(multi_test_id(version)).unwrap();
+    rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
-#[apply(base)]
-fn test_recursion_identity_sha256(#[case] version: SegmentVersion) {
-    let default_prover =
-        get_prover_server(&ProverOpts::succinct().with_segment_version(version)).unwrap();
+#[test_log::test]
+fn test_recursion_identity_sha256() {
+    let default_prover = get_prover_server(&ProverOpts::succinct()).unwrap();
 
     tracing::info!("Proving: echo 'hello'");
     let env = ExecutorEnv::builder()
@@ -329,10 +298,10 @@ fn test_recursion_identity_sha256(#[case] version: SegmentVersion) {
         .unwrap();
 }
 
-#[apply(base)]
-fn test_recursion_lift_resolve_e2e(#[case] version: SegmentVersion) {
-    let image_id = multi_test_id(version);
-    let opts = ProverOpts::default().with_segment_version(version);
+#[test_log::test]
+fn test_recursion_lift_resolve_e2e() {
+    let image_id = compute_image_id_v2(MULTI_TEST_ID).unwrap();
+    let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving: echo 'execution A'");
@@ -381,15 +350,15 @@ fn test_recursion_lift_resolve_e2e(#[case] version: SegmentVersion) {
         composition_receipt.clone().journal.bytes,
     );
 
-    receipt.verify(image_id).unwrap();
+    receipt.verify(MULTI_TEST_ID).unwrap();
 
     // These tests take a long time. Since we have the composition receipt, test the prover trait's compress function
     let prover = default_prover();
 
     let succinct_receipt = prover.compress(&opts, &composition_receipt).unwrap();
-    let ctx = VerifierContext::for_version(version);
+    let ctx = VerifierContext::default();
     succinct_receipt
-        .verify_with_context(&ctx, image_id)
+        .verify_with_context(&ctx, MULTI_TEST_ID)
         .unwrap();
 }
 
@@ -430,7 +399,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("91d639615549c55dc491e60a5c3d9d301c364549c3372023fddbf406202af45b")
+        digest!("99b99939ea26267725827b146a80fd64153fc11760fef55fe54e290b40b47c46")
     );
 }
 

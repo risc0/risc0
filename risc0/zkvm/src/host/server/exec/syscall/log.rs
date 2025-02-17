@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::{
     fileno,
     syscall::reg_abi::{REG_A3, REG_A4},

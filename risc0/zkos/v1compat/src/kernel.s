@@ -126,10 +126,18 @@ _ecall_halt:
     slli a1, a1, 16
     andi a0, a0, 0xff
     or a0, a1, a0
+    andi t0, a0, 0xff
 
     li a1, 0
     li a7, HOST_ECALL_TERMINATE
     ecall
+
+    # return to userspace if halt_type != HALT (i.e. 0)
+    beq t0, zero, 1f
+    mret
+
+1:
+    fence
 
 _ecall_software:
     # prepare a software ecall

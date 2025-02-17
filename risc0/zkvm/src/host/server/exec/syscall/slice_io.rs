@@ -16,7 +16,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use std::{cell::RefCell, rc::Rc};
 
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::{
     syscall::reg_abi::{REG_A3, REG_A4},
     WORD_SIZE,
