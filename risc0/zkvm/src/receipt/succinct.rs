@@ -18,10 +18,10 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::fmt::Debug;
 
 use anyhow::bail;
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{
     control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
@@ -59,10 +59,11 @@ use crate::{
 #[non_exhaustive]
 pub struct SuccinctReceipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// The cryptographic seal of this receipt. This seal is a STARK proving an execution of the
     /// recursion circuit.
+    #[debug("{} bytes", self.get_seal_bytes().len())]
     pub seal: Vec<u32>,
 
     /// The control ID of this receipt, identifying the recursion program that was run (e.g. lift,
@@ -91,7 +92,7 @@ where
 
 impl<Claim> SuccinctReceipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
@@ -359,7 +360,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("1f01febccc956b6d16d310b37844527eb5ee4a91e35776db29786e04a579a55f")
+            digest!("c6f6fbecf03249c565e279dbf498e3b2a5e692ed44b489cdc5c271e4750d32c6")
         );
     }
 

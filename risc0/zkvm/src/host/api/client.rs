@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,14 +29,23 @@ use crate::{
         api::SegmentInfo,
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
-    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
+    receipt::{
+        segment::default_segment_version, AssumptionReceipt, SegmentReceipt, SuccinctReceipt,
+    },
+    receipt_claim::UnionClaim,
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, SegmentVersion,
 };
+
+pub(crate) enum Compat {
+    Any,
+    Narrow,
+    Wide,
+}
 
 /// A client implementation for interacting with a zkVM server.
 pub struct Client {
     connector: Box<dyn Connector>,
-    compat: bool,
+    compat: Compat,
 }
 
 impl Default for Client {
@@ -54,19 +63,31 @@ impl Client {
     /// Construct a [Client] that connects to a sub-process which implements
     /// the server by calling the specified `server_path`.
     pub fn new_sub_process<P: AsRef<Path>>(server_path: P) -> Result<Self> {
-        let connector = ParentProcessConnector::new(server_path)?;
+        let connector = ParentProcessConnector::new_narrow_version(server_path)?;
         Ok(Self::with_connector(Box::new(connector)))
     }
 
     /// Construct a [Client] that connects to a sub-process which implements
     /// the server by calling the specified `server_path`.
     ///
-    /// Additionally allows for wider version mismatches, only rejecting major differences
+    /// Additionally allows for wider version mismatches, only rejecting major differences.
     pub fn new_sub_process_compat<P: AsRef<Path>>(server_path: P) -> Result<Self> {
         let connector = ParentProcessConnector::new_wide_version(server_path)?;
         Ok(Self {
             connector: Box::new(connector),
-            compat: true,
+            compat: Compat::Wide,
+        })
+    }
+
+    /// Construct a [Client] that connects to a sub-process which implements
+    /// the server by calling the specified `server_path`.
+    ///
+    /// Additionally allows for any version for testing purposes.
+    pub fn new_sub_process_any<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let connector = ParentProcessConnector::new(server_path)?;
+        Ok(Self {
+            connector: Box::new(connector),
+            compat: Compat::Any,
         })
     }
 
@@ -80,7 +101,7 @@ impl Client {
     pub fn with_connector(connector: Box<dyn Connector>) -> Self {
         Self {
             connector,
-            compat: false,
+            compat: Compat::Narrow,
         }
     }
 
@@ -131,11 +152,53 @@ impl Client {
     {
         let mut conn = self.connect()?;
 
+        let version = default_segment_version();
+
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Execute(
                 pb::api::ExecuteRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     segments_out: Some(segments_out.try_into()?),
+                    segment_version: Some(pb::base::CompatVersion {
+                        value: version as u32,
+                    }),
+                },
+            )),
+        };
+        // tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let result = self.execute_handler(segment_callback, &mut conn, env);
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Execute the specified ELF binary with `SegmentVersion::V2`.
+    pub fn execute_v2<F>(
+        &self,
+        env: &ExecutorEnv<'_>,
+        binary: Asset,
+        segments_out: AssetRequest,
+        segment_callback: F,
+    ) -> Result<SessionInfo>
+    where
+        F: FnMut(SegmentInfo, Asset) -> Result<()>,
+    {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Execute(
+                pb::api::ExecuteRequest {
+                    env: Some(self.make_execute_env(env, binary.try_into()?)?),
+                    segments_out: Some(segments_out.try_into()?),
+                    segment_version: Some(pb::base::CompatVersion {
+                        value: SegmentVersion::V2 as u32,
+                    }),
                 },
             )),
         };
@@ -175,9 +238,15 @@ impl Client {
 
         let reply: pb::api::ProveSegmentReply = conn.recv().context("rx reply failed")?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply
+            .kind
+            .ok_or_else(|| malformed_err("ProveSegmentReply.kind"))?
+        {
             pb::api::prove_segment_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("ProveSegmentReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SegmentReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -221,9 +290,15 @@ impl Client {
 
         let reply: pb::api::ProveZkrReply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply
+            .kind
+            .ok_or_else(|| malformed_err("ProveZkrReply.kind"))?
+        {
             pb::api::prove_zkr_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("ProveZkrReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -268,9 +343,15 @@ impl Client {
 
         let reply: pb::api::ProveKeccakReply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply
+            .kind
+            .ok_or_else(|| malformed_err("ProveKeccakReply.kind"))?
+        {
             pb::api::prove_keccak_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("ProveKeccakReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -311,9 +392,12 @@ impl Client {
 
         let reply: pb::api::LiftReply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply.kind.ok_or_else(|| malformed_err("LiftReply.kind"))? {
             pb::api::lift_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("LiftReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -354,13 +438,64 @@ impl Client {
 
         let reply: pb::api::JoinReply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply.kind.ok_or_else(|| malformed_err("JoinReply.kind"))? {
             pb::api::join_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("JoinReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
             pb::api::join_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Run the union program to compress any two [SuccinctReceipt]s into one.
+    ///
+    /// By repeated application of the union program, any number of receipts can
+    /// be compressed into a single receipt.
+    pub fn union(
+        &self,
+        opts: &ProverOpts,
+        a_receipt: Asset,
+        b_receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt<UnionClaim>> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Union(
+                pb::api::UnionRequest {
+                    opts: Some(opts.clone().into()),
+                    left_receipt: Some(a_receipt.try_into()?),
+                    right_receipt: Some(b_receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        // tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::UnionReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or_else(|| malformed_err("UnionReply.kind"))? {
+            pb::api::union_reply::Kind::Ok(result) => {
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("UnionReply.Ok.receipt"))?
+                    .as_bytes()?;
+                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::union_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -401,9 +536,15 @@ impl Client {
 
         let reply: pb::api::ResolveReply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply
+            .kind
+            .ok_or_else(|| malformed_err("ResolveReply.kind"))?
+        {
             pb::api::resolve_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("ResolveReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -445,9 +586,15 @@ impl Client {
 
         let reply: pb::api::IdentityP254Reply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply
+            .kind
+            .ok_or_else(|| malformed_err("IdentityP254Reply.kind"))?
+        {
             pb::api::identity_p254_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("IdentityP254Reply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -477,7 +624,7 @@ impl Client {
     ///
     /// Compression from [SuccinctReceipt](crate::SuccinctReceipt) to
     /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
-    /// verifier, refered to as the "STARK-to-SNARK" operation.
+    /// verifier, referred to as the "STARK-to-SNARK" operation.
     ///
     /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
     /// x86 hosts, and requires Docker to be installed. See issue
@@ -508,9 +655,15 @@ impl Client {
 
         let reply: pb::api::CompressReply = conn.recv()?;
 
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply
+            .kind
+            .ok_or_else(|| malformed_err("CompressReply.kind"))?
+        {
             pb::api::compress_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_bytes = result
+                    .receipt
+                    .ok_or_else(|| malformed_err("CompressReply.Ok.receipt"))?
+                    .as_bytes()?;
                 let receipt_pb = pb::core::Receipt::decode(receipt_bytes)?;
                 receipt_pb.try_into()
             }
@@ -542,7 +695,10 @@ impl Client {
         conn.send(request).context("send")?;
 
         let reply: pb::api::GenericReply = conn.recv().context("error from server")?;
-        let result = match reply.kind.ok_or(malformed_err())? {
+        let result = match reply
+            .kind
+            .ok_or_else(|| malformed_err("GenericReply.kind"))?
+        {
             pb::api::generic_reply::Kind::Ok(ok) => Ok(ok),
             pb::api::generic_reply::Kind::Error(err) => Err(err.into()),
         };
@@ -567,20 +723,15 @@ impl Client {
 
         let reply: pb::api::HelloReply = conn.recv()?;
         // tracing::trace!("rx: {reply:?}");
-        match reply.kind.ok_or(malformed_err())? {
+        match reply.kind.ok_or_else(|| malformed_err("HelloReply.kind"))? {
             pb::api::hello_reply::Kind::Ok(reply) => {
                 let server_version: semver::Version = reply
                     .version
-                    .ok_or(malformed_err())?
+                    .ok_or_else(|| malformed_err("HelloReply.Ok.version"))?
                     .try_into()
                     .map_err(|err: semver::Error| anyhow!(err))?;
 
-                let version_check = if self.compat {
-                    check_server_version_wide
-                } else {
-                    check_server_version
-                };
-                if !version_check(&client_version, &server_version) {
+                if !self.compat.check(&client_version, &server_version) {
                     let msg = format!("incompatible server version: {server_version}");
                     tracing::warn!("{msg}");
                     bail!(msg);
@@ -609,6 +760,7 @@ impl Client {
             read_fds: env.posix_io.borrow().read_fds(),
             write_fds: env.posix_io.borrow().write_fds(),
             segment_limit_po2: env.segment_limit_po2,
+            keccak_max_po2: env.keccak_max_po2,
             session_limit: env.session_limit,
             trace_events: (!env.trace.is_empty()).then_some(()),
             coprocessor: env.coprocessor.is_some(),
@@ -670,9 +822,15 @@ impl Client {
             let reply: pb::api::ServerReply = conn.recv()?;
             // tracing::trace!("rx: {reply:?}");
 
-            match reply.kind.ok_or(malformed_err())? {
+            match reply
+                .kind
+                .ok_or_else(|| malformed_err("ServerReply.kind"))?
+            {
                 pb::api::server_reply::Kind::Ok(request) => {
-                    match request.kind.ok_or(malformed_err())? {
+                    match request
+                        .kind
+                        .ok_or_else(|| malformed_err("ServerReply.Ok.kind"))?
+                    {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
                             // tracing::trace!("tx: {msg:?}");
@@ -682,10 +840,16 @@ impl Client {
                             let reply: pb::api::GenericReply = segment
                                 .segment
                                 .map_or_else(
-                                    || Err(malformed_err()),
+                                    || Err(malformed_err("ServerReply.Ok.SegmentDone.segment")),
                                     |segment| {
-                                        let asset =
-                                            segment.segment.ok_or(malformed_err())?.try_into()?;
+                                        let asset = segment
+                                            .segment
+                                            .ok_or_else(|| {
+                                                malformed_err(
+                                                    "ServerReply.Ok.SegmentDone.segment.segment",
+                                                )
+                                            })?
+                                            .try_into()?;
                                         let info = SegmentInfo {
                                             po2: segment.po2,
                                             cycles: segment.cycles,
@@ -714,12 +878,12 @@ impl Client {
                                         journal: Journal::new(session.journal),
                                         exit_code: session
                                             .exit_code
-                                            .ok_or(malformed_err())?
+                                            .ok_or_else(|| malformed_err("SessionInfo.exit_code"))?
                                             .try_into()?,
                                         receipt_claim,
                                     })
                                 }
-                                None => Err(malformed_err()),
+                                None => Err(malformed_err("ServerReply.ok.SessionDone.session")),
                             }
                         }
                         pb::api::client_callback::Kind::ProveDone(_) => {
@@ -741,9 +905,15 @@ impl Client {
             let reply: pb::api::ServerReply = conn.recv()?;
             // tracing::trace!("rx: {reply:?}");
 
-            match reply.kind.ok_or(malformed_err())? {
+            match reply
+                .kind
+                .ok_or_else(|| malformed_err("ServerReply.kind"))?
+            {
                 pb::api::server_reply::Kind::Ok(request) => {
-                    match request.kind.ok_or(malformed_err())? {
+                    match request
+                        .kind
+                        .ok_or_else(|| malformed_err("ServerReply.Ok.kind"))?
+                    {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
                             // tracing::trace!("tx: {msg:?}");
@@ -756,7 +926,9 @@ impl Client {
                             return Err(anyhow!("Illegal client callback"))
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
-                            return done.prove_info.ok_or(malformed_err())
+                            return done.prove_info.ok_or_else(|| {
+                                malformed_err("ServerReply.Ok.ProveDone.prove_info")
+                            })
                         }
                     }
                 }
@@ -766,10 +938,18 @@ impl Client {
     }
 
     fn on_io(&self, env: &ExecutorEnv<'_>, request: pb::api::OnIoRequest) -> Result<Bytes> {
-        match request.kind.ok_or(malformed_err())? {
+        match request
+            .kind
+            .ok_or_else(|| malformed_err("OnIoRequest.kind"))?
+        {
             pb::api::on_io_request::Kind::Posix(posix) => {
-                let cmd = posix.cmd.ok_or(malformed_err())?;
-                match cmd.kind.ok_or(malformed_err())? {
+                let cmd = posix
+                    .cmd
+                    .ok_or_else(|| malformed_err("OnIoRequest.Posix.cmd"))?;
+                match cmd
+                    .kind
+                    .ok_or_else(|| malformed_err("OnIoRequest.Posix.cmd.kind"))?
+                {
                     pb::api::posix_cmd::Kind::Read(nread) => {
                         self.on_posix_read(env, posix.fd, nread as usize)
                     }
@@ -816,7 +996,7 @@ impl Client {
         let slice_io = table
             .inner
             .get(name)
-            .ok_or(anyhow!("Unknown I/O channel name: {name}"))?;
+            .ok_or_else(|| anyhow!("Unknown I/O channel name: {name}"))?;
         let result = slice_io.borrow_mut().handle_io(name, from_guest)?;
         Ok(result)
     }
@@ -835,16 +1015,25 @@ impl Client {
         env: &ExecutorEnv<'_>,
         coprocessor_request: pb::api::CoprocessorRequest,
     ) -> Result<()> {
-        match coprocessor_request.kind.ok_or(malformed_err())? {
+        match coprocessor_request
+            .kind
+            .ok_or_else(|| malformed_err("OnCoprocessorRequest.kind"))?
+        {
             pb::api::coprocessor_request::Kind::ProveZkr(proof_request) => {
                 let proof_request = proof_request.try_into()?;
-                let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
+                let coprocessor = env
+                    .coprocessor
+                    .clone()
+                    .ok_or_else(|| malformed_err("OnCoprocessorRequest.ProveZkr.coprocessor"))?;
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_zkr(proof_request)
             }
             pb::api::coprocessor_request::Kind::ProveKeccak(proof_request) => {
                 let proof_request = proof_request.try_into()?;
-                let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
+                let coprocessor = env
+                    .coprocessor
+                    .clone()
+                    .ok_or_else(|| malformed_err("OnCoprocessorRequest.ProveKeccak.coprocessor"))?;
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_keccak(proof_request)
             }
@@ -863,31 +1052,32 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
     }
 }
 
-pub(crate) fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
-    if requested.pre.is_empty() {
-        requested.major == server.major && requested.minor == server.minor
-    } else {
-        requested == server
+impl Compat {
+    pub(crate) fn check(&self, requested: &semver::Version, server: &semver::Version) -> bool {
+        match self {
+            Compat::Any => true,
+            Compat::Narrow => {
+                if requested.pre.is_empty() {
+                    requested.major == server.major && requested.minor == server.minor
+                } else {
+                    requested == server
+                }
+            }
+            Compat::Wide => requested.major == server.major,
+        }
     }
-}
-
-pub(crate) fn check_server_version_wide(
-    requested: &semver::Version,
-    server: &semver::Version,
-) -> bool {
-    requested.major == server.major
 }
 
 #[cfg(test)]
 mod tests {
     use semver::Version;
 
-    use super::{check_server_version, check_server_version_wide};
+    use super::Compat;
 
     #[test]
-    fn check_version() {
+    fn check_version_narrow() {
         fn test(requested: &str, server: &str) -> bool {
-            check_server_version(
+            Compat::Narrow.check(
                 &Version::parse(requested).unwrap(),
                 &Version::parse(server).unwrap(),
             )
@@ -916,7 +1106,7 @@ mod tests {
     #[test]
     fn check_wide_version() {
         fn test(requested: &str, server: &str) -> bool {
-            check_server_version_wide(
+            Compat::Wide.check(
                 &Version::parse(requested).unwrap(),
                 &Version::parse(server).unwrap(),
             )

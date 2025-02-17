@@ -115,7 +115,7 @@ pub struct SyncSlice<'a, T: Default + Clone> {
 //
 // The user of the SyncSlice is responsible for ensuring that no
 // two threads access the same elements at the same time.
-unsafe impl<'a, T: Default + Clone> Sync for SyncSlice<'a, T> {}
+unsafe impl<T: Default + Clone> Sync for SyncSlice<'_, T> {}
 
 impl<'a, T: Default + Clone> SyncSlice<'a, T> {
     pub fn new(mut buf: MappedRwLockWriteGuard<'a, [T]>) -> Self {
@@ -602,6 +602,10 @@ impl<F: Field> Hal for CpuHal<F> {
         offsets: &[u32],
         values: &[Self::Elem],
     ) {
+        if index.is_empty() {
+            return;
+        }
+
         let mut into = into.as_slice_mut();
         for cycle in 0..index.len() - 1 {
             for idx in index[cycle]..index[cycle + 1] {

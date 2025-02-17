@@ -22,14 +22,21 @@
 .equ HOST_ECALL_TERMINATE, 0
 .equ HOST_ECALL_READ, 1
 .equ HOST_ECALL_SHA, 4
+.equ HOST_ECALL_BIGINT, 5
 .equ WORD_SIZE, 4
 .equ MAX_IO_BYTES, 1024
+.equ REG_SP, 2
 .equ REG_T0, 5
+.equ REG_T1, 6
+.equ REG_T2, 7
 .equ REG_A0, 10
 .equ REG_A1, 11
 .equ REG_A2, 12
 .equ REG_A3, 13
 .equ REG_A4, 14
+.equ REG_A5, 15
+.equ REG_A6, 16
+.equ REG_T3, 28
 
 .section .text
 .global _start
@@ -50,10 +57,10 @@ _start:
     sw t1, 0(t0)
 
     # Initialize useful constants
-    li t3, USER_REGS_ADDR
-    la t4, _ecall_table
-    li t5, ECALL_TABLE_SIZE
-    li t6, MAX_IO_BYTES
+    li tp, USER_REGS_ADDR
+    la s1, _ecall_table
+    li s2, ECALL_TABLE_SIZE
+    li s3, MAX_IO_BYTES
 
     # Load the user program entry into MEPC
     li a0, USER_START_ADDR
@@ -70,19 +77,19 @@ _ecall_table:
     fence # input
     j _ecall_software
     j _ecall_sha
-    fence # bigint
+    j _ecall_bigint
     fence # user
-    fence # bigint2
+    j _ecall_bigint2
 
 _ecall_dispatch:
     # load t0 from userspace
-    lw a0, REG_T0 * WORD_SIZE (t3)
+    lw a0, REG_T0 * WORD_SIZE (tp)
     # check that ecall request is within range
-    bge a0, t5, 1f
+    bge a0, s2, 1f
     # adjust index so that it points to word sized entries
     slli a0, a0, 2
     # compute the table entry
-    add a1, t4, a0
+    add a1, s1, a0
     # jump into dispatch table
     jr a1
 1:
@@ -90,7 +97,7 @@ _ecall_dispatch:
 
 _ecall_halt:
     # copy output digest from pointer in a1 to GLOBAL_OUTPUT_ADDR
-    lw t0, REG_A1 * WORD_SIZE (t3) # out_state
+    lw t0, REG_A1 * WORD_SIZE (tp) # out_state
     li t1, GLOBAL_OUTPUT_ADDR
     lw t2, 0(t0)
     sw t2, 0(t1)
@@ -113,7 +120,7 @@ _ecall_halt:
     # u8(0, 0, user_exit, halt_type)
     # We need this format to be compatible with Rv32imV2Claim:
     # u16(user_exit, halt_type)
-    lw a0, REG_A0 * WORD_SIZE (t3)
+    lw a0, REG_A0 * WORD_SIZE (tp)
     srli a1, a0, 8
     andi a1, a1, 0xff
     slli a1, a1, 16
@@ -127,13 +134,13 @@ _ecall_halt:
 _ecall_software:
     # prepare a software ecall
     li a7, HOST_ECALL_READ
-    lw a0, REG_A2 * WORD_SIZE (t3) # syscall_ptr -> fd
-    lw a1, REG_A0 * WORD_SIZE (t3) # from_host_ptr -> buf
-    lw a2, REG_A1 * WORD_SIZE (t3) # from_host_len -> len
+    lw a0, REG_A2 * WORD_SIZE (tp) # syscall_ptr -> fd
+    lw a1, REG_A0 * WORD_SIZE (tp) # from_host_ptr -> buf
+    lw a2, REG_A1 * WORD_SIZE (tp) # from_host_len -> len
     slli a2, a2, 2
 
     # check if length is > 1024
-    bltu t6, a2, 1f
+    bltu s3, a2, 1f
 
     # call the host
     ecall
@@ -142,7 +149,7 @@ _ecall_software:
     # fd == 0 means read (a0, a1) from host
     li a0, 0
     # read into user registers starting at a0
-    addi a1, t3, REG_A0 * WORD_SIZE
+    addi a1, tp, REG_A0 * WORD_SIZE
     # read two words from host
     li a2, 2 * WORD_SIZE
     # call the host
@@ -154,9 +161,46 @@ _ecall_software:
     j ecall_software
 
 _ecall_sha:
-    lw a0, REG_A0 * WORD_SIZE (t3) # out_state
-    lw a1, REG_A1 * WORD_SIZE (t3) # in_state
-    lw a2, REG_A2 * WORD_SIZE (t3) # block_ptr1
-    lw a3, REG_A3 * WORD_SIZE (t3) # block_ptr2
-    lw a4, REG_A4 * WORD_SIZE (t3) # count
+    lw a0, REG_A0 * WORD_SIZE (tp) # out_state
+    lw a1, REG_A1 * WORD_SIZE (tp) # in_state
+    lw a2, REG_A2 * WORD_SIZE (tp) # block_ptr1
+    lw a3, REG_A3 * WORD_SIZE (tp) # block_ptr2
+    lw a4, REG_A4 * WORD_SIZE (tp) # count
     j ecall_sha
+
+_ecall_bigint2:
+    # save stack pointer
+    mv s0, sp
+
+    # prepare ecall
+    lw sp, REG_SP * WORD_SIZE (tp) # stack pointer
+    lw t1, REG_T1 * WORD_SIZE (tp) # nondet_program_ptr
+    lw t2, REG_T2 * WORD_SIZE (tp) # verify_program_ptr
+    lw t3, REG_T3 * WORD_SIZE (tp) # consts_ptr
+    lw a0, REG_A0 * WORD_SIZE (tp) # blob_ptr
+    lw a1, REG_A1 * WORD_SIZE (tp) # a1
+    lw a2, REG_A2 * WORD_SIZE (tp) # a2
+    lw a3, REG_A3 * WORD_SIZE (tp) # a3
+    lw a4, REG_A4 * WORD_SIZE (tp) # a4
+    lw a5, REG_A5 * WORD_SIZE (tp) # a5
+    lw a6, REG_A6 * WORD_SIZE (tp) # a6
+    li a7, HOST_ECALL_BIGINT
+
+    # call the circuit
+    ecall
+
+    # restore stack pointer
+    mv sp, s0
+
+    # return back to userspace
+    mret
+
+_ecall_bigint:
+    # prepare a bigint ecall
+    lw a0, REG_A0 * WORD_SIZE (tp) # result
+    lw a1, REG_A1 * WORD_SIZE (tp) # op
+    lw a2, REG_A2 * WORD_SIZE (tp) # x
+    lw a3, REG_A3 * WORD_SIZE (tp) # y
+    lw a4, REG_A4 * WORD_SIZE (tp) # modulus
+
+    j ecall_bigint_v1compat

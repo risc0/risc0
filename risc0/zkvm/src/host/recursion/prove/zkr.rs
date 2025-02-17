@@ -35,7 +35,7 @@ fn get_zkr(name: &str, hashfn: &str) -> Result<(Program, Digest)> {
             .iter()
             .copied()
             .find_map(|(n, id)| (n == name).then_some(id))
-            .ok_or(anyhow!("failed to find {name} in the list of control IDs"))?,
+            .ok_or_else(|| anyhow!("failed to find {name} in the list of control IDs"))?,
     ))
 }
 
@@ -69,4 +69,8 @@ pub fn resolve(hashfn: &str) -> Result<(Program, Digest)> {
 
 pub fn identity(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("identity.zkr", hashfn)
+}
+
+pub fn union(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("union.zkr", hashfn)
 }

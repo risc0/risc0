@@ -19,9 +19,9 @@ The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] 
    rzup install
    ```
 
-Running `rzup` will install the latest version of the RISC Zero toolchain.
+Running `rzup` will install the latest released version of the RISC Zero toolchain.
 
-For a specific version, use `rzup install cargo-risczero <version>`, where the `<version>` is a [release tag] (e.g `v1.1.1`).
+For a specific version, use `rzup install cargo-risczero <version>`, where the `<version>` is a released SemVer version (e.g `1.1.1`). See [releases].
 
 See `rzup --help` for more options. You can find out more about `rzup` [here][rzup-repo].
 
@@ -44,13 +44,13 @@ rzup install cpp
 
 To update your installation:
 
-1. Run `rzup update` to update the RISC Zero toolchain to the latest [release tag] version.
+1. Run `rzup update` to update the RISC Zero toolchain to the latest released version. See [releases].
 
 After you update your installation, be sure to update your project's RISC Zero crates. To do this, you must update all RISC Zero dependencies in your project's host and guest `Cargo.toml` files. In most projects, this is done by updating the host and guest `risc0-zkvm` crate and the `risc0-build` build dependency. They should be updated to use the version number displayed by `cargo risczero --version`.
 
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[release tag]: https://github.com/risc0/risc0/releases
+[releases]: https://github.com/risc0/risc0/releases
 [Rust]: https://www.rust-lang.org
 [rustup]: https://rustup.rs
 [rzup-repo]: https://github.com/risc0/risc0/tree/main/rzup

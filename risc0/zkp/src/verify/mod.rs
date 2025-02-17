@@ -157,7 +157,7 @@ where
     merkle_verifiers: Vec<Option<MerkleTreeVerifier<'a>>>,
 }
 
-impl<'a, F: Field> VerifyParams<F> for Verifier<'a, F> {}
+impl<F: Field> VerifyParams<F> for Verifier<'_, F> {}
 
 impl<'a, F: Field> Verifier<'a, F> {
     /// Start a new verification session.
@@ -306,7 +306,15 @@ impl<'a, F: Field> Verifier<'a, F> {
 
         // Get a pseudorandom DEEP query point
         // See DEEP-ALI protocol from DEEP-FRI paper for details on DEEP query.
-        let z = self.iop().random_ext_elem();
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "circuit_debug")] {
+                let z_slice = self.iop().read_field_elem_slice(F::ExtElem::EXT_SIZE);
+                let z = F::ExtElem::from_subelems(z_slice.iter().cloned());
+            } else {
+                let z = self.iop().random_ext_elem();
+            }
+        }
+
         trace_if_enabled!("Z = {z:?}");
         let back_one = F::Elem::ROU_REV[self.po2];
 
@@ -367,6 +375,7 @@ impl<'a, F: Field> Verifier<'a, F> {
         check *= (F::ExtElem::from_subfield(&three) * z).pow(self.tot_cycles) - F::ExtElem::ONE;
         trace_if_enabled!("Check = {check:?}");
         if check != result {
+            tracing::debug!("check != result");
             return Err(VerificationError::InvalidProof);
         }
 
@@ -421,7 +430,6 @@ impl<'a, F: Field> Verifier<'a, F> {
                 .merkle_verifiers
                 .iter()
                 .map(|merkle: &Option<MerkleTreeVerifier>| -> Result<&'a [F::Elem], VerificationError> {
-                    tracing::debug!("Verifying a merkle...");
                     merkle.as_ref()
                         .unwrap()
                         .verify(self.iop().deref_mut(), hashfn, idx)

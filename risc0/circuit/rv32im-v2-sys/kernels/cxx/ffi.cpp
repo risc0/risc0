@@ -49,6 +49,8 @@
 
 namespace risc0::circuit::rv32im_v2::cpu {
 
+constexpr size_t kUserAccumSplit = kLayout_TopAccum.columns[0].col;
+
 std::array<uint32_t, 2> divide_rv32im(uint32_t numer, uint32_t denom, uint32_t signType) {
   uint32_t onesComp = (signType == 2);
   bool negNumer = signType && int32_t(numer) < 0;
@@ -209,6 +211,15 @@ std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
   return {pagingIdx, machineMode};
 }
 
+std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
+  std::array<Val, 16> ret;
+  size_t bigintIdx = ctx.preflight.cycles[ctx.cycle].bigintIdx;
+  for (size_t i = 0; i < 16; i++) {
+    ret[i] = ctx.preflight.bigintBytes[bigintIdx + i];
+  }
+  return ret;
+}
+
 void stepExec(ExecBuffers& buffers, PreflightTrace& preflight, LookupTables& tables, size_t cycle) {
   // printf("stepExec: %zu\n", cycle);
   ExecContext ctx(preflight, tables, cycle);
@@ -223,9 +234,10 @@ void stepAccum(AccumBuffers& buffers,
                size_t cycle) {
   ExecContext ctx(preflight, tables, cycle);
   MutableBufObj data(buffers.data);
-  MutableBufObj accum(buffers.accum, /*zeroBack=*/true);
+  MutableBufObj accum(buffers.accum, /*zeroBack=*/kUserAccumSplit);
   GlobalBufObj mix(buffers.mix);
-  step_TopAccum(ctx, &accum, &data, &mix);
+  GlobalBufObj global(buffers.global);
+  step_TopAccum(ctx, &accum, &data, &global, &mix);
   // printf("stepAccum: %zu -> [%u, %u, %u, %u]\n",
   //        cycle,
   //        buffers.accum.get(cycle, buffers.accum.cols - 4).asUInt32(),
@@ -312,7 +324,7 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
       for (size_t j = 0; j < 4; j++) {
         size_t col = buffers->accum.cols - 4 + j;
         Fp* itBegin = buffers->accum.buf + col * rows;
-        Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
+        Fp* itEnd = itBegin + lastCycle;
         // NOTE: poolstl does not support parallel inclusive_scan
         std::inclusive_scan(itBegin, itEnd, itBegin);
       }
@@ -321,6 +333,7 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
     {
       // apply totals
       nvtx3::scoped_range range("phase3");
+      size_t machineColumns = (buffers->accum.cols - kUserAccumSplit) / 4;
       auto begin = poolstl::iota_iter<uint32_t>(0);
       auto end = poolstl::iota_iter<uint32_t>(lastCycle);
       std::for_each(poolstl::par, begin, end, [&](uint32_t row) {
@@ -329,9 +342,10 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
         for (size_t k = 0; k < 4; k++) {
           prev[k] = buffers->accum.get(back1, buffers->accum.cols - 4 + k);
         }
-        for (size_t j = 0; j < buffers->accum.cols / 4 - 1; j++) {
+        for (size_t j = 0; j < machineColumns - 1; j++) {
           for (size_t k = 0; k < 4; k++) {
-            buffers->accum.set(row, j * 4 + k, buffers->accum.get(row, j * 4 + k) + prev[k]);
+            size_t col = kUserAccumSplit + j * 4 + k;
+            buffers->accum.set(row, col, buffers->accum.get(row, col) + prev[k]);
           }
         }
       });

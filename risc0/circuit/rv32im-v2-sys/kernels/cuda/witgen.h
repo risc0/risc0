@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,10 +51,10 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  __device__ MutableBufObj(Buffer& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
+  __device__ MutableBufObj(Buffer& buf, size_t zeroBack = 0) : buf(buf), zeroBack(zeroBack) {}
 
   __device__ Val load(ExecContext& ctx, size_t col, size_t back) override {
-    if (zeroBack && back > 0) {
+    if (zeroBack && col > zeroBack && back > 0) {
       return 0;
     }
     size_t backRow = (buf.rows + ctx.cycle - back) % buf.rows;
@@ -66,7 +66,7 @@ struct MutableBufObj : public BufferObj {
   }
 
   Buffer& buf;
-  bool zeroBack;
+  size_t zeroBack;
 };
 
 using MutableBuf = MutableBufObj*;
@@ -264,6 +264,7 @@ __device__ ::cuda::std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx);
 __device__ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len);
 __device__ Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal);
 __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx);
+__device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx);
 
 template <typename T> __device__ void extern_log(ExecContext& ctx, const char* message, T vals) {
   // printf("%s\n", message);

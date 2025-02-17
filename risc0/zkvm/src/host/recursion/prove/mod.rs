@@ -32,7 +32,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
         digest::{Digest, DIGEST_SHORTS},
-        hash::hash_suite_from_name,
+        hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::{CircuitHal, Hal},
@@ -46,7 +46,7 @@ use crate::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{Assumption, MaybePruned, Merge},
+    receipt_claim::{Assumption, MaybePruned, Merge, UnionClaim},
     sha::Digestible,
     ProverOpts, ReceiptClaim, SegmentVersion, Unknown,
 };
@@ -135,6 +135,56 @@ pub fn join(
     })
 }
 
+/// Run the union program to compress two succinct receipts into one.
+///
+/// By repeated application of the union program, any number of succinct
+/// receipts can be compressed into a single receipt.
+pub fn union(
+    a: &SuccinctReceipt<Unknown>,
+    b: &SuccinctReceipt<Unknown>,
+) -> Result<SuccinctReceipt<UnionClaim>> {
+    let a_assumption = Assumption {
+        claim: a.claim.digest(),
+        control_root: a.control_root()?,
+    }
+    .digest();
+    let b_assumption = Assumption {
+        claim: b.claim.digest(),
+        control_root: b.control_root()?,
+    }
+    .digest();
+
+    let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
+        if a_assumption <= b_assumption {
+            ((a_assumption, a), (b_assumption, b))
+        } else {
+            ((b_assumption, b), (a_assumption, a))
+        };
+    tracing::debug!("Proving union: left assumption = {:#?}", left_assumption);
+    tracing::debug!("Proving union: right assumption = {:#?}", right_assumption);
+
+    let opts = ProverOpts::succinct();
+    let mut prover = Prover::new_union(left_receipt, right_receipt, opts.clone())?;
+    let receipt = prover.prover.run()?;
+
+    let claim = UnionClaim {
+        left: left_assumption,
+        right: right_assumption,
+    };
+
+    // Include an inclusion proof for control_id to allow verification against a root.
+    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
+        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: prover.control_id,
+        control_inclusion_proof,
+        claim: MaybePruned::Value(claim),
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
+}
+
 /// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
 /// receipt proving the validity of the assumption.
 ///
@@ -171,18 +221,14 @@ where
         .as_value_mut()
         .context("conditional receipt output is pruned")?
         .as_mut()
-        .ok_or(anyhow!(
-            "conditional receipt has empty output and no assumptions"
-        ))?
+        .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
         .assumptions
         .as_value_mut()
         .context("conditional receipt assumptions are pruned")?
         .0
         .drain(..1)
         .next()
-        .ok_or(anyhow!(
-            "cannot resolve assumption from receipt with no assumptions"
-        ))?;
+        .ok_or_else(|| anyhow!("cannot resolve assumption from receipt with no assumptions"))?;
 
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
@@ -457,6 +503,39 @@ impl Prover {
         Ok(prover)
     }
 
+    /// Initialize a recursion prover with the union program to compress two
+    /// succinct receipts into one.
+    ///
+    /// By repeated application of the union program, any number of succinct
+    /// receipts can be compressed into a single receipt.
+    pub fn new_union(
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+        opts: ProverOpts,
+    ) -> Result<Self> {
+        ensure!(
+            a.hashfn == "poseidon2",
+            "union recursion program only supports poseidon2 hashfn; received {}",
+            a.hashfn
+        );
+        ensure!(
+            b.hashfn == "poseidon2",
+            "union recursion program only supports poseidon2 hashfn; received {}",
+            b.hashfn
+        );
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
+        let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
+
+        let (program, control_id) = zkr::union(&opts.hashfn)?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_succinct_receipt(a)?;
+        prover.add_succinct_receipt(b)?;
+        Ok(prover)
+    }
+
     /// Initialize a recursion prover with the join program to compress two receipts of the same
     /// session into one.
     ///
@@ -541,7 +620,7 @@ impl Prover {
             .as_value()
             .context("cannot resolve conditional receipt with pruned output")?
             .as_ref()
-            .ok_or(anyhow!("cannot resolve conditional receipt with no output"))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
             .clone();
 
         // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
@@ -553,9 +632,7 @@ impl Prover {
         let head: Assumption = assumptions
             .0
             .first()
-            .ok_or(anyhow!(
-                "cannot resolve conditional receipt with no assumptions"
-            ))?
+            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
             .as_value()
             .context("cannot resolve conditional receipt with pruned head assumption")?
             .clone();
@@ -658,6 +735,18 @@ impl Prover {
         a.claim.as_value()?.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
         self.add_input(bytemuck::cast_slice(&data_fp));
+        Ok(())
+    }
+
+    /// Add a receipt for a succinct receipt
+    fn add_succinct_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
+    where
+        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    {
+        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
+        // Union program expects an additional boolean to indicate that control root is zero.
+        let zero_root = BabyBearElem::new((a.control_root()? == Digest::ZERO) as u32);
+        self.add_input(bytemuck::cast_slice(&[zero_root]));
         Ok(())
     }
 

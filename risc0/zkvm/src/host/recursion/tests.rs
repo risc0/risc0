@@ -26,7 +26,7 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
+    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID_V1, MULTI_TEST_ID_V2,
 };
 use rstest::rstest;
 use rstest_reuse::{apply, template};
@@ -34,7 +34,8 @@ use rstest_reuse::{apply, template};
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
     compute_image_id_v2, default_prover, get_prover_server,
-    host::server::exec::executor2::Executor2,
+    host::server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
+    mmr::MerkleMountainAccumulator,
     receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
     ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, SegmentVersion,
@@ -222,8 +223,8 @@ fn generate_busy_loop_segments(
 
 fn multi_test_id(version: SegmentVersion) -> Digest {
     match version {
-        V1 => MULTI_TEST_ID.into(),
-        V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+        V1 => MULTI_TEST_ID_V1.into(),
+        V2 => compute_image_id_v2(MULTI_TEST_ID_V2).unwrap(),
     }
 }
 
@@ -429,6 +430,31 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("ffe166017b1ab460995b45510524c60e3756344feff2414f44cda25c33a78058")
+        digest!("91d639615549c55dc491e60a5c3d9d301c364549c3372023fddbf406202af45b")
     );
+}
+
+#[test]
+fn union() {
+    let default_prover = get_prover_server(&ProverOpts::succinct()).unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let default_receipt: SuccinctReceipt<Unknown> = default_prover
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .receipt
+        .inner
+        .succinct()
+        .unwrap()
+        .clone()
+        .into_unknown();
+
+    let mut mmr = MerkleMountainAccumulator::<UnionPeak>::new();
+    for receipt in vec![default_receipt; 5] {
+        mmr.insert(receipt).unwrap();
+    }
+    let _ = mmr.root().unwrap();
 }

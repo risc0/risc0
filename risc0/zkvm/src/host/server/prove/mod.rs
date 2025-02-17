@@ -19,6 +19,7 @@ pub(crate) mod keccak;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
+pub(crate) mod union_peak;
 
 use std::rc::Rc;
 
@@ -34,10 +35,10 @@ use crate::{
         CompositeReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::Unknown,
+    receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
-    stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
-    Segment, Session, VerifierContext,
+    stark_to_snark, ExecutorEnv, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment, Session,
+    VerifierContext,
 };
 
 mod private {
@@ -67,11 +68,7 @@ pub trait ProverServer: private::Sealed {
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
-    ) -> Result<ProveInfo> {
-        let mut exec = ExecutorImpl::from_elf(env, elf)?;
-        let session = exec.run()?;
-        self.prove_session(ctx, &session)
-    }
+    ) -> Result<ProveInfo>;
 
     /// Prove the specified [Session].
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
@@ -88,6 +85,13 @@ pub trait ProverServer: private::Sealed {
         a: &SuccinctReceipt<ReceiptClaim>,
         b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    /// Unite two [SuccinctReceipt] into a [SuccinctReceipt]
+    fn union(
+        &self,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<UnionClaim>>;
 
     /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a [SuccinctReceipt]
     /// proving the validity of the assumption.
@@ -130,9 +134,9 @@ pub trait ProverServer: private::Sealed {
                     }))
                 },
             )?
-            .ok_or(anyhow!(
-                "malformed composite receipt has no continuation segment receipts"
-            ))?;
+            .ok_or_else(|| {
+                anyhow!("malformed composite receipt has no continuation segment receipts")
+            })?;
 
         // Compress assumptions and resolve them to get the final succinct receipt.
         receipt.assumption_receipts.iter().try_fold(

@@ -18,13 +18,21 @@ use anyhow::{anyhow, bail, Result};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
+    bigint::{self, BigIntState},
     platform::*,
     poseidon2::{Poseidon2, Poseidon2State},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
     sha2::{self, Sha2State},
 };
 
-pub trait Risc0Context {
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub(crate) enum LoadOp {
+    Peek,
+    Load,
+    Record,
+}
+
+pub(crate) trait Risc0Context {
     /// Get the program counter
     fn get_pc(&self) -> ByteAddr;
 
@@ -44,17 +52,42 @@ pub trait Risc0Context {
 
     fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
 
-    fn peek_u32(&mut self, addr: WordAddr) -> Result<u32>;
-
-    fn load_register(&mut self, base: WordAddr, idx: usize) -> Result<u32> {
-        self.load_u32(base + idx)
-    }
-
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
         self.store_u32(base + idx, word)
     }
 
-    fn load_u32(&mut self, addr: WordAddr) -> Result<u32>;
+    fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
+
+    fn load_register(&mut self, op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
+        self.load_u32(op, base + idx)
+    }
+
+    fn load_machine_register(&mut self, op: LoadOp, idx: usize) -> Result<u32> {
+        self.load_register(op, MACHINE_REGS_ADDR.waddr(), idx)
+    }
+
+    fn load_aligned_addr_from_machine_register(
+        &mut self,
+        op: LoadOp,
+        idx: usize,
+    ) -> Result<WordAddr> {
+        check_aligned_addr(ByteAddr(self.load_machine_register(op, idx)?))
+    }
+
+    fn load_u8(&mut self, op: LoadOp, addr: ByteAddr) -> Result<u8> {
+        let word = self.load_u32(op, addr.waddr())?;
+        let bytes = word.to_le_bytes();
+        let byte_offset = addr.subaddr() as usize;
+        Ok(bytes[byte_offset])
+    }
+
+    fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+        let mut region = Vec::with_capacity(size);
+        for i in 0..size {
+            region.push(self.load_u8(op, addr + i)?);
+        }
+        Ok(region)
+    }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
@@ -97,30 +130,33 @@ pub trait Risc0Context {
 
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
-    fn load_machine_register(&mut self, idx: usize) -> Result<u32> {
-        self.load_u32(MACHINE_REGS_ADDR.waddr() + idx)
-    }
+    fn on_bigint_cycle(&mut self, cur_state: CycleState, bigint: &BigIntState);
 }
 
-pub struct Risc0Machine<'a> {
-    ctx: &'a mut dyn Risc0Context,
+fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
+    addr.waddr_aligned()
+        .ok_or_else(|| anyhow!("{addr:?} is an unaligned address"))
 }
 
-impl<'a> Risc0Machine<'a> {
-    pub fn step(emu: &mut Emulator, ctx: &'a mut dyn Risc0Context) -> Result<()> {
+pub struct Risc0Machine<'a, T: Risc0Context> {
+    ctx: &'a mut T,
+}
+
+impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
+    pub fn step(emu: &mut Emulator, ctx: &'a mut T) -> Result<()> {
         emu.step(&mut Risc0Machine { ctx }).inspect_err(|_| {
             emu.dump();
         })
     }
 
-    pub fn suspend(ctx: &'a mut dyn Risc0Context) -> Result<()> {
+    pub fn suspend(ctx: &'a mut T) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         this.store_memory(SUSPEND_PC_ADDR.waddr(), this.ctx.get_pc().0)?;
         this.store_memory(SUSPEND_MODE_ADDR.waddr(), this.ctx.get_machine_mode())?;
         this.ctx.suspend()
     }
 
-    pub fn resume(ctx: &'a mut dyn Risc0Context) -> Result<()> {
+    pub fn resume(ctx: &'a mut T) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
@@ -145,6 +181,7 @@ impl<'a> Risc0Machine<'a> {
             HOST_ECALL_WRITE => self.ecall_write(),
             HOST_ECALL_POSEIDON2 => self.ecall_poseidon2(),
             HOST_ECALL_SHA2 => self.ecall_sha2(),
+            HOST_ECALL_BIGINT => self.ecall_bigint(),
             _ => unimplemented!(),
         }
     }
@@ -173,7 +210,6 @@ impl<'a> Risc0Machine<'a> {
     }
 
     fn ecall_read(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_read");
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostReadSetup, 0, 0, 0)?;
         let mut cur_state = CycleState::HostReadSetup;
@@ -189,6 +225,7 @@ impl<'a> Risc0Machine<'a> {
         if len > 0 {
             guest_addr(ptr.0)?;
         }
+        tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
         self.store_register(REG_A0, rlen)?;
@@ -277,7 +314,6 @@ impl<'a> Risc0Machine<'a> {
             add_cycle!(ptr, rlen);
         }
 
-        // Ok(true)
         Ok(false)
     }
 
@@ -294,32 +330,36 @@ impl<'a> Risc0Machine<'a> {
         if len > MAX_IO_BYTES {
             bail!("Invalid length (too big) in host write: {len}");
         }
-        let bytes = self.peek(ptr, len as usize)?;
+        let bytes = self.ctx.load_region(LoadOp::Peek, ptr, len as usize)?;
         let rlen = self.ctx.host_write(fd, &bytes)?;
         self.store_register(REG_A0, rlen)?;
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::HostWrite, CycleState::Decode, 0, 0, 0)?;
-        // Ok(true)
         Ok(false)
     }
 
     fn ecall_poseidon2(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_poseidon2");
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0)?;
         Poseidon2::ecall(self.ctx)?;
-        // Ok(true)
         Ok(false)
     }
 
     fn ecall_sha2(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_sha2");
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::ShaEcall, 0, 0, 0)?;
         sha2::ecall(self.ctx)?;
+        Ok(false)
+    }
+
+    fn ecall_bigint(&mut self) -> Result<bool> {
+        self.next_pc();
+        self.ctx
+            .on_ecall_cycle(CycleState::MachineEcall, CycleState::BigIntEcall, 0, 0, 0)?;
+        bigint::ecall(self.ctx)?;
         Ok(false)
     }
 
@@ -333,21 +373,6 @@ impl<'a> Risc0Machine<'a> {
         self.ctx.set_user_pc(pc);
         self.ctx.set_machine_mode(1);
         Ok(())
-    }
-
-    fn peek(&mut self, ptr: ByteAddr, len: usize) -> Result<Vec<u8>> {
-        let mut bytes = vec![0u8; len];
-        for (i, byte) in bytes.iter_mut().enumerate().take(len) {
-            *byte = self.peek_u8(ptr + i)?;
-        }
-        Ok(bytes)
-    }
-
-    fn peek_u8(&mut self, ptr: ByteAddr) -> Result<u8> {
-        let word = self.ctx.peek_u32(ptr.waddr())?;
-        let bytes = word.to_le_bytes();
-        let offset = ptr.subaddr() as usize;
-        Ok(bytes[offset])
     }
 
     fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
@@ -379,7 +404,7 @@ impl<'a> Risc0Machine<'a> {
             let mut str = String::new();
             for j in 0..4 {
                 let idx = i * 4 + j;
-                let word = self.ctx.peek_u32(base_addr + idx)?;
+                let word = self.ctx.load_u32(LoadOp::Peek, base_addr + idx)?;
                 write!(str, "  x{idx}: {word:#010x}")?;
             }
             tracing::trace!("  {str}");
@@ -388,7 +413,7 @@ impl<'a> Risc0Machine<'a> {
     }
 }
 
-impl<'a> EmuContext for Risc0Machine<'a> {
+impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
     fn ecall(&mut self) -> Result<bool> {
         if self.is_machine_mode() {
             self.machine_ecall()
@@ -446,7 +471,7 @@ impl<'a> EmuContext for Risc0Machine<'a> {
     fn load_register(&mut self, idx: usize) -> Result<u32> {
         // tracing::trace!("load_reg: x{idx}");
         let base = self.regs_base_addr();
-        self.ctx.load_register(base, idx)
+        self.ctx.load_register(LoadOp::Record, base, idx)
     }
 
     fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
@@ -463,7 +488,7 @@ impl<'a> EmuContext for Risc0Machine<'a> {
     }
 
     fn load_memory(&mut self, addr: WordAddr) -> Result<u32> {
-        self.ctx.load_u32(addr)
+        self.ctx.load_u32(LoadOp::Record, addr)
     }
 
     fn store_memory(&mut self, addr: WordAddr, word: u32) -> Result<()> {

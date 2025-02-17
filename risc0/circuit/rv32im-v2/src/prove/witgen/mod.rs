@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod bigint;
 pub(crate) mod paged_map;
 pub(crate) mod poseidon2;
 pub(crate) mod preflight;
@@ -26,41 +27,49 @@ use preflight::PreflightTrace;
 use risc0_binfmt::WordAddr;
 use risc0_circuit_rv32im_v2_sys::RawPreflightCycle;
 use risc0_core::scope;
-use risc0_zkp::{core::digest::DIGEST_WORDS, field::Elem as _, hal::Hal};
+use risc0_zkp::{
+    core::digest::DIGEST_WORDS,
+    field::{Elem as _, ExtElem as _},
+    hal::Hal,
+};
 
 use self::preflight::Back;
-use super::hal::{CircuitWitnessGenerator, MetaBuffer, StepMode};
+use super::hal::{CircuitAccumulator, CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
     execute::{
-        platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State, segment::Segment,
+        bigint::BigIntState,
+        byte_poly::{BigIntAccum, BigIntAccumState},
+        platform::MERKLE_TREE_END_ADDR,
+        poseidon2::Poseidon2State,
+        segment::Segment,
         sha2::Sha2State,
     },
     zirgen::circuit::{
-        CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_CODE, REGCOUNT_DATA,
-        REGCOUNT_GLOBAL,
+        CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_ACCUM, REGCOUNT_CODE,
+        REGCOUNT_DATA, REGCOUNT_GLOBAL, REGCOUNT_MIX,
     },
 };
 
 pub(crate) struct WitnessGenerator<H: Hal> {
-    pub cycles: usize,
+    cycles: usize,
     pub global: MetaBuffer<H>,
     pub code: MetaBuffer<H>,
     pub data: MetaBuffer<H>,
+    pub accum: MetaBuffer<H>,
     pub trace: PreflightTrace,
 }
 
-impl<H: Hal> WitnessGenerator<H> {
-    pub fn new<C>(
+impl<H> WitnessGenerator<H>
+where
+    H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
+{
+    pub fn new<C: CircuitWitnessGenerator<H>>(
         hal: &H,
         circuit_hal: &C,
         segment: &Segment,
         mode: StepMode,
         rand_z: ExtVal,
-    ) -> Result<Self>
-    where
-        H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
-        C: CircuitWitnessGenerator<H>,
-    {
+    ) -> Result<Self> {
         scope!("witgen");
 
         let trace = segment.preflight(rand_z)?;
@@ -158,6 +167,11 @@ impl<H: Hal> WitnessGenerator<H> {
                         injector.set_u32_bits(row, col, value);
                     }
                 }
+                Back::BigInt(state) => {
+                    for (col, value) in zip(BigIntState::offsets(), state.as_array()) {
+                        injector.set(row, col, value);
+                    }
+                }
             }
             injector.set_cycle(row, cycle);
         }
@@ -180,13 +194,91 @@ impl<H: Hal> WitnessGenerator<H> {
             hal.eltwise_zeroize_elem(&data.buf);
         });
 
+        // #[cfg(feature = "entropy_finder")]
+        // if let Ok(dump_path) = std::env::var("DATA_DUMP") {
+        //     let raw = data.buf.to_vec();
+
+        //     let old = if std::fs::exists(&dump_path).unwrap() {
+        //         Some(std::fs::read(&dump_path).unwrap())
+        //     } else {
+        //         None
+        //     };
+
+        //     std::fs::write(dump_path, bytemuck::cast_slice(&raw)).unwrap();
+        //     if let Some(old) = old {
+        //         let old = bytemuck::cast_slice(&old);
+        //         for cycle in 0..cycles {
+        //             for col in 0..REGCOUNT_DATA {
+        //                 assert_eq!(
+        //                     H::Elem::new_raw(old[col * cycles + cycle]),
+        //                     raw[col * cycles + cycle],
+        //                     "cycle: {cycle}, col: {col}",
+        //                 );
+        //             }
+        //         }
+        //     }
+        // }
+
+        let accum = scope!(
+            "alloc(accum)",
+            MetaBuffer::new("accum", hal, cycles, REGCOUNT_ACCUM, true)
+        );
+
         Ok(Self {
             cycles,
             global,
             code,
             data,
+            accum,
             trace,
         })
+    }
+
+    pub fn accum<C: CircuitAccumulator<H>>(
+        &self,
+        hal: &H,
+        circuit_hal: &C,
+        mix: &[Val],
+    ) -> Result<MetaBuffer<H>> {
+        // use final mix to compute BigIntAccumPowers
+        let last_mix = ExtVal::from_subelems(mix[mix.len() - 4..].iter().cloned());
+
+        // inject BigIntAccumState backs
+        let mut injector = Injector::new(self.cycles);
+        let mut bigint_accum = BigIntAccum::new(last_mix);
+
+        for (row, back) in self.trace.backs.iter().enumerate() {
+            if let Back::BigInt(state) = back {
+                bigint_accum.step(state)?;
+                for (col, value) in zip(BigIntAccumState::offsets(), bigint_accum.state.as_array())
+                {
+                    injector.set(row, col, value);
+                }
+                injector.push();
+            }
+        }
+
+        hal.scatter(
+            &self.accum.buf,
+            &injector.index,
+            &injector.offsets,
+            &injector.values,
+        );
+
+        let mix = MetaBuffer {
+            buf: hal.copy_from_elem("mix", mix),
+            rows: 1,
+            cols: REGCOUNT_MIX,
+            checked: true,
+        };
+
+        circuit_hal.step_accum(&self.trace, &self.data, &self.accum, &self.global, &mix)?;
+
+        scope!("zeroize(accum)", {
+            hal.eltwise_zeroize_elem(&self.accum.buf);
+        });
+
+        Ok(mix)
     }
 }
 
@@ -210,6 +302,10 @@ impl Injector {
         }
     }
 
+    fn push(&mut self) {
+        self.index.push(self.offsets.len() as u32);
+    }
+
     fn set_cycle(&mut self, row: usize, cycle: &RawPreflightCycle) {
         const CYCLE_COL: usize = LAYOUT_TOP.cycle._super.offset;
         const NEXT_PC_LOW: usize = LAYOUT_TOP.next_pc_low._super.offset;
@@ -221,7 +317,7 @@ impl Injector {
         self.set(row, NEXT_PC_HIGH, cycle.pc >> 16);
         self.set(row, NEXT_STATE, cycle.state);
         self.set(row, NEXT_MACHINE_MODE, cycle.machine_mode as u32);
-        self.index.push(self.offsets.len() as u32);
+        self.push();
     }
 
     fn set(&mut self, row: usize, col: usize, value: u32) {

@@ -4,7 +4,7 @@
 pub struct ServerRequest {
     #[prost(
         oneof = "server_request::Kind",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12"
     )]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
@@ -35,6 +35,8 @@ pub mod server_request {
         ProveZkr(super::ProveZkrRequest),
         #[prost(message, tag = "11")]
         ProveKeccak(super::ProveKeccakRequest),
+        #[prost(message, tag = "12")]
+        Union(super::UnionRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -73,6 +75,8 @@ pub struct ExecuteRequest {
     pub env: ::core::option::Option<ExecutorEnv>,
     #[prost(message, optional, tag = "2")]
     pub segments_out: ::core::option::Option<AssetRequest>,
+    #[prost(message, optional, tag = "3")]
+    pub segment_version: ::core::option::Option<super::base::CompatVersion>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -255,6 +259,41 @@ pub struct JoinResult {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnionRequest {
+    #[prost(message, optional, tag = "1")]
+    pub opts: ::core::option::Option<ProverOpts>,
+    #[prost(message, optional, tag = "2")]
+    pub left_receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "3")]
+    pub right_receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "4")]
+    pub receipt_out: ::core::option::Option<AssetRequest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnionReply {
+    #[prost(oneof = "union_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<union_reply::Kind>,
+}
+/// Nested message and enum types in `UnionReply`.
+pub mod union_reply {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        Ok(super::UnionResult),
+        #[prost(message, tag = "2")]
+        Error(super::GenericError),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnionResult {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ResolveRequest {
     #[prost(message, optional, tag = "1")]
     pub opts: ::core::option::Option<ProverOpts>,
@@ -393,6 +432,8 @@ pub struct ExecutorEnv {
     pub segment_path: ::prost::alloc::string::String,
     #[prost(bool, tag = "13")]
     pub coprocessor: bool,
+    #[prost(uint32, optional, tag = "14")]
+    pub keccak_max_po2: ::core::option::Option<u32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -426,6 +467,8 @@ pub struct ProverOpts {
     pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
     #[prost(uint64, tag = "5")]
     pub max_segment_po2: u64,
+    #[prost(uint32, optional, tag = "6")]
+    pub segment_version: ::core::option::Option<u32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -605,7 +648,7 @@ pub mod posix_cmd {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TraceEvent {
-    #[prost(oneof = "trace_event::Kind", tags = "1, 2, 3")]
+    #[prost(oneof = "trace_event::Kind", tags = "1, 2, 3, 4, 5")]
     pub kind: ::core::option::Option<trace_event::Kind>,
 }
 /// Nested message and enum types in `TraceEvent`.
@@ -639,6 +682,18 @@ pub mod trace_event {
         pub region: ::prost::alloc::vec::Vec<u8>,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct PageIn {
+        #[prost(uint64, tag = "1")]
+        pub cycles: u64,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct PageOut {
+        #[prost(uint64, tag = "1")]
+        pub cycles: u64,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
         #[prost(message, tag = "1")]
@@ -647,6 +702,10 @@ pub mod trace_event {
         RegisterSet(RegisterSet),
         #[prost(message, tag = "3")]
         MemorySet(MemorySet),
+        #[prost(message, tag = "4")]
+        PageIn(PageIn),
+        #[prost(message, tag = "5")]
+        PageOut(PageOut),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

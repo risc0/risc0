@@ -9,7 +9,7 @@ edition = "2021"
 bytemuck = "1.20.0"
 risc0-circuit-keccak = { path = "../..", default-features = false }
 risc0-zkvm = { path = "../../../../zkvm", default-features = false, features = [
-  "std",
+  "std", "unstable"
 ] }
 risc0-zkvm-platform = { path = "../../../../zkvm/platform", default-features = false, features = [
   "unstable",

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 use alloc::{collections::BTreeSet, string::String, vec::Vec};
-use core::fmt::Debug;
 
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
-use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
+use derive_more::Debug;
+use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SegmentVersion, SystemState};
 use risc0_circuit_rv32im::{
     layout::{SystemStateLayout, OUT_LAYOUT},
     CIRCUIT,
@@ -34,18 +34,6 @@ use serde::{Deserialize, Serialize};
 use super::{VerifierContext, DEFAULT_MAX_PO2};
 use crate::{sha, MaybePruned, ReceiptClaim};
 
-/// TODO(flaub)
-#[derive(
-    Clone, Copy, Debug, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq,
-)]
-pub enum SegmentVersion {
-    /// TODO(flaub)
-    V1,
-
-    /// TODO(flaub)
-    V2,
-}
-
 /// A receipt attesting to the execution of a Segment.
 ///
 /// A SegmentReceipt attests that a Segment was executed in a manner
@@ -61,6 +49,7 @@ pub struct SegmentReceipt {
     /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
     /// non-opaque claim component, which can be conveniently accessed with
     /// [SegmentReceipt::claim].
+    #[debug("{} bytes", self.get_seal_bytes().len())]
     pub seal: Vec<u32>,
 
     /// Segment index within the [Receipt](crate::Receipt)
@@ -223,10 +212,18 @@ impl Digestible for SegmentReceiptVerifierParameters {
     }
 }
 
+pub(crate) fn default_segment_version() -> SegmentVersion {
+    #[cfg(feature = "std")]
+    let version = risc0_binfmt::risc0_rv32im_ver().unwrap_or(SegmentVersion::V1);
+    #[cfg(not(feature = "std"))]
+    let version = SegmentVersion::V1;
+    version
+}
+
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self::from_max_po2(DEFAULT_MAX_PO2, SegmentVersion::V1)
+        Self::from_max_po2(DEFAULT_MAX_PO2, default_segment_version())
     }
 }
 
@@ -300,7 +297,7 @@ mod tests {
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SegmentReceiptVerifierParameters::default().digest(),
-            digest!("52a27aff2de5a8206e3e88cb8dcb087c1193ede8efaf4889117bc68e704cf29a")
+            digest!("47da9f5fd755aeec39643267de04183479d2bccd609db5bbc815c16e0707b9f9")
         );
     }
 }

@@ -26,6 +26,7 @@ use std::{
     collections::HashMap,
     default::Default,
     env,
+    ffi::OsStr,
     fmt::Write as _,
     fs::{self, File},
     io::{BufRead, BufReader, Write},
@@ -36,7 +37,7 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use risc0_binfmt::KERNEL_START_ADDR;
+use risc0_binfmt::{risc0_rv32im_ver, SegmentVersion, KERNEL_START_ADDR};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -44,56 +45,14 @@ use serde::Deserialize;
 use self::{config::GuestInfo, docker::build_guest_package_docker};
 
 pub use self::{
-    config::{DockerOptions, GuestOptions},
+    config::{
+        DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
+        GuestOptionsBuilder, GuestOptionsBuilderError,
+    },
     docker::{docker_build, BuildStatus, TARGET_DIR},
 };
 
-/// This const represents a filename that is used in the use to indicate to in
-/// order to indicate to the client and the risc0-build crate that the new rust
-/// implementation of rzup is in use. The rust implementation of rzup will place
-/// a file with this name under `$RISC0_HOME`.
-pub const RUST_RZUP_INDICATOR: &str = ".rzup";
-
-const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
-
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
-
-/// Get the path used by cargo-risczero that stores downloaded toolchains
-pub fn risc0_data() -> Result<PathBuf> {
-    risc0_data_new().or_else(|_| risc0_data_compat())
-}
-
-// use the new location from rzup install.
-fn risc0_data_new() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = env::var("RISC0_HOME") {
-        dir.into()
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".risc0")
-    } else {
-        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
-    };
-
-    if !dir.join(RUST_RZUP_INDICATOR).exists() {
-        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
-    }
-
-    Ok(dir)
-}
-
-// check for backwards compatible cargo risczero install.
-fn risc0_data_compat() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = env::var("RISC0_DATA_DIR") {
-        dir.into()
-    } else if let Some(root) = dirs::data_dir() {
-        root.join("cargo-risczero")
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".cargo-risczero")
-    } else {
-        anyhow::bail!("Could not determine risc0 data dir. Set RISC0_DATA_DIR env var.");
-    };
-
-    Ok(dir)
-}
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -275,7 +234,18 @@ impl GuestBuilder for GuestListEntry {
         }
 
         let upper = self.name.to_uppercase().replace('-', "_");
-        let image_id = self.image_id.as_words();
+
+        let image_id_v1 = self.image_id.as_words();
+        let image_id_v2 = match self.v2_image_id {
+            ImageIdKind::User(digest) => digest,
+            ImageIdKind::Kernel(digest) => digest,
+        };
+        let image_id_v2 = image_id_v2.as_words();
+
+        let image_id = match risc0_rv32im_ver() {
+            Some(SegmentVersion::V2) => image_id_v2,
+            _ => image_id_v1,
+        };
 
         let elf = if is_skip_build() {
             "&[]".to_string()
@@ -289,14 +259,14 @@ impl GuestBuilder for GuestListEntry {
         writeln!(&mut str, "pub const {upper}_PATH: &str = {:?};", self.path).unwrap();
         writeln!(&mut str, "pub const {upper}_ID: [u32; 8] = {image_id:?};").unwrap();
 
-        let (part, v2_image_id) = match self.v2_image_id {
-            ImageIdKind::User(digest) => ("USER", digest),
-            ImageIdKind::Kernel(digest) => ("KERNEL", digest),
-        };
-        let v2_image_id = v2_image_id.as_words();
         writeln!(
             &mut str,
-            "pub const {upper}_V2_{part}_ID: [u32; 8] = {v2_image_id:?};",
+            "pub const {upper}_ID_V1: [u32; 8] = {image_id_v1:?};",
+        )
+        .unwrap();
+        writeln!(
+            &mut str,
+            "pub const {upper}_ID_V2: [u32; 8] = {image_id_v2:?};",
         )
         .unwrap();
 
@@ -439,6 +409,26 @@ fn sanitized_cmd(tool: &str) -> Command {
     cmd
 }
 
+fn cpp_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::CppToolchain)
+        .unwrap()
+        .expect("Risc Zero C++ toolchain installed");
+    println!("Using C++ toolchain version {version}");
+    path
+}
+
+fn rust_toolchain() -> PathBuf {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+        .expect("Risc Zero Rust toolchain installed");
+    println!("Using Rust toolchain version {version}");
+    path
+}
+
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
 #[stability::unstable]
@@ -449,15 +439,8 @@ pub fn cargo_command(subcmd: &str, rustc_flags: &[String]) -> Command {
 }
 
 pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Command {
-    let rustc = sanitized_cmd("rustup")
-        .args(["+risc0", "which", "rustc"])
-        .output()
-        .expect("rustup failed to find risc0 toolchain")
-        .stdout;
-
-    let rustc = String::from_utf8(rustc).unwrap();
-    let rustc = rustc.trim();
-    println!("Using rustc: {rustc}");
+    let rustc = rust_toolchain().join("bin/rustc");
+    println!("Using rustc: {}", rustc.display());
 
     let mut cmd = sanitized_cmd("cargo");
     let mut args = vec![subcmd, "--target", RISC0_TARGET_TRIPLE];
@@ -478,10 +461,7 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
 
     if !cpp_toolchain_override() {
-        let cc_path = risc0_data()
-            .unwrap()
-            .join("cpp/bin/riscv32-unknown-elf-gcc");
-        cmd.env("CC", cc_path)
+        cmd.env("CC", cpp_toolchain().join("bin/riscv32-unknown-elf-gcc"))
             .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
         // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
@@ -689,41 +669,31 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
     }
 }
 
-fn detect_toolchain(name: &str) {
-    let result = Command::new("rustup")
-        .args(["toolchain", "list", "--verbose"])
-        .stderr(Stdio::inherit())
-        .output()
-        .unwrap();
-    if !result.status.success() {
-        eprintln!("Failed to run: 'rustup toolchain list --verbose'");
-        std::process::exit(result.status.code().unwrap());
-    }
-
-    let stdout = String::from_utf8(result.stdout).unwrap();
-    if !stdout.lines().any(|line| line.trim().starts_with(name)) {
-        eprintln!("The 'risc0' toolchain could not be found.");
-        eprintln!("To install the risc0 toolchain, use rzup.");
-        eprintln!("For example:");
-        eprintln!("  curl -L https://risczero.com/install | bash");
-        eprintln!("  rzup install");
-        std::process::exit(-1);
-    }
-}
-
 fn get_out_dir() -> PathBuf {
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-    out_dir
-        .parent() // out
-        .unwrap()
-        .parent() // $crate
-        .unwrap()
-        .parent() // build
-        .unwrap()
-        .parent() // $profile
-        .unwrap()
-        .join("riscv-guest")
+    // This code is based on https://docs.rs/cxx-build/latest/src/cxx_build/target.rs.html#10-49
+
+    if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR").map(Into::<PathBuf>::into) {
+        if target_dir.is_absolute() {
+            return target_dir.join("riscv-guest");
+        }
+    }
+
+    let mut dir: PathBuf = env::var_os("OUT_DIR").unwrap().into();
+    loop {
+        if dir.join(".rustc_info.json").exists()
+            || dir.join("CACHEDIR.TAG").exists()
+            || dir.file_name() == Some(OsStr::new("target"))
+                && dir
+                    .parent()
+                    .is_some_and(|parent| parent.join("Cargo.toml").exists())
+        {
+            return dir.join("riscv-guest");
+        }
+        if dir.pop() {
+            continue;
+        }
+        panic!("Cannot find cargo target dir location")
+    }
 }
 
 fn get_guest_dir(host_pkg: impl AsRef<Path>, guest_pkg: impl AsRef<Path>) -> PathBuf {
@@ -808,10 +778,6 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
 
-    if !is_skip_build() {
-        detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
-    }
-
     let profile = if is_debug() { "debug" } else { "release" };
 
     let mut guest_list = vec![];
@@ -823,13 +789,8 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
             metadata: (&guest.pkg).into(),
         };
 
-        let methods: Vec<G> = if let Some(ref docker_opts) = guest.opts.use_docker {
-            let src_dir = docker_opts
-                .root_dir
-                .clone()
-                .unwrap_or_else(|| env::current_dir().unwrap());
-            build_guest_package_docker(&guest.pkg, &src_dir, &guest.target_dir, &guest_info)
-                .unwrap();
+        let methods: Vec<G> = if guest.opts.use_docker.is_some() {
+            build_guest_package_docker(&guest.pkg, &guest.target_dir, &guest_info).unwrap();
             guest_methods(&guest.pkg, &guest.target_dir, &guest_info, "docker")
         } else {
             build_guest_package(&guest.pkg, &guest.target_dir, &guest_info);
@@ -927,12 +888,8 @@ pub fn build_package(
 
     let profile = if is_debug() { "debug" } else { "release" };
 
-    if let Some(ref docker_opts) = options.use_docker {
-        let src_dir = docker_opts
-            .root_dir
-            .clone()
-            .unwrap_or_else(|| env::current_dir().unwrap());
-        build_guest_package_docker(pkg, &src_dir, target_dir.as_ref(), &guest_info)?;
+    if options.use_docker.is_some() {
+        build_guest_package_docker(pkg, target_dir.as_ref(), &guest_info)?;
         Ok(guest_methods(pkg, &target_dir, &guest_info, "docker"))
     } else {
         build_guest_package(pkg, &target_dir, &guest_info);

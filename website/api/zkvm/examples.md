@@ -9,11 +9,10 @@
   Waldo blog][waldo-blog]
 - **[ZK Checkmate][example-chess]**: prove that you see a mate-in-one, without
   revealing the winning move
-- **[ZK Proof of Exploit][zkpoex]∑**: prove that you _could_ exploit an Ethereum
+- **[ZK Proof of Exploit][zkpoex]**: prove that you _could_ exploit an Ethereum
   account, without revealing the exploit
 - **[ECDSA signature verification][example-ecdsa]**: prove the validity of an
   ECDSA signature
-- **[zkEVM][example-zkevm]**: demo of running EVM engine on the Risc Zero zkVM
 
 ## Running the Examples
 
@@ -57,7 +56,6 @@ cargo run --release
 [example-hello]: https://github.com/risc0/risc0/tree/main/examples/hello-world
 [example-json]: https://github.com/risc0/risc0/tree/main/examples/json
 [example-waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
-[example-zkevm]: https://github.com/risc0/risc0/tree/main/examples/zkevm-demo
 [examples-dir]: https://github.com/risc0/risc0/tree/main/examples
 [install]: ./install.md
 [releases]: https://github.com/risc0/risc0/releases

@@ -24,7 +24,7 @@ use risc0_binfmt::{ByteAddr as ByteAddr2, ExitCode, MemoryImage2, Program, Syste
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_circuit_rv32im_v2::{
     execute::{
-        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        platform::WORD_SIZE, trace as trace_v2, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
     },
     MAX_INSN_CYCLES,
@@ -45,7 +45,7 @@ use crate::{
 };
 
 use super::{
-    profiler::Profiler,
+    profiler::{self, Profiler},
     syscall::{SyscallContext, SyscallTable},
     Journal,
 };
@@ -92,7 +92,11 @@ impl<'a> Executor2<'a> {
         let image = MemoryImage2::with_kernel(program, kernel);
 
         let profiler = if env.pprof_out.is_some() {
-            let profiler = Rc::new(RefCell::new(Profiler::new(user_elf, None)?));
+            let profiler = Rc::new(RefCell::new(Profiler::new(
+                user_elf,
+                None,
+                profiler::read_enable_inline_functions_env_var(),
+            )?));
             env.trace.push(profiler.clone());
             Some(profiler)
         } else {
@@ -143,6 +147,7 @@ impl<'a> Executor2<'a> {
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
         scope!("execute");
+        tracing::info!("Executing rv32im-v2 session");
 
         let journal = Journal::default();
         self.env
@@ -160,7 +165,7 @@ impl<'a> Executor2<'a> {
             self.image.clone(),
             self,
             self.env.input_digest,
-            vec![], // TODO(flaub)
+            convert_trace_callbacks(self.env.trace.clone()),
         );
 
         let start_time = Instant::now();
@@ -229,6 +234,7 @@ impl<'a> Executor2<'a> {
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = self.syscall_table.assumptions_used.take();
+        let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
         let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
 
@@ -252,6 +258,7 @@ impl<'a> Executor2<'a> {
             journal: session_journal.map(crate::Journal::new),
             exit_code,
             assumptions,
+            mmr_assumptions,
             user_cycles: result.user_cycles,
             paging_cycles: result.paging_cycles,
             reserved_cycles: result.reserved_cycles,
@@ -278,12 +285,46 @@ impl<'a> Executor2<'a> {
     }
 }
 
+fn v1_trace_event_from_v2(event: trace_v2::TraceEvent) -> crate::TraceEvent {
+    match event {
+        trace_v2::TraceEvent::InstructionStart { cycle, pc, insn } => {
+            crate::TraceEvent::InstructionStart { cycle, pc, insn }
+        }
+
+        trace_v2::TraceEvent::RegisterSet { idx, value } => {
+            crate::TraceEvent::RegisterSet { idx, value }
+        }
+
+        trace_v2::TraceEvent::MemorySet { addr, region } => {
+            crate::TraceEvent::MemorySet { addr, region }
+        }
+
+        trace_v2::TraceEvent::PageIn { cycles } => crate::TraceEvent::PageIn { cycles },
+
+        trace_v2::TraceEvent::PageOut { cycles } => crate::TraceEvent::PageOut { cycles },
+    }
+}
+
+fn convert_trace_callbacks<'a>(
+    trace: Vec<Rc<RefCell<dyn crate::TraceCallback + 'a>>>,
+) -> Vec<Rc<RefCell<dyn trace_v2::TraceCallback + 'a>>> {
+    trace
+        .into_iter()
+        .map(|cb| {
+            Rc::new(RefCell::new(move |event| {
+                cb.borrow_mut()
+                    .trace_callback(v1_trace_event_from_v2(event))
+            })) as Rc<RefCell<dyn trace_v2::TraceCallback + 'a>>
+        })
+        .collect()
+}
+
 struct ContextAdapter<'a, 'b> {
     ctx: &'b mut dyn CircuitSyscallContext,
     syscall_table: SyscallTable<'a>,
 }
 
-impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
+impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
     fn get_pc(&self) -> u32 {
         self.ctx.get_pc()
     }
@@ -315,7 +356,7 @@ impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
     }
 }
 
-impl<'a> CircuitSyscall for Executor2<'a> {
+impl CircuitSyscall for Executor2<'_> {
     fn host_read(
         &self,
         ctx: &mut dyn CircuitSyscallContext,
@@ -364,7 +405,7 @@ impl<'a> CircuitSyscall for Executor2<'a> {
     }
 }
 
-impl<'a, 'b> ContextAdapter<'a, 'b> {
+impl ContextAdapter<'_, '_> {
     fn peek_string(&mut self, mut addr: ByteAddr2) -> Result<String> {
         tracing::trace!("peek_string: {addr:?}");
         let mut buf = Vec::new();

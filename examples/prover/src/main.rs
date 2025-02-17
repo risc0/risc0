@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,33 +23,44 @@ mod worker;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
-use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
-use risc0_zkp::digest;
 use risc0_zkvm::{
-    sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    MaybePruned, ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt,
-    Unknown,
+    sha::{Digest, Digestible},
+    ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
-use self::{plan::Planner, task_mgr::TaskManager};
+use crate::plan::Planner;
+
+use self::task_mgr::TaskManager;
 
 fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     prover_example();
 }
 
-struct Coprocessor {
+struct Coprocessor<'a> {
+    next_proof_idx: u32,
     pub(crate) receipts: HashMap<Digest, SuccinctReceipt<Unknown>>,
+    pub(crate) task_manager: &'a RefCell<TaskManager>,
+    pub(crate) planner: &'a RefCell<Planner>,
 }
 
-impl Coprocessor {
-    fn new() -> Self {
+impl<'a> Coprocessor<'a> {
+    fn new(task_manager: &'a RefCell<TaskManager>, planner: &'a RefCell<Planner>) -> Self {
         Self {
+            next_proof_idx: 0,
             receipts: HashMap::new(),
+            task_manager,
+            planner,
         }
     }
 }
 
-impl CoprocessorCallback for Coprocessor {
+impl CoprocessorCallback for Coprocessor<'_> {
     fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
         let client = ApiClient::from_env().unwrap();
         let claim_digest = proof_request.claim_digest;
@@ -59,14 +70,17 @@ impl CoprocessorCallback for Coprocessor {
     }
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
-        let client = ApiClient::from_env().unwrap();
-        let receipt = client.prove_keccak(proof_request, AssetRequest::Inline)?;
-        let claim_digest = match receipt.claim {
-            // unknown is always pruned so if we get to this branch, something went wrong...
-            MaybePruned::Value(_) => unimplemented!(),
-            MaybePruned::Pruned(claim_digest) => claim_digest,
-        };
-        self.receipts.insert(claim_digest, receipt);
+        self.planner
+            .borrow_mut()
+            .enqueue_keccak(self.next_proof_idx)
+            .unwrap();
+        self.task_manager
+            .borrow_mut()
+            .add_keccak_segment(self.next_proof_idx, proof_request);
+        while let Some(task) = self.planner.borrow_mut().next_task() {
+            self.task_manager.borrow_mut().add_task(task.clone());
+        }
+        self.next_proof_idx += 1;
         Ok(())
     }
 }
@@ -74,16 +88,13 @@ impl CoprocessorCallback for Coprocessor {
 fn prover_example() {
     println!("Submitting proof request...");
 
-    let mut task_manager = TaskManager::new();
-    let mut planner = Planner::default();
+    let task_manager = RefCell::new(TaskManager::new());
+    let planner = RefCell::new(Planner::default());
 
-    let po2 = 16;
-    let claim_digest = digest!("b83c10da0c23587bf318cbcec2c2ac0260dbd6c0fa6905df639f8f6056f0d56c");
-    let to_guest: (Digest, u32) = (claim_digest, po2);
+    let coprocessor = Rc::new(RefCell::new(Coprocessor::new(&task_manager, &planner)));
 
-    let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
     let env = ExecutorEnv::builder()
-        .write(&to_guest)
+        .write(&MultiTestSpec::KeccakUnion(3))
         .unwrap()
         .coprocessor_callback_ref(coprocessor.clone())
         .build()
@@ -94,14 +105,14 @@ fn prover_example() {
     let session = client
         .execute(
             &env,
-            Asset::Inline(KECCAK_ELF.into()),
+            Asset::Inline(MULTI_TEST_ELF.into()),
             AssetRequest::Inline,
             |info, segment| {
                 println!("{info:?}");
-                planner.enqueue_segment(segment_idx).unwrap();
-                task_manager.add_segment(segment_idx, segment);
-                while let Some(task) = planner.next_task() {
-                    task_manager.add_task(task.clone());
+                planner.borrow_mut().enqueue_segment(segment_idx).unwrap();
+                task_manager.borrow_mut().add_segment(segment_idx, segment);
+                while let Some(task) = planner.borrow_mut().next_task() {
+                    task_manager.borrow_mut().add_task(task.clone());
                 }
                 segment_idx += 1;
                 Ok(())
@@ -109,16 +120,23 @@ fn prover_example() {
         )
         .unwrap();
 
-    planner.finish().unwrap();
+    planner.borrow_mut().finish().unwrap();
 
     println!("Plan:");
-    println!("{planner:?}");
+    println!("{:?}", planner.borrow());
 
-    while let Some(task) = planner.next_task() {
-        task_manager.add_task(task.clone());
+    while let Some(task) = planner.borrow_mut().next_task() {
+        task_manager.borrow_mut().add_task(task.clone());
     }
 
-    let conditional_receipt = task_manager.run();
+    let opts = ProverOpts::default();
+    let (conditional_receipt, union_root) = task_manager.borrow_mut().finish();
+
+    let coprocessor = coprocessor.borrow();
+    let mut all_receipts = coprocessor.receipts.clone();
+    if let Some(union_root) = union_root {
+        all_receipts.insert(union_root.claim.digest(), union_root);
+    }
 
     let output = conditional_receipt
         .claim
@@ -131,13 +149,12 @@ fn prover_example() {
         .unwrap();
     let assumptions = output.assumptions.as_value().unwrap();
 
-    let coprocessor = coprocessor.borrow();
     let mut succinct_receipt = conditional_receipt.clone();
     for assumption in assumptions.iter() {
         let assumption = assumption.as_value().unwrap();
-        println!("{assumption:?}");
-        let assumption_receipt = coprocessor.receipts.get(&assumption.claim).unwrap().clone();
-        let opts = ProverOpts::default();
+        println!("Resolve: {assumption:?}");
+
+        let assumption_receipt = all_receipts.get(&assumption.claim).unwrap().clone();
         succinct_receipt = client
             .resolve(
                 &opts,
@@ -153,7 +170,7 @@ fn prover_example() {
         session.journal.bytes.clone(),
     );
     let asset = receipt.try_into().unwrap();
-    client.verify(asset, KECCAK_ID).unwrap();
+    client.verify(asset, MULTI_TEST_ID).unwrap();
     println!("Receipt verified!");
 }
 

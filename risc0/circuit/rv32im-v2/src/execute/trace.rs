@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,6 +53,12 @@ pub enum TraceEvent {
         #[debug("{region:#04x?}")]
         region: Vec<u8>,
     },
+
+    /// A page is read for the first time in a segment
+    PageIn { cycles: u64 },
+
+    /// A page has been written to for the first time in a segment
+    PageOut { cycles: u64 },
 }
 
 /// A callback used to collect [TraceEvent]s.

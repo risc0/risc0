@@ -17,6 +17,9 @@
 #![no_main]
 #![no_std]
 
+#[path = "multi_test/profiler.rs"]
+mod profiler;
+
 extern crate alloc;
 
 use alloc::{
@@ -26,7 +29,7 @@ use alloc::{
 use core::arch::asm;
 
 use getrandom::getrandom;
-use risc0_circuit_keccak::KeccakState;
+use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
@@ -77,18 +80,6 @@ const KECCAK_UPDATE: KeccakState = [
     0xEAF1FF7B5CECA249,
 ];
 
-#[inline(never)]
-#[no_mangle]
-fn profile_test_func1() {
-    profile_test_func2()
-}
-
-#[inline(always)]
-#[no_mangle]
-fn profile_test_func2() {
-    unsafe { asm!("nop") }
-}
-
 fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
@@ -131,7 +122,7 @@ fn main() {
         },
         MultiTestSpec::Profiler => {
             // Call an external function to make sure it's detected during profiling.
-            profile_test_func1()
+            profiler::profile_test_func1()
         }
         MultiTestSpec::Panic => {
             panic!("MultiTestSpec::Panic invoked");
@@ -567,6 +558,16 @@ fn main() {
                     0xd5f9328619cd99f7
                 ]
             );
+        }
+        MultiTestSpec::KeccakUnion(proof_count) => {
+            let cycles = 1 << KECCAK_DEFAULT_PO2;
+            let count = cycles / 200 * proof_count;
+
+            let mut state = KeccakState::default();
+
+            for _i in 0..count {
+                env::risc0_keccak_update(&mut state);
+            }
         }
     }
 }

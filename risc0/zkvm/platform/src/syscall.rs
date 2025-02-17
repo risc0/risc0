@@ -71,6 +71,11 @@ pub mod reg_abi {
     pub const REG_MAX: usize = 32; // maximum number of registers
 }
 
+pub mod keccak_mode {
+    pub const KECCAK_PERMUTE: u32 = 0;
+    pub const KECCAK_PROVE: u32 = 1;
+}
+
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
@@ -148,6 +153,7 @@ pub mod nr {
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
+    declare_syscall!(pub SYS_VERIFY_INTEGRITY2);
     declare_syscall!(pub SYS_WRITE);
 }
 
@@ -754,7 +760,8 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 ))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    unimplemented!("sys_alloc_aligned called when the bump allocator is disabled");
+    use core::alloc::GlobalAlloc;
+    crate::heap::embedded::HEAP.alloc(core::alloc::Layout::from_size_align(bytes, align).unwrap())
 }
 
 /// # Safety
@@ -811,6 +818,41 @@ pub unsafe extern "C" fn sys_verify_integrity(
     }
 }
 
+/// TODO: Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
+///
+/// # Safety
+///
+/// `claim_digest` must be aligned and dereferenceable.
+/// `control_root` must be aligned and dereferenceable.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_verify_integrity2(
+    claim_digest: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
+) {
+    let mut to_host = [0u32; DIGEST_WORDS * 2];
+    to_host[..DIGEST_WORDS].copy_from_slice(claim_digest.as_ref().unwrap_unchecked());
+    to_host[DIGEST_WORDS..].copy_from_slice(control_root.as_ref().unwrap_unchecked());
+
+    let Return(a0, _) = unsafe {
+        // Send the claim_digest to the host via software ecall.
+        syscall_2(
+            nr::SYS_VERIFY_INTEGRITY2,
+            null_mut(),
+            0,
+            to_host.as_ptr() as u32,
+            (DIGEST_BYTES * 2) as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // This should always be the case. This check is included for
+    // forwards-compatibility.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_verify_integrity2 returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+}
 // Make sure we only get one of these since it's stateful.
 #[cfg(not(feature = "export-syscalls"))]
 extern "C" {
@@ -926,14 +968,18 @@ pub unsafe extern "C" fn sys_prove_zkr(
 pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
-) {
-    syscall_1(
+) -> i32 {
+    let Return(a0, _) = syscall_3(
         nr::SYS_KECCAK,
         out_state as *mut u32,
         KECCACK_STATE_WORDS,
+        keccak_mode::KECCAK_PERMUTE,
         in_state as u32,
+        0,
     );
+    a0 as i32
 }
+
 /// Executes the keccak circuit, and then executes the lift predicate
 /// in the recursion circuit.
 ///
@@ -951,21 +997,16 @@ pub unsafe extern "C" fn sys_keccak(
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_keccak(
     claim_digest: *const [u32; DIGEST_WORDS],
-    po2: u32,
     control_root: *const [u32; DIGEST_WORDS],
-    input: *const u32,
-    input_len: usize,
 ) {
     let Return(a0, _) = unsafe {
-        syscall_5(
-            nr::SYS_PROVE_KECCAK,
+        syscall_3(
+            nr::SYS_KECCAK,
             null_mut(),
             0,
+            keccak_mode::KECCAK_PROVE,
             claim_digest as u32,
-            po2,
             control_root as u32,
-            input as u32,
-            input_len as u32,
         )
     };
 
@@ -992,9 +1033,7 @@ macro_rules! impl_sys_bigint2 {
             $(, $a3: ident
                 $(, $a4: ident
                     $(, $a5: ident
-                        $(, $a6: ident
-                            $(, $a7: ident )?
-                        )?
+                        $(, $a6: ident)?
                     )?
                 )?
             )?
@@ -1012,9 +1051,7 @@ macro_rules! impl_sys_bigint2 {
                 $(, $a3: *const u32
                     $(, $a4: *const u32
                         $(, $a5: *const u32
-                            $(, $a6: *const u32
-                                $(, $a7: *const u32)?
-                            )?
+                            $(, $a6: *const u32)?
                         )?
                     )?
                 )?
@@ -1043,9 +1080,7 @@ macro_rules! impl_sys_bigint2 {
                         $(in("a3") $a3,
                             $(in("a4") $a4,
                                 $(in("a5") $a5,
-                                    $(in("a6") $a6,
-                                        $(in("a7") $a7,)?
-                                    )?
+                                    $(in("a6") $a6)?
                                 )?
                             )?
                         )?
@@ -1065,4 +1100,3 @@ impl_sys_bigint2!(sys_bigint2_3, a1, a2, a3);
 impl_sys_bigint2!(sys_bigint2_4, a1, a2, a3, a4);
 impl_sys_bigint2!(sys_bigint2_5, a1, a2, a3, a4, a5);
 impl_sys_bigint2!(sys_bigint2_6, a1, a2, a3, a4, a5, a6);
-impl_sys_bigint2!(sys_bigint2_7, a1, a2, a3, a4, a5, a6, a7);

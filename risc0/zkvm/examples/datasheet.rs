@@ -20,10 +20,13 @@ use std::{
 
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
+use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
+use risc0_circuit_rv32im::prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
     get_prover_server, risc0_rv32im_ver, Executor2, ExecutorEnv, ExecutorImpl, ProverOpts,
-    ReceiptKind, SegmentVersion, Session, SimpleSegmentRef, RECURSION_PO2,
+    ReceiptKind, Segment, SegmentVersion, Session, SimpleSegmentRef, VerifierContext,
+    RECURSION_PO2,
 };
 use serde::Serialize;
 use serde_with::{serde_as, DurationNanoSeconds};
@@ -139,6 +142,7 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
         ))
     }
 }
+
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
     match risc0_rv32im_ver() {
         Some(SegmentVersion::V2) => Executor2::from_elf(env, elf)
@@ -162,7 +166,12 @@ enum Command {
     StarkToSnark,
     #[cfg(all(target_arch = "x86_64", feature = "docker"))]
     Groth16,
+    #[command(name = "bigint2")]
+    BigInt2,
 }
+
+/// This is the number of user cycles we expect for our "execute" benchmarks.
+const EXPECTED_EXECUTE_USER_CYCLES: u64 = (1 << DEFAULT_SEGMENT_LIMIT_PO2 as u64) - 1;
 
 #[derive(Default)]
 struct Datasheet {
@@ -206,6 +215,7 @@ impl Datasheet {
             Command::StarkToSnark => self.stark2snark(),
             #[cfg(all(target_arch = "x86_64", feature = "docker"))]
             Command::Groth16 => self.groth16(),
+            Command::BigInt2 => self.bigint2(),
         }
     }
 
@@ -218,7 +228,10 @@ impl Datasheet {
         let start = Instant::now();
         let session = execute_elf(env, LOOP_ELF).unwrap();
         let duration = start.elapsed();
-        assert_eq!(session.user_cycles, (1 << 20) - 1, "actual vs expected");
+        assert_eq!(
+            session.user_cycles, EXPECTED_EXECUTE_USER_CYCLES,
+            "actual vs expected"
+        );
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
@@ -277,8 +290,7 @@ impl Datasheet {
     fn lift(&mut self) {
         println!("lift");
 
-        let opts = ProverOpts::all_po2s()
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s();
         let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
 
@@ -316,8 +328,7 @@ impl Datasheet {
     fn join(&mut self) {
         println!("join");
 
-        let opts = ProverOpts::all_po2s()
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s();
         let ctx = opts.verifier_context();
         let prover = get_prover_server(&opts).unwrap();
 
@@ -365,9 +376,7 @@ impl Datasheet {
     fn succinct(&mut self) {
         println!("succinct");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
@@ -400,9 +409,7 @@ impl Datasheet {
     fn identity_p254(&mut self) {
         println!("identity_p254");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -439,9 +446,7 @@ impl Datasheet {
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Succinct)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -477,9 +482,7 @@ impl Datasheet {
     fn groth16(&mut self) {
         println!("groth16");
 
-        let opts = ProverOpts::all_po2s()
-            .with_receipt_kind(ReceiptKind::Groth16)
-            .with_segment_version(risc0_rv32im_ver().unwrap_or(SegmentVersion::V1));
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Groth16);
         let prover = get_prover_server(&opts).unwrap();
 
         let iterations: u32 = 64 * 1024;
@@ -507,6 +510,65 @@ impl Datasheet {
             seal,
             throughput,
         });
+    }
+
+    fn bigint2_execute(&mut self) -> Session {
+        println!("bigint2_execute");
+
+        let env = ExecutorEnv::builder().build().unwrap();
+
+        let start = Instant::now();
+        let session = execute_elf(env, BIGINT2_ELF).unwrap();
+        let duration = start.elapsed();
+
+        // We want this to be comparable to the other execute benchmarks
+        assert!(session.user_cycles - EXPECTED_EXECUTE_USER_CYCLES < 10_000);
+
+        let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
+        self.results.push(PerformanceData {
+            name: "bigint2_execute".into(),
+            hashfn: "N/A".into(),
+            cycles: session.user_cycles,
+            duration,
+            ram: 0,
+            seal: 0,
+            throughput,
+        });
+
+        session
+    }
+
+    fn bigint2_prove_segment(&mut self, session: &Session, segment: &Segment) {
+        println!("bigint2_prove_segment");
+
+        let opts = ProverOpts::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let vctx = VerifierContext::default();
+
+        tracker().lock().unwrap().reset();
+
+        let start = Instant::now();
+        prover.prove_segment(&vctx, segment).unwrap();
+
+        let duration = start.elapsed();
+        let ram = tracker().lock().unwrap().peak as u64;
+
+        let throughput = (session.total_cycles as f64) / duration.as_secs_f64();
+        self.results.push(PerformanceData {
+            name: "bigint2_prove_segment".into(),
+            hashfn: opts.hashfn,
+            cycles: session.total_cycles,
+            duration,
+            ram,
+            seal: 0,
+            throughput,
+        });
+    }
+
+    fn bigint2(&mut self) {
+        let session = self.bigint2_execute();
+        let segment = session.segments[0].resolve().unwrap();
+        self.bigint2_prove_segment(&session, &segment);
     }
 
     fn warmup(&self) {
