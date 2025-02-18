@@ -1223,9 +1223,63 @@ pub(crate) fn keccak_input_to_bytes(input: &[KeccakState]) -> Vec<u8> {
 
 #[stability::unstable]
 pub(crate) fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<KeccakState>> {
-    input
-        .chunks_exact(std::mem::size_of::<KeccakState>())
+    let chunks = input.chunks_exact(std::mem::size_of::<KeccakState>());
+    if !chunks.remainder().is_empty() {
+        bail!("Input length must be a multiple of KeccakState size");
+    }
+    chunks
         .map(bytemuck::try_pod_read_unaligned)
         .collect::<Result<_, _>>()
         .map_err(|e| anyhow!("Failed to convert input bytes to KeccakState: {}", e))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_keccak_bytes_to_input_alignment() {
+        // Create a buffer with extra padding at the start to test different alignments
+        let padding = 8; // Test all possible alignments (0-7)
+        let keccak_states = 3; // Test multiple KeccakStates
+        let state_size = std::mem::size_of::<KeccakState>();
+        let mut test_buffer = vec![0u8; padding + (keccak_states * state_size)];
+
+        // Fill with recognizable pattern
+        for (i, byte) in test_buffer.iter_mut().enumerate() {
+            *byte = (i % 256) as u8;
+        }
+
+        // Test each alignment
+        for offset in 0..8 {
+            let aligned_slice = &test_buffer[offset..][..(keccak_states * state_size)];
+            let result = try_keccak_bytes_to_input(aligned_slice);
+
+            assert!(result.is_ok(), "Failed to parse at alignment {}", offset);
+            let states = result.unwrap();
+            assert_eq!(
+                states.len(),
+                keccak_states,
+                "Wrong number of states at alignment {}",
+                offset
+            );
+
+            // Verify roundtrip
+            let bytes = keccak_input_to_bytes(&states);
+            assert_eq!(
+                bytes, aligned_slice,
+                "Roundtrip failed at alignment {}",
+                offset
+            );
+        }
+    }
+
+    #[test]
+    fn test_keccak_bytes_to_input_invalid_size() {
+        // Test with a buffer that's not a multiple of KeccakState size
+        let invalid_size = std::mem::size_of::<KeccakState>() + 1;
+        let buffer = vec![0u8; invalid_size];
+        let result = try_keccak_bytes_to_input(&buffer);
+        assert!(result.is_err(), "Should fail with invalid size");
+    }
 }
