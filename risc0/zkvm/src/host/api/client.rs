@@ -1039,21 +1039,6 @@ impl Client {
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_keccak(proof_request)
             }
-            pb::api::coprocessor_request::Kind::FinalizeProofSet(finalize_request) => {
-                let control_root: Digest = match finalize_request.control_root {
-                    Some(control_root) => control_root.try_into()?,
-                    None => {
-                        return Err(malformed_err(
-                            "OnCoprocessorRequest.FinalizeProofSet.control_root",
-                        ))
-                    }
-                };
-                let coprocessor = env.coprocessor.clone().ok_or_else(|| {
-                    malformed_err("OnCoprocessorRequest.FinalizeProofSet.coprocessor")
-                })?;
-                let mut coprocessor = coprocessor.borrow_mut();
-                coprocessor.finalize_proof_set(control_root)
-            }
         }
     }
 }
