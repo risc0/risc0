@@ -1214,14 +1214,12 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
     }
 }
 
-#[stability::unstable]
 pub(crate) fn keccak_input_to_bytes(input: &[KeccakState]) -> Vec<u8> {
     // Note: safe to cast slice given alignment of KeccakState (8 bytes) is greater than
     // the alignment of the u8 buffer.
     bytemuck::cast_slice(input).to_vec()
 }
 
-#[stability::unstable]
 pub(crate) fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<KeccakState>> {
     let chunks = input.chunks_exact(std::mem::size_of::<KeccakState>());
     if !chunks.remainder().is_empty() {
