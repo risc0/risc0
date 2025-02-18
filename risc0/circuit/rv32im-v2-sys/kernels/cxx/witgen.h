@@ -94,10 +94,10 @@ inline Val inRange(Val low, Val mid, Val high) {
 }
 
 inline void eqz(Val a, const char* loc) {
-  if (a.asUInt32()) {
-    std::stringstream ss;
-    ss << "eqz failure at: " << loc;
-    throw std::runtime_error(ss.str());
+  uint32_t v = a.asUInt32();
+  if (v) {
+    fprintf(stderr, "eqz failure at %s: %u != 0\n", loc, v);
+    abort();
   }
 }
 
