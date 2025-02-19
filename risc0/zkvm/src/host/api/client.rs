@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -249,6 +249,8 @@ impl Client {
         Claim: risc0_binfmt::Digestible + std::fmt::Debug + Clone + serde::Serialize,
         crate::MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
     {
+        use crate::host::api::convert::keccak_input_to_bytes;
+
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -257,7 +259,7 @@ impl Client {
                     claim_digest: Some(proof_request.claim_digest.into()),
                     po2: proof_request.po2 as u32,
                     control_root: Some(proof_request.control_root.into()),
-                    input: proof_request.input,
+                    input: keccak_input_to_bytes(&proof_request.input),
                     receipt_out: Some(receipt_out.try_into()?),
                 },
             )),
