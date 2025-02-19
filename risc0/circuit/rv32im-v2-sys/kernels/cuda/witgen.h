@@ -131,16 +131,16 @@ __device__ inline Val inRange(Val low, Val mid, Val high) {
   return Val(low <= mid && mid < high);
 }
 
-__device__ inline void eqz(Val a, const char* loc) {
+__device__ inline void eqz(ExecContext& ctx, Val a, const char* loc) {
   if (a.asUInt32()) {
-    printf("eqz failure at: %s\n", loc);
+    printf("[%zu] eqz failure at: %s\n", ctx.cycle, loc);
     assert(false && "eqz failure");
   }
 }
 
-__device__ inline void eqz(ExtVal a, const char* loc) {
+__device__ inline void eqz(ExecContext& ctx, ExtVal a, const char* loc) {
   for (size_t i = 0; i < EXT_SIZE; i++) {
-    eqz(a.elems[i], loc);
+    eqz(ctx, a.elems[i], loc);
   }
 }
 
@@ -155,7 +155,7 @@ struct Reg {
 #define BIND_LAYOUT(orig, buf) BoundLayout(orig, buf)
 #define LAYOUT_LOOKUP(orig, elem) BoundLayout(orig.layout.elem, orig.buf)
 #define LAYOUT_SUBSCRIPT(orig, index) BoundLayout(orig.layout[index], orig.buf)
-#define EQZ(val, loc) eqz(val, loc)
+#define EQZ(val, loc) eqz(ctx, val, loc)
 
 __device__ inline void store(ExecContext& ctx, BoundLayout<Reg> reg, Val val) {
   reg.buf->store(ctx, reg.layout.col, val);

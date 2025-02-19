@@ -13759,9 +13759,6 @@ pub const LAYOUT__824: &PoseidonCheckOutLayout = &PoseidonCheckOutLayout {
             _super: &Reg { offset: 197 },
         },
     },
-    ext_inv: &NondetExtRegLayout {
-        _super: &Reg { offset: 198 },
-    },
 };
 pub const LAYOUT__823: &PoseidonDoOut_SuperArm0Layout = &PoseidonDoOut_SuperArm0Layout {
     _super: LAYOUT__824,
