@@ -45,6 +45,9 @@ tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+[package.metadata.release]
+release = false
+
 [features]
 cuda = [
   "prove",
