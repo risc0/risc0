@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ use anyhow::Result;
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::{syscall::reg_abi::*, WORD_SIZE};
 
-use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
+use crate::{
+    host::{api::convert::try_keccak_bytes_to_input, client::env::ProveKeccakRequest},
+    Assumption, AssumptionReceipt,
+};
 
 use super::{Syscall, SyscallContext, SyscallKind};
 
@@ -38,6 +41,7 @@ impl Syscall for SysProveKeccak {
         let input_ptr = ByteAddr(ctx.load_register(REG_A6));
         let input_len = ctx.load_register(REG_A7);
         let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
+        let input = try_keccak_bytes_to_input(&input)?;
 
         let proof_request = ProveKeccakRequest {
             claim_digest: claim,

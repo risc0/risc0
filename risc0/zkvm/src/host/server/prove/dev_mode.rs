@@ -73,7 +73,7 @@ impl ProverServer for DevModeProver {
         let mut keccak_assumptions = HashMap::new();
 
         for proof_request in session.pending_keccaks.iter() {
-            let claim = compute_keccak_digest(&proof_request.input);
+            let claim = compute_keccak_digest(bytemuck::cast_slice(proof_request.input.as_slice()));
             let assumption = Assumption {
                 claim,
                 control_root: KECCAK_CONTROL_ROOT,
