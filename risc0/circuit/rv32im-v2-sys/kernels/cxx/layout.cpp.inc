@@ -4681,8 +4681,7 @@ constexpr PoseidonCheckOutLayout kLayout__824 = PoseidonCheckOutLayout{
     ._super = kLayout__676,
     ._1 = kLayout__825,
     .isNormal = IsZeroLayout{._super = NondetRegLayout{._super = /*offset=*/196},
-                             .inv = NondetRegLayout{._super = /*offset=*/197}},
-    .extInv = NondetExtRegLayout{._super = /*offset=*/198}};
+                             .inv = NondetRegLayout{._super = /*offset=*/197}}};
 constexpr PoseidonDoOut_SuperArm0Layout kLayout__823 = PoseidonDoOut_SuperArm0Layout{
     ._super = kLayout__824,
     ._extra0 = ArgU16Layout{.count = NondetRegLayout{._super = /*offset=*/156},

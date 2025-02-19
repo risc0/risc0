@@ -5826,7 +5826,6 @@ pub struct PoseidonCheckOutLayout {
     pub _super: &'static PoseidonStateLayout,
     pub _1: &'static PoseidonCheckOut__0_SuperLayout8LayoutArray,
     pub is_normal: &'static IsZeroLayout,
-    pub ext_inv: &'static NondetExtRegLayout,
 }
 impl risc0_zkp::layout::Component for PoseidonCheckOutLayout {
     fn ty_name(&self) -> &'static str {
@@ -5837,7 +5836,6 @@ impl risc0_zkp::layout::Component for PoseidonCheckOutLayout {
         v.visit_component("_super", self._super)?;
         v.visit_component("_1", self._1)?;
         v.visit_component("is_normal", self.is_normal)?;
-        v.visit_component("ext_inv", self.ext_inv)?;
         Ok(())
     }
 }
