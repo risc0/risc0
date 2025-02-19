@@ -17,6 +17,7 @@ use std::{fmt::Debug, path::PathBuf};
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
+use risc0_circuit_keccak::KeccakState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
@@ -1071,11 +1072,69 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
+        let input = try_keccak_bytes_to_input(&value.input)?;
+
         Ok(Self {
             claim_digest: value.claim_digest.ok_or_else(malformed_err)?.try_into()?,
             po2: value.po2 as usize,
             control_root: value.control_root.ok_or_else(malformed_err)?.try_into()?,
-            input: value.input,
+            input,
         })
     }
+}
+
+pub(crate) fn keccak_input_to_bytes(input: &[KeccakState]) -> Vec<u8> {
+    bytemuck::cast_slice(input).to_vec()
+}
+
+pub(crate) fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<KeccakState>> {
+    let chunks = input.chunks_exact(std::mem::size_of::<KeccakState>());
+    if !chunks.remainder().is_empty() {
+        bail!("Input length must be a multiple of KeccakState size");
+    }
+    chunks
+        .map(bytemuck::try_pod_read_unaligned)
+        .collect::<Result<_, _>>()
+        .map_err(|e| anyhow!("Failed to convert input bytes to KeccakState: {}", e))
+}
+
+#[test]
+fn test_keccak_bytes_to_input_alignment() {
+    // Create a buffer with extra padding at the start to test different alignments
+    let padding = 16; // We should hit all alignments by cycling through offsets 0-15
+    let keccak_states = 3; // Test multiple KeccakStates
+    let state_size = std::mem::size_of::<KeccakState>();
+    let mut test_buffer = vec![0u8; padding + (keccak_states * state_size)];
+
+    // Fill with recognizable pattern
+    for (i, byte) in test_buffer.iter_mut().enumerate() {
+        *byte = (i % 256) as u8;
+    }
+
+    // Test each offset
+    for offset in 0..padding {
+        let aligned_slice = &test_buffer[offset..][..(keccak_states * state_size)];
+        let result = try_keccak_bytes_to_input(aligned_slice);
+
+        assert!(result.is_ok(), "Failed to parse at offset {offset}");
+        let states = result.unwrap();
+        assert_eq!(
+            states.len(),
+            keccak_states,
+            "Wrong number of states at offset {offset}",
+        );
+
+        // Verify roundtrip
+        let bytes = keccak_input_to_bytes(&states);
+        assert_eq!(bytes, aligned_slice, "Roundtrip failed at offset {offset}",);
+    }
+}
+
+#[test]
+fn test_keccak_bytes_to_input_invalid_size() {
+    // Test with a buffer that's not a multiple of KeccakState size
+    let invalid_size = std::mem::size_of::<KeccakState>() + 1;
+    let buffer = vec![0u8; invalid_size];
+    let result = try_keccak_bytes_to_input(&buffer);
+    assert!(result.is_err(), "Should fail with invalid size");
 }
