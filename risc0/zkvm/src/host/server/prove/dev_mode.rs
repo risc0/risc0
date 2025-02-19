@@ -74,8 +74,6 @@ impl ProverServer for DevModeProver {
         let mut keccak_assumptions = HashMap::new();
 
         for proof_request in session.pending_keccaks.iter() {
-            // Note: safe to cast as slice here, given alignment of KeccakState (8 bytes) is greater
-            // than alignment of u8 slice.
             let claim = compute_keccak_digest(bytemuck::cast_slice(proof_request.input.as_slice()));
             let assumption = Assumption {
                 claim,

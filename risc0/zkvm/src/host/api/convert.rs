@@ -1215,8 +1215,6 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
 }
 
 pub(crate) fn keccak_input_to_bytes(input: &[KeccakState]) -> Vec<u8> {
-    // Note: safe to cast slice given alignment of KeccakState (8 bytes) is greater than
-    // the alignment of the u8 buffer.
     bytemuck::cast_slice(input).to_vec()
 }
 
