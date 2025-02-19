@@ -1232,7 +1232,7 @@ pub(crate) fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<KeccakState>
 #[test]
 fn test_keccak_bytes_to_input_alignment() {
     // Create a buffer with extra padding at the start to test different alignments
-    let padding = 8; // Test all possible alignments (0-7)
+    let padding = 16; // We should hit all alignments by cycling through offsets 0-15
     let keccak_states = 3; // Test multiple KeccakStates
     let state_size = std::mem::size_of::<KeccakState>();
     let mut test_buffer = vec![0u8; padding + (keccak_states * state_size)];
@@ -1243,7 +1243,7 @@ fn test_keccak_bytes_to_input_alignment() {
     }
 
     // Test each offset
-    for offset in 0..8 {
+    for offset in 0..padding {
         let aligned_slice = &test_buffer[offset..][..(keccak_states * state_size)];
         let result = try_keccak_bytes_to_input(aligned_slice);
 
