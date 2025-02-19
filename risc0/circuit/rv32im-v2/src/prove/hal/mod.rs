@@ -127,7 +127,7 @@ where
         scope!("prove");
 
         cfg_if::cfg_if! {
-            if #[cfg(feature = "circuit_debug")] {
+            if #[cfg(feature = "witgen_debug")] {
                 let rand_z = ExtVal::ONE;
                 let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
                     StepMode::SeqForward

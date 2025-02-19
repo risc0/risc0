@@ -2011,7 +2011,6 @@ struct PoseidonCheckOutLayout {
   PoseidonStateLayout _super;
   PoseidonCheckOut__0_SuperLayout8LayoutArray _1;
   IsZeroLayout isNormal;
-  NondetExtRegLayout extInv;
 };
 struct PoseidonDoOut_SuperArm0Layout {
   PoseidonCheckOutLayout _super;
