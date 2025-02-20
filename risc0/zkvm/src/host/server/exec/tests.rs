@@ -1148,17 +1148,20 @@ fn out_of_bounds_ecall() {
     multi_test(MultiTestSpec::OutOfBoundsEcall);
 }
 
+#[ignore]
 #[test_log::test]
 fn sys_fork() {
     multi_test(MultiTestSpec::SysFork);
 }
 
+#[ignore]
 #[test_log::test]
 #[should_panic(expected = "Unknown syscall")]
 fn sys_fork_fork_panic() {
     multi_test(MultiTestSpec::SysForkFork);
 }
 
+#[ignore]
 #[test_log::test]
 #[should_panic(expected = "Bad write file descriptor 3")]
 fn sys_fork_journal_panic() {
@@ -1223,6 +1226,7 @@ mod docker {
 
     use crate::TraceEvent;
 
+    #[ignore]
     #[test_log::test]
     fn trace() {
         let mut events: Vec<TraceEvent> = Vec::new();

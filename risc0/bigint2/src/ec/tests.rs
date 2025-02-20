@@ -20,7 +20,7 @@ use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Jou
 use crate::ec::secp256k1::SECP256K1_PRIME;
 
 fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
-    let opts = ProverOpts::fast().with_segment_version(version);
+    let opts = ProverOpts::fast();
     let prover = get_prover_server(&opts).unwrap();
     let now = Instant::now();
     let mut prove_info = prover.prove(env, elf).unwrap();

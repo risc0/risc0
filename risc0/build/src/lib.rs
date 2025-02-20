@@ -138,6 +138,7 @@ pub struct GuestListEntry {
 
     /// The image id of the guest program.
     pub image_id: Digest,
+
     /// The v2 image id of the guest program.
     pub v2_image_id: ImageIdKind,
 
