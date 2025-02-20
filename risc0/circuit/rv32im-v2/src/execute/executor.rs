@@ -307,6 +307,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         self.machine_mode = mode;
     }
 
+    fn resume(&mut self) -> Result<()> {
+        let input_words = self.input_digest.as_words().to_vec();
+        for (i, word) in input_words.iter().enumerate() {
+            self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, *word)?;
+        }
+        Ok(())
+    }
+
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
         self.cycles.user += 1;
