@@ -42,16 +42,13 @@ pub(crate) struct Poseidon2State {
     pub buf_out_addr: u32,
     pub is_elem: u32,
     pub check_out: u32,
-    #[allow(dead_code)]
     pub load_tx_type: u32,
     pub next_state: CycleState,
     pub sub_state: u32,
     pub buf_in_addr: u32,
     pub count: u32,
-    #[allow(dead_code)]
     pub mode: u32,
     pub inner: [u32; CELLS],
-    #[allow(dead_code)]
     pub zcheck: ExtVal,
 }
 
