@@ -31,6 +31,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
+witgen_debug = ["risc0-zkvm/witgen_debug"]
 circuit_debug = ["risc0-zkvm/circuit_debug"]
 cuda = ["risc0-zkvm/cuda"]
 default = []

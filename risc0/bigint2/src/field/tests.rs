@@ -291,10 +291,8 @@ fn extfield_xxone_mul_256(#[values(V1)] version: SegmentVersion) {
     assert_eq!(result, expected);
 }
 
-// TOOD(flaub): fix for v2
-
 #[test_log::test]
-fn extfield_xxone_mul_384(#[values(V1)] version: SegmentVersion) {
+fn extfield_xxone_mul_384(#[values(V1, V2)] version: SegmentVersion) {
     // (5x+5)(2x+2) mod (xx+1) =
     //   10xx+10x+10x+10 = 10xx+20x+10 = 10(xx+1)-10 + 6x+3 = 6x+0
     let lhs0 = BigUintWrap::from_str("05").unwrap();
@@ -316,10 +314,8 @@ fn extfield_xxone_mul_384(#[values(V1)] version: SegmentVersion) {
     assert_eq!(result, expected);
 }
 
-// TOOD(flaub): fix for v2
-
 #[test_log::test]
-fn extfield_deg4_mul(#[values(V1)] version: SegmentVersion) {
+fn extfield_deg4_mul(#[values(V1, V2)] version: SegmentVersion) {
     // (4xxx + 2xx + 5x +4)(2xxx + 6xx + 6x + 3) mod (x^4 + 1) =
     //   8x^6 + 24x^5 + 24x^4 + 12xxx +
     //   4x^5 + 12x^4 + 12xxx + 6xx +
