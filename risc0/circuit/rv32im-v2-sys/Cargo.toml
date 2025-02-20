@@ -20,6 +20,9 @@ cc = { version = "1.2.2", features = ["parallel"] }
 glob = "0.3"
 risc0-build-kernel = { workspace = true }
 
+[package.metadata.release]
+release = false
+
 [features]
 default = []
 cuda = ["dep:cust", "dep:sppark", "risc0-sys/cuda"]
