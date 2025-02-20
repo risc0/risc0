@@ -15,15 +15,11 @@
 use std::time::Instant;
 
 use risc0_bigint2_methods::{EC_ADD_ELF, EC_DOUBLE_ELF, EC_MUL_ELF};
-use risc0_zkvm::{
-    get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts, SegmentVersion,
-};
-use rstest::rstest;
-use SegmentVersion::{V1, V2};
+use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts};
 
 use crate::ec::secp256k1::SECP256K1_PRIME;
 
-fn run_test_no_decode(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> Journal {
+fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
     let opts = ProverOpts::fast().with_segment_version(version);
     let prover = get_prover_server(&opts).unwrap();
     let now = Instant::now();
@@ -41,13 +37,12 @@ fn run_test_no_decode(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> 
     receipt.journal.clone()
 }
 
-fn run_test<T: DeserializeOwned>(version: SegmentVersion, env: ExecutorEnv, elf: &[u8]) -> T {
-    run_test_no_decode(version, env, elf).decode().unwrap()
+fn run_test<T: DeserializeOwned>(env: ExecutorEnv, elf: &[u8]) -> T {
+    run_test_no_decode(env, elf).decode().unwrap()
 }
 
-#[rstest]
 #[test_log::test]
-fn ec_add_basic(#[values(V1, V2)] version: SegmentVersion) {
+fn ec_add_basic() {
     let lhs: Option<[[u32; 8]; 2]> = Some([
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
@@ -86,14 +81,12 @@ fn ec_add_basic(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(version, env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
     assert_eq!(result, Some(expected));
 }
 
-// TODO(flaub): fix for v2
-#[rstest]
 #[test_log::test]
-fn ec_double_basic(#[values(V1)] version: SegmentVersion) {
+fn ec_double_basic() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
             0x16F81798, 0x59F2815B, 0x2DCE28D9, 0x029BFCDB, 0xCE870B07, 0x55A06295, 0xF9DCBBAC,
@@ -121,20 +114,18 @@ fn ec_double_basic(#[values(V1)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(version, env, EC_DOUBLE_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
     assert_eq!(result, Some(expected));
 }
 
-#[rstest]
 #[test_log::test]
-fn ec_mul(#[values(V1, V2)] version: SegmentVersion) {
+fn ec_mul() {
     let env = ExecutorEnv::builder().build().unwrap();
-    run_test_no_decode(version, env, EC_MUL_ELF);
+    run_test_no_decode(env, EC_MUL_ELF);
 }
 
-#[rstest]
 #[test_log::test]
-fn ec_add_point_plus_identity(#[values(V1, V2)] version: SegmentVersion) {
+fn ec_add_point_plus_identity() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
@@ -152,13 +143,12 @@ fn ec_add_point_plus_identity(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(version, env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
     assert_eq!(result, point);
 }
 
-#[rstest]
 #[test_log::test]
-fn ec_add_identity_plus_point(#[values(V1, V2)] version: SegmentVersion) {
+fn ec_add_identity_plus_point() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
@@ -176,13 +166,12 @@ fn ec_add_identity_plus_point(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(version, env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
     assert_eq!(result, point);
 }
 
-#[rstest]
 #[test_log::test]
-fn ec_add_point_plus_negative(#[values(V1, V2)] version: SegmentVersion) {
+fn ec_add_point_plus_negative() {
     let point: [[u32; 8]; 2] = [
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
@@ -209,13 +198,12 @@ fn ec_add_point_plus_negative(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(version, env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
     assert_eq!(result, None);
 }
 
-#[rstest]
 #[test_log::test]
-fn ec_double_identity(#[values(V1, V2)] version: SegmentVersion) {
+fn ec_double_identity() {
     let identity: Option<[[u32; 8]; 2]> = None;
 
     let env = ExecutorEnv::builder()
@@ -223,13 +211,12 @@ fn ec_double_identity(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(version, env, EC_DOUBLE_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
     assert_eq!(result, None);
 }
 
-#[rstest]
 #[test_log::test]
-fn ec_double_point_with_zero_y(#[values(V1, V2)] version: SegmentVersion) {
+fn ec_double_point_with_zero_y() {
     let point_with_zero_y: Option<[[u32; 8]; 2]> = Some([
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
@@ -243,6 +230,6 @@ fn ec_double_point_with_zero_y(#[values(V1, V2)] version: SegmentVersion) {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(version, env, EC_DOUBLE_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
     assert_eq!(result, None);
 }
