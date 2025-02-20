@@ -103,7 +103,7 @@ fn lift(group: &mut BenchGroup) {
 fn join(group: &mut BenchGroup) {
     group.bench("join", |b| {
         let env = ExecutorEnv::builder()
-            .write_slice(&[3000])
+            .write_slice(&[5000])
             .segment_limit_po2(16)
             .build()
             .unwrap();
