@@ -451,15 +451,9 @@ impl<S: Syscall> Executor<'_, '_, S> {
         tracing::trace!("[{}] ecall_software", self.insn_cycles);
         let into_guest_ptr = ByteAddr(self.load_register(REG_A0)?);
         let into_guest_len = self.load_register(REG_A1)? as usize;
-        if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
-            bail!("{into_guest_ptr:?} is an invalid guest address");
-        }
 
         if into_guest_len > 0 {
-            let end_addr = into_guest_ptr
-                .checked_add(into_guest_len as u32)
-                .ok_or_else(|| anyhow!("invalid guest address range"))?;
-            Self::check_guest_addr(end_addr)?;
+            Self::check_aligned_guest_region(into_guest_ptr, into_guest_len)?;
         }
 
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
@@ -638,12 +632,28 @@ impl<S: Syscall> Executor<'_, '_, S> {
         Ok(addr)
     }
 
-    fn load_aligned_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
-        let addr = ByteAddr(self.load_register(idx)?);
+    fn check_aligned_guest_addr(addr: ByteAddr) -> Result<ByteAddr> {
+        Self::check_guest_addr(addr)?;
         if !addr.is_aligned() {
             bail!("{addr:?} is not an aligned guest memory address");
         }
-        Self::check_guest_addr(addr)
+        Ok(addr)
+    }
+
+    fn check_aligned_guest_region(base: ByteAddr, len: usize) -> Result<()> {
+        Self::check_aligned_guest_addr(base)?;
+        let end_addr = len
+            .checked_mul(WORD_SIZE)
+            .and_then(|len| len.try_into().ok())
+            .and_then(|len| base.checked_add(len))
+            .ok_or_else(|| anyhow!("invalid guest address range"))?;
+        Self::check_aligned_guest_addr(end_addr)?;
+        Ok(())
+    }
+
+    fn load_aligned_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
+        let addr = ByteAddr(self.load_register(idx)?);
+        Self::check_aligned_guest_addr(addr)
     }
 
     fn load_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
