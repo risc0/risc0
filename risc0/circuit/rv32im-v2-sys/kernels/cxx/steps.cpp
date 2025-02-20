@@ -6151,21 +6151,15 @@ FieldToWordStruct exec_FieldToWord(ExecContext& ctx,Val arg0, BoundLayout<FieldT
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:282)
 NondetU16RegStruct x2 = exec_NondetU16Reg(ctx,bitAnd(arg0, Val(65535)), LAYOUT_LOOKUP(layout1, low));
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:283)
-NondetU16RegStruct x2 = exec_NondetU16Reg(ctx,bitAnd(arg0, Val(65535)), LAYOUT_LOOKUP(layout1, low));
-// FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:283)
 NondetU16RegStruct x3 = exec_U16Reg(ctx,((arg0 - x2._super._super) * Val(2013235201)), LAYOUT_LOOKUP(layout1, high));
-// FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:287)
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:287)
 Val x4 = isz(x2._super._super);
 NondetRegStruct x5 = exec_NondetBitReg(ctx,x4, LAYOUT_LOOKUP(layout1, lowIsZero));
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:292)
-// FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:292)
 Val x6 = (Val(30720) - x3._super._super);
-// FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:290)
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:290)
 ComponentStruct x7 = ComponentStruct{
 };
-// FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:294)
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:294)
 Val x8 = (Val(30719) - x3._super._super);
 ComponentStruct x9;
@@ -6192,10 +6186,7 @@ return FieldToWordStruct{
 PoseidonStateStruct exec_PoseidonStoreOut(ExecContext& ctx,NondetRegStruct arg0, PoseidonStateStruct arg1_0, BoundLayout<PoseidonStoreOutLayout> layout2)   {
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:301)
 PoseidonStoreOut__0Struct8Array x3 = map(Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)}, LAYOUT_LOOKUP(layout2, _1), ([&](Val8Array::value_type x4, BoundLayout<PoseidonStoreOut__0_SuperLayout8LayoutArray::value_type> x5) {
-PoseidonStoreOut__0Struct8Array x3 = map(Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)}, LAYOUT_LOOKUP(layout2, _1), ([&](Val8Array::value_type x4, BoundLayout<PoseidonStoreOut__0_SuperLayout8LayoutArray::value_type> x5) {
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:302)
-FieldToWordStruct x6 = exec_FieldToWord(ctx,arg1_0.inner[to_size_t(x4)]._super, LAYOUT_LOOKUP(x5, ftw));
-// PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:303)
 FieldToWordStruct x6 = exec_FieldToWord(ctx,arg1_0.inner[to_size_t(x4)]._super, LAYOUT_LOOKUP(x5, ftw));
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:303)
 Val x7 = (arg1_0.bufOutAddr._super + x4);
@@ -6219,10 +6210,8 @@ NondetExtRegStruct x15 = exec_NondetExtReg(ctx,x14, LAYOUT_LOOKUP(layout2, extIn
 // PoseidonOpDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:8)
 // GetDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:72)
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:313)
-// PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:313)
 PoseidonOpDefStruct x16 = PoseidonOpDefStruct{
   .hasState = arg1_0.hasState._super,   .stateAddr = arg1_0.stateAddr._super,   .bufOutAddr = arg1_0.bufOutAddr._super,   .isElem = arg1_0.isElem._super,   .checkOut = arg1_0.checkOut._super,   .loadTxType = arg1_0.loadTxType._super};
-// PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:300)
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:300)
 Val24Array x17 = Val24Array{arg1_0.inner[0]._super, arg1_0.inner[1]._super, arg1_0.inner[2]._super, arg1_0.inner[3]._super, arg1_0.inner[4]._super, arg1_0.inner[5]._super, arg1_0.inner[6]._super, arg1_0.inner[7]._super, arg1_0.inner[8]._super, arg1_0.inner[9]._super, arg1_0.inner[10]._super, arg1_0.inner[11]._super, arg1_0.inner[12]._super, arg1_0.inner[13]._super, arg1_0.inner[14]._super, arg1_0.inner[15]._super, arg1_0.inner[16]._super, arg1_0.inner[17]._super, arg1_0.inner[18]._super, arg1_0.inner[19]._super, arg1_0.inner[20]._super, arg1_0.inner[21]._super, arg1_0.inner[22]._super, arg1_0.inner[23]._super};
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:313)
@@ -6231,82 +6220,57 @@ return x18;
 }
 PoseidonStateStruct exec_PoseidonDoOut(ExecContext& ctx,NondetRegStruct arg0, PoseidonStateStruct arg1_0, BoundLayout<PoseidonDoOutLayout> layout2)   {
 // PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)
-// PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)
 Val x3 = (Val(1) - arg1_0.checkOut._super);
 PoseidonStateStruct x4;
 if (to_size_t(arg1_0.checkOut._super)) {
 PoseidonStateStruct x5 = exec_PoseidonCheckOut(ctx,arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm0._super));
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra1.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra1.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra2.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra2.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra2.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra3.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra3.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra4.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra4.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra4.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra5.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra5.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra6.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra6.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra6.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra7.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra7.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra8.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra8.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra8.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra9.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra9.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra10.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra10.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra10.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra11.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra11.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra12.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra12.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra12.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra13.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra13.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra14.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra14.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra14.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra15.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra15.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra16.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra16.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra16.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra17.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra17.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra17.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra18.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra18.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra18.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra19.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra19.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra19.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra20.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra20.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra20.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra21.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra21.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra21.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra22.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra22.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra22.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra23.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra23.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, _super.arm0._extra23.count._super), 0), "PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)");
 x4 = x5;
 } else if (to_size_t(x3)) {
@@ -6321,10 +6285,7 @@ return x7;
 PoseidonStateStruct exec_PoseidonStoreState(ExecContext& ctx,NondetRegStruct arg0, PoseidonStateStruct arg1_0, BoundLayout<PoseidonStoreStateLayout> layout2)   {
 // PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:321)
 PoseidonStoreState__0Struct8Array x3 = map(Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)}, LAYOUT_LOOKUP(layout2, _1), ([&](Val8Array::value_type x4, BoundLayout<PoseidonStoreState__0_SuperLayout8LayoutArray::value_type> x5) {
-PoseidonStoreState__0Struct8Array x3 = map(Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)}, LAYOUT_LOOKUP(layout2, _1), ([&](Val8Array::value_type x4, BoundLayout<PoseidonStoreState__0_SuperLayout8LayoutArray::value_type> x5) {
 // PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:322)
-FieldToWordStruct x6 = exec_FieldToWord(ctx,arg1_0.inner[to_size_t((x4 + Val(16)))]._super, LAYOUT_LOOKUP(x5, ftw));
-// PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:323)
 FieldToWordStruct x6 = exec_FieldToWord(ctx,arg1_0.inner[to_size_t((x4 + Val(16)))]._super, LAYOUT_LOOKUP(x5, ftw));
 // PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:323)
 Val x7 = (arg1_0.stateAddr._super + x4);
@@ -6335,7 +6296,6 @@ return PoseidonStoreState__0Struct{
 }));
 // PoseidonOpDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:8)
 // GetDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:72)
-// PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:327)
 // PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:327)
 PoseidonOpDefStruct x9 = PoseidonOpDefStruct{
   .hasState = arg1_0.hasState._super,   .stateAddr = arg1_0.stateAddr._super,   .bufOutAddr = arg1_0.bufOutAddr._super,   .isElem = arg1_0.isElem._super,   .checkOut = arg1_0.checkOut._super,   .loadTxType = arg1_0.loadTxType._super};
@@ -6356,15 +6316,11 @@ return IsU24Struct{
 PoseidonStateStruct exec_PoseidonPagingLoadNode(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2)   {
 // PoseidonOpDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:8)
 // PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:346)
-// PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:346)
 PoseidonOpDefStruct x3 = PoseidonOpDefStruct{
   .hasState = Val(0),   .stateAddr = Val(0),   .bufOutAddr = (Val(1140850688) - (arg1_0 * Val(8))),   .isElem = Val(1),   .checkOut = Val(1),   .loadTxType = Val(1)};
 // NodeIdxToAddr(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:338)
 // PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:358)
-// NodeIdxToAddr(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:338)
-// PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:358)
 Val x4 = (((arg1_0 * Val(2)) + Val(1)) * Val(8));
-// PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:354)
 // PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:354)
 PoseidonStateStruct x5 = exec_PoseidonState(ctx,x3, Val(18), Val(0), (Val(1140850688) - x4), Val(1), Val(0), Val24Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, ExtVal(0, 0, 0, 0), layout2);
 return x5;
@@ -6372,16 +6328,13 @@ return x5;
 PoseidonStateStruct exec_PoseidonPagingLoadPage(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2)   {
 // PoseidonOpDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:8)
 // PoseidonPagingLoadPage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:368)
-// PoseidonPagingLoadPage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:368)
 PoseidonOpDefStruct x3 = PoseidonOpDefStruct{
   .hasState = Val(0),   .stateAddr = Val(0),   .bufOutAddr = (Val(1140850688) - (arg1_0 * Val(8))),   .isElem = Val(0),   .checkOut = Val(1),   .loadTxType = Val(1)};
-// PoseidonPagingLoadPage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:376)
 // PoseidonPagingLoadPage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:376)
 PoseidonStateStruct x4 = exec_PoseidonState(ctx,x3, Val(18), Val(0), ((arg1_0 - Val(4194304)) * Val(256)), Val(32), Val(1), Val24Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, ExtVal(0, 0, 0, 0), layout2);
 return x4;
 }
 PoseidonStateStruct exec_PoseidonPagingLoadDone(ExecContext& ctx,BoundLayout<PoseidonStateLayout> layout0)   {
-// PoseidonPagingLoadDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:390)
 // PoseidonPagingLoadDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:390)
 PoseidonStateStruct x1 = exec_PoseidonState(ctx,PoseidonOpDefStruct{
   .hasState = Val(0),   .stateAddr = Val(0),   .bufOutAddr = Val(1073741824),   .isElem = Val(0),   .checkOut = Val(0),   .loadTxType = Val(0)}, Val(1), Val(0), Val(0), Val(0), Val(2), Val24Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, ExtVal(0, 0, 0, 0), layout0);
@@ -6390,15 +6343,11 @@ return x1;
 PoseidonStateStruct exec_PoseidonPagingStoreNode(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2)   {
 // PoseidonOpDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:8)
 // PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:394)
-// PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:394)
 PoseidonOpDefStruct x3 = PoseidonOpDefStruct{
   .hasState = Val(0),   .stateAddr = Val(0),   .bufOutAddr = (Val(1140850688) - (arg1_0 * Val(8))),   .isElem = Val(1),   .checkOut = Val(0),   .loadTxType = Val(2)};
 // NodeIdxToAddr(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:338)
 // PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:406)
-// NodeIdxToAddr(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:338)
-// PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:406)
 Val x4 = (((arg1_0 * Val(2)) + Val(1)) * Val(8));
-// PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:402)
 // PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:402)
 PoseidonStateStruct x5 = exec_PoseidonState(ctx,x3, Val(18), Val(0), (Val(1140850688) - x4), Val(1), Val(4), Val24Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, ExtVal(0, 0, 0, 0), layout2);
 return x5;
@@ -6406,16 +6355,13 @@ return x5;
 PoseidonStateStruct exec_PoseidonPagingStorePage(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2)   {
 // PoseidonOpDef(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:8)
 // PoseidonPagingStorePage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:416)
-// PoseidonPagingStorePage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:416)
 PoseidonOpDefStruct x3 = PoseidonOpDefStruct{
   .hasState = Val(0),   .stateAddr = Val(0),   .bufOutAddr = (Val(1140850688) - (arg1_0 * Val(8))),   .isElem = Val(0),   .checkOut = Val(0),   .loadTxType = Val(2)};
-// PoseidonPagingStorePage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:424)
 // PoseidonPagingStorePage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:424)
 PoseidonStateStruct x4 = exec_PoseidonState(ctx,x3, Val(18), Val(0), ((arg1_0 - Val(4194304)) * Val(256)), Val(32), Val(3), Val24Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, ExtVal(0, 0, 0, 0), layout2);
 return x4;
 }
 PoseidonStateStruct exec_PoseidonPagingStoreDone(ExecContext& ctx,BoundLayout<PoseidonStateLayout> layout0)   {
-// PoseidonPagingStoreDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:438)
 // PoseidonPagingStoreDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:438)
 PoseidonStateStruct x1 = exec_PoseidonState(ctx,PoseidonOpDefStruct{
   .hasState = Val(0),   .stateAddr = Val(0),   .bufOutAddr = Val(1140850688),   .isElem = Val(0),   .checkOut = Val(0),   .loadTxType = Val(0)}, Val(5), Val(0), Val(0), Val(0), Val(5), Val24Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}, ExtVal(0, 0, 0, 0), layout0);
@@ -6424,21 +6370,15 @@ return x1;
 PoseidonStateStruct exec_PoseidonPaging(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, PoseidonStateStruct arg2_0, BoundLayout<PoseidonPagingLayout> layout3)   {
 // NodeAddrToIdx(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:337)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:442)
-// NodeAddrToIdx(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:337)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:442)
 Val x4 = (Val(1140850688) - arg2_0.bufOutAddr._super);
 // Div(<preamble>:22)
 Val x5 = (x4 * Val(1761607681));
 // nextPagingIdx(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:335)
-// nextPagingIdx(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:335)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:443)
-auto [x6, x7] = INVOKE_EXTERN(ctx,nextPagingIdx);
 auto [x6, x7] = INVOKE_EXTERN(ctx,nextPagingIdx);
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:444)
 NondetRegStruct x8 = exec_NondetReg(ctx,x6, LAYOUT_LOOKUP(layout3, curIdx));
-NondetRegStruct x8 = exec_NondetReg(ctx,x6, LAYOUT_LOOKUP(layout3, curIdx));
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:445)
-NondetRegStruct x9 = exec_NondetReg(ctx,x7, LAYOUT_LOOKUP(layout3, curMode));
 NondetRegStruct x9 = exec_NondetReg(ctx,x7, LAYOUT_LOOKUP(layout3, curMode));
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:446)
 OneHot_6_Struct x10 = exec_OneHot_6_(ctx,x9._super, LAYOUT_LOOKUP(layout3, modeSplit));
@@ -6462,7 +6402,6 @@ x15 = x14;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:455)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:455)
 NondetRegStruct x18 = exec_BitReg(ctx,(x9._super - arg1_0), LAYOUT_LOOKUP(layout3, _4));
 PoseidonStateStruct x19;
@@ -6494,7 +6433,6 @@ x19 = x25;
    assert(0 && "Reached unreachable mux arm");
 }
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:456)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:456)
 PoseidonStateStruct x26 = back_PoseidonState(ctx,0, LAYOUT_LOOKUP(layout3, _super._super));
 return x26;
 }
@@ -6502,217 +6440,146 @@ InstOutputBaseStruct exec_Poseidon0(ExecContext& ctx,NondetRegStruct arg0, InstI
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:467)
 DoCycleTableStruct x4 = exec_DoCycleTable(ctx,arg0, LAYOUT_LOOKUP(layout2, _0));
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:468)
-DoCycleTableStruct x4 = exec_DoCycleTable(ctx,arg0, LAYOUT_LOOKUP(layout2, _0));
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:468)
 Val x5 = (arg1_0.state - (arg1_0.minor + Val(16)));
-EQZ(x5, "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:468)");
 EQZ(x5, "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:468)");
 PoseidonStateStruct x6;
 if (to_size_t(arg1_0.minorOnehot._super[0]._super)) {
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:471)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:471)
 PoseidonStateStruct x7 = exec_PoseidonEntry(ctx,arg0, arg1_0.pcU32, arg1_0.mode, LAYOUT_LOOKUP(layout2, stateRedef.arm0._super));
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra0.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra2.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra4.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra6.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra8.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra10.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra12.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra14.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra16.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra17.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra18.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra19.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra20.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra21.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra22.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra23.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra24.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra25.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra26.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra27.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra28.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra29.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra30.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra31.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra32.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra33.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra34.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra35.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra36.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra37.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 x6 = x7;
 } else if (to_size_t(arg1_0.minorOnehot._super[1]._super)) {
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:472)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:472)
 PoseidonStateStruct x8 = back_PoseidonState(ctx,1, LAYOUT_LOOKUP(layout2, state));
 PoseidonStateStruct x9 = exec_PoseidonLoadState(ctx,arg0, x8, LAYOUT_LOOKUP(layout2, stateRedef.arm1._super));
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra1.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra2.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra3.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra4.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra5.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra6.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra7.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra8.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra9.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra10.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra11.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra12.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra13.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra14.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra15.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra16.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra17.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra18.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra19.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra20.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra21.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra22.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra23.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra24.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra25.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm1._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 x6 = x9;
 } else if (to_size_t(arg1_0.minorOnehot._super[2]._super)) {
@@ -6722,78 +6589,53 @@ PoseidonStateStruct x11 = exec_PoseidonLoadIn(ctx,arg0, x10, LAYOUT_LOOKUP(layou
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra0.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra2.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra4.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra6.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra8.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra10.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra12.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra14.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra16.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra17.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra18.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra19.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra20.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra21.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra22.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra23.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra24.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra25.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
@@ -6804,150 +6646,101 @@ PoseidonStateStruct x12 = exec_PoseidonInvalid(ctx,LAYOUT_LOOKUP(layout2, stateR
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra0.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra2.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra4.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra6.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra8.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra10.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra12.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra14.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra16.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra17.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra18.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra19.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra20.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra21.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra22.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra23.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra24.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra25.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra26.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra27.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra28.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra29.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra30.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra31.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra32.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra33.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra34.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra35.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra36.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra37.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra38.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra38.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra38.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra39.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra39.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra39.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra40.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra40.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra40.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra41.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra41.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra41.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra42.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra42.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra42.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra43.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra43.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra43.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra44.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra44.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra44.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra45.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra45.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra45.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra46.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra46.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra46.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra47.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra47.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra47.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra48.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra48.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra48.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra49.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra49.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
@@ -6958,150 +6751,101 @@ PoseidonStateStruct x13 = exec_PoseidonInvalid(ctx,LAYOUT_LOOKUP(layout2, stateR
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra0.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra2.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra3.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra4.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra5.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra6.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra7.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra8.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra9.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra10.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra11.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra12.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra13.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra14.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra15.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra16.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra17.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra18.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra19.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra20.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra21.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra22.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra23.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra24.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra25.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra26.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra27.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra28.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra29.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra30.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra31.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra32.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra33.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra34.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra35.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra36.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra37.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra38.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra38.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra38.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra39.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra39.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra39.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra40.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra40.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra40.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra41.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra41.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra41.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra42.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra42.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra42.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra43.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra43.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra43.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra44.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra44.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra44.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra45.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra45.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra45.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra46.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra46.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra46.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra47.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra47.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra47.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra48.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra48.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra48.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra49.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra49.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
@@ -7113,168 +6857,115 @@ PoseidonStateStruct x15 = exec_PoseidonDoOut(ctx,arg0, x14, LAYOUT_LOOKUP(layout
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra0.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra1.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 x6 = x15;
 } else if (to_size_t(arg1_0.minorOnehot._super[6]._super)) {
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:477)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:477)
 PoseidonStateStruct x16 = back_PoseidonState(ctx,1, LAYOUT_LOOKUP(layout2, state));
 PoseidonStateStruct x17 = exec_PoseidonPaging(ctx,arg0, arg1_0.mode, x16, LAYOUT_LOOKUP(layout2, stateRedef.arm6._super));
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra1.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra2.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra2.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra3.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra3.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra4.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra4.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra5.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra5.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra6.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra6.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra7.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra7.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra8.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra8.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra9.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra9.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra10.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra10.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra11.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra11.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra12.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra12.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra13.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra13.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra14.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra14.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra15.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra15.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra16.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra16.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra17.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra17.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra18.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra18.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra19.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra19.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra20.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra20.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra21.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra21.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra22.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra22.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra23.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra23.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra24.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra24.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra25.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra25.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra26.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra26.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra27.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra27.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra28.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra28.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra29.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra29.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra30.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra30.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra31.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra31.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra32.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra32.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra33.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra33.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra34.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra34.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra35.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra35.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra36.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra36.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra37.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra37.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra38.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra38.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra38.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra39.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra39.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra39.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra40.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra40.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra40.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra41.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra41.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra41.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra42.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra42.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra42.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra43.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra43.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra43.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra44.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra44.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra44.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra45.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra45.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra45.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 x6 = x17;
 } else if (to_size_t(arg1_0.minorOnehot._super[7]._super)) {
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:478)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:478)
 PoseidonStateStruct x18 = back_PoseidonState(ctx,1, LAYOUT_LOOKUP(layout2, state));
 PoseidonStateStruct x19 = exec_PoseidonStoreState(ctx,arg0, x18, LAYOUT_LOOKUP(layout2, stateRedef.arm7._super));
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra0.count._super), Val(0));
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra0.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra1.count._super), 0), "Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)");
 x6 = x19;
 } else {
@@ -7284,7 +6975,6 @@ PoseidonStateStruct x20 = back_PoseidonState(ctx,0, LAYOUT_LOOKUP(layout2, state
 // BigIntTopState(zirgen/circuit/rv32im/v2/dsl/inst.zir:75)
 // BigIntTopStateNull(zirgen/circuit/rv32im/v2/dsl/inst.zir:82)
 // InstOutput(zirgen/circuit/rv32im/v2/dsl/inst.zir:57)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:480)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:480)
 BigIntTopStateStruct x21 = BigIntTopStateStruct{
   .polyOp = Val(0),   .coeff = Val(0),   .witness = Val16Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}};
@@ -7297,20 +6987,15 @@ InstOutputBaseStruct exec_Poseidon1(ExecContext& ctx,NondetRegStruct arg0, InstI
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:484)
 DoCycleTableStruct x3 = exec_DoCycleTable(ctx,arg0, LAYOUT_LOOKUP(layout2, _0));
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:485)
-DoCycleTableStruct x3 = exec_DoCycleTable(ctx,arg0, LAYOUT_LOOKUP(layout2, _0));
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:485)
 Val x4 = (arg1_0.state - (arg1_0.minor + Val(24)));
-EQZ(x4, "Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:485)");
 EQZ(x4, "Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:485)");
 PoseidonStateStruct x5;
 if (to_size_t(arg1_0.minorOnehot._super[0]._super)) {
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:488)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:488)
 PoseidonStateStruct x6 = back_PoseidonState(ctx,1, LAYOUT_LOOKUP(layout2, state));
 PoseidonStateStruct x7 = exec_PoseidonExtRound(ctx,x6, LAYOUT_LOOKUP(layout2, stateRedef.arm0));
 x5 = x7;
 } else if (to_size_t(arg1_0.minorOnehot._super[1]._super)) {
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:489)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:489)
 PoseidonStateStruct x8 = back_PoseidonState(ctx,1, LAYOUT_LOOKUP(layout2, state));
 PoseidonStateStruct x9 = exec_PoseidonIntRounds(ctx,x8, LAYOUT_LOOKUP(layout2, stateRedef.arm1));
@@ -7343,12 +7028,10 @@ x5 = x15;
    assert(0 && "Reached unreachable mux arm");
 }
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:487)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:487)
 PoseidonStateStruct x16 = back_PoseidonState(ctx,0, LAYOUT_LOOKUP(layout2, stateRedef._super));
 // BigIntTopState(zirgen/circuit/rv32im/v2/dsl/inst.zir:75)
 // BigIntTopStateNull(zirgen/circuit/rv32im/v2/dsl/inst.zir:82)
 // InstOutput(zirgen/circuit/rv32im/v2/dsl/inst.zir:57)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:497)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:497)
 BigIntTopStateStruct x17 = BigIntTopStateStruct{
   .polyOp = Val(0),   .coeff = Val(0),   .witness = Val16Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)}};
@@ -13784,7 +13467,6 @@ PoseidonStateStruct x493;
 if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 0), _super), 0))) {
 // PoseidonEntry(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:132)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:471)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:471)
 // Top(zirgen/circuit/rv32im/v2/dsl/top.zir:82)
 Val x494 = (Val(1) - LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm0._super.pcZero._super._super), 0));
 PoseidonStateStruct x495;
@@ -13983,7 +13665,6 @@ x493 = x568;
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonLoadState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:156)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:472)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:472)
 NondetRegStruct x569 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm1._super._super.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -14082,7 +13763,6 @@ if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult
 // MemoryGet(zirgen/circuit/rv32im/v2/dsl/mem.zir:128)
 // PoseidonLoadInShort(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:178)
 // PoseidonLoadIn(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:234)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:473)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:473)
 ValU32Struct x607 = ValU32Struct{
   .low = LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm2._super._super.arm0.loadList), 0), _super.arm0.io.newTxn.dataLow._super), 0),   .high = LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm2._super._super.arm0.loadList), 0), _super.arm0.io.newTxn.dataHigh._super), 0)};
@@ -15187,7 +14867,6 @@ x493 = x882;
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonInvalid(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:61)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:474)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:474)
 NondetRegStruct x883 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm3._super.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -15279,7 +14958,6 @@ x493 = PoseidonStateStruct{
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:475)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:475)
 NondetRegStruct x919 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm4._super.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -15369,16 +15047,13 @@ x493 = PoseidonStateStruct{
   .hasState = x919,   .stateAddr = x920,   .bufOutAddr = x921,   .isElem = x922,   .checkOut = x923,   .loadTxType = x924,   .nextState = x925,   .subState = x926,   .bufInAddr = x927,   .count = x928,   .mode = x929,   .inner = NondetRegStruct24Array{x930, x931, x932, x933, x934, x935, x936, x937, x938, x939, x940, x941, x942, x943, x944, x945, x946, x947, x948, x949, x950, x951, x952, x953},   .zcheck = x954};
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 5), _super), 0))) {
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:476)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:476)
 PoseidonStateStruct x955 = back_PoseidonState(ctx,1, LAYOUT_LOOKUP(arg0, instResult.arm9.state));
-// PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)
 // PoseidonDoOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:317)
 Val x956 = (Val(1) - x955.checkOut._super);
 PoseidonStateStruct x957;
 if (to_size_t(x955.checkOut._super)) {
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// PoseidonCheckOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:277)
 // PoseidonCheckOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:277)
 NondetRegStruct x958 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm5._super._super.arm0._super._super.hasState._super), 0)};
@@ -15470,8 +15145,6 @@ x957 = PoseidonStateStruct{
 } else if (to_size_t(x956)) {
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:290)
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:302)
-// FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:290)
-// PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:302)
 Val x994 = (Val(1) - LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm5._super._super.arm1._1), 0), ftw.lowIsZero._super), 0));
 ComponentStruct x995;
 if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm5._super._super.arm1._1), 0), ftw.lowIsZero._super), 0))) {
@@ -15546,7 +15219,6 @@ x1009 = x19;
 }
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:313)
 // PoseidonStoreOut(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:313)
 NondetRegStruct x1010 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm5._super._super.arm1._super.hasState._super), 0)};
@@ -15643,8 +15315,6 @@ x493 = x1046;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 6), _super), 0))) {
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:447)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:477)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:447)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:477)
 Val x1047 = (LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super.modeSplit._super), 0), _super), 0) + LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super.modeSplit._super), 1), _super), 0));
 Val x1048 = (x1047 + LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super.modeSplit._super), 2), _super), 0));
 ComponentStruct x1049;
@@ -15659,8 +15329,6 @@ PoseidonStateStruct x1050;
 if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super.modeSplit._super), 0), _super), 0))) {
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:354)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:457)
 // PoseidonPagingLoadNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:354)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:457)
 NondetRegStruct x1051 = NondetRegStruct{
@@ -15755,8 +15423,6 @@ x1050 = PoseidonStateStruct{
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonPagingLoadPage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:376)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:458)
-// PoseidonPagingLoadPage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:376)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:458)
 NondetRegStruct x1087 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super._super.arm1.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -15847,8 +15513,6 @@ x1050 = PoseidonStateStruct{
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super.modeSplit._super), 2), _super), 0))) {
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// PoseidonPagingLoadDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:390)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:459)
 // PoseidonPagingLoadDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:390)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:459)
 NondetRegStruct x1123 = NondetRegStruct{
@@ -15943,8 +15607,6 @@ x1050 = PoseidonStateStruct{
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonPagingStorePage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:424)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:460)
-// PoseidonPagingStorePage(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:424)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:460)
 NondetRegStruct x1159 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super._super.arm3.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -16035,8 +15697,6 @@ x1050 = PoseidonStateStruct{
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super.modeSplit._super), 4), _super), 0))) {
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:402)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:461)
 // PoseidonPagingStoreNode(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:402)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:461)
 NondetRegStruct x1195 = NondetRegStruct{
@@ -16131,8 +15791,6 @@ x1050 = PoseidonStateStruct{
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonPagingStoreDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:438)
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:462)
-// PoseidonPagingStoreDone(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:438)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:462)
 NondetRegStruct x1231 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super._super.arm5.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -16224,13 +15882,9 @@ x1050 = PoseidonStateStruct{
    assert(0 && "Reached unreachable mux arm");
 }
 // PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:456)
-// PoseidonPaging(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:456)
 PoseidonStateStruct x1267 = back_PoseidonState(ctx,0, LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm6._super._super._super));
 x493 = x1267;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 7), _super), 0))) {
-// FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:290)
-// PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:322)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:478)
 // FieldToWord(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:290)
 // PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:322)
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:478)
@@ -16308,7 +15962,6 @@ x1283 = x19;
 }
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:327)
 // PoseidonStoreState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:327)
 NondetRegStruct x1284 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef.arm7._super._super.hasState._super), 0)};
@@ -16401,7 +16054,6 @@ x493 = PoseidonStateStruct{
    assert(0 && "Reached unreachable mux arm");
 }
 // Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
-// Poseidon0(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:470)
 PoseidonStateStruct x1320 = back_PoseidonState(ctx,0, LAYOUT_LOOKUP(arg0, instResult.arm9.stateRedef._super));
 x21 = InstOutputBaseStruct{
   .newPc = x11,   .newState = x1320.nextState._super,   .newMode = x1320.mode._super,   .topState = x16};
@@ -16411,7 +16063,6 @@ if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonExtRound(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:253)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:488)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:488)
 // Top(zirgen/circuit/rv32im/v2/dsl/top.zir:83)
 NondetRegStruct x1322 = NondetRegStruct{
@@ -16506,7 +16157,6 @@ x1321 = PoseidonStateStruct{
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonIntRounds(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:258)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:489)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:489)
 NondetRegStruct x1358 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm1._super.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -16599,7 +16249,6 @@ x1321 = PoseidonStateStruct{
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // PoseidonInvalid(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:61)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:490)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:490)
 NondetRegStruct x1394 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm2.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -16690,7 +16339,6 @@ x1321 = PoseidonStateStruct{
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 3), _super), 0))) {
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:491)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:491)
 NondetRegStruct x1430 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm3.hasState._super), 0)};
@@ -16783,7 +16431,6 @@ x1321 = PoseidonStateStruct{
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:492)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:492)
 NondetRegStruct x1466 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm4.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -16874,7 +16521,6 @@ x1321 = PoseidonStateStruct{
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 5), _super), 0))) {
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:493)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:493)
 NondetRegStruct x1502 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm5.hasState._super), 0)};
@@ -16967,7 +16613,6 @@ x1321 = PoseidonStateStruct{
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:494)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:494)
 NondetRegStruct x1538 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm6.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -17059,7 +16704,6 @@ x1321 = PoseidonStateStruct{
 // Reg(<preamble>:5)
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:34)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:495)
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:495)
 NondetRegStruct x1574 = NondetRegStruct{
   ._super = LOAD(LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef.arm7.hasState._super), 0)};
 // PoseidonState(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:35)
@@ -17150,7 +16794,6 @@ x1321 = PoseidonStateStruct{
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
-// Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:487)
 // Poseidon1(zirgen/circuit/rv32im/v2/dsl/inst_p2.zir:487)
 PoseidonStateStruct x1610 = back_PoseidonState(ctx,0, LAYOUT_LOOKUP(arg0, instResult.arm10.stateRedef._super));
 x21 = InstOutputBaseStruct{

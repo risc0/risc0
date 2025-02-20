@@ -16,7 +16,7 @@ use std::{fmt::Debug, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
-use risc0_binfmt::{SegmentVersion, SystemState};
+use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
