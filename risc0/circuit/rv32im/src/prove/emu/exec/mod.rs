@@ -485,7 +485,7 @@ impl<S: Syscall> Executor<'_, '_, S> {
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
         if into_guest_len > 0 {
-            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?;
+            self.store_region(into_guest_ptr, &syscall.to_guest)?;
         }
 
         let (a0, a1) = syscall.regs;
@@ -544,7 +544,7 @@ impl<S: Syscall> Executor<'_, '_, S> {
             *word = u32::from_be(*word);
         }
 
-        self.store_region_into_guest(state_out_ptr, bytemuck::cast_slice(&state))?;
+        self.store_region_into_guest(state_out_ptr, &state)?;
 
         self.pending.ecall = Some(EcallKind::Sha2);
         self.pending.cycles += sha_cycles(count as usize);
@@ -729,34 +729,24 @@ impl<S: Syscall> Executor<'_, '_, S> {
         Ok(String::from_utf8(buf)?)
     }
 
-    fn store_region_into_guest(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
-        Self::check_guest_addr(addr)?;
-        Self::check_guest_addr(addr + slice.len())?;
+    fn store_region_into_guest(&mut self, addr: ByteAddr, slice: &[u32]) -> Result<()> {
+        Self::check_aligned_guest_region(addr, slice.len())?;
         self.store_region(addr, slice)
     }
 
-    fn raw_store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
-        let byte_offset = addr.0 as usize % WORD_SIZE;
-        let word = self.peek_u32(addr)?;
-        let mut bytes = word.to_le_bytes();
-        bytes[byte_offset] = byte;
-        let word = u32::from_le_bytes(bytes);
-        self.raw_store_memory(addr.waddr(), word)
-    }
-
-    fn store_region(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
+    fn store_region(&mut self, addr: ByteAddr, slice: &[u32]) -> Result<()> {
         // tracing::trace!("store_region({addr:?}, {slice:02x?})");
         if !self.trace.is_empty() {
             self.pending.events.insert(TraceEvent::MemorySet {
                 addr: addr.0,
-                region: slice.into(),
+                region: slice.iter().flat_map(|word| word.to_le_bytes()).collect(),
             });
         }
 
         slice
             .iter()
             .enumerate()
-            .try_for_each(|(i, x)| self.raw_store_u8(addr + i, *x))?;
+            .try_for_each(|(i, x)| self.raw_store_memory((addr + i).waddr(), *x))?;
 
         Ok(())
     }
@@ -779,16 +769,6 @@ pub(crate) fn bytes_le_to_bigint(bytes: &[u8]) -> Natural {
     Natural::from_limbs_asc(&limbs)
 }
 
-pub(crate) fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
-    let limbs = value.to_limbs_asc();
-    let mut out = Vec::with_capacity(limbs.len() * 4);
-
-    for limb in limbs {
-        out.extend_from_slice(&limb.to_le_bytes());
-    }
-    out
-}
-
 impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
@@ -802,23 +782,25 @@ impl<S: Syscall> bibc::BigIntIO for Executor<'_, '_, S> {
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
         tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+        assert!(count % WORD_SIZE as u32 == 0);
+        let word_count = count / WORD_SIZE as u32;
         let base = ByteAddr(self.load_register(arena as usize)?);
         let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
-        let mut bytes = bigint_to_bytes_le(value);
+        let mut words = value.to_limbs_asc();
 
-        match bytes.len().cmp(&(count as usize)) {
-            Ordering::Greater => bytes.truncate(count as usize),
-            _ => bytes.resize(count as usize, 0),
+        match words.len().cmp(&(word_count as usize)) {
+            Ordering::Greater => words.truncate(word_count as usize),
+            _ => words.resize(word_count as usize, 0),
         };
 
         ensure!(
-            bytes.len() == count as usize,
-            "Expected exactly {} bytes, got {}",
-            count,
-            bytes.len()
+            words.len() == word_count as usize,
+            "Expected exactly {} words, got {}",
+            word_count,
+            words.len()
         );
 
-        self.store_region_into_guest(addr, &bytes)?;
+        self.store_region_into_guest(addr, &words)?;
 
         Ok(())
     }
