@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 risc0-groth16 = { path = "../../../../risc0/groth16", default-features = false, features = ["std"] }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+
+# [patch.crates-io]
+# ark-ff = { path = "../../../../../external/arkworks/algebra/ff" }
+# ark-ff = { path = "../nowhere" }  # TODO deliberately broken
