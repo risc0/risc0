@@ -455,7 +455,7 @@ impl<S: Syscall> Executor<'_, '_, S> {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
 
-        if into_guest_len > 0 && !into_guest_ptr.is_null() {
+        if into_guest_len > 0 {
             let end_addr = into_guest_ptr
                 .checked_add(into_guest_len as u32)
                 .ok_or_else(|| anyhow!("invalid guest address range"))?;
@@ -490,7 +490,7 @@ impl<S: Syscall> Executor<'_, '_, S> {
 
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
-        if into_guest_len > 0 && !into_guest_ptr.is_null() {
+        if into_guest_len > 0 {
             self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?;
         }
 
