@@ -116,14 +116,15 @@ extern __device__ FpExt rv32im_v2_11(uint32_t idx,
                                      FpExt arg9,
                                      const Fp* arg10,
                                      const Fp* arg11,
-                                     const Fp* arg12);
+                                     const Fp* arg12,
+                                     const Fp* arg13);
 extern __device__ FpExt rv32im_v2_10(uint32_t idx,
                                      uint32_t size,
                                      Fp* arg0,
                                      FpExt arg1,
                                      FpExt arg2,
-                                     FpExt* arg3,
-                                     FpExt arg4,
+                                     FpExt arg3,
+                                     FpExt* arg4,
                                      FpExt arg5,
                                      FpExt arg6,
                                      FpExt arg7,
@@ -194,9 +195,9 @@ extern __device__ FpExt rv32im_v2_7(uint32_t idx,
                                     const Fp* arg12);
 extern __device__ FpExt rv32im_v2_6(uint32_t idx,
                                     uint32_t size,
-                                    Fp* arg0,
+                                    FpExt arg0,
                                     FpExt arg1,
-                                    FpExt arg2,
+                                    Fp* arg2,
                                     FpExt arg3,
                                     FpExt arg4,
                                     FpExt arg5,
@@ -260,9 +261,10 @@ extern __device__ FpExt rv32im_v2_2(uint32_t idx,
                                     FpExt arg2,
                                     Fp* arg3,
                                     FpExt arg4,
-                                    const Fp* arg5,
+                                    FpExt arg5,
                                     const Fp* arg6,
-                                    const Fp* arg7);
+                                    const Fp* arg7,
+                                    const Fp* arg8);
 extern __device__ FpExt rv32im_v2_1(uint32_t idx,
                                     uint32_t size,
                                     FpExt* arg0,
@@ -288,7 +290,7 @@ extern __device__ FpExt poly_fp(uint32_t idx,
                                 const Fp* accum);
 
 constexpr size_t INV_RATE = 4;
-constexpr size_t kNumPolyMixPows = 468;
+constexpr size_t kNumPolyMixPows = 479;
 extern __constant__ FpExt poly_mix[kNumPolyMixPows];
 
 } // namespace risc0::circuit::rv32im_v2::cuda

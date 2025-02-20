@@ -2521,23 +2521,6 @@ struct BigIntReadLayout {
 using NondetU8RegLayout16LayoutArray = std::array<NondetU8RegLayout, 16>;
 struct BigIntWitnessLayout {
   NondetU8RegLayout16LayoutArray _super;
-  NondetRegLayout _0;
-  NondetRegLayout _1;
-  NondetRegLayout _2;
-  NondetRegLayout _3;
-  NondetRegLayout _4;
-  NondetRegLayout _5;
-  NondetRegLayout _6;
-  NondetRegLayout _7;
-  NondetRegLayout _8;
-  NondetRegLayout _9;
-  NondetRegLayout _10;
-  NondetRegLayout _11;
-  NondetRegLayout _12;
-  NondetRegLayout _13;
-  NondetRegLayout _14;
-  NondetRegLayout _15;
-  NondetRegLayout16LayoutArray nondet;
 };
 struct BigIntWrite__0_SuperLayout {
   MemoryWriteLayout _0;
@@ -2938,6 +2921,8 @@ struct ArgU8Struct {
   NondetRegStruct count;
   NondetRegStruct val;
 };
+struct U8RegStruct {
+};
 struct ArgU16Struct {
   NondetRegStruct count;
   NondetRegStruct val;
@@ -3310,24 +3295,6 @@ struct SplitU32Struct {
 using SplitU32Struct4Array = std::array<SplitU32Struct, 4>;
 struct BigIntReadStruct {
   NondetRegStruct16Array _super;
-};
-struct BigIntExternReturnStruct {
-  Val x00;
-  Val x01;
-  Val x02;
-  Val x03;
-  Val x04;
-  Val x05;
-  Val x06;
-  Val x07;
-  Val x08;
-  Val x09;
-  Val x10;
-  Val x11;
-  Val x12;
-  Val x13;
-  Val x14;
-  Val x15;
 };
 struct BigIntWitnessStruct {
   NondetRegStruct16Array _super;

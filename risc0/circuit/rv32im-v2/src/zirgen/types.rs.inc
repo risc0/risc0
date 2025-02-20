@@ -7283,23 +7283,6 @@ impl risc0_zkp::layout::Component for BigIntReadLayout {
 pub type NondetU8RegLayout16LayoutArray = [&'static NondetU8RegLayout; 16];
 pub struct BigIntWitnessLayout {
     pub _super: &'static NondetU8RegLayout16LayoutArray,
-    pub _0: &'static NondetRegLayout,
-    pub _1: &'static NondetRegLayout,
-    pub _2: &'static NondetRegLayout,
-    pub _3: &'static NondetRegLayout,
-    pub _4: &'static NondetRegLayout,
-    pub _5: &'static NondetRegLayout,
-    pub _6: &'static NondetRegLayout,
-    pub _7: &'static NondetRegLayout,
-    pub _8: &'static NondetRegLayout,
-    pub _9: &'static NondetRegLayout,
-    pub _10: &'static NondetRegLayout,
-    pub _11: &'static NondetRegLayout,
-    pub _12: &'static NondetRegLayout,
-    pub _13: &'static NondetRegLayout,
-    pub _14: &'static NondetRegLayout,
-    pub _15: &'static NondetRegLayout,
-    pub nondet: &'static NondetRegLayout16LayoutArray,
 }
 impl risc0_zkp::layout::Component for BigIntWitnessLayout {
     fn ty_name(&self) -> &'static str {
@@ -7308,23 +7291,6 @@ impl risc0_zkp::layout::Component for BigIntWitnessLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("_super", self._super)?;
-        v.visit_component("_0", self._0)?;
-        v.visit_component("_1", self._1)?;
-        v.visit_component("_2", self._2)?;
-        v.visit_component("_3", self._3)?;
-        v.visit_component("_4", self._4)?;
-        v.visit_component("_5", self._5)?;
-        v.visit_component("_6", self._6)?;
-        v.visit_component("_7", self._7)?;
-        v.visit_component("_8", self._8)?;
-        v.visit_component("_9", self._9)?;
-        v.visit_component("_10", self._10)?;
-        v.visit_component("_11", self._11)?;
-        v.visit_component("_12", self._12)?;
-        v.visit_component("_13", self._13)?;
-        v.visit_component("_14", self._14)?;
-        v.visit_component("_15", self._15)?;
-        v.visit_component("nondet", self.nondet)?;
         Ok(())
     }
 }
@@ -8304,6 +8270,8 @@ pub struct ArgU8Struct {
     pub val: NondetRegStruct,
 }
 #[derive(Copy, Clone, Debug)]
+pub struct U8RegStruct {}
+#[derive(Copy, Clone, Debug)]
 pub struct ArgU16Struct {
     pub count: NondetRegStruct,
     pub val: NondetRegStruct,
@@ -8739,25 +8707,6 @@ pub type SplitU32Struct4Array = [SplitU32Struct; 4];
 #[derive(Copy, Clone, Debug)]
 pub struct BigIntReadStruct {
     pub _super: NondetRegStruct16Array,
-}
-#[derive(Copy, Clone, Debug)]
-pub struct BigIntExternReturnStruct {
-    pub x00: Val,
-    pub x01: Val,
-    pub x02: Val,
-    pub x03: Val,
-    pub x04: Val,
-    pub x05: Val,
-    pub x06: Val,
-    pub x07: Val,
-    pub x08: Val,
-    pub x09: Val,
-    pub x10: Val,
-    pub x11: Val,
-    pub x12: Val,
-    pub x13: Val,
-    pub x14: Val,
-    pub x15: Val,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct BigIntWitnessStruct {
