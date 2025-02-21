@@ -241,7 +241,6 @@ pub(crate) fn allowed_control_ids(
         ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
             .map(str::to_string)
             .into_iter()
-            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
             .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
             .collect();
 
@@ -254,11 +253,9 @@ pub(crate) fn allowed_control_ids(
         ),
     };
 
-    Ok(risc0_circuit_rv32im::control_ids(hash_name, po2_max).chain(
-        zkr_control_ids
-            .into_iter()
-            .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)),
-    ))
+    Ok(zkr_control_ids
+        .into_iter()
+        .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)))
 }
 
 /// Constructs the root for the set of allowed control IDs, given a maximum cycle count as a po2.
@@ -360,7 +357,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("c9c2a02ff57bbccc33614cf9603865858da34a36ed00c89758d7659755362e3f")
+            digest!("ed15842d0be4b27a0c07499dfa90e6ef830eeab8684af3125c4332de8752f4ce")
         );
     }
 

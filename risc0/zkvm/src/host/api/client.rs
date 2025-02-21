@@ -29,11 +29,9 @@ use crate::{
         api::SegmentInfo,
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
-    receipt::{
-        segment::default_segment_version, AssumptionReceipt, SegmentReceipt, SuccinctReceipt,
-    },
+    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::UnionClaim,
-    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, SegmentVersion,
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
 pub(crate) enum Compat {
@@ -152,16 +150,11 @@ impl Client {
     {
         let mut conn = self.connect()?;
 
-        let version = default_segment_version();
-
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Execute(
                 pb::api::ExecuteRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     segments_out: Some(segments_out.try_into()?),
-                    segment_version: Some(pb::base::CompatVersion {
-                        value: version as u32,
-                    }),
                 },
             )),
         };
@@ -196,9 +189,6 @@ impl Client {
                 pb::api::ExecuteRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     segments_out: Some(segments_out.try_into()?),
-                    segment_version: Some(pb::base::CompatVersion {
-                        value: SegmentVersion::V2 as u32,
-                    }),
                 },
             )),
         };
@@ -324,6 +314,8 @@ impl Client {
         Claim: risc0_binfmt::Digestible + std::fmt::Debug + Clone + serde::Serialize,
         crate::MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
     {
+        use crate::host::api::convert::keccak_input_to_bytes;
+
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -332,7 +324,7 @@ impl Client {
                     claim_digest: Some(proof_request.claim_digest.into()),
                     po2: proof_request.po2 as u32,
                     control_root: Some(proof_request.control_root.into()),
-                    input: proof_request.input,
+                    input: keccak_input_to_bytes(&proof_request.input),
                     receipt_out: Some(receipt_out.try_into()?),
                 },
             )),

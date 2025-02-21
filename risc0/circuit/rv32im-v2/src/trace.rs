@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use anyhow::Result;
 use derive_more::Debug;
 use serde::{Deserialize, Serialize};

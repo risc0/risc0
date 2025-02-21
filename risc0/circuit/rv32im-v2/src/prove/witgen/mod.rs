@@ -91,16 +91,18 @@ where
 
         let mut global = vec![Val::INVALID; REGCOUNT_GLOBAL];
 
-        for i in 0..DIGEST_WORDS {
-            // state in
-            let low = segment.claim.pre_state.as_words()[i] & 0xffff;
-            let high = segment.claim.pre_state.as_words()[i] >> 16;
+        // state in
+        for (i, word) in segment.claim.pre_state.as_words().iter().enumerate() {
+            let low = word & 0xffff;
+            let high = word >> 16;
             global[LAYOUT_GLOBAL.state_in.values[i].low._super.offset] = low.into();
             global[LAYOUT_GLOBAL.state_in.values[i].high._super.offset] = high.into();
+        }
 
-            // input digest
-            let low = 0u32;
-            let high = 0u32;
+        // input digest
+        for (i, word) in segment.claim.input.as_words().iter().enumerate() {
+            let low = word & 0xffff;
+            let high = word >> 16;
             global[LAYOUT_GLOBAL.input.values[i].low._super.offset] = low.into();
             global[LAYOUT_GLOBAL.input.values[i].high._super.offset] = high.into();
         }

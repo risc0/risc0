@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ use clap::Parser;
 use regex::Regex;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl,
-    Groth16ReceiptVerifierParameters, ProverOpts, Receipt, VerifierContext,
+    get_prover_server, sha::Digestible, Executor2, ExecutorEnv, Groth16ReceiptVerifierParameters,
+    ProverOpts, Receipt, VerifierContext,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
@@ -197,7 +197,7 @@ fn generate_receipt() -> Receipt {
 
     tracing::info!("execute");
 
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = Executor2::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
     tracing::info!("prove");

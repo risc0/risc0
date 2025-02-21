@@ -17,12 +17,10 @@ use std::{path::PathBuf, str::FromStr};
 use anyhow::{Context, Result};
 use risc0_zkvm::{
     digest, ApiClient, Asset, AssetRequest, Digest, ExecutorEnv, Groth16ReceiptVerifierParameters,
-    ProverOpts, SegmentVersion, SuccinctReceiptVerifierParameters, VerifierContext,
+    ProverOpts, SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 use rstest::rstest;
-
-use SegmentVersion::*;
 
 const OUT_DIR: &str = env!("OUT_DIR");
 
@@ -56,13 +54,10 @@ fn into_version(version: &str) -> Result<semver::Version> {
     }
 }
 
-fn verifier_context(
-    version: semver::Version,
-    segment_version: SegmentVersion,
-) -> Result<VerifierContext> {
+fn verifier_context(version: semver::Version) -> Result<VerifierContext> {
     let cur_version = risc0_zkvm::get_version().context("Failed to get current version")?;
     if version.major == cur_version.major && version.minor == cur_version.minor {
-        return Ok(VerifierContext::for_version(segment_version));
+        return Ok(VerifierContext::default());
     }
 
     let verifying_key = Groth16ReceiptVerifierParameters::default().verifying_key;
@@ -137,12 +132,11 @@ fn new_client(version: &str) -> ApiClient {
 }
 
 #[rstest]
-#[case("1.1.3", V1)]
-#[case("1.2.2", V1)]
-#[case("main", V1)]
-#[case("main", V2)]
+#[case("1.1.3")]
+#[case("1.2.2")]
+#[case("main")]
 #[test_log::test]
-fn prove_lift(#[case] version: &str, #[case] segment_version: SegmentVersion) {
+fn prove_lift(#[case] version: &str) {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
@@ -153,25 +147,17 @@ fn prove_lift(#[case] version: &str, #[case] segment_version: SegmentVersion) {
     let client = new_client(version);
 
     let mut segments = vec![];
-    let session = match segment_version {
-        V1 => client
-            .execute(&env, binary, AssetRequest::Inline, |_info, segment| {
-                segments.push(segment);
-                Ok(())
-            })
-            .unwrap(),
-        V2 => client
-            .execute_v2(&env, binary, AssetRequest::Inline, |_info, segment| {
-                segments.push(segment);
-                Ok(())
-            })
-            .unwrap(),
-    };
+    let session = client
+        .execute(&env, binary, AssetRequest::Inline, |_info, segment| {
+            segments.push(segment);
+            Ok(())
+        })
+        .unwrap();
     assert_eq!(session.segments.len(), 1);
     assert_eq!(segments.len(), 1);
 
     for segment in segments {
-        let opts = ProverOpts::default().with_segment_version(segment_version);
+        let opts = ProverOpts::default();
         let segment_receipt = client
             .prove_segment(&opts, segment, AssetRequest::Inline)
             .unwrap();
@@ -184,7 +170,7 @@ fn prove_lift(#[case] version: &str, #[case] segment_version: SegmentVersion) {
             )
             .unwrap();
 
-        let ctx = verifier_context(into_version(version).unwrap(), segment_version).unwrap();
+        let ctx = verifier_context(into_version(version).unwrap()).unwrap();
         succinct_receipt
             .verify_integrity_with_context(&ctx)
             .unwrap();

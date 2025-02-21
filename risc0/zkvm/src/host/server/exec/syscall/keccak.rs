@@ -14,8 +14,8 @@
 
 use crate::host::client::env::ProveKeccakRequest;
 use anyhow::{bail, Result};
+use risc0_binfmt::ByteAddr;
 use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::syscall::{
     keccak_mode::{KECCAK_PERMUTE, KECCAK_PROVE},
     reg_abi::*,
@@ -99,7 +99,7 @@ impl SysKeccak {
         let proof_request = ProveKeccakRequest {
             claim_digest: claim,
             control_root,
-            input: bytemuck::cast_slice(self.inputs.as_slice()).to_vec(),
+            input: self.inputs.clone(),
             po2: self.max_po2,
         };
 
