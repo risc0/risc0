@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use clap::Parser;
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
+    get_prover_server, Executor2, ExecutorEnv, ProverOpts, ProverServer, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
 
@@ -80,7 +80,7 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         .write_slice(&[iterations])
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
+    let mut exec = Executor2::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
     let seal = if skip_prover {
         0

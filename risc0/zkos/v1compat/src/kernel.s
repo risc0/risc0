@@ -17,6 +17,7 @@
 .equ USER_REGS_ADDR, 0xffff0080
 .equ MEPC_ADDR, 0xffff0200
 .equ GLOBAL_OUTPUT_ADDR, 0xffff0240
+.equ GLOBAL_INPUT_ADDR, 0xffff0260
 .equ ECALL_DISPATCH_ADDR, 0xffff1000
 .equ ECALL_TABLE_SIZE, 7
 .equ HOST_ECALL_TERMINATE, 0
@@ -25,6 +26,7 @@
 .equ HOST_ECALL_BIGINT, 5
 .equ WORD_SIZE, 4
 .equ MAX_IO_BYTES, 1024
+.equ DIGEST_WORDS, 8
 .equ REG_SP, 2
 .equ REG_T0, 5
 .equ REG_T1, 6
@@ -74,7 +76,7 @@ _start:
 
 _ecall_table:
     j _ecall_halt
-    fence # input
+    j _ecall_input
     j _ecall_software
     j _ecall_sha
     j _ecall_bigint
@@ -126,10 +128,40 @@ _ecall_halt:
     slli a1, a1, 16
     andi a0, a0, 0xff
     or a0, a1, a0
+    andi t0, a0, 0xff
 
     li a1, 0
     li a7, HOST_ECALL_TERMINATE
     ecall
+
+    # return to userspace if halt_type != HALT (i.e. 0)
+    beq t0, zero, 1f
+    mret
+
+1:
+    fence
+
+# return a word of the input digest to the user
+_ecall_input:
+    lw t0, REG_A0 * WORD_SIZE (tp) # index
+
+    # check if index is > 8
+    li t1, DIGEST_WORDS
+    bge t0, t1, 1f
+
+    # load word from `GLOBAL_INPUT_ADDR + index * WORD_SIZE`
+    slli t0, t0, 2
+    li t1, GLOBAL_INPUT_ADDR
+    add t0, t0, t1
+    lw t0, 0(t0)
+
+    # store word into user register a0
+    sw t0, REG_A0 * WORD_SIZE (tp)
+
+    mret
+
+1:
+    fence # panic
 
 _ecall_software:
     # prepare a software ecall

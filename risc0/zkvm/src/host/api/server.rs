@@ -32,16 +32,13 @@ use crate::{
             env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
         },
-        server::{
-            prove::keccak::prove_keccak,
-            session::{InnerSegment, NullSegmentRef},
-        },
+        server::{prove::keccak::prove_keccak, session::NullSegmentRef},
     },
     prove_registered_zkr,
     recursion::identity_p254,
-    AssetRequest, Assumption, Executor2, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt,
-    ProverOpts, Receipt, ReceiptClaim, Segment, SegmentReceipt, SegmentRef, SegmentVersion,
-    Session, SuccinctReceipt, TraceCallback, TraceEvent, Unknown, VerifierContext,
+    AssetRequest, Assumption, Executor2, ExecutorEnv, InnerAssumptionReceipt, ProverOpts, Receipt,
+    ReceiptClaim, Segment, SegmentReceipt, SegmentRef, Session, SuccinctReceipt, TraceCallback,
+    TraceEvent, Unknown, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -364,22 +361,10 @@ impl Server {
                 .ok_or_else(|| malformed_err("ExecuteRequest.segments_out"))?;
             let bytes = binary.as_bytes()?;
 
-            let segment_version = match request
-                .segment_version
-                .ok_or_else(|| malformed_err("ExecuteRequest.segment_version"))?
-                .value
-            {
-                0 => SegmentVersion::V1,
-                1 => SegmentVersion::V2,
-                _ => bail!("Invalid segment version"),
-            };
-
             let session = match AssetRequest::try_from(segments_out.clone())? {
                 #[cfg(feature = "redis")]
-                AssetRequest::Redis(params) => {
-                    execute_redis(conn, env, bytes, params, segment_version)?
-                }
-                _ => execute_default(conn, env, bytes, &segments_out, segment_version)?,
+                AssetRequest::Redis(params) => execute_redis(conn, env, bytes, params)?,
+                _ => execute_default(conn, env, bytes, &segments_out)?,
             };
 
             let receipt_claim = session.claim()?;
@@ -487,13 +472,8 @@ impl Server {
                 .as_bytes()?;
             let segment: Segment = bincode::deserialize(&segment_bytes)?;
 
-            let segment_version = match segment.inner {
-                InnerSegment::V1(_) => SegmentVersion::V1,
-                InnerSegment::V2(_) => SegmentVersion::V2,
-            };
-
             let prover = get_prover_server(&opts)?;
-            let ctx = VerifierContext::for_version(segment_version);
+            let ctx = VerifierContext::default();
             let receipt = prover.prove_segment(&ctx, &segment)?;
 
             let receipt_pb: pb::core::SegmentReceipt = receipt.into();
@@ -1062,7 +1042,6 @@ fn execute_redis(
     env: ExecutorEnv,
     bytes: Bytes,
     params: super::RedisParams,
-    segment_version: SegmentVersion,
 ) -> Result<Session> {
     use redis::{Client, Commands, ConnectionLike, SetExpiry, SetOptions};
     use std::{
@@ -1150,10 +1129,7 @@ fn execute_redis(
         Ok(Box::new(NullSegmentRef))
     };
 
-    let session = match segment_version {
-        SegmentVersion::V1 => ExecutorImpl::from_elf(env, &bytes)?.run_with_callback(callback),
-        SegmentVersion::V2 => Executor2::from_elf(env, &bytes)?.run_with_callback(callback),
-    };
+    let session = Executor2::from_elf(env, &bytes)?.run_with_callback(callback);
 
     drop(sender);
 
@@ -1169,7 +1145,6 @@ fn execute_default(
     env: ExecutorEnv,
     bytes: Bytes,
     segments_out: &pb::api::AssetRequest,
-    segment_version: SegmentVersion,
 ) -> Result<Session> {
     let callback = |segment: Segment| -> Result<Box<dyn SegmentRef>> {
         let segment_bytes = bincode::serialize(&segment)?;
@@ -1182,10 +1157,7 @@ fn execute_default(
         Ok(Box::new(NullSegmentRef))
     };
 
-    match segment_version {
-        SegmentVersion::V1 => ExecutorImpl::from_elf(env, &bytes)?.run_with_callback(callback),
-        SegmentVersion::V2 => Executor2::from_elf(env, &bytes)?.run_with_callback(callback),
-    }
+    Executor2::from_elf(env, &bytes)?.run_with_callback(callback)
 }
 
 fn send_segment_done_msg(

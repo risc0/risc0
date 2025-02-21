@@ -21,7 +21,10 @@ use risc0_zkp::core::{
     log2_ceil,
 };
 
-use crate::{Rv32imV2Claim, TerminateState};
+use crate::{
+    trace::{TraceCallback, TraceEvent},
+    Rv32imV2Claim, TerminateState,
+};
 
 use super::{
     bigint::BigIntState,
@@ -33,9 +36,14 @@ use super::{
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
-    trace::{TraceCallback, TraceEvent},
     SyscallContext,
 };
+
+#[derive(Clone, Debug, Default)]
+pub struct EcallMetric {
+    pub count: u64,
+    pub cycles: u64,
+}
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
@@ -139,7 +147,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.segment_cycles()
                 );
 
-                assert!(self.segment_cycles() < segment_limit);
+                assert!(
+                    self.segment_cycles() < segment_limit,
+                    "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                    self.pc
+                );
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
@@ -293,6 +305,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn set_machine_mode(&mut self, mode: u32) {
         self.machine_mode = mode;
+    }
+
+    fn resume(&mut self) -> Result<()> {
+        let input_words = self.input_digest.as_words().to_vec();
+        for (i, word) in input_words.iter().enumerate() {
+            self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, *word)?;
+        }
+        Ok(())
     }
 
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
