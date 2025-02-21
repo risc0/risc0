@@ -15,9 +15,17 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{anyhow, bail, Context as _, Result};
-use risc0_circuit_rv32im::prove::emu::{
-    addr::{ByteAddr, WordAddr},
-    rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
+use risc0_binfmt::ByteAddr;
+// use risc0_circuit_rv32im::prove::emu::{
+//     addr::{ByteAddr, WordAddr},
+//     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
+// };
+use risc0_circuit_rv32im_v2::{
+    execute::{
+        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
+    },
+    MAX_INSN_CYCLES,
 };
 use risc0_zkvm_platform::{
     fileno,

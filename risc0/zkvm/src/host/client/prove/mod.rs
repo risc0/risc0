@@ -21,11 +21,9 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{anyhow, Result};
-use risc0_binfmt::SegmentVersion;
-use serde::{Deserialize, Serialize};
-
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
 use risc0_zkp::core::digest::Digest;
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "bonsai")]
 use {self::bonsai::BonsaiProver, crate::is_dev_mode};
@@ -33,10 +31,8 @@ use {self::bonsai::BonsaiProver, crate::is_dev_mode};
 use self::external::ExternalProver;
 
 use crate::{
-    get_version,
-    host::prove_info::ProveInfo,
-    receipt::{segment::default_segment_version, DEFAULT_MAX_PO2},
-    ExecutorEnv, Receipt, SegmentReceiptVerifierParameters, SessionInfo, VerifierContext,
+    get_version, host::prove_info::ProveInfo, receipt::DEFAULT_MAX_PO2, ExecutorEnv, Receipt,
+    SessionInfo, VerifierContext,
 };
 
 /// A Prover can execute a given ELF binary and produce a
@@ -79,7 +75,7 @@ pub trait Prover {
     /// Default [VerifierContext] and [ProverOpts] will be used.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         let opts = ProverOpts::default();
-        let ctx = opts.verifier_context();
+        let ctx = VerifierContext::default();
         self.prove_with_ctx(env, &ctx, elf, &opts)
     }
 
@@ -95,7 +91,7 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        let ctx = opts.verifier_context();
+        let ctx = VerifierContext::default();
         self.prove_with_ctx(env, &ctx, elf, opts)
     }
 
@@ -173,9 +169,6 @@ pub struct ProverOpts {
 
     /// Maximum cycle count, as a power of two (po2) that these prover options support.
     pub(crate) max_segment_po2: usize,
-
-    /// TODO(flaub)
-    pub segment_version: SegmentVersion,
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
@@ -213,7 +206,6 @@ impl Default for ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: default_segment_version(),
         }
     }
 }
@@ -235,7 +227,6 @@ impl ProverOpts {
                 .unwrap()
                 .collect(),
             max_segment_po2: po2_max,
-            segment_version: default_segment_version(),
         }
     }
 
@@ -253,9 +244,8 @@ impl ProverOpts {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
-            control_ids: risc0_circuit_rv32im::control_ids("sha-256", DEFAULT_MAX_PO2).collect(),
+            control_ids: Vec::new(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: default_segment_version(),
         }
     }
 
@@ -268,7 +258,6 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: default_segment_version(),
         }
     }
 
@@ -281,7 +270,6 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: default_segment_version(),
         }
     }
 
@@ -296,7 +284,6 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            segment_version: default_segment_version(),
         }
     }
 
@@ -341,32 +328,12 @@ impl ProverOpts {
         }
     }
 
-    /// TODO(flaub)
-    #[stability::unstable]
-    pub fn with_segment_version(self, segment_version: SegmentVersion) -> Self {
-        Self {
-            segment_version,
-            ..self
-        }
-    }
-
     #[cfg(feature = "prove")]
     pub(crate) fn hash_suite(
         &self,
     ) -> Result<risc0_zkp::core::hash::HashSuite<risc0_zkp::field::baby_bear::BabyBear>> {
         risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
             .ok_or_else(|| anyhow::anyhow!("unsupported hash suite: {}", self.hashfn))
-    }
-
-    /// TODO(flaub)
-    #[stability::unstable]
-    pub fn verifier_context(&self) -> VerifierContext {
-        VerifierContext::default().with_segment_verifier_parameters(
-            SegmentReceiptVerifierParameters::from_max_po2(
-                self.max_segment_po2,
-                self.segment_version,
-            ),
-        )
     }
 }
 

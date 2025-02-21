@@ -57,7 +57,6 @@ impl BuildCommand {
         for guest in &guest_list {
             println!("{}", guest.path);
 
-            println!("  ImageID:  {}", guest.image_id);
             match guest.v2_image_id {
                 risc0_build::ImageIdKind::User(digest) => {
                     println!("  UserID:   {digest}");

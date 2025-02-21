@@ -4361,7 +4361,6 @@ dependencies = [
  "risc0-bigint2-methods",
  "risc0-zkvm",
  "rstest",
- "rstest_reuse",
  "stability",
  "test-log",
  "tracing",
@@ -4383,6 +4382,7 @@ dependencies = [
  "borsh",
  "derive_more 2.0.1",
  "elf",
+ "lazy_static",
  "risc0-zkp",
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",
@@ -4756,7 +4756,6 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-keccak-methods",
  "risc0-circuit-recursion",
- "risc0-circuit-rv32im",
  "risc0-circuit-rv32im-v2",
  "risc0-core",
  "risc0-groth16",
@@ -4767,7 +4766,6 @@ dependencies = [
  "rmp-serde",
  "rrs-lib",
  "rstest",
- "rstest_reuse",
  "rustc-demangle",
  "rzup",
  "semver",
@@ -4906,17 +4904,6 @@ dependencies = [
  "rustc_version",
  "syn 2.0.90",
  "unicode-ident",
-]
-
-[[package]]
-name = "rstest_reuse"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3a8fb4672e840a587a66fc577a5491375df51ddb88f2a2c2a792598c326fe14"
-dependencies = [
- "quote",
- "rand",
- "syn 2.0.90",
 ]
 
 [[package]]

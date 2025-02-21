@@ -20,11 +20,10 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::{ByteAddr as ByteAddr2, ExitCode, MemoryImage2, Program, SystemState};
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, SystemState};
 use risc0_circuit_rv32im_v2::{
     execute::{
-        platform::WORD_SIZE, trace as trace_v2, Executor, Syscall as CircuitSyscall,
+        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
     },
     MAX_INSN_CYCLES,
@@ -36,10 +35,7 @@ use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
-    host::{
-        client::env::SegmentPath,
-        server::session::{InnerSegment, Session},
-    },
+    host::{client::env::SegmentPath, server::session::Session},
     receipt_claim::exit_code_from_rv32im_v2_claim,
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
@@ -165,7 +161,7 @@ impl<'a> Executor2<'a> {
             self.image.clone(),
             self,
             self.env.input_digest,
-            convert_trace_callbacks(self.env.trace.clone()),
+            self.env.trace.clone(),
         );
 
         let start_time = Instant::now();
@@ -205,7 +201,7 @@ impl<'a> Executor2<'a> {
 
                 let segment = Segment {
                     index: inner.index as u32,
-                    inner: InnerSegment::V2(inner),
+                    inner,
                     output,
                 };
                 let segment_ref = callback(segment)?;
@@ -285,40 +281,6 @@ impl<'a> Executor2<'a> {
     }
 }
 
-fn v1_trace_event_from_v2(event: trace_v2::TraceEvent) -> crate::TraceEvent {
-    match event {
-        trace_v2::TraceEvent::InstructionStart { cycle, pc, insn } => {
-            crate::TraceEvent::InstructionStart { cycle, pc, insn }
-        }
-
-        trace_v2::TraceEvent::RegisterSet { idx, value } => {
-            crate::TraceEvent::RegisterSet { idx, value }
-        }
-
-        trace_v2::TraceEvent::MemorySet { addr, region } => {
-            crate::TraceEvent::MemorySet { addr, region }
-        }
-
-        trace_v2::TraceEvent::PageIn { cycles } => crate::TraceEvent::PageIn { cycles },
-
-        trace_v2::TraceEvent::PageOut { cycles } => crate::TraceEvent::PageOut { cycles },
-    }
-}
-
-fn convert_trace_callbacks<'a>(
-    trace: Vec<Rc<RefCell<dyn crate::TraceCallback + 'a>>>,
-) -> Vec<Rc<RefCell<dyn trace_v2::TraceCallback + 'a>>> {
-    trace
-        .into_iter()
-        .map(|cb| {
-            Rc::new(RefCell::new(move |event| {
-                cb.borrow_mut()
-                    .trace_callback(v1_trace_event_from_v2(event))
-            })) as Rc<RefCell<dyn trace_v2::TraceCallback + 'a>>
-        })
-        .collect()
-}
-
 struct ContextAdapter<'a, 'b> {
     ctx: &'b mut dyn CircuitSyscallContext,
     syscall_table: SyscallTable<'a>,
@@ -342,12 +304,10 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
-        let addr = ByteAddr2(addr.0);
         self.ctx.peek_u8(addr)
     }
 
     fn load_u32(&mut self, addr: ByteAddr) -> Result<u32> {
-        let addr = ByteAddr2(addr.0);
         self.ctx.peek_u32(addr)
     }
 
@@ -376,7 +336,7 @@ impl CircuitSyscall for Executor2<'_> {
             syscall_table: self.syscall_table.clone(),
         };
 
-        let name_ptr = ByteAddr2(fd);
+        let name_ptr = ByteAddr(fd);
         let syscall = ctx.peek_string(name_ptr)?;
         tracing::trace!("host_read({syscall}, into_guest: {})", buf.len());
 
@@ -406,7 +366,7 @@ impl CircuitSyscall for Executor2<'_> {
 }
 
 impl ContextAdapter<'_, '_> {
-    fn peek_string(&mut self, mut addr: ByteAddr2) -> Result<String> {
+    fn peek_string(&mut self, mut addr: ByteAddr) -> Result<String> {
         tracing::trace!("peek_string: {addr:?}");
         let mut buf = Vec::new();
         loop {

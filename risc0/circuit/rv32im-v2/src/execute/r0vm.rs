@@ -204,6 +204,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         let a0 = self.load_register(REG_A0)?;
         let a1 = self.load_register(REG_A1)?;
         self.ctx.on_terminate(a0, a1)?;
+        self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::Terminate, CycleState::Suspend, 0, 0, 0)?;
         Ok(false)

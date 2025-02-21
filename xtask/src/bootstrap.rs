@@ -17,27 +17,20 @@ use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 use clap::Parser;
 use risc0_circuit_keccak::{prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
 use risc0_circuit_recursion::zkr::{get_all_zkrs, get_zkr};
-use risc0_zkp::{
-    core::{
-        digest::Digest,
-        hash::{
-            blake2b::Blake2bCpuHashSuite, hash_suite_from_name, poseidon2::Poseidon2HashSuite,
-            poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
-        },
+use risc0_zkp::core::{
+    digest::Digest,
+    hash::{
+        hash_suite_from_name, poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite,
     },
-    field::baby_bear::BabyBear,
-    hal::cpu::CpuHal,
-    MIN_CYCLES_PO2,
 };
 use risc0_zkvm::{
     recursion::{MerkleGroup, Program},
-    Loader, DEFAULT_MAX_PO2, RECURSION_PO2,
+    DEFAULT_MAX_PO2, RECURSION_PO2,
 };
 
 #[derive(Parser)]
 pub struct Bootstrap;
 
-const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 const CONTROL_ID_PATH_KECCAK: &str = "risc0/circuit/keccak/src/control_id.rs";
 
@@ -67,8 +60,7 @@ impl Bootstrap {
     }
 
     pub fn run(&self) {
-        let poseidon2_control_ids = Self::generate_rv32im_control_ids();
-        Self::generate_recursion_control_ids(poseidon2_control_ids);
+        Self::generate_recursion_control_ids();
         Self::bootstrap_keccak();
     }
 
@@ -79,39 +71,7 @@ impl Bootstrap {
             .expect("failed to format {path}");
     }
 
-    fn generate_rv32im_control_ids() -> Vec<(String, Digest)> {
-        tracing::info!("computing control IDs with SHA-256");
-        let control_id_sha256 = Loader::compute_control_id_table(&CpuHal::new(Sha256HashSuite::<
-            BabyBear,
-        >::new_suite(
-        )));
-        tracing::info!("computing control IDs with Poseidon2");
-        let control_id_poseidon2 =
-            Loader::compute_control_id_table(&CpuHal::new(Poseidon2HashSuite::new_suite()));
-        tracing::info!("computing control IDs with Blake2b");
-        let control_id_blake2b =
-            Loader::compute_control_id_table(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
-
-        let contents = format!(
-            include_str!("templates/control_id_rv32im.rs"),
-            Self::format_control_ids(control_id_sha256),
-            Self::format_control_ids(&control_id_poseidon2),
-            Self::format_control_ids(control_id_blake2b),
-        );
-        tracing::debug!("contents of rv32im control_id.rs:\n{contents}");
-
-        tracing::info!("writing control ids to {CONTROL_ID_PATH_RV32IM}");
-        std::fs::write(CONTROL_ID_PATH_RV32IM, contents).unwrap();
-
-        // Use rustfmt to format the file.
-        Self::rustfmt(CONTROL_ID_PATH_RV32IM);
-
-        // Return the control IDs that should be included in the allowed control IDs that are used
-        // by default in segment receipt verification, and in forming the control root.
-        control_id_poseidon2[..=DEFAULT_MAX_PO2 - MIN_CYCLES_PO2].to_vec()
-    }
-
-    fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<(String, Digest)>) {
+    fn generate_recursion_control_ids() {
         // Recursion programs (ZKRs) that are to be included in the allowed set, used in the
         // default verifier context.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
@@ -122,7 +82,6 @@ impl Bootstrap {
             ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
                 .map(str::to_string)
                 .into_iter()
-                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
                 .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
                 .collect();
 
@@ -143,15 +102,10 @@ impl Bootstrap {
             Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
         let sha256_control_ids = Self::generate_recursion_control_ids_with_hash(&zkrs, "sha-256");
 
-        let allowed_control_ids: Vec<(String, Digest)> = poseidon2_rv32im_control_ids
+        let allowed_control_ids: Vec<(String, Digest)> = poseidon2_control_ids
             .iter()
-            .cloned()
-            .chain(
-                poseidon2_control_ids
-                    .iter()
-                    .filter(|(name, _digest)| allowed_zkr_names.contains(name))
-                    .map(|(name, digest)| (format!("recursion {name}"), *digest)),
-            )
+            .filter(|(name, _digest)| allowed_zkr_names.contains(name))
+            .map(|(name, digest)| (format!("recursion {name}"), *digest))
             .collect();
         tracing::info!("Calculate allowed_control_ids {allowed_control_ids:#?}");
 
