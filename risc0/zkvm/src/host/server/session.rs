@@ -20,8 +20,7 @@ use std::{collections::BTreeSet, fs, path::PathBuf};
 use anyhow::{ensure, Result};
 use enum_map::EnumMap;
 use risc0_binfmt::SystemState;
-use risc0_circuit_rv32im::prove::{emu::exec::EcallMetric, segment::Segment as SegmentV1};
-use risc0_circuit_rv32im_v2::execute::Segment as SegmentV2;
+use risc0_circuit_rv32im_v2::execute::EcallMetric;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -123,35 +122,9 @@ pub struct Segment {
     /// The index of this [Segment] within the [Session]
     pub index: u32,
 
-    pub(crate) inner: InnerSegment,
+    pub(crate) inner: risc0_circuit_rv32im_v2::execute::Segment,
 
     pub(crate) output: Option<Output>,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub(crate) enum InnerSegment {
-    V1(SegmentV1),
-    V2(SegmentV2),
-}
-
-impl InnerSegment {
-    #[cfg(test)]
-    pub(crate) fn v1(&self) -> &SegmentV1 {
-        if let Self::V1(inner) = self {
-            inner
-        } else {
-            panic!("InnerSegment is not v1")
-        }
-    }
-
-    #[cfg(test)]
-    pub(crate) fn v2(&self) -> &SegmentV2 {
-        if let Self::V2(inner) = self {
-            inner
-        } else {
-            panic!("InnerSegment is not v2")
-        }
-    }
 }
 
 impl Segment {
@@ -159,17 +132,11 @@ impl Segment {
     ///
     /// If the [Segment]'s execution trace had 2^20 rows, this would return 20.
     pub fn po2(&self) -> usize {
-        match &self.inner {
-            InnerSegment::V1(segment) => segment.po2,
-            InnerSegment::V2(segment) => segment.po2 as usize,
-        }
+        self.inner.po2 as usize
     }
 
     pub(crate) fn user_cycles(&self) -> u32 {
-        match &self.inner {
-            InnerSegment::V1(segment) => segment.insn_cycles as u32,
-            InnerSegment::V2(segment) => segment.user_cycles,
-        }
+        self.inner.user_cycles
     }
 }
 
@@ -195,47 +162,6 @@ pub trait SessionEvents {
 }
 
 impl Session {
-    /// Construct a new [Session] from its constituent components.
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn new(
-        segments: Vec<Box<dyn SegmentRef>>,
-        input: Digest,
-        journal: Option<Vec<u8>>,
-        exit_code: ExitCode,
-        assumptions: Vec<(Assumption, AssumptionReceipt)>,
-        mmr_assumptions: Vec<AssumptionReceipt>,
-        user_cycles: u64,
-        paging_cycles: u64,
-        reserved_cycles: u64,
-        total_cycles: u64,
-        pre_state: SystemState,
-        post_state: SystemState,
-        pending_zkrs: Vec<ProveZkrRequest>,
-        pending_keccaks: Vec<ProveKeccakRequest>,
-        ecall_metrics: Vec<(String, EcallMetric)>,
-        syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
-    ) -> Self {
-        Self {
-            segments,
-            input,
-            journal: journal.map(Journal::new),
-            exit_code,
-            assumptions,
-            mmr_assumptions,
-            hooks: Vec::new(),
-            user_cycles,
-            paging_cycles,
-            reserved_cycles,
-            total_cycles,
-            pre_state,
-            post_state,
-            pending_zkrs,
-            pending_keccaks,
-            ecall_metrics,
-            syscall_metrics,
-        }
-    }
-
     /// Add a hook to be called during the proving phase.
     pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
         self.hooks.push(Box::new(hook));

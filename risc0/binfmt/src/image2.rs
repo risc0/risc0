@@ -11,8 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+extern crate alloc;
 
-use std::{collections::BTreeMap, sync::LazyLock};
+use alloc::{collections::BTreeMap, vec, vec::Vec};
+use lazy_static::lazy_static;
 
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
@@ -43,7 +45,9 @@ pub const KERNEL_START_ADDR: ByteAddr = ByteAddr(0xc000_0000);
 const SUSPEND_PC_ADDR: ByteAddr = ByteAddr(0xffff_0210);
 const SUSPEND_MODE_ADDR: ByteAddr = ByteAddr(0xffff_0214);
 
-static ZERO_CACHE: LazyLock<ZeroCache> = LazyLock::new(ZeroCache::new);
+lazy_static! {
+    static ref ZERO_CACHE: ZeroCache = ZeroCache::new();
+}
 
 struct ZeroCache {
     pub page: Page,

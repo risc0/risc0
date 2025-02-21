@@ -16,9 +16,8 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, host::server::session::NullSegmentRef,
-    receipt::segment::default_segment_version, Executor2, ExecutorEnv, ExecutorImpl, ProveInfo,
-    Receipt, SegmentInfo, SegmentVersion, SessionInfo, VerifierContext,
+    get_prover_server, host::server::session::NullSegmentRef, Executor2, ExecutorEnv, ProveInfo,
+    Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
@@ -59,30 +58,15 @@ impl Prover for LocalProver {
 impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut segments = Vec::new();
-        let session = match default_segment_version() {
-            SegmentVersion::V1 => {
-                ExecutorImpl::from_elf(env, elf)
-                    .unwrap()
-                    .run_with_callback(|segment| {
-                        segments.push(SegmentInfo {
-                            po2: segment.po2() as u32,
-                            cycles: segment.user_cycles(),
-                        });
-                        Ok(Box::new(NullSegmentRef))
-                    })
-            }
-            SegmentVersion::V2 => {
-                Executor2::from_elf(env, elf)
-                    .unwrap()
-                    .run_with_callback(|segment| {
-                        segments.push(SegmentInfo {
-                            po2: segment.po2() as u32,
-                            cycles: segment.user_cycles(),
-                        });
-                        Ok(Box::new(NullSegmentRef))
-                    })
-            }
-        }?;
+        let session = Executor2::from_elf(env, elf)
+            .unwrap()
+            .run_with_callback(|segment| {
+                segments.push(SegmentInfo {
+                    po2: segment.po2() as u32,
+                    cycles: segment.user_cycles(),
+                });
+                Ok(Box::new(NullSegmentRef))
+            })?;
 
         let receipt_claim = session.claim()?;
         Ok(SessionInfo {

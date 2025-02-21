@@ -39,7 +39,7 @@ extern FakeTwitRegStruct exec_FakeTwitReg(ExecContext& ctx,Val arg0, BoundLayout
 extern NondetRegStruct exec_IsZero(ExecContext& ctx,Val arg0, BoundLayout<IsZeroLayout> layout1)  ;
 extern ArgU8Struct exec_ArgU8(ExecContext& ctx,Val arg0, Val arg1_0, BoundLayout<ArgU8Layout> layout2)  ;
 extern NondetRegStruct exec_NondetU8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
-extern NondetRegStruct exec_U8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
+extern U8RegStruct exec_U8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
 extern ArgU16Struct exec_ArgU16(ExecContext& ctx,Val arg0, Val arg1_0, BoundLayout<ArgU16Layout> layout2)  ;
 extern NondetU16RegStruct exec_NondetU16Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU16RegLayout> layout1)  ;
 extern NondetU16RegStruct exec_U16Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU16RegLayout> layout1)  ;
@@ -205,7 +205,7 @@ extern BigIntStateStruct exec_BigIntInvalid(ExecContext& ctx,BoundLayout<BigIntS
 extern BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,NondetRegStruct arg0, BoundLayout<BigIntEcallLayout> layout1)  ;
 extern SplitU32Struct exec_SplitU32(ExecContext& ctx,ValU32Struct arg0, BoundLayout<SplitU32Layout> layout1)  ;
 extern BigIntReadStruct exec_BigIntRead(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<BigIntReadLayout> layout2)  ;
-extern BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,BigIntExternReturnStruct arg0, BoundLayout<BigIntWitnessLayout> layout1)  ;
+extern BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,Val16Array arg0, BoundLayout<BigIntWitnessLayout> layout1)  ;
 extern BigIntWitnessStruct exec_BigIntWrite(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<BigIntWriteLayout> layout2)  ;
 extern BigIntWitnessStruct exec_BigIntCheck(ExecContext& ctx,BoundLayout<BigIntWitnessLayout> layout0)  ;
 extern BigIntStateStruct exec_BigIntStep(ExecContext& ctx,NondetRegStruct arg0, BigIntStateStruct arg1_0, BoundLayout<BigIntStepLayout> layout2)  ;

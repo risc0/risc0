@@ -71,9 +71,9 @@ extern __device__ ArgU8Struct exec_ArgU8(ExecContext& ctx,
 extern __device__ NondetRegStruct exec_NondetU8Reg(ExecContext& ctx,
                                                    Val arg0,
                                                    BoundLayout<NondetU8RegLayout> layout1);
-extern __device__ NondetRegStruct exec_U8Reg(ExecContext& ctx,
-                                             Val arg0,
-                                             BoundLayout<NondetU8RegLayout> layout1);
+extern __device__ U8RegStruct exec_U8Reg(ExecContext& ctx,
+                                         Val arg0,
+                                         BoundLayout<NondetU8RegLayout> layout1);
 extern __device__ ArgU16Struct exec_ArgU16(ExecContext& ctx,
                                            Val arg0,
                                            Val arg1_0,
@@ -725,7 +725,7 @@ extern __device__ BigIntReadStruct exec_BigIntRead(ExecContext& ctx,
                                                    Val arg1_0,
                                                    BoundLayout<BigIntReadLayout> layout2);
 extern __device__ BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,
-                                                         BigIntExternReturnStruct arg0,
+                                                         Val16Array arg0,
                                                          BoundLayout<BigIntWitnessLayout> layout1);
 extern __device__ BigIntWitnessStruct exec_BigIntWrite(ExecContext& ctx,
                                                        NondetRegStruct arg0,
