@@ -175,7 +175,6 @@ impl Receipt {
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
-        #[cfg(feature = "std")]
         let image_id = match crate::compute_image_id_v2(image_id) {
             Ok(image_id) => image_id,
             Err(_) => return Err(VerificationError::ImageVerificationError),

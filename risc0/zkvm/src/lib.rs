@@ -164,7 +164,6 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-#[cfg(feature = "std")]
 pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
 
 pub use receipt::{
@@ -214,11 +213,10 @@ fn metal_implies_prove() {
 }
 
 /// Compute and return the v2 ImageID of the specified ELF binary.
-#[cfg(feature = "std")]
 pub fn compute_image_id_v2(
     user_id: impl Into<risc0_zkp::core::digest::Digest>,
 ) -> Result<risc0_zkp::core::digest::Digest> {
     let kernel_id: risc0_zkp::core::digest::Digest =
-        risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID.try_into()?;
+        Digest::from_bytes(*risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID);
     risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
 }

@@ -900,6 +900,7 @@ dependencies = [
  "borsh",
  "derive_more",
  "elf",
+ "lazy_static",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
