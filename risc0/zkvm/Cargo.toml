@@ -48,6 +48,7 @@ risc0-circuit-rv32im = { workspace = true }
 risc0-circuit-rv32im-v2 = { workspace = true }
 risc0-core = { workspace = true }
 risc0-groth16 = { workspace = true }
+risc0-zkos-v1compat = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true, features = [
   "rust-runtime",
@@ -83,7 +84,6 @@ redis = { version = "0.27.2", default-features = false, features = [
   "tls-native-tls",
 ], optional = true }
 risc0-build = { workspace = true, optional = true }
-risc0-zkos-v1compat = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
 rzup = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false }
@@ -131,16 +131,12 @@ rustdoc-args = ["--cfg", "docsrs"]
 features = ["client", "prove", "getrandom", "std", "unstable"]
 
 [features]
-circuit_debug = [
-  "risc0-circuit-rv32im-v2/circuit_debug",
-  "risc0-zkp/circuit_debug",
-]
+circuit_debug = ["risc0-zkp/circuit_debug"]
 client = [
   "dep:bincode",
   "dep:bytes",
   "dep:lazy-regex",
   "dep:risc0-build",
-  "dep:risc0-zkos-v1compat",
   "dep:rzup",
   "dep:prost",
   "dep:tempfile",
@@ -210,3 +206,4 @@ std = [
   "sha2/std",
 ]
 unstable = ["risc0-zkvm-platform/unstable"]
+witgen_debug = ["risc0-circuit-rv32im-v2/witgen_debug"]

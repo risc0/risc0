@@ -81,10 +81,10 @@ struct HostExecContext {
                        preflight->txnsLen * sizeof(MemoryTransaction),
                        cudaMemcpyHostToDevice));
 
-    CUDA_OK(cudaMalloc(&d_preflight.bigintBytes, preflight->bigintBytesLen * sizeof(uint32_t)));
+    CUDA_OK(cudaMalloc(&d_preflight.bigintBytes, preflight->bigintBytesLen));
     CUDA_OK(cudaMemcpy(d_preflight.bigintBytes,
                        preflight->bigintBytes,
-                       preflight->bigintBytesLen * sizeof(uint32_t),
+                       preflight->bigintBytesLen,
                        cudaMemcpyHostToDevice));
 
     d_preflight.txnsLen = preflight->txnsLen;

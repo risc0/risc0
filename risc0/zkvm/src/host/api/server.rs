@@ -27,6 +27,7 @@ use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, Tcp
 use crate::{
     get_prover_server, get_version,
     host::{
+        api::convert::keccak_input_to_bytes,
         client::{
             env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
@@ -230,6 +231,7 @@ impl CoprocessorCallback for CoprocessorProxy {
     }
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        let input = keccak_input_to_bytes(&proof_request.input);
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
@@ -240,37 +242,8 @@ impl CoprocessorCallback for CoprocessorProxy {
                                     claim_digest: Some(proof_request.claim_digest.into()),
                                     po2: proof_request.po2 as u32,
                                     control_root: Some(proof_request.control_root.into()),
-                                    input: proof_request.input,
+                                    input,
                                     receipt_out: None,
-                                }
-                            })),
-                        },
-                    )),
-                })),
-            })),
-        };
-        tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
-
-        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
-        match kind {
-            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
-            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
-        }
-    }
-
-    fn finalize_proof_set(&mut self, control_root: Digest) -> Result<()> {
-        let request = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
-                        pb::api::CoprocessorRequest {
-                            kind: Some(pb::api::coprocessor_request::Kind::FinalizeProofSet({
-                                pb::api::FinalizeProofSetRequest {
-                                    control_root: Some(control_root.into()),
                                 }
                             })),
                         },

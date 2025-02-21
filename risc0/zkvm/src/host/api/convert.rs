@@ -16,7 +16,8 @@ use std::{fmt::Debug, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
-use risc0_binfmt::SystemState;
+use risc0_binfmt::{SegmentVersion, SystemState};
+use risc0_circuit_keccak::KeccakState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
@@ -24,8 +25,8 @@ use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams}
 use crate::{
     host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
-        merkle::MerkleProof, segment::SegmentVersion, CompositeReceipt, FakeReceipt,
-        InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
+        merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
+        ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{UnionClaim, Unknown},
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
@@ -266,6 +267,13 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
     type Error = anyhow::Error;
 
     fn try_from(opts: pb::api::ProverOpts) -> Result<Self> {
+        let segment_version = match opts.segment_version {
+            Some(0) => SegmentVersion::V1,
+            Some(1) => SegmentVersion::V2,
+            Some(version) => bail!("Incompatible SegmentReceipt version: {version}"),
+            None => SegmentVersion::V1,
+        };
+
         Ok(Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
@@ -284,7 +292,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
-            segment_version: SegmentVersion::V1,
+            segment_version,
         })
     }
 }
@@ -297,6 +305,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
             max_segment_po2: opts.max_segment_po2 as u64,
+            segment_version: Some(opts.segment_version as u32),
         }
     }
 }
@@ -1188,6 +1197,8 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
+        let input = try_keccak_bytes_to_input(&value.input)?;
+
         Ok(Self {
             claim_digest: value
                 .claim_digest
@@ -1198,7 +1209,63 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
                 .control_root
                 .ok_or_else(|| malformed_err("ProveKeccakRequest.control_root"))?
                 .try_into()?,
-            input: value.input,
+            input,
         })
     }
+}
+
+pub(crate) fn keccak_input_to_bytes(input: &[KeccakState]) -> Vec<u8> {
+    bytemuck::cast_slice(input).to_vec()
+}
+
+pub(crate) fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<KeccakState>> {
+    let chunks = input.chunks_exact(std::mem::size_of::<KeccakState>());
+    if !chunks.remainder().is_empty() {
+        bail!("Input length must be a multiple of KeccakState size");
+    }
+    chunks
+        .map(bytemuck::try_pod_read_unaligned)
+        .collect::<Result<_, _>>()
+        .map_err(|e| anyhow!("Failed to convert input bytes to KeccakState: {}", e))
+}
+
+#[test]
+fn test_keccak_bytes_to_input_alignment() {
+    // Create a buffer with extra padding at the start to test different alignments
+    let padding = 16; // We should hit all alignments by cycling through offsets 0-15
+    let keccak_states = 3; // Test multiple KeccakStates
+    let state_size = std::mem::size_of::<KeccakState>();
+    let mut test_buffer = vec![0u8; padding + (keccak_states * state_size)];
+
+    // Fill with recognizable pattern
+    for (i, byte) in test_buffer.iter_mut().enumerate() {
+        *byte = (i % 256) as u8;
+    }
+
+    // Test each offset
+    for offset in 0..padding {
+        let aligned_slice = &test_buffer[offset..][..(keccak_states * state_size)];
+        let result = try_keccak_bytes_to_input(aligned_slice);
+
+        assert!(result.is_ok(), "Failed to parse at offset {offset}");
+        let states = result.unwrap();
+        assert_eq!(
+            states.len(),
+            keccak_states,
+            "Wrong number of states at offset {offset}",
+        );
+
+        // Verify roundtrip
+        let bytes = keccak_input_to_bytes(&states);
+        assert_eq!(bytes, aligned_slice, "Roundtrip failed at offset {offset}",);
+    }
+}
+
+#[test]
+fn test_keccak_bytes_to_input_invalid_size() {
+    // Test with a buffer that's not a multiple of KeccakState size
+    let invalid_size = std::mem::size_of::<KeccakState>() + 1;
+    let buffer = vec![0u8; invalid_size];
+    let result = try_keccak_bytes_to_input(&buffer);
+    assert!(result.is_err(), "Should fail with invalid size");
 }

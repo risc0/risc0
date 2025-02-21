@@ -88,7 +88,7 @@ pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
+pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SegmentVersion, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
@@ -166,14 +166,13 @@ pub use {
 };
 
 #[cfg(feature = "std")]
-pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
+pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2, risc0_rv32im_ver};
 
 pub use receipt::{
-    segment::SegmentVersion, AssumptionReceipt, CompositeReceipt,
-    CompositeReceiptVerifierParameters, FakeReceipt, Groth16Receipt,
-    Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt, Journal, Receipt,
-    ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
-    SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
+    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
+    Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
+    Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
 };
 
 pub use ::serde::de::DeserializeOwned;
@@ -216,23 +215,11 @@ fn metal_implies_prove() {
 }
 
 /// Compute and return the v2 ImageID of the specified ELF binary.
-#[cfg(feature = "client")]
+#[cfg(feature = "std")]
 pub fn compute_image_id_v2(
     user_id: impl Into<risc0_zkp::core::digest::Digest>,
 ) -> Result<risc0_zkp::core::digest::Digest> {
     let kernel_id: risc0_zkp::core::digest::Digest =
         risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID.try_into()?;
     risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
-}
-
-/// TODO(flaub)
-#[cfg(feature = "std")]
-#[stability::unstable]
-pub fn risc0_rv32im_ver() -> Option<SegmentVersion> {
-    let version = std::env::var("RISC0_RV32IM_VER").unwrap_or_default();
-    match version.as_str() {
-        "1" => Some(SegmentVersion::V1),
-        "2" => Some(SegmentVersion::V2),
-        _ => None,
-    }
 }

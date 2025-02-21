@@ -26,7 +26,7 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
+    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID_V1, MULTI_TEST_ID_V2,
 };
 use rstest::rstest;
 use rstest_reuse::{apply, template};
@@ -223,8 +223,8 @@ fn generate_busy_loop_segments(
 
 fn multi_test_id(version: SegmentVersion) -> Digest {
     match version {
-        V1 => MULTI_TEST_ID.into(),
-        V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+        V1 => MULTI_TEST_ID_V1.into(),
+        V2 => compute_image_id_v2(MULTI_TEST_ID_V2).unwrap(),
     }
 }
 
@@ -430,7 +430,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("91d639615549c55dc491e60a5c3d9d301c364549c3372023fddbf406202af45b")
+        digest!("64ba09777f3cd71e11c84f09006e155ec5d22c77a039f56f07ce7771c13b103f")
     );
 }
 

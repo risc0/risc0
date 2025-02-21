@@ -26,10 +26,6 @@ use super::{Syscall, SyscallContext, SyscallKind};
 #[derive(Clone)]
 pub(crate) struct SysVerify2;
 
-fn not_found_err(claim_digest: &Digest, control_root: &Digest) -> anyhow::Error {
-    anyhow!("sys_verify_integrity2: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}")
-}
-
 impl Syscall for SysVerify2 {
     fn syscall(
         &mut self,
@@ -54,33 +50,24 @@ impl Syscall for SysVerify2 {
             control_root
         );
 
-        if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
-            coprocessor.borrow_mut().finalize_proof_set(control_root)?;
-        }
-
         let assumption = Assumption {
             claim: claim_digest,
             control_root,
         };
 
+        let assumption_receipt = AssumptionReceipt::Unresolved(assumption.clone());
+
         ctx.syscall_table()
             .assumptions
             .borrow_mut()
             .0
-            .push(AssumptionReceipt::Unresolved(assumption));
-
-        let assumption = ctx
-            .syscall_table()
-            .assumptions
-            .borrow()
-            .find_assumption(&claim_digest, &control_root)?
-            .ok_or_else(|| not_found_err(&claim_digest, &control_root))?;
+            .push(assumption_receipt.clone());
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         ctx.syscall_table()
             .assumptions_used
             .borrow_mut()
-            .insert(0, assumption);
+            .insert(0, (assumption, assumption_receipt));
 
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::VerifyIntegrity2];
         metric.count += 1;

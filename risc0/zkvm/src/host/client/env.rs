@@ -27,7 +27,7 @@ use std::{
 use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
-use risc0_circuit_keccak::KECCAK_PO2_RANGE;
+use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
@@ -91,7 +91,7 @@ pub struct ProveKeccakRequest {
     pub control_root: Digest,
 
     /// Input transcript to provide to the keccak circuit.
-    pub input: Vec<u8>,
+    pub input: Vec<KeccakState>,
 }
 
 /// A trait that supports the ability to be notified of proof requests
@@ -103,9 +103,6 @@ pub trait CoprocessorCallback {
 
     /// Request that a keccak proof is produced.
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
-
-    /// Proofs for this sequence
-    fn finalize_proof_set(&mut self, control_root: Digest) -> Result<()>;
 }
 
 pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;

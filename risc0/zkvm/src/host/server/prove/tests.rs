@@ -13,12 +13,12 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::{MemoryImage, MemoryImage2};
+use risc0_binfmt::{MemoryImage, MemoryImage2, SegmentVersion};
 use risc0_circuit_rv32im::prove::emu::testutil;
 use risc0_circuit_rv32im_v2::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_V2_USER_ID,
+    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID_V1, MULTI_TEST_ID_V2,
 };
 use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
 use rstest::rstest;
@@ -28,7 +28,6 @@ use super::get_prover_server;
 use crate::{
     compute_image_id_v2,
     host::server::{exec::executor2::Executor2, testutils},
-    receipt::segment::SegmentVersion,
     serde::{from_slice, to_vec},
     ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
     VerifierContext,
@@ -83,8 +82,8 @@ fn prove_nothing(version: SegmentVersion) -> Result<ProveInfo> {
 
 fn multi_test_id(version: SegmentVersion) -> Digest {
     match version {
-        V1 => MULTI_TEST_ID.into(),
-        V2 => compute_image_id_v2(MULTI_TEST_V2_USER_ID).unwrap(),
+        V1 => MULTI_TEST_ID_V1.into(),
+        V2 => compute_image_id_v2(MULTI_TEST_ID_V2).unwrap(),
     }
 }
 
@@ -563,7 +562,7 @@ fn sys_input() {
 #[cfg(feature = "docker")]
 #[cfg(target_arch = "x86_64")]
 mod docker {
-    use risc0_zkvm_methods::VERIFY_ELF;
+    use risc0_zkvm_methods::{MULTI_TEST_ID, VERIFY_ELF};
 
     use super::*;
     use crate::{
@@ -710,7 +709,7 @@ mod sys_verify {
     use std::{cell::RefCell, rc::Rc, sync::OnceLock};
 
     use risc0_zkp::{core::hash::poseidon2::Poseidon2HashSuite, digest};
-    use risc0_zkvm_methods::{HELLO_COMMIT_ELF, HELLO_COMMIT_ID, HELLO_COMMIT_V2_USER_ID};
+    use risc0_zkvm_methods::{HELLO_COMMIT_ELF, HELLO_COMMIT_ID_V1, HELLO_COMMIT_ID_V2};
 
     use super::*;
     use crate::{
@@ -771,8 +770,8 @@ mod sys_verify {
 
     fn hello_commit_id(version: SegmentVersion) -> Digest {
         match version {
-            V1 => HELLO_COMMIT_ID.into(),
-            V2 => compute_image_id_v2(HELLO_COMMIT_V2_USER_ID).unwrap(),
+            V1 => HELLO_COMMIT_ID_V1.into(),
+            V2 => compute_image_id_v2(HELLO_COMMIT_ID_V2).unwrap(),
         }
     }
 
@@ -1053,10 +1052,6 @@ mod sys_verify {
 
         fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> anyhow::Result<()> {
             self.keccak_requests.push(proof_request);
-            Ok(())
-        }
-
-        fn finalize_proof_set(&mut self, _control_root: Digest) -> Result<()> {
             Ok(())
         }
     }

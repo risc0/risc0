@@ -28,8 +28,8 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    segment::SegmentVersion, Groth16ReceiptVerifierParameters, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceiptVerifierParameters, VerifierContext,
+    Groth16ReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{
     sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
@@ -259,7 +259,7 @@ impl CompositeReceiptVerifierParameters {
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
     #[stability::unstable]
-    pub fn from_max_po2(po2_max: usize, segment_version: SegmentVersion) -> Self {
+    pub fn from_max_po2(po2_max: usize, segment_version: risc0_binfmt::SegmentVersion) -> Self {
         Self {
             segment: MaybePruned::Value(SegmentReceiptVerifierParameters::from_max_po2(
                 po2_max,
@@ -273,7 +273,7 @@ impl CompositeReceiptVerifierParameters {
     /// Construct verifier parameters that will accept receipts with control any of the default
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
-    pub fn all_po2s(segment_version: SegmentVersion) -> Self {
+    pub fn all_po2s(segment_version: risc0_binfmt::SegmentVersion) -> Self {
         Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
     }
 }
@@ -318,7 +318,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("36e723437ac3324586df837556095c84b23619aba08077a02f838dcfbca67198")
+            digest!("e156638b7c1a2ed578ea1c8ee0f4ef8fa99ea93be79ab4b6530ffe89c6e550dc")
         );
     }
 }

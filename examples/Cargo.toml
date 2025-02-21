@@ -3,6 +3,7 @@ resolver = "2"
 members = [
   "bevy",
   "bls12_381",
+  "bn254",
   "browser-verify",
   "c-guest/host",
   "c-guest/platform",
