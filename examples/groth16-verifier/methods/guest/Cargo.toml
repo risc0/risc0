@@ -10,6 +10,4 @@ risc0-groth16 = { path = "../../../../risc0/groth16", default-features = false, 
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 
 [patch.crates-io]
-ark-ff = { path = "../../../../../external/arkworks/algebra/ff" }
-# Note: `ark-serialize` is patched only to get around a version mismatch, we aren't changing anything
-ark-serialize = { path = "../../../../../external/arkworks/algebra/serialize" }
+ark-ff-macros = { path = "../../../../../external/arkworks/algebra/ff-macros" }
