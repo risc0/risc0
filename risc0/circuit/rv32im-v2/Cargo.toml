@@ -35,7 +35,7 @@ tracing = { version = "0.1", default-features = false, features = [
 auto_ops = { version = "0.3", optional = true }
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
-malachite = { version = "0.4", optional = true, default-features = false, features = [
+malachite = { version = "0.5", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",
 ] }
