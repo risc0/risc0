@@ -8,7 +8,3 @@ edition = "2021"
 [dependencies]
 risc0-groth16 = { path = "../../../../risc0/groth16", default-features = false, features = ["std"] }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
-
-[patch.crates-io]
-# TODO: Update to a tag once it exists
-ark-ff-macros = { git = "https://github.com/risc0/arkworks-rs-algebra.git", rev = "84ae7357f56c7833f864a1d459117466c153a64f" }

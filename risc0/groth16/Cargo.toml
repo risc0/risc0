@@ -60,3 +60,7 @@ std = [
   "serde/std",
 ]
 unstable = []
+
+[patch.crates-io]
+# TODO: Update to a tag once it exists
+ark-ff-macros = { git = "https://github.com/risc0/arkworks-rs-algebra.git", rev = "84ae7357f56c7833f864a1d459117466c153a64f" }

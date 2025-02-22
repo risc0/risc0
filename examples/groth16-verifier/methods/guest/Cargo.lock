@@ -125,7 +125,8 @@ dependencies = [
 [[package]]
 name = "ark-ff-macros"
 version = "0.5.0"
-source = "git+https://github.com/risc0/arkworks-rs-algebra.git?rev=84ae7357f56c7833f864a1d459117466c153a64f#84ae7357f56c7833f864a1d459117466c153a64f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09be120733ee33f7693ceaa202ca41accd5653b779563608f1234f78ae07c4b3"
 dependencies = [
  "num-bigint",
  "num-traits",
