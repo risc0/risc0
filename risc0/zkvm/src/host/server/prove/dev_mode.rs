@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
-
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
+    mmr::{GuestPeak, MerkleMountainAccumulator},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::{UnionClaim, Unknown},
     Assumption, AssumptionReceipt, Executor2, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
@@ -70,16 +69,22 @@ impl ProverServer for DevModeProver {
         let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
             session.assumptions.iter().cloned().unzip();
 
-        let mut keccak_assumptions = HashMap::new();
+        let mut root_keccak_assumption = None;
 
+        let mut keccak_receipts: MerkleMountainAccumulator<GuestPeak> =
+            MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
             let claim = compute_keccak_digest(bytemuck::cast_slice(proof_request.input.as_slice()));
-            let assumption = Assumption {
+            tracing::debug!("adding keccak assumption: {}", claim);
+            keccak_receipts.insert(Assumption {
                 claim,
                 control_root: KECCAK_CONTROL_ROOT,
-            };
-            tracing::debug!("adding keccak assumption: {assumption:#?}");
-            keccak_assumptions.insert(assumption, claim);
+            })?;
+        }
+
+        if let Ok(root_assumption) = keccak_receipts.root() {
+            tracing::debug!("keccak root assumption: {:?}", root_assumption);
+            root_keccak_assumption = Some(root_assumption);
         }
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
@@ -88,12 +93,16 @@ impl ProverServer for DevModeProver {
             .map(|assumption_receipt| match assumption_receipt {
                 AssumptionReceipt::Proven(receipt) => Ok(receipt),
                 AssumptionReceipt::Unresolved(assumption) => {
-                    let claim = keccak_assumptions.get(&assumption).ok_or_else(|| {
-                        anyhow!("no receipt available for unresolved assumption: {assumption:#?}")
-                    })?;
-                    Ok(InnerAssumptionReceipt::Fake(FakeReceipt {
-                        claim: MaybePruned::Pruned(*claim),
-                    }))
+                    if Some(assumption.clone()) == root_keccak_assumption {
+                        Ok(InnerAssumptionReceipt::Fake(FakeReceipt {
+                            claim: MaybePruned::Pruned(assumption.claim),
+                        }))
+                    } else {
+                        bail!(
+                            "no receipt available for unresolved assumption: {:#?}",
+                            assumption
+                        )
+                    }
                 }
             })
             .collect::<Result<_>>()?;
