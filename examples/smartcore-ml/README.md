@@ -21,7 +21,7 @@ res/ml-model and res/input-data come preloaded with a trained decision tree clas
 It is important to specify the generic types for each model so that they can be successfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import:
 `use smartcore::linalg::basic::matrix::DenseMatrix;`
 when using KNN, be sure to add the following import:
-`use smartcore::metrics::distance::euclidian::Euclidian;`
+`use smartcore::metrics::distance::euclidean::Euclidean;`
 A list of the supported models with definitions for their respective types can be found below.  Note that {float} is a placeholder for either f32 or f64:
 
 ```rust
@@ -45,7 +45,7 @@ let model: LinearRegression< {float}, {float}, DenseMatrix<{float}>, Vec<{float}
 ```
 
 ```rust
-let model: KNNClassifier< {float}, u32, DenseMatrix<{float}>, Vec<u32>, Euclidian<{float}>> = trained_model;
+let model: KNNClassifier< {float}, u32, DenseMatrix<{float}>, Vec<u32>, Euclidean<{float}>> = trained_model;
 ```
 
 ```rust
