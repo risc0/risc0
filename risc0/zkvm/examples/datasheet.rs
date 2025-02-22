@@ -52,7 +52,7 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
-const ITERATIONS_1M_CYCLES: usize = 1024 * 512 - 45;
+const ITERATIONS_1M_CYCLES: usize = 1024 * 512 - 46;
 
 #[serde_as]
 #[derive(Debug, Serialize, Tabled)]
@@ -130,7 +130,7 @@ enum Command {
 }
 
 /// This is the number of user cycles we expect for our "execute" benchmarks.
-const EXPECTED_EXECUTE_USER_CYCLES: u64 = (1 << DEFAULT_SEGMENT_LIMIT_PO2 as u64) - 1;
+const EXPECTED_EXECUTE_USER_CYCLES: u64 = (1 << DEFAULT_SEGMENT_LIMIT_PO2 as u64) - 2;
 
 #[derive(Default)]
 struct Datasheet {
