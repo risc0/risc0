@@ -80,7 +80,7 @@ mod tests {
     #[test]
     fn hash_long() {
         let input = [0xau8; 100_000];
-        let (digest, receipt) = super::provably_hash(&String::from_utf8(input.to_vec()).unwrap());
+        let (digest, receipt) = super::provably_hash(core::str::from_utf8(&input).unwrap());
         receipt.verify(KECCAK_ID).unwrap();
         assert_eq!(
             hex::encode(digest.as_bytes()),
