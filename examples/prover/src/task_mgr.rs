@@ -118,6 +118,12 @@ impl TaskManager {
                 break;
             }
         }
+        if let Some(ref receipt) = union_root_receipt {
+            println!(
+                "union root receipt: claim {:?} control id: {}",
+                receipt.claim, receipt.control_id
+            );
+        }
         (*join_root_receipt.unwrap(), union_root_receipt)
     }
 
