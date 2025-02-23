@@ -286,7 +286,7 @@ typedef struct NvtxExportTableVersionInfo
     uint32_t version;
 
     /* Reserved for alignment, do not use */
-    uint32_t reserved0;
+    uint32_t reserved_0;
 
     /* This must be set by tools when attaching to provide applications
     *  the ability to, in emergency situations, detect problematic tools
