@@ -266,8 +266,11 @@ jobs:
       - name: run fibonacci benchmark
         run: cargo run --locked -F $FEATURE -- fibonacci
         working-directory: benchmarks
-      - name: run datasheet generator
+      - name: run datasheet generator (smoke test)
         run: cargo run --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
+      - name: run datasheet generator (CUDA full)
+        if: matrix.feature == 'cuda'
+        run: cargo run --locked -F $FEATURE -F prove --example datasheet
       - name: check benches
         run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
