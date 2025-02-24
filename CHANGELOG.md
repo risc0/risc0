@@ -2,6 +2,52 @@
 
 ## Next (upcoming release)
 
+## [v1.3.0 (2025-02-24)](https://github.com/risc0/risc0/releases/tag/v1.3.0)
+
+### Security
+
+* Updated verifier contract to allow segment size of PO2=22. For details on security impacts see https://github.com/risc0/risc0/pull/2849.
+
+### 🔥 Performance Improvements
+
+* prover: enabling segment size of PO2=22 to improve hardware utilization.
+* Make sure we only call `anyhow!` macro in error paths by using `ok_or_else` in place of `ok_or`.
+* keccak: drop accumulation of input keccak states in the guest.
+* `bigint`: replace num-bigint with better-performing `ibig` for `bibc` evaluator
+* Implement `union` predicate to allow parallel keccak proving.
+* Implement precompiles for bn254 arithmetic using the `subtrate-bn` crate.
+* Implement precompiles for bls12-381 arithmetic using the `zkcrypto/bls12-381` crate.
+* Replace `numb-bigint` and `crypto-bigint` with malachite on the host.
+
+### Fixes
+
+* Emulator: validate address range before allocating `to_guest` vector to avoid unnecessary allocations.
+* Emulator: require addresses used by `ecall_sha`, `ecall_bigint`, and `ecall_bigint2` to be aligned to ensure that proving and emulation will both fail.
+* `stark2snark`: fix `snarkjs` public signals length.
+* ffi: add arguments length checks to generate better error messages.
+* `risc0-build`: use `CARGO_TARGET_DIR` if set.
+* `risc0-zkvm-platform`: fix heap-pointer overflow in `sys_alloc_aligned`.
+* `risc0-zkp`: add unstable flag to address warning and allow usage of unstable features.
+* `bonsai-sdk`: remove default timeout (30s) and replace with `None` timeout.
+* `bonsai-sdk`: Fix timeout in `non_blocking` for the `bonsai-sdk`.
+
+
+### ⚡️ Features
+* bigint: Implement precompiles for 384-bit mod and field extension operations.
+* Profiler: show paging costs and implement feature to display inline functions.
+* Deployed a verifier to Linea Sepolia.
+* `stark2snark`: switch from rapidsnark to gnark.
+* `risc0-kernel-build`: allows user to specify `NVCC_CCBIN` and override the default gcc compiler that is used by the nvcc compiler.
+* `bigint`: Add field extension operations.
+* Add `bigint2` benchmarks to the datasheet.
+* Update host-side rust toolchain to use `1.83`
+* `bonsai-sdk`: remove default timeout
+* `bonsai-sdk`: add new public function to Bonsai SDK to check if an image already exists
+
+### 🚨 Breaking Changes
+* `risc0-build`: Use a builder pattern for `GuestOptions` and `DockerOptions`. This bumps the `risc0-build` version to `2.0`.
+* Deprecated `cargo risczero install` use the `rzup install` instead.
+
 ## [v1.2.1 (2025-01-15)](https://github.com/risc0/risc0/releases/tag/v1.2.1)
 
 ### 🔥 Performance Improvements
