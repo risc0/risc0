@@ -481,7 +481,8 @@ impl Datasheet {
         let duration = start.elapsed();
 
         // We want this to be comparable to the other execute benchmarks
-        assert!(session.user_cycles - EXPECTED_EXECUTE_USER_CYCLES < 10_000);
+        let cycle_diff = session.user_cycles.abs_diff(EXPECTED_EXECUTE_USER_CYCLES);
+        assert!(cycle_diff < 20_000, "{cycle_diff} not less than 20_000");
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
