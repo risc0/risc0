@@ -128,6 +128,7 @@ fn new_client(version: &str) -> ApiClient {
             .join(version)
             .join("bin/r0vm")
     };
+    println!("path: {}", server_path.display());
     ApiClient::new_sub_process_any(server_path).unwrap()
 }
 
