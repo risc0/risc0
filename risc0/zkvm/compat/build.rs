@@ -41,6 +41,7 @@ fn install_r0vm(version: &str, args: &[&str]) {
     let status = Command::new(cargo.as_os_str())
         .arg("install")
         .args(args)
+        .arg("--locked")
         .arg("--root")
         .arg(root)
         .arg(format!("risc0-r0vm@{version}"))
