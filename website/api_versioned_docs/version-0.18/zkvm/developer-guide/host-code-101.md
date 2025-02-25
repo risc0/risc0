@@ -77,7 +77,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [guest]: /terminology#guest
 [guest program]: /terminology#guest-program
 [Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
-[Hello World Tutorial]: https://github.com/risc0/risc0/blob/release-0.18/examples/hello-world/tutorial.md
+[Hello World Tutorial]: https://github.com/risc0/risc0/blob/release-0.19/examples/hello-world/README.md
 [host]: /terminology#host
 [journal]: /terminology#journal
 [JSON demo]: https://github.com/risc0/risc0/blob/release-0.18/examples/json/src/main.rs
