@@ -38,7 +38,7 @@ crates it may be possible to enable acceleration support without code changes by
 applying a [Cargo patch][cargo-patch].
 
 An example of how to use these crates to accelerate ECDSA signature verification
-can be in the [ECDSA example][ecdsa]. Note the [use of the patched
+can be found in the [ECDSA example][ecdsa]. Note the [use of the patched
 versions][ecdsa-patched] of `sha2`, `crypto-bigint` and `k256` crates used in
 the guest's `Cargo.toml`.
 
