@@ -16,7 +16,7 @@ use std::{fmt::Write as _, path::Path};
 
 use k256::ecdsa::{signature::Signer as _, Signature, SigningKey, VerifyingKey};
 
-const NUM_SIGNATURES: usize = 5;
+const NUM_SIGNATURES: usize = 7;
 const SIGNING_KEY: [u8; 32] = [
     191, 95, 105, 40, 155, 50, 183, 58, 61, 48, 1, 231, 44, 100, 10, 170, 64, 121, 99, 101, 208,
     121, 205, 143, 242, 81, 225, 52, 158, 95, 99, 36,
