@@ -165,34 +165,52 @@ impl<'a> GithubRelease<'a> {
         )?;
 
         let download_path = env.tmp_dir().join(archive_name);
-        let mut download_file = std::fs::OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(&download_path)?;
-
         let download_url = self.download_url(component, version, platform)?;
-        let mut resp = download_bytes(&download_url, env.github_token())?;
+        
+        let result = {
+            let mut download_file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(&download_path)?;
 
-        env.emit(RzupEvent::DownloadStarted {
-            id: component.to_string(),
-            version: version.to_string(),
-            url: download_url.clone(),
-            len: resp.content_length(),
-        });
+            let mut resp = download_bytes(&download_url, env.github_token())?;
 
-        resp.copy_to(&mut ProgressWriter::new(
-            component.to_string(),
-            env,
-            &mut download_file,
-        ))
-        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+            env.emit(RzupEvent::DownloadStarted {
+                id: component.to_string(),
+                version: version.to_string(),
+                url: download_url.clone(),
+                len: resp.content_length(),
+            });
 
-        env.emit(RzupEvent::DownloadCompleted {
-            id: component.to_string(),
-            version: version.to_string(),
-        });
+            let copy_result = resp.copy_to(&mut ProgressWriter::new(
+                component.to_string(),
+                env,
+                &mut download_file,
+            ))
+            .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")));
 
-        Ok(())
+            // Ensure file is closed before proceeding
+            drop(download_file);
+            
+            copy_result?;
+
+            env.emit(RzupEvent::DownloadCompleted {
+                id: component.to_string(),
+                version: version.to_string(),
+            });
+            Ok(())
+        };
+
+        if result.is_err() {
+            // Clean up the temporary file in case of any error
+            if let Err(e) = std::fs::remove_file(&download_path) {
+                env.emit(RzupEvent::Debug {
+                    message: format!("Failed to clean up temporary file: {e}"),
+                });
+            }
+        }
+
+        result
     }
 }
