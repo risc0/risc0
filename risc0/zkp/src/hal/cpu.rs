@@ -602,6 +602,10 @@ impl<F: Field> Hal for CpuHal<F> {
         offsets: &[u32],
         values: &[Self::Elem],
     ) {
+        if index.is_empty() {
+            return;
+        }
+
         let mut into = into.as_slice_mut();
         for cycle in 0..index.len() - 1 {
             for idx in index[cycle]..index[cycle + 1] {

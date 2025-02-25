@@ -24,6 +24,7 @@ use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
@@ -278,6 +279,24 @@ impl BorshDeserialize for Unknown {
     }
 }
 
+/// Each UnionClaim can be used as an inner node in a Merkle mountain
+/// accumulator, the root of which commits to a set of claims.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UnionClaim {
+    /// Digest of the "left" Assumption struct.
+    ///
+    /// The left should always be lesser of the two when interpreting the digest as a big-endian number.
+    pub left: Digest,
+    /// Digest of the "right" Assumption struct.
+    pub right: Digest,
+}
+
+impl Digestible for UnionClaim {
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>("risc0.UnionClaim", &[self.left, self.right], &[])
+    }
+}
+
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
 ///
 /// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
@@ -303,6 +322,7 @@ impl Digestible for Input {
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Output {
     /// The journal committed to by the guest execution.
+    #[debug("{}", fmt_debug_journal(journal))]
     pub journal: MaybePruned<Vec<u8>>,
 
     /// An ordered list of [ReceiptClaim] digests corresponding to the
@@ -314,6 +334,14 @@ pub struct Output {
     /// be trusted to correspond to a genuine execution). The claims can be checked by additional
     /// verifying a [crate::Receipt] for every digest in the assumptions list.
     pub assumptions: MaybePruned<Assumptions>,
+}
+
+#[allow(dead_code)]
+fn fmt_debug_journal(journal: &MaybePruned<Vec<u8>>) -> alloc::string::String {
+    match journal {
+        MaybePruned::Value(bytes) => alloc::format!("{} bytes", bytes.len()),
+        MaybePruned::Pruned(_) => alloc::format!("{journal:?}"),
+    }
 }
 
 impl Digestible for Output {

@@ -499,12 +499,22 @@ pub mod module_type {
             )),
             Err(_) => Some(Duration::from_millis(DEFAULT_TIMEOUT)),
         };
-
-        Ok(HttpClient::builder()
-            .default_headers(headers)
-            .pool_max_idle_per_host(0)
-            .timeout(timeout)
-            .build()?)
+        #[cfg(feature = "non_blocking")]
+        {
+            Ok(HttpClient::builder()
+                .default_headers(headers)
+                .pool_max_idle_per_host(0)
+                .timeout(timeout.unwrap_or(Duration::from_millis(DEFAULT_TIMEOUT)))
+                .build()?)
+        }
+        #[cfg(not(feature = "non_blocking"))]
+        {
+            Ok(HttpClient::builder()
+                .default_headers(headers)
+                .pool_max_idle_per_host(0)
+                .timeout(timeout)
+                .build()?)
+        }
     }
 
     impl Client {
@@ -609,6 +619,18 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             }
 
             Ok(())
+        }
+
+        /// Check if a image with the given image_id exists in bonsai
+        ///
+        /// The boolean return indicates if the image already exists
+        #[maybe_async_attr]
+        pub async fn has_img(&self, image_id: &str) -> Result<bool, SdkErr> {
+            let res_or_exists = self.get_image_upload_url(image_id).await?;
+            match res_or_exists {
+                ImageExistsOpt::Exists => Ok(true),
+                ImageExistsOpt::New(_) => Ok(false),
+            }
         }
 
         /// Upload a image buffer to the /images/ route

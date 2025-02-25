@@ -13,10 +13,10 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
-use core::fmt::Debug;
 
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_binfmt::{tagged_struct, Digestible};
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_groth16::{fr_from_hex_string, split_digest, Seal, Verifier, VerifyingKey};
@@ -37,9 +37,10 @@ use crate::{
 #[non_exhaustive]
 pub struct Groth16Receipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// A Groth16 proof of a zkVM execution with the associated claim.
+    #[debug("{} bytes", seal.len())]
     pub seal: Vec<u8>,
 
     /// [ReceiptClaim][crate::ReceiptClaim] containing information about the execution that this
@@ -56,7 +57,7 @@ where
 
 impl<Claim> Groth16Receipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Create a [Groth16Receipt] from the given seal, claim, and verifier parameters digest.
     pub fn new(seal: Vec<u8>, claim: MaybePruned<Claim>, verifier_parameters: Digest) -> Self {
@@ -194,7 +195,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("0168e42c857b6c12ea53984a5613ff1e2c1a1b419af5131dc23b6542b2876f86")
+            digest!("14da014b1157c2ac9bf00afa1d93b076245b22c5a50b5cb13307ae0a49890d11")
         );
     }
 }

@@ -1,0 +1,15 @@
+[package]
+name = "bn254-inner"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+bn254-core = { path = "../../core" }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std", "unstable"] }
+substrate-bn = "=0.6.0"
+
+[patch.crates-io]
+# TODO: Get a tag stabilized and use it
+substrate-bn = { git = "https://github.com/risc0/paritytech-bn", rev = "77f8a3f5d8576137a8c316d5781cdb724441b8fa" }

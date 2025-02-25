@@ -214,8 +214,12 @@ impl PagedMemory {
         }
     }
 
-    pub fn commit_step(&mut self) -> Vec<Action> {
-        take(&mut self.pending_actions)
+    pub fn pending_actions(&self) -> &[Action] {
+        &self.pending_actions
+    }
+
+    pub fn commit_step(&mut self) {
+        self.pending_actions.clear();
     }
 
     pub fn clear(&mut self) {

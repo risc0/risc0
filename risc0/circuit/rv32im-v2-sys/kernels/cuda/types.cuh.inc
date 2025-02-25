@@ -1,6 +1,40 @@
 struct NondetRegLayout {
   Reg _super;
 };
+using NondetRegLayout7LayoutArray = ::cuda::std::array<NondetRegLayout,7>;
+struct OneHot_7_Layout {
+  NondetRegLayout7LayoutArray _super;
+};
+struct NondetExtRegLayout {
+  Reg _super;
+};
+struct BigIntAccumStateLayout {
+  NondetExtRegLayout poly;
+  NondetExtRegLayout term;
+  NondetExtRegLayout total;
+};
+struct BigIntPolyOpAddTotalLayout {
+  BigIntAccumStateLayout _super;
+  NondetExtRegLayout tmp;
+};
+struct BigIntAccumStateLayout_0 {
+  BigIntAccumStateLayout _super;
+  BigIntAccumStateLayout arm0;
+  BigIntAccumStateLayout arm1;
+  BigIntAccumStateLayout arm2;
+  BigIntPolyOpAddTotalLayout arm3;
+  BigIntAccumStateLayout arm4;
+  BigIntAccumStateLayout arm5;
+  BigIntAccumStateLayout arm6;
+};
+struct BigIntAccumLayout {
+  OneHot_7_Layout polyOp;
+  BigIntAccumStateLayout state;
+  BigIntAccumStateLayout_0 stateRedef;
+};
+struct AccumLayout {
+  BigIntAccumLayout _0;
+};
 using NondetRegLayout8LayoutArray = ::cuda::std::array<NondetRegLayout,8>;
 struct OneHot_8_Layout {
   NondetRegLayout8LayoutArray _super;
@@ -1630,6 +1664,7 @@ struct ECall0Layout {
   AddrDecomposeBitsLayout pcAddr;
   _Arguments_ECall0OutputLayout _arguments_ECall0Output;
   ECall0OutputLayout output;
+  IsZeroLayout isSuspend;
   IsZeroLayout isDecode;
   IsZeroLayout isP2Entry;
   IsZeroLayout isShaEcall;
@@ -1637,9 +1672,6 @@ struct ECall0Layout {
   NormalizeU32Layout addPC;
 };
 using NondetRegLayout24LayoutArray = ::cuda::std::array<NondetRegLayout,24>;
-struct NondetExtRegLayout {
-  Reg _super;
-};
 struct PoseidonStateLayout {
   NondetRegLayout hasState;
   NondetRegLayout stateAddr;
@@ -1980,7 +2012,6 @@ struct PoseidonCheckOutLayout {
   PoseidonStateLayout _super;
   PoseidonCheckOut__0_SuperLayout8LayoutArray _1;
   IsZeroLayout isNormal;
-  NondetExtRegLayout extInv;
 };
 struct PoseidonDoOut_SuperArm0Layout {
   PoseidonCheckOutLayout _super;
@@ -2490,23 +2521,6 @@ struct BigIntReadLayout {
 using NondetU8RegLayout16LayoutArray = ::cuda::std::array<NondetU8RegLayout,16>;
 struct BigIntWitnessLayout {
   NondetU8RegLayout16LayoutArray _super;
-  NondetRegLayout _0;
-  NondetRegLayout _1;
-  NondetRegLayout _2;
-  NondetRegLayout _3;
-  NondetRegLayout _4;
-  NondetRegLayout _5;
-  NondetRegLayout _6;
-  NondetRegLayout _7;
-  NondetRegLayout _8;
-  NondetRegLayout _9;
-  NondetRegLayout _10;
-  NondetRegLayout _11;
-  NondetRegLayout _12;
-  NondetRegLayout _13;
-  NondetRegLayout _14;
-  NondetRegLayout _15;
-  NondetRegLayout16LayoutArray nondet;
 };
 struct BigIntWrite__0_SuperLayout {
   MemoryWriteLayout _0;
@@ -2859,15 +2873,18 @@ struct Arg_MemoryArgLayout {
 struct Arg_CycleArgLayout {
   Reg cycle;
 };
+using Reg1LayoutArray = ::cuda::std::array<Reg,1>;
 struct _accumLayout {
   Arg_ArgU8Layout argU8;
   Arg_ArgU16Layout argU16;
   Arg_MemoryArgLayout memoryArg;
   Arg_CycleArgLayout cycleArg;
   Reg _offset;
+  Reg1LayoutArray _user;
 };
 using Reg20LayoutArray = ::cuda::std::array<Reg,20>;
 struct LayoutAccumLayout {
+  AccumLayout user;
   Reg20LayoutArray columns;
 };
 struct TestSuccRunLayout {
@@ -2903,6 +2920,8 @@ struct FakeTwitRegStruct {
 struct ArgU8Struct {
   NondetRegStruct count;
   NondetRegStruct val;
+};
+struct U8RegStruct {
 };
 struct ArgU16Struct {
   NondetRegStruct count;
@@ -3055,10 +3074,16 @@ struct DivideReturnStruct {
   ValU32Struct quot;
   ValU32Struct rem;
 };
+struct BigIntTopStateStruct {
+  Val polyOp;
+  Val coeff;
+  Val16Array witness;
+};
 struct InstOutputBaseStruct {
   ValU32Struct newPc;
   Val newState;
   Val newMode;
+  BigIntTopStateStruct topState;
 };
 struct MiscInputStruct {
   InstInputStruct _super;
@@ -3271,34 +3296,31 @@ using SplitU32Struct4Array = ::cuda::std::array<SplitU32Struct,4>;
 struct BigIntReadStruct {
   NondetRegStruct16Array _super;
 };
-struct BigIntExternReturnStruct {
-  Val x00;
-  Val x01;
-  Val x02;
-  Val x03;
-  Val x04;
-  Val x05;
-  Val x06;
-  Val x07;
-  Val x08;
-  Val x09;
-  Val x10;
-  Val x11;
-  Val x12;
-  Val x13;
-  Val x14;
-  Val x15;
-};
 struct BigIntWitnessStruct {
   NondetRegStruct16Array _super;
 };
 struct BigIntWrite__0Struct {
 };
 using BigIntWrite__0Struct4Array = ::cuda::std::array<BigIntWrite__0Struct,4>;
+struct BigIntAccumStateStruct {
+  NondetExtRegStruct poly;
+  NondetExtRegStruct term;
+  NondetExtRegStruct total;
+};
+using Val7Array = ::cuda::std::array<Val,7>;
+using NondetRegStruct7Array = ::cuda::std::array<NondetRegStruct,7>;
+struct OneHot_7_Struct {
+  NondetRegStruct7Array _super;
+};
+using ExtVal1Array = ::cuda::std::array<ExtVal,1>;
+struct BigIntAccumStruct {
+};
 using Val13Array = ::cuda::std::array<Val,13>;
 using NondetRegStruct13Array = ::cuda::std::array<NondetRegStruct,13>;
 struct OneHot_13_Struct {
   NondetRegStruct13Array _super;
 };
 struct TopStruct {
+};
+struct AccumStruct {
 };

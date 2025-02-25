@@ -16,7 +16,7 @@
 
 mod args;
 mod cycle_count;
-mod fork;
+// mod fork;
 mod getenv;
 mod keccak;
 mod log;
@@ -27,17 +27,19 @@ mod prove_zkr;
 mod random;
 mod slice_io;
 mod verify;
+mod verify2;
 
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::{anyhow, Result};
 use enum_map::{Enum, EnumMap};
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::ByteAddr;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     nr::{
-        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_KECCAK, SYS_LOG, SYS_PANIC,
-        SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_KECCAK, SYS_LOG, SYS_PANIC, SYS_PIPE,
+        SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_VERIFY_INTEGRITY2,
+        SYS_WRITE,
     },
     SyscallName, DIGEST_BYTES,
 };
@@ -51,9 +53,9 @@ use crate::{
 };
 
 use self::{
-    args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, keccak::SysKeccak,
-    log::SysLog, panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite,
-    prove_zkr::SysProveZkr, random::SysRandom, slice_io::SysSliceIo, verify::SysVerify,
+    args::SysArgs, cycle_count::SysCycleCount, getenv::SysGetenv, keccak::SysKeccak, log::SysLog,
+    panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite, prove_zkr::SysProveZkr,
+    random::SysRandom, slice_io::SysSliceIo, verify::SysVerify, verify2::SysVerify2,
 };
 
 /// A host-side implementation of a system call.
@@ -68,6 +70,7 @@ pub(crate) trait Syscall {
 }
 
 /// Access to memory and machine state for syscalls.
+#[allow(dead_code)]
 pub(crate) trait SyscallContext<'a> {
     /// Returns the current program counter.
     fn get_pc(&self) -> u32;
@@ -116,6 +119,7 @@ pub(crate) enum SyscallKind {
     ProveKeccak,
     Read,
     VerifyIntegrity,
+    VerifyIntegrity2,
     Write,
 }
 
@@ -131,6 +135,7 @@ pub(crate) struct SyscallTable<'a> {
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
     pub(crate) assumptions_used: Rc<RefCell<AssumptionUsage>>,
+    pub(crate) mmr_assumptions: Rc<RefCell<Vec<AssumptionReceipt>>>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
     pub(crate) pending_zkrs: Rc<RefCell<Vec<ProveZkrRequest>>>,
     pub(crate) pending_keccaks: Rc<RefCell<Vec<ProveKeccakRequest>>>,
@@ -144,6 +149,7 @@ impl<'a> SyscallTable<'a> {
             posix_io: env.posix_io.clone(),
             assumptions: env.assumptions.clone(),
             assumptions_used: Default::default(),
+            mmr_assumptions: Default::default(),
             coprocessor: env.coprocessor.clone(),
             pending_zkrs: Default::default(),
             pending_keccaks: Default::default(),
@@ -157,7 +163,7 @@ impl<'a> SyscallTable<'a> {
         this.with_syscall(SYS_ARGC, SysArgs(env.args.clone()))
             .with_syscall(SYS_ARGV, SysArgs(env.args.clone()))
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
-            .with_syscall(SYS_FORK, SysFork)
+            // .with_syscall(SYS_FORK, SysFork)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_KECCAK, SysKeccak::new(env.keccak_max_po2))
             .with_syscall(SYS_LOG, SysLog)
@@ -167,6 +173,7 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_READ, SysRead)
             .with_syscall(SYS_VERIFY_INTEGRITY, SysVerify)
+            .with_syscall(SYS_VERIFY_INTEGRITY2, SysVerify2)
             .with_syscall(SYS_WRITE, SysWrite);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());

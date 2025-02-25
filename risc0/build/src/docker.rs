@@ -223,7 +223,9 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
+    use crate::{
+        build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder, ImageIdKind,
+    };
 
     use super::*;
 
@@ -247,7 +249,11 @@ mod test {
 
     fn compare_image_id(guest_list: &[GuestListEntry], name: &str, expected: &str) {
         let guest = guest_list.iter().find(|x| x.name == name).unwrap();
-        assert_eq!(expected, guest.image_id.to_string());
+        let image_id = match guest.v2_image_id {
+            ImageIdKind::User(digest) => digest,
+            ImageIdKind::Kernel(digest) => digest,
+        };
+        assert_eq!(expected, image_id.to_string());
     }
 
     // Test build reproducibility for risc0_zkvm_methods_guest.
@@ -263,7 +269,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "2e05907fb031403752a5a485607e3a1415b2294e334a72dd59b1f103b62a4ef8",
+            "45ce126d9eadaf6ec158da044acc1b1b10d40a3ce00b2530a46d871889c92e04",
         );
     }
 }

@@ -126,7 +126,10 @@ impl<'a> Preflight<'a> {
                 ..Default::default()
             },
             segment,
-            pager: PagedMemory::new(segment.partial_image.clone()),
+            pager: PagedMemory::new(
+                segment.partial_image.clone(),
+                false, /* tracing_enabled */
+            ),
             pc: ByteAddr(0),
             machine_mode: 0,
             cur_write: 0,
@@ -459,8 +462,9 @@ impl Risc0Context for Preflight<'_> {
             0,
             Back::None,
         );
-        for i in 0..DIGEST_WORDS {
-            self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, 0)?; // FIXME!
+        let input_words = self.segment.claim.input.as_words();
+        for (i, word) in input_words.iter().enumerate() {
+            self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, *word)?;
         }
         self.add_cycle_special(
             CycleState::Resume,

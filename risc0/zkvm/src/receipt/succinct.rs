@@ -18,10 +18,10 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::fmt::Debug;
 
 use anyhow::bail;
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{
     control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
@@ -59,10 +59,11 @@ use crate::{
 #[non_exhaustive]
 pub struct SuccinctReceipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// The cryptographic seal of this receipt. This seal is a STARK proving an execution of the
     /// recursion circuit.
+    #[debug("{} bytes", self.get_seal_bytes().len())]
     pub seal: Vec<u32>,
 
     /// The control ID of this receipt, identifying the recursion program that was run (e.g. lift,
@@ -91,7 +92,7 @@ where
 
 impl<Claim> SuccinctReceipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
@@ -240,7 +241,6 @@ pub(crate) fn allowed_control_ids(
         ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
             .map(str::to_string)
             .into_iter()
-            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
             .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
             .collect();
 
@@ -253,11 +253,9 @@ pub(crate) fn allowed_control_ids(
         ),
     };
 
-    Ok(risc0_circuit_rv32im::control_ids(hash_name, po2_max).chain(
-        zkr_control_ids
-            .into_iter()
-            .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)),
-    ))
+    Ok(zkr_control_ids
+        .into_iter()
+        .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)))
 }
 
 /// Constructs the root for the set of allowed control IDs, given a maximum cycle count as a po2.
@@ -359,7 +357,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("18c556e570b13cb96fdf30088cdad28325636122cf4a45089f4a3079773df539")
+            digest!("ed15842d0be4b27a0c07499dfa90e6ef830eeab8684af3125c4332de8752f4ce")
         );
     }
 

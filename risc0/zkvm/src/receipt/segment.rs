@@ -13,38 +13,20 @@
 // limitations under the License.
 
 use alloc::{collections::BTreeSet, string::String, vec::Vec};
-use core::fmt::Debug;
 
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
-use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
-use risc0_circuit_rv32im::{
-    layout::{SystemStateLayout, OUT_LAYOUT},
-    CIRCUIT,
-};
-use risc0_core::field::{baby_bear::BabyBearElem, Elem};
+use derive_more::Debug;
+use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
 use risc0_zkp::{
     adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
-    layout,
     verify::VerificationError,
 };
 use serde::{Deserialize, Serialize};
 
-use super::{VerifierContext, DEFAULT_MAX_PO2};
-use crate::{sha, MaybePruned, ReceiptClaim};
-
-/// TODO(flaub)
-#[derive(
-    Clone, Copy, Debug, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq,
-)]
-pub enum SegmentVersion {
-    /// TODO(flaub)
-    V1,
-
-    /// TODO(flaub)
-    V2,
-}
+use super::VerifierContext;
+use crate::{sha, ReceiptClaim};
 
 /// A receipt attesting to the execution of a Segment.
 ///
@@ -61,6 +43,7 @@ pub struct SegmentReceipt {
     /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
     /// non-opaque claim component, which can be conveniently accessed with
     /// [SegmentReceipt::claim].
+    #[debug("{} bytes", self.get_seal_bytes().len())]
     pub seal: Vec<u32>,
 
     /// Segment index within the [Receipt](crate::Receipt)
@@ -78,8 +61,6 @@ pub struct SegmentReceipt {
 
     /// [ReceiptClaim] containing information about the execution that this receipt proves.
     pub claim: ReceiptClaim,
-
-    pub(crate) segment_version: SegmentVersion,
 }
 
 impl SegmentReceipt {
@@ -104,12 +85,9 @@ impl SegmentReceipt {
             });
         }
 
-        let expected = match self.segment_version {
-            SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-            SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO,
-        };
+        let expected = risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO;
+
         if params.circuit_info != expected {
-            tracing::debug!("version: {:?}", self.segment_version);
             return Err(VerificationError::CircuitInfoMismatch {
                 expected,
                 received: params.circuit_info,
@@ -117,28 +95,9 @@ impl SegmentReceipt {
         }
 
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        let decoded_claim = match self.segment_version {
-            SegmentVersion::V1 => {
-                let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-                    params.control_ids.contains(control_id).then_some(()).ok_or(
-                        VerificationError::ControlVerificationError {
-                            control_id: *control_id,
-                        },
-                    )
-                };
-                let suite = ctx
-                    .suites
-                    .get(&self.hashfn)
-                    .ok_or(VerificationError::InvalidHashSuite)?;
-                risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
-                decode_receipt_claim_from_seal_v1(&self.seal)?
-            }
-            SegmentVersion::V2 => {
-                risc0_circuit_rv32im_v2::verify(&self.seal)?;
-                ReceiptClaim::decode_from_seal_v2(&self.seal, None)
-                    .or(Err(VerificationError::ReceiptFormatError))?
-            }
-        };
+        risc0_circuit_rv32im_v2::verify(&self.seal)?;
+        let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)
+            .or(Err(VerificationError::ReceiptFormatError))?;
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
         // claim on the struct.
@@ -180,34 +139,6 @@ pub struct SegmentReceiptVerifierParameters {
     pub circuit_info: ProtocolInfo,
 }
 
-impl SegmentReceiptVerifierParameters {
-    /// Construct verifier parameters that will accept receipts with control any of the default
-    /// control ID associated with cycle counts as powers of two (po2) up to the given max
-    /// inclusive.
-    #[stability::unstable]
-    pub fn from_max_po2(max_po2: usize, segment_version: SegmentVersion) -> Self {
-        Self {
-            control_ids: BTreeSet::from_iter(
-                ["poseidon2", "sha-256", "blake2b"]
-                    .into_iter()
-                    .flat_map(|hash_name| risc0_circuit_rv32im::control_ids(hash_name, max_po2)),
-            ),
-            proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: match segment_version {
-                SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-                SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO,
-            },
-        }
-    }
-
-    /// Construct verifier parameters that will accept receipts with control any of the default
-    /// control ID associated with cycle counts of all supported powers of two (po2).
-    #[stability::unstable]
-    pub fn all_po2s(segment_version: SegmentVersion) -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2, segment_version)
-    }
-}
-
 impl Digestible for SegmentReceiptVerifierParameters {
     /// Hash the [SegmentReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
@@ -226,64 +157,12 @@ impl Digestible for SegmentReceiptVerifierParameters {
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self::from_max_po2(DEFAULT_MAX_PO2, SegmentVersion::V1)
+        Self {
+            control_ids: BTreeSet::default(),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO,
+        }
     }
-}
-
-fn decode_system_state_from_io<E: Elem + Into<u32>>(
-    sys_state: layout::Tree<E, SystemStateLayout>,
-) -> Result<SystemState, VerificationError> {
-    let bytes: Vec<u8> = sys_state
-        .map(|c| c.image_id)
-        .get_bytes()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let pc = sys_state
-        .map(|c| c.pc)
-        .get_u32_from_bytes()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-    Ok(SystemState { pc, merkle_root })
-}
-
-pub(crate) fn decode_receipt_claim_from_seal_v1(
-    seal: &[u32],
-) -> Result<ReceiptClaim, VerificationError> {
-    let io: &[BabyBearElem] =
-        bytemuck::checked::cast_slice(&seal[..risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE]);
-    let global = layout::Tree::new(io, OUT_LAYOUT);
-    let pre = decode_system_state_from_io(global.map(|c| c.pre))?;
-    let post = decode_system_state_from_io(global.map(|c| c.post))?;
-
-    let input_bytes: Vec<u8> = global
-        .map(|c| c.input)
-        .get_bytes()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-
-    let output_bytes: Vec<u8> = global
-        .map(|c| c.output)
-        .get_bytes()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let output = Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-
-    let sys_exit = global
-        .map(|c| c.sys_exit_code)
-        .get_u32_from_elem()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let user_exit = global
-        .map(|c| c.user_exit_code)
-        .get_u32_from_elem()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let exit_code =
-        ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
-
-    Ok(ReceiptClaim {
-        pre: pre.into(),
-        post: post.into(),
-        exit_code,
-        input: MaybePruned::Pruned(input),
-        output: MaybePruned::Pruned(output),
-    })
 }
 
 #[cfg(test)]
@@ -300,7 +179,7 @@ mod tests {
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SegmentReceiptVerifierParameters::default().digest(),
-            digest!("52a27aff2de5a8206e3e88cb8dcb087c1193ede8efaf4889117bc68e704cf29a")
+            digest!("5a123dc5ac0a4ed69a91f746cca8453a3af36dc0803ccf36bcc5b63eb4f5e621")
         );
     }
 }

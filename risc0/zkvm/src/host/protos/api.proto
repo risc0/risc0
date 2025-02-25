@@ -18,6 +18,7 @@ message ServerRequest {
     VerifyRequest verify = 9;
     ProveZkrRequest prove_zkr = 10;
     ProveKeccakRequest prove_keccak = 11;
+    UnionRequest union = 12;
   }
 }
 
@@ -39,6 +40,7 @@ message HelloResult {
 message ExecuteRequest {
   ExecutorEnv env = 1;
   AssetRequest segments_out = 2;
+  base.CompatVersion segment_version = 3;
 }
 
 message ProveRequest {
@@ -135,6 +137,24 @@ message JoinResult {
   Asset receipt = 1;
 }
 
+message UnionRequest {
+  ProverOpts opts = 1;
+  Asset left_receipt = 2;
+  Asset right_receipt = 3;
+  AssetRequest receipt_out = 4;
+}
+
+message UnionReply {
+  oneof kind {
+    UnionResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message UnionResult {
+  Asset receipt = 1;
+}
+
 message ResolveRequest {
   ProverOpts opts = 1;
   Asset conditional_receipt = 2;
@@ -223,6 +243,7 @@ message ProverOpts {
   ReceiptKind receipt_kind = 3;
   repeated base.Digest control_ids = 4;
   uint64 max_segment_po2 = 5;
+  optional uint32 segment_version = 6;
 }
 
 enum ReceiptKind {
@@ -396,6 +417,7 @@ service Server {
   rpc resolve(ResolveRequest) returns (ResolveReply);
   rpc compress(CompressRequest) returns (CompressReply);
   rpc verify(VerifyRequest) returns (GenericReply);
+  rpc union(UnionRequest) returns (UnionReply);
 }
 
 service ExecuteCallback {

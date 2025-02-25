@@ -829,9 +829,9 @@ dependencies = [
 
 [[package]]
 name = "borsh"
-version = "1.5.3"
+version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2506947f73ad44e344215ccd6403ac2ae18cd8e046e581a441bf8d199f257f03"
+checksum = "5430e3be710b68d984d1391c854eb431a9d548640711faa54eecb1df93db91cc"
 dependencies = [
  "borsh-derive",
  "cfg_aliases",
@@ -839,9 +839,9 @@ dependencies = [
 
 [[package]]
 name = "borsh-derive"
-version = "1.5.3"
+version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2593a3b8b938bd68373196c9832f516be11fa487ef4ae745eb282e6a56a7244"
+checksum = "f8b668d39970baad5356d7c83a86fee3a539e6f93bf6764c97368243e17a0487"
 dependencies = [
  "once_cell",
  "proc-macro-crate",
@@ -1597,18 +1597,18 @@ dependencies = [
 
 [[package]]
 name = "derive_more"
-version = "1.0.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a9b99b9cbbe49445b21764dc0625032a89b145a2642e67603e1c936f5458d05"
+checksum = "093242cf7570c207c83073cf82f79706fe7b8317e98620a47d5be7c3d8497678"
 dependencies = [
  "derive_more-impl",
 ]
 
 [[package]]
 name = "derive_more-impl"
-version = "1.0.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb7330aeadfbe296029522e6c40f315320aba36fc43a5b3632f3795348f3bd22"
+checksum = "bda628edc44c4bb645fbe0f758797143e4e07926f7ebf4e9bdfbd3d2ce621df3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3014,9 +3014,9 @@ checksum = "db13adb97ab515a3691f56e4dbab09283d0b86cb45abd991d8634a9d6f501760"
 
 [[package]]
 name = "libc"
-version = "0.2.167"
+version = "0.2.169"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09d6582e104315a817dff97f75133544b2e094ee22447d2acf4a74e189ba06fc"
+checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
 
 [[package]]
 name = "libm"
@@ -3491,9 +3491,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.20.2"
+version = "1.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
+checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
 
 [[package]]
 name = "oorandom"
@@ -3503,9 +3503,9 @@ checksum = "b410bbe7e14ab526a0e86877eb47c6996a2bd7746f027ba551028c925390e4e9"
 
 [[package]]
 name = "openssl"
-version = "0.10.68"
+version = "0.10.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6174bc48f102d208783c2c84bf931bb75927a617866870de8a4ea85597f871f5"
+checksum = "61cfb4e166a8bb8c9b55c500bc2308550148ece889be90f609377e58140f42c6"
 dependencies = [
  "bitflags 2.6.0",
  "cfg-if",
@@ -3535,9 +3535,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.104"
+version = "0.9.105"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45abf306cbf99debc8195b66b7346498d7b10c210de50418b5ccd7ceba08c741"
+checksum = "8b22d5b84be05a8d6947c7cb71f7c849aa0f112acd4bf51c2a7c1c988ac0a9dc"
 dependencies = [
  "cc",
  "libc",
@@ -4361,7 +4361,6 @@ dependencies = [
  "risc0-bigint2-methods",
  "risc0-zkvm",
  "rstest",
- "rstest_reuse",
  "stability",
  "test-log",
  "tracing",
@@ -4381,8 +4380,9 @@ version = "1.3.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "elf",
+ "lazy_static",
  "risc0-zkp",
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",
@@ -4463,7 +4463,7 @@ version = "1.3.0-alpha.1"
 dependencies = [
  "cc",
  "cust",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "glob",
  "risc0-build-kernel",
  "risc0-core",
@@ -4521,7 +4521,7 @@ dependencies = [
  "crossbeam",
  "crypto-bigint",
  "cust",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "enum-map",
  "lazy-regex",
  "malachite",
@@ -4564,7 +4564,7 @@ dependencies = [
  "byteorder",
  "cfg-if",
  "clap 4.5.23",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "flate2",
  "malachite",
  "num-derive",
@@ -4592,7 +4592,7 @@ version = "0.1.0"
 dependencies = [
  "cc",
  "cust",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "glob",
  "risc0-build-kernel",
  "risc0-core",
@@ -4677,6 +4677,7 @@ dependencies = [
 name = "risc0-zkos-v1compat"
 version = "0.1.0"
 dependencies = [
+ "include_bytes_aligned",
  "no_std_strings",
 ]
 
@@ -4728,6 +4729,7 @@ dependencies = [
  "ciborium",
  "clap 4.5.23",
  "crypto-bigint",
+ "derive_more 2.0.1",
  "elf",
  "enum-iterator",
  "enum-map",
@@ -4754,7 +4756,6 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-keccak-methods",
  "risc0-circuit-recursion",
- "risc0-circuit-rv32im",
  "risc0-circuit-rv32im-v2",
  "risc0-core",
  "risc0-groth16",
@@ -4765,7 +4766,6 @@ dependencies = [
  "rmp-serde",
  "rrs-lib",
  "rstest",
- "rstest_reuse",
  "rustc-demangle",
  "rzup",
  "semver",
@@ -4783,6 +4783,20 @@ dependencies = [
  "tracing-forest",
  "tracing-subscriber 0.3.19",
  "typetag",
+]
+
+[[package]]
+name = "risc0-zkvm-compat-tests"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "risc0-r0vm",
+ "risc0-zkp",
+ "risc0-zkvm",
+ "risc0-zkvm-methods",
+ "rstest",
+ "semver",
+ "test-log",
 ]
 
 [[package]]
@@ -4864,21 +4878,21 @@ dependencies = [
 
 [[package]]
 name = "rstest"
-version = "0.23.0"
+version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a2c585be59b6b5dd66a9d2084aa1d8bd52fbdb806eafdeffb52791147862035"
+checksum = "03e905296805ab93e13c1ec3a03f4b6c4f35e9498a3d5fa96dc626d22c03cd89"
 dependencies = [
- "futures",
  "futures-timer",
+ "futures-util",
  "rstest_macros",
  "rustc_version",
 ]
 
 [[package]]
 name = "rstest_macros"
-version = "0.23.0"
+version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "825ea780781b15345a146be27eaefb05085e337e869bff01b4306a4fd4a9ad5a"
+checksum = "ef0053bbffce09062bee4bcc499b0fbe7a57b879f1efe088d6d8d4c7adcdef9b"
 dependencies = [
  "cfg-if",
  "glob",
@@ -4890,17 +4904,6 @@ dependencies = [
  "rustc_version",
  "syn 2.0.90",
  "unicode-ident",
-]
-
-[[package]]
-name = "rstest_reuse"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3a8fb4672e840a587a66fc577a5491375df51ddb88f2a2c2a792598c326fe14"
-dependencies = [
- "quote",
- "rand",
- "syn 2.0.90",
 ]
 
 [[package]]
@@ -5005,7 +5008,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "rzup"
-version = "0.3.0-alpha.1"
+version = "0.4.0-alpha.1"
 dependencies = [
  "clap 4.5.23",
  "colored",
@@ -5080,9 +5083,9 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "1.0.23"
+version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
+checksum = "f79dfe2d285b0488816f30e700a7438c5a73d816b5b7d3ac72fbc48b0d185e03"
 dependencies = [
  "serde",
 ]
@@ -5708,9 +5711,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.42.0"
+version = "1.43.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cec9b21b0450273377fc97bd4c33a8acffc8c996c987a7c5b319a0083707551"
+checksum = "3d61fa4ffa3de412bfea335c6ecff681de2b609ba3c77ef3e00e521813a9ed9e"
 dependencies = [
  "backtrace",
  "bytes",
@@ -5726,9 +5729,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-macros"
-version = "2.4.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "693d596312e88961bc67d7f1f97af8a70227d9f90c31bba5806eec004978d752"
+checksum = "6e06d43f1345a3bcd39f6a56dbb7dcab2ba47e68e8ac134855e7e2bdbaf8cab8"
 dependencies = [
  "proc-macro2",
  "quote",

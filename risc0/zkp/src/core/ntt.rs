@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -344,9 +344,7 @@ where
 #[cfg(test)]
 mod tests {
     use rand::thread_rng;
-    use risc0_core::field::{
-        baby_bear::BabyBearElem, goldilocks::GoldilocksElem, Elem, RootsOfUnity,
-    };
+    use risc0_core::field::{baby_bear::BabyBearElem, Elem, RootsOfUnity};
 
     use crate::core::ntt::{bit_reverse, evaluate_ntt, interpolate_ntt};
 
@@ -396,26 +394,6 @@ mod tests {
         assert_ne!(orig, buf);
         // Now go forward
         evaluate_ntt::<BabyBearElem, BabyBearElem>(&mut buf, 0);
-        // It should be back to identical
-        assert_eq!(orig, buf);
-    }
-
-    // Make sure fwd + rev is identity over goldilocks field
-    #[test]
-    fn roundtrip_goldilocks() {
-        const N: usize = 10;
-        const SIZE: usize = 1 << N;
-        // Randomly fill buffer
-        let mut rng = thread_rng();
-        let mut buf = [GoldilocksElem::random(&mut rng); SIZE];
-        // Copy it
-        let orig = buf;
-        // Now go backwards
-        interpolate_ntt::<GoldilocksElem, GoldilocksElem>(&mut buf);
-        // Make sure something changed
-        assert_ne!(orig, buf);
-        // Now go forward
-        evaluate_ntt::<GoldilocksElem, GoldilocksElem>(&mut buf, 0);
         // It should be back to identical
         assert_eq!(orig, buf);
     }

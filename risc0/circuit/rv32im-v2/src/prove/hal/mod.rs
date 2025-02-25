@@ -35,8 +35,8 @@ use crate::{
     execute::segment::Segment,
     zirgen::{
         circuit::{
-            CircuitField, ExtVal, Val, REGCOUNT_ACCUM, REGCOUNT_MIX, REGISTER_GROUP_ACCUM,
-            REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+            CircuitField, ExtVal, Val, REGCOUNT_MIX, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
+            REGISTER_GROUP_DATA,
         },
         taps::TAPSET,
         CircuitImpl,
@@ -127,7 +127,7 @@ where
         scope!("prove");
 
         cfg_if::cfg_if! {
-            if #[cfg(feature = "circuit_debug")] {
+            if #[cfg(feature = "witgen_debug")] {
                 let rand_z = ExtVal::ONE;
                 let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
                     StepMode::SeqForward
@@ -190,37 +190,10 @@ where
 
                 // Make the mixing values
                 let mix: [Val; REGCOUNT_MIX] = std::array::from_fn(|_| prover.iop().random_elem());
-                let mix = MetaBuffer {
-                    buf: self.hal.copy_from_elem("mix", mix.as_slice()),
-                    rows: 1,
-                    cols: REGCOUNT_MIX,
-                    checked: true,
-                };
 
-                let accum = scope!(
-                    "alloc(accum)",
-                    MetaBuffer::new(
-                        "accum",
-                        self.hal.as_ref(),
-                        witgen.cycles,
-                        REGCOUNT_ACCUM,
-                        true
-                    )
-                );
+                let mix = witgen.accum(self.hal.as_ref(), self.circuit_hal.as_ref(), &mix)?;
 
-                self.circuit_hal.step_accum(
-                    &witgen.trace,
-                    &witgen.data,
-                    &accum,
-                    &witgen.global,
-                    &mix,
-                )?;
-
-                scope!("zeroize(accum)", {
-                    self.hal.eltwise_zeroize_elem(&accum.buf);
-                });
-
-                prover.commit_group(REGISTER_GROUP_ACCUM, &accum.buf);
+                prover.commit_group(REGISTER_GROUP_ACCUM, &witgen.accum.buf);
 
                 mix
             });

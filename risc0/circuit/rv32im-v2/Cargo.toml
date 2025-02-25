@@ -14,7 +14,7 @@ required-features = ["prove"]
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.13"
-derive_more = { version = "1.0", default-features = false, features = [
+derive_more = { version = "2.0.1", default-features = false, features = [
   "add",
   "add_assign",
   "debug",
@@ -56,7 +56,6 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-circuit_debug = ["risc0-zkp/circuit_debug"]
 cuda = [
   "prove",
   "risc0-circuit-rv32im-v2-sys/cuda",
@@ -93,3 +92,4 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
+witgen_debug = []

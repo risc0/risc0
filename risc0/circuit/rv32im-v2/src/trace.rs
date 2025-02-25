@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+extern crate alloc;
+
+use alloc::vec::Vec;
 
 use anyhow::Result;
 use derive_more::Debug;
@@ -53,6 +57,12 @@ pub enum TraceEvent {
         #[debug("{region:#04x?}")]
         region: Vec<u8>,
     },
+
+    /// A page is read for the first time in a segment
+    PageIn { cycles: u64 },
+
+    /// A page has been written to for the first time in a segment
+    PageOut { cycles: u64 },
 }
 
 /// A callback used to collect [TraceEvent]s.

@@ -20,8 +20,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::{ByteAddr as ByteAddr2, ExitCode, MemoryImage2, Program, SystemState};
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, SystemState};
 use risc0_circuit_rv32im_v2::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
@@ -36,10 +35,7 @@ use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
-    host::{
-        client::env::SegmentPath,
-        server::session::{InnerSegment, Session},
-    },
+    host::{client::env::SegmentPath, server::session::Session},
     receipt_claim::exit_code_from_rv32im_v2_claim,
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
@@ -147,6 +143,7 @@ impl<'a> Executor2<'a> {
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
         scope!("execute");
+        tracing::info!("Executing rv32im-v2 session");
 
         let journal = Journal::default();
         self.env
@@ -164,7 +161,7 @@ impl<'a> Executor2<'a> {
             self.image.clone(),
             self,
             self.env.input_digest,
-            vec![], // TODO(flaub)
+            self.env.trace.clone(),
         );
 
         let start_time = Instant::now();
@@ -204,7 +201,7 @@ impl<'a> Executor2<'a> {
 
                 let segment = Segment {
                     index: inner.index as u32,
-                    inner: InnerSegment::V2(inner),
+                    inner,
                     output,
                 };
                 let segment_ref = callback(segment)?;
@@ -233,6 +230,7 @@ impl<'a> Executor2<'a> {
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = self.syscall_table.assumptions_used.take();
+        let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
         let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
 
@@ -256,6 +254,7 @@ impl<'a> Executor2<'a> {
             journal: session_journal.map(crate::Journal::new),
             exit_code,
             assumptions,
+            mmr_assumptions,
             user_cycles: result.user_cycles,
             paging_cycles: result.paging_cycles,
             reserved_cycles: result.reserved_cycles,
@@ -305,12 +304,10 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
-        let addr = ByteAddr2(addr.0);
         self.ctx.peek_u8(addr)
     }
 
     fn load_u32(&mut self, addr: ByteAddr) -> Result<u32> {
-        let addr = ByteAddr2(addr.0);
         self.ctx.peek_u32(addr)
     }
 
@@ -339,7 +336,7 @@ impl CircuitSyscall for Executor2<'_> {
             syscall_table: self.syscall_table.clone(),
         };
 
-        let name_ptr = ByteAddr2(fd);
+        let name_ptr = ByteAddr(fd);
         let syscall = ctx.peek_string(name_ptr)?;
         tracing::trace!("host_read({syscall}, into_guest: {})", buf.len());
 
@@ -369,7 +366,7 @@ impl CircuitSyscall for Executor2<'_> {
 }
 
 impl ContextAdapter<'_, '_> {
-    fn peek_string(&mut self, mut addr: ByteAddr2) -> Result<String> {
+    fn peek_string(&mut self, mut addr: ByteAddr) -> Result<String> {
         tracing::trace!("peek_string: {addr:?}");
         let mut buf = Vec::new();
         loop {

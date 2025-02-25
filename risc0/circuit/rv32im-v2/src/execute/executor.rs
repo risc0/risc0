@@ -21,11 +21,14 @@ use risc0_zkp::core::{
     log2_ceil,
 };
 
-use crate::{Rv32imV2Claim, TerminateState};
+use crate::{
+    trace::{TraceCallback, TraceEvent},
+    Rv32imV2Claim, TerminateState,
+};
 
 use super::{
     bigint::BigIntState,
-    pager::PagedMemory,
+    pager::{PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{LoadOp, Risc0Context, Risc0Machine},
@@ -33,9 +36,14 @@ use super::{
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
-    trace::{TraceCallback, TraceEvent},
     SyscallContext,
 };
+
+#[derive(Clone, Debug, Default)]
+pub struct EcallMetric {
+    pub count: u64,
+    pub cycles: u64,
+}
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
@@ -90,7 +98,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             machine_mode: 0,
             user_cycles: 0,
             phys_cycles: 0,
-            pager: PagedMemory::new(image),
+            pager: PagedMemory::new(image, !trace.is_empty() /* tracing_enabled */),
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
@@ -139,7 +147,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.segment_cycles()
                 );
 
-                assert!(self.segment_cycles() < segment_limit);
+                assert!(
+                    self.segment_cycles() < segment_limit,
+                    "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                    self.pc
+                );
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
@@ -259,6 +271,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
         Ok(())
     }
+
+    fn trace_pager(&mut self) -> Result<()> {
+        if !self.trace.is_empty() {
+            for &event in self.pager.trace_events() {
+                let event = TraceEvent::from(event);
+                for trace in self.trace.iter() {
+                    trace.borrow_mut().trace_callback(event.clone())?;
+                }
+            }
+            self.pager.clear_trace_events();
+        }
+        Ok(())
+    }
 }
 
 impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
@@ -280,6 +305,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn set_machine_mode(&mut self, mode: u32) {
         self.machine_mode = mode;
+    }
+
+    fn resume(&mut self) -> Result<()> {
+        let input_words = self.input_digest.as_words().to_vec();
+        for (i, word) in input_words.iter().enumerate() {
+            self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, *word)?;
+        }
+        Ok(())
     }
 
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
@@ -309,6 +342,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
         self.user_cycles += 1;
         self.phys_cycles += 1;
+        self.trace_pager()?;
         Ok(())
     }
 
@@ -321,6 +355,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         _s2: u32,
     ) -> Result<()> {
         self.phys_cycles += 1;
+        self.trace_pager()?;
         Ok(())
     }
 
@@ -421,5 +456,18 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
 
     fn get_pc(&self) -> u32 {
         self.user_pc.0
+    }
+}
+
+impl From<PageTraceEvent> for TraceEvent {
+    fn from(event: PageTraceEvent) -> Self {
+        match event {
+            PageTraceEvent::PageIn { cycles } => TraceEvent::PageIn {
+                cycles: cycles as u64,
+            },
+            PageTraceEvent::PageOut { cycles } => TraceEvent::PageOut {
+                cycles: cycles as u64,
+            },
+        }
     }
 }

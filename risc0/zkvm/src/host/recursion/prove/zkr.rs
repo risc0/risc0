@@ -45,17 +45,9 @@ pub fn test_recursion_circuit(hashfn: &str) -> Result<(Program, Digest)> {
 
 pub fn lift(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
     if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
-        get_zkr(&format!("lift_{po2}.zkr"), hashfn)
-    } else {
-        bail!("No rv32im verifier available for po2={po2}")
-    }
-}
-
-pub fn lift_rv32im_v2(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
-    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
         get_zkr(&format!("lift_rv32im_v2_{po2}.zkr"), hashfn)
     } else {
-        bail!("No rv32im_v2 verifier available for po2={po2}")
+        bail!("No rv32im verifier available for po2={po2}")
     }
 }
 
@@ -69,4 +61,8 @@ pub fn resolve(hashfn: &str) -> Result<(Program, Digest)> {
 
 pub fn identity(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("identity.zkr", hashfn)
+}
+
+pub fn union(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("union.zkr", hashfn)
 }

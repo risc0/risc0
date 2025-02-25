@@ -39,7 +39,7 @@ extern FakeTwitRegStruct exec_FakeTwitReg(ExecContext& ctx,Val arg0, BoundLayout
 extern NondetRegStruct exec_IsZero(ExecContext& ctx,Val arg0, BoundLayout<IsZeroLayout> layout1)  ;
 extern ArgU8Struct exec_ArgU8(ExecContext& ctx,Val arg0, Val arg1_0, BoundLayout<ArgU8Layout> layout2)  ;
 extern NondetRegStruct exec_NondetU8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
-extern NondetRegStruct exec_U8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
+extern U8RegStruct exec_U8Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU8RegLayout> layout1)  ;
 extern ArgU16Struct exec_ArgU16(ExecContext& ctx,Val arg0, Val arg1_0, BoundLayout<ArgU16Layout> layout2)  ;
 extern NondetU16RegStruct exec_NondetU16Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU16RegLayout> layout1)  ;
 extern NondetU16RegStruct exec_U16Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetU16RegLayout> layout1)  ;
@@ -205,15 +205,29 @@ extern BigIntStateStruct exec_BigIntInvalid(ExecContext& ctx,BoundLayout<BigIntS
 extern BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,NondetRegStruct arg0, BoundLayout<BigIntEcallLayout> layout1)  ;
 extern SplitU32Struct exec_SplitU32(ExecContext& ctx,ValU32Struct arg0, BoundLayout<SplitU32Layout> layout1)  ;
 extern BigIntReadStruct exec_BigIntRead(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<BigIntReadLayout> layout2)  ;
-extern BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,BigIntExternReturnStruct arg0, BoundLayout<BigIntWitnessLayout> layout1)  ;
+extern BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,Val16Array arg0, BoundLayout<BigIntWitnessLayout> layout1)  ;
 extern BigIntWitnessStruct exec_BigIntWrite(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<BigIntWriteLayout> layout2)  ;
 extern BigIntWitnessStruct exec_BigIntCheck(ExecContext& ctx,BoundLayout<BigIntWitnessLayout> layout0)  ;
 extern BigIntStateStruct exec_BigIntStep(ExecContext& ctx,NondetRegStruct arg0, BigIntStateStruct arg1_0, BoundLayout<BigIntStepLayout> layout2)  ;
 extern InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<BigInt0Layout> layout2)  ;
+extern BigIntAccumStateStruct back_BigIntAccumState(ExecContext& ctx,Index distance0, BoundLayout<BigIntAccumStateLayout> layout1)  ;
+extern BigIntAccumStateStruct exec_BigIntAccumState(ExecContext& ctx,ExtVal arg0, ExtVal arg1_0, ExtVal arg2_0, BoundLayout<BigIntAccumStateLayout> layout3)  ;
+extern OneHot_7_Struct exec_OneHot_7_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_7_Layout> layout1)  ;
+extern BigIntAccumStateStruct exec_BigIntPolyOpNop(ExecContext& ctx,BoundLayout<BigIntAccumStateLayout> layout0)  ;
+extern BigIntAccumStateStruct exec_BigIntPolyOpShift(ExecContext& ctx,BigIntTopStateStruct arg0, BigIntAccumStateStruct arg1_0, ExtVal arg2_0, BoundLayout<BigIntAccumStateLayout> layout3)  ;
+extern BigIntAccumStateStruct exec_BigIntPolyOpSetTerm(ExecContext& ctx,BigIntTopStateStruct arg0, BigIntAccumStateStruct arg1_0, ExtVal arg2_0, BoundLayout<BigIntAccumStateLayout> layout3)  ;
+extern BigIntAccumStateStruct exec_BigIntPolyOpAddTotal(ExecContext& ctx,BigIntTopStateStruct arg0, BigIntAccumStateStruct arg1_0, ExtVal arg2_0, BoundLayout<BigIntPolyOpAddTotalLayout> layout3)  ;
+extern BigIntAccumStateStruct exec_BigIntPolyOpCarry1(ExecContext& ctx,BigIntTopStateStruct arg0, BigIntAccumStateStruct arg1_0, ExtVal arg2_0, BoundLayout<BigIntAccumStateLayout> layout3)  ;
+extern BigIntAccumStateStruct exec_BigIntPolyOpCarry2(ExecContext& ctx,BigIntTopStateStruct arg0, BigIntAccumStateStruct arg1_0, ExtVal arg2_0, BoundLayout<BigIntAccumStateLayout> layout3)  ;
+extern BigIntAccumStateStruct exec_BigIntPolyOpEqz(ExecContext& ctx,BigIntTopStateStruct arg0, BigIntAccumStateStruct arg1_0, ExtVal arg2_0, BoundLayout<BigIntAccumStateLayout> layout3)  ;
+extern BigIntAccumStruct exec_BigIntAccum(ExecContext& ctx,BigIntTopStateStruct arg0, ExtVal1Array arg1_0, BoundLayout<BigIntAccumLayout> layout2)  ;
 extern OneHot_13_Struct exec_OneHot_13_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_13_Layout> layout1)  ;
 extern TopStruct exec_Top(ExecContext& ctx,BoundLayout<TopLayout> layout0, GlobalBuf global1)  ;
 extern void step_Top(ExecContext& ctx,MutableBuf data0, GlobalBuf global1)  ;
-extern ComponentStruct exec_TopAccum(ExecContext& ctx,BoundLayout<TopLayout> arg0, BoundLayout<LayoutAccumLayout> layout1, GlobalBuf mix2)  ;
-extern void step_TopAccum(ExecContext& ctx,MutableBuf accum0, MutableBuf data1, GlobalBuf mix2)  ;
+extern AccumStruct exec_Accum(ExecContext& ctx,BigIntTopStateStruct arg0, ExtVal1Array arg1_0, BoundLayout<AccumLayout> layout2)  ;
+extern BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,BoundLayout<TopLayout> arg0, GlobalBuf global1)  ;
+extern AccumStruct execUser_Accum(ExecContext& ctx,BoundLayout<TopLayout> arg0, ExtVal1Array arg1_0, BoundLayout<AccumLayout> layout2, GlobalBuf global3)  ;
+extern ComponentStruct exec_TopAccum(ExecContext& ctx,BoundLayout<TopLayout> arg0, BoundLayout<LayoutAccumLayout> layout1, GlobalBuf global2, GlobalBuf mix3)  ;
+extern void step_TopAccum(ExecContext& ctx,MutableBuf accum0, MutableBuf data1, GlobalBuf global2, GlobalBuf mix3)  ;
 
 } // namespace risc0::circuit::rv32im_v2::cpu

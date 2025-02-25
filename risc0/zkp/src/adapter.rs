@@ -30,7 +30,7 @@ pub const REGISTER_GROUP_CODE: usize = 1;
 pub const REGISTER_GROUP_DATA: usize = 2;
 
 // If true, enable tracing of adapter internals.
-const ADAPTER_TRACE_ENABLED: bool = true;
+const ADAPTER_TRACE_ENABLED: bool = false;
 
 macro_rules! trace_if_enabled {
     ($($args:tt)*) => {
