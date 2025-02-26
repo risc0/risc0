@@ -167,10 +167,15 @@ impl TraceProxy {
 
 impl TraceCallback for TraceProxy {
     fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
+        let Ok(event) = event.clone().try_into() else {
+            tracing::trace!("ignoring unknown event {event:?}");
+            return Ok(());
+        };
+
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Trace(event.into())),
+                    kind: Some(pb::api::on_io_request::Kind::Trace(event)),
                 })),
             })),
         };
