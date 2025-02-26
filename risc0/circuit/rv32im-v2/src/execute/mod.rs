@@ -27,10 +27,9 @@ mod syscall;
 #[cfg(test)]
 mod tests;
 pub mod testutil;
-pub mod trace;
 
 pub use self::{
-    executor::{Executor, ExecutorResult, SimpleSession},
+    executor::{EcallMetric, Executor, ExecutorResult, SimpleSession},
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},

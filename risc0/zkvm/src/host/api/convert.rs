@@ -16,7 +16,7 @@ use std::{fmt::Debug, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
-use risc0_binfmt::{SegmentVersion, SystemState};
+use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
@@ -37,6 +37,7 @@ mod ver {
     use super::pb::base::CompatVersion;
 
     pub const RECEIPT: CompatVersion = CompatVersion { value: 1 };
+    pub const SEGMENT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const SUCCINCT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const GROTH16_RECEIPT: CompatVersion = CompatVersion { value: 1 };
 }
@@ -141,23 +142,25 @@ impl TryFrom<pb::api::AssetRequest> for AssetRequest {
     }
 }
 
-impl From<TraceEvent> for pb::api::TraceEvent {
-    fn from(event: TraceEvent) -> Self {
+impl TryFrom<TraceEvent> for pb::api::TraceEvent {
+    type Error = anyhow::Error;
+
+    fn try_from(event: TraceEvent) -> Result<Self> {
         match event {
-            TraceEvent::InstructionStart { cycle, pc, insn } => Self {
+            TraceEvent::InstructionStart { cycle, pc, insn } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::InsnStart(
                     pb::api::trace_event::InstructionStart { cycle, pc, insn },
                 )),
-            },
-            TraceEvent::RegisterSet { idx, value } => Self {
+            }),
+            TraceEvent::RegisterSet { idx, value } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::RegisterSet(
                     pb::api::trace_event::RegisterSet {
                         idx: idx as u32,
                         value,
                     },
                 )),
-            },
-            TraceEvent::MemorySet { addr, region } => Self {
+            }),
+            TraceEvent::MemorySet { addr, region } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::MemorySet(
                     pb::api::trace_event::MemorySet {
                         addr,
@@ -165,17 +168,18 @@ impl From<TraceEvent> for pb::api::TraceEvent {
                         region,
                     },
                 )),
-            },
-            TraceEvent::PageIn { cycles } => Self {
+            }),
+            TraceEvent::PageIn { cycles } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::PageIn(
                     pb::api::trace_event::PageIn { cycles },
                 )),
-            },
-            TraceEvent::PageOut { cycles } => Self {
+            }),
+            TraceEvent::PageOut { cycles } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::PageOut(
                     pb::api::trace_event::PageOut { cycles },
                 )),
-            },
+            }),
+            _ => Err(anyhow!("unknown TraceEvent kind")),
         }
     }
 }
@@ -267,13 +271,6 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
     type Error = anyhow::Error;
 
     fn try_from(opts: pb::api::ProverOpts) -> Result<Self> {
-        let segment_version = match opts.segment_version {
-            Some(0) => SegmentVersion::V1,
-            Some(1) => SegmentVersion::V2,
-            Some(version) => bail!("Incompatible SegmentReceipt version: {version}"),
-            None => SegmentVersion::V1,
-        };
-
         Ok(Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
@@ -292,7 +289,6 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
-            segment_version,
         })
     }
 }
@@ -305,7 +301,6 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
             max_segment_po2: opts.max_segment_po2 as u64,
-            segment_version: Some(opts.segment_version as u32),
         }
     }
 }
@@ -449,9 +444,7 @@ impl TryFrom<pb::core::ReceiptMetadata> for ReceiptMetadata {
 impl From<SegmentReceipt> for pb::core::SegmentReceipt {
     fn from(value: SegmentReceipt) -> Self {
         Self {
-            version: Some(pb::base::CompatVersion {
-                value: value.segment_version as u32,
-            }),
+            version: Some(ver::SEGMENT_RECEIPT),
             seal: value.get_seal_bytes(),
             index: value.index,
             hashfn: value.hashfn,
@@ -473,16 +466,6 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal.push(word);
         }
 
-        let version = value
-            .version
-            .ok_or_else(|| malformed_err("SegmentReceipt.version"))?
-            .value;
-        let segment_version = match version {
-            0 => SegmentVersion::V1,
-            1 => SegmentVersion::V2,
-            _ => bail!("Incompatible SegmentReceipt version: {version}"),
-        };
-
         let claim = value
             .claim
             .ok_or_else(|| malformed_err("SegmentReceipt.claim"))?
@@ -497,7 +480,6 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
                 .verifier_parameters
                 .ok_or_else(|| malformed_err("SegmentReceipt.verifier_parameters"))?
                 .try_into()?,
-            segment_version,
         })
     }
 }
