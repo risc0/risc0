@@ -37,12 +37,11 @@ use risc0_zkvm::{
         memory_barrier, sha,
     },
     sha::{Digest, Sha256, SHA256_INIT},
-    Assumption, ReceiptClaim,
+    Assumption, ReceiptClaim, GUEST_MAX_MEM,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
 use risc0_zkvm_platform::{
     fileno,
-    memory::{self, SYSTEM},
     syscall::{
         bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
         sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
@@ -281,10 +280,11 @@ fn main() {
         }
         MultiTestSpec::Oom => {
             use core::hint::black_box;
-            // SYSTEM memory starts above the guest memory so this is guaranteed
-            // to be larger than the available heap:
-            let len = memory::SYSTEM.start() as usize;
-            let _data = black_box(vec![0_u8; len]);
+            // GUEST_MAX_MEM is the max amount of memory so this will be as large as the heap could get.
+            // setting this as the length results in a capacity error so allocate two of these instead
+            let len = GUEST_MAX_MEM / 2;
+            let _data1 = black_box(vec![0_u8; len]);
+            let _data2 = black_box(vec![0_u8; len]);
         }
         MultiTestSpec::RsaCompat => {
             // This test comes from: https://github.com/RustCrypto/RSA/blob/master/tests/pkcs1v15.rs
@@ -340,7 +340,7 @@ fn main() {
             );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {
-            let addr: *const u8 = SYSTEM.start() as _;
+            let addr: *const u8 = GUEST_MAX_MEM as _;
             sys_log(addr, 100);
         },
         MultiTestSpec::AlignedAlloc => {

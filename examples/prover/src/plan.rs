@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::VecDeque};
 
 #[derive(Debug)]
 pub enum PlannerErr {
@@ -114,7 +114,7 @@ pub struct Planner {
     /// List of current "keccak_peaks." Sorted in order of decreasing height.
     ///
     /// A task is a "keccak_peak" if (1) it is either a Keccak Segment or Union command AND (2) no other union tasks depend on it.
-    keccak_peaks: Vec<usize>,
+    keccak_peaks: VecDeque<usize>,
 
     /// Iterator position. Used by `self.next_task()`.
     consumer_position: usize,
@@ -163,7 +163,7 @@ impl Planner {
         self.tasks.push(Task::new_keccak(task_number, segment_idx));
 
         let mut new_peak = task_number;
-        while let Some(smallest_peak) = self.keccak_peaks.last().copied() {
+        while let Some(smallest_peak) = self.keccak_peaks.back().copied() {
             let new_height = self.get_task(new_peak).task_height;
             let smallest_peak_height = self.get_task(smallest_peak).task_height;
 
@@ -173,13 +173,13 @@ impl Planner {
             match new_height.cmp(&smallest_peak_height) {
                 Ordering::Less => break,
                 Ordering::Equal => {
-                    self.keccak_peaks.pop();
+                    self.keccak_peaks.pop_back();
                     new_peak = self.enqueue_union(smallest_peak, new_peak);
                 }
                 Ordering::Greater => unreachable!(),
             }
         }
-        self.keccak_peaks.push(new_peak);
+        self.keccak_peaks.push_back(new_peak);
 
         Ok(task_number)
     }
@@ -222,11 +222,11 @@ impl Planner {
 
         // Join remaining peaks
         while 2 <= self.keccak_peaks.len() {
-            let peak_0 = self.keccak_peaks.pop().unwrap();
-            let peak_1 = self.keccak_peaks.pop().unwrap();
+            let peak_0 = self.keccak_peaks.pop_front().unwrap();
+            let peak_1 = self.keccak_peaks.pop_front().unwrap();
 
             let peak_3 = self.enqueue_union(peak_1, peak_0);
-            self.keccak_peaks.push(peak_3);
+            self.keccak_peaks.push_front(peak_3);
         }
 
         // Add the Finalize task
