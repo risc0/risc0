@@ -136,23 +136,25 @@ impl TryFrom<pb::api::AssetRequest> for AssetRequest {
     }
 }
 
-impl From<TraceEvent> for pb::api::TraceEvent {
-    fn from(event: TraceEvent) -> Self {
+impl TryFrom<TraceEvent> for pb::api::TraceEvent {
+    type Error = anyhow::Error;
+
+    fn try_from(event: TraceEvent) -> Result<Self> {
         match event {
-            TraceEvent::InstructionStart { cycle, pc, insn } => Self {
+            TraceEvent::InstructionStart { cycle, pc, insn } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::InsnStart(
                     pb::api::trace_event::InstructionStart { cycle, pc, insn },
                 )),
-            },
-            TraceEvent::RegisterSet { idx, value } => Self {
+            }),
+            TraceEvent::RegisterSet { idx, value } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::RegisterSet(
                     pb::api::trace_event::RegisterSet {
                         idx: idx as u32,
                         value,
                     },
                 )),
-            },
-            TraceEvent::MemorySet { addr, region } => Self {
+            }),
+            TraceEvent::MemorySet { addr, region } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::MemorySet(
                     pb::api::trace_event::MemorySet {
                         addr,
@@ -160,17 +162,18 @@ impl From<TraceEvent> for pb::api::TraceEvent {
                         region,
                     },
                 )),
-            },
-            TraceEvent::PageIn { cycles } => Self {
+            }),
+            TraceEvent::PageIn { cycles } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::PageIn(
                     pb::api::trace_event::PageIn { cycles },
                 )),
-            },
-            TraceEvent::PageOut { cycles } => Self {
+            }),
+            TraceEvent::PageOut { cycles } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::PageOut(
                     pb::api::trace_event::PageOut { cycles },
                 )),
-            },
+            }),
+            _ => Err(anyhow!("unknown TraceEvent kind")),
         }
     }
 }
