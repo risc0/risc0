@@ -27,6 +27,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <vector>
 
@@ -40,6 +41,7 @@ struct ExecBuffers {
 struct AccumBuffers {
   Buffer<false> data;
   Buffer<false> accum;
+  Buffer<true> global;
   Buffer<true> mix;
 };
 
@@ -91,19 +93,6 @@ inline Val inRange(Val low, Val mid, Val high) {
   return Val(low <= mid && mid < high);
 }
 
-inline void eqz(Val a, const char* loc) {
-  if (a.asUInt32()) {
-    printf("eqz failure at: %s\n", loc);
-    throw std::runtime_error("eqz failure");
-  }
-}
-
-inline void eqz(ExtVal a, const char* loc) {
-  for (size_t i = 0; i < EXT_SIZE; i++) {
-    eqz(a.elems[i], loc);
-  }
-}
-
 struct ExecContext {
   ExecContext(PreflightTrace& preflight, LookupTables& tables, size_t cycle)
       : preflight(preflight), tables(tables), cycle(cycle) {}
@@ -126,10 +115,10 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  MutableBufObj(Buffer<false>& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
+  MutableBufObj(Buffer<false>& buf, size_t zeroBack = 0) : buf(buf), zeroBack(zeroBack) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
-    if (zeroBack && back > 0) {
+    if (zeroBack && col > zeroBack && back > 0) {
       return 0;
     }
     size_t backRow = (buf.rows + ctx.cycle - back) % buf.rows;
@@ -141,7 +130,7 @@ struct MutableBufObj : public BufferObj {
   }
 
   Buffer<false>& buf;
-  bool zeroBack;
+  size_t zeroBack;
 };
 
 using MutableBuf = MutableBufObj*;
@@ -170,10 +159,24 @@ template <typename T> struct BoundLayout {
   BufferObj* buf = nullptr;
 };
 
+inline void eqz(ExecContext& ctx, Val a, const char* loc) {
+  if (a.asUInt32()) {
+    std::stringstream ss;
+    ss << "[" << ctx.cycle << "]: eqz failure at: " << loc;
+    throw std::runtime_error(ss.str());
+  }
+}
+
+inline void eqz(ExecContext& ctx, ExtVal a, const char* loc) {
+  for (size_t i = 0; i < EXT_SIZE; i++) {
+    eqz(ctx, a.elems[i], loc);
+  }
+}
+
 #define BIND_LAYOUT(orig, buf) BoundLayout(orig, buf)
 #define LAYOUT_LOOKUP(orig, elem) BoundLayout(orig.layout.elem, orig.buf)
 #define LAYOUT_SUBSCRIPT(orig, index) BoundLayout(orig.layout[index], orig.buf)
-#define EQZ(val, loc) eqz(val, loc)
+#define EQZ(val, loc) eqz(ctx, val, loc)
 
 inline void store(ExecContext& ctx, BoundLayout<Reg> reg, Val val) {
   reg.buf->store(ctx, reg.layout.col, val);
@@ -281,6 +284,7 @@ std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx);
 Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len);
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal);
 std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx);
+std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx);
 
 // Setup the basic field stuff
 #define SET_FIELD(x) /**/

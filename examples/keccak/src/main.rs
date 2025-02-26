@@ -76,4 +76,16 @@ mod tests {
             "We expect to match the reference keccak hash of the standard test value 'abc'"
         );
     }
+
+    #[test]
+    fn hash_long() {
+        let input = [0xau8; 100_000];
+        let (digest, receipt) = super::provably_hash(core::str::from_utf8(&input).unwrap());
+        receipt.verify(KECCAK_ID).unwrap();
+        assert_eq!(
+            hex::encode(digest.as_bytes()),
+            "1d2563dc302864dbb7ef2c8a66485adaee9827d47dc608acb7e89e7aa88d77f1",
+            "keccak example: digest mismatch"
+        );
+    }
 }

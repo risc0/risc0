@@ -41,6 +41,8 @@
 
 namespace risc0::circuit::rv32im_v2::cuda {
 
+constexpr size_t kUserAccumSplit = kLayout_TopAccum.columns[0].col;
+
 struct ExecBuffers {
   Buffer global;
   Buffer data;
@@ -79,7 +81,14 @@ struct HostExecContext {
                        preflight->txnsLen * sizeof(MemoryTransaction),
                        cudaMemcpyHostToDevice));
 
+    CUDA_OK(cudaMalloc(&d_preflight.bigintBytes, preflight->bigintBytesLen));
+    CUDA_OK(cudaMemcpy(d_preflight.bigintBytes,
+                       preflight->bigintBytes,
+                       preflight->bigintBytesLen,
+                       cudaMemcpyHostToDevice));
+
     d_preflight.txnsLen = preflight->txnsLen;
+    d_preflight.bigintBytesLen = preflight->bigintBytesLen;
     d_preflight.tableSplitCycle = preflight->tableSplitCycle;
 
     CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
@@ -100,6 +109,7 @@ struct HostExecContext {
     cudaFree(d_tables.tableU16);
     cudaFree(d_tables.tableU8);
     cudaFree(ctx->tables);
+    cudaFree(d_preflight.bigintBytes);
     cudaFree(d_preflight.txns);
     cudaFree(d_preflight.cycles);
     cudaFree(ctx->preflight);
@@ -112,12 +122,14 @@ struct HostExecContext {
 struct AccumBuffers {
   Buffer data;
   Buffer accum;
+  Buffer global;
   Buffer mix;
 };
 
 struct DeviceAccumContext {
   Buffer* data;
   Buffer* accum;
+  Buffer* global;
   Buffer* mix;
   PreflightTrace* preflight;
   LookupTables* tables;
@@ -136,6 +148,9 @@ struct HostAccumContext {
 
     CUDA_OK(cudaMalloc(&ctx->accum, sizeof(Buffer)));
     CUDA_OK(cudaMemcpy(ctx->accum, &buffers->accum, sizeof(Buffer), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&ctx->global, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->global, &buffers->global, sizeof(Buffer), cudaMemcpyHostToDevice));
 
     CUDA_OK(cudaMalloc(&ctx->mix, sizeof(Buffer)));
     CUDA_OK(cudaMemcpy(ctx->mix, &buffers->mix, sizeof(Buffer), cudaMemcpyHostToDevice));
@@ -177,6 +192,7 @@ struct HostAccumContext {
     cudaFree(d_preflight.cycles);
     cudaFree(ctx->preflight);
     cudaFree(ctx->mix);
+    cudaFree(ctx->global);
     cudaFree(ctx->accum);
     cudaFree(ctx->data);
     cudaFree(ctx);
@@ -326,14 +342,14 @@ __device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
   return {pagingIdx, machineMode};
 }
 
-// __device__ void
-// stepAccum(AccumBuffers& buffers, PreflightTrace& preflight, LookupTables& tables, size_t cycle) {
-//   ExecContext ctx(preflight, tables, cycle);
-//   MutableBufObj data(ctx, buffers.data);
-//   MutableBufObj accum(ctx, buffers.accum);
-//   GlobalBufObj mix(ctx, buffers.mix);
-//   step_TopAccum(ctx, &accum, &data, &mix);
-// }
+__device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
+  ::cuda::std::array<Val, 16> ret;
+  size_t bigintIdx = ctx.preflight.cycles[ctx.cycle].bigintIdx;
+  for (size_t i = 0; i < 16; i++) {
+    ret[i] = ctx.preflight.bigintBytes[bigintIdx + i];
+  }
+  return ret;
+}
 
 __device__ void nextStep(DeviceExecContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
@@ -374,9 +390,10 @@ __global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
 
   ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
   MutableBufObj data(*ctx->data);
-  MutableBufObj accum(*ctx->accum, /*zeroBack=*/true);
+  MutableBufObj accum(*ctx->accum, /*zeroBack=*/kUserAccumSplit);
   GlobalBufObj mix(*ctx->mix);
-  step_TopAccum(execCtx, &accum, &data, &mix);
+  GlobalBufObj global(*ctx->global);
+  step_TopAccum(execCtx, &accum, &data, &global, &mix);
 }
 
 __global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
@@ -387,14 +404,16 @@ __global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
 
   Buffer& accum = *ctx->accum;
 
+  size_t machineColumns = (accum.cols - kUserAccumSplit) / 4;
   size_t back1 = (cycle + lastCycle - 1) % lastCycle;
   Fp prev[4];
   for (size_t k = 0; k < 4; k++) {
     prev[k] = accum.get(back1, accum.cols - 4 + k);
   }
-  for (size_t j = 0; j < accum.cols / 4 - 1; j++) {
+  for (size_t j = 0; j < machineColumns - 1; j++) {
     for (size_t k = 0; k < 4; k++) {
-      accum.set(cycle, j * 4 + k, accum.get(cycle, j * 4 + k) + prev[k]);
+      size_t col = kUserAccumSplit + j * 4 + k;
+      accum.set(cycle, col, accum.get(cycle, col) + prev[k]);
     }
   }
 }

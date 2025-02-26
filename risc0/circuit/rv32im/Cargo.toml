@@ -17,6 +17,7 @@ serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
 ] }
+smallvec = { version = "1.13", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -32,10 +33,13 @@ cfg-if = { version = "1.0", optional = true }
 crossbeam = { version = "0.8", optional = true }
 crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
-derive_more = { version = "1.0", features = ["debug"], optional = true }
+derive_more = { version = "2.0.1", features = ["debug"], optional = true }
 enum-map = { version = "2.7.3", optional = true }
-ibig = { version = "0.3.6" }
 lazy-regex = { version = "3.3", optional = true }
+malachite = { version = "0.4", optional = true, default-features = false, features = [
+  "naturals_and_integers",
+  "32_bit_limbs",
+] }
 num-derive = { version = "0.4", optional = true }
 num-traits = { version = "0.2", optional = true }
 rand = { version = "0.8", optional = true }
@@ -68,6 +72,7 @@ prove = [
   "dep:derive_more",
   "dep:enum-map",
   "dep:lazy-regex",
+  "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",
   "dep:rand",
@@ -75,6 +80,7 @@ prove = [
   "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
   "dep:sha2",
+  "dep:smallvec",
   "risc0-core/perf",
   "risc0-zkp/prove",
   "std",

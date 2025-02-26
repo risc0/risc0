@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ pub struct TapSet<'a> {
     pub group_names: &'a [&'a str],
 }
 
-impl<'a> TapSet<'a> {
+impl TapSet<'_> {
     pub fn num_groups(&self) -> usize {
         self.group_names.len()
     }
@@ -151,7 +151,7 @@ pub struct RegisterRef<'a> {
     cursor: usize,
 }
 
-impl<'a> RegisterRef<'a> {
+impl RegisterRef<'_> {
     pub fn group(&self) -> usize {
         self.data[self.cursor].group
     }
@@ -175,7 +175,7 @@ impl<'a> RegisterRef<'a> {
     }
 }
 
-impl<'a> Debug for RegisterRef<'a> {
+impl Debug for RegisterRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("RegisterRef")
             .field("group", &self.group())
@@ -229,7 +229,7 @@ pub struct TapRef<'a> {
     data: &'a TapData,
 }
 
-impl<'a> TapRef<'a> {
+impl TapRef<'_> {
     pub fn group(&self) -> usize {
         self.data.group
     }
@@ -247,7 +247,7 @@ impl<'a> TapRef<'a> {
     }
 }
 
-impl<'a> Debug for TapRef<'a> {
+impl Debug for TapRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("TapRef")
             .field("group", &self.group())
@@ -296,7 +296,7 @@ pub struct ComboRef<'a> {
     id: usize,
 }
 
-impl<'a> ComboRef<'a> {
+impl ComboRef<'_> {
     pub fn id(&self) -> usize {
         self.id
     }

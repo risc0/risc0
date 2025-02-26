@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,12 @@
 //! paging, and it does not include padding to extend the trace to
 //! the nearest power of two.
 
+mod inline;
+
 use std::{
     cell::RefCell,
     collections::HashMap,
+    fmt,
     fmt::Write,
     hash::{Hash, Hasher},
     rc::Rc,
@@ -33,8 +36,8 @@ use std::{
 
 use addr2line::{
     fallible_iterator::FallibleIterator,
-    gimli::{EndianRcSlice, RunTimeEndian},
-    object::{File, Object, ObjectSegment},
+    gimli::{self, EndianRcSlice, RunTimeEndian},
+    object::{self, File, Object, ObjectSegment},
     LookupResult, ObjectContext,
 };
 use anyhow::{anyhow, Result};
@@ -46,6 +49,7 @@ use rustc_demangle::demangle;
 
 use super::proto;
 use crate::{TraceCallback, TraceEvent};
+use inline::{InlineFunction, InlineFunctionTable};
 
 /// Operations effecting the function call stack.
 #[derive(Debug)]
@@ -91,6 +95,57 @@ fn extract_call_stack_op(insn: u32) -> Option<CallStackOp> {
     }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+enum ZkVmFunction {
+    PageIn,
+    PageOut,
+}
+
+impl fmt::Display for ZkVmFunction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::PageIn => write!(f, "[PageIn]"),
+            Self::PageOut => write!(f, "[PageOut]"),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+enum FunctionStart {
+    Real { pc: u32 },
+    Inline(InlineFunction),
+    ZkVm(ZkVmFunction),
+}
+
+impl FunctionStart {
+    fn get_pc(&self) -> u32 {
+        match self {
+            Self::Real { pc } => *pc,
+            Self::Inline(InlineFunction { low_pc, .. }) => *low_pc as u32,
+            Self::ZkVm(_) => 0,
+        }
+    }
+}
+
+impl fmt::Display for FunctionStart {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Real { pc } => write!(f, "0x{pc:x}"),
+            Self::Inline(InlineFunction {
+                abstract_origin,
+                low_pc,
+                high_pc,
+            }) => {
+                write!(
+                    f,
+                    "[inline function: 0x{abstract_origin:x} (0x{low_pc:x}..0x{high_pc:x}]"
+                )
+            }
+            Self::ZkVm(func) => write!(f, "{func}"),
+        }
+    }
+}
+
 /// Node in a tree tracking the call stacks and assigning cycles to stacks.
 ///
 /// Each node represents a unique call-stack as defined by a list of return
@@ -98,10 +153,10 @@ fn extract_call_stack_op(insn: u32) -> Option<CallStackOp> {
 #[derive(Clone, Debug, Default)]
 struct CallNode {
     /// Counter by program counter with the current call stack.
-    pub(crate) counts: HashMap<u32, usize>,
+    pub(crate) counts: HashMap<FunctionStart, usize>,
 
     /// Nodes representing further calls from this context.
-    pub(crate) calls: HashMap<u32, Rc<RefCell<CallNode>>>,
+    pub(crate) calls: HashMap<FunctionStart, Rc<RefCell<CallNode>>>,
 }
 
 impl CallNode {
@@ -112,9 +167,8 @@ impl CallNode {
 
         writeln!(output, "{indent_str}Counts:").unwrap();
         for (key, value) in &self.counts {
-            let frames = &profiler.lookup_pc(*key as u64);
-            if !frames.is_empty() {
-                let name = &frames[0].name;
+            if let Some(frame) = &profiler.lookup_function_start(*key) {
+                let name = &frame.name;
                 writeln!(output, "{indent_str}  {name} ({key}): {value}").unwrap();
             }
         }
@@ -146,7 +200,7 @@ pub struct Profiler {
 
     // Path of the call stack as a series of program counters,
     // representing the journey to the current node from the root
-    call_stack_path: Vec<u32>,
+    call_stack_path: Vec<FunctionStart>,
 
     // Root of the tree used to store samples attributable to a call stack.
     root: Rc<RefCell<CallNode>>,
@@ -155,7 +209,7 @@ pub struct Profiler {
     current_node: Option<Rc<RefCell<CallNode>>>,
 
     // Current CallNode key in the stack
-    current_key: u32,
+    current_key: Option<FunctionStart>,
 
     ctx: ObjectContext,
 
@@ -163,7 +217,7 @@ pub struct Profiler {
 }
 
 /// Represents a frame.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Frame {
     /// Function name
     pub name: String,
@@ -183,7 +237,7 @@ fn decode_frame(fr: addr2line::Frame<EndianRcSlice<RunTimeEndian>>) -> Option<Fr
     })
 }
 
-fn lookup_pc(pc: u32, ctx: &ObjectContext) -> Vec<Frame> {
+fn lookup_pc_in_dwarf(pc: u32, ctx: &ObjectContext) -> Vec<Frame> {
     let frames = match ctx.find_frames(pc as u64) {
         LookupResult::Output(result) => result.unwrap(),
         LookupResult::Load {
@@ -206,11 +260,61 @@ fn demangle_name(name: String) -> String {
     }
 }
 
+fn load_dwarf<'data, O: object::Object<'data>>(
+    file: &O,
+) -> Result<gimli::Dwarf<gimli::EndianRcSlice<gimli::RunTimeEndian>>> {
+    let endian = if file.is_little_endian() {
+        gimli::RunTimeEndian::Little
+    } else {
+        gimli::RunTimeEndian::Big
+    };
+
+    fn load_section<'data, O, Endian>(
+        id: gimli::SectionId,
+        file: &O,
+        endian: Endian,
+    ) -> std::result::Result<gimli::EndianRcSlice<Endian>, gimli::Error>
+    where
+        O: object::Object<'data>,
+        Endian: gimli::Endianity,
+    {
+        use object::ObjectSection as _;
+
+        let data = file
+            .section_by_name(id.name())
+            .and_then(|section| section.uncompressed_data().ok())
+            .unwrap_or(std::borrow::Cow::Borrowed(&[]));
+        Ok(gimli::EndianRcSlice::new(Rc::from(&*data), endian))
+    }
+
+    Ok(gimli::Dwarf::load(|id| load_section(id, file, endian))?)
+}
+
+pub fn read_enable_inline_functions_env_var() -> bool {
+    std::env::var("RISC0_PPROF_ENABLE_INLINE_FUNCTIONS")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some()
+}
+
 impl Profiler {
     /// Return a new profile from the given RISC-V ELF.
-    pub fn new(elf_data: &[u8], filename: Option<&str>) -> Result<Self> {
+    pub fn new(
+        elf_data: &[u8],
+        filename: Option<&str>,
+        enable_inline_functions: bool,
+    ) -> Result<Self> {
         let file = File::parse(elf_data)?;
-        let ctx = ObjectContext::new(&file)?;
+        let dwarf = load_dwarf(&file)?;
+
+        let inline_function_table_result = if enable_inline_functions {
+            InlineFunctionTable::build_from_dwarf(&dwarf)
+        } else {
+            Err(anyhow!("inline functions disabled"))
+        };
+
+        let ctx = ObjectContext::from_dwarf(dwarf)?;
         let root = Rc::new(RefCell::new(CallNode::default()));
         let mut profiler = Profiler {
             pc: u32::MAX,
@@ -219,7 +323,7 @@ impl Profiler {
             pop_stack: Vec::new(),
             root: Rc::clone(&root),
             current_node: Some(root),
-            current_key: 0,
+            current_key: None,
             call_stack_path: Vec::new(),
             ctx,
             profile: ProfileBuilder::new(),
@@ -244,15 +348,16 @@ impl Profiler {
             }
         }
 
-        let elf = ElfBytes::<LittleEndian>::minimal_parse(elf_data)?;
-        if let Some((symtab, strtab)) = elf.symbol_table()? {
-            for sym in symtab {
-                if sym.st_symtype() == STT_FUNC {
-                    let name = strtab.get(sym.st_name as usize)?;
-                    profiler
-                        .profile
-                        .function_lookup
-                        .insert(sym.st_value, demangle(name).to_string());
+        profiler.profile.symbol_table = build_symbol_table(elf_data)?;
+        match inline_function_table_result {
+            Ok(inline_function_table) => {
+                profiler.profile.inline_function_table = inline_function_table
+            }
+            Err(error) => {
+                if enable_inline_functions {
+                    tracing::warn!(
+                        "Error decoding DWARF data, inline functions not available: {error}"
+                    )
                 }
             }
         }
@@ -260,51 +365,56 @@ impl Profiler {
         Ok(profiler)
     }
 
-    /// Returns the frames name at the given pc.
-    pub fn lookup_pc(&self, pc: u64) -> Vec<Frame> {
-        let frames = if let Some(symbol) = self.profile.function_lookup.get(&pc).cloned() {
-            let mut dwarf_frames = lookup_pc(pc as u32, &self.ctx);
-            dwarf_frames.reverse();
-            let name = demangle_name(symbol).replace('&', "");
-            let mut lineno: i64 = 0;
-            let mut filename = "unknown".to_string();
-            if !dwarf_frames.is_empty() {
-                let debug_frame = &dwarf_frames[0];
-                let debug_name = debug_frame.name.replace('&', "");
-                if name == debug_name {
-                    lineno = debug_frame.lineno;
-                    filename = debug_frame.filename.clone();
-                }
-            }
-            let mut frames = vec![Frame {
-                name,
-                lineno,
-                filename,
-            }];
-            if dwarf_frames.len() > 1 {
-                for fr in dwarf_frames[1..].iter() {
-                    frames.push(fr.clone())
-                }
-            }
-            frames
+    fn lookup_function_start(&self, f: FunctionStart) -> Option<Frame> {
+        match f {
+            FunctionStart::Real { pc } => self.lookup_pc(pc),
+            FunctionStart::Inline(InlineFunction {
+                abstract_origin, ..
+            }) => self.lookup_inline_function(abstract_origin as u32),
+            FunctionStart::ZkVm(f) => Some(Frame {
+                name: f.to_string(),
+                lineno: 0,
+                filename: String::default(),
+            }),
+        }
+    }
+
+    fn lookup_pc(&self, pc: u32) -> Option<Frame> {
+        let dwarf_frames = lookup_pc_in_dwarf(pc, &self.ctx);
+        let symbol = self.profile.symbol_table.get(&(pc as u64)).cloned();
+
+        if !dwarf_frames.is_empty() {
+            Some(dwarf_frames.last().unwrap().clone())
         } else {
-            // only used when debug is set. However, it currently misinterprets when no_std
-            // lookup_pc(pc as u32, &self.ctx)
-            vec![]
-        };
-        frames
+            symbol.map(|symbol| Frame {
+                name: demangle_name(symbol).replace('&', ""),
+                lineno: 0,
+                filename: "unknown".into(),
+            })
+        }
+    }
+
+    fn lookup_inline_function(&self, abstract_origin: u32) -> Option<Frame> {
+        Some(
+            self.profile
+                .inline_function_table
+                .frames
+                .get(&(abstract_origin as u64))?
+                .clone(),
+        )
     }
 
     /// Walk the profile tree rooted at node_ref, adding all call stacks in the profile to the
     /// profile under construction. All call stacks encountered build on top of the base_stack.
     fn walk_stacks(&mut self, node_ref: Rc<RefCell<CallNode>>, base_stack: Vec<Frame>) {
         let node = node_ref.borrow();
-        for (&pc, count) in &node.counts {
+        for (function_start, count) in &node.counts {
             let mut new_stack = base_stack.clone();
-            let frames = self.lookup_pc(pc.into());
-            if !frames.is_empty() {
-                new_stack.extend(frames);
+            if let Some(frame) = self.lookup_function_start(*function_start) {
+                new_stack.push(frame);
             }
+
+            let pc = function_start.get_pc();
 
             let location_ids: Vec<_> = new_stack
                 .iter()
@@ -328,11 +438,11 @@ impl Profiler {
                 ..Default::default()
             };
 
-            if !sample.location_id.is_empty() {
+            if !sample.location_id.is_empty() && *count > 0 {
                 self.profile.add_sample(sample);
             }
 
-            if let Some(next_node_ref) = node.calls.get(&pc) {
+            if let Some(next_node_ref) = node.calls.get(function_start) {
                 self.walk_stacks(next_node_ref.clone(), new_stack);
             }
         }
@@ -355,6 +465,175 @@ impl Profiler {
         self.walk_stacks(root_ref, Vec::new());
         self.profile.profile.encode_to_vec()
     }
+
+    fn add_zkvm_frame(&mut self, function: ZkVmFunction, cycles: u64) {
+        if !self.call_stack_path.is_empty() {
+            let current_node = self
+                .current_node
+                .as_ref()
+                .expect("current_node should always be Some after initialization");
+            let current_key = self
+                .current_key
+                .expect("current_key should always be Some after initialization");
+
+            let node = current_node
+                .borrow_mut()
+                .calls
+                .entry(current_key)
+                .or_insert_with(|| Rc::new(RefCell::new(CallNode::default())))
+                .clone();
+
+            node.borrow_mut()
+                .counts
+                .entry(FunctionStart::ZkVm(function))
+                .and_modify(|e| *e += cycles as usize)
+                .or_insert(cycles as usize);
+        }
+    }
+
+    fn add_cycles_to_current_stack(&mut self, cycles: u64) {
+        if !self.call_stack_path.is_empty() {
+            let current_node = self
+                .current_node
+                .as_ref()
+                .expect("current_node should always be Some after initialization");
+            let mut current_node_borrowed = current_node.borrow_mut();
+            let current_key = self
+                .current_key
+                .expect("current_key should always be Some after initialization");
+            current_node_borrowed
+                .counts
+                .entry(current_key)
+                .and_modify(|e| *e += cycles as usize)
+                .or_insert(cycles as usize);
+        }
+    }
+
+    fn handle_function_call(
+        &mut self,
+        op: CallStackOp,
+        pc: u32,
+        orig_pc: u32,
+        update_stack: &mut bool,
+    ) -> Result<(), anyhow::Error> {
+        match op {
+            CallStackOp::Push => {
+                // Sometimes we confuse a jump and a function call. See if we are jumping to the
+                // start of a function or not to disambiguate.
+                if self.profile.symbol_table.contains_key(&(pc as u64)) {
+                    self.call_stack_path.push(FunctionStart::Real { pc });
+                    self.pop_stack.push(orig_pc);
+                    *update_stack = true;
+                }
+            }
+            CallStackOp::Pop => loop {
+                while matches!(self.call_stack_path.last(), Some(FunctionStart::Inline(_))) {
+                    self.call_stack_path.pop();
+                }
+
+                self.call_stack_path.pop().ok_or_else(|| {
+                    anyhow!("attempted to follow a return with an empty call stack")
+                })?;
+                let popped = self.pop_stack.pop().ok_or_else(|| {
+                    anyhow!("attempted to follow a return with an empty call stack")
+                })?;
+                *update_stack = true;
+                if popped == pc - 4 {
+                    break;
+                }
+            },
+            CallStackOp::PopPush => {
+                loop {
+                    while matches!(self.call_stack_path.last(), Some(FunctionStart::Inline(_))) {
+                        self.call_stack_path.pop();
+                    }
+
+                    self.call_stack_path.pop().ok_or_else(|| {
+                        anyhow!("attempted to follow a return with an empty call stack")
+                    })?;
+                    let popped = self.pop_stack.pop().ok_or_else(|| {
+                        anyhow!("attempted to follow a return with an empty call stack")
+                    })?;
+                    if popped == pc - 4 {
+                        break;
+                    }
+                }
+                self.call_stack_path.push(FunctionStart::Real { pc });
+                self.pop_stack.push(orig_pc);
+                *update_stack = true;
+            }
+        }
+        Ok(())
+    }
+
+    fn handle_inline_functions(&mut self, pc: u32, update_stack: &mut bool) {
+        loop {
+            let Some(FunctionStart::Inline(InlineFunction {
+                low_pc, high_pc, ..
+            })) = self.call_stack_path.last()
+            else {
+                break;
+            };
+
+            if !(*low_pc..*high_pc).contains(&(pc as u64)) {
+                self.call_stack_path.pop();
+                *update_stack = true;
+                continue;
+            }
+            break;
+        }
+
+        if let Some(inline_functions) = self.profile.inline_function_table.starts.get(&(pc as u64))
+        {
+            for func in inline_functions {
+                let to_add = FunctionStart::Inline(*func);
+                if self.call_stack_path.last() != Some(&to_add) {
+                    self.call_stack_path.push(to_add);
+                }
+            }
+            *update_stack = true;
+        }
+    }
+
+    fn update_stack(&mut self, pc: u32) {
+        tracing::debug!(
+            "updating stack pc={pc:x}, stack={:?}",
+            &self.call_stack_path
+        );
+        let mut curr_node = Rc::clone(&self.root);
+        for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
+            if i == self.call_stack_path.len() - 1 {
+                self.current_node = Some(Rc::clone(&curr_node));
+                self.current_key = Some(call_stack_key);
+            }
+            let next_node = {
+                let mut curr_node_borrowed = curr_node.borrow_mut();
+                curr_node_borrowed.counts.entry(call_stack_key).or_default();
+                curr_node_borrowed
+                    .calls
+                    .entry(call_stack_key)
+                    .or_insert_with(|| Rc::new(RefCell::new(CallNode::default())))
+                    .clone()
+            };
+            curr_node = next_node;
+        }
+    }
+}
+
+fn build_symbol_table(elf_data: &[u8]) -> Result<HashMap<u64, String>> {
+    let mut symbol_table = HashMap::new();
+
+    let elf = ElfBytes::<LittleEndian>::minimal_parse(elf_data)?;
+    if let Some((symtab, strtab)) = elf.symbol_table()? {
+        for sym in symtab {
+            if sym.st_symtype() == STT_FUNC {
+                let name = strtab.get(sym.st_name as usize)?;
+                symbol_table.insert(sym.st_value, demangle(name).to_string());
+            }
+        }
+    }
+
+    Ok(symbol_table)
 }
 
 impl TraceCallback for Profiler {
@@ -366,71 +645,18 @@ impl TraceCallback for Profiler {
                 let orig_pc = self.pc;
                 let orig_insn = self.insn;
 
-                if !self.call_stack_path.is_empty() {
-                    let current_node = self
-                        .current_node
-                        .as_ref()
-                        .expect("current_node should always be Some after initialization");
-                    let mut current_node_borrowed = current_node.borrow_mut();
-                    current_node_borrowed
-                        .counts
-                        .entry(self.current_key)
-                        .and_modify(|e| *e += cycles as usize)
-                        .or_insert(cycles as usize);
-                }
+                self.add_cycles_to_current_stack(cycles);
+
+                let mut update_stack = false;
 
                 if let Some(op) = extract_call_stack_op(orig_insn) {
-                    match op {
-                        CallStackOp::Push => {
-                            self.call_stack_path.push(pc);
-                            self.pop_stack.push(orig_pc);
-                        }
-                        CallStackOp::Pop => loop {
-                            self.call_stack_path.pop().ok_or_else(|| {
-                                anyhow!("attempted to follow a return with an empty call stack")
-                            })?;
-                            let popped = self.pop_stack.pop().ok_or_else(|| {
-                                anyhow!("attempted to follow a return with an empty call stack")
-                            })?;
-                            if pc - 4 == popped {
-                                break;
-                            }
-                        },
-                        CallStackOp::PopPush => {
-                            loop {
-                                self.call_stack_path.pop().ok_or_else(|| {
-                                    anyhow!("attempted to follow a return with an empty call stack")
-                                })?;
-                                let popped = self.pop_stack.pop().ok_or_else(|| {
-                                    anyhow!("attempted to follow a return with an empty call stack")
-                                })?;
-                                if pc - 4 == popped {
-                                    break;
-                                }
-                            }
-                            self.call_stack_path.push(pc);
-                            self.pop_stack.push(orig_pc);
-                        }
-                    }
+                    self.handle_function_call(op, pc, orig_pc, &mut update_stack)?;
+                }
 
-                    let mut curr_node = Rc::clone(&self.root);
-                    for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
-                        if i == self.call_stack_path.len() - 1 {
-                            self.current_node = Some(Rc::clone(&curr_node));
-                            self.current_key = *self.call_stack_path.last().ok_or_else(|| {
-                                anyhow!("attempted to access an empty call stack")
-                            })?;
-                        }
-                        let next_node = {
-                            let mut curr_node_borrowed = curr_node.borrow_mut();
-                            curr_node_borrowed
-                                .calls
-                                .entry(call_stack_key)
-                                .or_insert_with(|| Rc::new(RefCell::new(CallNode::default())))
-                                .clone()
-                        };
-                        curr_node = next_node;
-                    }
+                self.handle_inline_functions(pc, &mut update_stack);
+
+                if update_stack {
+                    self.update_stack(pc);
                 }
 
                 // Update pc, insn, and cycle
@@ -438,8 +664,13 @@ impl TraceCallback for Profiler {
                 self.insn = insn;
                 self.cycle = cycle;
             }
+            TraceEvent::PageIn { cycles } => self.add_zkvm_frame(ZkVmFunction::PageIn, cycles),
+            TraceEvent::PageOut { cycles } => self.add_zkvm_frame(ZkVmFunction::PageOut, cycles),
             TraceEvent::RegisterSet { .. } => (),
             TraceEvent::MemorySet { .. } => (),
+            _ => {
+                tracing::trace!("ignoring unknown event {event:?}");
+            }
         }
         Ok(())
     }
@@ -456,7 +687,8 @@ pub(crate) struct ProfileBuilder {
     strings: HashMap<String, i64>,
     functions: HashMap<(String, String), u64>,
     locations: HashMap<LocationKey, u64>,
-    function_lookup: HashMap<u64, String>,
+    symbol_table: HashMap<u64, String>,
+    inline_function_table: InlineFunctionTable,
     profile: proto::Profile,
 }
 
@@ -467,7 +699,8 @@ impl ProfileBuilder {
             functions: HashMap::new(),
             locations: HashMap::new(),
             profile: Default::default(),
-            function_lookup: Default::default(),
+            symbol_table: Default::default(),
+            inline_function_table: Default::default(),
         };
 
         // First string must always be the empty string
@@ -538,28 +771,43 @@ impl ProfileBuilder {
     /// Dereferences strings, etc. in the protobuf for testing purposes.
     /// Returns a tuple of (frames, program counter, cycles)
     #[cfg(test)]
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
-        self.profile.sample.iter().flat_map(move |sample| {
-            sample.location_id.iter().map(move |id| {
-                let loc = &self.profile.location[*id as usize - 1];
-                (
-                    loc.line
-                        .iter()
-                        .map(|line| {
-                            let func = &self.profile.function[line.function_id as usize - 1];
-                            Frame {
-                                name: self.profile.string_table[func.name as usize].clone(),
-                                lineno: line.line,
-                                filename: self.profile.string_table[func.filename as usize].clone(),
-                            }
-                        })
-                        .collect(),
-                    loc.address as usize,
-                    sample.value[0] as usize,
-                )
-            })
+    pub(crate) fn iter(&self) -> impl Iterator<Item = TestSample> + '_ {
+        self.profile.sample.iter().map(move |sample| TestSample {
+            frames: sample
+                .location_id
+                .iter()
+                .map(|id| {
+                    let loc = &self.profile.location[*id as usize - 1];
+                    let line = &loc.line[0];
+                    let func = &self.profile.function[line.function_id as usize - 1];
+                    FrameWithAddress {
+                        frame: Frame {
+                            name: self.profile.string_table[func.name as usize].clone(),
+                            lineno: line.line,
+                            filename: self.profile.string_table[func.filename as usize].clone(),
+                        },
+                        address: loc.address as usize,
+                    }
+                })
+                .collect(),
+            count: sample.value[0] as usize,
         })
     }
+}
+
+#[cfg(test)]
+#[derive(Debug)]
+pub struct FrameWithAddress {
+    pub frame: Frame,
+    pub address: usize,
+}
+
+/// A profile sample that has been converted into a format easy for testing
+#[cfg(test)]
+#[derive(Debug)]
+pub struct TestSample {
+    pub frames: Vec<FrameWithAddress>,
+    pub count: usize,
 }
 
 struct LocationKey {

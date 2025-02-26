@@ -33,7 +33,7 @@ pub struct PosixIo<'a> {
     pub(crate) write_fds: BTreeMap<u32, SharedWrite<'a>>,
 }
 
-impl<'a> Default for PosixIo<'a> {
+impl Default for PosixIo<'_> {
     fn default() -> Self {
         let mut new = Self::new();
         new.with_read_fd(fileno::STDIN, Cursor::new(vec![]))

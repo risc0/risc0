@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod bibc;
+pub(crate) mod bigint;
+pub(crate) mod byte_poly;
 mod executor;
 pub(crate) mod pager;
 pub mod platform;
@@ -24,10 +27,9 @@ mod syscall;
 #[cfg(test)]
 mod tests;
 pub mod testutil;
-mod trace;
 
 pub use self::{
-    executor::{Executor, ExecutorResult, SimpleSession},
+    executor::{EcallMetric, Executor, ExecutorResult, SimpleSession},
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},

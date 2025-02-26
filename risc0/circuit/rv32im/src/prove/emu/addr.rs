@@ -21,7 +21,7 @@ use super::pager::PAGE_WORDS;
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct ByteAddr(pub u32);
 
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialOrd, Ord, Hash, PartialEq)]
 pub struct WordAddr(pub u32);
 
 impl From<ByteAddr> for WordAddr {

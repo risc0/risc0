@@ -95,7 +95,7 @@ The STARK to SNARK translator uses a Groth16 prover over the BN254 pairing-frien
 ### How secure is the STARK to SNARK Prover?
 
 The best known attack vector against our STARK to SNARK Prover is to attack the underlying elliptic curve pairing used with BN254.
-This primitive has been heavily battle-tested: it's part of the core cryptography on Zcash and it's included as a precompile on Ethereum (see EIP-197).
+This primitive has been heavily battle-tested; it has been included as a precompile on Ethereum since the introduction of EIP-197.
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 

@@ -58,11 +58,11 @@ In analyzing the cryptographic security of our system, we consider two primary q
 
 The first question is about the **soundness** of the protocol, and the second question is whether the protocol is **zero-knowledge**.
 
-Soundness is often quantified in terms of "[bits]" — our [on-chain verifier contracts][Verifier Contract] target 97 bits of security.
+Soundness is often quantified in terms of "[bits]" — our [on-chain verifier contracts][Verifier Contract] target 96 bits of security.
 
 | Prover                | Cryptographic Assumptions                                                                                                                       | Bits of Security | Quantum Safe? |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------- |
-| RISC-V Prover         | - Random Oracle Model <br /> - Toy Problem Conjecture                                                                                           | 97               | Yes           |
+| RISC-V Prover         | - Random Oracle Model <br /> - Toy Problem Conjecture                                                                                           | 96               | Yes           |
 | Recursion Prover      | - Random Oracle Model <br /> - Toy Problem Conjecture                                                                                           | 99               | Yes           |
 | STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br /> - Knowledge of Exponent assumption <br /> - Integrity of Groth16 Trusted Setup Ceremony | 99+              | No            |
 
@@ -74,15 +74,15 @@ The RISC-V Prover and the Recursion Prover both use STARK-based protocols, which
 
 ### How secure are the STARK Provers?
 
-We estimate that it would take approximately 400,000 years to brute force a collision against our STARK protocol using GPUs in a parallel attack, using 1 million high-end GPUs.
+We estimate that it would take approximately 100,000 years to brute force a collision against our STARK protocol using GPUs in a parallel attack, using 1 million high-end GPUs.
 
 - Currently, we look to the RTX 4090 as a high-end reference GPU.
 - RTX 4090 [benchmarks] provide a reference SHA2-256 hashrate at less than 25,000 million hashes per second.
 - We have seen several [examples] of large purchases of GPUs on the order of 350,000 so we conservatively suggest that a distributed attacker may be able to operate 1 million RTX 4090s in parallel.
 
-At $2^{98}$ [bits] of security required to force a collision, we can estimate the time to brute force a collision as follows:
+At $2^{96}$ [bits] of security required to force a collision, we can estimate the time to brute force a collision as follows:
 
-`2^98 / (25,000,000,000 Hashes/s * 1,000,000 GPUs) / 60seconds / 60 minutes / 24 hours / 365 days = 401969 years`
+`2^96 / (25,000,000,000 Hashes/s * 1,000,000 GPUs) / 60seconds / 60 minutes / 24 hours / 365 days = 100492 years`
 
 The analysis for bits of security for the RISC-V and Recursion Prover can be found in the [security calculator].
 For a detailed cryptographic description of our STARK system, we refer readers to [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity][proof-system].
@@ -94,7 +94,7 @@ The STARK to SNARK translator uses a Groth16 prover over the BN254 pairing-frien
 ### How secure is the STARK to SNARK Prover?
 
 The best known attack vector against our STARK to SNARK Prover is to attack the underlying elliptic curve pairing used with BN254.
-This primitive has been heavily battle-tested: it's part of the core cryptography on Zcash and it's included as a precompile on Ethereum (see EIP-197).
+This primitive has been heavily battle-tested; it has been included as a precompile on Ethereum since the introduction of EIP-197.
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 

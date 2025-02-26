@@ -35,7 +35,7 @@ const DOCKER_IGNORE: &str = r#"
 /// The target directory for the ELF binaries.
 pub const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
-/// Indicates weather the build was successful or skipped.
+/// Indicates whether the build was successful or skipped.
 pub enum BuildStatus {
     /// The build was successful.
     Success,
@@ -223,7 +223,9 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
+    use crate::{
+        build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder, ImageIdKind,
+    };
 
     use super::*;
 
@@ -247,7 +249,11 @@ mod test {
 
     fn compare_image_id(guest_list: &[GuestListEntry], name: &str, expected: &str) {
         let guest = guest_list.iter().find(|x| x.name == name).unwrap();
-        assert_eq!(expected, guest.image_id.to_string());
+        let image_id = match guest.v2_image_id {
+            ImageIdKind::User(digest) => digest,
+            ImageIdKind::Kernel(digest) => digest,
+        };
+        assert_eq!(expected, image_id.to_string());
     }
 
     // Test build reproducibility for risc0_zkvm_methods_guest.
@@ -263,7 +269,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "6f52b77974aeef81fa57bd91926cdaebc11a0288506a68dcb73444b563e702b4",
+            "b92bb20166ca7e3ab7868d4f3d3996737511336fb1ad5e636db2b2673402af30",
         );
     }
 }

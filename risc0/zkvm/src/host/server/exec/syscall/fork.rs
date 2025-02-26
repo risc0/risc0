@@ -15,9 +15,17 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{anyhow, bail, Context as _, Result};
-use risc0_circuit_rv32im::prove::emu::{
-    addr::{ByteAddr, WordAddr},
-    rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
+use risc0_binfmt::ByteAddr;
+// use risc0_circuit_rv32im::prove::emu::{
+//     addr::{ByteAddr, WordAddr},
+//     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
+// };
+use risc0_circuit_rv32im_v2::{
+    execute::{
+        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
+    },
+    MAX_INSN_CYCLES,
 };
 use risc0_zkvm_platform::{
     fileno,
@@ -211,7 +219,7 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> EmuContext for ChildExecutor<'a, 'b> {
+impl EmuContext for ChildExecutor<'_, '_> {
     fn ecall(&mut self) -> Result<bool> {
         match EmuContext::load_register(self, REG_T0)? {
             ecall::SOFTWARE => self.ecall_software(),
@@ -299,7 +307,7 @@ impl<'a, 'b> EmuContext for ChildExecutor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> SyscallContext<'a> for ChildExecutor<'a, 'b> {
+impl<'a> SyscallContext<'a> for ChildExecutor<'a, '_> {
     fn get_pc(&self) -> u32 {
         self.pc.0
     }
