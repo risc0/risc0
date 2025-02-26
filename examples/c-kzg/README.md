@@ -2,7 +2,7 @@
 
 This code demonstrates that Ethereum's c-kzg-4844 crate runs on the zkVM guest. Since verification takes about 100 million segments, this only runs the executor.
 
-Something like this crate would normally be implemented as a test case in the risc0 repo. However, this crate fails to build when placed in complex workspace or directory structure. The test is placed here until we find a way to use it inside the risc0/zkvm/methods/ directory.
+Something like this crate would normally be implemented as a test case in the risc0 repo. However, this crate fails to build when placed in a complex workspace or directory structure. The test is placed here until we find a way to use it inside the risc0/zkvm/methods/ directory.
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ cargo run --release
 zkVM applications are organized into a [host program] and a [guest program].
 The host program can be found in [`src/main.rs`], and the guest program can be found in [`methods/guest/src/main.rs`].
 
-The [host] [executes] the guest program. This example does not produce a receipt and is intended as a test to ensure that this guest code runs without panic-ing.
+The [host] [executes] the guest program. This example does not produce a receipt and is intended as a test to ensure that this guest code runs without panicking.
 
 ## More Resources
 
