@@ -440,6 +440,9 @@ impl TraceCallback for Profiler {
             }
             TraceEvent::RegisterSet { .. } => (),
             TraceEvent::MemorySet { .. } => (),
+            _ => {
+                tracing::trace!("ignoring unknown event {event:?}");
+            }
         }
         Ok(())
     }

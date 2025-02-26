@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 
 /// An event traced from the running VM.
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {
