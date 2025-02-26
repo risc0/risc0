@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 
 /// An event traced from the running VM.
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {
