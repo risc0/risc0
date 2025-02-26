@@ -664,10 +664,13 @@ impl TraceCallback for Profiler {
                 self.insn = insn;
                 self.cycle = cycle;
             }
-            TraceEvent::RegisterSet { .. } => (),
-            TraceEvent::MemorySet { .. } => (),
             TraceEvent::PageIn { cycles } => self.add_zkvm_frame(ZkVmFunction::PageIn, cycles),
             TraceEvent::PageOut { cycles } => self.add_zkvm_frame(ZkVmFunction::PageOut, cycles),
+            TraceEvent::RegisterSet { .. } => (),
+            TraceEvent::MemorySet { .. } => (),
+            _ => {
+                tracing::trace!("ignoring unknown event {event:?}");
+            }
         }
         Ok(())
     }
