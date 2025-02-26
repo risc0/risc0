@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -134,23 +134,25 @@ impl TryFrom<pb::api::AssetRequest> for AssetRequest {
     }
 }
 
-impl From<TraceEvent> for pb::api::TraceEvent {
-    fn from(event: TraceEvent) -> Self {
+impl TryFrom<TraceEvent> for pb::api::TraceEvent {
+    type Error = anyhow::Error;
+
+    fn try_from(event: TraceEvent) -> Result<Self> {
         match event {
-            TraceEvent::InstructionStart { cycle, pc, insn } => Self {
+            TraceEvent::InstructionStart { cycle, pc, insn } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::InsnStart(
                     pb::api::trace_event::InstructionStart { cycle, pc, insn },
                 )),
-            },
-            TraceEvent::RegisterSet { idx, value } => Self {
+            }),
+            TraceEvent::RegisterSet { idx, value } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::RegisterSet(
                     pb::api::trace_event::RegisterSet {
                         idx: idx as u32,
                         value,
                     },
                 )),
-            },
-            TraceEvent::MemorySet { addr, region } => Self {
+            }),
+            TraceEvent::MemorySet { addr, region } => Ok(Self {
                 kind: Some(pb::api::trace_event::Kind::MemorySet(
                     pb::api::trace_event::MemorySet {
                         addr,
@@ -158,7 +160,8 @@ impl From<TraceEvent> for pb::api::TraceEvent {
                         region,
                     },
                 )),
-            },
+            }),
+            _ => Err(anyhow!("unknown TraceEvent kind")),
         }
     }
 }
