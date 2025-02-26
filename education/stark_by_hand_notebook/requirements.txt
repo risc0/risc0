@@ -1,0 +1,7 @@
+jupyter==1.0.0
+notebook>=7.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+sympy>=1.12.0
+ipywidgets>=8.0.0
+plotly>=5.13.0 
