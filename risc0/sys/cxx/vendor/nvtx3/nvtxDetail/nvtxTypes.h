@@ -91,10 +91,10 @@ typedef void (NVTX_API * nvtxNameClEventW_fakeimpl_fntype)(nvtx_cl_event evnt, c
 /* Real impl types are defined in nvtxImplCudaRt_v3.h, where CUDART headers are included */
 typedef void (NVTX_API * nvtxNameCudaDeviceA_impl_fntype)(int device, const char* name);
 typedef void (NVTX_API * nvtxNameCudaDeviceW_impl_fntype)(int device, const wchar_t* name);
-typedef void (NVTX_API * nvtxNameCudaStreamA_fakeimpl_fntype)(nvtx_cudaStream_t stream, const char* name);
-typedef void (NVTX_API * nvtxNameCudaStreamW_fakeimpl_fntype)(nvtx_cudaStream_t stream, const wchar_t* name);
-typedef void (NVTX_API * nvtxNameCudaEventA_fakeimpl_fntype)(nvtx_cudaEvent_t event, const char* name);
-typedef void (NVTX_API * nvtxNameCudaEventW_fakeimpl_fntype)(nvtx_cudaEvent_t event, const wchar_t* name);
+typedef void (NVTX_API * nvtxNameCudaStreamA_impl_fntype)(nvtx_cudaStream_t stream, const char* name);
+typedef void (NVTX_API * nvtxNameCudaStreamW_impl_fntype)(nvtx_cudaStream_t stream, const wchar_t* name);
+typedef void (NVTX_API * nvtxNameCudaEventA_impl_fntype)(nvtx_cudaEvent_t event, const char* name);
+typedef void (NVTX_API * nvtxNameCudaEventW_impl_fntype)(nvtx_cudaEvent_t event, const wchar_t* name);
 
 typedef void (NVTX_API * nvtxDomainMarkEx_impl_fntype)(nvtxDomainHandle_t domain, const nvtxEventAttributes_t* eventAttrib);
 typedef nvtxRangeId_t (NVTX_API * nvtxDomainRangeStartEx_impl_fntype)(nvtxDomainHandle_t domain, const nvtxEventAttributes_t* eventAttrib);
