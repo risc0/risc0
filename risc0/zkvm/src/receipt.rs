@@ -821,30 +821,21 @@ mod tests {
 
         assert_eq!(
             mangled_receipt.verify(Digest::ZERO).err().unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_with_context(&Default::default(), Digest::ZERO)
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_integrity_with_context(&Default::default())
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
     }
 
