@@ -747,7 +747,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "anyhow",
  "borsh",
@@ -760,7 +760,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -774,7 +774,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -787,7 +787,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "anyhow",
  "metal",
@@ -801,7 +801,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -809,7 +809,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "anyhow",
  "blake2",
@@ -850,7 +850,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "anyhow",
  "borsh",
@@ -875,7 +875,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "bytemuck",
  "cfg-if",
