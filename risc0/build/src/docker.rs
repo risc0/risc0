@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -255,7 +255,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "c205c6bc1c54645ae3c08b986ea6c8a70a2b05e3cb910922f8ca42d222e1a007",
+            "afa299e52a72fc42bf4456e60ce3f077cafe2b4819104a7cc9fa235fc7d35e24",
         );
     }
 }
