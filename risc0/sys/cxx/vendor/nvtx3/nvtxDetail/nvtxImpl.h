@@ -138,10 +138,10 @@ typedef struct nvtxGlobals_t
 
     nvtxNameCudaDeviceA_impl_fntype nvtxNameCudaDeviceA_impl_fnptr;
     nvtxNameCudaDeviceW_impl_fntype nvtxNameCudaDeviceW_impl_fnptr;
-    nvtxNameCudaStreamA_fakeimpl_fntype nvtxNameCudaStreamA_impl_fnptr;
-    nvtxNameCudaStreamW_fakeimpl_fntype nvtxNameCudaStreamW_impl_fnptr;
-    nvtxNameCudaEventA_fakeimpl_fntype nvtxNameCudaEventA_impl_fnptr;
-    nvtxNameCudaEventW_fakeimpl_fntype nvtxNameCudaEventW_impl_fnptr;
+    nvtxNameCudaStreamA_impl_fntype nvtxNameCudaStreamA_impl_fnptr;
+    nvtxNameCudaStreamW_impl_fntype nvtxNameCudaStreamW_impl_fnptr;
+    nvtxNameCudaEventA_impl_fntype nvtxNameCudaEventA_impl_fnptr;
+    nvtxNameCudaEventW_impl_fntype nvtxNameCudaEventW_impl_fnptr;
 
     nvtxDomainMarkEx_impl_fntype nvtxDomainMarkEx_impl_fnptr;
     nvtxDomainRangeStartEx_impl_fntype nvtxDomainRangeStartEx_impl_fnptr;
