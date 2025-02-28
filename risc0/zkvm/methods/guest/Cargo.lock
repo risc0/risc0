@@ -1312,7 +1312,7 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1346,7 +1346,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1360,7 +1360,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1373,7 +1373,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "metal",
@@ -1387,7 +1387,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -1395,7 +1395,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1414,7 +1414,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1437,7 +1437,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1463,7 +1463,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "borsh",
  "ciborium",
@@ -1493,7 +1493,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "bytemuck",
  "cfg-if",

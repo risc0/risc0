@@ -564,7 +564,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "duplicate",
  "maybe-async",
@@ -3710,7 +3710,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -3744,7 +3744,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "cc",
  "directories",
@@ -3757,7 +3757,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3777,7 +3777,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "cc",
  "cust",
@@ -3791,7 +3791,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3815,7 +3815,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3826,7 +3826,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -3859,7 +3859,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3870,7 +3870,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "bytemuck",
  "nvtx",
@@ -3880,7 +3880,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -3923,7 +3923,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "cust",
@@ -3933,7 +3933,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3963,7 +3963,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -4007,7 +4007,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "borsh",
  "ciborium",
@@ -4022,7 +4022,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -4033,7 +4033,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "1.3.0"
+version = "1.3.1"
 
 [[package]]
 name = "rkyv"
