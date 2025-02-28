@@ -129,11 +129,18 @@ impl<'de, R: WordRead + 'de> serde::de::VariantAccess<'de> for &'_ mut Deseriali
         Ok(())
     }
 
-    fn newtype_variant_seed<V: DeserializeSeed<'de>>(self, seed: V) -> super::err::Result<V::Value> {
+    fn newtype_variant_seed<V: DeserializeSeed<'de>>(
+        self,
+        seed: V,
+    ) -> super::err::Result<V::Value> {
         DeserializeSeed::deserialize(seed, self)
     }
 
-    fn tuple_variant<V: Visitor<'de>>(self, len: usize, visitor: V) -> super::err::Result<V::Value> {
+    fn tuple_variant<V: Visitor<'de>>(
+        self,
+        len: usize,
+        visitor: V,
+    ) -> super::err::Result<V::Value> {
         serde::de::Deserializer::deserialize_tuple(self, len, visitor)
     }
 
@@ -150,7 +157,10 @@ impl<'de, R: WordRead + 'de> serde::de::EnumAccess<'de> for &'_ mut Deserializer
     type Error = Error;
     type Variant = Self;
 
-    fn variant_seed<V: DeserializeSeed<'de>>(self, seed: V) -> super::err::Result<(V::Value, Self)> {
+    fn variant_seed<V: DeserializeSeed<'de>>(
+        self,
+        seed: V,
+    ) -> super::err::Result<(V::Value, Self)> {
         let tag = self.try_take_word()?;
         let val = DeserializeSeed::deserialize(seed, tag.into_deserializer())?;
         Ok((val, self))
@@ -165,7 +175,10 @@ struct MapAccess<'a, 'de, R: WordRead + 'de> {
 impl<'a, 'de: 'a, R: WordRead + 'de> serde::de::MapAccess<'de> for MapAccess<'a, 'de, R> {
     type Error = Error;
 
-    fn next_key_seed<K: DeserializeSeed<'de>>(&mut self, seed: K) -> super::err::Result<Option<K::Value>> {
+    fn next_key_seed<K: DeserializeSeed<'de>>(
+        &mut self,
+        seed: K,
+    ) -> super::err::Result<Option<K::Value>> {
         if self.len > 0 {
             self.len -= 1;
             Ok(Some(DeserializeSeed::deserialize(
@@ -177,7 +190,10 @@ impl<'a, 'de: 'a, R: WordRead + 'de> serde::de::MapAccess<'de> for MapAccess<'a,
         }
     }
 
-    fn next_value_seed<V: DeserializeSeed<'de>>(&mut self, seed: V) -> super::err::Result<V::Value> {
+    fn next_value_seed<V: DeserializeSeed<'de>>(
+        &mut self,
+        seed: V,
+    ) -> super::err::Result<V::Value> {
         DeserializeSeed::deserialize(seed, &mut *self.deserializer)
     }
 
@@ -390,14 +406,22 @@ impl<'de, R: WordRead + 'de> serde::Deserializer<'de> for &'_ mut Deserializer<'
         visitor.visit_unit()
     }
 
-    fn deserialize_unit_struct<V>(self, _name: &'static str, visitor: V) -> super::err::Result<V::Value>
+    fn deserialize_unit_struct<V>(
+        self,
+        _name: &'static str,
+        visitor: V,
+    ) -> super::err::Result<V::Value>
     where
         V: Visitor<'de>,
     {
         self.deserialize_unit(visitor)
     }
 
-    fn deserialize_newtype_struct<V>(self, _name: &'static str, visitor: V) -> super::err::Result<V::Value>
+    fn deserialize_newtype_struct<V>(
+        self,
+        _name: &'static str,
+        visitor: V,
+    ) -> super::err::Result<V::Value>
     where
         V: Visitor<'de>,
     {
@@ -506,7 +530,9 @@ mod tests {
         MyBinaryConstructor(Vec<u8>, SomeStruct),
     }
 
-    fn from_slice_serde_deserialize_owned<T: serde::de::DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T, crate::serde::err::Error> {
+    fn from_slice_serde_deserialize_owned<T: serde::de::DeserializeOwned, P: Pod>(
+        slice: &[P],
+    ) -> Result<T, crate::serde::err::Error> {
         match bytemuck::try_cast_slice(slice) {
             Ok(slice) => {
                 let mut deserializer = Deserializer::new(slice);
@@ -589,7 +615,10 @@ mod tests {
             f64: 2.71,
         };
         assert_eq!(expected, from_slice(&words).unwrap());
-        assert_eq!(expected, from_slice_serde_deserialize_owned(&words).unwrap());
+        assert_eq!(
+            expected,
+            from_slice_serde_deserialize_owned(&words).unwrap()
+        );
     }
 
     #[test]
@@ -608,6 +637,9 @@ mod tests {
             second: "abc".into(),
         };
         assert_eq!(expected, from_slice(&words).unwrap());
-        assert_eq!(expected, from_slice_serde_deserialize_owned(&words).unwrap());
+        assert_eq!(
+            expected,
+            from_slice_serde_deserialize_owned(&words).unwrap()
+        );
     }
 }
