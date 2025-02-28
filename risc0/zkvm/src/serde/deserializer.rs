@@ -495,8 +495,6 @@ mod tests {
 
     use serde::{Deserialize, Serialize};
 
-    use crate::serde::err;
-
     use super::*;
 
     #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -508,7 +506,7 @@ mod tests {
         MyBinaryConstructor(Vec<u8>, SomeStruct),
     }
 
-    fn from_slice_serde_deserialize_owned<T: serde::de::DeserializeOwned, P: Pod>(slice: &[P]) -> Result<&[u32], serde::err::Error> {
+    fn from_slice_serde_deserialize_owned<T: serde::de::DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T, crate::serde::err::Error> {
         match bytemuck::try_cast_slice(slice) {
             Ok(slice) => {
                 let mut deserializer = Deserializer::new(slice);
