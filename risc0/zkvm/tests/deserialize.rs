@@ -1,5 +1,4 @@
-use serde::{de::MapAccess, de::Visitor, ser::SerializeStruct, Deserialize, Serialize,
-    Serializer};
+use serde::{de::MapAccess, de::Visitor, ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
 use std::fmt;
 
@@ -28,7 +27,7 @@ impl<'de> Deserialize<'de> for MinimalStruct {
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_struct("MinimalStruct", &["value"], MinimalStructVisitor)
+        deserializer.deserialize_struct("MinimalStruct", &[], MinimalStructVisitor)
     }
 }
 
