@@ -6,35 +6,35 @@ use std::fmt;
 use serde::de::DeserializeOwned;
 
 #[derive(Eq, PartialEq, Debug, Clone, Hash)]
-pub struct I2();
+pub struct MinimalStruct();
 
-struct I2Visitor;
+struct MinimalStructVisitor;
 
-impl<'de> Visitor<'de> for I2Visitor {
-    type Value = I2;
+impl<'de> Visitor<'de> for MinimalStructVisitor {
+    type Value = MinimalStruct;
     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str("I2")
+        formatter.write_str("MinimalStruct")
     }
-    fn visit_map<V>(self, mut _map: V) -> Result<I2, V::Error>
+    fn visit_map<V>(self, mut _map: V) -> Result<MinimalStruct, V::Error>
     where
         V: MapAccess<'de>,
     {
-        Ok(I2())
+        Ok(MinimalStruct())
     }
 }
 
-impl<'de> Deserialize<'de> for I2 {
+impl<'de> Deserialize<'de> for MinimalStruct {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_struct("I2", &["value"], I2Visitor)
+        deserializer.deserialize_struct("MinimalStruct", &["value"], MinimalStructVisitor)
     }
 }
 
-impl Serialize for I2 {
+impl Serialize for MinimalStruct {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_struct("I2", 0)?.end()
+        serializer.serialize_struct("MinimalStruct", 0)?.end()
     }
 }
 
@@ -44,6 +44,6 @@ fn read<R: risc0_zkvm::serde::WordRead, T: DeserializeOwned>(input: R) -> T {
 
 #[test]
 fn test_visitor() {
-    let elem: I2 = read(r"{}");
-    assert_eq!(elem, I2());
+    let elem: MinimalStruct = read(r"{}");
+    assert_eq!(elem, MinimalStruct());
 }
