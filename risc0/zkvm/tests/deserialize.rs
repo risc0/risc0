@@ -42,6 +42,17 @@ fn read<R: risc0_zkvm::serde::WordRead, T: DeserializeOwned>(input: R) -> T {
     T::deserialize(&mut risc0_zkvm::serde::Deserializer::new(input)).unwrap()
 }
 
+// #[test]
+// fn test_visitor_raw() {
+//     let visitor = MinimalStructVisitor;
+//     use serde::de::value::MapDeserializer;
+//     use serde::de::value::Error as ValueError;
+//     let map = MapDeserializer::<_, ValueError>::new(std::collections::HashMap::new().into_iter());
+//     let elem: MinimalStruct = visitor.visit_map(map).unwrap();
+//     assert_eq!(elem, MinimalStruct());
+// }
+
+
 #[test]
 fn test_visitor() {
     let elem: MinimalStruct = read(r"{}");
