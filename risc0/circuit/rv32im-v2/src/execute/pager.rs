@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 use anyhow::{bail, Result};
+use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage2, Page, WordAddr};
 use risc0_zkp::core::digest::Digest;
@@ -68,14 +69,109 @@ pub(crate) enum PageTraceEvent {
 }
 
 #[derive(Debug)]
+pub(crate) struct PageStates {
+    states: BitVec,
+    indexes: Vec<u32>,
+}
+
+impl PageStates {
+    pub(crate) fn new(size: usize) -> Self {
+        let mut states = BitVec::with_capacity(size * 2);
+        states.grow(size * 2, false);
+
+        Self {
+            states,
+            indexes: vec![],
+        }
+    }
+
+    pub(crate) fn clear(&mut self) {
+        self.states.clear();
+        self.indexes.clear();
+    }
+
+    pub(crate) fn set(&mut self, index: u32, value: PageState) {
+        let set_before = self.get(index) != PageState::Unloaded;
+        match value {
+            PageState::Unloaded => unimplemented!(),
+            PageState::Loaded => {
+                // b01 => Loaded
+                self.states.set(index as usize * 2, false);
+                self.states.set(index as usize * 2 + 1, true);
+            }
+            PageState::Dirty => {
+                // b10 | b11 => Dirty
+                self.states.set(index as usize * 2, true);
+            }
+        }
+
+        if !set_before {
+            self.indexes.push(index);
+        }
+    }
+
+    pub(crate) fn get(&self, index: u32) -> PageState {
+        if self.states.get(index as usize * 2).unwrap() {
+            // b10 | b11 => Dirty
+            PageState::Dirty
+        } else if self.states.get(index as usize * 2 + 1).unwrap() {
+            // b01 => Loaded
+            PageState::Loaded
+        } else {
+            // b00 => Unloaded
+            PageState::Unloaded
+        }
+    }
+
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (u32, PageState)> + '_ {
+        self.indexes.iter().map(|index| (*index, self.get(*index)))
+    }
+
+    pub(crate) fn keys(&self) -> impl Iterator<Item = u32> + '_ {
+        self.indexes.iter().copied()
+    }
+}
+
+#[test]
+fn page_states() {
+    use PageState::*;
+
+    let mut s = PageStates::new(10);
+    for (a, b) in [(Loaded, Dirty), (Dirty, Loaded)] {
+        s.clear();
+
+        for i in 0..5 {
+            assert_eq!(s.get(i), Unloaded);
+
+            s.set(i, a);
+            assert_eq!(s.get(i), a);
+
+            s.set(i, b);
+            assert_eq!(s.get(i), b);
+
+            s.set(i, a);
+            assert_eq!(s.get(i), a);
+        }
+
+        assert_eq!(
+            s.iter().collect::<Vec<_>>(),
+            vec![(0, a), (1, a), (2, a), (3, a), (4, a)]
+        );
+
+        assert_eq!(s.keys().collect::<Vec<_>>(), (0..5).collect::<Vec<_>>());
+    }
+}
+
+const NUM_PAGE_STATES: usize = NUM_PAGES * 2;
+
+#[derive(Debug)]
 pub(crate) struct PagedMemory {
     pub image: MemoryImage2,
     #[debug(skip)]
     page_table: Vec<u32>,
     #[debug(skip)]
     page_cache: Vec<Page>,
-    #[debug("{page_states:#x?}")]
-    pub(crate) page_states: BTreeMap<u32, PageState>,
+    pub(crate) page_states: PageStates,
     pub cycles: u32,
     user_registers: [u32; REG_MAX],
     machine_registers: [u32; REG_MAX],
@@ -98,7 +194,7 @@ impl PagedMemory {
             image,
             page_table: vec![INVALID_IDX; NUM_PAGES],
             page_cache: Vec::new(),
-            page_states: BTreeMap::new(),
+            page_states: PageStates::new(NUM_PAGE_STATES),
             cycles: RESERVED_PAGING_CYCLES,
             user_registers,
             machine_registers,
@@ -181,7 +277,7 @@ impl PagedMemory {
         let mut cache_idx = self.page_table[page_idx as usize];
         if cache_idx == INVALID_IDX {
             self.load_page(page_idx)?;
-            self.page_states.insert(node_idx, PageState::Loaded);
+            self.page_states.set(node_idx, PageState::Loaded);
             cache_idx = self.page_table[page_idx as usize];
         }
         Ok(self.page_cache[cache_idx as usize].load(addr))
@@ -220,17 +316,17 @@ impl PagedMemory {
 
     fn page_for_writing(&mut self, page_idx: u32) -> Result<&mut Page> {
         let node_idx = node_idx(page_idx);
-        let state = if let Some(state) = self.page_states.get(&node_idx) {
-            *state
-        } else {
+        let mut state = self.page_states.get(node_idx);
+        if state == PageState::Unloaded {
             self.load_page(page_idx)?;
-            PageState::Loaded
+            state = PageState::Loaded;
         };
+
         if state == PageState::Loaded {
             self.cycles += PAGE_CYCLES;
             self.trace_page_out(PAGE_CYCLES);
             self.fixup_costs(node_idx, PageState::Dirty);
-            self.page_states.insert(node_idx, PageState::Dirty);
+            self.page_states.set(node_idx, PageState::Dirty);
         }
         let cache_idx = self.page_table[page_idx as usize] as usize;
         Ok(self.page_cache.get_mut(cache_idx).unwrap())
@@ -259,11 +355,16 @@ impl PagedMemory {
         let mut image = MemoryImage2::default();
 
         // Gather the original pages
-        for (&node_idx, &page_state) in self.page_states.iter() {
-            if node_idx < MEMORY_PAGES as u32 {
+        let sorted_indexes: BTreeSet<_> = self.page_states.keys().collect();
+
+        for node_idx in &sorted_indexes {
+            if *node_idx < MEMORY_PAGES as u32 {
                 continue;
             }
-            let page_idx = page_idx(node_idx);
+
+            let page_state = self.page_states.get(*node_idx);
+
+            let page_idx = page_idx(*node_idx);
             tracing::trace!("commit: {page_idx:#08x}, state: {page_state:?}");
 
             // Copy original state of all pages accessed in this segment.
@@ -278,20 +379,20 @@ impl PagedMemory {
         }
 
         // Add minimal needed 'uncles'
-        for &node_idx in self.page_states.keys() {
+        for node_idx in &sorted_indexes {
             // If this is a leaf, break
-            if node_idx >= MEMORY_PAGES as u32 {
+            if *node_idx >= MEMORY_PAGES as u32 {
                 break;
             }
 
-            let lhs_idx = node_idx * 2;
-            let rhs_idx = node_idx * 2 + 1;
+            let lhs_idx = *node_idx * 2;
+            let rhs_idx = *node_idx * 2 + 1;
 
             // Otherwise, add whichever child digest (if any) is not loaded
-            if !self.page_states.contains_key(&lhs_idx) {
+            if !sorted_indexes.contains(&lhs_idx) {
                 image.set_digest(lhs_idx, *self.image.get_digest(lhs_idx)?);
             }
-            if !self.page_states.contains_key(&rhs_idx) {
+            if !sorted_indexes.contains(&rhs_idx) {
                 image.set_digest(rhs_idx, *self.image.get_digest(rhs_idx)?);
             }
         }
@@ -315,10 +416,7 @@ impl PagedMemory {
     fn fixup_costs(&mut self, mut node_idx: u32, goal: PageState) {
         tracing::trace!("fixup: {node_idx:#010x}: {goal:?}");
         while node_idx != 0 {
-            let state = *self
-                .page_states
-                .get(&node_idx)
-                .unwrap_or(&PageState::Unloaded);
+            let state = self.page_states.get(node_idx);
             if goal > state {
                 if node_idx < MEMORY_PAGES as u32 {
                     if state == PageState::Unloaded {
@@ -332,7 +430,7 @@ impl PagedMemory {
                         self.trace_page_out(NODE_CYCLES);
                     }
                 }
-                self.page_states.insert(node_idx, goal);
+                self.page_states.set(node_idx, goal);
             }
             node_idx /= 2;
         }
