@@ -118,6 +118,41 @@ impl WordRead for FdReader {
     }
 }
 
+impl WordRead for &str {
+    fn read_words(&mut self, words: &mut [u32]) -> crate::serde::Result<()> {
+        let bytes = self.as_bytes();
+        if bytes.len() < words.len() * WORD_SIZE {
+            return Err(crate::serde::Error::DeserializeUnexpectedEnd);
+        }
+        for (i, word) in words.iter_mut().enumerate() {
+            *word = u32::from_le_bytes([
+                bytes[i * WORD_SIZE],
+                bytes[i * WORD_SIZE + 1],
+                bytes[i * WORD_SIZE + 2],
+                bytes[i * WORD_SIZE + 3],
+            ]);
+        }
+        Ok(())
+    }
+
+    fn read_padded_bytes(&mut self, bytes: &mut [u8]) -> crate::serde::Result<()> {
+        let self_bytes = self.as_bytes();
+        if self_bytes.len() < bytes.len() {
+            return Err(crate::serde::Error::DeserializeUnexpectedEnd);
+        }
+        bytes.copy_from_slice(&self_bytes[..bytes.len()]);
+
+        let unaligned = bytes.len() % WORD_SIZE;
+        if unaligned != 0 {
+            let pad_bytes = WORD_SIZE - unaligned;
+            if self_bytes.len() < bytes.len() + pad_bytes {
+                return Err(crate::serde::Error::DeserializeUnexpectedEnd);
+            }
+        }
+        Ok(())
+    }
+}
+
 #[cfg(feature = "std")]
 impl WordRead for std::io::BufReader<FdReader> {
     fn read_words(&mut self, words: &mut [u32]) -> crate::serde::Result<()> {
