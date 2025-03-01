@@ -44,10 +44,10 @@ RISC Zero's zkVM consists of three circuits.
 ## Recursion Programs
 
 The Recursion Circuit supports a number of programs, including `lift`, `join`, `resolve`, and `identity_p254`.
-These are using internally to the [Prover] implementations to produce [SuccinctReceipt] and [Groth16Receipt].
+These are used internally in the [Prover] implementations to produce [SuccinctReceipt] and [Groth16Receipt].
 
 1. The `lift` program verifies a STARK proof from the RISC-V Prover, using the Recursion Prover. This recursion proof has a single constant-time verification procedure, with respect to the original segment length, and is then used as the input to all other recursion programs (e.g. `join`, `resolve`, and `identity_p254`).
-2. The `join` program verifies two STARK proofs from the Recursion Prover, using the Recursion Prover. By repeated application of `join`, any number of receipts for execution spans within the same session can be compressed into a single receipt for the entire session.
+2. The `join` program verifies two STARK proofs from the Recursion Prover, using the Recursion Prover. By repeatedly applying `join`, any number of receipts for execution spans within the same session can be compressed into a single receipt for the entire session.
 3. The `identity_p254` program verifies a STARK proof from the Recursion Prover using the Recursion Prover with the Poseidon254 hash function. The `identity_p254` program is used as the last step in the prover pipeline before running the Groth16 prover.
 4. The `resolve` program (used for [proof composition]) verifies two STARK proofs using the Recursion Prover, in order to remove an [assumption] from a [receipt claim].
 
