@@ -513,7 +513,13 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
         let unaligned_at_start = min(nread, WORD_SIZE - ptr_offset);
         // Read unaligned bytes into "firstword".
         let Return(nread_first, firstword) =
-            syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
+            syscall_2(
+                nr::SYS_READ,
+                null_mut(),
+                0,
+                fd,
+                unaligned_at_start as u32,
+            );
         debug_assert_eq!(nread_first as usize, unaligned_at_start);
 
         // Align up to a word boundary to do the main copy.
@@ -818,7 +824,15 @@ pub unsafe extern "C" fn sys_verify_integrity(
     }
 }
 
-/// TODO: Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
+/// Send a ReceiptClaim digest to the host to request verification for proofs using union operations.
+///
+/// A cooperative prover will only return if there is a verifying proof associated with that claim
+/// digest, and will always return a result code of 0 to register a0. The caller must encode the
+/// claim_digest into a public assumptions list for inclusion in the guest output.
+///
+/// This variant is specifically designed for proofs that utilize union operations in their
+/// verification process. It follows the same verification pattern as `sys_verify_integrity` but
+/// with additional support for union-based proof structures.
 ///
 /// # Safety
 ///
