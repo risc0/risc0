@@ -265,6 +265,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.phys_cycles + self.pager.cycles + LOOKUP_TABLE_CYCLES as u32
     }
 
+    #[cold]
     fn trace(&mut self, event: TraceEvent) -> Result<()> {
         for trace in self.trace.iter() {
             trace.borrow_mut().trace_callback(event.clone())?;
@@ -272,17 +273,28 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
+    #[cold]
     fn trace_pager(&mut self) -> Result<()> {
-        if !self.trace.is_empty() {
-            for &event in self.pager.trace_events() {
-                let event = TraceEvent::from(event);
-                for trace in self.trace.iter() {
-                    trace.borrow_mut().trace_callback(event.clone())?;
-                }
+        for &event in self.pager.trace_events() {
+            let event = TraceEvent::from(event);
+            for trace in self.trace.iter() {
+                trace.borrow_mut().trace_callback(event.clone())?;
             }
-            self.pager.clear_trace_events();
         }
+        self.pager.clear_trace_events();
         Ok(())
+    }
+
+    #[cold]
+    fn trace_instruction(&self, cycle: u64, insn: &Instruction, decoded: &DecodedInstruction) {
+        tracing::trace!(
+            "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
+            self.user_cycles + 1,
+            self.segment_cycles() + 1,
+            self.pc,
+            decoded.insn,
+            disasm(insn, decoded)
+        );
     }
 }
 
@@ -319,14 +331,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         let cycle = self.cycles.user;
         self.cycles.user += 1;
         if tracing::enabled!(tracing::Level::TRACE) {
-            tracing::trace!(
-                "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-                self.user_cycles + 1,
-                self.segment_cycles() + 1,
-                self.pc,
-                decoded.insn,
-                disasm(insn, decoded)
-            );
+            self.trace_instruction(cycle, insn, decoded);
         }
         if !self.trace.is_empty() {
             self.trace(TraceEvent::InstructionStart {
@@ -342,7 +347,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
         self.user_cycles += 1;
         self.phys_cycles += 1;
-        self.trace_pager()?;
+        if !self.trace.is_empty() {
+            self.trace_pager()?;
+        }
         Ok(())
     }
 
@@ -355,7 +362,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         _s2: u32,
     ) -> Result<()> {
         self.phys_cycles += 1;
-        self.trace_pager()?;
+        if !self.trace.is_empty() {
+            self.trace_pager()?;
+        }
         Ok(())
     }
 
