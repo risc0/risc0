@@ -40,7 +40,6 @@ message HelloResult {
 message ExecuteRequest {
   ExecutorEnv env = 1;
   AssetRequest segments_out = 2;
-  base.CompatVersion segment_version = 3;
 }
 
 message ProveRequest {
@@ -243,7 +242,6 @@ message ProverOpts {
   ReceiptKind receipt_kind = 3;
   repeated base.Digest control_ids = 4;
   uint64 max_segment_po2 = 5;
-  optional uint32 segment_version = 6;
 }
 
 enum ReceiptKind {
@@ -257,6 +255,7 @@ message SessionInfo {
   bytes journal = 2;
   base.ExitCode exit_code = 3;
   Asset receipt_claim = 4;
+  base.Digest kernel_id = 5;
 }
 
 message SegmentInfo {

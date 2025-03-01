@@ -56,15 +56,7 @@ impl BuildCommand {
         println!("ELFs ready at:");
         for guest in &guest_list {
             println!("{}", guest.path);
-
-            match guest.v2_image_id {
-                risc0_build::ImageIdKind::User(digest) => {
-                    println!("  UserID:   {digest}");
-                }
-                risc0_build::ImageIdKind::Kernel(digest) => {
-                    println!("  KernelID: {digest}");
-                }
-            }
+            println!("  {:?}:   {}", guest.kind, guest.image_id);
         }
 
         Ok(())

@@ -74,6 +74,7 @@ impl Executor for LocalProver {
             journal: session.journal.unwrap_or_default(),
             exit_code: session.exit_code,
             receipt_claim: Some(receipt_claim),
+            kernel_id: session.kernel_id,
         })
     }
 }

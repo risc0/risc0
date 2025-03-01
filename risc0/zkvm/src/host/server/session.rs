@@ -107,6 +107,9 @@ pub struct Session {
 
     /// syscall metrics grouped by kind.
     pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
+
+    /// The merkle root of the kernel portion of the initial MemoryImage.
+    pub(crate) kernel_id: Digest,
 }
 
 /// The execution trace of a portion of a program.

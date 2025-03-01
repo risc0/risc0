@@ -39,6 +39,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use lazy_regex::regex_captures;
 use prost::Message;
+use risc0_zkp::core::digest::Digest;
 use semver::Version;
 
 use crate::{get_version, ExitCode, Journal, ReceiptClaim};
@@ -414,6 +415,9 @@ pub struct SessionInfo {
     /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
     /// proven if this session is passed to the Prover.
     pub receipt_claim: Option<ReceiptClaim>,
+
+    /// The merkle root of the kernel portion of the initial MemoryImage.
+    pub kernel_id: Digest,
 }
 
 impl SessionInfo {

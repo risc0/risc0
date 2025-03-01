@@ -26,6 +26,7 @@ message Receipt {
 
 message ReceiptMetadata {
   base.Digest verifier_parameters = 1;
+  base.Digest kernel_id = 2;
 }
 
 // NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.

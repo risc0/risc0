@@ -55,6 +55,8 @@ pub struct Executor2<'a> {
     pub(crate) syscall_table: SyscallTable<'a>,
     profiler: Option<Rc<RefCell<Profiler>>>,
     return_cache: Cell<(u32, u32)>,
+    // The merkle root of the kernel portion of the initial MemoryImage.
+    kernel_id: Digest,
 }
 
 impl<'a> Executor2<'a> {
@@ -102,7 +104,6 @@ impl<'a> Executor2<'a> {
         Self::with_details(env, image, profiler)
     }
 
-    /// TODO(flaub)
     #[allow(dead_code)]
     pub(crate) fn from_kernel_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let kernel = Program::load_elf(elf, u32::MAX)?;
@@ -112,16 +113,18 @@ impl<'a> Executor2<'a> {
 
     fn with_details(
         env: ExecutorEnv<'a>,
-        image: MemoryImage2,
+        mut image: MemoryImage2,
         profiler: Option<Rc<RefCell<Profiler>>>,
     ) -> Result<Self> {
         let syscall_table = SyscallTable::from_env(&env);
+        let kernel_id = image.kernel_id();
         Ok(Self {
             env,
             image,
             syscall_table,
             profiler,
             return_cache: Cell::new((0, 0)),
+            kernel_id,
         })
     }
 
@@ -272,6 +275,7 @@ impl<'a> Executor2<'a> {
             syscall_metrics,
             hooks: vec![],
             ecall_metrics: vec![],
+            kernel_id: self.kernel_id,
         };
 
         tracing::info!("execution time: {elapsed:?}");

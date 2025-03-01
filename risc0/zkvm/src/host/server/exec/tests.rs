@@ -551,7 +551,7 @@ mod sys_verify {
 
         let hello_commit_session = exec_hello_commit();
 
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
+        let image_id = compute_image_id_v2(HELLO_COMMIT_ID);
         tracing::debug!("image_id: {image_id}");
 
         let spec = &MultiTestSpec::SysVerify(vec![(
@@ -586,7 +586,7 @@ mod sys_verify {
     fn sys_verify_halt_codes() {
         use risc0_zkvm_methods::MULTI_TEST_ID;
 
-        let image_id = compute_image_id_v2(MULTI_TEST_ID).unwrap();
+        let image_id = compute_image_id_v2(MULTI_TEST_ID);
 
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");

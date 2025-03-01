@@ -549,6 +549,7 @@ mod docker {
                 claim: receipt.claim().unwrap(),
             }),
             receipt.clone().journal.bytes,
+            receipt.metadata.kernel_id,
         );
 
         let prover = DevModeProver;
@@ -691,7 +692,7 @@ mod sys_verify {
 
     #[test_log::test]
     fn sys_verify_1() {
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
+        let image_id = compute_image_id_v2(HELLO_COMMIT_ID);
         let spec = MultiTestSpec::SysVerify(vec![(
             image_id,
             hello_commit_receipt().journal.bytes.clone(),
@@ -714,7 +715,7 @@ mod sys_verify {
 
     #[test_log::test]
     fn sys_verify_2() {
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
+        let image_id = compute_image_id_v2(HELLO_COMMIT_ID);
         let spec = MultiTestSpec::SysVerify(vec![(
             image_id,
             hello_commit_receipt().journal.bytes.clone(),
@@ -732,7 +733,7 @@ mod sys_verify {
 
     #[test_log::test]
     fn sys_verify_3() {
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
+        let image_id = compute_image_id_v2(HELLO_COMMIT_ID);
         let spec = MultiTestSpec::SysVerify(vec![(
             image_id,
             hello_commit_receipt().journal.bytes.clone(),
