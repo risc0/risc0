@@ -457,7 +457,10 @@ impl<'de, R: WordRead + 'de> serde::Deserializer<'de> for &'_ mut Deserializer<'
     where
         V: Visitor<'de>,
     {
-        self.deserialize_tuple(fields.len(), visitor)
+        visitor.visit_map(MapAccess {
+            deserializer: self,
+            len: fields.len(),
+        })
     }
 
     fn deserialize_enum<V>(
