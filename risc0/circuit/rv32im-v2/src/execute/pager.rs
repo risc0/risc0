@@ -52,7 +52,6 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
     + POSEIDON_PAGING
     + STORE_ROOT_CYCLES;
 
-const INVALID_IDX: u32 = u32::MAX;
 const NUM_PAGES: usize = 4 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
@@ -164,11 +163,58 @@ fn page_states() {
 
 const NUM_PAGE_STATES: usize = NUM_PAGES * 2;
 
+struct PageTable {
+    table: Vec<u32>,
+}
+
+impl PageTable {
+    const INVALID_IDX: u32 = 0;
+
+    fn new() -> Self {
+        Self {
+            table: vec![Self::INVALID_IDX; NUM_PAGES],
+        }
+    }
+
+    fn get(&self, index: u32) -> Option<usize> {
+        let value = self.table[index as usize] as usize;
+        value.checked_sub(1)
+    }
+
+    fn set(&mut self, index: u32, value: usize) {
+        self.table[index as usize] = (value + 1) as u32
+    }
+
+    fn clear(&mut self) {
+        // You would think its faster to re-use the memory, but filling it with zeros is slower
+        // than just allocating a new piece of zeroed memory.
+        self.table = vec![Self::INVALID_IDX; NUM_PAGES];
+    }
+}
+
+#[test]
+fn page_table() {
+    let mut table = PageTable::new();
+
+    for idx in [0, 5, 12] {
+        assert_eq!(table.get(idx), None);
+
+        table.set(idx, 13);
+        assert_eq!(table.get(idx).unwrap(), 13);
+    }
+
+    table.clear();
+
+    for idx in [0, 5, 12] {
+        assert_eq!(table.get(idx), None);
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct PagedMemory {
     pub image: MemoryImage2,
     #[debug(skip)]
-    page_table: Vec<u32>,
+    page_table: PageTable,
     #[debug(skip)]
     page_cache: Vec<Page>,
     pub(crate) page_states: PageStates,
@@ -192,7 +238,7 @@ impl PagedMemory {
 
         Self {
             image,
-            page_table: vec![INVALID_IDX; NUM_PAGES],
+            page_table: PageTable::new(),
             page_cache: Vec::new(),
             page_states: PageStates::new(NUM_PAGE_STATES),
             cycles: RESERVED_PAGING_CYCLES,
@@ -204,7 +250,7 @@ impl PagedMemory {
     }
 
     pub(crate) fn reset(&mut self) {
-        self.page_table.fill(INVALID_IDX);
+        self.page_table.clear();
         self.page_cache.clear();
         self.page_states.clear();
         self.cycles = RESERVED_PAGING_CYCLES;
@@ -238,13 +284,12 @@ impl PagedMemory {
 
     fn peek_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        let cache_idx = self.page_table[page_idx as usize];
-        if cache_idx == INVALID_IDX {
+        if let Some(cache_idx) = self.page_table.get(page_idx) {
+            // Loaded, get from cache
+            Ok(self.page_cache[cache_idx].load(addr))
+        } else {
             // Unloaded, peek into image
             Ok(self.image.get_page(page_idx)?.load(addr))
-        } else {
-            // Loaded, get from cache
-            Ok(self.page_cache[cache_idx as usize].load(addr))
         }
     }
 
@@ -260,13 +305,12 @@ impl PagedMemory {
     }
 
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
-        let cache_idx = self.page_table[page_idx as usize];
-        if cache_idx == INVALID_IDX {
+        if let Some(cache_idx) = self.page_table.get(page_idx) {
+            // Loaded, get from cache
+            Ok(self.page_cache[cache_idx].0.clone())
+        } else {
             // Unloaded, peek into image
             Ok(self.image.get_page(page_idx)?.0.clone())
-        } else {
-            // Loaded, get from cache
-            Ok(self.page_cache[cache_idx as usize].0.clone())
         }
     }
 
@@ -274,13 +318,14 @@ impl PagedMemory {
         let page_idx = addr.page_idx();
         let node_idx = node_idx(page_idx);
         // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
-        let mut cache_idx = self.page_table[page_idx as usize];
-        if cache_idx == INVALID_IDX {
+        let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
+            cache_idx
+        } else {
             self.load_page(page_idx)?;
             self.page_states.set(node_idx, PageState::Loaded);
-            cache_idx = self.page_table[page_idx as usize];
-        }
-        Ok(self.page_cache[cache_idx as usize].load(addr))
+            self.page_table.get(page_idx).unwrap()
+        };
+        Ok(self.page_cache[cache_idx].load(addr))
     }
 
     pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
@@ -328,7 +373,7 @@ impl PagedMemory {
             self.fixup_costs(node_idx, PageState::Dirty);
             self.page_states.set(node_idx, PageState::Dirty);
         }
-        let cache_idx = self.page_table[page_idx as usize] as usize;
+        let cache_idx = self.page_table.get(page_idx).unwrap();
         Ok(self.page_cache.get_mut(cache_idx).unwrap())
     }
 
@@ -372,7 +417,7 @@ impl PagedMemory {
 
             // Update dirty pages into the image that accumulates over a session.
             if page_state == PageState::Dirty {
-                let cache_idx = self.page_table[page_idx as usize] as usize;
+                let cache_idx = self.page_table.get(page_idx).unwrap();
                 let page = &self.page_cache[cache_idx];
                 self.image.set_page(page_idx, page.clone());
             }
@@ -405,7 +450,7 @@ impl PagedMemory {
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
         tracing::trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
-        self.page_table[page_idx as usize] = self.page_cache.len() as u32;
+        self.page_table.set(page_idx, self.page_cache.len());
         self.page_cache.push(page);
         self.cycles += PAGE_CYCLES;
         self.trace_page_in(PAGE_CYCLES);
