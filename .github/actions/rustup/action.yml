@@ -28,7 +28,7 @@ runs:
         fi
       shell: bash
 
-    - run: rustup override unset
+    - run: rustup override unset || true
       shell: bash
 
     - run: rustup default ${{ inputs.toolchain }}
