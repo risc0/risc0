@@ -381,6 +381,11 @@ impl Emulator {
         }
     }
 
+    #[cold]
+    fn ring_push(&mut self, pc: ByteAddr, insn: Instruction, decoded: DecodedInstruction) {
+        self.ring.push((pc, insn, decoded));
+    }
+
     pub fn step<C: EmuContext>(&mut self, ctx: &mut C) -> Result<()> {
         let pc = ctx.get_pc();
 
@@ -400,7 +405,7 @@ impl Emulator {
         ctx.on_insn_decoded(&insn, &decoded)?;
         // Only store the ring buffer if we are gonna print it
         if tracing::enabled!(tracing::Level::DEBUG) {
-            self.ring.push((pc, insn, decoded.clone()));
+            self.ring_push(pc, insn, decoded.clone());
         }
 
         if match insn.category {

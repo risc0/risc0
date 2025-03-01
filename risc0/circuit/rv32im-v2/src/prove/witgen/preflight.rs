@@ -688,10 +688,10 @@ impl PagedMemory {
         let pages = self
             .page_states
             .iter()
-            .filter(|(&node_idx, &state)| {
-                node_idx >= MEMORY_PAGES as u32 && state == PageState::Dirty
+            .filter(|(node_idx, state)| {
+                *node_idx >= MEMORY_PAGES as u32 && *state == PageState::Dirty
             })
-            .map(|(&node_idx, _)| page_idx(node_idx))
+            .map(|(node_idx, _)| page_idx(node_idx))
             .collect();
         PagingActivity::new(pages)
     }
