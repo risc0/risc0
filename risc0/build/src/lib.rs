@@ -117,14 +117,17 @@ impl GuestBuilder for MinGuestListEntry {
     }
 }
 
-/// TODO(flaub)
+/// The portion of the MemoryImage that an Image ID represents.
 #[derive(Debug, Clone)]
 pub enum ImageIdKind {
-    /// TODO(flaub)
-    User(Digest),
+    /// This represents the entire MemoryImage.
+    Total,
 
-    /// TODO(flaub)
-    Kernel(Digest),
+    /// This represents just the user portion of the MemoryImage.
+    User,
+
+    /// This represents just the kernel portion of the MemoryImage.
+    Kernel,
 }
 
 /// Represents an item in the generated list of compiled guest binaries
@@ -139,8 +142,8 @@ pub struct GuestListEntry {
     /// The image id of the guest program.
     pub image_id: Digest,
 
-    /// The v2 image id of the guest program.
-    pub v2_image_id: ImageIdKind,
+    /// The kind of image ID generated.
+    pub kind: ImageIdKind,
 
     /// The path to the ELF binary
     pub path: Cow<'static, str>,
@@ -186,29 +189,25 @@ impl GuestBuilder for GuestListEntry {
     /// Builds the [GuestListEntry] by reading the ELF from disk, and calculating the associated
     /// image ID.
     fn build(guest_info: &GuestInfo, name: &str, elf_path: &str) -> Result<Self> {
-        let mut elf = vec![];
-
         let is_kernel = guest_info.metadata.kernel;
-        let mut image_id = if is_kernel {
-            ImageIdKind::Kernel(Digest::default())
-        } else {
-            ImageIdKind::User(Digest::default())
-        };
 
-        if !is_skip_build() {
-            elf = std::fs::read(elf_path)?;
-            if is_kernel {
-                image_id = ImageIdKind::Kernel(compute_image_id(&elf, elf_path, is_kernel)?);
-            } else {
-                image_id = ImageIdKind::User(compute_image_id(&elf, elf_path, is_kernel)?);
-            }
-        }
+        let (elf, image_id) = if is_skip_build() {
+            (vec![], Digest::default())
+        } else {
+            let elf = std::fs::read(elf_path)?;
+            let image_id = compute_image_id(&elf, elf_path, is_kernel)?;
+            (elf, image_id)
+        };
 
         Ok(Self {
             name: Cow::Owned(name.to_owned()),
             elf: Cow::Owned(elf),
-            image_id: Digest::default(),
-            v2_image_id: image_id,
+            image_id,
+            kind: if is_kernel {
+                ImageIdKind::Kernel
+            } else {
+                ImageIdKind::User
+            },
             path: Cow::Owned(elf_path.to_owned()),
         })
     }
@@ -223,11 +222,7 @@ impl GuestBuilder for GuestListEntry {
 
         let upper = self.name.to_uppercase().replace('-', "_");
 
-        let image_id = match self.v2_image_id {
-            ImageIdKind::User(digest) => digest,
-            ImageIdKind::Kernel(digest) => digest,
-        };
-        let image_id = image_id.as_words();
+        let image_id = self.image_id.as_words();
 
         let elf = if is_skip_build() {
             "&[]".to_string()
@@ -844,7 +839,7 @@ pub fn embed_self() -> Vec<GuestListEntry> {
     build_methods(&pkgs)
 }
 
-/// TODO(flaub)
+/// Build a guest package into the specified `target_dir` using the specified `GuestOptions`.
 pub fn build_package(
     pkg: &Package,
     target_dir: impl AsRef<Path>,

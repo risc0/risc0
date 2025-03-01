@@ -390,6 +390,7 @@ impl Server {
                                         .into(),
                                     "session_info.claim",
                                 )?),
+                                kernel_id: Some(session.kernel_id.into()),
                             }),
                         },
                     )),

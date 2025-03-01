@@ -304,7 +304,11 @@ fn lift_join_identity() {
         )
         .unwrap();
 
-    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes);
+    let rollup_receipt = Receipt::new(
+        InnerReceipt::Succinct(rollup),
+        session.journal.bytes,
+        session.kernel_id,
+    );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
@@ -334,7 +338,7 @@ fn lift_resolve() {
     // Drop the old client and create a new one to reset the segment list.
     let mut client = TestClient::new();
 
-    let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
+    let image_id = compute_image_id_v2(HELLO_COMMIT_ID);
 
     // Execute the composition multitest
     let env = ExecutorEnv::builder()
@@ -373,6 +377,7 @@ fn lift_resolve() {
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succinct_receipt),
         composition_session.journal.bytes,
+        composition_session.kernel_id,
     );
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
@@ -533,6 +538,7 @@ fn coprocessor_handler() {
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succinct_receipt),
         session.journal.bytes,
+        session.kernel_id,
     );
     receipt.verify(MULTI_TEST_ID).unwrap();
 }

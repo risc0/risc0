@@ -38,6 +38,8 @@ pub struct Receipt {
 pub struct ReceiptMetadata {
     #[prost(message, optional, tag = "1")]
     pub verifier_parameters: ::core::option::Option<super::base::Digest>,
+    #[prost(message, optional, tag = "2")]
+    pub kernel_id: ::core::option::Option<super::base::Digest>,
 }
 /// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
 /// In Rust, they are distinct types because Rust needs to size everything on the

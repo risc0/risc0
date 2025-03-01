@@ -119,6 +119,7 @@ impl ProverServer for DevModeProver {
                 claim: session_claim.into(),
             }),
             session.journal.clone().unwrap_or_default().bytes,
+            session.kernel_id,
         );
 
         Ok(ProveInfo {
@@ -177,6 +178,7 @@ impl ProverServer for DevModeProver {
                 claim: receipt.claim()?,
             }),
             receipt.journal.bytes.clone(),
+            receipt.metadata.kernel_id,
         ))
     }
 

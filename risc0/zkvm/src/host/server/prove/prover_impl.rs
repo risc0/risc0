@@ -180,12 +180,14 @@ impl ProverServer for ProverImpl {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
+                session.kernel_id,
             ),
             ReceiptKind::Succinct => {
                 let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
                 Receipt::new(
                     InnerReceipt::Succinct(succinct_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
+                    session.kernel_id,
                 )
             }
             ReceiptKind::Groth16 => {
@@ -194,6 +196,7 @@ impl ProverServer for ProverImpl {
                 Receipt::new(
                     InnerReceipt::Groth16(groth16_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
+                    session.kernel_id,
                 )
             }
         };
