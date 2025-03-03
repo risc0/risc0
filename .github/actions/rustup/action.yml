@@ -50,7 +50,7 @@ runs:
 
     - run: |
         SET_TOOLCHAIN=$(rustup show active-toolchain)
-        SET_TOOLCHAIN="${ACTIVE_TOOLCHAIN%% *}"
+        SET_TOOLCHAIN="${SET_TOOLCHAIN%% *}"
         echo $SET_TOOLCHAIN
         rustup toolchain install $SET_TOOLCHAIN
       shell: bash
