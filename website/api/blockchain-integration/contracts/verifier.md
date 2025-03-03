@@ -56,10 +56,12 @@ You can find detailed information in the [version management design][version-man
 
 :::info
 Contracts are not deployed for unreleased versions.
-You can use the [deployed contracts for a released version][doc-released-contracts].
+You can find the deployed contracts for released versions on our [Deployments page](https://github.com/risc0/risc0-ethereum/blob/main/DEPLOYMENTS.md).
 :::
 
-{/* TODO: Move this example into risc0-ethereum such that it will be under the same version management */}
+For the latest contract addresses and deployment information, please refer to the [RISC Zero Ethereum repository](https://github.com/risc0/risc0-ethereum). The repository contains all the necessary information about deployed verifier contracts across different networks, including mainnet and testnets.
+
+You can also find examples of how to use these contracts in the [risc0-foundry-template](https://github.com/risc0/risc0-foundry-template) repository.
 
 [doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
@@ -72,3 +74,4 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
 [version-management]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/version-management-design.md
+
