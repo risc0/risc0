@@ -10,6 +10,7 @@
   - [zkVM Application Design](#zkvm-application-design)
   - [Features, Performance, and Limitations](#features-performance-and-limitations)
 - [The RISC Zero Circuits](#the-risc-zero-circuits)
+- [Bonsai Proving Service](#bonsai-proving-service)
 - [Security](#security)
 
 ---
@@ -242,6 +243,65 @@
   - The RISC-V circuit receives an ELF binary file as a public input and private inputs from the host; the output of the RISC-V circuit is a receipt.
   - The recursion circuit is specialized to prove the verification of RISC Zero receipts; this circuit is used in order to compress many RISC Zero receipts into a single receipt.
   - The STARK-to-SNARK circuit is used to translate a STARK proof into a SNARK proof, which enables on-chain verification.
+</details>
+
+<br />
+
+## Bonsai Proving Service
+
+<a class="anchor" id="bonsai-basics" />
+
+<details closed>
+  <summary>
+    Q: What is Bonsai and how does it relate to RISC Zero?
+  </summary>
+
+  A: Bonsai is RISC Zero's proving service that allows developers to generate zero-knowledge proofs without having to run the computationally intensive proving process on their own hardware.
+
+  Bonsai makes it practical to use zero-knowledge proofs in production applications by:
+  - Handling the resource-intensive proving process
+  - Providing a simple API for submitting proving jobs
+  - Enabling on-chain verification of proofs
+  - Scaling to meet demand without requiring specialized hardware
+
+  You can learn more about Bonsai in the <a href="https://dev.risczero.com/bonsai">Bonsai documentation</a>.
+</details>
+
+<a class="anchor" id="bonsai-vs-local" />
+
+<details closed>
+  <summary>
+    Q: When should I use Bonsai versus local proving?
+  </summary>
+
+  A: You should consider using Bonsai when:
+  - You need to generate proofs in a production environment
+  - Your proofs are computationally intensive
+  - You want to avoid managing specialized hardware for proving
+  - You need to scale your proving capacity based on demand
+
+  Local proving is suitable for:
+  - Development and testing
+  - Simple proofs with low computational requirements
+  - Applications where you prefer to keep the entire proving process in your control
+  - Situations where you have specialized hardware optimized for proving
+</details>
+
+<a class="anchor" id="bonsai-blockchain" />
+
+<details closed>
+  <summary>
+    Q: How does Bonsai integrate with blockchain applications?
+  </summary>
+
+  A: Bonsai provides seamless integration with blockchain applications through:
+
+  - The Bonsai Relay, which automatically posts proof verification results on-chain
+  - Support for Ethereum and other EVM-compatible chains
+  - Smart contract templates for verifying RISC Zero proofs
+  - Tools for converting STARK proofs to SNARKs for efficient on-chain verification
+
+  For more details on blockchain integration, see our <a href="https://dev.risczero.com/bonsai/blockchain-zkvm-guide">Blockchain zkVM Guide</a>.
 </details>
 
 <br />
