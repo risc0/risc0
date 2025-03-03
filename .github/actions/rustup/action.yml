@@ -48,8 +48,11 @@ runs:
         echo "RUSTUP_MAX_RETRIES=10" >> $GITHUB_ENV
       shell: bash
 
-    - run: rustup toolchain install
+    - run: |
+        TOOLCHAIN_VERSION=$(rustup show active-toolchain | sed 's/ .*//')
+        echo $TOOLCHAIN_VERSION
+        rustup toolchain install $TOOLCHAIN_VERSION
       shell: bash
-    
+
     - run: rustc --version --verbose
       shell: bash
