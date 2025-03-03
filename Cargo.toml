@@ -62,9 +62,9 @@ risc0-core = { version = "1.4.0-alpha.1", default-features = false, path = "risc
 risc0-groth16 = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/groth16" }
 risc0-r0vm = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/r0vm" }
 risc0-sys = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/sys" }
-risc0-zkp = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/zkp" }
+risc0-zkp = { version = "2.0.0-alpha.1", default-features = false, path = "risc0/zkp" }
 risc0-zkos-v1compat = { version = "0.1.0", path = "risc0/zkos/v1compat" }
-risc0-zkvm = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/zkvm" }
+risc0-zkvm = { version = "2.0.0-alpha.1", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/zkvm/platform" }
 rzup = { version = "0.4.0-alpha.1", default-features = false, path = "rzup" }
 sppark = "0.1.10"

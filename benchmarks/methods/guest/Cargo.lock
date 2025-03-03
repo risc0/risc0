@@ -1329,7 +1329,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1352,7 +1352,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
