@@ -49,9 +49,10 @@ runs:
       shell: bash
 
     - run: |
-        TOOLCHAIN_VERSION=$(rustup show active-toolchain | sed 's/ .*//')
-        echo $TOOLCHAIN_VERSION
-        rustup toolchain install $TOOLCHAIN_VERSION
+        SET_TOOLCHAIN=$(rustup show active-toolchain)
+        SET_TOOLCHAIN="${ACTIVE_TOOLCHAIN%% *}"
+        echo $SET_TOOLCHAIN
+        rustup toolchain install $SET_TOOLCHAIN
       shell: bash
 
     - run: rustc --version --verbose
