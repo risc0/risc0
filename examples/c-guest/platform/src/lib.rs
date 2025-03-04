@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use risc0_zkvm_platform::syscall::{sys_halt, sys_panic, sys_read, sys_write};
 // Load the globals pointer. The program will load pointers relative to this
 // register, so it must be set to the right value on startup.
 // See: https://gnu-mcu-eclipse.github.io/arch/riscv/programmer/#the-gp-global-pointer-register
-// Linker relaxations must be disabled to avoid the initialization beign
+// Linker relaxations must be disabled to avoid the initialization begin
 // relaxed with an uninitialized global pointer: mv gp, gp
 //
 // This will also set up the stack pointer to the _stack_top address from the linker script and

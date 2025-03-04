@@ -12,16 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_bigint2_methods::{EC_ADD_ELF, EC_DOUBLE_ELF, EC_MUL_ELF};
-use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
-};
 use std::time::Instant;
-use test_log::test;
+
+use risc0_bigint2_methods::{EC_ADD_ELF, EC_DOUBLE_ELF, EC_MUL_ELF};
+use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts};
 
 use crate::ec::secp256k1::SECP256K1_PRIME;
 
-#[test]
+fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
+    let opts = ProverOpts::fast();
+    let prover = get_prover_server(&opts).unwrap();
+    let now = Instant::now();
+    let mut prove_info = prover.prove(env, elf).unwrap();
+    let elapsed = now.elapsed();
+    let receipt = &mut prove_info.receipt;
+    assert_eq!(
+        receipt.claim().unwrap().as_value().unwrap().exit_code,
+        ExitCode::Halted(0)
+    );
+
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+
+    receipt.journal.clone()
+}
+
+fn run_test<T: DeserializeOwned>(env: ExecutorEnv, elf: &[u8]) -> T {
+    run_test_no_decode(env, elf).decode().unwrap()
+}
+
+#[test_log::test]
 fn ec_add_basic() {
     let lhs: Option<[[u32; 8]; 2]> = Some([
         [
@@ -61,31 +81,11 @@ fn ec_add_basic() {
         .unwrap()
         .build()
         .unwrap();
-    let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    let elapsed = now.elapsed();
-    assert_eq!(
-        prove_info
-            .receipt
-            .journal
-            .decode::<Option<[[u32; 8]; 2]>>()
-            .unwrap(),
-        Some(expected)
-    );
-    tracing::info!("Runtime: {}", elapsed.as_millis());
-    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    assert_eq!(result, Some(expected));
 }
 
-#[test]
+#[test_log::test]
 fn ec_double_basic() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
@@ -114,50 +114,17 @@ fn ec_double_basic() {
         .unwrap()
         .build()
         .unwrap();
-    let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, EC_DOUBLE_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    let elapsed = now.elapsed();
-    assert_eq!(
-        prove_info
-            .receipt
-            .journal
-            .decode::<Option<[[u32; 8]; 2]>>()
-            .unwrap(),
-        Some(expected)
-    );
-    tracing::info!("Runtime: {}", elapsed.as_millis());
-    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
+    assert_eq!(result, Some(expected));
 }
 
-#[test]
+#[test_log::test]
 fn ec_mul() {
     let env = ExecutorEnv::builder().build().unwrap();
-    let now = Instant::now();
-    let session = ExecutorImpl::from_elf(env, EC_MUL_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    let elapsed = now.elapsed();
-    tracing::info!("Runtime: {}", elapsed.as_millis());
-    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+    run_test_no_decode(env, EC_MUL_ELF);
 }
 
-#[test]
+#[test_log::test]
 fn ec_add_point_plus_identity() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
@@ -176,25 +143,11 @@ fn ec_add_point_plus_identity() {
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    assert_eq!(
-        prove_info
-            .receipt
-            .journal
-            .decode::<Option<[[u32; 8]; 2]>>()
-            .unwrap(),
-        point
-    );
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    assert_eq!(result, point);
 }
 
-#[test]
+#[test_log::test]
 fn ec_add_identity_plus_point() {
     let point: Option<[[u32; 8]; 2]> = Some([
         [
@@ -213,27 +166,13 @@ fn ec_add_identity_plus_point() {
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    assert_eq!(
-        prove_info
-            .receipt
-            .journal
-            .decode::<Option<[[u32; 8]; 2]>>()
-            .unwrap(),
-        point
-    );
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    assert_eq!(result, point);
 }
 
-#[test]
+#[test_log::test]
 fn ec_add_point_plus_negative() {
-    let point: Option<[[u32; 8]; 2]> = Some([
+    let point: [[u32; 8]; 2] = [
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
             0x79be667e,
@@ -242,10 +181,10 @@ fn ec_add_point_plus_negative() {
             0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
             0x483ada77,
         ],
-    ]);
-    let x = point.unwrap()[0];
+    ];
+    let x = point[0];
     let neg_y = {
-        let mut y = point.unwrap()[1];
+        let mut y = point[1];
         for i in 0..8 {
             // Ignoring carries for this test case.
             y[i] = SECP256K1_PRIME[i] - y[i];
@@ -255,29 +194,15 @@ fn ec_add_point_plus_negative() {
     let neg_point: Option<[[u32; 8]; 2]> = Some([x, neg_y]);
 
     let env = ExecutorEnv::builder()
-        .write(&(point, neg_point))
+        .write(&(Some(point), neg_point))
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    assert_eq!(
-        prove_info
-            .receipt
-            .journal
-            .decode::<Option<[[u32; 8]; 2]>>()
-            .unwrap(),
-        None
-    );
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    assert_eq!(result, None);
 }
 
-#[test]
+#[test_log::test]
 fn ec_double_identity() {
     let identity: Option<[[u32; 8]; 2]> = None;
 
@@ -286,25 +211,11 @@ fn ec_double_identity() {
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, EC_DOUBLE_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    assert_eq!(
-        prove_info
-            .receipt
-            .journal
-            .decode::<Option<[[u32; 8]; 2]>>()
-            .unwrap(),
-        None
-    );
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
+    assert_eq!(result, None);
 }
 
-#[test]
+#[test_log::test]
 fn ec_double_point_with_zero_y() {
     let point_with_zero_y: Option<[[u32; 8]; 2]> = Some([
         [
@@ -319,20 +230,6 @@ fn ec_double_point_with_zero_y() {
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, EC_DOUBLE_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    let prove_info = prover
-        .prove_session(&VerifierContext::default(), &session)
-        .unwrap();
-    assert_eq!(
-        prove_info
-            .receipt
-            .journal
-            .decode::<Option<[[u32; 8]; 2]>>()
-            .unwrap(),
-        None
-    );
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
+    assert_eq!(result, None);
 }

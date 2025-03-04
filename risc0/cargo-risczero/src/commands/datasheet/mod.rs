@@ -199,8 +199,6 @@ struct BenchmarkData {
 }
 
 mod util {
-    use risc0_zkvm::SegmentVersion;
-
     use super::*;
 
     pub fn execute(client: &ApiClient, env: &ExecutorEnv, elf: &[u8]) -> Result<SessionInfo> {
@@ -231,7 +229,7 @@ mod util {
         let binary = risc0_zkvm::Asset::Inline(elf.to_vec().into());
         let prove_info = client.prove(env, opts, binary)?;
 
-        let ctx = VerifierContext::all_po2s(SegmentVersion::V1);
+        let ctx = VerifierContext::all_po2s();
         if opts.prove_guest_errors {
             prove_info.receipt.verify_integrity_with_context(&ctx)?;
         } else {

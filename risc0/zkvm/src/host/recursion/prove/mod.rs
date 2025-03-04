@@ -27,17 +27,15 @@ use risc0_circuit_recursion::{
     prove::{DigestKind, RecursionReceipt},
     CircuitImpl,
 };
-use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
         digest::{Digest, DIGEST_SHORTS},
-        hash::hash_suite_from_name,
+        hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::{CircuitHal, Hal},
     verify::ReadIOP,
-    MIN_CYCLES_PO2,
 };
 use serde::Serialize;
 
@@ -46,9 +44,9 @@ use crate::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{Assumption, MaybePruned, Merge},
+    receipt_claim::{Assumption, MaybePruned, Merge, UnionClaim},
     sha::Digestible,
-    ProverOpts, ReceiptClaim, SegmentVersion, Unknown,
+    ProverOpts, ReceiptClaim, Unknown,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -131,6 +129,56 @@ pub fn join(
         control_id: prover.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&ab_claim)?.into(),
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
+}
+
+/// Run the union program to compress two succinct receipts into one.
+///
+/// By repeated application of the union program, any number of succinct
+/// receipts can be compressed into a single receipt.
+pub fn union(
+    a: &SuccinctReceipt<Unknown>,
+    b: &SuccinctReceipt<Unknown>,
+) -> Result<SuccinctReceipt<UnionClaim>> {
+    let a_assumption = Assumption {
+        claim: a.claim.digest(),
+        control_root: a.control_root()?,
+    }
+    .digest();
+    let b_assumption = Assumption {
+        claim: b.claim.digest(),
+        control_root: b.control_root()?,
+    }
+    .digest();
+
+    let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
+        if a_assumption <= b_assumption {
+            ((a_assumption, a), (b_assumption, b))
+        } else {
+            ((b_assumption, b), (a_assumption, a))
+        };
+    tracing::debug!("Proving union: left assumption = {:#?}", left_assumption);
+    tracing::debug!("Proving union: right assumption = {:#?}", right_assumption);
+
+    let opts = ProverOpts::succinct();
+    let mut prover = Prover::new_union(left_receipt, right_receipt, opts.clone())?;
+    let receipt = prover.prover.run()?;
+
+    let claim = UnionClaim {
+        left: left_assumption,
+        right: right_assumption,
+    };
+
+    // Include an inclusion proof for control_id to allow verification against a root.
+    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
+        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: prover.control_id,
+        control_inclusion_proof,
+        claim: MaybePruned::Value(claim),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
@@ -414,10 +462,7 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
-        let out_size = match segment.segment_version {
-            SegmentVersion::V1 => risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE,
-            SegmentVersion::V2 => risc0_circuit_rv32im_v2::CircuitImpl::OUTPUT_SIZE,
-        };
+        let out_size = risc0_circuit_rv32im_v2::CircuitImpl::OUTPUT_SIZE;
 
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.
@@ -426,30 +471,45 @@ impl Prover {
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = match segment.segment_version {
-            SegmentVersion::V1 => zkr::lift(po2, &opts.hashfn)?,
-            SegmentVersion::V2 => zkr::lift_rv32im_v2(po2, &opts.hashfn)?,
-        };
+        let (program, control_id) = zkr::lift(po2, &opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_input(&segment.seal);
 
-        match segment.segment_version {
-            SegmentVersion::V1 => {
-                // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
-                let which = po2 - MIN_CYCLES_PO2;
-                let inner_control_id = POSEIDON2_CONTROL_IDS[which];
-                prover.add_seal(
-                    &segment.seal,
-                    &inner_control_id,
-                    &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
-                )?;
-            }
-            SegmentVersion::V2 => {
-                prover.add_input(&segment.seal);
-            }
-        }
+        Ok(prover)
+    }
 
+    /// Initialize a recursion prover with the union program to compress two
+    /// succinct receipts into one.
+    ///
+    /// By repeated application of the union program, any number of succinct
+    /// receipts can be compressed into a single receipt.
+    pub fn new_union(
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+        opts: ProverOpts,
+    ) -> Result<Self> {
+        ensure!(
+            a.hashfn == "poseidon2",
+            "union recursion program only supports poseidon2 hashfn; received {}",
+            a.hashfn
+        );
+        ensure!(
+            b.hashfn == "poseidon2",
+            "union recursion program only supports poseidon2 hashfn; received {}",
+            b.hashfn
+        );
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
+        let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
+
+        let (program, control_id) = zkr::union(&opts.hashfn)?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_succinct_receipt(a)?;
+        prover.add_succinct_receipt(b)?;
         Ok(prover)
     }
 
@@ -652,6 +712,18 @@ impl Prover {
         a.claim.as_value()?.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
         self.add_input(bytemuck::cast_slice(&data_fp));
+        Ok(())
+    }
+
+    /// Add a receipt for a succinct receipt
+    fn add_succinct_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
+    where
+        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    {
+        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
+        // Union program expects an additional boolean to indicate that control root is zero.
+        let zero_root = BabyBearElem::new((a.control_root()? == Digest::ZERO) as u32);
+        self.add_input(bytemuck::cast_slice(&[zero_root]));
         Ok(())
     }
 

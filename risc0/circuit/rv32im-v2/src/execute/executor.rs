@@ -21,20 +21,29 @@ use risc0_zkp::core::{
     log2_ceil,
 };
 
-use crate::{Rv32imV2Claim, TerminateState};
+use crate::{
+    trace::{TraceCallback, TraceEvent},
+    Rv32imV2Claim, TerminateState,
+};
 
 use super::{
-    pager::PagedMemory,
+    bigint::BigIntState,
+    pager::{PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
-    r0vm::{Risc0Context, Risc0Machine},
+    r0vm::{LoadOp, Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
-    trace::{TraceCallback, TraceEvent},
     SyscallContext,
 };
+
+#[derive(Clone, Debug, Default)]
+pub struct EcallMetric {
+    pub count: u64,
+    pub cycles: u64,
+}
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
@@ -89,7 +98,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             machine_mode: 0,
             user_cycles: 0,
             phys_cycles: 0,
-            pager: PagedMemory::new(image),
+            pager: PagedMemory::new(image, !trace.is_empty() /* tracing_enabled */),
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
@@ -138,7 +147,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.segment_cycles()
                 );
 
-                assert!(self.segment_cycles() < segment_limit);
+                assert!(
+                    self.segment_cycles() < segment_limit,
+                    "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                    self.pc
+                );
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
@@ -184,6 +197,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
         let final_cycles = self.segment_cycles().next_power_of_two();
         let final_po2 = log2_ceil(final_cycles as usize);
+        let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
 
         let final_claim = Rv32imV2Claim {
             pre_state: pre_digest,
@@ -257,9 +271,22 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
         Ok(())
     }
+
+    fn trace_pager(&mut self) -> Result<()> {
+        if !self.trace.is_empty() {
+            for &event in self.pager.trace_events() {
+                let event = TraceEvent::from(event);
+                for trace in self.trace.iter() {
+                    trace.borrow_mut().trace_callback(event.clone())?;
+                }
+            }
+            self.pager.clear_trace_events();
+        }
+        Ok(())
+    }
 }
 
-impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
+impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     fn get_pc(&self) -> ByteAddr {
         self.pc
     }
@@ -280,27 +307,42 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         self.machine_mode = mode;
     }
 
+    fn resume(&mut self) -> Result<()> {
+        let input_words = self.input_digest.as_words().to_vec();
+        for (i, word) in input_words.iter().enumerate() {
+            self.store_u32(GLOBAL_INPUT_ADDR.waddr() + i, *word)?;
+        }
+        Ok(())
+    }
+
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
         self.cycles.user += 1;
-        tracing::trace!(
-            "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-            self.user_cycles + 1,
-            self.segment_cycles() + 1,
-            self.pc,
-            decoded.insn,
-            disasm(insn, decoded)
-        );
-        self.trace(TraceEvent::InstructionStart {
-            cycle,
-            pc: self.pc.0,
-            insn: decoded.insn,
-        })
+        if tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
+                self.user_cycles + 1,
+                self.segment_cycles() + 1,
+                self.pc,
+                decoded.insn,
+                disasm(insn, decoded)
+            );
+        }
+        if !self.trace.is_empty() {
+            self.trace(TraceEvent::InstructionStart {
+                cycle,
+                pc: self.pc.0,
+                insn: decoded.insn,
+            })
+        } else {
+            Ok(())
+        }
     }
 
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
         self.user_cycles += 1;
         self.phys_cycles += 1;
+        self.trace_pager()?;
         Ok(())
     }
 
@@ -313,25 +355,27 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         _s2: u32,
     ) -> Result<()> {
         self.phys_cycles += 1;
+        self.trace_pager()?;
         Ok(())
     }
 
-    fn peek_u32(&mut self, addr: WordAddr) -> Result<u32> {
-        self.pager.peek(addr)
-    }
-
-    fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
-        let word = self.pager.load(addr)?;
+    fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
+        let word = match op {
+            LoadOp::Peek => self.pager.peek(addr)?,
+            LoadOp::Load | LoadOp::Record => self.pager.load(addr)?,
+        };
         // tracing::trace!("load_mem({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
-        self.trace(TraceEvent::MemorySet {
-            addr: addr.baddr().0,
-            region: word.to_be_bytes().to_vec(),
-        })?;
+        if !self.trace.is_empty() {
+            self.trace(TraceEvent::MemorySet {
+                addr: addr.baddr().0,
+                region: word.to_be_bytes().to_vec(),
+            })?;
+        }
         self.pager.store(addr, word)
     }
 
@@ -345,7 +389,7 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         tracing::debug!("{:?}", self.terminate_state);
 
         let output: Digest = self
-            .peek_region(GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
+            .load_region(LoadOp::Peek, GLOBAL_OUTPUT_ADDR, DIGEST_BYTES)?
             .as_slice()
             .try_into()?;
         self.output_digest = Some(output);
@@ -370,30 +414,36 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
         self.phys_cycles += 1;
     }
 
-    fn on_poseidon2_cycle(&mut self, cur_state: CycleState, _p2: &Poseidon2State) {
-        tracing::trace!("on_poseidon2_cycle: {cur_state:?}");
+    fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
+        self.phys_cycles += 1;
+    }
+
+    fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
         self.phys_cycles += 1;
     }
 }
 
-impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
+impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
         if idx >= REG_MAX {
             bail!("invalid register: x{idx}");
         }
-        Risc0Context::peek_u32(self, USER_REGS_ADDR.waddr() + idx)
+        self.load_register(LoadOp::Peek, USER_REGS_ADDR.waddr(), idx)
     }
 
     fn peek_u32(&mut self, addr: ByteAddr) -> Result<u32> {
         // let addr = Self::check_guest_addr(addr)?;
-        Risc0Context::peek_u32(self, addr.waddr())
+        self.load_u32(LoadOp::Peek, addr.waddr())
     }
 
     fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
         // let addr = Self::check_guest_addr(addr)?;
-        let word = Risc0Context::peek_u32(self, addr.waddr())?;
-        let bytes = word.to_le_bytes();
-        Ok(bytes[addr.subaddr() as usize])
+        self.load_u8(LoadOp::Peek, addr)
+    }
+
+    fn peek_region(&mut self, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
+        // let addr = Self::check_guest_addr(addr)?;
+        self.load_region(LoadOp::Peek, addr, size)
     }
 
     fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
@@ -406,5 +456,18 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
 
     fn get_pc(&self) -> u32 {
         self.user_pc.0
+    }
+}
+
+impl From<PageTraceEvent> for TraceEvent {
+    fn from(event: PageTraceEvent) -> Self {
+        match event {
+            PageTraceEvent::PageIn { cycles } => TraceEvent::PageIn {
+                cycles: cycles as u64,
+            },
+            PageTraceEvent::PageOut { cycles } => TraceEvent::PageOut {
+                cycles: cycles as u64,
+            },
+        }
     }
 }

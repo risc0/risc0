@@ -27,7 +27,7 @@ use std::{
 use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
-use risc0_circuit_keccak::KECCAK_PO2_RANGE;
+use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
@@ -79,6 +79,7 @@ pub struct ProveZkrRequest {
 
 /// A Keccak proof request.
 #[stability::unstable]
+#[derive(Clone)]
 pub struct ProveKeccakRequest {
     /// The digest of the claim that this keccak input is expected to produce.
     pub claim_digest: Digest,
@@ -90,7 +91,7 @@ pub struct ProveKeccakRequest {
     pub control_root: Digest,
 
     /// Input transcript to provide to the keccak circuit.
-    pub input: Vec<u8>,
+    pub input: Vec<KeccakState>,
 }
 
 /// A trait that supports the ability to be notified of proof requests

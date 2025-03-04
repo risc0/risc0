@@ -17,6 +17,9 @@
 #![no_main]
 #![no_std]
 
+#[path = "multi_test/profiler.rs"]
+mod profiler;
+
 extern crate alloc;
 
 use alloc::{
@@ -26,7 +29,7 @@ use alloc::{
 use core::arch::asm;
 
 use getrandom::getrandom;
-use risc0_circuit_keccak::KeccakState;
+use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
@@ -34,12 +37,11 @@ use risc0_zkvm::{
         memory_barrier, sha,
     },
     sha::{Digest, Sha256, SHA256_INIT},
-    Assumption, ReceiptClaim,
+    Assumption, ReceiptClaim, GUEST_MAX_MEM,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
 use risc0_zkvm_platform::{
     fileno,
-    memory::{self, SYSTEM},
     syscall::{
         bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
         sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
@@ -76,18 +78,6 @@ const KECCAK_UPDATE: KeccakState = [
     0x75F644E97F30A13B,
     0xEAF1FF7B5CECA249,
 ];
-
-#[inline(never)]
-#[no_mangle]
-fn profile_test_func1() {
-    profile_test_func2()
-}
-
-#[inline(always)]
-#[no_mangle]
-fn profile_test_func2() {
-    unsafe { asm!("nop") }
-}
 
 fn main() {
     let impl_select: MultiTestSpec = env::read();
@@ -131,7 +121,7 @@ fn main() {
         },
         MultiTestSpec::Profiler => {
             // Call an external function to make sure it's detected during profiling.
-            profile_test_func1()
+            profiler::profile_test_func1()
         }
         MultiTestSpec::Panic => {
             panic!("MultiTestSpec::Panic invoked");
@@ -290,10 +280,11 @@ fn main() {
         }
         MultiTestSpec::Oom => {
             use core::hint::black_box;
-            // SYSTEM memory starts above the guest memory so this is guaranteed
-            // to be larger than the available heap:
-            let len = memory::SYSTEM.start() as usize;
-            let _data = black_box(vec![0_u8; len]);
+            // GUEST_MAX_MEM is the max amount of memory so this will be as large as the heap could get.
+            // setting this as the length results in a capacity error so allocate two of these instead
+            let len = GUEST_MAX_MEM / 2;
+            let _data1 = black_box(vec![0_u8; len]);
+            let _data2 = black_box(vec![0_u8; len]);
         }
         MultiTestSpec::RsaCompat => {
             // This test comes from: https://github.com/RustCrypto/RSA/blob/master/tests/pkcs1v15.rs
@@ -349,7 +340,7 @@ fn main() {
             );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {
-            let addr: *const u8 = SYSTEM.start() as _;
+            let addr: *const u8 = GUEST_MAX_MEM as _;
             sys_log(addr, 100);
         },
         MultiTestSpec::AlignedAlloc => {
@@ -567,6 +558,16 @@ fn main() {
                     0xd5f9328619cd99f7
                 ]
             );
+        }
+        MultiTestSpec::KeccakUnion(proof_count) => {
+            let cycles = 1 << KECCAK_DEFAULT_PO2;
+            let count = cycles / 200 * proof_count;
+
+            let mut state = KeccakState::default();
+
+            for _i in 0..count {
+                env::risc0_keccak_update(&mut state);
+            }
         }
     }
 }

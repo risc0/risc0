@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,7 +68,13 @@ where
     fn prove_segment(&self, segment: &Segment) -> Result<Seal> {
         scope!("prove_segment");
 
+        // let start = std::time::Instant::now();
+        // let _trace = segment.preflight()?;
+        // tracing::info!("preflight time: {:?}", start.elapsed());
+        // return Ok(Seal::new());
+
         let trace = segment.preflight()?;
+
         let io = segment.prepare_globals();
 
         let witgen = WitnessGenerator::new(

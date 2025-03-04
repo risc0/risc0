@@ -103,14 +103,9 @@ fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     .digest::<Impl>()
 }
 
-/// Compute `ceil(a / b)` via truncated integer division.
-const fn div_ceil(a: u32, b: u32) -> u32 {
-    (a + b - 1) / b
-}
-
 /// Round `a` up to the nearest multiple of `b`.
 const fn round_up(a: u32, b: u32) -> u32 {
-    div_ceil(a, b) * b
+    a.div_ceil(b) * b
 }
 
 impl Default for PageTableInfo {

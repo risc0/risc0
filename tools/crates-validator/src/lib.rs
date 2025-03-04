@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -411,7 +411,7 @@ impl Validator {
         // RUST_TOOLCHAIN env vars, here we strip out all the extra env vars so
         // the cargo subcommands will correctly dispatch to rustup to pick the
         // target project's rust-toolchain.toml.
-        let mut filtered_env = filter_flags(&["TERM", "TZ", "CC", "CXX", "LANG", "PATH"]);
+        let mut filtered_env = filter_flags(&["CC", "CXX", "HOME", "LANG", "PATH", "TERM", "TZ"]);
 
         // TODO: support GCC
         if profile.settings.inject_cc_flags {

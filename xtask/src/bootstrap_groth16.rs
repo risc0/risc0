@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ use clap::Parser;
 use regex::Regex;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl,
+    get_prover_server, sha::Digestible, Digest, Executor2, ExecutorEnv,
     Groth16ReceiptVerifierParameters, ProverOpts, Receipt, VerifierContext,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
 #[derive(Debug, Parser)]
 pub struct BootstrapGroth16 {
@@ -163,6 +163,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     let seal = hex::encode(receipt.inner.groth16().unwrap().seal.clone());
     let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
+    let user_id = hex::encode(Digest::from(MULTI_TEST_ID).as_bytes());
 
     // NOTE: Selector value is the first four bytes of the verifier param digest. It is added as part
     // of ABI encoding and used for routing to the correct verifier on-chain. We do not use the
@@ -171,9 +172,11 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     let seal = format!(r#"bytes public constant SEAL = hex"{selector}{seal}";"#);
     let journal = format!(r#"bytes public constant JOURNAL = hex"{journal}";"#);
     let image_id = format!(r#"bytes32 public constant IMAGE_ID = hex"{image_id}";"#);
+    let user_id = format!(r#"bytes32 public constant USER_ID = hex"{user_id}";"#);
 
     let solidity_test_receipt_path = risc0_ethereum_path.join(SOLIDITY_TEST_RECEIPT_PATH);
-    let content = &format!("{SOL_HEADER}{LIB_HEADER}\n{seal}\n{journal}\n{image_id}\n}}");
+    let content =
+        &format!("{SOL_HEADER}{LIB_HEADER}\n{seal}\n{journal}\n{image_id}\n{user_id}\n}}");
     fs::write(&solidity_test_receipt_path, content).unwrap();
 
     // Use forge fmt to format the file.
@@ -197,7 +200,7 @@ fn generate_receipt() -> Receipt {
 
     tracing::info!("execute");
 
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = Executor2::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
     tracing::info!("prove");

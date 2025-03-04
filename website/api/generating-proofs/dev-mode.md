@@ -8,7 +8,7 @@ A risc0 project, when run in dev-mode by setting the `RISC0_DEV_MODE`
 environment variable, supports ([fake]) receipt creation and pass-through
 'verification' function, so that dev-mode may be switched on and off at runtime
 without impacting project workflows. In particular, receipts generated in
-dev-mode still includes public outputs written to the [journal].
+dev-mode still include public outputs written to the [journal].
 
 However, because the proving process is bypassed, receipts generated when
 dev-mode is enabled will fail a standard receipt verification check. Only when

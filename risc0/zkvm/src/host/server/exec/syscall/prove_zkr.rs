@@ -15,7 +15,7 @@
 // Manages system calls for accelerators and other proof composition
 
 use anyhow::Result;
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::{
     syscall::reg_abi::{REG_A3, REG_A4, REG_A5, REG_A6, REG_A7},
     WORD_SIZE,

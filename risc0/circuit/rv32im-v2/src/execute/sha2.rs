@@ -18,7 +18,7 @@ use risc0_zkp::core::hash::sha::BLOCK_WORDS;
 
 use crate::execute::{
     platform::*,
-    r0vm::{guest_addr, Risc0Context},
+    r0vm::{guest_addr, LoadOp, Risc0Context},
 };
 
 const SHA2_LOAD_STATE_CYCLES: u32 = 4;
@@ -56,12 +56,12 @@ impl Sha2State {
 }
 
 pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
-    let state_in_addr = guest_addr(ctx.load_machine_register(REG_A0)?)?.waddr();
-    let state_out_addr = guest_addr(ctx.load_machine_register(REG_A1)?)?.waddr();
-    let data_addr = guest_addr(ctx.load_machine_register(REG_A2)?)?.waddr();
-    let count = ctx.load_machine_register(REG_A3)? & 0xffff;
-    let k_addr = guest_addr(ctx.load_machine_register(REG_A4)?)?.waddr();
-    tracing::debug!("sha2: {count} blocks");
+    let state_in_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A0)?)?.waddr();
+    let state_out_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A1)?)?.waddr();
+    let data_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A2)?)?.waddr();
+    let count = ctx.load_machine_register(LoadOp::Record, REG_A3)? & 0xffff;
+    let k_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A4)?)?.waddr();
+    tracing::trace!("sha2: {count} blocks");
 
     if count > MAX_SHA_COUNT {
         bail!("Invalid count (too big) in sha2 ecall: {count}");
@@ -88,8 +88,8 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
     for i in 0..SHA2_LOAD_STATE_CYCLES {
         sha2.round = i;
         sha2.step(ctx, &mut cur_state, CycleState::ShaLoadState);
-        let a = ctx.load_u32(sha2.state_in_addr + 3u32 - i)?;
-        let e = ctx.load_u32(sha2.state_in_addr + 7u32 - i)?;
+        let a = ctx.load_u32(LoadOp::Record, sha2.state_in_addr + 3u32 - i)?;
+        let e = ctx.load_u32(LoadOp::Record, sha2.state_in_addr + 7u32 - i)?;
         sha2.a = a.to_be();
         sha2.e = e.to_be();
         old_a.push(sha2.a);
@@ -103,8 +103,8 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
         for i in 0..SHA2_LOAD_DATA_CYCLES {
             sha2.round = i;
             sha2.step(ctx, &mut cur_state, CycleState::ShaLoadData);
-            let k = ctx.load_u32(sha2.k_addr + i)?;
-            sha2.w = ctx.load_u32(sha2.data_addr)?.to_be();
+            let k = ctx.load_u32(LoadOp::Record, sha2.k_addr + i)?;
+            sha2.w = ctx.load_u32(LoadOp::Record, sha2.data_addr)?.to_be();
             sha2.data_addr += 1u32;
             old_w.push(sha2.w);
             let (a, e) = compute_ae(&old_a, &old_e, k, sha2.w);
@@ -117,7 +117,7 @@ pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
         for i in 0..SHA2_MIX_CYCLES {
             sha2.round = i;
             sha2.step(ctx, &mut cur_state, CycleState::ShaMix);
-            let k = ctx.load_u32(sha2.k_addr + BLOCK_WORDS + i)?;
+            let k = ctx.load_u32(LoadOp::Record, sha2.k_addr + BLOCK_WORDS + i)?;
             sha2.w = compute_w(&old_w);
             old_w.push(sha2.w);
             let (a, e) = compute_ae(&old_a, &old_e, k, sha2.w);

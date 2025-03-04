@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ pub mod embedded;
 pub fn used() -> usize {
     cfg_if::cfg_if! {
         if #[cfg(feature = "heap-embedded-alloc")] {
-            embedded::HEAP.used()
+            0
         } else {
             bump::used()
         }
@@ -33,7 +33,7 @@ pub fn used() -> usize {
 pub fn free() -> usize {
     cfg_if::cfg_if! {
         if #[cfg(feature = "heap-embedded-alloc")] {
-            embedded::HEAP.free()
+            0
         } else {
             bump::free()
         }

@@ -16,7 +16,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use std::{cell::RefCell, rc::Rc};
 
-use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::{
     syscall::reg_abi::{REG_A3, REG_A4},
     WORD_SIZE,
@@ -48,7 +48,7 @@ impl<'a> SysSliceIo<'a> {
 /// calls. The first call returns (nelem, _) indicating how many
 /// elements are to be sent back to the guest, and the second call
 /// actually returns the elements after the guest allocates space.
-impl<'a> Syscall for SysSliceIo<'a> {
+impl Syscall for SysSliceIo<'_> {
     fn syscall(
         &mut self,
         syscall: &str,

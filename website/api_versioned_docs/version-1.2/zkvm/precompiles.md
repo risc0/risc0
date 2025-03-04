@@ -85,6 +85,16 @@ can be in the [ECDSA example][ecdsa]. Note the [use of the patched
 versions][ecdsa-patched] of `sha2`, `crypto-bigint` and `k256` crates used in
 the guest's `Cargo.toml`.
 
+Some crates will allow you a choice of different backend crates, and you may be
+able to use this to select a crate we have already published a patch for. An
+example is Revm's `revm-precompile` crate, which by default uses `k256`; in this
+case you can use [our patch for `k256`][k256-patch]. However, if you set the
+[`secp256k1` feature flag][revm-precompile-toml], it will use the `secp256k1`
+crate instead, where we don't currently provide a patch.
+
+If you need a precompile patched into a different crate than the ones listed
+here, please reach out and let us know!
+
 ## Adding Precompile Support To Crates
 
 It's possible to add precompile support for your own crates.
@@ -118,6 +128,8 @@ no longer be required.
 [feature-flag]: https://doc.rust-lang.org/cargo/reference/features.html#dependency-features
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.3..k256/v0.13.3-risczero.1
+[k256-patch]: https://github.com/risc0/RustCrypto-elliptic-curves/tree/k256/v0.13.3-risczero.1
 [lincomb]: https://github.com/risc0/RustCrypto-elliptic-curves/blob/k256/v0.13.3-risczero.1/k256/src/arithmetic/mul.rs#L349-L377
+[revm-precompile-toml]: https://github.com/bluealloy/revm/blob/45581c451a440776fd59576d7b27c366b1528724/crates/precompile/Cargo.toml
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
 [Yes]: #stability

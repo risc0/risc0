@@ -23,11 +23,14 @@ mod zkvm {
     use core::{
         arch::{asm, global_asm},
         cmp::min,
+        mem::MaybeUninit,
     };
+    use include_bytes_aligned::include_bytes_aligned;
 
     const HOST_ECALL_READ: u32 = 1;
     const HOST_ECALL_WRITE: u32 = 2;
     const HOST_ECALL_SHA: u32 = 4;
+    const HOST_ECALL_BIGINT: u32 = 5;
     const WORD_SIZE: u32 = 4;
     const DIGEST_WORDS: usize = 8;
     const BLOCK_WORDS: usize = 2 * DIGEST_WORDS;
@@ -51,6 +54,135 @@ mod zkvm {
     ];
 
     global_asm!(include_str!("kernel.s"));
+
+    const MODMUL_256: &[u8] = include_bytes_aligned!(4, "bigint_v1compat/modmul_256.blob");
+    const MUL_256: &[u8] = include_bytes_aligned!(4, "bigint_v1compat/mul_256.blob");
+    const BIGINT_OP_MULTIPLY: u32 = 0;
+    const BIGINT_WIDTH_WORDS: usize = 256 / 8 / WORD_SIZE as usize;
+
+    #[repr(C)]
+    pub struct BigIntBlobHeader {
+        pub nondet_program_size: u32,
+        pub verify_program_size: u32,
+        pub consts_size: u32,
+        pub temp_size: u32,
+    }
+
+    #[no_mangle]
+    unsafe extern "C" fn ecall_bigint_v1compat(
+        result: *mut [u32; BIGINT_WIDTH_WORDS],
+        op: u32,
+        x: *const [u32; BIGINT_WIDTH_WORDS],
+        y: *const [u32; BIGINT_WIDTH_WORDS],
+        modulus: *const [u32; BIGINT_WIDTH_WORDS],
+    ) -> ! {
+        if op != BIGINT_OP_MULTIPLY {
+            illegal_instruction();
+        }
+
+        let mod_zero = (*modulus).iter().all(|e| *e == 0);
+        let blob_ptr = if mod_zero {
+            MUL_256.as_ptr()
+        } else {
+            MODMUL_256.as_ptr()
+        };
+        let header = blob_ptr as *const BigIntBlobHeader;
+        let nondet_program_ptr = (header.add(1)) as *const u32;
+        let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);
+        let consts_ptr = verify_program_ptr.add((*header).verify_program_size as usize);
+        let temp_space = ((*header).temp_size as usize) << 2;
+
+        if mod_zero {
+            let mut temp_result = MaybeUninit::<[[u32; BIGINT_WIDTH_WORDS]; 2]>::uninit();
+
+            asm!("sub sp, sp, {temp_space}", temp_space = in(reg) temp_space);
+            host_ecall_bigint_3(
+                nondet_program_ptr,
+                verify_program_ptr,
+                consts_ptr,
+                blob_ptr,
+                x as *const u32,
+                y as *const u32,
+                temp_result.as_mut_ptr() as *const u32,
+            );
+            asm!("add sp, sp, {temp_space}", temp_space = in(reg) temp_space);
+
+            let temp_result = temp_result.assume_init();
+
+            // Check for overflow of the result
+            if temp_result[1].iter().any(|e| *e != 0) {
+                illegal_instruction();
+            }
+
+            (*result).copy_from_slice(&temp_result[0]);
+        } else {
+            asm!("sub sp, sp, {temp_space}", temp_space = in(reg) temp_space);
+            host_ecall_bigint_4(
+                nondet_program_ptr,
+                verify_program_ptr,
+                consts_ptr,
+                blob_ptr,
+                x as *const u32,
+                y as *const u32,
+                modulus as *const u32,
+                result as *const u32,
+            );
+            asm!("add sp, sp, {temp_space}", temp_space = in(reg) temp_space);
+        }
+
+        asm!("mret", options(noreturn))
+    }
+
+    #[inline(always)]
+    unsafe fn illegal_instruction() -> ! {
+        asm!("fence", options(noreturn));
+    }
+
+    #[inline(always)]
+    unsafe fn host_ecall_bigint_3(
+        nondet_program_ptr: *const u32,
+        verify_program_ptr: *const u32,
+        consts_ptr: *const u32,
+        blob_ptr: *const u8,
+        a1: *const u32,
+        a2: *const u32,
+        a3: *const u32,
+    ) {
+        asm!("ecall",
+            in("a7") HOST_ECALL_BIGINT,
+            in("t1") nondet_program_ptr,
+            in("t2") verify_program_ptr,
+            in("t3") consts_ptr,
+            in("a0") blob_ptr,
+            in("a1") a1,
+            in("a2") a2,
+            in("a3") a3,
+        );
+    }
+
+    #[inline(always)]
+    unsafe fn host_ecall_bigint_4(
+        nondet_program_ptr: *const u32,
+        verify_program_ptr: *const u32,
+        consts_ptr: *const u32,
+        blob_ptr: *const u8,
+        a1: *const u32,
+        a2: *const u32,
+        a3: *const u32,
+        a4: *const u32,
+    ) {
+        asm!("ecall",
+            in("a7") HOST_ECALL_BIGINT,
+            in("t1") nondet_program_ptr,
+            in("t2") verify_program_ptr,
+            in("t3") consts_ptr,
+            in("a0") blob_ptr,
+            in("a1") a1,
+            in("a2") a2,
+            in("a3") a3,
+            in("a4") a4,
+        );
+    }
 
     #[no_mangle]
     unsafe extern "C" fn ecall_software(fd: u32, mut buf: *const u8, mut len: u32) -> ! {

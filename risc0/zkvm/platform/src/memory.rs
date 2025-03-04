@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ use super::WORD_SIZE;
 
 pub const MEM_BITS: usize = 28;
 pub const MEM_SIZE: usize = 1 << MEM_BITS;
-pub const GUEST_MIN_MEM: usize = 0x0000_0400;
-pub const GUEST_MAX_MEM: usize = SYSTEM.start;
+pub const GUEST_MIN_MEM: usize = 0x0000_4000;
+pub const GUEST_MAX_MEM: usize = 0xC000_0000;
 
 /// Top of stack; stack grows down from this location.
 pub const STACK_TOP: u32 = 0x0020_0400;

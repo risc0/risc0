@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 
 //! This module contains functions for running a Groth16 prover using Docker.
 //!
-//! Docker is used here as a way to provide [rapidsnark] and the required prover key in a single
-//! package. Proving with Groth16 is currently only supported using Docker.
+//! Docker is used here as a way to provide [gnark] and the required prover key in a single package.
+//! Proving with Groth16 is currently only supported using Docker.
 //!
-//! [rapidsnark]: https://github.com/iden3/rapidsnark
+//! [gnark]: https://github.com/Consensys/gnark
 
 use std::{
     env::consts::ARCH,
@@ -58,7 +58,7 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .arg("--rm")
         .arg("-v")
         .arg(format!("{}:/mnt", work_dir.to_string_lossy()))
-        .arg("risczero/risc0-groth16-prover:v2024-05-17.1")
+        .arg("risczero/risc0-groth16-prover:v2025-01-31.1")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()?;

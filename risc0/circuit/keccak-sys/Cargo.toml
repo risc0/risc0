@@ -10,7 +10,7 @@ links = "risc0-circuit-keccak-sys"
 
 [dependencies]
 cust = { version = "0.3", optional = true }
-derive_more = { version = "1.0", features = ["debug"] }
+derive_more = { version = "2.0.1", features = ["debug"] }
 risc0-core = { workspace = true }
 risc0-sys = { workspace = true }
 sppark = { workspace = true, optional = true }

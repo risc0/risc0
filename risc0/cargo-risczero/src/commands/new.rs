@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -128,9 +128,12 @@ impl NewCommand {
             template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, build));
             template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, zkvm));
         } else {
-            let spec = format!("version = \"{risc0_version}\"");
-            template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, spec.clone()));
-            template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, spec));
+            let zkvm_spec = format!("version = \"{risc0_version}\"");
+            // This hard-coding of 2.0.0 for `risc0-build` is a temporary fix until we can come up
+            // with something more robust.
+            let build_spec = "version = \"2.0.0\"".into();
+            template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, build_spec));
+            template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, zkvm_spec));
         }
 
         let guest_name = match &self.guest_name {

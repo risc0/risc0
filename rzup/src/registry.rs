@@ -33,10 +33,6 @@ fn parse_version_from_entry(
 
     let dir_name = entry.file_name().to_string_lossy().to_string();
 
-    if !dir_name.contains(component.as_str()) {
-        return Ok(None);
-    }
-
     match Paths::parse_version_from_path(&dir_name, component) {
         Some(version) => {
             env.emit(RzupEvent::Debug {
@@ -126,8 +122,10 @@ impl Registry {
 
         // Components installed by old versions might leave us in a state where there is a
         // component installed, but no active version
-        if let Some((version, path)) = self.find_highest_installed_version(env, component)? {
-            return Ok(Some((version, path)));
+        if let Some(version) = self.find_highest_installed_version(env, component)? {
+            if let Some(path) = Paths::find_version_dir(env, component, &version)? {
+                return Ok(Some((version, path)));
+            }
         }
 
         Ok(None)
@@ -236,25 +234,34 @@ impl Registry {
         &self,
         env: &Environment,
         component: &Component,
-    ) -> Result<Option<(Version, PathBuf)>> {
+    ) -> Result<Option<Version>> {
         let all_versions = Self::list_component_versions(env, component)?;
 
         // If we found any versions, set the highest one as default
-        if let Some((highest_version, path)) = all_versions.first() {
+        if let Some((highest_version, _)) = all_versions.first() {
             env.emit(RzupEvent::Debug {
                 message: format!(
                     "Setting highest version {highest_version} as default for {component}",
                 ),
             });
-            return Ok(Some((highest_version.clone(), path.clone())));
+            return Ok(Some(highest_version.clone()));
         }
         Ok(None)
     }
 
-    fn find_new_default_version(&mut self, env: &Environment, component: &Component) -> Result<()> {
+    fn find_new_default_version(
+        &mut self,
+        env: &Environment,
+        removed_version: &Version,
+        component: &Component,
+    ) -> Result<()> {
         // Check if we uninstalled the default version
-        if self.settings.get_default_version(component).is_none() {
-            if let Some((new_version, _)) = self.find_highest_installed_version(env, component)? {
+        if self
+            .settings
+            .get_default_version(component)
+            .is_some_and(|version| &version == removed_version)
+        {
+            if let Some(new_version) = self.find_highest_installed_version(env, component)? {
                 self.set_default_component_version(env, component, new_version)?;
             }
         }
@@ -269,7 +276,7 @@ impl Registry {
     ) -> Result<()> {
         if let Some(parent) = component.parent_component() {
             components::uninstall(&parent, env, &version)?;
-            self.find_new_default_version(env, &parent)?;
+            self.find_new_default_version(env, &version, &parent)?;
         } else {
             components::uninstall(component, env, &version)?;
         }
@@ -278,7 +285,7 @@ impl Registry {
             version: version.to_string(),
         });
 
-        self.find_new_default_version(env, component)?;
+        self.find_new_default_version(env, &version, component)?;
 
         Ok(())
     }

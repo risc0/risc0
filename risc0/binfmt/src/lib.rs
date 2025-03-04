@@ -25,14 +25,12 @@ mod exit_code;
 mod hash;
 #[cfg(not(target_os = "zkvm"))]
 mod image;
-#[cfg(feature = "std")]
 mod image2;
 mod sys_state;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use self::image::{MemoryImage, PageTableInfo};
 
-#[cfg(feature = "std")]
 pub use self::image2::{MemoryImage2, Page, KERNEL_START_ADDR};
 
 pub use crate::{
@@ -58,7 +56,6 @@ pub fn compute_image_id(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::D
 }
 
 /// Compute and return the ImageID of the user-mode portion of the specified ELF binary.
-#[cfg(feature = "std")]
 pub fn compute_user_id_v2(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::Digest> {
     let program = Program::load_elf(elf, KERNEL_START_ADDR.0)?;
     let mut image = MemoryImage2::new_user(program);
@@ -66,7 +63,6 @@ pub fn compute_user_id_v2(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest:
 }
 
 /// Compute and return the ImageID of the kernel-mode portion of the specified ELF binary.
-#[cfg(feature = "std")]
 pub fn compute_kernel_id_v2(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::Digest> {
     let program = Program::load_elf(elf, u32::MAX)?;
     let mut image = MemoryImage2::new_kernel(program);
@@ -74,7 +70,6 @@ pub fn compute_kernel_id_v2(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::diges
 }
 
 /// Compute and return the ImageID of the user-mode portion of the specified ELF binary.
-#[cfg(feature = "std")]
 pub fn compute_image_id_v2(
     user_id: impl Into<risc0_zkp::core::digest::Digest>,
     kernel_id: impl Into<risc0_zkp::core::digest::Digest>,

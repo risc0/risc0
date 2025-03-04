@@ -42,7 +42,7 @@ RISC0_PPROF_OUT=./profile.pb RUST_LOG=info RISC0_DEV_MODE=1 RISC0_INFO=1 cargo r
 The above command will run the Fibonacci computation for 1000 iterations and
 write the profiling output to `profile.pb`. Use the environment variable
 `RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
-We recommend running profiling in [dev mode][devmode] to avoid unneccesary proving time.
+We recommend running profiling in [dev mode][devmode] to avoid unnecessary proving time.
 
 ### Step 3: Visualization
 
@@ -88,6 +88,14 @@ Use the pprof web interface to compare the performance of the 3 Fibonacci
 implementations. Refer to the [pprof docs][pprof] for more information about the
 web interface.
 :::
+
+## Inline Functions
+
+Your compiler may end up inlining a lot of functions which can make it difficult to see what is
+going on in the profile sometimes. If you have compiled your program with debug symbols you can
+enable inline function tracking in the profiler by setting
+`RISC0_PPROF_ENABLE_INLINE_FUNCTIONS=yes`. This will make the profile more detailed, but it comes at
+a cost of slowing down the profiler.
 
 [^1]: Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every

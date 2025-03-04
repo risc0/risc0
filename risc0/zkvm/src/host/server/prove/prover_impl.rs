@@ -22,19 +22,16 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, session::InnerSegment},
+        server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
     },
+    mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
-    receipt::{
-        segment::{decode_receipt_claim_from_seal_v1, SegmentVersion},
-        InnerReceipt, SegmentReceipt, SuccinctReceipt,
-    },
-    receipt_claim::{MaybePruned, Merge, Unknown},
-    risc0_rv32im_ver,
+    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
+    recursion::prove::union,
     sha::Digestible,
-    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, ExecutorImpl,
-    InnerAssumptionReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
-    VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
+    ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -44,17 +41,14 @@ pub struct ProverImpl {
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(mut opts: ProverOpts) -> Self {
-        if let Some(version) = risc0_rv32im_ver() {
-            opts = opts.with_segment_version(version);
-        }
+    pub fn new(opts: ProverOpts) -> Self {
         Self { opts }
     }
 }
 
 impl ProverServer for ProverImpl {
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-        let ctx = self.opts.verifier_context();
+        let ctx = VerifierContext::default();
         self.prove_with_ctx(env, &ctx, elf)
     }
 
@@ -64,10 +58,7 @@ impl ProverServer for ProverImpl {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = match self.opts.segment_version {
-            SegmentVersion::V1 => ExecutorImpl::from_elf(env, elf)?.run()?,
-            SegmentVersion::V2 => Executor2::from_elf(env, elf)?.run()?,
-        };
+        let session = Executor2::from_elf(env, elf)?.run()?;
         self.prove_session(ctx, &session)
     }
 
@@ -131,14 +122,22 @@ impl ProverServer for ProverImpl {
             zkr_receipts.insert(assumption, receipt);
         }
 
+        let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
+            MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request)?;
+            tracing::debug!("adding keccak assumption: {}", receipt.claim.digest());
+            keccak_receipts.insert(receipt)?;
+        }
+
+        if let Ok(root_receipt) = keccak_receipts.root() {
             let assumption = Assumption {
-                claim: receipt.claim.digest(),
-                control_root: receipt.control_root()?,
+                claim: root_receipt.claim.digest(),
+                control_root: root_receipt.control_root()?,
             };
-            tracing::debug!("adding keccak assumption: {assumption:#?}");
-            zkr_receipts.insert(assumption, receipt);
+
+            tracing::debug!("keccak root assumption: {:?}", assumption);
+            zkr_receipts.insert(assumption, root_receipt.clone());
         }
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
@@ -217,20 +216,9 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let (seal, claim, segment_version) = match &segment.inner {
-            InnerSegment::V1(inner) => {
-                let seal = risc0_circuit_rv32im::prove::segment_prover(&self.opts.hashfn)?
-                    .prove_segment(inner)?;
-                let mut claim = decode_receipt_claim_from_seal_v1(&seal)?;
-                claim.output = segment.output.clone().into();
-                (seal, claim, SegmentVersion::V1)
-            }
-            InnerSegment::V2(segment) => {
-                let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(segment)?;
-                let claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.po2))?;
-                (seal, claim, SegmentVersion::V2)
-            }
-        };
+        let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(&segment.inner)?;
+        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.inner.po2))?;
+        claim.output = segment.output.clone().into();
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
@@ -243,7 +231,6 @@ impl ProverServer for ProverImpl {
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
-            segment_version,
         };
         receipt.verify_integrity_with_context(ctx)?;
 
@@ -283,6 +270,14 @@ impl ProverServer for ProverImpl {
         request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
         prove_keccak(request)
+    }
+
+    fn union(
+        &self,
+        a: &SuccinctReceipt<Unknown>,
+        b: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<UnionClaim>> {
+        union(a, b)
     }
 }
 

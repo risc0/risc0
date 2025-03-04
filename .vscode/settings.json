@@ -36,12 +36,6 @@
   "files.eol": "\n",
   "git.ignoreLimitWarning": true,
   "files.associations": {
-    "*.h.inc": "cpp",
-    "*.cpp.inc": "cpp",
-    "*.cu": "cuda",
-    "*.cuh.inc": "cuda",
-    "*.cu.inc": "cuda",
-    "*.rs.inc": "rust",
     "*.sh": "shellscript",
     "*.py": "python",
     "*.cl": "c",
@@ -54,6 +48,12 @@
     "*.scr": "tcl",
     "cstddef": "cpp",
     "*.bazel": "starlark",
+    "*.h.inc": "cpp",
+    "*.cpp.inc": "cpp",
+    "*.cu": "cuda",
+    "*.cuh.inc": "cuda",
+    "*.cu.inc": "cuda",
+    "*.rs.inc": "rust",
     "fstream": "cpp",
     "ios": "cpp",
     "iosfwd": "cpp",
@@ -62,7 +62,8 @@
     "stdexcept": "cpp",
     "array": "cpp",
     "*.css": "tailwindcss",
-    "initializer_list": "cpp"
+    "initializer_list": "cpp",
+    "*.inc": "cpp"
   },
   "tailwindCSS.experimental.classRegex": [
     [
