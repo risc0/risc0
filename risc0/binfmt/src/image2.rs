@@ -168,6 +168,11 @@ impl MemoryImage2 {
         bail!("Unavailable page: {page_idx}")
     }
 
+    /// Return the page data, panics if not available
+    pub fn get_existing_page(&self, page_idx: u32) -> Page {
+        self.pages.get(&page_idx).unwrap().clone()
+    }
+
     /// Set the data for a page
     pub fn set_page(&mut self, page_idx: u32, page: Page) {
         // tracing::trace!("set_page({page_idx:#08x})");
@@ -185,6 +190,11 @@ impl MemoryImage2 {
         self.digests
             .get(&digest_idx)
             .ok_or_else(|| anyhow!("Unavailable digest: {digest_idx}"))
+    }
+
+    /// Get a digest, panics if not available
+    pub fn get_existing_digest(&self, digest_idx: u32) -> &Digest {
+        self.digests.get(&digest_idx).unwrap()
     }
 
     /// Set a digest

@@ -140,7 +140,7 @@ impl<'a> Executor2<'a> {
     /// [crate::ExitCode::Paused] is reached, producing a [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
-        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
         scope!("execute");
         tracing::info!("Executing rv32im-v2 session");
@@ -179,7 +179,8 @@ impl<'a> Executor2<'a> {
                             .claim
                             .output
                             .and_then(|digest| {
-                                (digest != Digest::ZERO).then(|| journal.buf.borrow().clone())
+                                (digest != Digest::ZERO)
+                                    .then(|| journal.buf.lock().unwrap().clone())
                             })
                             .map(|journal| {
                                 Ok(Output {
@@ -187,7 +188,8 @@ impl<'a> Executor2<'a> {
                                     assumptions: Assumptions(
                                         self.syscall_table
                                             .assumptions_used
-                                            .borrow()
+                                            .lock()
+                                            .unwrap()
                                             .iter()
                                             .map(|(a, _)| a.clone().into())
                                             .collect::<Vec<_>>(),
@@ -216,20 +218,19 @@ impl<'a> Executor2<'a> {
         let exit_code = exit_code_from_rv32im_v2_claim(&result.claim)?;
 
         // Set the session_journal to the committed data iff the guest set a non-zero output.
-        let session_journal = result
-            .claim
-            .output
-            .and_then(|digest| (digest != Digest::ZERO).then(|| journal.buf.take()));
+        let session_journal = result.claim.output.and_then(|digest| {
+            (digest != Digest::ZERO).then(|| std::mem::take(&mut *journal.buf.lock().unwrap()))
+        });
         if !exit_code.expects_output() && session_journal.is_some() {
             tracing::debug!(
                 "dropping non-empty journal due to exit code {exit_code:?}: 0x{}",
-                hex::encode(journal.buf.borrow().as_slice())
+                hex::encode(journal.buf.lock().unwrap().as_slice())
             );
         };
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let assumptions = self.syscall_table.assumptions_used.take();
+        let assumptions = std::mem::take(&mut *self.syscall_table.assumptions_used.lock().unwrap());
         let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
         let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
