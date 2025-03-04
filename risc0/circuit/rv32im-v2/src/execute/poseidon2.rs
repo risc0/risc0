@@ -32,6 +32,30 @@ use crate::{
     zirgen::circuit::ExtVal,
 };
 
+use rayon::prelude::*;
+use std::sync::Once;
+
+// Initialize only once
+static INIT: Once = Once::new();
+
+// Function to configure thread pool
+fn initialize_thread_pool() {
+    INIT.call_once(|| {
+        // Get optimal number of threads based on system
+        let num_threads = std::thread::available_parallelism()
+            .map(|p| p.get())
+            .unwrap_or_else(|_| 4);
+
+        // Configure global thread pool
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(num_threads)
+            .build_global()
+            .unwrap();
+
+        tracing::debug!("Initialized Rayon thread pool with {} threads", num_threads);
+    });
+}
+
 const BABY_BEAR_P_U32: u32 = baby_bear::P;
 const BABY_BEAR_P_U64: u64 = baby_bear::P as u64;
 
@@ -198,23 +222,32 @@ impl Poseidon2State {
     // Optimized method for multiplication by M_EXT.
     // See appendix B of Poseidon2 paper for additional details.
     fn multiply_by_m_ext(&mut self) {
-        // Pre-allocate output array
+        // Step 1: Calculate chunk results in parallel
+        let inner = self.inner;
+        let chunk_results: Vec<_> = (0..CELLS / 4)
+            .into_par_iter()
+            .map(|i| {
+                let base_idx = i * 4;
+                let chunk_in = [
+                    inner[base_idx],
+                    inner[base_idx + 1],
+                    inner[base_idx + 2],
+                    inner[base_idx + 3],
+                ];
+
+                // Apply the 4x4 circulant multiplication
+                multiply_by_4x4_circulant(&chunk_in)
+            })
+            .collect();
+
+        // Step 2: Process the results deterministically (sequential)
         let mut out = [0u32; CELLS];
         let mut tmp_sums = [0u32; 4];
 
-        // Process 4 elements at a time for better cache utilization
-        for i in 0..CELLS / 4 {
-            // Get a reference to the current 4-element chunk to reduce array access overhead
+        // Apply chunk results to output
+        for (i, chunk) in chunk_results.iter().enumerate() {
             let base_idx = i * 4;
-            let chunk_in = &self.inner[base_idx..base_idx + 4];
-
-            // Use the 4x4 circulant multiplication
-            let chunk =
-                multiply_by_4x4_circulant(&[chunk_in[0], chunk_in[1], chunk_in[2], chunk_in[3]]);
-
-            // Update sums and output values in a single pass
             for j in 0..4 {
-                // Convert once to u64 to avoid potential overflow
                 let to_add = chunk[j] as u64 % BABY_BEAR_P_U64;
                 let to_add_u32 = to_add as u32;
 
@@ -227,7 +260,7 @@ impl Poseidon2State {
             }
         }
 
-        // Final combination step
+        // Final combination step (same as original)
         for i in 0..CELLS {
             self.inner[i] = (out[i] + tmp_sums[i % 4]) % BABY_BEAR_P_U32;
         }
@@ -263,17 +296,21 @@ impl Poseidon2State {
         // Add round constants to all cells
         self.add_round_constants_full(idx);
 
-        // Apply S-box to each cell
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..CELLS {
-            // Apply the S-box function directly to avoid function call overhead
-            let x = self.inner[i] as u64;
-            let x2 = (x * x) % BABY_BEAR_P_U64;
-            let x4 = (x2 * x2) % BABY_BEAR_P_U64;
-            let x6 = (x4 * x2) % BABY_BEAR_P_U64;
-            let x7 = (x6 * x) % BABY_BEAR_P_U64;
-            self.inner[i] = x7 as u32;
-        }
+        // Parallel S-box application
+        let inner_copy = self.inner;
+        self.inner = (0..CELLS)
+            .into_par_iter()
+            .map(|i| {
+                let x = inner_copy[i] as u64;
+                let x2 = (x * x) % BABY_BEAR_P_U64;
+                let x4 = (x2 * x2) % BABY_BEAR_P_U64;
+                let x6 = (x4 * x2) % BABY_BEAR_P_U64;
+                let x7 = (x6 * x) % BABY_BEAR_P_U64;
+                x7 as u32
+            })
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
 
         // Apply matrix multiplication
         self.multiply_by_m_ext();
@@ -301,10 +338,15 @@ impl Poseidon2State {
     }
 
     fn add_round_constants_full(&mut self, round: usize) {
-        for i in 0..CELLS {
-            self.inner[i] += ROUND_CONSTANTS[round * CELLS + i].as_u32();
-            self.inner[i] %= BABY_BEAR_P_U32;
-        }
+        let constants = &ROUND_CONSTANTS[round * CELLS..(round + 1) * CELLS];
+        let inner_copy = self.inner;
+
+        self.inner = (0..CELLS)
+            .into_par_iter()
+            .map(|i| (inner_copy[i] + constants[i].as_u32()) % BABY_BEAR_P_U32)
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
     }
 
     fn add_round_constants_partial(&mut self, round: usize) {
@@ -352,6 +394,9 @@ pub(crate) struct Poseidon2;
 
 impl Poseidon2 {
     pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
+        // Initialize thread pool if not already done
+        initialize_thread_pool();
+
         tracing::trace!("ecall");
         let state_addr = ctx.load_machine_register(LoadOp::Record, REG_A0)?;
         let buf_in_addr = ctx.load_machine_register(LoadOp::Record, REG_A1)?;

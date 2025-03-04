@@ -45,6 +45,7 @@ repository = "https://github.com/risc0/risc0/"
 [workspace.dependencies]
 bonsai-sdk = { version = "1.4.0-alpha.1", default-features = false, path = "bonsai/sdk" }
 hotbench = { path = "tools/hotbench" }
+hashlink = "0.10.0"
 metal = "0.29"
 risc0-bigint2 = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/bigint2" }
 risc0-binfmt = { version = "1.4.0-alpha.1", default-features = false, path = "risc0/binfmt" }
