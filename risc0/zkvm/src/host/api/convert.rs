@@ -18,7 +18,7 @@ use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
-use risc0_zkp::core::digest::Digest;
+use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
@@ -424,6 +424,7 @@ impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
     fn from(value: ReceiptMetadata) -> Self {
         Self {
             verifier_parameters: Some(value.verifier_parameters.into()),
+            kernel_id: Some(value.kernel_id.into()),
         }
     }
 }
@@ -436,6 +437,12 @@ impl TryFrom<pb::core::ReceiptMetadata> for ReceiptMetadata {
             verifier_parameters: value
                 .verifier_parameters
                 .ok_or_else(|| malformed_err("ReceiptMetadata.verifier_parameters"))?
+                .try_into()?,
+            kernel_id: value
+                .kernel_id
+                .unwrap_or_else(|| pb::base::Digest {
+                    words: vec![0; DIGEST_WORDS],
+                })
                 .try_into()?,
         })
     }

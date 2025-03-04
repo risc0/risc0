@@ -17,7 +17,7 @@ use std::path::Path;
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
-use risc0_zkp::core::digest::Digest;
+use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 
 use super::{
     malformed_err, pb, Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector,
@@ -873,10 +873,16 @@ impl Client {
                                             .ok_or_else(|| malformed_err("SessionInfo.exit_code"))?
                                             .try_into()?,
                                         receipt_claim,
+                                        kernel_id: session
+                                            .kernel_id
+                                            .unwrap_or_else(|| pb::base::Digest {
+                                                words: vec![0; DIGEST_WORDS],
+                                            })
+                                            .try_into()?,
                                     })
                                 }
                                 None => Err(malformed_err("ServerReply.ok.SessionDone.session")),
-                            }
+                            };
                         }
                         pb::api::client_callback::Kind::ProveDone(_) => {
                             return Err(anyhow!("Illegal client callback"))

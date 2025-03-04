@@ -20,7 +20,12 @@ pub(crate) mod merkle;
 pub(crate) mod segment;
 pub(crate) mod succinct;
 
-use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    string::String,
+    vec,
+    vec::Vec,
+};
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -131,9 +136,10 @@ pub struct Receipt {
 
 impl Receipt {
     /// Construct a new Receipt
-    pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
+    pub fn new(inner: InnerReceipt, journal: Vec<u8>, kernel_id: Digest) -> Self {
         let metadata = ReceiptMetadata {
             verifier_parameters: inner.verifier_parameters(),
+            kernel_id,
         };
         Self {
             inner,
@@ -163,7 +169,7 @@ impl Receipt {
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
-        image_id: impl Into<Digest>,
+        user_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
         if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
             return Err(VerificationError::VerifierParametersMismatch {
@@ -175,10 +181,11 @@ impl Receipt {
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
-        let image_id = match crate::compute_image_id_v2(image_id) {
-            Ok(image_id) => image_id,
-            Err(_) => return Err(VerificationError::ImageVerificationError),
-        };
+        if !ctx.allowed_kernel_ids.contains(&self.metadata.kernel_id) {
+            return Err(VerificationError::InvalidKernel);
+        }
+
+        let image_id = risc0_binfmt::compute_image_id_v2(user_id.into(), self.metadata.kernel_id);
 
         // Check that the claim on the verified receipt matches what was expected. Since we have
         // constrained all field in the ReceiptClaim, we can directly construct the expected digest
@@ -457,7 +464,7 @@ where
 /// It contains information about the proving system, SDK versions, and other information to help
 /// with interoperability. It is not cryptographically bound to the receipt, and should not be used
 /// for security-relevant decisions, such as choosing whether or not to accept a receipt based on
-/// it's stated version.
+/// its stated version.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct ReceiptMetadata {
@@ -468,6 +475,9 @@ pub struct ReceiptMetadata {
     /// corresponding to multiple versions of a proof system or circuit) and it is ambiguous which
     /// one should be used to attempt verification of a receipt.
     pub verifier_parameters: Digest,
+
+    /// The merkle root of the kernel portion of the initial MemoryImage.
+    pub kernel_id: Digest,
 }
 
 /// An assumption attached to a guest execution as a result of calling
@@ -692,6 +702,9 @@ pub struct VerifierContext {
 
     /// Parameters for verification of [Groth16Receipt].
     pub groth16_verifier_parameters: Option<Groth16ReceiptVerifierParameters>,
+
+    /// The set of image_ids of kernels to be used to produce proofs.
+    pub allowed_kernel_ids: BTreeSet<Digest>,
 }
 
 impl VerifierContext {
@@ -702,6 +715,7 @@ impl VerifierContext {
             segment_verifier_parameters: None,
             succinct_verifier_parameters: None,
             groth16_verifier_parameters: None,
+            allowed_kernel_ids: BTreeSet::default(),
         }
     }
 
@@ -712,6 +726,10 @@ impl VerifierContext {
             ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
             ("sha-256".into(), Sha256HashSuite::new_suite()),
         ])
+    }
+
+    fn allowed_kernel_ids() -> BTreeSet<Digest> {
+        BTreeSet::from([Digest::from_bytes(*risc0_zkos_v1compat::V1COMPAT_KERNEL_ID)])
     }
 
     /// Construct a verifier context that will accept receipts with control any of the default
@@ -728,6 +746,7 @@ impl VerifierContext {
             groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters::from_max_po2(
                 po2_max,
             )),
+            allowed_kernel_ids: Self::allowed_kernel_ids(),
         }
     }
 
@@ -782,12 +801,6 @@ impl VerifierContext {
             groth16: self.groth16_verifier_parameters.as_ref()?.clone().into(),
         })
     }
-
-    /// TODO(flaub)
-    #[stability::unstable]
-    pub fn for_version() -> Self {
-        Self::from_max_po2(DEFAULT_MAX_PO2)
-    }
 }
 
 impl Default for VerifierContext {
@@ -797,6 +810,7 @@ impl Default for VerifierContext {
             segment_verifier_parameters: Some(Default::default()),
             succinct_verifier_parameters: Some(Default::default()),
             groth16_verifier_parameters: Some(Default::default()),
+            allowed_kernel_ids: Self::allowed_kernel_ids(),
         }
     }
 }
@@ -817,6 +831,7 @@ mod tests {
                 claim: MaybePruned::Pruned(Digest::ZERO),
             }),
             vec![],
+            Digest::ZERO,
         );
         let ones_digest = Digest::from([1u8; DIGEST_BYTES]);
         mangled_receipt.metadata.verifier_parameters = ones_digest;
@@ -861,6 +876,7 @@ mod tests {
                 claim: MaybePruned::Value(claim),
             }),
             vec![],
+            Digest::ZERO,
         );
         let encoded = borsh::to_vec(&receipt).unwrap();
         let decoded: Receipt = borsh::from_slice(&encoded).unwrap();

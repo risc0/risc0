@@ -186,6 +186,7 @@ pub trait ProverServer: private::Sealed {
                     Ok(Receipt::new(
                         InnerReceipt::Succinct(succinct_receipt),
                         receipt.journal.bytes.clone(),
+                        receipt.metadata.kernel_id,
                     ))
                 }
                 ReceiptKind::Groth16 => {
@@ -194,6 +195,7 @@ pub trait ProverServer: private::Sealed {
                     Ok(Receipt::new(
                         InnerReceipt::Groth16(groth16_receipt),
                         receipt.journal.bytes.clone(),
+                        receipt.metadata.kernel_id,
                     ))
                 }
             },
@@ -204,6 +206,7 @@ pub trait ProverServer: private::Sealed {
                     Ok(Receipt::new(
                         InnerReceipt::Groth16(groth16_receipt),
                         receipt.journal.bytes.clone(),
+                        receipt.metadata.kernel_id,
                     ))
                 }
             },

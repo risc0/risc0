@@ -115,7 +115,6 @@ pub use {
             },
         },
     },
-    // TODO: Loader
     risc0_groth16::{
         docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
     },
@@ -213,10 +212,7 @@ fn metal_implies_prove() {
 }
 
 /// Compute and return the v2 ImageID of the specified ELF binary.
-pub fn compute_image_id_v2(
-    user_id: impl Into<risc0_zkp::core::digest::Digest>,
-) -> Result<risc0_zkp::core::digest::Digest> {
-    let kernel_id: risc0_zkp::core::digest::Digest =
-        Digest::from_bytes(*risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID);
+pub fn compute_image_id_v2(user_id: impl Into<Digest>) -> Digest {
+    let kernel_id = Digest::from_bytes(*risc0_zkos_v1compat::V1COMPAT_KERNEL_ID);
     risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
 }

@@ -229,6 +229,7 @@ fn test_recursion_lift_join_identity_e2e() {
     let rollup_receipt = Receipt::new(
         InnerReceipt::Succinct(rollup),
         session.journal.unwrap().bytes,
+        session.kernel_id,
     );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
@@ -300,7 +301,7 @@ fn test_recursion_identity_sha256() {
 
 #[test_log::test]
 fn test_recursion_lift_resolve_e2e() {
-    let image_id = compute_image_id_v2(MULTI_TEST_ID).unwrap();
+    let image_id = compute_image_id_v2(MULTI_TEST_ID);
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
 
@@ -348,6 +349,7 @@ fn test_recursion_lift_resolve_e2e() {
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succinct_receipt),
         composition_receipt.clone().journal.bytes,
+        composition_receipt.metadata.kernel_id,
     );
 
     receipt.verify(MULTI_TEST_ID).unwrap();

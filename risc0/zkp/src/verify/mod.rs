@@ -55,39 +55,40 @@ macro_rules! trace_if_enabled {
 #[derive(PartialEq)]
 #[non_exhaustive]
 pub enum VerificationError {
-    ReceiptFormatError,
-    ControlVerificationError {
-        control_id: Digest,
+    CircuitInfoMismatch {
+        expected: ProtocolInfo,
+        received: ProtocolInfo,
     },
-    ImageVerificationError,
-    MerkleQueryOutOfRange {
-        idx: usize,
-        rows: usize,
-    },
-    InvalidProof,
-    JournalDigestMismatch,
     ClaimDigestMismatch {
         expected: Digest,
         received: Digest,
     },
-    UnexpectedExitCode,
+    ControlVerificationError {
+        control_id: Digest,
+    },
+    ImageVerificationError,
     InvalidHashSuite,
-    VerifierParametersMissing,
-    VerifierParametersMismatch {
-        expected: Digest,
-        received: Digest,
+    InvalidKernel,
+    InvalidProof,
+    JournalDigestMismatch,
+    MerkleQueryOutOfRange {
+        idx: usize,
+        rows: usize,
     },
     ProofSystemInfoMismatch {
         expected: ProtocolInfo,
         received: ProtocolInfo,
     },
-    CircuitInfoMismatch {
-        expected: ProtocolInfo,
-        received: ProtocolInfo,
-    },
+    ReceiptFormatError,
+    UnexpectedExitCode,
     UnresolvedAssumption {
         digest: Digest,
     },
+    VerifierParametersMismatch {
+        expected: Digest,
+        received: Digest,
+    },
+    VerifierParametersMissing,
 }
 
 impl fmt::Debug for VerificationError {
@@ -104,6 +105,7 @@ impl fmt::Display for VerificationError {
                 write!(f, "control_id mismatch: {control_id}")
             }
             VerificationError::ImageVerificationError => write!(f, "image_id mismatch"),
+            VerificationError::InvalidKernel => write!(f, "invalid kernel"),
             VerificationError::MerkleQueryOutOfRange { idx, rows } => write!(
                 f,
                 "requested Merkle validation on row {idx}, but only {rows} rows exist",

@@ -477,6 +477,8 @@ pub struct SessionInfo {
     pub exit_code: ::core::option::Option<super::base::ExitCode>,
     #[prost(message, optional, tag = "4")]
     pub receipt_claim: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "5")]
+    pub kernel_id: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

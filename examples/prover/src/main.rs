@@ -168,6 +168,7 @@ fn prover_example() {
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succinct_receipt),
         session.journal.bytes.clone(),
+        session.kernel_id,
     );
     let asset = receipt.try_into().unwrap();
     client.verify(asset, MULTI_TEST_ID).unwrap();
