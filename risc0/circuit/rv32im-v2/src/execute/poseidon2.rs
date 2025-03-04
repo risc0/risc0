@@ -235,35 +235,67 @@ impl Poseidon2State {
 
     // Exploit the fact that off-diagonal entries of M_INT are all 1.
     fn multiply_by_m_int(&mut self) {
+        // Exploit the fact that off-diagonal entries of M_INT are all 1.
         let mut sum = 0u64;
-        for i in 0..CELLS {
-            sum += self.inner[i] as u64;
+        for val in self.inner.iter() {
+            sum += *val as u64;
         }
         sum %= BABY_BEAR_P_U64;
+
+        // Following the reference implementation:
+        // cells[i] = sum + M_INT_DIAG_HZN[i] * cells[i];
         for (i, diag) in M_INT_DIAG_HZN.iter().enumerate().take(CELLS) {
-            let diag = diag.as_u32() as u64;
-            let cell = self.inner[i] as u64;
-            self.inner[i] = ((sum + diag * cell) % BABY_BEAR_P_U64) as u32;
+            let curr_val = self.inner[i] as u64;
+            let diag_val = diag.as_u32() as u64;
+
+            // Directly apply the formula from the reference implementation
+            let new_val = (sum + (diag_val * curr_val) % BABY_BEAR_P_U64) % BABY_BEAR_P_U64;
+            self.inner[i] = new_val as u32;
         }
     }
 
     fn do_ext_round(&mut self, mut idx: usize) {
+        // Adjust index if needed
         if idx >= ROUNDS_HALF_FULL {
             idx += ROUNDS_PARTIAL;
         }
 
+        // Add round constants to all cells
         self.add_round_constants_full(idx);
+
+        // Apply S-box to each cell
+        #[allow(clippy::needless_range_loop)]
         for i in 0..CELLS {
-            self.inner[i] = sbox2(self.inner[i]);
+            // Apply the S-box function directly to avoid function call overhead
+            let x = self.inner[i] as u64;
+            let x2 = (x * x) % BABY_BEAR_P_U64;
+            let x4 = (x2 * x2) % BABY_BEAR_P_U64;
+            let x6 = (x4 * x2) % BABY_BEAR_P_U64;
+            let x7 = (x6 * x) % BABY_BEAR_P_U64;
+            self.inner[i] = x7 as u32;
         }
 
+        // Apply matrix multiplication
         self.multiply_by_m_ext();
     }
 
     fn do_int_rounds(&mut self) {
+        // Process all internal rounds at once for better efficiency
         for i in 0..ROUNDS_PARTIAL {
+            // Add round constants only to the first element (partial round)
             self.add_round_constants_partial(ROUNDS_HALF_FULL + i);
-            self.inner[0] = sbox2(self.inner[0]);
+
+            // Apply S-box directly to the first element to avoid function call overhead
+            {
+                let x = self.inner[0] as u64;
+                let x2 = (x * x) % BABY_BEAR_P_U64;
+                let x4 = (x2 * x2) % BABY_BEAR_P_U64;
+                let x6 = (x4 * x2) % BABY_BEAR_P_U64;
+                let x7 = (x6 * x) % BABY_BEAR_P_U64;
+                self.inner[0] = x7 as u32;
+            }
+
+            // Apply internal matrix multiplication
             self.multiply_by_m_int();
         }
     }
@@ -314,15 +346,6 @@ fn multiply_by_4x4_circulant(x: &[u32; 4]) -> [u32; 4] {
         result2 as u32,
         four_t1_plus_two_x3_plus_t0 as u32,
     ]
-}
-
-fn sbox2(x: u32) -> u32 {
-    let x = x as u64;
-    let x2 = (x * x) % BABY_BEAR_P_U64;
-    let x4 = (x2 * x2) % BABY_BEAR_P_U64;
-    let x6 = (x4 * x2) % BABY_BEAR_P_U64;
-    let x7 = (x6 * x) % BABY_BEAR_P_U64;
-    x7 as u32
 }
 
 pub(crate) struct Poseidon2;
