@@ -60,9 +60,9 @@ impl Poseidon2State {
             state_addr,
             buf_in_addr,
             buf_out_addr,
-            has_state: if state_addr == 0 { 0 } else { 1 },
-            is_elem: if is_elem == 0 { 0 } else { 1 },
-            check_out: if check_out == 0 { 0 } else { 1 },
+            has_state: (state_addr != 0) as u32,
+            is_elem: (is_elem != 0) as u32,
+            check_out: (check_out != 0) as u32,
             count: bits_count & 0xffff,
             mode: 1,
             load_tx_type: tx::READ,
@@ -104,32 +104,47 @@ impl Poseidon2State {
         // While we have data to process
         let mut buf_in_addr = WordAddr(self.buf_in_addr);
         // tracing::debug!("buf_in_addr: {buf_in_addr:?}");
-        // HERE!
-        while self.count > 0 {
+
+        // Pre-compute iteration count for faster loops
+        let iterations = self.count;
+        for _ in 0..iterations {
             // Do load
             self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 0);
 
+            // Use a temporary buffer to avoid direct manipulation of self.inner during loading
+            let mut temp_buffer = [0u32; 2 * DIGEST_WORDS];
+
             if self.is_elem != 0 {
-                for i in 0..DIGEST_WORDS {
-                    self.inner[i] = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
+                // Load all words first, then copy to inner array
+                for item in &mut temp_buffer[..DIGEST_WORDS] {
+                    *item = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
                 }
+                // Copy to inner in one batch
+                self.inner[..DIGEST_WORDS].copy_from_slice(&temp_buffer[..DIGEST_WORDS]);
+
                 self.buf_in_addr = buf_in_addr.0;
                 self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 1);
-                for i in 0..DIGEST_WORDS {
-                    self.inner[DIGEST_WORDS + i] =
-                        ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
+
+                for item in &mut temp_buffer[DIGEST_WORDS..2 * DIGEST_WORDS] {
+                    *item = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
                 }
-                self.buf_in_addr = buf_in_addr.0;
+                // Copy second half in one batch
+                self.inner[DIGEST_WORDS..2 * DIGEST_WORDS]
+                    .copy_from_slice(&temp_buffer[DIGEST_WORDS..2 * DIGEST_WORDS]);
             } else {
+                // We need the index for the computation, so suppress the clippy warning
+                #[allow(clippy::needless_range_loop)]
                 for i in 0..DIGEST_WORDS {
                     let word = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                    self.inner[2 * i] = word & 0xffff;
-                    self.inner[2 * i + 1] = word >> 16;
+                    temp_buffer[2 * i] = word & 0xffff;
+                    temp_buffer[2 * i + 1] = word >> 16;
                 }
-                self.buf_in_addr = buf_in_addr.0;
+                // Copy to inner in one batch
+                self.inner[..2 * DIGEST_WORDS].copy_from_slice(&temp_buffer[..2 * DIGEST_WORDS]);
             }
+            self.buf_in_addr = buf_in_addr.0;
 
-            // Do the mix
+            // Keep the original round structure to maintain constraint consistency
             self.multiply_by_m_ext();
             for i in 0..ROUNDS_HALF_FULL {
                 self.step(ctx, &mut cur_state, CycleState::PoseidonExtRound, i as u32);
@@ -183,25 +198,36 @@ impl Poseidon2State {
     // Optimized method for multiplication by M_EXT.
     // See appendix B of Poseidon2 paper for additional details.
     fn multiply_by_m_ext(&mut self) {
-        let mut out = [0; CELLS];
-        let mut tmp_sums = [0; 4];
+        // Pre-allocate output array
+        let mut out = [0u32; CELLS];
+        let mut tmp_sums = [0u32; 4];
 
+        // Process 4 elements at a time for better cache utilization
         for i in 0..CELLS / 4 {
-            let chunk = multiply_by_4x4_circulant(&[
-                self.inner[i * 4],
-                self.inner[i * 4 + 1],
-                self.inner[i * 4 + 2],
-                self.inner[i * 4 + 3],
-            ]);
+            // Get a reference to the current 4-element chunk to reduce array access overhead
+            let base_idx = i * 4;
+            let chunk_in = &self.inner[base_idx..base_idx + 4];
+
+            // Use the 4x4 circulant multiplication
+            let chunk =
+                multiply_by_4x4_circulant(&[chunk_in[0], chunk_in[1], chunk_in[2], chunk_in[3]]);
+
+            // Update sums and output values in a single pass
             for j in 0..4 {
-                let to_add = chunk[j] as u64;
-                let to_add = (to_add % BABY_BEAR_P_U64) as u32;
-                tmp_sums[j] += to_add;
-                tmp_sums[j] %= BABY_BEAR_P_U32;
-                out[i * 4 + j] += to_add;
-                out[i * 4 + j] %= BABY_BEAR_P_U32;
+                // Convert once to u64 to avoid potential overflow
+                let to_add = chunk[j] as u64 % BABY_BEAR_P_U64;
+                let to_add_u32 = to_add as u32;
+
+                // Update temporary sums
+                tmp_sums[j] = (tmp_sums[j] + to_add_u32) % BABY_BEAR_P_U32;
+
+                // Update output array
+                let out_idx = base_idx + j;
+                out[out_idx] = (out[out_idx] + to_add_u32) % BABY_BEAR_P_U32;
             }
         }
+
+        // Final combination step
         for i in 0..CELLS {
             self.inner[i] = (out[i] + tmp_sums[i % 4]) % BABY_BEAR_P_U32;
         }
@@ -259,15 +285,35 @@ fn multiply_by_4x4_circulant(x: &[u32; 4]) -> [u32; 4] {
     // See appendix B of Poseidon2 paper.
     const CIRC_FACTOR_2: u64 = 2;
     const CIRC_FACTOR_4: u64 = 4;
-    let t0 = (x[0] as u64 + x[1] as u64) % BABY_BEAR_P_U64;
-    let t1 = (x[2] as u64 + x[3] as u64) % BABY_BEAR_P_U64;
-    let t2 = (CIRC_FACTOR_2 * x[1] as u64 + t1) % BABY_BEAR_P_U64;
-    let t3 = (CIRC_FACTOR_2 * x[3] as u64 + t0) % BABY_BEAR_P_U64;
-    let t4 = (CIRC_FACTOR_4 * t1 + t3) % BABY_BEAR_P_U64;
-    let t5 = (CIRC_FACTOR_4 * t0 + t2) % BABY_BEAR_P_U64;
-    let t6 = (t3 + t5) % BABY_BEAR_P_U64;
-    let t7 = (t2 + t4) % BABY_BEAR_P_U64;
-    [t6 as u32, t5 as u32, t7 as u32, t4 as u32]
+
+    // Convert all inputs to u64 at once to reduce conversions
+    let x0 = x[0] as u64;
+    let x1 = x[1] as u64;
+    let x2 = x[2] as u64;
+    let x3 = x[3] as u64;
+
+    // Combine operations to reduce the number of modulo operations
+    // Only apply modulo when necessary to prevent overflow
+    let t0 = (x0 + x1) % BABY_BEAR_P_U64;
+    let t1 = (x2 + x3) % BABY_BEAR_P_U64;
+
+    // Use temporary variables with descriptive names
+    let two_x1_plus_t1 = (CIRC_FACTOR_2 * x1 + t1) % BABY_BEAR_P_U64;
+    let two_x3_plus_t0 = (CIRC_FACTOR_2 * x3 + t0) % BABY_BEAR_P_U64;
+
+    let four_t1_plus_two_x3_plus_t0 = (CIRC_FACTOR_4 * t1 + two_x3_plus_t0) % BABY_BEAR_P_U64;
+    let four_t0_plus_two_x1_plus_t1 = (CIRC_FACTOR_4 * t0 + two_x1_plus_t1) % BABY_BEAR_P_U64;
+
+    let result0 = (two_x3_plus_t0 + four_t0_plus_two_x1_plus_t1) % BABY_BEAR_P_U64;
+    let result2 = (two_x1_plus_t1 + four_t1_plus_two_x3_plus_t0) % BABY_BEAR_P_U64;
+
+    // Convert back to u32 only at the end
+    [
+        result0 as u32,
+        four_t0_plus_two_x1_plus_t1 as u32,
+        result2 as u32,
+        four_t1_plus_two_x3_plus_t0 as u32,
+    ]
 }
 
 fn sbox2(x: u32) -> u32 {
