@@ -315,10 +315,10 @@ impl PagedMemory {
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
         if let Some(cache_idx) = self.page_table.get(page_idx) {
             // Loaded, get from cache
-            Ok(self.page_cache[cache_idx].0.clone())
+            Ok(self.page_cache[cache_idx].data().clone())
         } else {
             // Unloaded, peek into image
-            Ok(self.image.get_page(page_idx)?.0.clone())
+            Ok(self.image.get_page(page_idx)?.data().clone())
         }
     }
 

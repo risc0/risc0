@@ -13,8 +13,11 @@
 // limitations under the License.
 extern crate alloc;
 
-use alloc::{collections::BTreeMap, vec, vec::Vec};
+use alloc::{collections::BTreeMap, format, vec, vec::Vec};
 use lazy_static::lazy_static;
+
+#[cfg(feature = "std")]
+use std::sync::Arc;
 
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
@@ -72,8 +75,14 @@ impl ZeroCache {
 }
 
 /// TODO(flaub)
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Page(pub Vec<u8>);
+#[cfg(feature = "std")]
+#[derive(Clone)]
+pub struct Page(Arc<Vec<u8>>);
+
+/// TODO(flaub)
+#[cfg(not(feature = "std"))]
+#[derive(Clone)]
+pub struct Page(Vec<u8>);
 
 /// TODO(flaub)
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -286,11 +295,19 @@ impl MemoryImage2 {
 
 impl Default for Page {
     fn default() -> Self {
-        Self(vec![0; PAGE_BYTES])
+        Self::from_vec(vec![0; PAGE_BYTES])
     }
 }
 
 impl Page {
+    /// Caller must ensure given Vec is of length `PAGE_BYTES`
+    fn from_vec(v: Vec<u8>) -> Self {
+        #[cfg(not(feature = "std"))]
+        return Self(v);
+        #[cfg(feature = "std")]
+        return Self(Arc::new(v));
+    }
+
     /// TODO(flaub)
     pub fn digest(&self) -> Digest {
         let mut cells = [BabyBearElem::ZERO; CELLS];
@@ -317,11 +334,56 @@ impl Page {
         word
     }
 
+    #[cfg(feature = "std")]
+    fn ensure_writable(&mut self) -> &mut [u8] {
+        &mut Arc::make_mut(&mut self.0)[..]
+    }
+
+    #[cfg(not(feature = "std"))]
+    fn ensure_writable(&mut self) -> &mut [u8] {
+        &mut self.0
+    }
+
     /// TODO(flaub)
     pub fn store(&mut self, addr: WordAddr, word: u32) {
+        let writable_ref = self.ensure_writable();
+
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         // tracing::trace!("store({addr:?}, {byte_addr:#05x}, {word:#010x})");
-        self.0[byte_addr..byte_addr + WORD_SIZE].clone_from_slice(&word.to_le_bytes());
+        writable_ref[byte_addr..byte_addr + WORD_SIZE].clone_from_slice(&word.to_le_bytes());
+    }
+
+    /// Get a shared reference to the underlying data in the page
+    pub fn data(&self) -> &Vec<u8> {
+        &self.0
+    }
+}
+
+impl Serialize for Page {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        self.0.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Page {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        use serde::de::Error as _;
+
+        let vec = <Vec<u8> as Deserialize>::deserialize(deserializer)?;
+        if vec.len() != PAGE_BYTES {
+            return Err(D::Error::custom(format!(
+                "serialized page has wrong length {} != {}",
+                vec.len(),
+                PAGE_BYTES
+            )));
+        }
+        Ok(Self::from_vec(vec))
     }
 }
 
