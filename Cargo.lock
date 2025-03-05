@@ -4675,6 +4675,7 @@ dependencies = [
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
+ "rstest",
  "serde",
  "smallvec",
  "tar",

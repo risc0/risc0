@@ -292,3 +292,279 @@ impl Poseidon2 {
         p2.rest(ctx, CycleState::Decode)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::execute::bigint::BigIntState;
+    use crate::execute::rv32im::{DecodedInstruction, Instruction};
+    use crate::execute::sha2::Sha2State;
+    use risc0_binfmt::ByteAddr;
+    use rstest::*;
+    use std::collections::BTreeMap;
+
+    #[derive(Default)]
+    struct FakeRisc0Context {
+        memory: BTreeMap<WordAddr, u32>,
+    }
+
+    impl Risc0Context for FakeRisc0Context {
+        fn get_pc(&self) -> ByteAddr {
+            unimplemented!()
+        }
+
+        fn set_pc(&mut self, _addr: ByteAddr) {
+            unimplemented!()
+        }
+
+        fn set_user_pc(&mut self, _addr: ByteAddr) {
+            unimplemented!()
+        }
+
+        fn get_machine_mode(&self) -> u32 {
+            unimplemented!()
+        }
+
+        fn set_machine_mode(&mut self, _mode: u32) {
+            unimplemented!()
+        }
+
+        fn on_insn_start(
+            &mut self,
+            _insn: &Instruction,
+            _decoded: &DecodedInstruction,
+        ) -> Result<()> {
+            unimplemented!()
+        }
+
+        fn on_insn_end(
+            &mut self,
+            _insn: &Instruction,
+            _decoded: &DecodedInstruction,
+        ) -> Result<()> {
+            unimplemented!()
+        }
+
+        fn load_u32(&mut self, _op: LoadOp, addr: WordAddr) -> Result<u32> {
+            Ok(*self.memory.get(&addr).unwrap_or_else(|| {
+                panic!("{addr:?} should be pointing to a place we expect a read from")
+            }))
+        }
+
+        fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+            self.memory.insert(addr, word);
+            Ok(())
+        }
+
+        fn on_ecall_cycle(
+            &mut self,
+            _cur: CycleState,
+            _next: CycleState,
+            _s0: u32,
+            _s1: u32,
+            _s2: u32,
+        ) -> Result<()> {
+            unimplemented!()
+        }
+
+        fn on_terminate(&mut self, _a0: u32, _a1: u32) -> Result<()> {
+            unimplemented!()
+        }
+
+        fn host_read(&mut self, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
+            unimplemented!()
+        }
+
+        fn host_write(&mut self, _fd: u32, _buf: &[u8]) -> Result<u32> {
+            unimplemented!()
+        }
+
+        fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
+            unimplemented!()
+        }
+
+        fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
+            // do nothing
+        }
+
+        fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
+            unimplemented!()
+        }
+    }
+
+    fn do_poseidon2_test(
+        state: Option<[u32; DIGEST_WORDS]>,
+        expected_state: Option<[u32; DIGEST_WORDS]>,
+        input: Vec<[u32; DIGEST_WORDS]>,
+        is_elem: bool,
+        check_out: bool,
+        expected_digest: Option<[u32; DIGEST_WORDS]>,
+    ) {
+        let mut ctx = FakeRisc0Context::default();
+        let mut state_addr = 0;
+        let buf_in_addr = 0x0000_00f0u32;
+        let buf_out_addr = 0x0000_0f00u32;
+        let mut bits_count = input.len() as u32;
+        if is_elem {
+            bits_count /= 2;
+            bits_count |= PFLAG_IS_ELEM;
+        }
+        if check_out {
+            bits_count |= PFLAG_CHECK_OUT;
+
+            for (i, word) in expected_digest.as_ref().unwrap().iter().enumerate() {
+                ctx.store_u32(WordAddr(buf_out_addr + i as u32), *word)
+                    .unwrap();
+            }
+        }
+
+        if let Some(state) = state {
+            state_addr = 0x0000_000fu32;
+            for (i, word) in state.iter().enumerate() {
+                ctx.store_u32(WordAddr(state_addr + i as u32), *word)
+                    .unwrap();
+            }
+        }
+
+        for (di, digest) in input.iter().enumerate() {
+            for (i, word) in digest.iter().enumerate() {
+                ctx.store_u32(
+                    WordAddr(buf_in_addr + (di * DIGEST_WORDS) as u32 + i as u32),
+                    *word,
+                )
+                .unwrap();
+            }
+        }
+
+        ctx.store_register(MACHINE_REGS_ADDR.into(), REG_A0, state_addr)
+            .unwrap();
+        ctx.store_register(MACHINE_REGS_ADDR.into(), REG_A1, buf_in_addr)
+            .unwrap();
+        ctx.store_register(MACHINE_REGS_ADDR.into(), REG_A2, buf_out_addr)
+            .unwrap();
+        ctx.store_register(MACHINE_REGS_ADDR.into(), REG_A3, bits_count)
+            .unwrap();
+
+        Poseidon2::ecall(&mut ctx).unwrap();
+
+        if !check_out {
+            if let Some(expected_digest) = expected_digest {
+                let mut result = [0u32; DIGEST_WORDS];
+                for (i, entry) in result.iter_mut().enumerate() {
+                    *entry = ctx
+                        .load_u32(LoadOp::Load, WordAddr(buf_out_addr + i as u32))
+                        .unwrap();
+                }
+
+                assert_eq!(result, expected_digest);
+            }
+        }
+
+        if let Some(expected_state) = expected_state {
+            let mut result = [0u32; DIGEST_WORDS];
+            for (i, entry) in result.iter_mut().enumerate() {
+                *entry = ctx
+                    .load_u32(LoadOp::Load, WordAddr(state_addr + i as u32))
+                    .unwrap();
+            }
+            assert_eq!(result, expected_state);
+        }
+    }
+
+    #[rstest]
+    #[case(true)]
+    #[case(false)]
+    fn poseidon2_golden_values_no_state(#[case] check_out: bool) {
+        do_poseidon2_test(
+            None, // input state
+            None, // expected output state
+            vec![
+                [9, 10, 11, 12, 13, 14, 15, 16],
+                [17, 18, 19, 20, 21, 22, 23, 24],
+            ], // input
+            false, // is_elem
+            check_out,
+            Some([
+                1241390379, 1884310950, 2004172716, 1853849309, 1672721011, 735804474, 153377151,
+                952436416,
+            ]), // expected output
+        );
+    }
+
+    #[rstest]
+    #[case(true)]
+    #[case(false)]
+    fn poseidon2_golden_values_with_state(#[case] check_out: bool) {
+        do_poseidon2_test(
+            Some([1, 2, 3, 4, 5, 6, 7, 8]), // input state
+            Some([
+                422124962, 343687663, 603825122, 1639060710, 1556827893, 679680067, 606447550,
+                1396714734,
+            ]), // expected output state
+            vec![
+                [9, 10, 11, 12, 13, 14, 15, 16],
+                [17, 18, 19, 20, 21, 22, 23, 24],
+            ], // input
+            false,                          // is_elem
+            check_out,
+            Some([
+                6842047, 1969060596, 1995282880, 1672656144, 1703098754, 1618323730, 422751358,
+                34172807,
+            ]), // expected output
+        );
+    }
+
+    #[rstest]
+    #[case(true)]
+    #[case(false)]
+    fn poseidon2_golden_values_is_elem(#[case] check_out: bool) {
+        do_poseidon2_test(
+            Some([1, 2, 3, 4, 5, 6, 7, 8]), // input state
+            Some([
+                96963433, 323050890, 1098113381, 1153227947, 1063620455, 1699460217, 1373078027,
+                1590826877,
+            ]), // expected output state
+            vec![
+                [9, 10, 11, 12, 13, 14, 15, 16],
+                [17, 18, 19, 20, 21, 22, 23, 24],
+            ], // input
+            true,                           // is_elem
+            check_out,
+            Some([
+                3691086, 1319454864, 1208834290, 1281204362, 1699301062, 1294181281, 744596484,
+                1693946696,
+            ]), // expected output
+        );
+    }
+
+    fn rand_digest(rng: &mut rand::rngs::ThreadRng) -> [u32; DIGEST_WORDS] {
+        use rand::RngCore as _;
+
+        let mut digest = [0u32; DIGEST_WORDS];
+        for e in digest.iter_mut() {
+            *e = rng.next_u32();
+        }
+        digest
+    }
+
+    #[test]
+    fn poseidon2_benchmark() {
+        let mut rng = rand::thread_rng();
+
+        for _ in 0..100_000 {
+            let mut input = vec![];
+            for _ in 0..5 {
+                input.push(rand_digest(&mut rng));
+            }
+
+            do_poseidon2_test(
+                Some(rand_digest(&mut rng)), // input state
+                None,                        // expected output state
+                input,
+                false, // is_elem
+                false, // check_out
+                None,  // expected output
+            );
+        }
+    }
+}
