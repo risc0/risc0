@@ -3749,6 +3749,7 @@ dependencies = [
  "docker-generate",
  "hex",
  "risc0-binfmt",
+ "risc0-zkos-v1compat",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rzup",

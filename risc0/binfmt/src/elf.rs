@@ -14,11 +14,14 @@
 
 extern crate alloc;
 
-use alloc::collections::BTreeMap;
+use alloc::{collections::BTreeMap, vec, vec::Vec};
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, bail, ensure, Context, Result};
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
+use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
 use risc0_zkvm_platform::WORD_SIZE;
+
+use crate::{Digestible as _, MemoryImage2, SystemState, KERNEL_START_ADDR};
 
 /// A RISC Zero program
 pub struct Program {
@@ -106,5 +109,70 @@ impl Program {
             }
         }
         Ok(Program { entry, image })
+    }
+}
+
+/// A pair to hold a user ELF and a kernel ELF together.
+pub struct ProgramPair<'a> {
+    /// The user ELF.
+    pub user_elf: &'a [u8],
+
+    /// The kernel ELF.
+    pub kernel_elf: &'a [u8],
+}
+
+impl<'a> ProgramPair<'a> {
+    /// Construct from a pair of ELFs.
+    pub fn new(user_elf: &'a [u8], kernel_elf: &'a [u8]) -> Self {
+        Self {
+            user_elf,
+            kernel_elf,
+        }
+    }
+
+    /// Parse a blob into a ProgramPair.
+    pub fn decode(blob: &'a [u8]) -> Result<Self> {
+        ensure!(blob.len() > WORD_SIZE);
+
+        let user_len_bytes = &blob[..WORD_SIZE];
+        let user_len = u32::from_le_bytes(user_len_bytes.try_into().unwrap()) as usize;
+        ensure!(user_len > 0);
+
+        let kernel_offset = WORD_SIZE + user_len;
+        let user_elf = &blob[WORD_SIZE..kernel_offset];
+        let kernel_elf = &blob[kernel_offset..];
+
+        Ok(Self {
+            user_elf,
+            kernel_elf,
+        })
+    }
+
+    /// Convert this pair into a blob.
+    pub fn encode(&self) -> Vec<u8> {
+        let user_len = self.user_elf.len();
+        let kernel_offset = WORD_SIZE + user_len;
+        let user_len = user_len as u32;
+
+        let mut ret = vec![0; size_of_val(&user_len) + self.user_elf.len() + self.kernel_elf.len()];
+        ret[..WORD_SIZE].copy_from_slice(&user_len.to_le_bytes());
+        ret[WORD_SIZE..kernel_offset].copy_from_slice(self.user_elf);
+        ret[kernel_offset..].copy_from_slice(self.kernel_elf);
+        ret
+    }
+
+    /// Convert this pair into a MemoryImage2.
+    pub fn to_image(&self) -> Result<MemoryImage2> {
+        let user_program =
+            Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")?;
+        let kernel_program =
+            Program::load_elf(self.kernel_elf, u32::MAX).context("Loading kernel ELF")?;
+        Ok(MemoryImage2::with_kernel(user_program, kernel_program))
+    }
+
+    /// Compute and return the ImageID of this ProgramPair.
+    pub fn compute_image_id(&self) -> Result<Digest> {
+        let merkle_root = self.to_image()?.image_id();
+        Ok(SystemState { pc: 0, merkle_root }.digest::<Impl>())
     }
 }

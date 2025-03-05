@@ -11,7 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #![no_std]
+
 pub const V1COMPAT_ELF: &[u8] = include_bytes!("../elfs/v1compat.elf");
 
-pub const V1COMPAT_V2_KERNEL_ID: &[u8; 32] = include_bytes!("../elfs/v1compat.kid");
+pub const V1COMPAT_KERNEL_ID: &[u8; 32] = include_bytes!("../elfs/v1compat.iid");

@@ -164,7 +164,7 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
+pub use risc0_binfmt::{compute_kernel_id, compute_user_id};
 
 pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
@@ -210,13 +210,4 @@ pub fn is_dev_mode() -> bool {
 fn metal_implies_prove() {
     // we should be able to access prove feature items when metal has been enabled
     let _prover = get_prover_server(&ProverOpts::default());
-}
-
-/// Compute and return the v2 ImageID of the specified ELF binary.
-pub fn compute_image_id_v2(
-    user_id: impl Into<risc0_zkp::core::digest::Digest>,
-) -> Result<risc0_zkp::core::digest::Digest> {
-    let kernel_id: risc0_zkp::core::digest::Digest =
-        Digest::from_bytes(*risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID);
-    risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
 }

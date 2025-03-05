@@ -16,7 +16,6 @@ pub mod bake;
 pub mod build;
 pub mod build_toolchain;
 pub mod datasheet;
-pub mod deploy;
 #[cfg(feature = "experimental")]
 pub mod guest;
 pub mod install;

@@ -28,7 +28,6 @@ fn main() -> Result<()> {
         Commands::Build(cmd) => cmd.run(),
         Commands::BuildToolchain(cmd) => cmd.run(),
         Commands::Datasheet(cmd) => cmd.run(),
-        Commands::Deploy(cmd) => cmd.run(),
         #[cfg(feature = "experimental")]
         Commands::Guest(cmd) => cmd.run(),
         Commands::Install(cmd) => cmd.run(),
