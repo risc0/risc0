@@ -29,7 +29,7 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
-    compute_image_id_v2, default_prover, get_prover_server,
+    default_prover, get_prover_server,
     host::server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
     mmr::MerkleMountainAccumulator,
     receipt_claim::{MaybePruned, Unknown},
@@ -300,7 +300,6 @@ fn test_recursion_identity_sha256() {
 
 #[test_log::test]
 fn test_recursion_lift_resolve_e2e() {
-    let image_id = compute_image_id_v2(MULTI_TEST_ID).unwrap();
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
 
@@ -330,8 +329,8 @@ fn test_recursion_lift_resolve_e2e() {
         .add_assumption(assumption_receipt_a.clone())
         .add_assumption(assumption_receipt_b.clone())
         .write(&MultiTestSpec::SysVerify(vec![
-            (image_id, b"execution A".to_vec()),
-            (image_id, b"execution B".to_vec()),
+            (MULTI_TEST_ID.into(), b"execution A".to_vec()),
+            (MULTI_TEST_ID.into(), b"execution B".to_vec()),
         ]))
         .unwrap()
         .build()

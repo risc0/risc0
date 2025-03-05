@@ -24,8 +24,7 @@ use clap::{Args, Parser, Subcommand};
 
 use self::commands::{
     bake::BakeCommand, build::BuildCommand, build_toolchain::BuildToolchainCommand,
-    datasheet::DatasheetCommand, deploy::DeployCommand, install::InstallCommand, new::NewCommand,
-    verify::VerifyCommand,
+    install::InstallCommand, new::NewCommand, verify::VerifyCommand,
 };
 
 #[derive(Parser)]
@@ -58,13 +57,6 @@ pub enum Commands {
 
     /// Build the riscv32im-risc0-zkvm-elf toolchain.
     BuildToolchain(BuildToolchainCommand),
-
-    /// Perform a benchmark to evaluate zkVM performance for this machine's
-    /// hardware.
-    Datasheet(DatasheetCommand),
-
-    /// Uploads the guest code to Bonsai.
-    Deploy(DeployCommand),
 
     /// Guest commands
     #[cfg(feature = "experimental")]

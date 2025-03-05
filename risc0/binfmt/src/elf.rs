@@ -14,11 +14,14 @@
 
 extern crate alloc;
 
-use alloc::collections::BTreeMap;
+use alloc::{collections::BTreeMap, vec, vec::Vec};
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, bail, ensure, Context, Result};
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
+use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
 use risc0_zkvm_platform::WORD_SIZE;
+
+use crate::{Digestible as _, MemoryImage2, SystemState, KERNEL_START_ADDR};
 
 /// A RISC Zero program
 pub struct Program {
@@ -106,5 +109,87 @@ impl Program {
             }
         }
         Ok(Program { entry, image })
+    }
+}
+
+const MAGIC: &[u8] = b"R0BF"; // RISC Zero Binary Format
+const VERSION: u32 = 1; // current version
+
+const VERSION_OFFSET: usize = MAGIC.len();
+const USER_LEN_OFFSET: usize = VERSION_OFFSET + WORD_SIZE;
+const USER_ELF_OFFSET: usize = USER_LEN_OFFSET + WORD_SIZE;
+
+/// A container to hold a user ELF and a kernel ELF together.
+pub struct ProgramBinary<'a> {
+    /// The user ELF.
+    pub user_elf: &'a [u8],
+
+    /// The kernel ELF.
+    pub kernel_elf: &'a [u8],
+}
+
+impl<'a> ProgramBinary<'a> {
+    /// Construct from a pair of ELFs.
+    pub fn new(user_elf: &'a [u8], kernel_elf: &'a [u8]) -> Self {
+        Self {
+            user_elf,
+            kernel_elf,
+        }
+    }
+
+    /// Parse a blob into a `ProgramBinary`.
+    pub fn decode(blob: &'a [u8]) -> Result<Self> {
+        ensure!(blob.len() > USER_ELF_OFFSET, "Malformed ProgramBinary");
+
+        let magic = &blob[..VERSION_OFFSET];
+        ensure!(magic == MAGIC, "Malformed ProgramBinary");
+
+        let version = u32::from_le_bytes(blob[VERSION_OFFSET..USER_LEN_OFFSET].try_into().unwrap());
+        ensure!(version == VERSION, "ProgramBinary version mismatch");
+
+        let user_len =
+            u32::from_le_bytes(blob[USER_LEN_OFFSET..USER_ELF_OFFSET].try_into().unwrap()) as usize;
+        ensure!(user_len > 0, "Malformed ProgramBinary");
+
+        let kernel_offset = USER_ELF_OFFSET + user_len;
+        ensure!(kernel_offset < blob.len(), "Malformed ProgramBinary");
+
+        let user_elf = &blob[USER_ELF_OFFSET..kernel_offset];
+        let kernel_elf = &blob[kernel_offset..];
+
+        Ok(Self {
+            user_elf,
+            kernel_elf,
+        })
+    }
+
+    /// Convert this binary into a blob.
+    pub fn encode(&self) -> Vec<u8> {
+        let user_len = self.user_elf.len();
+        let kernel_offset = USER_ELF_OFFSET + user_len;
+        let user_len = user_len as u32;
+
+        let mut ret = vec![0; USER_ELF_OFFSET + self.user_elf.len() + self.kernel_elf.len()];
+        ret[..VERSION_OFFSET].copy_from_slice(MAGIC);
+        ret[VERSION_OFFSET..USER_LEN_OFFSET].copy_from_slice(&VERSION.to_le_bytes());
+        ret[USER_LEN_OFFSET..USER_ELF_OFFSET].copy_from_slice(&user_len.to_le_bytes());
+        ret[USER_ELF_OFFSET..kernel_offset].copy_from_slice(self.user_elf);
+        ret[kernel_offset..].copy_from_slice(self.kernel_elf);
+        ret
+    }
+
+    /// Convert this binary into a `MemoryImage2`.
+    pub fn to_image(&self) -> Result<MemoryImage2> {
+        let user_program =
+            Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")?;
+        let kernel_program =
+            Program::load_elf(self.kernel_elf, u32::MAX).context("Loading kernel ELF")?;
+        Ok(MemoryImage2::with_kernel(user_program, kernel_program))
+    }
+
+    /// Compute and return the ImageID of this binary.
+    pub fn compute_image_id(&self) -> Result<Digest> {
+        let merkle_root = self.to_image()?.image_id();
+        Ok(SystemState { pc: 0, merkle_root }.digest::<Impl>())
     }
 }

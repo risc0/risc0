@@ -175,11 +175,6 @@ impl Receipt {
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
-        let image_id = match crate::compute_image_id_v2(image_id) {
-            Ok(image_id) => image_id,
-            Err(_) => return Err(VerificationError::ImageVerificationError),
-        };
-
         // Check that the claim on the verified receipt matches what was expected. Since we have
         // constrained all field in the ReceiptClaim, we can directly construct the expected digest
         // and do not need to open the claim digest on the inner receipt.
@@ -781,12 +776,6 @@ impl VerifierContext {
             succinct: self.succinct_verifier_parameters.as_ref()?.clone().into(),
             groth16: self.groth16_verifier_parameters.as_ref()?.clone().into(),
         })
-    }
-
-    /// TODO(flaub)
-    #[stability::unstable]
-    pub fn for_version() -> Self {
-        Self::from_max_po2(DEFAULT_MAX_PO2)
     }
 }
 

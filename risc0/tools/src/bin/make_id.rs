@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,17 +22,18 @@
 //! repository](https://github.com/risc0/risc0-rust-starter) for help getting
 //! started.
 
-use std::fs;
-
 use clap::Parser;
-use risc0_zkvm::compute_image_id;
+use risc0_binfmt::ProgramBinary;
 
-/// Generates an ImageID for a given RISC-V ELF binary.
+/// Generates an ImageID for a given RISC-V user ELF and kernel ELF binary.
 #[derive(Parser)]
 #[clap(about, version, author)]
 struct Args {
-    /// The ELF file to compute a ImageID from.
-    elf: String,
+    /// The user ELF to compute an ImageID from.
+    user_elf: String,
+
+    /// The kernel ELF to compute an ImageID from.
+    kernel_elf: String,
 
     /// The resulting ImageID file.
     out: String,
@@ -40,7 +41,10 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let elf_contents = fs::read(args.elf).unwrap();
-    let image_id = compute_image_id(&elf_contents).unwrap();
+    let user_elf = std::fs::read(args.user_elf).unwrap();
+    let kernel_elf = std::fs::read(args.kernel_elf).unwrap();
+    let image_id = ProgramBinary::new(&user_elf, &kernel_elf)
+        .compute_image_id()
+        .unwrap();
     std::fs::write(args.out, image_id.as_bytes()).unwrap();
 }
