@@ -28,7 +28,7 @@ use crate::{
 
 use super::{
     bigint::BigIntState,
-    pager::{PageTraceEvent, PagedMemory},
+    pager::{compute_partial_image, PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{LoadOp, Risc0Context, Risc0Machine},
@@ -154,9 +154,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 );
                 Risc0Machine::suspend(self)?;
 
-                let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
+                let (pre_image, pre_digest, post_digest) = self.pager.commit();
                 callback(Segment {
-                    partial_image,
+                    partial_image: compute_partial_image(pre_image, self.pager.page_indexes()),
                     claim: Rv32imV2Claim {
                         pre_state: pre_digest,
                         post_state: post_digest,
@@ -194,7 +194,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         Risc0Machine::suspend(self)?;
 
-        let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
+        let (pre_image, pre_digest, post_digest) = self.pager.commit();
         let final_cycles = self.segment_cycles().next_power_of_two();
         let final_po2 = log2_ceil(final_cycles as usize);
         let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
@@ -209,7 +209,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         };
 
         callback(Segment {
-            partial_image,
+            partial_image: compute_partial_image(pre_image, self.pager.page_indexes()),
             claim: final_claim,
             read_record: std::mem::take(&mut self.read_record),
             write_record: std::mem::take(&mut self.write_record),

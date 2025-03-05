@@ -75,18 +75,10 @@ pub(crate) struct PageStates {
 
 impl PageStates {
     pub(crate) fn new(size: usize) -> Self {
-        let mut states = BitVec::with_capacity(size * 2);
-        states.grow(size * 2, false);
-
         Self {
-            states,
+            states: BitVec::from_elem(size * 2, false),
             indexes: vec![],
         }
-    }
-
-    pub(crate) fn clear(&mut self) {
-        self.states.clear();
-        self.indexes.clear();
     }
 
     pub(crate) fn set(&mut self, index: u32, value: PageState) {
@@ -129,6 +121,11 @@ impl PageStates {
     pub(crate) fn keys(&self) -> impl Iterator<Item = u32> + '_ {
         self.indexes.iter().copied()
     }
+
+    pub(crate) fn clear(&mut self) {
+        self.states.clear();
+        self.indexes.clear();
+    }
 }
 
 #[test]
@@ -167,6 +164,12 @@ struct PageTable {
     table: Vec<u32>,
 }
 
+impl Default for PageTable {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PageTable {
     const INVALID_IDX: u32 = 0;
 
@@ -186,7 +189,8 @@ impl PageTable {
     }
 
     fn clear(&mut self) {
-        // You would think its faster to re-use the memory, but filling it with zeros is slower
+        // You would think its faster to re-use the memory, but filling it with zeros is
+        // slower
         // than just allocating a new piece of zeroed memory.
         self.table = vec![Self::INVALID_IDX; NUM_PAGES];
     }
@@ -254,6 +258,10 @@ impl PagedMemory {
         self.page_cache.clear();
         self.page_states.clear();
         self.cycles = RESERVED_PAGING_CYCLES;
+    }
+
+    pub(crate) fn page_indexes(&self) -> BTreeSet<u32> {
+        self.page_states.keys().collect()
     }
 
     fn try_load_register(&self, addr: WordAddr) -> Option<u32> {
@@ -391,29 +399,25 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn commit(&mut self) -> Result<(Digest, MemoryImage2, Digest)> {
+    pub(crate) fn commit(&mut self) -> (MemoryImage2, Digest, Digest) {
         // tracing::trace!("commit: {self:#?}");
 
         self.write_registers();
 
+        let pre_image = self.image.clone();
         let pre_state = self.image.image_id();
-        let mut image = MemoryImage2::default();
 
-        // Gather the original pages
-        let sorted_indexes: BTreeSet<_> = self.page_states.keys().collect();
+        let mut sorted_keys: Vec<_> = self.page_states.keys().collect();
+        sorted_keys.sort();
 
-        for node_idx in &sorted_indexes {
-            if *node_idx < MEMORY_PAGES as u32 {
+        for node_idx in sorted_keys {
+            if node_idx < MEMORY_PAGES as u32 {
                 continue;
             }
 
-            let page_state = self.page_states.get(*node_idx);
-
-            let page_idx = page_idx(*node_idx);
+            let page_state = self.page_states.get(node_idx);
+            let page_idx = page_idx(node_idx);
             tracing::trace!("commit: {page_idx:#08x}, state: {page_state:?}");
-
-            // Copy original state of all pages accessed in this segment.
-            image.set_page(page_idx, self.image.get_page(page_idx)?);
 
             // Update dirty pages into the image that accumulates over a session.
             if page_state == PageState::Dirty {
@@ -423,28 +427,8 @@ impl PagedMemory {
             }
         }
 
-        // Add minimal needed 'uncles'
-        for node_idx in &sorted_indexes {
-            // If this is a leaf, break
-            if *node_idx >= MEMORY_PAGES as u32 {
-                break;
-            }
-
-            let lhs_idx = *node_idx * 2;
-            let rhs_idx = *node_idx * 2 + 1;
-
-            // Otherwise, add whichever child digest (if any) is not loaded
-            if !sorted_indexes.contains(&lhs_idx) {
-                image.set_digest(lhs_idx, *self.image.get_digest(lhs_idx)?);
-            }
-            if !sorted_indexes.contains(&rhs_idx) {
-                image.set_digest(rhs_idx, *self.image.get_digest(rhs_idx)?);
-            }
-        }
-
         let post_state = self.image.image_id();
-
-        Ok((pre_state, image, post_state))
+        (pre_image, pre_state, post_state)
     }
 
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
@@ -504,4 +488,43 @@ impl PagedMemory {
 
 pub(crate) fn page_idx(node_idx: u32) -> u32 {
     node_idx - MEMORY_PAGES as u32
+}
+
+pub(crate) fn compute_partial_image(
+    input_image: MemoryImage2,
+    indexes: BTreeSet<u32>,
+) -> MemoryImage2 {
+    let mut image = MemoryImage2::default();
+
+    for node_idx in &indexes {
+        if *node_idx < MEMORY_PAGES as u32 {
+            continue;
+        }
+
+        let page_idx = page_idx(*node_idx);
+
+        // Copy original state of all pages accessed in this segment.
+        image.set_page(page_idx, input_image.get_existing_page(page_idx));
+    }
+
+    // Add minimal needed 'uncles'
+    for node_idx in &indexes {
+        // If this is a leaf, break
+        if *node_idx >= MEMORY_PAGES as u32 {
+            break;
+        }
+
+        let lhs_idx = *node_idx * 2;
+        let rhs_idx = *node_idx * 2 + 1;
+
+        // Otherwise, add whichever child digest (if any) is not loaded
+        if !indexes.contains(&lhs_idx) {
+            image.set_digest(lhs_idx, *input_image.get_existing_digest(lhs_idx));
+        }
+        if !indexes.contains(&rhs_idx) {
+            image.set_digest(rhs_idx, *input_image.get_existing_digest(rhs_idx));
+        }
+    }
+
+    image
 }
