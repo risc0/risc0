@@ -139,20 +139,20 @@ impl<'a> ProgramBinary<'a> {
 
     /// Parse a blob into a `ProgramBinary`.
     pub fn decode(blob: &'a [u8]) -> Result<Self> {
-        ensure!(blob.len() > USER_ELF_OFFSET);
+        ensure!(blob.len() > USER_ELF_OFFSET, "Malformed ProgramBinary");
 
         let magic = &blob[..VERSION_OFFSET];
-        ensure!(magic == MAGIC);
+        ensure!(magic == MAGIC, "Malformed ProgramBinary");
 
         let version = u32::from_le_bytes(blob[VERSION_OFFSET..USER_LEN_OFFSET].try_into().unwrap());
-        ensure!(version == VERSION);
+        ensure!(version == VERSION, "ProgramBinary version mismatch");
 
         let user_len =
             u32::from_le_bytes(blob[USER_LEN_OFFSET..USER_ELF_OFFSET].try_into().unwrap()) as usize;
-        ensure!(user_len > 0);
+        ensure!(user_len > 0, "Malformed ProgramBinary");
 
         let kernel_offset = USER_ELF_OFFSET + user_len;
-        ensure!(kernel_offset < blob.len());
+        ensure!(kernel_offset < blob.len(), "Malformed ProgramBinary");
 
         let user_elf = &blob[USER_ELF_OFFSET..kernel_offset];
         let kernel_elf = &blob[kernel_offset..];
