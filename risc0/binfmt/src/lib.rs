@@ -33,7 +33,7 @@ pub use self::image2::{MemoryImage2, Page, KERNEL_START_ADDR};
 
 pub use crate::{
     addr::{ByteAddr, WordAddr},
-    elf::{Program, ProgramPair},
+    elf::{Program, ProgramBinary},
     exit_code::{ExitCode, InvalidExitCodeError},
     hash::{tagged_iter, tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
@@ -45,5 +45,5 @@ pub(crate) const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 
 /// Compute and return the ImageID of the specified combined user ELF + kernel ELF binary.
 pub fn compute_image_id(blob: &[u8]) -> Result<Digest> {
-    ProgramPair::decode(blob)?.compute_image_id()
+    ProgramBinary::decode(blob)?.compute_image_id()
 }

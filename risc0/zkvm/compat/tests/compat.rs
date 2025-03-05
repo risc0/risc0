@@ -15,7 +15,7 @@
 use std::{path::PathBuf, str::FromStr};
 
 use anyhow::{Context, Result};
-use risc0_binfmt::ProgramPair;
+use risc0_binfmt::ProgramBinary;
 use risc0_zkvm::{
     digest, ApiClient, Asset, AssetRequest, Digest, ExecutorEnv, Groth16ReceiptVerifierParameters,
     ProverOpts, SuccinctReceiptVerifierParameters, VerifierContext,
@@ -148,8 +148,8 @@ fn prove_lift(#[case] version: &str) {
 
     let semver = into_version(version).unwrap();
     let binary = if semver.major == 1 {
-        let pair = ProgramPair::decode(MULTI_TEST_ELF).unwrap();
-        Asset::Inline(pair.user_elf.into())
+        let binary = ProgramBinary::decode(MULTI_TEST_ELF).unwrap();
+        Asset::Inline(binary.user_elf.into())
     } else {
         Asset::Inline(MULTI_TEST_ELF.into())
     };

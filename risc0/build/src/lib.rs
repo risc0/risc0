@@ -38,7 +38,7 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use risc0_binfmt::{ProgramPair, KERNEL_START_ADDR};
+use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -179,8 +179,8 @@ impl GuestBuilder for GuestListEntry {
             } else {
                 let user_elf = std::fs::read(&elf_path)?;
                 let kernel_elf = guest_info.options.kernel();
-                let pair = ProgramPair::new(&user_elf, &kernel_elf);
-                elf = pair.encode();
+                let binary = ProgramBinary::new(&user_elf, &kernel_elf);
+                elf = binary.encode();
                 let combined_path = PathBuf::from_str(&(elf_path + ".bin"))?;
                 std::fs::write(&combined_path, &elf)?;
                 elf_path = combined_path.to_str().unwrap().to_owned();

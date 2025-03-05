@@ -22,7 +22,7 @@ use std::{
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
-use risc0_binfmt::ProgramPair;
+use risc0_binfmt::ProgramBinary;
 use risc0_circuit_rv32im_v2::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
@@ -57,7 +57,7 @@ const ITERATIONS_1M_CYCLES: usize = 1024 * 512 - 46;
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
     const LOOP_ELF: &[u8] = include_bytes!("loop.bin");
-    ProgramPair::new(LOOP_ELF, V1COMPAT_ELF).encode()
+    ProgramBinary::new(LOOP_ELF, V1COMPAT_ELF).encode()
 });
 
 #[serde_as]

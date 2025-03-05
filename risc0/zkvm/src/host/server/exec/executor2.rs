@@ -20,7 +20,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, ProgramPair, SystemState};
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, ProgramBinary, SystemState};
 use risc0_circuit_rv32im_v2::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
@@ -73,12 +73,12 @@ impl<'a> Executor2<'a> {
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
     pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        let pair = ProgramPair::decode(elf)?;
-        let image = pair.to_image()?;
+        let binary = ProgramBinary::decode(elf)?;
+        let image = binary.to_image()?;
 
         let profiler = if env.pprof_out.is_some() {
             let profiler = Rc::new(RefCell::new(Profiler::new(
-                &pair,
+                &binary,
                 None,
                 profiler::read_enable_inline_functions_env_var(),
             )?));

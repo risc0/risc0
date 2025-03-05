@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage2, Program, ProgramPair};
+use risc0_binfmt::{ExitCode, MemoryImage2, Program, ProgramBinary};
 use risc0_circuit_rv32im_v2::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
@@ -876,9 +876,9 @@ fn fault() {
 
 #[test_log::test]
 fn profiler() {
-    let pair = ProgramPair::decode(MULTI_TEST_ELF).unwrap();
+    let binary = ProgramBinary::decode(MULTI_TEST_ELF).unwrap();
     let mut profiler = Profiler::new(
-        &pair,
+        &binary,
         Some("multi_test.elf"),
         true, /* enable_inline_functions */
     )
@@ -999,7 +999,7 @@ fn profiler() {
         }
     }
 
-    let elf_mem = Program::load_elf(pair.user_elf, u32::MAX).unwrap().image;
+    let elf_mem = Program::load_elf(binary.user_elf, u32::MAX).unwrap().image;
 
     // Check that the addresses for these two functions point to the right place
     for func_name in ["profile_test_func2", "profile_test_func3"] {

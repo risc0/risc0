@@ -23,7 +23,7 @@
 //! started.
 
 use clap::Parser;
-use risc0_binfmt::ProgramPair;
+use risc0_binfmt::ProgramBinary;
 
 /// Generates an ImageID for a given RISC-V user ELF and kernel ELF binary.
 #[derive(Parser)]
@@ -43,7 +43,7 @@ fn main() {
     let args = Args::parse();
     let user_elf = std::fs::read(args.user_elf).unwrap();
     let kernel_elf = std::fs::read(args.kernel_elf).unwrap();
-    let image_id = ProgramPair::new(&user_elf, &kernel_elf)
+    let image_id = ProgramBinary::new(&user_elf, &kernel_elf)
         .compute_image_id()
         .unwrap();
     std::fs::write(args.out, image_id.as_bytes()).unwrap();

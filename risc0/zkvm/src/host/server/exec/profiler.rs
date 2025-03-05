@@ -43,7 +43,7 @@ use addr2line::{
 use anyhow::{anyhow, Result};
 use elf::{abi::STT_FUNC, endian::LittleEndian, ElfBytes};
 use prost::Message;
-use risc0_binfmt::ProgramPair;
+use risc0_binfmt::ProgramBinary;
 use risc0_zkvm_platform::memory::TEXT_START;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
@@ -302,11 +302,11 @@ pub fn read_enable_inline_functions_env_var() -> bool {
 impl Profiler {
     /// Return a new profile from the given RISC-V ELF.
     pub fn new(
-        program_pair: &ProgramPair,
+        binary: &ProgramBinary,
         filename: Option<&str>,
         enable_inline_functions: bool,
     ) -> Result<Self> {
-        let file = File::parse(program_pair.user_elf)?;
+        let file = File::parse(binary.user_elf)?;
         let dwarf = load_dwarf(&file)?;
 
         let inline_function_table_result = if enable_inline_functions {
@@ -349,7 +349,7 @@ impl Profiler {
             }
         }
 
-        profiler.profile.symbol_table = build_symbol_table(program_pair.user_elf)?;
+        profiler.profile.symbol_table = build_symbol_table(binary.user_elf)?;
         match inline_function_table_result {
             Ok(inline_function_table) => {
                 profiler.profile.inline_function_table = inline_function_table
