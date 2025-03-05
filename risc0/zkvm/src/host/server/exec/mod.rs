@@ -25,20 +25,23 @@ pub(crate) mod syscall;
 #[cfg(test)]
 mod tests;
 
-use std::{cell::RefCell, io::Write, rc::Rc};
+use std::{
+    io::Write,
+    sync::{Arc, Mutex},
+};
 
 // Capture the journal output in a buffer that we can access afterwards.
 #[derive(Clone, Default)]
 struct Journal {
-    buf: Rc<RefCell<Vec<u8>>>,
+    buf: Arc<Mutex<Vec<u8>>>,
 }
 
 impl Write for Journal {
     fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
-        self.buf.borrow_mut().write(bytes)
+        self.buf.lock().unwrap().write(bytes)
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
-        self.buf.borrow_mut().flush()
+        self.buf.lock().unwrap().flush()
     }
 }
