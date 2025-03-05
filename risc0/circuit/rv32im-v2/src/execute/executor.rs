@@ -436,6 +436,12 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(word)
     }
 
+    fn load_register(&mut self, _op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
+        let word = self.pager.load_register(base, idx);
+        // tracing::trace!("load_register({:?}) -> {word:#010x}", addr.baddr());
+        Ok(word)
+    }
+
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
         if !self.trace.is_empty() {
@@ -445,6 +451,18 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
             })?;
         }
         self.pager.store(addr, word)
+    }
+
+    fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
+        // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
+        if !self.trace.is_empty() {
+            self.trace(TraceEvent::MemorySet {
+                addr: (base + idx).baddr().0,
+                region: word.to_be_bytes().to_vec(),
+            })?;
+        }
+        self.pager.store_register(base, idx, word);
+        Ok(())
     }
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {

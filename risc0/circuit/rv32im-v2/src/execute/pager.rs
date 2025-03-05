@@ -347,6 +347,16 @@ impl PagedMemory {
         }
     }
 
+    pub(crate) fn load_register(&mut self, base: WordAddr, idx: usize) -> u32 {
+        if base == USER_REGS_ADDR.waddr() {
+            self.user_registers[idx]
+        } else if base == MACHINE_REGS_ADDR.waddr() {
+            self.machine_registers[idx]
+        } else {
+            unimplemented!("unknown register address {base:?}");
+        }
+    }
+
     fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
         let page_idx = addr.page_idx();
@@ -364,6 +374,16 @@ impl PagedMemory {
             Ok(())
         } else {
             self.store_ram(addr, word)
+        }
+    }
+
+    pub(crate) fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) {
+        if base == USER_REGS_ADDR.waddr() {
+            self.user_registers[idx] = word;
+        } else if base == MACHINE_REGS_ADDR.waddr() {
+            self.machine_registers[idx] = word;
+        } else {
+            unimplemented!("unknown register address {base:?}");
         }
     }
 
