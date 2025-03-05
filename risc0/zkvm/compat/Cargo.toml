@@ -8,6 +8,7 @@ release = false
 
 [dependencies]
 anyhow = "1.0.95"
+risc0-binfmt = { workspace = true }
 risc0-r0vm = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["client", "r0vm-ver-compat"] }

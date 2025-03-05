@@ -4748,7 +4748,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -4822,6 +4822,7 @@ name = "risc0-zkvm-compat-tests"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "risc0-binfmt",
  "risc0-r0vm",
  "risc0-zkp",
  "risc0-zkvm",

@@ -47,17 +47,3 @@ pub(crate) const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 pub fn compute_image_id(blob: &[u8]) -> Result<Digest> {
     ProgramPair::decode(blob)?.compute_image_id()
 }
-
-/// Compute and return the ImageID of the user ELF binary.
-pub fn compute_user_id(elf: &[u8]) -> Result<Digest> {
-    let program = Program::load_elf(elf, KERNEL_START_ADDR.0)?;
-    let mut image = MemoryImage2::new_user(program);
-    Ok(image.user_id())
-}
-
-/// Compute and return the ImageID of the kernel ELF binary.
-pub fn compute_kernel_id(elf: &[u8]) -> Result<Digest> {
-    let program = Program::load_elf(elf, u32::MAX)?;
-    let mut image = MemoryImage2::new_kernel(program);
-    Ok(image.kernel_id())
-}

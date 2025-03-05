@@ -153,18 +153,13 @@ fn r0vm_image_id(path: &str, flag: &str) -> Result<Digest> {
     }
 }
 
-fn compute_image_id(elf: &[u8], elf_path: &str, is_kernel: bool) -> Result<Digest> {
-    let flag = if is_kernel { "--kernel-id" } else { "--id" };
-    Ok(match r0vm_image_id(elf_path, flag) {
+fn compute_image_id(elf: &[u8], elf_path: &str) -> Result<Digest> {
+    Ok(match r0vm_image_id(elf_path, "--id") {
         Ok(image_id) => image_id,
         Err(err) => {
             tty_println("Falling back to slow ImageID computation. Updating to the latest r0vm will speed this up.");
             tty_println(&format!("  error: {err}"));
-            if is_kernel {
-                risc0_binfmt::compute_kernel_id(elf)?
-            } else {
-                risc0_binfmt::compute_image_id(elf)?
-            }
+            risc0_binfmt::compute_image_id(elf)?
         }
     })
 }
@@ -189,9 +184,8 @@ impl GuestBuilder for GuestListEntry {
                 let combined_path = PathBuf::from_str(&(elf_path + ".bin"))?;
                 std::fs::write(&combined_path, &elf)?;
                 elf_path = combined_path.to_str().unwrap().to_owned();
+                image_id = compute_image_id(&elf, &elf_path)?;
             }
-
-            image_id = compute_image_id(&elf, &elf_path, is_kernel)?;
         }
 
         Ok(Self {

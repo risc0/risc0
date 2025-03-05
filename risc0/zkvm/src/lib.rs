@@ -164,8 +164,6 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-pub use risc0_binfmt::{compute_kernel_id, compute_user_id};
-
 pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
     Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,

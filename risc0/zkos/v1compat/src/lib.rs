@@ -15,5 +15,3 @@
 #![no_std]
 
 pub const V1COMPAT_ELF: &[u8] = include_bytes!("../elfs/v1compat.elf");
-
-pub const V1COMPAT_KERNEL_ID: &[u8; 32] = include_bytes!("../elfs/v1compat.iid");
