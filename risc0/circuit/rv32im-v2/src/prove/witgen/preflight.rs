@@ -182,7 +182,7 @@ impl<'a> Preflight<'a> {
     // Do page out
     pub fn write_pages(&mut self) -> Result<()> {
         let activity = self.pager.dirty_pages();
-        self.pager.commit()?;
+        self.pager.commit();
         Poseidon2::write_start(self)?;
         for &page_idx in activity.pages.iter().rev() {
             Poseidon2::write_page(self, page_idx)?;
