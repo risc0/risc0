@@ -29,7 +29,12 @@ mod slice_io;
 mod verify;
 mod verify2;
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    rc::Rc,
+    sync::{Arc, Mutex},
+};
 
 use anyhow::{anyhow, Result};
 use enum_map::{Enum, EnumMap};
@@ -134,7 +139,7 @@ pub(crate) struct SyscallTable<'a> {
     pub(crate) inner: HashMap<String, Rc<RefCell<dyn Syscall + 'a>>>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
-    pub(crate) assumptions_used: Rc<RefCell<AssumptionUsage>>,
+    pub(crate) assumptions_used: Arc<Mutex<AssumptionUsage>>,
     pub(crate) mmr_assumptions: Rc<RefCell<Vec<AssumptionReceipt>>>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
     pub(crate) pending_zkrs: Rc<RefCell<Vec<ProveZkrRequest>>>,
