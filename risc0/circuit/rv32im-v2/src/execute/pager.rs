@@ -426,6 +426,7 @@ impl PagedMemory {
                 self.image.set_page(page_idx, page.clone());
             }
         }
+        self.image.update_digests();
 
         let post_state = self.image.image_id();
         (pre_image, pre_state, post_state)
@@ -525,6 +526,8 @@ pub(crate) fn compute_partial_image(
             image.set_digest(rhs_idx, *input_image.get_existing_digest(rhs_idx));
         }
     }
+
+    image.update_digests();
 
     image
 }

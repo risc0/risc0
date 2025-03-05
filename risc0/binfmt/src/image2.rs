@@ -13,7 +13,12 @@
 // limitations under the License.
 extern crate alloc;
 
-use alloc::{collections::BTreeMap, format, vec, vec::Vec};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    format, vec,
+    vec::Vec,
+};
+use core::mem;
 use lazy_static::lazy_static;
 
 #[cfg(feature = "std")]
@@ -96,6 +101,9 @@ pub struct MemoryImage2 {
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
     pub digests: BTreeMap<u32, Digest>,
+
+    #[debug("{}", dirty.len())]
+    dirty: BTreeSet<u32>,
 }
 
 impl Default for MemoryImage2 {
@@ -103,6 +111,7 @@ impl Default for MemoryImage2 {
         Self {
             pages: Default::default(),
             digests: BTreeMap::from([(1, ZERO_CACHE.digests[0])]),
+            dirty: Default::default(),
         }
     }
 }
@@ -130,6 +139,8 @@ impl MemoryImage2 {
         if let Some(page) = cur_page.take() {
             this.set_page(cur_page_idx, page);
         }
+
+        this.update_digests();
 
         this
     }
@@ -189,7 +200,7 @@ impl MemoryImage2 {
         self.expand_if_zero(digest_idx);
         self.digests.insert(digest_idx, page.digest());
         self.pages.insert(page_idx, page);
-        self.fixup_digests(digest_idx);
+        self.mark_dirty(digest_idx);
     }
 
     /// Get a digest, fails if unavailable
@@ -212,8 +223,7 @@ impl MemoryImage2 {
         self.expand_if_zero(digest_idx);
         // Set the digest value
         self.digests.insert(digest_idx, digest);
-        // Fixup digest values
-        self.fixup_digests(digest_idx);
+        self.mark_dirty(digest_idx);
     }
 
     /// Return the root digest
@@ -274,21 +284,35 @@ impl MemoryImage2 {
         }
     }
 
-    /// Fixup digests after a change
-    fn fixup_digests(&mut self, mut digest_idx: u32) {
+    /// Mark inner digests as dirty after a change
+    fn mark_dirty(&mut self, mut digest_idx: u32) {
         while digest_idx != 1 {
             let parent_idx = digest_idx / 2;
             let lhs_idx = parent_idx * 2;
             let rhs_idx = parent_idx * 2 + 1;
             let lhs = self.digests.get(&lhs_idx);
             let rhs = self.digests.get(&rhs_idx);
-            if let (Some(&lhs), Some(&rhs)) = (lhs, rhs) {
-                let parent_digest = DigestPair { lhs, rhs }.digest();
-                self.digests.insert(parent_idx, parent_digest);
+            if let (Some(_), Some(_)) = (lhs, rhs) {
+                self.dirty.insert(parent_idx);
                 digest_idx = parent_idx;
             } else {
                 break;
             };
+        }
+    }
+
+    /// After making changes to the image, call this to update all the digests that need to be
+    /// updated.
+    pub fn update_digests(&mut self) {
+        let dirty: Vec<_> = mem::take(&mut self.dirty).into_iter().collect();
+        for idx in dirty.into_iter().rev() {
+            let lhs_idx = idx * 2;
+            let rhs_idx = idx * 2 + 1;
+            let lhs = *self.digests.get(&lhs_idx).unwrap();
+            let rhs = *self.digests.get(&rhs_idx).unwrap();
+
+            let parent_digest = DigestPair { lhs, rhs }.digest();
+            self.digests.insert(idx, parent_digest);
         }
     }
 }
