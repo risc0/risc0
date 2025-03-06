@@ -23,6 +23,7 @@ use risc0_zkp::{
     },
     field::baby_bear::{self},
 };
+use wide::{u32x4, u32x8, u64x4};
 
 use crate::{
     execute::{
@@ -48,8 +49,29 @@ pub(crate) struct Poseidon2State {
     pub buf_in_addr: u32,
     pub count: u32,
     pub mode: u32,
-    pub inner: [u32; CELLS],
+    pub inner: [u32x8; CELLS / 8],
     pub zcheck: ExtVal,
+}
+
+fn load_u32x8(ctx: &mut dyn Risc0Context, op: LoadOp, addr: WordAddr) -> Result<u32x8> {
+    Ok([
+        ctx.load_u32(op, addr)?,
+        ctx.load_u32(op, addr + 1)?,
+        ctx.load_u32(op, addr + 2)?,
+        ctx.load_u32(op, addr + 3)?,
+        ctx.load_u32(op, addr + 4)?,
+        ctx.load_u32(op, addr + 5)?,
+        ctx.load_u32(op, addr + 6)?,
+        ctx.load_u32(op, addr + 7)?,
+    ]
+    .into())
+}
+
+fn store_u32x8(ctx: &mut dyn Risc0Context, addr: WordAddr, value: &u32x8) -> Result<()> {
+    for i in 0..8 {
+        ctx.store_u32(addr + i, value.as_array_ref()[i])?;
+    }
+    Ok(())
 }
 
 impl Poseidon2State {
@@ -84,6 +106,24 @@ impl Poseidon2State {
         *cur_state = next_state;
     }
 
+    fn set_inner_word(&mut self, index: usize, word: u32) {
+        self.inner[index / 8].as_array_mut()[index % 8] = word;
+    }
+
+    pub(crate) fn get_inner_word(&self, index: usize) -> u32 {
+        self.inner[index / 8].as_array_ref()[index % 8]
+    }
+
+    fn inner_x4(&self) -> &[u32x4; CELLS / 4] {
+        // This should be safe since a u32x8 is repr(C) with two `u32x4` fields.
+        unsafe { std::mem::transmute(&self.inner) }
+    }
+
+    fn inner_x4_mut(&mut self) -> &mut [u32x4; CELLS / 4] {
+        // This should be safe since a u32x8 is repr(C) with two `u32x4` fields.
+        unsafe { std::mem::transmute(&mut self.inner) }
+    }
+
     pub(crate) fn rest(
         &mut self,
         ctx: &mut dyn Risc0Context,
@@ -96,9 +136,7 @@ impl Poseidon2State {
         if self.has_state == 1 {
             // tracing::trace!("has_state");
             self.step(ctx, &mut cur_state, CycleState::PoseidonLoadState, 0);
-            for i in 0..DIGEST_WORDS {
-                self.inner[DIGEST_WORDS * 2 + i] = ctx.load_u32(LoadOp::Record, state_addr + i)?;
-            }
+            self.inner[2] = load_u32x8(ctx, LoadOp::Record, state_addr)?;
         }
 
         // While we have data to process
@@ -110,21 +148,21 @@ impl Poseidon2State {
             self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 0);
 
             if self.is_elem != 0 {
-                for i in 0..DIGEST_WORDS {
-                    self.inner[i] = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                }
+                self.inner[0] = load_u32x8(ctx, LoadOp::Record, buf_in_addr)?;
+                buf_in_addr += 8u32;
+
                 self.buf_in_addr = buf_in_addr.0;
                 self.step(ctx, &mut cur_state, CycleState::PoseidonLoadIn, 1);
-                for i in 0..DIGEST_WORDS {
-                    self.inner[DIGEST_WORDS + i] =
-                        ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                }
+
+                self.inner[1] = load_u32x8(ctx, LoadOp::Record, buf_in_addr)?;
+                buf_in_addr += 8u32;
                 self.buf_in_addr = buf_in_addr.0;
             } else {
                 for i in 0..DIGEST_WORDS {
                     let word = ctx.load_u32(LoadOp::Record, buf_in_addr.postfix_inc())?;
-                    self.inner[2 * i] = word & 0xffff;
-                    self.inner[2 * i + 1] = word >> 16;
+
+                    self.set_inner_word(2 * i, word & 0xffff);
+                    self.set_inner_word(2 * i + 1, word >> 16);
                 }
                 self.buf_in_addr = buf_in_addr.0;
             }
@@ -151,7 +189,7 @@ impl Poseidon2State {
             for i in 0..DIGEST_WORDS {
                 let addr = buf_out_addr + i;
                 let word = ctx.load_u32(LoadOp::Record, addr)?;
-                let cell = self.inner[i];
+                let cell = self.get_inner_word(i);
                 if word != cell {
                     tracing::warn!(
                         "buf_in_addr: {:?}, buf_out_addr: {buf_out_addr:?}, cell: {i}",
@@ -161,18 +199,14 @@ impl Poseidon2State {
                 }
             }
         } else {
-            for i in 0..DIGEST_WORDS {
-                ctx.store_u32(buf_out_addr + i, self.inner[i])?;
-            }
+            store_u32x8(ctx, buf_out_addr, &self.inner[0])?;
         }
 
         self.buf_in_addr = 0;
 
         if self.has_state == 1 {
             self.step(ctx, &mut cur_state, CycleState::PoseidonStoreState, 0);
-            for i in 0..DIGEST_WORDS {
-                ctx.store_u32(state_addr + i, self.inner[DIGEST_WORDS * 2 + i])?;
-            }
+            store_u32x8(ctx, state_addr, &self.inner[2])?;
         }
 
         self.step(ctx, &mut cur_state, final_state, 0);
@@ -183,41 +217,43 @@ impl Poseidon2State {
     // Optimized method for multiplication by M_EXT.
     // See appendix B of Poseidon2 paper for additional details.
     fn multiply_by_m_ext(&mut self) {
-        let mut out = [0; CELLS];
-        let mut tmp_sums = [0; 4];
+        let mut out = [u32x4::from([0u32; 4]); CELLS / 4];
+        let mut tmp_sums = u32x4::from([0u32; 4]);
 
+        #[allow(clippy::needless_range_loop)]
         for i in 0..CELLS / 4 {
-            let chunk = multiply_by_4x4_circulant(&[
-                self.inner[i * 4],
-                self.inner[i * 4 + 1],
-                self.inner[i * 4 + 2],
-                self.inner[i * 4 + 3],
-            ]);
-            for j in 0..4 {
-                let to_add = chunk[j] as u64;
-                let to_add = (to_add % BABY_BEAR_P_U64) as u32;
-                tmp_sums[j] += to_add;
-                tmp_sums[j] %= BABY_BEAR_P_U32;
-                out[i * 4 + j] += to_add;
-                out[i * 4 + j] %= BABY_BEAR_P_U32;
-            }
+            let chunk = u32x4::from(multiply_by_4x4_circulant(self.inner_x4()[i].as_array_ref()));
+
+            tmp_sums += chunk;
+            u32x4_baby_bear_mod(&mut tmp_sums);
+
+            out[i] += chunk;
+            u32x4_baby_bear_mod(&mut out[i]);
         }
-        for i in 0..CELLS {
-            self.inner[i] = (out[i] + tmp_sums[i % 4]) % BABY_BEAR_P_U32;
+
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..CELLS / 4 {
+            self.inner_x4_mut()[i] = out[i] + tmp_sums;
+        }
+        for i in 0..CELLS / 8 {
+            u32x8_baby_bear_mod(&mut self.inner[i]);
         }
     }
 
     // Exploit the fact that off-diagonal entries of M_INT are all 1.
     fn multiply_by_m_int(&mut self) {
-        let mut sum = 0u64;
-        for i in 0..CELLS {
-            sum += self.inner[i] as u64;
+        let mut sum = u64x4::from([0u64; 4]);
+        for i in 0..CELLS / 4 {
+            sum += u64x4_from_u32x4(&self.inner_x4()[i]);
         }
-        sum %= BABY_BEAR_P_U64;
-        for (i, diag) in M_INT_DIAG_HZN.iter().enumerate().take(CELLS) {
-            let diag = diag.as_u32() as u64;
-            let cell = self.inner[i] as u64;
-            self.inner[i] = ((sum + diag * cell) % BABY_BEAR_P_U64) as u32;
+        let sum = sum.as_array_ref().iter().sum::<u64>() % BABY_BEAR_P_U64;
+
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..CELLS / 4 {
+            let cell = u64x4_from_u32x4(&self.inner_x4()[i]);
+            let mut res = u64x4::splat(sum) + M_INT_DIAG_HZN_U64X4[i] * cell;
+            u64x4_baby_bear_mod(&mut res);
+            self.inner_x4_mut()[i] = u32x4_from_u64x4(&res);
         }
     }
 
@@ -227,8 +263,8 @@ impl Poseidon2State {
         }
 
         self.add_round_constants_full(idx);
-        for i in 0..CELLS {
-            self.inner[i] = sbox2(self.inner[i]);
+        for i in 0..CELLS / 4 {
+            self.inner_x4_mut()[i] = sbox2x4(&self.inner_x4()[i]);
         }
 
         self.multiply_by_m_ext();
@@ -237,21 +273,32 @@ impl Poseidon2State {
     fn do_int_rounds(&mut self) {
         for i in 0..ROUNDS_PARTIAL {
             self.add_round_constants_partial(ROUNDS_HALF_FULL + i);
-            self.inner[0] = sbox2(self.inner[0]);
+            self.set_inner_word(0, sbox2(self.get_inner_word(0)));
             self.multiply_by_m_int();
         }
     }
 
     fn add_round_constants_full(&mut self, round: usize) {
-        for i in 0..CELLS {
-            self.inner[i] += ROUND_CONSTANTS[round * CELLS + i].as_u32();
-            self.inner[i] %= BABY_BEAR_P_U32;
+        for i in 0..CELLS / 8 {
+            self.inner[i] += u32x8::new([
+                ROUND_CONSTANTS[round * CELLS + i * 8].as_u32(),
+                ROUND_CONSTANTS[round * CELLS + i * 8 + 1].as_u32(),
+                ROUND_CONSTANTS[round * CELLS + i * 8 + 2].as_u32(),
+                ROUND_CONSTANTS[round * CELLS + i * 8 + 3].as_u32(),
+                ROUND_CONSTANTS[round * CELLS + i * 8 + 4].as_u32(),
+                ROUND_CONSTANTS[round * CELLS + i * 8 + 5].as_u32(),
+                ROUND_CONSTANTS[round * CELLS + i * 8 + 6].as_u32(),
+                ROUND_CONSTANTS[round * CELLS + i * 8 + 7].as_u32(),
+            ]);
+
+            u32x8_baby_bear_mod(&mut self.inner[i]);
         }
     }
 
     fn add_round_constants_partial(&mut self, round: usize) {
-        self.inner[0] += ROUND_CONSTANTS[round * CELLS].as_u32();
-        self.inner[0] %= BABY_BEAR_P_U32;
+        let v =
+            (self.get_inner_word(0) + ROUND_CONSTANTS[round * CELLS].as_u32()) % BABY_BEAR_P_U32;
+        self.set_inner_word(0, v);
     }
 }
 
@@ -278,6 +325,80 @@ fn sbox2(x: u32) -> u32 {
     let x7 = (x6 * x) % BABY_BEAR_P_U64;
     x7 as u32
 }
+
+fn sbox2x4(x: &u32x4) -> u32x4 {
+    let x = u64x4_from_u32x4(x);
+
+    let mut x2 = x * x;
+    u64x4_baby_bear_mod(&mut x2);
+
+    let mut x4 = x2 * x2;
+    u64x4_baby_bear_mod(&mut x4);
+
+    let mut x6 = x4 * x2;
+    u64x4_baby_bear_mod(&mut x6);
+
+    let mut x7 = x6 * x;
+    u64x4_baby_bear_mod(&mut x7);
+
+    u32x4_from_u64x4(&x7)
+}
+
+fn u64x4_from_u32x4(x: &u32x4) -> u64x4 {
+    let x_arr = x.as_array_ref();
+    u64x4::from([
+        x_arr[0] as u64,
+        x_arr[1] as u64,
+        x_arr[2] as u64,
+        x_arr[3] as u64,
+    ])
+}
+
+fn u32x4_from_u64x4(x: &u64x4) -> u32x4 {
+    let x_arr = x.as_array_ref();
+    u32x4::from([
+        x_arr[0] as u32,
+        x_arr[1] as u32,
+        x_arr[2] as u32,
+        x_arr[3] as u32,
+    ])
+}
+
+fn u32x4_baby_bear_mod(x: &mut u32x4) {
+    for i in 0..4 {
+        x.as_array_mut()[i] %= BABY_BEAR_P_U32;
+    }
+}
+
+fn u64x4_baby_bear_mod(x: &mut u64x4) {
+    for i in 0..4 {
+        x.as_array_mut()[i] %= BABY_BEAR_P_U64;
+    }
+}
+
+fn u32x8_baby_bear_mod(x: &mut u32x8) {
+    for i in 0..8 {
+        x.as_array_mut()[i] %= BABY_BEAR_P_U32;
+    }
+}
+
+const fn m_int_diag_hzn_u64x4_new(idx: usize) -> u64x4 {
+    u64x4::new([
+        M_INT_DIAG_HZN[idx * 4].as_u32() as u64,
+        M_INT_DIAG_HZN[idx * 4 + 1].as_u32() as u64,
+        M_INT_DIAG_HZN[idx * 4 + 2].as_u32() as u64,
+        M_INT_DIAG_HZN[idx * 4 + 3].as_u32() as u64,
+    ])
+}
+
+const M_INT_DIAG_HZN_U64X4: [u64x4; CELLS / 4] = [
+    m_int_diag_hzn_u64x4_new(0),
+    m_int_diag_hzn_u64x4_new(1),
+    m_int_diag_hzn_u64x4_new(2),
+    m_int_diag_hzn_u64x4_new(3),
+    m_int_diag_hzn_u64x4_new(4),
+    m_int_diag_hzn_u64x4_new(5),
+];
 
 pub(crate) struct Poseidon2;
 

@@ -1290,6 +1290,7 @@ dependencies = [
  "risc0-zkp",
  "serde",
  "tracing",
+ "wide",
 ]
 
 [[package]]
