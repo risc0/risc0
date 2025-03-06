@@ -29,7 +29,7 @@ use crate::{
         pager::{page_idx, PageState, PagedMemory},
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
-        r0vm::{LoadOp, Risc0Context, Risc0Machine},
+        r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
         rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
         sha2::Sha2State,
@@ -576,6 +576,7 @@ impl Risc0Context for Preflight<'_> {
         s0: u32,
         s1: u32,
         s2: u32,
+        _kind: EcallKind,
     ) -> Result<()> {
         self.add_cycle_special(cur_state, next_state, self.pc.0, 0, Back::Ecall(s0, s1, s2));
         self.phys_cycles += 1;

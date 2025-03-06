@@ -15,7 +15,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
-use enum_map::{Enum, EnumMap};
+use enum_map::EnumMap;
 use risc0_binfmt::{ByteAddr, MemoryImage2, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
@@ -32,7 +32,7 @@ use super::{
     pager::{PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
-    r0vm::{LoadOp, Risc0Context, Risc0Machine},
+    r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
     sha2::Sha2State,
@@ -44,18 +44,6 @@ use super::{
 pub struct EcallMetric {
     pub count: u64,
     pub cycles: u64,
-}
-
-// TODO: Here?
-#[derive(Clone, Copy, Debug, Enum)]
-enum EcallKind {
-    BigInt,
-    Poseidon2,
-    Read,
-    Sha2,
-    Terminate,
-    User,
-    Write,
 }
 
 // TODO: Here?
@@ -387,9 +375,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         _s0: u32,
         _s1: u32,
         _s2: u32,
+        kind: EcallKind,
     ) -> Result<()> {
         self.phys_cycles += 1;
-        let kind = EcallKind::Terminate;  // TODO: This is wrong, I'm just testing partial hookups
         self.ecall_metrics.0[kind].cycles += 1;
         if cur == CycleState::MachineEcall {
             self.ecall_metrics.0[kind].count += 1;
@@ -422,6 +410,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
         self.user_cycles += 1;
+        // TODO: Probably some counts for ecalls?
 
         self.terminate_state = Some(TerminateState {
             a0: a0.into(),
