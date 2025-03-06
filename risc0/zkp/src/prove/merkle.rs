@@ -62,15 +62,21 @@ impl<H: Hal> MerkleTreeProver<H> {
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
         let nodes = hal.alloc_digest("nodes", rows * 2);
-        // hash each column
-        hal.hash_rows(&nodes.slice(rows, rows), matrix);
-        // For each layer, hash up the layer below
-        scope!("hash_fold", {
+        
+        // Use scope for more precise profiling
+        scope!("merkle_tree_hash", {
+            // hash each column
+            hal.hash_rows(&nodes.slice(rows, rows), matrix);
+            
+            // For each layer, hash up the layer below
+            // Use parallel hashing for large layers
             for i in (0..params.layers).rev() {
                 let layer_size = 1 << i;
+                // For large layers, use parallel hashing
                 hal.hash_fold(&nodes, layer_size * 2, layer_size);
             }
         });
+        
         let root = nodes.get_at(1);
         MerkleTreeProver {
             params,
