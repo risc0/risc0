@@ -81,7 +81,11 @@ impl Player {
 fn read_stdin_guess() -> String {
     let mut guess = String::new();
     loop {
-        io::stdin().read_line(&mut guess).unwrap();
+        if io::stdin().read_line(&mut guess).is_err() {
+            println!("Error reading input. Please try again.");
+            guess.clear();
+            continue;
+        }
         guess.pop(); // remove trailing newline
 
         if guess.chars().count() == WORD_LENGTH {
@@ -180,27 +184,27 @@ mod tests {
 
         assert!(
             score.0[0] == LetterFeedback::Present,
-            "Other partials should be yellow"
+            "First letter should be marked as present (yellow)"
         );
 
         assert!(
             score.0[1] == LetterFeedback::Correct,
-            "Consumed exact matches should be green"
+            "Second letter should be marked as correct (green)"
         );
 
         assert!(
             score.0[2] == LetterFeedback::Miss,
-            "Excessive instances of letter should not flag yellow"
+            "Third letter should be marked as miss (gray) since it's already used in correct position"
         );
 
         assert!(
-            score.0[1] == LetterFeedback::Correct,
-            "Misses should still miss"
+            score.0[3] == LetterFeedback::Present,
+            "Fourth letter should be marked as present (yellow)"
         );
 
         assert!(
-            score.0[1] == LetterFeedback::Correct,
-            "Unconsumed matches should be green"
+            score.0[4] == LetterFeedback::Miss,
+            "Fifth letter should be marked as miss (gray)"
         );
     }
 }
