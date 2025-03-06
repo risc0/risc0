@@ -33,7 +33,6 @@ pub(crate) enum LoadOp {
     Record,
 }
 
-// TODO: Here?
 #[derive(Clone, Copy, Debug, Enum)]
 pub enum EcallKind {
     BigInt,
@@ -368,7 +367,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
     fn ecall_sha2(&mut self) -> Result<bool> {
         self.next_pc();
         self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::ShaEcall, 0, 0, 0, EcallKind::Poseidon2)?;
+            .on_ecall_cycle(CycleState::MachineEcall, CycleState::ShaEcall, 0, 0, 0, EcallKind::Sha2)?;
         sha2::ecall(self.ctx)?;
         Ok(false)
     }
