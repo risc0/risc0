@@ -250,7 +250,9 @@ impl Session {
             pct(self.reserved_cycles)
         );
 
-        tracing::info!("ecalls");
+        // TODO: Subtract out ecalls from reserved? Track separately?
+
+        tracing::info!("ecalls (included in reserved)");
         let mut ecall_metrics = self.ecall_metrics.clone();
         ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
         for (name, metric) in ecall_metrics.iter().rev() {
