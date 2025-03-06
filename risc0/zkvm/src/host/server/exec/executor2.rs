@@ -143,10 +143,6 @@ impl<'a> Executor2<'a> {
     {
         scope!("execute");
         tracing::info!("Executing rv32im-v2 session");
-        tracing::info!("TODO Or... am I in this code? (`risc0/zkvm/src/host/server/exec/executor2.rs`)");
-
-        // TODO: Is this where I want to create this ecall metrics table?
-        // let ecall_metrics: Vec<(String, EcallMetric)> = vec![(String::from("TODO: Test"), EcallMetric{count: 1, cycles: 400})];  // TODO: This is fake data for testing
 
         let journal = Journal::default();
         self.env
@@ -167,7 +163,6 @@ impl<'a> Executor2<'a> {
             self.env.trace.clone(),
         );
 
-        // TODO: We run the Executor here
         let start_time = Instant::now();
         let result = exec.run(
             segment_limit_po2,

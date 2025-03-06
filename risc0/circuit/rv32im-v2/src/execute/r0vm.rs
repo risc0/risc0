@@ -144,8 +144,6 @@ pub(crate) trait Risc0Context {
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
     fn on_bigint_cycle(&mut self, cur_state: CycleState, bigint: &BigIntState);
-
-    // fn update_ecall_metrics(&mut self);  // TODO: Maybe?
 }
 
 fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
@@ -524,11 +522,6 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
 
     fn check_data_store(&self, addr: ByteAddr) -> bool {
         self.check_data_load(addr)
-    }
-
-    /// TODO: Document, is this right?
-    fn update_ecall_metrics(&mut self) {
-        // TODO: for now a no-op, but implement something real
     }
 }
 

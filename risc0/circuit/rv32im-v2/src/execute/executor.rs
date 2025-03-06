@@ -46,7 +46,6 @@ pub struct EcallMetric {
     pub cycles: u64,
 }
 
-// TODO: Here?
 #[derive(Default)]
 pub struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
 
@@ -65,7 +64,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     output_digest: Option<Digest>,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
-    ecall_metrics: EcallMetrics,  // TODO: Do I want this here?
+    ecall_metrics: EcallMetrics,
 }
 
 pub struct ExecutorResult {
@@ -113,7 +112,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             output_digest: None,
             trace,
             cycles: SessionCycles::default(),
-            ecall_metrics:EcallMetrics::default(),  // TODO: Do I want this here?
+            ecall_metrics:EcallMetrics::default(),
         }
     }
 
@@ -135,7 +134,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Risc0Machine::resume(self)?;
         let initial_digest = self.pager.image.image_id();
         tracing::debug!("initial_digest: {initial_digest}");
-        tracing::info!("TODO Yes I am in this code (`risc0/circuit/rv32im-v2/src/execute/executor.rs`)");
 
         while self.terminate_state.is_none() {
             if let Some(max_cycles) = max_cycles {
@@ -163,8 +161,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
-                // TODO: Note how the callback is mut and the various fields of the Segment are too -- could put Ecall metrics on a Segment if useful
-                // TODO: Or actually, maybe put them on the Executor (`self` here) and pass `self.ecall_metrics` as part of the segment, so that the `Executor2` can get at them later
                 callback(Segment {
                     partial_image,
                     claim: Rv32imV2Claim {
@@ -410,7 +406,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
         self.user_cycles += 1;
-        // TODO: Probably some counts for ecalls?
+        // TODO: We don't want to count user_cycles towards the terminate ecall, right?
 
         self.terminate_state = Some(TerminateState {
             a0: a0.into(),
