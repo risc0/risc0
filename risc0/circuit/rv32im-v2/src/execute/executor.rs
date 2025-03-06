@@ -112,7 +112,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             output_digest: None,
             trace,
             cycles: SessionCycles::default(),
-            ecall_metrics:EcallMetrics::default(),
+            ecall_metrics: EcallMetrics::default(),
         }
     }
 

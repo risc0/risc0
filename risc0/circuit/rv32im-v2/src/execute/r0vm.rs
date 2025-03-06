@@ -212,20 +212,38 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
     fn ecall_terminate(&mut self) -> Result<bool> {
         tracing::trace!("ecall_terminate");
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::Terminate, 0, 0, 0, EcallKind::Terminate)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::Terminate,
+            0,
+            0,
+            0,
+            EcallKind::Terminate,
+        )?;
         let a0 = self.load_register(REG_A0)?;
         let a1 = self.load_register(REG_A1)?;
         self.ctx.on_terminate(a0, a1)?;
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::Terminate, CycleState::Suspend, 0, 0, 0, EcallKind::Terminate)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::Terminate,
+            CycleState::Suspend,
+            0,
+            0,
+            0,
+            EcallKind::Terminate,
+        )?;
         Ok(false)
     }
 
     fn ecall_read(&mut self) -> Result<bool> {
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostReadSetup, 0, 0, 0, EcallKind::Read)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::HostReadSetup,
+            0,
+            0,
+            0,
+            EcallKind::Read,
+        )?;
         let mut cur_state = CycleState::HostReadSetup;
         let fd = self.load_register(REG_A0)?;
         let mut ptr = ByteAddr(self.load_register(REG_A1)?);
@@ -334,8 +352,14 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
     fn ecall_write(&mut self) -> Result<bool> {
         tracing::trace!("ecall_write");
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostWrite, 0, 0, 0, EcallKind::Write)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::HostWrite,
+            0,
+            0,
+            0,
+            EcallKind::Write,
+        )?;
         let fd = self.load_register(REG_A0)?;
         let ptr = ByteAddr(self.load_register(REG_A1)?);
         let len = self.load_register(REG_A2)?;
@@ -349,31 +373,55 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         let rlen = self.ctx.host_write(fd, &bytes)?;
         self.store_register(REG_A0, rlen)?;
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::HostWrite, CycleState::Decode, 0, 0, 0, EcallKind::Write)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::HostWrite,
+            CycleState::Decode,
+            0,
+            0,
+            0,
+            EcallKind::Write,
+        )?;
         Ok(false)
     }
 
     fn ecall_poseidon2(&mut self) -> Result<bool> {
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0, EcallKind::Poseidon2)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::PoseidonEntry,
+            0,
+            0,
+            0,
+            EcallKind::Poseidon2,
+        )?;
         Poseidon2::ecall(self.ctx)?;
         Ok(false)
     }
 
     fn ecall_sha2(&mut self) -> Result<bool> {
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::ShaEcall, 0, 0, 0, EcallKind::Sha2)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::ShaEcall,
+            0,
+            0,
+            0,
+            EcallKind::Sha2,
+        )?;
         sha2::ecall(self.ctx)?;
         Ok(false)
     }
 
     fn ecall_bigint(&mut self) -> Result<bool> {
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::BigIntEcall, 0, 0, 0, EcallKind::BigInt)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::BigIntEcall,
+            0,
+            0,
+            0,
+            EcallKind::BigInt,
+        )?;
         bigint::ecall(self.ctx)?;
         Ok(false)
     }

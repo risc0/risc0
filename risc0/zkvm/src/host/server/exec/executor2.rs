@@ -23,7 +23,8 @@ use anyhow::{Context as _, Result};
 use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, SystemState};
 use risc0_circuit_rv32im_v2::{
     execute::{
-        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR
+        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
     },
     MAX_INSN_CYCLES,
 };
