@@ -2964,6 +2964,7 @@ dependencies = [
  "docker-generate",
  "hex",
  "risc0-binfmt",
+ "risc0-zkos-v1compat",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rzup",
@@ -3180,7 +3181,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",

@@ -15,6 +15,7 @@ dirs = "5.0"
 docker-generate = "0.1"
 hex = "0.4"
 risc0-binfmt = { workspace = true, features = ["std"] }
+risc0-zkos-v1compat = { workspace = true }
 risc0-zkp = { workspace = true, features = ["std"] }
 risc0-zkvm-platform = { workspace = true }
 rzup = { workspace = true }

@@ -20,16 +20,15 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, SystemState};
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, ProgramBinary, SystemState};
 use risc0_circuit_rv32im_v2::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
-        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
+        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
     },
     MAX_INSN_CYCLES,
 };
 use risc0_core::scope;
-use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
@@ -73,23 +72,13 @@ impl<'a> Executor2<'a> {
     /// Construct a new [Executor2] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
-    pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        Self::from_user_kernel_elfs(env, elf, V1COMPAT_ELF)
-    }
-
-    /// TODO(flaub)
-    pub fn from_user_kernel_elfs(
-        mut env: ExecutorEnv<'a>,
-        user_elf: &[u8],
-        kernel_elf: &[u8],
-    ) -> Result<Self> {
-        let kernel = Program::load_elf(kernel_elf, u32::MAX)?;
-        let program = Program::load_elf(user_elf, USER_END_ADDR.0)?;
-        let image = MemoryImage2::with_kernel(program, kernel);
+    pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
+        let binary = ProgramBinary::decode(elf)?;
+        let image = binary.to_image()?;
 
         let profiler = if env.pprof_out.is_some() {
             let profiler = Rc::new(RefCell::new(Profiler::new(
-                user_elf,
+                &binary,
                 None,
                 profiler::read_enable_inline_functions_env_var(),
             )?));
@@ -140,7 +129,7 @@ impl<'a> Executor2<'a> {
     /// [crate::ExitCode::Paused] is reached, producing a [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
-        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
         scope!("execute");
         tracing::info!("Executing rv32im-v2 session");
@@ -179,7 +168,8 @@ impl<'a> Executor2<'a> {
                             .claim
                             .output
                             .and_then(|digest| {
-                                (digest != Digest::ZERO).then(|| journal.buf.borrow().clone())
+                                (digest != Digest::ZERO)
+                                    .then(|| journal.buf.lock().unwrap().clone())
                             })
                             .map(|journal| {
                                 Ok(Output {
@@ -187,7 +177,8 @@ impl<'a> Executor2<'a> {
                                     assumptions: Assumptions(
                                         self.syscall_table
                                             .assumptions_used
-                                            .borrow()
+                                            .lock()
+                                            .unwrap()
                                             .iter()
                                             .map(|(a, _)| a.clone().into())
                                             .collect::<Vec<_>>(),
@@ -216,20 +207,19 @@ impl<'a> Executor2<'a> {
         let exit_code = exit_code_from_rv32im_v2_claim(&result.claim)?;
 
         // Set the session_journal to the committed data iff the guest set a non-zero output.
-        let session_journal = result
-            .claim
-            .output
-            .and_then(|digest| (digest != Digest::ZERO).then(|| journal.buf.take()));
+        let session_journal = result.claim.output.and_then(|digest| {
+            (digest != Digest::ZERO).then(|| std::mem::take(&mut *journal.buf.lock().unwrap()))
+        });
         if !exit_code.expects_output() && session_journal.is_some() {
             tracing::debug!(
                 "dropping non-empty journal due to exit code {exit_code:?}: 0x{}",
-                hex::encode(journal.buf.borrow().as_slice())
+                hex::encode(journal.buf.lock().unwrap().as_slice())
             );
         };
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let assumptions = self.syscall_table.assumptions_used.take();
+        let assumptions = std::mem::take(&mut *self.syscall_table.assumptions_used.lock().unwrap());
         let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
         let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
