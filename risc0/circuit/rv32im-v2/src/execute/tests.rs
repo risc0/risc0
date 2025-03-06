@@ -22,6 +22,7 @@ use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2};
 
 #[test]
 fn basic() {
+    tracing::info!("TODO Well at least I made it into the deliberately failing execute::tests:basic test...");
     let program = testutil::kernel::basic();
     let expected_cycles = program.image.len();
     let mut image = MemoryImage2::new_kernel(program);
@@ -53,6 +54,7 @@ fn basic() {
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
     assert_eq!(segment.user_cycles, expected_cycles as u32);
+    assert!(false, "TODO: deliberate failure");
 }
 
 #[test]

@@ -15,6 +15,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
+use enum_map::{Enum, EnumMap};
 use risc0_binfmt::{ByteAddr, MemoryImage2, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
@@ -45,6 +46,22 @@ pub struct EcallMetric {
     pub cycles: u64,
 }
 
+// TODO: Here?
+#[derive(Clone, Copy, Debug, Enum)]
+enum EcallKind {
+    BigInt,
+    Poseidon2,
+    Read,
+    Sha2,
+    Terminate,
+    User,
+    Write,
+}
+
+// TODO: Here?
+#[derive(Default)]
+pub struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
+
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
@@ -60,6 +77,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     output_digest: Option<Digest>,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
+    ecall_metrics: EcallMetrics,  // TODO: Do I want this here?
 }
 
 pub struct ExecutorResult {
@@ -107,6 +125,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             output_digest: None,
             trace,
             cycles: SessionCycles::default(),
+            ecall_metrics:EcallMetrics::default(),  // TODO: Do I want this here?
         }
     }
 
@@ -128,6 +147,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Risc0Machine::resume(self)?;
         let initial_digest = self.pager.image.image_id();
         tracing::debug!("initial_digest: {initial_digest}");
+        tracing::info!("TODO Yes I am in this code (`risc0/circuit/rv32im-v2/src/execute/executor.rs`)");
 
         while self.terminate_state.is_none() {
             if let Some(max_cycles) = max_cycles {
@@ -155,6 +175,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
+                // TODO: Note how the callback is mut and the various fields of the Segment are too -- could put Ecall metrics on a Segment if useful
+                // TODO: Or actually, maybe put them on the Executor (`self` here) and pass `self.ecall_metrics` as part of the segment, so that the `Executor2` can get at them later
                 callback(Segment {
                     partial_image,
                     claim: Rv32imV2Claim {
@@ -248,6 +270,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })
     }
 
+    pub fn take_ecall_metrics(&mut self) -> EcallMetrics {
+        std::mem::take(&mut self.ecall_metrics)
+    }
+
     fn reset(&mut self) {
         self.pager.reset();
         self.terminate_state = None;
@@ -259,6 +285,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.phys_cycles = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
+        self.ecall_metrics = EcallMetrics::default();
     }
 
     fn segment_cycles(&self) -> u32 {
@@ -355,13 +382,18 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_ecall_cycle(
         &mut self,
-        _cur: CycleState,
+        cur: CycleState,
         _next: CycleState,
         _s0: u32,
         _s1: u32,
         _s2: u32,
     ) -> Result<()> {
         self.phys_cycles += 1;
+        let kind = EcallKind::Terminate;  // TODO: This is wrong, I'm just testing partial hookups
+        self.ecall_metrics.0[kind].cycles += 1;
+        if cur == CycleState::MachineEcall {
+            self.ecall_metrics.0[kind].count += 1;
+        }
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
@@ -420,14 +452,17 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
+        self.ecall_metrics.0[EcallKind::Sha2].cycles += 1;
         self.phys_cycles += 1;
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
+        self.ecall_metrics.0[EcallKind::Poseidon2].cycles += 1;
         self.phys_cycles += 1;
     }
 
     fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
+        self.ecall_metrics.0[EcallKind::BigInt].cycles += 1;
         self.phys_cycles += 1;
     }
 }
@@ -465,6 +500,16 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
 
     fn get_pc(&self) -> u32 {
         self.user_pc.0
+    }
+}
+
+impl From<EcallMetrics> for Vec<(String, EcallMetric)> {
+    fn from(metrics: EcallMetrics) -> Self {
+        metrics
+            .0
+            .into_iter()
+            .map(|(kind, metric)| (format!("{kind:?}"), metric))
+            .collect()
     }
 }
 

@@ -23,8 +23,7 @@ use anyhow::{Context as _, Result};
 use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, SystemState};
 use risc0_circuit_rv32im_v2::{
     execute::{
-        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
-        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
+        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall, SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR
     },
     MAX_INSN_CYCLES,
 };
@@ -144,6 +143,10 @@ impl<'a> Executor2<'a> {
     {
         scope!("execute");
         tracing::info!("Executing rv32im-v2 session");
+        tracing::info!("TODO Or... am I in this code? (`risc0/zkvm/src/host/server/exec/executor2.rs`)");
+
+        // TODO: Is this where I want to create this ecall metrics table?
+        // let ecall_metrics: Vec<(String, EcallMetric)> = vec![(String::from("TODO: Test"), EcallMetric{count: 1, cycles: 400})];  // TODO: This is fake data for testing
 
         let journal = Journal::default();
         self.env
@@ -164,6 +167,7 @@ impl<'a> Executor2<'a> {
             self.env.trace.clone(),
         );
 
+        // TODO: We run the Executor here
         let start_time = Instant::now();
         let result = exec.run(
             segment_limit_po2,
@@ -227,6 +231,8 @@ impl<'a> Executor2<'a> {
             );
         };
 
+        let ecall_metrics = exec.take_ecall_metrics();
+
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = self.syscall_table.assumptions_used.take();
@@ -271,7 +277,7 @@ impl<'a> Executor2<'a> {
             pending_keccaks,
             syscall_metrics,
             hooks: vec![],
-            ecall_metrics: vec![],
+            ecall_metrics: ecall_metrics.into(),
         };
 
         tracing::info!("execution time: {elapsed:?}");

@@ -331,6 +331,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             },
             _ => post_state,
         };
+        tracing::info!("TODO Actually I am in this code (`risc0/circuit/rv32im/src/prove/emu/exec/mod.rs`)");
 
         let ecall_metrics = std::mem::take(&mut self.ecall_metrics);
 

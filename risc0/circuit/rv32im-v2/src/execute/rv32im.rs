@@ -61,6 +61,9 @@ pub trait EmuContext {
 
     // Check access for data store
     fn check_data_store(&self, addr: ByteAddr) -> bool;
+
+    // TODO
+    fn update_ecall_metrics(&mut self);
 }
 
 // #[derive(Default)]
@@ -642,7 +645,7 @@ impl Emulator {
         kind: InsnKind,
         decoded: &DecodedInstruction,
     ) -> Result<bool> {
-        match kind {
+        let result = match kind {
             InsnKind::Eany => match decoded.rs2 {
                 0 => ctx.ecall(),
                 1 => ctx.trap(Exception::Breakpoint),
@@ -650,7 +653,9 @@ impl Emulator {
             },
             InsnKind::Mret => ctx.mret(),
             _ => unreachable!(),
-        }
+        };
+        ctx.update_ecall_metrics();
+        result
     }
 }
 

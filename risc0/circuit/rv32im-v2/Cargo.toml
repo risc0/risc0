@@ -19,6 +19,7 @@ derive_more = { version = "2.0.1", default-features = false, features = [
   "add_assign",
   "debug",
 ] }
+enum-map = "2.7.3"  # TODO [maybe could be execute only?]
 paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }

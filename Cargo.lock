@@ -4662,6 +4662,7 @@ dependencies = [
  "cfg-if",
  "clap 4.5.23",
  "derive_more 2.0.1",
+ "enum-map",
  "flate2",
  "malachite",
  "num-derive",

@@ -3851,6 +3851,7 @@ dependencies = [
  "byteorder",
  "cfg-if",
  "derive_more 2.0.1",
+ "enum-map",
  "malachite",
  "num-derive",
  "num-traits",
