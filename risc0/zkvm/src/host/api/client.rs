@@ -35,7 +35,6 @@ use crate::{
 };
 
 pub(crate) enum Compat {
-    Any,
     Narrow,
     Wide,
 }
@@ -44,6 +43,7 @@ pub(crate) enum Compat {
 pub struct Client {
     connector: Box<dyn Connector>,
     compat: Compat,
+    version_override: Option<semver::Version>,
 }
 
 impl Default for Client {
@@ -69,23 +69,15 @@ impl Client {
     /// the server by calling the specified `server_path`.
     ///
     /// Additionally allows for wider version mismatches, only rejecting major differences.
-    pub fn new_sub_process_compat<P: AsRef<Path>>(server_path: P) -> Result<Self> {
-        let connector = ParentProcessConnector::new_wide_version(server_path)?;
-        Ok(Self {
-            connector: Box::new(connector),
-            compat: Compat::Wide,
-        })
-    }
-
-    /// Construct a [Client] that connects to a sub-process which implements
-    /// the server by calling the specified `server_path`.
-    ///
-    /// Additionally allows for any version for testing purposes.
-    pub fn new_sub_process_any<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+    pub fn new_sub_process_compat<P: AsRef<Path>>(
+        server_path: P,
+        version_override: semver::Version,
+    ) -> Result<Self> {
         let connector = ParentProcessConnector::new(server_path)?;
         Ok(Self {
             connector: Box::new(connector),
-            compat: Compat::Any,
+            compat: Compat::Wide,
+            version_override: Some(version_override),
         })
     }
 
@@ -100,6 +92,7 @@ impl Client {
         Self {
             connector,
             compat: Compat::Narrow,
+            version_override: None,
         }
     }
 
@@ -707,6 +700,7 @@ impl Client {
         let mut conn = self.connector.connect()?;
 
         let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let client_version = self.version_override.as_ref().unwrap_or(&client_version);
         let request = pb::api::HelloRequest {
             version: Some(client_version.clone().into()),
         };
@@ -723,7 +717,7 @@ impl Client {
                     .try_into()
                     .map_err(|err: semver::Error| anyhow!(err))?;
 
-                if !self.compat.check(&client_version, &server_version) {
+                if !self.compat.check(client_version, &server_version) {
                     let msg = format!("incompatible server version: {server_version}");
                     tracing::warn!("{msg}");
                     bail!(msg);
@@ -1047,7 +1041,6 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
 impl Compat {
     pub(crate) fn check(&self, requested: &semver::Version, server: &semver::Version) -> bool {
         match self {
-            Compat::Any => true,
             Compat::Narrow => {
                 if requested.pre.is_empty() {
                     requested.major == server.major && requested.minor == server.minor

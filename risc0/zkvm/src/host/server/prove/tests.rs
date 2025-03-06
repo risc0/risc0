@@ -634,7 +634,6 @@ mod sys_verify {
 
     use super::*;
     use crate::{
-        compute_image_id_v2,
         recursion::{prove::zkr, test_zkr, MerkleGroup},
         register_zkr,
         sha::Digestible as _,
@@ -691,9 +690,8 @@ mod sys_verify {
 
     #[test_log::test]
     fn sys_verify_1() {
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
         let spec = MultiTestSpec::SysVerify(vec![(
-            image_id,
+            HELLO_COMMIT_ID.into(),
             hello_commit_receipt().journal.bytes.clone(),
         )]);
 
@@ -714,9 +712,8 @@ mod sys_verify {
 
     #[test_log::test]
     fn sys_verify_2() {
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
         let spec = MultiTestSpec::SysVerify(vec![(
-            image_id,
+            HELLO_COMMIT_ID.into(),
             hello_commit_receipt().journal.bytes.clone(),
         )]);
 
@@ -732,9 +729,8 @@ mod sys_verify {
 
     #[test_log::test]
     fn sys_verify_3() {
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
         let spec = MultiTestSpec::SysVerify(vec![(
-            image_id,
+            HELLO_COMMIT_ID.into(),
             hello_commit_receipt().journal.bytes.clone(),
         )]);
 

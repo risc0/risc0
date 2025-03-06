@@ -20,16 +20,15 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, SystemState};
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, ProgramBinary, SystemState};
 use risc0_circuit_rv32im_v2::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
-        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
+        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
     },
     MAX_INSN_CYCLES,
 };
 use risc0_core::scope;
-use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
@@ -73,23 +72,13 @@ impl<'a> Executor2<'a> {
     /// Construct a new [Executor2] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
-    pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        Self::from_user_kernel_elfs(env, elf, V1COMPAT_ELF)
-    }
-
-    /// TODO(flaub)
-    pub fn from_user_kernel_elfs(
-        mut env: ExecutorEnv<'a>,
-        user_elf: &[u8],
-        kernel_elf: &[u8],
-    ) -> Result<Self> {
-        let kernel = Program::load_elf(kernel_elf, u32::MAX)?;
-        let program = Program::load_elf(user_elf, USER_END_ADDR.0)?;
-        let image = MemoryImage2::with_kernel(program, kernel);
+    pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
+        let binary = ProgramBinary::decode(elf)?;
+        let image = binary.to_image()?;
 
         let profiler = if env.pprof_out.is_some() {
             let profiler = Rc::new(RefCell::new(Profiler::new(
-                user_elf,
+                &binary,
                 None,
                 profiler::read_enable_inline_functions_env_var(),
             )?));
