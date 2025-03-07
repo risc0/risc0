@@ -10,3 +10,4 @@ The following [crate feature flags](https://doc.rust-lang.org/cargo/reference/fe
 | metal   | macos             | prove, std | Deprecated - Metal GPU acceleration for the prover is enabled by default on Apple Silicon. |
 | prove   | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                    |
 | std     | all               |            | Support for the Rust stdlib.                                                               |
+

@@ -23,7 +23,7 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im_v2::execute::DEFAULT_SEGMENT_LIMIT_PO2;
+use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{

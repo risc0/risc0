@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage2, Program, ProgramBinary, SystemState};
-use risc0_circuit_rv32im_v2::{
+use risc0_circuit_rv32im::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
