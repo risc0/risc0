@@ -164,40 +164,6 @@ impl Client {
         result
     }
 
-    /// Execute the specified ELF binary with `SegmentVersion::V2`.
-    pub fn execute_v2<F>(
-        &self,
-        env: &ExecutorEnv<'_>,
-        binary: Asset,
-        segments_out: AssetRequest,
-        segment_callback: F,
-    ) -> Result<SessionInfo>
-    where
-        F: FnMut(SegmentInfo, Asset) -> Result<()>,
-    {
-        let mut conn = self.connect()?;
-
-        let request = pb::api::ServerRequest {
-            kind: Some(pb::api::server_request::Kind::Execute(
-                pb::api::ExecuteRequest {
-                    env: Some(self.make_execute_env(env, binary.try_into()?)?),
-                    segments_out: Some(segments_out.try_into()?),
-                },
-            )),
-        };
-        // tracing::trace!("tx: {request:?}");
-        conn.send(request)?;
-
-        let result = self.execute_handler(segment_callback, &mut conn, env);
-
-        let code = conn.close()?;
-        if code != 0 {
-            bail!("Child finished with: {code}");
-        }
-
-        result
-    }
-
     /// Prove the specified segment.
     pub fn prove_segment(
         &self,

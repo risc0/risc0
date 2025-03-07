@@ -107,7 +107,7 @@ pub use {
             RECURSION_PO2,
         },
         server::{
-            exec::executor2::Executor2,
+            exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -136,8 +136,8 @@ pub use {
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
-                default_executor, default_prover, external::ExternalProver, Executor, Prover,
-                ProverOpts, ReceiptKind,
+                default_executor, default_prover, external::ExternalProver, local_executor,
+                Executor, Prover, ProverOpts, ReceiptKind,
             },
         },
     },

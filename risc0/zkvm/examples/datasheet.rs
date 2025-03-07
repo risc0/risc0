@@ -27,7 +27,7 @@ use risc0_circuit_rv32im_v2::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, Executor2, ExecutorEnv, ProverOpts, ReceiptKind, Segment, Session,
+    get_prover_server, ExecutorImpl, ExecutorEnv, ProverOpts, ReceiptKind, Segment, Session,
     SimpleSegmentRef, VerifierContext, RECURSION_PO2,
 };
 use serde::Serialize;
@@ -114,7 +114,7 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }

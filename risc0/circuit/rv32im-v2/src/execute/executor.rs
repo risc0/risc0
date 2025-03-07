@@ -15,7 +15,7 @@
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 
 use anyhow::{bail, Result};
-use risc0_binfmt::{ByteAddr, MemoryImage2, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
     log2_ceil,
@@ -64,7 +64,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
 
 pub struct ExecutorResult {
     pub segments: u64,
-    pub post_image: MemoryImage2,
+    pub post_image: MemoryImage,
     pub user_cycles: u64,
     pub total_cycles: u64,
     pub paging_cycles: u64,
@@ -86,7 +86,7 @@ pub struct SimpleSession {
 }
 
 struct ComputePartialImageRequest {
-    image: MemoryImage2,
+    image: MemoryImage,
     page_indexes: BTreeSet<u32>,
 
     input_digest: Digest,
@@ -139,7 +139,7 @@ fn compute_partial_images(
 
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn new(
-        image: MemoryImage2,
+        image: MemoryImage,
         syscall_handler: &'a S,
         input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,

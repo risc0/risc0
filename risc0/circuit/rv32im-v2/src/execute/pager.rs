@@ -17,7 +17,7 @@ use std::collections::BTreeSet;
 use anyhow::{bail, Result};
 use bit_vec::BitVec;
 use derive_more::Debug;
-use risc0_binfmt::{MemoryImage2, Page, WordAddr};
+use risc0_binfmt::{MemoryImage, Page, WordAddr};
 use risc0_zkp::core::digest::Digest;
 
 use super::{node_idx, platform::*};
@@ -216,7 +216,7 @@ fn page_table() {
 
 #[derive(Debug)]
 pub(crate) struct PagedMemory {
-    pub image: MemoryImage2,
+    pub image: MemoryImage,
     #[debug(skip)]
     page_table: PageTable,
     #[debug(skip)]
@@ -230,7 +230,7 @@ pub(crate) struct PagedMemory {
 }
 
 impl PagedMemory {
-    pub(crate) fn new(mut image: MemoryImage2, tracing_enabled: bool) -> Self {
+    pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool) -> Self {
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
@@ -419,7 +419,7 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn commit(&mut self) -> (MemoryImage2, Digest, Digest) {
+    pub(crate) fn commit(&mut self) -> (MemoryImage, Digest, Digest) {
         // tracing::trace!("commit: {self:#?}");
 
         self.write_registers();
@@ -512,10 +512,10 @@ pub(crate) fn page_idx(node_idx: u32) -> u32 {
 }
 
 pub(crate) fn compute_partial_image(
-    input_image: MemoryImage2,
+    input_image: MemoryImage,
     indexes: BTreeSet<u32>,
-) -> MemoryImage2 {
-    let mut image = MemoryImage2::default();
+) -> MemoryImage {
+    let mut image = MemoryImage::default();
 
     for node_idx in &indexes {
         if *node_idx < MEMORY_PAGES as u32 {

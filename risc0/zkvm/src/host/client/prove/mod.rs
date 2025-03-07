@@ -418,6 +418,11 @@ pub fn default_executor() -> Rc<dyn Executor> {
     Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
 }
 
+/// Return a local [Executor].
+pub fn local_executor() -> Rc<dyn Executor> {
+    Rc::new(self::local::LocalProver::new("local"))
+}
+
 pub(crate) fn get_r0vm_path() -> Result<PathBuf> {
     if let Ok(path) = std::env::var("RISC0_SERVER_PATH") {
         let path = PathBuf::from(path);

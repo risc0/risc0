@@ -803,25 +803,6 @@ pub fn embed_methods() -> Vec<GuestListEntry> {
     embed_methods_with_options(HashMap::new())
 }
 
-/// Embed the current crate's binary targets built for RISC-V.
-pub fn embed_self() -> Vec<GuestListEntry> {
-    if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
-        // Guest shouldn't recursively depend on itself.
-        return vec![];
-    }
-
-    let pkg = current_package();
-    let target_dir = get_out_dir().join(&pkg.name);
-    let pkgs = vec![GuestPackageWithOptions {
-        name: pkg.name.clone(),
-        pkg,
-        opts: GuestOptions::default(),
-        target_dir,
-    }];
-
-    build_methods(&pkgs)
-}
-
 /// Build a guest package into the specified `target_dir` using the specified
 /// `GuestOptions`.
 pub fn build_package(

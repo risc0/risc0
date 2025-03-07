@@ -21,7 +21,7 @@ use elf::{endian::LittleEndian, file::Class, ElfBytes};
 use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
 use risc0_zkvm_platform::WORD_SIZE;
 
-use crate::{Digestible as _, MemoryImage2, SystemState, KERNEL_START_ADDR};
+use crate::{Digestible as _, MemoryImage, SystemState, KERNEL_START_ADDR};
 
 /// A RISC Zero program
 pub struct Program {
@@ -179,12 +179,12 @@ impl<'a> ProgramBinary<'a> {
     }
 
     /// Convert this binary into a `MemoryImage2`.
-    pub fn to_image(&self) -> Result<MemoryImage2> {
+    pub fn to_image(&self) -> Result<MemoryImage> {
         let user_program =
             Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")?;
         let kernel_program =
             Program::load_elf(self.kernel_elf, u32::MAX).context("Loading kernel ELF")?;
-        Ok(MemoryImage2::with_kernel(user_program, kernel_program))
+        Ok(MemoryImage::with_kernel(user_program, kernel_program))
     }
 
     /// Compute and return the ImageID of this binary.
