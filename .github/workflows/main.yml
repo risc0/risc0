@@ -443,16 +443,16 @@ jobs:
           version: "0.36.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
         run: |
-          cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
+          cargo semver-checks --default-features
             --exclude cargo-risczero \
             --exclude doc-test \
             --exclude fibonacci-methods \
             --exclude risc0-bigint2 \
             --exclude risc0-bigint2-methods \
             --exclude risc0-circuit-keccak-methods \
-            --exclude risc0-zkos-v1compat \
             --exclude risc0-zkvm-receipts \
-            --exclude risc0-zkvm-methods
+            --exclude risc0-zkvm-methods \
+            --exclude hotbench
       - run: sccache --show-stats
 
   check-template:
