@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage2, Program};
+use risc0_binfmt::{ExitCode, MemoryImage2, Program, ProgramBinary};
 use risc0_circuit_rv32im_v2::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
@@ -513,7 +513,7 @@ fn large_io_bytes() {
 }
 
 mod sys_verify {
-    use crate::{compute_image_id_v2, MaybePruned, ReceiptClaim};
+    use crate::{MaybePruned, ReceiptClaim};
 
     use super::*;
 
@@ -551,11 +551,8 @@ mod sys_verify {
 
         let hello_commit_session = exec_hello_commit();
 
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
-        tracing::debug!("image_id: {image_id}");
-
         let spec = &MultiTestSpec::SysVerify(vec![(
-            image_id,
+            HELLO_COMMIT_ID.into(),
             hello_commit_session.journal.clone().unwrap().bytes,
         )]);
 
@@ -586,13 +583,11 @@ mod sys_verify {
     fn sys_verify_halt_codes() {
         use risc0_zkvm_methods::MULTI_TEST_ID;
 
-        let image_id = compute_image_id_v2(MULTI_TEST_ID).unwrap();
-
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
-            let spec = &MultiTestSpec::SysVerify(vec![(image_id, Vec::new())]);
+            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
@@ -881,8 +876,9 @@ fn fault() {
 
 #[test_log::test]
 fn profiler() {
+    let binary = ProgramBinary::decode(MULTI_TEST_ELF).unwrap();
     let mut profiler = Profiler::new(
-        MULTI_TEST_ELF,
+        &binary,
         Some("multi_test.elf"),
         true, /* enable_inline_functions */
     )
@@ -1003,7 +999,7 @@ fn profiler() {
         }
     }
 
-    let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
+    let elf_mem = Program::load_elf(binary.user_elf, u32::MAX).unwrap().image;
 
     // Check that the addresses for these two functions point to the right place
     for func_name in ["profile_test_func2", "profile_test_func3"] {

@@ -477,15 +477,15 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
 
     fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
         // tracing::trace!("store_reg: x{idx} <= {word:#010x}");
-        let mut base = self.regs_base_addr();
+        let base = self.regs_base_addr();
 
         // To avoid the use of a degree in the circuit, all writes to REG_ZERO
         // are shunted to a memory location that is never read from.
         if idx == REG_ZERO {
-            base += REG_MAX * 2;
+            self.ctx.store_u32(base + REG_MAX * 2, word)
+        } else {
+            self.ctx.store_register(base, idx, word)
         }
-
-        self.ctx.store_register(base, idx, word)
     }
 
     fn load_memory(&mut self, addr: WordAddr) -> Result<u32> {
