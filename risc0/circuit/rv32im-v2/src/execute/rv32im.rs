@@ -642,7 +642,7 @@ impl Emulator {
         kind: InsnKind,
         decoded: &DecodedInstruction,
     ) -> Result<bool> {
-        let result = match kind {
+        match kind {
             InsnKind::Eany => match decoded.rs2 {
                 0 => ctx.ecall(),
                 1 => ctx.trap(Exception::Breakpoint),
@@ -650,8 +650,7 @@ impl Emulator {
             },
             InsnKind::Mret => ctx.mret(),
             _ => unreachable!(),
-        };
-        result
+        }
     }
 }
 
