@@ -22,7 +22,7 @@ use std::{
 use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{ExitCode, MemoryImage2, Program, ProgramBinary};
-use risc0_circuit_rv32im_v2::TerminateState;
+use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
@@ -90,7 +90,7 @@ fn insufficient_segment_limit() {
 
 #[test_log::test]
 fn basic() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::user::basic();
+    let program = risc0_circuit_rv32im::execute::testutil::user::basic();
     let env = ExecutorEnv::default();
     let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX).unwrap();
     let mut image = MemoryImage2::with_kernel(program, kernel);
@@ -117,7 +117,7 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
     let mut image = MemoryImage2::new_kernel(program);
     let pre_image_id = image.image_id();
 
