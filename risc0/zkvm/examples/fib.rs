@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use clap::Parser;
 use risc0_zkvm::{
-    get_prover_server, ExecutorImpl, ExecutorEnv, ProverOpts, ProverServer, VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
 

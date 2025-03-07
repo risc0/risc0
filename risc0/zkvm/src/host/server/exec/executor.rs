@@ -57,9 +57,9 @@ pub struct ExecutorImpl<'a> {
 }
 
 impl<'a> ExecutorImpl<'a> {
-    /// Construct a new [Executor2] from a [MemoryImage2] and entry point.
+    /// Construct a new [ExecutorImpl] from a [MemoryImage] and entry point.
     ///
-    /// Before a guest program is proven, the [Executor2] is responsible for
+    /// Before a guest program is proven, the [ExecutorImpl] is responsible for
     /// deciding where a zkVM program should be split into [Segment]s and what
     /// work will be done in each segment. This is the execution phase:
     /// the guest program is executed to determine how its proof should be
@@ -69,7 +69,7 @@ impl<'a> ExecutorImpl<'a> {
         Self::with_details(env, image, None)
     }
 
-    /// Construct a new [Executor2] from the ELF binary of the guest program
+    /// Construct a new [ExecutorImpl] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
     pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {

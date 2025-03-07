@@ -419,6 +419,7 @@ pub fn default_executor() -> Rc<dyn Executor> {
 }
 
 /// Return a local [Executor].
+#[cfg(feature = "prove")]
 pub fn local_executor() -> Rc<dyn Executor> {
     Rc::new(self::local::LocalProver::new("local"))
 }

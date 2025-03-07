@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde, ExecutorImpl, ExecutorEnv, ReceiptClaim};
+use risc0_zkvm::{serde, ExecutorEnv, ExecutorImpl, ReceiptClaim};
 use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF, BENCH_ID};
 
 fn run_guest(msg: &str, spec: BenchmarkSpec) {

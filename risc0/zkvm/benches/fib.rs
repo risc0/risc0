@@ -14,7 +14,7 @@
 
 use hotbench::{benchmark_group, benchmark_main, BenchGroup};
 use risc0_zkvm::{
-    get_prover_server, ExecutorImpl, ExecutorEnv, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
 };
 use risc0_zkvm_methods::FIB_ELF;
 

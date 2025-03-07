@@ -178,7 +178,7 @@ impl<'a> ProgramBinary<'a> {
         ret
     }
 
-    /// Convert this binary into a `MemoryImage2`.
+    /// Convert this binary into a `MemoryImage`.
     pub fn to_image(&self) -> Result<MemoryImage> {
         let user_program =
             Program::load_elf(self.user_elf, KERNEL_START_ADDR.0).context("Loading user ELF")?;
