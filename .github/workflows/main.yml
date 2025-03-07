@@ -443,7 +443,7 @@ jobs:
           version: "0.36.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
         run: |
-          cargo semver-checks --default-features
+          cargo semver-checks --default-features \
             --exclude cargo-risczero \
             --exclude doc-test \
             --exclude fibonacci-methods \
