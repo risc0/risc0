@@ -7,9 +7,6 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[package.metadata.release]
-release = false
-
 [[bin]]
 name = "rzup"
 path = "src/bin/rzup.rs"
