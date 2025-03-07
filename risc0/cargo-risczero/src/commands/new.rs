@@ -129,9 +129,9 @@ impl NewCommand {
             template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, zkvm));
         } else {
             let zkvm_spec = format!("version = \"{risc0_version}\"");
-            // This hard-coding of 2.0.0 for `risc0-build` is a temporary fix until we can come up
+            // This hard-coding of 3.0.0 for `risc0-build` is a temporary fix until we can come up
             // with something more robust.
-            let build_spec = "version = \"2.0.0\"".into();
+            let build_spec = "version = \"3.0.0-rc.1\"".into();
             template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, build_spec));
             template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, zkvm_spec));
         }
