@@ -74,3 +74,4 @@ opt-level = 3
 
 [profile.release]
 lto = true
+debug = "full"
