@@ -1,5 +1,6 @@
 [package]
 name = "risc0-zkos-v1compat"
+description = "RISC Zero zero-knowledge VM kernel for v1 compatibility"
 version = "2.0.0-rc.1"
 edition = { workspace = true }
 license = { workspace = true }
