@@ -40,14 +40,14 @@ pub enum CargoCli {
 #[non_exhaustive]
 /// `cargo risczero`
 pub struct RisczeroArgs {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     /// Which `risczero` command to run
     pub command: Commands,
 }
 
 #[derive(Subcommand)]
 #[non_exhaustive]
-/// Primary commands  of `cargo risczero`.
+/// Primary commands of `cargo risczero`.
 pub enum Commands {
     /// Bake guest code.
     Bake(BakeCommand),
