@@ -452,6 +452,7 @@ jobs:
             --exclude risc0-circuit-keccak-methods \
             --exclude risc0-zkvm-receipts \
             --exclude risc0-zkvm-methods \
+            --exclude risc0-zkos-v1compat \
             --exclude hotbench
       - run: sccache --show-stats
 
