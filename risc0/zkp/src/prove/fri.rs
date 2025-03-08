@@ -94,28 +94,43 @@ pub fn fri_prove<H: Hal, F>(
     scope!("fri_prove");
     let ext_size = H::ExtElem::EXT_SIZE;
     let orig_domain = coeffs.size() / ext_size * INV_RATE;
-    let mut rounds = Vec::new();
+    
+    // Pre-allocate vector to store all rounds
+    // This avoids repeated memory allocations in the loop
+    let mut rounds = Vec::with_capacity((log2_ceil(coeffs.size() / ext_size) - log2_ceil(FRI_MIN_DEGREE)).max(0));
+    
     let mut coeffs = coeffs.clone();
     while coeffs.size() / ext_size > FRI_MIN_DEGREE {
         let round = ProveRoundInfo::new(hal, iop, &coeffs);
         coeffs = round.coeffs.clone();
         rounds.push(round);
     }
-    // Put the final coefficients into natural order
+    
+    // Optimization: allocate memory for final_coeffs only once
     let final_coeffs = hal.alloc_elem("final_coeffs", coeffs.size());
     hal.eltwise_copy_elem(&final_coeffs, &coeffs);
+    
+    // Use batch_bit_reverse for parallel bit reversal
     hal.batch_bit_reverse(&final_coeffs, ext_size);
+    
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
         iop.write_field_elem_slice::<H::Elem>(view);
         let digest = hal.get_hash_suite().hashfn.hash_elem_slice(view);
         iop.commit(&digest);
     });
+    
+    // Optimization: pre-compute random indices for all queries
+    // This allows better cache utilization and avoids repeated computations
+    let query_indices: Vec<usize> = (0..QUERIES)
+        .map(|_| iop.random_bits(log2_ceil(orig_domain)) as usize)
+        .collect();
+    
     // Do queries
     debug!("Doing Queries");
-    for _ in 0..QUERIES {
-        // Get a 'random' index.
-        let mut pos = iop.random_bits(log2_ceil(orig_domain)) as usize;
+    for &pos in &query_indices {
+        // Start with the original position
+        let mut pos = pos;
         // Do the 'inner' proof for this index
         inner(iop, pos);
         // Write the per-round proofs

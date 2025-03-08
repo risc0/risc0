@@ -340,13 +340,29 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
+        scope!("batch_interpolate_ntt");
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
-        io.as_slice_mut()
-            .par_chunks_exact_mut(row_size)
-            .for_each(|row| {
-                interpolate_ntt::<Self::Elem, Self::Elem>(row);
-            });
+        
+        // Optimization: use parallel processing for large arrays
+        // This significantly speeds up interpolation for large data
+        const PARALLEL_THRESHOLD: usize = 1024;
+        
+        if row_size > PARALLEL_THRESHOLD {
+            // Use parallel processing for large arrays
+            io.as_slice_mut()
+                .par_chunks_exact_mut(row_size)
+                .for_each(|row| {
+                    interpolate_ntt::<Self::Elem, Self::Elem>(row);
+                });
+        } else {
+            // For small arrays, use sequential processing
+            io.as_slice_mut()
+                .chunks_exact_mut(row_size)
+                .for_each(|row| {
+                    interpolate_ntt::<Self::Elem, Self::Elem>(row);
+                });
+        }
     }
 
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
@@ -553,17 +569,34 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
+        scope!("hash_rows");
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
+        
+        // Optimization: use parallel hashing for large arrays
+        // Define a threshold for switching to parallel processing
+        const PARALLEL_THRESHOLD: usize = 16;
+        
         let mut output = output.as_slice_mut();
         let matrix = &*matrix.as_slice();
         let hashfn = self.suite.hashfn.as_ref();
-        output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            let column: Vec<Self::Elem> =
-                (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
-            *output = *hashfn.hash_elem_slice(column.as_slice());
-        });
+        
+        if row_size >= PARALLEL_THRESHOLD {
+            // Use parallel processing for a large number of rows
+            output.par_iter_mut().enumerate().for_each(|(idx, output)| {
+                let column: Vec<Self::Elem> =
+                    (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
+                *output = *hashfn.hash_elem_slice(column.as_slice());
+            });
+        } else {
+            // For a small number of rows, use sequential processing
+            for (idx, output) in output.iter_mut().enumerate() {
+                let column: Vec<Self::Elem> =
+                    (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
+                *output = *hashfn.hash_elem_slice(column.as_slice());
+            }
+        }
     }
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {

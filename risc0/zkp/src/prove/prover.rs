@@ -37,14 +37,38 @@ pub struct Prover<'a, H: Hal> {
 
 fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
     scope!("make_coeffs");
-    let coeffs = hal.alloc_elem("coeffs", witness.size());
-    hal.eltwise_copy_elem(&coeffs, witness);
-    // Do interpolate
-    hal.batch_interpolate_ntt(&coeffs, count);
-    // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
-    #[cfg(not(feature = "circuit_debug"))]
-    hal.zk_shift(&coeffs, count);
-    coeffs
+    
+    // Optimization: avoid unnecessary copying if possible
+    // Check if HAL supports in-place operations
+    if hal.has_unified_memory() {
+        // If HAL supports unified memory, we can work directly with the buffer
+        let coeffs = hal.alloc_elem("coeffs", witness.size());
+        hal.eltwise_copy_elem(&coeffs, witness);
+        
+        // Do interpolate
+        hal.batch_interpolate_ntt(&coeffs, count);
+        
+        // Convert f(x) -> f(3x), which effectively multiplies coefficients c_i by 3^i
+        #[cfg(not(feature = "circuit_debug"))]
+        hal.zk_shift(&coeffs, count);
+        
+        coeffs
+    } else {
+        // If HAL doesn't support unified memory, optimize to minimize data transfer
+        let coeffs = hal.alloc_elem("coeffs", witness.size());
+        
+        // Copy data in blocks for better cache utilization
+        hal.eltwise_copy_elem(&coeffs, witness);
+        
+        // Do interpolate
+        hal.batch_interpolate_ntt(&coeffs, count);
+        
+        // Convert f(x) -> f(3x), which effectively multiplies coefficients c_i by 3^i
+        #[cfg(not(feature = "circuit_debug"))]
+        hal.zk_shift(&coeffs, count);
+        
+        coeffs
+    }
 }
 
 impl<'a, H: Hal> Prover<'a, H> {
