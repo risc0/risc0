@@ -2253,7 +2253,10 @@ mod tests {
             "git",
             &["-c", "init.defaultBranch=master", "init"],
             Some(&test_repo),
-            &[],
+            &[
+                ("GIT_CONFIG_SYSTEM", "/dev/null"),
+                ("GIT_CONFIG_GLOBAL", "/dev/null"),
+            ],
         )
         .unwrap();
 
@@ -2285,7 +2288,10 @@ mod tests {
                 "initial commit",
             ],
             Some(&test_repo),
-            &[],
+            &[
+                ("GIT_CONFIG_SYSTEM", "/dev/null"),
+                ("GIT_CONFIG_GLOBAL", "/dev/null"),
+            ],
         )
         .unwrap();
         build::run_command("git", &["tag", "foo"], Some(&test_repo), &[]).unwrap();
@@ -2317,7 +2323,10 @@ mod tests {
                 "bar",
             ],
             Some(&test_repo),
-            &[],
+            &[
+                ("GIT_CONFIG_SYSTEM", "/dev/null"),
+                ("GIT_CONFIG_GLOBAL", "/dev/null"),
+            ],
         )
         .unwrap();
 
