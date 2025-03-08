@@ -114,8 +114,9 @@ impl Registry {
         env: &Environment,
         component: &Component,
     ) -> Result<Option<(Version, std::path::PathBuf)>> {
+        let component_installed = component.parent_component().unwrap_or(*component);
         if let Some(version) = self.settings.get_default_version(component) {
-            if let Some(path) = Paths::find_version_dir(env, component, &version)? {
+            if let Some(path) = Paths::find_version_dir(env, &component_installed, &version)? {
                 return Ok(Some((version, path)));
             }
         }
@@ -123,7 +124,7 @@ impl Registry {
         // Components installed by old versions might leave us in a state where there is a
         // component installed, but no active version
         if let Some(version) = self.find_highest_installed_version(env, component)? {
-            if let Some(path) = Paths::find_version_dir(env, component, &version)? {
+            if let Some(path) = Paths::find_version_dir(env, &component_installed, &version)? {
                 return Ok(Some((version, path)));
             }
         }
@@ -137,7 +138,8 @@ impl Registry {
         component: &Component,
         version: Version,
     ) -> Result<()> {
-        if Paths::find_version_dir(env, component, &version)?.is_none() {
+        let component_installed = component.parent_component().unwrap_or(*component);
+        if Paths::find_version_dir(env, &component_installed, &version)?.is_none() {
             return Err(RzupError::InvalidVersion(format!(
                 "Version {version} is not installed",
             )));
