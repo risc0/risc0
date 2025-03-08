@@ -217,6 +217,8 @@ impl<'a> Executor2<'a> {
             );
         };
 
+        let ecall_metrics = exec.take_ecall_metrics();
+
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = std::mem::take(&mut *self.syscall_table.assumptions_used.lock().unwrap());
@@ -261,7 +263,7 @@ impl<'a> Executor2<'a> {
             pending_keccaks,
             syscall_metrics,
             hooks: vec![],
-            ecall_metrics: vec![],
+            ecall_metrics: ecall_metrics.into(),
         };
 
         tracing::info!("execution time: {elapsed:?}");

@@ -15,6 +15,7 @@
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 
 use anyhow::{bail, Result};
+use enum_map::EnumMap;
 use risc0_binfmt::{ByteAddr, MemoryImage2, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
@@ -31,7 +32,7 @@ use super::{
     pager::{compute_partial_image, PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
-    r0vm::{LoadOp, Risc0Context, Risc0Machine},
+    r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
     sha2::Sha2State,
@@ -44,6 +45,9 @@ pub struct EcallMetric {
     pub count: u64,
     pub cycles: u64,
 }
+
+#[derive(Default)]
+pub struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
@@ -60,6 +64,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     output_digest: Option<Digest>,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
+    ecall_metrics: EcallMetrics,
 }
 
 pub struct ExecutorResult {
@@ -159,6 +164,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             output_digest: None,
             trace,
             cycles: SessionCycles::default(),
+            ecall_metrics: EcallMetrics::default(),
         }
     }
 
@@ -307,6 +313,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })
     }
 
+    pub fn take_ecall_metrics(&mut self) -> EcallMetrics {
+        std::mem::take(&mut self.ecall_metrics)
+    }
+
     fn reset(&mut self) {
         self.pager.reset();
         self.terminate_state = None;
@@ -318,6 +328,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.phys_cycles = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
+        self.ecall_metrics = EcallMetrics::default();
     }
 
     fn segment_cycles(&self) -> u32 {
@@ -414,13 +425,18 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_ecall_cycle(
         &mut self,
-        _cur: CycleState,
+        cur: CycleState,
         _next: CycleState,
         _s0: u32,
         _s1: u32,
         _s2: u32,
+        kind: EcallKind,
     ) -> Result<()> {
         self.phys_cycles += 1;
+        self.ecall_metrics.0[kind].cycles += 1;
+        if cur == CycleState::MachineEcall {
+            self.ecall_metrics.0[kind].count += 1;
+        }
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
@@ -467,6 +483,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
         self.user_cycles += 1;
+        // TODO: We don't want to count user_cycles towards the terminate ecall, right?
 
         self.terminate_state = Some(TerminateState {
             a0: a0.into(),
@@ -497,14 +514,17 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
+        self.ecall_metrics.0[EcallKind::Sha2].cycles += 1;
         self.phys_cycles += 1;
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
+        self.ecall_metrics.0[EcallKind::Poseidon2].cycles += 1;
         self.phys_cycles += 1;
     }
 
     fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
+        self.ecall_metrics.0[EcallKind::BigInt].cycles += 1;
         self.phys_cycles += 1;
     }
 }
@@ -542,6 +562,16 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
 
     fn get_pc(&self) -> u32 {
         self.user_pc.0
+    }
+}
+
+impl From<EcallMetrics> for Vec<(String, EcallMetric)> {
+    fn from(metrics: EcallMetrics) -> Self {
+        metrics
+            .0
+            .into_iter()
+            .map(|(kind, metric)| (format!("{kind:?}"), metric))
+            .collect()
     }
 }
 
