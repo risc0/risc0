@@ -243,7 +243,8 @@ impl Rzup {
     /// * `version` - Version to check
     #[cfg_attr(not(feature = "cli"), expect(dead_code))]
     pub(crate) fn version_exists(&self, component: &Component, version: &Version) -> Result<bool> {
-        Ok(Paths::find_version_dir(&self.environment, component, version)?.is_some())
+        let component_installed = component.parent_component().unwrap_or(*component);
+        Ok(Paths::find_version_dir(&self.environment, &component_installed, version)?.is_some())
     }
 
     /// Gets the settings manager.
@@ -429,8 +430,14 @@ mod tests {
                 json_response("{\"tag_name\":\"v1.1.0\"}")
             }
             "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
+            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
+            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
             "/gihub_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
+            "/risc0_github/risc0/releases/download/v1.0.0-rc.1/\
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
+            "/risc0_github/risc0/releases/download/v1.0.0-rc.2/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-aarch64-apple-darwin.tgz" => dummy_tar_gz_response(),
@@ -817,6 +824,7 @@ mod tests {
             |rzup| {
                 rzup.install_component(&component, Some(version.clone()), false)
                     .unwrap();
+                assert!(rzup.version_exists(&component, &version).unwrap());
             },
             vec![
                 RzupEvent::InstallationStarted {
@@ -1385,6 +1393,48 @@ mod tests {
                 (
                     ".cargo/bin/r0vm".into(),
                     ".risc0/extensions/v1.1.0-cargo-risczero-x86_64-unknown-linux-gnu/r0vm".into(),
+                )
+            ],
+        );
+    }
+
+    #[test]
+    fn set_default_version_r0vm_rc_version() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
+            Component::R0Vm,
+            Version::parse("1.0.0-rc.1").unwrap(),
+            Version::parse("1.0.0-rc.2").unwrap(),
+            vec![
+                (
+                    ".cargo/bin/cargo-risczero".into(),
+                    ".risc0/extensions/v1.0.0-rc.1-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                        .into(),
+                ),
+                (
+                    ".cargo/bin/r0vm".into(),
+                    ".risc0/extensions/v1.0.0-rc.1-cargo-risczero-x86_64-unknown-linux-gnu/r0vm"
+                        .into(),
+                )
+            ],
+            vec![
+                (
+                    ".cargo/bin/cargo-risczero".into(),
+                    ".risc0/extensions/v1.0.0-rc.1-cargo-risczero-x86_64-unknown-linux-gnu/cargo-risczero"
+                        .into(),
+                ),
+                (
+                    ".cargo/bin/r0vm".into(),
+                    ".risc0/extensions/v1.0.0-rc.2-cargo-risczero-x86_64-unknown-linux-gnu/r0vm"
+                        .into(),
                 )
             ],
         );

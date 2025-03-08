@@ -79,6 +79,7 @@ impl Paths {
                 }
             }
         }
+
         Ok(res)
     }
 
@@ -132,8 +133,7 @@ impl Paths {
                 // New format with platform suffix
                 extract_version(&version_part[..p])
             } else {
-                let p = version_part.find('-')?;
-                extract_version(&version_part[..p])
+                None
             }
         } else {
             None
@@ -205,6 +205,14 @@ mod tests {
             Component::CargoRiscZero,
             "v1.2.1-rc.0-cargo-risczero",
             Version::parse("1.2.1-rc.0").unwrap(),
+        );
+    }
+
+    #[test]
+    fn test_get_and_parse_cargo_risczero_version_fails() {
+        assert_eq!(
+            Paths::parse_version_from_path("v1.2.1-rc.0-foobar", &Component::CargoRiscZero),
+            None
         );
     }
 
