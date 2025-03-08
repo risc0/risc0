@@ -22,7 +22,7 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
+        server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     },
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
@@ -58,7 +58,7 @@ impl ProverServer for ProverImpl {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = Executor2::from_elf(env, elf)?.run()?;
+        let session = ExecutorImpl::from_elf(env, elf)?.run()?;
         self.prove_session(ctx, &session)
     }
 

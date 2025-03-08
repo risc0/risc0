@@ -15,7 +15,7 @@
 use std::rc::Rc;
 
 use rand::thread_rng;
-use risc0_binfmt::{MemoryImage2, Program};
+use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::field::Elem;
 use test_log::test;
 
@@ -30,7 +30,7 @@ use crate::{
 };
 
 fn run_preflight(program: Program) {
-    let image = MemoryImage2::new_kernel(program);
+    let image = MemoryImage::new_kernel(program);
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
@@ -60,7 +60,7 @@ fn simple_loop() {
 }
 
 fn fwd_rev_ab_test(program: Program) {
-    let image = MemoryImage2::new_kernel(program);
+    let image = MemoryImage::new_kernel(program);
 
     let session = testutil::execute(
         image,

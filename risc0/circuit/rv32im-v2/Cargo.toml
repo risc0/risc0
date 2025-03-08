@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [[example]]
-name = "rv32im_v2"
+name = "rv32im"
 required-features = ["prove"]
 
 [dependencies]
