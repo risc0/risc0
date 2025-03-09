@@ -905,7 +905,7 @@ dependencies = [
 [[package]]
 name = "tiny-keccak"
 version = "2.0.2"
-source = "git+https://github.com/risc0/tiny-keccak?rev=7ff2b8465891d1cbb55a69e553e05d369ce41d72#7ff2b8465891d1cbb55a69e553e05d369ce41d72"
+source = "git+https://github.com/risc0/tiny-keccak?tag=tiny-keccak/v2.0.2-risczero.0#8fcc866dc94dcec3e79c3b2bc8fbc51b22f2d5e1"
 dependencies = [
  "crunchy",
 ]
