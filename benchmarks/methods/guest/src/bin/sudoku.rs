@@ -44,7 +44,7 @@ fn valid_solution(sudoku: &Sudoku) -> bool {
         for j in 0..9 {
             line += sudoku.0[i][j];
             col += sudoku.0[j][i];
-            sub += sudoku.0[((i / 3) * 3) + j / 3][i % 3 * 3 + j % 3];
+            sub += sudoku.0[(i / 3) * 3 + j / 3][(i % 3) * 3 + j % 3];
         }
 
         if line != 45 || col != 45 || sub != 45 {
