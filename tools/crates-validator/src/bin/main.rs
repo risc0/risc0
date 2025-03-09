@@ -25,7 +25,7 @@ use tracing_subscriber::EnvFilter;
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Path to YAML version of [ProfileConfig]
-    #[arg(short = 'P', long, default_value = "./profiles/primary.yaml")]
+    #[arg(short = 'P', long, default_value = "./profiles/primary.yml")]
     profiles_path: PathBuf,
 
     /// Run just a single crate from the [ProfileConfig]
