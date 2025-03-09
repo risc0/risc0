@@ -110,7 +110,7 @@ a message within the zkvm where an observer can measure the proving time or view
 [commit-lockfile]: https://blog.rust-lang.org/2023/08/29/committing-lockfiles.html
 [discord-url]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-1.2/examples/ecdsa
-[ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/methods/guest/Cargo.toml#L13-L18
+[ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/k256/methods/guest/Cargo.toml#L13-L18
 [feature-flag]: https://doc.rust-lang.org/cargo/reference/features.html#dependency-features
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.3..k256/v0.13.3-risczero.1
