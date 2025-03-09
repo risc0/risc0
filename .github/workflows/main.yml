@@ -525,7 +525,7 @@ jobs:
         run: |
           target/release/main \
           -p ${{ github.workspace }} \
-          -P profiles/profiles-10.yaml \
+          -P profiles/profiles-10.yml \
           -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
