@@ -18,21 +18,21 @@
 namespace risc0::circuit::keccak::cpu {
 void step_Top_10(ExecContext& ctx,MutableBuf arg0)   {
 // Reg(<preamble>:4)
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:458)
-// Top(zirgen/circuit/keccak2/top.zir:481)
-set(ctx,arg0, 12, Val(8));
 // ControlState(zirgen/circuit/keccak2/top.zir:402)
-set(ctx,arg0, 13, Val(0));
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:459)
+// Top(zirgen/circuit/keccak2/top.zir:482)
+set(ctx,arg0, 12, Val(8));
 // ControlState(zirgen/circuit/keccak2/top.zir:403)
-set(ctx,arg0, 14, Val(0));
+set(ctx,arg0, 13, Val(0));
 // ControlState(zirgen/circuit/keccak2/top.zir:404)
+set(ctx,arg0, 14, Val(0));
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
 set(ctx,arg0, 15, get(ctx,arg0, 15, 1));
 return ;
 }
 void step_Top_26(ExecContext& ctx,MutableBuf arg0)   {
 // TopState(zirgen/circuit/keccak2/top.zir:43)
-// Top(zirgen/circuit/keccak2/top.zir:491)
+// Top(zirgen/circuit/keccak2/top.zir:492)
 Val x1 = get(ctx,arg0, 916, 1);
 Val x2 = get(ctx,arg0, 917, 1);
 Val x3 = get(ctx,arg0, 918, 1);
@@ -49,311 +49,311 @@ Val x13 = get(ctx,arg0, 928, 1);
 Val x14 = get(ctx,arg0, 929, 1);
 Val x15 = get(ctx,arg0, 930, 1);
 Val x16 = get(ctx,arg0, 931, 1);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
-// ReadCycle(zirgen/circuit/keccak2/top.zir:331)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
+// ReadCycle(zirgen/circuit/keccak2/top.zir:332)
 Val x17 = INVOKE_EXTERN(ctx,getPreimage, Val(0));
 set(ctx,arg0, 816, x17);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x18 = INVOKE_EXTERN(ctx,getPreimage, Val(1));
 set(ctx,arg0, 817, x18);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x19 = INVOKE_EXTERN(ctx,getPreimage, Val(2));
 set(ctx,arg0, 818, x19);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x20 = INVOKE_EXTERN(ctx,getPreimage, Val(3));
 set(ctx,arg0, 819, x20);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x21 = INVOKE_EXTERN(ctx,getPreimage, Val(4));
 set(ctx,arg0, 820, x21);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x22 = INVOKE_EXTERN(ctx,getPreimage, Val(5));
 set(ctx,arg0, 821, x22);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x23 = INVOKE_EXTERN(ctx,getPreimage, Val(6));
 set(ctx,arg0, 822, x23);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x24 = INVOKE_EXTERN(ctx,getPreimage, Val(7));
 set(ctx,arg0, 823, x24);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x25 = INVOKE_EXTERN(ctx,getPreimage, Val(8));
 set(ctx,arg0, 824, x25);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x26 = INVOKE_EXTERN(ctx,getPreimage, Val(9));
 set(ctx,arg0, 825, x26);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x27 = INVOKE_EXTERN(ctx,getPreimage, Val(10));
 set(ctx,arg0, 826, x27);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x28 = INVOKE_EXTERN(ctx,getPreimage, Val(11));
 set(ctx,arg0, 827, x28);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x29 = INVOKE_EXTERN(ctx,getPreimage, Val(12));
 set(ctx,arg0, 828, x29);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x30 = INVOKE_EXTERN(ctx,getPreimage, Val(13));
 set(ctx,arg0, 829, x30);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x31 = INVOKE_EXTERN(ctx,getPreimage, Val(14));
 set(ctx,arg0, 830, x31);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x32 = INVOKE_EXTERN(ctx,getPreimage, Val(15));
 set(ctx,arg0, 831, x32);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x33 = INVOKE_EXTERN(ctx,getPreimage, Val(16));
 set(ctx,arg0, 832, x33);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x34 = INVOKE_EXTERN(ctx,getPreimage, Val(17));
 set(ctx,arg0, 833, x34);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x35 = INVOKE_EXTERN(ctx,getPreimage, Val(18));
 set(ctx,arg0, 834, x35);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x36 = INVOKE_EXTERN(ctx,getPreimage, Val(19));
 set(ctx,arg0, 835, x36);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x37 = INVOKE_EXTERN(ctx,getPreimage, Val(20));
 set(ctx,arg0, 836, x37);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x38 = INVOKE_EXTERN(ctx,getPreimage, Val(21));
 set(ctx,arg0, 837, x38);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x39 = INVOKE_EXTERN(ctx,getPreimage, Val(22));
 set(ctx,arg0, 838, x39);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x40 = INVOKE_EXTERN(ctx,getPreimage, Val(23));
 set(ctx,arg0, 839, x40);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x41 = INVOKE_EXTERN(ctx,getPreimage, Val(24));
 set(ctx,arg0, 840, x41);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x42 = INVOKE_EXTERN(ctx,getPreimage, Val(25));
 set(ctx,arg0, 841, x42);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x43 = INVOKE_EXTERN(ctx,getPreimage, Val(26));
 set(ctx,arg0, 842, x43);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x44 = INVOKE_EXTERN(ctx,getPreimage, Val(27));
 set(ctx,arg0, 843, x44);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x45 = INVOKE_EXTERN(ctx,getPreimage, Val(28));
 set(ctx,arg0, 844, x45);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x46 = INVOKE_EXTERN(ctx,getPreimage, Val(29));
 set(ctx,arg0, 845, x46);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x47 = INVOKE_EXTERN(ctx,getPreimage, Val(30));
 set(ctx,arg0, 846, x47);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x48 = INVOKE_EXTERN(ctx,getPreimage, Val(31));
 set(ctx,arg0, 847, x48);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x49 = INVOKE_EXTERN(ctx,getPreimage, Val(32));
 set(ctx,arg0, 848, x49);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x50 = INVOKE_EXTERN(ctx,getPreimage, Val(33));
 set(ctx,arg0, 849, x50);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x51 = INVOKE_EXTERN(ctx,getPreimage, Val(34));
 set(ctx,arg0, 850, x51);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x52 = INVOKE_EXTERN(ctx,getPreimage, Val(35));
 set(ctx,arg0, 851, x52);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x53 = INVOKE_EXTERN(ctx,getPreimage, Val(36));
 set(ctx,arg0, 852, x53);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x54 = INVOKE_EXTERN(ctx,getPreimage, Val(37));
 set(ctx,arg0, 853, x54);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x55 = INVOKE_EXTERN(ctx,getPreimage, Val(38));
 set(ctx,arg0, 854, x55);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x56 = INVOKE_EXTERN(ctx,getPreimage, Val(39));
 set(ctx,arg0, 855, x56);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x57 = INVOKE_EXTERN(ctx,getPreimage, Val(40));
 set(ctx,arg0, 856, x57);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x58 = INVOKE_EXTERN(ctx,getPreimage, Val(41));
 set(ctx,arg0, 857, x58);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x59 = INVOKE_EXTERN(ctx,getPreimage, Val(42));
 set(ctx,arg0, 858, x59);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x60 = INVOKE_EXTERN(ctx,getPreimage, Val(43));
 set(ctx,arg0, 859, x60);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x61 = INVOKE_EXTERN(ctx,getPreimage, Val(44));
 set(ctx,arg0, 860, x61);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x62 = INVOKE_EXTERN(ctx,getPreimage, Val(45));
 set(ctx,arg0, 861, x62);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x63 = INVOKE_EXTERN(ctx,getPreimage, Val(46));
 set(ctx,arg0, 862, x63);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x64 = INVOKE_EXTERN(ctx,getPreimage, Val(47));
 set(ctx,arg0, 863, x64);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x65 = INVOKE_EXTERN(ctx,getPreimage, Val(48));
 set(ctx,arg0, 864, x65);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x66 = INVOKE_EXTERN(ctx,getPreimage, Val(49));
 set(ctx,arg0, 865, x66);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x67 = INVOKE_EXTERN(ctx,getPreimage, Val(50));
 set(ctx,arg0, 866, x67);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x68 = INVOKE_EXTERN(ctx,getPreimage, Val(51));
 set(ctx,arg0, 867, x68);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x69 = INVOKE_EXTERN(ctx,getPreimage, Val(52));
 set(ctx,arg0, 868, x69);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x70 = INVOKE_EXTERN(ctx,getPreimage, Val(53));
 set(ctx,arg0, 869, x70);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x71 = INVOKE_EXTERN(ctx,getPreimage, Val(54));
 set(ctx,arg0, 870, x71);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x72 = INVOKE_EXTERN(ctx,getPreimage, Val(55));
 set(ctx,arg0, 871, x72);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x73 = INVOKE_EXTERN(ctx,getPreimage, Val(56));
 set(ctx,arg0, 872, x73);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x74 = INVOKE_EXTERN(ctx,getPreimage, Val(57));
 set(ctx,arg0, 873, x74);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x75 = INVOKE_EXTERN(ctx,getPreimage, Val(58));
 set(ctx,arg0, 874, x75);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x76 = INVOKE_EXTERN(ctx,getPreimage, Val(59));
 set(ctx,arg0, 875, x76);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x77 = INVOKE_EXTERN(ctx,getPreimage, Val(60));
 set(ctx,arg0, 876, x77);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x78 = INVOKE_EXTERN(ctx,getPreimage, Val(61));
 set(ctx,arg0, 877, x78);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x79 = INVOKE_EXTERN(ctx,getPreimage, Val(62));
 set(ctx,arg0, 878, x79);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x80 = INVOKE_EXTERN(ctx,getPreimage, Val(63));
 set(ctx,arg0, 879, x80);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x81 = INVOKE_EXTERN(ctx,getPreimage, Val(64));
 set(ctx,arg0, 880, x81);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x82 = INVOKE_EXTERN(ctx,getPreimage, Val(65));
 set(ctx,arg0, 881, x82);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x83 = INVOKE_EXTERN(ctx,getPreimage, Val(66));
 set(ctx,arg0, 882, x83);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x84 = INVOKE_EXTERN(ctx,getPreimage, Val(67));
 set(ctx,arg0, 883, x84);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x85 = INVOKE_EXTERN(ctx,getPreimage, Val(68));
 set(ctx,arg0, 884, x85);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x86 = INVOKE_EXTERN(ctx,getPreimage, Val(69));
 set(ctx,arg0, 885, x86);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x87 = INVOKE_EXTERN(ctx,getPreimage, Val(70));
 set(ctx,arg0, 886, x87);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x88 = INVOKE_EXTERN(ctx,getPreimage, Val(71));
 set(ctx,arg0, 887, x88);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x89 = INVOKE_EXTERN(ctx,getPreimage, Val(72));
 set(ctx,arg0, 888, x89);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x90 = INVOKE_EXTERN(ctx,getPreimage, Val(73));
 set(ctx,arg0, 889, x90);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x91 = INVOKE_EXTERN(ctx,getPreimage, Val(74));
 set(ctx,arg0, 890, x91);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x92 = INVOKE_EXTERN(ctx,getPreimage, Val(75));
 set(ctx,arg0, 891, x92);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x93 = INVOKE_EXTERN(ctx,getPreimage, Val(76));
 set(ctx,arg0, 892, x93);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x94 = INVOKE_EXTERN(ctx,getPreimage, Val(77));
 set(ctx,arg0, 893, x94);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x95 = INVOKE_EXTERN(ctx,getPreimage, Val(78));
 set(ctx,arg0, 894, x95);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x96 = INVOKE_EXTERN(ctx,getPreimage, Val(79));
 set(ctx,arg0, 895, x96);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x97 = INVOKE_EXTERN(ctx,getPreimage, Val(80));
 set(ctx,arg0, 896, x97);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x98 = INVOKE_EXTERN(ctx,getPreimage, Val(81));
 set(ctx,arg0, 897, x98);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x99 = INVOKE_EXTERN(ctx,getPreimage, Val(82));
 set(ctx,arg0, 898, x99);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x100 = INVOKE_EXTERN(ctx,getPreimage, Val(83));
 set(ctx,arg0, 899, x100);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x101 = INVOKE_EXTERN(ctx,getPreimage, Val(84));
 set(ctx,arg0, 900, x101);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x102 = INVOKE_EXTERN(ctx,getPreimage, Val(85));
 set(ctx,arg0, 901, x102);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x103 = INVOKE_EXTERN(ctx,getPreimage, Val(86));
 set(ctx,arg0, 902, x103);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x104 = INVOKE_EXTERN(ctx,getPreimage, Val(87));
 set(ctx,arg0, 903, x104);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x105 = INVOKE_EXTERN(ctx,getPreimage, Val(88));
 set(ctx,arg0, 904, x105);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x106 = INVOKE_EXTERN(ctx,getPreimage, Val(89));
 set(ctx,arg0, 905, x106);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x107 = INVOKE_EXTERN(ctx,getPreimage, Val(90));
 set(ctx,arg0, 906, x107);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x108 = INVOKE_EXTERN(ctx,getPreimage, Val(91));
 set(ctx,arg0, 907, x108);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x109 = INVOKE_EXTERN(ctx,getPreimage, Val(92));
 set(ctx,arg0, 908, x109);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x110 = INVOKE_EXTERN(ctx,getPreimage, Val(93));
 set(ctx,arg0, 909, x110);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x111 = INVOKE_EXTERN(ctx,getPreimage, Val(94));
 set(ctx,arg0, 910, x111);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x112 = INVOKE_EXTERN(ctx,getPreimage, Val(95));
 set(ctx,arg0, 911, x112);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x113 = INVOKE_EXTERN(ctx,getPreimage, Val(96));
 set(ctx,arg0, 912, x113);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x114 = INVOKE_EXTERN(ctx,getPreimage, Val(97));
 set(ctx,arg0, 913, x114);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x115 = INVOKE_EXTERN(ctx,getPreimage, Val(98));
 set(ctx,arg0, 914, x115);
-// GetPreimage(zirgen/circuit/keccak2/top.zir:277)
+// GetPreimage(zirgen/circuit/keccak2/top.zir:278)
 Val x116 = INVOKE_EXTERN(ctx,getPreimage, Val(99));
 set(ctx,arg0, 915, x116);
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
-// SFlatToBits(zirgen/circuit/keccak2/top.zir:327)
-// ReadCycle(zirgen/circuit/keccak2/top.zir:333)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
+// SFlatToBits(zirgen/circuit/keccak2/top.zir:328)
+// ReadCycle(zirgen/circuit/keccak2/top.zir:334)
 set(ctx,arg0, 16, Val(0));
 set(ctx,arg0, 17, Val(0));
 set(ctx,arg0, 18, Val(0));
@@ -1156,7 +1156,7 @@ set(ctx,arg0, 814, Val(0));
 set(ctx,arg0, 815, Val(0));
 // Reg(<preamble>:4)
 // TopState(zirgen/circuit/keccak2/top.zir:36)
-// ReadCycle(zirgen/circuit/keccak2/top.zir:334)
+// ReadCycle(zirgen/circuit/keccak2/top.zir:335)
 set(ctx,arg0, 16, get(ctx,arg0, 16, 0));
 set(ctx,arg0, 17, get(ctx,arg0, 17, 0));
 set(ctx,arg0, 18, get(ctx,arg0, 18, 0));
@@ -2082,7 +2082,7 @@ void step_Top_42(ExecContext& ctx,MutableBuf arg0)   {
 // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
 // LoadWin(zirgen/circuit/keccak2/top.zir:164)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:191)
-// Top(zirgen/circuit/keccak2/top.zir:499)
+// Top(zirgen/circuit/keccak2/top.zir:500)
 Val x1 = get(ctx,arg0, 1090, 0);
 Val x2 = get(ctx,arg0, 1091, 0);
 // LoadWin(zirgen/circuit/keccak2/top.zir:167)

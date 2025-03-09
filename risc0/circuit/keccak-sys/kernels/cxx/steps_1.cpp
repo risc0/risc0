@@ -18,21 +18,21 @@
 namespace risc0::circuit::keccak::cpu {
 void step_Top_0(ExecContext& ctx,MutableBuf arg0)   {
 // Reg(<preamble>:4)
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// Top(zirgen/circuit/keccak2/top.zir:479)
-set(ctx,arg0, 12, Val(11));
 // ControlState(zirgen/circuit/keccak2/top.zir:402)
-set(ctx,arg0, 13, Val(0));
+// Top(zirgen/circuit/keccak2/top.zir:480)
+set(ctx,arg0, 12, Val(11));
 // ControlState(zirgen/circuit/keccak2/top.zir:403)
-set(ctx,arg0, 14, Val(0));
+set(ctx,arg0, 13, Val(0));
 // ControlState(zirgen/circuit/keccak2/top.zir:404)
+set(ctx,arg0, 14, Val(0));
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
 set(ctx,arg0, 15, Val(0));
 return ;
 }
 void step_Top_16(ExecContext& ctx,MutableBuf arg0)   {
-// ShaNextRound(zirgen/circuit/keccak2/top.zir:417)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:460)
-// Top(zirgen/circuit/keccak2/top.zir:481)
+// ShaNextRound(zirgen/circuit/keccak2/top.zir:418)
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:461)
+// Top(zirgen/circuit/keccak2/top.zir:482)
 Val x1 = (get(ctx,arg0, 15, 1) - Val(7));
 // IsZero(zirgen/circuit/keccak2/is_zero.zir:8)
 set(ctx,arg0, 933, isz(x1));
@@ -40,7 +40,7 @@ Val x2 = get(ctx,arg0, 933, 0);
 // IsZero(zirgen/circuit/keccak2/is_zero.zir:11)
 set(ctx,arg0, 934, inv_0(x1));
 if (to_size_t(x2)) {
-// ShaNextRound(zirgen/circuit/keccak2/top.zir:418)
+// ShaNextRound(zirgen/circuit/keccak2/top.zir:419)
 step_Top_14(ctx,arg0);
 }
 if (to_size_t((Val(1) - x2))) {
@@ -51,7 +51,7 @@ return ;
 void step_Top_32(ExecContext& ctx,MutableBuf arg0)   {
 // Reg(<preamble>:4)
 // TopState(zirgen/circuit/keccak2/top.zir:36)
-// Top(zirgen/circuit/keccak2/top.zir:497)
+// Top(zirgen/circuit/keccak2/top.zir:498)
 Val x1 = get(ctx,arg0, 16, 2);
 Val x2 = get(ctx,arg0, 17, 2);
 Val x3 = get(ctx,arg0, 18, 2);
@@ -852,12 +852,12 @@ Val x797 = get(ctx,arg0, 812, 2);
 Val x798 = get(ctx,arg0, 813, 2);
 Val x799 = get(ctx,arg0, 814, 2);
 Val x800 = get(ctx,arg0, 815, 2);
-// ControlState(zirgen/circuit/keccak2/top.zir:404)
-// Top(zirgen/circuit/keccak2/top.zir:477)
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
+// Top(zirgen/circuit/keccak2/top.zir:478)
 Val x801 = get(ctx,arg0, 15, 0);
 // Chi(zirgen/circuit/keccak2/keccak.zir:73)
 // KeccakRound34(zirgen/circuit/keccak2/top.zir:117)
-// Top(zirgen/circuit/keccak2/top.zir:497)
+// Top(zirgen/circuit/keccak2/top.zir:498)
 Val x802 = ((Val(1) - x33) * x65);
 // BitXor(zirgen/circuit/keccak2/bits.zir:32)
 Val x803 = ((x1 + x802) - ((x1 * Val(2)) * x802));
@@ -4314,7 +4314,7 @@ void step_Top_48(ExecContext& ctx,MutableBuf arg0)   {
 // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
 // LoadWin(zirgen/circuit/keccak2/top.zir:164)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:191)
-// Top(zirgen/circuit/keccak2/top.zir:499)
+// Top(zirgen/circuit/keccak2/top.zir:500)
 Val x1 = get(ctx,arg0, 1090, 0);
 Val x2 = get(ctx,arg0, 1091, 0);
 // LoadWin(zirgen/circuit/keccak2/top.zir:167)

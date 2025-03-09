@@ -18,28 +18,28 @@
 namespace risc0::circuit::keccak::cpu {
 void step_Top_2(ExecContext& ctx,MutableBuf arg0)   {
 // Reg(<preamble>:4)
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:448)
-// Top(zirgen/circuit/keccak2/top.zir:481)
-set(ctx,arg0, 12, Val(9));
 // ControlState(zirgen/circuit/keccak2/top.zir:402)
-set(ctx,arg0, 13, Val(0));
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:449)
+// Top(zirgen/circuit/keccak2/top.zir:482)
+set(ctx,arg0, 12, Val(9));
 // ControlState(zirgen/circuit/keccak2/top.zir:403)
-set(ctx,arg0, 14, Val(0));
+set(ctx,arg0, 13, Val(0));
 // ControlState(zirgen/circuit/keccak2/top.zir:404)
+set(ctx,arg0, 14, Val(0));
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
 set(ctx,arg0, 15, Val(0));
 return ;
 }
 void step_Top_18(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// ShaNextBlock(zirgen/circuit/keccak2/top.zir:432)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:461)
-set(ctx,arg0, 12, Val(2));
 // ControlState(zirgen/circuit/keccak2/top.zir:402)
-set(ctx,arg0, 13, Val(0));
+// ShaNextBlock(zirgen/circuit/keccak2/top.zir:433)
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:462)
+set(ctx,arg0, 12, Val(2));
 // ControlState(zirgen/circuit/keccak2/top.zir:403)
-set(ctx,arg0, 14, Val(0));
+set(ctx,arg0, 13, Val(0));
 // ControlState(zirgen/circuit/keccak2/top.zir:404)
+set(ctx,arg0, 14, Val(0));
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
 set(ctx,arg0, 15, Val(0));
 return ;
 }
@@ -48,7 +48,7 @@ void step_Top_34(ExecContext& ctx,MutableBuf arg0)   {
 // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
 // LoadWin(zirgen/circuit/keccak2/top.zir:164)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:191)
-// Top(zirgen/circuit/keccak2/top.zir:499)
+// Top(zirgen/circuit/keccak2/top.zir:500)
 Val x1 = get(ctx,arg0, 1090, 0);
 Val x2 = get(ctx,arg0, 1091, 0);
 // LoadWin(zirgen/circuit/keccak2/top.zir:167)
@@ -314,14 +314,14 @@ Val x189 = get(ctx,arg0, 524, 1);
 Val x190 = get(ctx,arg0, 525, 1);
 Val x191 = get(ctx,arg0, 526, 1);
 Val x192 = get(ctx,arg0, 527, 1);
-// ControlState(zirgen/circuit/keccak2/top.zir:403)
-// Top(zirgen/circuit/keccak2/top.zir:477)
-Val x193 = get(ctx,arg0, 14, 0);
 // ControlState(zirgen/circuit/keccak2/top.zir:404)
+// Top(zirgen/circuit/keccak2/top.zir:478)
+Val x193 = get(ctx,arg0, 14, 0);
+// ControlState(zirgen/circuit/keccak2/top.zir:405)
 Val x194 = get(ctx,arg0, 15, 0);
 // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
 // ShaCycle(zirgen/circuit/keccak2/top.zir:188)
-// Top(zirgen/circuit/keccak2/top.zir:499)
+// Top(zirgen/circuit/keccak2/top.zir:500)
 Val x195 = isz((Val(0) - x194));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
 set(ctx,arg0, 1081, x195);
@@ -582,7 +582,7 @@ Val x405 = (x170 * Val(2));
 Val x406 = ((x170 + x184) - (x405 * x184));
 Val x407 = (x171 * Val(2));
 Val x408 = ((x171 + x185) - (x407 * x185));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x409 = (((x249 + (x250 * Val(2))) + (x251 * Val(4))) + (x252 * Val(8)));
@@ -644,7 +644,7 @@ Val x463 = ((Val(1) - x189) * x125);
 Val x464 = ((Val(1) - x190) * x126);
 Val x465 = ((Val(1) - x191) * x127);
 Val x466 = ((Val(1) - x192) * x128);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x467 = (((x162 * x130) + x436) * Val(2));
 Val x468 = (((x163 * x131) + x437) * Val(4));
@@ -990,7 +990,7 @@ Val x678 = (Val(1) - x64);
 Val x679 = ((x677 * (Val(1) - x32)) + ((x96 * x678) * x32));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x680 = (Val(1) - x96);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x681 = (((x559 + ((x560 * x34) * x2)) + (x557 * x2)) * Val(2));
 Val x682 = (((x563 + ((x564 * x35) * x3)) + (x561 * x3)) * Val(4));
@@ -1076,7 +1076,7 @@ Val x760 = (((x759 + x751) + x752) + x753);
 Val x761 = (((x700 + x694) + x695) + ((x740 + x734) + x735));
 Val x762 = (((x720 + x714) + x715) + ((x760 + x754) + x755));
 Val x763 = (x551 + x761);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x764 = (get(ctx,arg0, 144, 1) + (get(ctx,arg0, 145, 1) * Val(2)));
@@ -1129,7 +1129,7 @@ Val x787 = ((get(ctx,arg0, 948, 0) * Val(4)) + (get(ctx,arg0, 947, 0) * Val(2)))
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x788 = (x785 - ((x787 + get(ctx,arg0, 946, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 16, bitAnd(x784, Val(1)));
 Val x789 = get(ctx,arg0, 16, 0);
@@ -1227,7 +1227,7 @@ Val x827 = ((get(ctx,arg0, 954, 0) * Val(4)) + (get(ctx,arg0, 953, 0) * Val(2)))
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x828 = (x825 - ((x827 + get(ctx,arg0, 952, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 272, bitAnd(x824, Val(1)));
 Val x829 = get(ctx,arg0, 272, 0);
@@ -1467,7 +1467,7 @@ Val x1017 = (x838 * Val(2));
 Val x1018 = ((x838 + x852) - (x1017 * x852));
 Val x1019 = (x839 * Val(2));
 Val x1020 = ((x839 + x853) - (x1019 * x853));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x1021 = (((x861 + (x862 * Val(2))) + (x863 * Val(4))) + (x864 * Val(8)));
@@ -1523,7 +1523,7 @@ Val x1069 = ((Val(1) - x857) * x157);
 Val x1070 = ((Val(1) - x858) * x158);
 Val x1071 = ((Val(1) - x859) * x159);
 Val x1072 = ((Val(1) - x860) * x160);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x1073 = (((x830 * x162) + x1042) * Val(2));
 Val x1074 = (((x831 * x163) + x1043) * Val(4));
@@ -1773,7 +1773,7 @@ Val x1252 = (x820 * x96);
 Val x1253 = ((x1252 * x678) + ((x820 * x680) * x64));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x1254 = (Val(1) - x820);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x1255 = (((x1163 + ((x1164 * x66) * x34)) + (x1162 * x34)) * Val(2));
 Val x1256 = (((x1166 + ((x1167 * x67) * x35)) + (x1165 * x35)) * Val(4));
@@ -1859,7 +1859,7 @@ Val x1334 = (((x1333 + x1325) + x1326) + x1327);
 Val x1335 = (((x1274 + x1268) + x1269) + ((x1314 + x1308) + x1309));
 Val x1336 = (((x1294 + x1288) + x1289) + ((x1334 + x1328) + x1329));
 Val x1337 = (x1157 + x1335);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x1338 = (((x1 + (x2 * Val(2))) + (x3 * Val(4))) + (x4 * Val(8)));
@@ -1906,7 +1906,7 @@ Val x1355 = ((get(ctx,arg0, 966, 0) * Val(4)) + (get(ctx,arg0, 965, 0) * Val(2))
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x1356 = (x1353 - ((x1355 + get(ctx,arg0, 964, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 48, bitAnd(x1352, Val(1)));
 Val x1357 = get(ctx,arg0, 48, 0);
@@ -2004,7 +2004,7 @@ Val x1395 = ((get(ctx,arg0, 972, 0) * Val(4)) + (get(ctx,arg0, 971, 0) * Val(2))
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x1396 = (x1393 - ((x1395 + get(ctx,arg0, 970, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 304, bitAnd(x1392, Val(1)));
 Val x1397 = get(ctx,arg0, 304, 0);
@@ -2244,7 +2244,7 @@ Val x1585 = (x1406 * Val(2));
 Val x1586 = ((x1406 + x1420) - (x1585 * x1420));
 Val x1587 = (x1407 * Val(2));
 Val x1588 = ((x1407 + x1421) - (x1587 * x1421));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x1589 = (((x1429 + (x1430 * Val(2))) + (x1431 * Val(4))) + (x1432 * Val(8)));
@@ -2300,7 +2300,7 @@ Val x1637 = ((Val(1) - x1425) * x189);
 Val x1638 = ((Val(1) - x1426) * x190);
 Val x1639 = ((Val(1) - x1427) * x191);
 Val x1640 = ((Val(1) - x1428) * x192);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x1641 = (((x1398 * x830) + x1610) * Val(2));
 Val x1642 = (((x1399 * x831) + x1611) * Val(4));
@@ -2550,7 +2550,7 @@ Val x1820 = (x1388 * x820);
 Val x1821 = ((x1820 * x680) + ((x1388 * x1254) * x96));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x1822 = (Val(1) - x1388);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x1823 = (((x1731 + ((x1732 * x790) * x66)) + (x1730 * x66)) * Val(2));
 Val x1824 = (((x1734 + ((x1735 * x791) * x67)) + (x1733 * x67)) * Val(4));
@@ -2636,7 +2636,7 @@ Val x1902 = (((x1901 + x1893) + x1894) + x1895);
 Val x1903 = (((x1842 + x1836) + x1837) + ((x1882 + x1876) + x1877));
 Val x1904 = (((x1862 + x1856) + x1857) + ((x1902 + x1896) + x1897));
 Val x1905 = (x1725 + x1903);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x1906 = (((x33 + (x34 * Val(2))) + (x35 * Val(4))) + (x36 * Val(8)));
@@ -2683,7 +2683,7 @@ Val x1923 = ((get(ctx,arg0, 984, 0) * Val(4)) + (get(ctx,arg0, 983, 0) * Val(2))
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x1924 = (x1921 - ((x1923 + get(ctx,arg0, 982, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 80, bitAnd(x1920, Val(1)));
 Val x1925 = get(ctx,arg0, 80, 0);
@@ -2781,7 +2781,7 @@ Val x1963 = ((get(ctx,arg0, 990, 0) * Val(4)) + (get(ctx,arg0, 989, 0) * Val(2))
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x1964 = (x1961 - ((x1963 + get(ctx,arg0, 988, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 336, bitAnd(x1960, Val(1)));
 Val x1965 = get(ctx,arg0, 336, 0);
@@ -3021,7 +3021,7 @@ Val x2153 = (x1974 * Val(2));
 Val x2154 = ((x1974 + x1988) - (x2153 * x1988));
 Val x2155 = (x1975 * Val(2));
 Val x2156 = ((x1975 + x1989) - (x2155 * x1989));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x2157 = (((x1997 + (x1998 * Val(2))) + (x1999 * Val(4))) + (x2000 * Val(8)));
@@ -3077,7 +3077,7 @@ Val x2205 = ((Val(1) - x1993) * x857);
 Val x2206 = ((Val(1) - x1994) * x858);
 Val x2207 = ((Val(1) - x1995) * x859);
 Val x2208 = ((Val(1) - x1996) * x860);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x2209 = (((x1966 * x1398) + x2178) * Val(2));
 Val x2210 = (((x1967 * x1399) + x2179) * Val(4));
@@ -3327,7 +3327,7 @@ Val x2388 = (x1956 * x1388);
 Val x2389 = ((x2388 * x1254) + ((x1956 * x1822) * x820));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x2390 = (Val(1) - x1956);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x2391 = (((x2299 + ((x2300 * x1358) * x790)) + (x2298 * x790)) * Val(2));
 Val x2392 = (((x2302 + ((x2303 * x1359) * x791)) + (x2301 * x791)) * Val(4));
@@ -3413,7 +3413,7 @@ Val x2470 = (((x2469 + x2461) + x2462) + x2463);
 Val x2471 = (((x2410 + x2404) + x2405) + ((x2450 + x2444) + x2445));
 Val x2472 = (((x2430 + x2424) + x2425) + ((x2470 + x2464) + x2465));
 Val x2473 = (x2293 + x2471);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x2474 = (((x65 + x321) + (x67 * Val(4))) + (x68 * Val(8)));
@@ -3460,7 +3460,7 @@ Val x2491 = ((get(ctx,arg0, 1002, 0) * Val(4)) + (get(ctx,arg0, 1001, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x2492 = (x2489 - ((x2491 + get(ctx,arg0, 1000, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 112, bitAnd(x2488, Val(1)));
 Val x2493 = get(ctx,arg0, 112, 0);
@@ -3558,7 +3558,7 @@ Val x2531 = ((get(ctx,arg0, 1008, 0) * Val(4)) + (get(ctx,arg0, 1007, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x2532 = (x2529 - ((x2531 + get(ctx,arg0, 1006, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 368, bitAnd(x2528, Val(1)));
 Val x2533 = get(ctx,arg0, 368, 0);
@@ -3798,7 +3798,7 @@ Val x2721 = (x2542 * Val(2));
 Val x2722 = ((x2542 + x2556) - (x2721 * x2556));
 Val x2723 = (x2543 * Val(2));
 Val x2724 = ((x2543 + x2557) - (x2723 * x2557));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x2725 = (((x2565 + (x2566 * Val(2))) + (x2567 * Val(4))) + (x2568 * Val(8)));
@@ -3854,7 +3854,7 @@ Val x2773 = ((Val(1) - x2561) * x1425);
 Val x2774 = ((Val(1) - x2562) * x1426);
 Val x2775 = ((Val(1) - x2563) * x1427);
 Val x2776 = ((Val(1) - x2564) * x1428);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x2777 = (((x2534 * x1966) + x2746) * Val(2));
 Val x2778 = (((x2535 * x1967) + x2747) * Val(4));
@@ -4104,7 +4104,7 @@ Val x2956 = (x2524 * x1956);
 Val x2957 = ((x2956 * x1822) + ((x2524 * x2390) * x1388));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x2958 = (Val(1) - x2524);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x2959 = (((x2867 + ((x2868 * x1926) * x1358)) + (x2866 * x1358)) * Val(2));
 Val x2960 = (((x2870 + ((x2871 * x1927) * x1359)) + (x2869 * x1359)) * Val(4));
@@ -4190,7 +4190,7 @@ Val x3038 = (((x3037 + x3029) + x3030) + x3031);
 Val x3039 = (((x2978 + x2972) + x2973) + ((x3018 + x3012) + x3013));
 Val x3040 = (((x2998 + x2992) + x2993) + ((x3038 + x3032) + x3033));
 Val x3041 = (x2861 + x3039);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x3042 = (((x789 + x933) + (x791 * Val(4))) + (x792 * Val(8)));
@@ -4237,7 +4237,7 @@ Val x3059 = ((get(ctx,arg0, 1020, 0) * Val(4)) + (get(ctx,arg0, 1019, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x3060 = (x3057 - ((x3059 + get(ctx,arg0, 1018, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 144, bitAnd(x3056, Val(1)));
 Val x3061 = get(ctx,arg0, 144, 0);
@@ -4335,7 +4335,7 @@ Val x3099 = ((get(ctx,arg0, 1026, 0) * Val(4)) + (get(ctx,arg0, 1025, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x3100 = (x3097 - ((x3099 + get(ctx,arg0, 1024, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 400, bitAnd(x3096, Val(1)));
 Val x3101 = get(ctx,arg0, 400, 0);
@@ -4575,7 +4575,7 @@ Val x3289 = (x3110 * Val(2));
 Val x3290 = ((x3110 + x3124) - (x3289 * x3124));
 Val x3291 = (x3111 * Val(2));
 Val x3292 = ((x3111 + x3125) - (x3291 * x3125));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x3293 = (((x3133 + (x3134 * Val(2))) + (x3135 * Val(4))) + (x3136 * Val(8)));
@@ -4631,7 +4631,7 @@ Val x3341 = ((Val(1) - x3129) * x1993);
 Val x3342 = ((Val(1) - x3130) * x1994);
 Val x3343 = ((Val(1) - x3131) * x1995);
 Val x3344 = ((Val(1) - x3132) * x1996);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x3345 = (((x3102 * x2534) + x3314) * Val(2));
 Val x3346 = (((x3103 * x2535) + x3315) * Val(4));
@@ -4881,7 +4881,7 @@ Val x3524 = (x3092 * x2524);
 Val x3525 = ((x3524 * x2390) + ((x3092 * x2958) * x1956));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x3526 = (Val(1) - x3092);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x3527 = (((x3435 + ((x3436 * x2494) * x1926)) + (x3434 * x1926)) * Val(2));
 Val x3528 = (((x3438 + ((x3439 * x2495) * x1927)) + (x3437 * x1927)) * Val(4));
@@ -4967,7 +4967,7 @@ Val x3606 = (((x3605 + x3597) + x3598) + x3599);
 Val x3607 = (((x3546 + x3540) + x3541) + ((x3586 + x3580) + x3581));
 Val x3608 = (((x3566 + x3560) + x3561) + ((x3606 + x3600) + x3601));
 Val x3609 = (x3429 + x3607);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x3610 = (((x1357 + x1501) + (x1359 * Val(4))) + (x1360 * Val(8)));
@@ -5014,7 +5014,7 @@ Val x3627 = ((get(ctx,arg0, 1038, 0) * Val(4)) + (get(ctx,arg0, 1037, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x3628 = (x3625 - ((x3627 + get(ctx,arg0, 1036, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 176, bitAnd(x3624, Val(1)));
 Val x3629 = get(ctx,arg0, 176, 0);
@@ -5112,7 +5112,7 @@ Val x3667 = ((get(ctx,arg0, 1044, 0) * Val(4)) + (get(ctx,arg0, 1043, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x3668 = (x3665 - ((x3667 + get(ctx,arg0, 1042, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 432, bitAnd(x3664, Val(1)));
 Val x3669 = get(ctx,arg0, 432, 0);
@@ -5352,7 +5352,7 @@ Val x3857 = (x3678 * Val(2));
 Val x3858 = ((x3678 + x3692) - (x3857 * x3692));
 Val x3859 = (x3679 * Val(2));
 Val x3860 = ((x3679 + x3693) - (x3859 * x3693));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x3861 = (((x3701 + (x3702 * Val(2))) + (x3703 * Val(4))) + (x3704 * Val(8)));
@@ -5408,7 +5408,7 @@ Val x3909 = ((Val(1) - x3697) * x2561);
 Val x3910 = ((Val(1) - x3698) * x2562);
 Val x3911 = ((Val(1) - x3699) * x2563);
 Val x3912 = ((Val(1) - x3700) * x2564);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x3913 = (((x3670 * x3102) + x3882) * Val(2));
 Val x3914 = (((x3671 * x3103) + x3883) * Val(4));
@@ -5658,7 +5658,7 @@ Val x4092 = (x3660 * x3092);
 Val x4093 = ((x4092 * x2958) + ((x3660 * x3526) * x2524));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x4094 = (Val(1) - x3660);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x4095 = (((x4003 + ((x4004 * x3062) * x2494)) + (x4002 * x2494)) * Val(2));
 Val x4096 = (((x4006 + ((x4007 * x3063) * x2495)) + (x4005 * x2495)) * Val(4));
@@ -5744,7 +5744,7 @@ Val x4174 = (((x4173 + x4165) + x4166) + x4167);
 Val x4175 = (((x4114 + x4108) + x4109) + ((x4154 + x4148) + x4149));
 Val x4176 = (((x4134 + x4128) + x4129) + ((x4174 + x4168) + x4169));
 Val x4177 = (x3997 + x4175);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x4178 = (((x1925 + x2069) + (x1927 * Val(4))) + (x1928 * Val(8)));
@@ -5791,7 +5791,7 @@ Val x4195 = ((get(ctx,arg0, 1056, 0) * Val(4)) + (get(ctx,arg0, 1055, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x4196 = (x4193 - ((x4195 + get(ctx,arg0, 1054, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 208, bitAnd(x4192, Val(1)));
 Val x4197 = get(ctx,arg0, 208, 0);
@@ -5889,7 +5889,7 @@ Val x4235 = ((get(ctx,arg0, 1062, 0) * Val(4)) + (get(ctx,arg0, 1061, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x4236 = (x4233 - ((x4235 + get(ctx,arg0, 1060, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 464, bitAnd(x4232, Val(1)));
 Val x4237 = get(ctx,arg0, 464, 0);
@@ -6129,7 +6129,7 @@ Val x4425 = (x4246 * Val(2));
 Val x4426 = ((x4246 + x4260) - (x4425 * x4260));
 Val x4427 = (x4247 * Val(2));
 Val x4428 = ((x4247 + x4261) - (x4427 * x4261));
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
 Val x4429 = (((x4269 + (x4270 * Val(2))) + (x4271 * Val(4))) + (x4272 * Val(8)));
@@ -6185,7 +6185,7 @@ Val x4477 = ((Val(1) - x4265) * x3129);
 Val x4478 = ((Val(1) - x4266) * x3130);
 Val x4479 = ((Val(1) - x4267) * x3131);
 Val x4480 = ((Val(1) - x4268) * x3132);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x4481 = (((x4238 * x3670) + x4450) * Val(2));
 Val x4482 = (((x4239 * x3671) + x4451) * Val(4));
@@ -6435,7 +6435,7 @@ Val x4660 = (x4228 * x3660);
 Val x4661 = ((x4660 * x3526) + ((x4228 * x4094) * x3092));
 // MajU32(zirgen/circuit/keccak2/sha2.zir:18)
 Val x4662 = ((Val(1) - x4228) * x3660);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 Val x4663 = (((x4571 + (x4572 * x3062)) + (x4570 * x3062)) * Val(2));
 Val x4664 = (((x4574 + (x4575 * x3063)) + (x4573 * x3063)) * Val(4));
@@ -6521,7 +6521,7 @@ Val x4742 = (((x4741 + x4733) + x4734) + x4735);
 Val x4743 = (((x4682 + x4676) + x4677) + ((x4722 + x4716) + x4717));
 Val x4744 = (((x4702 + x4696) + x4697) + ((x4742 + x4736) + x4737));
 Val x4745 = (x4565 + x4743);
-// Pack(zirgen/circuit/keccak2/pack.zir:32)
+// Pack(zirgen/circuit/keccak2/pack.zir:33)
 // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
 // ComputeAE(zirgen/circuit/keccak2/sha2.zir:93)
 Val x4746 = (((x2493 + x2637) + (x2495 * Val(4))) + (x2496 * Val(8)));
@@ -6568,7 +6568,7 @@ Val x4763 = ((get(ctx,arg0, 1074, 0) * Val(4)) + (get(ctx,arg0, 1073, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x4764 = (x4761 - ((x4763 + get(ctx,arg0, 1072, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 240, bitAnd(x4760, Val(1)));
 set(ctx,arg0, 241, (bitAnd(x4760, Val(2)) * Val(1006632961)));
@@ -6634,7 +6634,7 @@ Val x4771 = ((get(ctx,arg0, 1080, 0) * Val(4)) + (get(ctx,arg0, 1079, 0) * Val(2
 // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
 Val x4772 = (x4769 - ((x4771 + get(ctx,arg0, 1078, 0)) * Val(65536)));
 // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+// UnpackReg(zirgen/circuit/keccak2/pack.zir:49)
 // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
 set(ctx,arg0, 496, bitAnd(x4768, Val(1)));
 set(ctx,arg0, 497, (bitAnd(x4768, Val(2)) * Val(1006632961)));
