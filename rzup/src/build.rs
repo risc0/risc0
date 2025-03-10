@@ -170,7 +170,8 @@ fn find_build_directories(build_dir: &Path) -> Result<(PathBuf, PathBuf)> {
 pub fn build_rust_toolchain(
     env: &Environment,
     repo_url: &str,
-    tag_or_commit: &str,
+    tag_or_commit: &Option<String>,
+    path: &Option<String>,
 ) -> Result<Version> {
     env.emit(RzupEvent::BuildingRustToolchain);
 
@@ -180,16 +181,23 @@ pub fn build_rust_toolchain(
         message: "cloning git repository".into(),
     });
 
-    let repo_dir = env.tmp_dir().join("build-rust-toolchain");
-
-    if !repo_dir.join(".git").exists() {
-        git_clone(repo_url, &repo_dir)?;
-    } else {
-        git_fetch(&repo_dir)?;
-    }
-    git_checkout(&repo_dir, tag_or_commit)?;
-    git_reset_hard(&repo_dir)?;
-    git_submodule_update(&repo_dir)?;
+    // if building from commit
+    let repo_dir = match path {
+        None => {
+            let repo_dir = env.tmp_dir().join("build-rust-toolchain");
+            if !repo_dir.join(".git").exists() {
+                git_clone(repo_url, &repo_dir)?;
+            } else {
+                git_fetch(&repo_dir)?;
+            }
+            let tag_or_commit = tag_or_commit.as_ref().unwrap();
+            git_checkout(&repo_dir, tag_or_commit)?;
+            git_reset_hard(&repo_dir)?;
+            git_submodule_update(&repo_dir)?;
+            repo_dir
+        }
+        Some(path) => path.into(),
+    };
 
     let commit = git_short_rev_parse(&repo_dir, "HEAD")?;
 

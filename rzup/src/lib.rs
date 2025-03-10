@@ -309,9 +309,11 @@ impl Rzup {
     pub(crate) fn build_rust_toolchain(
         &mut self,
         repo_url: &str,
-        tag_or_commit: &str,
+        tag_or_commit: &Option<String>,
+        path: &Option<String>,
     ) -> Result<()> {
-        let version = build::build_rust_toolchain(&self.environment, repo_url, tag_or_commit)?;
+        let version =
+            build::build_rust_toolchain(&self.environment, repo_url, tag_or_commit, path)?;
         self.set_default_version(&Component::RustToolchain, version)?;
         Ok(())
     }
