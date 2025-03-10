@@ -28,6 +28,7 @@ const METAL_INCS: &[(&str, &str)] = &[
 ];
 
 #[derive(Eq, PartialEq, Hash)]
+#[non_exhaustive]
 pub enum KernelType {
     Cpp,
     Cuda,
