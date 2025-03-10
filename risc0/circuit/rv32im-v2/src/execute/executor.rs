@@ -82,6 +82,7 @@ struct SessionCycles {
     reserved: u64,
 }
 
+#[non_exhaustive]
 pub struct SimpleSession {
     pub segments: Vec<Segment>,
     pub result: ExecutorResult,
