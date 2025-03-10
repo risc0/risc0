@@ -120,6 +120,7 @@ const USER_LEN_OFFSET: usize = VERSION_OFFSET + WORD_SIZE;
 const USER_ELF_OFFSET: usize = USER_LEN_OFFSET + WORD_SIZE;
 
 /// A container to hold a user ELF and a kernel ELF together.
+#[non_exhaustive]
 pub struct ProgramBinary<'a> {
     /// The user ELF.
     pub user_elf: &'a [u8],
