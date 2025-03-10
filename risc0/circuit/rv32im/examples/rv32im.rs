@@ -16,7 +16,7 @@ use std::time::Instant;
 
 use clap::Parser;
 use risc0_binfmt::MemoryImage;
-use risc0_circuit_rv32im_v2::{
+use risc0_circuit_rv32im::{
     execute::{platform::LOOKUP_TABLE_CYCLES, testutil, DEFAULT_SEGMENT_LIMIT_PO2},
     prove::segment_prover,
     MAX_INSN_CYCLES,
@@ -99,7 +99,7 @@ fn main() {
         let start_time = Instant::now();
         let seal = prover.prove(segment).unwrap();
         if !args.skip_verification {
-            risc0_circuit_rv32im_v2::verify(&seal).expect("Verification failed");
+            risc0_circuit_rv32im::verify(&seal).expect("Verification failed");
         }
         let prove_time = start_time.elapsed().as_secs_f64();
 

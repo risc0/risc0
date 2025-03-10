@@ -257,10 +257,10 @@ extern "C" {
 using namespace risc0;
 using namespace risc0::circuit::rv32im_v2::cpu;
 
-const char* risc0_circuit_rv32im_v2_cpu_witgen(uint32_t mode,
-                                               ExecBuffers* buffers,
-                                               PreflightTrace* preflight,
-                                               uint32_t lastCycle) {
+const char* risc0_circuit_rv32im_cpu_witgen(uint32_t mode,
+                                            ExecBuffers* buffers,
+                                            PreflightTrace* preflight,
+                                            uint32_t lastCycle) {
   LookupTables tables;
   size_t split = preflight->tableSplitCycle;
   try {
@@ -300,9 +300,9 @@ const char* risc0_circuit_rv32im_v2_cpu_witgen(uint32_t mode,
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
-                                              PreflightTrace* preflight,
-                                              uint32_t lastCycle) {
+const char* risc0_circuit_rv32im_cpu_accum(AccumBuffers* buffers,
+                                           PreflightTrace* preflight,
+                                           uint32_t lastCycle) {
   try {
     LookupTables tables;
 

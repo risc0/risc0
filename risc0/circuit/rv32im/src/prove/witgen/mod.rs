@@ -25,7 +25,7 @@ use std::iter::zip;
 use anyhow::{Context, Result};
 use preflight::PreflightTrace;
 use risc0_binfmt::WordAddr;
-use risc0_circuit_rv32im_v2_sys::RawPreflightCycle;
+use risc0_circuit_rv32im_sys::RawPreflightCycle;
 use risc0_core::scope;
 use risc0_zkp::{
     core::digest::DIGEST_WORDS,

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_circuit_rv32im_v2_sys::RawMemoryTransaction;
+use risc0_circuit_rv32im_sys::RawMemoryTransaction;
 use risc0_zkp::{
     core::digest::DIGEST_WORDS,
     field::{baby_bear, Elem as _},

@@ -28,7 +28,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args);
 
 } // namespace risc0::circuit::rv32im_v2
 
-extern "C" const char* risc0_circuit_rv32im_v2_cpu_poly_fp(
+extern "C" const char* risc0_circuit_rv32im_cpu_poly_fp(
     size_t cycle, size_t steps, FpExt* poly_mix, Fp** args, FpExt* result) {
   try {
     *result = circuit::rv32im_v2::poly_fp(cycle, steps, poly_mix, args);
