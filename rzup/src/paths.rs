@@ -129,12 +129,10 @@ impl Paths {
             parse_cpp_version(dir_name.split('-').next()?).ok()
         } else if dir_name.starts_with('v') {
             let version_part = dir_name.strip_prefix('v')?;
-            if let Some(p) = version_part.find(&format!("-{component}")) {
+            version_part.find(&format!("-{component}")).and_then(|p| {
                 // New format with platform suffix
                 extract_version(&version_part[..p])
-            } else {
-                None
-            }
+            })
         } else {
             None
         }
