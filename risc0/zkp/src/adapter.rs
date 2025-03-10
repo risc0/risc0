@@ -41,6 +41,7 @@ macro_rules! trace_if_enabled {
 }
 
 #[derive(Clone, Copy, Debug)]
+#[non_exhaustive]
 pub struct MixState<EE: ExtElem> {
     pub tot: EE,
     pub mul: EE,
