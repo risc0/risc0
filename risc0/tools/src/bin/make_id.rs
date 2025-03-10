@@ -27,7 +27,7 @@ use risc0_binfmt::ProgramBinary;
 
 /// Generates an ImageID for a given RISC-V user ELF and kernel ELF binary.
 #[derive(Parser)]
-#[clap(about, version, author)]
+#[command(about, version, author)]
 struct Args {
     /// The user ELF to compute an ImageID from.
     user_elf: String,
