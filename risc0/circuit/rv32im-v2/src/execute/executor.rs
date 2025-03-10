@@ -63,6 +63,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     cycles: SessionCycles,
 }
 
+#[non_exhaustive]
 pub struct ExecutorResult {
     pub segments: u64,
     pub post_image: MemoryImage,
