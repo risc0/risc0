@@ -10,6 +10,5 @@ risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, featur
 tiny-keccak = { version = "2.0.2", features = ["keccak"] }
 
 [patch.crates-io]
-# Placing this patch statement in the workspace Cargo.toml will add RISC Zero keccak precompile
-# support for all downstream usages of the `tiny-keccak` crate.
-tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", rev = "7ff2b8465891d1cbb55a69e553e05d369ce41d72" }
+# Adding RISC Zero keccak precompile support
+tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }
