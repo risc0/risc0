@@ -40,6 +40,7 @@ use super::{
 };
 
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub struct EcallMetric {
     pub count: u64,
     pub cycles: u64,
