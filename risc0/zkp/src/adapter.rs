@@ -198,6 +198,7 @@ pub struct PolyExtStepDef {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum PolyExtStep {
     Const(u32),
     ConstExt(u32, u32, u32, u32),
