@@ -428,20 +428,21 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
 }
 
 fn get_rustc_version() -> Result<semver::Version> {
-        let output = Command::new("rustc")
+    let output = Command::new("rustc")
         .arg("--version")
         .env("RUSTUP_TOOLCHAIN", "risc0")
         .output()
         .expect("failed to get risc0 toolchain's rustc version. Please ensure that your risc0 toolchain installed is correctly");
 
-        let version= String::from_utf8(output.stdout)?;
-        let re = Regex::new(r"\d+\.\d+\.\d+").unwrap();
+    let version = String::from_utf8(output.stdout)?;
+    let re = Regex::new(r"\d+\.\d+\.\d+").unwrap();
 
-        if let Some(matched) = re.find(&version) {
-            semver::Version::parse(matched.as_str()).or_else(|_| Err(anyhow!("failed to parse version from rustc output")))
-        } else {
-            bail!("No semver found.")
-        }
+    if let Some(matched) = re.find(&version) {
+        semver::Version::parse(matched.as_str())
+            .or_else(|_| Err(anyhow!("failed to parse version from rustc output")))
+    } else {
+        bail!("No semver found.")
+    }
 }
 
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
