@@ -115,7 +115,7 @@ fn git_clone(src: &str, dest: &Path) -> Result<()> {
 }
 
 fn git_checkout(path: &Path, tag_or_commit: &str) -> Result<()> {
-    run_command("git", &["checkout", tag_or_commit], Some(path), &[])?;
+    run_command("git", &["checkout", "-f", tag_or_commit], Some(path), &[])?;
     Ok(())
 }
 
@@ -218,7 +218,7 @@ pub fn build_rust_toolchain(
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            "-Cpasses=loweratomic",
+            "-Cpasses=lower-atomic",
         )],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {
@@ -238,7 +238,7 @@ pub fn build_rust_toolchain(
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            "-Cpasses=loweratomic",
+            "-Cpasses=lower-atomic",
         )],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {
