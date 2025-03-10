@@ -112,7 +112,7 @@ impl<'a> Preflight<'a> {
         let total_cycles = 1 << segment.po2;
 
         let mut page_memory = PagedMap::default();
-        for (&node_idx, digest) in segment.partial_image.digests.iter() {
+        for (&node_idx, digest) in segment.partial_image.digests() {
             let node_addr = node_idx_to_addr(node_idx);
             for i in 0..DIGEST_WORDS {
                 page_memory.insert(&(node_addr + i), digest.as_words()[i]);
@@ -680,8 +680,8 @@ impl PagingActivity {
 
 impl PagedMemory {
     pub(crate) fn loaded_pages(&self) -> PagingActivity {
-        tracing::trace!("loaded_pages: {:#010x?}", self.image.pages.keys());
-        PagingActivity::new(self.image.pages.keys().copied().collect())
+        tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
+        PagingActivity::new(self.image.get_page_indexes())
     }
 
     pub(crate) fn dirty_pages(&self) -> PagingActivity {
