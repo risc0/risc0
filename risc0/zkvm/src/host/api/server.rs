@@ -32,11 +32,13 @@ use crate::{
             env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
         },
-        server::{prove::keccak::prove_keccak, session::NullSegmentRef},
+        server::{
+            exec::executor::ExecutorImpl, prove::keccak::prove_keccak, session::NullSegmentRef,
+        },
     },
     prove_registered_zkr,
     recursion::identity_p254,
-    AssetRequest, Assumption, Executor2, ExecutorEnv, InnerAssumptionReceipt, ProverOpts, Receipt,
+    AssetRequest, Assumption, ExecutorEnv, InnerAssumptionReceipt, ProverOpts, Receipt,
     ReceiptClaim, Segment, SegmentReceipt, SegmentRef, Session, SuccinctReceipt, TraceCallback,
     TraceEvent, Unknown, VerifierContext,
 };
@@ -1134,7 +1136,7 @@ fn execute_redis(
         Ok(Box::new(NullSegmentRef))
     };
 
-    let session = Executor2::from_elf(env, &bytes)?.run_with_callback(callback);
+    let session = ExecutorImpl::from_elf(env, &bytes)?.run_with_callback(callback);
 
     drop(sender);
 
@@ -1162,7 +1164,7 @@ fn execute_default(
         Ok(Box::new(NullSegmentRef))
     };
 
-    Executor2::from_elf(env, &bytes)?.run_with_callback(callback)
+    ExecutorImpl::from_elf(env, &bytes)?.run_with_callback(callback)
 }
 
 fn send_segment_done_msg(

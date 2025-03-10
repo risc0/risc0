@@ -92,7 +92,7 @@ pub struct Page(Vec<u8>);
 
 /// TODO(flaub)
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MemoryImage2 {
+pub struct MemoryImage {
     /// TODO(flaub)
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
@@ -107,7 +107,7 @@ pub struct MemoryImage2 {
     dirty: BTreeSet<u32>,
 }
 
-impl Default for MemoryImage2 {
+impl Default for MemoryImage {
     fn default() -> Self {
         Self {
             pages: Default::default(),
@@ -117,7 +117,7 @@ impl Default for MemoryImage2 {
     }
 }
 
-impl MemoryImage2 {
+impl MemoryImage {
     fn new(image: BTreeMap<u32, u32>) -> Self {
         let mut this = Self::default();
         let mut cur_page_idx = u32::MAX;
@@ -449,7 +449,7 @@ mod tests {
     use risc0_zkp::digest;
     use test_log::test;
 
-    use super::{MemoryImage2, Program, ZERO_CACHE};
+    use super::{MemoryImage, Program, ZERO_CACHE};
 
     #[test]
     fn poseidon2_zeros() {
@@ -488,7 +488,7 @@ mod tests {
             entry,
             image: BTreeMap::from([(entry, 0x1234b337)]),
         };
-        let mut image = MemoryImage2::new_kernel(program);
+        let mut image = MemoryImage::new_kernel(program);
         assert_eq!(
             *image.get_digest(0x0040_0100).unwrap(),
             digest!("242ce034cc4e9326f8b7071124454b2be1a1cd5d21b6483c7ff81d4ba5ac9566")

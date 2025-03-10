@@ -3725,7 +3725,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -3740,7 +3740,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.1.0-alpha.1"
+version = "3.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -4046,7 +4046,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "bytemuck",
  "cfg-if",
