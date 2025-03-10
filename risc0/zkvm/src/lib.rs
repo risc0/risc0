@@ -141,7 +141,7 @@ pub use {
             },
         },
     },
-    risc0_circuit_rv32im_v2::trace::{TraceCallback, TraceEvent},
+    risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 
 #[cfg(not(target_os = "zkvm"))]
