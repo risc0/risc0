@@ -999,7 +999,7 @@ fn profiler() {
         }
     }
 
-    let elf_mem = Program::load_elf(binary.user_elf, u32::MAX).unwrap().image;
+    let program = Program::load_elf(binary.user_elf, u32::MAX).unwrap();
 
     // Check that the addresses for these two functions point to the right place
     for func_name in ["profile_test_func2", "profile_test_func3"] {
@@ -1009,8 +1009,8 @@ fn profiler() {
             .unwrap();
 
         let addr = test_func.frames[0].address;
-        let inst = *elf_mem
-            .get(&(addr as u32))
+        let inst = program
+            .read_u32(&(addr as u32))
             .unwrap_or_else(|| panic!("0x{addr:x} found in elf"));
 
         // check its nop
