@@ -17,6 +17,7 @@
 use crate::Receipt;
 
 /// Information returned by the prover including receipt as well as other information useful for debugging
+#[non_exhaustive]
 pub struct ProveInfo {
     /// receipt from the computation
     pub receipt: Receipt,
