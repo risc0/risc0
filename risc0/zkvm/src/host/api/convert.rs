@@ -224,6 +224,7 @@ impl TryFrom<ExitCode> for pb::base::ExitCode {
                 ExitCode::SessionLimit => pb::base::exit_code::Kind::SessionLimit(()),
                 ExitCode::Paused(code) => pb::base::exit_code::Kind::Paused(code),
                 ExitCode::Halted(code) => pb::base::exit_code::Kind::Halted(code),
+                e => bail!("unsupported exit code: {e:?}"),
             }),
         })
     }
