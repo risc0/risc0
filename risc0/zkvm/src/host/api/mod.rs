@@ -385,6 +385,7 @@ pub enum AssetRequest {
 
 /// Provides information about the result of execution.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
