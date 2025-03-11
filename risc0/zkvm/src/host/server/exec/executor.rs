@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, SystemState};
-use risc0_circuit_rv32im_v2::{
+use risc0_circuit_rv32im::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
@@ -132,7 +132,6 @@ impl<'a> ExecutorImpl<'a> {
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
         scope!("execute");
-        tracing::info!("Executing rv32im-v2 session");
 
         let journal = Journal::default();
         self.env
