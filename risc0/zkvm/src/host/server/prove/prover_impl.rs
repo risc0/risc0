@@ -216,7 +216,7 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(&segment.inner)?;
+        let seal = risc0_circuit_rv32im::prove::segment_prover()?.prove(&segment.inner)?;
         let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.inner.po2))?;
         claim.output = segment.output.clone().into();
 

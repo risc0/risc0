@@ -22,7 +22,7 @@ use std::{
 use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, ProgramBinary};
-use risc0_circuit_rv32im_v2::TerminateState;
+use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
@@ -90,7 +90,7 @@ fn insufficient_segment_limit() {
 
 #[test_log::test]
 fn basic() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::user::basic();
+    let program = risc0_circuit_rv32im::execute::testutil::user::basic();
     let env = ExecutorEnv::default();
     let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX).unwrap();
     let mut image = MemoryImage::with_kernel(program, kernel);
@@ -117,7 +117,7 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
@@ -999,7 +999,7 @@ fn profiler() {
         }
     }
 
-    let elf_mem = Program::load_elf(binary.user_elf, u32::MAX).unwrap().image;
+    let program = Program::load_elf(binary.user_elf, u32::MAX).unwrap();
 
     // Check that the addresses for these two functions point to the right place
     for func_name in ["profile_test_func2", "profile_test_func3"] {
@@ -1009,8 +1009,8 @@ fn profiler() {
             .unwrap();
 
         let addr = test_func.frames[0].address;
-        let inst = *elf_mem
-            .get(&(addr as u32))
+        let inst = program
+            .read_u32(&(addr as u32))
             .unwrap_or_else(|| panic!("0x{addr:x} found in elf"));
 
         // check its nop

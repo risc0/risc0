@@ -4586,7 +4586,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-rv32im-v2"
+name = "risc0-circuit-rv32im"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -4606,7 +4606,7 @@ dependencies = [
  "rayon",
  "ringbuffer",
  "risc0-binfmt",
- "risc0-circuit-rv32im-v2-sys",
+ "risc0-circuit-rv32im-sys",
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
@@ -4619,7 +4619,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-rv32im-v2-sys"
+name = "risc0-circuit-rv32im-sys"
 version = "0.1.0"
 dependencies = [
  "cc",
@@ -4789,7 +4789,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-keccak-methods",
  "risc0-circuit-recursion",
- "risc0-circuit-rv32im-v2",
+ "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
