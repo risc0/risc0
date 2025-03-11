@@ -14,7 +14,7 @@
 
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
-use risc0_circuit_rv32im_v2::TerminateState;
+use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::{memory, WORD_SIZE};
@@ -427,7 +427,7 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
     let image = MemoryImage::new_kernel(program);
 
     let env = ExecutorEnv::builder()
@@ -1018,7 +1018,7 @@ fn run_unconstrained() -> Result<()> {
 
 mod soundness {
     // use risc0_circuit_rv32im::{prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2, CIRCUIT};
-    use risc0_circuit_rv32im_v2::{execute::DEFAULT_SEGMENT_LIMIT_PO2, CircuitImpl};
+    use risc0_circuit_rv32im::{execute::DEFAULT_SEGMENT_LIMIT_PO2, CircuitImpl};
     use risc0_zkp::{
         adapter::TapsProvider,
         field::{

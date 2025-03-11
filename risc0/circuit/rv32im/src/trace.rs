@@ -17,19 +17,24 @@ extern crate alloc;
 use alloc::vec::Vec;
 
 use anyhow::Result;
+use derive_more::Debug;
 use serde::{Deserialize, Serialize};
 
 /// An event traced from the running VM.
-#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {
         /// Cycle number since startup
         cycle: u64,
+
         /// Program counter of the instruction being executed
+        #[debug("{pc:#010x}")]
         pc: u32,
+
         /// Encoded instruction being executed.
+        #[debug("{pc:#010x}")]
         insn: u32,
     },
 
@@ -37,15 +42,20 @@ pub enum TraceEvent {
     RegisterSet {
         /// Register ID (0-16)
         idx: usize,
+
         /// New value in the register
+        #[debug("{value:#010x}")]
         value: u32,
     },
 
     /// A memory location has been written
     MemorySet {
         /// Address of memory that's been written
+        #[debug("{addr:#010x}")]
         addr: u32,
+
         /// Data that's been written
+        #[debug("{region:#04x?}")]
         region: Vec<u8>,
     },
 
@@ -64,21 +74,5 @@ pub trait TraceCallback {
 impl<F: FnMut(TraceEvent) -> Result<()>> TraceCallback for F {
     fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
         self(event)
-    }
-}
-
-impl core::fmt::Debug for TraceEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::InstructionStart { cycle, pc, insn } => {
-                write!(f, "InstructionStart({cycle}, 0x{pc:08X}, 0x{insn:08X})")
-            }
-            Self::RegisterSet { idx, value } => write!(f, "RegisterSet({idx}, 0x{value:08X})"),
-            Self::MemorySet { addr, region } => {
-                write!(f, "MemorySet(0x{addr:08X}, {region:#04X?})")
-            }
-            Self::PageIn { cycles } => write!(f, "PageIn({cycles})"),
-            Self::PageOut { cycles } => write!(f, "PageOut({cycles})"),
-        }
     }
 }
