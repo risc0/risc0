@@ -233,3 +233,45 @@ fn ec_double_point_with_zero_y() {
     let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
     assert_eq!(result, None);
 }
+
+#[test]
+fn p384() {
+    let point: Option<[[u32; 12]; 2]> = Some([
+        [
+            0x72760ab7,
+            0x3a545e38,
+            0xbf55296c,
+            0x5502f25d,
+            0x82542a38,
+            0x59f741e0,
+            0x8ba79b98,
+            0x6e1d3b62,
+            0xf320ad74,
+            0x8eb1c71e,
+            0xbe8b0537,
+            0xaa87ca22,
+        ],
+        [
+            0x90ea0e5f,
+            0x7a431d7c,
+            0x1d7e819d,
+            0x0a60b1ce,
+            0xb5f0b8c0,
+            0xe9da3113,
+            0x289a147c,
+            0xf8f41dbd,
+            0x9292dc29,
+            0x5d9e98bf,
+            0x96262c6f,
+            0x3617de4a,
+        ],
+    ]);
+
+    let env = ExecutorEnv::builder()
+        .write(&point)
+        .unwrap()
+        .build()
+        .unwrap();
+    let result: Option<[[u32; 12]; 2]> = run_test(env, EC_384_ELF);
+    assert_eq!(result, None);
+}
