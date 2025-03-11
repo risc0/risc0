@@ -39,7 +39,7 @@ and `cargo-risczero` binaries.
 cargo install --force --path risc0/cargo-risczero
 ```
 
-Otherwise, if using a stable version branch, you can install these through the standard flow:
+Otherwise, if using a stable version branch, you can install `cargo-risczero` through the standard flow:
 
 ```bash
 curl -L https://risczero.com/install | bash
