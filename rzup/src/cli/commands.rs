@@ -282,7 +282,7 @@ pub(crate) struct BuildCommand {
     #[arg(value_parser=parser("build"))]
     name: String,
 
-    /// Tag or commit of the component to uninstall
+    /// Tag or commit of the component to build
     #[arg(short, long)]
     tag_or_commit: Option<String>,
 
