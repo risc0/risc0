@@ -23,7 +23,7 @@ use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2};
 #[test]
 fn basic() {
     let program = testutil::kernel::basic();
-    let expected_cycles = program.image.len();
+    let expected_cycles = program.size_in_words();
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 

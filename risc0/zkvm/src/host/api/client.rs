@@ -731,7 +731,7 @@ impl Client {
                         AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {
                             kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
-                                    pb::core::InnerReceipt::from(inner.clone())
+                                    pb::core::InnerReceipt::try_from(inner.clone())?
                                         .encode_to_vec()
                                         .into(),
                                 )
@@ -741,7 +741,7 @@ impl Client {
                         AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
                             kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::Assumption::from(assumption.clone())
+                                    pb::core::Assumption::try_from(assumption.clone())?
                                         .encode_to_vec()
                                         .into(),
                                 )
