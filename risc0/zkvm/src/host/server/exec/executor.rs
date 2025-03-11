@@ -12,25 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, rc::Rc, sync::Arc, time::Instant};
+use std::{
+    cell::{Cell, RefCell},
+    rc::Rc,
+    sync::Arc,
+    time::Instant,
+};
 
 use anyhow::{Context as _, Result};
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_circuit_rv32im::prove::emu::{
-    addr::ByteAddr,
-    exec::{
-        Executor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
-        DEFAULT_SEGMENT_LIMIT_PO2,
+use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, SystemState};
+use risc0_circuit_rv32im::{
+    execute::{
+        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
     },
+    MAX_INSN_CYCLES,
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
+use risc0_zkvm_platform::{align_up, fileno, syscall::ecall};
 use tempfile::tempdir;
 
 use crate::{
-    host::{client::env::SegmentPath, server::session::InnerSegment},
-    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef, Session,
+    host::{client::env::SegmentPath, server::session::Session},
+    receipt_claim::exit_code_from_rv32im_v2_claim,
+    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
 
 use super::{
@@ -47,6 +53,7 @@ pub struct ExecutorImpl<'a> {
     image: MemoryImage,
     pub(crate) syscall_table: SyscallTable<'a>,
     profiler: Option<Rc<RefCell<Profiler>>>,
+    return_cache: Cell<(u32, u32)>,
 }
 
 impl<'a> ExecutorImpl<'a> {
@@ -57,6 +64,7 @@ impl<'a> ExecutorImpl<'a> {
     /// work will be done in each segment. This is the execution phase:
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
+    #[allow(dead_code)]
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage) -> Result<Self> {
         Self::with_details(env, image, None)
     }
@@ -64,26 +72,13 @@ impl<'a> ExecutorImpl<'a> {
     /// Construct a new [ExecutorImpl] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
-    ///
-    /// # Example
-    /// ```
-    /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
-    /// use risc0_zkvm_methods::{BENCH_ELF, bench::BenchmarkSpec};
-    ///
-    /// let env = ExecutorEnv::builder()
-    ///     .write(&BenchmarkSpec::SimpleLoop { iters: 1 })
-    ///     .unwrap()
-    ///     .build()
-    ///     .unwrap();
-    /// let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
-    /// ```
     pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+        let binary = ProgramBinary::decode(elf)?;
+        let image = binary.to_image()?;
 
         let profiler = if env.pprof_out.is_some() {
             let profiler = Rc::new(RefCell::new(Profiler::new(
-                elf,
+                &binary,
                 None,
                 profiler::read_enable_inline_functions_env_var(),
             )?));
@@ -94,6 +89,14 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         Self::with_details(env, image, profiler)
+    }
+
+    /// TODO(flaub)
+    #[allow(dead_code)]
+    pub(crate) fn from_kernel_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
+        let kernel = Program::load_elf(elf, u32::MAX)?;
+        let image = MemoryImage::new_kernel(kernel);
+        Self::with_details(env, image, None)
     }
 
     fn with_details(
@@ -107,6 +110,7 @@ impl<'a> ExecutorImpl<'a> {
             image,
             syscall_table,
             profiler,
+            return_cache: Cell::new((0, 0)),
         })
     }
 
@@ -125,10 +129,9 @@ impl<'a> ExecutorImpl<'a> {
     /// [crate::ExitCode::Paused] is reached, producing a [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
-        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
         scope!("execute");
-        tracing::info!("Executing rv32im-v1 session");
 
         let journal = Journal::default();
         self.env
@@ -150,60 +153,74 @@ impl<'a> ExecutorImpl<'a> {
         );
 
         let start_time = Instant::now();
-        let result = exec.run(segment_limit_po2, self.env.session_limit, |inner| {
-            let output = inner
-                .exit_code
-                .expects_output()
-                .then(|| -> Option<Result<_>> {
-                    inner
-                        .output_digest
-                        .and_then(|digest| {
-                            (digest != Digest::ZERO).then(|| journal.buf.borrow().clone())
-                        })
-                        .map(|journal| {
-                            Ok(Output {
-                                journal: journal.into(),
-                                assumptions: Assumptions(
-                                    self.syscall_table
-                                        .assumptions_used
-                                        .borrow()
-                                        .iter()
-                                        .map(|(a, _)| a.clone().into())
-                                        .collect::<Vec<_>>(),
-                                )
-                                .into(),
+        let result = exec.run(
+            segment_limit_po2,
+            MAX_INSN_CYCLES,
+            self.env.session_limit,
+            |inner| {
+                let output = inner
+                    .claim
+                    .terminate_state
+                    .is_some()
+                    .then(|| -> Option<Result<_>> {
+                        inner
+                            .claim
+                            .output
+                            .and_then(|digest| {
+                                (digest != Digest::ZERO)
+                                    .then(|| journal.buf.lock().unwrap().clone())
                             })
-                        })
-                })
-                .flatten()
-                .transpose()?;
+                            .map(|journal| {
+                                Ok(Output {
+                                    journal: journal.into(),
+                                    assumptions: Assumptions(
+                                        self.syscall_table
+                                            .assumptions_used
+                                            .lock()
+                                            .unwrap()
+                                            .iter()
+                                            .map(|(a, _)| a.clone().into())
+                                            .collect::<Vec<_>>(),
+                                    )
+                                    .into(),
+                                })
+                            })
+                    })
+                    .flatten()
+                    .transpose()?;
 
-            let segment = Segment {
-                index: inner.index as u32,
-                inner: InnerSegment::V1(inner),
-                output,
-            };
-            let segment_ref = callback(segment)?;
-            refs.push(segment_ref);
-            Ok(())
-        })?;
+                let segment = Segment {
+                    index: inner.index as u32,
+                    inner,
+                    output,
+                };
+                let segment_ref = callback(segment)?;
+                refs.push(segment_ref);
+                Ok(())
+            },
+        )?;
         let elapsed = start_time.elapsed();
 
+        tracing::debug!("output_digest: {:?}", result.claim.output);
+
+        let exit_code = exit_code_from_rv32im_v2_claim(&result.claim)?;
+
         // Set the session_journal to the committed data iff the guest set a non-zero output.
-        let session_journal = result
-            .output_digest
-            .and_then(|digest| (digest != Digest::ZERO).then(|| journal.buf.take()));
-        if !result.exit_code.expects_output() && session_journal.is_some() {
+        let session_journal = result.claim.output.and_then(|digest| {
+            (digest != Digest::ZERO).then(|| std::mem::take(&mut *journal.buf.lock().unwrap()))
+        });
+        if !exit_code.expects_output() && session_journal.is_some() {
             tracing::debug!(
-                "dropping non-empty journal due to exit code {:?}: 0x{}",
-                result.exit_code,
-                hex::encode(journal.buf.borrow().as_slice())
+                "dropping non-empty journal due to exit code {exit_code:?}: 0x{}",
+                hex::encode(journal.buf.lock().unwrap().as_slice())
             );
         };
 
+        let ecall_metrics = exec.take_ecall_metrics();
+
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let assumptions = self.syscall_table.assumptions_used.take();
+        let assumptions = std::mem::take(&mut *self.syscall_table.assumptions_used.lock().unwrap());
         let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
         let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
@@ -216,24 +233,37 @@ impl<'a> ExecutorImpl<'a> {
         self.image = result.post_image.clone();
         let syscall_metrics = self.syscall_table.metrics.borrow().clone();
 
-        let session = Session::new(
-            refs,
-            self.env.input_digest.unwrap_or_default(),
-            session_journal,
-            result.exit_code,
+        // NOTE: When a segment ends in a Halted(_) state, the post_digest will be null.
+        let post_digest = match exit_code {
+            ExitCode::Halted(_) => Digest::ZERO,
+            _ => result.claim.post_state,
+        };
+
+        let session = Session {
+            segments: refs,
+            input: self.env.input_digest.unwrap_or_default(),
+            journal: session_journal.map(crate::Journal::new),
+            exit_code,
             assumptions,
             mmr_assumptions,
-            result.user_cycles,
-            result.paging_cycles,
-            result.reserved_cycles,
-            result.total_cycles,
-            result.pre_state,
-            result.post_state,
+            user_cycles: result.user_cycles,
+            paging_cycles: result.paging_cycles,
+            reserved_cycles: result.reserved_cycles,
+            total_cycles: result.total_cycles,
+            pre_state: SystemState {
+                pc: 0,
+                merkle_root: result.claim.pre_state,
+            },
+            post_state: SystemState {
+                pc: 0,
+                merkle_root: post_digest,
+            },
             pending_zkrs,
             pending_keccaks,
-            result.ecall_metrics,
             syscall_metrics,
-        );
+            hooks: vec![],
+            ecall_metrics: ecall_metrics.into(),
+        };
 
         tracing::info!("execution time: {elapsed:?}");
         session.log();
@@ -243,7 +273,7 @@ impl<'a> ExecutorImpl<'a> {
 }
 
 struct ContextAdapter<'a, 'b> {
-    ctx: &'b mut dyn NewSyscallContext,
+    ctx: &'b mut dyn CircuitSyscallContext,
     syscall_table: SyscallTable<'a>,
 }
 
@@ -277,21 +307,67 @@ impl<'a> SyscallContext<'a> for ContextAdapter<'a, '_> {
     }
 }
 
-impl NewSyscall for ExecutorImpl<'_> {
-    fn syscall(
+impl CircuitSyscall for ExecutorImpl<'_> {
+    fn host_read(
         &self,
-        syscall: &str,
-        ctx: &mut dyn NewSyscallContext,
-        into_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+        ctx: &mut dyn CircuitSyscallContext,
+        fd: u32,
+        buf: &mut [u8],
+    ) -> Result<u32> {
+        if fd == 0 {
+            let (a0, a1) = self.return_cache.get();
+            tracing::trace!("host_read(buf: {}) -> ({a0:#010x}, {a1:#010x})", buf.len());
+            let buf: &mut [u32] = bytemuck::cast_slice_mut(buf);
+            (buf[0], buf[1]) = (a0, a1);
+            return Ok(2 * WORD_SIZE as u32);
+        }
+
         let mut ctx = ContextAdapter {
             ctx,
             syscall_table: self.syscall_table.clone(),
         };
-        self.syscall_table
-            .get_syscall(syscall)
-            .context(format!("Unknown syscall: {syscall:?}"))?
-            .borrow_mut()
-            .syscall(syscall, &mut ctx, into_guest)
+
+        let name_ptr = ByteAddr(fd);
+        let syscall = ctx.peek_string(name_ptr)?;
+        tracing::trace!("host_read({syscall}, into_guest: {})", buf.len());
+
+        let words = align_up(buf.len(), WORD_SIZE) / WORD_SIZE;
+        let mut to_guest = vec![0u32; words];
+
+        self.return_cache.set(
+            self.syscall_table
+                .get_syscall(&syscall)
+                .context(format!("Unknown syscall: {syscall:?}"))?
+                .borrow_mut()
+                .syscall(&syscall, &mut ctx, &mut to_guest)?,
+        );
+
+        let bytes = bytemuck::cast_slice(to_guest.as_slice());
+        let rlen = buf.len();
+        buf.copy_from_slice(&bytes[..rlen]);
+
+        Ok(rlen as u32)
+    }
+
+    fn host_write(&self, ctx: &mut dyn CircuitSyscallContext, _fd: u32, buf: &[u8]) -> Result<u32> {
+        let str = String::from_utf8(buf.to_vec())?;
+        tracing::debug!("R0VM[{}] {str}", ctx.get_cycle());
+        Ok(buf.len() as u32)
+    }
+}
+
+impl ContextAdapter<'_, '_> {
+    fn peek_string(&mut self, mut addr: ByteAddr) -> Result<String> {
+        tracing::trace!("peek_string: {addr:?}");
+        let mut buf = Vec::new();
+        loop {
+            let bytes = self.ctx.peek_u8(addr)?;
+            if bytes == 0 {
+                break;
+            }
+            buf.push(bytes);
+            addr += 1u32;
+        }
+        Ok(String::from_utf8(buf)?)
     }
 }

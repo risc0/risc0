@@ -1236,7 +1236,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1277,7 +1277,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-rv32im-v2"
+name = "risc0-circuit-rv32im"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1352,7 +1352,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1363,7 +1363,7 @@ dependencies = [
  "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
- "risc0-circuit-rv32im-v2",
+ "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1379,7 +1379,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "bytemuck",
  "cfg-if",

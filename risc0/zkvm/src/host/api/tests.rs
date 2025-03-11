@@ -37,7 +37,6 @@ use test_log::test;
 
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    compute_image_id_v2,
     receipt::SuccinctReceipt,
     recursion::{prove::zkr::test_recursion_circuit, MerkleGroup},
     register_zkr, ApiClient, ApiServer, CoprocessorCallback, ExecutorEnv, InnerReceipt,
@@ -334,13 +333,11 @@ fn lift_resolve() {
     // Drop the old client and create a new one to reset the segment list.
     let mut client = TestClient::new();
 
-    let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
-
     // Execute the composition multitest
     let env = ExecutorEnv::builder()
         .add_assumption(assumption_succinct_receipt.claim.clone())
         .write(&MultiTestSpec::SysVerify(vec![(
-            image_id,
+            HELLO_COMMIT_ID.into(),
             b"hello world".to_vec(),
         )]))
         .unwrap()

@@ -15,24 +15,24 @@
 use std::{
     hint::black_box,
     path::PathBuf,
+    sync::LazyLock,
     time::{Duration, Instant},
 };
 
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
-use risc0_circuit_rv32im_v2::execute::DEFAULT_SEGMENT_LIMIT_PO2;
+use risc0_binfmt::ProgramBinary;
+use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, Executor2, ExecutorEnv, ProverOpts, ReceiptKind, Segment, Session,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, Segment, Session,
     SimpleSegmentRef, VerifierContext, RECURSION_PO2,
 };
 use serde::Serialize;
 use serde_with::{serde_as, DurationNanoSeconds};
 use tabled::{settings::Style, Table, Tabled};
-
-/// Pre-compiled program that simply loops `count: u32` times (read from stdin).
-const LOOP_ELF: &[u8] = include_bytes!("loop.bin");
 
 /// Powers-of-two for cycles, paired with the number of loop iterations used to
 /// achieve that many cycles.
@@ -53,6 +53,12 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
 const ITERATIONS_1M_CYCLES: usize = 1024 * 512 - 46;
+
+/// Pre-compiled program that simply loops `count: u32` times (read from stdin).
+static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
+    const LOOP_ELF: &[u8] = include_bytes!("loop.bin");
+    ProgramBinary::new(LOOP_ELF, V1COMPAT_ELF).encode()
+});
 
 #[serde_as]
 #[derive(Debug, Serialize, Tabled)]
@@ -108,7 +114,7 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -185,7 +191,7 @@ impl Datasheet {
             .unwrap();
 
         let start = Instant::now();
-        let session = execute_elf(env, LOOP_ELF).unwrap();
+        let session = execute_elf(env, &LOOP_ELF).unwrap();
         let duration = start.elapsed();
         assert_eq!(
             session.user_cycles, EXPECTED_EXECUTE_USER_CYCLES,
@@ -225,7 +231,7 @@ impl Datasheet {
                 tracker().lock().unwrap().reset();
 
                 let start = Instant::now();
-                let info = black_box(prover.prove(env, LOOP_ELF).unwrap());
+                let info = black_box(prover.prove(env, &LOOP_ELF).unwrap());
                 let duration = start.elapsed();
 
                 let ram = tracker().lock().unwrap().peak as u64;
@@ -258,7 +264,7 @@ impl Datasheet {
             .build()
             .unwrap();
 
-        let session = execute_elf(env, LOOP_ELF).unwrap();
+        let session = execute_elf(env, &LOOP_ELF).unwrap();
         let segment = session.segments[0].resolve().unwrap();
         let receipt = prover.prove_segment(&ctx, &segment).unwrap();
 
@@ -298,7 +304,7 @@ impl Datasheet {
             .segment_limit_po2(po2 - 1)
             .build()
             .unwrap();
-        let session = execute_elf(env, LOOP_ELF).unwrap();
+        let session = execute_elf(env, &LOOP_ELF).unwrap();
         assert!(
             session.segments.len() >= 2,
             "cycles: {}",
@@ -347,7 +353,7 @@ impl Datasheet {
         tracker().lock().unwrap().reset();
 
         let start = Instant::now();
-        let info = prover.prove(env, LOOP_ELF).unwrap();
+        let info = prover.prove(env, &LOOP_ELF).unwrap();
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
@@ -376,7 +382,7 @@ impl Datasheet {
             .build()
             .unwrap();
 
-        let info = prover.prove(env, LOOP_ELF).unwrap();
+        let info = prover.prove(env, &LOOP_ELF).unwrap();
         let succinct_receipt = info.receipt.inner.succinct().unwrap();
 
         tracker().lock().unwrap().reset();
@@ -413,7 +419,7 @@ impl Datasheet {
             .build()
             .unwrap();
 
-        let info = prover.prove(env, LOOP_ELF).unwrap();
+        let info = prover.prove(env, &LOOP_ELF).unwrap();
         let succinct_receipt = info.receipt.inner.succinct().unwrap();
         let receipt = risc0_zkvm::recursion::identity_p254(&succinct_receipt).unwrap();
         let seal_bytes = receipt.get_seal_bytes();
@@ -453,7 +459,7 @@ impl Datasheet {
         tracker().lock().unwrap().reset();
 
         let start = Instant::now();
-        let info = prover.prove(env, LOOP_ELF).unwrap();
+        let info = prover.prove(env, &LOOP_ELF).unwrap();
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak as u64;
@@ -543,8 +549,14 @@ impl Datasheet {
                 .write_slice(&0u32.to_le_bytes())
                 .build()
                 .unwrap();
-            prover.prove(env, LOOP_ELF).unwrap();
+            prover.prove(env, &LOOP_ELF).unwrap();
         }
+
+        let env = ExecutorEnv::builder()
+            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .build()
+            .unwrap();
+        execute_elf(env, &LOOP_ELF).unwrap();
     }
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,77 +12,83 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
-    build_cpu_kernels();
-
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
         build_cuda_kernels();
     }
 
-    if env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios") {
-        build_metal_kernels();
-    }
+    build_cpu_kernels();
 }
 
 fn build_cpu_kernels() {
-    println!("cargo:rerun-if-changed=cxx");
+    rerun_if_changed("kernels/cxx");
     KernelBuild::new(KernelType::Cpp)
-        .files([
-            "cxx/bigint.cpp",
-            "cxx/extern.cpp",
-            "cxx/ffi.cpp",
-            "cxx/poly_fp.cpp",
-            "cxx/step_compute_accum.cpp",
-            "cxx/step_exec.cpp",
-            "cxx/step_verify_accum.cpp",
-            "cxx/step_verify_bytes.cpp",
-            "cxx/step_verify_mem.cpp",
-        ])
-        .deps(glob::glob("cxx/*.h").unwrap().map(|x| x.unwrap()))
+        .files(glob_paths("kernels/cxx/*.cpp"))
+        .deps(glob_paths("kernels/cxx/*.h"))
+        .deps(glob_paths("kernels/cxx/*.cpp.inc"))
+        .deps(glob_paths("kernels/cxx/*.h.inc"))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("risc0_rv32im_cpu");
 }
 
 fn build_cuda_kernels() {
-    KernelBuild::new(KernelType::Cuda)
-        .files([
-            "kernels/cuda/eval_check.cu",
-            "kernels/cuda/ffi.cu",
-            "kernels/cuda/ffi_supra.cu",
-            "kernels/cuda/step_compute_accum.cu",
-            "kernels/cuda/step_exec.cu",
-            "kernels/cuda/step_verify_accum.cu",
-            "kernels/cuda/step_verify_bytes.cu",
-            "kernels/cuda/step_verify_mem.cu",
-        ])
-        .deps(["kernels/cuda"])
+    let output = "risc0_rv32im_cuda";
+
+    println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+    println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
+    println!("cargo:rerun-if-env-changed=SCCACHE_RECACHE");
+    rerun_if_changed("kernels/cuda");
+
+    env::set_var("SCCACHE_IDLE_TIMEOUT", "0");
+
+    if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
+        let out_path = out_dir.join(format!("lib{output}-skip.a"));
+        std::fs::OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(&out_path)
+            .unwrap();
+        println!("cargo:{}={}", output, out_path.display());
+        return;
+    }
+
+    let mut build = cc::Build::new();
+    build
+        .cuda(true)
+        .cudart("static")
+        .debug(false)
+        .flag("-diag-suppress=177")
+        .flag("-diag-suppress=550")
+        .flag("-diag-suppress=2922")
+        .flag("-std=c++17")
+        .flag("-Xcompiler")
+        .flag("-Wno-unused-function,-Wno-unused-parameter")
+        .flag("-Xcompiler")
+        .flag("-O3")
+        .flag("-Xptxas")
+        .flag("-O3")
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .include(env::var("DEP_SPPARK_ROOT").unwrap())
-        .compile("risc0_rv32im_cuda");
+        .include(env::var("DEP_SPPARK_ROOT").unwrap());
+    if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
+        build.flag("-arch=native");
+    }
+    build.files(glob_paths("kernels/cuda/*.cu")).compile(output);
 }
 
-fn build_metal_kernels() {
-    KernelBuild::new(KernelType::Metal)
-        .files([
-            // "kernels/metal/bigint.metal",
-            "kernels/metal/extern.metal",
-            "kernels/metal/eval_check.metal",
-            "kernels/metal/ffi.metal",
-            "kernels/metal/step_compute_accum.metal",
-            // "kernels/metal/step_exec.metal",
-            "kernels/metal/step_verify_accum.metal",
-            // "kernels/metal/step_verify_bytes.metal",
-            // "kernels/metal/step_verify_mem.metal",
-        ])
-        .deps([
-            "kernels/metal/context.h",
-            "kernels/metal/extern.h",
-            "kernels/metal/kernels.h",
-        ])
-        .compile("metal_kernel");
+fn rerun_if_changed<P: AsRef<Path>>(path: P) {
+    println!("cargo:rerun-if-changed={}", path.as_ref().display());
+}
+
+fn glob_paths(pattern: &str) -> Vec<PathBuf> {
+    glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
 }
