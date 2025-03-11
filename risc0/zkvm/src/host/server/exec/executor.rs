@@ -30,7 +30,7 @@ use risc0_circuit_rv32im::{
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::{align_up, fileno, syscall::ecall};
+use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
