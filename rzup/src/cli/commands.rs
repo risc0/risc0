@@ -283,9 +283,11 @@ pub(crate) struct BuildCommand {
     name: String,
 
     /// Tag or commit of the component to uninstall
+    #[arg(short, long)]
     tag_or_commit: Option<String>,
 
     /// optional local path to build from
+    #[arg(short, long)]
     path: Option<String>,
 }
 
