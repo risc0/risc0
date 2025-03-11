@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 use crate::Rv32imV2Claim;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Segment {
     /// Initial sparse memory state for the segment
     pub partial_image: MemoryImage,

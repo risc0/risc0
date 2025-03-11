@@ -96,12 +96,12 @@ pub struct MemoryImage {
     /// TODO(flaub)
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
-    pub pages: BTreeMap<u32, Page>,
+    pages: BTreeMap<u32, Page>,
 
     /// TODO(flaub)
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
-    pub digests: BTreeMap<u32, Digest>,
+    digests: BTreeMap<u32, Digest>,
 
     #[debug("{}", dirty.len())]
     dirty: BTreeSet<u32>,
@@ -168,6 +168,16 @@ impl MemoryImage {
         kernel.image.insert(SUSPEND_PC_ADDR.0, kernel.entry);
         kernel.image.insert(SUSPEND_MODE_ADDR.0, 1);
         Self::new(kernel.image)
+    }
+
+    /// Returns a set of the page indexes that are loaded.
+    pub fn get_page_indexes(&self) -> BTreeSet<u32> {
+        self.pages.keys().copied().collect()
+    }
+
+    /// Sorted iterator over page digests (page_idx -> Digest)
+    pub fn digests(&self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
+        self.digests.iter()
     }
 
     /// Return the page data, fails if unavailable

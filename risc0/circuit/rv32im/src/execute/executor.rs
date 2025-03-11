@@ -40,6 +40,7 @@ use super::{
 };
 
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub struct EcallMetric {
     pub count: u64,
     pub cycles: u64,
@@ -62,6 +63,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     cycles: SessionCycles,
 }
 
+#[non_exhaustive]
 pub struct ExecutorResult {
     pub segments: u64,
     pub post_image: MemoryImage,
@@ -80,6 +82,7 @@ struct SessionCycles {
     reserved: u64,
 }
 
+#[non_exhaustive]
 pub struct SimpleSession {
     pub segments: Vec<Segment>,
     pub result: ExecutorResult,
