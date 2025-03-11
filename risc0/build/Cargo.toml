@@ -14,7 +14,6 @@ derive_builder = "0.20.2"
 dirs = "5.0"
 docker-generate = "0.1"
 hex = "0.4"
-regex = "1"
 risc0-binfmt = { workspace = true, features = ["std"] }
 risc0-zkos-v1compat = { workspace = true }
 risc0-zkp = { workspace = true, features = ["std"] }

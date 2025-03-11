@@ -35,10 +35,9 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use regex::Regex;
 use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
@@ -427,28 +426,19 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     cmd
 }
 
-fn get_rustc_version() -> Result<semver::Version> {
-    let output = Command::new("rustc")
-        .arg("--version")
-        .env("RUSTUP_TOOLCHAIN", "risc0")
-        .output()
-        .expect("failed to get risc0 toolchain's rustc version. Please ensure that your risc0 toolchain installed is correctly");
-
-    let version = String::from_utf8(output.stdout)?;
-    let re = Regex::new(r"\d+\.\d+\.\d+").unwrap();
-
-    if let Some(matched) = re.find(&version) {
-        semver::Version::parse(matched.as_str())
-            .map_err(|_| anyhow!("failed to parse version from rustc output"))
-    } else {
-        bail!("No semver found.")
-    }
+fn get_rust_toolchain_version() -> semver::Version {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, _) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+        .expect("Risc Zero Rust toolchain installed");
+    version
 }
 
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
 pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
     // llvm changed `loweratomic` to `lower-atomic`
-    let lower_atomic = if get_rustc_version().unwrap() > semver::Version::new(1, 81, 0) {
+    let lower_atomic = if get_rust_toolchain_version() > semver::Version::new(1, 81, 0) {
         "passes=lower-atomic"
     } else {
         "passes=loweratomic"

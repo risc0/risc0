@@ -4476,7 +4476,6 @@ dependencies = [
  "dirs",
  "docker-generate",
  "hex",
- "regex",
  "risc0-binfmt",
  "risc0-zkos-v1compat",
  "risc0-zkp",
