@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ mod bootstrap_protos;
 #[cfg(feature = "zkvm")]
 mod gen_receipt;
 mod install;
+mod semver_checks;
 
 use clap::{Parser, Subcommand};
 
@@ -28,6 +29,7 @@ use clap::{Parser, Subcommand};
 use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 use self::{
     bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos, install::Install,
+    semver_checks::SemverChecks,
 };
 
 #[derive(Parser)]
@@ -47,6 +49,7 @@ enum Commands {
     #[cfg(feature = "zkvm")]
     GenReceipt(GenReceipt),
     Install(Install),
+    SemverChecks(SemverChecks),
 }
 
 impl Commands {
@@ -61,6 +64,7 @@ impl Commands {
             Commands::Install(cmd) => cmd.run(),
             #[cfg(feature = "zkvm")]
             Commands::GenReceipt(cmd) => cmd.run(),
+            Commands::SemverChecks(cmd) => cmd.run(),
         }
     }
 }
