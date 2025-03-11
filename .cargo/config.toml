@@ -5,3 +5,7 @@ xtask = "run --package xtask --release --"
 
 [build]
 rustflags = ["-Dclippy::all", "-Dwarnings"]
+rustc-wrapper = "sccache"
+
+[registries.crates-io]
+protocol = "sparse"
