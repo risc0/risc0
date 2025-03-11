@@ -81,33 +81,29 @@ mod receipt_claim;
 pub mod serde;
 pub mod sha;
 
-#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
-pub use host::recursion;
-
+pub use ::serde::de::DeserializeOwned;
 pub use anyhow::Result;
+pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
+pub use risc0_zkp::core::digest::{digest, Digest};
+pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
-
-pub use self::receipt_claim::{
-    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
-    UnionClaim, Unknown,
-};
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 pub use {
     self::host::{
         api::server::Server as ApiServer,
-        client::prove::local::LocalProver,
+        client::prove::{local::LocalProver, local_executor},
         recursion::{
+            self,
             prove::{prove_registered_zkr, prove_zkr, register_zkr},
             RECURSION_PO2,
         },
         server::{
-            exec::executor2::Executor2,
+            exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -115,7 +111,6 @@ pub use {
             },
         },
     },
-    // TODO: Loader
     risc0_groth16::{
         docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
     },
@@ -150,11 +145,6 @@ pub use {
 pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
 
 #[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "prove")]
-#[cfg(feature = "unstable")]
-pub use self::host::server::prove::keccak::prove_keccak;
-
-#[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
@@ -164,18 +154,18 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-pub use risc0_binfmt::{compute_kernel_id_v2, compute_user_id_v2};
-
-pub use receipt::{
-    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
-    Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
-    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
+pub use self::{
+    receipt::{
+        AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
+        Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
+        Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
+        SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
+    },
+    receipt_claim::{
+        Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+        UnionClaim, Unknown,
+    },
 };
-
-pub use ::serde::de::DeserializeOwned;
-
-pub use risc0_zkp::core::digest::{digest, Digest};
 
 use semver::Version;
 
@@ -210,13 +200,4 @@ pub fn is_dev_mode() -> bool {
 fn metal_implies_prove() {
     // we should be able to access prove feature items when metal has been enabled
     let _prover = get_prover_server(&ProverOpts::default());
-}
-
-/// Compute and return the v2 ImageID of the specified ELF binary.
-pub fn compute_image_id_v2(
-    user_id: impl Into<risc0_zkp::core::digest::Digest>,
-) -> Result<risc0_zkp::core::digest::Digest> {
-    let kernel_id: risc0_zkp::core::digest::Digest =
-        Digest::from_bytes(*risc0_zkos_v1compat::V1COMPAT_V2_KERNEL_ID);
-    risc0_binfmt::compute_image_id_v2(user_id, kernel_id)
 }

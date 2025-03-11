@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_binfmt::{MemoryImage2, Program};
+use risc0_binfmt::{MemoryImage, Program};
 use test_log::test;
 
 use super::segment_prover;
@@ -22,7 +22,7 @@ use crate::{
 };
 
 fn run_program(program: Program) {
-    let image = MemoryImage2::new_kernel(program);
+    let image = MemoryImage::new_kernel(program);
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,

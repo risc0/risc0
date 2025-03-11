@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [[example]]
-name = "rv32im_v2"
+name = "rv32im"
 required-features = ["prove"]
 
 [dependencies]
@@ -33,6 +33,7 @@ tracing = { version = "0.1", default-features = false, features = [
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 auto_ops = { version = "0.3", optional = true }
+bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
 malachite = { version = "0.4", optional = true, default-features = false, features = [

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use derive_more::Debug;
-use risc0_binfmt::MemoryImage2;
+use risc0_binfmt::MemoryImage;
 use serde::{Deserialize, Serialize};
 
 use crate::Rv32imV2Claim;
@@ -21,7 +21,7 @@ use crate::Rv32imV2Claim;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Segment {
     /// Initial sparse memory state for the segment
-    pub partial_image: MemoryImage2,
+    pub partial_image: MemoryImage,
 
     pub claim: Rv32imV2Claim,
 

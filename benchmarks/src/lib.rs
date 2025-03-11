@@ -23,7 +23,7 @@ use std::{
 
 use human_repr::{HumanCount, HumanDuration, HumanThroughput};
 use risc0_zkvm::{
-    get_prover_server, sha::Digest, Executor2, ExecutorEnv, ProverOpts, Session, VerifierContext,
+    get_prover_server, sha::Digest, ExecutorEnv, ExecutorImpl, ProverOpts, Session, VerifierContext,
 };
 use serde::Serialize;
 use serde_with::{serde_as, DurationNanoSeconds};
@@ -116,7 +116,7 @@ impl Job {
             .write_slice(&self.input)
             .build()
             .unwrap();
-        let mut exec = Executor2::from_elf(env, &self.elf).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, &self.elf).unwrap();
         let start = Instant::now();
         let session = exec.run().unwrap();
         let elapsed = start.elapsed();
