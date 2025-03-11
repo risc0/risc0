@@ -439,7 +439,7 @@ fn get_rustc_version() -> Result<semver::Version> {
 
     if let Some(matched) = re.find(&version) {
         semver::Version::parse(matched.as_str())
-            .or_else(|_| Err(anyhow!("failed to parse version from rustc output")))
+            .map_err(|_| anyhow!("failed to parse version from rustc output"))
     } else {
         bail!("No semver found.")
     }
