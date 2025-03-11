@@ -26,7 +26,7 @@ fn input_point() -> AffinePoint<12, Secp384r1Curve> {
 
 fn main() {
     let inp = input_point();
-    let buffer = input_point();
+    let mut buffer = input_point();
     let scalar = [10u32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
 
     let mut result = AffinePoint::<12, Secp384r1Curve>::IDENTITY;
@@ -40,6 +40,6 @@ fn main() {
     inp.mul(&scalar, &mut result2);
 
     // The two results should match
-    assert_eq!(result.as_u32s(), result2.as_u32s);
+    assert_eq!(result.as_u32s(), result2.as_u32s());
     env::commit(&result.as_u32s());
 }
