@@ -20,7 +20,7 @@ use risc0_binfmt::ByteAddr;
 //     addr::{ByteAddr, WordAddr},
 //     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
 // };
-use risc0_circuit_rv32im_v2::{
+use risc0_circuit_rv32im::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,

@@ -263,7 +263,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "5a3dc304d7b67d82be9968c815cbc8934068721f74ac8d82d6fd3859fb566c60",
+            "610f7ff456a0b9ceb55284789360f8f89ce5fc1d2c11714c614f7c5f47b2e0d3",
         );
     }
 }
