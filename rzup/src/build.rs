@@ -226,9 +226,9 @@ pub fn build_rust_toolchain(
     });
 
     let lower_atomic = if version > semver::Version::new(1, 81, 0) {
-        "passes=lower-atomic"
+        "-Cpasses=lower-atomic"
     } else {
-        "passes=loweratomic"
+        "-Cpasses=loweratomic"
     };
 
     run_command_and_stream_output(
