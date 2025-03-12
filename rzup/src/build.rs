@@ -229,15 +229,9 @@ pub fn build_rust_toolchain(
     });
 
     let lower_atomic = if version > semver::Version::new(1, 81, 0) {
-<<<<<<< HEAD
         "-Cpasses=lower-atomic"
     } else {
         "-Cpasses=loweratomic"
-=======
-        "passes=lower-atomic"
-    } else {
-        "passes=loweratomic"
->>>>>>> 0b1eae0f5 (rzup build rust: set lower-atomic based on version number)
     };
 
     run_command_and_stream_output(
