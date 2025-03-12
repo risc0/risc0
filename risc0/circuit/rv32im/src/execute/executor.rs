@@ -486,7 +486,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
         self.user_cycles += 1;
-        // TODO: We don't want to count user_cycles towards the terminate ecall, right?
+        self.ecall_metrics.0[EcallKind::Terminate].cycles += 1;
 
         self.terminate_state = Some(TerminateState {
             a0: a0.into(),
