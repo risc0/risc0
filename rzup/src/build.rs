@@ -180,6 +180,10 @@ pub fn build_rust_toolchain(
     // if building from commit
     let repo_dir = match path {
         None => {
+            env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                message: "using git repository".into(),
+            });
+
             let repo_dir = env.tmp_dir().join("build-rust-toolchain");
             if !repo_dir.join(".git").exists() {
                 env.emit(RzupEvent::BuildingRustToolchainUpdate {
@@ -195,7 +199,12 @@ pub fn build_rust_toolchain(
             git_submodule_update(&repo_dir)?;
             repo_dir
         }
-        Some(path) => path.into(),
+        Some(path) => {
+            env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                message: format!("using path {}", path),
+            });
+            path.into()
+        }
     };
 
     let commit = git_short_rev_parse(&repo_dir, "HEAD")?;
@@ -220,9 +229,15 @@ pub fn build_rust_toolchain(
     });
 
     let lower_atomic = if version > semver::Version::new(1, 81, 0) {
+<<<<<<< HEAD
         "-Cpasses=lower-atomic"
     } else {
         "-Cpasses=loweratomic"
+=======
+        "passes=lower-atomic"
+    } else {
+        "passes=loweratomic"
+>>>>>>> 0b1eae0f5 (rzup build rust: set lower-atomic based on version number)
     };
 
     run_command_and_stream_output(
