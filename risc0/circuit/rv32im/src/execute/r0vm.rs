@@ -18,7 +18,6 @@ use anyhow::{anyhow, bail, Result};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
-    bigint::{self, BigIntState},
     platform::*,
     poseidon2::{Poseidon2, Poseidon2State},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
@@ -51,10 +50,6 @@ pub(crate) trait Risc0Context {
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
 
     fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
-
-    fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
-        self.store_u32(base + idx, word)
-    }
 
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
 
@@ -90,6 +85,10 @@ pub(crate) trait Risc0Context {
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
+
+    fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
+        self.store_u32(base + idx, word)
+    }
 
     fn on_ecall_cycle(
         &mut self,
@@ -130,7 +129,7 @@ pub(crate) trait Risc0Context {
 
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
-    fn on_bigint_cycle(&mut self, cur_state: CycleState, bigint: &BigIntState);
+    fn ecall_bigint(&mut self) -> Result<()>;
 }
 
 fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
@@ -360,7 +359,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::BigIntEcall, 0, 0, 0)?;
-        bigint::ecall(self.ctx)?;
+        self.ctx.ecall_bigint()?;
         Ok(false)
     }
 
