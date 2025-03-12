@@ -1251,7 +1251,7 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1266,7 +1266,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.1.0-alpha.1"
+version = "3.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1275,9 +1275,11 @@ dependencies = [
  "docker-generate",
  "hex",
  "risc0-binfmt",
+ "risc0-zkos-v1compat",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rzup",
+ "semver",
  "serde",
  "serde_json",
  "stability",
@@ -1312,7 +1314,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-rv32im-v2"
+name = "risc0-circuit-rv32im"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1387,7 +1389,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1398,7 +1400,7 @@ dependencies = [
  "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
- "risc0-circuit-rv32im-v2",
+ "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1439,7 +1441,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.4.0-alpha.1"
+version = "2.0.0-alpha.1"
 dependencies = [
  "bytemuck",
  "cfg-if",

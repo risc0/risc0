@@ -21,8 +21,8 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage2, Program};
-use risc0_circuit_rv32im_v2::TerminateState;
+use risc0_binfmt::{ExitCode, MemoryImage, Program, ProgramBinary};
+use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
@@ -40,7 +40,7 @@ use sha2::{Digest as _, Sha256};
 
 use crate::{
     host::server::exec::{
-        executor2::Executor2,
+        executor::ExecutorImpl,
         profiler::Profiler,
         syscall::{Syscall, SyscallContext},
     },
@@ -50,7 +50,7 @@ use crate::{
 };
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -90,13 +90,13 @@ fn insufficient_segment_limit() {
 
 #[test_log::test]
 fn basic() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::user::basic();
+    let program = risc0_circuit_rv32im::execute::testutil::user::basic();
     let env = ExecutorEnv::default();
     let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX).unwrap();
-    let mut image = MemoryImage2::with_kernel(program, kernel);
+    let mut image = MemoryImage::with_kernel(program, kernel);
     let pre_image_id = image.image_id();
 
-    let mut exec = Executor2::new(env, image).unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
         .unwrap();
@@ -117,15 +117,15 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
-    let mut image = MemoryImage2::new_kernel(program);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
     let env = ExecutorEnv::builder()
         .segment_limit_po2(13) // 8K cycles
         .build()
         .unwrap();
-    let mut exec = Executor2::new(env, image).unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
         .unwrap();
@@ -513,7 +513,7 @@ fn large_io_bytes() {
 }
 
 mod sys_verify {
-    use crate::{compute_image_id_v2, MaybePruned, ReceiptClaim};
+    use crate::{MaybePruned, ReceiptClaim};
 
     use super::*;
 
@@ -551,11 +551,8 @@ mod sys_verify {
 
         let hello_commit_session = exec_hello_commit();
 
-        let image_id = compute_image_id_v2(HELLO_COMMIT_ID).unwrap();
-        tracing::debug!("image_id: {image_id}");
-
         let spec = &MultiTestSpec::SysVerify(vec![(
-            image_id,
+            HELLO_COMMIT_ID.into(),
             hello_commit_session.journal.clone().unwrap().bytes,
         )]);
 
@@ -586,13 +583,11 @@ mod sys_verify {
     fn sys_verify_halt_codes() {
         use risc0_zkvm_methods::MULTI_TEST_ID;
 
-        let image_id = compute_image_id_v2(MULTI_TEST_ID).unwrap();
-
         for code in [0u8, 1, 2, 255] {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
-            let spec = &MultiTestSpec::SysVerify(vec![(image_id, Vec::new())]);
+            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
@@ -881,8 +876,9 @@ fn fault() {
 
 #[test_log::test]
 fn profiler() {
+    let binary = ProgramBinary::decode(MULTI_TEST_ELF).unwrap();
     let mut profiler = Profiler::new(
-        MULTI_TEST_ELF,
+        &binary,
         Some("multi_test.elf"),
         true, /* enable_inline_functions */
     )
@@ -893,7 +889,7 @@ fn profiler() {
         .trace_callback(&mut profiler)
         .build()
         .unwrap();
-    Executor2::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -1003,7 +999,7 @@ fn profiler() {
         }
     }
 
-    let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
+    let program = Program::load_elf(binary.user_elf, u32::MAX).unwrap();
 
     // Check that the addresses for these two functions point to the right place
     for func_name in ["profile_test_func2", "profile_test_func3"] {
@@ -1013,8 +1009,8 @@ fn profiler() {
             .unwrap();
 
         let addr = test_func.frames[0].address;
-        let inst = *elf_mem
-            .get(&(addr as u32))
+        let inst = program
+            .read_u32(&(addr as u32))
             .unwrap_or_else(|| panic!("0x{addr:x} found in elf"));
 
         // check its nop
@@ -1113,7 +1109,8 @@ fn post_state_digest_randomization() {
         .map(|_| {
             // Run the guest and extract the post state digest.
 
-            let mut exec = Executor2::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            let mut exec =
+                ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
             // Override the default randomness syscall using crate-internal API.
             exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
             exec.run()
@@ -1240,7 +1237,7 @@ mod docker {
                 })
                 .build()
                 .unwrap();
-            Executor2::from_elf(env, MULTI_TEST_ELF)
+            ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
                 .unwrap()
                 .run()
                 .unwrap();
