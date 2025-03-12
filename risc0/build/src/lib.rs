@@ -426,8 +426,23 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     cmd
 }
 
+fn get_rust_toolchain_version() -> semver::Version {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, _) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+        .expect("Risc Zero Rust toolchain installed");
+    version
+}
+
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
 pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
+    // llvm changed `loweratomic` to `lower-atomic`
+    let lower_atomic = if get_rust_toolchain_version() > semver::Version::new(1, 81, 0) {
+        "passes=lower-atomic"
+    } else {
+        "passes=loweratomic"
+    };
     let rustc_flags = guest_meta.rustc_flags.clone().unwrap_or_default();
     let rustc_flags: Vec<_> = rustc_flags.iter().map(|s| s.as_str()).collect();
     let text_addr = if guest_meta.kernel {
@@ -441,7 +456,7 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
         &[
             // Replace atomic ops with nonatomic versions since the guest is single threaded.
             "-C",
-            "passes=loweratomic",
+            lower_atomic,
             // Specify where to start loading the program in
             // memory.  The clang linker understands the same
             // command line arguments as the GNU linker does; see
