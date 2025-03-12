@@ -281,7 +281,9 @@ fn double_raw<const WIDTH: usize>(
             );
         }
     } else {
-        unimplemented!("Bitwidths above 384 bits not currently supported for elliptic curve precompiles");
+        unimplemented!(
+            "Bitwidths above 384 bits not currently supported for elliptic curve precompiles"
+        );
     }
 }
 
@@ -319,7 +321,9 @@ fn add_raw<const WIDTH: usize>(
             );
         }
     } else {
-        unimplemented!("Bitwidths above 384 bits not currently supported for elliptic curve precompiles");
+        unimplemented!(
+            "Bitwidths above 384 bits not currently supported for elliptic curve precompiles"
+        );
     }
 }
 

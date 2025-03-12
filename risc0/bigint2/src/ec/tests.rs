@@ -14,7 +14,7 @@
 
 use std::time::Instant;
 
-use risc0_bigint2_methods::{EC_ADD_256_ELF, EC_DOUBLE_256_ELF, EC_MUL_256_ELF, EC_384_ELF};
+use risc0_bigint2_methods::{EC_384_ELF, EC_ADD_256_ELF, EC_DOUBLE_256_ELF, EC_MUL_256_ELF};
 use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts};
 
 use crate::ec::secp256k1::SECP256K1_PRIME;
@@ -238,32 +238,12 @@ fn ec_double_point_with_zero_y() {
 fn p384() {
     let point: Option<[[u32; 12]; 2]> = Some([
         [
-            0x72760ab7,
-            0x3a545e38,
-            0xbf55296c,
-            0x5502f25d,
-            0x82542a38,
-            0x59f741e0,
-            0x8ba79b98,
-            0x6e1d3b62,
-            0xf320ad74,
-            0x8eb1c71e,
-            0xbe8b0537,
-            0xaa87ca22,
+            0x72760ab7, 0x3a545e38, 0xbf55296c, 0x5502f25d, 0x82542a38, 0x59f741e0, 0x8ba79b98,
+            0x6e1d3b62, 0xf320ad74, 0x8eb1c71e, 0xbe8b0537, 0xaa87ca22,
         ],
         [
-            0x90ea0e5f,
-            0x7a431d7c,
-            0x1d7e819d,
-            0x0a60b1ce,
-            0xb5f0b8c0,
-            0xe9da3113,
-            0x289a147c,
-            0xf8f41dbd,
-            0x9292dc29,
-            0x5d9e98bf,
-            0x96262c6f,
-            0x3617de4a,
+            0x90ea0e5f, 0x7a431d7c, 0x1d7e819d, 0x0a60b1ce, 0xb5f0b8c0, 0xe9da3113, 0x289a147c,
+            0xf8f41dbd, 0x9292dc29, 0x5d9e98bf, 0x96262c6f, 0x3617de4a,
         ],
     ]);
 
@@ -274,6 +254,17 @@ fn p384() {
         .unwrap();
     let result: Option<[[u32; 12]; 2]> = run_test(env, EC_384_ELF);
     // Confirm the result is stable
-    assert_eq!(result, Some([[409360635, 2848664851, 1350301978, 3985540523, 689060044, 2468174889, 3080429192, 1329016208, 4014988934, 1737304534, 1003912940, 2791949654],
-        [3074040285, 2541244266, 612534489, 695042453, 3283551656, 3305299832, 202914865, 4144044373, 3052465373, 584648765, 3888195487, 2844309290]]));
+    assert_eq!(
+        result,
+        Some([
+            [
+                409360635, 2848664851, 1350301978, 3985540523, 689060044, 2468174889, 3080429192,
+                1329016208, 4014988934, 1737304534, 1003912940, 2791949654
+            ],
+            [
+                3074040285, 2541244266, 612534489, 695042453, 3283551656, 3305299832, 202914865,
+                4144044373, 3052465373, 584648765, 3888195487, 2844309290
+            ]
+        ])
+    );
 }
