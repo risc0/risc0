@@ -54,7 +54,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
     machine_mode: u32,
-    phys_cycles: u32,
+    user_cycles: u32,
     pager: PagedMemory,
     terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
@@ -100,7 +100,7 @@ struct ComputePartialImageRequest {
     output_digest: Option<Digest>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
-    phys_cycles: u32,
+    user_cycles: u32,
     pager_cycles: u32,
     terminate_state: Option<TerminateState>,
     segment_threshold: u32,
@@ -131,7 +131,7 @@ fn compute_partial_images(
             },
             read_record: req.read_record,
             write_record: req.write_record,
-            suspend_cycle: req.phys_cycles,
+            suspend_cycle: req.user_cycles,
             paging_cycles: req.pager_cycles,
             po2: req.po2,
             index: segment_counter,
@@ -153,7 +153,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             pc: ByteAddr(0),
             user_pc: ByteAddr(0),
             machine_mode: 0,
-            phys_cycles: 0,
+            user_cycles: 0,
             pager: PagedMemory::new(image, !trace.is_empty() /* tracing_enabled */),
             terminate_state: None,
             read_record: Vec::new(),
@@ -205,7 +205,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 if self.segment_cycles() >= segment_threshold {
                     tracing::debug!(
                         "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {} >= {segment_threshold}",
-                        self.phys_cycles,
+                        self.user_cycles,
                         self.pager.cycles,
                         self.segment_cycles()
                     );
@@ -226,7 +226,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         output_digest: self.output_digest,
                         read_record: std::mem::take(&mut self.read_record),
                         write_record: std::mem::take(&mut self.write_record),
-                        phys_cycles: self.phys_cycles,
+                        user_cycles: self.user_cycles,
                         pager_cycles: self.pager.cycles,
                         terminate_state: self.terminate_state,
                         segment_threshold,
@@ -240,11 +240,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
                     let total_cycles = 1 << segment_po2;
                     let pager_cycles = self.pager.cycles as u64;
-                    let phys_cycles = self.phys_cycles as u64;
+                    let user_cycles = self.user_cycles as u64;
                     self.cycles.total += total_cycles;
                     self.cycles.paging += pager_cycles;
-                    self.cycles.reserved += total_cycles - pager_cycles - phys_cycles;
-                    self.phys_cycles = 0;
+                    self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
+                    self.user_cycles = 0;
                     self.pager.reset();
 
                     Risc0Machine::resume(self)?;
@@ -266,7 +266,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 output_digest: self.output_digest,
                 read_record: std::mem::take(&mut self.read_record),
                 write_record: std::mem::take(&mut self.write_record),
-                phys_cycles: self.phys_cycles,
+                user_cycles: self.user_cycles,
                 pager_cycles: self.pager.cycles,
                 terminate_state: self.terminate_state,
                 segment_threshold,
@@ -279,11 +279,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             let final_cycles = final_cycles as u64;
-            let phys_cycles = self.phys_cycles as u64;
+            let user_cycles = self.user_cycles as u64;
             let pager_cycles = self.pager.cycles as u64;
             self.cycles.total += final_cycles;
             self.cycles.paging += pager_cycles;
-            self.cycles.reserved += final_cycles - pager_cycles - phys_cycles;
+            self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
 
             drop(commit_sender);
             Ok((post_digest, partial_images_thread.join().unwrap()?))
@@ -320,19 +320,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.write_record.clear();
         self.output_digest = None;
         self.machine_mode = 0;
-        self.phys_cycles = 0;
+        self.user_cycles = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
         self.ecall_metrics = EcallMetrics::default();
     }
 
     fn segment_cycles(&self) -> u32 {
-        self.phys_cycles + self.pager.cycles + LOOKUP_TABLE_CYCLES as u32
+        self.user_cycles + self.pager.cycles + LOOKUP_TABLE_CYCLES as u32
     }
 
     fn inc_user_cycles(&mut self) {
         self.cycles.user += 1;
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
     }
 
     #[cold]
@@ -359,7 +359,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn trace_instruction(&self, cycle: u64, insn: &Instruction, decoded: &DecodedInstruction) {
         tracing::trace!(
             "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-            self.phys_cycles + 1,
+            self.user_cycles + 1,
             self.segment_cycles() + 1,
             self.pc,
             decoded.insn,
