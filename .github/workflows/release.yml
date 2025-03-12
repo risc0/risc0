@@ -47,7 +47,7 @@ jobs:
         run: docker build -f .github/containers/release/Dockerfile --output tmp/pkg .
       - if: matrix.os == 'macOS'
         run: |
-          cargo build -p cargo-risczero --release
+          cargo build -p cargo-risczero --release --locked
           mkdir -p tmp/pkg
           cp target/release/cargo-risczero tmp/pkg
           cp target/release/r0vm tmp/pkg
