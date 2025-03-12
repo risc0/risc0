@@ -180,12 +180,11 @@ pub fn build_rust_toolchain(
     // if building from commit
     let repo_dir = match path {
         None => {
-            env.emit(RzupEvent::BuildingRustToolchainUpdate {
-                message: "using git repository".into(),
-            });
-
             let repo_dir = env.tmp_dir().join("build-rust-toolchain");
             if !repo_dir.join(".git").exists() {
+                env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                    message: "cloning git repository".into(),
+                });
                 git_clone(repo_url, &repo_dir)?;
             } else {
                 git_fetch(&repo_dir)?;
@@ -196,12 +195,7 @@ pub fn build_rust_toolchain(
             git_submodule_update(&repo_dir)?;
             repo_dir
         }
-        Some(path) => {
-            env.emit(RzupEvent::BuildingRustToolchainUpdate {
-                message: format!("using path {}", path),
-            });
-            path.into()
-        }
+        Some(path) => path.into(),
     };
 
     let commit = git_short_rev_parse(&repo_dir, "HEAD")?;
