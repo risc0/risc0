@@ -19,9 +19,14 @@ use auto_ops::impl_op_ex;
 use risc0_zkp::field::Elem as _;
 use smallvec::{smallvec, SmallVec};
 
-use crate::zirgen::circuit::ExtVal;
+use crate::{
+    execute::bigint::{BIGINT_ACCUM_STATE_COUNT, BIGINT_WIDTH_BYTES},
+    zirgen::circuit::{BigIntAccumStateLayout, ExtVal, LAYOUT_TOP_ACCUM},
+};
 
-use super::bigint::{BigIntState, Instruction, PolyOp, BIGINT_WIDTH_BYTES};
+use super::bigint::{BigIntState, Instruction, PolyOp};
+
+const BIGINT_ACCUM_STATE_LAYOUT: &BigIntAccumStateLayout = LAYOUT_TOP_ACCUM.user._0.state;
 
 #[derive(Debug)]
 pub(crate) struct BytePolyProgram {
@@ -189,6 +194,44 @@ impl BigIntAccumState {
             term: ExtVal::ONE,
             total: ExtVal::ZERO,
         }
+    }
+
+    pub(crate) const fn offsets() -> [usize; BIGINT_ACCUM_STATE_COUNT] {
+        [
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset,
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 1,
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 2,
+            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 3,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 1,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 2,
+            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 3,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 1,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 2,
+            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 3,
+        ]
+    }
+
+    pub(crate) fn as_array(&self) -> [u32; BIGINT_ACCUM_STATE_COUNT] {
+        let poly = self.poly.elems();
+        let term = self.term.elems();
+        let total = self.total.elems();
+
+        [
+            poly[0].into(),
+            poly[1].into(),
+            poly[2].into(),
+            poly[3].into(),
+            term[0].into(),
+            term[1].into(),
+            term[2].into(),
+            term[3].into(),
+            total[0].into(),
+            total[1].into(),
+            total[2].into(),
+            total[3].into(),
+        ]
     }
 }
 
