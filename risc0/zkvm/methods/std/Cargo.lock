@@ -1279,6 +1279,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rzup",
+ "semver",
  "serde",
  "serde_json",
  "stability",
