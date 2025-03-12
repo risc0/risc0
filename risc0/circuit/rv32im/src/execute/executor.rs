@@ -54,7 +54,6 @@ pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
     machine_mode: u32,
-    user_cycles: u32,
     phys_cycles: u32,
     pager: PagedMemory,
     terminate_state: Option<TerminateState>,
@@ -101,7 +100,6 @@ struct ComputePartialImageRequest {
     output_digest: Option<Digest>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
-    user_cycles: u32,
     phys_cycles: u32,
     pager_cycles: u32,
     terminate_state: Option<TerminateState>,
@@ -133,7 +131,6 @@ fn compute_partial_images(
             },
             read_record: req.read_record,
             write_record: req.write_record,
-            user_cycles: req.user_cycles,
             suspend_cycle: req.phys_cycles,
             paging_cycles: req.pager_cycles,
             po2: req.po2,
@@ -156,7 +153,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             pc: ByteAddr(0),
             user_pc: ByteAddr(0),
             machine_mode: 0,
-            user_cycles: 0,
             phys_cycles: 0,
             pager: PagedMemory::new(image, !trace.is_empty() /* tracing_enabled */),
             terminate_state: None,
@@ -230,7 +226,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         output_digest: self.output_digest,
                         read_record: std::mem::take(&mut self.read_record),
                         write_record: std::mem::take(&mut self.write_record),
-                        user_cycles: self.user_cycles,
                         phys_cycles: self.phys_cycles,
                         pager_cycles: self.pager.cycles,
                         terminate_state: self.terminate_state,
@@ -245,11 +240,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
                     let total_cycles = 1 << segment_po2;
                     let pager_cycles = self.pager.cycles as u64;
-                    let user_cycles = self.user_cycles as u64;
+                    let phys_cycles = self.phys_cycles as u64;
                     self.cycles.total += total_cycles;
                     self.cycles.paging += pager_cycles;
-                    self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
-                    self.user_cycles = 0;
+                    self.cycles.reserved += total_cycles - pager_cycles - phys_cycles;
                     self.phys_cycles = 0;
                     self.pager.reset();
 
@@ -272,7 +266,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 output_digest: self.output_digest,
                 read_record: std::mem::take(&mut self.read_record),
                 write_record: std::mem::take(&mut self.write_record),
-                user_cycles: self.user_cycles,
                 phys_cycles: self.phys_cycles,
                 pager_cycles: self.pager.cycles,
                 terminate_state: self.terminate_state,
@@ -286,11 +279,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             let final_cycles = final_cycles as u64;
-            let user_cycles = self.user_cycles as u64;
+            let phys_cycles = self.phys_cycles as u64;
             let pager_cycles = self.pager.cycles as u64;
             self.cycles.total += final_cycles;
             self.cycles.paging += pager_cycles;
-            self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
+            self.cycles.reserved += final_cycles - pager_cycles - phys_cycles;
 
             drop(commit_sender);
             Ok((post_digest, partial_images_thread.join().unwrap()?))
@@ -327,7 +320,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.write_record.clear();
         self.output_digest = None;
         self.machine_mode = 0;
-        self.user_cycles = 0;
         self.phys_cycles = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
@@ -336,6 +328,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     fn segment_cycles(&self) -> u32 {
         self.phys_cycles + self.pager.cycles + LOOKUP_TABLE_CYCLES as u32
+    }
+
+    fn inc_user_cycles(&mut self) {
+        self.cycles.user += 1;
+        self.phys_cycles += 1;
     }
 
     #[cold]
@@ -362,7 +359,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn trace_instruction(&self, cycle: u64, insn: &Instruction, decoded: &DecodedInstruction) {
         tracing::trace!(
             "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-            self.user_cycles + 1,
+            self.phys_cycles + 1,
             self.segment_cycles() + 1,
             self.pc,
             decoded.insn,
@@ -402,7 +399,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
-        self.cycles.user += 1;
+        // self.cycles.user += 1;
         if tracing::enabled!(tracing::Level::TRACE) {
             self.trace_instruction(cycle, insn, decoded);
         }
@@ -418,8 +415,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
-        self.user_cycles += 1;
-        self.phys_cycles += 1;
+        self.inc_user_cycles();
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
@@ -435,7 +431,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         _s2: u32,
         kind: EcallKind,
     ) -> Result<()> {
-        self.phys_cycles += 1;
+        self.inc_user_cycles();
         self.ecall_metrics.0[kind].cycles += 1;
         if cur == CycleState::MachineEcall {
             self.ecall_metrics.0[kind].count += 1;
@@ -485,9 +481,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
-        self.user_cycles += 1;
-        self.ecall_metrics.0[EcallKind::Terminate].cycles += 1;
-
         self.terminate_state = Some(TerminateState {
             a0: a0.into(),
             a1: a1.into(),
@@ -518,17 +511,17 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
         self.ecall_metrics.0[EcallKind::Sha2].cycles += 1;
-        self.phys_cycles += 1;
+        self.inc_user_cycles();
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
         self.ecall_metrics.0[EcallKind::Poseidon2].cycles += 1;
-        self.phys_cycles += 1;
+        self.inc_user_cycles();
     }
 
     fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
         self.ecall_metrics.0[EcallKind::BigInt].cycles += 1;
-        self.phys_cycles += 1;
+        self.inc_user_cycles();
     }
 }
 

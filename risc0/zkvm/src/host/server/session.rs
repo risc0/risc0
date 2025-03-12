@@ -136,7 +136,7 @@ impl Segment {
     }
 
     pub(crate) fn user_cycles(&self) -> u32 {
-        self.inner.user_cycles
+        self.inner.suspend_cycle
     }
 }
 
@@ -250,9 +250,7 @@ impl Session {
             pct(self.reserved_cycles)
         );
 
-        // TODO: Subtract out ecalls from reserved? Track separately?
-
-        tracing::info!("ecalls (included in reserved)");
+        tracing::info!("ecalls");
         let mut ecall_metrics = self.ecall_metrics.clone();
         ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
         for (name, metric) in ecall_metrics.iter().rev() {
