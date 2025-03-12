@@ -14,7 +14,7 @@
 
 use std::time::Instant;
 
-use risc0_bigint2_methods::{EC_ADD_ELF, EC_DOUBLE_ELF, EC_MUL_ELF};
+use risc0_bigint2_methods::{EC_ADD_256_ELF, EC_DOUBLE_256_ELF, EC_MUL_256_ELF, EC_384_ELF};
 use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts};
 
 use crate::ec::secp256k1::SECP256K1_PRIME;
@@ -81,7 +81,7 @@ fn ec_add_basic() {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_256_ELF);
     assert_eq!(result, Some(expected));
 }
 
@@ -114,14 +114,14 @@ fn ec_double_basic() {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_256_ELF);
     assert_eq!(result, Some(expected));
 }
 
 #[test_log::test]
 fn ec_mul() {
     let env = ExecutorEnv::builder().build().unwrap();
-    run_test_no_decode(env, EC_MUL_ELF);
+    run_test_no_decode(env, EC_MUL_256_ELF);
 }
 
 #[test_log::test]
@@ -143,7 +143,7 @@ fn ec_add_point_plus_identity() {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_256_ELF);
     assert_eq!(result, point);
 }
 
@@ -166,7 +166,7 @@ fn ec_add_identity_plus_point() {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_256_ELF);
     assert_eq!(result, point);
 }
 
@@ -198,7 +198,7 @@ fn ec_add_point_plus_negative() {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_ADD_256_ELF);
     assert_eq!(result, None);
 }
 
@@ -211,7 +211,7 @@ fn ec_double_identity() {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_256_ELF);
     assert_eq!(result, None);
 }
 
@@ -230,7 +230,7 @@ fn ec_double_point_with_zero_y() {
         .unwrap()
         .build()
         .unwrap();
-    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_ELF);
+    let result: Option<[[u32; 8]; 2]> = run_test(env, EC_DOUBLE_256_ELF);
     assert_eq!(result, None);
 }
 
@@ -273,5 +273,6 @@ fn p384() {
         .build()
         .unwrap();
     let result: Option<[[u32; 12]; 2]> = run_test(env, EC_384_ELF);
-    assert_eq!(result, None);
+    assert_eq!(result, Some([[409360635, 2848664851, 1350301978, 3985540523, 689060044, 2468174889, 3080429192, 1329016208, 4014988934, 1737304534, 1003912940, 2791949654],
+        [3074040285, 2541244266, 612534489, 695042453, 3283551656, 3305299832, 202914865, 4144044373, 3052465373, 584648765, 3888195487, 2844309290]]));
 }

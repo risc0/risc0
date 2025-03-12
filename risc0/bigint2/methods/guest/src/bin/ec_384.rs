@@ -26,7 +26,7 @@ fn input_point() -> AffinePoint<12, Secp384r1Curve> {
 
 fn main() {
     let inp = input_point();
-    let mut buffer = input_point();
+    let mut buffer = inp.clone();
     let scalar = [10u32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
 
     let mut result = AffinePoint::<12, Secp384r1Curve>::IDENTITY;
