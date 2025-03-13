@@ -5,7 +5,11 @@ import fnmatch
 
 def find_cargo_toml_files(start_path):
     matches = []
-    for root, _, filenames in os.walk(start_path):
+    for root, dirs, filenames in os.walk(start_path):
+        # Skip git submodules dependencies
+        if root == start_path and "lib" in dirs:
+            dirs.remove("lib")
+
         for filename in fnmatch.filter(filenames, 'Cargo.toml'):
             matches.append(os.path.join(root, filename))
     return matches
