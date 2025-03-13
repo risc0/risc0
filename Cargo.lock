@@ -1032,6 +1032,7 @@ dependencies = [
  "risc0-r0vm",
  "risc0-zkp",
  "risc0-zkvm",
+ "semver",
  "serde",
  "serde_json",
  "serde_with",
