@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, SystemState};
-use risc0_circuit_rv32im_v2::{
+use risc0_circuit_rv32im::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
@@ -132,7 +132,6 @@ impl<'a> ExecutorImpl<'a> {
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>> + Send,
     {
         scope!("execute");
-        tracing::info!("Executing rv32im-v2 session");
 
         let journal = Journal::default();
         self.env
@@ -217,6 +216,8 @@ impl<'a> ExecutorImpl<'a> {
             );
         };
 
+        let ecall_metrics = exec.take_ecall_metrics();
+
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = std::mem::take(&mut *self.syscall_table.assumptions_used.lock().unwrap());
@@ -261,11 +262,16 @@ impl<'a> ExecutorImpl<'a> {
             pending_keccaks,
             syscall_metrics,
             hooks: vec![],
-            ecall_metrics: vec![],
+            ecall_metrics: ecall_metrics.into(),
         };
 
         tracing::info!("execution time: {elapsed:?}");
         session.log();
+
+        assert_eq!(
+            session.total_cycles,
+            session.user_cycles + session.paging_cycles + session.reserved_cycles
+        );
 
         Ok(session)
     }

@@ -462,7 +462,7 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
-        let out_size = risc0_circuit_rv32im_v2::CircuitImpl::OUTPUT_SIZE;
+        let out_size = risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE;
 
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.

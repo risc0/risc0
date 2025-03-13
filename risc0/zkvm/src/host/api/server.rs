@@ -382,12 +382,12 @@ impl Server {
                             session: Some(pb::api::SessionInfo {
                                 segments: session.segments.len().try_into()?,
                                 journal: session.journal.unwrap_or_default().bytes,
-                                exit_code: Some(session.exit_code.into()),
+                                exit_code: Some(session.exit_code.try_into()?),
                                 receipt_claim: Some(pb::api::Asset::from_bytes(
                                     &pb::api::AssetRequest {
                                         kind: Some(pb::api::asset_request::Kind::Inline(())),
                                     },
-                                    pb::core::ReceiptClaim::from(receipt_claim)
+                                    pb::core::ReceiptClaim::try_from(receipt_claim)?
                                         .encode_to_vec()
                                         .into(),
                                     "session_info.claim",
@@ -432,7 +432,7 @@ impl Server {
             let ctx = VerifierContext::default();
             let prove_info = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
-            let prove_info: pb::core::ProveInfo = prove_info.into();
+            let prove_info: pb::core::ProveInfo = prove_info.try_into()?;
             let prove_info_bytes = prove_info.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -483,7 +483,7 @@ impl Server {
             let ctx = VerifierContext::default();
             let receipt = prover.prove_segment(&ctx, &segment)?;
 
-            let receipt_pb: pb::core::SegmentReceipt = receipt.into();
+            let receipt_pb: pb::core::SegmentReceipt = receipt.try_into()?;
             let receipt_bytes = receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -526,7 +526,7 @@ impl Server {
                 .try_into()?;
             let receipt = prove_registered_zkr(&control_id, vec![control_id], &request.input)?;
 
-            let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
             let receipt_bytes = receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -566,7 +566,7 @@ impl Server {
             let request: ProveKeccakRequest = request_pb.clone().try_into()?;
             let receipt = prove_keccak(&request)?;
 
-            let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
             let receipt_bytes = receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request_pb
@@ -612,7 +612,7 @@ impl Server {
             let prover = get_prover_server(&opts)?;
             let receipt = prover.lift(&segment_receipt)?;
 
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -661,7 +661,7 @@ impl Server {
             let prover = get_prover_server(&opts)?;
             let receipt = prover.join(&left_succinct_receipt, &right_succinct_receipt)?;
 
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -710,7 +710,7 @@ impl Server {
             let prover = get_prover_server(&opts)?;
             let receipt = prover.union(&left_succinct_receipt, &right_succinct_receipt)?;
 
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -766,7 +766,7 @@ impl Server {
                 &assumption_succinct_receipt.into_unknown(),
             )?;
 
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -807,7 +807,7 @@ impl Server {
                 bincode::deserialize(&receipt_bytes)?;
 
             let receipt = identity_p254(&succinct_receipt)?;
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request
@@ -857,7 +857,7 @@ impl Server {
             let prover = get_prover_server(&opts)?;
             let receipt = prover.compress(&opts, &receipt)?;
 
-            let receipt_pb: pb::core::Receipt = receipt.into();
+            let receipt_pb: pb::core::Receipt = receipt.try_into()?;
             let receipt_bytes = receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request

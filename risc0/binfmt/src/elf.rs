@@ -26,10 +26,10 @@ use crate::{Digestible as _, MemoryImage, SystemState, KERNEL_START_ADDR};
 /// A RISC Zero program
 pub struct Program {
     /// The entrypoint of the program
-    pub entry: u32,
+    pub(crate) entry: u32,
 
     /// The initial memory image
-    pub image: BTreeMap<u32, u32>,
+    pub(crate) image: BTreeMap<u32, u32>,
 }
 
 impl Program {
@@ -108,7 +108,22 @@ impl Program {
                 }
             }
         }
-        Ok(Program { entry, image })
+        Ok(Program::new_from_entry_and_image(entry, image))
+    }
+
+    /// Create `Program` from given entry-point and image map
+    pub fn new_from_entry_and_image(entry: u32, image: BTreeMap<u32, u32>) -> Self {
+        Self { entry, image }
+    }
+
+    /// The size of the image in a count of words
+    pub fn size_in_words(&self) -> usize {
+        self.image.len()
+    }
+
+    /// Read a word from the image
+    pub fn read_u32(&self, address: &u32) -> Option<u32> {
+        self.image.get(address).copied()
     }
 }
 
@@ -120,6 +135,7 @@ const USER_LEN_OFFSET: usize = VERSION_OFFSET + WORD_SIZE;
 const USER_ELF_OFFSET: usize = USER_LEN_OFFSET + WORD_SIZE;
 
 /// A container to hold a user ELF and a kernel ELF together.
+#[non_exhaustive]
 pub struct ProgramBinary<'a> {
     /// The user ELF.
     pub user_elf: &'a [u8],

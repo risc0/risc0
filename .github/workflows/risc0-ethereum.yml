@@ -3,7 +3,7 @@ name: risc0-ethereum CI
 on:
   merge_group:
   pull_request:
-    branches: [main, "release-*"]
+    branches: ["release-*"]
   workflow_dispatch:
     inputs:
       risc0-ethereum-branch:
