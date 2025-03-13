@@ -56,6 +56,9 @@ pub struct ExecutorImpl<'a> {
     return_cache: Cell<(u32, u32)>,
 }
 
+// This should reconcile with what binfmt writes.
+const ZKVM_ABI_VERSION: u32 = 1;
+
 impl<'a> ExecutorImpl<'a> {
     /// Construct a new [ExecutorImpl] from a [MemoryImage] and entry point.
     ///
@@ -74,6 +77,12 @@ impl<'a> ExecutorImpl<'a> {
     /// environmental configuration details.
     pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let binary = ProgramBinary::decode(elf)?;
+
+        let abi_version = binary.header.abi_version;
+        if abi_version != ZKVM_ABI_VERSION {
+            bail!("ProgramBinary abi_version mismatch {abi_version} != {ZKVM_ABI_VERSION}");
+        }
+
         let image = binary.to_image()?;
 
         let profiler = if env.pprof_out.is_some() {
