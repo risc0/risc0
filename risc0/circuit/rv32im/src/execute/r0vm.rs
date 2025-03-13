@@ -102,18 +102,6 @@ pub(crate) trait Risc0Context {
         self.store_u32(base + idx, word)
     }
 
-    fn on_ecall_cycle(
-        &mut self,
-        cur: CycleState,
-        next: CycleState,
-        s0: u32,
-        s1: u32,
-        s2: u32,
-        kind: EcallKind,
-    ) -> Result<()>;
-
-    fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;
-
     fn suspend(&mut self) -> Result<()> {
         // default no-op
         Ok(())
@@ -137,6 +125,18 @@ pub(crate) trait Risc0Context {
 
     /// For writes, just pass through, record rlen only
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32>;
+
+    fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;
+
+    fn on_ecall_cycle(
+        &mut self,
+        cur: CycleState,
+        next: CycleState,
+        s0: u32,
+        s1: u32,
+        s2: u32,
+        kind: EcallKind,
+    ) -> Result<()>;
 
     fn on_sha2_cycle(&mut self, cur_state: CycleState, sha2: &Sha2State);
 

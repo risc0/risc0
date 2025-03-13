@@ -330,9 +330,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.user_cycles + self.pager.cycles + LOOKUP_TABLE_CYCLES as u32
     }
 
-    fn inc_user_cycles(&mut self) {
-        self.cycles.user += 1;
-        self.user_cycles += 1;
+    fn inc_user_cycles(&mut self, count: usize, ecall: Option<EcallKind>) {
+        self.cycles.user += count as u64;
+        self.user_cycles += count as u32;
+        if let Some(kind) = ecall {
+            self.ecall_metrics.0[kind].cycles += count as u64;
+        }
     }
 
     #[cold]
@@ -399,7 +402,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
-        // self.cycles.user += 1;
         if tracing::enabled!(tracing::Level::TRACE) {
             self.trace_instruction(cycle, insn, decoded);
         }
@@ -415,7 +417,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
-        self.inc_user_cycles();
+        self.inc_user_cycles(1, None);
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
@@ -431,11 +433,10 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         _s2: u32,
         kind: EcallKind,
     ) -> Result<()> {
-        self.inc_user_cycles();
-        self.ecall_metrics.0[kind].cycles += 1;
         if cur == CycleState::MachineEcall {
             self.ecall_metrics.0[kind].count += 1;
         }
+        self.inc_user_cycles(1, Some(kind));
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
@@ -510,18 +511,16 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
-        self.ecall_metrics.0[EcallKind::Sha2].cycles += 1;
-        self.inc_user_cycles();
+        self.inc_user_cycles(1, Some(EcallKind::Sha2));
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
-        self.phys_cycles += 1;
+        self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
     }
 
     fn ecall_bigint(&mut self) -> Result<()> {
         let cycles = bigint::ecall_execute(self)?;
-        self.ecall_metrics.0[EcallKind::BigInt].cycles += 1;
-        self.inc_user_cycles(); // FIXME
+        self.inc_user_cycles(cycles, Some(EcallKind::BigInt));
         Ok(())
     }
 }

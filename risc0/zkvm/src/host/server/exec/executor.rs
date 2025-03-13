@@ -268,6 +268,11 @@ impl<'a> ExecutorImpl<'a> {
         tracing::info!("execution time: {elapsed:?}");
         session.log();
 
+        assert_eq!(
+            session.total_cycles,
+            session.user_cycles + session.paging_cycles + session.reserved_cycles
+        );
+
         Ok(session)
     }
 }

@@ -268,12 +268,6 @@ impl Session {
         for (name, metric) in syscall_metrics.iter().rev() {
             tracing::info!("\t{} {name:?} calls", metric.count);
         }
-
-        // TODO(flaub): figure out why v2 fails this
-        // assert_eq!(
-        //     self.total_cycles,
-        //     self.user_cycles + self.paging_cycles + self.reserved_cycles
-        // );
     }
 
     /// Returns stats for the session
