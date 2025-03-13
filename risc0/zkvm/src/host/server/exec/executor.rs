@@ -19,7 +19,7 @@ use std::{
     time::Instant,
 };
 
-use anyhow::{Context as _, Result};
+use anyhow::{bail, Context as _, Result};
 use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, SystemState};
 use risc0_circuit_rv32im::{
     execute::{
