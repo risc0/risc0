@@ -57,7 +57,8 @@ impl Syscall for SysVerify {
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         ctx.syscall_table()
             .assumptions_used
-            .borrow_mut()
+            .lock()
+            .unwrap()
             .insert(0, assumption);
 
         let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::VerifyIntegrity];

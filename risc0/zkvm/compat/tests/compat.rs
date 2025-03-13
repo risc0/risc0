@@ -15,6 +15,7 @@
 use std::{path::PathBuf, str::FromStr};
 
 use anyhow::{Context, Result};
+use risc0_binfmt::ProgramBinary;
 use risc0_zkvm::{
     digest, ApiClient, Asset, AssetRequest, Digest, ExecutorEnv, Groth16ReceiptVerifierParameters,
     ProverOpts, SuccinctReceiptVerifierParameters, VerifierContext,
@@ -128,7 +129,9 @@ fn new_client(version: &str) -> ApiClient {
             .join(version)
             .join("bin/r0vm")
     };
-    ApiClient::new_sub_process_any(server_path).unwrap()
+    println!("path: {}", server_path.display());
+    let semver = into_version(version).unwrap();
+    ApiClient::new_sub_process_compat(server_path, semver).unwrap()
 }
 
 #[rstest]
@@ -142,7 +145,14 @@ fn prove_lift(#[case] version: &str) {
         .unwrap()
         .build()
         .unwrap();
-    let binary = Asset::Inline(MULTI_TEST_ELF.into());
+
+    let semver = into_version(version).unwrap();
+    let binary = if semver.major == 1 {
+        let binary = ProgramBinary::decode(MULTI_TEST_ELF).unwrap();
+        Asset::Inline(binary.user_elf.into())
+    } else {
+        Asset::Inline(MULTI_TEST_ELF.into())
+    };
 
     let client = new_client(version);
 
@@ -170,7 +180,7 @@ fn prove_lift(#[case] version: &str) {
             )
             .unwrap();
 
-        let ctx = verifier_context(into_version(version).unwrap()).unwrap();
+        let ctx = verifier_context(semver.clone()).unwrap();
         succinct_receipt
             .verify_integrity_with_context(&ctx)
             .unwrap();

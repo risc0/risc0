@@ -200,22 +200,6 @@ impl ParentProcessConnector {
         Self::new(server_path)
     }
 
-    pub fn new_wide_version<P: AsRef<Path>>(server_path: P) -> Result<Self> {
-        let client_version = get_version().map_err(|err| anyhow!(err))?;
-        let server_version = get_server_version(&server_path)?;
-
-        if !client::Compat::Wide.check(&client_version, &server_version) {
-            let msg = format!(
-                "Your installation of r0vm differs by a major version:\n\
-            {client_version} vs {server_version} only minor, patch / pre-releases supported"
-            );
-            tracing::warn!("{msg}");
-            bail!(msg);
-        }
-
-        Self::new(server_path)
-    }
-
     fn spawn_fail(&self) -> String {
         format!(
             "Could not launch zkvm: \"{}\". \n
@@ -401,6 +385,7 @@ pub enum AssetRequest {
 
 /// Provides information about the result of execution.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
@@ -426,6 +411,7 @@ impl SessionInfo {
 
 /// Provides information about a segment of execution.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,

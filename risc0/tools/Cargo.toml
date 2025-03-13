@@ -1,6 +1,6 @@
 [package]
 name = "risc0-tools"
-version = { workspace = true }
+version = "2.0.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -9,8 +9,9 @@ description = "RISC Zero devtools"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
-risc0-zkvm = { workspace = true, features = ["default"] }
+risc0-binfmt = { workspace = true }
 
 [dev-dependencies]
 assert_cmd = "2.0"
+risc0-zkos-v1compat = { workspace = true }
 tempfile = "3.12"
