@@ -17,73 +17,77 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_4(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:452)
-// Top(zirgen/circuit/keccak2/top.zir:481)
+// ControlState(zirgen/circuit/keccak/top.zir:403)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:454)
+// Top(zirgen/circuit/keccak/top.zir:483)
 set(ctx,arg0, 12, Val(2));
-// ControlState(zirgen/circuit/keccak2/top.zir:402)
+// ControlState(zirgen/circuit/keccak/top.zir:404)
 set(ctx,arg0, 13, Val(1));
-// ControlState(zirgen/circuit/keccak2/top.zir:403)
+// ControlState(zirgen/circuit/keccak/top.zir:405)
 set(ctx,arg0, 14, Val(0));
-// ControlState(zirgen/circuit/keccak2/top.zir:404)
+// ControlState(zirgen/circuit/keccak/top.zir:406)
 set(ctx,arg0, 15, Val(0));
 return ;
 }
 void step_Top_20(ExecContext& ctx,MutableBuf arg0)   {
-// ControlState(zirgen/circuit/keccak2/top.zir:401)
-// ShaNextBlock(zirgen/circuit/keccak2/top.zir:439)
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:461)
+// ControlState(zirgen/circuit/keccak/top.zir:403)
+// ShaNextBlock(zirgen/circuit/keccak/top.zir:441)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:463)
 set(ctx,arg0, 12, Val(0));
-// ControlState(zirgen/circuit/keccak2/top.zir:402)
+// ControlState(zirgen/circuit/keccak/top.zir:404)
 set(ctx,arg0, 13, Val(0));
-// ControlState(zirgen/circuit/keccak2/top.zir:403)
+// ControlState(zirgen/circuit/keccak/top.zir:405)
 set(ctx,arg0, 14, Val(0));
-// ControlState(zirgen/circuit/keccak2/top.zir:404)
+// ControlState(zirgen/circuit/keccak/top.zir:406)
 set(ctx,arg0, 15, Val(0));
 return ;
 }
 void step_Top_36(ExecContext& ctx,MutableBuf arg0)   {
-// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
-// LoadWin(zirgen/circuit/keccak2/top.zir:164)
-// ShaCycle(zirgen/circuit/keccak2/top.zir:191)
-// Top(zirgen/circuit/keccak2/top.zir:499)
-Val x1 = get(ctx,arg0, 1090, 0);
-Val x2 = get(ctx,arg0, 1091, 0);
-// LoadWin(zirgen/circuit/keccak2/top.zir:167)
+// NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
+// OneHot(zirgen/circuit/keccak/one_hot.zir:7)
+// LoadWin(zirgen/circuit/keccak/top.zir:165)
+// ShaCycle(zirgen/circuit/keccak/top.zir:192)
+// Top(zirgen/circuit/keccak/top.zir:501)
+Val x1 = get(ctx,arg0, 1092, 0);
+Val x2 = get(ctx,arg0, 1093, 0);
+// LoadWin(zirgen/circuit/keccak/top.zir:168)
 Val x3 = ((get(ctx,arg0, 818, 1) * x1) + (get(ctx,arg0, 850, 1) * x2));
-// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
-// LoadWin(zirgen/circuit/keccak2/top.zir:164)
-Val x4 = get(ctx,arg0, 1092, 0);
-Val x5 = get(ctx,arg0, 1093, 0);
-// LoadWin(zirgen/circuit/keccak2/top.zir:167)
+// builtin NondetReg
+// NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
+// OneHot(zirgen/circuit/keccak/one_hot.zir:7)
+// LoadWin(zirgen/circuit/keccak/top.zir:165)
+Val x4 = get(ctx,arg0, 1094, 0);
+Val x5 = get(ctx,arg0, 1095, 0);
+// LoadWin(zirgen/circuit/keccak/top.zir:168)
 Val x6 = ((x3 + (get(ctx,arg0, 882, 1) * x4)) + (get(ctx,arg0, 914, 1) * x5));
-// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
-// ShaCycle(zirgen/circuit/keccak2/top.zir:188)
-Val x7 = get(ctx,arg0, 1081, 0);
-// LoadWin(zirgen/circuit/keccak2/top.zir:174)
-// ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+// builtin NondetReg
+// NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
+// OneHot(zirgen/circuit/keccak/one_hot.zir:7)
+// ShaCycle(zirgen/circuit/keccak/top.zir:189)
+Val x7 = get(ctx,arg0, 1083, 0);
+// LoadWin(zirgen/circuit/keccak/top.zir:175)
+// ShaCycle(zirgen/circuit/keccak/top.zir:192)
 Val x8 = ((get(ctx,arg0, 834, 1) * x1) + (get(ctx,arg0, 866, 1) * x2));
-// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
-// ShaCycle(zirgen/circuit/keccak2/top.zir:188)
-Val x9 = get(ctx,arg0, 1082, 0);
-// LoadWin(zirgen/circuit/keccak2/top.zir:166)
-// ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+// builtin NondetReg
+// NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
+// OneHot(zirgen/circuit/keccak/one_hot.zir:7)
+// ShaCycle(zirgen/circuit/keccak/top.zir:189)
+Val x9 = get(ctx,arg0, 1084, 0);
+// LoadWin(zirgen/circuit/keccak/top.zir:167)
+// ShaCycle(zirgen/circuit/keccak/top.zir:192)
 Val x10 = ((x6 * x7) + ((x8 + (get(ctx,arg0, 898, 1) * x4)) * x9));
-// LoadWin(zirgen/circuit/keccak2/top.zir:167)
+// LoadWin(zirgen/circuit/keccak/top.zir:168)
 Val x11 = ((get(ctx,arg0, 819, 1) * x1) + (get(ctx,arg0, 851, 1) * x2));
 Val x12 = ((x11 + (get(ctx,arg0, 883, 1) * x4)) + (get(ctx,arg0, 915, 1) * x5));
-// LoadWin(zirgen/circuit/keccak2/top.zir:174)
+// LoadWin(zirgen/circuit/keccak/top.zir:175)
 Val x13 = ((get(ctx,arg0, 835, 1) * x1) + (get(ctx,arg0, 867, 1) * x2));
-// LoadWin(zirgen/circuit/keccak2/top.zir:166)
+// LoadWin(zirgen/circuit/keccak/top.zir:167)
 Val x14 = ((x12 * x7) + ((x13 + (get(ctx,arg0, 899, 1) * x4)) * x9));
-// NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-// ExpandBE(zirgen/circuit/keccak2/sha2.zir:54)
-// DoShaStep(zirgen/circuit/keccak2/top.zir:138)
-// ShaCycle(zirgen/circuit/keccak2/top.zir:193)
+// builtin NondetReg
+// NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
+// ExpandBE(zirgen/circuit/keccak/sha2.zir:56)
+// DoShaStep(zirgen/circuit/keccak/top.zir:138)
+// ShaCycle(zirgen/circuit/keccak/top.zir:194)
 set(ctx,arg0, 560, (bitAnd(x14, Val(256)) * Val(2005401601)));
 set(ctx,arg0, 561, (bitAnd(x14, Val(512)) * Val(2009333761)));
 set(ctx,arg0, 562, (bitAnd(x14, Val(1024)) * Val(2011299841)));
@@ -119,10 +123,10 @@ set(ctx,arg0, 591, (bitAnd(x10, Val(128)) * Val(1997537281)));
 return ;
 }
 void step_Top_52(ExecContext& ctx,MutableBuf arg0)   {
-// Reg(<preamble>:4)
-// TopState(zirgen/circuit/keccak2/top.zir:36)
-// InitCycle(zirgen/circuit/keccak2/top.zir:314)
-// Top(zirgen/circuit/keccak2/top.zir:501)
+// Reg(<preamble>:5)
+// TopState(zirgen/circuit/keccak/top.zir:36)
+// InitCycle(zirgen/circuit/keccak/top.zir:316)
+// Top(zirgen/circuit/keccak/top.zir:503)
 set(ctx,arg0, 16, Val(0));
 set(ctx,arg0, 17, Val(0));
 set(ctx,arg0, 18, Val(0));
@@ -923,7 +927,7 @@ set(ctx,arg0, 812, Val(0));
 set(ctx,arg0, 813, Val(0));
 set(ctx,arg0, 814, Val(0));
 set(ctx,arg0, 815, Val(0));
-// TopState(zirgen/circuit/keccak2/top.zir:40)
+// TopState(zirgen/circuit/keccak/top.zir:40)
 set(ctx,arg0, 816, Val(0));
 set(ctx,arg0, 817, Val(0));
 set(ctx,arg0, 818, Val(0));
@@ -1024,7 +1028,7 @@ set(ctx,arg0, 912, Val(0));
 set(ctx,arg0, 913, Val(0));
 set(ctx,arg0, 914, Val(0));
 set(ctx,arg0, 915, Val(0));
-// TopState(zirgen/circuit/keccak2/top.zir:43)
+// TopState(zirgen/circuit/keccak/top.zir:43)
 set(ctx,arg0, 916, Val(58983));
 set(ctx,arg0, 917, Val(27145));
 set(ctx,arg0, 918, Val(44677));

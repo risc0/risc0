@@ -1,4 +1,17 @@
-pub const LAYOUT__1: &NondetRegLayout12LayoutArray = &[
+pub const LAYOUT__0: &CycleCounterLayout = &CycleCounterLayout {
+    _super: &NondetRegLayout {
+        _super: &Reg { offset: 932 },
+    },
+    is_first_cycle: &IsZeroLayout {
+        _super: &NondetRegLayout {
+            _super: &Reg { offset: 933 },
+        },
+        inv: &NondetRegLayout {
+            _super: &Reg { offset: 934 },
+        },
+    },
+};
+pub const LAYOUT__2: &NondetRegLayout12LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 0 },
     },
@@ -36,8 +49,8 @@ pub const LAYOUT__1: &NondetRegLayout12LayoutArray = &[
         _super: &Reg { offset: 11 },
     },
 ];
-pub const LAYOUT__0: &WrapOneHotLayout = &WrapOneHotLayout { _super: LAYOUT__1 };
-pub const LAYOUT__2: &ControlStateLayout = &ControlStateLayout {
+pub const LAYOUT__1: &WrapOneHotLayout = &WrapOneHotLayout { _super: LAYOUT__2 };
+pub const LAYOUT__3: &ControlStateLayout = &ControlStateLayout {
     cycle_type: &NondetRegLayout {
         _super: &Reg { offset: 12 },
     },
@@ -51,98 +64,98 @@ pub const LAYOUT__2: &ControlStateLayout = &ControlStateLayout {
         _super: &Reg { offset: 15 },
     },
 };
-pub const LAYOUT__5: &ComputeCurrentStep_SuperArm2_SuperLayout =
+pub const LAYOUT__6: &ComputeCurrentStep_SuperArm2_SuperLayout =
     &ComputeCurrentStep_SuperArm2_SuperLayout {
-        _super: LAYOUT__2,
-        arm0: LAYOUT__2,
-        arm1: LAYOUT__2,
+        _super: LAYOUT__3,
+        arm0: LAYOUT__3,
+        arm1: LAYOUT__3,
     };
-pub const LAYOUT__7: &KeccackNextRound_SuperLayout = &KeccackNextRound_SuperLayout {
-    _super: LAYOUT__2,
-    arm0: LAYOUT__2,
-    arm1: LAYOUT__2,
+pub const LAYOUT__8: &KeccackNextRound_SuperLayout = &KeccackNextRound_SuperLayout {
+    _super: LAYOUT__3,
+    arm0: LAYOUT__3,
+    arm1: LAYOUT__3,
 };
-pub const LAYOUT__6: &KeccackNextRoundLayout = &KeccackNextRoundLayout {
-    _super: LAYOUT__7,
+pub const LAYOUT__7: &KeccackNextRoundLayout = &KeccackNextRoundLayout {
+    _super: LAYOUT__8,
     is_last: &IsZeroLayout {
         _super: &NondetRegLayout {
-            _super: &Reg { offset: 933 },
-        },
-        inv: &NondetRegLayout {
-            _super: &Reg { offset: 934 },
-        },
-    },
-};
-pub const LAYOUT__9: &ShaNextRound_SuperLayout = &ShaNextRound_SuperLayout {
-    _super: LAYOUT__2,
-    arm0: LAYOUT__2,
-    arm1: LAYOUT__2,
-};
-pub const LAYOUT__8: &ShaNextRoundLayout = &ShaNextRoundLayout {
-    _super: LAYOUT__9,
-    is_last: &IsZeroLayout {
-        _super: &NondetRegLayout {
-            _super: &Reg { offset: 933 },
-        },
-        inv: &NondetRegLayout {
-            _super: &Reg { offset: 934 },
-        },
-    },
-};
-pub const LAYOUT__13: &ShaNextBlock_SuperArm2_Super_SuperLayout =
-    &ShaNextBlock_SuperArm2_Super_SuperLayout {
-        _super: LAYOUT__2,
-        arm0: LAYOUT__2,
-        arm1: LAYOUT__2,
-    };
-pub const LAYOUT__12: &ShaNextBlock_SuperArm2_SuperLayout = &ShaNextBlock_SuperArm2_SuperLayout {
-    _super: LAYOUT__13,
-    more: &NondetRegLayout {
-        _super: &Reg { offset: 933 },
-    },
-};
-pub const LAYOUT__11: &ShaNextBlock_SuperLayout = &ShaNextBlock_SuperLayout {
-    _super: LAYOUT__2,
-    arm0: LAYOUT__2,
-    arm1: LAYOUT__2,
-    arm2: LAYOUT__12,
-};
-pub const LAYOUT__10: &ShaNextBlockLayout = &ShaNextBlockLayout {
-    _super: LAYOUT__11,
-    is_last: &IsZeroLayout {
-        _super: &NondetRegLayout {
-            _super: &Reg { offset: 934 },
-        },
-        inv: &NondetRegLayout {
             _super: &Reg { offset: 935 },
+        },
+        inv: &NondetRegLayout {
+            _super: &Reg { offset: 936 },
+        },
+    },
+};
+pub const LAYOUT__10: &ShaNextRound_SuperLayout = &ShaNextRound_SuperLayout {
+    _super: LAYOUT__3,
+    arm0: LAYOUT__3,
+    arm1: LAYOUT__3,
+};
+pub const LAYOUT__9: &ShaNextRoundLayout = &ShaNextRoundLayout {
+    _super: LAYOUT__10,
+    is_last: &IsZeroLayout {
+        _super: &NondetRegLayout {
+            _super: &Reg { offset: 935 },
+        },
+        inv: &NondetRegLayout {
+            _super: &Reg { offset: 936 },
+        },
+    },
+};
+pub const LAYOUT__14: &ShaNextBlock_SuperArm2_Super_SuperLayout =
+    &ShaNextBlock_SuperArm2_Super_SuperLayout {
+        _super: LAYOUT__3,
+        arm0: LAYOUT__3,
+        arm1: LAYOUT__3,
+    };
+pub const LAYOUT__13: &ShaNextBlock_SuperArm2_SuperLayout = &ShaNextBlock_SuperArm2_SuperLayout {
+    _super: LAYOUT__14,
+    more: &NondetRegLayout {
+        _super: &Reg { offset: 935 },
+    },
+};
+pub const LAYOUT__12: &ShaNextBlock_SuperLayout = &ShaNextBlock_SuperLayout {
+    _super: LAYOUT__3,
+    arm0: LAYOUT__3,
+    arm1: LAYOUT__3,
+    arm2: LAYOUT__13,
+};
+pub const LAYOUT__11: &ShaNextBlockLayout = &ShaNextBlockLayout {
+    _super: LAYOUT__12,
+    is_last: &IsZeroLayout {
+        _super: &NondetRegLayout {
+            _super: &Reg { offset: 936 },
+        },
+        inv: &NondetRegLayout {
+            _super: &Reg { offset: 937 },
         },
     },
     is_sub0: &NondetRegLayout {
-        _super: &Reg { offset: 936 },
+        _super: &Reg { offset: 938 },
     },
 };
-pub const LAYOUT__4: &ComputeCurrentStep_SuperLayout = &ComputeCurrentStep_SuperLayout {
-    _super: LAYOUT__2,
-    arm0: LAYOUT__2,
-    arm1: LAYOUT__2,
-    arm2: LAYOUT__5,
-    arm3: LAYOUT__2,
-    arm4: LAYOUT__2,
-    arm5: LAYOUT__2,
-    arm6: LAYOUT__2,
-    arm7: LAYOUT__2,
-    arm8: LAYOUT__6,
-    arm9: LAYOUT__8,
-    arm10: LAYOUT__10,
-    arm11: LAYOUT__2,
+pub const LAYOUT__5: &ComputeCurrentStep_SuperLayout = &ComputeCurrentStep_SuperLayout {
+    _super: LAYOUT__3,
+    arm0: LAYOUT__3,
+    arm1: LAYOUT__3,
+    arm2: LAYOUT__6,
+    arm3: LAYOUT__3,
+    arm4: LAYOUT__3,
+    arm5: LAYOUT__3,
+    arm6: LAYOUT__3,
+    arm7: LAYOUT__3,
+    arm8: LAYOUT__7,
+    arm9: LAYOUT__9,
+    arm10: LAYOUT__11,
+    arm11: LAYOUT__3,
 };
-pub const LAYOUT__3: &TopControlStateLayout = &TopControlStateLayout {
-    _super: LAYOUT__2,
-    arm0: LAYOUT__2,
-    arm1: LAYOUT__4,
+pub const LAYOUT__4: &TopControlStateLayout = &TopControlStateLayout {
+    _super: LAYOUT__3,
+    arm0: LAYOUT__3,
+    arm1: LAYOUT__5,
 };
-pub const LAYOUT__14: &OneHot_12_Layout = &OneHot_12_Layout { _super: LAYOUT__1 };
-pub const LAYOUT__16: &NondetRegLayout800LayoutArray = &[
+pub const LAYOUT__15: &OneHot_12_Layout = &OneHot_12_Layout { _super: LAYOUT__2 };
+pub const LAYOUT__17: &NondetRegLayout800LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 16 },
     },
@@ -2544,7 +2557,7 @@ pub const LAYOUT__16: &NondetRegLayout800LayoutArray = &[
         _super: &Reg { offset: 815 },
     },
 ];
-pub const LAYOUT__17: &NondetRegLayout100LayoutArray = &[
+pub const LAYOUT__18: &NondetRegLayout100LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 816 },
     },
@@ -2846,7 +2859,7 @@ pub const LAYOUT__17: &NondetRegLayout100LayoutArray = &[
         _super: &Reg { offset: 915 },
     },
 ];
-pub const LAYOUT__18: &NondetRegLayout16LayoutArray = &[
+pub const LAYOUT__19: &NondetRegLayout16LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 916 },
     },
@@ -2896,26 +2909,26 @@ pub const LAYOUT__18: &NondetRegLayout16LayoutArray = &[
         _super: &Reg { offset: 931 },
     },
 ];
-pub const LAYOUT__15: &TopStateLayout = &TopStateLayout {
-    bits: LAYOUT__16,
-    kflat: LAYOUT__17,
-    sflat: LAYOUT__18,
+pub const LAYOUT__16: &TopStateLayout = &TopStateLayout {
+    bits: LAYOUT__17,
+    kflat: LAYOUT__18,
+    sflat: LAYOUT__19,
 };
-pub const LAYOUT__21: &UnpackReg_800__16_Layout = &UnpackReg_800__16_Layout { _super: LAYOUT__16 };
-pub const LAYOUT__20: &ReadCycleLayout = &ReadCycleLayout {
-    _super: LAYOUT__15,
-    load: LAYOUT__17,
-    bits: LAYOUT__21,
+pub const LAYOUT__22: &UnpackReg_800__16_Layout = &UnpackReg_800__16_Layout { _super: LAYOUT__17 };
+pub const LAYOUT__21: &ReadCycleLayout = &ReadCycleLayout {
+    _super: LAYOUT__16,
+    load: LAYOUT__18,
+    bits: LAYOUT__22,
 };
-pub const LAYOUT__22: &ExpandCycleLayout = &ExpandCycleLayout {
-    _super: LAYOUT__15,
-    bits: LAYOUT__21,
+pub const LAYOUT__23: &ExpandCycleLayout = &ExpandCycleLayout {
+    _super: LAYOUT__16,
+    bits: LAYOUT__22,
 };
-pub const LAYOUT__23: &WriteCycleLayout = &WriteCycleLayout {
-    _super: LAYOUT__15,
-    bits: LAYOUT__21,
+pub const LAYOUT__24: &WriteCycleLayout = &WriteCycleLayout {
+    _super: LAYOUT__16,
+    bits: LAYOUT__22,
 };
-pub const LAYOUT__28: &NondetRegLayout64LayoutArray = &[
+pub const LAYOUT__29: &NondetRegLayout64LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 16 },
     },
@@ -3109,9 +3122,9 @@ pub const LAYOUT__28: &NondetRegLayout64LayoutArray = &[
         _super: &Reg { offset: 79 },
     },
 ];
-pub const LAYOUT__27: &ThetaP1_Super_SuperLayout =
-    &ThetaP1_Super_SuperLayout { _super: LAYOUT__28 };
-pub const LAYOUT__30: &NondetRegLayout64LayoutArray = &[
+pub const LAYOUT__28: &ThetaP1_Super_SuperLayout =
+    &ThetaP1_Super_SuperLayout { _super: LAYOUT__29 };
+pub const LAYOUT__31: &NondetRegLayout64LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 80 },
     },
@@ -3305,9 +3318,9 @@ pub const LAYOUT__30: &NondetRegLayout64LayoutArray = &[
         _super: &Reg { offset: 143 },
     },
 ];
-pub const LAYOUT__29: &ThetaP1_Super_SuperLayout =
-    &ThetaP1_Super_SuperLayout { _super: LAYOUT__30 };
-pub const LAYOUT__32: &NondetRegLayout64LayoutArray = &[
+pub const LAYOUT__30: &ThetaP1_Super_SuperLayout =
+    &ThetaP1_Super_SuperLayout { _super: LAYOUT__31 };
+pub const LAYOUT__33: &NondetRegLayout64LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 144 },
     },
@@ -3501,9 +3514,9 @@ pub const LAYOUT__32: &NondetRegLayout64LayoutArray = &[
         _super: &Reg { offset: 207 },
     },
 ];
-pub const LAYOUT__31: &ThetaP1_Super_SuperLayout =
-    &ThetaP1_Super_SuperLayout { _super: LAYOUT__32 };
-pub const LAYOUT__34: &NondetRegLayout64LayoutArray = &[
+pub const LAYOUT__32: &ThetaP1_Super_SuperLayout =
+    &ThetaP1_Super_SuperLayout { _super: LAYOUT__33 };
+pub const LAYOUT__35: &NondetRegLayout64LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 208 },
     },
@@ -3697,9 +3710,9 @@ pub const LAYOUT__34: &NondetRegLayout64LayoutArray = &[
         _super: &Reg { offset: 271 },
     },
 ];
-pub const LAYOUT__33: &ThetaP1_Super_SuperLayout =
-    &ThetaP1_Super_SuperLayout { _super: LAYOUT__34 };
-pub const LAYOUT__36: &NondetRegLayout64LayoutArray = &[
+pub const LAYOUT__34: &ThetaP1_Super_SuperLayout =
+    &ThetaP1_Super_SuperLayout { _super: LAYOUT__35 };
+pub const LAYOUT__37: &NondetRegLayout64LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 272 },
     },
@@ -3893,22 +3906,16 @@ pub const LAYOUT__36: &NondetRegLayout64LayoutArray = &[
         _super: &Reg { offset: 335 },
     },
 ];
-pub const LAYOUT__35: &ThetaP1_Super_SuperLayout =
-    &ThetaP1_Super_SuperLayout { _super: LAYOUT__36 };
-pub const LAYOUT__26: &ThetaP1_Super_SuperLayout5LayoutArray =
-    &[LAYOUT__27, LAYOUT__29, LAYOUT__31, LAYOUT__33, LAYOUT__35];
-pub const LAYOUT__25: &ThetaP1Layout = &ThetaP1Layout { _super: LAYOUT__26 };
-pub const LAYOUT__24: &KeccakRound0Layout = &KeccakRound0Layout {
-    _super: LAYOUT__15,
-    b: LAYOUT__25,
+pub const LAYOUT__36: &ThetaP1_Super_SuperLayout =
+    &ThetaP1_Super_SuperLayout { _super: LAYOUT__37 };
+pub const LAYOUT__27: &ThetaP1_Super_SuperLayout5LayoutArray =
+    &[LAYOUT__28, LAYOUT__30, LAYOUT__32, LAYOUT__34, LAYOUT__36];
+pub const LAYOUT__26: &ThetaP1Layout = &ThetaP1Layout { _super: LAYOUT__27 };
+pub const LAYOUT__25: &KeccakRound0Layout = &KeccakRound0Layout {
+    _super: LAYOUT__16,
+    b: LAYOUT__26,
 };
-pub const LAYOUT__41: &NondetRegLayout24LayoutArray = &[
-    &NondetRegLayout {
-        _super: &Reg { offset: 937 },
-    },
-    &NondetRegLayout {
-        _super: &Reg { offset: 938 },
-    },
+pub const LAYOUT__42: &NondetRegLayout24LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 939 },
     },
@@ -3975,27 +3982,27 @@ pub const LAYOUT__41: &NondetRegLayout24LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 960 },
     },
+    &NondetRegLayout {
+        _super: &Reg { offset: 961 },
+    },
+    &NondetRegLayout {
+        _super: &Reg { offset: 962 },
+    },
 ];
-pub const LAYOUT__40: &OneHot_24_Layout = &OneHot_24_Layout { _super: LAYOUT__41 };
-pub const LAYOUT__39: &RoundToArrayLayout = &RoundToArrayLayout { split: LAYOUT__40 };
-pub const LAYOUT__38: &IotaLayout = &IotaLayout {
-    iota_array: LAYOUT__39,
+pub const LAYOUT__41: &OneHot_24_Layout = &OneHot_24_Layout { _super: LAYOUT__42 };
+pub const LAYOUT__40: &RoundToArrayLayout = &RoundToArrayLayout { split: LAYOUT__41 };
+pub const LAYOUT__39: &IotaLayout = &IotaLayout {
+    iota_array: LAYOUT__40,
 };
-pub const LAYOUT__37: &KeccakRound34_0_Layout = &KeccakRound34_0_Layout {
-    _super: LAYOUT__15,
-    _0: LAYOUT__38,
+pub const LAYOUT__38: &KeccakRound34_0_Layout = &KeccakRound34_0_Layout {
+    _super: LAYOUT__16,
+    _0: LAYOUT__39,
 };
-pub const LAYOUT__42: &KeccakRound34_1_Layout = &KeccakRound34_1_Layout {
-    _super: LAYOUT__15,
-    _0: LAYOUT__38,
+pub const LAYOUT__43: &KeccakRound34_1_Layout = &KeccakRound34_1_Layout {
+    _super: LAYOUT__16,
+    _0: LAYOUT__39,
 };
-pub const LAYOUT__45: &NondetRegLayout8LayoutArray = &[
-    &NondetRegLayout {
-        _super: &Reg { offset: 1081 },
-    },
-    &NondetRegLayout {
-        _super: &Reg { offset: 1082 },
-    },
+pub const LAYOUT__46: &NondetRegLayout8LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 1083 },
     },
@@ -4014,27 +4021,33 @@ pub const LAYOUT__45: &NondetRegLayout8LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 1088 },
     },
-];
-pub const LAYOUT__44: &OneHot_8_Layout = &OneHot_8_Layout { _super: LAYOUT__45 };
-pub const LAYOUT__48: &NondetRegLayout4LayoutArray = &[
+    &NondetRegLayout {
+        _super: &Reg { offset: 1089 },
+    },
     &NondetRegLayout {
         _super: &Reg { offset: 1090 },
     },
-    &NondetRegLayout {
-        _super: &Reg { offset: 1091 },
-    },
+];
+pub const LAYOUT__45: &OneHot_8_Layout = &OneHot_8_Layout { _super: LAYOUT__46 };
+pub const LAYOUT__49: &NondetRegLayout4LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 1092 },
     },
     &NondetRegLayout {
         _super: &Reg { offset: 1093 },
     },
+    &NondetRegLayout {
+        _super: &Reg { offset: 1094 },
+    },
+    &NondetRegLayout {
+        _super: &Reg { offset: 1095 },
+    },
 ];
-pub const LAYOUT__47: &OneHot_4_Layout = &OneHot_4_Layout { _super: LAYOUT__48 };
-pub const LAYOUT__46: &LoadWinLayout = &LoadWinLayout {
-    block_select: LAYOUT__47,
+pub const LAYOUT__48: &OneHot_4_Layout = &OneHot_4_Layout { _super: LAYOUT__49 };
+pub const LAYOUT__47: &LoadWinLayout = &LoadWinLayout {
+    block_select: LAYOUT__48,
 };
-pub const LAYOUT__51: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__52: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 528 },
     },
@@ -4132,41 +4145,41 @@ pub const LAYOUT__51: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 559 },
     },
 ];
-pub const LAYOUT__52: &ExpandBELayout = &ExpandBELayout { _super: LAYOUT__51 };
-pub const LAYOUT__54: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__51 };
-pub const LAYOUT__55: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 937 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 938 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 939 },
-    },
-};
+pub const LAYOUT__53: &ExpandBELayout = &ExpandBELayout { _super: LAYOUT__52 };
+pub const LAYOUT__55: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__52 };
 pub const LAYOUT__56: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 940 },
+        _super: &Reg { offset: 939 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 941 },
+        _super: &Reg { offset: 940 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 942 },
+        _super: &Reg { offset: 941 },
     },
 };
-pub const LAYOUT__53: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__54,
-    low_carry: LAYOUT__55,
-    high_carry: LAYOUT__56,
+pub const LAYOUT__57: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 942 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 943 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 944 },
+    },
 };
-pub const LAYOUT__50: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__51,
-    arm0: LAYOUT__52,
-    arm1: LAYOUT__53,
+pub const LAYOUT__54: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__55,
+    low_carry: LAYOUT__56,
+    high_carry: LAYOUT__57,
 };
-pub const LAYOUT__59: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__51: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__52,
+    arm0: LAYOUT__53,
+    arm1: LAYOUT__54,
+};
+pub const LAYOUT__60: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 16 },
     },
@@ -4264,35 +4277,35 @@ pub const LAYOUT__59: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 47 },
     },
 ];
-pub const LAYOUT__58: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__59 };
-pub const LAYOUT__60: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 943 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 944 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 945 },
-    },
-};
+pub const LAYOUT__59: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__60 };
 pub const LAYOUT__61: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 946 },
+        _super: &Reg { offset: 945 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 947 },
+        _super: &Reg { offset: 946 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 948 },
+        _super: &Reg { offset: 947 },
     },
 };
-pub const LAYOUT__57: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__58,
-    low_carry: LAYOUT__60,
-    high_carry: LAYOUT__61,
+pub const LAYOUT__62: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 948 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 949 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 950 },
+    },
 };
-pub const LAYOUT__64: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__58: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__59,
+    low_carry: LAYOUT__61,
+    high_carry: LAYOUT__62,
+};
+pub const LAYOUT__65: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 272 },
     },
@@ -4390,40 +4403,40 @@ pub const LAYOUT__64: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 303 },
     },
 ];
-pub const LAYOUT__63: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__64 };
-pub const LAYOUT__65: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 949 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 950 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 951 },
-    },
-};
+pub const LAYOUT__64: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__65 };
 pub const LAYOUT__66: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 952 },
+        _super: &Reg { offset: 951 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 953 },
+        _super: &Reg { offset: 952 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 954 },
+        _super: &Reg { offset: 953 },
     },
 };
-pub const LAYOUT__62: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__63,
-    low_carry: LAYOUT__65,
-    high_carry: LAYOUT__66,
+pub const LAYOUT__67: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 954 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 955 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 956 },
+    },
 };
-pub const LAYOUT__49: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__50,
-    a: LAYOUT__57,
-    e: LAYOUT__62,
+pub const LAYOUT__63: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__64,
+    low_carry: LAYOUT__66,
+    high_carry: LAYOUT__67,
 };
-pub const LAYOUT__69: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__50: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__51,
+    a: LAYOUT__58,
+    e: LAYOUT__63,
+};
+pub const LAYOUT__70: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 560 },
     },
@@ -4521,41 +4534,41 @@ pub const LAYOUT__69: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 591 },
     },
 ];
-pub const LAYOUT__70: &ExpandBELayout = &ExpandBELayout { _super: LAYOUT__69 };
-pub const LAYOUT__72: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__69 };
-pub const LAYOUT__73: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 955 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 956 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 957 },
-    },
-};
+pub const LAYOUT__71: &ExpandBELayout = &ExpandBELayout { _super: LAYOUT__70 };
+pub const LAYOUT__73: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__70 };
 pub const LAYOUT__74: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 958 },
+        _super: &Reg { offset: 957 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 959 },
+        _super: &Reg { offset: 958 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 960 },
+        _super: &Reg { offset: 959 },
     },
 };
-pub const LAYOUT__71: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__72,
-    low_carry: LAYOUT__73,
-    high_carry: LAYOUT__74,
+pub const LAYOUT__75: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 960 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 961 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 962 },
+    },
 };
-pub const LAYOUT__68: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__69,
-    arm0: LAYOUT__70,
-    arm1: LAYOUT__71,
+pub const LAYOUT__72: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__73,
+    low_carry: LAYOUT__74,
+    high_carry: LAYOUT__75,
 };
-pub const LAYOUT__77: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__69: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__70,
+    arm0: LAYOUT__71,
+    arm1: LAYOUT__72,
+};
+pub const LAYOUT__78: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 48 },
     },
@@ -4653,35 +4666,35 @@ pub const LAYOUT__77: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 79 },
     },
 ];
-pub const LAYOUT__76: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__77 };
-pub const LAYOUT__78: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 961 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 962 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 963 },
-    },
-};
+pub const LAYOUT__77: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__78 };
 pub const LAYOUT__79: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 964 },
+        _super: &Reg { offset: 963 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 965 },
+        _super: &Reg { offset: 964 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 966 },
+        _super: &Reg { offset: 965 },
     },
 };
-pub const LAYOUT__75: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__76,
-    low_carry: LAYOUT__78,
-    high_carry: LAYOUT__79,
+pub const LAYOUT__80: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 966 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 967 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 968 },
+    },
 };
-pub const LAYOUT__82: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__76: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__77,
+    low_carry: LAYOUT__79,
+    high_carry: LAYOUT__80,
+};
+pub const LAYOUT__83: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 304 },
     },
@@ -4779,40 +4792,40 @@ pub const LAYOUT__82: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 335 },
     },
 ];
-pub const LAYOUT__81: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__82 };
-pub const LAYOUT__83: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 967 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 968 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 969 },
-    },
-};
+pub const LAYOUT__82: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__83 };
 pub const LAYOUT__84: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 970 },
+        _super: &Reg { offset: 969 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 971 },
+        _super: &Reg { offset: 970 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 972 },
+        _super: &Reg { offset: 971 },
     },
 };
-pub const LAYOUT__80: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__81,
-    low_carry: LAYOUT__83,
-    high_carry: LAYOUT__84,
+pub const LAYOUT__85: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 972 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 973 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 974 },
+    },
 };
-pub const LAYOUT__67: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__68,
-    a: LAYOUT__75,
-    e: LAYOUT__80,
+pub const LAYOUT__81: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__82,
+    low_carry: LAYOUT__84,
+    high_carry: LAYOUT__85,
 };
-pub const LAYOUT__87: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__68: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__69,
+    a: LAYOUT__76,
+    e: LAYOUT__81,
+};
+pub const LAYOUT__88: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 592 },
     },
@@ -4910,41 +4923,41 @@ pub const LAYOUT__87: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 623 },
     },
 ];
-pub const LAYOUT__88: &ExpandBELayout = &ExpandBELayout { _super: LAYOUT__87 };
-pub const LAYOUT__90: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__87 };
-pub const LAYOUT__91: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 973 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 974 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 975 },
-    },
-};
+pub const LAYOUT__89: &ExpandBELayout = &ExpandBELayout { _super: LAYOUT__88 };
+pub const LAYOUT__91: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__88 };
 pub const LAYOUT__92: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 976 },
+        _super: &Reg { offset: 975 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 977 },
+        _super: &Reg { offset: 976 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 978 },
+        _super: &Reg { offset: 977 },
     },
 };
-pub const LAYOUT__89: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__90,
-    low_carry: LAYOUT__91,
-    high_carry: LAYOUT__92,
+pub const LAYOUT__93: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 978 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 979 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 980 },
+    },
 };
-pub const LAYOUT__86: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__87,
-    arm0: LAYOUT__88,
-    arm1: LAYOUT__89,
+pub const LAYOUT__90: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__91,
+    low_carry: LAYOUT__92,
+    high_carry: LAYOUT__93,
 };
-pub const LAYOUT__95: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__87: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__88,
+    arm0: LAYOUT__89,
+    arm1: LAYOUT__90,
+};
+pub const LAYOUT__96: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 80 },
     },
@@ -5042,35 +5055,35 @@ pub const LAYOUT__95: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 111 },
     },
 ];
-pub const LAYOUT__94: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__95 };
-pub const LAYOUT__96: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 979 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 980 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 981 },
-    },
-};
+pub const LAYOUT__95: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout { _super: LAYOUT__96 };
 pub const LAYOUT__97: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 982 },
+        _super: &Reg { offset: 981 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 983 },
+        _super: &Reg { offset: 982 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 984 },
+        _super: &Reg { offset: 983 },
     },
 };
-pub const LAYOUT__93: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__94,
-    low_carry: LAYOUT__96,
-    high_carry: LAYOUT__97,
+pub const LAYOUT__98: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 984 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 985 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 986 },
+    },
 };
-pub const LAYOUT__100: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__94: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__95,
+    low_carry: LAYOUT__97,
+    high_carry: LAYOUT__98,
+};
+pub const LAYOUT__101: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 336 },
     },
@@ -5168,42 +5181,42 @@ pub const LAYOUT__100: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 367 },
     },
 ];
-pub const LAYOUT__99: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__100,
-};
-pub const LAYOUT__101: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 985 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 986 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 987 },
-    },
+pub const LAYOUT__100: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__101,
 };
 pub const LAYOUT__102: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 988 },
+        _super: &Reg { offset: 987 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 989 },
+        _super: &Reg { offset: 988 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 990 },
+        _super: &Reg { offset: 989 },
     },
 };
-pub const LAYOUT__98: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__99,
-    low_carry: LAYOUT__101,
-    high_carry: LAYOUT__102,
+pub const LAYOUT__103: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 990 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 991 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 992 },
+    },
 };
-pub const LAYOUT__85: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__86,
-    a: LAYOUT__93,
-    e: LAYOUT__98,
+pub const LAYOUT__99: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__100,
+    low_carry: LAYOUT__102,
+    high_carry: LAYOUT__103,
 };
-pub const LAYOUT__105: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__86: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__87,
+    a: LAYOUT__94,
+    e: LAYOUT__99,
+};
+pub const LAYOUT__106: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 624 },
     },
@@ -5301,45 +5314,45 @@ pub const LAYOUT__105: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 655 },
     },
 ];
-pub const LAYOUT__106: &ExpandBELayout = &ExpandBELayout {
-    _super: LAYOUT__105,
+pub const LAYOUT__107: &ExpandBELayout = &ExpandBELayout {
+    _super: LAYOUT__106,
 };
-pub const LAYOUT__108: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__105,
-};
-pub const LAYOUT__109: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 991 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 992 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 993 },
-    },
+pub const LAYOUT__109: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__106,
 };
 pub const LAYOUT__110: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 994 },
+        _super: &Reg { offset: 993 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 995 },
+        _super: &Reg { offset: 994 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 996 },
+        _super: &Reg { offset: 995 },
     },
 };
-pub const LAYOUT__107: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__108,
-    low_carry: LAYOUT__109,
-    high_carry: LAYOUT__110,
+pub const LAYOUT__111: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 996 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 997 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 998 },
+    },
 };
-pub const LAYOUT__104: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__105,
-    arm0: LAYOUT__106,
-    arm1: LAYOUT__107,
+pub const LAYOUT__108: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__109,
+    low_carry: LAYOUT__110,
+    high_carry: LAYOUT__111,
 };
-pub const LAYOUT__113: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__105: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__106,
+    arm0: LAYOUT__107,
+    arm1: LAYOUT__108,
+};
+pub const LAYOUT__114: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 112 },
     },
@@ -5437,37 +5450,37 @@ pub const LAYOUT__113: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 143 },
     },
 ];
-pub const LAYOUT__112: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__113,
-};
-pub const LAYOUT__114: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 997 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 998 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 999 },
-    },
+pub const LAYOUT__113: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__114,
 };
 pub const LAYOUT__115: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1000 },
+        _super: &Reg { offset: 999 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1001 },
+        _super: &Reg { offset: 1000 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1002 },
+        _super: &Reg { offset: 1001 },
     },
 };
-pub const LAYOUT__111: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__112,
-    low_carry: LAYOUT__114,
-    high_carry: LAYOUT__115,
+pub const LAYOUT__116: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1002 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1003 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1004 },
+    },
 };
-pub const LAYOUT__118: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__112: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__113,
+    low_carry: LAYOUT__115,
+    high_carry: LAYOUT__116,
+};
+pub const LAYOUT__119: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 368 },
     },
@@ -5565,42 +5578,42 @@ pub const LAYOUT__118: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 399 },
     },
 ];
-pub const LAYOUT__117: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__118,
-};
-pub const LAYOUT__119: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1003 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1004 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1005 },
-    },
+pub const LAYOUT__118: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__119,
 };
 pub const LAYOUT__120: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1006 },
+        _super: &Reg { offset: 1005 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1007 },
+        _super: &Reg { offset: 1006 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1008 },
+        _super: &Reg { offset: 1007 },
     },
 };
-pub const LAYOUT__116: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__117,
-    low_carry: LAYOUT__119,
-    high_carry: LAYOUT__120,
+pub const LAYOUT__121: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1008 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1009 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1010 },
+    },
 };
-pub const LAYOUT__103: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__104,
-    a: LAYOUT__111,
-    e: LAYOUT__116,
+pub const LAYOUT__117: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__118,
+    low_carry: LAYOUT__120,
+    high_carry: LAYOUT__121,
 };
-pub const LAYOUT__123: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__104: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__105,
+    a: LAYOUT__112,
+    e: LAYOUT__117,
+};
+pub const LAYOUT__124: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 656 },
     },
@@ -5698,45 +5711,45 @@ pub const LAYOUT__123: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 687 },
     },
 ];
-pub const LAYOUT__124: &ExpandBELayout = &ExpandBELayout {
-    _super: LAYOUT__123,
+pub const LAYOUT__125: &ExpandBELayout = &ExpandBELayout {
+    _super: LAYOUT__124,
 };
-pub const LAYOUT__126: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__123,
-};
-pub const LAYOUT__127: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1009 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1010 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1011 },
-    },
+pub const LAYOUT__127: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__124,
 };
 pub const LAYOUT__128: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1012 },
+        _super: &Reg { offset: 1011 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1013 },
+        _super: &Reg { offset: 1012 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1014 },
+        _super: &Reg { offset: 1013 },
     },
 };
-pub const LAYOUT__125: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__126,
-    low_carry: LAYOUT__127,
-    high_carry: LAYOUT__128,
+pub const LAYOUT__129: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1014 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1015 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1016 },
+    },
 };
-pub const LAYOUT__122: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__123,
-    arm0: LAYOUT__124,
-    arm1: LAYOUT__125,
+pub const LAYOUT__126: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__127,
+    low_carry: LAYOUT__128,
+    high_carry: LAYOUT__129,
 };
-pub const LAYOUT__131: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__123: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__124,
+    arm0: LAYOUT__125,
+    arm1: LAYOUT__126,
+};
+pub const LAYOUT__132: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 144 },
     },
@@ -5834,37 +5847,37 @@ pub const LAYOUT__131: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 175 },
     },
 ];
-pub const LAYOUT__130: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__131,
-};
-pub const LAYOUT__132: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1015 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1016 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1017 },
-    },
+pub const LAYOUT__131: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__132,
 };
 pub const LAYOUT__133: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1018 },
+        _super: &Reg { offset: 1017 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1019 },
+        _super: &Reg { offset: 1018 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1020 },
+        _super: &Reg { offset: 1019 },
     },
 };
-pub const LAYOUT__129: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__130,
-    low_carry: LAYOUT__132,
-    high_carry: LAYOUT__133,
+pub const LAYOUT__134: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1020 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1021 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1022 },
+    },
 };
-pub const LAYOUT__136: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__130: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__131,
+    low_carry: LAYOUT__133,
+    high_carry: LAYOUT__134,
+};
+pub const LAYOUT__137: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 400 },
     },
@@ -5962,42 +5975,42 @@ pub const LAYOUT__136: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 431 },
     },
 ];
-pub const LAYOUT__135: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__136,
-};
-pub const LAYOUT__137: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1021 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1022 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1023 },
-    },
+pub const LAYOUT__136: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__137,
 };
 pub const LAYOUT__138: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1024 },
+        _super: &Reg { offset: 1023 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1025 },
+        _super: &Reg { offset: 1024 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1026 },
+        _super: &Reg { offset: 1025 },
     },
 };
-pub const LAYOUT__134: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__135,
-    low_carry: LAYOUT__137,
-    high_carry: LAYOUT__138,
+pub const LAYOUT__139: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1026 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1027 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1028 },
+    },
 };
-pub const LAYOUT__121: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__122,
-    a: LAYOUT__129,
-    e: LAYOUT__134,
+pub const LAYOUT__135: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__136,
+    low_carry: LAYOUT__138,
+    high_carry: LAYOUT__139,
 };
-pub const LAYOUT__141: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__122: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__123,
+    a: LAYOUT__130,
+    e: LAYOUT__135,
+};
+pub const LAYOUT__142: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 688 },
     },
@@ -6095,45 +6108,45 @@ pub const LAYOUT__141: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 719 },
     },
 ];
-pub const LAYOUT__142: &ExpandBELayout = &ExpandBELayout {
-    _super: LAYOUT__141,
+pub const LAYOUT__143: &ExpandBELayout = &ExpandBELayout {
+    _super: LAYOUT__142,
 };
-pub const LAYOUT__144: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__141,
-};
-pub const LAYOUT__145: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1027 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1028 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1029 },
-    },
+pub const LAYOUT__145: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__142,
 };
 pub const LAYOUT__146: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1030 },
+        _super: &Reg { offset: 1029 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1031 },
+        _super: &Reg { offset: 1030 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1032 },
+        _super: &Reg { offset: 1031 },
     },
 };
-pub const LAYOUT__143: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__144,
-    low_carry: LAYOUT__145,
-    high_carry: LAYOUT__146,
+pub const LAYOUT__147: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1032 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1033 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1034 },
+    },
 };
-pub const LAYOUT__140: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__141,
-    arm0: LAYOUT__142,
-    arm1: LAYOUT__143,
+pub const LAYOUT__144: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__145,
+    low_carry: LAYOUT__146,
+    high_carry: LAYOUT__147,
 };
-pub const LAYOUT__149: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__141: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__142,
+    arm0: LAYOUT__143,
+    arm1: LAYOUT__144,
+};
+pub const LAYOUT__150: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 176 },
     },
@@ -6231,37 +6244,37 @@ pub const LAYOUT__149: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 207 },
     },
 ];
-pub const LAYOUT__148: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__149,
-};
-pub const LAYOUT__150: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1033 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1034 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1035 },
-    },
+pub const LAYOUT__149: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__150,
 };
 pub const LAYOUT__151: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1036 },
+        _super: &Reg { offset: 1035 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1037 },
+        _super: &Reg { offset: 1036 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1038 },
+        _super: &Reg { offset: 1037 },
     },
 };
-pub const LAYOUT__147: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__148,
-    low_carry: LAYOUT__150,
-    high_carry: LAYOUT__151,
+pub const LAYOUT__152: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1038 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1039 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1040 },
+    },
 };
-pub const LAYOUT__154: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__148: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__149,
+    low_carry: LAYOUT__151,
+    high_carry: LAYOUT__152,
+};
+pub const LAYOUT__155: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 432 },
     },
@@ -6359,42 +6372,42 @@ pub const LAYOUT__154: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 463 },
     },
 ];
-pub const LAYOUT__153: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__154,
-};
-pub const LAYOUT__155: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1039 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1040 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1041 },
-    },
+pub const LAYOUT__154: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__155,
 };
 pub const LAYOUT__156: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1042 },
+        _super: &Reg { offset: 1041 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1043 },
+        _super: &Reg { offset: 1042 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1044 },
+        _super: &Reg { offset: 1043 },
     },
 };
-pub const LAYOUT__152: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__153,
-    low_carry: LAYOUT__155,
-    high_carry: LAYOUT__156,
+pub const LAYOUT__157: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1044 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1045 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1046 },
+    },
 };
-pub const LAYOUT__139: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__140,
-    a: LAYOUT__147,
-    e: LAYOUT__152,
+pub const LAYOUT__153: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__154,
+    low_carry: LAYOUT__156,
+    high_carry: LAYOUT__157,
 };
-pub const LAYOUT__159: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__140: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__141,
+    a: LAYOUT__148,
+    e: LAYOUT__153,
+};
+pub const LAYOUT__160: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 720 },
     },
@@ -6492,45 +6505,45 @@ pub const LAYOUT__159: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 751 },
     },
 ];
-pub const LAYOUT__160: &ExpandBELayout = &ExpandBELayout {
-    _super: LAYOUT__159,
+pub const LAYOUT__161: &ExpandBELayout = &ExpandBELayout {
+    _super: LAYOUT__160,
 };
-pub const LAYOUT__162: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__159,
-};
-pub const LAYOUT__163: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1045 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1046 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1047 },
-    },
+pub const LAYOUT__163: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__160,
 };
 pub const LAYOUT__164: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1048 },
+        _super: &Reg { offset: 1047 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1049 },
+        _super: &Reg { offset: 1048 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1050 },
+        _super: &Reg { offset: 1049 },
     },
 };
-pub const LAYOUT__161: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__162,
-    low_carry: LAYOUT__163,
-    high_carry: LAYOUT__164,
+pub const LAYOUT__165: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1050 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1051 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1052 },
+    },
 };
-pub const LAYOUT__158: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__159,
-    arm0: LAYOUT__160,
-    arm1: LAYOUT__161,
+pub const LAYOUT__162: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__163,
+    low_carry: LAYOUT__164,
+    high_carry: LAYOUT__165,
 };
-pub const LAYOUT__167: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__159: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__160,
+    arm0: LAYOUT__161,
+    arm1: LAYOUT__162,
+};
+pub const LAYOUT__168: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 208 },
     },
@@ -6628,37 +6641,37 @@ pub const LAYOUT__167: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 239 },
     },
 ];
-pub const LAYOUT__166: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__167,
-};
-pub const LAYOUT__168: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1051 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1052 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1053 },
-    },
+pub const LAYOUT__167: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__168,
 };
 pub const LAYOUT__169: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1054 },
+        _super: &Reg { offset: 1053 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1055 },
+        _super: &Reg { offset: 1054 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1056 },
+        _super: &Reg { offset: 1055 },
     },
 };
-pub const LAYOUT__165: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__166,
-    low_carry: LAYOUT__168,
-    high_carry: LAYOUT__169,
+pub const LAYOUT__170: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1056 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1057 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1058 },
+    },
 };
-pub const LAYOUT__172: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__166: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__167,
+    low_carry: LAYOUT__169,
+    high_carry: LAYOUT__170,
+};
+pub const LAYOUT__173: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 464 },
     },
@@ -6756,42 +6769,42 @@ pub const LAYOUT__172: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 495 },
     },
 ];
-pub const LAYOUT__171: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__172,
-};
-pub const LAYOUT__173: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1057 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1058 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1059 },
-    },
+pub const LAYOUT__172: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__173,
 };
 pub const LAYOUT__174: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1060 },
+        _super: &Reg { offset: 1059 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1061 },
+        _super: &Reg { offset: 1060 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1062 },
+        _super: &Reg { offset: 1061 },
     },
 };
-pub const LAYOUT__170: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__171,
-    low_carry: LAYOUT__173,
-    high_carry: LAYOUT__174,
+pub const LAYOUT__175: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1062 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1063 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1064 },
+    },
 };
-pub const LAYOUT__157: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__158,
-    a: LAYOUT__165,
-    e: LAYOUT__170,
+pub const LAYOUT__171: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__172,
+    low_carry: LAYOUT__174,
+    high_carry: LAYOUT__175,
 };
-pub const LAYOUT__177: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__158: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__159,
+    a: LAYOUT__166,
+    e: LAYOUT__171,
+};
+pub const LAYOUT__178: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 752 },
     },
@@ -6889,45 +6902,45 @@ pub const LAYOUT__177: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 783 },
     },
 ];
-pub const LAYOUT__178: &ExpandBELayout = &ExpandBELayout {
-    _super: LAYOUT__177,
+pub const LAYOUT__179: &ExpandBELayout = &ExpandBELayout {
+    _super: LAYOUT__178,
 };
-pub const LAYOUT__180: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__177,
-};
-pub const LAYOUT__181: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1063 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1064 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1065 },
-    },
+pub const LAYOUT__181: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__178,
 };
 pub const LAYOUT__182: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1066 },
+        _super: &Reg { offset: 1065 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1067 },
+        _super: &Reg { offset: 1066 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1068 },
+        _super: &Reg { offset: 1067 },
     },
 };
-pub const LAYOUT__179: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__180,
-    low_carry: LAYOUT__181,
-    high_carry: LAYOUT__182,
+pub const LAYOUT__183: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1068 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1069 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1070 },
+    },
 };
-pub const LAYOUT__176: &DoShaStepWLayout = &DoShaStepWLayout {
-    _super: LAYOUT__177,
-    arm0: LAYOUT__178,
-    arm1: LAYOUT__179,
+pub const LAYOUT__180: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__181,
+    low_carry: LAYOUT__182,
+    high_carry: LAYOUT__183,
 };
-pub const LAYOUT__185: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__177: &DoShaStepWLayout = &DoShaStepWLayout {
+    _super: LAYOUT__178,
+    arm0: LAYOUT__179,
+    arm1: LAYOUT__180,
+};
+pub const LAYOUT__186: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 240 },
     },
@@ -7025,37 +7038,37 @@ pub const LAYOUT__185: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 271 },
     },
 ];
-pub const LAYOUT__184: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__185,
-};
-pub const LAYOUT__186: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1069 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1070 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1071 },
-    },
+pub const LAYOUT__185: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__186,
 };
 pub const LAYOUT__187: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1072 },
+        _super: &Reg { offset: 1071 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1073 },
+        _super: &Reg { offset: 1072 },
     },
     bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1074 },
+        _super: &Reg { offset: 1073 },
     },
 };
-pub const LAYOUT__183: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__184,
-    low_carry: LAYOUT__186,
-    high_carry: LAYOUT__187,
+pub const LAYOUT__188: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
+        _super: &Reg { offset: 1074 },
+    },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1075 },
+    },
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1076 },
+    },
 };
-pub const LAYOUT__190: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__184: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__185,
+    low_carry: LAYOUT__187,
+    high_carry: LAYOUT__188,
+};
+pub const LAYOUT__191: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 496 },
     },
@@ -7153,133 +7166,133 @@ pub const LAYOUT__190: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 527 },
     },
 ];
-pub const LAYOUT__189: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__190,
-};
-pub const LAYOUT__191: &CarryExtractLayout = &CarryExtractLayout {
-    bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1075 },
-    },
-    bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1076 },
-    },
-    bit2: &NondetRegLayout {
-        _super: &Reg { offset: 1077 },
-    },
+pub const LAYOUT__190: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__191,
 };
 pub const LAYOUT__192: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
-        _super: &Reg { offset: 1078 },
+        _super: &Reg { offset: 1077 },
     },
     bit1: &NondetRegLayout {
-        _super: &Reg { offset: 1079 },
+        _super: &Reg { offset: 1078 },
     },
     bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1079 },
+    },
+};
+pub const LAYOUT__193: &CarryExtractLayout = &CarryExtractLayout {
+    bit0: &NondetRegLayout {
         _super: &Reg { offset: 1080 },
     },
-};
-pub const LAYOUT__188: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__189,
-    low_carry: LAYOUT__191,
-    high_carry: LAYOUT__192,
-};
-pub const LAYOUT__175: &DoShaStepLayout = &DoShaStepLayout {
-    w: LAYOUT__176,
-    a: LAYOUT__183,
-    e: LAYOUT__188,
-};
-pub const LAYOUT__193: &DoShaStepLayout8LayoutArray = &[
-    LAYOUT__49,
-    LAYOUT__67,
-    LAYOUT__85,
-    LAYOUT__103,
-    LAYOUT__121,
-    LAYOUT__139,
-    LAYOUT__157,
-    LAYOUT__175,
-];
-pub const LAYOUT__43: &ShaCycleLayout = &ShaCycleLayout {
-    _super: LAYOUT__15,
-    one_hot: LAYOUT__44,
-    is_load: &NondetRegLayout {
-        _super: &Reg { offset: 1089 },
+    bit1: &NondetRegLayout {
+        _super: &Reg { offset: 1081 },
     },
-    win: LAYOUT__46,
-    step0: LAYOUT__49,
-    step1: LAYOUT__67,
-    step2: LAYOUT__85,
-    step3: LAYOUT__103,
-    step4: LAYOUT__121,
-    step5: LAYOUT__139,
-    step6: LAYOUT__157,
-    step7: LAYOUT__175,
-    steps: LAYOUT__193,
+    bit2: &NondetRegLayout {
+        _super: &Reg { offset: 1082 },
+    },
 };
-pub const LAYOUT__196: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__184,
-    low_carry: LAYOUT__55,
-    high_carry: LAYOUT__56,
+pub const LAYOUT__189: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__190,
+    low_carry: LAYOUT__192,
+    high_carry: LAYOUT__193,
+};
+pub const LAYOUT__176: &DoShaStepLayout = &DoShaStepLayout {
+    w: LAYOUT__177,
+    a: LAYOUT__184,
+    e: LAYOUT__189,
+};
+pub const LAYOUT__194: &DoShaStepLayout8LayoutArray = &[
+    LAYOUT__50,
+    LAYOUT__68,
+    LAYOUT__86,
+    LAYOUT__104,
+    LAYOUT__122,
+    LAYOUT__140,
+    LAYOUT__158,
+    LAYOUT__176,
+];
+pub const LAYOUT__44: &ShaCycleLayout = &ShaCycleLayout {
+    _super: LAYOUT__16,
+    one_hot: LAYOUT__45,
+    is_load: &NondetRegLayout {
+        _super: &Reg { offset: 1091 },
+    },
+    win: LAYOUT__47,
+    step0: LAYOUT__50,
+    step1: LAYOUT__68,
+    step2: LAYOUT__86,
+    step3: LAYOUT__104,
+    step4: LAYOUT__122,
+    step5: LAYOUT__140,
+    step6: LAYOUT__158,
+    step7: LAYOUT__176,
+    steps: LAYOUT__194,
 };
 pub const LAYOUT__197: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__166,
-    low_carry: LAYOUT__60,
-    high_carry: LAYOUT__61,
+    _super: LAYOUT__185,
+    low_carry: LAYOUT__56,
+    high_carry: LAYOUT__57,
 };
 pub const LAYOUT__198: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__148,
-    low_carry: LAYOUT__65,
-    high_carry: LAYOUT__66,
+    _super: LAYOUT__167,
+    low_carry: LAYOUT__61,
+    high_carry: LAYOUT__62,
 };
 pub const LAYOUT__199: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__130,
-    low_carry: LAYOUT__73,
-    high_carry: LAYOUT__74,
+    _super: LAYOUT__149,
+    low_carry: LAYOUT__66,
+    high_carry: LAYOUT__67,
 };
-pub const LAYOUT__195: &CarryAndExpandLayout4LayoutArray =
-    &[LAYOUT__196, LAYOUT__197, LAYOUT__198, LAYOUT__199];
-pub const LAYOUT__201: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__189,
-    low_carry: LAYOUT__78,
-    high_carry: LAYOUT__79,
+pub const LAYOUT__200: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__131,
+    low_carry: LAYOUT__74,
+    high_carry: LAYOUT__75,
 };
+pub const LAYOUT__196: &CarryAndExpandLayout4LayoutArray =
+    &[LAYOUT__197, LAYOUT__198, LAYOUT__199, LAYOUT__200];
 pub const LAYOUT__202: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__171,
-    low_carry: LAYOUT__83,
-    high_carry: LAYOUT__84,
+    _super: LAYOUT__190,
+    low_carry: LAYOUT__79,
+    high_carry: LAYOUT__80,
 };
 pub const LAYOUT__203: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__153,
-    low_carry: LAYOUT__91,
-    high_carry: LAYOUT__92,
+    _super: LAYOUT__172,
+    low_carry: LAYOUT__84,
+    high_carry: LAYOUT__85,
 };
 pub const LAYOUT__204: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__135,
-    low_carry: LAYOUT__96,
-    high_carry: LAYOUT__97,
+    _super: LAYOUT__154,
+    low_carry: LAYOUT__92,
+    high_carry: LAYOUT__93,
 };
-pub const LAYOUT__200: &CarryAndExpandLayout4LayoutArray =
-    &[LAYOUT__201, LAYOUT__202, LAYOUT__203, LAYOUT__204];
-pub const LAYOUT__194: &ShaNextBlockCycleLayout = &ShaNextBlockCycleLayout {
-    _super: LAYOUT__15,
-    tot_a: LAYOUT__195,
-    tot_e: LAYOUT__200,
+pub const LAYOUT__205: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__136,
+    low_carry: LAYOUT__97,
+    high_carry: LAYOUT__98,
 };
-pub const LAYOUT__19: &TopCurStateLayout = &TopCurStateLayout {
-    _super: LAYOUT__15,
-    arm0: LAYOUT__15,
-    arm1: LAYOUT__20,
-    arm2: LAYOUT__22,
-    arm3: LAYOUT__23,
-    arm4: LAYOUT__24,
-    arm5: LAYOUT__15,
-    arm6: LAYOUT__15,
-    arm7: LAYOUT__37,
-    arm8: LAYOUT__42,
-    arm9: LAYOUT__43,
-    arm10: LAYOUT__194,
-    arm11: LAYOUT__15,
+pub const LAYOUT__201: &CarryAndExpandLayout4LayoutArray =
+    &[LAYOUT__202, LAYOUT__203, LAYOUT__204, LAYOUT__205];
+pub const LAYOUT__195: &ShaNextBlockCycleLayout = &ShaNextBlockCycleLayout {
+    _super: LAYOUT__16,
+    tot_a: LAYOUT__196,
+    tot_e: LAYOUT__201,
 };
-pub const LAYOUT__206: &NondetRegLayout16LayoutArray = &[
+pub const LAYOUT__20: &TopCurStateLayout = &TopCurStateLayout {
+    _super: LAYOUT__16,
+    arm0: LAYOUT__16,
+    arm1: LAYOUT__21,
+    arm2: LAYOUT__23,
+    arm3: LAYOUT__24,
+    arm4: LAYOUT__25,
+    arm5: LAYOUT__16,
+    arm6: LAYOUT__16,
+    arm7: LAYOUT__38,
+    arm8: LAYOUT__43,
+    arm9: LAYOUT__44,
+    arm10: LAYOUT__195,
+    arm11: LAYOUT__16,
+};
+pub const LAYOUT__207: &NondetRegLayout16LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 0 },
     },
@@ -7329,20 +7342,21 @@ pub const LAYOUT__206: &NondetRegLayout16LayoutArray = &[
         _super: &Reg { offset: 15 },
     },
 ];
-pub const LAYOUT__205: &DigestRegLayout = &DigestRegLayout {
-    values: LAYOUT__206,
+pub const LAYOUT__206: &DigestRegLayout = &DigestRegLayout {
+    values: LAYOUT__207,
 };
 pub const LAYOUT_TOP: &TopLayout = &TopLayout {
-    is_first: &NondetRegLayout {
-        _super: &Reg { offset: 932 },
-    },
-    cycle_mux: LAYOUT__0,
-    control_state: LAYOUT__2,
-    control_state_redef: LAYOUT__3,
-    one_hot: LAYOUT__14,
-    cur_state: LAYOUT__15,
-    cur_state_redef: LAYOUT__19,
+    cycle: LAYOUT__0,
+    cycle_mux: LAYOUT__1,
+    control_state: LAYOUT__3,
+    control_state_redef: LAYOUT__4,
+    one_hot: LAYOUT__15,
+    cur_state: LAYOUT__16,
+    cur_state_redef: LAYOUT__20,
 };
 pub const LAYOUT_GLOBAL: &_globalLayout = &_globalLayout {
-    final_digest: LAYOUT__205,
+    final_digest: LAYOUT__206,
+    total_cycles: &NondetRegLayout {
+        _super: &Reg { offset: 16 },
+    },
 };
