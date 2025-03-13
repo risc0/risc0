@@ -17,7 +17,7 @@ use std::path::Path;
 use anyhow::Result;
 use cargo_metadata::Package;
 use clap::Parser;
-use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder, ImageIdKind};
+use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder};
 
 /// `cargo risczero bake`
 #[derive(Parser)]
@@ -83,16 +83,8 @@ impl BakeCommand {
             std::fs::create_dir_all(tgt_path.parent().unwrap())?;
             std::fs::copy(src_path, tgt_path)?;
 
-            match guest.v2_image_id {
-                ImageIdKind::User(digest) => {
-                    let image_id_path = elfs_dir.join(file_name).with_extension("uid");
-                    std::fs::write(image_id_path, digest.as_bytes())?
-                }
-                ImageIdKind::Kernel(digest) => {
-                    let image_id_path = elfs_dir.join(file_name).with_extension("kid");
-                    std::fs::write(image_id_path, digest.as_bytes())?
-                }
-            };
+            let image_id_path = elfs_dir.join(file_name).with_extension("iid");
+            std::fs::write(image_id_path, guest.image_id.as_bytes())?;
         }
 
         Ok(())

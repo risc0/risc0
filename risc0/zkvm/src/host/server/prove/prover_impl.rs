@@ -22,7 +22,7 @@ use crate::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
-        server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
+        server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     },
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
@@ -58,7 +58,7 @@ impl ProverServer for ProverImpl {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = Executor2::from_elf(env, elf)?.run()?;
+        let session = ExecutorImpl::from_elf(env, elf)?.run()?;
         self.prove_session(ctx, &session)
     }
 
@@ -216,7 +216,7 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let seal = risc0_circuit_rv32im_v2::prove::segment_prover()?.prove(&segment.inner)?;
+        let seal = risc0_circuit_rv32im::prove::segment_prover()?.prove(&segment.inner)?;
         let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.inner.po2))?;
         claim.output = segment.output.clone().into();
 

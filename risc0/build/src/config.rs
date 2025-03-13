@@ -16,6 +16,7 @@ use std::{env, path::PathBuf};
 
 use cargo_metadata::Package;
 use derive_builder::Builder;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use serde::{Deserialize, Serialize};
 
 /// Options for configuring a docker build environment.
@@ -78,6 +79,17 @@ pub struct GuestOptions {
     /// Use a docker environment for building.
     #[builder(setter(strip_option))]
     pub use_docker: Option<DockerOptions>,
+
+    /// Override the default kernel ELF to be used for execution.
+    #[builder(setter(strip_option))]
+    pub kernel: Option<Vec<u8>>,
+}
+
+impl GuestOptions {
+    /// Get the kernel ELF to be used for execution.
+    pub fn kernel(&self) -> Vec<u8> {
+        self.kernel.clone().unwrap_or_else(|| V1COMPAT_ELF.to_vec())
+    }
 }
 
 /// Metadata defining options to build a guest

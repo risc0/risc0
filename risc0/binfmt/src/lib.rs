@@ -23,19 +23,17 @@ mod addr;
 mod elf;
 mod exit_code;
 mod hash;
-#[cfg(not(target_os = "zkvm"))]
 mod image;
-mod image2;
 mod sys_state;
 
-#[cfg(not(target_os = "zkvm"))]
-pub use self::image::{MemoryImage, PageTableInfo};
+use anyhow::Result;
+use risc0_zkp::core::digest::Digest;
 
-pub use self::image2::{MemoryImage2, Page, KERNEL_START_ADDR};
+pub use self::image::{MemoryImage, Page, KERNEL_START_ADDR};
 
 pub use crate::{
     addr::{ByteAddr, WordAddr},
-    elf::Program,
+    elf::{Program, ProgramBinary},
     exit_code::{ExitCode, InvalidExitCodeError},
     hash::{tagged_iter, tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
@@ -45,42 +43,7 @@ pub(crate) const WORD_SIZE: usize = 4;
 const PAGE_BYTES: usize = 1024;
 pub(crate) const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 
-/// Compute and return the ImageID of the specified ELF binary.
-#[cfg(not(target_os = "zkvm"))]
-pub fn compute_image_id(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::Digest> {
-    use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
-
-    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    Ok(image.compute_id())
-}
-
-/// Compute and return the ImageID of the user-mode portion of the specified ELF binary.
-pub fn compute_user_id_v2(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::Digest> {
-    let program = Program::load_elf(elf, KERNEL_START_ADDR.0)?;
-    let mut image = MemoryImage2::new_user(program);
-    Ok(image.user_id())
-}
-
-/// Compute and return the ImageID of the kernel-mode portion of the specified ELF binary.
-pub fn compute_kernel_id_v2(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::Digest> {
-    let program = Program::load_elf(elf, u32::MAX)?;
-    let mut image = MemoryImage2::new_kernel(program);
-    Ok(image.kernel_id())
-}
-
-/// Compute and return the ImageID of the user-mode portion of the specified ELF binary.
-pub fn compute_image_id_v2(
-    user_id: impl Into<risc0_zkp::core::digest::Digest>,
-    kernel_id: impl Into<risc0_zkp::core::digest::Digest>,
-) -> anyhow::Result<risc0_zkp::core::digest::Digest> {
-    use crate::Digestible;
-    use risc0_zkp::core::hash::sha::Impl;
-
-    let merkle_root = self::image2::DigestPair {
-        lhs: user_id.into(),
-        rhs: kernel_id.into(),
-    }
-    .digest();
-    Ok(SystemState { pc: 0, merkle_root }.digest::<Impl>())
+/// Compute and return the ImageID of the specified combined user ELF + kernel ELF binary.
+pub fn compute_image_id(blob: &[u8]) -> Result<Digest> {
+    ProgramBinary::decode(blob)?.compute_image_id()
 }

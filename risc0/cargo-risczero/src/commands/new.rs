@@ -18,6 +18,8 @@ use anyhow::{anyhow, Result};
 use clap::Parser;
 use const_format::concatcp;
 use regex::Regex;
+use semver::VersionReq;
+use std::collections::BTreeMap;
 use text_io::read;
 
 const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -53,6 +55,34 @@ static PROJECT_NON_TEMPLATED_FILES: &[(&str, &str)] = &[
     (".gitignore", GIT_IGNORE),
     ("LICENSE", LICENSE),
 ];
+
+/// The captured output of `cargo metadata` that was run on the current crate at build time.
+fn own_cargo_metadata_output() -> cargo_metadata::Metadata {
+    serde_json::from_str(include_str!(concat!(
+        env!("OUT_DIR"),
+        "/cargo_metadata_output.json"
+    )))
+    .expect("generated cargo_metadata_output.json contains invalid data")
+}
+
+fn build_own_dependency_graph(metadata: &cargo_metadata::Metadata) -> BTreeMap<&str, &VersionReq> {
+    let crate_name = std::env!("CARGO_CRATE_NAME").replace("_", "-");
+    let packages = &metadata.packages;
+    let package = packages
+        .iter()
+        .find(|p| p.name == crate_name)
+        .unwrap_or_else(|| {
+            panic!(
+                "cannot find crate {crate_name} in {:#?}",
+                packages.iter().map(|p| &p.name).collect::<Vec<_>>()
+            )
+        });
+    package
+        .dependencies
+        .iter()
+        .map(|dep| (&dep.name[..], &dep.req))
+        .collect()
+}
 
 /// `cargo risczero new`
 #[derive(Parser)]
@@ -111,9 +141,6 @@ impl NewCommand {
             std::env::current_dir().expect("Failed to fetch cwd")
         };
 
-        let risc0_version = std::env::var("CARGO_PKG_VERSION")
-            .unwrap_or_else(|_| RISC0_DEFAULT_VERSION.to_string());
-
         let mut template_variables = Vec::new();
 
         if let Some(branch) = self.use_git_branch.as_ref() {
@@ -128,11 +155,13 @@ impl NewCommand {
             template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, build));
             template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, zkvm));
         } else {
-            let zkvm_spec = format!("version = \"{risc0_version}\"");
-            // This hard-coding of 2.0.0 for `risc0-build` is a temporary fix until we can come up
-            // with something more robust.
-            let build_spec = "version = \"2.0.0\"".into();
+            let own_metadata = own_cargo_metadata_output();
+            let own_dependencies = build_own_dependency_graph(&own_metadata);
+
+            let build_spec = format!("version = \"{}\"", own_dependencies["risc0-build"]);
             template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, build_spec));
+
+            let zkvm_spec = format!("version = \"{}\"", own_dependencies["risc0-zkvm"]);
             template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, zkvm_spec));
         }
 
@@ -279,10 +308,21 @@ mod tests {
 
         let proj_path = tmpdir.path().join(proj_name);
 
+        let own_metadata = own_cargo_metadata_output();
+        let own_dependencies = build_own_dependency_graph(&own_metadata);
+
         assert!(proj_path.exists());
+
+        let zkvm_version = own_dependencies["risc0-zkvm"];
         assert!(find_in_file(
-            &format!("risc0-zkvm = {{ version = \"{RISC0_DEFAULT_VERSION}\" }}"),
+            &format!("risc0-zkvm = {{ version = \"{zkvm_version}\" }}"),
             &proj_path.join("host/Cargo.toml")
+        ));
+
+        let build_version = own_dependencies["risc0-build"];
+        assert!(!find_in_file(
+            &format!("risc0-build = {{ version = \"{build_version}\" }}"),
+            &proj_path.join("methods/guest/Cargo.toml")
         ));
 
         assert!(!find_in_file(
