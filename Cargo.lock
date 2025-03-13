@@ -4458,6 +4458,7 @@ dependencies = [
  "derive_more 2.0.1",
  "elf",
  "lazy_static",
+ "postcard",
  "risc0-zkp",
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",
