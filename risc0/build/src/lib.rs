@@ -460,10 +460,10 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 
 fn get_rustc_version() -> Result<semver::Version> {
     let output = Command::new("rustc")
-    .arg("--version")
-    .env("RUSTUP_TOOLCHAIN", "risc0")
-    .output()
-    .expect("failed to get risc0 toolchain's rustc version. Please ensure that your risc0 toolchain installed is correctly");
+        .arg("--version")
+        .env("RUSTUP_TOOLCHAIN", "risc0")
+        .output()
+        .expect("failed to get risc0 toolchain's rustc version. Please ensure that your risc0 toolchain installed is correctly");
 
     let version = String::from_utf8(output.stdout)?;
     let re = Regex::new(r"\d+\.\d+\.\d+").unwrap();
