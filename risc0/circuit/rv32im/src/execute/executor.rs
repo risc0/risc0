@@ -28,7 +28,7 @@ use crate::{
 };
 
 use super::{
-    bigint::BigIntState,
+    bigint,
     pager::{compute_partial_image, PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
@@ -515,13 +515,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
-        self.ecall_metrics.0[EcallKind::Poseidon2].cycles += 1;
-        self.inc_user_cycles();
+        self.phys_cycles += 1;
     }
 
-    fn on_bigint_cycle(&mut self, _cur_state: CycleState, _bigint: &BigIntState) {
+    fn ecall_bigint(&mut self) -> Result<()> {
+        let cycles = bigint::ecall_execute(self)?;
         self.ecall_metrics.0[EcallKind::BigInt].cycles += 1;
-        self.inc_user_cycles();
+        self.inc_user_cycles(); // FIXME
+        Ok(())
     }
 }
 

@@ -1251,7 +1251,7 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1266,7 +1266,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1279,6 +1279,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rzup",
+ "semver",
  "serde",
  "serde_json",
  "stability",
@@ -1287,7 +1288,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0-alpha.1"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1301,7 +1302,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0-alpha.1"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1314,7 +1315,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1330,7 +1331,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.4.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -1338,7 +1339,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0-alpha.1"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1357,7 +1358,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1365,7 +1366,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.4.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1388,7 +1389,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1415,7 +1416,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.4.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "bincode",
  "borsh",
@@ -1440,7 +1441,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -1517,7 +1518,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "rzup"
-version = "0.4.0-alpha.1"
+version = "0.4.0"
 dependencies = [
  "semver",
  "serde",

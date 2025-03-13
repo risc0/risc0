@@ -16,7 +16,7 @@ use crate::error::Result;
 use crate::events::RzupEvent;
 use crate::{Rzup, RzupError};
 
-use clap::Parser;
+use clap::{ArgGroup, Parser};
 use colored::Colorize;
 use semver::Version;
 
@@ -272,13 +272,23 @@ pub const BUILD_HELP: &str = "Discussion:
     the default version. The resulting component version contains the commit hash.";
 
 #[derive(Parser)]
+#[clap(group(
+    ArgGroup::new("mode")
+        .args(&["tag_or_commit", "path"])
+        .required(true)
+))]
 pub(crate) struct BuildCommand {
-    /// Name of component to uninstall
+    /// Name of component to build
     #[arg(value_parser=parser("build"))]
     name: String,
 
-    /// Tag or commit of the component to uninstall
-    tag_or_commit: String,
+    /// Tag or commit of the component to build
+    #[arg(short, long)]
+    tag_or_commit: Option<String>,
+
+    /// optional local path to build from
+    #[arg(short, long)]
+    path: Option<String>,
 }
 
 impl BuildCommand {
@@ -288,6 +298,10 @@ impl BuildCommand {
             return Err(RzupError::Other(format!("cannot build {component}")));
         }
 
-        rzup.build_rust_toolchain("https://github.com/risc0/rust.git", &self.tag_or_commit)
+        rzup.build_rust_toolchain(
+            "https://github.com/risc0/rust.git",
+            &self.tag_or_commit,
+            &self.path,
+        )
     }
 }
