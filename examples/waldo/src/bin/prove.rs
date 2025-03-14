@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,26 +25,26 @@ use waldo_core::{
 use waldo_methods::IMAGE_CROP_ELF;
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Args {
     /// Input file path to the full Where's Waldo image.
-    #[clap(short = 'i', long, value_parser, value_hint = clap::ValueHint::FilePath)]
+    #[arg(short = 'i', long, value_parser, value_hint = clap::ValueHint::FilePath)]
     image: PathBuf,
 
     /// X coordinate, in pixels from the top-left corner, of Waldo.
-    #[clap(short = 'x', long, value_parser)]
+    #[arg(short = 'x', long, value_parser)]
     waldo_x: u32,
 
     /// Y coordinate, in pixels from the top-left corner, of Waldo.
-    #[clap(short = 'y', long, value_parser)]
+    #[arg(short = 'y', long, value_parser)]
     waldo_y: u32,
 
     /// Width, in pixels, of the cutout for Waldo.
-    #[clap(long, value_parser)]
+    #[arg(long, value_parser)]
     width: u32,
 
     /// Height, in pixels, of the cutout for Waldo.
-    #[clap(long, value_parser)]
+    #[arg(long, value_parser)]
     height: u32,
 
     /// Optional input file path to an image mask to apply to Waldo.
@@ -52,12 +52,12 @@ struct Args {
     /// Waldo such that a black pixel in the mask will result in the
     /// corresponding image pixel being blacked out. Must be the same
     /// dimensions, in pixels, as the cut out x and y.
-    #[clap(short = 'm', long, value_parser, value_hint = clap::ValueHint::FilePath)]
+    #[arg(short = 'm', long, value_parser, value_hint = clap::ValueHint::FilePath)]
     mask: Option<PathBuf>,
 
     /// Output file path to save the receipt. Note that the receipt contains the
     /// cutout of waldo.
-    #[clap(short = 'r', long, value_parser, default_value = "./receipt.bin", value_hint = clap::ValueHint::FilePath)]
+    #[arg(short = 'r', long, value_parser, default_value = "./receipt.bin", value_hint = clap::ValueHint::FilePath)]
     receipt: PathBuf,
 }
 

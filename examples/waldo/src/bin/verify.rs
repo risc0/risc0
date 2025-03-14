@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,27 +24,27 @@ use waldo_core::{
 use waldo_methods::IMAGE_CROP_ID;
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Args {
     /// Input file path to the full Where's Waldo image.
     /// Used to verify that the Waldo in the receipt actually came from this
     /// image.
-    #[clap(short, long, value_parser, value_hint = clap::ValueHint::FilePath)]
+    #[arg(short, long, value_parser, value_hint = clap::ValueHint::FilePath)]
     image: PathBuf,
 
     /// Input file path to fetch the receipt. Note that the receipt contains the
     /// cutout of waldo.
-    #[clap(short = 'r', long, value_parser, default_value = "./receipt.bin", value_hint = clap::ValueHint::FilePath)]
+    #[arg(short = 'r', long, value_parser, default_value = "./receipt.bin", value_hint = clap::ValueHint::FilePath)]
     receipt: PathBuf,
 
     /// Output file path to save the cutout image of Waldo extracted from the
     /// receipt. SAFETY: Make sure to visually inspect the cutout and verify
     /// it really is Waldo and not some barber pole!
-    #[clap(short = 'o', long, value_parser, default_value = "./waldo_cutout.png", value_hint = clap::ValueHint::FilePath)]
+    #[arg(short = 'o', long, value_parser, default_value = "./waldo_cutout.png", value_hint = clap::ValueHint::FilePath)]
     waldo: PathBuf,
 
     /// Flag to disable displaying the Waldo cutout in the terminal.
-    #[clap(long)]
+    #[arg(long)]
     no_display: bool,
 }
 
