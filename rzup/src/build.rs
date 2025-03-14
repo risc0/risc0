@@ -225,6 +225,12 @@ pub fn build_rust_toolchain(
         "-Cpasses=loweratomic"
     };
 
+    let stage2_flags: &[&str] = if version > semver::Version::new(1, 84, 0) {
+        &["build", "--stage", "2", "compiler/rustc", "library"]
+    } else {
+        &["build", "--stage", "2"]
+    };
+
     run_command_and_stream_output(
         "./x",
         &["build"],
@@ -247,7 +253,7 @@ pub fn build_rust_toolchain(
 
     run_command_and_stream_output(
         "./x",
-        &["build", "--stage", "2"],
+        stage2_flags,
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
