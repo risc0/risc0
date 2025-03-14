@@ -95,7 +95,6 @@ impl SegmentReceipt {
         }
 
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-
         risc0_circuit_rv32im::verify(&self.seal)?;
         let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)
             .or(Err(VerificationError::ReceiptFormatError))?;
