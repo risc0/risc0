@@ -10,9 +10,10 @@ def find_cargo_toml_files(start_path, ignore_dirs=None):
     matches = []
     for root, dirs, filenames in os.walk(start_path):
         # Skip directories specified in ignore_dirs
-        for ignore_dir in ignore_dirs:
-            if ignore_dir in dirs:
-                dirs.remove(ignore_dir)
+        root_abs = os.path.abspath(root)
+        if any(root_abs.startswith(os.path.abspath(i)) for i in ignore_dirs):
+            dirs.clear()
+            continue
 
         for filename in fnmatch.filter(filenames, 'Cargo.toml'):
             matches.append(os.path.join(root, filename))
@@ -87,7 +88,7 @@ def main(directory, dep_path_mapping, ignore_dirs):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Modify dependencies in Cargo.toml files within a directory.")
     parser.add_argument("directory", help="Directory to search for Cargo.toml files")
-    parser.add_argument("--ignore", nargs="+", default=[],
+    parser.add_argument("--ignore", action="append", default=[],
                         help="List of directories to ignore for patching")
     args = parser.parse_args()
 

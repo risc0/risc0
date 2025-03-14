@@ -132,10 +132,10 @@ jobs:
           version: nightly-5c69a9d9fd4e2ec07fc398ab5ef9d706c33890c2
       # Apply local patch
       - name: Local patch on risc0-ethereum
-        run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py . --ignore lib
+        run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py --ignore lib .
         working-directory:  ${{ env.RISC0_ETHEREUM_PATH }}
       - name: Local patch on risc0-foundry-template
-        run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py . --ignore lib
+        run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py --ignore lib .
         working-directory:  ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
       # Run Bootstrap-groth16 to update test receipt for checking
       # the latest groth16 prover against the solidity verifier on risc0-ethereum
