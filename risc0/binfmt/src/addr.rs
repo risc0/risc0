@@ -92,12 +92,12 @@ impl WordAddr {
 
     /// Increments this address to the next word
     ///
-    /// This is a prefixing increment, analogous to `++addr` in C; the value this evaluates to is the value after the increment has completed.
+    /// This increments the address without returning any value.
     pub fn inc(&mut self) {
         self.0 += 1;
     }
 
-    /// Increments this address to the next word
+    /// Increments this address to the next word and returns its previous value
     ///
     /// This is a postfixing increment, analogous to `addr++` in C; the value this evaluates to is the value prior to the increment.
     pub fn postfix_inc(&mut self) -> Self {
