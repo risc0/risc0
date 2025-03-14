@@ -52,7 +52,7 @@ fn basic() {
     );
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    assert_eq!(segment.user_cycles, expected_cycles as u32);
+    assert_eq!(segment.suspend_cycle, expected_cycles as u32 + 1);
 }
 
 #[test]
