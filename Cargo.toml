@@ -73,4 +73,7 @@ lto = true
 opt-level = 3
 
 [profile.release]
-lto = true
+debug = true            # Include debug symbols
+strip = false           # Do NOT strip symbols
+lto = "thin"
+codegen-units = 1

@@ -246,7 +246,7 @@ const fn insn(
 }
 
 type InstructionTable = [Instruction; 48];
-type FastInstructionTable = [u8; 1 << 10];
+type FastInstructionTable = [Instruction; 1 << 10];
 
 const RV32IM_ISA: InstructionTable = [
     insn(InsnKind::Invalid, InsnCategory::Invalid, 0x00, 0x0, 0x00),
@@ -320,14 +320,19 @@ impl Default for FastDecodeTable {
 
 impl FastDecodeTable {
     fn new() -> Self {
-        let mut table: FastInstructionTable = [0; 1 << 10];
-        for (isa_idx, insn) in RV32IM_ISA.iter().enumerate() {
-            Self::add_insn(&mut table, insn, isa_idx);
+        // Initialize the table with the Invalid instruction (index 0)
+        let mut table: FastInstructionTable = [RV32IM_ISA[0]; 1 << 10];
+
+        // Fill in the table with actual instructions
+        for insn in RV32IM_ISA.iter() {
+            Self::add_insn(&mut table, insn);
         }
+
         Self { table }
     }
 
     // Map to 10 bit format
+    #[inline(always)]
     fn map10(opcode: u32, func3: u32, func7: u32) -> usize {
         let op_high = opcode >> 2;
         // Map 0 -> 0, 1 -> 1, 0x20 -> 2, everything else to 3
@@ -341,28 +346,30 @@ impl FastDecodeTable {
         ((op_high << 5) | (func72bits << 3) | func3) as usize
     }
 
-    fn add_insn(table: &mut FastInstructionTable, insn: &Instruction, isa_idx: usize) {
+    // Update to store instructions directly instead of indices
+    fn add_insn(table: &mut FastInstructionTable, insn: &Instruction) {
         let op_high = insn.opcode >> 2;
         if (insn.func3 as i32) < 0 {
             for f3 in 0..8 {
                 for f7b in 0..4 {
                     let idx = (op_high << 5) | (f7b << 3) | f3;
-                    table[idx as usize] = isa_idx as u8;
+                    table[idx as usize] = *insn;
                 }
             }
         } else if (insn.func7 as i32) < 0 {
             for f7b in 0..4 {
                 let idx = (op_high << 5) | (f7b << 3) | insn.func3;
-                table[idx as usize] = isa_idx as u8;
+                table[idx as usize] = *insn;
             }
         } else {
-            table[Self::map10(insn.opcode, insn.func3, insn.func7)] = isa_idx as u8;
+            table[Self::map10(insn.opcode, insn.func3, insn.func7)] = *insn;
         }
     }
 
+    // Simplified lookup function - direct table access
+    #[inline(always)]
     fn lookup(&self, decoded: &DecodedInstruction) -> Instruction {
-        let isa_idx = self.table[Self::map10(decoded.opcode, decoded.func3, decoded.func7)];
-        RV32IM_ISA[isa_idx as usize]
+        self.table[Self::map10(decoded.opcode, decoded.func3, decoded.func7)]
     }
 }
 
@@ -401,6 +408,7 @@ impl Emulator {
         }
 
         let decoded = DecodedInstruction::new(word);
+
         let insn = self.table.lookup(&decoded);
         ctx.on_insn_decoded(&insn, &decoded)?;
         // Only store the ring buffer if we are gonna print it
