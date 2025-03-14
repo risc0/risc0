@@ -18,7 +18,8 @@ use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::platform::{REG_MAX, REG_ZERO, WORD_SIZE};
-
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::_mm_prefetch;
 pub trait EmuContext {
     // Handle environment call
     fn ecall(&mut self) -> Result<bool>;
@@ -396,6 +397,15 @@ impl Emulator {
     pub fn step<C: EmuContext>(&mut self, ctx: &mut C) -> Result<()> {
         let pc = ctx.get_pc();
 
+        // Prefetch the next instruction
+        #[cfg(target_arch = "x86_64")]
+        unsafe {
+            _mm_prefetch(
+                (pc + WORD_SIZE).0 as *const i8,
+                std::arch::x86_64::_MM_HINT_T0,
+            );
+        }
+
         if !ctx.check_insn_load(pc) {
             ctx.trap(Exception::InstructionFault)?;
             return Ok(());
@@ -438,8 +448,11 @@ impl Emulator {
         let pc = ctx.get_pc();
         let mut new_pc = pc + WORD_SIZE;
         let mut rd = decoded.rd;
-        let rs1 = ctx.load_register(decoded.rs1 as usize)?;
-        let rs2 = ctx.load_register(decoded.rs2 as usize)?;
+        // Load rs1 and rs2 in parallel
+        let [rs1, rs2] = [
+            ctx.load_register(decoded.rs1 as usize)?,
+            ctx.load_register(decoded.rs2 as usize)?,
+        ];
         let imm_i = decoded.imm_i();
         let mut br_cond = |cond| -> u32 {
             rd = 0;

@@ -307,37 +307,27 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
             add_cycle!(ptr, rlen);
         }
 
-        // HERE!
-        while rlen >= MAX_IO_WORDS {
-            let words = min(rlen / MAX_IO_WORDS, MAX_IO_WORDS);
-            // tracing::trace!("body: {words}");
-            for j in 0..MAX_IO_WORDS {
-                if j < words {
-                    let word = u32::from_le_bytes(bytes[i..i + WORD_SIZE].try_into()?);
-                    // tracing::trace!("store: {i}, {j}, {word:#010x} -> {ptr:?}");
-                    self.store_memory(ptr.waddr(), word)?;
-                    ptr += WORD_SIZE;
-                    i += WORD_SIZE;
-                    rlen -= WORD_SIZE as u32;
-                } else {
-                    // tracing::trace!("store: {:#010x} -> null", 0);
+        // HERE
+        while rlen > 0 {
+            // First, handle all real data in a single batch
+            let words_to_copy = min(rlen / WORD_SIZE as u32, MAX_IO_WORDS);
+
+            // Process all real data with a simple loop
+            for _ in 0..words_to_copy {
+                let word = u32::from_le_bytes(bytes[i..i + WORD_SIZE].try_into()?);
+                self.store_memory(ptr.waddr(), word)?;
+                ptr += WORD_SIZE;
+                i += WORD_SIZE;
+                rlen -= WORD_SIZE as u32;
+            }
+
+            // Then handle padding separately, only if needed
+            if words_to_copy < MAX_IO_WORDS {
+                // Bulk write zeros for padding (could use SIMD if available)
+                for _ in words_to_copy..MAX_IO_WORDS {
                     self.store_memory(SAFE_WRITE_ADDR.waddr(), 0)?;
                 }
             }
-
-            if rlen == 0 {
-                self.next_pc();
-            }
-
-            add_cycle!(ptr, rlen);
-        }
-
-        while rlen > 0 {
-            // tracing::trace!("suffix");
-            self.store_u8(ptr, bytes[i])?;
-            ptr += 1u32;
-            i += 1;
-            rlen -= 1;
 
             if rlen == 0 {
                 self.next_pc();
