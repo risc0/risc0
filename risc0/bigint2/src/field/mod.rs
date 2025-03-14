@@ -180,7 +180,6 @@ pub fn modsub_384_unchecked(
     }
 }
 
-
 pub fn extfield_deg2_add_256_unchecked(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
