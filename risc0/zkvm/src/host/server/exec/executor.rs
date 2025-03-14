@@ -20,7 +20,10 @@ use std::{
 };
 
 use anyhow::{bail, Context as _, Result};
-use risc0_binfmt::{ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, SystemState};
+use risc0_binfmt::{
+    AbiKind, ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, ProgramBinaryHeader,
+    SystemState,
+};
 use risc0_circuit_rv32im::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
@@ -56,8 +59,23 @@ pub struct ExecutorImpl<'a> {
     return_cache: Cell<(u32, u32)>,
 }
 
-// This should reconcile with what binfmt writes.
-const ZKVM_ABI_VERSION: u32 = 1;
+/// Check to see if the executor is compatible with the given guest program.
+fn check_program_version(header: &ProgramBinaryHeader) -> Result<()> {
+    let abi_kind = header.abi_kind;
+    let abi_version = &header.abi_version;
+
+    if abi_kind != AbiKind::V1Compat {
+        bail!("ProgramBinary abi_kind mismatch {abi_kind:?} != AbiKind::V1Compat");
+    }
+    if !semver::VersionReq::parse("^1.0.0")
+        .unwrap()
+        .matches(abi_version)
+    {
+        bail!("ProgramBinary abi_version mismatch {abi_version} doesn't match ^1.0.0");
+    }
+
+    Ok(())
+}
 
 impl<'a> ExecutorImpl<'a> {
     /// Construct a new [ExecutorImpl] from a [MemoryImage] and entry point.
@@ -77,11 +95,7 @@ impl<'a> ExecutorImpl<'a> {
     /// environmental configuration details.
     pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let binary = ProgramBinary::decode(elf)?;
-
-        let abi_version = binary.header.abi_version;
-        if abi_version != ZKVM_ABI_VERSION {
-            bail!("ProgramBinary abi_version mismatch {abi_version} != {ZKVM_ABI_VERSION}");
-        }
+        check_program_version(&binary.header)?;
 
         let image = binary.to_image()?;
 

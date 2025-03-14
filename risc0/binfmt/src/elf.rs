@@ -133,10 +133,8 @@ const BINARY_FORMAT_VERSION: u32 = 1; // RISC Zero Binary Format Version Number
 
 #[derive(Serialize, Deserialize)]
 enum ProgramBinaryHeaderValueOnDisk {
-    AbiVersion(u32),
+    AbiVersion(AbiKind, semver::Version),
 }
-
-const LATEST_ABI_VERSION: u32 = 1;
 
 trait ReadBytesExt<'a> {
     fn read_u32(&mut self) -> Result<u32>;
@@ -178,17 +176,32 @@ impl WriteBytesExt for Vec<u8> {
     }
 }
 
+/// What kind of ABI is the program using
+#[non_exhaustive]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum AbiKind {
+    /// The v1 version of the ABI
+    V1Compat,
+    /// The Linux ABI
+    Linux, // unused for now
+}
+
 /// A list of key-value pairs that contains information about the program.
 #[non_exhaustive]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProgramBinaryHeader {
-    pub abi_version: u32,
+    /// The ABI the program uses
+    pub abi_kind: AbiKind,
+
+    /// The version of the ABI that the program uses
+    pub abi_version: semver::Version,
 }
 
 impl Default for ProgramBinaryHeader {
     fn default() -> Self {
         Self {
-            abi_version: LATEST_ABI_VERSION,
+            abi_version: semver::Version::new(1, 0, 0),
+            abi_kind: AbiKind::V1Compat,
         }
     }
 }
@@ -219,20 +232,26 @@ impl ProgramBinaryHeader {
         if kv_pairs.len() != 1 {
             bail!("Malformed ProgramBinaryHeader: duplicate attributes");
         }
-        let abi_version = kv_pairs
+        let (abi_kind, abi_version) = kv_pairs
             .into_iter()
             .map(|pair| {
-                let ProgramBinaryHeaderValueOnDisk::AbiVersion(v) = pair;
-                v
+                let ProgramBinaryHeaderValueOnDisk::AbiVersion(abi_kind, abi_version) = pair;
+                (abi_kind, abi_version)
             })
             .next()
             .ok_or_else(|| anyhow!("ProgramBinary header missing AbiVersion"))?;
 
-        Ok(Self { abi_version })
+        Ok(Self {
+            abi_kind,
+            abi_version,
+        })
     }
 
     fn encode(&self) -> Vec<u8> {
-        let kv_pairs = vec![ProgramBinaryHeaderValueOnDisk::AbiVersion(self.abi_version)];
+        let kv_pairs = vec![ProgramBinaryHeaderValueOnDisk::AbiVersion(
+            self.abi_kind,
+            self.abi_version.clone(),
+        )];
 
         let mut ret = vec![];
 
