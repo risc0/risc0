@@ -226,7 +226,7 @@ pub fn build_rust_toolchain(
     };
 
     let stage2_flags: &[&str] = if version > semver::Version::new(1, 84, 0) {
-        &["build", "--stage", "2", "compiler/rustc", "library"]
+        &["build", "--stage", "2", "compiler/rustc", "library", "src/tools/cargo", "src/tools/clippy", "src/tools/rustfmt"]
     } else {
         &["build", "--stage", "2"]
     };
