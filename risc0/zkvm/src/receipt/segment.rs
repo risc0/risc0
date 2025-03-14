@@ -18,6 +18,7 @@ use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
+use risc0_circuit_rv32im::RV32IM_SEAL_VERSION;
 use risc0_zkp::{
     adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
@@ -94,9 +95,15 @@ impl SegmentReceipt {
             });
         }
 
+        if self.seal[0] != RV32IM_SEAL_VERSION {
+            return Err(VerificationError::ReceiptFormatError);
+        }
+
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        risc0_circuit_rv32im::verify(&self.seal)?;
-        let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)
+        let seal = &self.seal[1..];
+
+        risc0_circuit_rv32im::verify(seal)?;
+        let decoded_claim = ReceiptClaim::decode_from_seal_v2(seal, None)
             .or(Err(VerificationError::ReceiptFormatError))?;
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
