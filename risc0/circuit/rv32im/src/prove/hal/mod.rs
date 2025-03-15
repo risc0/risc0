@@ -41,6 +41,7 @@ use crate::{
         taps::TAPSET,
         CircuitImpl,
     },
+    RV32IM_SEAL_VERSION,
 };
 
 pub(crate) struct MetaBuffer<H: Hal> {
@@ -158,6 +159,15 @@ where
 
             let mut prover = Prover::new(self.hal.as_ref(), TAPSET);
             let hashfn = &self.hal.get_hash_suite().hashfn;
+
+            // Add a version tag to the start of the seal. It's not intended for
+            // this value to be consumed by downstream lift predicates. Instead
+            // it's meant to be a header which can be used by future versions in
+            // case we'd like to adjust the encoding of the seal.
+            //
+            // We write via the IOP to avoid having to prepend a value to an
+            // already allocated vector.
+            prover.iop().write_u32_slice(&[RV32IM_SEAL_VERSION]);
 
             let mix = scope!("main", {
                 // At the start of the protocol, seed the Fiat-Shamir transcript with context information
