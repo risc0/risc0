@@ -274,7 +274,7 @@ jobs:
       - name: check benches
         run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
-      - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
+      - run: cargo check -p risc0-circuit-rv32im-v2 -F $FEATURE
       - run: cargo check -p risc0-core
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
@@ -443,17 +443,18 @@ jobs:
           version: "0.36.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
         run: |
-          cargo semver-checks --default-features \
+          cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
             --exclude cargo-risczero \
             --exclude doc-test \
             --exclude fibonacci-methods \
             --exclude risc0-bigint2 \
             --exclude risc0-bigint2-methods \
+            --exclude risc0-circuit-rv32im-v2 \
+            --exclude risc0-circuit-rv32im-v2-sys \
             --exclude risc0-circuit-keccak-methods \
-            --exclude risc0-zkvm-receipts \
-            --exclude risc0-zkvm-methods \
             --exclude risc0-zkos-v1compat \
-            --exclude hotbench
+            --exclude risc0-zkvm-receipts \
+            --exclude risc0-zkvm-methods
       - run: sccache --show-stats
 
   check-template:
