@@ -182,7 +182,9 @@ pub fn modsub_384_unchecked(
 
 // These "checked" versions verify that `result < modulus`
 
-pub fn modadd_256(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modadd_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -195,7 +197,9 @@ pub fn modadd_256(
     assert!(crate::is_less(result, modulus));
 }
 
-pub fn modadd_384(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modadd_384(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
@@ -218,7 +222,9 @@ pub fn modadd_384(
 /// `inp` and `modulus` must be relatively prime. When `modulus` is prime, this just means that
 /// `inp` must not be a multiple of `modulus`, but when `modulus` is composite there are more cases
 /// with no solution, e.g. `8` does not have an inverse mod `12`.
-pub fn modinv_256(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modinv_256(
     inp: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
@@ -230,7 +236,9 @@ pub fn modinv_256(
     assert!(crate::is_less(result, modulus));
 }
 
-pub fn modinv_384(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modinv_384(
     inp: &[u32; FIELD_384_WIDTH_WORDS],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [u32; FIELD_384_WIDTH_WORDS],
@@ -242,7 +250,9 @@ pub fn modinv_384(
     assert!(crate::is_less(&result, &modulus));
 }
 
-pub fn modmul_256(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modmul_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -255,7 +265,9 @@ pub fn modmul_256(
     assert!(crate::is_less(result, modulus));
 }
 
-pub fn modmul_384(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modmul_384(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
@@ -268,7 +280,9 @@ pub fn modmul_384(
     assert!(crate::is_less(&result, &modulus));
 }
 
-pub fn modsub_256(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modsub_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -281,7 +295,9 @@ pub fn modsub_256(
     assert!(crate::is_less(result, modulus));
 }
 
-pub fn modsub_384(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn modsub_384(
     lhs: &[u32; FIELD_384_WIDTH_WORDS],
     rhs: &[u32; FIELD_384_WIDTH_WORDS],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
@@ -294,7 +310,9 @@ pub fn modsub_384(
     assert!(crate::is_less(&result, &modulus));
 }
 
-pub fn extfield_deg2_add_256(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn extfield_deg2_add_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -311,7 +329,9 @@ pub fn extfield_deg2_add_256(
     }
 }
 
-pub fn extfield_deg2_add_384(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn extfield_deg2_add_384(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
@@ -366,7 +386,9 @@ pub fn extfield_deg4_mul_256(
     }
 }
 
-pub fn extfield_deg2_sub_256(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn extfield_deg2_sub_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -383,7 +405,9 @@ pub fn extfield_deg2_sub_256(
     }
 }
 
-pub fn extfield_deg2_sub_384(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn extfield_deg2_sub_384(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
@@ -400,7 +424,9 @@ pub fn extfield_deg2_sub_384(
     }
 }
 
-pub fn extfield_xxone_mul_256(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn extfield_xxone_mul_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -419,7 +445,9 @@ pub fn extfield_xxone_mul_256(
     }
 }
 
-pub fn extfield_xxone_mul_384(
+#[stability::unstable]
+#[no_mangle]
+pub extern "C" fn extfield_xxone_mul_384(
     lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
