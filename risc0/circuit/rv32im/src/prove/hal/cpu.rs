@@ -17,9 +17,8 @@ use std::rc::Rc;
 use anyhow::Result;
 use rayon::prelude::*;
 use risc0_circuit_rv32im_sys::{
-    risc0_circuit_rv32im_v2_cpu_accum, risc0_circuit_rv32im_v2_cpu_poly_fp,
-    risc0_circuit_rv32im_v2_cpu_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers,
-    RawPreflightTrace,
+    risc0_circuit_rv32im_cpu_accum, risc0_circuit_rv32im_cpu_poly_fp,
+    risc0_circuit_rv32im_cpu_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers, RawPreflightTrace,
 };
 use risc0_core::scope;
 use risc0_sys::ffi_wrap;
@@ -83,7 +82,7 @@ impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_v2_cpu_witgen(mode as u32, &buffers, &preflight, cycles as u32)
+            risc0_circuit_rv32im_cpu_witgen(mode as u32, &buffers, &preflight, cycles as u32)
         })
     }
 }
@@ -138,9 +137,7 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
             bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
-        ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_v2_cpu_accum(&buffers, &preflight, cycles as u32)
-        })
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_cpu_accum(&buffers, &preflight, cycles as u32) })
     }
 }
 
@@ -184,7 +181,7 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
             let args: Vec<*const Val> = args.iter().map(|x| (*x).as_ptr()).collect();
             let mut tot = ExtVal::ZERO;
             unsafe {
-                risc0_circuit_rv32im_v2_cpu_poly_fp(
+                risc0_circuit_rv32im_cpu_poly_fp(
                     cycle,
                     domain,
                     poly_mix_pows.as_ptr(),

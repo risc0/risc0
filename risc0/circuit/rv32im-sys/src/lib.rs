@@ -81,20 +81,20 @@ pub struct RawAccumBuffers {
 }
 
 extern "C" {
-    pub fn risc0_circuit_rv32im_v2_cpu_witgen(
+    pub fn risc0_circuit_rv32im_cpu_witgen(
         mode: u32,
         buffers: *const RawExecBuffers,
         preflight: *const RawPreflightTrace,
         cycles: u32,
     ) -> *const std::os::raw::c_char;
 
-    pub fn risc0_circuit_rv32im_v2_cpu_accum(
+    pub fn risc0_circuit_rv32im_cpu_accum(
         buffers: *const RawAccumBuffers,
         preflight: *const RawPreflightTrace,
         cycles: u32,
     ) -> *const std::os::raw::c_char;
 
-    pub fn risc0_circuit_rv32im_v2_cpu_poly_fp(
+    pub fn risc0_circuit_rv32im_cpu_poly_fp(
         cycle: usize,
         steps: usize,
         poly_mixs: *const BabyBearExtElem,
@@ -105,20 +105,20 @@ extern "C" {
 
 #[cfg(feature = "cuda")]
 extern "C" {
-    pub fn risc0_circuit_rv32im_v2_cuda_witgen(
+    pub fn risc0_circuit_rv32im_cuda_witgen(
         mode: u32,
         buffers: *const RawExecBuffers,
         preflight: *const RawPreflightTrace,
         cycles: u32,
     ) -> *const std::os::raw::c_char;
 
-    pub fn risc0_circuit_rv32im_v2_cuda_accum(
+    pub fn risc0_circuit_rv32im_cuda_accum(
         buffers: *const RawAccumBuffers,
         preflight: *const RawPreflightTrace,
         cycles: u32,
     ) -> *const std::os::raw::c_char;
 
-    pub fn risc0_circuit_rv32im_v2_cuda_eval_check(
+    pub fn risc0_circuit_rv32im_cuda_eval_check(
         check: DevicePointer<u8>,
         ctrl: DevicePointer<u8>,
         data: DevicePointer<u8>,

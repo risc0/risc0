@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_binfmt::MemoryImage2;
+use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use test_log::test;
 
@@ -23,8 +23,8 @@ use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2};
 #[test]
 fn basic() {
     let program = testutil::kernel::basic();
-    let expected_cycles = program.image.len();
-    let mut image = MemoryImage2::new_kernel(program);
+    let expected_cycles = program.size_in_words();
+    let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
     println!("image_id: {pre_image_id}");
@@ -52,13 +52,13 @@ fn basic() {
     );
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    assert_eq!(segment.user_cycles, expected_cycles as u32);
+    assert_eq!(segment.suspend_cycle, expected_cycles as u32 + 1);
 }
 
 #[test]
 fn system_split() {
     let program = testutil::kernel::simple_loop(2000);
-    let mut image = MemoryImage2::new_kernel(program);
+    let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
     let session = testutil::execute(

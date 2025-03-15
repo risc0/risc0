@@ -428,10 +428,10 @@ extern "C" {
 
 using namespace risc0::circuit::rv32im_v2::cuda;
 
-const char* risc0_circuit_rv32im_v2_cuda_witgen(uint32_t mode,
-                                                ExecBuffers* buffers,
-                                                PreflightTrace* preflight,
-                                                uint32_t lastCycle) {
+const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
+                                             ExecBuffers* buffers,
+                                             PreflightTrace* preflight,
+                                             uint32_t lastCycle) {
   try {
     HostExecContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
@@ -471,9 +471,9 @@ const char* risc0_circuit_rv32im_v2_cuda_witgen(uint32_t mode,
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_v2_cuda_accum(AccumBuffers* buffers,
-                                               PreflightTrace* preflight,
-                                               uint32_t lastCycle) {
+const char* risc0_circuit_rv32im_cuda_accum(AccumBuffers* buffers,
+                                            PreflightTrace* preflight,
+                                            uint32_t lastCycle) {
   try {
     HostAccumContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;

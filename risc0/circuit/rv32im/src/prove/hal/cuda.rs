@@ -16,8 +16,8 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_rv32im_sys::{
-    risc0_circuit_rv32im_v2_cuda_accum, risc0_circuit_rv32im_v2_cuda_eval_check,
-    risc0_circuit_rv32im_v2_cuda_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers,
+    risc0_circuit_rv32im_cuda_accum, risc0_circuit_rv32im_cuda_eval_check,
+    risc0_circuit_rv32im_cuda_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers,
     RawPreflightTrace,
 };
 use risc0_core::{
@@ -97,7 +97,7 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
             table_split_cycle: preflight.table_split_cycle,
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_v2_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)
+            risc0_circuit_rv32im_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)
         })
     }
 }
@@ -152,9 +152,7 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
             bigint_bytes_len: preflight.bigint_bytes.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
-        ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_v2_cuda_accum(&buffers, &preflight, cycles as u32)
-        })
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_cuda_accum(&buffers, &preflight, cycles as u32) })
     }
 }
 
@@ -213,7 +211,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 .unwrap();
 
         ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_v2_cuda_eval_check(
+            risc0_circuit_rv32im_cuda_eval_check(
                 check.as_device_ptr(),
                 ctrl.as_device_ptr(),
                 data.as_device_ptr(),

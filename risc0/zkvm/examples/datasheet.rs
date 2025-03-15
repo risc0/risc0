@@ -23,11 +23,11 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
+use risc0_circuit_rv32im::{execute::LOOKUP_TABLE_CYCLES, MAX_INSN_CYCLES};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, Executor2, ExecutorEnv, ProverOpts, ReceiptKind, Segment, Session,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, Segment, Session,
     SimpleSegmentRef, VerifierContext, RECURSION_PO2,
 };
 use serde::Serialize;
@@ -52,7 +52,8 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
-const ITERATIONS_1M_CYCLES: usize = 1024 * 512 - 46;
+const ITERATIONS_1M_CYCLES: usize = 1024 * 507 + 2;
+const EXPECTED_RESERVED_CYCLES: usize = LOOKUP_TABLE_CYCLES + MAX_INSN_CYCLES;
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
@@ -114,7 +115,7 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -134,9 +135,6 @@ enum Command {
     #[command(name = "bigint2")]
     BigInt2,
 }
-
-/// This is the number of user cycles we expect for our "execute" benchmarks.
-const EXPECTED_EXECUTE_USER_CYCLES: u64 = (1 << DEFAULT_SEGMENT_LIMIT_PO2 as u64) - 2;
 
 #[derive(Default)]
 struct Datasheet {
@@ -193,10 +191,10 @@ impl Datasheet {
         let start = Instant::now();
         let session = execute_elf(env, &LOOP_ELF).unwrap();
         let duration = start.elapsed();
-        assert_eq!(
-            session.user_cycles, EXPECTED_EXECUTE_USER_CYCLES,
-            "actual vs expected"
-        );
+
+        // We want to ensure that we're using a full single segment for this benchmark.
+        assert_eq!(session.segments.len(), 1);
+        assert!(session.reserved_cycles as usize <= EXPECTED_RESERVED_CYCLES);
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
@@ -485,10 +483,6 @@ impl Datasheet {
         let start = Instant::now();
         let session = execute_elf(env, BIGINT2_ELF).unwrap();
         let duration = start.elapsed();
-
-        // We want this to be comparable to the other execute benchmarks
-        let cycle_diff = session.user_cycles.abs_diff(EXPECTED_EXECUTE_USER_CYCLES);
-        assert!(cycle_diff < 20_000, "{cycle_diff} not less than 20_000");
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {

@@ -15,7 +15,7 @@
 use std::collections::BTreeMap;
 
 use anyhow::{bail, Result};
-use risc0_binfmt::{MemoryImage2, Program};
+use risc0_binfmt::{MemoryImage, Program};
 use risc0_core::scope;
 use risc0_zkp::{
     core::{digest::Digest, log2_ceil},
@@ -47,7 +47,7 @@ impl Syscall for NullSyscall {
 }
 
 pub fn execute<S: Syscall>(
-    image: MemoryImage2,
+    image: MemoryImage,
     segment_limit_po2: usize,
     max_insn_cycles: usize,
     max_cycles: Option<u64>,
@@ -206,7 +206,7 @@ impl Assembler {
 
         image.extend(self.data.iter());
 
-        Program { entry, image }
+        Program::new_from_entry_and_image(entry, image)
     }
 
     pub fn word(&mut self, addr: u32, word: u32) {

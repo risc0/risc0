@@ -1,14 +1,14 @@
 [package]
 name = "risc0-circuit-rv32im"
 description = "RISC Zero circuit for rv32im"
-version = "2.0.0-rc.1"
+version = "2.0.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
 [[example]]
-name = "rv32im_v2"
+name = "rv32im"
 required-features = ["prove"]
 
 [dependencies]
@@ -36,6 +36,7 @@ auto_ops = { version = "0.3", optional = true }
 bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
+enum-map = { version = "2.7.3", optional = true }
 malachite = { version = "0.4", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",
@@ -69,6 +70,7 @@ execute = [
   "anyhow/backtrace",
   "dep:auto_ops",
   "dep:byteorder",
+  "dep:enum-map",
   "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",

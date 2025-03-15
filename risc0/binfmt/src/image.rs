@@ -80,34 +80,40 @@ impl ZeroCache {
     }
 }
 
-/// TODO(flaub)
+/// A page of memory
+///
+/// This represents a single page of memory. When accessing memory, all the memory in the page is paged in and then accessible for the rest of the segment, at which point it is paged out.
 #[cfg(feature = "std")]
 #[derive(Clone)]
 pub struct Page(Arc<Vec<u8>>);
 
-/// TODO(flaub)
+/// A page of memory
+///
+/// This represents a single page of memory. When accessing memory, all the memory in the page is paged in and then accessible for the rest of the segment, at which point it is paged out.
 #[cfg(not(feature = "std"))]
 #[derive(Clone)]
 pub struct Page(Vec<u8>);
 
-/// TODO(flaub)
+/// A memory image
+///
+/// A full memory image of a zkVM guest. Includes functionality for accessing memory and associated digests, and for initializing the memory state for a [Program].
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MemoryImage2 {
+pub struct MemoryImage {
     /// TODO(flaub)
     #[debug("{}", pages.len())]
     // #[debug("{:#010x?}", pages.keys())]
-    pub pages: BTreeMap<u32, Page>,
+    pages: BTreeMap<u32, Page>,
 
     /// TODO(flaub)
     #[debug("{}", digests.len())]
     // #[debug("{:#010x?}", digests.keys())]
-    pub digests: BTreeMap<u32, Digest>,
+    digests: BTreeMap<u32, Digest>,
 
     #[debug("{}", dirty.len())]
     dirty: BTreeSet<u32>,
 }
 
-impl Default for MemoryImage2 {
+impl Default for MemoryImage {
     fn default() -> Self {
         Self {
             pages: Default::default(),
@@ -117,7 +123,7 @@ impl Default for MemoryImage2 {
     }
 }
 
-impl MemoryImage2 {
+impl MemoryImage {
     fn new(image: BTreeMap<u32, u32>) -> Self {
         let mut this = Self::default();
         let mut cur_page_idx = u32::MAX;
@@ -146,14 +152,14 @@ impl MemoryImage2 {
         this
     }
 
-    /// TODO(flaub)
+    /// Creates the initial memory state for a user-mode `program`.
     pub fn new_user(program: Program) -> Self {
         let mut image = program.image;
         image.insert(USER_START_ADDR.0, program.entry);
         Self::new(image)
     }
 
-    /// TODO(flaub)
+    /// Creates the initial memory state for a kernel-mode `program`.
     pub fn new_kernel(program: Program) -> Self {
         let mut image = program.image;
         image.insert(SUSPEND_PC_ADDR.0, program.entry);
@@ -161,13 +167,23 @@ impl MemoryImage2 {
         Self::new(image)
     }
 
-    /// TODO(flaub)
+    /// Creates the initial memory state for a user-mode `user` [Program] with a kernel-mode `kernel` [Program].
     pub fn with_kernel(mut user: Program, mut kernel: Program) -> Self {
         user.image.insert(USER_START_ADDR.0, user.entry);
         kernel.image.append(&mut user.image);
         kernel.image.insert(SUSPEND_PC_ADDR.0, kernel.entry);
         kernel.image.insert(SUSPEND_MODE_ADDR.0, 1);
         Self::new(kernel.image)
+    }
+
+    /// Returns a set of the page indexes that are loaded.
+    pub fn get_page_indexes(&self) -> BTreeSet<u32> {
+        self.pages.keys().copied().collect()
+    }
+
+    /// Sorted iterator over page digests (page_idx -> Digest)
+    pub fn digests(&self) -> impl Iterator<Item = (&'_ u32, &'_ Digest)> + '_ {
+        self.digests.iter()
     }
 
     /// Return the page data, fails if unavailable
@@ -333,7 +349,9 @@ impl Page {
         return Self(Arc::new(v));
     }
 
-    /// TODO(flaub)
+    /// Produce the digest of this page
+    ///
+    /// Hashes the data in this page to produce a digest which can be used for verifying memory integrity.
     pub fn digest(&self) -> Digest {
         let mut cells = [BabyBearElem::ZERO; CELLS];
         for i in 0..PAGE_WORDS / DIGEST_WORDS {
@@ -348,7 +366,9 @@ impl Page {
         cells_to_digest(&cells)
     }
 
-    /// TODO(flaub)
+    /// Read a word from a page
+    ///
+    /// Loads the data at `addr` from this page. This only looks at the subaddress, and does not check if the address belongs to this page. Thus, if you pass a [WordAddr] belonging to a different page, [Page::load] will load from the address in _this_ page with the same [WordAddr::page_subaddr].
     pub fn load(&self, addr: WordAddr) -> u32 {
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         let mut bytes = [0u8; WORD_SIZE];
@@ -369,7 +389,9 @@ impl Page {
         &mut self.0
     }
 
-    /// TODO(flaub)
+    /// Store a word to this page
+    ///
+    /// Stores the data `word` to the address `addr` in this page. This only looks at the subaddress, and does not check if the address belongs to this page. Thus, if you pass a [WordAddr] belonging to a different page, [Page::store] will store to the address in _this_ page with the same [WordAddr::page_subaddr].
     pub fn store(&mut self, addr: WordAddr, word: u32) {
         let writable_ref = self.ensure_writable();
 
@@ -449,7 +471,7 @@ mod tests {
     use risc0_zkp::digest;
     use test_log::test;
 
-    use super::{MemoryImage2, Program, ZERO_CACHE};
+    use super::{MemoryImage, Program, ZERO_CACHE};
 
     #[test]
     fn poseidon2_zeros() {
@@ -488,7 +510,7 @@ mod tests {
             entry,
             image: BTreeMap::from([(entry, 0x1234b337)]),
         };
-        let mut image = MemoryImage2::new_kernel(program);
+        let mut image = MemoryImage::new_kernel(program);
         assert_eq!(
             *image.get_digest(0x0040_0100).unwrap(),
             digest!("242ce034cc4e9326f8b7071124454b2be1a1cd5d21b6483c7ff81d4ba5ac9566")

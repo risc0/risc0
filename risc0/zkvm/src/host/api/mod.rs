@@ -385,6 +385,7 @@ pub enum AssetRequest {
 
 /// Provides information about the result of execution.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
@@ -410,6 +411,7 @@ impl SessionInfo {
 
 /// Provides information about a segment of execution.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,

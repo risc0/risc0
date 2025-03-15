@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub(crate) mod bigint;
+pub(crate) mod byte_poly;
 pub(crate) mod paged_map;
 pub(crate) mod poseidon2;
 pub(crate) mod preflight;
@@ -33,15 +34,15 @@ use risc0_zkp::{
     hal::Hal,
 };
 
-use self::preflight::Back;
+use self::{
+    bigint::BigIntState,
+    byte_poly::{BigIntAccum, BigIntAccumState},
+    preflight::Back,
+};
 use super::hal::{CircuitAccumulator, CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
     execute::{
-        bigint::BigIntState,
-        byte_poly::{BigIntAccum, BigIntAccumState},
-        platform::MERKLE_TREE_END_ADDR,
-        poseidon2::Poseidon2State,
-        segment::Segment,
+        platform::MERKLE_TREE_END_ADDR, poseidon2::Poseidon2State, segment::Segment,
         sha2::Sha2State,
     },
     zirgen::circuit::{

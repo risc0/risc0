@@ -35,11 +35,11 @@ fn build_cpu_kernels() {
         .deps(glob_paths("kernels/cxx/*.cpp.inc"))
         .deps(glob_paths("kernels/cxx/*.h.inc"))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .compile("risc0_rv32im_v2_cpu");
+        .compile("risc0_rv32im_cpu");
 }
 
 fn build_cuda_kernels() {
-    let output = "risc0_rv32im_v2_cuda";
+    let output = "risc0_rv32im_cuda";
 
     println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
     println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");

@@ -51,16 +51,16 @@ using namespace risc0::circuit::rv32im_v2::cuda;
 
 extern "C" {
 
-const char* risc0_circuit_rv32im_v2_cuda_eval_check(Fp* check,
-                                                    const Fp* ctrl,
-                                                    const Fp* data,
-                                                    const Fp* accum,
-                                                    const Fp* mix,
-                                                    const Fp* out,
-                                                    const Fp& rou,
-                                                    uint32_t po2,
-                                                    uint32_t domain,
-                                                    const FpExt* poly_mix_pows) {
+const char* risc0_circuit_rv32im_cuda_eval_check(Fp* check,
+                                                 const Fp* ctrl,
+                                                 const Fp* data,
+                                                 const Fp* accum,
+                                                 const Fp* mix,
+                                                 const Fp* out,
+                                                 const Fp& rou,
+                                                 uint32_t po2,
+                                                 uint32_t domain,
+                                                 const FpExt* poly_mix_pows) {
   try {
     CUDA_OK(cudaDeviceSynchronize());
 

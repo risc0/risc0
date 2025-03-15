@@ -16,7 +16,7 @@ use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    compute_image_id, get_prover_server, ApiServer, Executor2, ExecutorEnv, ProverOpts,
+    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
     ProverServer, VerifierContext,
 };
 
@@ -151,11 +151,11 @@ pub fn main() {
     let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = fs::read(elf_path).unwrap();
-            Executor2::from_elf(env, &elf_contents).unwrap()
+            ExecutorImpl::from_elf(env, &elf_contents).unwrap()
         } else if let Some(ref image_path) = args.mode.image {
             let image_contents = fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
-            Executor2::new(env, image).unwrap()
+            ExecutorImpl::new(env, image).unwrap()
         } else {
             unreachable!()
         };
