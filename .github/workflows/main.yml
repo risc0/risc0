@@ -113,7 +113,7 @@ jobs:
       - examples
       - docker
       - test
-      # - test-crates
+      - test-crates
       - web
     runs-on: ubuntu-latest
     steps:
@@ -336,33 +336,33 @@ jobs:
         working-directory: examples/profiling
       - run: sccache --show-stats
 
-  # test-crates:
-  #   if: needs.changes.outputs.test-crates == 'true'
-  #   needs: changes
-  #   runs-on: [self-hosted, prod, Linux, cpu]
-  #   strategy:
-  #     fail-fast: false
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         path: 'risc0'
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         repository: risc0/RustCrypto-crypto-bigint
-  #         path: 'RustCrypto-crypto-bigint'
-  #     - uses: ./risc0/.github/actions/rustup
-  #     - uses: ./risc0/.github/actions/sccache
-  #       with:
-  #         key: Linux-default
-  #     - name: Install risczero toolchain
-  #       run: |
-  #         cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-  #         cargo install --force --path risc0/cargo-risczero -F experimental
-  #       working-directory: risc0
-  #     - name: run cargo risczero test
-  #       working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
-  #       run: cargo risczero test
-  #     - run: sccache --show-stats
+  test-crates:
+    if: needs.changes.outputs.test-crates == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'risc0'
+      - uses: actions/checkout@v4
+        with:
+          repository: risc0/RustCrypto-crypto-bigint
+          path: 'RustCrypto-crypto-bigint'
+      - uses: ./risc0/.github/actions/rustup
+      - uses: ./risc0/.github/actions/sccache
+        with:
+          key: Linux-default
+      - name: Install risczero toolchain
+        run: |
+          cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+          cargo install --force --path risc0/cargo-risczero -F experimental
+        working-directory: risc0
+      - name: run cargo risczero test
+        working-directory: RustCrypto-crypto-bigint
+        run: cargo risczero test
+      - run: sccache --show-stats
 
   doc:
     if: needs.changes.outputs.doc == 'true'
