@@ -19,8 +19,8 @@ namespace risc0::circuit::keccak::cpu {
 void step_Top_13(ExecContext& ctx,MutableBuf arg0)   {
 // builtin Sub
 // KeccackNextRound(zirgen/circuit/keccak/top.zir:410)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:461)
-// Top(zirgen/circuit/keccak/top.zir:483)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:463)
+// Top(zirgen/circuit/keccak/top.zir:486)
 Val x1 = (get(ctx,arg0, 15, 1) - Val(23));
 // builtin NondetReg
 // IsZero(zirgen/circuit/keccak/is_zero.zir:8)
@@ -42,7 +42,7 @@ void step_Top_29(ExecContext& ctx,MutableBuf arg0)   {
 // Xor5(zirgen/circuit/keccak/xor5.zir:7)
 // ThetaP1(zirgen/circuit/keccak/keccak.zir:13)
 // KeccakRound0(zirgen/circuit/keccak/top.zir:97)
-// Top(zirgen/circuit/keccak/top.zir:496)
+// Top(zirgen/circuit/keccak/top.zir:499)
 Val x1 = ((get(ctx,arg0, 16, 2) + get(ctx,arg0, 176, 2)) + get(ctx,arg0, 336, 2));
 // builtin BitAnd
 // Xor5(zirgen/circuit/keccak/xor5.zir:8)
@@ -3846,7 +3846,7 @@ return ;
 }
 void step_Top_45(ExecContext& ctx,MutableBuf arg0)   {
 // TopState(zirgen/circuit/keccak/top.zir:36)
-// Top(zirgen/circuit/keccak/top.zir:501)
+// Top(zirgen/circuit/keccak/top.zir:504)
 Val x1 = get(ctx,arg0, 727, 2);
 Val x2 = get(ctx,arg0, 738, 2);
 Val x3 = get(ctx,arg0, 723, 2);
@@ -4492,7 +4492,7 @@ Val x186 = (((x83 + x87) + x91) + (x169 + (x177 + x185)));
 // builtin Mul
 // Div(<preamble>:22)
 // CarryExtract(zirgen/circuit/keccak/sha2.zir:35)
-// CarryAndExpand(zirgen/circuit/keccak/sha2.zir:44)
+// CarryAndExpand(zirgen/circuit/keccak/sha2.zir:45)
 // DoShaStep(zirgen/circuit/keccak/top.zir:138)
 Val x187 = (bitAnd(x186, Val(983040)) * Val(2013235201));
 // builtin NondetReg
@@ -4840,7 +4840,7 @@ Val x284 = ((x283 + (get(ctx,arg0, 750, 1) * Val(16384))) + (get(ctx,arg0, 751, 
 // Add2(zirgen/circuit/keccak/sha2.zir:30)
 Val x285 = (((x266 + (x267 * Val(16384))) + (x268 * Val(32768))) + (x276 + x284));
 Val x286 = (((x227 + x228) + x229) + x285);
-// CarryAndExpand(zirgen/circuit/keccak/sha2.zir:45)
+// CarryAndExpand(zirgen/circuit/keccak/sha2.zir:46)
 // DoShaStep(zirgen/circuit/keccak/top.zir:138)
 Val x287 = (x286 + x189);
 // builtin Mul
@@ -4862,8 +4862,8 @@ Val x289 = ((get(ctx,arg0, 1034, 0) * Val(4)) + (get(ctx,arg0, 1033, 0) * Val(2)
 Val x290 = (x287 - ((x289 + get(ctx,arg0, 1032, 0)) * Val(65536)));
 // builtin NondetReg
 // NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
-// UnpackReg(zirgen/circuit/keccak/pack.zir:52)
-// CarryAndExpand(zirgen/circuit/keccak/sha2.zir:46)
+// UnpackReg(zirgen/circuit/keccak/pack.zir:53)
+// CarryAndExpand(zirgen/circuit/keccak/sha2.zir:47)
 set(ctx,arg0, 688, bitAnd(x190, Val(1)));
 set(ctx,arg0, 689, (bitAnd(x190, Val(2)) * Val(1006632961)));
 set(ctx,arg0, 690, (bitAnd(x190, Val(4)) * Val(1509949441)));
