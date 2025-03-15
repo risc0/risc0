@@ -394,7 +394,7 @@ struct OneHot_12__SuperStruct {
 };
 using OneHot_12__SuperStruct12Array = std::array<OneHot_12__SuperStruct, 12>;
 struct OneHot_12_Struct {
-  OneHot_12__SuperStruct12Array bits;
+  OneHot_12__SuperStruct12Array _super;
 };
 struct WrapOneHot_SuperStruct {
   NondetRegStruct _super;
