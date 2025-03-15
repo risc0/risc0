@@ -131,7 +131,7 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
             Self::check_guest_addr(end_addr)?;
         }
 
-        let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
+        let name_ptr = self.load_aligned_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.load_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
         Self::check_guest_addr(name_end)?;
@@ -174,7 +174,7 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         Ok(addr)
     }
 
-    fn load_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
+    fn load_aligned_guest_addr_from_register(&mut self, idx: usize) -> Result<ByteAddr> {
         let addr = ByteAddr(EmuContext::load_register(self, idx)?);
         Self::check_guest_addr(addr)
     }
