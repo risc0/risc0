@@ -37,27 +37,31 @@ pub trait Curve<const WIDTH: usize> {
 /// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH` of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so the maximum bitwidth will be `32 * WIDTH`)
 #[derive(Debug, Eq, PartialEq)]
 pub struct WeierstrassCurve<const WIDTH: usize> {
-    // buffer[0] is the prime, buffer[1] is a, buffer[2] is b
-    buffer: [[u32; WIDTH]; 3],
+    /// The prime field modulus
+    pub prime: [u32; WIDTH],
+    /// The coefficient 'a' in the Weierstrass equation y^2 = x^3 + ax + b
+    pub a: [u32; WIDTH],
+    /// The coefficient 'b' in the Weierstrass equation y^2 = x^3 + ax + b
+    pub b: [u32; WIDTH],
 }
 
 impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
-    // TODO this constructor is prone to misuse, ideal to have named fields
     pub const fn new(
         prime: [u32; WIDTH],
         a: [u32; WIDTH],
         b: [u32; WIDTH],
     ) -> WeierstrassCurve<WIDTH> {
-        WeierstrassCurve {
-            buffer: [prime, a, b],
-        }
+        WeierstrassCurve { prime, a, b }
     }
 
     /// The curve as concatenated u32s
     ///
     /// Little-endian, prime then a then b
     pub(crate) fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
-        &self.buffer
+        // Safety: This is safe because the memory layout of the struct is guaranteed to be
+        // the same as [[u32; WIDTH]; 3] due to the fields being in the same order and having
+        // the same types.
+        unsafe { std::mem::transmute(self) }
     }
 }
 
@@ -160,9 +164,9 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         }
 
         // Check that the final result is less than the curve's prime.
-        let prime = C::CURVE.buffer[0];
-        assert!(crate::is_less(&result_ptr.buffer[0], &prime));
-        assert!(crate::is_less(&result_ptr.buffer[1], &prime));
+        let prime = &C::CURVE.prime;
+        assert!(crate::is_less(&result_ptr.buffer[0], prime));
+        assert!(crate::is_less(&result_ptr.buffer[1], prime));
     }
 
     /// Elliptic curve doubling of the affine point.
@@ -173,9 +177,9 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         // An honest host will always return a result less than the curve's prime in each coordinate.
         // A dishonest prover can sometimes return a result greater than the prime, so enforce that
         // we're in the honest case.
-        let prime = C::CURVE.buffer[0];
-        assert!(crate::is_less(&result.buffer[0], &prime));
-        assert!(crate::is_less(&result.buffer[1], &prime));
+        let prime = &C::CURVE.prime;
+        assert!(crate::is_less(&result.buffer[0], prime));
+        assert!(crate::is_less(&result.buffer[1], prime));
     }
 
     /// [double] without checking the result is less than the curve's prime.
@@ -205,9 +209,9 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         // An honest host will always return a result less than the curve's prime in each coordinate.
         // A dishonest prover can sometimes return a result greater than the prime, so enforce that
         // we're in the honest case.
-        let prime = C::CURVE.buffer[0];
-        assert!(crate::is_less(&result.buffer[0], &prime));
-        assert!(crate::is_less(&result.buffer[1], &prime));
+        let prime = &C::CURVE.prime;
+        assert!(crate::is_less(&result.buffer[0], prime));
+        assert!(crate::is_less(&result.buffer[1], prime));
     }
 
     #[inline]
