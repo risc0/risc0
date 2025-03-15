@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,17 @@ mod runtime {
     }
 }
 
+fn capture_crate_dependencies() {
+    let cmd = cargo_metadata::MetadataCommand::new();
+    let metadata = cmd.exec().unwrap();
+    let out_dir = std::env::var_os("OUT_DIR").unwrap();
+    std::fs::write(
+        std::path::Path::new(&out_dir).join("cargo_metadata_output.json"),
+        serde_json::to_string(&metadata).unwrap(),
+    )
+    .unwrap();
+}
+
 fn main() {
     #[cfg(feature = "experimental")]
     {
@@ -46,4 +57,6 @@ fn main() {
             .init();
         runtime::build_and_zip_test_runtime();
     }
+
+    capture_crate_dependencies()
 }

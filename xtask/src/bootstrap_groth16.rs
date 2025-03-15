@@ -18,7 +18,7 @@ use clap::Parser;
 use regex::Regex;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, Digest, Executor2, ExecutorEnv,
+    get_prover_server, sha::Digestible, Digest, ExecutorEnv, ExecutorImpl,
     Groth16ReceiptVerifierParameters, ProverOpts, Receipt, VerifierContext,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -200,7 +200,7 @@ fn generate_receipt() -> Receipt {
 
     tracing::info!("execute");
 
-    let mut exec = Executor2::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
     tracing::info!("prove");

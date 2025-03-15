@@ -16,8 +16,9 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, host::server::session::NullSegmentRef, Executor2, ExecutorEnv, ProveInfo,
-    Receipt, SegmentInfo, SessionInfo, VerifierContext,
+    get_prover_server,
+    host::server::{exec::executor::ExecutorImpl, session::NullSegmentRef},
+    ExecutorEnv, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
@@ -58,7 +59,7 @@ impl Prover for LocalProver {
 impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut segments = Vec::new();
-        let session = Executor2::from_elf(env, elf)
+        let session = ExecutorImpl::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| {
                 segments.push(SegmentInfo {

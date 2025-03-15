@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::MemoryImage2;
-use risc0_circuit_rv32im_v2::TerminateState;
+use risc0_binfmt::MemoryImage;
+use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::{memory, WORD_SIZE};
@@ -22,14 +22,14 @@ use rstest::rstest;
 
 use super::get_prover_server;
 use crate::{
-    host::server::{exec::executor2::Executor2, testutils},
+    host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
     ExecutorEnv, ExitCode, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
     VerifierContext,
 };
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -187,7 +187,7 @@ fn bigint_accel() {
             .unwrap()
             .build()
             .unwrap();
-        let mut exec = Executor2::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = prove_session(&session).unwrap();
         let expected = case.expected();
@@ -287,7 +287,7 @@ mod riscv {
     use crate::ExecutorEnv;
 
     fn prove_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
-        let session = Executor2::from_kernel_elf(env, elf)
+        let session = ExecutorImpl::from_kernel_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))?;
         prove_session(&session)
@@ -384,7 +384,7 @@ fn pause_resume() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = Executor2::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
 
     // Run until sys_pause
     let session = exec.run().unwrap();
@@ -409,7 +409,7 @@ fn pause_exit_nonzero() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = Executor2::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
 
     // Run until sys_pause
     let session = exec.run().unwrap();
@@ -427,14 +427,14 @@ fn pause_exit_nonzero() {
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
 
-    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
-    let image = MemoryImage2::new_kernel(program);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    let image = MemoryImage::new_kernel(program);
 
     let env = ExecutorEnv::builder()
         .segment_limit_po2(13) // 8k cycles
         .build()
         .unwrap();
-    let session = Executor2::new(env, image).unwrap().run().unwrap();
+    let session = ExecutorImpl::new(env, image).unwrap().run().unwrap();
     let segments: Vec<_> = session
         .segments
         .iter()
@@ -477,7 +477,7 @@ fn sys_input() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = Executor2::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     prove_session(&session).unwrap();
@@ -577,7 +577,10 @@ mod docker {
             .unwrap()
             .build()
             .unwrap();
-        let session = Executor2::from_elf(env, VERIFY_ELF).unwrap().run().unwrap();
+        let session = ExecutorImpl::from_elf(env, VERIFY_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
         println!("{:?}", session.stats());
     }
@@ -994,7 +997,7 @@ fn run_unconstrained() -> Result<()> {
             .unwrap()
             .build()
             .unwrap();
-        let session = Executor2::from_elf(env, MULTI_TEST_ELF)?.run()?;
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
         let receipt = prove_session(&session).unwrap();
         let segments = &receipt.inner.composite().unwrap().segments;
 
@@ -1015,7 +1018,7 @@ fn run_unconstrained() -> Result<()> {
 
 mod soundness {
     // use risc0_circuit_rv32im::{prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2, CIRCUIT};
-    use risc0_circuit_rv32im_v2::{execute::DEFAULT_SEGMENT_LIMIT_PO2, CircuitImpl};
+    use risc0_circuit_rv32im::{execute::DEFAULT_SEGMENT_LIMIT_PO2, CircuitImpl};
     use risc0_zkp::{
         adapter::TapsProvider,
         field::{

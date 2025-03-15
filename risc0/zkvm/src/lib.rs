@@ -81,33 +81,29 @@ mod receipt_claim;
 pub mod serde;
 pub mod sha;
 
-#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
-pub use host::recursion;
-
+pub use ::serde::de::DeserializeOwned;
 pub use anyhow::Result;
+pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
+pub use risc0_zkp::core::digest::{digest, Digest};
+pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
-
-pub use self::receipt_claim::{
-    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
-    UnionClaim, Unknown,
-};
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 pub use {
     self::host::{
         api::server::Server as ApiServer,
-        client::prove::local::LocalProver,
+        client::prove::{local::LocalProver, local_executor},
         recursion::{
+            self,
             prove::{prove_registered_zkr, prove_zkr, register_zkr},
             RECURSION_PO2,
         },
         server::{
-            exec::executor2::Executor2,
+            exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -115,7 +111,6 @@ pub use {
             },
         },
     },
-    // TODO: Loader
     risc0_groth16::{
         docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
     },
@@ -141,18 +136,13 @@ pub use {
             },
         },
     },
-    risc0_circuit_rv32im_v2::trace::{TraceCallback, TraceEvent},
+    risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 #[cfg(feature = "unstable")]
 pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
-
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "prove")]
-#[cfg(feature = "unstable")]
-pub use self::host::server::prove::keccak::prove_keccak;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {
@@ -164,16 +154,18 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-pub use receipt::{
-    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
-    Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
-    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
+pub use self::{
+    receipt::{
+        AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
+        Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
+        Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
+        SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
+    },
+    receipt_claim::{
+        Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+        UnionClaim, Unknown,
+    },
 };
-
-pub use ::serde::de::DeserializeOwned;
-
-pub use risc0_zkp::core::digest::{digest, Digest};
 
 use semver::Version;
 

@@ -426,8 +426,23 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     cmd
 }
 
+fn get_rust_toolchain_version() -> semver::Version {
+    let rzup = rzup::Rzup::new().unwrap();
+    let (version, _) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+        .expect("Risc Zero Rust toolchain installed");
+    version
+}
+
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
 pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
+    // llvm changed `loweratomic` to `lower-atomic`
+    let lower_atomic = if get_rust_toolchain_version() > semver::Version::new(1, 81, 0) {
+        "passes=lower-atomic"
+    } else {
+        "passes=loweratomic"
+    };
     let rustc_flags = guest_meta.rustc_flags.clone().unwrap_or_default();
     let rustc_flags: Vec<_> = rustc_flags.iter().map(|s| s.as_str()).collect();
     let text_addr = if guest_meta.kernel {
@@ -441,7 +456,7 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
         &[
             // Replace atomic ops with nonatomic versions since the guest is single threaded.
             "-C",
-            "passes=loweratomic",
+            lower_atomic,
             // Specify where to start loading the program in
             // memory.  The clang linker understands the same
             // command line arguments as the GNU linker does; see
@@ -801,25 +816,6 @@ fn build_methods<G: GuestBuilder>(guest_packages: &[GuestPackageWithOptions]) ->
 /// "MY_METHOD_ID" and "MY_METHOD_ELF" respectively.
 pub fn embed_methods() -> Vec<GuestListEntry> {
     embed_methods_with_options(HashMap::new())
-}
-
-/// Embed the current crate's binary targets built for RISC-V.
-pub fn embed_self() -> Vec<GuestListEntry> {
-    if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
-        // Guest shouldn't recursively depend on itself.
-        return vec![];
-    }
-
-    let pkg = current_package();
-    let target_dir = get_out_dir().join(&pkg.name);
-    let pkgs = vec![GuestPackageWithOptions {
-        name: pkg.name.clone(),
-        pkg,
-        opts: GuestOptions::default(),
-        target_dir,
-    }];
-
-    build_methods(&pkgs)
 }
 
 /// Build a guest package into the specified `target_dir` using the specified
