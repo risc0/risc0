@@ -74,10 +74,13 @@ impl InstallCommand {
             return Ok(None);
         };
 
-        // special handling for cpp date-based versions
-        // TODO: Move away from date version tags to semver
-        if self.name.as_ref().is_some_and(|n| n == "cpp") {
-            return Ok(Some(parse_cpp_version(v)?));
+        // Handle special version formats for specific components
+        if let Some(name) = &self.name {
+            // Handle CPP component's date-based version format
+            // In the future, we should move away from date-based version tags to semver
+            if name == "cpp" {
+                return Ok(Some(parse_cpp_version(v)?));
+            }
         }
 
         Ok(Some(Version::parse(v).map_err(|_| {
