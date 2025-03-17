@@ -238,6 +238,8 @@ fn compare_published_package_to_vendored_version(
     version: &Version,
     vendored_packages: &Path,
 ) -> Result<(), anyhow::Error> {
+    println!("Comparing {package} v{version} to crates.io version to see if it needs a patch version bump");
+
     // Have cargo package up the package for publishing
     run_command(
         Command::new("cargo")
