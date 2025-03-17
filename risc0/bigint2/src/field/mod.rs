@@ -494,6 +494,8 @@ pub fn extfield_deg4_mul_256(
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
     assert!(crate::is_less(&result[0], &modulus));
     assert!(crate::is_less(&result[1], &modulus));
+    assert!(crate::is_less(&result[2], &modulus));
+    assert!(crate::is_less(&result[3], &modulus));
 }
 
 pub fn extfield_deg2_sub_256(
