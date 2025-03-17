@@ -4590,7 +4590,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.0"
+version = "2.0.0-rc.2"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -4624,7 +4624,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.0"
+version = "2.0.0-rc.2"
 dependencies = [
  "cc",
  "cust",
@@ -4855,7 +4855,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0"
+version = "2.0.0-rc.2"
 dependencies = [
  "bytemuck",
  "cfg-if",

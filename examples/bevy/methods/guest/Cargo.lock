@@ -1296,7 +1296,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.0"
+version = "2.0.0-rc.2"
 dependencies = [
  "anyhow",
  "bit-vec 0.8.0",
@@ -1397,7 +1397,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0"
+version = "2.0.0-rc.2"
 dependencies = [
  "bytemuck",
  "cfg-if",
