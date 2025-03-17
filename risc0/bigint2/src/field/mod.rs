@@ -448,9 +448,8 @@ pub fn extfield_deg2_add_256(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg2_add_384(
@@ -463,9 +462,8 @@ pub fn extfield_deg2_add_384(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg2_mul_256(
@@ -479,9 +477,8 @@ pub fn extfield_deg2_mul_256(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg4_mul_256(
@@ -495,9 +492,8 @@ pub fn extfield_deg4_mul_256(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg2_sub_256(
@@ -510,9 +506,8 @@ pub fn extfield_deg2_sub_256(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg2_sub_384(
@@ -525,9 +520,8 @@ pub fn extfield_deg2_sub_384(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_xxone_mul_256(
@@ -541,9 +535,8 @@ pub fn extfield_xxone_mul_256(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_xxone_mul_384(
@@ -557,7 +550,6 @@ pub fn extfield_xxone_mul_384(
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
-    for elem in result {
-        assert!(crate::is_less(&elem, &modulus));
-    }
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
