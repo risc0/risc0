@@ -218,15 +218,15 @@ fn run_command(cmd: &mut Command, error_message: &str) -> Result<()> {
         .output()
         .with_context(move || context)?;
 
-    // Outputting like this allows the test code to capture the output
-    let stdout_str =
-        std::str::from_utf8(&output.stdout).context("command produced invalid UTF-8 output")?;
-    print!("{stdout_str}",);
-    let stderr_str =
-        std::str::from_utf8(&output.stderr).context("command produced invalid UTF-8 output")?;
-    eprint!("{stderr_str}",);
-
     if !output.status.success() {
+        // Outputting like this allows the test code to capture the output
+        let stdout_str =
+            std::str::from_utf8(&output.stdout).context("command produced invalid UTF-8 output")?;
+        print!("{stdout_str}",);
+        let stderr_str =
+            std::str::from_utf8(&output.stderr).context("command produced invalid UTF-8 output")?;
+        eprint!("{stderr_str}",);
+
         bail!("{error_message}");
     }
     Ok(())
