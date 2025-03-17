@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,8 +32,9 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
+use regex::Regex;
 use risc0_binfmt::compute_image_id;
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
@@ -457,15 +458,39 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     cmd
 }
 
+fn get_rustc_version() -> Result<semver::Version> {
+    let output = Command::new("rustc")
+        .arg("--version")
+        .env("RUSTUP_TOOLCHAIN", "risc0")
+        .output()
+        .expect("failed to get risc0 toolchain's rustc version. Please ensure that your risc0 toolchain installed is correctly");
+
+    let version = String::from_utf8(output.stdout)?;
+    let re = Regex::new(r"\d+\.\d+\.\d+").unwrap();
+
+    if let Some(matched) = re.find(&version) {
+        semver::Version::parse(matched.as_str())
+            .map_err(|_| anyhow!("failed to parse version from rustc output"))
+    } else {
+        bail!("No semver found.")
+    }
+}
+
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
 pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
+    // llvm changed `loweratomic` to `lower-atomic`
+    let lower_atomic = if get_rustc_version().unwrap() > semver::Version::new(1, 81, 0) {
+        "passes=lower-atomic"
+    } else {
+        "passes=loweratomic"
+    };
     [
         // Append other rust flags
         rustc_flags,
         &[
             // Replace atomic ops with nonatomic versions since the guest is single threaded.
             "-C",
-            "passes=loweratomic",
+            lower_atomic,
             // Specify where to start loading the program in
             // memory.  The clang linker understands the same
             // command line arguments as the GNU linker does; see
