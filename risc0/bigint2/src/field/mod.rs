@@ -180,6 +180,150 @@ pub fn modsub_384_unchecked(
     }
 }
 
+pub fn extfield_deg2_add_256_unchecked(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_4(
+            EXTFIELD_DEG2_ADD_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg2_add_384_unchecked(
+    lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_384_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_4(
+            EXTFIELD_DEG2_ADD_384_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg2_mul_256_unchecked(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    monic_irr: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_5(
+            EXTFIELD_DEG2_MUL_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            monic_irr.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg4_mul_256_unchecked(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    monic_irr: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
+) {
+    unsafe {
+        sys_bigint2_5(
+            EXTFIELD_DEG4_MUL_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            monic_irr.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg2_sub_256_unchecked(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_4(
+            EXTFIELD_DEG2_SUB_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_deg2_sub_384_unchecked(
+    lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_384_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_4(
+            EXTFIELD_DEG2_SUB_384_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_xxone_mul_256_unchecked(
+    lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    modsqr: &[u32; 2 * FIELD_256_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_5(
+            EXTFIELD_XXONE_MUL_256_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            modsqr.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
+pub fn extfield_xxone_mul_384_unchecked(
+    lhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+    rhs: &[[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+    modulus: &[u32; FIELD_384_WIDTH_WORDS],
+    modsqr: &[u32; 2 * FIELD_384_WIDTH_WORDS],
+    result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
+) {
+    unsafe {
+        sys_bigint2_5(
+            EXTFIELD_XXONE_MUL_384_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            modulus.as_ptr(),
+            modsqr.as_ptr(),
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
+}
+
 // These "checked" versions verify that `result < modulus`
 
 pub fn modadd_256(
@@ -300,15 +444,12 @@ pub fn extfield_deg2_add_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    unsafe {
-        sys_bigint2_4(
-            EXTFIELD_DEG2_ADD_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_deg2_add_256_unchecked(&lhs, &rhs, &modulus, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg2_add_384(
@@ -317,15 +458,12 @@ pub fn extfield_deg2_add_384(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    unsafe {
-        sys_bigint2_4(
-            EXTFIELD_DEG2_ADD_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_deg2_add_384_unchecked(&lhs, &rhs, &modulus, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg2_mul_256(
@@ -335,16 +473,12 @@ pub fn extfield_deg2_mul_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    unsafe {
-        sys_bigint2_5(
-            EXTFIELD_DEG2_MUL_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            monic_irr.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_deg2_mul_256_unchecked(&lhs, &rhs, &monic_irr, &modulus, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg4_mul_256(
@@ -354,16 +488,14 @@ pub fn extfield_deg4_mul_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_4],
 ) {
-    unsafe {
-        sys_bigint2_5(
-            EXTFIELD_DEG4_MUL_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            monic_irr.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_deg4_mul_256_unchecked(&lhs, &rhs, &monic_irr, &modulus, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
+    assert!(crate::is_less(&result[2], &modulus));
+    assert!(crate::is_less(&result[3], &modulus));
 }
 
 pub fn extfield_deg2_sub_256(
@@ -372,15 +504,12 @@ pub fn extfield_deg2_sub_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    unsafe {
-        sys_bigint2_4(
-            EXTFIELD_DEG2_SUB_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_deg2_sub_256_unchecked(&lhs, &rhs, &modulus, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_deg2_sub_384(
@@ -389,15 +518,12 @@ pub fn extfield_deg2_sub_384(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    unsafe {
-        sys_bigint2_4(
-            EXTFIELD_DEG2_SUB_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_deg2_sub_384_unchecked(&lhs, &rhs, &modulus, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_xxone_mul_256(
@@ -407,16 +533,12 @@ pub fn extfield_xxone_mul_256(
     modsqr: &[u32; 2 * FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    unsafe {
-        sys_bigint2_5(
-            EXTFIELD_XXONE_MUL_256_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            modsqr.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_xxone_mul_256_unchecked(&lhs, &rhs, &modulus, &modsqr, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
 
 pub fn extfield_xxone_mul_384(
@@ -426,14 +548,10 @@ pub fn extfield_xxone_mul_384(
     modsqr: &[u32; 2 * FIELD_384_WIDTH_WORDS],
     result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    unsafe {
-        sys_bigint2_5(
-            EXTFIELD_XXONE_MUL_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr(),
-            modsqr.as_ptr(),
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    extfield_xxone_mul_384_unchecked(&lhs, &rhs, &modulus, &modsqr, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result[0], &modulus));
+    assert!(crate::is_less(&result[1], &modulus));
 }
