@@ -89,7 +89,7 @@ fn benchmark_group() {
         "2a3f714fcddea4984f228c4d1dbd41a79b470b1546c68f6bb268a04aa0394bac"
     ))));
     let y = black_box(Scalar::reduce(U256::from_be_bytes(hex!(
-        "2a3f714fcddea4984f228c4d1dbd41a79b470b1546c68f6bb268a04aa0394bac"
+        "98973615f3b819529d885bbed9a69bc66a678d00289a8b1f3a0ff19801c10cdd"
     ))));
 
     // NOTE: Accounts for >95% of the total cycle count for ECDSA verification.

@@ -15,10 +15,10 @@
 use std::{cmp::min, fmt::Write as _};
 
 use anyhow::{anyhow, bail, Result};
+use enum_map::Enum;
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
-    bigint::{self, BigIntState},
     platform::*,
     poseidon2::{Poseidon2, Poseidon2State},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
@@ -30,6 +30,17 @@ pub(crate) enum LoadOp {
     Peek,
     Load,
     Record,
+}
+
+#[derive(Clone, Copy, Debug, Enum)]
+pub enum EcallKind {
+    BigInt,
+    Poseidon2,
+    Read,
+    Sha2,
+    Terminate,
+    User,
+    Write,
 }
 
 pub(crate) trait Risc0Context {
@@ -51,10 +62,6 @@ pub(crate) trait Risc0Context {
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
 
     fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
-
-    fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
-        self.store_u32(base + idx, word)
-    }
 
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
 
@@ -91,16 +98,9 @@ pub(crate) trait Risc0Context {
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
-    fn on_ecall_cycle(
-        &mut self,
-        cur: CycleState,
-        next: CycleState,
-        s0: u32,
-        s1: u32,
-        s2: u32,
-    ) -> Result<()>;
-
-    fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;
+    fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
+        self.store_u32(base + idx, word)
+    }
 
     fn suspend(&mut self) -> Result<()> {
         // default no-op
@@ -126,11 +126,23 @@ pub(crate) trait Risc0Context {
     /// For writes, just pass through, record rlen only
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32>;
 
+    fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()>;
+
+    fn on_ecall_cycle(
+        &mut self,
+        cur: CycleState,
+        next: CycleState,
+        s0: u32,
+        s1: u32,
+        s2: u32,
+        kind: EcallKind,
+    ) -> Result<()>;
+
     fn on_sha2_cycle(&mut self, cur_state: CycleState, sha2: &Sha2State);
 
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State);
 
-    fn on_bigint_cycle(&mut self, cur_state: CycleState, bigint: &BigIntState);
+    fn ecall_bigint(&mut self) -> Result<()>;
 }
 
 fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
@@ -199,20 +211,38 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
     fn ecall_terminate(&mut self) -> Result<bool> {
         tracing::trace!("ecall_terminate");
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::Terminate, 0, 0, 0)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::Terminate,
+            0,
+            0,
+            0,
+            EcallKind::Terminate,
+        )?;
         let a0 = self.load_register(REG_A0)?;
         let a1 = self.load_register(REG_A1)?;
         self.ctx.on_terminate(a0, a1)?;
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::Terminate, CycleState::Suspend, 0, 0, 0)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::Terminate,
+            CycleState::Suspend,
+            0,
+            0,
+            0,
+            EcallKind::Terminate,
+        )?;
         Ok(false)
     }
 
     fn ecall_read(&mut self) -> Result<bool> {
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostReadSetup, 0, 0, 0)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::HostReadSetup,
+            0,
+            0,
+            0,
+            EcallKind::Read,
+        )?;
         let mut cur_state = CycleState::HostReadSetup;
         let fd = self.load_register(REG_A0)?;
         let mut ptr = ByteAddr(self.load_register(REG_A1)?);
@@ -254,6 +284,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
                     $ptr.waddr().0,
                     $ptr.subaddr(),
                     $rlen,
+                    EcallKind::Read,
                 )?;
                 cur_state = next_state;
             }};
@@ -320,8 +351,14 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
     fn ecall_write(&mut self) -> Result<bool> {
         tracing::trace!("ecall_write");
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::HostWrite, 0, 0, 0)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::HostWrite,
+            0,
+            0,
+            0,
+            EcallKind::Write,
+        )?;
         let fd = self.load_register(REG_A0)?;
         let ptr = ByteAddr(self.load_register(REG_A1)?);
         let len = self.load_register(REG_A2)?;
@@ -335,32 +372,56 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         let rlen = self.ctx.host_write(fd, &bytes)?;
         self.store_register(REG_A0, rlen)?;
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::HostWrite, CycleState::Decode, 0, 0, 0)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::HostWrite,
+            CycleState::Decode,
+            0,
+            0,
+            0,
+            EcallKind::Write,
+        )?;
         Ok(false)
     }
 
     fn ecall_poseidon2(&mut self) -> Result<bool> {
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::PoseidonEntry,
+            0,
+            0,
+            0,
+            EcallKind::Poseidon2,
+        )?;
         Poseidon2::ecall(self.ctx)?;
         Ok(false)
     }
 
     fn ecall_sha2(&mut self) -> Result<bool> {
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::ShaEcall, 0, 0, 0)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::ShaEcall,
+            0,
+            0,
+            0,
+            EcallKind::Sha2,
+        )?;
         sha2::ecall(self.ctx)?;
         Ok(false)
     }
 
     fn ecall_bigint(&mut self) -> Result<bool> {
         self.next_pc();
-        self.ctx
-            .on_ecall_cycle(CycleState::MachineEcall, CycleState::BigIntEcall, 0, 0, 0)?;
-        bigint::ecall(self.ctx)?;
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::BigIntEcall,
+            0,
+            0,
+            0,
+            EcallKind::BigInt,
+        )?;
+        self.ctx.ecall_bigint()?;
         Ok(false)
     }
 

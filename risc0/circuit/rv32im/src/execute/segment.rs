@@ -34,8 +34,6 @@ pub struct Segment {
     #[debug(skip)]
     pub write_record: Vec<u32>,
 
-    pub user_cycles: u32,
-
     /// Cycle at which we suspend
     pub suspend_cycle: u32,
 

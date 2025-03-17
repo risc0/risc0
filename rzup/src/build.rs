@@ -177,15 +177,14 @@ pub fn build_rust_toolchain(
 
     let _lock_file = env.flock("rust-toolchain-build", "building a Rust toolchain")?;
 
-    env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "cloning git repository".into(),
-    });
-
     // if building from commit
     let repo_dir = match path {
         None => {
             let repo_dir = env.tmp_dir().join("build-rust-toolchain");
             if !repo_dir.join(".git").exists() {
+                env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                    message: "cloning git repository".into(),
+                });
                 git_clone(repo_url, &repo_dir)?;
             } else {
                 git_fetch(&repo_dir)?;
@@ -220,13 +219,19 @@ pub fn build_rust_toolchain(
         message: "./x build".into(),
     });
 
+    let lower_atomic = if version > semver::Version::new(1, 81, 0) {
+        "-Cpasses=lower-atomic"
+    } else {
+        "-Cpasses=loweratomic"
+    };
+
     run_command_and_stream_output(
         "./x",
         &["build"],
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            "-Cpasses=lower-atomic",
+            lower_atomic,
         )],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {
@@ -246,7 +251,7 @@ pub fn build_rust_toolchain(
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            "-Cpasses=lower-atomic",
+            lower_atomic,
         )],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {

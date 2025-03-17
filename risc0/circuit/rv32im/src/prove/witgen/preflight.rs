@@ -24,12 +24,12 @@ use risc0_zkp::core::digest::DIGEST_WORDS;
 
 use crate::{
     execute::{
-        bigint::{BigIntBytes, BigIntState},
+        bigint::BigIntBytes,
         node_idx,
         pager::{page_idx, PageState, PagedMemory},
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
-        r0vm::{LoadOp, Risc0Context, Risc0Machine},
+        r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
         rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
         sha2::Sha2State,
@@ -37,7 +37,10 @@ use crate::{
     zirgen::circuit::ExtVal,
 };
 
-use super::{node_addr_to_idx, node_idx_to_addr, paged_map::PagedMap, poseidon2::Checksum};
+use super::{
+    bigint::BigIntState, node_addr_to_idx, node_idx_to_addr, paged_map::PagedMap,
+    poseidon2::Checksum,
+};
 
 #[derive(Clone, Debug, Default)]
 pub(crate) enum Back {
@@ -77,7 +80,7 @@ pub(crate) struct Preflight<'a> {
     user_cycle: u32,
     txn_idx: u32,
     bigint_idx: u32,
-    phys_cycles: u32,
+    user_cycles: u32,
     orig_words: PagedMap,
     prev_cycle: PagedMap,
     page_memory: PagedMap,
@@ -137,7 +140,7 @@ impl<'a> Preflight<'a> {
             txn_idx: 0,
             bigint_idx: 0,
             user_cycle: 0,
-            phys_cycles: 0,
+            user_cycles: 0,
             orig_words: Default::default(),
             prev_cycle: Default::default(),
             page_memory,
@@ -158,7 +161,7 @@ impl<'a> Preflight<'a> {
         }
         self.machine_mode = 2;
         Poseidon2::read_done(self)?;
-        self.phys_cycles = 0;
+        self.user_cycles = 0;
         Ok(())
     }
 
@@ -166,13 +169,13 @@ impl<'a> Preflight<'a> {
     pub fn body(&mut self) -> Result<()> {
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
-        while self.phys_cycles < self.segment.suspend_cycle {
+        while self.user_cycles < self.segment.suspend_cycle {
             Risc0Machine::step(&mut emu, self)?;
         }
         tracing::debug!(
             "suspend(cycle: {}:{}, pc: {:?}, mode: {})",
             self.trace.cycles.len(),
-            self.phys_cycles,
+            self.user_cycles,
             self.pc,
             self.machine_mode
         );
@@ -430,6 +433,18 @@ impl<'a> Preflight<'a> {
         // tracing::trace!("add_cycle_special(cur_state: {cur_state:?}, next_state: {next_state:?}, major: {major}, minor: {minor})");
         self.add_cycle(next_state, pc, major, minor, paging_idx, back);
     }
+
+    pub(crate) fn on_bigint_cycle(&mut self, cur_state: CycleState, bigint: &BigIntState) {
+        self.add_witness(&bigint.bytes);
+        self.add_cycle_special(
+            cur_state,
+            bigint.next_state,
+            self.pc.0,
+            0, //paging_idx
+            Back::BigInt(bigint.clone()),
+        );
+        self.user_cycles += 1;
+    }
 }
 
 impl Risc0Context for Preflight<'_> {
@@ -506,7 +521,7 @@ impl Risc0Context for Preflight<'_> {
         );
         self.add_cycle_insn(CycleState::Decode, self.pc.0, insn.kind);
         self.user_cycle += 1;
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
         Ok(())
     }
 
@@ -576,9 +591,10 @@ impl Risc0Context for Preflight<'_> {
         s0: u32,
         s1: u32,
         s2: u32,
+        _kind: EcallKind,
     ) -> Result<()> {
         self.add_cycle_special(cur_state, next_state, self.pc.0, 0, Back::Ecall(s0, s1, s2));
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
         Ok(())
     }
 
@@ -617,7 +633,7 @@ impl Risc0Context for Preflight<'_> {
             node_addr_to_idx(sha2.state_out_addr),
             Back::Sha2(sha2.clone()),
         );
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
     }
 
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State) {
@@ -628,19 +644,11 @@ impl Risc0Context for Preflight<'_> {
             node_addr_to_idx(WordAddr(p2.buf_out_addr)),
             Back::Poseidon2(p2.clone()),
         );
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
     }
 
-    fn on_bigint_cycle(&mut self, cur_state: CycleState, bigint: &BigIntState) {
-        self.add_witness(&bigint.bytes);
-        self.add_cycle_special(
-            cur_state,
-            bigint.next_state,
-            self.pc.0,
-            0, //paging_idx
-            Back::BigInt(bigint.clone()),
-        );
-        self.phys_cycles += 1;
+    fn ecall_bigint(&mut self) -> Result<()> {
+        super::bigint::ecall_preflight(self)
     }
 }
 

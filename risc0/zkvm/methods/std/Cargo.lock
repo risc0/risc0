@@ -686,6 +686,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4445909572dbd556c457c849c4ca58623d84b27c8fff1e74b0b4227d8b90d17b"
 
 [[package]]
+name = "embedded-io"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
+
+[[package]]
+name = "embedded-io"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1108,6 +1120,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "170a2601f67cc9dba8edd8c4870b15f71a6a2dc196daec8c83f72b59dff628a8"
 dependencies = [
  "cobs",
+ "embedded-io 0.4.0",
+ "embedded-io 0.6.1",
  "heapless",
  "serde",
 ]
@@ -1251,22 +1265,24 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "borsh",
  "derive_more",
  "elf",
  "lazy_static",
+ "postcard",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "semver",
  "serde",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-build"
-version = "3.0.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1288,7 +1304,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0-alpha.1"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1302,7 +1318,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0-alpha.1"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1315,7 +1331,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1331,7 +1347,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.4.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -1339,7 +1355,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0-alpha.1"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1358,7 +1374,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1366,7 +1382,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.4.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1389,7 +1405,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1416,7 +1432,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.4.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "bincode",
  "borsh",
@@ -1441,7 +1457,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0-alpha.1"
+version = "2.0.0"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -1518,7 +1534,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "rzup"
-version = "0.4.0-alpha.1"
+version = "0.4.0"
 dependencies = [
  "semver",
  "serde",

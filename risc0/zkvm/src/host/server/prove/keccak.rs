@@ -63,6 +63,7 @@ pub(crate) fn prove_keccak(request: &ProveKeccakRequest) -> Result<SuccinctRecei
         zkr_input.extend(request.control_root.as_words());
         zkr_input.extend(seal);
         zkr_input.extend(bytemuck::cast_slice(claim_sha_input.as_slice()));
+        zkr_input.push(1 << request.po2);
 
         zkr_input
     };
