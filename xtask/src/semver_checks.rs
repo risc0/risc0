@@ -223,7 +223,7 @@ fn run_command(cmd: &mut Command, error_message: &str) -> Result<()> {
         std::str::from_utf8(&output.stdout).context("command produced invalid UTF-8 output")?;
     print!("{stdout_str}",);
     let stderr_str =
-        std::str::from_utf8(&output.stdout).context("command produced invalid UTF-8 output")?;
+        std::str::from_utf8(&output.stderr).context("command produced invalid UTF-8 output")?;
     eprint!("{stderr_str}",);
 
     if !output.status.success() {
@@ -249,7 +249,7 @@ fn compare_published_package_to_vendored_version(
                 package,
             ])
             .current_dir(workspace_root),
-        "failed to create publishable version of {package}",
+        &format!("failed to create publishable version of {package}"),
     )?;
 
     // Run diff on the vendored package from crates.io and the local package
