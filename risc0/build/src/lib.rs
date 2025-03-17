@@ -358,13 +358,13 @@ fn sanitized_cmd(tool: &str) -> Command {
     cmd
 }
 
-fn cpp_toolchain() -> PathBuf {
+fn cpp_toolchain() -> Option<PathBuf> {
     let rzup = rzup::Rzup::new().unwrap();
-    let Some((version, path)) = rzup.get_default_version(&rzup::Component::CppToolchain) else {
-        panic!("Risc Zero C++ toolchain not found. Try running `rzup install cpp`");
-    };
+    let (version, path) = rzup
+        .get_default_version(&rzup::Component::CppToolchain)
+        .unwrap()?;
     println!("Using C++ toolchain version {version}");
-    path
+    Some(path)
 }
 
 fn rust_toolchain() -> PathBuf {
@@ -411,8 +411,21 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
 
     if !cpp_toolchain_override() {
-        cmd.env("CC", cpp_toolchain().join("bin/riscv32-unknown-elf-gcc"))
-            .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+        if let Some(toolchain_path) = cpp_toolchain() {
+            cmd.env("CC", toolchain_path.join("bin/riscv32-unknown-elf-gcc"));
+        } else {
+            // If you aren't compiling any C/C++ code, it might be just fine to not have a C++
+            // toolchain installed, but if you are then your compilation will surely fail. To avoid
+            // a potentially confusing error message, set the CC path to a bogus path that will
+            // hopefully make the issue obvious.
+            cmd.env(
+                "CC",
+                "/no_risc0_cpp_toolchain_installed_run_rzup_install_cpp",
+            );
+        }
+
+        cmd.env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
         // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
         // would be seamless if there was a reliable way to tell whether it is enabled in
