@@ -1,8 +1,5 @@
 # Groth16 Prover
 
-> Currently, due to the Circom native C++ witness generator that depends on x86
-> assembly for field operations, only x86 architecture is supported.
-
 This directory contains utilities for performing a "stark2snark" workflow. This
 is useful for transforming a RISC Zero STARK proof into a Groth16 SNARK proof
 which is suitable for publishing on-chain.
