@@ -360,20 +360,21 @@ fn sanitized_cmd(tool: &str) -> Command {
 
 fn cpp_toolchain() -> PathBuf {
     let rzup = rzup::Rzup::new().unwrap();
-    let (version, path) = rzup
-        .get_default_version(&rzup::Component::CppToolchain)
-        .unwrap()
-        .expect("Risc Zero C++ toolchain installed");
+    let Some((version, path)) = rzup.get_default_version(&rzup::Component::CppToolchain) else {
+        panic!("Risc Zero C++ toolchain not found. Try running `rzup install cpp`");
+    };
     println!("Using C++ toolchain version {version}");
     path
 }
 
 fn rust_toolchain() -> PathBuf {
     let rzup = rzup::Rzup::new().unwrap();
-    let (version, path) = rzup
+    let Some((version, path)) = rzup
         .get_default_version(&rzup::Component::RustToolchain)
         .unwrap()
-        .expect("Risc Zero Rust toolchain installed");
+    else {
+        panic!("Risc Zero Rust toolchain not found. Try running `rzup install rust`");
+    };
     println!("Using Rust toolchain version {version}");
     path
 }
@@ -428,10 +429,12 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
 
 fn get_rust_toolchain_version() -> semver::Version {
     let rzup = rzup::Rzup::new().unwrap();
-    let (version, _) = rzup
+    let Some((version, _)) = rzup
         .get_default_version(&rzup::Component::RustToolchain)
         .unwrap()
-        .expect("Risc Zero Rust toolchain installed");
+    else {
+        panic!("Risc Zero Rust toolchain not found. Try running `rzup install rust`");
+    };
     version
 }
 
