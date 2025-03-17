@@ -310,9 +310,11 @@ impl Rzup {
     pub(crate) fn build_rust_toolchain(
         &mut self,
         repo_url: &str,
-        tag_or_commit: &str,
+        tag_or_commit: &Option<String>,
+        path: &Option<String>,
     ) -> Result<()> {
-        let version = build::build_rust_toolchain(&self.environment, repo_url, tag_or_commit)?;
+        let version =
+            build::build_rust_toolchain(&self.environment, repo_url, tag_or_commit, path)?;
         self.set_default_version(&Component::RustToolchain, version)?;
         Ok(())
     }
@@ -2403,7 +2405,8 @@ mod tests {
         run_and_assert_events(
             &mut rzup,
             |rzup| {
-                rzup.build_rust_toolchain(&repo_url, "master").unwrap();
+                rzup.build_rust_toolchain(&repo_url, &Some("master".to_string()), &None)
+                    .unwrap();
             },
             vec![
                 RzupEvent::BuildingRustToolchain,
@@ -2468,13 +2471,15 @@ mod tests {
         let (test_repo, master) = create_fake_rust_repo(&tmp_dir);
 
         let repo_url = format!("file://{}", test_repo.display());
-        rzup.build_rust_toolchain(&repo_url, "foo").unwrap();
+        rzup.build_rust_toolchain(&repo_url, &Some("foo".to_string()), &None)
+            .unwrap();
 
         let foo_commit = build::git_short_rev_parse(&test_repo, "foo").unwrap();
         let mut foo = master.clone();
         foo.build = semver::BuildMetadata::new(&foo_commit).unwrap();
 
-        rzup.build_rust_toolchain(&repo_url, "master").unwrap();
+        rzup.build_rust_toolchain(&repo_url, &Some("master".to_string()), &None)
+            .unwrap();
 
         std::fs::remove_dir_all(tmp_dir.path().join(".risc0/tmp")).unwrap();
         assert_files(

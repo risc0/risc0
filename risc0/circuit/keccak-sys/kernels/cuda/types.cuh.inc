@@ -1,6 +1,14 @@
 struct NondetRegLayout {
   Reg _super;
 };
+struct IsZeroLayout {
+  NondetRegLayout _super;
+  NondetRegLayout inv;
+};
+struct CycleCounterLayout {
+  NondetRegLayout _super;
+  IsZeroLayout isFirstCycle;
+};
 using NondetRegLayout12LayoutArray = ::cuda::std::array<NondetRegLayout,12>;
 struct WrapOneHotLayout {
   NondetRegLayout12LayoutArray _super;
@@ -20,10 +28,6 @@ struct KeccackNextRound_SuperLayout {
   ControlStateLayout _super;
   ControlStateLayout arm0;
   ControlStateLayout arm1;
-};
-struct IsZeroLayout {
-  NondetRegLayout _super;
-  NondetRegLayout inv;
 };
 struct KeccackNextRoundLayout {
   KeccackNextRound_SuperLayout _super;
@@ -214,7 +218,7 @@ struct DigestRegLayout {
   NondetRegLayout16LayoutArray values;
 };
 struct TopLayout {
-  NondetRegLayout isFirst;
+  CycleCounterLayout cycle;
   WrapOneHotLayout cycleMux;
   ControlStateLayout controlState;
   TopControlStateLayout controlStateRedef;
@@ -224,12 +228,18 @@ struct TopLayout {
 };
 struct _globalLayout {
   DigestRegLayout finalDigest;
+  NondetRegLayout totalCycles;
 };
 struct NondetRegStruct {
   Val _super;
 };
 struct NondetBitRegStruct {
   NondetRegStruct _super;
+};
+struct ComponentStruct {
+};
+struct CycleCounterStruct {
+  NondetRegStruct isFirstCycle;
 };
 using Val5Array = ::cuda::std::array<Val,5>;
 using Val64Array = ::cuda::std::array<Val,64>;
@@ -318,8 +328,6 @@ struct ShaStateStruct {
   Val32Array4Array a;
   Val32Array4Array e;
   Val32Array16Array w;
-};
-struct ComponentStruct {
 };
 using ComponentStruct32Array = ::cuda::std::array<ComponentStruct,32>;
 struct DoShaStepStruct {

@@ -23,7 +23,7 @@ use super::{testutil, DEFAULT_SEGMENT_LIMIT_PO2};
 #[test]
 fn basic() {
     let program = testutil::kernel::basic();
-    let expected_cycles = program.image.len();
+    let expected_cycles = program.size_in_words();
     let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
@@ -52,7 +52,7 @@ fn basic() {
     );
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    assert_eq!(segment.user_cycles, expected_cycles as u32);
+    assert_eq!(segment.suspend_cycle, expected_cycles as u32 + 1);
 }
 
 #[test]

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 use crate::Receipt;
 
 /// Information returned by the prover including receipt as well as other information useful for debugging
+#[non_exhaustive]
 pub struct ProveInfo {
     /// receipt from the computation
     pub receipt: Receipt,
@@ -27,6 +28,7 @@ pub struct ProveInfo {
 
 /// Struct containing information about a prover's cycle count after running the guest program
 #[derive(Debug)]
+#[non_exhaustive]
 pub struct SessionStats {
     /// Count of segments in this proof request
     pub segments: usize,

@@ -12,16 +12,170 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::{anyhow, bail, ensure, Result};
+use derive_more::Debug;
+use num_derive::FromPrimitive;
+use num_traits::FromPrimitive as _;
+use risc0_binfmt::WordAddr;
+
 use crate::{
     execute::{
-        bigint::{BigIntState, BIGINT_ACCUM_STATE_COUNT, BIGINT_STATE_COUNT},
-        byte_poly::BigIntAccumState,
+        bigint::{
+            BigIntBytes, BigIntWitness, BIGINT_STATE_COUNT, BIGINT_WIDTH_BYTES, BIGINT_WIDTH_WORDS,
+        },
+        r0vm::{LoadOp, Risc0Context},
+        CycleState, WORD_SIZE,
     },
-    zirgen::circuit::{BigIntAccumStateLayout, BigIntStateLayout, LAYOUT_TOP, LAYOUT_TOP_ACCUM},
+    zirgen::circuit::{BigIntStateLayout, LAYOUT_TOP},
 };
 
+use super::{byte_poly::BytePolyProgram, preflight::Preflight};
+
 const BIGINT_STATE_LAYOUT: &BigIntStateLayout = LAYOUT_TOP.inst_result.arm12.state;
-const BIGINT_ACCUM_STATE_LAYOUT: &BigIntAccumStateLayout = LAYOUT_TOP_ACCUM.user._0.state;
+
+#[derive(Clone, Debug)]
+pub(crate) struct BigIntState {
+    pub is_ecall: bool,
+    pub pc: WordAddr,
+    pub poly_op: PolyOp,
+    pub coeff: u32,
+    pub bytes: BigIntBytes,
+    pub next_state: CycleState,
+}
+
+struct BigInt {
+    state: BigIntState,
+    program: BytePolyProgram,
+}
+
+#[derive(Debug)]
+#[debug("{poly_op:?}({mem_op:?}, c:{coeff}, r:{reg}, o:{offset})")]
+pub(crate) struct Instruction {
+    pub poly_op: PolyOp,
+    pub mem_op: MemoryOp,
+    pub coeff: i32,
+    pub reg: u32,
+    pub offset: u32,
+}
+
+#[derive(Clone, Copy, Debug, FromPrimitive, PartialEq)]
+pub(crate) enum PolyOp {
+    Reset,
+    Shift,
+    SetTerm,
+    AddTotal,
+    Carry1,
+    Carry2,
+    EqZero,
+}
+
+#[derive(Clone, Copy, Debug, FromPrimitive, PartialEq)]
+pub(crate) enum MemoryOp {
+    Read,
+    Write,
+    Check,
+}
+
+impl Instruction {
+    // instruction encoding:
+    // 3  2   2  2    1               0
+    // 1  8   4  1    6               0
+    // mmmmppppcccaaaaaoooooooooooooooo
+    pub fn decode(insn: u32) -> Result<Self> {
+        Ok(Self {
+            mem_op: MemoryOp::from_u32(insn >> 28 & 0x0f)
+                .ok_or_else(|| anyhow!("Invalid mem_op in bigint program"))?,
+            poly_op: PolyOp::from_u32(insn >> 24 & 0x0f)
+                .ok_or_else(|| anyhow!("Invalid poly_op in bigint program"))?,
+            coeff: (insn >> 21 & 0x07) as i32 - 4,
+            reg: insn >> 16 & 0x1f,
+            offset: insn & 0xffff,
+        })
+    }
+}
+
+impl BigInt {
+    fn run(&mut self, ctx: &mut Preflight, witness: &BigIntWitness) -> Result<()> {
+        ctx.on_bigint_cycle(CycleState::BigIntEcall, &self.state);
+        while self.state.next_state == CycleState::BigIntStep {
+            self.step(ctx, witness)?;
+        }
+        Ok(())
+    }
+
+    fn step(&mut self, ctx: &mut Preflight, witness: &BigIntWitness) -> Result<()> {
+        self.state.pc.inc();
+        let insn = Instruction::decode(ctx.load_u32(LoadOp::Record, self.state.pc)?)?;
+
+        let base =
+            ctx.load_aligned_addr_from_machine_register(LoadOp::Record, insn.reg as usize)?;
+        let addr = base + insn.offset * BIGINT_WIDTH_WORDS as u32;
+
+        tracing::trace!("step({:?}, {insn:?}, {addr:?})", self.state.pc);
+        if insn.mem_op == MemoryOp::Check && insn.poly_op != PolyOp::Reset {
+            if !self.program.in_carry {
+                self.program.in_carry = true;
+                self.program.total_carry = self.program.total.clone();
+                let mut carry = 0;
+
+                // Do carry propagation
+                for coeff in self.program.total_carry.coeffs.iter_mut() {
+                    *coeff += carry;
+                    ensure!(*coeff % 256 == 0, "bad carry");
+                    *coeff /= 256;
+                    carry = *coeff;
+                }
+                tracing::trace!("carry propagate complete");
+            }
+
+            let base_point = 128 * 256 * 64;
+            for (i, ret) in self.state.bytes.iter_mut().enumerate() {
+                let offset = insn.offset as usize;
+                let coeff = self.program.total_carry.coeffs[offset * BIGINT_WIDTH_BYTES + i] as u32;
+                let value = coeff.wrapping_add(base_point);
+                match insn.poly_op {
+                    PolyOp::Carry1 => *ret = ((value >> 14) & 0xff) as u8,
+                    PolyOp::Carry2 => *ret = ((value >> 8) & 0x3f) as u8,
+                    PolyOp::Shift | PolyOp::EqZero => *ret = (value & 0xff) as u8,
+                    _ => {
+                        bail!("Invalid poly_op in bigint program")
+                    }
+                }
+            }
+        } else if insn.mem_op == MemoryOp::Read {
+            for i in 0..BIGINT_WIDTH_WORDS {
+                let word = ctx.load_u32(LoadOp::Record, addr + i)?;
+                for (j, byte) in word.to_le_bytes().iter().enumerate() {
+                    self.state.bytes[i * WORD_SIZE + j] = *byte;
+                }
+            }
+        } else if !addr.is_null() {
+            self.state.bytes = *witness
+                .get(&addr)
+                .ok_or_else(|| anyhow!("Missing bigint witness: {addr:?}"))?;
+            if insn.mem_op == MemoryOp::Write {
+                let words: &[u32] = bytemuck::cast_slice(&self.state.bytes);
+                for (i, word) in words.iter().enumerate() {
+                    ctx.store_u32(addr + i, *word)?;
+                }
+            }
+        }
+
+        self.program.step(&insn, &self.state.bytes)?;
+
+        self.state.is_ecall = false;
+        self.state.poly_op = insn.poly_op;
+        self.state.coeff = (insn.coeff + 4) as u32;
+        self.state.next_state = if !self.state.is_ecall && insn.poly_op == PolyOp::Reset {
+            CycleState::Decode
+        } else {
+            CycleState::BigIntStep
+        };
+
+        ctx.on_bigint_cycle(CycleState::BigIntStep, &self.state);
+        Ok(())
+    }
+}
 
 impl BigIntState {
     pub(crate) const fn offsets() -> [usize; BIGINT_STATE_COUNT] {
@@ -77,42 +231,22 @@ impl BigIntState {
     }
 }
 
-impl BigIntAccumState {
-    pub(crate) const fn offsets() -> [usize; BIGINT_ACCUM_STATE_COUNT] {
-        [
-            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset,
-            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 1,
-            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 2,
-            BIGINT_ACCUM_STATE_LAYOUT.poly._super.offset + 3,
-            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset,
-            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 1,
-            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 2,
-            BIGINT_ACCUM_STATE_LAYOUT.term._super.offset + 3,
-            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset,
-            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 1,
-            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 2,
-            BIGINT_ACCUM_STATE_LAYOUT.total._super.offset + 3,
-        ]
-    }
+pub(crate) fn ecall_preflight(ctx: &mut Preflight) -> Result<()> {
+    let exec = crate::execute::bigint::ecall(ctx)?;
 
-    pub(crate) fn as_array(&self) -> [u32; BIGINT_ACCUM_STATE_COUNT] {
-        let poly = self.poly.elems();
-        let term = self.term.elems();
-        let total = self.total.elems();
+    let state = BigIntState {
+        is_ecall: true,
+        pc: exec.verify_program_ptr,
+        poly_op: PolyOp::Reset,
+        coeff: 0,
+        bytes: Default::default(),
+        next_state: CycleState::BigIntStep,
+    };
 
-        [
-            poly[0].into(),
-            poly[1].into(),
-            poly[2].into(),
-            poly[3].into(),
-            term[0].into(),
-            term[1].into(),
-            term[2].into(),
-            term[3].into(),
-            total[0].into(),
-            total[1].into(),
-            total[2].into(),
-            total[3].into(),
-        ]
-    }
+    let mut bigint = BigInt {
+        state,
+        program: BytePolyProgram::new(),
+    };
+
+    bigint.run(ctx, &exec.witness)
 }

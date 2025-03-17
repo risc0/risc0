@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 use crate::Rv32imV2Claim;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Segment {
     /// Initial sparse memory state for the segment
     pub partial_image: MemoryImage,
@@ -32,8 +33,6 @@ pub struct Segment {
     /// Recorded rlen of guest->host IO, one entry per write
     #[debug(skip)]
     pub write_record: Vec<u32>,
-
-    pub user_cycles: u32,
 
     /// Cycle at which we suspend
     pub suspend_cycle: u32,
