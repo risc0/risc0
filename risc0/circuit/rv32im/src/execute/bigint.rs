@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, io::Cursor};
+use std::{collections::BTreeMap, io::Cursor};
 
 use anyhow::Result;
 use malachite::Natural;
@@ -34,7 +34,7 @@ pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;
 pub(crate) const BIGINT_WIDTH_BYTES: usize = BIGINT_WIDTH_WORDS * WORD_SIZE;
 
 pub(crate) type BigIntBytes = [u8; BIGINT_WIDTH_BYTES];
-pub(crate) type BigIntWitness = HashMap<WordAddr, BigIntBytes>;
+pub(crate) type BigIntWitness = BTreeMap<WordAddr, BigIntBytes>;
 
 fn bytes_le_to_bigint(bytes: &[u8]) -> Natural {
     let mut limbs = Vec::with_capacity((bytes.len() + 3) / 4);
@@ -67,7 +67,7 @@ impl<'a> BigIntIOImpl<'a> {
     pub fn new(ctx: &'a mut dyn Risc0Context) -> Self {
         Self {
             ctx,
-            witness: HashMap::new(),
+            witness: BTreeMap::new(),
         }
     }
 }

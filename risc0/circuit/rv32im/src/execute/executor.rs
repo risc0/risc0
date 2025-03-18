@@ -459,7 +459,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
+        // tracing::trace!(
+        //     "store_u32({:?}, {word:#010x}), pc: {:?}",
+        //     addr.baddr(),
+        //     self.pc
+        // );
         if !self.trace.is_empty() {
             self.trace(TraceEvent::MemorySet {
                 addr: addr.baddr().0,
@@ -470,7 +474,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
-        // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
+        // tracing::trace!("store_register({:?}, {word:#010x})", addr.baddr());
         if !self.trace.is_empty() {
             self.trace(TraceEvent::MemorySet {
                 addr: (base + idx).baddr().0,

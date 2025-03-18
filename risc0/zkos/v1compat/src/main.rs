@@ -75,7 +75,7 @@ mod zkvm {
         x: *const [u32; BIGINT_WIDTH_WORDS],
         y: *const [u32; BIGINT_WIDTH_WORDS],
         modulus: *const [u32; BIGINT_WIDTH_WORDS],
-    ) -> ! {
+    ) {
         if op != BIGINT_OP_MULTIPLY {
             illegal_instruction();
         }
@@ -129,8 +129,6 @@ mod zkvm {
             );
             asm!("add sp, sp, {temp_space}", temp_space = in(reg) temp_space);
         }
-
-        asm!("mret", options(noreturn))
     }
 
     #[inline(always)]
