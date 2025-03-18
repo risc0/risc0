@@ -67,6 +67,7 @@ jobs:
             check-semver:
               - *base
               - risc0/**
+              - xtask/src/semver_checks.rs
             check-template:
               - *base
               - risc0/**
