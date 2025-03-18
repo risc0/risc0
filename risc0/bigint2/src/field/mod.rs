@@ -15,6 +15,8 @@
 #[cfg(test)]
 mod tests;
 
+pub mod ffi_field;
+
 use include_bytes_aligned::include_bytes_aligned;
 
 use crate::{
