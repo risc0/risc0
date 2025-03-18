@@ -3905,6 +3905,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "paste",
+ "postcard",
  "rand",
  "rayon",
  "ringbuffer",
