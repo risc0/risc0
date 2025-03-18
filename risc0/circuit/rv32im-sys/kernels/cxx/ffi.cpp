@@ -167,6 +167,13 @@ void extern_log(ExecContext& ctx, const std::string& message, std::vector<Val> v
   // std::cout << "\n";
 }
 
+void extern_assert(ExecContext& ctx, Val cond, const char* message) {
+  // if (cond != 0) {
+  //   printf("assertion failed: %s\n", message);
+  //   assert(0);
+  // }
+}
+
 std::array<Val, 4> extern_divide(
     ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType) {
   uint32_t numer = numerLow.asUInt32() | (numerHigh.asUInt32() << 16);
