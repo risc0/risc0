@@ -22,7 +22,6 @@ use semver::Version;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::str::FromStr;
 
 const CONFIG_TOML: &str = include_str!("rust-toolchain-build-config.toml");
 
@@ -148,6 +147,25 @@ pub fn git_short_rev_parse(path: &Path, tag: &str) -> Result<String> {
     )
 }
 
+fn find_rustc_build_directory(build_dir: &Path) -> Result<PathBuf> {
+    if !build_dir.exists() {
+        return Err(RzupError::Other(
+            "failed to find Rust toolchain build directory".into(),
+        ));
+    }
+
+    for entry in std::fs::read_dir(build_dir)? {
+        let entry = entry?;
+        let stage2_dir = entry.path().join("stage2");
+        if stage2_dir.is_dir() && stage2_dir.join("bin").is_dir() {
+            return Ok(stage2_dir);
+        }
+    }
+    Err(RzupError::Other(
+        "failed to find Rust toolchain stage2 rustc build directory".into(),
+    ))
+}
+
 fn find_build_directories(build_dir: &Path) -> Result<(PathBuf, PathBuf)> {
     if !build_dir.exists() {
         return Err(RzupError::Other(
@@ -207,10 +225,7 @@ pub fn build_rust_toolchain(
     let mut version = Version::parse(version_str.trim())?;
     version.build = semver::BuildMetadata::new(&commit).unwrap();
 
-    let dest_dir = match std::env::var("RISC0_RUST_DEST_DIR") {
-        Ok(path) => PathBuf::from_str(&path).unwrap(), // infallible
-        _ => Paths::get_version_dir(env, &Component::RustToolchain, &version),
-    };
+    let dest_dir = Paths::get_version_dir(env, &Component::RustToolchain, &version);
 
     if dest_dir.exists() {
         return Err(RzupError::Other(format!(
@@ -218,32 +233,28 @@ pub fn build_rust_toolchain(
         )));
     }
 
-    if version > semver::Version::new(1, 84, 0) {
-        let config = format!(
-            "{CONFIG_TOML}\n\
-            [install]\n\
-            prefix = \"{}\"\n\
-            sysconfdir = \"{}\"\n",
-            dest_dir.display(),
-            dest_dir.display()
-        );
+    std::fs::write(repo_dir.join("config.toml"), CONFIG_TOML)?;
 
-        std::fs::write(repo_dir.join("config.toml"), config)?;
-        build_185_toolchain(env, version, &repo_dir)
+    if version > semver::Version::new(1, 84, 0) {
+        build_185_toolchain(env, version, &repo_dir, &dest_dir)
     } else {
-        std::fs::write(repo_dir.join("config.toml"), CONFIG_TOML)?;
         build_older_toolchain(env, version, &repo_dir, &dest_dir)
     }
 }
 
-fn build_185_toolchain(env: &Environment, version: Version, repo_dir: &Path) -> Result<Version> {
+fn build_185_toolchain(
+    env: &Environment,
+    version: Version,
+    repo_dir: &Path,
+    dest_dir: &Path,
+) -> Result<Version> {
     env.emit(RzupEvent::BuildingRustToolchainUpdate {
         message: "./x dist dist rustc cargo clippy rustfmt rust-std".to_string(),
     });
 
     run_command_and_stream_output(
         "./x",
-        &["dist", "rustc", "cargo", "clippy", "rustfmt", "rust-std"],
+        &["build", "--stage", "2", "compiler/rustc", "library"],
         Some(repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
@@ -261,25 +272,12 @@ fn build_185_toolchain(env: &Environment, version: Version, repo_dir: &Path) -> 
         message: "installing".into(),
     });
 
-    run_command_and_stream_output(
-        "./x",
-        &[
-            "install",
-            "compiler/rustc",
-            "cargo",
-            "clippy",
-            "rustfmt",
-            "library/std",
-        ],
-        Some(repo_dir),
-        &[],
-        |line| {
-            env.emit(RzupEvent::BuildingRustToolchainUpdate {
-                message: line.into(),
-            });
-        },
-    )
-    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain install: {e}")))?;
+    if let Some(parent) = dest_dir.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    let stage2 = find_rustc_build_directory(&repo_dir.join("build"))?;
+    std::fs::rename(stage2, dest_dir)?;
 
     env.emit(RzupEvent::DoneBuildingRustToolchain {
         version: version.to_string(),
