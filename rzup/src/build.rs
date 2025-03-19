@@ -226,7 +226,6 @@ pub fn build_rust_toolchain(
     version.build = semver::BuildMetadata::new(&commit).unwrap();
 
     let dest_dir = Paths::get_version_dir(env, &Component::RustToolchain, &version);
-
     if dest_dir.exists() {
         return Err(RzupError::Other(format!(
             "Rust toolchain version {version} already installed"
@@ -242,50 +241,6 @@ pub fn build_rust_toolchain(
     }
 }
 
-fn build_185_toolchain(
-    env: &Environment,
-    version: Version,
-    repo_dir: &Path,
-    dest_dir: &Path,
-) -> Result<Version> {
-    env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "./x dist dist rustc cargo clippy rustfmt rust-std".to_string(),
-    });
-
-    run_command_and_stream_output(
-        "./x",
-        &["build", "--stage", "2", "compiler/rustc", "library"],
-        Some(repo_dir),
-        &[(
-            "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            "-Cpasses=lower-atomic",
-        )],
-        |line| {
-            env.emit(RzupEvent::BuildingRustToolchainUpdate {
-                message: line.into(),
-            });
-        },
-    )
-    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain dist: {e}")))?;
-
-    env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "installing".into(),
-    });
-
-    if let Some(parent) = dest_dir.parent() {
-        std::fs::create_dir_all(parent)?;
-    }
-
-    let stage2 = find_rustc_build_directory(&repo_dir.join("build"))?;
-    std::fs::rename(stage2, dest_dir)?;
-
-    env.emit(RzupEvent::DoneBuildingRustToolchain {
-        version: version.to_string(),
-    });
-
-    Ok(version)
-}
-
 fn build_older_toolchain(
     env: &Environment,
     version: Version,
@@ -293,7 +248,6 @@ fn build_older_toolchain(
     dest_dir: &Path,
 ) -> Result<Version> {
     let stage2_flags: &[&str] = &["build", "--stage", "2"];
-
     let lower_atomic = if version > semver::Version::new(1, 81, 0) {
         "-Cpasses=lower-atomic"
     } else {
@@ -335,6 +289,51 @@ fn build_older_toolchain(
         let tool = tool?;
         std::fs::rename(tool.path(), dest_dir.join("bin").join(tool.file_name()))?;
     }
+
+    env.emit(RzupEvent::DoneBuildingRustToolchain {
+        version: version.to_string(),
+    });
+
+    Ok(version)
+}
+
+fn build_185_toolchain(
+    env: &Environment,
+    version: Version,
+    repo_dir: &Path,
+    dest_dir: &Path,
+) -> Result<Version> {
+    let stage2_flags: &[&str] = &["build", "--stage", "2", "compiler/rustc", "library"];
+    env.emit(RzupEvent::BuildingRustToolchainUpdate {
+        message: format!("./x {:?}", stage2_flags),
+    });
+
+    run_command_and_stream_output(
+        "./x",
+        stage2_flags,
+        Some(repo_dir),
+        &[(
+            "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
+            "-Cpasses=lower-atomic",
+        )],
+        |line| {
+            env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                message: line.into(),
+            });
+        },
+    )
+    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain build --stage 2: {e}")))?;
+
+    env.emit(RzupEvent::BuildingRustToolchainUpdate {
+        message: "installing".into(),
+    });
+
+    if let Some(parent) = dest_dir.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    let stage2 = find_rustc_build_directory(&repo_dir.join("build"))?;
+    std::fs::rename(stage2, dest_dir)?;
 
     env.emit(RzupEvent::DoneBuildingRustToolchain {
         version: version.to_string(),

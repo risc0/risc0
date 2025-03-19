@@ -1,7 +1,7 @@
 [build]
 target = ["riscv32im-risc0-zkvm-elf"]
 extended = true
-tools = ["cargo", "clippy", "rustfmt"]
+tools = ["cargo", "cargo-clippy", "clippy", "rustfmt"]
 configure-args = []
 cargo-native-static = true
 
