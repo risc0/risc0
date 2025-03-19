@@ -238,13 +238,13 @@ pub fn build_rust_toolchain(
 
 fn build_185_toolchain(env: &Environment, version: Version, repo_dir: &Path) -> Result<Version> {
     env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: format!("./x dist dist rustc cargo clippy rustfmt rust-std"),
+        message: "./x dist dist rustc cargo clippy rustfmt rust-std".to_string(),
     });
 
     run_command_and_stream_output(
         "./x",
         &["dist", "rustc", "cargo", "clippy", "rustfmt", "rust-std"],
-        Some(&repo_dir),
+        Some(repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
             "-Cpasses=lower-atomic",
@@ -271,7 +271,7 @@ fn build_185_toolchain(env: &Environment, version: Version, repo_dir: &Path) -> 
             "rustfmt",
             "library/std",
         ],
-        Some(&repo_dir),
+        Some(repo_dir),
         &[],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {
@@ -309,7 +309,7 @@ fn build_older_toolchain(
     run_command_and_stream_output(
         "./x",
         stage2_flags,
-        Some(&repo_dir),
+        Some(repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
             lower_atomic,
@@ -331,7 +331,7 @@ fn build_older_toolchain(
     }
 
     let (stage2, stage2_tools) = find_build_directories(&repo_dir.join("build"))?;
-    std::fs::rename(stage2, &dest_dir)?;
+    std::fs::rename(stage2, dest_dir)?;
 
     for tool in std::fs::read_dir(stage2_tools)? {
         let tool = tool?;
