@@ -15,6 +15,7 @@
 use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
+use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
     compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
     ProverServer, VerifierContext,
@@ -86,6 +87,9 @@ struct Mode {
     /// The image to execute
     #[arg(long)]
     image: Option<PathBuf>,
+
+    #[arg(long)]
+    segment: Option<PathBuf>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -122,6 +126,13 @@ pub fn main() {
 
     if let Some(port) = args.mode.port {
         run_server(port);
+        return;
+    }
+
+    if let Some(path) = args.mode.segment {
+        let bytes = std::fs::read(path).unwrap();
+        let segment = Segment::decode(&bytes).unwrap();
+        segment.execute().unwrap();
         return;
     }
 

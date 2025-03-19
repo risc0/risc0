@@ -3905,6 +3905,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "paste",
+ "postcard",
  "rand",
  "rayon",
  "ringbuffer",
@@ -3937,6 +3938,7 @@ name = "risc0-core"
 version = "2.0.0"
 dependencies = [
  "bytemuck",
+ "bytemuck_derive",
  "nvtx",
  "puffin",
  "rand_core",
