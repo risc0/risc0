@@ -315,7 +315,9 @@ impl Rzup {
     ) -> Result<()> {
         let version =
             build::build_rust_toolchain(&self.environment, repo_url, tag_or_commit, path)?;
-        self.set_default_version(&Component::RustToolchain, version)?;
+        if std::env::var("RISC0_RUST_DEST_DIR").is_err() {
+            self.set_default_version(&Component::RustToolchain, version)?;
+        }
         Ok(())
     }
 }
