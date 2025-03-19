@@ -9,6 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 bytemuck = { version = "1.12", features = ["derive"] }
+bytemuck_derive = "=1.8.1"
 rand_core = "0.6"
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
