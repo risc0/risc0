@@ -61,9 +61,17 @@ const R2: u32 = 1172168163;
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Eq, Clone, Copy, NoUninit, Zeroable)]
+#[derive(Eq, Clone, Copy)]
 #[repr(transparent)]
 pub struct Elem(u32);
+
+// Safety: fields must be NoUninit, repr(transparent) or repr(C), contains no padding or generics
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.NoUninit.html#safety>
+unsafe impl NoUninit for Elem {}
+
+// Safety: All fields must be Zeroable
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.Zeroable.html#safety>
+unsafe impl Zeroable for Elem {}
 
 /// Alias for the Baby Bear [Elem]
 pub type BabyBearElem = Elem;
@@ -382,13 +390,16 @@ const EXT_SIZE: usize = 4;
 /// The irreducible polynomial `x^4 + 11` was chosen because `11` is
 /// the simplest choice of `BETA` for `x^4 + BETA` that makes this polynomial
 /// irreducible.
-#[derive(Eq, Clone, Copy, Zeroable)]
+#[derive(Eq, Clone, Copy)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
 
-// ExtElem has no padding bytes as Elem has none and is 32 bits in width.
-// See bytemuck docs for a full list of requirements.
-// https://docs.rs/bytemuck/latest/bytemuck/trait.NoUninit.html#safety
+// Safety: All fields must be Zeroable
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.Zeroable.html#safety>
+unsafe impl Zeroable for ExtElem {}
+
+// Safety: fields must be NoUninit, repr(transparent) or repr(C), contains no padding or generics
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.NoUninit.html#safety>
 unsafe impl NoUninit for ExtElem {}
 
 unsafe impl CheckedBitPattern for ExtElem {

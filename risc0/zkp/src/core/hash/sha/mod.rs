@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -128,9 +128,17 @@ pub trait Sha256 {
 /// 512-bit (64-byte) chunks in a [Merkle–Damgård] construction.
 ///
 /// [Merkle–Damgård]: https://en.wikipedia.org/wiki/Merkle%E2%80%93Damg%C3%A5rd_construction
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Pod, Zeroable, Serialize, Deserialize)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[repr(transparent)]
 pub struct Block([u32; BLOCK_WORDS]);
+
+// Safety: All fields must be Zeroable
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.Zeroable.html#safety>
+unsafe impl Zeroable for Block {}
+
+// Safety: fields must be Pod, repr(transparent) or repr(C), contains no padding or generics
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.Pod.html#safety>
+unsafe impl Pod for Block {}
 
 impl Block {
     /// Returns a reference to the [Block] as a slice of words.

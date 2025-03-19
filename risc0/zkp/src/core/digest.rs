@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,8 +51,6 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
     PartialOrd,
     PartialEq,
     Hash,
-    Pod,
-    Zeroable,
     Serialize,
     Deserialize,
     BorshSerialize,
@@ -60,6 +58,14 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
 )]
 #[repr(transparent)]
 pub struct Digest([u32; DIGEST_WORDS]);
+
+// Safety: fields must be Pod, repr(transparent) or repr(C), contains no padding or generics
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.Pod.html#safety>
+unsafe impl Pod for Digest {}
+
+// Safety: All fields must be Zeroable
+// <https://docs.rs/bytemuck/latest/bytemuck/trait.Zeroable.html#safety>
+unsafe impl Zeroable for Digest {}
 
 impl Digest {
     /// Digest of all zeroes.
