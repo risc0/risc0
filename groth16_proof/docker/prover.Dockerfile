@@ -27,9 +27,38 @@ RUN apt-get update -q -y && apt-get install -q -y build-essential clang libgmp-d
 
 # Build the witness generator with Clang instead of GCC and no optimization (-O0)
 COPY --from=circom /usr/src/groth16/stark_verify_cpp/ stark_verify_cpp/
-RUN sed -i 's/g++/clang++/' stark_verify_cpp/Makefile && \
-  echo "stark_verify.o: stark_verify.cpp \$(DEPS_HPP)\n\t\$(CC) -c $< \$(CFLAGS) -O0" >> stark_verify_cpp/Makefile && \
-  (cd stark_verify_cpp; make)
+
+COPY scripts/chunk.py scripts/chunk.py
+COPY scripts/outline.py scripts/outline.py
+COPY scripts/replacement-Makefile stark_verify_cpp/Makefile
+
+# Break the witness generator source into more manageable pieces
+RUN apt-get install -q -y python3-dev
+RUN python3 scripts/chunk.py stark_verify_cpp/stark_verify.cpp
+RUN rm stark_verify_cpp/stark_verify.cpp
+
+# Extract declarations to create a shared header file.
+RUN (cd stark_verify_cpp; \
+  grep stark_verify-1.cpp -e "^#include" > stark_verify.h; \
+  grep stark_verify-1.cpp -e "^void" >> stark_verify.h; \
+  grep stark_verify-1.cpp -e "^Circom_TemplateFunction" | sed -e 's/ = {/;/g' -e 's/^/extern /' >> stark_verify.h; \
+  # Add one missing declaration \
+  echo "void release_memory_component(Circom_CalcWit* ctx, uint pos);" >> stark_verify.h; \
+  # Rewrite the first chunk, omitting the declarations we just extracted. \
+  grep stark_verify-1.cpp -v -e "^#include" | grep -v -e "^void" > \
+    stark_verify-0.cpp; \
+  mv stark_verify-0.cpp stark_verify-1.cpp; \
+  # Insert an include declaration into each implementation chunk. \
+  find -name "stark_verify-*.cpp" -exec sed -i '1 i #include "stark_verify.h"' {} \; \
+)
+
+# One of the functions will be considerably larger than the rest.
+# Break it down further, so it doesn't choke the backend.
+RUN (BIG_FILE=$(du -h stark_verify_cpp/*.cpp | sort -rh | head -1 | awk '{ print $2 }'); \
+  python3 scripts/outline.py "$BIG_FILE"; \
+  rm "$BIG_FILE")
+
+RUN (cd stark_verify_cpp; make -j`nproc`)
 
 # Stage 3: Build the Gnark prover
 FROM golang:1.23-bookworm AS gnark
