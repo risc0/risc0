@@ -26,6 +26,7 @@ pub enum MultiTestSpec {
     AlignedAlloc,
     AllocZeroed,
     BigInt {
+        count: u32,
         x: [u32; bigint::WIDTH_WORDS],
         y: [u32; bigint::WIDTH_WORDS],
         modulus: [u32; bigint::WIDTH_WORDS],

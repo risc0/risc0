@@ -248,6 +248,7 @@ fn bigint_accel() {
     for case in cases {
         println!("Running BigInt circuit test case: {:x?}", case);
         let input = MultiTestSpec::BigInt {
+            count: 1,
             x: case.x,
             y: case.y,
             modulus: case.modulus,
@@ -270,6 +271,7 @@ fn bigint_accel() {
 #[test_log::test]
 fn bigint_accel_mod_zero_product_too_large() {
     let input = MultiTestSpec::BigInt {
+        count: 1,
         x: [u32::MAX; bigint::WIDTH_WORDS],
         y: [u32::MAX; bigint::WIDTH_WORDS],
         modulus: [0u32; bigint::WIDTH_WORDS],
@@ -282,6 +284,24 @@ fn bigint_accel_mod_zero_product_too_large() {
         .unwrap();
     let error = execute_elf(env, MULTI_TEST_ELF).map(|_| ()).unwrap_err();
     assert!(error.to_string().contains("IllegalInstruction"), "{error}");
+}
+
+#[test_log::test]
+fn bigint_repeat() {
+    let input = MultiTestSpec::BigInt {
+        count: 100,
+        x: [1, 2, 3, 4, 5, 6, 7, 8],
+        y: [9, 10, 11, 12, 13, 14, 15, 16],
+        modulus: [17, 18, 19, 20, 21, 22, 23, 24],
+    };
+
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 #[test_log::test]
