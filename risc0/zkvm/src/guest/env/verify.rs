@@ -84,6 +84,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
 /// [composition]: https://dev.risczero.com/terminology#composition
 pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
+    #[allow(clippy::unnecessary_map_or)]
     let assumptions_empty = claim
         .output
         .as_value()?
