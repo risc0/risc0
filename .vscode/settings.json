@@ -91,6 +91,7 @@
   ],
   "rust-analyzer.showUnlinkedFileNotification": false,
   "rust-analyzer.linkedProjects": [
+    "rzup/Cargo.toml",
     "Cargo.toml",
     "benchmarks/Cargo.toml",
     "examples/Cargo.toml",

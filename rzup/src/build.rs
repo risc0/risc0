@@ -22,6 +22,7 @@ use semver::Version;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::str::FromStr;
 
 const CONFIG_TOML: &str = include_str!("rust-toolchain-build-config.toml");
 
@@ -206,38 +207,47 @@ pub fn build_rust_toolchain(
     let mut version = Version::parse(version_str.trim())?;
     version.build = semver::BuildMetadata::new(&commit).unwrap();
 
-    let dest_dir = Paths::get_version_dir(env, &Component::RustToolchain, &version);
+    let dest_dir = match std::env::var("RISC0_RUST_DEST_DIR") {
+        Ok(path) => PathBuf::from_str(&path).unwrap(), // infallible
+        _ => Paths::get_version_dir(env, &Component::RustToolchain, &version),
+    };
+
     if dest_dir.exists() {
         return Err(RzupError::Other(format!(
             "Rust toolchain version {version} already installed"
         )));
     }
 
-    std::fs::write(repo_dir.join("config.toml"), CONFIG_TOML)?;
+    if version > semver::Version::new(1, 84, 0) {
+        let config = format!(
+            "{CONFIG_TOML}\n\
+            [install]\n\
+            prefix = \"{}\"\n\
+            sysconfdir = \"{}\"\n",
+            dest_dir.display(),
+            dest_dir.display()
+        );
 
+        std::fs::write(repo_dir.join("config.toml"), config)?;
+        build_185_toolchain(env, version, &repo_dir)
+    } else {
+        std::fs::write(repo_dir.join("config.toml"), CONFIG_TOML)?;
+        build_older_toolchain(env, version, &repo_dir, &dest_dir)
+    }
+}
+
+fn build_185_toolchain(env: &Environment, version: Version, repo_dir: &Path) -> Result<Version> {
     env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "./x build".into(),
+        message: format!("./x dist dist rustc cargo clippy rustfmt rust-std"),
     });
-
-    let lower_atomic = if version > semver::Version::new(1, 81, 0) {
-        "-Cpasses=lower-atomic"
-    } else {
-        "-Cpasses=loweratomic"
-    };
-
-    let stage2_flags: &[&str] = if version > semver::Version::new(1, 84, 0) {
-        &["build", "--stage", "2", "compiler/rustc", "library", "src/tools/cargo", "src/tools/clippy", "src/tools/rustfmt"]
-    } else {
-        &["build", "--stage", "2"]
-    };
 
     run_command_and_stream_output(
         "./x",
-        &["build"],
+        &["dist", "rustc", "cargo", "clippy", "rustfmt", "rust-std"],
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            lower_atomic,
+            "-Cpasses=lower-atomic",
         )],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {
@@ -245,10 +255,55 @@ pub fn build_rust_toolchain(
             });
         },
     )
-    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain build: {e}")))?;
+    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain dist: {e}")))?;
 
     env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "./x build --stage 2".into(),
+        message: "installing".into(),
+    });
+
+    run_command_and_stream_output(
+        "./x",
+        &[
+            "install",
+            "compiler/rustc",
+            "cargo",
+            "clippy",
+            "rustfmt",
+            "library/std",
+        ],
+        Some(&repo_dir),
+        &[],
+        |line| {
+            env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                message: line.into(),
+            });
+        },
+    )
+    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain install: {e}")))?;
+
+    env.emit(RzupEvent::DoneBuildingRustToolchain {
+        version: version.to_string(),
+    });
+
+    Ok(version)
+}
+
+fn build_older_toolchain(
+    env: &Environment,
+    version: Version,
+    repo_dir: &Path,
+    dest_dir: &Path,
+) -> Result<Version> {
+    let stage2_flags: &[&str] = &["build", "--stage", "2"];
+
+    let lower_atomic = if version > semver::Version::new(1, 81, 0) {
+        "-Cpasses=lower-atomic"
+    } else {
+        "-Cpasses=loweratomic"
+    };
+
+    env.emit(RzupEvent::BuildingRustToolchainUpdate {
+        message: format!("./x {:?}", stage2_flags),
     });
 
     run_command_and_stream_output(
