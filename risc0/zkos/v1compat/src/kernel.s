@@ -235,4 +235,6 @@ _ecall_bigint:
     lw a3, REG_A3 * WORD_SIZE (tp) # y
     lw a4, REG_A4 * WORD_SIZE (tp) # modulus
 
-    j ecall_bigint_v1compat
+    call ecall_bigint_v1compat
+
+    mret

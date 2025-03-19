@@ -266,10 +266,15 @@ fn main() {
             }
             env::log("Busy loop complete");
         }
-        MultiTestSpec::BigInt { x, y, modulus } => {
+        MultiTestSpec::BigInt {
+            count,
+            x,
+            y,
+            modulus,
+        } => {
             let mut result = [0u32; bigint::WIDTH_WORDS];
-            unsafe {
-                sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus);
+            for _ in 0..count {
+                unsafe { sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus) };
             }
             env::commit_slice(&result);
         }

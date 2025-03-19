@@ -218,15 +218,15 @@ fn run_command(cmd: &mut Command, error_message: &str) -> Result<()> {
         .output()
         .with_context(move || context)?;
 
-    // Outputting like this allows the test code to capture the output
-    let stdout_str =
-        std::str::from_utf8(&output.stdout).context("command produced invalid UTF-8 output")?;
-    print!("{stdout_str}",);
-    let stderr_str =
-        std::str::from_utf8(&output.stdout).context("command produced invalid UTF-8 output")?;
-    eprint!("{stderr_str}",);
-
     if !output.status.success() {
+        // Outputting like this allows the test code to capture the output
+        let stdout_str =
+            std::str::from_utf8(&output.stdout).context("command produced invalid UTF-8 output")?;
+        print!("{stdout_str}",);
+        let stderr_str =
+            std::str::from_utf8(&output.stderr).context("command produced invalid UTF-8 output")?;
+        eprint!("{stderr_str}",);
+
         bail!("{error_message}");
     }
     Ok(())
@@ -238,6 +238,8 @@ fn compare_published_package_to_vendored_version(
     version: &Version,
     vendored_packages: &Path,
 ) -> Result<(), anyhow::Error> {
+    println!("Comparing {package} v{version} to crates.io version to see if it needs a patch version bump");
+
     // Have cargo package up the package for publishing
     run_command(
         Command::new("cargo")
@@ -249,20 +251,32 @@ fn compare_published_package_to_vendored_version(
                 package,
             ])
             .current_dir(workspace_root),
-        "failed to create publishable version of {package}",
+        &format!("failed to create publishable version of {package}"),
     )?;
+    let published_crate = workspace_root.join(format!("target/package/{package}-{version}"));
+
+    // When publishing locally cargo will create this directory, it doesn't exist on crates stored
+    // in `crates.io`
+    let target_dir = published_crate.join("target");
+    if target_dir.exists() {
+        std::fs::remove_dir_all(&target_dir)
+            .with_context(|| format!("failed to delete {target_dir:?}"))?;
+    }
 
     // Run diff on the vendored package from crates.io and the local package
     run_command(
         Command::new("diff")
             .arg("-r")
+            // This exists only in vendored crates
             .args(["-x", ".cargo-checksum.json"])
-            .args(["-x", ".rustc_info.json"])
-            .args(["-x", "*.rlib"])
-            .args(["-x", "*.rmeta"])
-            .args(["-x", "*.d"])
+            // We don't want lockfile changes to require a new release, its too volatile
+            .args(["-x", "Cargo.lock"])
+            // This is only informational and doesn't affect behavior
+            .args(["-x", "Cargo.toml.orig"])
+            // This contains information about the commit it was published from
+            .args(["-x", ".cargo_vcs_info.json"])
             .arg(vendored_packages.join(package))
-            .arg(workspace_root.join(format!("target/package/{package}-{version}"))),
+            .arg(published_crate),
         &format!(
             "Differences found between published {package} and main. Patch version bump required."
         ),
@@ -489,6 +503,13 @@ mod tests {
             .status()
             .unwrap()
             .success());
+
+        // Locally published crates have this directory, but not ones on `crates.io`
+        let published_crate = tempdir
+            .path()
+            .join("baseline")
+            .join(format!("target/package/foobar-{baseline_version}"));
+        std::fs::remove_dir_all(published_crate.join("target")).unwrap();
 
         let published_baseline = tempdir.path().join("published_baseline");
         std::fs::rename(

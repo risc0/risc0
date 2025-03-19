@@ -177,6 +177,7 @@ fn bigint_accel() {
     for case in cases {
         println!("Running BigInt circuit test case: {:08x?}", case);
         let input = MultiTestSpec::BigInt {
+            count: 1,
             x: case.x,
             y: case.y,
             modulus: case.modulus,

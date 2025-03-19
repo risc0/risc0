@@ -2946,7 +2946,7 @@ struct DenormedValU32Struct {
 };
 struct NormalizeU32Struct {
   ValU32Struct _super;
-  NondetRegStruct carry;
+  NondetRegStruct highCarry;
 };
 struct AddrDecomposeStruct {
   Val _super;
@@ -2957,7 +2957,6 @@ struct AddrDecomposeBitsStruct {
   NondetRegStruct low0;
   NondetRegStruct low1;
   Val low2;
-  Val addr;
 };
 struct CmpEqualStruct {
   NondetRegStruct isEqual;
@@ -3027,7 +3026,6 @@ using Val8Array = std::array<Val, 8>;
 using NondetRegStruct8Array = std::array<NondetRegStruct, 8>;
 struct OneHot_8_Struct {
   NondetRegStruct8Array _super;
-  NondetRegStruct8Array bits;
 };
 struct InstInputStruct {
   Val minor;
@@ -3063,7 +3061,6 @@ struct MultiplyAccumulateStruct {
 };
 struct DivInputStruct {
   InstInputStruct _super;
-  InstInputStruct ii;
   DecoderStruct decoded;
   GetDataStruct rs1;
   GetDataStruct rs2;
@@ -3087,7 +3084,6 @@ struct InstOutputBaseStruct {
 };
 struct MiscInputStruct {
   InstInputStruct _super;
-  InstInputStruct ii;
   DecoderStruct decoded;
   GetDataStruct rs1;
   GetDataStruct rs2;
@@ -3099,7 +3095,6 @@ struct MiscOutputStruct {
 };
 struct MulInputStruct {
   InstInputStruct _super;
-  InstInputStruct ii;
   DecoderStruct decoded;
   GetDataStruct rs1;
   GetDataStruct rs2;
@@ -3152,7 +3147,6 @@ using Val6Array = std::array<Val, 6>;
 using NondetRegStruct6Array = std::array<NondetRegStruct, 6>;
 struct OneHot_6_Struct {
   NondetRegStruct6Array _super;
-  NondetRegStruct6Array bits;
 };
 struct ECallOutputStruct {
   Val state;

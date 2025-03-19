@@ -8300,7 +8300,7 @@ pub struct DenormedValU32Struct {
 #[derive(Copy, Clone, Debug)]
 pub struct NormalizeU32Struct {
     pub _super: ValU32Struct,
-    pub carry: NondetRegStruct,
+    pub high_carry: NondetRegStruct,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct AddrDecomposeStruct {
@@ -8313,7 +8313,6 @@ pub struct AddrDecomposeBitsStruct {
     pub low0: NondetRegStruct,
     pub low1: NondetRegStruct,
     pub low2: Val,
-    pub addr: Val,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct CmpEqualStruct {
@@ -8396,7 +8395,6 @@ pub type NondetRegStruct8Array = [NondetRegStruct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_8_Struct {
     pub _super: NondetRegStruct8Array,
-    pub bits: NondetRegStruct8Array,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct InstInputStruct {
@@ -8438,7 +8436,6 @@ pub struct MultiplyAccumulateStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct DivInputStruct {
     pub _super: InstInputStruct,
-    pub ii: InstInputStruct,
     pub decoded: DecoderStruct,
     pub rs1: GetDataStruct,
     pub rs2: GetDataStruct,
@@ -8466,7 +8463,6 @@ pub struct InstOutputBaseStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct MiscInputStruct {
     pub _super: InstInputStruct,
-    pub ii: InstInputStruct,
     pub decoded: DecoderStruct,
     pub rs1: GetDataStruct,
     pub rs2: GetDataStruct,
@@ -8480,7 +8476,6 @@ pub struct MiscOutputStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct MulInputStruct {
     pub _super: InstInputStruct,
-    pub ii: InstInputStruct,
     pub decoded: DecoderStruct,
     pub rs1: GetDataStruct,
     pub rs2: GetDataStruct,
@@ -8540,7 +8535,6 @@ pub type NondetRegStruct6Array = [NondetRegStruct; 6];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_6_Struct {
     pub _super: NondetRegStruct6Array,
-    pub bits: NondetRegStruct6Array,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct ECallOutputStruct {
