@@ -1026,6 +1026,7 @@ dependencies = [
 name = "risc0-bigint2-guest"
 version = "0.1.0"
 dependencies = [
+ "include_bytes_aligned",
  "k256",
  "num-bigint",
  "num-bigint-dig",
