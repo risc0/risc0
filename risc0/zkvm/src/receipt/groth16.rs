@@ -195,7 +195,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("ff1469282758f7a9734c13bf9e5768b73e32f5ab6a89c45db41dfcdcf61ee3c3")
+            digest!("9f39696cb3ae9d6038d6b7a55c09017f0cf35e226ad7582b82dbabb0dae53385")
         );
     }
 }
