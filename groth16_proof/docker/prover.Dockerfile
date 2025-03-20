@@ -37,23 +37,8 @@ RUN apt-get install -q -y python3-dev
 RUN python3 scripts/chunk.py stark_verify_cpp/stark_verify.cpp
 RUN rm stark_verify_cpp/stark_verify.cpp
 
-# Extract declarations to create a shared header file.
-RUN (cd stark_verify_cpp; \
-  grep stark_verify-1.cpp -e "^#include" > stark_verify.h; \
-  grep stark_verify-1.cpp -e "^void" >> stark_verify.h; \
-  grep stark_verify-1.cpp -e "^Circom_TemplateFunction" | sed -e 's/ = {/;/g' -e 's/^/extern /' >> stark_verify.h; \
-  # Add one missing declaration \
-  echo "void release_memory_component(Circom_CalcWit* ctx, uint pos);" >> stark_verify.h; \
-  # Rewrite the first chunk, omitting the declarations we just extracted. \
-  grep stark_verify-1.cpp -v -e "^#include" | grep -v -e "^void" > \
-    stark_verify-0.cpp; \
-  mv stark_verify-0.cpp stark_verify-1.cpp; \
-  # Insert an include declaration into each implementation chunk. \
-  find -name "stark_verify-*.cpp" -exec sed -i '1 i #include "stark_verify.h"' {} \; \
-)
-
-# One of the functions will be considerably larger than the rest.
-# Break it down further, so it doesn't choke the backend.
+# One of the functions will be considerably larger than the rest;
+# break it down further, so it doesn't choke the compiler backend
 RUN (BIG_FILE=$(du -h stark_verify_cpp/*.cpp | sort -rh | head -1 | awk '{ print $2 }'); \
   python3 scripts/outline.py "$BIG_FILE"; \
   rm "$BIG_FILE")
