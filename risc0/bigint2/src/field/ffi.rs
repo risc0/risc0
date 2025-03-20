@@ -22,7 +22,7 @@ pub extern "C" fn risc0_bigint_modadd_256_unchecked(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modadd_256_unchecked(lhs, rhs, modulus, result);
+    unchecked::modadd_256(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -33,7 +33,7 @@ pub extern "C" fn risc0_bigint_modadd_384_unchecked(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [u32; FIELD_384_WIDTH_WORDS],
 ) {
-    modadd_384_unchecked(lhs, rhs, modulus, result);
+    unchecked::modadd_384(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -43,7 +43,7 @@ pub extern "C" fn risc0_bigint_modinv_256_unchecked(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modinv_256_unchecked(inp, modulus, result);
+    unchecked::modinv_256(inp, modulus, result);
 }
 
 #[stability::unstable]
@@ -53,7 +53,7 @@ pub extern "C" fn risc0_bigint_modinv_384_unchecked(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [u32; FIELD_384_WIDTH_WORDS],
 ) {
-    modinv_384_unchecked(inp, modulus, result);
+    unchecked::modinv_384(inp, modulus, result);
 }
 
 #[stability::unstable]
@@ -64,7 +64,7 @@ pub extern "C" fn risc0_bigint_modmul_256_unchecked(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modmul_256_unchecked(lhs, rhs, modulus, result);
+    unchecked::modmul_256(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -75,7 +75,7 @@ pub extern "C" fn risc0_bigint_modmul_384_unchecked(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [u32; FIELD_384_WIDTH_WORDS],
 ) {
-    modmul_384_unchecked(lhs, rhs, modulus, result);
+    unchecked::modmul_384(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -86,7 +86,7 @@ pub extern "C" fn risc0_bigint_modsub_256_unchecked(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modsub_256_unchecked(lhs, rhs, modulus, result);
+    unchecked::modsub_256(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -97,7 +97,7 @@ pub extern "C" fn risc0_bigint_modsub_384_unchecked(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [u32; FIELD_384_WIDTH_WORDS],
 ) {
-    modsub_384_unchecked(lhs, rhs, modulus, result);
+    unchecked::modsub_384(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -108,7 +108,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_add_256_unchecked(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    extfield_deg2_add_256_unchecked(lhs, rhs, modulus, result);
+    unchecked::extfield_deg2_add_256(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -119,7 +119,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_add_384_unchecked(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    extfield_deg2_add_384_unchecked(lhs, rhs, modulus, result);
+    unchecked::extfield_deg2_add_384(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -130,7 +130,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_sub_256_unchecked(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    extfield_deg2_sub_256_unchecked(lhs, rhs, modulus, result);
+    unchecked::extfield_deg2_sub_256(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -141,7 +141,7 @@ pub extern "C" fn risc0_bigint_extfield_deg2_sub_384_unchecked(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    extfield_deg2_sub_384_unchecked(lhs, rhs, modulus, result);
+    unchecked::extfield_deg2_sub_384(lhs, rhs, modulus, result);
 }
 
 #[stability::unstable]
@@ -153,7 +153,7 @@ pub extern "C" fn risc0_bigint_extfield_xxone_mul_256_unchecked(
     modsqr: &[u32; 2 * FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    extfield_xxone_mul_256_unchecked(lhs, rhs, modulus, modsqr, result);
+    unchecked::extfield_xxone_mul_256(lhs, rhs, modulus, modsqr, result);
 }
 
 #[stability::unstable]
@@ -165,7 +165,7 @@ pub extern "C" fn risc0_bigint_extfield_xxone_mul_384_unchecked(
     modsqr: &[u32; 2 * FIELD_384_WIDTH_WORDS],
     result: &mut [[u32; FIELD_384_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
-    extfield_xxone_mul_384_unchecked(lhs, rhs, modulus, modsqr, result);
+    unchecked::extfield_xxone_mul_384(lhs, rhs, modulus, modsqr, result);
 }
 
 #[stability::unstable]
