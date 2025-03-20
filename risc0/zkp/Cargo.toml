@@ -72,3 +72,6 @@ prove = [
 ]
 std = ["anyhow/std"]
 unstable = []
+
+[lints]
+workspace = true

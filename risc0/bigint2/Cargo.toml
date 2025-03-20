@@ -38,3 +38,6 @@ default = []
 num-bigint-dig = ["dep:num-bigint-dig"]
 num-bigint = ["dep:num-bigint"]
 unstable = []
+
+[lints]
+workspace = true
