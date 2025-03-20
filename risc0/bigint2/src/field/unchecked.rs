@@ -20,14 +20,14 @@
 //! when computing internal results during a series of finite field operations, provided the other
 //! finite field operations expect that inputs may violate this constraint, but using these
 //! functions can create security holes in certain other use cases (e.g. comparing to a hash value).
-//! 
+//!
 //! There are checking wrappers available in [crate::field] for use cases where `result < modulus`
 //! checking is necessary; you should also avoid these functions and prefer the checked versions in
 //! [crate::field] if you are uncertain about the security implications of this choice.
 
 use crate::{
     ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5},
-    field::{FIELD_256_WIDTH_WORDS, FIELD_384_WIDTH_WORDS, EXT_DEGREE_2, EXT_DEGREE_4},
+    field::{EXT_DEGREE_2, EXT_DEGREE_4, FIELD_256_WIDTH_WORDS, FIELD_384_WIDTH_WORDS},
 };
 
 use include_bytes_aligned::include_bytes_aligned;
