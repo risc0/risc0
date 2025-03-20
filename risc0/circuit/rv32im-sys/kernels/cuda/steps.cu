@@ -16039,16 +16039,18 @@ __device__ InstOutputBaseStruct exec_Sha0(ExecContext& ctx,
 __device__ BigIntStateStruct back_BigIntState(ExecContext& ctx,
                                               Index distance0,
                                               BoundLayout<BigIntStateLayout> layout1) {
-  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-  NondetRegStruct x2 = back_BitReg(ctx, distance0, LAYOUT_LOOKUP(layout1, isEcall));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-  NondetRegStruct x3 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, pc));
+  NondetRegStruct x2 = back_BitReg(ctx, distance0, LAYOUT_LOOKUP(layout1, isEcall));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-  NondetRegStruct x4 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, polyOp));
+  NondetRegStruct x3 = back_BitReg(ctx, distance0, LAYOUT_LOOKUP(layout1, mode));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-  NondetRegStruct x5 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, coeff));
+  NondetRegStruct x4 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, pc));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-  NondetRegStruct16Array x6 = map(
+  NondetRegStruct x5 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, polyOp));
+  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+  NondetRegStruct x6 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, coeff));
+  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+  NondetRegStruct16Array x7 = map(
       Val16Array{Val(0),
                  Val(1),
                  Val(2),
@@ -16066,50 +16068,64 @@ __device__ BigIntStateStruct back_BigIntState(ExecContext& ctx,
                  Val(14),
                  Val(15)},
       LAYOUT_LOOKUP(layout1, bytes),
-      ([&](Val16Array::value_type x7, BoundLayout<NondetRegLayout16LayoutArray::value_type> x8) {
-        NondetRegStruct x9 = back_Reg(ctx, distance0, x8);
-        return x9;
+      ([&](Val16Array::value_type x8, BoundLayout<NondetRegLayout16LayoutArray::value_type> x9) {
+        NondetRegStruct x10 = back_Reg(ctx, distance0, x9);
+        return x10;
       }));
-  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-  NondetRegStruct x10 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, nextState));
-  return BigIntStateStruct{
-      .isEcall = x2, .pc = x3, .polyOp = x4, .coeff = x5, .bytes = x6, .nextState = x10};
+  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+  NondetRegStruct x11 = back_Reg(ctx, distance0, LAYOUT_LOOKUP(layout1, nextState));
+  return BigIntStateStruct{.isEcall = x2,
+                           .mode = x3,
+                           .pc = x4,
+                           .polyOp = x5,
+                           .coeff = x6,
+                           .bytes = x7,
+                           .nextState = x11};
 }
 __device__ BigIntStateStruct exec_BigIntState(ExecContext& ctx,
                                               Val arg0,
                                               Val arg1_0,
                                               Val arg2_0,
                                               Val arg3,
-                                              Val16Array arg4,
-                                              Val arg5,
-                                              BoundLayout<BigIntStateLayout> layout6) {
-  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-  NondetRegStruct x7 = exec_BitReg(ctx, arg0, LAYOUT_LOOKUP(layout6, isEcall));
+                                              Val arg4,
+                                              Val16Array arg5,
+                                              Val arg6,
+                                              BoundLayout<BigIntStateLayout> layout7) {
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-  NondetRegStruct x8 = exec_Reg(ctx, arg1_0, LAYOUT_LOOKUP(layout6, pc));
+  NondetRegStruct x8 = exec_BitReg(ctx, arg0, LAYOUT_LOOKUP(layout7, isEcall));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-  NondetRegStruct x9 = exec_Reg(ctx, arg2_0, LAYOUT_LOOKUP(layout6, polyOp));
+  NondetRegStruct x9 = exec_BitReg(ctx, arg1_0, LAYOUT_LOOKUP(layout7, mode));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-  NondetRegStruct x10 = exec_Reg(ctx, arg3, LAYOUT_LOOKUP(layout6, coeff));
+  NondetRegStruct x10 = exec_Reg(ctx, arg2_0, LAYOUT_LOOKUP(layout7, pc));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-  NondetRegStruct16Array x11 = map(
-      arg4,
-      LAYOUT_LOOKUP(layout6, bytes),
-      ([&](Val16Array::value_type x12, BoundLayout<NondetRegLayout16LayoutArray::value_type> x13) {
-        NondetRegStruct x14 = exec_Reg(ctx, x12, x13);
-        return x14;
-      }));
+  NondetRegStruct x11 = exec_Reg(ctx, arg3, LAYOUT_LOOKUP(layout7, polyOp));
   // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-  NondetRegStruct x15 = exec_Reg(ctx, arg5, LAYOUT_LOOKUP(layout6, nextState));
-  return BigIntStateStruct{
-      .isEcall = x7, .pc = x8, .polyOp = x9, .coeff = x10, .bytes = x11, .nextState = x15};
+  NondetRegStruct x12 = exec_Reg(ctx, arg4, LAYOUT_LOOKUP(layout7, coeff));
+  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+  NondetRegStruct16Array x13 = map(
+      arg5,
+      LAYOUT_LOOKUP(layout7, bytes),
+      ([&](Val16Array::value_type x14, BoundLayout<NondetRegLayout16LayoutArray::value_type> x15) {
+        NondetRegStruct x16 = exec_Reg(ctx, x14, x15);
+        return x16;
+      }));
+  // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+  NondetRegStruct x17 = exec_Reg(ctx, arg6, LAYOUT_LOOKUP(layout7, nextState));
+  return BigIntStateStruct{.isEcall = x8,
+                           .mode = x9,
+                           .pc = x10,
+                           .polyOp = x11,
+                           .coeff = x12,
+                           .bytes = x13,
+                           .nextState = x17};
 }
 __device__ BigIntStateStruct exec_BigIntInvalid(ExecContext& ctx,
                                                 BoundLayout<BigIntStateLayout> layout0) {
-  // BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:24)
-  EQZ(Val(2013265920), "BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:24)");
-  // BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:25)
+  // BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)
+  EQZ(Val(2013265920), "BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:26)");
+  // BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:27)
   BigIntStateStruct x1 = exec_BigIntState(ctx,
+                                          Val(0),
                                           Val(0),
                                           Val(0),
                                           Val(0),
@@ -16137,15 +16153,17 @@ __device__ BigIntStateStruct exec_BigIntInvalid(ExecContext& ctx,
 __device__ BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,
                                               NondetRegStruct arg0,
                                               BoundLayout<BigIntEcallLayout> layout1) {
-  // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:38)
-  ReadAddrStruct x2 = exec_ReadAddr(ctx, arg0, Val(7), LAYOUT_LOOKUP(layout1, pc));
-  // Log(<preamble>:25)
-  // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:39)
-  INVOKE_EXTERN(ctx, log, "pc", std::initializer_list<Val>{x2._super});
   // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:41)
-  BigIntStateStruct x3 = exec_BigIntState(ctx,
+  GetDataStruct x2 = exec_MemoryRead(ctx, arg0, Val(1073725445), LAYOUT_LOOKUP(layout1, mode));
+  // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:42)
+  EQZ(x2._super.high, "BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:42)");
+  // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:44)
+  ReadAddrStruct x3 = exec_ReadAddr(ctx, arg0, Val(7), LAYOUT_LOOKUP(layout1, pc));
+  // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:46)
+  BigIntStateStruct x4 = exec_BigIntState(ctx,
                                           Val(1),
-                                          (x2._super - Val(1)),
+                                          x2._super.low,
+                                          (x3._super - Val(1)),
                                           Val(0),
                                           Val(0),
                                           Val16Array{Val(0),
@@ -16166,58 +16184,75 @@ __device__ BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,
                                                      Val(0)},
                                           Val(41),
                                           LAYOUT_LOOKUP(layout1, _super));
-  return x3;
+  return x4;
 }
 __device__ SplitU32Struct exec_SplitU32(ExecContext& ctx,
                                         ValU32Struct arg0,
                                         BoundLayout<SplitU32Layout> layout1) {
-  // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:52)
+  // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:58)
   SplitWordStruct x2 = exec_SplitWord(ctx, arg0.low, LAYOUT_LOOKUP(layout1, low));
-  // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:53)
+  // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:59)
   SplitWordStruct x3 = exec_SplitWord(ctx, arg0.high, LAYOUT_LOOKUP(layout1, high));
-  // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:51)
+  // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:57)
   SplitU32Struct x4 =
       SplitU32Struct{.bytes = NondetRegStruct4Array{x2.byte0, x2.byte1, x3.byte0, x3.byte1}};
   return x4;
 }
+__device__ AddrDecomposeBitsStruct exec_BigIntAddr(ExecContext& ctx,
+                                                   ValU32Struct arg0,
+                                                   Val arg1_0,
+                                                   BoundLayout<BigIntAddrLayout> layout2) {
+  // BigIntAddr(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:65)
+  NondetRegStruct x3 = exec_IsZero(ctx, (arg0.high - Val(49151)), LAYOUT_LOOKUP(layout2, _0));
+  EQZ(x3._super, "BigIntAddr(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:65)");
+  // BigIntAddr(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:66)
+  AddrDecomposeBitsStruct x4 =
+      exec_AddrDecomposeBits(ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super));
+  // BigIntAddr(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:67)
+  EQZ(x4.low2, "BigIntAddr(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:67)");
+  return x4;
+}
 __device__ BigIntReadStruct exec_BigIntRead(ExecContext& ctx,
                                             NondetRegStruct arg0,
-                                            Val arg1_0,
-                                            BoundLayout<BigIntReadLayout> layout2) {
-  // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:60)
-  SplitU32Struct4Array x3 =
+                                            ValU32Struct arg1_0,
+                                            Val arg2_0,
+                                            BoundLayout<BigIntReadLayout> layout3) {
+  // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:74)
+  AddrDecomposeBitsStruct x4 = exec_BigIntAddr(ctx, arg1_0, arg2_0, LAYOUT_LOOKUP(layout3, addr));
+  // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:75)
+  SplitU32Struct4Array x5 =
       map(Val4Array{Val(0), Val(1), Val(2), Val(3)},
-          LAYOUT_LOOKUP(layout2, words),
-          ([&](Val4Array::value_type x4,
-               BoundLayout<BigIntReadWords_SuperLayout4LayoutArray::value_type> x5) {
-            // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:61)
-            GetDataStruct x6 = exec_MemoryRead(ctx, arg0, (arg1_0 + x4), LAYOUT_LOOKUP(x5, _0));
-            SplitU32Struct x7 = exec_SplitU32(ctx, x6._super, LAYOUT_LOOKUP(x5, _super));
-            return x7;
+          LAYOUT_LOOKUP(layout3, words),
+          ([&](Val4Array::value_type x6,
+               BoundLayout<BigIntReadWords_SuperLayout4LayoutArray::value_type> x7) {
+            // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:76)
+            GetDataStruct x8 = exec_MemoryRead(ctx, arg0, (x4._super + x6), LAYOUT_LOOKUP(x7, _0));
+            SplitU32Struct x9 = exec_SplitU32(ctx, x8._super, LAYOUT_LOOKUP(x7, _super));
+            return x9;
           }));
-  // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:64)
-  NondetRegStruct16Array x8 = NondetRegStruct16Array{x3[0].bytes[0],
-                                                     x3[0].bytes[1],
-                                                     x3[0].bytes[2],
-                                                     x3[0].bytes[3],
-                                                     x3[1].bytes[0],
-                                                     x3[1].bytes[1],
-                                                     x3[1].bytes[2],
-                                                     x3[1].bytes[3],
-                                                     x3[2].bytes[0],
-                                                     x3[2].bytes[1],
-                                                     x3[2].bytes[2],
-                                                     x3[2].bytes[3],
-                                                     x3[3].bytes[0],
-                                                     x3[3].bytes[1],
-                                                     x3[3].bytes[2],
-                                                     x3[3].bytes[3]};
-  return BigIntReadStruct{._super = x8};
+  // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:79)
+  NondetRegStruct16Array x10 = NondetRegStruct16Array{x5[0].bytes[0],
+                                                      x5[0].bytes[1],
+                                                      x5[0].bytes[2],
+                                                      x5[0].bytes[3],
+                                                      x5[1].bytes[0],
+                                                      x5[1].bytes[1],
+                                                      x5[1].bytes[2],
+                                                      x5[1].bytes[3],
+                                                      x5[2].bytes[0],
+                                                      x5[2].bytes[1],
+                                                      x5[2].bytes[2],
+                                                      x5[2].bytes[3],
+                                                      x5[3].bytes[0],
+                                                      x5[3].bytes[1],
+                                                      x5[3].bytes[2],
+                                                      x5[3].bytes[3]};
+  return BigIntReadStruct{._super = x10};
 }
 __device__ BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,
                                                   Val16Array arg0,
                                                   BoundLayout<BigIntWitnessLayout> layout1) {
-  // BigIntWitness(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:73)
+  // BigIntWitness(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:88)
   NondetRegStruct16Array x2 = map(
       arg0,
       LAYOUT_LOOKUP(layout1, _super),
@@ -16229,47 +16264,50 @@ __device__ BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,
 }
 __device__ BigIntWitnessStruct exec_BigIntWrite(ExecContext& ctx,
                                                 NondetRegStruct arg0,
-                                                Val arg1_0,
-                                                BoundLayout<BigIntWriteLayout> layout2) {
+                                                ValU32Struct arg1_0,
+                                                Val arg2_0,
+                                                BoundLayout<BigIntWriteLayout> layout3) {
+  // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:94)
+  AddrDecomposeBitsStruct x4 = exec_BigIntAddr(ctx, arg1_0, arg2_0, LAYOUT_LOOKUP(layout3, addr));
   // BigIntExtern(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:3)
-  // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:79)
-  auto [x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18] =
+  // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:95)
+  auto [x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20] =
       INVOKE_EXTERN(ctx, bigIntExtern);
-  BigIntWitnessStruct x19 = exec_BigIntWitness(
+  BigIntWitnessStruct x21 = exec_BigIntWitness(
       ctx,
-      Val16Array{x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18},
-      LAYOUT_LOOKUP(layout2, _super));
-  // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:80)
-  BigIntWrite__0Struct4Array x20 =
+      Val16Array{x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20},
+      LAYOUT_LOOKUP(layout3, _super));
+  // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:96)
+  BigIntWrite__0Struct4Array x22 =
       map(Val4Array{Val(0), Val(1), Val(2), Val(3)},
-          LAYOUT_LOOKUP(layout2, _1),
-          ([&](Val4Array::value_type x21,
-               BoundLayout<BigIntWrite__0_SuperLayout4LayoutArray::value_type> x22) {
+          LAYOUT_LOOKUP(layout3, _1),
+          ([&](Val4Array::value_type x23,
+               BoundLayout<BigIntWrite__0_SuperLayout4LayoutArray::value_type> x24) {
             // builtin Mul
-            // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:82)
-            Val x23 = (x21 * Val(4));
-            Val x24 = (x19._super[to_size_t((x23 + Val(1)))]._super * Val(256));
+            // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:98)
+            Val x25 = (x23 * Val(4));
+            Val x26 = (x21._super[to_size_t((x25 + Val(1)))]._super * Val(256));
             // builtin Add
-            Val x25 = (x19._super[to_size_t(x23)]._super + x24);
+            Val x27 = (x21._super[to_size_t(x25)]._super + x26);
             // builtin Mul
-            // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:83)
-            Val x26 = (x19._super[to_size_t((x23 + Val(3)))]._super * Val(256));
+            // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:99)
+            Val x28 = (x21._super[to_size_t((x25 + Val(3)))]._super * Val(256));
             // builtin Add
-            Val x27 = (x19._super[to_size_t((x23 + Val(2)))]._super + x26);
-            // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:85)
-            MemoryWriteStruct x28 = exec_MemoryWrite(ctx,
+            Val x29 = (x21._super[to_size_t((x25 + Val(2)))]._super + x28);
+            // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:101)
+            MemoryWriteStruct x30 = exec_MemoryWrite(ctx,
                                                      arg0,
-                                                     (arg1_0 + x21),
-                                                     ValU32Struct{.low = x25, .high = x27},
-                                                     LAYOUT_LOOKUP(x22, _0));
+                                                     (x4._super + x23),
+                                                     ValU32Struct{.low = x27, .high = x29},
+                                                     LAYOUT_LOOKUP(x24, _0));
             return BigIntWrite__0Struct{};
           }));
-  return x19;
+  return x21;
 }
 __device__ BigIntWitnessStruct exec_BigIntCheck(ExecContext& ctx,
                                                 BoundLayout<BigIntWitnessLayout> layout0) {
   // BigIntExtern(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:3)
-  // BigIntCheck(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:92)
+  // BigIntCheck(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:108)
   auto [x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16] =
       INVOKE_EXTERN(ctx, bigIntExtern);
   BigIntWitnessStruct x17 = exec_BigIntWitness(
@@ -16283,105 +16321,113 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
                                              BigIntStateStruct arg1_0,
                                              BoundLayout<BigIntStepLayout> layout2) {
   // builtin Add
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:98)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:114)
   Val x3 = (arg1_0.pc._super + Val(1));
   // Log(<preamble>:25)
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:99)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:115)
   INVOKE_EXTERN(ctx, log, "pc", std::initializer_list<Val>{x3});
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:102)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:118)
   GetDataStruct x4 = exec_MemoryRead(ctx, arg0, x3, LAYOUT_LOOKUP(layout2, loadInst_0));
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:103)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:119)
   SplitWordStruct x5 = exec_SplitWord(ctx, x4._super.high, LAYOUT_LOOKUP(layout2, instHigh));
   // builtin BitAnd
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:108)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:124)
   Val x6 = bitAnd(x5.byte1._super, Val(15));
   NondetRegStruct x7 = exec_NondetReg(ctx, x6, LAYOUT_LOOKUP(layout2, polyOp));
   // builtin Sub
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:109)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:125)
   Val x8 = (x5.byte1._super - x7._super);
   NondetRegStruct x9 = exec_NondetReg(ctx, (x8 * Val(1887436801)), LAYOUT_LOOKUP(layout2, memOp));
   // builtin Add
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:110)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:126)
   Val x10 = ((x9._super * Val(16)) + x7._super);
-  Val x11 = (x5.byte1._super - x10);
-  EQZ(x11, "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:110)");
+  EQZ((x10 - x5.byte1._super), "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:126)");
   // Po2(zirgen/circuit/rv32im/v2/dsl/po2.zir:10)
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:112)
-  Val30Array x12 = Val30Array{
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:128)
+  Val30Array x11 = Val30Array{
       Val(1),        Val(2),        Val(4),        Val(8),         Val(16),        Val(32),
       Val(64),       Val(128),      Val(256),      Val(512),       Val(1024),      Val(2048),
       Val(4096),     Val(8192),     Val(16384),    Val(32768),     Val(65536),     Val(131072),
       Val(262144),   Val(524288),   Val(1048576),  Val(2097152),   Val(4194304),   Val(8388608),
       Val(16777216), Val(33554432), Val(67108864), Val(134217728), Val(268435456), Val(536870912)};
-  NondetRegStruct5Array x13 = map(
+  NondetRegStruct5Array x12 = map(
       Val5Array{Val(0), Val(1), Val(2), Val(3), Val(4)},
       LAYOUT_LOOKUP(layout2, regBits),
-      ([&](Val5Array::value_type x14, BoundLayout<NondetRegLayout5LayoutArray::value_type> x15) {
+      ([&](Val5Array::value_type x13, BoundLayout<NondetRegLayout5LayoutArray::value_type> x14) {
         // builtin BitAnd
-        Val x16 = bitAnd(x5.byte0._super, x12[to_size_t(x14)]);
+        Val x15 = bitAnd(x5.byte0._super, x11[to_size_t(x13)]);
         // builtin Inv
         // Div(<preamble>:19)
-        Val x17 = inv_0(x12[to_size_t(x14)]);
+        Val x16 = inv_0(x11[to_size_t(x13)]);
         // Div(<preamble>:20)
-        EQZ(((x17 * x12[to_size_t(x14)]) - Val(1)),
+        EQZ(((x16 * x11[to_size_t(x13)]) - Val(1)),
             "loc(callsite( Div ( <preamble> :20:22) at  BigIntStep ( "
-            "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :112:61)))");
-        NondetRegStruct x18 = exec_NondetBitReg(ctx, (x17 * x16), x15);
-        return x18;
+            "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :128:61)))");
+        NondetRegStruct x17 = exec_NondetBitReg(ctx, (x16 * x15), x14);
+        return x17;
       }));
   // builtin Mul
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:113)
-  Val x19 = (x13[1]._super * Val(2));
-  Val x20 = (x13[2]._super * Val(4));
-  Val x21 = (x13[3]._super * Val(8));
-  Val x22 = (x13[4]._super * Val(16));
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:129)
+  Val x18 = (x12[1]._super * Val(2));
+  Val x19 = (x12[2]._super * Val(4));
+  Val x20 = (x12[3]._super * Val(8));
+  Val x21 = (x12[4]._super * Val(16));
   // builtin Add
-  Val x23 = (x13[0]._super + x19);
-  Val x24 = (((x23 + x20) + x21) + x22);
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:115)
-  NondetRegStruct3Array x25 = map(
+  Val x22 = (x12[0]._super + x18);
+  Val x23 = (((x22 + x19) + x20) + x21);
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:131)
+  NondetRegStruct3Array x24 = map(
       Val3Array{Val(0), Val(1), Val(2)},
       LAYOUT_LOOKUP(layout2, coeffBits),
-      ([&](Val3Array::value_type x26, BoundLayout<NondetRegLayout3LayoutArray::value_type> x27) {
+      ([&](Val3Array::value_type x25, BoundLayout<NondetRegLayout3LayoutArray::value_type> x26) {
         // builtin BitAnd
-        Val x28 = bitAnd(x5.byte0._super, x12[to_size_t((x26 + Val(5)))]);
+        Val x27 = bitAnd(x5.byte0._super, x11[to_size_t((x25 + Val(5)))]);
         // builtin Inv
         // Div(<preamble>:19)
-        Val x29 = inv_0(x12[to_size_t((x26 + Val(5)))]);
+        Val x28 = inv_0(x11[to_size_t((x25 + Val(5)))]);
         // Div(<preamble>:20)
-        EQZ(((x29 * x12[to_size_t((x26 + Val(5)))]) - Val(1)),
+        EQZ(((x28 * x11[to_size_t((x25 + Val(5)))]) - Val(1)),
             "loc(callsite( Div ( <preamble> :20:22) at  BigIntStep ( "
-            "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :115:67)))");
-        NondetRegStruct x30 = exec_NondetBitReg(ctx, (x29 * x28), x27);
-        return x30;
+            "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :131:67)))");
+        NondetRegStruct x29 = exec_NondetBitReg(ctx, (x28 * x27), x26);
+        return x29;
       }));
   // builtin Mul
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:116)
-  Val x31 = (x25[1]._super * Val(2));
-  Val x32 = (x25[2]._super * Val(4));
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:132)
+  Val x30 = (x24[1]._super * Val(2));
+  Val x31 = (x24[2]._super * Val(4));
   // builtin Add
-  Val x33 = (x25[0]._super + x31);
-  Val x34 = (x33 + x32);
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:117)
-  Val x35 = (((x34 * Val(32)) + x24) - x5.byte0._super);
-  EQZ(x35, "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:117)");
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:122)
-  ReadAddrStruct x36 = exec_ReadAddr(ctx, arg0, x24, LAYOUT_LOOKUP(layout2, _2));
+  Val x32 = (x24[0]._super + x30);
+  Val x33 = (x32 + x31);
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:133)
+  Val x34 = (((x33 * Val(32)) + x23) - x5.byte0._super);
+  EQZ(x34, "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:133)");
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:138)
+  GetDataStruct x35 =
+      exec_MemoryRead(ctx, arg0, (x23 + Val(1073725440)), LAYOUT_LOOKUP(layout2, baseAddrU32));
   // builtin Mul
-  Val x37 = (x4._super.low * Val(4));
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:139)
+  Val x36 = (x4._super.low * Val(4));
   // builtin Add
-  Val x38 = (x36._super + x37);
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:126)
+  // AddU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:27)
+  Val x37 = (x35._super.low + (x36 * Val(4)));
+  NormalizeU32Struct x38 =
+      exec_NormalizeU32(ctx,
+                        DenormedValU32Struct{.low = x37, .high = x35._super.high},
+                        LAYOUT_LOOKUP(layout2, dataAddrU32));
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:143)
   OneHot_3_Struct x39 = exec_OneHot_3_(ctx, x9._super, LAYOUT_LOOKUP(layout2, memOpOneHot));
   NondetRegStruct16Array x40;
   if (to_size_t(x39._super[0]._super)) {
-    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:128)
-    BigIntReadStruct x41 = exec_BigIntRead(ctx, arg0, x38, LAYOUT_LOOKUP(layout2, bytes.arm0));
+    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:145)
+    BigIntReadStruct x41 = exec_BigIntRead(
+        ctx, arg0, x38._super, arg1_0.mode._super, LAYOUT_LOOKUP(layout2, bytes.arm0));
     x40 = x41._super;
   } else if (to_size_t(x39._super[1]._super)) {
-    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:129)
-    BigIntWitnessStruct x42 = exec_BigIntWrite(ctx, arg0, x38, LAYOUT_LOOKUP(layout2, bytes.arm1));
-    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)
+    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:146)
+    BigIntWitnessStruct x42 = exec_BigIntWrite(
+        ctx, arg0, x38._super, arg1_0.mode._super, LAYOUT_LOOKUP(layout2, bytes.arm1));
+    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)
     NondetRegStruct16Array x43 = NondetRegStruct16Array{x42._super[0],
                                                         x42._super[1],
                                                         x42._super[2],
@@ -16400,45 +16446,51 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
                                                         x42._super[15]};
     x40 = x43;
   } else if (to_size_t(x39._super[2]._super)) {
-    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:130)
+    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:147)
     BigIntWitnessStruct x44 = exec_BigIntCheck(ctx, LAYOUT_LOOKUP(layout2, bytes.arm2._super));
-    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)
+    // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra0.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra1.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra2.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra3.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra4.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra5.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra6.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra7.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra8.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra9.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra10.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra11.count._super), 0),
-        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)");
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
+    STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra12.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra12.count._super), 0),
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
+    STORE(LAYOUT_LOOKUP(layout2, bytes.arm2._extra13.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, bytes.arm2._extra13.count._super), 0),
+        "BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)");
     NondetRegStruct16Array x45 = NondetRegStruct16Array{x44._super[0],
                                                         x44._super[1],
                                                         x44._super[2],
@@ -16459,8 +16511,8 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:134)
-  NondetRegStruct x46 = exec_IsZero(ctx, x7._super, LAYOUT_LOOKUP(layout2, _3));
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:151)
+  NondetRegStruct x46 = exec_IsZero(ctx, x7._super, LAYOUT_LOOKUP(layout2, _2));
   // builtin Sub
   Val x47 = (Val(1) - arg1_0.isEcall._super);
   // builtin Mul
@@ -16473,7 +16525,7 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:127)
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:144)
   Val16Array x50 = Val16Array{x40[0]._super,
                               x40[1]._super,
                               x40[2]._super,
@@ -16490,9 +16542,16 @@ __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,
                               x40[13]._super,
                               x40[14]._super,
                               x40[15]._super};
-  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:141)
-  BigIntStateStruct x51 =
-      exec_BigIntState(ctx, Val(0), x3, x7._super, x34, x50, x49, LAYOUT_LOOKUP(layout2, _super));
+  // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:158)
+  BigIntStateStruct x51 = exec_BigIntState(ctx,
+                                           Val(0),
+                                           arg1_0.mode._super,
+                                           x3,
+                                           x7._super,
+                                           x33,
+                                           x50,
+                                           x49,
+                                           LAYOUT_LOOKUP(layout2, _super));
   return x51;
 }
 __device__ InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,
@@ -16500,801 +16559,876 @@ __device__ InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,
                                              InstInputStruct arg1_0,
                                              BoundLayout<BigInt0Layout> layout2) {
   // Log(<preamble>:25)
-  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:152)
+  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:170)
   INVOKE_EXTERN(ctx, log, "BigInt0", std::initializer_list<Val>{});
-  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:153)
+  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:171)
   DoCycleTableStruct x3 = exec_DoCycleTable(ctx, arg0, LAYOUT_LOOKUP(layout2, _0));
-  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:154)
+  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:172)
   Val x4 = (arg1_0.state - (arg1_0.minor + Val(40)));
-  EQZ(x4, "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:154)");
+  EQZ(x4, "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:172)");
   BigIntStateStruct x5;
   if (to_size_t(arg1_0.minorOnehot._super[0]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:157)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:175)
     BigIntStateStruct x6 =
         exec_BigIntEcall(ctx, arg0, LAYOUT_LOOKUP(layout2, stateRedef.arm0._super));
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra0.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra1.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra2.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra3.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra4.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra5.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra6.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra7.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra8.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra9.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra10.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra11.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra12.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra13.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra14.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra15.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra16.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra17.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra18.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra19.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra20.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra21.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra22.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra23.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra24.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra25.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra26.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra27.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra28.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra29.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra30.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra31.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra32.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra33.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm0._extra33.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     x5 = x6;
   } else if (to_size_t(arg1_0.minorOnehot._super[1]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:158)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:176)
     BigIntStateStruct x7 = back_BigIntState(ctx, 1, LAYOUT_LOOKUP(layout2, state));
     BigIntStateStruct x8 = exec_BigIntStep(ctx, arg0, x7, LAYOUT_LOOKUP(layout2, stateRedef.arm1));
     x5 = x8;
   } else if (to_size_t(arg1_0.minorOnehot._super[2]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:159)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:177)
     BigIntStateStruct x9 = exec_BigIntInvalid(ctx, LAYOUT_LOOKUP(layout2, stateRedef.arm2._super));
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra0.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra1.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra2.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra3.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra4.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra5.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra6.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra7.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra8.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra9.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra10.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra11.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra12.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra13.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra14.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra15.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra16.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra17.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra18.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra19.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra20.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra21.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra22.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra23.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra24.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra25.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra26.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra27.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra28.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra29.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra30.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra31.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra32.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra33.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra34.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra35.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra36.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra36.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra37.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra37.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra38.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra38.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra39.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm2._extra39.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     x5 = x9;
   } else if (to_size_t(arg1_0.minorOnehot._super[3]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:160)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:178)
     BigIntStateStruct x10 = exec_BigIntInvalid(ctx, LAYOUT_LOOKUP(layout2, stateRedef.arm3._super));
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra0.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra1.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra2.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra3.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra4.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra5.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra6.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra7.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra8.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra9.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra10.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra11.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra12.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra13.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra14.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra15.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra16.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra17.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra18.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra19.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra20.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra21.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra22.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra23.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra24.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra25.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra26.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra27.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra28.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra29.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra30.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra31.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra32.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra33.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra34.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra35.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra36.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra36.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra37.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra37.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra38.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra38.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra39.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm3._extra39.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     x5 = x10;
   } else if (to_size_t(arg1_0.minorOnehot._super[4]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:161)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:179)
     BigIntStateStruct x11 = exec_BigIntInvalid(ctx, LAYOUT_LOOKUP(layout2, stateRedef.arm4._super));
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra0.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra1.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra2.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra3.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra4.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra5.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra6.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra7.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra8.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra9.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra10.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra11.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra12.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra13.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra14.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra15.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra16.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra17.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra18.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra19.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra20.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra21.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra22.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra23.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra24.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra25.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra26.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra27.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra28.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra29.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra30.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra31.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra32.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra33.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra34.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra35.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra36.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra36.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra37.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra37.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra38.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra38.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra39.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm4._extra39.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     x5 = x11;
   } else if (to_size_t(arg1_0.minorOnehot._super[5]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:162)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:180)
     BigIntStateStruct x12 = exec_BigIntInvalid(ctx, LAYOUT_LOOKUP(layout2, stateRedef.arm5._super));
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra0.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra1.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra2.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra3.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra4.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra5.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra6.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra7.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra8.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra9.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra10.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra11.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra12.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra13.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra14.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra15.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra16.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra17.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra18.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra19.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra20.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra21.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra22.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra23.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra24.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra25.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra26.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra27.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra28.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra29.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra30.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra31.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra32.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra33.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra34.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra35.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra36.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra36.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra37.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra37.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra38.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra38.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra39.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm5._extra39.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     x5 = x12;
   } else if (to_size_t(arg1_0.minorOnehot._super[6]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:163)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:181)
     BigIntStateStruct x13 = exec_BigIntInvalid(ctx, LAYOUT_LOOKUP(layout2, stateRedef.arm6._super));
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra0.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra1.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra2.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra3.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra4.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra5.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra6.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra7.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra8.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra9.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra10.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra11.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra12.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra13.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra14.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra15.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra16.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra17.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra18.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra19.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra20.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra21.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra22.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra23.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra24.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra25.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra26.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra27.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra28.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra29.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra30.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra31.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra32.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra33.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra34.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra35.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra36.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra36.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra37.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra37.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra38.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra38.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra39.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm6._extra39.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     x5 = x13;
   } else if (to_size_t(arg1_0.minorOnehot._super[7]._super)) {
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:164)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:182)
     BigIntStateStruct x14 = exec_BigIntInvalid(ctx, LAYOUT_LOOKUP(layout2, stateRedef.arm7._super));
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra0.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra0.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra1.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra1.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra2.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra2.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra3.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra3.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra4.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra4.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra5.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra5.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra6.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra6.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra7.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra7.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra8.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra8.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra9.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra9.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra10.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra10.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra11.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra11.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra12.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra12.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra13.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra13.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra14.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra14.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra15.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra15.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra16.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra16.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra17.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra17.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra18.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra18.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra19.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra19.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra20.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra20.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra21.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra21.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra22.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra22.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra23.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra23.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra24.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra24.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra25.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra25.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra26.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra26.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra27.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra27.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra28.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra28.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra29.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra29.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra30.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra30.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra31.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra31.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra32.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra32.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra33.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra33.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra34.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra34.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra35.count._super), Val(0));
     EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra35.count._super), 0),
-        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)");
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra36.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra36.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra37.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra37.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra38.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra38.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
+    STORE(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra39.count._super), Val(0));
+    EQZ(LOAD(LAYOUT_LOOKUP(layout2, stateRedef.arm7._extra39.count._super), 0),
+        "BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)");
     x5 = x14;
   } else {
     assert(0 && "Reached unreachable mux arm");
@@ -17317,13 +17451,13 @@ __device__ InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,
                               x15.bytes[14]._super,
                               x15.bytes[15]._super};
   // BigIntTopState(zirgen/circuit/rv32im/v2/dsl/inst.zir:78)
-  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:166)
+  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:184)
   BigIntTopStateStruct x17 =
       BigIntTopStateStruct{.polyOp = x15.polyOp._super, .coeff = x15.coeff._super, .witness = x16};
-  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
+  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
   BigIntStateStruct x18 = back_BigIntState(ctx, 0, LAYOUT_LOOKUP(layout2, stateRedef._super));
   // InstOutputBase(zirgen/circuit/rv32im/v2/dsl/inst.zir:49)
-  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:167)
+  // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:185)
   InstOutputBaseStruct x19 = InstOutputBaseStruct{.newPc = arg1_0.pcU32,
                                                   .newState = x18.nextState._super,
                                                   .newMode = arg1_0.mode,
@@ -17332,11 +17466,11 @@ __device__ InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,
 }
 __device__ BigIntAccumStateStruct back_BigIntAccumState(
     ExecContext& ctx, Index distance0, BoundLayout<BigIntAccumStateLayout> layout1) {
-  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:171)
+  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:189)
   NondetExtRegStruct x2 = back_ExtReg(ctx, distance0, LAYOUT_LOOKUP(layout1, poly));
-  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:172)
+  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:190)
   NondetExtRegStruct x3 = back_ExtReg(ctx, distance0, LAYOUT_LOOKUP(layout1, term));
-  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:173)
+  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:191)
   NondetExtRegStruct x4 = back_ExtReg(ctx, distance0, LAYOUT_LOOKUP(layout1, total));
   return BigIntAccumStateStruct{.poly = x2, .term = x3, .total = x4};
 }
@@ -17346,11 +17480,11 @@ exec_BigIntAccumState(ExecContext& ctx,
                       ExtVal arg1_0,
                       ExtVal arg2_0,
                       BoundLayout<BigIntAccumStateLayout> layout3) {
-  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:171)
+  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:189)
   NondetExtRegStruct x4 = exec_ExtReg(ctx, arg0, LAYOUT_LOOKUP(layout3, poly));
-  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:172)
+  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:190)
   NondetExtRegStruct x5 = exec_ExtReg(ctx, arg1_0, LAYOUT_LOOKUP(layout3, term));
-  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:173)
+  // BigIntAccumState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:191)
   NondetExtRegStruct x6 = exec_ExtReg(ctx, arg2_0, LAYOUT_LOOKUP(layout3, total));
   return BigIntAccumStateStruct{.poly = x4, .term = x5, .total = x6};
 }
@@ -17386,7 +17520,7 @@ __device__ OneHot_7_Struct exec_OneHot_7_(ExecContext& ctx,
 }
 __device__ BigIntAccumStateStruct
 exec_BigIntPolyOpNop(ExecContext& ctx, BoundLayout<BigIntAccumStateLayout> layout0) {
-  // BigIntPolyOpNop(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:233)
+  // BigIntPolyOpNop(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:251)
   BigIntAccumStateStruct x1 = exec_BigIntAccumState(
       ctx, ExtVal(0, 0, 0, 0), ExtVal(1, 0, 0, 0), ExtVal(0, 0, 0, 0), layout0);
   return x1;
@@ -17398,40 +17532,40 @@ exec_BigIntPolyOpShift(ExecContext& ctx,
                        ExtVal arg2_0,
                        BoundLayout<BigIntAccumStateLayout> layout3) {
   // builtin ExtMul
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:192)
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
-  // BigIntPolyOpShift(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:242)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:210)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:236)
+  // BigIntPolyOpShift(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:260)
   ExtVal x4 = (arg2_0 * ExtVal(1, 0, 0, 0));
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:193)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:211)
   ExtVal x5 = (x4 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:194)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:212)
   ExtVal x6 = (x5 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:195)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:213)
   ExtVal x7 = (x6 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:196)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:214)
   ExtVal x8 = (x7 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:197)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:215)
   ExtVal x9 = (x8 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:198)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:216)
   ExtVal x10 = (x9 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:199)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:217)
   ExtVal x11 = (x10 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:200)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
   ExtVal x12 = (x11 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:201)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:219)
   ExtVal x13 = (x12 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:202)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
   ExtVal x14 = (x13 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:203)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
   ExtVal x15 = (x14 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:204)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:222)
   ExtVal x16 = (x15 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:205)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:223)
   ExtVal x17 = (x16 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:206)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:224)
   ExtVal x18 = (x17 * arg2_0);
   // builtin MakeExt
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:239)
   ExtVal x19 = (arg0.witness[0] + ExtVal(0, 0, 0, 0));
   ExtVal x20 = (arg0.witness[1] + ExtVal(0, 0, 0, 0));
   ExtVal x21 = (arg0.witness[2] + ExtVal(0, 0, 0, 0));
@@ -17449,15 +17583,15 @@ exec_BigIntPolyOpShift(ExecContext& ctx,
   ExtVal x33 = (arg0.witness[14] + ExtVal(0, 0, 0, 0));
   ExtVal x34 = (arg0.witness[15] + ExtVal(0, 0, 0, 0));
   // builtin ExtAdd
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:238)
   ExtVal x35 = (((x19 * ExtVal(1, 0, 0, 0)) + ExtVal(0, 0, 0, 0)) + (x4 * x20));
   ExtVal x36 = (((x35 + (x5 * x21)) + (x6 * x22)) + (x7 * x23));
   ExtVal x37 = (((x36 + (x8 * x24)) + (x9 * x25)) + (x10 * x26));
   ExtVal x38 = (((x37 + (x11 * x27)) + (x12 * x28)) + (x13 * x29));
   ExtVal x39 = (((x38 + (x14 * x30)) + (x15 * x31)) + (x16 * x32));
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:228)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:246)
   ExtVal x40 = (arg1_0.poly._super + ((x39 + (x17 * x33)) + (x18 * x34)));
-  // BigIntPolyOpShift(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:243)
+  // BigIntPolyOpShift(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:261)
   BigIntAccumStateStruct x41 = exec_BigIntAccumState(
       ctx, (x40 * (x18 * arg2_0)), arg1_0.term._super, arg1_0.total._super, layout3);
   return x41;
@@ -17469,38 +17603,38 @@ exec_BigIntPolyOpSetTerm(ExecContext& ctx,
                          ExtVal arg2_0,
                          BoundLayout<BigIntAccumStateLayout> layout3) {
   // builtin ExtMul
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:192)
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
-  // BigIntPolyOpSetTerm(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:252)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:210)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:236)
+  // BigIntPolyOpSetTerm(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:270)
   ExtVal x4 = (arg2_0 * ExtVal(1, 0, 0, 0));
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:193)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:211)
   ExtVal x5 = (x4 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:194)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:212)
   ExtVal x6 = (x5 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:195)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:213)
   ExtVal x7 = (x6 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:196)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:214)
   ExtVal x8 = (x7 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:197)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:215)
   ExtVal x9 = (x8 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:198)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:216)
   ExtVal x10 = (x9 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:199)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:217)
   ExtVal x11 = (x10 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:200)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
   ExtVal x12 = (x11 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:201)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:219)
   ExtVal x13 = (x12 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:202)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
   ExtVal x14 = (x13 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:203)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
   ExtVal x15 = (x14 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:204)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:222)
   ExtVal x16 = (x15 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:205)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:223)
   ExtVal x17 = (x16 * arg2_0);
   // builtin MakeExt
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:239)
   ExtVal x18 = (arg0.witness[0] + ExtVal(0, 0, 0, 0));
   ExtVal x19 = (arg0.witness[1] + ExtVal(0, 0, 0, 0));
   ExtVal x20 = (arg0.witness[2] + ExtVal(0, 0, 0, 0));
@@ -17518,16 +17652,16 @@ exec_BigIntPolyOpSetTerm(ExecContext& ctx,
   ExtVal x32 = (arg0.witness[14] + ExtVal(0, 0, 0, 0));
   ExtVal x33 = (arg0.witness[15] + ExtVal(0, 0, 0, 0));
   // builtin ExtAdd
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:238)
   ExtVal x34 = (((x18 * ExtVal(1, 0, 0, 0)) + ExtVal(0, 0, 0, 0)) + (x4 * x19));
   ExtVal x35 = (((x34 + (x5 * x20)) + (x6 * x21)) + (x7 * x22));
   ExtVal x36 = (((x35 + (x8 * x23)) + (x9 * x24)) + (x10 * x25));
   ExtVal x37 = (((x36 + (x11 * x26)) + (x12 * x27)) + (x13 * x28));
   ExtVal x38 = (((x37 + (x14 * x29)) + (x15 * x30)) + (x16 * x31));
   ExtVal x39 = ((x38 + (x17 * x32)) + ((x17 * arg2_0) * x33));
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:228)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:246)
   ExtVal x40 = (arg1_0.poly._super + x39);
-  // BigIntPolyOpSetTerm(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:253)
+  // BigIntPolyOpSetTerm(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:271)
   BigIntAccumStateStruct x41 =
       exec_BigIntAccumState(ctx, ExtVal(0, 0, 0, 0), x40, arg1_0.total._super, layout3);
   return x41;
@@ -17539,41 +17673,41 @@ exec_BigIntPolyOpAddTotal(ExecContext& ctx,
                           ExtVal arg2_0,
                           BoundLayout<BigIntPolyOpAddTotalLayout> layout3) {
   // builtin MakeExt
-  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:262)
+  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:280)
   ExtVal x4 = ((arg0.coeff - Val(4)) + ExtVal(0, 0, 0, 0));
   // builtin ExtMul
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:192)
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
-  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:263)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:210)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:236)
+  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:281)
   ExtVal x5 = (arg2_0 * ExtVal(1, 0, 0, 0));
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:193)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:211)
   ExtVal x6 = (x5 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:194)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:212)
   ExtVal x7 = (x6 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:195)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:213)
   ExtVal x8 = (x7 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:196)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:214)
   ExtVal x9 = (x8 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:197)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:215)
   ExtVal x10 = (x9 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:198)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:216)
   ExtVal x11 = (x10 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:199)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:217)
   ExtVal x12 = (x11 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:200)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
   ExtVal x13 = (x12 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:201)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:219)
   ExtVal x14 = (x13 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:202)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
   ExtVal x15 = (x14 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:203)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
   ExtVal x16 = (x15 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:204)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:222)
   ExtVal x17 = (x16 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:205)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:223)
   ExtVal x18 = (x17 * arg2_0);
   // builtin MakeExt
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:239)
   ExtVal x19 = (arg0.witness[0] + ExtVal(0, 0, 0, 0));
   ExtVal x20 = (arg0.witness[1] + ExtVal(0, 0, 0, 0));
   ExtVal x21 = (arg0.witness[2] + ExtVal(0, 0, 0, 0));
@@ -17591,21 +17725,21 @@ exec_BigIntPolyOpAddTotal(ExecContext& ctx,
   ExtVal x33 = (arg0.witness[14] + ExtVal(0, 0, 0, 0));
   ExtVal x34 = (arg0.witness[15] + ExtVal(0, 0, 0, 0));
   // builtin ExtAdd
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:238)
   ExtVal x35 = (((x19 * ExtVal(1, 0, 0, 0)) + ExtVal(0, 0, 0, 0)) + (x5 * x20));
   ExtVal x36 = (((x35 + (x6 * x21)) + (x7 * x22)) + (x8 * x23));
   ExtVal x37 = (((x36 + (x9 * x24)) + (x10 * x25)) + (x11 * x26));
   ExtVal x38 = (((x37 + (x12 * x27)) + (x13 * x28)) + (x14 * x29));
   ExtVal x39 = (((x38 + (x15 * x30)) + (x16 * x31)) + (x17 * x32));
   ExtVal x40 = ((x39 + (x18 * x33)) + ((x18 * arg2_0) * x34));
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:228)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:246)
   ExtVal x41 = (arg1_0.poly._super + x40);
-  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:264)
+  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:282)
   NondetExtRegStruct x42 = exec_ExtReg(ctx, (x4 * arg1_0.term._super), LAYOUT_LOOKUP(layout3, tmp));
   // builtin ExtAdd
-  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:268)
+  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:286)
   ExtVal x43 = (arg1_0.total._super + (x42._super * x41));
-  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:265)
+  // BigIntPolyOpAddTotal(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:283)
   BigIntAccumStateStruct x44 = exec_BigIntAccumState(
       ctx, ExtVal(0, 0, 0, 0), ExtVal(1, 0, 0, 0), x43, LAYOUT_LOOKUP(layout3, _super));
   return x44;
@@ -17617,40 +17751,40 @@ exec_BigIntPolyOpCarry1(ExecContext& ctx,
                         ExtVal arg2_0,
                         BoundLayout<BigIntAccumStateLayout> layout3) {
   // builtin ExtMul
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:192)
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
-  // BigIntPolyOpCarry1(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:274)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:210)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:236)
+  // BigIntPolyOpCarry1(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:292)
   ExtVal x4 = (arg2_0 * ExtVal(1, 0, 0, 0));
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:193)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:211)
   ExtVal x5 = (x4 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:194)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:212)
   ExtVal x6 = (x5 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:195)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:213)
   ExtVal x7 = (x6 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:196)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:214)
   ExtVal x8 = (x7 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:197)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:215)
   ExtVal x9 = (x8 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:198)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:216)
   ExtVal x10 = (x9 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:199)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:217)
   ExtVal x11 = (x10 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:200)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
   ExtVal x12 = (x11 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:201)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:219)
   ExtVal x13 = (x12 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:202)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
   ExtVal x14 = (x13 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:203)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
   ExtVal x15 = (x14 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:204)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:222)
   ExtVal x16 = (x15 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:205)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:223)
   ExtVal x17 = (x16 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:206)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:224)
   ExtVal x18 = (x17 * arg2_0);
   // builtin MakeExt
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:239)
   ExtVal x19 = (arg0.witness[0] + ExtVal(0, 0, 0, 0));
   ExtVal x20 = (arg0.witness[1] + ExtVal(0, 0, 0, 0));
   ExtVal x21 = (arg0.witness[2] + ExtVal(0, 0, 0, 0));
@@ -17668,13 +17802,13 @@ exec_BigIntPolyOpCarry1(ExecContext& ctx,
   ExtVal x33 = (arg0.witness[14] + ExtVal(0, 0, 0, 0));
   ExtVal x34 = (arg0.witness[15] + ExtVal(0, 0, 0, 0));
   // builtin ExtAdd
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:238)
   ExtVal x35 = (((x19 * ExtVal(1, 0, 0, 0)) + ExtVal(0, 0, 0, 0)) + (x4 * x20));
   ExtVal x36 = (((x35 + (x5 * x21)) + (x6 * x22)) + (x7 * x23));
   ExtVal x37 = (((x36 + (x8 * x24)) + (x9 * x25)) + (x10 * x26));
   ExtVal x38 = (((x37 + (x11 * x27)) + (x12 * x28)) + (x13 * x29));
   ExtVal x39 = (((x38 + (x14 * x30)) + (x15 * x31)) + (x16 * x32));
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:224)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:242)
   ExtVal x40 = (((x4 * ExtVal(128, 0, 0, 0)) + ExtVal(128, 0, 0, 0)) + (x5 * ExtVal(128, 0, 0, 0)));
   ExtVal x41 = (((x40 + (x6 * ExtVal(128, 0, 0, 0))) + (x7 * ExtVal(128, 0, 0, 0))) +
                 (x8 * ExtVal(128, 0, 0, 0)));
@@ -17685,11 +17819,11 @@ exec_BigIntPolyOpCarry1(ExecContext& ctx,
   ExtVal x44 = (((x43 + (x15 * ExtVal(128, 0, 0, 0))) + (x16 * ExtVal(128, 0, 0, 0))) +
                 (x17 * ExtVal(128, 0, 0, 0)));
   // builtin ExtSub
-  // BigIntPolyOpCarry1(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:276)
+  // BigIntPolyOpCarry1(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:294)
   ExtVal x45 = (((x39 + (x17 * x33)) + (x18 * x34)) - (x44 + (x18 * ExtVal(128, 0, 0, 0))));
   // builtin ExtAdd
   ExtVal x46 = (arg1_0.poly._super + (x45 * ExtVal(16384, 0, 0, 0)));
-  // BigIntPolyOpCarry1(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:275)
+  // BigIntPolyOpCarry1(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:293)
   BigIntAccumStateStruct x47 =
       exec_BigIntAccumState(ctx, x46, arg1_0.term._super, arg1_0.total._super, layout3);
   return x47;
@@ -17701,38 +17835,38 @@ exec_BigIntPolyOpCarry2(ExecContext& ctx,
                         ExtVal arg2_0,
                         BoundLayout<BigIntAccumStateLayout> layout3) {
   // builtin ExtMul
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:192)
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
-  // BigIntPolyOpCarry2(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:284)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:210)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:236)
+  // BigIntPolyOpCarry2(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:302)
   ExtVal x4 = (arg2_0 * ExtVal(1, 0, 0, 0));
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:193)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:211)
   ExtVal x5 = (x4 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:194)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:212)
   ExtVal x6 = (x5 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:195)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:213)
   ExtVal x7 = (x6 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:196)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:214)
   ExtVal x8 = (x7 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:197)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:215)
   ExtVal x9 = (x8 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:198)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:216)
   ExtVal x10 = (x9 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:199)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:217)
   ExtVal x11 = (x10 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:200)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
   ExtVal x12 = (x11 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:201)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:219)
   ExtVal x13 = (x12 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:202)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
   ExtVal x14 = (x13 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:203)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
   ExtVal x15 = (x14 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:204)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:222)
   ExtVal x16 = (x15 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:205)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:223)
   ExtVal x17 = (x16 * arg2_0);
   // builtin MakeExt
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:239)
   ExtVal x18 = (arg0.witness[0] + ExtVal(0, 0, 0, 0));
   ExtVal x19 = (arg0.witness[1] + ExtVal(0, 0, 0, 0));
   ExtVal x20 = (arg0.witness[2] + ExtVal(0, 0, 0, 0));
@@ -17750,16 +17884,16 @@ exec_BigIntPolyOpCarry2(ExecContext& ctx,
   ExtVal x32 = (arg0.witness[14] + ExtVal(0, 0, 0, 0));
   ExtVal x33 = (arg0.witness[15] + ExtVal(0, 0, 0, 0));
   // builtin ExtAdd
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:238)
   ExtVal x34 = (((x18 * ExtVal(1, 0, 0, 0)) + ExtVal(0, 0, 0, 0)) + (x4 * x19));
   ExtVal x35 = (((x34 + (x5 * x20)) + (x6 * x21)) + (x7 * x22));
   ExtVal x36 = (((x35 + (x8 * x23)) + (x9 * x24)) + (x10 * x25));
   ExtVal x37 = (((x36 + (x11 * x26)) + (x12 * x27)) + (x13 * x28));
   ExtVal x38 = (((x37 + (x14 * x29)) + (x15 * x30)) + (x16 * x31));
   ExtVal x39 = ((x38 + (x17 * x32)) + ((x17 * arg2_0) * x33));
-  // BigIntPolyOpCarry2(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:286)
+  // BigIntPolyOpCarry2(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:304)
   ExtVal x40 = (arg1_0.poly._super + (x39 * ExtVal(256, 0, 0, 0)));
-  // BigIntPolyOpCarry2(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:285)
+  // BigIntPolyOpCarry2(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:303)
   BigIntAccumStateStruct x41 =
       exec_BigIntAccumState(ctx, x40, arg1_0.term._super, arg1_0.total._super, layout3);
   return x41;
@@ -17771,38 +17905,38 @@ exec_BigIntPolyOpEqz(ExecContext& ctx,
                      ExtVal arg2_0,
                      BoundLayout<BigIntAccumStateLayout> layout3) {
   // builtin ExtMul
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:192)
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
-  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:294)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:210)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:236)
+  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:312)
   ExtVal x4 = (arg2_0 * ExtVal(1, 0, 0, 0));
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:193)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:211)
   ExtVal x5 = (x4 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:194)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:212)
   ExtVal x6 = (x5 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:195)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:213)
   ExtVal x7 = (x6 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:196)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:214)
   ExtVal x8 = (x7 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:197)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:215)
   ExtVal x9 = (x8 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:198)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:216)
   ExtVal x10 = (x9 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:199)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:217)
   ExtVal x11 = (x10 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:200)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:218)
   ExtVal x12 = (x11 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:201)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:219)
   ExtVal x13 = (x12 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:202)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
   ExtVal x14 = (x13 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:203)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
   ExtVal x15 = (x14 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:204)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:222)
   ExtVal x16 = (x15 * arg2_0);
-  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:205)
+  // BigIntAccumPowers(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:223)
   ExtVal x17 = (x16 * arg2_0);
   // builtin MakeExt
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:221)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:239)
   ExtVal x18 = (arg0.witness[0] + ExtVal(0, 0, 0, 0));
   ExtVal x19 = (arg0.witness[1] + ExtVal(0, 0, 0, 0));
   ExtVal x20 = (arg0.witness[2] + ExtVal(0, 0, 0, 0));
@@ -17820,23 +17954,23 @@ exec_BigIntPolyOpEqz(ExecContext& ctx,
   ExtVal x32 = (arg0.witness[14] + ExtVal(0, 0, 0, 0));
   ExtVal x33 = (arg0.witness[15] + ExtVal(0, 0, 0, 0));
   // builtin ExtAdd
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:220)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:238)
   ExtVal x34 = (((x18 * ExtVal(1, 0, 0, 0)) + ExtVal(0, 0, 0, 0)) + (x4 * x19));
   ExtVal x35 = (((x34 + (x5 * x20)) + (x6 * x21)) + (x7 * x22));
   ExtVal x36 = (((x35 + (x8 * x23)) + (x9 * x24)) + (x10 * x25));
   ExtVal x37 = (((x36 + (x11 * x26)) + (x12 * x27)) + (x13 * x28));
   ExtVal x38 = (((x37 + (x14 * x29)) + (x15 * x30)) + (x16 * x31));
   ExtVal x39 = ((x38 + (x17 * x32)) + ((x17 * arg2_0) * x33));
-  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:228)
+  // BigIntAccumStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:246)
   ExtVal x40 = (arg1_0.poly._super + x39);
-  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:296)
+  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:314)
   ExtVal x41 = (arg1_0.total._super + (x40 * (x4 - ExtVal(256, 0, 0, 0))));
   // builtin EqzExt
-  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:297)
+  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:315)
   EQZ(x41,
       "loc(callsite( builtin EqzExt  at  BigIntPolyOpEqz ( "
-      "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :297:10)))");
-  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:298)
+      "zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir :315:10)))");
+  // BigIntPolyOpEqz(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:316)
   BigIntAccumStateStruct x42 = exec_BigIntAccumState(
       ctx, ExtVal(0, 0, 0, 0), ExtVal(1, 0, 0, 0), ExtVal(0, 0, 0, 0), layout3);
   return x42;
@@ -17845,45 +17979,45 @@ __device__ BigIntAccumStruct exec_BigIntAccum(ExecContext& ctx,
                                               BigIntTopStateStruct arg0,
                                               ExtVal1Array arg1_0,
                                               BoundLayout<BigIntAccumLayout> layout2) {
-  // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:177)
+  // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:195)
   OneHot_7_Struct x3 = exec_OneHot_7_(ctx, arg0.polyOp, LAYOUT_LOOKUP(layout2, polyOp));
   BigIntAccumStateStruct x4;
   if (to_size_t(x3._super[0]._super)) {
-    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:180)
+    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:198)
     BigIntAccumStateStruct x5 = exec_BigIntPolyOpNop(ctx, LAYOUT_LOOKUP(layout2, stateRedef.arm0));
     x4 = x5;
   } else if (to_size_t(x3._super[1]._super)) {
-    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:181)
+    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:199)
     BigIntAccumStateStruct x6 = back_BigIntAccumState(ctx, 1, LAYOUT_LOOKUP(layout2, state));
     BigIntAccumStateStruct x7 =
         exec_BigIntPolyOpShift(ctx, arg0, x6, arg1_0[0], LAYOUT_LOOKUP(layout2, stateRedef.arm1));
     x4 = x7;
   } else if (to_size_t(x3._super[2]._super)) {
-    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:182)
+    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:200)
     BigIntAccumStateStruct x8 = back_BigIntAccumState(ctx, 1, LAYOUT_LOOKUP(layout2, state));
     BigIntAccumStateStruct x9 =
         exec_BigIntPolyOpSetTerm(ctx, arg0, x8, arg1_0[0], LAYOUT_LOOKUP(layout2, stateRedef.arm2));
     x4 = x9;
   } else if (to_size_t(x3._super[3]._super)) {
-    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:183)
+    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:201)
     BigIntAccumStateStruct x10 = back_BigIntAccumState(ctx, 1, LAYOUT_LOOKUP(layout2, state));
     BigIntAccumStateStruct x11 = exec_BigIntPolyOpAddTotal(
         ctx, arg0, x10, arg1_0[0], LAYOUT_LOOKUP(layout2, stateRedef.arm3));
     x4 = x11;
   } else if (to_size_t(x3._super[4]._super)) {
-    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:184)
+    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:202)
     BigIntAccumStateStruct x12 = back_BigIntAccumState(ctx, 1, LAYOUT_LOOKUP(layout2, state));
     BigIntAccumStateStruct x13 =
         exec_BigIntPolyOpCarry1(ctx, arg0, x12, arg1_0[0], LAYOUT_LOOKUP(layout2, stateRedef.arm4));
     x4 = x13;
   } else if (to_size_t(x3._super[5]._super)) {
-    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:185)
+    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:203)
     BigIntAccumStateStruct x14 = back_BigIntAccumState(ctx, 1, LAYOUT_LOOKUP(layout2, state));
     BigIntAccumStateStruct x15 =
         exec_BigIntPolyOpCarry2(ctx, arg0, x14, arg1_0[0], LAYOUT_LOOKUP(layout2, stateRedef.arm5));
     x4 = x15;
   } else if (to_size_t(x3._super[6]._super)) {
-    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:186)
+    // BigIntAccum(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:204)
     BigIntAccumStateStruct x16 = back_BigIntAccumState(ctx, 1, LAYOUT_LOOKUP(layout2, state));
     BigIntAccumStateStruct x17 =
         exec_BigIntPolyOpEqz(ctx, arg0, x16, arg1_0[0], LAYOUT_LOOKUP(layout2, stateRedef.arm6));
@@ -44603,105 +44737,101 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
       // builtin NondetReg
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:41)
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:157)
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigIntEcall(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:46)
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:175)
       // Top(zirgen/circuit/rv32im/v2/dsl/top.zir:85)
       NondetRegStruct x2983 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.isEcall._super),
               0)};
-      // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
       NondetRegStruct x2984 = NondetRegStruct{
           ._super = LOAD(
-              LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+              LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.mode._super), 0)};
+      // Reg(<preamble>:5)
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
       NondetRegStruct x2985 = NondetRegStruct{
+          ._super = LOAD(
+              LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.pc._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x2986 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.polyOp._super),
               0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x2986 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x2987 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x2987 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x2988 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 0),
                   _super),
               0)};
-      NondetRegStruct x2988 = NondetRegStruct{
+      NondetRegStruct x2989 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 1),
                   _super),
               0)};
-      NondetRegStruct x2989 = NondetRegStruct{
+      NondetRegStruct x2990 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 2),
                   _super),
               0)};
-      NondetRegStruct x2990 = NondetRegStruct{
+      NondetRegStruct x2991 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 3),
                   _super),
               0)};
-      NondetRegStruct x2991 = NondetRegStruct{
+      NondetRegStruct x2992 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 4),
                   _super),
               0)};
-      NondetRegStruct x2992 = NondetRegStruct{
+      NondetRegStruct x2993 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 5),
                   _super),
               0)};
-      NondetRegStruct x2993 = NondetRegStruct{
+      NondetRegStruct x2994 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 6),
                   _super),
               0)};
-      NondetRegStruct x2994 = NondetRegStruct{
+      NondetRegStruct x2995 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 7),
                   _super),
               0)};
-      NondetRegStruct x2995 = NondetRegStruct{
+      NondetRegStruct x2996 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 8),
                   _super),
               0)};
-      NondetRegStruct x2996 = NondetRegStruct{
-          ._super = LOAD(
-              LAYOUT_LOOKUP(
-                  LAYOUT_SUBSCRIPT(
-                      LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 9),
-                  _super),
-              0)};
       NondetRegStruct x2997 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
-                      LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes),
-                      10),
+                      LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes), 9),
                   _super),
               0)};
       NondetRegStruct x2998 = NondetRegStruct{
@@ -44709,7 +44839,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes),
-                      11),
+                      10),
                   _super),
               0)};
       NondetRegStruct x2999 = NondetRegStruct{
@@ -44717,7 +44847,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes),
-                      12),
+                      11),
                   _super),
               0)};
       NondetRegStruct x3000 = NondetRegStruct{
@@ -44725,7 +44855,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes),
-                      13),
+                      12),
                   _super),
               0)};
       NondetRegStruct x3001 = NondetRegStruct{
@@ -44733,7 +44863,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes),
-                      14),
+                      13),
                   _super),
               0)};
       NondetRegStruct x3002 = NondetRegStruct{
@@ -44741,20 +44871,28 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes),
+                      14),
+                  _super),
+              0)};
+      NondetRegStruct x3003 = NondetRegStruct{
+          ._super = LOAD(
+              LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.bytes),
                       15),
                   _super),
               0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3003 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3004 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm0._super._super.nextState._super),
               0)};
       x2982 = BigIntStateStruct{.isEcall = x2983,
-                                .pc = x2984,
-                                .polyOp = x2985,
-                                .coeff = x2986,
-                                .bytes = NondetRegStruct16Array{x2987,
-                                                                x2988,
+                                .mode = x2984,
+                                .pc = x2985,
+                                .polyOp = x2986,
+                                .coeff = x2987,
+                                .bytes = NondetRegStruct16Array{x2988,
                                                                 x2989,
                                                                 x2990,
                                                                 x2991,
@@ -44768,88 +44906,129 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                                                                 x2999,
                                                                 x3000,
                                                                 x3001,
-                                                                x3002},
-                                .nextState = x3003};
+                                                                x3002,
+                                                                x3003},
+                                .nextState = x3004};
     } else if (to_size_t(
                    LOAD(LAYOUT_LOOKUP(
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 1),
                             _super),
                         0))) {
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:158)
-      BigIntStateStruct x3004 =
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:176)
+      BigIntStateStruct x3005 =
           back_BigIntState(ctx, 1, LAYOUT_LOOKUP(arg0, instResult.arm12.state));
       // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
       // NondetU8Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:18)
       // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-      // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:103)
-      Val x3005 = inRange(
+      // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:119)
+      Val x3006 = inRange(
           Val(0),
           LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.instHigh.byte0.arg.val._super),
                0),
           Val(256));
-      INVOKE_EXTERN(ctx, assert, (Val(1) - x3005), "value out of range!");
+      INVOKE_EXTERN(ctx, assert, (Val(1) - x3006), "value out of range!");
       // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-      Val x3006 = inRange(
+      Val x3007 = inRange(
           Val(0),
           LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.instHigh.byte1.arg.val._super),
                0),
           Val(256));
-      INVOKE_EXTERN(ctx, assert, (Val(1) - x3006), "value out of range!");
-      NondetRegStruct16Array x3007;
+      INVOKE_EXTERN(ctx, assert, (Val(1) - x3007), "value out of range!");
+      // ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
+      // NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
+      // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
+      // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:139)
+      Val x3008 =
+          inRange(Val(0),
+                  LOAD(LAYOUT_LOOKUP(
+                           arg0, instResult.arm12.stateRedef.arm1.dataAddrU32.low16.arg.val._super),
+                       0),
+                  Val(65536));
+      INVOKE_EXTERN(ctx, assert, (Val(1) - x3008), "value out of range!");
+      // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
+      Val x3009 = inRange(
+          Val(0),
+          LOAD(LAYOUT_LOOKUP(arg0,
+                             instResult.arm12.stateRedef.arm1.dataAddrU32.high16.arg.val._super),
+               0),
+          Val(65536));
+      INVOKE_EXTERN(ctx, assert, (Val(1) - x3009), "value out of range!");
+      NondetRegStruct16Array x3010;
       if (to_size_t(LOAD(
               LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.memOpOneHot._super), 0),
                   _super),
               0))) {
-        // builtin NondetReg
-        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:52)
-        // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:61)
-        // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:128)
-        NondetRegStruct x3008 = NondetRegStruct{
-            ._super = LOAD(
-                LAYOUT_LOOKUP(
-                    LAYOUT_SUBSCRIPT(
-                        LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
-                    _super.low.byte0.arg.val._super),
-                0)};
-        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3009 = inRange(
-            Val(0),
-            LOAD(LAYOUT_LOOKUP(
-                     LAYOUT_SUBSCRIPT(
-                         LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
-                     _super.low.byte0.arg.val._super),
-                 0),
-            Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3009), "value out of range!");
-        // builtin NondetReg
-        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3010 = NondetRegStruct{
-            ._super = LOAD(
-                LAYOUT_LOOKUP(
-                    LAYOUT_SUBSCRIPT(
-                        LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
-                    _super.low.byte1.arg.val._super),
-                0)};
-        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3011 = inRange(
-            Val(0),
-            LOAD(LAYOUT_LOOKUP(
-                     LAYOUT_SUBSCRIPT(
-                         LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
-                     _super.low.byte1.arg.val._super),
-                 0),
-            Val(256));
+        // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
+        // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:85)
+        // BigIntAddr(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:66)
+        // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:74)
+        // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:145)
+        Val x3011 = inRange(Val(0),
+                            LOAD(LAYOUT_LOOKUP(arg0,
+                                               instResult.arm12.stateRedef.arm1.bytes.arm0.addr
+                                                   ._super.upperDiff.arg.val._super),
+                                 0),
+                            Val(65536));
         INVOKE_EXTERN(ctx, assert, (Val(1) - x3011), "value out of range!");
+        // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:89)
+        Val x3012 = inRange(
+            Val(0),
+            LOAD(LAYOUT_LOOKUP(
+                     arg0,
+                     instResult.arm12.stateRedef.arm1.bytes.arm0.addr._super.med14.arg.val._super),
+                 0),
+            Val(65536));
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3012), "value out of range!");
+        // builtin NondetReg
+        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
+        // NondetU8Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:18)
+        // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:58)
+        // BigIntRead(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:76)
+        NondetRegStruct x3013 = NondetRegStruct{
+            ._super = LOAD(
+                LAYOUT_LOOKUP(
+                    LAYOUT_SUBSCRIPT(
+                        LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
+                    _super.low.byte0.arg.val._super),
+                0)};
+        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
+        Val x3014 = inRange(
+            Val(0),
+            LOAD(LAYOUT_LOOKUP(
+                     LAYOUT_SUBSCRIPT(
+                         LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
+                     _super.low.byte0.arg.val._super),
+                 0),
+            Val(256));
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3014), "value out of range!");
+        // builtin NondetReg
+        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
+        // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
+        NondetRegStruct x3015 = NondetRegStruct{
+            ._super = LOAD(
+                LAYOUT_LOOKUP(
+                    LAYOUT_SUBSCRIPT(
+                        LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
+                    _super.low.byte1.arg.val._super),
+                0)};
+        // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
+        Val x3016 = inRange(
+            Val(0),
+            LOAD(LAYOUT_LOOKUP(
+                     LAYOUT_SUBSCRIPT(
+                         LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1.bytes.arm0.words), 0),
+                     _super.low.byte1.arg.val._super),
+                 0),
+            Val(256));
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3016), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:53)
-        NondetRegStruct x3012 = NondetRegStruct{
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:59)
+        NondetRegStruct x3017 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -44857,7 +45036,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte0.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3013 = inRange(
+        Val x3018 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -44865,11 +45044,11 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte0.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3013), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3018), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3014 = NondetRegStruct{
+        NondetRegStruct x3019 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -44877,7 +45056,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte1.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3015 = inRange(
+        Val x3020 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -44885,12 +45064,12 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte1.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3015), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3020), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:52)
-        NondetRegStruct x3016 = NondetRegStruct{
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:58)
+        NondetRegStruct x3021 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -44898,7 +45077,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.low.byte0.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3017 = inRange(
+        Val x3022 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -44906,11 +45085,11 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.low.byte0.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3017), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3022), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3018 = NondetRegStruct{
+        NondetRegStruct x3023 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -44918,7 +45097,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.low.byte1.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3019 = inRange(
+        Val x3024 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -44926,12 +45105,12 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.low.byte1.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3019), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3024), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:53)
-        NondetRegStruct x3020 = NondetRegStruct{
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:59)
+        NondetRegStruct x3025 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -44939,7 +45118,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte0.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3021 = inRange(
+        Val x3026 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -44947,11 +45126,11 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte0.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3021), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3026), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3022 = NondetRegStruct{
+        NondetRegStruct x3027 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -44959,7 +45138,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte1.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3023 = inRange(
+        Val x3028 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -44967,12 +45146,12 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte1.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3023), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3028), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:52)
-        NondetRegStruct x3024 = NondetRegStruct{
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:58)
+        NondetRegStruct x3029 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -44980,7 +45159,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.low.byte0.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3025 = inRange(
+        Val x3030 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -44988,11 +45167,11 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.low.byte0.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3025), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3030), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3026 = NondetRegStruct{
+        NondetRegStruct x3031 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -45000,7 +45179,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.low.byte1.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3027 = inRange(
+        Val x3032 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45008,12 +45187,12 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.low.byte1.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3027), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3032), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:53)
-        NondetRegStruct x3028 = NondetRegStruct{
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:59)
+        NondetRegStruct x3033 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -45021,7 +45200,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte0.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3029 = inRange(
+        Val x3034 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45029,11 +45208,11 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte0.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3029), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3034), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3030 = NondetRegStruct{
+        NondetRegStruct x3035 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -45041,7 +45220,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte1.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3031 = inRange(
+        Val x3036 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45049,12 +45228,12 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte1.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3031), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3036), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:52)
-        NondetRegStruct x3032 = NondetRegStruct{
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:58)
+        NondetRegStruct x3037 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -45062,7 +45241,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.low.byte0.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3033 = inRange(
+        Val x3038 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45070,11 +45249,11 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.low.byte0.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3033), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3038), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3034 = NondetRegStruct{
+        NondetRegStruct x3039 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -45082,7 +45261,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.low.byte1.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3035 = inRange(
+        Val x3040 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45090,12 +45269,12 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.low.byte1.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3035), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3040), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:33)
-        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:53)
-        NondetRegStruct x3036 = NondetRegStruct{
+        // SplitU32(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:59)
+        NondetRegStruct x3041 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -45103,7 +45282,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte0.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3037 = inRange(
+        Val x3042 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45111,11 +45290,11 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte0.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3037), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3042), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
         // SplitWord(zirgen/circuit/rv32im/v2/dsl/inst_mem.zir:34)
-        NondetRegStruct x3038 = NondetRegStruct{
+        NondetRegStruct x3043 = NondetRegStruct{
             ._super = LOAD(
                 LAYOUT_LOOKUP(
                     LAYOUT_SUBSCRIPT(
@@ -45123,7 +45302,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                     _super.high.byte1.arg.val._super),
                 0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3039 = inRange(
+        Val x3044 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45131,23 +45310,23 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      _super.high.byte1.arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3039), "value out of range!");
-        x3007 = NondetRegStruct16Array{x3008,
-                                       x3010,
-                                       x3012,
-                                       x3014,
-                                       x3016,
-                                       x3018,
-                                       x3020,
-                                       x3022,
-                                       x3024,
-                                       x3026,
-                                       x3028,
-                                       x3030,
-                                       x3032,
-                                       x3034,
-                                       x3036,
-                                       x3038};
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3044), "value out of range!");
+        x3010 = NondetRegStruct16Array{x3013,
+                                       x3015,
+                                       x3017,
+                                       x3019,
+                                       x3021,
+                                       x3023,
+                                       x3025,
+                                       x3027,
+                                       x3029,
+                                       x3031,
+                                       x3033,
+                                       x3035,
+                                       x3037,
+                                       x3039,
+                                       x3041,
+                                       x3043};
       } else if (to_size_t(
                      LOAD(LAYOUT_LOOKUP(
                               LAYOUT_SUBSCRIPT(
@@ -45156,12 +45335,35 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                                   1),
                               _super),
                           0))) {
+        // ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
+        // NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
+        // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
+        // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:85)
+        // BigIntAddr(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:66)
+        // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:94)
+        // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:146)
+        Val x3045 = inRange(Val(0),
+                            LOAD(LAYOUT_LOOKUP(arg0,
+                                               instResult.arm12.stateRedef.arm1.bytes.arm1.addr
+                                                   ._super.upperDiff.arg.val._super),
+                                 0),
+                            Val(65536));
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3045), "value out of range!");
+        // AddrDecomposeBits(zirgen/circuit/rv32im/v2/dsl/u32.zir:89)
+        Val x3046 = inRange(
+            Val(0),
+            LOAD(LAYOUT_LOOKUP(
+                     arg0,
+                     instResult.arm12.stateRedef.arm1.bytes.arm1.addr._super.med14.arg.val._super),
+                 0),
+            Val(65536));
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3046), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        // BigIntWitness(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:73)
-        // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:79)
-        // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:129)
-        NondetRegStruct x3040 = NondetRegStruct{
+        // NondetU8Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:18)
+        // BigIntWitness(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:88)
+        // BigIntWrite(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:95)
+        NondetRegStruct x3047 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45171,7 +45373,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3041 = inRange(
+        Val x3048 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45181,10 +45383,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3041), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3048), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3042 = NondetRegStruct{
+        NondetRegStruct x3049 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45194,7 +45396,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3043 = inRange(
+        Val x3050 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45204,10 +45406,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3043), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3050), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3044 = NondetRegStruct{
+        NondetRegStruct x3051 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45217,7 +45419,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3045 = inRange(
+        Val x3052 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45227,10 +45429,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3045), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3052), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3046 = NondetRegStruct{
+        NondetRegStruct x3053 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45240,7 +45442,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3047 = inRange(
+        Val x3054 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45250,10 +45452,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3047), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3054), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3048 = NondetRegStruct{
+        NondetRegStruct x3055 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45263,7 +45465,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3049 = inRange(
+        Val x3056 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45273,10 +45475,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3049), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3056), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3050 = NondetRegStruct{
+        NondetRegStruct x3057 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45286,7 +45488,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3051 = inRange(
+        Val x3058 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45296,10 +45498,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3051), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3058), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3052 = NondetRegStruct{
+        NondetRegStruct x3059 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45309,7 +45511,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3053 = inRange(
+        Val x3060 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45319,10 +45521,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3053), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3060), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3054 = NondetRegStruct{
+        NondetRegStruct x3061 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45332,7 +45534,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3055 = inRange(
+        Val x3062 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45342,10 +45544,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3055), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3062), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3056 = NondetRegStruct{
+        NondetRegStruct x3063 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45355,7 +45557,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3057 = inRange(
+        Val x3064 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45365,10 +45567,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3057), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3064), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3058 = NondetRegStruct{
+        NondetRegStruct x3065 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45378,7 +45580,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3059 = inRange(
+        Val x3066 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45388,10 +45590,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3059), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3066), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3060 = NondetRegStruct{
+        NondetRegStruct x3067 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45401,7 +45603,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3061 = inRange(
+        Val x3068 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45411,10 +45613,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3061), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3068), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3062 = NondetRegStruct{
+        NondetRegStruct x3069 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45424,7 +45626,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3063 = inRange(
+        Val x3070 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45434,10 +45636,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3063), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3070), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3064 = NondetRegStruct{
+        NondetRegStruct x3071 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45447,7 +45649,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3065 = inRange(
+        Val x3072 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45457,10 +45659,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3065), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3072), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3066 = NondetRegStruct{
+        NondetRegStruct x3073 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45470,7 +45672,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3067 = inRange(
+        Val x3074 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45480,10 +45682,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3067), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3074), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3068 = NondetRegStruct{
+        NondetRegStruct x3075 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45493,7 +45695,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3069 = inRange(
+        Val x3076 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45503,10 +45705,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3069), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3076), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3070 = NondetRegStruct{
+        NondetRegStruct x3077 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45516,7 +45718,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3071 = inRange(
+        Val x3078 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45526,23 +45728,23 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3071), "value out of range!");
-        x3007 = NondetRegStruct16Array{x3040,
-                                       x3042,
-                                       x3044,
-                                       x3046,
-                                       x3048,
-                                       x3050,
-                                       x3052,
-                                       x3054,
-                                       x3056,
-                                       x3058,
-                                       x3060,
-                                       x3062,
-                                       x3064,
-                                       x3066,
-                                       x3068,
-                                       x3070};
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3078), "value out of range!");
+        x3010 = NondetRegStruct16Array{x3047,
+                                       x3049,
+                                       x3051,
+                                       x3053,
+                                       x3055,
+                                       x3057,
+                                       x3059,
+                                       x3061,
+                                       x3063,
+                                       x3065,
+                                       x3067,
+                                       x3069,
+                                       x3071,
+                                       x3073,
+                                       x3075,
+                                       x3077};
       } else if (to_size_t(
                      LOAD(LAYOUT_LOOKUP(
                               LAYOUT_SUBSCRIPT(
@@ -45553,9 +45755,9 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                           0))) {
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        // BigIntCheck(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:92)
-        // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:130)
-        NondetRegStruct x3072 = NondetRegStruct{
+        // BigIntCheck(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:108)
+        // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:147)
+        NondetRegStruct x3079 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45565,7 +45767,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3073 = inRange(
+        Val x3080 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45575,10 +45777,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3073), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3080), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3074 = NondetRegStruct{
+        NondetRegStruct x3081 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45588,7 +45790,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3075 = inRange(
+        Val x3082 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45598,10 +45800,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3075), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3082), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3076 = NondetRegStruct{
+        NondetRegStruct x3083 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45611,7 +45813,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3077 = inRange(
+        Val x3084 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45621,10 +45823,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3077), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3084), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3078 = NondetRegStruct{
+        NondetRegStruct x3085 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45634,7 +45836,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3079 = inRange(
+        Val x3086 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45644,10 +45846,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3079), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3086), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3080 = NondetRegStruct{
+        NondetRegStruct x3087 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45657,7 +45859,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3081 = inRange(
+        Val x3088 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45667,10 +45869,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3081), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3088), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3082 = NondetRegStruct{
+        NondetRegStruct x3089 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45680,7 +45882,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3083 = inRange(
+        Val x3090 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45690,10 +45892,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3083), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3090), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3084 = NondetRegStruct{
+        NondetRegStruct x3091 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45703,7 +45905,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3085 = inRange(
+        Val x3092 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45713,10 +45915,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3085), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3092), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3086 = NondetRegStruct{
+        NondetRegStruct x3093 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45726,7 +45928,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3087 = inRange(
+        Val x3094 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45736,10 +45938,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3087), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3094), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3088 = NondetRegStruct{
+        NondetRegStruct x3095 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45749,7 +45951,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3089 = inRange(
+        Val x3096 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45759,10 +45961,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3089), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3096), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3090 = NondetRegStruct{
+        NondetRegStruct x3097 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45772,7 +45974,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3091 = inRange(
+        Val x3098 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45782,10 +45984,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3091), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3098), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3092 = NondetRegStruct{
+        NondetRegStruct x3099 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45795,7 +45997,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3093 = inRange(
+        Val x3100 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45805,10 +46007,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3093), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3100), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3094 = NondetRegStruct{
+        NondetRegStruct x3101 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45818,7 +46020,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3095 = inRange(
+        Val x3102 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45828,10 +46030,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3095), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3102), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3096 = NondetRegStruct{
+        NondetRegStruct x3103 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45841,7 +46043,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3097 = inRange(
+        Val x3104 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45851,10 +46053,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3097), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3104), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3098 = NondetRegStruct{
+        NondetRegStruct x3105 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45864,7 +46066,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3099 = inRange(
+        Val x3106 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45874,10 +46076,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3099), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3106), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3100 = NondetRegStruct{
+        NondetRegStruct x3107 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45887,7 +46089,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3101 = inRange(
+        Val x3108 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45897,10 +46099,10 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3101), "value out of range!");
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3108), "value out of range!");
         // builtin NondetReg
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:10)
-        NondetRegStruct x3102 = NondetRegStruct{
+        NondetRegStruct x3109 = NondetRegStruct{
             ._super =
                 LOAD(LAYOUT_LOOKUP(
                          LAYOUT_SUBSCRIPT(
@@ -45910,7 +46112,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                          arg.val._super),
                      0)};
         // ArgU8(zirgen/circuit/rv32im/v2/dsl/lookups.zir:12)
-        Val x3103 = inRange(
+        Val x3110 = inRange(
             Val(0),
             LOAD(LAYOUT_LOOKUP(
                      LAYOUT_SUBSCRIPT(
@@ -45920,199 +46122,204 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                      arg.val._super),
                  0),
             Val(256));
-        INVOKE_EXTERN(ctx, assert, (Val(1) - x3103), "value out of range!");
-        x3007 = NondetRegStruct16Array{x3072,
-                                       x3074,
-                                       x3076,
-                                       x3078,
-                                       x3080,
-                                       x3082,
-                                       x3084,
-                                       x3086,
-                                       x3088,
-                                       x3090,
-                                       x3092,
-                                       x3094,
-                                       x3096,
-                                       x3098,
-                                       x3100,
-                                       x3102};
+        INVOKE_EXTERN(ctx, assert, (Val(1) - x3110), "value out of range!");
+        x3010 = NondetRegStruct16Array{x3079,
+                                       x3081,
+                                       x3083,
+                                       x3085,
+                                       x3087,
+                                       x3089,
+                                       x3091,
+                                       x3093,
+                                       x3095,
+                                       x3097,
+                                       x3099,
+                                       x3101,
+                                       x3103,
+                                       x3105,
+                                       x3107,
+                                       x3109};
       } else {
         assert(0 && "Reached unreachable mux arm");
       }
       // builtin Sub
-      // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:134)
-      Val x3104 = (Val(1) - x3004.isEcall._super);
+      // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:151)
+      Val x3111 = (Val(1) - x3005.isEcall._super);
       // builtin Mul
-      Val x3105 =
-          (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._3._super._super), 0) * x3104);
-      Val x3106;
-      if (to_size_t(x3105)) {
-        x3106 = Val(48);
-      } else if (to_size_t((Val(1) - x3105))) {
-        x3106 = Val(41);
+      Val x3112 =
+          (LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._2._super._super), 0) * x3111);
+      Val x3113;
+      if (to_size_t(x3112)) {
+        x3113 = Val(48);
+      } else if (to_size_t((Val(1) - x3112))) {
+        x3113 = Val(41);
       } else {
         assert(0 && "Reached unreachable mux arm");
       }
       // builtin NondetReg
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:141)
-      NondetRegStruct x3107 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigIntStep(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:158)
+      NondetRegStruct x3114 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.isEcall._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+      NondetRegStruct x3115 = NondetRegStruct{
+          ._super =
+              LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.mode._super), 0)};
       // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-      NondetRegStruct x3108 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
+      NondetRegStruct x3116 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-      NondetRegStruct x3109 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x3117 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.polyOp._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x3110 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x3118 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x3111 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x3119 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 0),
                        _super),
                    0)};
-      NondetRegStruct x3112 = NondetRegStruct{
+      NondetRegStruct x3120 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 1),
                        _super),
                    0)};
-      NondetRegStruct x3113 = NondetRegStruct{
+      NondetRegStruct x3121 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 2),
                        _super),
                    0)};
-      NondetRegStruct x3114 = NondetRegStruct{
+      NondetRegStruct x3122 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 3),
                        _super),
                    0)};
-      NondetRegStruct x3115 = NondetRegStruct{
+      NondetRegStruct x3123 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 4),
                        _super),
                    0)};
-      NondetRegStruct x3116 = NondetRegStruct{
+      NondetRegStruct x3124 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 5),
                        _super),
                    0)};
-      NondetRegStruct x3117 = NondetRegStruct{
+      NondetRegStruct x3125 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 6),
                        _super),
                    0)};
-      NondetRegStruct x3118 = NondetRegStruct{
+      NondetRegStruct x3126 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 7),
                        _super),
                    0)};
-      NondetRegStruct x3119 = NondetRegStruct{
+      NondetRegStruct x3127 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 8),
                        _super),
                    0)};
-      NondetRegStruct x3120 = NondetRegStruct{
+      NondetRegStruct x3128 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 9),
                        _super),
                    0)};
-      NondetRegStruct x3121 = NondetRegStruct{
+      NondetRegStruct x3129 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 10),
                        _super),
                    0)};
-      NondetRegStruct x3122 = NondetRegStruct{
+      NondetRegStruct x3130 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 11),
                        _super),
                    0)};
-      NondetRegStruct x3123 = NondetRegStruct{
+      NondetRegStruct x3131 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 12),
                        _super),
                    0)};
-      NondetRegStruct x3124 = NondetRegStruct{
+      NondetRegStruct x3132 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 13),
                        _super),
                    0)};
-      NondetRegStruct x3125 = NondetRegStruct{
+      NondetRegStruct x3133 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 14),
                        _super),
                    0)};
-      NondetRegStruct x3126 = NondetRegStruct{
+      NondetRegStruct x3134 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.bytes), 15),
                        _super),
                    0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3127 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3135 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm1._super.nextState._super), 0)};
-      x2982 = BigIntStateStruct{.isEcall = x3107,
-                                .pc = x3108,
-                                .polyOp = x3109,
-                                .coeff = x3110,
-                                .bytes = NondetRegStruct16Array{x3111,
-                                                                x3112,
-                                                                x3113,
-                                                                x3114,
-                                                                x3115,
-                                                                x3116,
-                                                                x3117,
-                                                                x3118,
-                                                                x3119,
+      x2982 = BigIntStateStruct{.isEcall = x3114,
+                                .mode = x3115,
+                                .pc = x3116,
+                                .polyOp = x3117,
+                                .coeff = x3118,
+                                .bytes = NondetRegStruct16Array{x3119,
                                                                 x3120,
                                                                 x3121,
                                                                 x3122,
                                                                 x3123,
                                                                 x3124,
                                                                 x3125,
-                                                                x3126},
-                                .nextState = x3127};
+                                                                x3126,
+                                                                x3127,
+                                                                x3128,
+                                                                x3129,
+                                                                x3130,
+                                                                x3131,
+                                                                x3132,
+                                                                x3133,
+                                                                x3134},
+                                .nextState = x3135};
     } else if (to_size_t(
                    LOAD(LAYOUT_LOOKUP(
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 2),
@@ -46120,163 +46327,168 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         0))) {
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:25)
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:159)
-      NondetRegStruct x3128 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigIntInvalid(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:27)
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:177)
+      NondetRegStruct x3136 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.isEcall._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+      NondetRegStruct x3137 = NondetRegStruct{
+          ._super =
+              LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.mode._super), 0)};
       // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-      NondetRegStruct x3129 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
+      NondetRegStruct x3138 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-      NondetRegStruct x3130 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x3139 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.polyOp._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x3131 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x3140 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x3132 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x3141 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 0),
                        _super),
                    0)};
-      NondetRegStruct x3133 = NondetRegStruct{
+      NondetRegStruct x3142 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 1),
                        _super),
                    0)};
-      NondetRegStruct x3134 = NondetRegStruct{
+      NondetRegStruct x3143 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 2),
                        _super),
                    0)};
-      NondetRegStruct x3135 = NondetRegStruct{
+      NondetRegStruct x3144 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 3),
                        _super),
                    0)};
-      NondetRegStruct x3136 = NondetRegStruct{
+      NondetRegStruct x3145 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 4),
                        _super),
                    0)};
-      NondetRegStruct x3137 = NondetRegStruct{
+      NondetRegStruct x3146 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 5),
                        _super),
                    0)};
-      NondetRegStruct x3138 = NondetRegStruct{
+      NondetRegStruct x3147 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 6),
                        _super),
                    0)};
-      NondetRegStruct x3139 = NondetRegStruct{
+      NondetRegStruct x3148 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 7),
                        _super),
                    0)};
-      NondetRegStruct x3140 = NondetRegStruct{
+      NondetRegStruct x3149 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 8),
                        _super),
                    0)};
-      NondetRegStruct x3141 = NondetRegStruct{
+      NondetRegStruct x3150 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 9),
                        _super),
                    0)};
-      NondetRegStruct x3142 = NondetRegStruct{
+      NondetRegStruct x3151 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 10),
                        _super),
                    0)};
-      NondetRegStruct x3143 = NondetRegStruct{
+      NondetRegStruct x3152 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 11),
                        _super),
                    0)};
-      NondetRegStruct x3144 = NondetRegStruct{
+      NondetRegStruct x3153 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 12),
                        _super),
                    0)};
-      NondetRegStruct x3145 = NondetRegStruct{
+      NondetRegStruct x3154 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 13),
                        _super),
                    0)};
-      NondetRegStruct x3146 = NondetRegStruct{
+      NondetRegStruct x3155 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 14),
                        _super),
                    0)};
-      NondetRegStruct x3147 = NondetRegStruct{
+      NondetRegStruct x3156 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.bytes), 15),
                        _super),
                    0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3148 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3157 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm2._super.nextState._super), 0)};
-      x2982 = BigIntStateStruct{.isEcall = x3128,
-                                .pc = x3129,
-                                .polyOp = x3130,
-                                .coeff = x3131,
-                                .bytes = NondetRegStruct16Array{x3132,
-                                                                x3133,
-                                                                x3134,
-                                                                x3135,
-                                                                x3136,
-                                                                x3137,
-                                                                x3138,
-                                                                x3139,
-                                                                x3140,
-                                                                x3141,
+      x2982 = BigIntStateStruct{.isEcall = x3136,
+                                .mode = x3137,
+                                .pc = x3138,
+                                .polyOp = x3139,
+                                .coeff = x3140,
+                                .bytes = NondetRegStruct16Array{x3141,
                                                                 x3142,
                                                                 x3143,
                                                                 x3144,
                                                                 x3145,
                                                                 x3146,
-                                                                x3147},
-                                .nextState = x3148};
+                                                                x3147,
+                                                                x3148,
+                                                                x3149,
+                                                                x3150,
+                                                                x3151,
+                                                                x3152,
+                                                                x3153,
+                                                                x3154,
+                                                                x3155,
+                                                                x3156},
+                                .nextState = x3157};
     } else if (to_size_t(
                    LOAD(LAYOUT_LOOKUP(
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 3),
@@ -46284,162 +46496,167 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         0))) {
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:160)
-      NondetRegStruct x3149 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:178)
+      NondetRegStruct x3158 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.isEcall._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+      NondetRegStruct x3159 = NondetRegStruct{
+          ._super =
+              LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.mode._super), 0)};
       // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-      NondetRegStruct x3150 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
+      NondetRegStruct x3160 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-      NondetRegStruct x3151 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x3161 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.polyOp._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x3152 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x3162 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x3153 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x3163 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 0),
                        _super),
                    0)};
-      NondetRegStruct x3154 = NondetRegStruct{
+      NondetRegStruct x3164 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 1),
                        _super),
                    0)};
-      NondetRegStruct x3155 = NondetRegStruct{
+      NondetRegStruct x3165 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 2),
                        _super),
                    0)};
-      NondetRegStruct x3156 = NondetRegStruct{
+      NondetRegStruct x3166 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 3),
                        _super),
                    0)};
-      NondetRegStruct x3157 = NondetRegStruct{
+      NondetRegStruct x3167 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 4),
                        _super),
                    0)};
-      NondetRegStruct x3158 = NondetRegStruct{
+      NondetRegStruct x3168 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 5),
                        _super),
                    0)};
-      NondetRegStruct x3159 = NondetRegStruct{
+      NondetRegStruct x3169 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 6),
                        _super),
                    0)};
-      NondetRegStruct x3160 = NondetRegStruct{
+      NondetRegStruct x3170 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 7),
                        _super),
                    0)};
-      NondetRegStruct x3161 = NondetRegStruct{
+      NondetRegStruct x3171 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 8),
                        _super),
                    0)};
-      NondetRegStruct x3162 = NondetRegStruct{
+      NondetRegStruct x3172 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 9),
                        _super),
                    0)};
-      NondetRegStruct x3163 = NondetRegStruct{
+      NondetRegStruct x3173 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 10),
                        _super),
                    0)};
-      NondetRegStruct x3164 = NondetRegStruct{
+      NondetRegStruct x3174 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 11),
                        _super),
                    0)};
-      NondetRegStruct x3165 = NondetRegStruct{
+      NondetRegStruct x3175 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 12),
                        _super),
                    0)};
-      NondetRegStruct x3166 = NondetRegStruct{
+      NondetRegStruct x3176 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 13),
                        _super),
                    0)};
-      NondetRegStruct x3167 = NondetRegStruct{
+      NondetRegStruct x3177 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 14),
                        _super),
                    0)};
-      NondetRegStruct x3168 = NondetRegStruct{
+      NondetRegStruct x3178 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.bytes), 15),
                        _super),
                    0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3169 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3179 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm3._super.nextState._super), 0)};
-      x2982 = BigIntStateStruct{.isEcall = x3149,
-                                .pc = x3150,
-                                .polyOp = x3151,
-                                .coeff = x3152,
-                                .bytes = NondetRegStruct16Array{x3153,
-                                                                x3154,
-                                                                x3155,
-                                                                x3156,
-                                                                x3157,
-                                                                x3158,
-                                                                x3159,
-                                                                x3160,
-                                                                x3161,
-                                                                x3162,
-                                                                x3163,
+      x2982 = BigIntStateStruct{.isEcall = x3158,
+                                .mode = x3159,
+                                .pc = x3160,
+                                .polyOp = x3161,
+                                .coeff = x3162,
+                                .bytes = NondetRegStruct16Array{x3163,
                                                                 x3164,
                                                                 x3165,
                                                                 x3166,
                                                                 x3167,
-                                                                x3168},
-                                .nextState = x3169};
+                                                                x3168,
+                                                                x3169,
+                                                                x3170,
+                                                                x3171,
+                                                                x3172,
+                                                                x3173,
+                                                                x3174,
+                                                                x3175,
+                                                                x3176,
+                                                                x3177,
+                                                                x3178},
+                                .nextState = x3179};
     } else if (to_size_t(
                    LOAD(LAYOUT_LOOKUP(
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 4),
@@ -46447,162 +46664,167 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         0))) {
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:161)
-      NondetRegStruct x3170 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:179)
+      NondetRegStruct x3180 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.isEcall._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+      NondetRegStruct x3181 = NondetRegStruct{
+          ._super =
+              LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.mode._super), 0)};
       // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-      NondetRegStruct x3171 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
+      NondetRegStruct x3182 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-      NondetRegStruct x3172 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x3183 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.polyOp._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x3173 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x3184 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x3174 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x3185 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 0),
                        _super),
                    0)};
-      NondetRegStruct x3175 = NondetRegStruct{
+      NondetRegStruct x3186 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 1),
                        _super),
                    0)};
-      NondetRegStruct x3176 = NondetRegStruct{
+      NondetRegStruct x3187 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 2),
                        _super),
                    0)};
-      NondetRegStruct x3177 = NondetRegStruct{
+      NondetRegStruct x3188 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 3),
                        _super),
                    0)};
-      NondetRegStruct x3178 = NondetRegStruct{
+      NondetRegStruct x3189 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 4),
                        _super),
                    0)};
-      NondetRegStruct x3179 = NondetRegStruct{
+      NondetRegStruct x3190 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 5),
                        _super),
                    0)};
-      NondetRegStruct x3180 = NondetRegStruct{
+      NondetRegStruct x3191 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 6),
                        _super),
                    0)};
-      NondetRegStruct x3181 = NondetRegStruct{
+      NondetRegStruct x3192 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 7),
                        _super),
                    0)};
-      NondetRegStruct x3182 = NondetRegStruct{
+      NondetRegStruct x3193 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 8),
                        _super),
                    0)};
-      NondetRegStruct x3183 = NondetRegStruct{
+      NondetRegStruct x3194 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 9),
                        _super),
                    0)};
-      NondetRegStruct x3184 = NondetRegStruct{
+      NondetRegStruct x3195 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 10),
                        _super),
                    0)};
-      NondetRegStruct x3185 = NondetRegStruct{
+      NondetRegStruct x3196 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 11),
                        _super),
                    0)};
-      NondetRegStruct x3186 = NondetRegStruct{
+      NondetRegStruct x3197 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 12),
                        _super),
                    0)};
-      NondetRegStruct x3187 = NondetRegStruct{
+      NondetRegStruct x3198 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 13),
                        _super),
                    0)};
-      NondetRegStruct x3188 = NondetRegStruct{
+      NondetRegStruct x3199 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 14),
                        _super),
                    0)};
-      NondetRegStruct x3189 = NondetRegStruct{
+      NondetRegStruct x3200 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.bytes), 15),
                        _super),
                    0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3190 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3201 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm4._super.nextState._super), 0)};
-      x2982 = BigIntStateStruct{.isEcall = x3170,
-                                .pc = x3171,
-                                .polyOp = x3172,
-                                .coeff = x3173,
-                                .bytes = NondetRegStruct16Array{x3174,
-                                                                x3175,
-                                                                x3176,
-                                                                x3177,
-                                                                x3178,
-                                                                x3179,
-                                                                x3180,
-                                                                x3181,
-                                                                x3182,
-                                                                x3183,
-                                                                x3184,
-                                                                x3185,
+      x2982 = BigIntStateStruct{.isEcall = x3180,
+                                .mode = x3181,
+                                .pc = x3182,
+                                .polyOp = x3183,
+                                .coeff = x3184,
+                                .bytes = NondetRegStruct16Array{x3185,
                                                                 x3186,
                                                                 x3187,
                                                                 x3188,
-                                                                x3189},
-                                .nextState = x3190};
+                                                                x3189,
+                                                                x3190,
+                                                                x3191,
+                                                                x3192,
+                                                                x3193,
+                                                                x3194,
+                                                                x3195,
+                                                                x3196,
+                                                                x3197,
+                                                                x3198,
+                                                                x3199,
+                                                                x3200},
+                                .nextState = x3201};
     } else if (to_size_t(
                    LOAD(LAYOUT_LOOKUP(
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 5),
@@ -46610,162 +46832,167 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         0))) {
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:162)
-      NondetRegStruct x3191 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:180)
+      NondetRegStruct x3202 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.isEcall._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+      NondetRegStruct x3203 = NondetRegStruct{
+          ._super =
+              LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.mode._super), 0)};
       // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-      NondetRegStruct x3192 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
+      NondetRegStruct x3204 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-      NondetRegStruct x3193 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x3205 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.polyOp._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x3194 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x3206 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x3195 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x3207 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 0),
                        _super),
                    0)};
-      NondetRegStruct x3196 = NondetRegStruct{
+      NondetRegStruct x3208 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 1),
                        _super),
                    0)};
-      NondetRegStruct x3197 = NondetRegStruct{
+      NondetRegStruct x3209 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 2),
                        _super),
                    0)};
-      NondetRegStruct x3198 = NondetRegStruct{
+      NondetRegStruct x3210 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 3),
                        _super),
                    0)};
-      NondetRegStruct x3199 = NondetRegStruct{
+      NondetRegStruct x3211 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 4),
                        _super),
                    0)};
-      NondetRegStruct x3200 = NondetRegStruct{
+      NondetRegStruct x3212 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 5),
                        _super),
                    0)};
-      NondetRegStruct x3201 = NondetRegStruct{
+      NondetRegStruct x3213 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 6),
                        _super),
                    0)};
-      NondetRegStruct x3202 = NondetRegStruct{
+      NondetRegStruct x3214 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 7),
                        _super),
                    0)};
-      NondetRegStruct x3203 = NondetRegStruct{
+      NondetRegStruct x3215 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 8),
                        _super),
                    0)};
-      NondetRegStruct x3204 = NondetRegStruct{
+      NondetRegStruct x3216 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 9),
                        _super),
                    0)};
-      NondetRegStruct x3205 = NondetRegStruct{
+      NondetRegStruct x3217 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 10),
                        _super),
                    0)};
-      NondetRegStruct x3206 = NondetRegStruct{
+      NondetRegStruct x3218 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 11),
                        _super),
                    0)};
-      NondetRegStruct x3207 = NondetRegStruct{
+      NondetRegStruct x3219 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 12),
                        _super),
                    0)};
-      NondetRegStruct x3208 = NondetRegStruct{
+      NondetRegStruct x3220 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 13),
                        _super),
                    0)};
-      NondetRegStruct x3209 = NondetRegStruct{
+      NondetRegStruct x3221 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 14),
                        _super),
                    0)};
-      NondetRegStruct x3210 = NondetRegStruct{
+      NondetRegStruct x3222 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.bytes), 15),
                        _super),
                    0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3211 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3223 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm5._super.nextState._super), 0)};
-      x2982 = BigIntStateStruct{.isEcall = x3191,
-                                .pc = x3192,
-                                .polyOp = x3193,
-                                .coeff = x3194,
-                                .bytes = NondetRegStruct16Array{x3195,
-                                                                x3196,
-                                                                x3197,
-                                                                x3198,
-                                                                x3199,
-                                                                x3200,
-                                                                x3201,
-                                                                x3202,
-                                                                x3203,
-                                                                x3204,
-                                                                x3205,
-                                                                x3206,
-                                                                x3207,
+      x2982 = BigIntStateStruct{.isEcall = x3202,
+                                .mode = x3203,
+                                .pc = x3204,
+                                .polyOp = x3205,
+                                .coeff = x3206,
+                                .bytes = NondetRegStruct16Array{x3207,
                                                                 x3208,
                                                                 x3209,
-                                                                x3210},
-                                .nextState = x3211};
+                                                                x3210,
+                                                                x3211,
+                                                                x3212,
+                                                                x3213,
+                                                                x3214,
+                                                                x3215,
+                                                                x3216,
+                                                                x3217,
+                                                                x3218,
+                                                                x3219,
+                                                                x3220,
+                                                                x3221,
+                                                                x3222},
+                                .nextState = x3223};
     } else if (to_size_t(
                    LOAD(LAYOUT_LOOKUP(
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 6),
@@ -46773,162 +47000,167 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         0))) {
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:163)
-      NondetRegStruct x3212 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:181)
+      NondetRegStruct x3224 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.isEcall._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+      NondetRegStruct x3225 = NondetRegStruct{
+          ._super =
+              LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.mode._super), 0)};
       // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-      NondetRegStruct x3213 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
+      NondetRegStruct x3226 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-      NondetRegStruct x3214 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x3227 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.polyOp._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x3215 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x3228 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x3216 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x3229 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 0),
                        _super),
                    0)};
-      NondetRegStruct x3217 = NondetRegStruct{
+      NondetRegStruct x3230 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 1),
                        _super),
                    0)};
-      NondetRegStruct x3218 = NondetRegStruct{
+      NondetRegStruct x3231 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 2),
                        _super),
                    0)};
-      NondetRegStruct x3219 = NondetRegStruct{
+      NondetRegStruct x3232 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 3),
                        _super),
                    0)};
-      NondetRegStruct x3220 = NondetRegStruct{
+      NondetRegStruct x3233 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 4),
                        _super),
                    0)};
-      NondetRegStruct x3221 = NondetRegStruct{
+      NondetRegStruct x3234 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 5),
                        _super),
                    0)};
-      NondetRegStruct x3222 = NondetRegStruct{
+      NondetRegStruct x3235 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 6),
                        _super),
                    0)};
-      NondetRegStruct x3223 = NondetRegStruct{
+      NondetRegStruct x3236 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 7),
                        _super),
                    0)};
-      NondetRegStruct x3224 = NondetRegStruct{
+      NondetRegStruct x3237 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 8),
                        _super),
                    0)};
-      NondetRegStruct x3225 = NondetRegStruct{
+      NondetRegStruct x3238 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 9),
                        _super),
                    0)};
-      NondetRegStruct x3226 = NondetRegStruct{
+      NondetRegStruct x3239 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 10),
                        _super),
                    0)};
-      NondetRegStruct x3227 = NondetRegStruct{
+      NondetRegStruct x3240 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 11),
                        _super),
                    0)};
-      NondetRegStruct x3228 = NondetRegStruct{
+      NondetRegStruct x3241 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 12),
                        _super),
                    0)};
-      NondetRegStruct x3229 = NondetRegStruct{
+      NondetRegStruct x3242 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 13),
                        _super),
                    0)};
-      NondetRegStruct x3230 = NondetRegStruct{
+      NondetRegStruct x3243 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 14),
                        _super),
                    0)};
-      NondetRegStruct x3231 = NondetRegStruct{
+      NondetRegStruct x3244 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.bytes), 15),
                        _super),
                    0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3232 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3245 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm6._super.nextState._super), 0)};
-      x2982 = BigIntStateStruct{.isEcall = x3212,
-                                .pc = x3213,
-                                .polyOp = x3214,
-                                .coeff = x3215,
-                                .bytes = NondetRegStruct16Array{x3216,
-                                                                x3217,
-                                                                x3218,
-                                                                x3219,
-                                                                x3220,
-                                                                x3221,
-                                                                x3222,
-                                                                x3223,
-                                                                x3224,
-                                                                x3225,
-                                                                x3226,
-                                                                x3227,
-                                                                x3228,
-                                                                x3229,
+      x2982 = BigIntStateStruct{.isEcall = x3224,
+                                .mode = x3225,
+                                .pc = x3226,
+                                .polyOp = x3227,
+                                .coeff = x3228,
+                                .bytes = NondetRegStruct16Array{x3229,
                                                                 x3230,
-                                                                x3231},
-                                .nextState = x3232};
+                                                                x3231,
+                                                                x3232,
+                                                                x3233,
+                                                                x3234,
+                                                                x3235,
+                                                                x3236,
+                                                                x3237,
+                                                                x3238,
+                                                                x3239,
+                                                                x3240,
+                                                                x3241,
+                                                                x3242,
+                                                                x3243,
+                                                                x3244},
+                                .nextState = x3245};
     } else if (to_size_t(
                    LOAD(LAYOUT_LOOKUP(
                             LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(arg0, instInput.minorOnehot._super), 7),
@@ -46936,190 +47168,195 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
                         0))) {
       // NondetBitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:13)
       // BitReg(zirgen/circuit/rv32im/v2/dsl/bits.zir:19)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:13)
-      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:164)
-      NondetRegStruct x3233 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
+      // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:182)
+      NondetRegStruct x3246 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.isEcall._super), 0)};
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
+      NondetRegStruct x3247 = NondetRegStruct{
+          ._super =
+              LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.mode._super), 0)};
       // Reg(<preamble>:5)
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:14)
-      NondetRegStruct x3234 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
+      NondetRegStruct x3248 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.pc._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:15)
-      NondetRegStruct x3235 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
+      NondetRegStruct x3249 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.polyOp._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:16)
-      NondetRegStruct x3236 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
+      NondetRegStruct x3250 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.coeff._super), 0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:17)
-      NondetRegStruct x3237 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:19)
+      NondetRegStruct x3251 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 0),
                        _super),
                    0)};
-      NondetRegStruct x3238 = NondetRegStruct{
+      NondetRegStruct x3252 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 1),
                        _super),
                    0)};
-      NondetRegStruct x3239 = NondetRegStruct{
+      NondetRegStruct x3253 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 2),
                        _super),
                    0)};
-      NondetRegStruct x3240 = NondetRegStruct{
+      NondetRegStruct x3254 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 3),
                        _super),
                    0)};
-      NondetRegStruct x3241 = NondetRegStruct{
+      NondetRegStruct x3255 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 4),
                        _super),
                    0)};
-      NondetRegStruct x3242 = NondetRegStruct{
+      NondetRegStruct x3256 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 5),
                        _super),
                    0)};
-      NondetRegStruct x3243 = NondetRegStruct{
+      NondetRegStruct x3257 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 6),
                        _super),
                    0)};
-      NondetRegStruct x3244 = NondetRegStruct{
+      NondetRegStruct x3258 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 7),
                        _super),
                    0)};
-      NondetRegStruct x3245 = NondetRegStruct{
+      NondetRegStruct x3259 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 8),
                        _super),
                    0)};
-      NondetRegStruct x3246 = NondetRegStruct{
+      NondetRegStruct x3260 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 9),
                        _super),
                    0)};
-      NondetRegStruct x3247 = NondetRegStruct{
+      NondetRegStruct x3261 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 10),
                        _super),
                    0)};
-      NondetRegStruct x3248 = NondetRegStruct{
+      NondetRegStruct x3262 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 11),
                        _super),
                    0)};
-      NondetRegStruct x3249 = NondetRegStruct{
+      NondetRegStruct x3263 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 12),
                        _super),
                    0)};
-      NondetRegStruct x3250 = NondetRegStruct{
+      NondetRegStruct x3264 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 13),
                        _super),
                    0)};
-      NondetRegStruct x3251 = NondetRegStruct{
+      NondetRegStruct x3265 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 14),
                        _super),
                    0)};
-      NondetRegStruct x3252 = NondetRegStruct{
+      NondetRegStruct x3266 = NondetRegStruct{
           ._super =
               LOAD(LAYOUT_LOOKUP(
                        LAYOUT_SUBSCRIPT(
                            LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.bytes), 15),
                        _super),
                    0)};
-      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:18)
-      NondetRegStruct x3253 = NondetRegStruct{
+      // BigIntState(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:20)
+      NondetRegStruct x3267 = NondetRegStruct{
           ._super = LOAD(
               LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef.arm7._super.nextState._super), 0)};
-      x2982 = BigIntStateStruct{.isEcall = x3233,
-                                .pc = x3234,
-                                .polyOp = x3235,
-                                .coeff = x3236,
-                                .bytes = NondetRegStruct16Array{x3237,
-                                                                x3238,
-                                                                x3239,
-                                                                x3240,
-                                                                x3241,
-                                                                x3242,
-                                                                x3243,
-                                                                x3244,
-                                                                x3245,
-                                                                x3246,
-                                                                x3247,
-                                                                x3248,
-                                                                x3249,
-                                                                x3250,
-                                                                x3251,
-                                                                x3252},
-                                .nextState = x3253};
+      x2982 = BigIntStateStruct{.isEcall = x3246,
+                                .mode = x3247,
+                                .pc = x3248,
+                                .polyOp = x3249,
+                                .coeff = x3250,
+                                .bytes = NondetRegStruct16Array{x3251,
+                                                                x3252,
+                                                                x3253,
+                                                                x3254,
+                                                                x3255,
+                                                                x3256,
+                                                                x3257,
+                                                                x3258,
+                                                                x3259,
+                                                                x3260,
+                                                                x3261,
+                                                                x3262,
+                                                                x3263,
+                                                                x3264,
+                                                                x3265,
+                                                                x3266},
+                                .nextState = x3267};
     } else {
       assert(0 && "Reached unreachable mux arm");
     }
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:156)
-    BigIntStateStruct x3254 =
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:174)
+    BigIntStateStruct x3268 =
         back_BigIntState(ctx, 0, LAYOUT_LOOKUP(arg0, instResult.arm12.stateRedef._super));
-    Val16Array x3255 = Val16Array{x3254.bytes[0]._super,
-                                  x3254.bytes[1]._super,
-                                  x3254.bytes[2]._super,
-                                  x3254.bytes[3]._super,
-                                  x3254.bytes[4]._super,
-                                  x3254.bytes[5]._super,
-                                  x3254.bytes[6]._super,
-                                  x3254.bytes[7]._super,
-                                  x3254.bytes[8]._super,
-                                  x3254.bytes[9]._super,
-                                  x3254.bytes[10]._super,
-                                  x3254.bytes[11]._super,
-                                  x3254.bytes[12]._super,
-                                  x3254.bytes[13]._super,
-                                  x3254.bytes[14]._super,
-                                  x3254.bytes[15]._super};
+    Val16Array x3269 = Val16Array{x3268.bytes[0]._super,
+                                  x3268.bytes[1]._super,
+                                  x3268.bytes[2]._super,
+                                  x3268.bytes[3]._super,
+                                  x3268.bytes[4]._super,
+                                  x3268.bytes[5]._super,
+                                  x3268.bytes[6]._super,
+                                  x3268.bytes[7]._super,
+                                  x3268.bytes[8]._super,
+                                  x3268.bytes[9]._super,
+                                  x3268.bytes[10]._super,
+                                  x3268.bytes[11]._super,
+                                  x3268.bytes[12]._super,
+                                  x3268.bytes[13]._super,
+                                  x3268.bytes[14]._super,
+                                  x3268.bytes[15]._super};
     // BigIntTopState(zirgen/circuit/rv32im/v2/dsl/inst.zir:78)
-    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:166)
-    BigIntTopStateStruct x3256 = BigIntTopStateStruct{
-        .polyOp = x3254.polyOp._super, .coeff = x3254.coeff._super, .witness = x3255};
+    // BigInt0(zirgen/circuit/rv32im/v2/dsl/inst_bigint.zir:184)
+    BigIntTopStateStruct x3270 = BigIntTopStateStruct{
+        .polyOp = x3268.polyOp._super, .coeff = x3268.coeff._super, .witness = x3269};
     x21 = InstOutputBaseStruct{
-        .newPc = x11, .newState = x3254.nextState._super, .newMode = x13, .topState = x3256};
+        .newPc = x11, .newState = x3268.nextState._super, .newMode = x13, .topState = x3270};
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
@@ -59605,38 +59842,157 @@ __device__ ComponentStruct exec_TopAccum(ExecContext& ctx,
                   count._super),
               0) *
          inv_0(x2407));
+    // zirgen/dsl/passes/GenerateAccum.cpp:217
+    ExtVal x2409 = (x2404 * x2407);
     // zirgen/dsl/passes/GenerateAccum.cpp:223
-    ExtVal x2409 =
+    ExtVal x2410 =
         (LOAD(LAYOUT_LOOKUP(
                   LAYOUT_SUBSCRIPT(
                       LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU8), 16),
                   count._super),
               0) *
          x2407);
+    // zirgen/dsl/passes/GenerateAccum.cpp:146
+    ExtVal x2411 =
+        (LOAD_EXT(LAYOUT_LOOKUP(x4, randomness.argU16.val), 0) *
+         LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 0),
+                  val._super),
+              0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:238
+    ExtVal x2412 = (x2411 + LOAD_EXT(LAYOUT_LOOKUP(x4, randomness._offset), 0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:240
+    ExtVal x2413 =
+        (LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 0),
+                  count._super),
+              0) *
+         inv_0(x2412));
+    // zirgen/dsl/passes/GenerateAccum.cpp:241
+    ExtVal x2414 = (((x2400 + x2405) + x2408) + x2413);
     // zirgen/dsl/passes/GenerateAccum.cpp:189
-    STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), ((x2400 + x2405) + x2408));
+    STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), x2414);
     // zirgen/dsl/passes/GenerateAccum.cpp:177
-    ExtVal x2410 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0) -
+    ExtVal x2415 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0) -
                     LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 11), 0));
     // zirgen/dsl/passes/GenerateAccum.cpp:180
-    ExtVal x2411 =
-        (((x2410 * (x2404 * x2407)) - x2409) -
-         (x2404 *
+    ExtVal x2416 =
+        (((x2415 * (x2409 * x2412)) - (x2410 * x2412)) -
+         ((x2404 *
+           LOAD(LAYOUT_LOOKUP(
+                    LAYOUT_SUBSCRIPT(
+                        LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU8), 17),
+                    count._super),
+                0)) *
+          x2412));
+    // zirgen/dsl/passes/GenerateAccum.cpp:182
+    EQZ((x2416 -
+         (x2409 *
           LOAD(LAYOUT_LOOKUP(
                    LAYOUT_SUBSCRIPT(
-                       LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU8), 17),
+                       LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 0),
                    count._super),
-               0)));
-    // zirgen/dsl/passes/GenerateAccum.cpp:182
-    EQZ(x2411, "zirgen/dsl/passes/GenerateAccum.cpp:182");
-    // zirgen/dsl/passes/GenerateAccum.cpp:122
-    STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19),
-              LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0));
-    // zirgen/dsl/passes/GenerateAccum.cpp:124
-    ExtVal x2412 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) -
+               0))),
+        "zirgen/dsl/passes/GenerateAccum.cpp:182");
+    // zirgen/dsl/passes/GenerateAccum.cpp:146
+    ExtVal x2417 =
+        (LOAD_EXT(LAYOUT_LOOKUP(x4, randomness.argU16.val), 0) *
+         LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 1),
+                  val._super),
+              0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:238
+    ExtVal x2418 = (x2417 + LOAD_EXT(LAYOUT_LOOKUP(x4, randomness._offset), 0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:240
+    ExtVal x2419 =
+        (LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 1),
+                  count._super),
+              0) *
+         inv_0(x2418));
+    // zirgen/dsl/passes/GenerateAccum.cpp:146
+    ExtVal x2420 =
+        (LOAD_EXT(LAYOUT_LOOKUP(x4, randomness.argU16.val), 0) *
+         LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 2),
+                  val._super),
+              0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:238
+    ExtVal x2421 = (x2420 + LOAD_EXT(LAYOUT_LOOKUP(x4, randomness._offset), 0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:240
+    ExtVal x2422 =
+        (LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 2),
+                  count._super),
+              0) *
+         inv_0(x2421));
+    // zirgen/dsl/passes/GenerateAccum.cpp:217
+    ExtVal x2423 = (x2418 * x2421);
+    // zirgen/dsl/passes/GenerateAccum.cpp:223
+    ExtVal x2424 =
+        (LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 1),
+                  count._super),
+              0) *
+         x2421);
+    // zirgen/dsl/passes/GenerateAccum.cpp:146
+    ExtVal x2425 =
+        (LOAD_EXT(LAYOUT_LOOKUP(x4, randomness.argU16.val), 0) *
+         LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 3),
+                  val._super),
+              0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:238
+    ExtVal x2426 = (x2425 + LOAD_EXT(LAYOUT_LOOKUP(x4, randomness._offset), 0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:240
+    ExtVal x2427 =
+        (LOAD(LAYOUT_LOOKUP(
+                  LAYOUT_SUBSCRIPT(
+                      LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 3),
+                  count._super),
+              0) *
+         inv_0(x2426));
+    // zirgen/dsl/passes/GenerateAccum.cpp:241
+    ExtVal x2428 = (((x2414 + x2419) + x2422) + x2427);
+    // zirgen/dsl/passes/GenerateAccum.cpp:189
+    STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), x2428);
+    // zirgen/dsl/passes/GenerateAccum.cpp:177
+    ExtVal x2429 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), 0) -
                     LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 12), 0));
+    // zirgen/dsl/passes/GenerateAccum.cpp:180
+    ExtVal x2430 =
+        (((x2429 * (x2423 * x2426)) - (x2424 * x2426)) -
+         ((x2418 *
+           LOAD(LAYOUT_LOOKUP(
+                    LAYOUT_SUBSCRIPT(
+                        LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 2),
+                    count._super),
+                0)) *
+          x2426));
+    // zirgen/dsl/passes/GenerateAccum.cpp:182
+    EQZ((x2430 -
+         (x2423 *
+          LOAD(LAYOUT_LOOKUP(
+                   LAYOUT_SUBSCRIPT(
+                       LAYOUT_LOOKUP(arg0, instResult.arm12._arguments_BigInt0State.argU16), 3),
+                   count._super),
+               0))),
+        "zirgen/dsl/passes/GenerateAccum.cpp:182");
+    // zirgen/dsl/passes/GenerateAccum.cpp:122
+    STORE_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), x2428);
+    // zirgen/dsl/passes/GenerateAccum.cpp:124
+    ExtVal x2431 = (LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 19), 0) -
+                    LOAD_EXT(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout1, columns), 13), 0));
     // zirgen/dsl/passes/GenerateAccum.cpp:125
-    EQZ(x2412, "zirgen/dsl/passes/GenerateAccum.cpp:125");
+    EQZ(x2431, "zirgen/dsl/passes/GenerateAccum.cpp:125");
     x8 = x7;
   } else {
     assert(0 && "Reached unreachable mux arm");

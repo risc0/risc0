@@ -709,9 +709,10 @@ extern __device__ BigIntStateStruct exec_BigIntState(ExecContext& ctx,
                                                      Val arg1_0,
                                                      Val arg2_0,
                                                      Val arg3,
-                                                     Val16Array arg4,
-                                                     Val arg5,
-                                                     BoundLayout<BigIntStateLayout> layout6);
+                                                     Val arg4,
+                                                     Val16Array arg5,
+                                                     Val arg6,
+                                                     BoundLayout<BigIntStateLayout> layout7);
 extern __device__ BigIntStateStruct exec_BigIntInvalid(ExecContext& ctx,
                                                        BoundLayout<BigIntStateLayout> layout0);
 extern __device__ BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,
@@ -720,17 +721,23 @@ extern __device__ BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,
 extern __device__ SplitU32Struct exec_SplitU32(ExecContext& ctx,
                                                ValU32Struct arg0,
                                                BoundLayout<SplitU32Layout> layout1);
+extern __device__ AddrDecomposeBitsStruct exec_BigIntAddr(ExecContext& ctx,
+                                                          ValU32Struct arg0,
+                                                          Val arg1_0,
+                                                          BoundLayout<BigIntAddrLayout> layout2);
 extern __device__ BigIntReadStruct exec_BigIntRead(ExecContext& ctx,
                                                    NondetRegStruct arg0,
-                                                   Val arg1_0,
-                                                   BoundLayout<BigIntReadLayout> layout2);
+                                                   ValU32Struct arg1_0,
+                                                   Val arg2_0,
+                                                   BoundLayout<BigIntReadLayout> layout3);
 extern __device__ BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,
                                                          Val16Array arg0,
                                                          BoundLayout<BigIntWitnessLayout> layout1);
 extern __device__ BigIntWitnessStruct exec_BigIntWrite(ExecContext& ctx,
                                                        NondetRegStruct arg0,
-                                                       Val arg1_0,
-                                                       BoundLayout<BigIntWriteLayout> layout2);
+                                                       ValU32Struct arg1_0,
+                                                       Val arg2_0,
+                                                       BoundLayout<BigIntWriteLayout> layout3);
 extern __device__ BigIntWitnessStruct exec_BigIntCheck(ExecContext& ctx,
                                                        BoundLayout<BigIntWitnessLayout> layout0);
 extern __device__ BigIntStateStruct exec_BigIntStep(ExecContext& ctx,

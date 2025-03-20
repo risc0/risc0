@@ -31,6 +31,12 @@ pub enum MultiTestSpec {
         y: [u32; bigint::WIDTH_WORDS],
         modulus: [u32; bigint::WIDTH_WORDS],
     },
+    BigIntRaw {
+        result: u32,
+        x: u32,
+        y: u32,
+        modulus: u32,
+    },
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u64,
