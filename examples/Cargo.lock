@@ -3787,7 +3787,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3809,7 +3809,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "1.4.0"
+version = "2.0.0"
 dependencies = [
  "cc",
  "directories",
@@ -3905,6 +3905,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "paste",
+ "postcard",
  "rand",
  "rayon",
  "ringbuffer",
@@ -3937,6 +3938,7 @@ name = "risc0-core"
 version = "2.0.0"
 dependencies = [
  "bytemuck",
+ "bytemuck_derive",
  "nvtx",
  "puffin",
  "rand_core",
@@ -4336,7 +4338,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "rzup"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "semver",
  "serde",
