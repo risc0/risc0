@@ -303,7 +303,7 @@ fn build_185_toolchain(
     repo_dir: &Path,
     dest_dir: &Path,
 ) -> Result<Version> {
-    let stage2_flags: &[&str] = &["build", "--stage", "2", "compiler/rustc", "library"];
+    let stage2_flags: &[&str] = &["build", "--stage", "2"];
     env.emit(RzupEvent::BuildingRustToolchainUpdate {
         message: format!("./x {:?}", stage2_flags),
     });
