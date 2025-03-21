@@ -32,7 +32,7 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [signature-aggregation]: https://github.com/risc0/risc0-ethereum/blob/main/examples/governance/methods/guest/src/bin/finalize_votes.rs
 [steel-blog]: https://www.risczero.com/blog/introducing-steel-1.0
 [steel-repo]: https://crates.io/crates/risc0-steel
-[steel-src]: https://github.com/risc0/risc0-ethereum/tree/main/steel
+[steel-src]: https://github.com/risc0/risc0-ethereum/tree/main/crates/steel
 [verifier-contracts]: https://github.com/risc0/risc0-ethereum/tree/main/contracts
 [zeth-article]: https://www.risczero.com/news/zeth-release
 [zeth-repo]: https://github.com/risc0/zeth
