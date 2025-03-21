@@ -62,7 +62,7 @@ pub struct HighLowU16(pub u16, pub u16);
 
 impl From<HighLowU16> for u32 {
     fn from(x: HighLowU16) -> Self {
-        (x.0 as u32) << 16 | (x.1 as u32)
+        ((x.0 as u32) << 16) | (x.1 as u32)
     }
 }
 

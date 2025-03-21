@@ -248,6 +248,7 @@ fn bigint_accel() {
     for case in cases {
         println!("Running BigInt circuit test case: {:x?}", case);
         let input = MultiTestSpec::BigInt {
+            count: 1,
             x: case.x,
             y: case.y,
             modulus: case.modulus,
@@ -268,8 +269,10 @@ fn bigint_accel() {
 }
 
 #[test_log::test]
+#[should_panic(expected = "IllegalInstruction")]
 fn bigint_accel_mod_zero_product_too_large() {
     let input = MultiTestSpec::BigInt {
+        count: 1,
         x: [u32::MAX; bigint::WIDTH_WORDS],
         y: [u32::MAX; bigint::WIDTH_WORDS],
         modulus: [0u32; bigint::WIDTH_WORDS],
@@ -280,8 +283,80 @@ fn bigint_accel_mod_zero_product_too_large() {
         .unwrap()
         .build()
         .unwrap();
-    let error = execute_elf(env, MULTI_TEST_ELF).map(|_| ()).unwrap_err();
-    assert!(error.to_string().contains("IllegalInstruction"), "{error}");
+    execute_elf(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test_log::test]
+fn bigint_repeat() {
+    let input = MultiTestSpec::BigInt {
+        count: 100,
+        x: [1, 2, 3, 4, 5, 6, 7, 8],
+        y: [9, 10, 11, 12, 13, 14, 15, 16],
+        modulus: [17, 18, 19, 20, 21, 22, 23, 24],
+    };
+
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+const BIGINT_LEGAL_ADDR: u32 = 0x3000_0000;
+const BIGINT_ILLEGAL_ADDR: u32 = 0xc000_0000;
+
+#[rstest]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_ILLEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_ILLEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_ILLEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_ILLEGAL_ADDR
+)]
+#[test_log::test]
+fn bigint_raw(#[case] result: u32, #[case] x: u32, #[case] y: u32, #[case] modulus: u32) {
+    let input = MultiTestSpec::BigIntRaw {
+        result,
+        x,
+        y,
+        modulus,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 #[test_log::test]

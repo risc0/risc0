@@ -27,6 +27,7 @@ mod zkvm {
     };
     use include_bytes_aligned::include_bytes_aligned;
 
+    const MACHINE_MODE: u32 = 1;
     const HOST_ECALL_READ: u32 = 1;
     const HOST_ECALL_WRITE: u32 = 2;
     const HOST_ECALL_SHA: u32 = 4;
@@ -37,6 +38,7 @@ mod zkvm {
     const MAX_IO_BYTES: u32 = 1024;
     const MAX_SHA_COUNT: u32 = 10;
     const USER_REGS_ADDR: u32 = 0xffff_0080;
+    const USER_END_ADDR: usize = 0xc000_0000;
     const REG_A0: usize = 10;
     const REG_A1: usize = 11;
 
@@ -68,6 +70,12 @@ mod zkvm {
         pub temp_size: u32,
     }
 
+    fn assert_user_ptr(ptr: usize) {
+        if ptr >= USER_END_ADDR {
+            unsafe { illegal_instruction() };
+        }
+    }
+
     #[no_mangle]
     unsafe extern "C" fn ecall_bigint_v1compat(
         result: *mut [u32; BIGINT_WIDTH_WORDS],
@@ -75,7 +83,12 @@ mod zkvm {
         x: *const [u32; BIGINT_WIDTH_WORDS],
         y: *const [u32; BIGINT_WIDTH_WORDS],
         modulus: *const [u32; BIGINT_WIDTH_WORDS],
-    ) -> ! {
+    ) {
+        assert_user_ptr(result as usize);
+        assert_user_ptr(x as usize);
+        assert_user_ptr(y as usize);
+        assert_user_ptr(modulus as usize);
+
         if op != BIGINT_OP_MULTIPLY {
             illegal_instruction();
         }
@@ -129,8 +142,6 @@ mod zkvm {
             );
             asm!("add sp, sp, {temp_space}", temp_space = in(reg) temp_space);
         }
-
-        asm!("mret", options(noreturn))
     }
 
     #[inline(always)]
@@ -150,6 +161,7 @@ mod zkvm {
     ) {
         asm!("ecall",
             in("a7") HOST_ECALL_BIGINT,
+            in("t0") MACHINE_MODE,
             in("t1") nondet_program_ptr,
             in("t2") verify_program_ptr,
             in("t3") consts_ptr,
@@ -173,6 +185,7 @@ mod zkvm {
     ) {
         asm!("ecall",
             in("a7") HOST_ECALL_BIGINT,
+            in("t0") MACHINE_MODE,
             in("t1") nondet_program_ptr,
             in("t2") verify_program_ptr,
             in("t3") consts_ptr,
@@ -277,7 +290,7 @@ mod zkvm {
             in("a1") msg_ptr,
             in("a2") msg_len,
         );
-        asm!("fence", options(noreturn))
+        illegal_instruction()
     }
 
     #[no_mangle]

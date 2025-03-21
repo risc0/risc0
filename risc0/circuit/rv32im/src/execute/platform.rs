@@ -26,6 +26,7 @@ pub const ZERO_PAGE_START_ADDR: ByteAddr = ByteAddr(0x0000_0000);
 pub const ZERO_PAGE_END_ADDR: ByteAddr = ByteAddr(0x0001_0000);
 pub const USER_START_ADDR: ByteAddr = ZERO_PAGE_END_ADDR;
 pub const USER_END_ADDR: ByteAddr = ByteAddr(0xc000_0000);
+pub const USER_BIGINT_END_ADDR: ByteAddr = ByteAddr(0xbfff_0000);
 pub const KERNEL_START_ADDR: ByteAddr = USER_END_ADDR;
 pub const KERNEL_END_ADDR: ByteAddr = ByteAddr(0xff00_0000);
 pub const MACHINE_REGS_ADDR: ByteAddr = ByteAddr(0xffff_0000);

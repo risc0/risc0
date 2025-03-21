@@ -44,6 +44,7 @@ malachite = { version = "0.4", optional = true, default-features = false, featur
 memmap2 = { version = "0.9 " }
 num-derive = { version = "0.4.2", optional = true }
 num-traits = { version = "0.2.19", optional = true }
+postcard = { version = "1.1.1", optional = true, features = ["use-std"] }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 ringbuffer = { version = "0.15.0", optional = true }
@@ -75,6 +76,7 @@ execute = [
   "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",
+  "dep:postcard",
   "dep:ringbuffer",
   "dep:smallvec",
   "risc0-core/perf",

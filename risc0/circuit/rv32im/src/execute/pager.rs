@@ -342,9 +342,9 @@ impl PagedMemory {
     }
 
     fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
         let page_idx = addr.page_idx();
-        let mut page = self.page_for_writing(page_idx)?;
+        // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
+        let page = self.page_for_writing(page_idx)?;
         page.store(addr, word);
         Ok(())
     }
