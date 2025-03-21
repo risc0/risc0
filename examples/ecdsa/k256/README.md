@@ -47,7 +47,7 @@ For more information on how to use the precompile, see the [precompile documenta
 
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [RustCrypto]: https://docs.rs/k256/latest/k256/
-[1]: https://semaphore.appliedzkp.org/
+[1]: https://docs.semaphore.pse.dev
 [2]: https://medium.com/@boneh/using-zk-proofs-to-fight-disinformation-17e7d57fe52f
 [3]: https://minaprotocol.com/
 [4]: methods/guest/Cargo.toml
