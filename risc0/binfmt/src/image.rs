@@ -342,7 +342,7 @@ impl Default for Page {
 
 impl Page {
     /// Caller must ensure given Vec is of length `PAGE_BYTES`
-    fn from_vec(v: Vec<u8>) -> Self {
+    pub fn from_vec(v: Vec<u8>) -> Self {
         #[cfg(not(feature = "std"))]
         return Self(v);
         #[cfg(feature = "std")]

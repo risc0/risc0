@@ -18,6 +18,7 @@ mod executor;
 pub(crate) mod pager;
 pub mod platform;
 pub(crate) mod poseidon2;
+pub(crate) mod qemu;
 pub(crate) mod r0vm;
 pub(crate) mod rv32im;
 pub(crate) mod segment;

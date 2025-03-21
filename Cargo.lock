@@ -5760,6 +5760,7 @@ dependencies = [
  "enum-map",
  "flate2",
  "malachite",
+ "memmap2",
  "num-derive",
  "num-traits",
  "paste",

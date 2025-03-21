@@ -44,6 +44,10 @@ pub enum EcallKind {
 }
 
 pub(crate) trait Risc0Context {
+    fn inc_user_cycles(&mut self, _count: usize, _ecall: Option<EcallKind>) {
+        todo!()
+    }
+
     /// Get the program counter
     fn get_pc(&self) -> ByteAddr;
 
@@ -151,7 +155,7 @@ fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
 }
 
 pub struct Risc0Machine<'a, T: Risc0Context> {
-    ctx: &'a mut T,
+pub(crate)    ctx: &'a mut T,
 }
 
 impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
@@ -221,8 +225,10 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         )?;
         let a0 = self.load_register(REG_A0)?;
         let a1 = self.load_register(REG_A1)?;
+        println!("a0: {a0:?} a1: {a1:?}");
         self.ctx.on_terminate(a0, a1)?;
         self.next_pc();
+        println!("next pc");
         self.ctx.on_ecall_cycle(
             CycleState::Terminate,
             CycleState::Suspend,
@@ -231,6 +237,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
             0,
             EcallKind::Terminate,
         )?;
+        println!("ecall cycle complete");
         Ok(false)
     }
 
@@ -454,7 +461,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         }
     }
 
-    fn dump_registers(&mut self, is_machine_mode: bool) -> Result<()> {
+    pub(crate)fn dump_registers(&mut self, is_machine_mode: bool) -> Result<()> {
         let base_addr = if is_machine_mode {
             tracing::trace!("machine registers:");
             MACHINE_REGS_ADDR.waddr()
@@ -477,6 +484,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
 impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
     fn ecall(&mut self) -> Result<bool> {
+        tracing::trace!("ecall from machine_mode = {}", self.is_machine_mode());
         if self.is_machine_mode() {
             self.machine_ecall()
         } else {

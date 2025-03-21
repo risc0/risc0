@@ -15,6 +15,7 @@
 use std::collections::BTreeSet;
 
 use anyhow::{anyhow, bail, Result};
+use memmap2::MmapMut;
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
@@ -84,6 +85,7 @@ pub(crate) struct Preflight<'a> {
     orig_words: PagedMap,
     prev_cycle: PagedMap,
     page_memory: PagedMap,
+    _page_buf: MmapMut,
 }
 
 impl Segment {
@@ -121,6 +123,8 @@ impl<'a> Preflight<'a> {
                 page_memory.insert(&(node_addr + i), digest.as_words()[i]);
             }
         }
+        let mut page_buf = MmapMut::map_anon(1024 * 1024 * 1024 * 4).unwrap();
+        let page_ptr: *mut u8 = page_buf.as_mut_ptr();
         Self {
             trace: PreflightTrace {
                 cycles: Vec::with_capacity(total_cycles),
@@ -129,9 +133,11 @@ impl<'a> Preflight<'a> {
                 ..Default::default()
             },
             segment,
+            _page_buf: page_buf,
             pager: PagedMemory::new(
                 segment.partial_image.clone(),
                 false, /* tracing_enabled */
+                page_ptr,
             ),
             pc: ByteAddr(0),
             machine_mode: 0,

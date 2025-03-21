@@ -63,14 +63,46 @@ pub(crate) enum PageState {
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum PageTraceEvent {
-    PageIn { cycles: u32 },
-    PageOut { cycles: u32 },
+    PageIn { cycles: u32, page_idx: u32 },
+    PageOut { cycles: u32, page_idx: u32 },
 }
 
 #[derive(Debug)]
 pub(crate) struct PageStates {
     states: BitVec,
     indexes: Vec<u32>,
+}
+
+struct UnsafePage {
+    ptr: *mut u8,
+}
+
+impl UnsafePage {
+    pub fn load(&self, addr: WordAddr) -> u32 {
+        let byte_addr = addr.page_subaddr().baddr().0 as usize;
+        let mut bytes = [0u8; WORD_SIZE];
+        let mem = unsafe { std::slice::from_raw_parts(self.ptr.add(byte_addr), WORD_SIZE) };
+        bytes.clone_from_slice(mem);
+        #[allow(clippy::let_and_return)] // easier to toggle optional tracing
+        let word = u32::from_le_bytes(bytes);
+        tracing::trace!("load({addr:?}) -> {word:#010x}");
+        word
+    }
+
+    pub fn store(&mut self, addr: WordAddr, word: u32) {
+        let byte_addr = addr.page_subaddr().baddr().0 as usize;
+        tracing::trace!(
+            "store({addr:?}, {byte_addr:#05x}, {word:#010x}), base ptr: {:#x?}",
+            self.ptr
+        );
+        let mem = unsafe { std::slice::from_raw_parts_mut(self.ptr.add(byte_addr), WORD_SIZE) };
+        mem.clone_from_slice(&word.to_le_bytes());
+    }
+
+    fn as_page(&self) -> Page {
+        let bytes = unsafe { std::slice::from_raw_parts(self.ptr, PAGE_BYTES) };
+        Page::from_vec(Vec::from(bytes))
+    }
 }
 
 impl PageStates {
@@ -160,77 +192,21 @@ fn page_states() {
 
 const NUM_PAGE_STATES: usize = NUM_PAGES * 2;
 
-struct PageTable {
-    table: Vec<u32>,
-}
-
-impl Default for PageTable {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl PageTable {
-    const INVALID_IDX: u32 = 0;
-
-    fn new() -> Self {
-        Self {
-            table: vec![Self::INVALID_IDX; NUM_PAGES],
-        }
-    }
-
-    fn get(&self, index: u32) -> Option<usize> {
-        let value = self.table[index as usize] as usize;
-        value.checked_sub(1)
-    }
-
-    fn set(&mut self, index: u32, value: usize) {
-        self.table[index as usize] = (value + 1) as u32
-    }
-
-    fn clear(&mut self) {
-        // You would think its faster to re-use the memory, but filling it with zeros is
-        // slower
-        // than just allocating a new piece of zeroed memory.
-        self.table = vec![Self::INVALID_IDX; NUM_PAGES];
-    }
-}
-
-#[test]
-fn page_table() {
-    let mut table = PageTable::new();
-
-    for idx in [0, 5, 12] {
-        assert_eq!(table.get(idx), None);
-
-        table.set(idx, 13);
-        assert_eq!(table.get(idx).unwrap(), 13);
-    }
-
-    table.clear();
-
-    for idx in [0, 5, 12] {
-        assert_eq!(table.get(idx), None);
-    }
-}
-
 #[derive(Debug)]
 pub(crate) struct PagedMemory {
     pub image: MemoryImage,
     #[debug(skip)]
-    page_table: PageTable,
-    #[debug(skip)]
-    page_cache: Vec<Page>,
     pub(crate) page_states: PageStates,
     pub cycles: u32,
     user_registers: [u32; REG_MAX],
     machine_registers: [u32; REG_MAX],
     tracing_enabled: bool,
+    base: *mut u8,
     trace_events: Vec<PageTraceEvent>,
 }
 
 impl PagedMemory {
-    pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool) -> Self {
+    pub(crate) fn new(mut image: MemoryImage, tracing_enabled: bool, base: *mut u8) -> Self {
         let mut machine_registers = [0; REG_MAX];
         let mut user_registers = [0; REG_MAX];
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
@@ -239,23 +215,25 @@ impl PagedMemory {
             machine_registers[idx] = page.load(MACHINE_REGS_ADDR.waddr() + idx);
             user_registers[idx] = page.load(USER_REGS_ADDR.waddr() + idx);
         }
-
-        Self {
+        
+        let res = Self {
             image,
-            page_table: PageTable::new(),
-            page_cache: Vec::new(),
             page_states: PageStates::new(NUM_PAGE_STATES),
             cycles: RESERVED_PAGING_CYCLES,
             user_registers,
             machine_registers,
             tracing_enabled,
             trace_events: vec![],
-        }
+            base,
+        };
+
+        // Why isn't this done elsewhere?
+//        let  _regs_page = res.page_for_writing(page_idx);
+        res
+
     }
 
     pub(crate) fn reset(&mut self) {
-        self.page_table.clear();
-        self.page_cache.clear();
         self.page_states.clear();
         self.cycles = RESERVED_PAGING_CYCLES;
     }
@@ -292,12 +270,20 @@ impl PagedMemory {
 
     fn peek_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        if let Some(cache_idx) = self.page_table.get(page_idx) {
+        let node_idx = node_idx(page_idx);
+        if self.page_states.get(node_idx) != PageState::Unloaded {
             // Loaded, get from cache
-            Ok(self.page_cache[cache_idx].load(addr))
+            Ok(self.page_cache(page_idx).load(addr))
         } else {
             // Unloaded, peek into image
             Ok(self.image.get_page(page_idx)?.load(addr))
+        }
+    }
+
+    fn page_cache(&self, page_idx: u32) -> UnsafePage {
+        assert!((page_idx as usize) < NUM_PAGES);
+        UnsafePage {
+            ptr: unsafe { self.base.add(page_idx as usize * PAGE_BYTES) },
         }
     }
 
@@ -313,9 +299,10 @@ impl PagedMemory {
     }
 
     pub(crate) fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
-        if let Some(cache_idx) = self.page_table.get(page_idx) {
+        let node_idx = node_idx(page_idx);
+        if self.page_states.get(node_idx) != PageState::Unloaded {
             // Loaded, get from cache
-            Ok(self.page_cache[cache_idx].data().clone())
+            Ok(self.page_cache(page_idx).as_page().data().clone())
         } else {
             // Unloaded, peek into image
             Ok(self.image.get_page(page_idx)?.data().clone())
@@ -326,14 +313,11 @@ impl PagedMemory {
         let page_idx = addr.page_idx();
         let node_idx = node_idx(page_idx);
         // tracing::trace!("load: {addr:?}, page: {page_idx:#08x}, node: {node_idx:#08x}");
-        let cache_idx = if let Some(cache_idx) = self.page_table.get(page_idx) {
-            cache_idx
-        } else {
+        if self.page_states.get(node_idx) == PageState::Unloaded {
             self.load_page(page_idx)?;
             self.page_states.set(node_idx, PageState::Loaded);
-            self.page_table.get(page_idx).unwrap()
-        };
-        Ok(self.page_cache[cache_idx].load(addr))
+        }
+        Ok(self.page_cache(page_idx).load(addr))
     }
 
     pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
@@ -360,7 +344,7 @@ impl PagedMemory {
     fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
         let page_idx = addr.page_idx();
-        let page = self.page_for_writing(page_idx)?;
+        let mut page = self.page_for_writing(page_idx)?;
         page.store(addr, word);
         Ok(())
     }
@@ -387,7 +371,7 @@ impl PagedMemory {
         }
     }
 
-    fn page_for_writing(&mut self, page_idx: u32) -> Result<&mut Page> {
+    fn page_for_writing(&mut self, page_idx: u32) -> Result<UnsafePage> {
         let node_idx = node_idx(page_idx);
         let mut state = self.page_states.get(node_idx);
         if state == PageState::Unloaded {
@@ -397,25 +381,31 @@ impl PagedMemory {
 
         if state == PageState::Loaded {
             self.cycles += PAGE_CYCLES;
-            self.trace_page_out(PAGE_CYCLES);
+            self.trace_page_out(PAGE_CYCLES, page_idx);
             self.fixup_costs(node_idx, PageState::Dirty);
             self.page_states.set(node_idx, PageState::Dirty);
         }
-        let cache_idx = self.page_table.get(page_idx).unwrap();
-        Ok(self.page_cache.get_mut(cache_idx).unwrap())
+        Ok(self.page_cache(page_idx))
     }
 
-    fn write_registers(&mut self) {
+    pub(crate) fn write_registers(&mut self) {
         // Copy register values first to avoid borrow conflicts
         let user_registers = self.user_registers;
         let machine_registers = self.machine_registers;
         // This works because we can assume that user and machine register files
         // live in the same page.
         let page_idx = MACHINE_REGS_ADDR.waddr().page_idx();
-        let page = self.page_for_writing(page_idx).unwrap();
+        let mut page = self.page_for_writing(page_idx).unwrap();
         for idx in 0..REG_MAX {
             page.store(MACHINE_REGS_ADDR.waddr() + idx, machine_registers[idx]);
             page.store(USER_REGS_ADDR.waddr() + idx, user_registers[idx]);
+        }
+    }
+
+    pub(crate) fn read_registers(&mut self) {
+        for idx in 0..REG_MAX {
+            self.machine_registers[idx] = dbg!(self.load_ram(MACHINE_REGS_ADDR.waddr() + idx).unwrap());
+            self.user_registers[idx] = dbg!(self.load_ram(USER_REGS_ADDR.waddr() + idx).unwrap());
         }
     }
 
@@ -441,9 +431,8 @@ impl PagedMemory {
 
             // Update dirty pages into the image that accumulates over a session.
             if page_state == PageState::Dirty {
-                let cache_idx = self.page_table.get(page_idx).unwrap();
-                let page = &self.page_cache[cache_idx];
-                self.image.set_page(page_idx, page.clone());
+                let page = &self.page_cache(page_idx);
+                self.image.set_page(page_idx, page.as_page());
             }
         }
         self.image.update_digests();
@@ -453,12 +442,21 @@ impl PagedMemory {
     }
 
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
-        tracing::trace!("load_page: {page_idx:#08x}");
+        tracing::trace!(
+            "load_page: {page_idx:#08x} start: {:#x}",
+            page_idx as usize * PAGE_BYTES
+        );
         let page = self.image.get_page(page_idx)?;
-        self.page_table.set(page_idx, self.page_cache.len());
-        self.page_cache.push(page);
+        unsafe {
+            println!("base: {:?}", self.base);
+            let mem = std::slice::from_raw_parts_mut(
+                self.base.add(page_idx as usize * PAGE_BYTES),
+                PAGE_BYTES,
+            );
+            mem.clone_from_slice(page.data());
+        }
         self.cycles += PAGE_CYCLES;
-        self.trace_page_in(PAGE_CYCLES);
+        self.trace_page_in(PAGE_CYCLES, page_idx);
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);
         Ok(())
     }
@@ -472,12 +470,12 @@ impl PagedMemory {
                     if state == PageState::Unloaded {
                         // tracing::trace!("fixup: {state:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
-                        self.trace_page_in(NODE_CYCLES);
+                        self.trace_page_in(NODE_CYCLES, 0);
                     }
                     if goal == PageState::Dirty {
                         // tracing::trace!("fixup: {goal:?}: {node_idx:#010x}");
                         self.cycles += NODE_CYCLES;
-                        self.trace_page_out(NODE_CYCLES);
+                        self.trace_page_out(NODE_CYCLES, 0);
                     }
                 }
                 self.page_states.set(node_idx, goal);
@@ -494,15 +492,17 @@ impl PagedMemory {
         self.trace_events.clear();
     }
 
-    fn trace_page_in(&mut self, cycles: u32) {
+    fn trace_page_in(&mut self, cycles: u32, page_idx: u32) {
         if self.tracing_enabled {
-            self.trace_events.push(PageTraceEvent::PageIn { cycles });
+            self.trace_events
+                .push(PageTraceEvent::PageIn { cycles, page_idx });
         }
     }
 
-    fn trace_page_out(&mut self, cycles: u32) {
+    fn trace_page_out(&mut self, cycles: u32, page_idx: u32) {
         if self.tracing_enabled {
-            self.trace_events.push(PageTraceEvent::PageOut { cycles });
+            self.trace_events
+                .push(PageTraceEvent::PageOut { cycles, page_idx });
         }
     }
 }

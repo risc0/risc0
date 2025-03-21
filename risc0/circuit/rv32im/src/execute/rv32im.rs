@@ -399,6 +399,7 @@ impl Emulator {
             ctx.trap(Exception::IllegalInstruction(word, 0))?;
             return Ok(());
         }
+        tracing::trace!("pc: {:#x} word: {:#x}", pc.0, word);
 
         let decoded = DecodedInstruction::new(word);
         let insn = self.table.lookup(&decoded);
