@@ -341,9 +341,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck_derive"
-version = "1.6.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4da9a32f3fed317401fa3c862968128267c3106685286e15d5aaa3d7389c2f60"
+checksum = "3fa76293b4f7bb636ab88fd78228235b5248b4d05cc589aed610f954af5d7c7a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -912,7 +912,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -929,7 +929,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -943,7 +943,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -956,7 +956,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -972,15 +972,16 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "bytemuck",
+ "bytemuck_derive",
  "rand_core",
 ]
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -999,7 +1000,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1007,7 +1008,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1030,7 +1031,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1066,7 +1067,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "cfg-if",

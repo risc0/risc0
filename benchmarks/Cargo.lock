@@ -389,6 +389,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
+name = "atomic-polyfill"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8cf2bce30dfe09ef0bfaef228b9d414faaf7e563035494d7fe092dba54b300f4"
+dependencies = [
+ "critical-section",
+]
+
+[[package]]
 name = "auto_ops"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -498,7 +507,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "duplicate",
  "maybe-async",
@@ -756,6 +765,12 @@ checksum = "a97769d94ddab943e4510d138150169a2758b5ef3eb191a9ee688de3e23ef7b3"
 dependencies = [
  "cfg-if",
 ]
+
+[[package]]
+name = "critical-section"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "790eea4361631c5e7d22598ecd5723ff611904e3344ce8720784c93e3d83d40b"
 
 [[package]]
 name = "crossbeam-deque"
@@ -1596,6 +1611,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hash32"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0c35f58762feb77d74ebe43bdbc3210f09be9fe6742234d573bacc26ed92b67"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1626,6 +1650,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ba4ff7128dee98c7dc9794b6a411377e1404dba1c97deb8d1a55297bd25d8af"
 dependencies = [
  "hashbrown 0.14.5",
+]
+
+[[package]]
+name = "heapless"
+version = "0.7.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cdc6457c0eb62c71aac4bc17216026d8410337c4126773b9c5daba343f17964f"
+dependencies = [
+ "atomic-polyfill",
+ "hash32",
+ "rustc_version",
+ "serde",
+ "spin",
+ "stable_deref_trait",
 ]
 
 [[package]]
@@ -2602,6 +2640,7 @@ dependencies = [
  "cobs",
  "embedded-io 0.4.0",
  "embedded-io 0.6.1",
+ "heapless",
  "serde",
 ]
 
@@ -3001,7 +3040,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -3018,7 +3057,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.0.1-rc.2"
+version = "2.0.1-rc.3"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3040,7 +3079,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "cc",
  "directories",
@@ -3053,7 +3092,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3073,7 +3112,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "cc",
  "cust",
@@ -3087,7 +3126,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3111,7 +3150,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3122,7 +3161,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -3136,6 +3175,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "paste",
+ "postcard",
  "rand",
  "rayon",
  "ringbuffer",
@@ -3151,7 +3191,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "cc",
  "cust",
@@ -3165,9 +3205,10 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "bytemuck",
+ "bytemuck_derive",
  "nvtx",
  "puffin",
  "rand_core",
@@ -3175,7 +3216,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -3198,7 +3239,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "cust",
@@ -3208,7 +3249,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -3216,7 +3257,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3246,7 +3287,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -3291,7 +3332,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -3425,7 +3466,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "rzup"
-version = "0.4.0"
+version = "0.4.1-rc.3"
 dependencies = [
  "semver",
  "serde",
@@ -3631,6 +3672,9 @@ name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
+dependencies = [
+ "lock_api",
+]
 
 [[package]]
 name = "spki"

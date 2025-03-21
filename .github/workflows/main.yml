@@ -67,6 +67,7 @@ jobs:
             check-semver:
               - *base
               - risc0/**
+              - xtask/src/semver_checks.rs
             check-template:
               - *base
               - risc0/**
@@ -436,24 +437,10 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-default
-      - name: Install cargo-semver-checks
-        uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
-        with:
-          crate: cargo-semver-checks
-          version: "0.36.0"
-      - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
-        run: |
-          cargo semver-checks --default-features \
-            --exclude cargo-risczero \
-            --exclude doc-test \
-            --exclude fibonacci-methods \
-            --exclude risc0-bigint2 \
-            --exclude risc0-bigint2-methods \
-            --exclude risc0-circuit-keccak-methods \
-            --exclude risc0-zkvm-receipts \
-            --exclude risc0-zkvm-methods \
-            --exclude risc0-zkos-v1compat \
-            --exclude hotbench
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - name: run SemVer checks
+        run: cargo xtask semver-checks
       - run: sccache --show-stats
 
   check-template:

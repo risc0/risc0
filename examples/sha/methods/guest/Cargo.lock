@@ -329,9 +329,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck_derive"
-version = "1.7.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ee891b04274a59bd38b412188e24b849617b2e45a0fd8d057deb63e7403761b"
+checksum = "3fa76293b4f7bb636ab88fd78228235b5248b4d05cc589aed610f954af5d7c7a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -875,7 +875,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -892,7 +892,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -906,7 +906,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -919,7 +919,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -935,15 +935,16 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "bytemuck",
+ "bytemuck_derive",
  "rand_core",
 ]
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0-rc.2"
+version = "1.4.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -962,7 +963,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -970,7 +971,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -993,7 +994,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1020,7 +1021,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "cfg-if",
