@@ -3,7 +3,7 @@
 set -eoux
 
 # We presume the following are installed system wide:
-# circom
+# circom 2.2.2 or later
 # make and standard dev stuff
 # clang
 # nasm
@@ -13,11 +13,24 @@ set -eoux
 # scripts/build.sh from the `groth16_proof` folder
 
 # Run circom
-(cd groth16; circom --c --r1cs stark_verify.circom)
+(cd groth16; circom --c --no_asm --r1cs --O2 stark_verify.circom)
 
-# Edit the make file
-sed -i 's/g++/clang++/' groth16/stark_verify_cpp/Makefile
-sed -i 's/O3/O0/' groth16/stark_verify_cpp/Makefile
+# Replace the makefile, since we are about to break the main file down into
+# pieces for individual compilation, and we want to use clang anyway.
+cp scripts/replacement-Makefile groth16/stark_verify_cpp/Makefile
+# Replace witgen library files which won't build on aarch64 as-is
+cp scripts/replacement-fr.hpp groth16/stark_verify_cpp/fr.hpp
+cp scripts/replacement-fr.cpp groth16/stark_verify_cpp/fr.cpp
 
-# Build the witness generation (only works on x86 machines)
-(cd groth16/stark_verify_cpp; make)
+# Break the generated program into more manageable pieces.
+python3 scripts/chunk.py groth16/stark_verify_cpp/stark_verify.cpp
+rm groth16/stark_verify_cpp/stark_verify.cpp
+
+# One of the pieces will be much larger than the others; we expect it to be
+# the top-level Verify_*_run function. Break it down further.
+BIG_FILE=$(du -h groth16/stark_verify_cpp/*.cpp | sort -rh | head -1 | awk '{ print $2 }')
+python3 scripts/outline.py "$BIG_FILE"
+rm "$BIG_FILE"
+
+# Build the witness generation
+(cd groth16/stark_verify_cpp; make -j`nproc`)
