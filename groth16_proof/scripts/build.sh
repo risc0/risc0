@@ -20,13 +20,13 @@ set -eoux
 cp scripts/replacement-Makefile groth16/stark_verify_cpp/Makefile
 
 # Break the generated program into more manageable pieces.
-python scripts/chunk.py groth16/stark_verify_cpp/stark_verify.cpp
+python3 scripts/chunk.py groth16/stark_verify_cpp/stark_verify.cpp
 rm groth16/stark_verify_cpp/stark_verify.cpp
 
 # One of the pieces will be much larger than the others; we expect it to be
 # the top-level Verify_*_run function. Break it down further.
 BIG_FILE=$(du -h groth16/stark_verify_cpp/*.cpp | sort -rh | head -1 | awk '{ print $2 }')
-python scripts/outline.py "$BIG_FILE"
+python3 scripts/outline.py "$BIG_FILE"
 rm "$BIG_FILE"
 
 # Build the witness generation
