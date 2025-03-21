@@ -269,7 +269,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     Risc0Machine::resume(self)?;
                 }
 
-                self.qemu.borrow_mut().process_trace_events();
                 let mut cycles_remain: usize = (segment_threshold - self.segment_cycles()) as usize;
                 tracing::trace!("cycles remain {cycles_remain} after {}", self.segment_cycles());
                 if let Some(max_cycles) = max_cycles {
@@ -282,21 +281,21 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 if cycles_remain > u32::MAX as usize {
                     cycles_remain = u32::MAX as usize
                 }
-                if cycles_remain > 3  /* && self.user_cycles == 10  */{
+                if cycles_remain > 3  /* && self.user_cycles == 10  */ {
                     tracing::trace!("adjusted cycles remain: {cycles_remain}");
                     {
                     let rc = Rc::clone(&self.qemu);
                     let mut qemu = rc.borrow_mut();
                         qemu.step(self,  cycles_remain - 3)?;
-//                        qemu.step(self,  1)?;
+//                        qemu.step(self,  3)?;
                     }
                     tracing::trace!("after qemu, segment cycles = {}", self.segment_cycles());
                 }
-                if self.user_cycles >= 9 && self.user_cycles <= 11 {
-                    let mut mach = Risc0Machine{ctx:self};
-                    mach.dump_registers(true)?;
-                    mach.dump_registers(false)?;
-                }
+//                if self.user_cycles >= 9 && self.user_cycles <= 11 {
+//                    let mut mach = Risc0Machine{ctx:self};
+//                    mach.dump_registers(true)?;
+//                    mach.dump_registers(false)?;
+//                }
                 Risc0Machine::step(&mut emu, self).map_err(|err| {
                     let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
                     if let Err(inner) = result {
@@ -382,8 +381,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 dump_path.to_string_lossy()
             );
 
-            let (image, pre_digest, post_digest) = self.pager.commit();
-            let page_indexes = self.pager.page_indexes();
+            let (image, pre_digest, post_digest) = self.pager_mut().commit();
+            let page_indexes = self.pager().page_indexes();
             let partial_image = compute_partial_image(image, page_indexes);
 
             let segment = Segment {
@@ -399,7 +398,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 read_record: std::mem::take(&mut self.read_record),
                 write_record: std::mem::take(&mut self.write_record),
                 suspend_cycle: self.user_cycles,
-                paging_cycles: self.pager.cycles,
+                paging_cycles: self.pager().cycles,
                 po2: po2 as u32,
                 index,
                 segment_threshold,
@@ -445,14 +444,15 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     #[cold]
     fn trace_pager(&mut self) -> Result<()> {
-        self.qemu.borrow_mut().process_trace_events();
-        for &event in self.qemu.borrow().trace_events() {
+        let mut qemu = self.qemu.borrow_mut();
+        qemu.process_trace_events();
+        for &event in qemu.trace_events() {
             let event = TraceEvent::from(event);
             for trace in self.trace.iter() {
                 trace.borrow_mut().trace_callback(event.clone())?;
             }
         }
-        self.qemu.borrow_mut().clear_trace_events();
+        qemu.clear_trace_events();
         Ok(())
     }
 

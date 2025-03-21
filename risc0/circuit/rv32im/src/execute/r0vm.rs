@@ -214,7 +214,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
     }
 
     fn ecall_terminate(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_terminate");
+        println!("ecall terminate start, pc = {:#x}", self.ctx.get_pc().0);
         self.ctx.on_ecall_cycle(
             CycleState::MachineEcall,
             CycleState::Terminate,
@@ -227,8 +227,8 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         let a1 = self.load_register(REG_A1)?;
         println!("a0: {a0:?} a1: {a1:?}");
         self.ctx.on_terminate(a0, a1)?;
+        println!("next pc from = {:#x}", self.ctx.get_pc().0);
         self.next_pc();
-        println!("next pc");
         self.ctx.on_ecall_cycle(
             CycleState::Terminate,
             CycleState::Suspend,
@@ -237,7 +237,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
             0,
             EcallKind::Terminate,
         )?;
-        println!("ecall cycle complete");
+        println!("ecall cycle complete, pc = {:#x}", self.ctx.get_pc().0);
         Ok(false)
     }
 

@@ -1,5 +1,6 @@
 use super::pager::{PageTraceEvent, PagedMemory};
 use super::r0vm::Risc0Context;
+use crate::execute::{MACHINE_REGS_ADDR, REG_MAX, USER_REGS_ADDR};
 use anyhow::Result;
 use num_derive::FromPrimitive;
 use risc0_binfmt::{ByteAddr, MemoryImage};
@@ -58,6 +59,9 @@ extern "C" {
     fn r0vm_reset_pages();
     fn r0vm_set_page_readable(idx: u32);
     fn r0vm_set_page_writable(idx: u32);
+
+    fn r0vm_set_register(state: *mut TaskState, idx: u32, val: u32);
+    fn r0vm_get_register(state: *mut TaskState, idx: u32) -> u32;
 
     static guest_base: usize;
 }
@@ -141,8 +145,6 @@ impl Qemu {
     }
 
     pub fn step(&mut self, ctx: &mut impl Risc0Context, cycle_budget: usize) -> Result<()> {
-        self.pager.write_registers();
-
         let mut task_state = TaskState {
             pc: ctx.get_pc().0,
             machine_mode: ctx.get_machine_mode(),
@@ -150,7 +152,24 @@ impl Qemu {
             badaddr: 0,
         };
 
-        let _task_exception = unsafe { r0vm_run_some(&mut task_state) };
+        let base = if ctx.get_machine_mode() != 0 {
+            MACHINE_REGS_ADDR.waddr()
+        } else {
+            USER_REGS_ADDR.waddr()
+        };
+        for idx in 0..REG_MAX {
+            let val = self.pager.load_register(base, idx);
+            unsafe {
+                r0vm_set_register(&mut task_state, idx as u32, val);
+            }
+        }
+
+        let trapnr = unsafe { r0vm_run_some(&mut task_state) };
+
+        for idx in 0..REG_MAX {
+            let val = unsafe { r0vm_get_register(&mut task_state, idx as u32) };
+            self.pager.store_register(base, idx, val);
+        }
 
         assert!(
             task_state.cycle_budget as usize <= cycle_budget,
@@ -158,18 +177,21 @@ impl Qemu {
             task_state.cycle_budget
         );
 
-        let cycles_used = cycle_budget - task_state.cycle_budget as usize;
+
+        let mut cycles_used = cycle_budget - task_state.cycle_budget as usize;
+        if trapnr == 8 {
+            println!("trapnr fixup");
+            cycles_used -= 1;
+        }
         ctx.inc_user_cycles(cycles_used, /*ecall=*/ None);
         println!("qemu cycles used: {cycles_used}");
 
         // TODO: Do we want qemu to be able to update machine mode?
         assert_eq!(task_state.machine_mode, ctx.get_machine_mode());
         ctx.set_pc(ByteAddr(task_state.pc));
-        self.pager.read_registers();
         Ok(())
     }
 }
-
 
 // xori:
 // 2025-03-20T21:53:14.241133Z TRACE risc0_circuit_rv32im::execute::executor: [172:6105:171] 0x07000200> 0x00000073  ecall

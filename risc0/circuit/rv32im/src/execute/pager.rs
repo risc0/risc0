@@ -215,8 +215,8 @@ impl PagedMemory {
             machine_registers[idx] = page.load(MACHINE_REGS_ADDR.waddr() + idx);
             user_registers[idx] = page.load(USER_REGS_ADDR.waddr() + idx);
         }
-        
-        let res = Self {
+
+        Self {
             image,
             page_states: PageStates::new(NUM_PAGE_STATES),
             cycles: RESERVED_PAGING_CYCLES,
@@ -225,12 +225,7 @@ impl PagedMemory {
             tracing_enabled,
             trace_events: vec![],
             base,
-        };
-
-        // Why isn't this done elsewhere?
-//        let  _regs_page = res.page_for_writing(page_idx);
-        res
-
+        }
     }
 
     pub(crate) fn reset(&mut self) {
@@ -344,7 +339,7 @@ impl PagedMemory {
     fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let page_idx = addr.page_idx();
         // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
-        let page = self.page_for_writing(page_idx)?;
+        let mut page = self.page_for_writing(page_idx)?;
         page.store(addr, word);
         Ok(())
     }
@@ -388,7 +383,7 @@ impl PagedMemory {
         Ok(self.page_cache(page_idx))
     }
 
-    pub(crate) fn write_registers(&mut self) {
+    fn write_registers(&mut self) {
         // Copy register values first to avoid borrow conflicts
         let user_registers = self.user_registers;
         let machine_registers = self.machine_registers;
@@ -399,13 +394,6 @@ impl PagedMemory {
         for idx in 0..REG_MAX {
             page.store(MACHINE_REGS_ADDR.waddr() + idx, machine_registers[idx]);
             page.store(USER_REGS_ADDR.waddr() + idx, user_registers[idx]);
-        }
-    }
-
-    pub(crate) fn read_registers(&mut self) {
-        for idx in 0..REG_MAX {
-            self.machine_registers[idx] = dbg!(self.load_ram(MACHINE_REGS_ADDR.waddr() + idx).unwrap());
-            self.user_registers[idx] = dbg!(self.load_ram(USER_REGS_ADDR.waddr() + idx).unwrap());
         }
     }
 

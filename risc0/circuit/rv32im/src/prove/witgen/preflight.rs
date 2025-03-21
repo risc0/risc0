@@ -176,6 +176,9 @@ impl<'a> Preflight<'a> {
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
         while self.user_cycles < self.segment.suspend_cycle {
+            tracing::debug!(
+                "user cycle: {}, suspend cycle: {}", self.user_cycles, self.segment.suspend_cycle);
+            
             Risc0Machine::step(&mut emu, self)?;
         }
         tracing::debug!(
