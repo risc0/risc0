@@ -22,6 +22,7 @@ mod bootstrap_protos;
 mod gen_receipt;
 mod install;
 mod semver_checks;
+mod update_lock_files;
 
 use clap::{Parser, Subcommand};
 
@@ -29,7 +30,7 @@ use clap::{Parser, Subcommand};
 use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 use self::{
     bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos, install::Install,
-    semver_checks::SemverChecks,
+    semver_checks::SemverChecks, update_lock_files::UpdateLockFiles,
 };
 
 #[derive(Parser)]
@@ -50,6 +51,7 @@ enum Commands {
     GenReceipt(GenReceipt),
     Install(Install),
     SemverChecks(SemverChecks),
+    UpdateLockFiles(UpdateLockFiles),
 }
 
 impl Commands {
@@ -65,6 +67,7 @@ impl Commands {
             #[cfg(feature = "zkvm")]
             Commands::GenReceipt(cmd) => cmd.run(),
             Commands::SemverChecks(cmd) => cmd.run(),
+            Commands::UpdateLockFiles(cmd) => cmd.run(),
         }
     }
 }
