@@ -2,117 +2,163 @@ use super::pager::{PageTraceEvent, PagedMemory};
 use super::r0vm::Risc0Context;
 use crate::execute::{MACHINE_REGS_ADDR, REG_MAX, USER_REGS_ADDR};
 use anyhow::Result;
-use num_derive::FromPrimitive;
 use risc0_binfmt::{ByteAddr, MemoryImage};
-use std::sync::{Mutex, Once};
+//use std::process::{ChildStdin, ChildStdout, Command, Stdio};
+use std::os::unix::net::UnixStream;
 
-#[derive(Debug, FromPrimitive)]
-#[repr(i32)]
+use memmap2::MmapMut;
+use qapi::{Qmp, Stream};
+use risc0_zkp::core::digest::Digest;
+use serde::{Deserialize, Serialize};
+use std::fs::OpenOptions;
+use std::io::BufReader;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Mutex, MutexGuard,
+};
+
 #[allow(non_camel_case_types)]
-enum QException {
-    RISCV_EXCP_NONE = -1, /* sentinel value */
-    RISCV_EXCP_INST_ADDR_MIS = 0x0,
-    RISCV_EXCP_INST_ACCESS_FAULT = 0x1,
-    RISCV_EXCP_ILLEGAL_INST = 0x2,
-    RISCV_EXCP_BREAKPOINT = 0x3,
-    RISCV_EXCP_LOAD_ADDR_MIS = 0x4,
-    RISCV_EXCP_LOAD_ACCESS_FAULT = 0x5,
-    RISCV_EXCP_STORE_AMO_ADDR_MIS = 0x6,
-    RISCV_EXCP_STORE_AMO_ACCESS_FAULT = 0x7,
-    RISCV_EXCP_U_ECALL = 0x8,
-    RISCV_EXCP_S_ECALL = 0x9,
-    RISCV_EXCP_VS_ECALL = 0xa,
-    RISCV_EXCP_M_ECALL = 0xb,
-    RISCV_EXCP_INST_PAGE_FAULT = 0xc,  /* since: priv-1.10.0 */
-    RISCV_EXCP_LOAD_PAGE_FAULT = 0xd,  /* since: priv-1.10.0 */
-    RISCV_EXCP_STORE_PAGE_FAULT = 0xf, /* since: priv-1.10.0 */
-    RISCV_EXCP_DOUBLE_TRAP = 0x10,
-    RISCV_EXCP_SW_CHECK = 0x12, /* since: priv-1.13.0 */
-    RISCV_EXCP_HW_ERR = 0x13,   /* since: priv-1.13.0 */
-    RISCV_EXCP_INST_GUEST_PAGE_FAULT = 0x14,
-    RISCV_EXCP_LOAD_GUEST_ACCESS_FAULT = 0x15,
-    RISCV_EXCP_VIRT_INSTRUCTION_FAULT = 0x16,
-    RISCV_EXCP_STORE_GUEST_AMO_ACCESS_FAULT = 0x17,
-    RISCV_EXCP_SEMIHOST = 0x3f,
-
-    EXCP_INTERRUPT = 0x10000, /* async interruption */
-    EXCP_HLT = 0x10001,       /* hlt instruction reached */
-    EXCP_DEBUG = 0x10002,     /* cpu stopped after a breakpoint or singlestep */
-    EXCP_HALTED = 0x10003,    /* cpu is halted (waiting for external event) */
-    EXCP_YIELD = 0x10004,     /* cpu wants to yield timeslice to another */
-    EXCP_ATOMIC = 0x10005,    /* stop-the-world and emulate atomic */
+#[allow(deprecated)]
+#[allow(dead_code)]
+#[allow(non_snake_case)]
+mod generated {
+    use serde::{Deserialize, Serialize};
+    include!(concat!(env!("OUT_DIR"), "/qmp.rs"));
 }
 
-#[repr(C)]
-struct TaskState {
-    pc: u32,
-    machine_mode: u32,
-    cycle_budget: u32,
-    badaddr: u32,
-}
-
-extern "C" {
-    fn r0vm_init();
-
-    fn r0vm_run_some(state: *mut TaskState) -> u32;
-
-    fn r0vm_reset_pages();
-    fn r0vm_set_page_readable(idx: u32);
-    fn r0vm_set_page_writable(idx: u32);
-
-    fn r0vm_set_register(state: *mut TaskState, idx: u32, val: u32);
-    fn r0vm_get_register(state: *mut TaskState, idx: u32) -> u32;
-
-    static guest_base: usize;
-}
+use generated::{
+    r0vm_mark_page_read, r0vm_mark_page_write, r0vm_reset_pages, r0vm_run_some, R0VMState,
+};
 
 pub(crate) struct Qemu {
+    //qmp: Qmp<qapi::Stream<BufReader<ChildStdout>, ChildStdin>>,
+    qmp: Qmp<qapi::Stream<BufReader<UnixStream>, UnixStream>>,
+    _page_buf: MmapMut,
     pub pager: PagedMemory,
     trace_enabled: bool,
     trace_events: Vec<PageTraceEvent>,
+    _mu: MutexGuard<'static, ()>,
 }
 
-static START: Once = Once::new();
-static INSTANCE_COUNT: Mutex<usize> = Mutex::new(0);
-
-impl Drop for Qemu {
-    fn drop(&mut self) {
-        let mut mu = INSTANCE_COUNT.lock().unwrap();
-
-        assert!(*mu > 0);
-        *mu -= 1;
-    }
+#[derive(Serialize, Deserialize)]
+// Track cycles for repeatability
+pub struct Tracker {
+    pub image_id: Digest,
+    pub elems: Vec<Option<u32>>,
 }
 
-impl Qemu {
-    pub fn new(image: MemoryImage, trace_enabled: bool) -> Self {
-        START.call_once(|| {
-            unsafe { r0vm_init() };
-        });
+static DID_QEMU: AtomicBool = AtomicBool::new(false);
 
-        let mut mu = INSTANCE_COUNT.lock().unwrap();
-        assert_eq!(*mu, 0);
-        *mu += 1;
+impl Tracker {
+    pub(crate) fn new(image_id: Digest) -> Self {
+        let filename = format!("/tmp/cycles.{image_id}");
+        match std::fs::read(filename) {
+            Ok(contents) => {
+                println!("Loading cycles for {}", image_id);
+                serde_json::from_str(std::str::from_utf8(contents.as_slice()).unwrap()).unwrap()
+            }
+            Err(err) => {
+                println!("Nothing saved, so new cycles for {} because of {err}", image_id);
 
-        unsafe {
-            r0vm_reset_pages();
-            assert!(guest_base != 0);
-            println!("guest base: {:#X}", guest_base);
-            Qemu {
-                pager: PagedMemory::new(
-                    image,
-                    /*tracing enabled=*/ true,
-                    guest_base as *mut u8,
-                ),
-                trace_events: Vec::new(),
-                trace_enabled,
+                Tracker {
+                    image_id,
+                    elems: Vec::new(),
+                }
             }
         }
     }
 
+    pub(crate) fn track(&mut self, user_cycles: usize, pc: u32) {
+        if self.elems.len() <= user_cycles {
+            self.elems.resize(user_cycles + 1, None);
+        }
+
+        let elem = &mut self.elems[user_cycles];
+        eprintln!("user_cycles: {user_cycles} pc: {pc} expecting {elem:?}");
+        if elem.is_some() {
+            assert!(elem.unwrap() == pc);
+        } else {
+            assert!(!DID_QEMU.load(Ordering::Relaxed), "Did not expect a cycle at {user_cycles} pc {pc:#x}");
+            *elem = Some(pc);
+        }
+    }
+
+    pub fn dump(&self) {
+        if DID_QEMU.load(Ordering::Relaxed) {
+            println!("Skipping cycle dump because we used qemu");
+        } else {
+            println!("Dumping cycles for {}", self.image_id);
+            let filename = format!("/tmp/cycles.{}", self.image_id);
+            std::fs::write(filename, serde_json::to_string(&self).unwrap()).unwrap();
+        }
+    }
+}
+
+const MEM_FILE: &str = "/tmp/qemu-guest-mem.dat";
+
+static MU: Mutex<()> = Mutex::new(());
+const SOCKET: &str = "/tmp/qemu.sock";
+
+impl<'a> Qemu {
+    pub fn new(image: MemoryImage, trace_enabled: bool) -> Self {
+        let mut mu = MU.lock();
+        if MU.is_poisoned() {
+            MU.clear_poison();
+            mu = MU.lock();
+        }
+        let mu = mu.unwrap();
+//        std::thread::sleep(std::time::Duration::from_secs(1));
+
+        let mem_file = OpenOptions::new()
+            .write(true)
+            .read(true)
+            .create(true)
+            .open(MEM_FILE)
+            .unwrap();
+        mem_file.set_len(1024 * 1024 * 1024 * 4).unwrap();
+        let mut page_buf = unsafe { MmapMut::map_mut(&mem_file) }.unwrap();
+
+        //        let mut cmd = Command::new("/tmp/qemu-build/qemu-system-riscv32");
+        //        cmd.args(["-icount", "shift=1"])
+        //            .args(["-mem-path", MEM_FILE]);
+        // cmd.args(["-qmp", "stdio"]);
+        // cmd.stdin(Stdio::piped());
+        // cmd.stdout(Stdio::piped());
+
+        //        }
+        //        let child = cmd.spawn().unwrap();
+
+        //        let stream = Stream::new(BufReader::new(child.stdout.unwrap()), child.stdin.unwrap());
+
+        let ustream = UnixStream::connect(SOCKET).expect("failed to connect to socket");
+        let ustream2 = ustream.try_clone().unwrap();
+        let stream = Stream::new(BufReader::new(ustream), ustream2);
+        // unix:/tmp/qemu.sock,server
+
+        let mut qmp = Qmp::new(stream);
+
+        let info = qmp.handshake().expect("handshake failed");
+        println!("QMP info: {:#?}", info);
+
+        let pager = PagedMemory::new(
+            image,
+            /* tracing enabled=*/ true,
+            page_buf.as_mut_ptr(),
+        );
+        qmp.execute(&r0vm_reset_pages {}).unwrap();
+
+        Self {
+            qmp,
+            pager,
+            _page_buf: page_buf,
+            trace_enabled,
+            trace_events: Vec::new(),
+            _mu: mu,
+        }
+    }
+
     pub fn reset(&mut self) {
-        unsafe { r0vm_reset_pages() };
-        self.pager.reset();
+        self.qmp.execute(&r0vm_reset_pages {}).unwrap();
     }
 
     pub(crate) fn trace_events(&self) -> &[PageTraceEvent] {
@@ -126,16 +172,18 @@ impl Qemu {
     pub fn process_trace_events(&mut self) {
         for event in self.pager.trace_events() {
             match *event {
-                PageTraceEvent::PageIn { page_idx, .. } => unsafe {
+                PageTraceEvent::PageIn { page_idx, .. } => {
                     if page_idx > 0 {
-                        r0vm_set_page_readable(page_idx)
+                        self.qmp.execute(&r0vm_mark_page_read { page_idx }).unwrap();
                     }
-                },
-                PageTraceEvent::PageOut { page_idx, .. } => unsafe {
+                }
+                PageTraceEvent::PageOut { page_idx, .. } => {
                     if page_idx > 0 {
-                        r0vm_set_page_writable(page_idx)
+                        self.qmp
+                            .execute(&r0vm_mark_page_write { page_idx })
+                            .unwrap();
                     }
-                },
+                }
             }
         }
         if self.trace_enabled {
@@ -145,50 +193,47 @@ impl Qemu {
     }
 
     pub fn step(&mut self, ctx: &mut impl Risc0Context, cycle_budget: usize) -> Result<()> {
-        let mut task_state = TaskState {
-            pc: ctx.get_pc().0,
-            machine_mode: ctx.get_machine_mode(),
-            cycle_budget: cycle_budget as u32,
-            badaddr: 0,
-        };
-
         let base = if ctx.get_machine_mode() != 0 {
             MACHINE_REGS_ADDR.waddr()
         } else {
             USER_REGS_ADDR.waddr()
         };
+        let mut in_regs = Vec::new();
         for idx in 0..REG_MAX {
-            let val = self.pager.load_register(base, idx);
-            unsafe {
-                r0vm_set_register(&mut task_state, idx as u32, val);
-            }
+            in_regs.push(self.pager.load_register(base, idx));
         }
+        DID_QEMU.store(true, Ordering::Relaxed);
 
-        let trapnr = unsafe { r0vm_run_some(&mut task_state) };
+        let in_state = R0VMState {
+            pc: ctx.get_pc().0,
+            registers: in_regs,
+            machine_mode: ctx.get_machine_mode() > 0,
+            cycle_budget: cycle_budget as u32,
+        };
 
-        for idx in 0..REG_MAX {
-            let val = unsafe { r0vm_get_register(&mut task_state, idx as u32) };
-            self.pager.store_register(base, idx, val);
-        }
+        let out_state = self
+            .qmp
+            .execute(&r0vm_run_some { state: in_state })
+            .unwrap();
 
         assert!(
-            task_state.cycle_budget as usize <= cycle_budget,
+            out_state.cycle_budget as usize <= cycle_budget,
             "input budget: {cycle_budget} output budget: {}",
-            task_state.cycle_budget
+            out_state.cycle_budget
         );
 
-
-        let mut cycles_used = cycle_budget - task_state.cycle_budget as usize;
-        if trapnr == 8 {
-            println!("trapnr fixup");
-            cycles_used -= 1;
-        }
+        let cycles_used = cycle_budget - out_state.cycle_budget as usize;
         ctx.inc_user_cycles(cycles_used, /*ecall=*/ None);
-        println!("qemu cycles used: {cycles_used}");
+        tracing::trace!("qemu cycles used: {cycles_used}");
 
         // TODO: Do we want qemu to be able to update machine mode?
-        assert_eq!(task_state.machine_mode, ctx.get_machine_mode());
-        ctx.set_pc(ByteAddr(task_state.pc));
+        assert_eq!(out_state.machine_mode, ctx.get_machine_mode() > 0);
+        ctx.set_pc(ByteAddr(out_state.pc));
+        for idx in 0..REG_MAX {
+            self.pager
+                .store_register(base, idx, out_state.registers[idx]);
+        }
+
         Ok(())
     }
 }

@@ -70,6 +70,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
     ecall_metrics: EcallMetrics,
+    tracker: super::qemu::Tracker,
 }
 
 #[non_exhaustive]
@@ -148,11 +149,12 @@ fn compute_partial_images(
 
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn new(
-        image: MemoryImage,
+        mut image: MemoryImage,
         syscall_handler: &'a S,
         input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     ) -> Self {
+        let image_id = image.image_id();
         Self {
             pc: ByteAddr(0),
             user_pc: ByteAddr(0),
@@ -171,13 +173,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             trace,
             cycles: SessionCycles::default(),
             ecall_metrics: EcallMetrics::default(),
+            tracker: super::qemu::Tracker::new(image_id)
         }
     }
 
     fn pager_mut(&mut self) -> RefMut<'_, PagedMemory> {
         RefMut::map(self.qemu.borrow_mut(), |q: &mut Qemu| &mut q.pager)
     }
-    
+
     fn pager(&self) -> Ref<'_, PagedMemory> {
         Ref::map(self.qemu.borrow(), |q| &q.pager)
     }
@@ -265,37 +268,44 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
                     self.user_cycles = 0;
                     self.pager_mut().reset();
+                    self.qemu.borrow_mut().reset();
 
                     Risc0Machine::resume(self)?;
                 }
 
                 let mut cycles_remain: usize = (segment_threshold - self.segment_cycles()) as usize;
-                tracing::trace!("cycles remain {cycles_remain} after {}", self.segment_cycles());
+                tracing::trace!(
+                    "cycles remain {cycles_remain} after {}",
+                    self.segment_cycles()
+                );
                 if let Some(max_cycles) = max_cycles {
                     let user_cycles_remain = max_cycles - self.cycles.user;
                     if (user_cycles_remain as usize) < cycles_remain {
                         cycles_remain = user_cycles_remain as usize;
-                            tracing::trace!("user specified less: {cycles_remain}");
+                        tracing::trace!("user specified less: {cycles_remain}");
                     }
                 }
                 if cycles_remain > u32::MAX as usize {
                     cycles_remain = u32::MAX as usize
                 }
-                if cycles_remain > 3  /* && self.user_cycles == 10  */ {
+                if cycles_remain > 5  /* && self.user_cycles == 10  */    {
                     tracing::trace!("adjusted cycles remain: {cycles_remain}");
                     {
-                    let rc = Rc::clone(&self.qemu);
-                    let mut qemu = rc.borrow_mut();
-                        qemu.step(self,  cycles_remain - 3)?;
-//                        qemu.step(self,  3)?;
+                        let rc = Rc::clone(&self.qemu);
+                        let mut qemu = rc.borrow_mut();
+                                                qemu.step(self,  cycles_remain - 3)?;
+                        //                        qemu.step(self, 3)?;
                     }
                     tracing::trace!("after qemu, segment cycles = {}", self.segment_cycles());
                 }
-//                if self.user_cycles >= 9 && self.user_cycles <= 11 {
-//                    let mut mach = Risc0Machine{ctx:self};
-//                    mach.dump_registers(true)?;
-//                    mach.dump_registers(false)?;
-//                }
+                //                if self.user_cycles >= 9 && self.user_cycles <= 11 {
+                //                    let mut mach = Risc0Machine{ctx:self};
+                //                    mach.dump_registers(true)?;
+                //                    mach.dump_registers(false)?;
+                //                }
+                self.tracker.track(
+                    self.segment_cycles() as usize + segment_counter as usize * segment_limit as usize,
+                    self.pc.0);
                 Risc0Machine::step(&mut emu, self).map_err(|err| {
                     let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
                     if let Err(inner) = result {
@@ -305,6 +315,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     }
                 })?;
                 self.qemu.borrow_mut().process_trace_events();
+//                super::qemu::TRACKER.lock().unwrap().track(
+//                    self.user_cycles as usize + segment_counter as usize * segment_limit as usize,
+//                    self.pc.0,
+//                );
+                self.tracker.track(
+                    self.segment_cycles() as usize + segment_counter as usize * segment_limit as usize,
+                    self.pc.0);
             }
 
             Risc0Machine::suspend(self)?;
@@ -357,6 +374,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             terminate_state: self.terminate_state,
             shutdown_cycle: None,
         };
+
+        self.tracker.dump();
 
         Ok(ExecutorResult {
             segments: segment_counter + 1,

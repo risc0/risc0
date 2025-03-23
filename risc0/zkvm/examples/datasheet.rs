@@ -143,7 +143,7 @@ struct Datasheet {
 
 impl Datasheet {
     pub fn run(&mut self, args: Args) {
-        self.warmup();
+        if false {self.warmup();}
 
         if let Some(ref cmd) = args.command {
             self.run_cmd(cmd, &args);

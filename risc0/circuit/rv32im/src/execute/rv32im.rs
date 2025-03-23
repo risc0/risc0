@@ -398,7 +398,7 @@ impl Emulator {
         let word = ctx.load_memory(pc.waddr())?;
         tracing::trace!("pc: {:#x} (ctx says {:#x}) word: {:#x}", pc.0, ctx.get_pc().0, word);
         if word & 0x03 != 0x03 {
-            if true {panic!("uh oh!");}
+            if true {panic!("uh oh! illegal instruction encountered");}
             ctx.trap(Exception::IllegalInstruction(word, 0))?;
             return Ok(());
         }
@@ -418,11 +418,11 @@ impl Emulator {
             InsnCategory::System => self.step_system(ctx, insn.kind, &decoded)?,
             InsnCategory::Invalid => ctx.trap(Exception::IllegalInstruction(word, 1))?,
         } {
-            tracing::trace!("Normal end, pc = {:?}", ctx.get_pc().0);
+            tracing::trace!("Normal end, pc = {:#X}", ctx.get_pc().0);
             ctx.on_normal_end(&insn, &decoded)?;
         };
 
-            tracing::trace!("step done, pc = {:?}", ctx.get_pc().0);
+            tracing::trace!("step done, pc = {:#X}", ctx.get_pc().0);
         Ok(())
     }
 

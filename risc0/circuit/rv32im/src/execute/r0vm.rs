@@ -18,6 +18,7 @@ use anyhow::{anyhow, bail, Result};
 use enum_map::Enum;
 use risc0_binfmt::{ByteAddr, WordAddr};
 
+
 use super::{
     platform::*,
     poseidon2::{Poseidon2, Poseidon2State},

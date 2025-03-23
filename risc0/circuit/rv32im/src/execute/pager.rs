@@ -367,6 +367,10 @@ impl PagedMemory {
     }
 
     fn page_for_writing(&mut self, page_idx: u32) -> Result<UnsafePage> {
+        tracing::trace!(
+            "page for writing: {page_idx:#08x} start: {:#x}",
+            page_idx as usize * PAGE_BYTES
+        );
         let node_idx = node_idx(page_idx);
         let mut state = self.page_states.get(node_idx);
         if state == PageState::Unloaded {
@@ -375,6 +379,7 @@ impl PagedMemory {
         };
 
         if state == PageState::Loaded {
+            tracing::trace!("marking dirty");
             self.cycles += PAGE_CYCLES;
             self.trace_page_out(PAGE_CYCLES, page_idx);
             self.fixup_costs(node_idx, PageState::Dirty);

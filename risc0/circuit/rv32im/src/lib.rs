@@ -21,6 +21,8 @@ pub mod prove;
 pub mod trace;
 mod zirgen;
 
+pub(crate) use qapi_qmp::QmpCommand;
+
 use core::num::TryFromIntError;
 
 use anyhow::{anyhow, ensure, Result};
