@@ -270,7 +270,7 @@ pub const BUILD_HELP: &str = "Discussion:
     the default version. The resulting component version contains the commit hash.";
 
 #[derive(Parser)]
-#[clap(group(
+#[command(group(
     ArgGroup::new("mode")
         .args(&["tag_or_commit", "path"])
         .required(true)
