@@ -359,11 +359,20 @@ impl PagedMemory {
     pub(crate) fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) {
         if base == USER_REGS_ADDR.waddr() {
             self.user_registers[idx] = word;
+            // needed because sometimes priv mode will go read registers from memory directly.
+            unsafe {
+                (self.base.add(USER_REGS_ADDR.0 as usize) as *mut u32).add(idx).write(word);
+            }
         } else if base == MACHINE_REGS_ADDR.waddr() {
             self.machine_registers[idx] = word;
+            // needed because sometimes priv mode will go read registers from memory directly.
+            unsafe {
+                (self.base.add(MACHINE_REGS_ADDR.0 as usize) as *mut u32).add(idx).write(word);
+            }
         } else {
             unimplemented!("unknown register address {base:?}");
         }
+        self.write_registers();
     }
 
     fn page_for_writing(&mut self, page_idx: u32) -> Result<UnsafePage> {

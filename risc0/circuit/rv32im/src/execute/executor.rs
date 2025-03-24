@@ -196,6 +196,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
         let mut segment_counter = 0;
+        let qemu_start : u32 = std::env::var("QEMU_START").unwrap_or("999999".to_string()).parse().unwrap();
+        // ^^ 38 dies for datasheet fastests
 
         self.reset();
 
@@ -288,16 +290,22 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 if cycles_remain > u32::MAX as usize {
                     cycles_remain = u32::MAX as usize
                 }
-                if cycles_remain > 5  /* && self.user_cycles == 10  */    {
+                let mut mach = Risc0Machine{ctx:self};
+                mach.dump_registers(true)?;
+                mach.dump_registers(false)?;
+                if cycles_remain > 5  { //  && self.user_cycles == qemu_start {
                     tracing::trace!("adjusted cycles remain: {cycles_remain}");
-                    {
+                    if true {
                         let rc = Rc::clone(&self.qemu);
                         let mut qemu = rc.borrow_mut();
                                                 qemu.step(self,  cycles_remain - 3)?;
-                        //                        qemu.step(self, 3)?;
+                        //qemu.step(self, 1)?;
+                    } else {
+                        
                     }
                     tracing::trace!("after qemu, segment cycles = {}", self.segment_cycles());
                 }
+                assert!(self.user_cycles < qemu_start * 2);
                 //                if self.user_cycles >= 9 && self.user_cycles <= 11 {
                 //                    let mut mach = Risc0Machine{ctx:self};
                 //                    mach.dump_registers(true)?;
@@ -478,10 +486,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     #[cold]
     fn trace_instruction(&self, cycle: u64, insn: &Instruction, decoded: &DecodedInstruction) {
         tracing::trace!(
-            "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
+            "[{}:{}:{cycle}] {:?}{}> {:#010x}  {}",
             self.user_cycles + 1,
             self.segment_cycles() + 1,
             self.pc,
+            if self.machine_mode > 0 { " M" } else { ""},
             decoded.insn,
             disasm(insn, decoded)
         );

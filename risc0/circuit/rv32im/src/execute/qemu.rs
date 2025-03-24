@@ -69,12 +69,13 @@ impl Tracker {
     }
 
     pub(crate) fn track(&mut self, user_cycles: usize, pc: u32) {
+        if true { return }
         if self.elems.len() <= user_cycles {
             self.elems.resize(user_cycles + 1, None);
         }
 
         let elem = &mut self.elems[user_cycles];
-        eprintln!("user_cycles: {user_cycles} pc: {pc} expecting {elem:?}");
+        tracing::trace!("user_cycles: {user_cycles} pc: {pc} expecting {elem:?}");
         if elem.is_some() {
             assert!(elem.unwrap() == pc);
         } else {

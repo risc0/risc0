@@ -21,6 +21,7 @@ pub mod prove;
 pub mod trace;
 mod zirgen;
 
+#[cfg(not(target_os = "zkvm"))]
 pub(crate) use qapi_qmp::QmpCommand;
 
 use core::num::TryFromIntError;
