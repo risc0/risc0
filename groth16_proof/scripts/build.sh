@@ -19,8 +19,8 @@ set -eoux
 # pieces for individual compilation, and we want to use clang anyway.
 cp scripts/replacement-Makefile groth16/stark_verify_cpp/Makefile
 # Replace witgen library files which won't build on aarch64 as-is
-cp scripts/replacement-fr.hpp groth16/stark_verify_cpp/fr.hpp
-cp scripts/replacement-fr.cpp groth16/stark_verify_cpp/fr.cpp
+cp scripts/replacement-fr.hpp-x groth16/stark_verify_cpp/fr.hpp
+cp scripts/replacement-fr.cpp-x groth16/stark_verify_cpp/fr.cpp
 
 # Break the generated program into more manageable pieces.
 python3 scripts/chunk.py groth16/stark_verify_cpp/stark_verify.cpp
