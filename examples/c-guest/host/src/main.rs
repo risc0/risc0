@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::fs;
+use rand::Rng;
 
 use risc0_zkvm::{compute_image_id, default_prover, ExecutorEnv};
 
@@ -27,7 +28,14 @@ fn main() -> anyhow::Result<()> {
     let consensus_elf = fs::read("./guest/out/main")?;
     let consensus_id = compute_image_id(&consensus_elf)?;
 
+    // Generate random bytes for entropy
+    let mut rng = rand::thread_rng();
+    let entropy_bytes: Vec<u8> = (0..16).map(|_| rng.gen::<u8>()).collect();
+
     let env = ExecutorEnv::builder()
+        // First send entropy bytes
+        .write_slice(&entropy_bytes)
+        // Then send the main data
         .write_slice(&7u32.to_le_bytes())
         .write_slice(&11u32.to_le_bytes())
         .build()?;
