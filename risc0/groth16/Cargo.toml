@@ -60,6 +60,3 @@ std = [
   "serde/std",
 ]
 unstable = []
-
-[lints]
-workspace = true

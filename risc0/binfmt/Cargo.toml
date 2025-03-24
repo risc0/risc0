@@ -47,6 +47,3 @@ std = [
   "tracing/log",
   "tracing/std",
 ]
-
-[lints]
-workspace = true

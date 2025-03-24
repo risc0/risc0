@@ -26,6 +26,3 @@ all-features = true
 [features]
 perf = ["dep:nvtx", "dep:puffin"]
 std = []
-
-[lints]
-workspace = true

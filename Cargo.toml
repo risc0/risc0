@@ -74,6 +74,3 @@ opt-level = 3
 
 [profile.release]
 lto = true
-
-[workspace.lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(test)'] }

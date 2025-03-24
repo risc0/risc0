@@ -203,6 +203,3 @@ std = [
 ]
 unstable = ["risc0-zkvm-platform/unstable"]
 witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]
-
-[lints]
-workspace = true
