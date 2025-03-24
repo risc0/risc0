@@ -111,6 +111,7 @@ pub struct FileLock(File);
 
 impl Drop for FileLock {
     fn drop(&mut self) {
+        #[allow(unstable_name_collisions)]
         drop(self.0.unlock());
     }
 }
