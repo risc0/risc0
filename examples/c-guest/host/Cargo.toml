@@ -7,6 +7,7 @@ edition = "2021"
 anyhow = "1.0"
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+rand = "0.8"
 
 [build-dependencies]
 risc0-build = { path = "../../../risc0/build/" }
