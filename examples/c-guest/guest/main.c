@@ -15,14 +15,43 @@
 #include "platform.h"
 #include <assert.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 
 union u32_cast {
   uint32_t value;
   uint8_t buffer[4];
 };
 
+// Simple bit mixing function for increased entropy
+uint32_t mix_bits(uint32_t value) {
+  value = value ^ (value << 13);
+  value = value ^ (value >> 17);
+  value = value ^ (value << 5);
+  return value;
+}
+
 int main() {
-  // TODO introduce entropy into memory image (for zk)
+  // Introducing entropy into memory image for zk proofs
+  // Create and use a value that will affect the overall memory state
+  // without changing the program logic
+  volatile uint32_t entropy_seed = 0;
+  uint8_t entropy_bytes[16];
+  
+  // Get additional random data from the host
+  assert(env_read(entropy_bytes, sizeof(entropy_bytes)) == sizeof(entropy_bytes));
+  
+  // Mix entropy into memory
+  for (size_t i = 0; i + 3 < sizeof(entropy_bytes); i += 4) {
+    uint32_t entropy_chunk = 
+      ((uint32_t)entropy_bytes[i]) | 
+      ((uint32_t)entropy_bytes[i+1] << 8) | 
+      ((uint32_t)entropy_bytes[i+2] << 16) | 
+      ((uint32_t)entropy_bytes[i+3] << 24);
+    
+    entropy_seed ^= mix_bits(entropy_chunk);
+  }
+  
   sha256_state* hasher = init_sha256();
 
   // Read two u32 values from the host, assuming LE byte order.
