@@ -260,6 +260,8 @@ impl<'a> Preflight<'a> {
     }
 
     fn fini(&mut self) -> Result<()> {
+        let start_cycles = self.trace.cycles.len();
+
         for i in (16..256).step_by(16) {
             self.add_cycle_special(
                 CycleState::ControlTable,
@@ -287,6 +289,7 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+
         if self.segment.claim.terminate_state.is_none() {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
@@ -295,6 +298,7 @@ impl<'a> Preflight<'a> {
             let diff = self.trace.cycles.len() - segment_threshold;
             self.trace.cycles[diff / 2].diff_count[diff % 2] += 1;
         }
+
         self.machine_mode = 1;
         self.add_cycle_special(
             CycleState::ControlDone,
@@ -303,6 +307,8 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+        assert_eq!(self.trace.cycles.len() - start_cycles, RESERVED_CYCLES);
+
         let last_cycle = 1 << self.segment.po2;
         for _ in self.trace.cycles.len()..last_cycle {
             self.add_cycle_special(
