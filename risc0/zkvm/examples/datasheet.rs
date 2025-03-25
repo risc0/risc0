@@ -23,7 +23,7 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im::{execute::LOOKUP_TABLE_CYCLES, MAX_INSN_CYCLES};
+use risc0_circuit_rv32im::{execute::RESERVED_CYCLES, MAX_INSN_CYCLES};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
@@ -53,7 +53,7 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
 const ITERATIONS_1M_CYCLES: usize = 1024 * 507 + 2;
-const EXPECTED_RESERVED_CYCLES: usize = LOOKUP_TABLE_CYCLES + MAX_INSN_CYCLES;
+const EXPECTED_RESERVED_CYCLES: usize = RESERVED_CYCLES + MAX_INSN_CYCLES;
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
