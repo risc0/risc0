@@ -202,9 +202,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     }
                 }
 
-                if self.segment_cycles() >= segment_threshold {
+                if self.segment_cycles() > segment_threshold {
                     tracing::debug!(
-                        "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {} >= {segment_threshold}",
+                        "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
                         self.user_cycles,
                         self.pager.cycles,
                         self.segment_cycles()
@@ -384,7 +384,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn segment_cycles(&self) -> u32 {
-        self.user_cycles + self.pager.cycles + LOOKUP_TABLE_CYCLES as u32
+        self.user_cycles + self.pager.cycles + RESERVED_CYCLES as u32
     }
 
     fn inc_user_cycles(&mut self, count: usize, ecall: Option<EcallKind>) {
