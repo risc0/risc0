@@ -28,7 +28,7 @@ use super::{
 };
 
 pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
-pub const MIN_CYCLES_PO2: usize = log2_ceil(LOOKUP_TABLE_CYCLES + RESERVED_PAGING_CYCLES as usize);
+pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
 pub struct NullSyscall;
