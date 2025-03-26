@@ -532,10 +532,10 @@ impl Datasheet {
     }
 
     fn warmup(&self) {
+        println!("warmup");
+
         #[cfg(any(feature = "cuda", feature = "metal"))]
         {
-            println!("warmup");
-
             let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
 
