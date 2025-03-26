@@ -32,7 +32,7 @@ fn main() {
         .file("stark_verify_cpp/main.cpp")
         .file("stark_verify_cpp/calcwit.cpp")
         .file("stark_verify_cpp/fr.cpp")
-        .files(glob_paths("stark_verify_cpp/stark-verify-*.cpp"))
+        .files(glob_paths("stark_verify_cpp/stark_verify-*.cpp"))
         .files(glob_paths("stark_verify_cpp/Verify_347_run*.cpp"))
         .compile("stark_verify");
 }
