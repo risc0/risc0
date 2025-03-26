@@ -80,6 +80,7 @@ pub mod docker;
 mod seal_format;
 #[cfg(feature = "prove")]
 mod seal_to_json;
+pub mod stark_verify;
 mod verifier;
 
 pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
