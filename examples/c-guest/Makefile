@@ -42,7 +42,7 @@ gcc:
 	else \
 		echo "riscv32 toolchain already exists, skipping step"; \
     fi
-	 
+
 .PHONY: guest
 guest: gcc platform
 	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/main.c -o ./guest/out/main -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -T ./guest/riscv32im-risc0-zkvm-elf.ld
