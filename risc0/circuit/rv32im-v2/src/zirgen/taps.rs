@@ -16,6 +16,7 @@
 
 use risc0_zkp::taps::{TapData, TapSet};
 
+#[allow(clippy::empty_line_after_outer_attr)]
 #[allow(missing_docs)]
 
 pub const TAPSET: &TapSet = &TapSet::<'static> {

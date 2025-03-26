@@ -68,7 +68,7 @@ impl<'a> Injector<'a> {
         let pc = pc + 4u32;
         let bytes = pc.0.to_le_bytes();
         let bot2 = bytes[3] & 0b11;
-        let top2 = bytes[3] >> 2 & 0b11;
+        let top2 = (bytes[3] >> 2) & 0b11;
         let pc = DATA_LAYOUT.mux.body.pc;
         self.add(pc.bytes[0], bytes[0] as u32);
         self.add(pc.bytes[1], bytes[1] as u32);

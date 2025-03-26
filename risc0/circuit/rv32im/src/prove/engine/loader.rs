@@ -74,7 +74,7 @@ pub static SHA_K: [u32; SHA_K_SIZE] = [
 ];
 
 const fn div_ceil(a: usize, b: usize) -> usize {
-    (a + b - 1) / b
+    a.div_ceil(b)
 }
 
 const fn setup_count(regs: usize) -> usize {

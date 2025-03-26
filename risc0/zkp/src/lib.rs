@@ -16,6 +16,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![allow(clippy::needless_lifetimes)]
 
 extern crate alloc;
 

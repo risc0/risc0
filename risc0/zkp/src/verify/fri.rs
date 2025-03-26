@@ -110,8 +110,7 @@ where
         let orig_domain = INV_RATE * degree;
         let mut domain = orig_domain;
         // Prep the folding verifiers
-        let rounds_capacity =
-            (log2_ceil((degree + FRI_FOLD - 1) / FRI_FOLD) + FRI_FOLD_PO2 - 1) / FRI_FOLD_PO2;
+        let rounds_capacity = log2_ceil(degree.div_ceil(FRI_FOLD)).div_ceil(FRI_FOLD_PO2);
         let mut rounds = Vec::with_capacity(rounds_capacity);
         while degree > FRI_MIN_DEGREE {
             rounds.push(VerifyRoundInfo::new(iop, hashfn, domain));

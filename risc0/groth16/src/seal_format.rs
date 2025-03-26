@@ -22,7 +22,7 @@ pub(crate) enum IopType {
     Digest,
 }
 
-pub(crate) const K_SEAL_TYPES: [IopType; K_SEAL_ELEMS] = [
+pub(crate) static K_SEAL_TYPES: [IopType; K_SEAL_ELEMS] = [
     IopType::Fp,
     IopType::Fp,
     IopType::Fp,

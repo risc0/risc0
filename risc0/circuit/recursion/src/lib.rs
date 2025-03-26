@@ -27,6 +27,8 @@
 //! This is a low-level interface; users should prefer to use the
 //! `risc0_zkvm` crate.
 
+#![allow(clippy::needless_lifetimes)]
+
 extern crate alloc;
 
 pub mod control_id;

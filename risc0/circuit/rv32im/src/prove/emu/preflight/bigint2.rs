@@ -68,12 +68,12 @@ impl Instruction {
     // mmmmppppcccaaaaaoooooooooooooooo
     pub fn decode(insn: u32) -> Result<Self> {
         Ok(Self {
-            mem_op: MemoryOp::from_u32(insn >> 28 & 0x0f)
+            mem_op: MemoryOp::from_u32((insn >> 28) & 0x0f)
                 .ok_or(anyhow!("Invalid mem_op in bigint2 program"))?,
-            poly_op: PolyOp::from_u32(insn >> 24 & 0x0f)
+            poly_op: PolyOp::from_u32((insn >> 24) & 0x0f)
                 .ok_or(anyhow!("Invalid poly_op in bigint2 program"))?,
-            coeff: (insn >> 21 & 0x07) as i32 - 4,
-            reg: insn >> 16 & 0x1f,
+            coeff: ((insn >> 21) & 0x07) as i32 - 4,
+            reg: (insn >> 16) & 0x1f,
             offset: insn & 0xffff,
         })
     }

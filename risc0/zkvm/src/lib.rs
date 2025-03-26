@@ -16,6 +16,8 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![allow(clippy::needless_lifetimes)]
+#![allow(clippy::needless_as_bytes)]
 
 //! The RISC Zero zkVM is a RISC-V virtual machine that produces [zero-knowledge
 //! proofs] of code it executes. By using the zkVM, a cryptographic [receipt] is

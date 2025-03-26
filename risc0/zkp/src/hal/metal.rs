@@ -877,7 +877,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
 }
 
 fn simple_launch_params(count: u32, threads_per_group: u32) -> (MTLSize, MTLSize) {
-    let groups = (count + threads_per_group - 1) / threads_per_group;
+    let groups = count.div_ceil(threads_per_group);
     (
         MTLSize::new(groups.into(), 1, 1),
         MTLSize::new(threads_per_group.into(), 1, 1),

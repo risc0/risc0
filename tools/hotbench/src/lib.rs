@@ -114,7 +114,7 @@ fn make_filename_safe(string: &str) -> String {
     )
 }
 
-impl<'a> Bencher<'a> {
+impl Bencher<'_> {
     #[inline(never)]
     pub fn iter<I, O, S, R>(&self, items: usize, mut setup: S, mut routine: R)
     where

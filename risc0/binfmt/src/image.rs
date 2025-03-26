@@ -105,7 +105,7 @@ fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
 
 /// Compute `ceil(a / b)` via truncated integer division.
 const fn div_ceil(a: u32, b: u32) -> u32 {
-    (a + b - 1) / b
+    a.div_ceil(b)
 }
 
 /// Round `a` up to the nearest multiple of `b`.

@@ -226,6 +226,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
     // parallel processing.  E.g., if we have to resolve any calls to
     // BACK.
     fn set_not_splittable(&mut self, ctx: &CircuitStepContext) {
+        #[allow(clippy::unnecessary_map_or)]
         if self
             .split_points
             .last()
