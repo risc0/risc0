@@ -3992,7 +3992,6 @@ name = "risc0-sys"
 version = "1.4.0"
 dependencies = [
  "anyhow",
- "blst",
  "cust",
  "risc0-build-kernel",
  "sppark",
