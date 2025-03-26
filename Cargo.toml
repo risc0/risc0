@@ -63,7 +63,7 @@ risc0-zkos-v1compat = { version = "2.0.0", path = "risc0/zkos/v1compat" }
 risc0-zkvm = { version = "2.0.1", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "2.0.1", default-features = false, path = "risc0/zkvm/platform" }
 rzup = { version = "0.4.0", default-features = false, path = "rzup" }
-sppark = "0.1.10"
+sppark = "0.1.11"
 
 [profile.bench]
 lto = true

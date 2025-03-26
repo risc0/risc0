@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ use risc0_zkp::{
     },
     hal::{
         cuda::{
-            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashSha256,
-            DeviceExtElem,
+            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashPoseidon254,
+            CudaHashSha256, DeviceExtElem,
         },
         AccumPreflight, Buffer, CircuitHal, Hal,
     },
@@ -222,6 +222,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
 pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
+pub type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
 
 #[cfg(test)]
 mod tests {
