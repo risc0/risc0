@@ -33,7 +33,7 @@ platform:
 .PHONY: headers
 headers:
     # Note: this is currently broken on main, as there is a FFI incompatible type
-	cbindgen --crate zkvm-platform -c ./platform/cbindgen.toml -o ./guest/platform.h
+	cd ./platform && cbindgen --crate zkvm-platform -c ./cbindgen.toml -o ../guest/platform.h
 
 .PHONY: gcc
 gcc:
@@ -45,7 +45,7 @@ gcc:
 
 .PHONY: guest
 guest: gcc platform
-	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/main.c -o ./guest/out/main -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -T ./guest/riscv32im-risc0-zkvm-elf.ld
+	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/main.c -o ./guest/out/main -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -T ./guest/riscv32im-risc0-zkvm-elf.ld -D DEFINE_ZKVM
 
 .PHONY: execute
 execute: guest
