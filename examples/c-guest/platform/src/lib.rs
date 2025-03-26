@@ -49,6 +49,14 @@ _start:
 
 const ERR_FREED: &[u8] = b"error: sha256_state has not been initialized or has already been freed";
 
+#[cfg(target_os = "zkvm")]
+#[no_mangle]
+pub extern "C" fn init_allocator() {
+    unsafe {
+        risc0_zkvm_platform::heap::init();
+    }
+}
+
 /// C wrapper for guest sha256 implementation.
 ///
 /// This is used in the guest to generate any sha256

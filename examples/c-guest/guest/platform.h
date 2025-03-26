@@ -251,8 +251,7 @@ typedef uint32_t Digest[DIGEST_WORDS];
 
 
 
-
-
+void init_allocator(void);
 
 struct sha256_state *init_sha256(void);
 
