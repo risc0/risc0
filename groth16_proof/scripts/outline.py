@@ -60,19 +60,19 @@ with open(source_file, "r") as input:
                 chunk_file_name = f"{func_name}_{step_name}.cpp"
                 chunk_path = os.path.join(dest_dir, chunk_file_name)
                 with open(chunk_path, "w") as output:
-                    output.write(f'#include "{func_name}.h"\n')
+                    output.write(f'#include "{func_name}.hpp"\n')
                     output.write(f'void {method_name}{param_decls}{{\n')
                     output.writelines(cur_chunk)
                     output.write("}\n")
                 cur_chunk = []
         nesting -= line.count("}")
 
-globals_path = os.path.join(dest_dir, func_name + ".h")
+globals_path = os.path.join(dest_dir, func_name + ".hpp")
 global_decls.append("};\n")
 with open(globals_path, "w") as output:
     output.writelines(global_decls)
 
 main_path = os.path.join(dest_dir, func_name + ".cpp")
 with open(main_path, "w") as output:
-    output.write(f'#include "{func_name}.h"\n')
+    output.write(f'#include "{func_name}.hpp"\n')
     output.writelines(main)

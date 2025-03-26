@@ -9,7 +9,7 @@ import os
 source_file = sys.argv[1]
 dest_base, dest_ext = os.path.splitext(source_file)
 decls = []
-chunk = [f'#include "{os.path.basename(dest_base)}.h"\n']
+chunk = [f'#include "{os.path.basename(dest_base)}.hpp"\n']
 chunk_index = 1
 with open(source_file, 'r') as input:
     nesting = 0
@@ -46,6 +46,6 @@ if len(chunk) > 1:
 # Add one inexplicably missing declaration
 decls.append("void release_memory_component(Circom_CalcWit* ctx, uint pos);")
 # Write the header file
-with open(f"{dest_base}.h", "w") as output:
+with open(f"{dest_base}.hpp", "w") as output:
     output.writelines(decls)
 
