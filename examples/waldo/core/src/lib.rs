@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[macro_use]
-extern crate merkle_light_derive;
-
 pub mod image;
 pub mod merkle;
 

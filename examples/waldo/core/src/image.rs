@@ -16,6 +16,8 @@ use image::{DynamicImage, GrayImage, Rgb, RgbImage};
 use serde::{Deserialize, Serialize};
 
 use crate::merkle::{MerkleTree, Node};
+use merkle_light::hash::Hashable;
+use std::hash::Hasher;
 
 /// Recommended default chunk size to use in the ImageMerkleTree and
 /// ImageOracle.
@@ -24,11 +26,19 @@ pub const IMAGE_CHUNK_SIZE: u32 = 8;
 // Chunk struct used internally to wrap the raw bytes and include a width value.
 // Important for chunks at the edge of the image which may have a width or
 // height of less than N.
-#[derive(Debug, Clone, Serialize, Deserialize, Hashable)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct ImageChunk {
     data: Vec<u8>,
     width: u32,
     height: u32,
+}
+
+impl<H: Hasher> Hashable<H> for ImageChunk {
+    fn hash(&self, state: &mut H) {
+        self.data.hash(state);
+        self.width.hash(state);
+        self.height.hash(state);
+    }
 }
 
 impl From<RgbImage> for ImageChunk {
