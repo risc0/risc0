@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,18 +15,12 @@
 #[cfg(test)]
 mod tests {
     use risc0_groth16::stark_verify;
+    use std::path::Path;
 
     #[test]
     fn test_stark_verify() {
-        unsafe {
-            let datbuf = stark_verify::CIRCUIT_DATA.as_ptr();
-            let datsize = stark_verify::CIRCUIT_DATA.len();
-            const JSONFILE: &[u8] = "input.json".as_bytes();
-            let jsonfile = JSONFILE.as_ptr();
-            const WTNSFILE: &[u8] = "output.wtns".as_bytes();
-            let wtnsfile = WTNSFILE.as_ptr();
-            let _ret = stark_verify::calc_witness(
-                datbuf, datsize as u64, jsonfile, wtnsfile);
-        }
+        let input_path = Path::new("input.json");
+        let output_path = Path::new("output.wtns");
+        let _ret = stark_verify::calc_witness(input_path, output_path);
     }
 }
