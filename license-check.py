@@ -4,6 +4,7 @@ import sys
 import os
 from pathlib import Path
 import subprocess
+import argparse
 
 PUBLIC_HEADER = """
 // Copyright {YEAR} RISC Zero, Inc.
@@ -44,7 +45,7 @@ def check_header(expected_year, lines_actual):
     return None
 
 
-def check_file(root, file):
+def check_file(root, file, replace):
     cmd = ["git", "log", "-1", "--format=%ad", "--date=format:%Y", file]
     expected_year = subprocess.check_output(cmd, encoding="UTF-8").strip()
     rel_path = file.relative_to(root)
@@ -54,9 +55,21 @@ def check_file(root, file):
         print(f"{rel_path}: invalid header!")
         print(f"  expected: {result[0]}")
         print(f"    actual: {result[1]}")
+        if replace:
+            replace_header(file, result[0], result[1])
         return 1
     return 0
 
+def replace_header(file, expected, actual):
+    content=""
+    with open(file, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    new_content = content.replace(actual, expected)
+    with open(file, 'w', encoding='utf-8') as f:
+        f.write(new_content)
+
+    return None
 
 def repo_root():
     """Return an absolute Path to the repo root"""
@@ -73,6 +86,11 @@ def tracked_files():
 
 
 def main():
+
+    parser = argparse.ArgumentParser(description="to update years, use the --write option")
+    parser.add_argument("--write", action="store_true", help="modify files with correct year")
+    args = parser.parse_args()
+
     root = repo_root()
     ret = 0
     for path in tracked_files():
@@ -85,7 +103,7 @@ def main():
             if skip:
                 continue
 
-            ret |= check_file(root, path)
+            ret |= check_file(root, path, args.write)
     sys.exit(ret)
 
 
