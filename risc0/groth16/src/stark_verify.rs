@@ -18,16 +18,28 @@
 //! desired path of the output `.wtns` file.
 
 
-use std::os::raw::{c_int, c_ulong};
+use std::{
+    os::raw::{c_int, c_ulong},
+    path::Path,
+};
 
 extern "C" {
     #[allow(dead_code)]
     /// Verify an input and generate a witness file.
-    pub fn calc_witness(datbuf: *const u8, datsize: c_ulong, jsonfile: *const u8, wtnsfile: *const u8) -> c_int;
+    fn internal_calc_witness(datbuf: *const u8, datsize: c_ulong, jsonfile: *const u8, wtnsfile: *const u8) -> c_int;
 }
 
 #[allow(dead_code)]
 /// Circuit data which must be provided to stark_verify.
-pub const CIRCUIT_DATA: &[u8] = include_bytes!("../stark_verify_cpp/stark_verify.dat");
+const CIRCUIT_DATA: &[u8] = include_bytes!("../stark_verify_cpp/stark_verify.dat");
 
-
+/// Verify an input and generate a witness file.
+pub fn calc_witness(jsonfile: &Path, wtnsfile: &Path) -> i32 {
+    let datptr = CIRCUIT_DATA.as_ptr();
+    let datlen = CIRCUIT_DATA.len() as u64;
+    let json_arg = jsonfile.to_str().unwrap().as_bytes().as_ptr();
+    let wtns_arg = wtnsfile.to_str().unwrap().as_bytes().as_ptr();
+    unsafe {
+        return internal_calc_witness(datptr, datlen, json_arg, wtns_arg);
+    }
+}

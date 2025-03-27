@@ -313,8 +313,11 @@ void writeBinWitness(Circom_CalcWit *ctx, std::string wtnsFileName) {
     fclose(write_ptr);
 }
 
-extern "C" {
-int calc_witness(u8 *bdata, size_t sb_st_size, const char *argv1, const char *argv2) {
+extern "C" int internal_calc_witness(
+        u8 *bdata,
+        size_t sb_st_size,
+        const char *argv1,
+        const char *argv2) {
     std::string jsonfile(argv1);
     std::string wtnsfile(argv2);
 
@@ -329,6 +332,5 @@ int calc_witness(u8 *bdata, size_t sb_st_size, const char *argv1, const char *ar
     }
     writeBinWitness(ctx,wtnsfile);
     return 0;
-}
 }
 

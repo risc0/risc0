@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ fn main() {
         .flag("-Wno-address-of-packed-member")
         .flag("-Wno-unused-parameter")
         .flag("-Wno-sign-compare")
+        .flag("-Wno-unused-variable")
+        .flag("-Wno-unused-but-set-variable")
+        .flag("-Wno-type-limits")
         .flag("-O0")
         .include("stark_verify_cpp")
         .file("stark_verify_cpp/main.cpp")
