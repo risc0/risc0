@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <nlohmann/json.hpp>
 #include <vector>
-#include <chrono>
+#include <stdexcept>
 
 using json = nlohmann::json;
 
@@ -321,16 +321,21 @@ extern "C" int internal_calc_witness(
     std::string jsonfile(argv1);
     std::string wtnsfile(argv2);
 
-    Circom_Circuit *circuit = loadCircuit(bdata, sb_st_size);
+    try {
+        Circom_Circuit *circuit = loadCircuit(bdata, sb_st_size);
 
-    Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
+        Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
 
-    loadJson(ctx, jsonfile);
-    if (ctx->getRemaingInputsToBeSet()!=0) {
-      std::cerr << "Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << std::endl;
-      return 1;
+        loadJson(ctx, jsonfile);
+        if (ctx->getRemaingInputsToBeSet()!=0) {
+          std::cerr << "Not all inputs have been set. Only " << get_main_input_signal_no()-ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << std::endl;
+          return 1;
+        }
+        writeBinWitness(ctx,wtnsfile);
+        return 0;
+    } catch (std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
     }
-    writeBinWitness(ctx,wtnsfile);
-    return 0;
 }
 
