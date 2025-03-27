@@ -905,6 +905,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "blst"
+version = "0.3.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47c79a94619fade3c0b887670333513a67ac28a6a7e653eb260bf0d4103db38d"
+dependencies = [
+ "cc",
+ "glob",
+ "threadpool",
+ "zeroize",
+]
+
+[[package]]
 name = "bonsai-sdk"
 version = "1.4.0"
 dependencies = [
@@ -1070,7 +1082,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "bincode",
@@ -3407,6 +3419,12 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
+
+[[package]]
+name = "hermit-abi"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc"
@@ -4597,6 +4615,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "num_cpus"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
+dependencies = [
+ "hermit-abi 0.3.9",
+ "libc",
+]
+
+[[package]]
 name = "number_prefix"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5580,7 +5608,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "anyhow",
  "clap 4.5.32",
@@ -5608,7 +5636,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -5628,7 +5656,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -5663,7 +5691,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5695,7 +5723,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "cc",
  "cust",
@@ -5709,7 +5737,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5736,7 +5764,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5747,7 +5775,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -5782,7 +5810,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "cc",
  "cust",
@@ -5808,7 +5836,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -5832,7 +5860,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -5851,9 +5879,10 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "anyhow",
+ "blst",
  "cust",
  "risc0-build-kernel",
  "sppark",
@@ -5880,7 +5909,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -5913,7 +5942,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -6015,7 +6044,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -6563,9 +6592,9 @@ dependencies = [
 
 [[package]]
 name = "sppark"
-version = "0.1.10"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac5090642d9ae844edd9a5c23cb1fce6724ca88d50c55178ee8d1f656df5826b"
+checksum = "16bf457036c0a778140ce4c3bcf9ff30c5c70a9d9c0bb04fe513af025b647b2c"
 dependencies = [
  "cc",
  "which 4.4.2",
@@ -6972,6 +7001,15 @@ checksum = "8b9ef9bad013ada3808854ceac7b46812a6465ba368859a37e2100283d2d719c"
 dependencies = [
  "cfg-if",
  "once_cell",
+]
+
+[[package]]
+name = "threadpool"
+version = "1.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d050e60b33d41c19108b32cea32164033a9013fe3b46cbd4457559bfbf77afaa"
+dependencies = [
+ "num_cpus",
 ]
 
 [[package]]
