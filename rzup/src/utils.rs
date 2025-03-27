@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ pub struct FileLock(File);
 
 impl Drop for FileLock {
     fn drop(&mut self) {
+        #[allow(unstable_name_collisions)]
         drop(self.0.unlock());
     }
 }

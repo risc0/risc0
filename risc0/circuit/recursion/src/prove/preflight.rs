@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -226,6 +226,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
     // parallel processing.  E.g., if we have to resolve any calls to
     // BACK.
     fn set_not_splittable(&mut self, ctx: &CircuitStepContext) {
+        #[allow(clippy::unnecessary_map_or)]
         if self
             .split_points
             .last()

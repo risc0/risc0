@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@
 //!
 //! This is a low-level interface; users should prefer to use the
 //! `risc0_zkvm` crate.
+
+#![allow(clippy::needless_lifetimes)]
 
 extern crate alloc;
 

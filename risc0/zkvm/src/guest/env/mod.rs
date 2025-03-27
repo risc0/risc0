@@ -155,6 +155,7 @@ pub(crate) fn init() {
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         #[cfg(feature = "unstable")]
+        #[allow(static_mut_refs)]
         KECCAK2_BATCHER.take().unwrap().finalize();
 
         #[allow(static_mut_refs)]
@@ -502,8 +503,12 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 ///
 /// While is accesses a static mutable, this is considered safe because the zkVM
 /// is single-threaded and non-preemptive.
+#[cfg(target_os = "zkvm")]
 #[cfg(feature = "unstable")]
 #[no_mangle]
 pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
-    unsafe { KECCAK2_BATCHER.get_mut().unwrap().update(state) }
+    #[allow(static_mut_refs)]
+    unsafe {
+        KECCAK2_BATCHER.get_mut().unwrap().update(state)
+    }
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
 
 /// Compute `ceil(a / b)` via truncated integer division.
 const fn div_ceil(a: u32, b: u32) -> u32 {
-    (a + b - 1) / b
+    a.div_ceil(b)
 }
 
 /// Round `a` up to the nearest multiple of `b`.

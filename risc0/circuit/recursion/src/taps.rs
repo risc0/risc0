@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 use risc0_zkp::taps::{TapData, TapSet};
 
+#[allow(clippy::empty_line_after_outer_attr)]
 #[allow(missing_docs)]
 
 pub const TAPSET: &TapSet = &TapSet::<'static> {

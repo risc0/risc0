@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
 /// [composition]: https://dev.risczero.com/terminology#composition
 pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
+    #[allow(clippy::unnecessary_map_or)]
     let assumptions_empty = claim
         .output
         .as_value()?

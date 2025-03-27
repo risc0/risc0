@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ impl<'de, R: WordRead + 'de> Deserializer<'de, R> {
     fn try_take_dword(&mut self) -> Result<u64> {
         let low = self.try_take_word()? as u64;
         let high = self.try_take_word()? as u64;
-        Ok(low | high << 32)
+        Ok(low | (high << 32))
     }
 }
 

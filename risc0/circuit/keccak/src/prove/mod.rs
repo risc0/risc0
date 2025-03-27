@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ where
             for (i, word) in digest.as_mut_words().iter_mut().enumerate() {
                 let low: u32 = slice[i * 2].into();
                 let high: u32 = slice[i * 2 + 1].into();
-                *word = low | high << 16;
+                *word = low | (high << 16);
             }
             tracing::debug!("final digest: {digest}");
 
