@@ -75,6 +75,7 @@ impl Keccak2Batcher {
         }
     }
 
+    #[allow(dead_code)]
     pub fn update(&mut self, keccak_state: &mut KeccakState) {
         self.inputs.push(*keccak_state);
         sha_single_keccak(&mut self.claim_state, keccak_state);
