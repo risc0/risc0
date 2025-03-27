@@ -22,7 +22,7 @@ ENTRY(_start)
 MEMORY {
   stack        : ORIGIN = 0x00004000, LENGTH =  0x001FC400
   ram          : ORIGIN = 0x00200800, LENGTH =  0xBFDFF800
-  system  (X)  : ORIGIN = 0xC0000000, LENGTH =  0xF4000000
+  system  (X)  : ORIGIN = 0xC0000000, LENGTH =  0x40000000
 }
 
 SECTIONS {
