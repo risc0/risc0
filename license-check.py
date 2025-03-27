@@ -62,14 +62,13 @@ def check_file(root, file, replace):
 
 def replace_header(file, expected, actual):
     content=""
-    with open(file, 'r', encoding='utf-8') as f:
+    with open(file, 'r+', encoding='utf-8') as f:
         content = f.read()
-
-    new_content = content.replace(actual, expected)
-    with open(file, 'w', encoding='utf-8') as f:
+        f.seek(0)
+        new_content = content.replace(actual, expected, 1)
         f.write(new_content)
-
-    return None
+        f.truncate()
+        f.close()
 
 def repo_root():
     """Return an absolute Path to the repo root"""
@@ -87,8 +86,8 @@ def tracked_files():
 
 def main():
 
-    parser = argparse.ArgumentParser(description="to update years, use the --write option")
-    parser.add_argument("--write", action="store_true", help="modify files with correct year")
+    parser = argparse.ArgumentParser(description="to update years, use the --fix option")
+    parser.add_argument("--fix", action="store_true", help="modify files with correct year")
     args = parser.parse_args()
 
     root = repo_root()
@@ -103,7 +102,7 @@ def main():
             if skip:
                 continue
 
-            ret |= check_file(root, path, args.write)
+            ret |= check_file(root, path, args.fix)
     sys.exit(ret)
 
 
