@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    path::PathBuf,
-};
-
 fn main() {
     let mut build = cc::Build::new();
     println!("cargo::rerun-if-changed=stark_verify_cpp/main.cpp");
+    println!("cargo::rerun-if-changed=stark_verify_cpp/stark_verify.cpp");
+    println!("cargo::rerun-if-changed=stark_verify_cpp/fr.cpp");
+    println!("cargo::rerun-if-changed=stark_verify_cpp/fr.hpp");
+    println!("cargo::rerun-if-changed=stark_verify_cpp/calcwit.cpp");
+    println!("cargo::rerun-if-changed=stark_verify_cpp/calcwit.hpp");
     println!("cargo::rustc-link-lib=gmp");
     build
         .cpp(true)
@@ -30,16 +31,13 @@ fn main() {
         .flag("-Wno-unused-variable")
         .flag("-Wno-unused-but-set-variable")
         .flag("-Wno-type-limits")
+        .flag("-flarge-source-files")
         .flag("-O0")
         .include("stark_verify_cpp")
         .file("stark_verify_cpp/main.cpp")
         .file("stark_verify_cpp/calcwit.cpp")
         .file("stark_verify_cpp/fr.cpp")
-        .files(glob_paths("stark_verify_cpp/stark_verify-*.cpp"))
-        .files(glob_paths("stark_verify_cpp/Verify_347_run*.cpp"))
+        .file("stark_verify_cpp/stark_verify.cpp")
         .compile("stark_verify");
 }
 
-fn glob_paths(pattern: &str) -> Vec<PathBuf> {
-    glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
-}
