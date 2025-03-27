@@ -2,6 +2,12 @@
 
 ## Next (upcoming release)
 
+## [v1.2.6 (2025-03-27)](https://github.com/risc0/risc0/releases/tag/v1.2.6)
+
+### Features
+
+* risc0-build: enable guest-side rust 1.85.0 toolchain
+
 ## [v1.2.4 (2025-02-19)](https://github.com/risc0/risc0/releases/tag/v1.2.4)
 
 ### Fixes
