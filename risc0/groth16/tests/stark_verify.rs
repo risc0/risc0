@@ -15,12 +15,26 @@
 #[cfg(test)]
 mod tests {
     use risc0_groth16::stark_verify;
-    use std::path::Path;
+    use std::{
+        fs::File,
+        io::Write,
+    };
+    use tempfile::tempdir;
+
+    const INPUT_DATA: &[u8] = include_bytes!("data/proof.json");
+    // const EXPECT_DATA: &[u8] = include_bytes!("data/expect.wtns");
 
     #[test]
     fn test_stark_verify() {
-        let input_path = Path::new("input.json");
-        let output_path = Path::new("output.wtns");
-        let _ret = stark_verify::calc_witness(input_path, output_path);
+        let dir = tempdir().unwrap();
+        let in_path = dir.path().join("input.json");
+        let mut in_file = File::create(&in_path).unwrap();
+        in_file.write_all(&INPUT_DATA).unwrap();
+        let out_path = dir.path().join("output.wtns");
+        let ret = stark_verify::calc_witness(&in_path, &out_path);
+        assert!(0 == ret);
+        // load output and compare against expected value
+        drop(in_file);
+        dir.close().unwrap();
     }
 }
