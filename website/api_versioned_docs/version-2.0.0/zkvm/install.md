@@ -57,7 +57,7 @@ versions of components are published.
 
 In order to avoid this, `rzup` should be run in CI using the following commands:
 
-```
+```sh
 rzup install rust 1.81.0 # set this to the desired risc0 rust toolchain.
 rzup install cpp 2024.1.5 # only required if the guest uses any C++ code or rust crates that bind to C++ code.
 rzup install r0vm 2.0.0 # should be the same version as cargo-risczero and risc0-zkvm crate
