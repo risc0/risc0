@@ -21,20 +21,32 @@ mod tests {
     };
     use tempfile::tempdir;
 
-    const INPUT_DATA: &[u8] = include_bytes!("data/proof.json");
-    // const EXPECT_DATA: &[u8] = include_bytes!("data/expect.wtns");
-
-    #[test]
-    fn test_stark_verify() {
+    fn test_witgen(input: &[u8], expect: &[u8]) {
         let dir = tempdir().unwrap();
         let in_path = dir.path().join("input.json");
         let mut in_file = File::create(&in_path).unwrap();
-        in_file.write_all(&INPUT_DATA).unwrap();
+        in_file.write_all(&input).unwrap();
         let out_path = dir.path().join("output.wtns");
         let ret = stark_verify::calc_witness(&in_path, &out_path);
         assert!(0 == ret);
-        // load output and compare against expected value
+        let wtns = std::fs::read(out_path).unwrap();
+        assert_eq!(wtns, &*expect);
         drop(in_file);
         dir.close().unwrap();
     }
+
+    #[test]
+    fn test_loop() {
+        const INPUT: &[u8] = include_bytes!("data/loop-seal.json");
+        const EXPECT: &[u8] = include_bytes!("data/loop.wtns");
+        test_witgen(INPUT, EXPECT);
+    }
+
+    #[test]
+    fn test_fib() {
+        const INPUT: &[u8] = include_bytes!("data/fib-seal.json");
+        const EXPECT: &[u8] = include_bytes!("data/fib.wtns");
+        test_witgen(INPUT, EXPECT);
+    }
+
 }
