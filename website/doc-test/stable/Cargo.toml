@@ -7,10 +7,10 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
-risc0-zkvm = { git = "https://github.com/risc0/risc0.git", branch = "release-1.2", features = [
+risc0-zkvm = { git = "https://github.com/risc0/risc0.git", branch = "release-2.0", features = [
   "prove",
 ] }
-risc0-zkvm-methods = { git = "https://github.com/risc0/risc0.git", branch = "release-1.2" }
+risc0-zkvm-methods = { git = "https://github.com/risc0/risc0.git", branch = "release-2.0" }
 serde = { version = "1.0", features = ["derive"] }
 
 [build-dependencies]
