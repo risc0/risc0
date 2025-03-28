@@ -54,6 +54,7 @@ pub use self::{
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
+const DEFAULT_DOCKER_TAG: &str = "r0.1.85.0";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
