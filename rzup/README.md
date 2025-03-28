@@ -149,3 +149,24 @@ rzup stores its installations in:
 When communicating with GitHub, it tries using authentication. This can be useful to get around
 rate-limiting. It attempts to get a token from the `GITHUB_TOKEN` environment variable, then from
 ~/.config/gh/hosts.yml.
+
+## Using `rzup` in CI
+
+When using `rzup` in CI environments, it's important to pin each component to
+the desired version. Invoking `rzup install` will download the latest software
+released by RISC Zero and may cause CI environments to suddenly fail when new
+versions of components are published.
+
+In order to avoid this, `rzup` should be run in CI using the following commands:
+
+```
+rzup install rust 1.81.0
+rzup install cpp 2024.1.5 # only required if the guest uses any C++ code or rust crates that bind to C++ code.
+rzup install r0vm 2.0.0 # should be the same version as cargo-risczero and risc0-zkvm crate
+rzup install cargo-risczero 2.0.0 # should be the same version as cargo-risczero and risc0-zkvm crate
+```
+
+Once new versions of components are released, this allows CI maintainers to bump
+each component individually. Note: `r0vm` and `cargo-risczero` should use the
+same version numbers and this version number should match the version of the
+`risc0-zkvm` crate in the project.
