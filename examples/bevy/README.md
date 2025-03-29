@@ -2,6 +2,10 @@
 
 This code demonstrates a minimal example of how to use the [bevy] game engine inside the RISC Zero [zkVM].
 
+## Performance
+
+Game engines like Bevy can be computationally intensive when run inside a zkVM. For faster development and testing, we recommend running this example on [Bonsai] or using the [`DEV_MODE`][DEV_MODE].
+
 ## Quick Start
 
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
@@ -10,6 +14,12 @@ Then, run the example with:
 
 ```bash
 cargo run --release
+```
+
+Or in [`DEV_MODE`][DEV_MODE] for much faster execution:
+
+```bash
+RISC0_DEV_MODE=1 cargo run --release
 ```
 
 ## Use Cases
@@ -35,6 +45,8 @@ For more information about building, running, and testing zkVM applications, see
 [`src/main.rs`]: src/main.rs
 [bevy]: https://bevyengine.org/
 [Bonsai application]: https://dev.bonsai.xyz
+[Bonsai]: https://dev.bonsai.xyz/apply
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
 [developer docs]: https://dev.risczero.com/zkvm
 [ECDSA]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
