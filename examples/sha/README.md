@@ -2,6 +2,10 @@
 
 This code demonstrates how to provably compute the SHA-256 hash of a string using RISC Zero.
 
+## Performance
+
+While the SHA-256 implementation in the zkVM is optimized using hardware acceleration, generating zero-knowledge proofs still requires computational resources. For faster development and testing, we recommend running this example on [Bonsai] or using the [`DEV_MODE`][DEV_MODE].
+
 ## Quick Start
 
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
@@ -10,6 +14,12 @@ Then, run the example with:
 
 ```bash
 cargo run --release
+```
+
+Or in [`DEV_MODE`][DEV_MODE] for much faster execution:
+
+```bash
+RISC0_DEV_MODE=1 cargo run --release
 ```
 
 Notable details:
@@ -27,3 +37,5 @@ Note that the code snippets in this video are based on the 0.14 version of the z
 
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [RustCrypto]: https://docs.rs/sha2/latest/sha2/
+[Bonsai]: https://dev.bonsai.xyz/apply
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
