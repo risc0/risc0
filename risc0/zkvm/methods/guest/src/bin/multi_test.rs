@@ -266,13 +266,34 @@ fn main() {
             }
             env::log("Busy loop complete");
         }
-        MultiTestSpec::BigInt { x, y, modulus } => {
+        MultiTestSpec::BigInt {
+            count,
+            x,
+            y,
+            modulus,
+        } => {
             let mut result = [0u32; bigint::WIDTH_WORDS];
-            unsafe {
-                sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus);
+            for _ in 0..count {
+                unsafe { sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus) };
             }
             env::commit_slice(&result);
         }
+        MultiTestSpec::BigIntRaw {
+            result,
+            x,
+            y,
+            modulus,
+        } => unsafe {
+            asm!(
+                "ecall",
+                in("t0") ecall::BIGINT,
+                in("a0") result,
+                in("a1") bigint::OP_MULTIPLY,
+                in("a2") x,
+                in("a3") y,
+                in("a4") modulus,
+            );
+        },
         MultiTestSpec::LibM => {
             use core::hint::black_box;
             let f = black_box(1.0_f32);
