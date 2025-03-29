@@ -32,6 +32,11 @@ tracing = { version = "0.1", optional = true }
 [dev-dependencies]
 serde_json = { version = "1.0" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tempfile = "3"
+
+[build-dependencies]
+cc = { version = "1.2.2", features = ["parallel"] }
+glob = "0.3"
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
