@@ -20,7 +20,17 @@ env:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            target: x86_64-unknown-linux-gnu
+          - os: macOS
+            arch: ARM64
+            target: aarch64-apple-darwin
     permissions:
       pull-requests: read
     outputs:
@@ -38,7 +48,17 @@ jobs:
   circom-compat:
     if: needs.changes.outputs.check == 'true'
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            target: x86_64-unknown-linux-gnu
+          - os: macOS
+            arch: ARM64
+            target: aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go 1.23
