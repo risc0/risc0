@@ -4,6 +4,10 @@ This simple password checker is implemented in Rust. The program is implemented 
 
 The policy checker accepts a password string and a salt from the host driver and checks the validity of the password. A password validity-checking function then examines the password and panics if criteria are not met. If the password meets validity criteria, execution proceeds and the zkVM appends a hash of the salted password to the journal. The journal is a readable record of all values committed by code in the zkVM; it is attached to the receipt (a record of correct execution).
 
+## Performance
+
+Cryptographic operations in the zkVM can be resource-intensive. For faster development and testing, we recommend running this example on [Bonsai] or using the [`DEV_MODE`][DEV_MODE].
+
 ## Quick Start
 
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
@@ -12,6 +16,12 @@ Then, run the example with:
 
 ```bash
 cargo run --release
+```
+
+Or in [`DEV_MODE`][DEV_MODE] for much faster execution:
+
+```bash
+RISC0_DEV_MODE=1 cargo run --release
 ```
 
 ## Why use zkVM to run this?
@@ -36,3 +46,5 @@ This is example code meant to illustrate the fundamentals of programming with th
 For a walk-through of the fundamentals of this example, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=Yg_BGqj_6lg\&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5\&index=5).
 
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[Bonsai]: https://dev.bonsai.xyz/apply
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
