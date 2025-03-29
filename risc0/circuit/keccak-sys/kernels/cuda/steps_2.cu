@@ -20,8 +20,8 @@ namespace risc0::circuit::keccak::cuda {
 __device__ void step_Top_1(ExecContext& ctx, MutableBuf arg0) {
   // Reg(<preamble>:5)
   // ControlState(zirgen/circuit/keccak/top.zir:403)
-  // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:449)
-  // Top(zirgen/circuit/keccak/top.zir:483)
+  // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:451)
+  // Top(zirgen/circuit/keccak/top.zir:486)
   set(ctx, arg0, 12, Val(0));
   // ControlState(zirgen/circuit/keccak/top.zir:404)
   set(ctx, arg0, 13, Val(0));
@@ -34,7 +34,7 @@ __device__ void step_Top_1(ExecContext& ctx, MutableBuf arg0) {
 __device__ void step_Top_17(ExecContext& ctx, MutableBuf arg0) {
   // ControlState(zirgen/circuit/keccak/top.zir:403)
   // ShaNextBlock(zirgen/circuit/keccak/top.zir:433)
-  // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:463)
+  // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:465)
   set(ctx, arg0, 12, Val(9));
   // ControlState(zirgen/circuit/keccak/top.zir:404)
   set(ctx, arg0, 13, get(ctx, arg0, 13, 1));
@@ -46,7 +46,7 @@ __device__ void step_Top_17(ExecContext& ctx, MutableBuf arg0) {
 }
 __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   // TopState(zirgen/circuit/keccak/top.zir:36)
-  // Top(zirgen/circuit/keccak/top.zir:500)
+  // Top(zirgen/circuit/keccak/top.zir:503)
   Val x1 = get(ctx, arg0, 16, 2);
   Val x2 = get(ctx, arg0, 17, 2);
   Val x3 = get(ctx, arg0, 18, 2);
@@ -848,12 +848,12 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   Val x799 = get(ctx, arg0, 814, 2);
   Val x800 = get(ctx, arg0, 815, 2);
   // ControlState(zirgen/circuit/keccak/top.zir:406)
-  // Top(zirgen/circuit/keccak/top.zir:479)
+  // Top(zirgen/circuit/keccak/top.zir:482)
   Val x801 = get(ctx, arg0, 15, 0);
   // builtin Mul
-  // Chi(zirgen/circuit/keccak/keccak.zir:73)
+  // Chi(zirgen/circuit/keccak/keccak.zir:75)
   // KeccakRound34(zirgen/circuit/keccak/top.zir:117)
-  // Top(zirgen/circuit/keccak/top.zir:500)
+  // Top(zirgen/circuit/keccak/top.zir:503)
   Val x802 = ((Val(1) - x33) * x65);
   // builtin Sub
   // BitXor(zirgen/circuit/keccak/bits.zir:34)
@@ -4855,8 +4855,8 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   Val x2401 = ((x800 + x2400) - ((x800 * Val(2)) * x2400));
   // builtin Isz
   // OneHot(zirgen/circuit/keccak/one_hot.zir:7)
-  // RoundToArray(zirgen/circuit/keccak/keccak.zir:114)
-  // Iota(zirgen/circuit/keccak/keccak.zir:121)
+  // RoundToArray(zirgen/circuit/keccak/keccak.zir:117)
+  // Iota(zirgen/circuit/keccak/keccak.zir:124)
   Val x2402 = isz((Val(0) - x801));
   // builtin NondetReg
   // NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
@@ -4977,7 +4977,7 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   // NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
   set(ctx, arg0, 962, x2425);
   // builtin Add
-  // RoundToArray(zirgen/circuit/keccak/keccak.zir:116)
+  // RoundToArray(zirgen/circuit/keccak/keccak.zir:119)
   Val x2426 = ((get(ctx, arg0, 941, 0) + get(ctx, arg0, 942, 0)) + get(ctx, arg0, 945, 0));
   Val x2427 =
       (((x2426 + get(ctx, arg0, 946, 0)) + get(ctx, arg0, 952, 0)) + get(ctx, arg0, 953, 0));
@@ -4988,7 +4988,7 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   Val x2430 = (x2429 + get(ctx, arg0, 962, 0));
   // builtin Sub
   // BitXor(zirgen/circuit/keccak/bits.zir:34)
-  // Iota(zirgen/circuit/keccak/keccak.zir:125)
+  // Iota(zirgen/circuit/keccak/keccak.zir:128)
   Val x2431 = ((x2430 + x865) - ((x2430 * Val(2)) * x865));
   // builtin NondetReg
   // Reg(<preamble>:5)
@@ -5915,7 +5915,7 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
 }
 __device__ void step_Top_49(ExecContext& ctx, MutableBuf arg0) {
   // TopState(zirgen/circuit/keccak/top.zir:36)
-  // Top(zirgen/circuit/keccak/top.zir:501)
+  // Top(zirgen/circuit/keccak/top.zir:504)
   Val x1 = get(ctx, arg0, 535, 1);
   Val x2 = get(ctx, arg0, 546, 1);
   Val x3 = get(ctx, arg0, 531, 1);
@@ -6569,7 +6569,7 @@ __device__ void step_Top_49(ExecContext& ctx, MutableBuf arg0) {
   // builtin Mul
   // Div(<preamble>:22)
   // CarryExtract(zirgen/circuit/keccak/sha2.zir:35)
-  // CarryAndExpand(zirgen/circuit/keccak/sha2.zir:44)
+  // CarryAndExpand(zirgen/circuit/keccak/sha2.zir:45)
   // DoShaStep(zirgen/circuit/keccak/top.zir:138)
   Val x187 = (bitAnd(x186, Val(983040)) * Val(2013235201));
   // builtin NondetReg
@@ -6925,7 +6925,7 @@ __device__ void step_Top_49(ExecContext& ctx, MutableBuf arg0) {
   // ShaCycle(zirgen/circuit/keccak/top.zir:200)
   Val x285 = (((x266 + (x267 * Val(16384))) + (x268 * Val(32768))) + (x276 + x284));
   Val x286 = (((x227 + x228) + x229) + x285);
-  // CarryAndExpand(zirgen/circuit/keccak/sha2.zir:45)
+  // CarryAndExpand(zirgen/circuit/keccak/sha2.zir:46)
   // DoShaStep(zirgen/circuit/keccak/top.zir:138)
   Val x287 = (x286 + x189);
   // builtin Mul
@@ -6947,8 +6947,8 @@ __device__ void step_Top_49(ExecContext& ctx, MutableBuf arg0) {
   Val x290 = (x287 - ((x289 + get(ctx, arg0, 1068, 0)) * Val(65536)));
   // builtin NondetReg
   // NondetBitReg(zirgen/circuit/keccak/bits.zir:13)
-  // UnpackReg(zirgen/circuit/keccak/pack.zir:52)
-  // CarryAndExpand(zirgen/circuit/keccak/sha2.zir:46)
+  // UnpackReg(zirgen/circuit/keccak/pack.zir:53)
+  // CarryAndExpand(zirgen/circuit/keccak/sha2.zir:47)
   set(ctx, arg0, 752, bitAnd(x190, Val(1)));
   set(ctx, arg0, 753, (bitAnd(x190, Val(2)) * Val(1006632961)));
   set(ctx, arg0, 754, (bitAnd(x190, Val(4)) * Val(1509949441)));
