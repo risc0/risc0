@@ -81,7 +81,7 @@ crates it may be possible to enable precompile support without code changes by
 applying a [Cargo patch][cargo-patch].
 
 An example of how to use these crates to accelerate ECDSA signature verification
-can be in the [ECDSA example][ecdsa]. Note the [use of the patched
+can be in found the [ECDSA example][ecdsa]. Note the [use of the patched
 versions][ecdsa-patched] of `sha2`, `crypto-bigint` and `k256` crates used in
 the guest's `Cargo.toml`.
 
@@ -112,7 +112,7 @@ precompiles that are still undergoing revision and review, and so users must opt
 features by setting the `"unstable"` [feature flag][feature-flag] on the `risc0-zkvm` crate used by
 the zkVM guest and by the `risc0-build` crate used to build the guest. These also require using
 versions `>=1.2.0` of `risc0` crates. For users who need a stable, production-ready version we are
-working on stablizing these precompiles as soon as possible, and the `"unstable"` feature flag will
+working on stabilizing these precompiles as soon as possible, and the `"unstable"` feature flag will
 no longer be required.
 
 [^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA
