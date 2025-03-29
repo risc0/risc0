@@ -8,6 +8,10 @@ designed to help you get started building zkVM applications.
 For a step-by-step guide to building your first zkVM application, we recommend
 [this tutorial][tutorial].
 
+## Performance
+
+As zkVM applications may require significant computational resources to prove, we recommend running this example on [Bonsai] or using the [`DEV_MODE`][DEV_MODE] for faster iteration during development.
+
 ## Quick Start
 
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
@@ -16,6 +20,12 @@ Then, run the example with:
 
 ```bash
 cargo run --release
+```
+
+Or in [`DEV_MODE`][DEV_MODE] for much faster execution:
+
+```bash
+RISC0_DEV_MODE=1 cargo run --release
 ```
 
 Congratulations! You just constructed a zero-knowledge proof that you know the
@@ -74,3 +84,4 @@ tutorial][tutorial]. For more materials, check out the [developer docs].
 [tutorial]: https://dev.risczero.com/api/zkvm/tutorials/hello-world
 [verify]: https://dev.risczero.com/terminology#verify
 [zkVM]: https://dev.risczero.com/zkvm
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
