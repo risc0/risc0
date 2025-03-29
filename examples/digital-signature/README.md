@@ -2,6 +2,10 @@
 
 A simple digital signature scheme built on the RISC Zero platform.
 
+## Performance
+
+Cryptographic signature generation and verification in the zkVM can be resource-intensive. For faster development and testing, we recommend running this example on [Bonsai] or using the [`DEV_MODE`][DEV_MODE].
+
 ## Quick Start
 
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
@@ -10,6 +14,12 @@ Then, run the example with:
 
 ```bash
 cargo run --release -- "This is a signed message" --passphrase="passw0rd"
+```
+
+Or in [`DEV_MODE`][DEV_MODE] for much faster execution:
+
+```bash
+RISC0_DEV_MODE=1 cargo run --release -- "This is a signed message" --passphrase="passw0rd"
 ```
 
 ## Summary
@@ -40,3 +50,5 @@ passphrase. Sending those along with the message covers the full scope of a
 typical digital signature scheme.
 
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[Bonsai]: https://dev.bonsai.xyz/apply
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
