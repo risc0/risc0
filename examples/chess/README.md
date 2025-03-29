@@ -4,6 +4,10 @@ This code demonstrates a minimal example of how to use the RISC Zero [zkVM] to m
 
 The demo uses the [shakmaty] crate to prove that a chess position has a checkmate without revealing what that checkmate is.
 
+## Performance
+
+Chess validation can be computationally intensive. For faster development and testing, we recommend running this example on [Bonsai] or using the [`DEV_MODE`][DEV_MODE].
+
 ## Quick Start
 
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
@@ -12,6 +16,12 @@ Then, run the example with:
 
 ```bash
 cargo run --release
+```
+
+Or in [`DEV_MODE`][DEV_MODE] for much faster execution:
+
+```bash
+RISC0_DEV_MODE=1 cargo run --release
 ```
 
 Congratulations! You just constructed a zero-knowledge proof that includes a mate-in-one.
@@ -50,6 +60,8 @@ The [guest code] checks that applying the move to the initial board state is leg
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
 [Bonsai application]: https://dev.bonsai.xyz
+[Bonsai]: https://dev.bonsai.xyz/apply
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
 [developer docs]: https://dev.risczero.com
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
