@@ -126,13 +126,13 @@ pub struct Receipt {
     /// information to help with interoperability. It is not cryptographically bound to the receipt,
     /// and should not be used for security-relevant decisions, such as choosing whether or not to
     /// accept a receipt based on it's stated version.
-    pub metadata: ReceiptMetadata,
+    pub claim: ReceiptClaim,
 }
 
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
-        let metadata = ReceiptMetadata {
+        let claim = ReceiptClaim {
             verifier_parameters: inner.verifier_parameters(),
         };
         Self {
@@ -455,7 +455,7 @@ where
 /// it's stated version.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
-pub struct ReceiptMetadata {
+pub struct ReceiptClaim {
     /// Information which can be used to decide whether a given verifier is compatible with this
     /// receipt (i.e. that it may be able to verify it).
     ///
