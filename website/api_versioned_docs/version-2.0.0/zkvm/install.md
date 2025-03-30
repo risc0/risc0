@@ -48,9 +48,34 @@ To update your installation:
 
 After you update your installation, be sure to update your project's RISC Zero crates. To do this, you must update all RISC Zero dependencies in your project's host and guest `Cargo.toml` files. In most projects, this is done by updating the host and guest `risc0-zkvm` crate and the `risc0-build` build dependency. They should be updated to use the version number displayed by `cargo risczero --version`.
 
+## Using `rzup` in CI
+
+When using `rzup` in CI environments, it's important to pin each component to
+the desired version. Invoking `rzup install` will download the latest software
+released by RISC Zero and may cause CI environments to suddenly fail when new
+versions of components are published.
+
+In order to avoid this, `rzup` should be run in CI using the following commands:
+
+```sh
+rzup install rust 1.81.0 # set this to the desired risc0 rust toolchain.
+rzup install cpp 2024.1.5 # only required if the guest uses any C++ code or rust crates that bind to C++ code.
+rzup install r0vm 2.0.0 # should be the same version as cargo-risczero and risc0-zkvm crate
+rzup install cargo-risczero 2.0.0 # should be the same version as cargo-risczero and risc0-zkvm crate
+```
+
+Once new versions of components are released, this allows CI maintainers to bump
+each component individually. Note: `r0vm` and `cargo-risczero` should use the
+same version numbers and this version number should match the version of the
+`risc0-zkvm` crate in the project.
+
+In order to see the latest releases for risc0-zkvm crate and the `r0vm`/`cargo-risczero` utilities see [releases].
+In order to see the latest releases for the rust toolchain see [Rust-releases].
+
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [releases]: https://github.com/risc0/risc0/releases
 [Rust]: https://www.rust-lang.org
+[Rust-releases]: https://github.com/risc0/rust/releases
 [rustup]: https://rustup.rs
 [rzup-repo]: https://github.com/risc0/risc0/tree/release-2.0/rzup
