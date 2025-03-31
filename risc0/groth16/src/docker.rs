@@ -26,7 +26,7 @@ use std::{
 };
 
 use anyhow::{bail, Result};
-use tempfile::tempdir;
+use tempfile::tempdir_in;
 
 use crate::{to_json, ProofJson, Seal};
 
