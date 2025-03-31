@@ -7,8 +7,8 @@ Verify that a RISC Zero program is in your browser using WASM!
 In addition to [Rust] and [Node.js], you will need to run from the root of the repository:
 
 ```bash
-cargo xtask install
-cargo xtask gen-receipt
+cargo xfast install
+cargo xfast gen-receipt
 ```
 
 Next, install the `cargo-risczero` tool and install the toolchain with:
