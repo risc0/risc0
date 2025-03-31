@@ -142,8 +142,14 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
     .concat()
     .join(" ");
 
+    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
+    let docker_tag = format!(
+        "risczero/risc0-guest-builder:{}",
+        docker_opts.docker_container_tag()
+    );
+
     let mut build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.85.0")
+        .from_alias("build", &docker_tag)
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -162,7 +168,6 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         )])
         .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
 
-    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
     let docker_env = docker_opts.env();
     if !docker_env.is_empty() {
         build = build.env(&docker_env);
