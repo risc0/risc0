@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(feature="prove")]
 fn main() {
     let mut build = cc::Build::new();
     println!("cargo::rerun-if-changed=stark_verify_cpp/main.cpp");
@@ -41,3 +42,7 @@ fn main() {
         .compile("stark_verify");
 }
 
+#[cfg(not(feature="prove"))]
+fn main() {
+    // no special behavior
+}
