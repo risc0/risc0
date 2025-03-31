@@ -26,6 +26,8 @@ risc0-zkp = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, features = ["prove"], optional = true }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods", optional = true }
 semver = "1"
+serde = { version = "1", features = ["derive"] }
+serde_with = "3"
 tempfile = "3.12"
 toml = "0.8"
 toml_edit = "0.22.24"
