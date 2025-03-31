@@ -19,6 +19,8 @@ use derive_builder::Builder;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use serde::{Deserialize, Serialize};
 
+use crate::DEFAULT_DOCKER_TAG;
+
 /// Options for configuring a docker build environment.
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Builder)]
 #[builder(default)]
@@ -32,6 +34,10 @@ pub struct DockerOptions {
 
     /// Additional environment variables for the build container.
     pub env: Vec<(String, String)>,
+
+    /// Docker container tag to use
+    #[builder(setter(into, strip_option))]
+    pub docker_container_tag: Option<String>,
 }
 
 impl DockerOptions {
@@ -48,6 +54,19 @@ impl DockerOptions {
             .iter()
             .map(|(key, val)| (key.as_str(), val.as_str()))
             .collect()
+    }
+
+    /// Get the docker container tag, or default container tag if none
+    ///
+    /// This value may be set by using the `RISC0_DOCKER_CONTAINER_TAG` environment variable.
+    pub fn docker_container_tag(&self) -> String {
+        if let Ok(tag) = env::var("RISC0_DOCKER_CONTAINER_TAG") {
+            return tag;
+        }
+
+        self.docker_container_tag
+            .clone()
+            .unwrap_or(DEFAULT_DOCKER_TAG.to_string())
     }
 }
 
