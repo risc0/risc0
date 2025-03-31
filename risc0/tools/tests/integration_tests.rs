@@ -16,14 +16,14 @@ use std::process::Command;
 
 use assert_cmd::prelude::*;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
-use tempfile::tempdir;
+use tempfile::tempdir_in;
 
 /// This file contains tests that exercise the tools as if it were run on the
 /// commandline.
 
 #[test]
 fn run_make_id() {
-    let temp_dir = tempdir().unwrap();
+    let temp_dir = tempdir_in(risc0_root).unwrap();
 
     let user_elf_path = "tests/add";
     let id_path = temp_dir.path().join("add.id");
