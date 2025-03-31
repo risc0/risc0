@@ -51,8 +51,8 @@ rzup install
 #### xtask wasm tools (if testing [browser-verify](./examples/browser-verify))
 
 ```bash
-cargo xtask install
-cargo xtask gen-receipt
+cargo xfast install
+cargo xfast gen-receipt
 ```
 
 ## PR Checklist
