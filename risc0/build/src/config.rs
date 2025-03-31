@@ -36,6 +36,7 @@ pub struct DockerOptions {
     pub env: Vec<(String, String)>,
 
     /// Docker container tag to use
+    #[builder(setter(into, strip_option))]
     pub docker_container_tag: Option<String>,
 }
 
