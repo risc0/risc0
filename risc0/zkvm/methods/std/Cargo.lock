@@ -1282,7 +1282,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.0.1"
+version = "2.1.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1304,7 +1304,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1318,7 +1318,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1331,7 +1331,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1356,7 +1356,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1406,7 +1406,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "borsh",
