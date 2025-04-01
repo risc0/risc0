@@ -79,7 +79,7 @@ num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-redis = { version = "0.27.2", default-features = false, features = [
+redis = { version = "0.29.2", default-features = false, features = [
   "tls-native-tls",
 ], optional = true }
 risc0-build = { workspace = true, optional = true }
