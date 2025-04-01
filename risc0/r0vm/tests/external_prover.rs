@@ -36,7 +36,6 @@ fn basic_proof() {
     receipt.inner.succinct().unwrap();
 }
 
-#[cfg(all(target_arch = "x86_64", target_os = "linux"))]
 #[test_log::test]
 fn compressed_proof() {
     let receipt = prove_nothing(&ProverOpts::groth16()).unwrap();

@@ -49,8 +49,9 @@
 //! used to transform it into a Groth16 proof. This function becomes available when the `prove`
 //! feature flag is enabled.
 //!
-//! > IMPORTANT: This feature requires an x86 architecture and Docker installed.
-//! > Additionally, specific [installation steps](https://github.com/risc0/risc0/tree/main/groth16_proof) must be followed to use this functionality.
+//! > IMPORTANT: This feature requires Docker installed. Additionally, specific
+//! > [installation steps](https://github.com/risc0/risc0/tree/main/groth16_proof)
+//! > must be followed to use this functionality.
 //!
 //! The recommended way to get a Groth16 proof is to use the `Prover` trait in the [risc0-zkvm]
 //! crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
