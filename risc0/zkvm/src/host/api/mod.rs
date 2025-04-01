@@ -175,7 +175,7 @@ impl ParentProcessConnector {
             let server_suggestion = if client_version.pre.is_empty() {
                 format!(
                     "1. Install r0vm server version {}.{}\n",
-                    server_version.major, server_version.minor
+                    client_version.major, client_version.minor
                 )
             } else {
                 format!("1. Your risc0 dependencies are using a pre-released version {client_version}.\n   \
