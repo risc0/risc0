@@ -159,11 +159,6 @@ impl<'a> GithubRelease<'a> {
         let platform = env.platform();
         let archive_name = self.get_archive_name(component, platform)?;
 
-        let _lock_file = env.flock(
-            &archive_name.to_string_lossy(),
-            &format!("downloading {component} version {version}"),
-        )?;
-
         let download_path = env.tmp_dir().join(archive_name);
         let mut download_file = std::fs::OpenOptions::new()
             .write(true)

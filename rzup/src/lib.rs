@@ -794,8 +794,10 @@ mod tests {
             let entry = entry.unwrap();
             if entry.file_type().is_file() {
                 let entry_path = entry.path();
-                let entry_relative_path = entry_path.strip_prefix(path).unwrap();
-                found_files.push(entry_relative_path.to_str().unwrap().to_owned());
+                if entry_path.extension().is_none_or(|ext| ext != "lock") {
+                    let entry_relative_path = entry_path.strip_prefix(path).unwrap();
+                    found_files.push(entry_relative_path.to_str().unwrap().to_owned());
+                }
             }
         }
 

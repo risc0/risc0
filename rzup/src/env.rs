@@ -223,7 +223,7 @@ impl Environment {
     }
 
     #[cfg(feature = "install")]
-    pub fn flock(&self, name: &str, conflict_message: &str) -> Result<LockFile> {
+    pub fn flock(&self, name: &str) -> Result<LockFile> {
         use fs2::FileExt as _;
 
         let lock_path = self.tmp_dir().join(format!("{name}.lock"));
@@ -234,31 +234,19 @@ impl Environment {
             .truncate(true)
             .open(&lock_path)?;
 
-        lock_file.try_lock_exclusive().map_err(|_| {
-            RzupError::Other(format!("Another process is currently {conflict_message}"))
-        })?;
+        lock_file.lock_exclusive()?;
 
-        Ok(LockFile {
-            _file: lock_file,
-            path: lock_path,
-        })
+        Ok(LockFile { _file: lock_file })
     }
 
     #[cfg(not(feature = "install"))]
-    pub fn flock(&self, _name: &str, _conflict_message: &str) -> Result<LockFile> {
+    pub fn flock(&self, _name: &str) -> Result<LockFile> {
         Err(RzupError::Other("not built with install support".into()))
     }
 }
 
 pub struct LockFile {
     _file: std::fs::File,
-    path: PathBuf,
-}
-
-impl Drop for LockFile {
-    fn drop(&mut self) {
-        let _ = std::fs::remove_file(&self.path);
-    }
 }
 
 #[cfg(test)]

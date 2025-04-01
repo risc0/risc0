@@ -23,7 +23,7 @@ mod zirgen;
 
 use core::num::TryFromIntError;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, ensure, Result};
 use derive_more::Debug;
 use risc0_zkp::{
     adapter::CircuitInfo as _,
@@ -37,6 +37,8 @@ use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
 
 pub use self::zirgen::CircuitImpl;
 
+pub const RV32IM_SEAL_VERSION: u32 = 1;
+
 pub const MAX_INSN_CYCLES: usize = 2000; // TODO(flaub): calculate actual value
 
 pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
@@ -44,6 +46,12 @@ pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
 
     // We don't have a `code' buffer to verify.
     let check_code_fn = |_: u32, _: &Digest| Ok(());
+
+    if seal[0] != RV32IM_SEAL_VERSION {
+        return Err(VerificationError::ReceiptFormatError);
+    }
+
+    let seal = &seal[1..];
 
     let hash_suite = Poseidon2HashSuite::new_suite();
     risc0_zkp::verify::verify(&CircuitImpl, &hash_suite, seal, check_code_fn)
@@ -54,7 +62,7 @@ pub struct HighLowU16(pub u16, pub u16);
 
 impl From<HighLowU16> for u32 {
     fn from(x: HighLowU16) -> Self {
-        (x.0 as u32) << 16 | (x.1 as u32)
+        ((x.0 as u32) << 16) | (x.1 as u32)
     }
 }
 
@@ -82,6 +90,9 @@ pub struct Rv32imV2Claim {
 
 impl Rv32imV2Claim {
     pub fn decode(seal: &[u32]) -> Result<Rv32imV2Claim> {
+        ensure!(seal[0] == RV32IM_SEAL_VERSION, "seal version mismatch");
+        let seal = &seal[1..];
+
         let io: &[Val] = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
         let global = Tree::new(io, LAYOUT_GLOBAL);
 

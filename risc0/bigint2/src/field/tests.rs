@@ -20,12 +20,14 @@ use risc0_bigint2_methods::{
     EXTFIELD_DEG2_SUB_256_ELF, EXTFIELD_DEG2_SUB_384_ELF, EXTFIELD_DEG4_MUL_ELF,
     EXTFIELD_XXONE_MUL_256_ELF, EXTFIELD_XXONE_MUL_384_ELF, MODADD_256_ELF, MODADD_384_ELF,
     MODINV_256_ELF, MODINV_384_ELF, MODMUL_256_ELF, MODMUL_384_ELF, MODSUB_256_ELF, MODSUB_384_ELF,
+    RAW_TEST_ELF,
 };
-use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, ProverOpts};
+use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts};
+use rstest::rstest;
 
 use crate::BigUintWrap;
 
-fn run_test<T: DeserializeOwned>(env: ExecutorEnv, elf: &[u8]) -> T {
+fn run_test_no_decode(env: ExecutorEnv, elf: &[u8]) -> Journal {
     let opts = ProverOpts::fast();
     let prover = get_prover_server(&opts).unwrap();
     let now = Instant::now();
@@ -40,7 +42,11 @@ fn run_test<T: DeserializeOwned>(env: ExecutorEnv, elf: &[u8]) -> T {
     tracing::info!("Runtime: {}", elapsed.as_millis());
     tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 
-    receipt.journal.decode().unwrap()
+    receipt.journal.clone()
+}
+
+fn run_test<T: DeserializeOwned>(env: ExecutorEnv, elf: &[u8]) -> T {
+    run_test_no_decode(env, elf).decode().unwrap()
 }
 
 #[test_log::test]
@@ -361,4 +367,25 @@ fn extfield_deg4_mul() {
         .unwrap();
     let result: (BigUint, BigUint, BigUint, BigUint) = run_test(env, EXTFIELD_DEG4_MUL_ELF);
     assert_eq!(result, expected);
+}
+
+const BIGINT_LEGAL_ADDR: u32 = 0x3000_0000;
+const BIGINT_ILLEGAL_ADDR: u32 = 0xc000_0000;
+
+#[rstest]
+#[case(BIGINT_LEGAL_ADDR, BIGINT_LEGAL_ADDR, BIGINT_LEGAL_ADDR)]
+#[should_panic(expected = "Invalid bigint address")]
+#[case(BIGINT_ILLEGAL_ADDR, BIGINT_LEGAL_ADDR, BIGINT_LEGAL_ADDR)]
+#[should_panic(expected = "Invalid bigint address")]
+#[case(BIGINT_LEGAL_ADDR, BIGINT_ILLEGAL_ADDR, BIGINT_LEGAL_ADDR)]
+#[should_panic(expected = "Invalid bigint address")]
+#[case(BIGINT_LEGAL_ADDR, BIGINT_LEGAL_ADDR, BIGINT_ILLEGAL_ADDR)]
+#[test_log::test]
+fn raw_addr(#[case] lhs: u32, #[case] rhs: u32, #[case] result: u32) {
+    let env = ExecutorEnv::builder()
+        .write(&(lhs, rhs, result))
+        .unwrap()
+        .build()
+        .unwrap();
+    run_test_no_decode(env, RAW_TEST_ELF);
 }

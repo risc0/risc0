@@ -15,6 +15,7 @@
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 
 use anyhow::{bail, Result};
+use enum_map::EnumMap;
 use risc0_binfmt::{ByteAddr, MemoryImage, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
@@ -31,7 +32,7 @@ use super::{
     pager::{compute_partial_image, PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
-    r0vm::{LoadOp, Risc0Context, Risc0Machine},
+    r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
     sha2::Sha2State,
@@ -46,12 +47,14 @@ pub struct EcallMetric {
     pub cycles: u64,
 }
 
+#[derive(Default)]
+pub struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
+
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
     user_pc: ByteAddr,
     machine_mode: u32,
     user_cycles: u32,
-    phys_cycles: u32,
     pager: PagedMemory,
     terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
@@ -61,6 +64,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     output_digest: Option<Digest>,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
+    ecall_metrics: EcallMetrics,
 }
 
 #[non_exhaustive]
@@ -97,13 +101,13 @@ struct ComputePartialImageRequest {
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
     user_cycles: u32,
-    phys_cycles: u32,
     pager_cycles: u32,
     terminate_state: Option<TerminateState>,
     segment_threshold: u32,
     pre_digest: Digest,
     post_digest: Digest,
     po2: u32,
+    index: u64,
 }
 
 /// Maximum number of segments we can queue up before we block execution
@@ -112,8 +116,7 @@ const MAX_OUTSTANDING_SEGMENTS: usize = 5;
 fn compute_partial_images(
     recv: std::sync::mpsc::Receiver<ComputePartialImageRequest>,
     mut callback: impl FnMut(Segment) -> Result<()>,
-) -> Result<u64> {
-    let mut segment_counter = 0;
+) -> Result<()> {
     while let Ok(req) = recv.recv() {
         let partial_image = compute_partial_image(req.image, req.page_indexes);
         callback(Segment {
@@ -128,16 +131,14 @@ fn compute_partial_images(
             },
             read_record: req.read_record,
             write_record: req.write_record,
-            user_cycles: req.user_cycles,
-            suspend_cycle: req.phys_cycles,
+            suspend_cycle: req.user_cycles,
             paging_cycles: req.pager_cycles,
             po2: req.po2,
-            index: segment_counter,
+            index: req.index,
             segment_threshold: req.segment_threshold,
         })?;
-        segment_counter += 1;
     }
-    Ok(segment_counter)
+    Ok(())
 }
 
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
@@ -152,7 +153,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
-            phys_cycles: 0,
             pager: PagedMemory::new(image, !trace.is_empty() /* tracing_enabled */),
             terminate_state: None,
             read_record: Vec::new(),
@@ -162,6 +162,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             output_digest: None,
             trace,
             cycles: SessionCycles::default(),
+            ecall_metrics: EcallMetrics::default(),
         }
     }
 
@@ -175,6 +176,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let segment_limit: u32 = 1 << segment_po2;
         assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
+        let mut segment_counter = 0;
 
         self.reset();
 
@@ -186,7 +188,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let (commit_sender, commit_recv) =
             std::sync::mpsc::sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
 
-        let (post_digest, total_num_segments) = std::thread::scope(|scope| {
+        let post_digest = std::thread::scope(|scope| {
             let partial_images_thread =
                 scope.spawn(move || compute_partial_images(commit_recv, callback));
 
@@ -200,10 +202,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     }
                 }
 
-                if self.segment_cycles() >= segment_threshold {
+                if self.segment_cycles() > segment_threshold {
                     tracing::debug!(
-                        "split(phys: {} + pager: {} + reserved: {LOOKUP_TABLE_CYCLES}) = {} >= {segment_threshold}",
-                        self.phys_cycles,
+                        "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
+                        self.user_cycles,
                         self.pager.cycles,
                         self.segment_cycles()
                     );
@@ -225,18 +227,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         read_record: std::mem::take(&mut self.read_record),
                         write_record: std::mem::take(&mut self.write_record),
                         user_cycles: self.user_cycles,
-                        phys_cycles: self.phys_cycles,
                         pager_cycles: self.pager.cycles,
                         terminate_state: self.terminate_state,
                         segment_threshold,
                         pre_digest,
                         post_digest,
                         po2: segment_po2 as u32,
+                        index: segment_counter,
                     };
                     if commit_sender.send(req).is_err() {
                         return Err(partial_images_thread.join().unwrap().unwrap_err());
                     }
 
+                    segment_counter += 1;
                     let total_cycles = 1 << segment_po2;
                     let pager_cycles = self.pager.cycles as u64;
                     let user_cycles = self.user_cycles as u64;
@@ -244,13 +247,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.cycles.paging += pager_cycles;
                     self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
                     self.user_cycles = 0;
-                    self.phys_cycles = 0;
                     self.pager.reset();
 
                     Risc0Machine::resume(self)?;
                 }
 
-                Risc0Machine::step(&mut emu, self)?;
+                Risc0Machine::step(&mut emu, self).map_err(|err| {
+                    let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
+                    if let Err(inner) = result {
+                        err.context(inner)
+                    } else {
+                        err
+                    }
+                })?;
             }
 
             Risc0Machine::suspend(self)?;
@@ -267,13 +276,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 read_record: std::mem::take(&mut self.read_record),
                 write_record: std::mem::take(&mut self.write_record),
                 user_cycles: self.user_cycles,
-                phys_cycles: self.phys_cycles,
                 pager_cycles: self.pager.cycles,
                 terminate_state: self.terminate_state,
                 segment_threshold,
                 pre_digest,
                 post_digest,
                 po2: final_po2 as u32,
+                index: segment_counter,
             };
             if commit_sender.send(req).is_err() {
                 return Err(partial_images_thread.join().unwrap().unwrap_err());
@@ -287,7 +296,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
 
             drop(commit_sender);
-            Ok((post_digest, partial_images_thread.join().unwrap()?))
+
+            partial_images_thread.join().unwrap()?;
+
+            Ok(post_digest)
         })?;
 
         let session_claim = Rv32imV2Claim {
@@ -300,7 +312,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         };
 
         Ok(ExecutorResult {
-            segments: total_num_segments,
+            segments: segment_counter + 1,
             post_image: self.pager.image.clone(),
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
@@ -308,6 +320,54 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             reserved_cycles: self.cycles.reserved,
             claim: session_claim,
         })
+    }
+
+    fn dump_segment(
+        &mut self,
+        po2: usize,
+        segment_threshold: u32,
+        index: u64,
+    ) -> anyhow::Result<()> {
+        if let Some(dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
+            tracing::error!(
+                "Execution failure, saving segment to {}:",
+                dump_path.to_string_lossy()
+            );
+
+            let (image, pre_digest, post_digest) = self.pager.commit();
+            let page_indexes = self.pager.page_indexes();
+            let partial_image = compute_partial_image(image, page_indexes);
+
+            let segment = Segment {
+                partial_image,
+                claim: Rv32imV2Claim {
+                    pre_state: pre_digest,
+                    post_state: post_digest,
+                    input: self.input_digest,
+                    output: self.output_digest,
+                    terminate_state: self.terminate_state,
+                    shutdown_cycle: None,
+                },
+                read_record: std::mem::take(&mut self.read_record),
+                write_record: std::mem::take(&mut self.write_record),
+                suspend_cycle: self.user_cycles,
+                paging_cycles: self.pager.cycles,
+                po2: po2 as u32,
+                index,
+                segment_threshold,
+            };
+            tracing::error!("{segment:?}");
+
+            let bytes = segment.encode()?;
+            tracing::error!("serialized {} bytes", bytes.len());
+
+            std::fs::write(dump_path, bytes)?;
+        }
+        Ok(())
+    }
+
+    pub fn take_ecall_metrics(&mut self) -> EcallMetrics {
+        std::mem::take(&mut self.ecall_metrics)
     }
 
     fn reset(&mut self) {
@@ -318,13 +378,21 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.output_digest = None;
         self.machine_mode = 0;
         self.user_cycles = 0;
-        self.phys_cycles = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
+        self.ecall_metrics = EcallMetrics::default();
     }
 
     fn segment_cycles(&self) -> u32 {
-        self.phys_cycles + self.pager.cycles + LOOKUP_TABLE_CYCLES as u32
+        self.user_cycles + self.pager.cycles + RESERVED_CYCLES as u32
+    }
+
+    fn inc_user_cycles(&mut self, count: usize, ecall: Option<EcallKind>) {
+        self.cycles.user += count as u64;
+        self.user_cycles += count as u32;
+        if let Some(kind) = ecall {
+            self.ecall_metrics.0[kind].cycles += count as u64;
+        }
     }
 
     #[cold]
@@ -391,7 +459,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
-        self.cycles.user += 1;
         if tracing::enabled!(tracing::Level::TRACE) {
             self.trace_instruction(cycle, insn, decoded);
         }
@@ -407,8 +474,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
-        self.user_cycles += 1;
-        self.phys_cycles += 1;
+        self.inc_user_cycles(1, None);
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
@@ -417,13 +483,17 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
 
     fn on_ecall_cycle(
         &mut self,
-        _cur: CycleState,
+        cur: CycleState,
         _next: CycleState,
         _s0: u32,
         _s1: u32,
         _s2: u32,
+        kind: EcallKind,
     ) -> Result<()> {
-        self.phys_cycles += 1;
+        if cur == CycleState::MachineEcall {
+            self.ecall_metrics.0[kind].count += 1;
+        }
+        self.inc_user_cycles(1, Some(kind));
         if !self.trace.is_empty() {
             self.trace_pager()?;
         }
@@ -446,7 +516,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
+        // tracing::trace!(
+        //     "store_u32({:?}, {word:#010x}), pc: {:?}",
+        //     addr.baddr(),
+        //     self.pc
+        // );
         if !self.trace.is_empty() {
             self.trace(TraceEvent::MemorySet {
                 addr: addr.baddr().0,
@@ -457,7 +531,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
-        // tracing::trace!("store_mem({:?}, {word:#010x})", addr.baddr());
+        // tracing::trace!("store_register({:?}, {word:#010x})", addr.baddr());
         if !self.trace.is_empty() {
             self.trace(TraceEvent::MemorySet {
                 addr: (base + idx).baddr().0,
@@ -469,8 +543,6 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_terminate(&mut self, a0: u32, a1: u32) -> Result<()> {
-        self.user_cycles += 1;
-
         self.terminate_state = Some(TerminateState {
             a0: a0.into(),
             a1: a1.into(),
@@ -500,16 +572,16 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     }
 
     fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &Sha2State) {
-        self.phys_cycles += 1;
+        self.inc_user_cycles(1, Some(EcallKind::Sha2));
     }
 
     fn on_poseidon2_cycle(&mut self, _cur_state: CycleState, _p2: &Poseidon2State) {
-        self.phys_cycles += 1;
+        self.inc_user_cycles(1, Some(EcallKind::Poseidon2));
     }
 
     fn ecall_bigint(&mut self) -> Result<()> {
         let cycles = bigint::ecall_execute(self)?;
-        self.phys_cycles += cycles as u32;
+        self.inc_user_cycles(cycles, Some(EcallKind::BigInt));
         Ok(())
     }
 }
@@ -547,6 +619,16 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
 
     fn get_pc(&self) -> u32 {
         self.user_pc.0
+    }
+}
+
+impl From<EcallMetrics> for Vec<(String, EcallMetric)> {
+    fn from(metrics: EcallMetrics) -> Self {
+        metrics
+            .0
+            .into_iter()
+            .map(|(kind, metric)| (format!("{kind:?}"), metric))
+            .collect()
     }
 }
 

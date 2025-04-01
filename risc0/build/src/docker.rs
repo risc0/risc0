@@ -142,8 +142,14 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
     .concat()
     .join(" ");
 
+    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
+    let docker_tag = format!(
+        "risczero/risc0-guest-builder:{}",
+        docker_opts.docker_container_tag()
+    );
+
     let mut build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
+        .from_alias("build", &docker_tag)
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -158,11 +164,10 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
     build = build
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
-            "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
+            "/root/.risc0/cpp/bin/riscv32-unknown-elf-gcc",
         )])
         .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
 
-    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
     let docker_env = docker_opts.env();
     if !docker_env.is_empty() {
         build = build.env(&docker_env);
@@ -263,7 +268,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "61c290ae691869681145e21a1fa6a1810ac3193362987c60d68ec7fcf08d8b63",
+            "6fb4f0249fa7a0dc858e295c888096bd6e5d5b6ac58312d59178ab88339505f8",
         );
     }
 }

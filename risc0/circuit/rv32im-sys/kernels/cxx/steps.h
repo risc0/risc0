@@ -200,13 +200,14 @@ extern ShaStateStruct exec_ShaMix(ExecContext& ctx,NondetRegStruct arg0, ShaStat
 extern ShaStateStruct exec_ShaStoreState(ExecContext& ctx,NondetRegStruct arg0, ShaStateStruct arg1_0, ShaStateStruct arg2_0, ShaStateStruct arg3, BoundLayout<ShaStoreStateLayout> layout4)  ;
 extern InstOutputBaseStruct exec_Sha0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Sha0Layout> layout2)  ;
 extern BigIntStateStruct back_BigIntState(ExecContext& ctx,Index distance0, BoundLayout<BigIntStateLayout> layout1)  ;
-extern BigIntStateStruct exec_BigIntState(ExecContext& ctx,Val arg0, Val arg1_0, Val arg2_0, Val arg3, Val16Array arg4, Val arg5, BoundLayout<BigIntStateLayout> layout6)  ;
+extern BigIntStateStruct exec_BigIntState(ExecContext& ctx,Val arg0, Val arg1_0, Val arg2_0, Val arg3, Val arg4, Val16Array arg5, Val arg6, BoundLayout<BigIntStateLayout> layout7)  ;
 extern BigIntStateStruct exec_BigIntInvalid(ExecContext& ctx,BoundLayout<BigIntStateLayout> layout0)  ;
 extern BigIntStateStruct exec_BigIntEcall(ExecContext& ctx,NondetRegStruct arg0, BoundLayout<BigIntEcallLayout> layout1)  ;
 extern SplitU32Struct exec_SplitU32(ExecContext& ctx,ValU32Struct arg0, BoundLayout<SplitU32Layout> layout1)  ;
-extern BigIntReadStruct exec_BigIntRead(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<BigIntReadLayout> layout2)  ;
+extern AddrDecomposeBitsStruct exec_BigIntAddr(ExecContext& ctx,ValU32Struct arg0, Val arg1_0, BoundLayout<BigIntAddrLayout> layout2)  ;
+extern BigIntReadStruct exec_BigIntRead(ExecContext& ctx,NondetRegStruct arg0, ValU32Struct arg1_0, Val arg2_0, BoundLayout<BigIntReadLayout> layout3)  ;
 extern BigIntWitnessStruct exec_BigIntWitness(ExecContext& ctx,Val16Array arg0, BoundLayout<BigIntWitnessLayout> layout1)  ;
-extern BigIntWitnessStruct exec_BigIntWrite(ExecContext& ctx,NondetRegStruct arg0, Val arg1_0, BoundLayout<BigIntWriteLayout> layout2)  ;
+extern BigIntWitnessStruct exec_BigIntWrite(ExecContext& ctx,NondetRegStruct arg0, ValU32Struct arg1_0, Val arg2_0, BoundLayout<BigIntWriteLayout> layout3)  ;
 extern BigIntWitnessStruct exec_BigIntCheck(ExecContext& ctx,BoundLayout<BigIntWitnessLayout> layout0)  ;
 extern BigIntStateStruct exec_BigIntStep(ExecContext& ctx,NondetRegStruct arg0, BigIntStateStruct arg1_0, BoundLayout<BigIntStepLayout> layout2)  ;
 extern InstOutputBaseStruct exec_BigInt0(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<BigInt0Layout> layout2)  ;

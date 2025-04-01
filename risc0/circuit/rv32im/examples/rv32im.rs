@@ -17,7 +17,7 @@ use std::time::Instant;
 use clap::Parser;
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im::{
-    execute::{platform::LOOKUP_TABLE_CYCLES, testutil, DEFAULT_SEGMENT_LIMIT_PO2},
+    execute::{platform::RESERVED_CYCLES, testutil, DEFAULT_SEGMENT_LIMIT_PO2},
     prove::segment_prover,
     MAX_INSN_CYCLES,
 };
@@ -41,9 +41,9 @@ struct Cli {
 }
 
 const PAGING_CYCLES: usize = 1821;
-const NON_LOOP_CYCLES: usize = 8;
-const RESERVED_CYCLES: usize =
-    LOOKUP_TABLE_CYCLES + PAGING_CYCLES + NON_LOOP_CYCLES + MAX_INSN_CYCLES;
+const BEFORE_LOOP_CYCLES: usize = 8;
+const NON_LOOP_CYCLES: usize =
+    RESERVED_CYCLES + PAGING_CYCLES + BEFORE_LOOP_CYCLES + MAX_INSN_CYCLES;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -54,8 +54,8 @@ fn main() {
 
     let po2 = args.po2;
     let segment_cycles = 1 << po2;
-    assert!(segment_cycles > RESERVED_CYCLES);
-    let iterations = (segment_cycles - RESERVED_CYCLES) / 2;
+    assert!(segment_cycles > NON_LOOP_CYCLES);
+    let iterations = (segment_cycles - NON_LOOP_CYCLES) / 2;
 
     let program = testutil::kernel::simple_loop(iterations as u32);
     let image = MemoryImage::new_kernel(program);

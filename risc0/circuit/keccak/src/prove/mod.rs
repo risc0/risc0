@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ use self::{
 use crate::{
     zirgen::{
         circuit::{
-            CircuitField, ExtVal, Val, REGCOUNT_ACCUM, REGCOUNT_CODE, REGCOUNT_DATA,
+            CircuitField, ExtVal, Val, LAYOUT_GLOBAL, REGCOUNT_ACCUM, REGCOUNT_CODE, REGCOUNT_DATA,
             REGCOUNT_GLOBAL, REGCOUNT_MIX, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
             REGISTER_GROUP_DATA,
         },
@@ -103,7 +103,15 @@ where
         let cycles: usize = 1 << po2;
         let preflight = PreflightTrace::<C::PreferredPreflightOrder>::new(inputs, cycles);
 
-        let global = MetaBuffer::new("global", self.hal.as_ref(), 1, REGCOUNT_GLOBAL, true);
+        let mut global = vec![Val::INVALID; REGCOUNT_GLOBAL];
+        global[LAYOUT_GLOBAL.total_cycles._super.offset] = Elem::from_u64(1 << po2);
+
+        let global = MetaBuffer {
+            buf: self.hal.copy_from_elem("global", &global),
+            rows: 1,
+            cols: REGCOUNT_GLOBAL,
+            checked_reads: true,
+        };
         let code = MetaBuffer::new("code", self.hal.as_ref(), cycles, REGCOUNT_CODE, true);
         let data = scope!(
             "alloc(data)",
@@ -140,7 +148,7 @@ where
             for (i, word) in digest.as_mut_words().iter_mut().enumerate() {
                 let low: u32 = slice[i * 2].into();
                 let high: u32 = slice[i * 2 + 1].into();
-                *word = low | high << 16;
+                *word = low | (high << 16);
             }
             tracing::debug!("final digest: {digest}");
 

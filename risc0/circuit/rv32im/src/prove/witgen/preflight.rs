@@ -29,7 +29,7 @@ use crate::{
         pager::{page_idx, PageState, PagedMemory},
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
-        r0vm::{LoadOp, Risc0Context, Risc0Machine},
+        r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
         rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
         segment::Segment,
         sha2::Sha2State,
@@ -80,7 +80,7 @@ pub(crate) struct Preflight<'a> {
     user_cycle: u32,
     txn_idx: u32,
     bigint_idx: u32,
-    phys_cycles: u32,
+    user_cycles: u32,
     orig_words: PagedMap,
     prev_cycle: PagedMap,
     page_memory: PagedMap,
@@ -140,7 +140,7 @@ impl<'a> Preflight<'a> {
             txn_idx: 0,
             bigint_idx: 0,
             user_cycle: 0,
-            phys_cycles: 0,
+            user_cycles: 0,
             orig_words: Default::default(),
             prev_cycle: Default::default(),
             page_memory,
@@ -161,7 +161,7 @@ impl<'a> Preflight<'a> {
         }
         self.machine_mode = 2;
         Poseidon2::read_done(self)?;
-        self.phys_cycles = 0;
+        self.user_cycles = 0;
         Ok(())
     }
 
@@ -169,13 +169,13 @@ impl<'a> Preflight<'a> {
     pub fn body(&mut self) -> Result<()> {
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
-        while self.phys_cycles < self.segment.suspend_cycle {
+        while self.user_cycles < self.segment.suspend_cycle {
             Risc0Machine::step(&mut emu, self)?;
         }
         tracing::debug!(
             "suspend(cycle: {}:{}, pc: {:?}, mode: {})",
             self.trace.cycles.len(),
-            self.phys_cycles,
+            self.user_cycles,
             self.pc,
             self.machine_mode
         );
@@ -260,6 +260,8 @@ impl<'a> Preflight<'a> {
     }
 
     fn fini(&mut self) -> Result<()> {
+        let start_cycles = self.trace.cycles.len();
+
         for i in (16..256).step_by(16) {
             self.add_cycle_special(
                 CycleState::ControlTable,
@@ -287,6 +289,7 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+
         if self.segment.claim.terminate_state.is_none() {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
@@ -295,6 +298,7 @@ impl<'a> Preflight<'a> {
             let diff = self.trace.cycles.len() - segment_threshold;
             self.trace.cycles[diff / 2].diff_count[diff % 2] += 1;
         }
+
         self.machine_mode = 1;
         self.add_cycle_special(
             CycleState::ControlDone,
@@ -303,6 +307,8 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
+        assert_eq!(self.trace.cycles.len() - start_cycles, RESERVED_CYCLES);
+
         let last_cycle = 1 << self.segment.po2;
         for _ in self.trace.cycles.len()..last_cycle {
             self.add_cycle_special(
@@ -443,7 +449,7 @@ impl<'a> Preflight<'a> {
             0, //paging_idx
             Back::BigInt(bigint.clone()),
         );
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
     }
 }
 
@@ -521,7 +527,7 @@ impl Risc0Context for Preflight<'_> {
         );
         self.add_cycle_insn(CycleState::Decode, self.pc.0, insn.kind);
         self.user_cycle += 1;
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
         Ok(())
     }
 
@@ -591,9 +597,10 @@ impl Risc0Context for Preflight<'_> {
         s0: u32,
         s1: u32,
         s2: u32,
+        _kind: EcallKind,
     ) -> Result<()> {
         self.add_cycle_special(cur_state, next_state, self.pc.0, 0, Back::Ecall(s0, s1, s2));
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
         Ok(())
     }
 
@@ -632,7 +639,7 @@ impl Risc0Context for Preflight<'_> {
             node_addr_to_idx(sha2.state_out_addr),
             Back::Sha2(sha2.clone()),
         );
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
     }
 
     fn on_poseidon2_cycle(&mut self, cur_state: CycleState, p2: &Poseidon2State) {
@@ -643,7 +650,7 @@ impl Risc0Context for Preflight<'_> {
             node_addr_to_idx(WordAddr(p2.buf_out_addr)),
             Back::Poseidon2(p2.clone()),
         );
-        self.phys_cycles += 1;
+        self.user_cycles += 1;
     }
 
     fn ecall_bigint(&mut self) -> Result<()> {
