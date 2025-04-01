@@ -26,7 +26,7 @@ tracing = { version = "0.1", default-features = false, features = [
 metal = { workspace = true }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-bytemuck = "1.12"
+bytemuck = "1.22"
 cust = { version = "0.3", optional = true }
 lazy-regex = { version = "3.3", optional = true }
 rand = { version = "0.8", optional = true }

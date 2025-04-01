@@ -35,7 +35,7 @@ required-features = ["prove"]
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 borsh = { version = "1.5", default-features = false, features = ["derive"] }
-bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
+bytemuck = { version = "1.22", features = ["extern_crate_alloc"] }
 derive_more = { version = "2.0.1", default-features = false, features = [
   "debug",
 ] }

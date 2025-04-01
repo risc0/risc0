@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-bytemuck = { version = "1.12", features = ["derive"] }
+bytemuck = { version = "1.22", features = ["derive"] }
 bytemuck_derive = "=1.8.1"
 rand_core = "0.6"
 
