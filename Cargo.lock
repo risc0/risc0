@@ -1088,7 +1088,7 @@ dependencies = [
  "bincode",
  "bonsai-sdk",
  "cargo_metadata",
- "clap 4.5.32",
+ "clap 4.5.35",
  "clap-cargo",
  "const_format",
  "dirs",
@@ -1136,7 +1136,7 @@ dependencies = [
  "cargo-config2",
  "cargo_metadata",
  "cargo_toml",
- "clap 4.5.32",
+ "clap 4.5.35",
  "clap-cargo",
  "clap-verbosity-flag",
  "directories 6.0.0",
@@ -1281,9 +1281,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.32"
+version = "4.5.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6088f3ae8c3608d19260cd7445411865a485688711b78b5be70d78cd96136f83"
+checksum = "d8aa86934b44c19c50f87cc2790e19f54f7a67aedb64101c2e1a2e5ecfb73944"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -1297,7 +1297,7 @@ checksum = "d546f0e84ff2bfa4da1ce9b54be42285767ba39c688572ca32412a09a73851e5"
 dependencies = [
  "anstyle",
  "cargo_metadata",
- "clap 4.5.32",
+ "clap 4.5.35",
  "serde",
  "serde_json",
 ]
@@ -1308,15 +1308,15 @@ version = "3.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2678fade3b77aa3a8ff3aae87e9c008d3fb00473a41c71fbf74e91c8c7b37e84"
 dependencies = [
- "clap 4.5.32",
+ "clap 4.5.35",
  "log",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.5.32"
+version = "4.5.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22a7ef7f676155edfb82daa97f99441f3ebf4a58d5e32f295a56259f1b6facc8"
+checksum = "2414dbb2dd0695280da6ea9261e327479e9d37b0630f6b53ba2a11c60c679fd9"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1518,7 +1518,7 @@ dependencies = [
  "anes",
  "cast",
  "ciborium",
- "clap 4.5.32",
+ "clap 4.5.35",
  "criterion-plot",
  "is-terminal",
  "itertools 0.10.5",
@@ -5611,7 +5611,7 @@ name = "risc0-bigint2"
 version = "1.4.2"
 dependencies = [
  "anyhow",
- "clap 4.5.32",
+ "clap 4.5.35",
  "include_bytes_aligned",
  "num-bigint 0.4.6",
  "num-bigint-dig",
@@ -5696,7 +5696,7 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
- "clap 4.5.32",
+ "clap 4.5.35",
  "keccak",
  "paste",
  "rand",
@@ -5783,7 +5783,7 @@ dependencies = [
  "bytemuck",
  "byteorder",
  "cfg-if",
- "clap 4.5.32",
+ "clap 4.5.35",
  "derive_more 2.0.1",
  "enum-map",
  "flate2",
@@ -5867,7 +5867,7 @@ dependencies = [
  "assert_fs",
  "bincode",
  "bytemuck",
- "clap 4.5.32",
+ "clap 4.5.35",
  "risc0-circuit-rv32im",
  "risc0-zkvm",
  "risc0-zkvm-methods",
@@ -5893,7 +5893,7 @@ name = "risc0-tools"
 version = "2.0.0"
 dependencies = [
  "assert_cmd",
- "clap 4.5.32",
+ "clap 4.5.35",
  "risc0-binfmt",
  "risc0-zkos-v1compat",
  "tempfile",
@@ -5953,7 +5953,7 @@ dependencies = [
  "bytes",
  "chrono",
  "ciborium",
- "clap 4.5.32",
+ "clap 4.5.35",
  "crypto-bigint",
  "derive_more 2.0.1",
  "elf",
@@ -6288,7 +6288,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 name = "rzup"
 version = "0.4.2"
 dependencies = [
- "clap 4.5.32",
+ "clap 4.5.35",
  "colored",
  "flate2",
  "fs2",
@@ -8203,7 +8203,7 @@ dependencies = [
  "camino",
  "cargo-semver-checks",
  "cargo_metadata",
- "clap 4.5.32",
+ "clap 4.5.35",
  "hex",
  "log",
  "prost-build",
