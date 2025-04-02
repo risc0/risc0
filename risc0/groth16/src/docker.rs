@@ -78,4 +78,3 @@ fn is_docker_installed() -> bool {
         .map(|output| output.status.success())
         .unwrap_or(false)
 }
-
