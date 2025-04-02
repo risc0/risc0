@@ -35,9 +35,9 @@ RUN python3 scripts/split.py stark_verify_cpp/stark_verify.cpp \
 RUN mv stark_verify_cpp/stark_verify.x \
     stark_verify_cpp/stark_verify.cpp
 
-RUN sed -i 's/g++/clang++/' stark_verify_cpp/Makefile && \
-  echo "stark_verify.o: stark_verify.cpp \$(DEPS_HPP)\n\t\$(CC) -c $< \$(CFLAGS) -O0" >> stark_verify_cpp/Makefile && \
-  (cd stark_verify_cpp; make)
+COPY scripts/replacement-Makefile stark_verify_cpp/Makefile
+
+RUN (cd stark_verify_cpp; make)
 
 # Stage 3: Build the Gnark prover
 FROM golang:1.23-bookworm AS gnark
