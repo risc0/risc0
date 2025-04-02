@@ -1082,7 +1082,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "bincode",
@@ -2544,7 +2544,7 @@ dependencies = [
  "gix-utils",
  "itoa",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -2626,7 +2626,7 @@ dependencies = [
  "smallvec",
  "thiserror 2.0.6",
  "unicode-bom",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -2872,7 +2872,7 @@ dependencies = [
  "itoa",
  "smallvec",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -3005,7 +3005,7 @@ dependencies = [
  "gix-utils",
  "maybe-async",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -3037,7 +3037,7 @@ dependencies = [
  "gix-validate",
  "memmap2",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -5608,7 +5608,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.1"
+version = "1.4.2"
 dependencies = [
  "anyhow",
  "clap 4.5.32",
@@ -5656,7 +5656,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.0.2"
+version = "2.1.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -5691,7 +5691,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.1"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5723,7 +5723,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "1.4.1"
+version = "2.0.1"
 dependencies = [
  "cc",
  "cust",
@@ -5737,7 +5737,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.5.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5764,7 +5764,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.4.1"
+version = "2.0.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5836,7 +5836,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.1"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -5860,7 +5860,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -5942,7 +5942,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -7182,15 +7182,15 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.22.22"
+version = "0.22.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ae48d6208a266e853d946088ed816055e556cc6028c5e8e2b84d9fa5dd7c7f5"
+checksum = "17b4795ff5edd201c7cd6dca065ae59972ce77d1b80fa0a84d94950ece7d1474"
 dependencies = [
  "indexmap 2.7.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
- "winnow",
+ "winnow 0.7.4",
 ]
 
 [[package]]
@@ -8133,6 +8133,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "winnow"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e97b544156e9bebe1a0ffbc03484fc1ffe3100cbce3ffb17eac35f7cdd7ab36"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "winsafe"
 version = "0.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8191,6 +8200,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bincode",
+ "camino",
  "cargo-semver-checks",
  "cargo_metadata",
  "clap 4.5.32",
@@ -8208,6 +8218,7 @@ dependencies = [
  "semver",
  "tempfile",
  "toml",
+ "toml_edit",
  "tracing",
  "tracing-subscriber 0.3.19",
  "walkdir",
