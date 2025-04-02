@@ -35,6 +35,34 @@ preemption, so there is also no support for atomic instructions. If the
 execution raises an exception such as an unaligned access, the execution
 terminates without executing exception handlers.
 
+## The User/Kernel Split
+
+Starting with the v2 circuit, the RISC Zero zkVM introduces distinct user and
+kernel modes. Guest code running on the zkVM is divided into two components: the
+kernel and user-space programs, both executing the rv32im instruction set. The
+kernel functions as an operating system kernel, while user programs run in a
+separate user execution mode. This separation ensures that the kernel's resources
+remain protected from user-space code.
+
+When executing guest code, the zkVM first runs the kernel, which is responsible
+for initializing system resources. The specific tasks performed by the kernel
+depend on its implementation, but its primary role is to prepare the environment
+for user programs. Once initialization is complete, control is handed over to
+the user program for execution.
+
+While running, a user program may invoke an ECALL to perform I/O, call
+accelerators, or run custom system call handlers. When an ECALL is run in the
+user code, the zkVM traps the call and transfers control to the kernel.
+The kernel processes the request by dispatching it to the appropriate system
+call handler, which may involve delegating computation to the host. The dispatch
+is implemented in the kernel. Once the host returns the results, the kernel
+processes the response, delivers the result back to the user program, and
+resumes execution in user space.
+
+This user-kernel split enables the zkVM to support user code using different
+system call ABIs simply by swapping the kernel, rather than modifying the
+circuit.
+
 ## zkVM Memory Layout
 
 The following table summarizes the layout of the zkVM memory
@@ -51,6 +79,6 @@ The following table summarizes the layout of the zkVM memory
 The zkVM executes instructions in order; in other words, instructions are never
 reordered and the zkVM's memory model is sequentially consistent. Unlike many
 processors, the zkVM has no notion of traditional memory caches and
-cache-coherency protocols implemented in the zkVM.
+cache-coherency protocols.
 
 [OsDevWiki]: https://wiki.osdev.org/Main_Page
