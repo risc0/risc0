@@ -182,7 +182,7 @@ impl ParentProcessConnector {
                     If you encounter this error message when running code on the risc0 codebase, you must\n   \
                     either run the command `git checkout origin/release-{}.{}` to checkout the version of the\n   \
                     risc0 code that is compatible with your server or build the r0vm server from source\n   \
-                    https://github.com/risc0/risc0/blob/main/CONTRIBUTING.md\n", server_version.major, server_version.minor
+                    https://github.com/risc0/risc0/blob/main/CONTRIBUTING.md\n", client_version.major, client_version.minor
                 )
             };
             let msg = format!(
@@ -191,7 +191,7 @@ impl ParentProcessConnector {
                 {server_suggestion}\
                 2. Change the risc0-zkvm and risc0-build dependencies in your project to {}.{}\n\n\
                 risc0-zkvm version: {client_version}\n\
-                r0vm server version: {server_version}", server_version.major, server_version.minor
+                r0vm server version: {server_version}", client_version.major, client_version.minor
             );
             tracing::warn!("{msg}");
             bail!(msg);
