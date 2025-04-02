@@ -255,7 +255,10 @@ fn compare_published_package_to_vendored_version(
     version: &Version,
     vendored_packages: &Path,
 ) -> Result<(), anyhow::Error> {
-    println!("Comparing {package} v{version} to crates.io version to see if it needs a patch version bump");
+    println!(
+        "Comparing {package} v{version} to crates.io version \
+        to see if it needs a patch version bump"
+    );
 
     // Have cargo package up the package for publishing
     run_command(
@@ -268,7 +271,10 @@ fn compare_published_package_to_vendored_version(
                 package,
             ])
             .current_dir(workspace_root),
-        &format!("failed to create publishable version of {package}"),
+        &format!(
+            "Failed to create publishable version of {package}. \
+            Patch version bump likely required."
+        ),
     )?;
     let published_crate = workspace_root.join(format!("target/package/{package}-{version}"));
 
@@ -295,7 +301,8 @@ fn compare_published_package_to_vendored_version(
             .arg(vendored_packages.join(package))
             .arg(published_crate),
         &format!(
-            "Differences found between published {package} and main. Patch version bump required."
+            "Differences found between published {package} and local version. \
+            Patch version bump required."
         ),
     )?;
 
@@ -311,14 +318,28 @@ fn check_for_patch_version_bump(
     let tempdir = tempdir().unwrap();
     let vendored_packages = vendor_packages(cargo_vendor, &tempdir, packages)?;
 
+    let mut errors = vec![];
     for (package, version) in packages {
-        compare_published_package_to_vendored_version(
+        let res = compare_published_package_to_vendored_version(
             workspace_root,
             package,
             version,
             &vendored_packages,
-        )?;
+        );
+
+        if let Err(error) = res {
+            errors.push(error);
+        }
     }
+    if !errors.is_empty() {
+        let div = std::iter::repeat("=").take(32).collect::<Vec<_>>().join("");
+        let mut message = format!("{div}\nPatch version bump check issues:\n{div}\n");
+        for (n, error) in errors.iter().enumerate() {
+            message += &format!("{}. {error}\n", n + 1);
+        }
+        bail!("{}", message);
+    }
+
     Ok(())
 }
 
@@ -795,7 +816,11 @@ mod tests {
             )
             .unwrap_err()
             .to_string(),
-            "Differences found between published foobar and main. Patch version bump required."
+            "================================\n\
+             Patch version bump check issues:\n\
+             ================================\n\
+             1. Differences found between published foobar and local version. \
+                Patch version bump required.\n"
         );
     }
 
