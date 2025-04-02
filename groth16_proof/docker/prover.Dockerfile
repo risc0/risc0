@@ -29,15 +29,22 @@ COPY --from=circom /usr/src/groth16/stark_verify_cpp/ stark_verify_cpp/
 
 # Install python and slice up the witness generator
 RUN apt-get install -q -y python3-dev
-COPY scripts/split.py scripts/split.py
-RUN python3 scripts/split.py stark_verify_cpp/stark_verify.cpp \
-    stark_verify_cpp/stark_verify.x
-RUN mv stark_verify_cpp/stark_verify.x \
-    stark_verify_cpp/stark_verify.cpp
+
+# Break the generated source file into smaller, function-sized pieces.
+COPY scripts/chunk.py scripts/chunk.py
+RUN python3 scripts/chunk.py stark_verify_cpp/stark_verify.cpp
+RUN rm stark_verify_cpp/stark_verify.cpp
+
+# One of the functions will be considerably larger than the rest;
+# break it down further, so it doesn't choke the compiler backend
+COPY scripts/outline.py scripts/outline.py
+RUN (BIG_FILE=$(du -h stark_verify_cpp/*.cpp | sort -rh | head -1 | awk '{ print $2 }'); \
+  python3 scripts/outline.py "$BIG_FILE"; \
+  rm "$BIG_FILE")
 
 COPY scripts/replacement-Makefile stark_verify_cpp/Makefile
 
-RUN (cd stark_verify_cpp; make)
+RUN (cd stark_verify_cpp; make -j`nproc`)
 
 # Stage 3: Build the Gnark prover
 FROM golang:1.23-bookworm AS gnark
