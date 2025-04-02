@@ -905,6 +905,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "blst"
+version = "0.3.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47c79a94619fade3c0b887670333513a67ac28a6a7e653eb260bf0d4103db38d"
+dependencies = [
+ "cc",
+ "glob",
+ "threadpool",
+ "zeroize",
+]
+
+[[package]]
 name = "bonsai-sdk"
 version = "1.4.0"
 dependencies = [
@@ -993,9 +1005,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck_derive"
-version = "1.8.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcfcc3cd946cb52f0bbfdbbcfa2f4e24f75ebb6c0e1002f7c25904fada18b9ec"
+checksum = "3fa76293b4f7bb636ab88fd78228235b5248b4d05cc589aed610f954af5d7c7a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1070,7 +1082,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "bincode",
@@ -2532,7 +2544,7 @@ dependencies = [
  "gix-utils",
  "itoa",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -2614,7 +2626,7 @@ dependencies = [
  "smallvec",
  "thiserror 2.0.6",
  "unicode-bom",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -2860,7 +2872,7 @@ dependencies = [
  "itoa",
  "smallvec",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -2993,7 +3005,7 @@ dependencies = [
  "gix-utils",
  "maybe-async",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -3025,7 +3037,7 @@ dependencies = [
  "gix-validate",
  "memmap2",
  "thiserror 2.0.6",
- "winnow",
+ "winnow 0.6.20",
 ]
 
 [[package]]
@@ -3404,6 +3416,12 @@ checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "hermit-abi"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 
 [[package]]
 name = "hermit-abi"
@@ -4597,6 +4615,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "num_cpus"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
+dependencies = [
+ "hermit-abi 0.3.9",
+ "libc",
+]
+
+[[package]]
 name = "number_prefix"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5580,7 +5608,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.0"
+version = "1.4.2"
 dependencies = [
  "anyhow",
  "clap 4.5.32",
@@ -5608,7 +5636,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -5628,7 +5656,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.0"
+version = "2.1.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -5663,7 +5691,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5695,7 +5723,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "1.4.0"
+version = "2.0.1"
 dependencies = [
  "cc",
  "cust",
@@ -5709,7 +5737,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5736,7 +5764,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.4.0"
+version = "2.0.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5747,7 +5775,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -5763,6 +5791,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "paste",
+ "postcard",
  "rand",
  "rayon",
  "ringbuffer",
@@ -5781,7 +5810,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "cc",
  "cust",
@@ -5798,6 +5827,7 @@ name = "risc0-core"
 version = "2.0.0"
 dependencies = [
  "bytemuck",
+ "bytemuck_derive",
  "nvtx",
  "puffin",
  "rand",
@@ -5806,7 +5836,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -5830,7 +5860,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -5838,6 +5868,7 @@ dependencies = [
  "bincode",
  "bytemuck",
  "clap 4.5.32",
+ "risc0-circuit-rv32im",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "temp-env",
@@ -5848,9 +5879,10 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "anyhow",
+ "blst",
  "cust",
  "risc0-build-kernel",
  "sppark",
@@ -5877,7 +5909,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -5910,7 +5942,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -6012,7 +6044,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -6254,7 +6286,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "rzup"
-version = "0.4.0"
+version = "0.4.2"
 dependencies = [
  "clap 4.5.32",
  "colored",
@@ -6560,9 +6592,9 @@ dependencies = [
 
 [[package]]
 name = "sppark"
-version = "0.1.10"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac5090642d9ae844edd9a5c23cb1fce6724ca88d50c55178ee8d1f656df5826b"
+checksum = "16bf457036c0a778140ce4c3bcf9ff30c5c70a9d9c0bb04fe513af025b647b2c"
 dependencies = [
  "cc",
  "which 4.4.2",
@@ -6972,6 +7004,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "threadpool"
+version = "1.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d050e60b33d41c19108b32cea32164033a9013fe3b46cbd4457559bfbf77afaa"
+dependencies = [
+ "num_cpus",
+]
+
+[[package]]
 name = "time"
 version = "0.3.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7141,15 +7182,15 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.22.22"
+version = "0.22.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ae48d6208a266e853d946088ed816055e556cc6028c5e8e2b84d9fa5dd7c7f5"
+checksum = "17b4795ff5edd201c7cd6dca065ae59972ce77d1b80fa0a84d94950ece7d1474"
 dependencies = [
  "indexmap 2.7.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
- "winnow",
+ "winnow 0.7.4",
 ]
 
 [[package]]
@@ -8092,6 +8133,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "winnow"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e97b544156e9bebe1a0ffbc03484fc1ffe3100cbce3ffb17eac35f7cdd7ab36"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "winsafe"
 version = "0.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8150,6 +8200,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bincode",
+ "camino",
  "cargo-semver-checks",
  "cargo_metadata",
  "clap 4.5.32",
@@ -8167,8 +8218,10 @@ dependencies = [
  "semver",
  "tempfile",
  "toml",
+ "toml_edit",
  "tracing",
  "tracing-subscriber 0.3.19",
+ "walkdir",
  "which 7.0.0",
  "xshell",
 ]

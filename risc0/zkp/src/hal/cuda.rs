@@ -34,7 +34,10 @@ use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
-        hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite, HashSuite},
+        hash::{
+            poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite,
+            sha::Sha256HashSuite, HashSuite,
+        },
         log2_ceil,
     },
     FRI_FOLD,
@@ -171,6 +174,51 @@ impl CudaHash for CudaHashPoseidon2 {
     }
 }
 
+pub struct CudaHashPoseidon254 {
+    suite: HashSuite<BabyBear>,
+}
+
+impl CudaHash for CudaHashPoseidon254 {
+    fn new() -> Self {
+        CudaHashPoseidon254 {
+            suite: Poseidon254HashSuite::new_suite(),
+        }
+    }
+
+    fn hash_fold(&self, io: &BufferImpl<Digest>, output_size: usize) {
+        let err = unsafe {
+            let input = io.as_device_ptr_with_offset(2 * output_size);
+            let output = io.as_device_ptr_with_offset(output_size);
+            sppark_poseidon254_fold(output, input, output_size)
+        };
+        if err.code != 0 {
+            panic!("Failure during hash_fold: {err}");
+        }
+    }
+
+    fn hash_rows(&self, output: &BufferImpl<Digest>, matrix: &BufferImpl<BabyBearElem>) {
+        let row_size = output.size();
+        let col_size = matrix.size() / output.size();
+        assert_eq!(matrix.size(), col_size * row_size);
+
+        let err = unsafe {
+            sppark_poseidon254_rows(
+                output.as_device_ptr(),
+                matrix.as_device_ptr(),
+                row_size,
+                col_size.try_into().unwrap(),
+            )
+        };
+        if err.code != 0 {
+            panic!("Failure during hash_rows 254: {err}");
+        }
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
+}
+
 pub struct CudaHal<Hash: CudaHash> {
     pub max_threads: u32,
     hash: Option<Box<Hash>>,
@@ -180,6 +228,7 @@ pub struct CudaHal<Hash: CudaHash> {
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
 pub type CudaHalPoseidon2 = CudaHal<CudaHashPoseidon2>;
+pub type CudaHalPoseidon254 = CudaHal<CudaHashPoseidon254>;
 
 struct RawBuffer {
     name: &'static str,

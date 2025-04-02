@@ -7084,6 +7084,7 @@ impl risc0_zkp::layout::Component for Sha0Layout {
 }
 pub struct BigIntStateLayout {
     pub is_ecall: &'static NondetRegLayout,
+    pub mode: &'static NondetRegLayout,
     pub pc: &'static NondetRegLayout,
     pub poly_op: &'static NondetRegLayout,
     pub coeff: &'static NondetRegLayout,
@@ -7097,6 +7098,7 @@ impl risc0_zkp::layout::Component for BigIntStateLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("is_ecall", self.is_ecall)?;
+        v.visit_component("mode", self.mode)?;
         v.visit_component("pc", self.pc)?;
         v.visit_component("poly_op", self.poly_op)?;
         v.visit_component("coeff", self.coeff)?;
@@ -7112,6 +7114,7 @@ pub struct _Arguments_BigInt0StateLayout {
     pub memory_arg: &'static MemoryArgLayout12LayoutArray,
     pub cycle_arg: &'static CycleArgLayout6LayoutArray,
     pub arg_u8: &'static ArgU8Layout18LayoutArray,
+    pub arg_u16: &'static ArgU16Layout4LayoutArray,
 }
 impl risc0_zkp::layout::Component for _Arguments_BigInt0StateLayout {
     fn ty_name(&self) -> &'static str {
@@ -7122,11 +7125,13 @@ impl risc0_zkp::layout::Component for _Arguments_BigInt0StateLayout {
         v.visit_component("memory_arg", self.memory_arg)?;
         v.visit_component("cycle_arg", self.cycle_arg)?;
         v.visit_component("arg_u8", self.arg_u8)?;
+        v.visit_component("arg_u16", self.arg_u16)?;
         Ok(())
     }
 }
 pub struct BigIntEcallLayout {
     pub _super: &'static BigIntStateLayout,
+    pub mode: &'static MemoryReadLayout,
     pub pc: &'static ReadAddrLayout,
 }
 impl risc0_zkp::layout::Component for BigIntEcallLayout {
@@ -7136,6 +7141,7 @@ impl risc0_zkp::layout::Component for BigIntEcallLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("_super", self._super)?;
+        v.visit_component("mode", self.mode)?;
         v.visit_component("pc", self.pc)?;
         Ok(())
     }
@@ -7150,13 +7156,13 @@ pub struct BigInt0StateArm0Layout {
     pub _extra5: &'static MemoryArgLayout,
     pub _extra6: &'static MemoryArgLayout,
     pub _extra7: &'static MemoryArgLayout,
-    pub _extra8: &'static MemoryArgLayout,
-    pub _extra9: &'static MemoryArgLayout,
+    pub _extra8: &'static CycleArgLayout,
+    pub _extra9: &'static CycleArgLayout,
     pub _extra10: &'static CycleArgLayout,
     pub _extra11: &'static CycleArgLayout,
-    pub _extra12: &'static CycleArgLayout,
-    pub _extra13: &'static CycleArgLayout,
-    pub _extra14: &'static CycleArgLayout,
+    pub _extra12: &'static ArgU8Layout,
+    pub _extra13: &'static ArgU8Layout,
+    pub _extra14: &'static ArgU8Layout,
     pub _extra15: &'static ArgU8Layout,
     pub _extra16: &'static ArgU8Layout,
     pub _extra17: &'static ArgU8Layout,
@@ -7172,9 +7178,10 @@ pub struct BigInt0StateArm0Layout {
     pub _extra27: &'static ArgU8Layout,
     pub _extra28: &'static ArgU8Layout,
     pub _extra29: &'static ArgU8Layout,
-    pub _extra30: &'static ArgU8Layout,
-    pub _extra31: &'static ArgU8Layout,
-    pub _extra32: &'static ArgU8Layout,
+    pub _extra30: &'static ArgU16Layout,
+    pub _extra31: &'static ArgU16Layout,
+    pub _extra32: &'static ArgU16Layout,
+    pub _extra33: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for BigInt0StateArm0Layout {
     fn ty_name(&self) -> &'static str {
@@ -7216,10 +7223,12 @@ impl risc0_zkp::layout::Component for BigInt0StateArm0Layout {
         v.visit_component("_extra30", self._extra30)?;
         v.visit_component("_extra31", self._extra31)?;
         v.visit_component("_extra32", self._extra32)?;
+        v.visit_component("_extra33", self._extra33)?;
         Ok(())
     }
 }
 pub struct _Arguments_BigIntStepBytesLayout {
+    pub arg_u16: &'static ArgU16Layout2LayoutArray,
     pub arg_u8: &'static ArgU8Layout16LayoutArray,
     pub memory_arg: &'static MemoryArgLayout8LayoutArray,
     pub cycle_arg: &'static CycleArgLayout4LayoutArray,
@@ -7230,9 +7239,25 @@ impl risc0_zkp::layout::Component for _Arguments_BigIntStepBytesLayout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("arg_u16", self.arg_u16)?;
         v.visit_component("arg_u8", self.arg_u8)?;
         v.visit_component("memory_arg", self.memory_arg)?;
         v.visit_component("cycle_arg", self.cycle_arg)?;
+        Ok(())
+    }
+}
+pub struct BigIntAddrLayout {
+    pub _super: &'static AddrDecomposeBitsLayout,
+    pub _0: &'static IsZeroLayout,
+}
+impl risc0_zkp::layout::Component for BigIntAddrLayout {
+    fn ty_name(&self) -> &'static str {
+        "BigIntAddrLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("_0", self._0)?;
         Ok(())
     }
 }
@@ -7268,6 +7293,7 @@ impl risc0_zkp::layout::Component for BigIntReadWords_SuperLayout {
 }
 pub type BigIntReadWords_SuperLayout4LayoutArray = [&'static BigIntReadWords_SuperLayout; 4];
 pub struct BigIntReadLayout {
+    pub addr: &'static BigIntAddrLayout,
     pub words: &'static BigIntReadWords_SuperLayout4LayoutArray,
 }
 impl risc0_zkp::layout::Component for BigIntReadLayout {
@@ -7276,6 +7302,7 @@ impl risc0_zkp::layout::Component for BigIntReadLayout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("addr", self.addr)?;
         v.visit_component("words", self.words)?;
         Ok(())
     }
@@ -7310,6 +7337,7 @@ impl risc0_zkp::layout::Component for BigIntWrite__0_SuperLayout {
 pub type BigIntWrite__0_SuperLayout4LayoutArray = [&'static BigIntWrite__0_SuperLayout; 4];
 pub struct BigIntWriteLayout {
     pub _super: &'static BigIntWitnessLayout,
+    pub addr: &'static BigIntAddrLayout,
     pub _1: &'static BigIntWrite__0_SuperLayout4LayoutArray,
 }
 impl risc0_zkp::layout::Component for BigIntWriteLayout {
@@ -7319,24 +7347,27 @@ impl risc0_zkp::layout::Component for BigIntWriteLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("_super", self._super)?;
+        v.visit_component("addr", self.addr)?;
         v.visit_component("_1", self._1)?;
         Ok(())
     }
 }
 pub struct BigIntStepBytesArm2Layout {
     pub _super: &'static BigIntWitnessLayout,
-    pub _extra0: &'static MemoryArgLayout,
-    pub _extra1: &'static MemoryArgLayout,
+    pub _extra0: &'static ArgU16Layout,
+    pub _extra1: &'static ArgU16Layout,
     pub _extra2: &'static MemoryArgLayout,
     pub _extra3: &'static MemoryArgLayout,
     pub _extra4: &'static MemoryArgLayout,
     pub _extra5: &'static MemoryArgLayout,
     pub _extra6: &'static MemoryArgLayout,
     pub _extra7: &'static MemoryArgLayout,
-    pub _extra8: &'static CycleArgLayout,
-    pub _extra9: &'static CycleArgLayout,
+    pub _extra8: &'static MemoryArgLayout,
+    pub _extra9: &'static MemoryArgLayout,
     pub _extra10: &'static CycleArgLayout,
     pub _extra11: &'static CycleArgLayout,
+    pub _extra12: &'static CycleArgLayout,
+    pub _extra13: &'static CycleArgLayout,
 }
 impl risc0_zkp::layout::Component for BigIntStepBytesArm2Layout {
     fn ty_name(&self) -> &'static str {
@@ -7357,6 +7388,8 @@ impl risc0_zkp::layout::Component for BigIntStepBytesArm2Layout {
         v.visit_component("_extra9", self._extra9)?;
         v.visit_component("_extra10", self._extra10)?;
         v.visit_component("_extra11", self._extra11)?;
+        v.visit_component("_extra12", self._extra12)?;
+        v.visit_component("_extra13", self._extra13)?;
         Ok(())
     }
 }
@@ -7385,11 +7418,12 @@ pub struct BigIntStepLayout {
     pub mem_op: &'static NondetRegLayout,
     pub reg_bits: &'static NondetRegLayout5LayoutArray,
     pub coeff_bits: &'static NondetRegLayout3LayoutArray,
-    pub _2: &'static ReadAddrLayout,
+    pub base_addr_u32: &'static MemoryReadLayout,
+    pub data_addr_u32: &'static NormalizeU32Layout,
     pub mem_op_one_hot: &'static OneHot_3_Layout,
     pub _arguments_big_int_step_bytes: &'static _Arguments_BigIntStepBytesLayout,
     pub bytes: &'static BigIntStepBytesLayout,
-    pub _3: &'static IsZeroLayout,
+    pub _2: &'static IsZeroLayout,
 }
 impl risc0_zkp::layout::Component for BigIntStepLayout {
     fn ty_name(&self) -> &'static str {
@@ -7404,14 +7438,15 @@ impl risc0_zkp::layout::Component for BigIntStepLayout {
         v.visit_component("mem_op", self.mem_op)?;
         v.visit_component("reg_bits", self.reg_bits)?;
         v.visit_component("coeff_bits", self.coeff_bits)?;
-        v.visit_component("_2", self._2)?;
+        v.visit_component("base_addr_u32", self.base_addr_u32)?;
+        v.visit_component("data_addr_u32", self.data_addr_u32)?;
         v.visit_component("mem_op_one_hot", self.mem_op_one_hot)?;
         v.visit_component(
             "_arguments_big_int_step_bytes",
             self._arguments_big_int_step_bytes,
         )?;
         v.visit_component("bytes", self.bytes)?;
-        v.visit_component("_3", self._3)?;
+        v.visit_component("_2", self._2)?;
         Ok(())
     }
 }
@@ -7453,6 +7488,10 @@ pub struct BigInt0StateArm2Layout {
     pub _extra33: &'static ArgU8Layout,
     pub _extra34: &'static ArgU8Layout,
     pub _extra35: &'static ArgU8Layout,
+    pub _extra36: &'static ArgU16Layout,
+    pub _extra37: &'static ArgU16Layout,
+    pub _extra38: &'static ArgU16Layout,
+    pub _extra39: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for BigInt0StateArm2Layout {
     fn ty_name(&self) -> &'static str {
@@ -7497,6 +7536,10 @@ impl risc0_zkp::layout::Component for BigInt0StateArm2Layout {
         v.visit_component("_extra33", self._extra33)?;
         v.visit_component("_extra34", self._extra34)?;
         v.visit_component("_extra35", self._extra35)?;
+        v.visit_component("_extra36", self._extra36)?;
+        v.visit_component("_extra37", self._extra37)?;
+        v.visit_component("_extra38", self._extra38)?;
+        v.visit_component("_extra39", self._extra39)?;
         Ok(())
     }
 }
@@ -7538,6 +7581,10 @@ pub struct BigInt0StateArm3Layout {
     pub _extra33: &'static ArgU8Layout,
     pub _extra34: &'static ArgU8Layout,
     pub _extra35: &'static ArgU8Layout,
+    pub _extra36: &'static ArgU16Layout,
+    pub _extra37: &'static ArgU16Layout,
+    pub _extra38: &'static ArgU16Layout,
+    pub _extra39: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for BigInt0StateArm3Layout {
     fn ty_name(&self) -> &'static str {
@@ -7582,6 +7629,10 @@ impl risc0_zkp::layout::Component for BigInt0StateArm3Layout {
         v.visit_component("_extra33", self._extra33)?;
         v.visit_component("_extra34", self._extra34)?;
         v.visit_component("_extra35", self._extra35)?;
+        v.visit_component("_extra36", self._extra36)?;
+        v.visit_component("_extra37", self._extra37)?;
+        v.visit_component("_extra38", self._extra38)?;
+        v.visit_component("_extra39", self._extra39)?;
         Ok(())
     }
 }
@@ -7623,6 +7674,10 @@ pub struct BigInt0StateArm4Layout {
     pub _extra33: &'static ArgU8Layout,
     pub _extra34: &'static ArgU8Layout,
     pub _extra35: &'static ArgU8Layout,
+    pub _extra36: &'static ArgU16Layout,
+    pub _extra37: &'static ArgU16Layout,
+    pub _extra38: &'static ArgU16Layout,
+    pub _extra39: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for BigInt0StateArm4Layout {
     fn ty_name(&self) -> &'static str {
@@ -7667,6 +7722,10 @@ impl risc0_zkp::layout::Component for BigInt0StateArm4Layout {
         v.visit_component("_extra33", self._extra33)?;
         v.visit_component("_extra34", self._extra34)?;
         v.visit_component("_extra35", self._extra35)?;
+        v.visit_component("_extra36", self._extra36)?;
+        v.visit_component("_extra37", self._extra37)?;
+        v.visit_component("_extra38", self._extra38)?;
+        v.visit_component("_extra39", self._extra39)?;
         Ok(())
     }
 }
@@ -7708,6 +7767,10 @@ pub struct BigInt0StateArm5Layout {
     pub _extra33: &'static ArgU8Layout,
     pub _extra34: &'static ArgU8Layout,
     pub _extra35: &'static ArgU8Layout,
+    pub _extra36: &'static ArgU16Layout,
+    pub _extra37: &'static ArgU16Layout,
+    pub _extra38: &'static ArgU16Layout,
+    pub _extra39: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for BigInt0StateArm5Layout {
     fn ty_name(&self) -> &'static str {
@@ -7752,6 +7815,10 @@ impl risc0_zkp::layout::Component for BigInt0StateArm5Layout {
         v.visit_component("_extra33", self._extra33)?;
         v.visit_component("_extra34", self._extra34)?;
         v.visit_component("_extra35", self._extra35)?;
+        v.visit_component("_extra36", self._extra36)?;
+        v.visit_component("_extra37", self._extra37)?;
+        v.visit_component("_extra38", self._extra38)?;
+        v.visit_component("_extra39", self._extra39)?;
         Ok(())
     }
 }
@@ -7793,6 +7860,10 @@ pub struct BigInt0StateArm6Layout {
     pub _extra33: &'static ArgU8Layout,
     pub _extra34: &'static ArgU8Layout,
     pub _extra35: &'static ArgU8Layout,
+    pub _extra36: &'static ArgU16Layout,
+    pub _extra37: &'static ArgU16Layout,
+    pub _extra38: &'static ArgU16Layout,
+    pub _extra39: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for BigInt0StateArm6Layout {
     fn ty_name(&self) -> &'static str {
@@ -7837,6 +7908,10 @@ impl risc0_zkp::layout::Component for BigInt0StateArm6Layout {
         v.visit_component("_extra33", self._extra33)?;
         v.visit_component("_extra34", self._extra34)?;
         v.visit_component("_extra35", self._extra35)?;
+        v.visit_component("_extra36", self._extra36)?;
+        v.visit_component("_extra37", self._extra37)?;
+        v.visit_component("_extra38", self._extra38)?;
+        v.visit_component("_extra39", self._extra39)?;
         Ok(())
     }
 }
@@ -7878,6 +7953,10 @@ pub struct BigInt0StateArm7Layout {
     pub _extra33: &'static ArgU8Layout,
     pub _extra34: &'static ArgU8Layout,
     pub _extra35: &'static ArgU8Layout,
+    pub _extra36: &'static ArgU16Layout,
+    pub _extra37: &'static ArgU16Layout,
+    pub _extra38: &'static ArgU16Layout,
+    pub _extra39: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for BigInt0StateArm7Layout {
     fn ty_name(&self) -> &'static str {
@@ -7922,6 +8001,10 @@ impl risc0_zkp::layout::Component for BigInt0StateArm7Layout {
         v.visit_component("_extra33", self._extra33)?;
         v.visit_component("_extra34", self._extra34)?;
         v.visit_component("_extra35", self._extra35)?;
+        v.visit_component("_extra36", self._extra36)?;
+        v.visit_component("_extra37", self._extra37)?;
+        v.visit_component("_extra38", self._extra38)?;
+        v.visit_component("_extra39", self._extra39)?;
         Ok(())
     }
 }
@@ -8300,7 +8383,7 @@ pub struct DenormedValU32Struct {
 #[derive(Copy, Clone, Debug)]
 pub struct NormalizeU32Struct {
     pub _super: ValU32Struct,
-    pub carry: NondetRegStruct,
+    pub high_carry: NondetRegStruct,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct AddrDecomposeStruct {
@@ -8313,7 +8396,6 @@ pub struct AddrDecomposeBitsStruct {
     pub low0: NondetRegStruct,
     pub low1: NondetRegStruct,
     pub low2: Val,
-    pub addr: Val,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct CmpEqualStruct {
@@ -8396,7 +8478,6 @@ pub type NondetRegStruct8Array = [NondetRegStruct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_8_Struct {
     pub _super: NondetRegStruct8Array,
-    pub bits: NondetRegStruct8Array,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct InstInputStruct {
@@ -8438,7 +8519,6 @@ pub struct MultiplyAccumulateStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct DivInputStruct {
     pub _super: InstInputStruct,
-    pub ii: InstInputStruct,
     pub decoded: DecoderStruct,
     pub rs1: GetDataStruct,
     pub rs2: GetDataStruct,
@@ -8466,7 +8546,6 @@ pub struct InstOutputBaseStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct MiscInputStruct {
     pub _super: InstInputStruct,
-    pub ii: InstInputStruct,
     pub decoded: DecoderStruct,
     pub rs1: GetDataStruct,
     pub rs2: GetDataStruct,
@@ -8480,7 +8559,6 @@ pub struct MiscOutputStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct MulInputStruct {
     pub _super: InstInputStruct,
-    pub ii: InstInputStruct,
     pub decoded: DecoderStruct,
     pub rs1: GetDataStruct,
     pub rs2: GetDataStruct,
@@ -8540,7 +8618,6 @@ pub type NondetRegStruct6Array = [NondetRegStruct; 6];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_6_Struct {
     pub _super: NondetRegStruct6Array,
-    pub bits: NondetRegStruct6Array,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct ECallOutputStruct {
@@ -8693,6 +8770,7 @@ pub struct ShaStateStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct BigIntStateStruct {
     pub is_ecall: NondetRegStruct,
+    pub mode: NondetRegStruct,
     pub pc: NondetRegStruct,
     pub poly_op: NondetRegStruct,
     pub coeff: NondetRegStruct,
