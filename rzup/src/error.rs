@@ -36,10 +36,10 @@ pub enum RzupError {
     #[error("{0}")]
     Other(String),
 
-    #[error("Rate Limited: {0}")]
+    #[error("Rate limited: {0}")]
     RateLimited(String),
 
-    #[error("Unsupported Platform: {0}")]
+    #[error("Unsupported platform: {0}")]
     UnsupportedPlatform(String),
 }
 
