@@ -22,15 +22,28 @@ use anyhow::{anyhow, bail, Context as _, Result};
 use cargo_semver_checks::{Check, GlobalConfig, Rustdoc};
 use clap::Parser;
 use semver::Version;
+use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, DisplayFromStr};
 use tempfile::tempdir;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+use std::fmt;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::str::FromStr;
 
 #[derive(Parser)]
-pub struct SemverChecks;
+pub struct SemverChecks {
+    /// Error if there is a difference between the existing `semver-baselines.lock` and what was
+    /// checked.
+    #[arg(long)]
+    locked: bool,
+
+    /// Ignore the existing `semver-baselines.lock`
+    #[arg(long)]
+    update: bool,
+}
 
 /// Sends all writes into the given channel.
 struct ChannelWriter(std::sync::mpsc::Sender<Vec<u8>>);
@@ -79,7 +92,7 @@ fn tee_semver_output(recv: std::sync::mpsc::Receiver<Vec<u8>>) -> Vec<u8> {
 }
 
 /// See [`SemverOutput`]
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct VersionPair {
     current: Version,
     baseline: Version,
@@ -112,7 +125,7 @@ impl TryFrom<OptionalVersionPair> for VersionPair {
 ///
 /// If `cargo-semver-checks` gave some programmatic way to get this information we wouldn't need to
 /// parse it ourselves.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 struct SemverOutput {
     crate_versions: BTreeMap<String, VersionPair>,
 }
@@ -146,6 +159,10 @@ impl SemverOutput {
                 .map(|(k, v)| Ok((k, v.try_into().context("{k} missing version")?)))
                 .collect::<Result<_>>()?,
         })
+    }
+
+    fn extend(&mut self, other: Self) {
+        self.crate_versions.extend(other.crate_versions)
     }
 }
 
@@ -196,7 +213,7 @@ fn vendor_packages(
     cargo_toml_contents += "name = \"placeholder-project\"\n";
     cargo_toml_contents += "[dependencies]\n";
     for (package, version) in packages {
-        cargo_toml_contents += &format!("{package} = \"{version}\"\n");
+        cargo_toml_contents += &format!("{package} = \"={version}\"\n");
     }
     std::fs::write(project_dir.join("Cargo.toml"), &cargo_toml_contents)?;
     std::fs::create_dir(project_dir.join("src"))?;
@@ -305,8 +322,8 @@ fn check_for_patch_version_bump(
     Ok(())
 }
 
-/// Find packages in the workspace that don't have `release = false`
-fn find_publishable_packages(
+/// Find packages in the workspace that don't have `release = false` and have a `lib` target
+fn find_publishable_packages_with_lib(
     workspace_root: &Path,
 ) -> Result<BTreeMap<String, cargo_metadata::Package>> {
     let metadata = cargo_metadata::MetadataCommand::new()
@@ -323,6 +340,11 @@ fn find_publishable_packages(
                     continue;
                 }
             }
+        }
+
+        // check if package has a `lib` target (semver won't run on non-libraries)
+        if !package.targets.iter().any(|t| t.is_lib()) {
+            continue;
         }
 
         packages.insert(package.name.clone(), package.clone());
@@ -343,21 +365,159 @@ fn real_cargo_vendor(path: &Path) -> Result<()> {
     Ok(())
 }
 
+#[derive(Debug, PartialEq, Eq)]
+enum VersionOrNone {
+    Version(Version),
+    None,
+}
+
+impl VersionOrNone {
+    fn as_option(&self) -> Option<&Version> {
+        match self {
+            Self::Version(v) => Some(v),
+            Self::None => None,
+        }
+    }
+}
+
+impl From<Version> for VersionOrNone {
+    fn from(v: Version) -> Self {
+        Self::Version(v)
+    }
+}
+
+impl FromStr for VersionOrNone {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        if s == "none" {
+            Ok(Self::None)
+        } else {
+            Ok(Self::Version(Version::parse(s)?))
+        }
+    }
+}
+
+impl fmt::Display for VersionOrNone {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Version(v) => write!(f, "{v}"),
+            Self::None => write!(f, "none"),
+        }
+    }
+}
+
+#[serde_as]
+#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
+struct SemverBaselines {
+    #[serde_as(as = "BTreeMap<_, DisplayFromStr>")]
+    versions: BTreeMap<String, VersionOrNone>,
+}
+
+impl SemverBaselines {
+    fn get(&self, name: &str) -> Option<&VersionOrNone> {
+        self.versions.get(name)
+    }
+}
+
+impl fmt::Display for SemverBaselines {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{")?;
+
+        let mut iter = self.versions.iter();
+        if let Some((name, version)) = iter.next() {
+            write!(f, "{name}: {version}")?;
+            for (name, version) in iter {
+                write!(f, ", {name}: {version}")?;
+            }
+        }
+
+        write!(f, "}}")?;
+        Ok(())
+    }
+}
+
+impl From<SemverOutput> for SemverBaselines {
+    fn from(o: SemverOutput) -> Self {
+        Self {
+            versions: o
+                .crate_versions
+                .into_iter()
+                .map(|(name, version_pair)| (name, version_pair.baseline.into()))
+                .collect(),
+        }
+    }
+}
+
+fn read_semver_lock_file(workspace_root: &Path) -> Result<Option<SemverBaselines>> {
+    let path = workspace_root.join("semver-baselines.lock");
+    if !path.exists() {
+        return Ok(None);
+    }
+
+    toml::from_str(&std::fs::read_to_string(path).context("failed to read lock-file")?)
+        .context("failed to decode lock-file")
+}
+
+fn write_semver_lock_file(workspace_root: &Path, baselines: &SemverBaselines) -> Result<()> {
+    std::fs::write(
+        workspace_root.join("semver-baselines.lock"),
+        toml::to_string_pretty(baselines).context("failed to serialize lock-file")?,
+    )
+    .context("failed to write lock-file")?;
+    Ok(())
+}
+
 /// Entrypoint for the tests. See the module doc-comment about what it does.
 ///
-/// `workspace_root` : The path to the workspace we are checking
-/// `semver_baseline`: The baseline version we are comparing to
-/// `cargo_vendor`   : Function that runs `cargo vendor` command. We dependency inject this for the
-///                    sake of the tests
+/// `workspace_root`         : The path to the workspace we are checking
+/// `semver_baseline_factory`: Constructor for baseline version
+/// `cargo_vendor`           : Function that runs `cargo vendor` command. We dependency inject this
+///                            for the sake of the tests
 fn run_inner(
+    args: &SemverChecks,
     workspace_root: &Path,
-    semver_baseline: Rustdoc,
+    mut semver_baseline_factory: impl FnMut(Option<&Version>) -> Rustdoc,
     cargo_vendor: impl FnOnce(&Path) -> Result<()>,
 ) -> Result<()> {
-    let packages = find_publishable_packages(workspace_root)?;
-    let package_names = packages.keys().cloned().collect();
+    let packages = find_publishable_packages_with_lib(workspace_root)?;
 
-    let semver_output = run_semver_checks(workspace_root, semver_baseline, package_names)?;
+    let input_baselines = (!args.update)
+        .then(|| read_semver_lock_file(workspace_root))
+        .transpose()?
+        .flatten()
+        .unwrap_or_default();
+
+    let mut skipped_packages = BTreeSet::new();
+    let mut semver_output = SemverOutput::default();
+    for package in packages.keys() {
+        let version = input_baselines.get(package);
+        if version.is_some_and(|v| v == &VersionOrNone::None) {
+            println!("skipping {package} which has no baseline");
+            skipped_packages.insert(package.clone());
+            continue;
+        }
+        let baseline = semver_baseline_factory(version.and_then(|v| v.as_option()));
+        let output = run_semver_checks(workspace_root, baseline, vec![package.into()])?;
+        semver_output.extend(output);
+    }
+
+    let mut output_baselines: SemverBaselines = semver_output.clone().into();
+    if !args.update {
+        output_baselines.versions.extend(
+            skipped_packages
+                .into_iter()
+                .map(|p| (p, VersionOrNone::None)),
+        );
+    }
+    if args.locked && output_baselines != input_baselines {
+        bail!(
+            "`--locked` provided and baselines don't match: \
+                output != input: {output_baselines} != {input_baselines}"
+        );
+    }
+
+    write_semver_lock_file(workspace_root, &output_baselines)?;
 
     let unbumped_packages: Vec<_> = semver_output
         .crate_versions
@@ -377,11 +537,15 @@ fn run_inner(
 impl SemverChecks {
     pub fn run(&self) {
         let current_dir = std::env::current_dir().expect("should be able to get current directory");
-        if let Err(e) = run_inner(
-            &current_dir,
-            Rustdoc::from_registry_latest_crate_version(),
-            real_cargo_vendor,
-        ) {
+        let baseline_factory = |version: Option<&Version>| {
+            if let Some(version) = version {
+                Rustdoc::from_registry(version.to_string())
+            } else {
+                Rustdoc::from_registry_latest_crate_version()
+            }
+        };
+
+        if let Err(e) = run_inner(self, &current_dir, baseline_factory, real_cargo_vendor) {
             panic!("{e}");
         }
     }
@@ -437,56 +601,26 @@ mod tests {
         assert_eq!(output, SemverOutput { crate_versions })
     }
 
-    /// Writes out a project twice with one crate called "foobar". Runs checks on the two versions
-    /// with one being the "baseline" and the other being the "current" version.
-    fn test_run(
-        baseline_contents: &str,
-        baseline_version: Version,
-        current_contents: &str,
-        current_version: Version,
-    ) -> Result<()> {
-        let tempdir = tempdir().unwrap();
-
-        // Both copies need the same workspace Cargo.toml
-        for d in ["baseline", "current"] {
-            std::fs::create_dir_all(tempdir.path().join(d)).unwrap();
-            std::fs::write(
-                tempdir.path().join(d).join("Cargo.toml"),
-                "
-                [workspace]
-                members = [\"foobar\"]
-                resolve = \"2\"
-                ",
-            )
-            .unwrap();
-        }
-
-        let write_cargo_toml = |path: &Path, version: &Version| {
-            std::fs::write(
-                path.join("Cargo.toml"),
-                format!(
-                    "\
+    fn write_cargo_toml(path: &Path, name: &str, version: &Version) {
+        std::fs::write(
+            path.join("Cargo.toml"),
+            format!(
+                "\
                     [package]\n\
-                    name = \"foobar\"\n\
+                    name = \"{name}\"\n\
                     version = \"{version}\"\n\
                     "
-                ),
-            )
-            .unwrap();
-        };
+            ),
+        )
+        .unwrap();
+    }
 
-        // Create the baseline skeleton
-        let baseline_foobar = tempdir.path().join("baseline/foobar");
-        std::fs::create_dir_all(baseline_foobar.join("src")).unwrap();
-        write_cargo_toml(&baseline_foobar, &baseline_version);
-        std::fs::write(baseline_foobar.join("src/lib.rs"), baseline_contents).unwrap();
-
-        // Create the current skeleton
-        let current_foobar = tempdir.path().join("current/foobar");
-        std::fs::create_dir_all(current_foobar.join("src")).unwrap();
-        write_cargo_toml(&current_foobar, &current_version);
-        std::fs::write(current_foobar.join("src/lib.rs"), current_contents).unwrap();
-
+    fn publish_baseline_crate(
+        tempdir: &tempfile::TempDir,
+        baseline_name: &str,
+        baseline_version: &Version,
+        crate_name: &str,
+    ) {
         // Create a published version of the baseline like what would exist on `crates.io` and save
         // it so we can move it into place in our test version of `cargo vendor`
         assert!(Command::new("cargo")
@@ -495,9 +629,9 @@ mod tests {
                 "--allow-dirty",
                 "--dry-run",
                 "--package",
-                "foobar",
+                crate_name
             ])
-            .current_dir(tempdir.path().join("baseline"))
+            .current_dir(tempdir.path().join(baseline_name))
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .status()
@@ -507,36 +641,139 @@ mod tests {
         // Locally published crates have this directory, but not ones on `crates.io`
         let published_crate = tempdir
             .path()
-            .join("baseline")
-            .join(format!("target/package/foobar-{baseline_version}"));
+            .join(baseline_name)
+            .join(format!("target/package/{crate_name}-{baseline_version}"));
         std::fs::remove_dir_all(published_crate.join("target")).unwrap();
 
-        let published_baseline = tempdir.path().join("published_baseline");
+        let published_baseline = tempdir
+            .path()
+            .join(format!("published_{baseline_name}_{crate_name}"));
         std::fs::rename(
             tempdir
                 .path()
-                .join("baseline/target/package")
-                .join(format!("foobar-{baseline_version}")),
+                .join(baseline_name)
+                .join("target/package")
+                .join(format!("{crate_name}-{baseline_version}")),
             &published_baseline,
         )
         .unwrap();
+    }
 
+    fn create_baseline(
+        tempdir: &tempfile::TempDir,
+        baseline_name: &str,
+        baseline_contents: &str,
+        baseline_version: Version,
+    ) {
+        std::fs::create_dir_all(tempdir.path().join(baseline_name)).unwrap();
+        std::fs::write(
+            tempdir.path().join(baseline_name).join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        let baseline_foobar = tempdir.path().join(baseline_name).join("foobar");
+        std::fs::create_dir_all(baseline_foobar.join("src")).unwrap();
+        write_cargo_toml(&baseline_foobar, "foobar", &baseline_version);
+        std::fs::write(baseline_foobar.join("src/lib.rs"), baseline_contents).unwrap();
+
+        publish_baseline_crate(tempdir, baseline_name, &baseline_version, "foobar");
+    }
+
+    fn create_current(
+        tempdir: &tempfile::TempDir,
+        current_contents: &str,
+        current_version: Version,
+    ) {
+        std::fs::create_dir_all(tempdir.path().join("current")).unwrap();
+        std::fs::write(
+            tempdir.path().join("current").join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        let current_foobar = tempdir.path().join("current/foobar");
+        std::fs::create_dir_all(current_foobar.join("src")).unwrap();
+        write_cargo_toml(&current_foobar, "foobar", &current_version);
+        std::fs::write(current_foobar.join("src/lib.rs"), current_contents).unwrap();
+    }
+
+    fn run_with_temp_dir(
+        tempdir: &tempfile::TempDir,
+        latest_baseline: &str,
+        update: bool,
+        locked: bool,
+    ) -> Result<()> {
+        let args = SemverChecks { update, locked };
         run_inner(
+            &args,
             &tempdir.path().join("current"),
-            Rustdoc::from_root(tempdir.path().join("baseline")),
+            |passed_version| {
+                if let Some(version) = passed_version {
+                    Rustdoc::from_root(tempdir.path().join(format!("baseline_{version}")))
+                } else {
+                    Rustdoc::from_root(tempdir.path().join(latest_baseline))
+                }
+            },
             |d| {
                 // This is our test version of `cargo vendor`
-                std::fs::create_dir_all(d.join("vendor")).unwrap();
-                std::fs::rename(published_baseline, d.join("vendor/foobar")).unwrap();
-                std::fs::write(d.join("vendor/foobar/.cargo-checksum.json"), "").unwrap();
+                let cargo_toml: toml::Value =
+                    toml::from_str(&std::fs::read_to_string(d.join("Cargo.toml")).unwrap())
+                        .unwrap();
+                let deps = cargo_toml.get("dependencies").unwrap();
+
+                for (dep_name, dep_value) in deps.as_table().unwrap() {
+                    let published_baseline = tempdir.path().join(format!(
+                        "published_baseline_{}_{dep_name}",
+                        dep_value.as_str().unwrap().strip_prefix("=").unwrap()
+                    ));
+
+                    std::fs::create_dir_all(d.join("vendor")).unwrap();
+
+                    let dep_path = d.join("vendor").join(dep_name);
+                    std::fs::rename(published_baseline, &dep_path).unwrap();
+                    std::fs::write(dep_path.join(".cargo-checksum.json"), "").unwrap();
+                }
+
                 Ok(())
             },
         )
     }
 
+    /// Writes out a project twice with one crate called "foobar". Runs checks on the two versions
+    /// with one being the "baseline" and the other being the "current" version.
+    fn test_run(
+        tempdir: &tempfile::TempDir,
+        baseline_contents: &str,
+        baseline_version: Version,
+        current_contents: &str,
+        current_version: Version,
+    ) -> Result<()> {
+        create_current(tempdir, current_contents, current_version);
+        let baseline_name = format!("baseline_{baseline_version}");
+
+        create_baseline(tempdir, &baseline_name, baseline_contents, baseline_version);
+        run_with_temp_dir(
+            tempdir,
+            &baseline_name,
+            false, /* update */
+            false, /* locked */
+        )
+    }
+
     #[test]
     fn no_change_passes() {
+        let tempdir = tempdir().unwrap();
         test_run(
+            &tempdir,
             "pub fn foo() {}",
             Version::new(1, 0, 0),
             "pub fn foo() {}",
@@ -547,8 +784,10 @@ mod tests {
 
     #[test]
     fn patch_change_fails() {
+        let tempdir = tempdir().unwrap();
         assert_eq!(
             test_run(
+                &tempdir,
                 "pub fn foo() {}",
                 Version::new(1, 0, 0),
                 "pub fn foo() { /*hello*/ }",
@@ -562,7 +801,9 @@ mod tests {
 
     #[test]
     fn patch_change_passes() {
+        let tempdir = tempdir().unwrap();
         test_run(
+            &tempdir,
             "pub fn foo() {}",
             Version::new(1, 0, 0),
             "pub fn foo() { /*hello*/ }",
@@ -573,8 +814,10 @@ mod tests {
 
     #[test]
     fn minor_change_fails() {
+        let tempdir = tempdir().unwrap();
         assert_eq!(
             test_run(
+                &tempdir,
                 "pub fn foo() {}",
                 Version::new(1, 0, 0),
                 "#[deprecated] pub fn foo() {}",
@@ -588,7 +831,9 @@ mod tests {
 
     #[test]
     fn minor_change_passes() {
+        let tempdir = tempdir().unwrap();
         test_run(
+            &tempdir,
             "pub fn foo() {}",
             Version::new(1, 0, 0),
             "#[deprecated] pub fn foo() {}",
@@ -599,8 +844,10 @@ mod tests {
 
     #[test]
     fn major_change_fails() {
+        let tempdir = tempdir().unwrap();
         assert_eq!(
             test_run(
+                &tempdir,
                 "pub fn foo() {}",
                 Version::new(1, 0, 0),
                 "pub fn foo(_a: u32) {}",
@@ -614,12 +861,314 @@ mod tests {
 
     #[test]
     fn major_change_passes() {
+        let tempdir = tempdir().unwrap();
         test_run(
+            &tempdir,
             "pub fn foo() {}",
             Version::new(1, 0, 0),
             "pub fn foo(_a: u32) {}",
             Version::new(2, 0, 0),
         )
         .unwrap();
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn lock_file_test(
+        baseline1_contents: &str,
+        baseline1_version: Version,
+        baseline2_contents: &str,
+        baseline2_version: Version,
+        current_contents: &str,
+        current_version: Version,
+        update: bool,
+        locked: bool,
+    ) -> Result<()> {
+        let tempdir = tempdir().unwrap();
+
+        create_current(&tempdir, current_contents, current_version);
+
+        let baseline1_name = format!("baseline_{baseline1_version}");
+        create_baseline(
+            &tempdir,
+            &baseline1_name,
+            baseline1_contents,
+            baseline1_version,
+        );
+
+        // Run once to populate the lock-file
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap();
+
+        // Add a new baseline, if not for the lock-file keeping it comparing to the old baseline,
+        // it would cause an error.
+        let baseline2_name = format!("baseline_{baseline2_version}");
+        create_baseline(
+            &tempdir,
+            &baseline2_name,
+            baseline2_contents,
+            baseline2_version,
+        );
+
+        run_with_temp_dir(&tempdir, &baseline2_name, update, locked)
+    }
+
+    #[test]
+    fn lock_file_test_major_bump() {
+        lock_file_test(
+            "pub fn foo() {}",
+            Version::new(1, 0, 0),
+            "pub fn foo(_a: u32) {}",
+            Version::new(2, 1, 0),
+            "pub fn foo(_a: u32, _b: u32) {}",
+            Version::new(2, 0, 0),
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn lock_file_test_major_bump_update() {
+        assert_eq!(
+            lock_file_test(
+                "pub fn foo() {}",
+                Version::new(1, 0, 0),
+                "pub fn foo(_a: u32) {}",
+                Version::new(2, 1, 0),
+                "pub fn foo(_a: u32, _b: u32) {}",
+                Version::new(2, 0, 0),
+                true,  /* update */
+                false, /* locked */
+            )
+            .unwrap_err()
+            .to_string(),
+            "SemVer checks failed. Minor or major version bump required."
+        );
+    }
+
+    #[test]
+    fn lock_file_test_new_version_update_locked() {
+        assert_eq!(
+            lock_file_test(
+                "pub fn foo() {}",
+                Version::new(1, 0, 0),
+                "pub fn foo(_a: u32) {}",
+                Version::new(2, 1, 0),
+                "pub fn foo(_a: u32) {}",
+                Version::new(2, 0, 0),
+                true, /* update */
+                true, /* locked */
+            )
+            .unwrap_err()
+            .to_string(),
+            "`--locked` provided and baselines don't match: output != input: {foobar: 2.1.0} != {}"
+        );
+    }
+
+    #[test]
+    fn lock_file_test_locked_no_change() {
+        lock_file_test(
+            "pub fn foo() {}",
+            Version::new(1, 0, 0),
+            "pub fn foo(_a: u32) {}",
+            Version::new(2, 1, 0),
+            "pub fn foo(_a: u32) {}",
+            Version::new(2, 0, 0),
+            false, /* update */
+            true,  /* locked */
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn lock_file_test_patch_bump() {
+        lock_file_test(
+            "pub fn foo() {}",
+            Version::new(1, 0, 0),
+            "pub fn foo(_a: u32) {}",
+            Version::new(1, 0, 1),
+            "pub fn foo() {}",
+            Version::new(1, 0, 1),
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn locked_fails_due_to_empty_lockfile() {
+        let tempdir = tempdir().unwrap();
+
+        create_current(&tempdir, "pub fn foo() {}", Version::new(2, 0, 0));
+
+        let baseline1_version = Version::new(1, 0, 0);
+        let baseline1_name = format!("baseline_{baseline1_version}");
+        create_baseline(
+            &tempdir,
+            &baseline1_name,
+            "pub fn foo(_a: u32) {}",
+            baseline1_version,
+        );
+
+        assert_eq!(
+            run_with_temp_dir(
+                &tempdir,
+                &baseline1_name,
+                false, /* update */
+                true,  /* locked */
+            )
+            .unwrap_err()
+            .to_string(),
+            "`--locked` provided and baselines don't match: output != input: {foobar: 1.0.0} != {}"
+        );
+    }
+
+    #[test]
+    fn add_new_crate() {
+        let tempdir = tempdir().unwrap();
+
+        create_current(&tempdir, "pub fn foo() {}", Version::new(2, 0, 0));
+
+        let baseline1_version = Version::new(1, 0, 0);
+        let baseline1_name = format!("baseline_{baseline1_version}");
+        create_baseline(
+            &tempdir,
+            &baseline1_name,
+            "pub fn foo(_a: u32) {}",
+            baseline1_version,
+        );
+
+        // Run once to populate the lock-file
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap();
+
+        // Add a new crate
+        std::fs::write(
+            tempdir.path().join("current").join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\", \"baz\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        // mark the new crate's baseline as "none"
+        let mut f = std::fs::OpenOptions::new()
+            .append(true)
+            .open(tempdir.path().join("current/semver-baselines.lock"))
+            .unwrap();
+        write!(f, "\nbaz = \"none\"").unwrap();
+        drop(f);
+
+        let current_baz = tempdir.path().join("current/baz");
+        std::fs::create_dir_all(current_baz.join("src")).unwrap();
+        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0));
+        std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
+
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            true,  /* locked */
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn update_with_new_crate() {
+        let tempdir = tempdir().unwrap();
+
+        create_current(&tempdir, "pub fn foo() {}", Version::new(2, 0, 0));
+
+        let baseline1_version = Version::new(1, 0, 0);
+        let baseline1_name = format!("baseline_{baseline1_version}");
+        create_baseline(
+            &tempdir,
+            &baseline1_name,
+            "pub fn foo(_a: u32) {}",
+            baseline1_version.clone(),
+        );
+
+        // Run once to populate the lock-file
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            false, /* update */
+            false, /* locked */
+        )
+        .unwrap();
+
+        // Add a new crate
+        std::fs::write(
+            tempdir.path().join("current").join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\", \"baz\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        // mark the new crate's baseline as "none"
+        let mut f = std::fs::OpenOptions::new()
+            .append(true)
+            .open(tempdir.path().join("current/semver-baselines.lock"))
+            .unwrap();
+        write!(f, "\nbaz = \"none\"").unwrap();
+        drop(f);
+
+        let current_baz = tempdir.path().join("current/baz");
+        std::fs::create_dir_all(current_baz.join("src")).unwrap();
+        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0));
+        std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
+
+        // create baseline version of baz
+        std::fs::write(
+            tempdir.path().join(&baseline1_name).join("Cargo.toml"),
+            "
+            [workspace]
+            members = [\"foobar\", \"baz\"]
+            resolve = \"2\"
+            ",
+        )
+        .unwrap();
+
+        let baseline_baz = tempdir.path().join(&baseline1_name).join("baz");
+        std::fs::create_dir_all(baseline_baz.join("src")).unwrap();
+        write_cargo_toml(&baseline_baz, "baz", &baseline1_version);
+        std::fs::write(baseline_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
+
+        publish_baseline_crate(&tempdir, &baseline1_name, &baseline1_version, "baz");
+
+        run_with_temp_dir(
+            &tempdir,
+            &baseline1_name,
+            true,  /* update */
+            false, /* locked */
+        )
+        .unwrap();
+        let baselines = read_semver_lock_file(&tempdir.path().join("current"))
+            .unwrap()
+            .unwrap();
+
+        let mut expected = SemverBaselines::default();
+        expected
+            .versions
+            .insert("foobar".into(), Version::new(1, 0, 0).into());
+        expected
+            .versions
+            .insert("baz".into(), Version::new(1, 0, 0).into());
+        assert_eq!(baselines, expected);
     }
 }
