@@ -67,6 +67,22 @@ with open(source_file, "r") as input:
                 cur_chunk = []
         nesting -= line.count("}")
 
+if cur_chunk:
+    step_count += 1
+    step_name = f"step_{step_count}"
+    method_name = f"{struct_name}::{step_name}"
+    param_decls = "(uint ctx_index,Circom_CalcWit* ctx)"
+    global_decls.append(f"void {step_name}{param_decls};\n")
+    main[-1] = f"state.{step_name}(ctx_index,ctx);\n}}\n"
+    chunk_file_name = f"{func_name}_{step_name}.cpp"
+    chunk_path = os.path.join(dest_dir, chunk_file_name)
+    with open(chunk_path, "w") as output:
+        output.write(f'#include "{func_name}.hpp"\n')
+        output.write(f'void {method_name}{param_decls}{{\n')
+        output.writelines(cur_chunk)
+        output.write("}\n")
+    cur_chunk = []
+
 globals_path = os.path.join(dest_dir, func_name + ".hpp")
 global_decls.append("};\n")
 with open(globals_path, "w") as output:
