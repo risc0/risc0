@@ -65,14 +65,13 @@ circuit.
 
 ## zkVM Memory Layout
 
-The following table summarizes the layout of the zkVM memory
+The following table summarizes the layout of the zkVM guest memory
 
 | Address Range             | Size   | Name          | Description                                                                                   |
 | ------------------------- | ------ | ------------- | --------------------------------------------------------------------------------------------- |
-| `0x00000000 - 0x000003ff` | 1 KB   | Invalid page  | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
-| `0x00000400 - 0x0BFFFFFF` | 192 MB | User Memory   | Contains code, heap, and stack of the guest program                                           |
-| `0x0C000000 - 0x0CFFFFFF` | 16 MB  | System Memory | Contains RISC-V registers and non-leaf Merkle tree nodes for the page table                   |
-| `0x0D000000 - 0x0DFFFFFF` | 16 MB  | Page Table    | Contains the Page Table                                                                       |
+| `0x00000000 - 0x0000FFFF` | 64 KiB | Invalid page  | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
+| `0x00010000 - 0xBFFFFFFF` | ~3 GB  | User Memory   | Contains code, heap, and stack of the guest program                                           |
+| `0xC0000000 - 0xFF000000` | ~1 GB  | System Memory | Contains kernel code and data such as ecall/trap dispatch, global inputs/outputs              |
 
 ## zkVM Memory Model
 
