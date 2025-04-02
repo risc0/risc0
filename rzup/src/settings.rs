@@ -209,6 +209,25 @@ mod tests {
         assert_eq!(version, Version::new(1, 81, 0));
     }
 
+    /// If the version string in default_versions is not a valid semver,
+    /// it should be ignored without panicking.
+    #[test]
+    fn test_invalid_version_is_ignored() {
+        let (_tmp_dir, env) = test_env();
+
+        // Write invalid semver version into settings.toml
+        std::fs::write(
+            env.settings_path(),
+            "[default_versions]\ncargo-risczero = \"not-a-semver\"\n",
+        )
+        .unwrap();
+
+        let settings = Settings::load(&env).unwrap();
+
+        // Ensure invalid version is ignored gracefully
+        assert_eq!(settings.get_default_version(&Component::CargoRiscZero), None);
+    }
+
     #[test]
     fn test_settings_defaults() {
         let settings = Settings::default();
