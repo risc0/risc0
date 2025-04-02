@@ -276,7 +276,7 @@ impl ProverOpts {
     /// Choose the prover that generates Groth16 receipts which are constant size in the length of
     /// the execution and small enough to verify on blockchains, like Ethereum.
     ///
-    /// Only supported for x86_64 Linux with Docker installed.
+    /// Only supported with Docker installed.
     pub fn groth16() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
