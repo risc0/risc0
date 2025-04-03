@@ -77,7 +77,6 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
 }
 
 fn prove(group: &mut BenchGroup) {
-    prove_segment(group, "sha-256");
     prove_segment(group, "poseidon2");
 }
 
