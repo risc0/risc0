@@ -79,10 +79,10 @@ pub fn modadd_384(
     unsafe {
         sys_bigint2_4(
             MODADD_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -110,9 +110,9 @@ pub fn modinv_384(
     unsafe {
         sys_bigint2_3(
             MODINV_384_BLOB.as_ptr(),
-            inp.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            inp.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -143,10 +143,10 @@ pub fn modmul_384(
     unsafe {
         sys_bigint2_4(
             MODMUL_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -194,10 +194,10 @@ pub fn modsub_384(
     unsafe {
         sys_bigint2_4(
             MODSUB_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
