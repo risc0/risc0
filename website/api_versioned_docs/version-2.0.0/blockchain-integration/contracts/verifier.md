@@ -199,7 +199,6 @@ You can find detailed information in the [version management design][version-man
 
 <br />
 
-[doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [estop-1-etherscan]: https://etherscan.io/address/0x68dC2cB4e61774873971c499D9b239ec5Ac540E3#code
 [estop-1101-etherscan]: https://zkevm.polygonscan.com/address/0x0aA83C8e32cb07087e4c9409Ae092e7d66Dd890a#code
 [estop-8453-etherscan]: https://basescan.org/address/0x68dC2cB4e61774873971c499D9b239ec5Ac540E3#code
