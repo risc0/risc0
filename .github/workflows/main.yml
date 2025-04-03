@@ -205,8 +205,6 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - name: "root: cargo clippy"
-        run: cargo clippy -F $FEATURE --all-targets
-      - name: "root: cargo clippy -F unstable"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
       - name: "benchmarks: cargo clippy"
         run: cargo clippy -F $FEATURE --all-targets
