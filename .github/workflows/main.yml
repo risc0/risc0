@@ -67,7 +67,9 @@ jobs:
             check-semver:
               - *base
               - risc0/**
+              - bonsai/sdk/**
               - xtask/src/semver_checks.rs
+              - semver-baselines.lock
             check-template:
               - *base
               - risc0/**
@@ -526,7 +528,11 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: run SemVer checks
-        run: cargo run --bin xtask --no-default-features semver-checks
+        run: cargo run --bin xtask --no-default-features -- semver-checks --locked $UPDATE
+        env:
+            # Pass `--update` on release branches to ensure the release-branch semver-checks are
+            # always testing against the latest crates.io versions.
+            UPDATE: ${{ startsWith(github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
       - run: sccache --show-stats
 
   check-template:
