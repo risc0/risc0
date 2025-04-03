@@ -188,6 +188,9 @@ jobs:
             feature: default
           - os: Linux
             arch: X64
+            feature: unstable
+          - os: Linux
+            arch: X64
             feature: cuda
           - os: macOS
             arch: ARM64
