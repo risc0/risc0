@@ -52,7 +52,7 @@ pub fn modadd_384(
     modulus: &[u32; FIELD_384_WIDTH_WORDS],
     result: &mut [u32; FIELD_384_WIDTH_WORDS],
 ) {
-    unchecked::modadd_384(&lhs, &rhs, &modulus, result);
+    unchecked::modadd_384(lhs, rhs, modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
