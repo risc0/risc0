@@ -209,44 +209,43 @@ impl Datasheet {
     }
 
     fn composite(&mut self, args: &Args) {
-        for hashfn in ["sha-256", "poseidon2"] {
-            let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
-            let prover = get_prover_server(&opts).unwrap();
+        let hashfn = "poseidon2";
+        let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
+        let prover = get_prover_server(&opts).unwrap();
 
-            for (po2, iterations) in CYCLES_PO2_ITERS
-                .iter()
-                .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
-            {
-                let expected = 1 << po2;
-                println!("rv32im/{hashfn}: {expected}");
+        for (po2, iterations) in CYCLES_PO2_ITERS
+            .iter()
+            .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
+        {
+            let expected = 1 << po2;
+            println!("rv32im/{hashfn}: {expected}");
 
-                let env = ExecutorEnv::builder()
-                    .segment_limit_po2(args.max_po2 as u32)
-                    .write_slice(&iterations.to_le_bytes())
-                    .build()
-                    .unwrap();
+            let env = ExecutorEnv::builder()
+                .segment_limit_po2(args.max_po2 as u32)
+                .write_slice(&iterations.to_le_bytes())
+                .build()
+                .unwrap();
 
-                tracker().lock().unwrap().reset();
+            tracker().lock().unwrap().reset();
 
-                let start = Instant::now();
-                let info = black_box(prover.prove(env, &LOOP_ELF).unwrap());
-                let duration = start.elapsed();
+            let start = Instant::now();
+            let info = black_box(prover.prove(env, &LOOP_ELF).unwrap());
+            let duration = start.elapsed();
 
-                let ram = tracker().lock().unwrap().peak as u64;
-                assert_eq!(info.stats.total_cycles, expected, "actual vs expected");
-                let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
-                let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
+            let ram = tracker().lock().unwrap().peak as u64;
+            assert_eq!(info.stats.total_cycles, expected, "actual vs expected");
+            let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+            let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
 
-                self.results.push(PerformanceData {
-                    name: "rv32im".into(),
-                    hashfn: hashfn.into(),
-                    cycles: info.stats.total_cycles,
-                    duration,
-                    ram,
-                    seal,
-                    throughput,
-                });
-            }
+            self.results.push(PerformanceData {
+                name: "rv32im".into(),
+                hashfn: hashfn.into(),
+                cycles: info.stats.total_cycles,
+                duration,
+                ram,
+                seal,
+                throughput,
+            });
         }
     }
 
