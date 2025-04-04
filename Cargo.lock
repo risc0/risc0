@@ -8209,6 +8209,7 @@ dependencies = [
  "prost-build",
  "protobuf-src",
  "regex",
+ "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-core",
