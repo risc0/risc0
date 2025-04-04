@@ -37,13 +37,6 @@ use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
-#[repr(C)]
-enum AccumOpType {
-    #[allow(dead_code)]
-    Add,
-    Multiply,
-}
-
 pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
@@ -167,22 +160,15 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
         scope!("prefix_products", {
             extern "C" {
-                fn sppark_calc_prefix_operation(
+                fn sppark_prefix_product(
                     d_elems: DevicePointer<DeviceExtElem>,
                     count: u32,
-                    op: AccumOpType,
                 ) -> SpparkError;
             }
 
-            let err = unsafe {
-                sppark_calc_prefix_operation(
-                    wom.as_device_ptr(),
-                    steps as u32,
-                    AccumOpType::Multiply,
-                )
-            };
+            let err = unsafe { sppark_prefix_product(wom.as_device_ptr(), steps as u32) };
             if err.code != 0 {
-                panic!("Failure during sppark_calc_prefix_operation: {err}");
+                panic!("Failure during sppark_prefix_product: {err}");
             }
         });
 
