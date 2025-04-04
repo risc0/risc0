@@ -1,6 +1,6 @@
 # About the FRI Protocol
 
-The FRI ([**F**ast](about-ntts-and-fourier.md), [**R**eed-Solomon](about-rs-codes.md) [**I**nteractive](https://en.wikipedia.org/wiki/Interactive_proof_system) [Oracle](https://en.wikipedia.org/wiki/Oracle_machine) [Proof of Proximity](https://privacytools.seas.harvard.edu/files/privacytools/files/stoc283fp-rothblum.pdf)) protocol is the final component of RISC Zero's argument of computational integrity.
+The FRI ([**F**ast](about-ntts-and-fourier.md), [**R**eed-Solomon](about-rs-codes.md) [**I**nteractive](https://en.wikipedia.org/wiki/Interactive_proof_system) [Oracle](https://en.wikipedia.org/wiki/Oracle_machine) [Proof of Proximity](https://privacytools.seas.harvard.edu/sites/g/files/omnuum6656/files/privacytools/files/stoc283fp-rothblum.pdf)) protocol is the final component of RISC Zero's argument of computational integrity.
 
 RISC Zero's [STARK](about-starks.md) converts an assertion of computational integrity to an assertion about polynomial division.
 In the language of Reed-Solomon codes, this assertion about polynomial division can be re-framed as an assertion about [block proximity](https://en.wikipedia.org/wiki/Hamming_distance).
