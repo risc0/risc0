@@ -20,7 +20,7 @@ use crate::field::FIELD_4096_WIDTH_WORDS;
 type RsaArray = [u32; FIELD_4096_WIDTH_WORDS];
 
 pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut RsaArray) {
-    let mut buffer = *base;  // Note: copy semantics
+    let mut buffer = *base; // Note: copy semantics
     for _ in 0..16 {
         // Since we use the same modulus in every modmul, its safe to use `unchecked` internally
         crate::field::unchecked::modmul_4096(&buffer, &buffer, modulus, result);
