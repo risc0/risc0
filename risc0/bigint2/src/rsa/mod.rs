@@ -20,7 +20,7 @@ use crate::field::{modmul_4096, FIELD_4096_WIDTH_WORDS};
 type RsaArray = [u32; FIELD_4096_WIDTH_WORDS];
 
 pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut RsaArray) {
-    let mut buffer = base.clone();
+    let mut buffer = *base;  // Note: copy semantics
     for _ in 0..16 {
         modmul_4096(&buffer, &buffer, modulus, result);
         std::mem::swap(&mut buffer, result);
