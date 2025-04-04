@@ -65,7 +65,6 @@ impl Settings {
             }
         }
 
-
         for table_name in settings.unknown_settings.keys() {
             env.emit(RzupEvent::Print {
                 message: format!("! Warning: settings.toml: unknown table `{table_name}`"),
@@ -242,7 +241,10 @@ mod tests {
             }],
         );
 
-        assert_eq!(settings.get_default_version(&Component::CargoRiscZero), None);
+         assert_eq!(
+             settings.get_default_version(&Component::CargoRiscZero),
+             None
+         );
     }
 
     #[test]
