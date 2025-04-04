@@ -27,7 +27,7 @@ fn main() {
     let base = base.to_u32_array();
     let modulus = modulus.to_u32_array();
 
-    let mut result = [0u32; risc0_bigint2::rsa::RSA_4096_WIDTH_WORDS];
+    let mut result = [0u32; risc0_bigint2::field::FIELD_4096_WIDTH_WORDS];
     risc0_bigint2::rsa::modpow_65537(&base, &modulus, &mut result);
 
     let result = BigUint::from_slice(&result);

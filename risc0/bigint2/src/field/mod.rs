@@ -30,6 +30,7 @@ use crate::WORD_SIZE;
 
 pub const FIELD_256_WIDTH_WORDS: usize = 256 / (WORD_SIZE * 8);
 pub const FIELD_384_WIDTH_WORDS: usize = 384 / (WORD_SIZE * 8);
+pub const FIELD_4096_WIDTH_WORDS: usize = 4096 / (WORD_SIZE * 8);
 pub const EXT_DEGREE_2: usize = 2;
 pub const EXT_DEGREE_4: usize = 4;
 
@@ -113,6 +114,19 @@ pub fn modmul_384(
     result: &mut [u32; FIELD_384_WIDTH_WORDS],
 ) {
     unchecked::modmul_384(lhs, rhs, modulus, result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(result, modulus));
+}
+
+pub fn modmul_4096(
+    lhs: &[u32; FIELD_4096_WIDTH_WORDS],
+    rhs: &[u32; FIELD_4096_WIDTH_WORDS],
+    modulus: &[u32; FIELD_4096_WIDTH_WORDS],
+    result: &mut [u32; FIELD_4096_WIDTH_WORDS],
+) {
+    unchecked::modmul_4096(lhs, rhs, modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
