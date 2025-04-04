@@ -428,13 +428,13 @@ mod tests {
         }
 
         Ok(match &req.uri().to_string()[..] {
-            "/gihub_api/repos/risc0/risc0/releases/latest" => {
+            "/github_api/repos/risc0/risc0/releases/latest" => {
                 json_response("{\"tag_name\":\"v1.1.0\"}")
             }
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
-            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0-rc.1/\
@@ -447,21 +447,21 @@ mod tests {
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
                 rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-osx-arm64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-osx-arm64"),
-            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
-            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.1.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0/install" => text_response(install_script.clone()),
@@ -500,7 +500,7 @@ mod tests {
             Self {
                 base_urls: BaseUrls {
                     risc0_github_base_url: format!("http://{address}/risc0_github"),
-                    github_api_base_url: format!("http://{address}/gihub_api"),
+                    github_api_base_url: format!("http://{address}/github_api"),
                     risc0_base_url: format!("http://{address}/risc0"),
                 },
             }
