@@ -219,7 +219,8 @@ pub fn build_rust_toolchain(
         message: "./x build".into(),
     });
 
-    let lower_atomic = if version > semver::Version::new(1, 81, 0) {
+    let req = semver::VersionReq::parse(">1.81.0")?;
+    let lower_atomic = if req.matches(&version) {
         "-Cpasses=lower-atomic"
     } else {
         "-Cpasses=loweratomic"
