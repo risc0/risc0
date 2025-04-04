@@ -241,10 +241,10 @@ mod tests {
             }],
         );
 
-         assert_eq!(
-             settings.get_default_version(&Component::CargoRiscZero),
-             None
-         );
+        assert_eq!(
+            settings.get_default_version(&Component::CargoRiscZero),
+            None
+        );
     }
 
     #[test]
