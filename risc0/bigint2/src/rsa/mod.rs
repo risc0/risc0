@@ -15,21 +15,21 @@
 #[cfg(test)]
 mod tests;
 
-use crate::field::{modmul_4096, FIELD_4096_WIDTH_WORDS};
+use crate::field::FIELD_4096_WIDTH_WORDS;
 
 type RsaArray = [u32; FIELD_4096_WIDTH_WORDS];
 
 pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut RsaArray) {
     let mut buffer = *base;  // Note: copy semantics
     for _ in 0..16 {
-        modmul_4096(&buffer, &buffer, modulus, result);
+        // Since we use the same modulus in every modmul, its safe to use `unchecked` internally
+        crate::field::unchecked::modmul_4096(&buffer, &buffer, modulus, result);
         std::mem::swap(&mut buffer, result);
     }
-    modmul_4096(&buffer, base, modulus, result);
     // An honest host will always return a result less than the modulus.
     // A dishonest prover could return a result greater than the modulus that differs by a multiple
     // of the modulus, e.g. they could return `4` (instead of `1`) as the answer to `1^65537 % 3`,
     // since `4 - 1 = 3`.
-    // Therefore, we check that we are in the honest case.
-    assert!(crate::is_less(result, modulus));
+    // Therefore, we check that we are in the honest case for the final result.
+    crate::field::modmul_4096(&buffer, base, modulus, result);
 }
