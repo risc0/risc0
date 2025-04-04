@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
+	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/backend/witness"
 	"github.com/consensys/gnark/constraint"
@@ -56,7 +57,7 @@ func run() error {
 		return fmt.Errorf("failed to load witness: %w", err)
 	}
 
-	proof, err := groth16.Prove(r1cs, pk, fullWitness)
+	proof, err := groth16.Prove(r1cs, pk, fullWitness, backend.WithIcicleAcceleration())
 	if err != nil {
 		return fmt.Errorf("failed to create Groth16 proof: %w", err)
 	}
