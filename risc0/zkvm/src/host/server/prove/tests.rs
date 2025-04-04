@@ -485,7 +485,6 @@ fn sys_input() {
 }
 
 #[cfg(feature = "docker")]
-#[cfg(target_arch = "x86_64")]
 mod docker {
     use risc0_zkvm_methods::{MULTI_TEST_ID, VERIFY_ELF};
 
