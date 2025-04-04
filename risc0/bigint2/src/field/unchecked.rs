@@ -27,7 +27,10 @@
 
 use crate::{
     ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5},
-    field::{EXT_DEGREE_2, EXT_DEGREE_4, FIELD_256_WIDTH_WORDS, FIELD_384_WIDTH_WORDS, FIELD_4096_WIDTH_WORDS},
+    field::{
+        EXT_DEGREE_2, EXT_DEGREE_4, FIELD_256_WIDTH_WORDS, FIELD_384_WIDTH_WORDS,
+        FIELD_4096_WIDTH_WORDS,
+    },
 };
 
 use include_bytes_aligned::include_bytes_aligned;

@@ -15,7 +15,7 @@
 #[cfg(test)]
 mod tests;
 
-use crate::field::{FIELD_4096_WIDTH_WORDS, modmul_4096};
+use crate::field::{modmul_4096, FIELD_4096_WIDTH_WORDS};
 
 type RsaArray = [u32; FIELD_4096_WIDTH_WORDS];
 
