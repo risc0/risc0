@@ -15,25 +15,17 @@
 #[cfg(test)]
 mod tests;
 
-use include_bytes_aligned::include_bytes_aligned;
+use crate::field::{FIELD_4096_WIDTH_WORDS, modmul_4096};
 
-use crate::{ffi::sys_bigint2_3, WORD_SIZE};
-
-pub const RSA_4096_WIDTH_WORDS: usize = 4096 / (WORD_SIZE * 8);
-
-const BLOB: &[u8] = include_bytes_aligned!(4, "modpow_65537.blob");
-
-type RsaArray = [u32; RSA_4096_WIDTH_WORDS];
+type RsaArray = [u32; FIELD_4096_WIDTH_WORDS];
 
 pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut RsaArray) {
-    unsafe {
-        sys_bigint2_3(
-            BLOB.as_ptr(),
-            base.as_ptr(),
-            modulus.as_ptr(),
-            result.as_mut_ptr(),
-        );
+    let mut buffer = base.clone();
+    for _ in 0..16 {
+        modmul_4096(&buffer, &buffer, modulus, result);
+        std::mem::swap(&mut buffer, result);
     }
+    modmul_4096(&buffer, base, modulus, result);
     // An honest host will always return a result less than the modulus.
     // A dishonest prover could return a result greater than the modulus that differs by a multiple
     // of the modulus, e.g. they could return `4` (instead of `1`) as the answer to `1^65537 % 3`,
