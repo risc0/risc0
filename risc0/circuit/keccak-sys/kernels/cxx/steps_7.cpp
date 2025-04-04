@@ -19,8 +19,8 @@ namespace risc0::circuit::keccak::cpu {
 void step_Top_6(ExecContext& ctx,MutableBuf arg0)   {
 // Reg(<preamble>:5)
 // ControlState(zirgen/circuit/keccak/top.zir:403)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:456)
-// Top(zirgen/circuit/keccak/top.zir:483)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:458)
+// Top(zirgen/circuit/keccak/top.zir:486)
 set(ctx,arg0, 12, Val(9));
 // ControlState(zirgen/circuit/keccak/top.zir:404)
 set(ctx,arg0, 13, Val(1));
@@ -33,7 +33,7 @@ return ;
 void step_Top_22(ExecContext& ctx,MutableBuf arg0)   {
 // builtin Sub
 // ShaNextBlock(zirgen/circuit/keccak/top.zir:428)
-// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:463)
+// ComputeCurrentStep(zirgen/circuit/keccak/top.zir:465)
 Val x1 = (get(ctx,arg0, 14, 1) - Val(3));
 // builtin NondetReg
 // IsZero(zirgen/circuit/keccak/is_zero.zir:8)
@@ -70,7 +70,7 @@ void step_Top_38(ExecContext& ctx,MutableBuf arg0)   {
 // OneHot(zirgen/circuit/keccak/one_hot.zir:7)
 // LoadWin(zirgen/circuit/keccak/top.zir:165)
 // ShaCycle(zirgen/circuit/keccak/top.zir:192)
-// Top(zirgen/circuit/keccak/top.zir:501)
+// Top(zirgen/circuit/keccak/top.zir:504)
 Val x1 = get(ctx,arg0, 1092, 0);
 Val x2 = get(ctx,arg0, 1093, 0);
 // LoadWin(zirgen/circuit/keccak/top.zir:168)

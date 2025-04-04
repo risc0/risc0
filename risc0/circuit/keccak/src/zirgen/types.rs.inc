@@ -964,7 +964,7 @@ pub struct OneHot_12__SuperStruct {
 pub type OneHot_12__SuperStruct12Array = [OneHot_12__SuperStruct; 12];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_12_Struct {
-    pub bits: OneHot_12__SuperStruct12Array,
+    pub _super: OneHot_12__SuperStruct12Array,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct WrapOneHot_SuperStruct {

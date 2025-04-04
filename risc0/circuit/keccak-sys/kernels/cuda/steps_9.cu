@@ -20,8 +20,8 @@ namespace risc0::circuit::keccak::cuda {
 __device__ void step_Top_8(ExecContext& ctx, MutableBuf arg0) {
   // Reg(<preamble>:5)
   // ControlState(zirgen/circuit/keccak/top.zir:403)
-  // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:458)
-  // Top(zirgen/circuit/keccak/top.zir:483)
+  // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:460)
+  // Top(zirgen/circuit/keccak/top.zir:486)
   set(ctx, arg0, 12, Val(6));
   // ControlState(zirgen/circuit/keccak/top.zir:404)
   set(ctx, arg0, 13, Val(0));
@@ -33,7 +33,7 @@ __device__ void step_Top_8(ExecContext& ctx, MutableBuf arg0) {
 }
 __device__ void step_Top_24(ExecContext& ctx, MutableBuf arg0) {
   if (to_size_t(get(ctx, arg0, 0, 1))) {
-    // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:448)
+    // ComputeCurrentStep(zirgen/circuit/keccak/top.zir:450)
     step_Top_1(ctx, arg0);
   }
   if (to_size_t(get(ctx, arg0, 1, 1))) {
@@ -77,7 +77,7 @@ __device__ void step_Top_40(ExecContext& ctx, MutableBuf arg0) {
   // OneHot(zirgen/circuit/keccak/one_hot.zir:7)
   // LoadWin(zirgen/circuit/keccak/top.zir:165)
   // ShaCycle(zirgen/circuit/keccak/top.zir:192)
-  // Top(zirgen/circuit/keccak/top.zir:501)
+  // Top(zirgen/circuit/keccak/top.zir:504)
   Val x1 = get(ctx, arg0, 1092, 0);
   Val x2 = get(ctx, arg0, 1093, 0);
   // LoadWin(zirgen/circuit/keccak/top.zir:168)
