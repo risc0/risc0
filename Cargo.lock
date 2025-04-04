@@ -5611,10 +5611,12 @@ name = "risc0-bigint2"
 version = "1.4.2"
 dependencies = [
  "anyhow",
+ "byteorder",
  "clap 4.5.32",
  "include_bytes_aligned",
  "num-bigint 0.4.6",
  "num-bigint-dig",
+ "num-derive",
  "num-traits",
  "puffin",
  "puffin_http",

@@ -8,13 +8,16 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+anyhow = { version = "1.0", optional = true }
+byteorder = { version = "1.5", optional = true }
 include_bytes_aligned = "0.1"
 num-bigint = { version = "0.4", default-features = false, optional = true }
 num-bigint-dig = { version = "0.8", default-features = false, optional = true }
+num-derive = { version = "0.4.2", optional = true }
+num-traits = { version = "0.2", optional = true }
 stability = "0.2"
 
 [dev-dependencies]
-anyhow = "1.0"
 clap = { version = "4.5", features = ["derive"] }
 num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
 num-bigint-dig = { version = "0.8", default-features = false, features = [
@@ -37,4 +40,5 @@ cuda = ["risc0-zkvm/cuda"]
 default = []
 num-bigint-dig = ["dep:num-bigint-dig"]
 num-bigint = ["dep:num-bigint"]
+analyze = ["dep:anyhow", "dep:byteorder", "dep:num-derive", "dep:num-traits"]
 unstable = []
