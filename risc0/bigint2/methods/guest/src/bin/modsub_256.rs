@@ -29,7 +29,7 @@ fn main() {
     let modulus = modulus.to_u32_array();
 
     let mut result = [0u32; risc0_bigint2::field::FIELD_256_WIDTH_WORDS];
-    risc0_bigint2::field::modsub_256(&lhs, &rhs, &modulus, &mut result);
+    risc0_bigint2::field::modsub_256(lhs, rhs, modulus, mut result);
 
     let result = BigUint::from_slice(&result);
 
