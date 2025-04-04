@@ -7,6 +7,7 @@ require (
 	github.com/consensys/gnark-crypto v0.15.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sync v0.10.0
+	github.com/ingonyama-zk/icicle-gnark/v3 v3.2.2
 )
 
 require (
