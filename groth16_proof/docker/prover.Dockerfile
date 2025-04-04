@@ -55,7 +55,8 @@ RUN which cmake
 RUN (cd $(go env GOMODCACHE)/github.com/ingonyama-zk/icicle-gnark/v3@v3.2.2/wrappers/golang/; ./build.sh -curve=bn254)
 
 # Build the Gnark prover with CGO disabled for static linking
-ENV CGO_ENABLED=0
+# ...or leave it enabled, because icicle won't build without it
+#ENV CGO_ENABLED=0
 RUN go build -tags=icicle ./cmd/prover
 
 # Convert files to Gnark format using a custom converter tool
