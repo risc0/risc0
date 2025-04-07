@@ -20,7 +20,6 @@
 //! [gnark]: https://github.com/Consensys/gnark
 
 use std::{
-    env::consts::ARCH,
     path::Path,
     process::{Command, Stdio},
 };
@@ -33,9 +32,6 @@ use crate::{to_json, ProofJson, Seal};
 /// Groth16 a given seal of an `identity_p254` receipt into a Groth16 `Seal`.
 /// Requires running Docker on an x86 architecture.
 pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
-    if !is_x86_architecture() {
-        bail!("stark_to_snark is only supported on x86 architecture.")
-    }
     if !is_docker_installed() {
         bail!("Please install docker first.")
     }
@@ -58,7 +54,7 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .arg("--rm")
         .arg("-v")
         .arg(format!("{}:/mnt", work_dir.to_string_lossy()))
-        .arg("risczero/risc0-groth16-prover:v2025-01-31.1")
+        .arg("risczero/risc0-groth16-prover:v2025-04-03.1")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()?;
@@ -81,8 +77,4 @@ fn is_docker_installed() -> bool {
         .output()
         .map(|output| output.status.success())
         .unwrap_or(false)
-}
-
-fn is_x86_architecture() -> bool {
-    ARCH == "x86_64" || ARCH == "x86"
 }

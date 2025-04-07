@@ -128,9 +128,9 @@ enum Command {
     Join,
     Succinct,
     Identity,
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     StarkToSnark,
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     Groth16,
     #[command(name = "bigint2")]
     BigInt2,
@@ -174,9 +174,9 @@ impl Datasheet {
             Command::Join => self.join(),
             Command::Succinct => self.succinct(),
             Command::Identity => self.identity_p254(),
-            #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+            #[cfg(feature = "docker")]
             Command::StarkToSnark => self.stark2snark(),
-            #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+            #[cfg(feature = "docker")]
             Command::Groth16 => self.groth16(),
             Command::BigInt2 => self.bigint2(),
         }
@@ -404,7 +404,7 @@ impl Datasheet {
         });
     }
 
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
@@ -440,7 +440,7 @@ impl Datasheet {
         });
     }
 
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     fn groth16(&mut self) {
         println!("groth16");
 
