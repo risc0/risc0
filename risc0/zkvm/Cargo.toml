@@ -69,7 +69,7 @@ tracing = { version = "0.1", default-features = false, features = [
 addr2line = { version = "0.22", features = ["rustc-demangle"], optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
-bytes = { version = "1.7", features = ["serde"], optional = true }
+bytes = { version = "1.10", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 enum-map = { version = "2.7.3", optional = true }
 keccak = { version = "0.1.5", optional = true }
