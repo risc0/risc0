@@ -81,7 +81,6 @@ if cur_chunk:
         output.write(f'void {method_name}{param_decls}{{\n')
         output.writelines(cur_chunk)
         output.write("}\n")
-    cur_chunk = []
 
 globals_path = os.path.join(dest_dir, func_name + ".hpp")
 global_decls.append("};\n")
