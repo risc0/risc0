@@ -43,7 +43,7 @@ if len(chunk) > 1:
     with open(dest_file, 'w') as output:
         output.writelines(chunk)
 
-# Add one inexplicably missing declaration
+# Add one declaration which appears to have been unintentionally omitted
 decls.append("void release_memory_component(Circom_CalcWit* ctx, uint pos);")
 # Write the header file
 with open(f"{dest_base}.hpp", "w") as output:
