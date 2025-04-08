@@ -183,8 +183,8 @@ pub fn get_version() -> Result<Version, semver::Error> {
 pub fn is_dev_mode() -> bool {
     let is_env_set = std::env::var("RISC0_DEV_MODE")
         .ok()
-        .map(|x| x.to_lowercase())
-        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .map(|x| x.to_lowercase().trim().to_string())
+        .filter(|x| x == "1" || x == "true" || x == "yes" || x == "on")
         .is_some();
 
     if cfg!(feature = "disable-dev-mode") && is_env_set {
