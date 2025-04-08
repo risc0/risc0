@@ -2,6 +2,10 @@
 
 This example demonstrates how to verify an ECDSA signature inside the zkVM using secp256k1 signatures.
 
+## Performance
+
+Even with the optimizations described below, ECDSA signature verification requires significant computational resources. For faster development and testing, we recommend running this example on [Bonsai] or using the [`DEV_MODE`][DEV_MODE].
+
 ## Quick Start
 
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
@@ -10,6 +14,12 @@ Then, run the example with:
 
 ```bash
 cargo run --release
+```
+
+Or in [`DEV_MODE`][DEV_MODE] for much faster execution:
+
+```bash
+RISC0_DEV_MODE=1 cargo run --release
 ```
 
 ## Use Cases
@@ -53,3 +63,5 @@ For more information on how to use the precompile, see the [precompile documenta
 [4]: methods/guest/Cargo.toml
 [5]: https://github.com/risc0/RustCrypto-elliptic-curves/pull/1
 [6]: https://dev.risczero.com/api/zkvm/precompiles
+[Bonsai]: https://dev.bonsai.xyz/apply
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
