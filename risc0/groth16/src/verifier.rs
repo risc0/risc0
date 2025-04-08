@@ -17,16 +17,15 @@ extern crate alloc;
 use alloc::{vec, vec::Vec};
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::{Bn254, G1Projective};
+use ark_bn254::Bn254;
 use ark_ec::AffineRepr;
-use ark_groth16::{Groth16, PreparedVerifyingKey, Proof};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use ark_serialize::CanonicalSerialize;
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    from_u256, g1_from_bytes, g2_from_bytes, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson,
+    from_u256, ProofJson, PublicInputsJson, Pvk, Seal, VerifyingKeyJson, Vk,
 };
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
@@ -74,53 +73,64 @@ const IC4_Y: &str = "21663537384585072695701846972542344484111393047775983928357
 const IC5_X: &str = "6834578911681792552110317589222010969491336870276623105249474534788043166867";
 const IC5_Y: &str = "15060583660288623605191393599883223885678013570733629274538391874953353488393";
 
+
 /// Groth16 `Verifier` instance over the BN_254 curve encoded in little endian.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+// #[derive(Clone, Debug, Deserialize, Serialize)]
+// TODO: Goal ... depending on exact needs may want to still hold onto things as Vec<u8> or Vec<Vec<u8>>
+#[derive(Clone)]
 pub struct Verifier {
-    /// prepared verifying key little endian encoded.
-    encoded_pvk: Vec<u8>,
-    /// proof little endian encoded.
-    encoded_proof: Vec<u8>,
-    /// prepared public inputs little endian encoded.
-    encoded_prepared_inputs: Vec<u8>,
+    // /// prepared verifying key little endian encoded.
+    // encoded_pvk: Vec<u8>,
+    // /// proof little endian encoded.
+    // encoded_proof: Vec<u8>,
+    // /// prepared public inputs little endian encoded.
+    // encoded_prepared_inputs: Vec<u8>,
+    pvk: Pvk,
+    proof: Seal,
+    prepared_inputs: substrate_bn::G1,
 }
 
 impl Verifier {
     /// Creates a new Groth16 `Verifier` instance.
     pub fn new(
         seal: &Seal,
-        public_inputs: &[Fr],
-        verifying_key: &VerifyingKey,
+        public_inputs: &[substrate_bn::Fr],
+        verifying_key: &Vk,
     ) -> Result<Self, Error> {
-        let pvk = ark_groth16::prepare_verifying_key(&verifying_key.0);
-        let mut encoded_pvk = Vec::new();
-        pvk.serialize_uncompressed(&mut encoded_pvk)
-            .map_err(|err| anyhow!(err))?;
+        // let pvk = ark_groth16::prepare_verifying_key(&verifying_key.0);
+        let pvk = Pvk::from(verifying_key.clone());  // TODO: Is clone the right approach here? Or don't borrow the parameter?
 
-        let mut encoded_proof = Vec::new();
-        let proof = Proof::<Bn254> {
-            a: g1_from_bytes(&seal.a)?,
-            b: g2_from_bytes(&seal.b)?,
-            c: g1_from_bytes(&seal.c)?,
-        };
-        proof
-            .serialize_uncompressed(&mut encoded_proof)
-            .map_err(|err| anyhow!(err))?;
+        // let mut encoded_pvk = Vec::new();
+        // pvk.serialize_uncompressed(&mut encoded_pvk)
+        //     .map_err(|err| anyhow!(err))?;
 
-        let mut encoded_prepared_inputs = Vec::new();
-        let prepared_inputs = Groth16::<Bn254>::prepare_inputs(
-            &pvk,
-            &public_inputs.iter().map(|x| x.0).collect::<Vec<_>>(),
-        )
-        .map_err(|err| anyhow!(err))?;
-        prepared_inputs
-            .serialize_uncompressed(&mut encoded_prepared_inputs)
-            .map_err(|err| anyhow!(err))?;
+        // let mut encoded_proof = Vec::new();
+        // let proof = Proof::<Bn254> {
+        //     a: g1_from_bytes(&seal.a)?,
+        //     b: g2_from_bytes(&seal.b)?,
+        //     c: g1_from_bytes(&seal.c)?,
+        // };
+        // proof
+        //     .serialize_uncompressed(&mut encoded_proof)
+        //     .map_err(|err| anyhow!(err))?;
+
+        // let mut encoded_prepared_inputs = Vec::new();
+        // let prepared_inputs = Groth16::<Bn254>::prepare_inputs(
+        //     &pvk,
+        //     &public_inputs.iter().map(|x| x.0).collect::<Vec<_>>(),
+        // )
+        // .map_err(|err| anyhow!(err))?;
+        // prepared_inputs
+        //     .serialize_uncompressed(&mut encoded_prepared_inputs)
+        //     .map_err(|err| anyhow!(err))?;
+
+        // TODO: Use this error handling approach elsewhere?
+        let prepared_inputs = prepare_inputs(&pvk, public_inputs).map_err(|err| anyhow!(err))?;
 
         Ok(Self {
-            encoded_pvk,
-            encoded_proof,
-            encoded_prepared_inputs,
+            pvk,
+            proof: seal.clone(),
+            prepared_inputs,
         })
     }
 
@@ -140,19 +150,48 @@ impl Verifier {
 
     /// Verifies the Groth16 proof.
     pub fn verify(&self) -> Result<(), Error> {
-        let pvk = &PreparedVerifyingKey::deserialize_uncompressed(&*self.encoded_pvk)
-            .map_err(|err| anyhow!(err))?;
-        let proof =
-            &Proof::deserialize_uncompressed(&*self.encoded_proof).map_err(|err| anyhow!(err))?;
-        let prepared_inputs =
-            &G1Projective::deserialize_uncompressed(self.encoded_prepared_inputs.as_slice())
-                .map_err(|err| anyhow!(err))?;
-        match Groth16::<Bn254>::verify_proof_with_prepared_inputs(pvk, proof, prepared_inputs)
-            .map_err(|err| anyhow!(err))?
-        {
-            true => Ok(()),
-            false => Err(anyhow!("Invalid proof")),
+        // let pvk = &PreparedVerifyingKey::deserialize_uncompressed(&*self.encoded_pvk)
+        //     .map_err(|err| anyhow!(err))?;
+        // let proof =
+        //     &Proof::deserialize_uncompressed(&*self.encoded_proof).map_err(|err| anyhow!(err))?;
+        // let prepared_inputs =
+        //     &G1Projective::deserialize_uncompressed(self.encoded_prepared_inputs.as_slice())
+        //         .map_err(|err| anyhow!(err))?;
+        // TODO: May need deserialization? Depends on approach we take
+
+
+        let plain_result = substrate_bn::miller_loop_batch(
+            // TODO: more clones that are probably unnecessary...
+            // TODO: Use this one
+            &[
+                (crate::LocalG2::from_be_bytes(&self.proof.b)?.into(), crate::LocalG1::from_be_bytes(&self.proof.a)?.into()),
+                (self.pvk.gamma_g2_neg_pc.clone().into(), self.prepared_inputs),
+                (self.pvk.delta_g2_neg_pc.clone().into(), crate::LocalG1::from_be_bytes(&self.proof.c)?.into()),
+            ]
+
+            // TODO: This is deliberately broken! Just testing!
+            // &[
+            //     (crate::LocalG2::from_be_bytes(&self.proof.b)?.into(), crate::LocalG1::from_be_bytes(&self.proof.c)?.into()),
+            //     (self.pvk.gamma_g2_neg_pc.clone().into(), self.prepared_inputs),
+            //     (self.pvk.delta_g2_neg_pc.clone().into(), crate::LocalG1::from_be_bytes(&self.proof.a)?.into()),
+            // ]
+            // /TODO end of deliberate break
+        ).expect("TODO better error handling");
+        let exponentiated = plain_result.final_exponentiation().ok_or_else(||anyhow!("Unexpected identity in final exponentiation step of verify"))?;
+        if exponentiated == self.pvk.alpha_g1_beta_g2 {
+            Ok(())
+        } else {
+            Err(anyhow!("Groth16 proof failed verification"))
         }
+
+
+
+        // match Groth16::<Bn254>::verify_proof_with_prepared_inputs(pvk, proof, prepared_inputs)
+        //     .map_err(|err| anyhow!(err))?
+        // {
+        //     true => Ok(()),
+        //     false => Err(anyhow!("Invalid proof")),
+        // }
     }
 }
 
@@ -254,40 +293,96 @@ mod serde_ark {
     }
 }
 
+// /// Default verifying key for RISC Zero recursive verification.
+// pub fn verifying_key() -> VerifyingKey {
+//     try_verifying_key().unwrap()
+// }
+
+// TODO: Ok that the type changed?
+// TODO: I don't think the allow(dead_code) should be needed...
 /// Default verifying key for RISC Zero recursive verification.
-pub fn verifying_key() -> VerifyingKey {
-    try_verifying_key().unwrap()
+#[allow(dead_code)]
+pub fn verifying_key() -> Vk {
+    try_vk().unwrap()
 }
 
-// try_verifying_key executes entirely over const data and so should never error.
-fn try_verifying_key() -> Result<VerifyingKey, Error> {
-    let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
-    let beta_g2 = g2_from_bytes(&[
+// // try_verifying_key executes entirely over const data and so should never error.
+// fn try_verifying_key() -> Result<VerifyingKey, Error> {
+//     let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+//     let beta_g2 = g2_from_bytes(&[
+//         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
+//         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
+//     ])?;
+//     let gamma_g2 = g2_from_bytes(&[
+//         vec![from_u256(GAMMA_X1)?, from_u256(GAMMA_X2)?],
+//         vec![from_u256(GAMMA_Y1)?, from_u256(GAMMA_Y2)?],
+//     ])?;
+//     let delta_g2 = g2_from_bytes(&[
+//         vec![from_u256(DELTA_X1)?, from_u256(DELTA_X2)?],
+//         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
+//     ])?;
+
+//     let ic0 = g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+//     let ic1 = g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+//     let ic2 = g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+//     let ic3 = g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+//     let ic4 = g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+//     let ic5 = g1_from_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
+//     let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4, ic5];
+
+//     Ok(VerifyingKey(ark_groth16::VerifyingKey::<Bn254> {
+//         alpha_g1,
+//         beta_g2,
+//         gamma_g2,
+//         delta_g2,
+//         gamma_abc_g1,
+//     }))
+// }
+
+// TODO: Naming
+fn try_vk() -> Result<Vk, Error> {
+    let alpha_g1 = crate::LocalG1::from_be_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+    let beta_g2 = crate::LocalG2::from_be_bytes(&[
         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
     ])?;
-    let gamma_g2 = g2_from_bytes(&[
+    let gamma_g2 = crate::LocalG2::from_be_bytes(&[
         vec![from_u256(GAMMA_X1)?, from_u256(GAMMA_X2)?],
         vec![from_u256(GAMMA_Y1)?, from_u256(GAMMA_Y2)?],
     ])?;
-    let delta_g2 = g2_from_bytes(&[
+    let delta_g2 = crate::LocalG2::from_be_bytes(&[
         vec![from_u256(DELTA_X1)?, from_u256(DELTA_X2)?],
         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
     ])?;
 
-    let ic0 = g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
-    let ic1 = g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
-    let ic2 = g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
-    let ic3 = g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
-    let ic4 = g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
-    let ic5 = g1_from_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
+    let ic0 = crate::LocalG1::from_be_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+    let ic1 = crate::LocalG1::from_be_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+    let ic2 = crate::LocalG1::from_be_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+    let ic3 = crate::LocalG1::from_be_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+    let ic4 = crate::LocalG1::from_be_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+    let ic5 = crate::LocalG1::from_be_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
     let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4, ic5];
 
-    Ok(VerifyingKey(ark_groth16::VerifyingKey::<Bn254> {
+    Ok(Vk {
         alpha_g1,
         beta_g2,
         gamma_g2,
         delta_g2,
         gamma_abc_g1,
-    }))
+    })
+}
+
+// TODO
+pub fn prepare_inputs(pvk: &Pvk, public_inputs: &[substrate_bn::Fr]) -> Result<substrate_bn::G1> {
+    if (public_inputs.len() + 1) != pvk.vk.gamma_abc_g1.len() {
+        return Err(anyhow!("Cannot prepare inputs, verifying key length should be 1 more than number of inputs (instead: {}, {})", pvk.vk.gamma_abc_g1.len(), public_inputs.len()));
+    }
+
+    // TODO: A whole bunch of cloning that I may be able to avoid with proper types initially
+    let mut res: substrate_bn::G1 = pvk.vk.gamma_abc_g1[0].clone().into();
+    for (inp, ic) in public_inputs.iter().zip(pvk.vk.gamma_abc_g1.iter().skip(1)) {
+        res = res + substrate_bn::G1::from(ic.clone()) * *inp;
+    }
+
+    Ok(res)
 }

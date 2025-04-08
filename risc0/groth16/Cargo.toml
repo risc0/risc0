@@ -26,6 +26,7 @@ serde = { version = "1.0", default-features = false, features = [
 ] }
 serde_json = { version = "1.0", optional = true }
 stability = "0.2"
+substrate-bn = "0.6.0"   # TODO: Also turn on acceleration
 tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", optional = true }
 

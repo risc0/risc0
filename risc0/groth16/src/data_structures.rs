@@ -17,11 +17,9 @@ extern crate alloc;
 use alloc::{string::String, vec, vec::Vec};
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::Bn254;
-use core::str::FromStr;
 use serde::{Deserialize, Serialize};
 
-use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes};
 
 /// Groth16 seal object encoded in big endian.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -154,7 +152,7 @@ pub struct VerifyingKeyJson {
 
 impl VerifyingKeyJson {
     /// Computes the prepared verifying key
-    pub fn verifying_key(&self) -> Result<VerifyingKey, Error> {
+    pub fn verifying_key(&self) -> Result<Vk, Error> {
         if self.vk_alpha_1.len() < 2 {
             return Err(anyhow!("Malformed G1 element field: vk_alpha_1"));
         }
@@ -219,13 +217,51 @@ impl VerifyingKeyJson {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(VerifyingKey(ark_groth16::VerifyingKey::<Bn254> {
+        Ok(Vk {
             alpha_g1,
             beta_g2,
             gamma_g2,
             delta_g2,
             gamma_abc_g1,
-        }))
+        })
+    }
+}
+
+/// A groth16 verification key (TODO)
+/// 
+/// A verification key. It needs to be prepared into a [Pvk] before use. (TODO)
+// TODO: Derives?
+#[derive(Clone)]
+pub struct Vk {
+    // TODO: better pattern for access?
+    pub(crate) alpha_g1: crate::LocalG1,
+    pub(crate) beta_g2: crate::LocalG2,
+    pub(crate) gamma_g2: crate::LocalG2,
+    pub(crate) delta_g2: crate::LocalG2,
+    pub(crate) gamma_abc_g1: Vec<crate::LocalG1>,
+}
+
+/// A prepared groth16 verification key (TODO)
+/// 
+/// TODO: Note that status quo this doesn't contain the original verification key and so can't be regenerated
+#[derive(Clone)]
+pub struct Pvk {
+    // TODO: better pattern for access?
+    pub(crate) vk: Vk,
+    pub(crate) alpha_g1_beta_g2: substrate_bn::Gt,
+    pub(crate) gamma_g2_neg_pc: crate::LocalG2,
+    pub(crate) delta_g2_neg_pc: crate::LocalG2,
+}
+
+// TODO: Or is it TryFrom?
+impl From<Vk> for Pvk {
+    fn from(item: Vk) -> Self {
+        Pvk {
+            vk: item.clone(),  // TODO: Hmm do I really need to clone?
+            alpha_g1_beta_g2: substrate_bn::pairing(item.alpha_g1.into(), item.beta_g2.into()),  // Note: `pairing` includes final exponentiation
+            gamma_g2_neg_pc: -item.gamma_g2,
+            delta_g2_neg_pc: -item.delta_g2,
+        }
     }
 }
 
@@ -238,13 +274,12 @@ pub struct PublicInputsJson {
 
 impl PublicInputsJson {
     /// Converts public inputs to scalars over the field of the G1/G2 groups.
-    pub fn to_scalar(&self) -> Result<Vec<Fr>, Error> {
+    pub fn to_scalar(&self) -> Result<Vec<substrate_bn::Fr>, Error> {
         self.values
             .iter()
             .map(|input| {
-                ark_bn254::Fr::from_str(input)
-                    .map(Fr)
-                    .map_err(|_| anyhow!("Failed to decode 'public inputs' values"))
+                substrate_bn::Fr::from_str(input)
+                    .ok_or_else(||anyhow!("Failed to decode 'public inputs' values"))
             })
             .collect()
     }

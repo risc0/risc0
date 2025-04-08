@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO: Redo intro docs
+
 //! # Groth16
 //!
 //! This library implements a verifier for the Groth16 protocol over the BN_254 elliptic curve.
@@ -66,12 +68,13 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use core::str::FromStr;
+use std::ops::Neg;
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::{G1Affine, G2Affine};
 use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
+use substrate_bn::Group;
 
 mod data_structures;
 #[cfg(feature = "prove")]
@@ -82,10 +85,10 @@ mod seal_format;
 mod seal_to_json;
 mod verifier;
 
-pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
+pub use data_structures::{ProofJson, PublicInputsJson, Pvk, Seal, VerifyingKeyJson, Vk};
 #[cfg(feature = "prove")]
 pub use seal_to_json::to_json;
-pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
+pub use verifier::{Fr, Verifier, VerifyingKey};
 
 /// Splits the digest in half returning a scalar for each halve.
 pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
@@ -111,38 +114,104 @@ pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
         .map_err(|err| anyhow!(err))
 }
 
+// TODO: Clean up or use something else directly
+#[stability::unstable]
+#[derive(Clone)]
+struct LocalG1(Option<substrate_bn::AffineG1>);
+
+impl LocalG1 {
+    /// Deserialize an element over the G1 group from bytes in big-endian format
+    #[stability::unstable]
+    pub fn from_be_bytes(elem: &[Vec<u8>]) -> Result<Self, Error> {
+        if elem.len() != 2 {
+            return Err(anyhow!("Malformed G1 field element"));
+        }
+        // TODO: Better error forwarding
+        let x = substrate_bn::Fq::from_slice(&elem[0]).map_err(|_|{anyhow!("TODO")})?;
+        let y = substrate_bn::Fq::from_slice(&elem[1]).map_err(|_|{anyhow!("TODO")})?;
+        // Note that AffineG1::new checks that the point is on the curve
+        Ok(LocalG1(Some(substrate_bn::AffineG1::new(x, y).map_err(|_|{anyhow!("TODO")})?)))
+    }
+}
+
+impl Neg for LocalG1 {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        LocalG1(match self.0 {
+            None => None,
+            // TODO: `new` re-does the "check point on curve" logic, which isn't actually needed here and can't fail
+            Some(val) => Some(substrate_bn::AffineG1::new(val.x(), -val.y()).unwrap()),
+        })
+    }
+}
+
+// TODO: I'm a bit suspicious that these should just be `G1` the whole way through
+impl From<LocalG1> for substrate_bn::G1 {
+    fn from(item: LocalG1) -> Self {
+        match item.0 {
+            None => substrate_bn::G1::zero(),
+            Some(val) => substrate_bn::G1::from(val),
+        }
+    }
+}
+
+// TODO: Clean up or use something else directly
+#[derive(Clone)]
+struct LocalG2(Option<substrate_bn::AffineG2>);
+
+impl LocalG2 {
+    /// Deserialize an element over the G2 group from bytes in big-endian format
+    #[stability::unstable]
+    pub fn from_be_bytes(elem: &[Vec<Vec<u8>>]) -> Result<Self, Error> {
+        if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
+            return Err(anyhow!("Malformed G2 field element"));
+        }
+        // TODO: Am I right about which is real and which is imaginary?
+        // TODO: Better error forwarding
+        let x_re = substrate_bn::Fq::from_slice(&elem[0][1]).map_err(|_|{anyhow!("TODO")})?;
+        let x_im = substrate_bn::Fq::from_slice(&elem[0][0]).map_err(|_|{anyhow!("TODO")})?;
+        let x = substrate_bn::Fq2::new(x_re, x_im);
+        let y_re = substrate_bn::Fq::from_slice(&elem[1][1]).map_err(|_|{anyhow!("TODO")})?;
+        let y_im = substrate_bn::Fq::from_slice(&elem[1][0]).map_err(|_|{anyhow!("TODO")})?;
+        let y = substrate_bn::Fq2::new(y_re, y_im);
+        // Note that AffineG1::new checks that the point is on the curve and in the subgroup
+        Ok(LocalG2(Some(substrate_bn::AffineG2::new(x, y).map_err(|_|{anyhow!("TODO")})?)))
+    }
+}
+
+impl Neg for LocalG2 {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        LocalG2(match self.0 {
+            None => None,
+            // TODO: `new` re-does the "check point on curve & in subgroup" logic, which isn't actually needed here and can't fail
+            Some(val) => Some(substrate_bn::AffineG2::new(val.x(), -val.y()).unwrap()),
+        })
+    }
+}
+
+// TODO: I'm a bit suspicious that these should just be `G2` the whole way through
+impl From<LocalG2> for substrate_bn::G2 {
+    fn from(item: LocalG2) -> Self {
+        match item.0 {
+            None => substrate_bn::G2::zero(),
+            Some(val) => substrate_bn::G2::from(val),
+        }
+    }
+}
+
 /// Deserialize an element over the G1 group from bytes in big-endian format
 #[stability::unstable]
-pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
-    if elem.len() != 2 {
-        return Err(anyhow!("Malformed G1 field element"));
-    }
-    let g1_affine: Vec<u8> = elem[0]
-        .iter()
-        .rev()
-        .chain(elem[1].iter().rev())
-        .cloned()
-        .collect();
-
-    G1Affine::deserialize_uncompressed(&*g1_affine).map_err(|err| anyhow!(err))
+pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<LocalG1, Error> {
+    LocalG1::from_be_bytes(elem)
 }
 
 /// Deserialize an element over the G2 group from bytes in big-endian format
 #[stability::unstable]
-pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
-    if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
-        return Err(anyhow!("Malformed G2 field element"));
-    }
-    let g2_affine: Vec<u8> = elem[0][1]
-        .iter()
-        .rev()
-        .chain(elem[0][0].iter().rev())
-        .chain(elem[1][1].iter().rev())
-        .chain(elem[1][0].iter().rev())
-        .cloned()
-        .collect();
-
-    G2Affine::deserialize_uncompressed(&*g2_affine).map_err(|err| anyhow!(err))
+pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<LocalG2, Error> {
+    LocalG2::from_be_bytes(elem)
 }
 
 // Convert the U256 value to a byte array in big-endian format
