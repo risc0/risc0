@@ -17,8 +17,6 @@ extern crate alloc;
 use alloc::{vec, vec::Vec};
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::Bn254;
-use ark_ec::AffineRepr;
 use ark_serialize::CanonicalSerialize;
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
@@ -223,40 +221,63 @@ impl Digestible for Fr {
 }
 
 /// Verifying key for Groth16 proofs.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct VerifyingKey(#[serde(with = "serde_ark")] pub(crate) ark_groth16::VerifyingKey<Bn254>);
+// TODO: Can we get away with fewer derives?
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone)]
+pub struct VerifyingKey(pub(crate) Vk);
 
-/// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
-fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
-    let mut buffer = Vec::<u8>::new();
-    // If p is the point at infinity, the verifying key is invalid. Panic.
-    let (x, y) = p.xy().unwrap();
-    y.serialize_uncompressed(&mut buffer).unwrap();
-    x.serialize_uncompressed(&mut buffer).unwrap();
+// /// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
+// fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
+//     let mut buffer = Vec::<u8>::new();
+//     // If p is the point at infinity, the verifying key is invalid. Panic.
+//     let (x, y) = p.xy().unwrap();
+//     y.serialize_uncompressed(&mut buffer).unwrap();
+//     x.serialize_uncompressed(&mut buffer).unwrap();
+//     buffer.reverse();
+//     *S::hash_bytes(&buffer)
+// }
+
+// TODO: As with other uses of LocalG1/LocalG2, we should probably deprecate those and clean this up
+fn hash_g1_point<S: Sha256>(p: &crate::LocalG1) -> Digest {
+    let mut buffer = [0u8; 64];
+    let pt = p.0.expect("Verifying key contains point at infinity and hence is invalid");
+    pt.y().to_big_endian(&mut buffer[0..32]).expect("output slice length is 32");
+    pt.x().to_big_endian(&mut buffer[32..64]).expect("output slice length is 32");
     buffer.reverse();
+    // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
+    //    > If this matters, test it, and fix any bugs!
+    //    > If this doesn't matter, drop the `buffer.reverse()`!
     *S::hash_bytes(&buffer)
 }
 
-impl VerifyingKey {
-    #[stability::unstable]
-    pub fn ark_verifying_key(&self) -> ark_groth16::VerifyingKey<Bn254> {
-        self.0.clone()
-    }
+fn hash_g2_point<S: Sha256>(p: &crate::LocalG2) -> Digest {
+    let mut buffer = [0u8; 128];
+    let pt = p.0.expect("Verifying key contains point at infinity and hence is invalid");
+    pt.y().real().to_big_endian(&mut buffer[0..32]).expect("output slice length is 32");
+    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).expect("output slice length is 32");
+    pt.x().real().to_big_endian(&mut buffer[64..96]).expect("output slice length is 32");
+    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).expect("output slice length is 32");
+    buffer.reverse();
+    // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
+    //    > If this matters, test it, and fix any bugs!
+    //    > If this doesn't matter, drop the `buffer.reverse()`!
+    *S::hash_bytes(&buffer)
 }
 
+// TODO: Presumably we need this somewhere?
 impl Digestible for VerifyingKey {
     /// Hash the [VerifyingKey] to get a struct digest.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0_groth16.VerifyingKey",
             &[
-                hash_point::<S>(self.0.alpha_g1),
-                hash_point::<S>(self.0.beta_g2),
-                hash_point::<S>(self.0.gamma_g2),
-                hash_point::<S>(self.0.delta_g2),
+                hash_g1_point::<S>(&self.0.alpha_g1),
+                hash_g2_point::<S>(&self.0.beta_g2),
+                hash_g2_point::<S>(&self.0.gamma_g2),
+                hash_g2_point::<S>(&self.0.delta_g2),
                 tagged_iter::<S>(
                     "risc0_groth16.VerifyingKey.IC",
-                    self.0.gamma_abc_g1.iter().map(|p| hash_point::<S>(*p)),
+                    self.0.gamma_abc_g1.iter().map(|p| hash_g1_point::<S>(p)),
                 ),
             ],
             &[],

@@ -88,7 +88,7 @@ mod verifier;
 pub use data_structures::{ProofJson, PublicInputsJson, Pvk, Seal, VerifyingKeyJson, Vk};
 #[cfg(feature = "prove")]
 pub use seal_to_json::to_json;
-pub use verifier::{Fr, Verifier, VerifyingKey};
+pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
 
 /// Splits the digest in half returning a scalar for each halve.
 pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
