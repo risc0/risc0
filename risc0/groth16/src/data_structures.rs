@@ -19,7 +19,7 @@ use alloc::{string::String, vec, vec::Vec};
 use anyhow::{anyhow, Error, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::{from_u256, g1_from_bytes, g2_from_bytes};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
 
 /// Groth16 seal object encoded in big endian.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -152,7 +152,7 @@ pub struct VerifyingKeyJson {
 
 impl VerifyingKeyJson {
     /// Computes the prepared verifying key
-    pub fn verifying_key(&self) -> Result<Vk, Error> {
+    pub fn verifying_key(&self) -> Result<VerifyingKey, Error> {
         if self.vk_alpha_1.len() < 2 {
             return Err(anyhow!("Malformed G1 element field: vk_alpha_1"));
         }
@@ -217,13 +217,13 @@ impl VerifyingKeyJson {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Vk {
+        Ok(VerifyingKey(Vk {
             alpha_g1,
             beta_g2,
             gamma_g2,
             delta_g2,
             gamma_abc_g1,
-        })
+        }))
     }
 }
 

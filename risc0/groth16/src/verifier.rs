@@ -93,10 +93,10 @@ impl Verifier {
     pub fn new(
         seal: &Seal,
         public_inputs: &[substrate_bn::Fr],
-        verifying_key: &Vk,
+        verifying_key: &VerifyingKey,
     ) -> Result<Self, Error> {
         // let pvk = ark_groth16::prepare_verifying_key(&verifying_key.0);
-        let pvk = Pvk::from(verifying_key.clone());  // TODO: Is clone the right approach here? Or don't borrow the parameter?
+        let pvk = Pvk::from(verifying_key.0.clone());  // TODO: Is clone the right approach here? Or don't borrow the parameter?
 
         // let mut encoded_pvk = Vec::new();
         // pvk.serialize_uncompressed(&mut encoded_pvk)
@@ -323,9 +323,9 @@ mod serde_ark {
 // TODO: I don't think the allow(dead_code) should be needed...
 /// Default verifying key for RISC Zero recursive verification.
 #[allow(dead_code)]
-pub fn verifying_key() -> Vk {
+pub fn verifying_key() -> VerifyingKey {
     // TODO: We should probably be wrapping this as a VerifyingKey for compatability
-    try_vk().unwrap()
+    VerifyingKey(try_vk().unwrap())
 }
 
 // // try_verifying_key executes entirely over const data and so should never error.
