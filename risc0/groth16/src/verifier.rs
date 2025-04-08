@@ -324,6 +324,7 @@ mod serde_ark {
 /// Default verifying key for RISC Zero recursive verification.
 #[allow(dead_code)]
 pub fn verifying_key() -> Vk {
+    // TODO: We should probably be wrapping this as a VerifyingKey for compatability
     try_vk().unwrap()
 }
 

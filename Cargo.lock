@@ -6019,6 +6019,7 @@ dependencies = [
  "serde_with",
  "sha2",
  "stability",
+ "substrate-bn",
  "tabled 0.16.0",
  "tar",
  "tempfile",

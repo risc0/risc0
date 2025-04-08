@@ -91,13 +91,13 @@ pub use seal_to_json::to_json;
 pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
 
 /// Splits the digest in half returning a scalar for each halve.
-pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
+pub fn split_digest(d: Digest) -> Result<(substrate_bn::Fr, substrate_bn::Fr), Error> {
     let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
     let middle = big_endian.len() / 2;
     let (b, a) = big_endian.split_at(middle);
     Ok((
-        fr_from_bytes(&from_u256_hex(&hex::encode(a))?)?,
-        fr_from_bytes(&from_u256_hex(&hex::encode(b))?)?,
+        substrate_bn::Fr::from_slice(&from_u256_hex(&hex::encode(a))?).map_err(|_|anyhow!("TODO"))?,
+        substrate_bn::Fr::from_slice(&from_u256_hex(&hex::encode(b))?).map_err(|_|anyhow!("TODO"))?,
     ))
 }
 
