@@ -121,7 +121,7 @@ impl Rzup {
     /// Sets an event handler for receiving notifications about operations.
     ///
     /// # Arguments
-    /// * `handler` - Function that will be called for each event
+    /// * `event_handler` - Function that will be called for each event
     #[cfg(test)]
     pub(crate) fn set_event_handler(
         &mut self,
