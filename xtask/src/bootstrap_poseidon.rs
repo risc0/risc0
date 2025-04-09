@@ -70,7 +70,8 @@ fn to_elems(input_string: &str) -> Vec<Elem> {
             .chars()
             .filter(|c| "0123456789abcdef".contains(*c))
             .collect();
-        let num = u32::from_str_radix(&tidy_part, 16).unwrap();
+        let num = u32::from_str_radix(&tidy_part, 16)
+            .expect("failed to parse hex number into u32");
         assert!(num < (FIELD as u32));
         out.push(Elem::new(num));
     }
@@ -95,7 +96,7 @@ fn extract_from_sage(consts: &mut ComputedConstants, stdout: &str) {
     assert!(consts.mds.len() == CELLS * CELLS);
 }
 
-// Run the upstream 'official' sage code and gets the output
+// Run the upstream 'official' sage code and get the output
 fn run_sage() -> String {
     // Make a temporary directory
     let temp_dir = tempdir().unwrap();
@@ -145,7 +146,7 @@ fn run_sage() -> String {
         .arg(SECURITY.to_string()) // Desired security level
         .arg(format!("{:x}", FIELD)) // P in hex i.e. 15*2^27 + 1
         .stdout(Stdio::piped()) // Pipe output
-        .spawn()
+        .spawn().expect("Failed to spawn Sage process. Is Sage installed?")
         .unwrap();
 
     // Convert the output to a bunch of lines
