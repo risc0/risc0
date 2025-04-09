@@ -24,7 +24,7 @@ use super::get_prover_server;
 use crate::{
     host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
+    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
     VerifierContext,
 };
 
@@ -96,6 +96,50 @@ fn keccak_union() {
 #[test_log::test]
 fn basic() {
     prove_nothing().unwrap();
+}
+
+/// We don't currently support a hashfn value other than "poseidon2", so we are testing that we get
+/// an error if you try to create a proof using that hashfn, or if you try to verify a receipt that
+/// is using that hashfn.
+#[test_log::test]
+fn sha256_hashfn_fails() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::fast();
+    assert_eq!(opts.hashfn, "sha-256");
+    let err = get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .map(|_| ())
+        .unwrap_err();
+    assert_eq!(
+        err.to_string(),
+        "provided `ProverOpts` has unsupported `hashfn` value of \"sha-256\"; \
+        supported `hashfn` values are: \"poseidon2\"."
+    );
+
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::composite();
+    let mut info = get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap();
+    let InnerReceipt::Composite(composite_recipt) = &mut info.receipt.inner else {
+        panic!("unexpected receipt type");
+    };
+    for seg in &mut composite_recipt.segments {
+        seg.hashfn = "sha-256".into();
+    }
+
+    let err = info.receipt.verify(MULTI_TEST_ID).unwrap_err();
+    assert_eq!(err, VerificationError::InvalidHashSuite);
 }
 
 #[test_log::test]
