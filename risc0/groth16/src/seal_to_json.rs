@@ -61,9 +61,11 @@ fn digest_to_decimal(digest: &Digest) -> Result<String> {
     to_decimal(&format!("{:?}", digest_to_fr(digest))).context("digest_to_decimal failed")
 }
 
-fn to_decimal(s: &str) -> Option<String> {
+fn to_decimal(s: &str) -> Result<String> {
     s.strip_prefix("Fr(0x")
         .and_then(|s| s.strip_suffix(')'))
-        .and_then(|stripped| BigUint::from_str_radix(stripped, 16).ok())
+        .ok_or_else(|| anyhow::anyhow!("Invalid string format"))?
+        .parse::<BigUint>()
         .map(|n| n.to_str_radix(10))
+        .map_err(|e| anyhow::anyhow!("Failed to convert BigUint: {}", e))
 }
