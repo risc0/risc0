@@ -66,7 +66,7 @@ impl VerifyCommand {
             }
         }
 
-        Ok(result?)
+        Ok(())
     }
 
     fn get_image_id(&self) -> Result<Digest> {
