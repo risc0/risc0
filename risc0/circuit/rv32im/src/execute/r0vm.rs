@@ -21,7 +21,7 @@ use risc0_binfmt::{ByteAddr, WordAddr};
 use super::{
     platform::*,
     poseidon2::{Poseidon2, Poseidon2State},
-    rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, Instruction},
+    rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, InsnKind, Instruction},
     sha2::{self, Sha2State},
 };
 
@@ -59,9 +59,10 @@ pub(crate) trait Risc0Context {
     /// Set the machine mode
     fn set_machine_mode(&mut self, mode: u32);
 
+    #[allow(dead_code)]
     fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
 
-    fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
+    fn on_insn_end(&mut self, kind: InsnKind) -> Result<()>;
 
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
 
@@ -514,12 +515,8 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         Ok(false)
     }
 
-    fn on_insn_decoded(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
-        self.ctx.on_insn_start(insn, decoded)
-    }
-
-    fn on_normal_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
-        self.ctx.on_insn_end(insn, decoded)
+    fn on_normal_end(&mut self, kind: InsnKind) -> Result<()> {
+        self.ctx.on_insn_end(kind)
     }
 
     fn get_pc(&self) -> ByteAddr {

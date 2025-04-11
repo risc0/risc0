@@ -23,6 +23,7 @@ use risc0_zkp::core::{
 };
 
 use crate::{
+    execute::rv32im::InsnKind,
     trace::{TraceCallback, TraceEvent},
     Rv32imV2Claim, TerminateState,
 };
@@ -416,6 +417,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     #[cold]
+    #[allow(dead_code)]
     fn trace_instruction(&self, cycle: u64, insn: &Instruction, decoded: &DecodedInstruction) {
         tracing::trace!(
             "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
@@ -473,7 +475,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         }
     }
 
-    fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
+    fn on_insn_end(&mut self, _kind: InsnKind) -> Result<()> {
         self.inc_user_cycles(1, None);
         if !self.trace.is_empty() {
             self.trace_pager()?;
