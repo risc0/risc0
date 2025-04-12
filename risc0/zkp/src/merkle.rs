@@ -45,14 +45,11 @@ impl MerkleTreeParams {
         // to this top layer. This allows us to avoid checking hashes in this
         // part of the tree multiple times. We choose the top layer to be the
         // one with size at most equal to queries.
-        let mut top_layer = 0;
-        for i in 1..layers {
-            if (1 << i) > queries {
-                break;
-            }
-            top_layer = i;
-        }
+
+        // Calculate top_layer directly using min and log2
+        let top_layer = core::cmp::min(to_po2(queries), layers - 1);
         let top_size = 1 << top_layer;
+
         MerkleTreeParams {
             row_size,
             col_size,
