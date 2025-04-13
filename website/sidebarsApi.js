@@ -256,6 +256,11 @@ export default {
       ],
     },
     {
+      type: "doc",
+      id: "best-practice-for-vscode",
+      label:"Best practice for VSCode",
+    },
+    {
       type: "link",
       label: "Awesome risc0",
       href: "https://github.com/inversebrah/awesome-risc0",
