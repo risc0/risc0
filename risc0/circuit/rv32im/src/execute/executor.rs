@@ -280,7 +280,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
-            let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
             let (pre_image, pre_digest, post_digest) = self.pager.commit();
             let req = ComputePartialImageRequest {
                 image: pre_image,
@@ -292,7 +291,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 user_cycles: self.user_cycles,
                 pager_cycles: self.pager.cycles,
                 terminate_state: self.terminate_state,
-                segment_threshold,
+                segment_threshold: 0, // meaningless for final segment
                 pre_digest,
                 post_digest,
                 po2: final_po2 as u32,
