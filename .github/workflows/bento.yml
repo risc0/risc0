@@ -44,7 +44,7 @@ jobs:
   bento:
     runs-on: [ self-hosted, Linux, X64, prod, cpu ]
     needs: changes
-    if: needs.files-changed.outputs.bento == 'true'
+    if: needs.changes.outputs.bento == 'true'
     services:
       postgres:
         image: postgres:latest
@@ -125,7 +125,7 @@ jobs:
   bento_run:
     runs-on: [ self-hosted, Linux, X64, prod, cuda, g6.4xlarge ]
     needs: changes
-    if: needs.files-changed.outputs.bento == 'true'
+    if: needs.changes.outputs.bento == 'true'
     steps:
       - name: checkout code
         uses: actions/checkout@v4
