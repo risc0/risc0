@@ -1,0 +1,183 @@
+name: Bento
+
+on:
+  merge_group:
+  pull_request:
+    branches: main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+defaults:
+  run:
+    # This ensures `-eo pipefail`, which is important for catching errors
+    shell: bash
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      bento: ${{ steps.filter.outputs.bento }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: risc0/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+        id: filter
+        with:
+          filters: |
+            base: &base
+              - .github/actions/**
+              - .github/workflows/main.yml
+              - Cargo.toml
+              - rust-toolchain.toml
+              - Cargo.lock
+              - rzup/**
+            bento:
+              - *base
+              - bonsai/sdk/**
+              - risc0/**
+              - bento/**
+
+  bento:
+    runs-on: [ self-hosted, Linux, X64, prod, cpu ]
+    needs: changes
+    if: needs.files-changed.outputs.bento == 'true'
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: password
+    defaults:
+      run:
+        working-directory: ./bento
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: setup sccache + s3
+        uses: ./.github/actions/sccache
+
+      - name: install rust
+        uses: ./.github/actions/rustup
+        with:
+          toolchain: ${{ inputs.toolchain-version }}
+
+      - name: install rzup
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+
+      - name: install rzup components
+        run: rzup install
+
+      - name: install cargo-sort
+        uses: baptiste0928/cargo-install@904927dbe77864e0f2281519fe9d5bd097a220b3
+        with:
+          crate: cargo-sort
+          version: "=1.0.9"
+          locked: true
+
+      - name: cargo Sort
+        run: cargo sort --workspace --check
+
+      - name: cargo format
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy
+        env:
+          RUSTFLAGS: "-Dwarnings"
+        run: |
+          cargo build -p sample-guest-methods -q
+          RISC0_SKIP_BUILD=1 cargo clippy --all-targets
+
+      - name: cargo doc
+        run: cargo doc
+
+      - name: Install sqlx-cli
+        uses: baptiste0928/cargo-install@904927dbe77864e0f2281519fe9d5bd097a220b3
+        with:
+          crate: sqlx-cli
+          version: '=0.8.2'
+          locked: true
+          args: --no-default-features
+          features: postgres
+
+      - name: run taskdb migrations
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+        run: sqlx migrate run --source ./crates/taskdb/migrations/
+
+      - name: cargo test
+        run: cargo test --locked --workspace --all-targets -- --ignored
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+          RISC0_DEV_MODE: true
+
+      - name: sccache stats
+        run: sccache --show-stats
+
+  bento_run:
+    runs-on: [ self-hosted, Linux, X64, prod, cuda, g6.4xlarge ]
+    needs: changes
+    if: needs.files-changed.outputs.bento == 'true'
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: install rust
+        uses: ./.github/actions/rustup
+        with:
+          toolchain: ${{ inputs.toolchain-version }}
+
+      - name: install rzup
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+
+      - name: install rzup components
+        run: rzup install
+
+      - name: Fetch CI AWS Creds
+        id: aws-creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: 'us-west-2'
+          role-to-assume: 'arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_shared_access'
+          output-credentials: true
+
+      - name: create ci creds file
+        run: |
+          echo "[default]" > ./dockerfiles/ci-cache-creds.txt
+          echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> ./dockerfiles/ci-cache-creds.txt && \
+          echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> ./dockerfiles/ci-cache-creds.txt && \
+          echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> ./dockerfiles/ci-cache-creds.txt
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start bento cluster
+        run: docker compose --env-file sample.env -f compose.yml -f ./dockerfiles/compose.ci.yml up -d
+
+      - name: setup sccache + s3
+        uses: ./.github/actions/sccache
+
+      - name: Run a sample proof through
+        # TODO: snark, multi-segments, bigint, keccak, composition guest to express all functionality
+        working-directory: bento
+        run: RUST_LOG=info cargo run --bin bento_cli -- -c 32 -s

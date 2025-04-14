@@ -72,6 +72,7 @@ services:
 
   exec_agent:
     image: agent
+    runtime: nvidia
     restart: always
     depends_on:
       - postgres
@@ -80,6 +81,9 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/agent.dockerfile
+      args:
+        NVCC_APPEND_FLAGS: "--gpu-architecture=compute_86 --gpu-code=compute_86,sm_86 --generate-code arch=compute_86,code=sm_86"
+        CUDA_OPT_LEVEL: 1
     mem_limit: 4G
     cpu_count: 4
     environment:
@@ -100,6 +104,7 @@ services:
 
   aux_agent:
     image: agent
+    runtime: nvidia
     pull_policy: never
     restart: always
     depends_on:
@@ -122,6 +127,7 @@ services:
 
   gpu_prove_agent0: &gpu
     image: agent
+    runtime: nvidia
     pull_policy: never
     restart: always
     depends_on:
@@ -140,9 +146,19 @@ services:
       RUST_LOG: ${RUST_LOG}
       RUST_BACKTRACE: 1
     entrypoint: /app/agent -t prove
+    # comment-out if running in CPU proving mode
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              # TODO: how to scale this with N gpus?
+              device_ids: ['0']
+              capabilities: [gpu]
 
   snark_agent:
     image: agent
+    runtime: nvidia
     pull_policy: never
     restart: always
     depends_on:
