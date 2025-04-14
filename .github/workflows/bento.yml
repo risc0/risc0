@@ -36,15 +36,7 @@ jobs:
         id: filter
         with:
           filters: |
-            base: &base
-              - .github/actions/**
-              - .github/workflows/main.yml
-              - Cargo.toml
-              - rust-toolchain.toml
-              - Cargo.lock
-              - rzup/**
             bento:
-              - *base
               - bonsai/sdk/**
               - risc0/**
               - bento/**

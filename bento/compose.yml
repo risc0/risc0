@@ -1,7 +1,3 @@
-# How to run:
-#   docker compose --file compose.yml --env-file sample.env up --build
-
-version: '3.3'
 name: bento
 services:
   redis:

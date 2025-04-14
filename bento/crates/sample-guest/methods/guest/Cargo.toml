@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 bytemuck = "1.13"
-risc0-zkvm = { version = "2.0.0", default-features = false, features = [
+risc0-zkvm = { path = "../../../../../risc0/zkvm", default-features = false, features = [
     "std", "unstable"
 ] }
 sample-guest-common = { path = "../../common" }
