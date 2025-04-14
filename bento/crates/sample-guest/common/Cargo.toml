@@ -1,0 +1,8 @@
+[package]
+name = "sample-guest-common"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkvm = { workspace = true }
+serde = { workspace = true, features = ["derive"] }

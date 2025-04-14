@@ -1,0 +1,14 @@
+[package]
+name = "method_name"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+bytemuck = "1.13"
+risc0-zkvm = { version = "2.0.0", default-features = false, features = [
+    "std", "unstable"
+] }
+sample-guest-common = { path = "../../common" }
+tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", rev = "7ff2b8465891d1cbb55a69e553e05d369ce41d72", features = ["keccak"] }
