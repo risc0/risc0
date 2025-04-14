@@ -45,7 +45,20 @@ pub const INSTALL_HELP: &str = "Discussion:
     `GITHUB_TOKEN` environment variable, then from ~/.config/gh/hosts.yml.
 
     The default version of the component is updated to the version that was
-    just installed.";
+    just installed.
+
+    ──────────────
+    Component List:
+      - rust            → version format: r0.1.85.0
+      - cargo-risczero  → version format: v2.0.1
+      - cpp             → version format: YYYY.MM.DD
+
+    You can run 'rzup show' to list installed versions.
+
+    For more information on available versions:
+      - rust: https://github.com/risc0/rust/releases
+      - cargo-risczero: https://github.com/risc0/risc0/releases
+      - cpp: https://github.com/risc0/toolchain/releases";
 
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
@@ -74,18 +87,50 @@ impl InstallCommand {
             return Ok(None);
         };
 
-        // special handling for cpp date-based versions
-        // TODO: Move away from date version tags to semver
-        if self.name.as_ref().is_some_and(|n| n == "cpp") {
-            return Ok(Some(parse_cpp_version(v)?));
+        if let Some(name) = &self.name {
+            match name.as_str() {
+                "cpp" => {
+                    // TODO: Move away from date version tags to semver
+                    return Ok(Some(parse_cpp_version(v)?));
+                }
+                "rust" => {
+                    if let Some(stripped) = v.strip_prefix("r0.") {
+                        return Ok(Some(Version::parse(stripped).map_err(|_| {
+                            RzupError::InvalidVersion(format!(
+                                "{v}\n\n  {}: unable to parse version after removing 'r0.' prefix",
+                                "tip".green()
+                            ))
+                        })?));
+                    } else {
+                        return Err(RzupError::InvalidVersion(format!(
+                            "{v}\n\n  {}: 'rust' expects versions in format 'r0.X.Y.Z'",
+                            "tip".green()
+                        )));
+                    }
+                }
+                "cargo-risczero" => {
+                    if let Some(stripped) = v.strip_prefix("v") {
+                        return Ok(Some(Version::parse(stripped).map_err(|_| {
+                            RzupError::InvalidVersion(format!(
+                                "{v}\n\n  {}: unable to parse version after removing 'v' prefix",
+                                "tip".green()
+                            ))
+                        })?));
+                    } else {
+                        return Err(RzupError::InvalidVersion(format!(
+                            "{v}\n\n  {}: 'cargo-risczero' expects versions in format 'vX.Y.Z'",
+                            "tip".green()
+                        )));
+                    }
+                }
+                _ => {}
+            }
         }
 
-        Ok(Some(Version::parse(v).map_err(|_| {
-            RzupError::InvalidVersion(format!(
-                "{v}\n\n  {}: use semantic version (e.g. 1.0.0)",
-                "tip".green()
-            ))
-        })?))
+        Err(RzupError::InvalidVersion(format!(
+            "{v}\n\n  {}: unknown component or invalid version format",
+            "tip".green()
+        )))
     }
 
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
@@ -93,7 +138,18 @@ impl InstallCommand {
 
         if let Some(name) = &self.name {
             if name != "self" {
-                rzup.install_component(&name.parse()?, version, self.force)?;
+                if !Component::iter().any(|c| c.as_str() == name) {
+                    rzup.print(format!(
+                        "{} '{}' is not a valid component. Valid options: {:?}",
+                        "error:".red(),
+                        name,
+                        Component::iter().map(|c| c.as_str()).collect::<Vec<_>>()
+                    ));
+                    return Err(RzupError::ComponentNotFound(name.to_string()));
+                }
+
+                let component = name.parse()?;
+                rzup.install_component(&component, version, self.force)?;
             } else {
                 rzup.self_update()?
             }
@@ -104,7 +160,6 @@ impl InstallCommand {
         Ok(())
     }
 }
-
 pub const SHOW_HELP: &str = "Discussion:
     Lists the installed components and their versions.
 
@@ -173,8 +228,13 @@ pub(crate) struct DefaultCommand {
 
 impl DefaultCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
-        let version = Version::parse(&self.version)
-            .map_err(|_| RzupError::InvalidVersion(self.version.clone()))?;
+        let version = Version::parse(&self.version).map_err(|_| {
+            RzupError::InvalidVersion(format!(
+                "{}\n\n  {}: use semantic version (e.g. 1.0.0)",
+                self.version,
+                "tip".green()
+            ))
+        })?;
         let component = self.name.parse()?;
         if rzup.version_exists(&component, &version)? {
             rzup.set_default_version(&component, version.clone())?;
