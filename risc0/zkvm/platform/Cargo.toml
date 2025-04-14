@@ -19,7 +19,7 @@ critical-section = { version = "1.1.2", optional = true }
 embedded-alloc = { version = "0.6.0", features = [
   "allocator_api",
 ], optional = true }
-getrandom = { version = "0.2", features = ["custom"], optional = true }
+getrandom = { version = "0.3", optional = true }
 libm = { version = "0.2", optional = true }
 
 [package.metadata.docs.rs]

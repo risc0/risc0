@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use getrandom::{register_custom_getrandom, Error};
+use getrandom::Error;
 
 /// This is a getrandom handler for the zkvm. It's intended to hook into a
 /// getrandom crate or a dependent of the getrandom crate used by the guest code.
 #[cfg(feature = "getrandom")]
-pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
+#[no_mangle]
+unsafe extern "Rust" fn __getrandom_v03_custom(dest_ptr: *mut u8, len: usize) -> Result<(), Error> {
     use crate::{syscall::sys_rand, WORD_SIZE};
+
+    let dest = core::slice::from_raw_parts_mut(dest_ptr, len);
 
     if dest.is_empty() {
         return Ok(());
@@ -52,7 +55,11 @@ pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
 }
 
 #[cfg(not(feature = "getrandom"))]
-pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
+#[no_mangle]
+unsafe extern "Rust" fn __getrandom_v03_custom(
+    _dest_ptr: *mut u8,
+    _len: usize,
+) -> Result<(), Error> {
     panic!(
         r#"
 
@@ -82,5 +89,3 @@ crate used for the guest.
 "#
     );
 }
-
-register_custom_getrandom!(zkvm_getrandom);
