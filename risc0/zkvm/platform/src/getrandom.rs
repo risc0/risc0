@@ -89,3 +89,12 @@ crate used for the guest.
 "#
     );
 }
+
+/// This entrypoint for getrandom is used for versions < 0.3
+#[no_mangle]
+unsafe fn __getrandom_custom(dest: *mut u8, len: usize) -> u32 {
+    __getrandom_v03_custom(dest, len)
+        .map_err(|e| e.raw_os_error().unwrap_or(2))
+        .err()
+        .unwrap_or(0) as u32
+}
