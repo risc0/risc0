@@ -231,7 +231,7 @@ impl VerifyingKeyJson {
 /// 
 /// A verification key. It needs to be prepared into a [Pvk] before use. (TODO)
 // TODO: Derives?
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Vk {
     // TODO: better pattern for access?
     pub(crate) alpha_g1: substrate_bn::G1,
