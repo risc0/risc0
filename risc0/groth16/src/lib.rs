@@ -132,7 +132,6 @@ pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<substrate_bn::G2, Error> {
     if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
         return Err(anyhow!("Malformed G2 field element"));
     }
-    // TODO: Am I right about which is real and which is imaginary?
     // TODO: Better error forwarding
     let x_re = substrate_bn::Fq::from_slice(&elem[0][1]).map_err(|_|{anyhow!("TODO")})?;
     let x_im = substrate_bn::Fq::from_slice(&elem[0][0]).map_err(|_|{anyhow!("TODO")})?;
