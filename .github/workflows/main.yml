@@ -713,10 +713,6 @@ jobs:
         env:
           POSTGRES_PASSWORD: password
     env:
-      RISC0_BUILD_LOCKED: 1
-      RISC0_EXECUTOR: ipc
-      RISC0_PROVER: ipc
-      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RISC0_DEV_MODE: true
       DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
