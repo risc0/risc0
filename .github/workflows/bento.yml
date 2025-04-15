@@ -97,8 +97,7 @@ jobs:
           cargo build -p sample-guest-methods -q
           RISC0_SKIP_BUILD=1 cargo clippy --all-targets
 
-      - name: cargo doc
-        run: cargo doc
+      - run: cargo doc --no-deps
 
       - name: Install sqlx-cli
         uses: baptiste0928/cargo-install@904927dbe77864e0f2281519fe9d5bd097a220b3
@@ -165,7 +164,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Start bento cluster
-        run: docker compose --env-file sample.env -f compose.yml -f ./dockerfiles/compose.ci.yml up -d
+        run: docker compose --env-file sample.env -f compose.yml up -d
 
       - name: setup sccache + s3
         uses: ./.github/actions/sccache
