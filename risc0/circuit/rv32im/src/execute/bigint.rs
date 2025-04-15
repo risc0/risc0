@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod analyze;
+
 use std::{collections::BTreeMap, io::Cursor};
 
 use anyhow::{ensure, Result};
