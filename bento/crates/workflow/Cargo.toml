@@ -37,4 +37,5 @@ name = "agent"
 path = "src/bin/agent.rs"
 
 [features]
+default = []
 cuda = ["risc0-zkvm/cuda"]
