@@ -16,6 +16,7 @@ permissions:
   contents: read
 
 env:
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 defaults:
@@ -66,7 +67,7 @@ jobs:
       - name: install rust
         uses: ./.github/actions/rustup
         with:
-          toolchain: ${{ inputs.toolchain-version }}
+          toolchain: ${{ env.RISC0_RUST_TOOLCHAIN_VERSION }}
 
       - name: install rzup
         run: |
@@ -135,7 +136,7 @@ jobs:
       - name: install rust
         uses: ./.github/actions/rustup
         with:
-          toolchain: ${{ inputs.toolchain-version }}
+          toolchain: ${{ env.RISC0_RUST_TOOLCHAIN_VERSION }}
 
       - name: install rzup
         run: |
