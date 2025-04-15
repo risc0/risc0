@@ -31,6 +31,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      bento: ${{ steps.filter.outputs.bento }}
       browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
@@ -55,6 +56,10 @@ jobs:
               - rust-toolchain.toml
               - Cargo.lock
               - rzup/**
+            bento:
+              - bonsai/sdk/**
+              - risc0/**
+              - bento/**
             browser:
               - *base
               - examples/browser-verify/**
@@ -149,10 +154,12 @@ jobs:
         with:
           node-version: 20
       - run: cargo fmt --all --check
+      - run: cargo fmt --all --check --manifest-path bento/Cargo.toml
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo sort --workspace --check
+      - run: cargo sort --workspace --check bento
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
@@ -206,6 +213,9 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - name: "root: cargo clippy"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
+      - name: "bento: cargo clippy"
+        run: cargo clippy -F $FEATURE --all-targets
+        working-directory: bento
       - name: "benchmarks: cargo clippy"
         run: cargo clippy -F $FEATURE --all-targets
         working-directory: benchmarks
@@ -468,6 +478,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+      - run: cargo doc --no-deps --manifest-path bento/Cargo.toml
       - run: sccache --show-stats
 
   # Run as a separate job because we need to install a different set of tools.

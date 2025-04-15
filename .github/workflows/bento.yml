@@ -16,8 +16,9 @@ permissions:
   contents: read
 
 env:
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
   run:
@@ -42,10 +43,10 @@ jobs:
               - risc0/**
               - bento/**
 
-  bento:
-    runs-on: [ self-hosted, Linux, X64, prod, cpu ]
-    needs: changes
+  bento_test:
     if: needs.changes.outputs.bento == 'true'
+    needs: changes
+    runs-on: [ self-hosted, prod, Linux, X64, cpu ]
     services:
       postgres:
         image: postgres:latest
@@ -53,52 +54,28 @@ jobs:
           - 5432:5432
         env:
           POSTGRES_PASSWORD: password
-    defaults:
-      run:
-        working-directory: ./bento
-
+    env:
+      RISC0_BUILD_LOCKED: 1
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUST_BACKTRACE: full
+      RISC0_DEV_MODE: true
+      DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
     steps:
-      - name: checkout code
-        uses: actions/checkout@v4
-
-      - name: setup sccache + s3
-        uses: ./.github/actions/sccache
-
-      - name: install rust
-        uses: ./.github/actions/rustup
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
         with:
-          toolchain: ${{ env.RISC0_RUST_TOOLCHAIN_VERSION }}
-
-      - name: install rzup
-        run: |
-          curl -L https://risczero.com/install | bash
-          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
-
-      - name: install rzup components
-        run: rzup install
-
-      - name: install cargo-sort
-        uses: baptiste0928/cargo-install@904927dbe77864e0f2281519fe9d5bd097a220b3
+          key: Linux-cpu
+      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
-          crate: cargo-sort
-          version: "=1.0.9"
-          locked: true
-
-      - name: cargo Sort
-        run: cargo sort --workspace --check
-
-      - name: cargo format
-        run: cargo fmt --all -- --check
-
-      - name: cargo clippy
-        env:
-          RUSTFLAGS: "-Dwarnings"
-        run: |
-          cargo build -p sample-guest-methods -q
-          RISC0_SKIP_BUILD=1 cargo clippy --all-targets
-
-      - run: cargo doc --no-deps
-
+          crate: cargo-binstall
+          version: "1.10.16"
+      - run: cargo binstall cargo-nextest
+      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo build --release -p risc0-r0vm
       - name: Install sqlx-cli
         uses: baptiste0928/cargo-install@904927dbe77864e0f2281519fe9d5bd097a220b3
         with:
@@ -107,69 +84,50 @@ jobs:
           locked: true
           args: --no-default-features
           features: postgres
-
-      - name: run taskdb migrations
-        env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
-        run: sqlx migrate run --source ./crates/taskdb/migrations/
-
-      - name: cargo test
-        run: cargo test --locked --workspace --all-targets -- --ignored
-        env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
-          RISC0_DEV_MODE: true
-
-      - name: sccache stats
-        run: sccache --show-stats
+      - run: sqlx migrate run --source bento/crates/taskdb/migrations/
+      - run: cargo test --manifest-path bento/Cargo.toml --locked --workspace --all-targets -- --ignored
+      - run: sccache --show-stats
 
   bento_run:
-    runs-on: [ self-hosted, Linux, X64, prod, cuda, g6.4xlarge ]
-    needs: changes
     if: needs.changes.outputs.bento == 'true'
+    needs: changes
+    runs-on: [ self-hosted, prod, Linux, X64, docker, nvidia_rtx_a5000 ]
+    env:
+      FEATURE: cuda
+      RISC0_BUILD_LOCKED: 1
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUST_BACKTRACE: full
     steps:
-      - name: checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cuda
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
         with:
-          submodules: recursive
-
-      - name: install rust
-        uses: ./.github/actions/rustup
+          key: Linux-cuda
+      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
-          toolchain: ${{ env.RISC0_RUST_TOOLCHAIN_VERSION }}
+          crate: cargo-binstall
+          version: "1.10.16"
+      - name: Install cargo-nextest
+        run: cargo binstall cargo-nextest
+      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo build --release -p risc0-r0vm -F $FEATURE
 
-      - name: install rzup
-        run: |
-          curl -L https://risczero.com/install | bash
-          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
-
-      - name: install rzup components
-        run: rzup install
-
-      - name: Fetch CI AWS Creds
+      - uses: aws-actions/configure-aws-credentials@v4
         id: aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: 'us-west-2'
           role-to-assume: 'arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_shared_access'
           output-credentials: true
-
       - name: create ci creds file
         run: |
           echo "[default]" > ./dockerfiles/ci-cache-creds.txt
           echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> ./dockerfiles/ci-cache-creds.txt && \
           echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> ./dockerfiles/ci-cache-creds.txt && \
           echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> ./dockerfiles/ci-cache-creds.txt
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Start bento cluster
-        run: docker compose --env-file sample.env -f compose.yml up -d
-
-      - name: setup sccache + s3
-        uses: ./.github/actions/sccache
-
-      - name: Run a sample proof through
-        # TODO: snark, multi-segments, bigint, keccak, composition guest to express all functionality
-        working-directory: bento
-        run: RUST_LOG=info cargo run --bin bento_cli -- -c 32 -s
+      - uses: docker/setup-buildx-action@v3
+      - run: docker compose --env-file bento/sample.env -f bento/compose.yml up -d
+      - run: RUST_LOG=info cargo run --manifest-path bento/Cargo.toml --bin bento_cli -- -c 32 -s
