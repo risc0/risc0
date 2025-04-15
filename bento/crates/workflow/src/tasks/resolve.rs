@@ -23,17 +23,30 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
     tracing::info!("Starting resolve for job_id: {job_id}, max_idx: {max_idx}");
 
     let mut conn = agent.redis_pool.get().await?;
-    let receipt: Vec<u8> = conn.get::<_, Vec<u8>>(&root_receipt_key).await.with_context(|| {
-        format!("segment data not found for root receipt key: {root_receipt_key}")
-    })?;
+    let receipt: Vec<u8> = conn
+        .get::<_, Vec<u8>>(&root_receipt_key)
+        .await
+        .with_context(|| {
+            format!("segment data not found for root receipt key: {root_receipt_key}")
+        })?;
 
     tracing::info!("Root receipt size: {} bytes", receipt.len());
     let mut conditional_receipt: SuccinctReceipt<ReceiptClaim> = deserialize_obj(&receipt)?;
 
     let mut assumptions_len: Option<u64> = None;
-    if conditional_receipt.claim.clone().as_value()?.output.is_some() {
-        if let Some(guest_output) =
-            conditional_receipt.claim.clone().as_value()?.output.as_value()?
+    if conditional_receipt
+        .claim
+        .clone()
+        .as_value()?
+        .output
+        .is_some()
+    {
+        if let Some(guest_output) = conditional_receipt
+            .claim
+            .clone()
+            .as_value()?
+            .output
+            .as_value()?
         {
             if !guest_output.assumptions.is_empty() {
                 let assumptions = guest_output
@@ -43,8 +56,12 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
                     .iter();
 
                 tracing::info!("Resolving {} assumption(s)", assumptions.len());
-                assumptions_len =
-                    Some(assumptions.len().try_into().context("Failed to convert to u64")?);
+                assumptions_len = Some(
+                    assumptions
+                        .len()
+                        .try_into()
+                        .context("Failed to convert to u64")?,
+                );
 
                 let mut union_claim = String::new();
                 if let Some(idx) = request.union_max_idx {

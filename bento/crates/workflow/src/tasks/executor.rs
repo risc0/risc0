@@ -468,7 +468,9 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
 
             match task_type {
                 SenderType::Segment(segment_index) => {
-                    planner.enqueue_segment().expect("Failed to enqueue segment");
+                    planner
+                        .enqueue_segment()
+                        .expect("Failed to enqueue segment");
                     while let Some(tree_task) = planner.next_task() {
                         process_task(
                             &args_copy,
@@ -632,7 +634,10 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
     // Write the guest stdout/stderr logs to object store after completing exec
     agent
         .s3_client
-        .write_file_to_s3(&format!("{EXEC_LOGS_BUCKET_DIR}/{job_id}.log"), &guest_log_path)
+        .write_file_to_s3(
+            &format!("{EXEC_LOGS_BUCKET_DIR}/{job_id}.log"),
+            &guest_log_path,
+        )
         .await
         .context("Failed to upload guest logs to object store")?;
 

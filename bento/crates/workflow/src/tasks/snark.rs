@@ -29,7 +29,10 @@ const PROOF_FILE: &str = "proof.json";
 pub async fn stark2snark(agent: &Agent, job_id: &str, req: &SnarkReq) -> Result<SnarkResp> {
     let work_dir = tempdir().context("Failed to create tmpdir")?;
 
-    let receipt_key = format!("{RECEIPT_BUCKET_DIR}/{STARK_BUCKET_DIR}/{}.bincode", req.receipt);
+    let receipt_key = format!(
+        "{RECEIPT_BUCKET_DIR}/{STARK_BUCKET_DIR}/{}.bincode",
+        req.receipt
+    );
     tracing::info!("Downloading receipt, {receipt_key}");
     let receipt: Receipt = agent
         .s3_client
@@ -65,8 +68,10 @@ pub async fn stark2snark(agent: &Agent, job_id: &str, req: &SnarkReq) -> Result<
     unistd::mkfifo(&witness_file, stat::Mode::S_IRWXU).context("Failed to create fifo")?;
 
     // Spawn stark_verify process
-    let mut wit_gen =
-        Command::new(app_path.join("stark_verify")).arg(&seal_path).arg(&witness_file).spawn()?;
+    let mut wit_gen = Command::new(app_path.join("stark_verify"))
+        .arg(&seal_path)
+        .arg(&witness_file)
+        .spawn()?;
 
     tracing::info!("Running gnark, {job_id}");
     let cs_file = app_path.join("stark_verify.cs");
@@ -115,8 +120,10 @@ pub async fn stark2snark(agent: &Agent, job_id: &str, req: &SnarkReq) -> Result<
         Groth16ReceiptVerifierParameters::default().digest(),
     );
 
-    let snark_receipt =
-        Receipt::new(risc0_zkvm::InnerReceipt::Groth16(snark_receipt), receipt.journal.bytes);
+    let snark_receipt = Receipt::new(
+        risc0_zkvm::InnerReceipt::Groth16(snark_receipt),
+        receipt.journal.bytes,
+    );
 
     let key = &format!("{RECEIPT_BUCKET_DIR}/{GROTH16_BUCKET_DIR}/{job_id}.bincode");
     tracing::info!("Uploading snark receipt to S3: {}", key);
@@ -126,5 +133,7 @@ pub async fn stark2snark(agent: &Agent, job_id: &str, req: &SnarkReq) -> Result<
         .await
         .context("Failed to upload final receipt to obj store")?;
 
-    Ok(SnarkResp { snark: job_id.to_string() })
+    Ok(SnarkResp {
+        snark: job_id.to_string(),
+    })
 }

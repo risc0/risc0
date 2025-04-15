@@ -9,11 +9,15 @@ use workflow::{Agent, Args};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt().with_env_filter(EnvFilter::from_default_env()).init();
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 
     let args = Args::parse();
     let task_stream = args.task_stream.clone();
-    let agent = Agent::new(args).await.context("Failed to initialize Agent")?;
+    let agent = Agent::new(args)
+        .await
+        .context("Failed to initialize Agent")?;
 
     sqlx::migrate!("../taskdb/migrations")
         .run(&agent.db_pool)

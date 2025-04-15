@@ -35,7 +35,12 @@ pub async fn union(agent: &Agent, job_id: &Uuid, request: &UnionReq) -> Result<(
         deserialize_obj(&right_receipt_bytes).context("Failed to deserialize right receipt")?;
 
     // run union
-    tracing::info!("Union {job_id} - {} + {} -> {}", request.left, request.right, request.idx);
+    tracing::info!(
+        "Union {job_id} - {} + {} -> {}",
+        request.left,
+        request.right,
+        request.idx
+    );
 
     let unioned = agent
         .prover
@@ -48,9 +53,14 @@ pub async fn union(agent: &Agent, job_id: &Uuid, request: &UnionReq) -> Result<(
     // send result to redis
     let union_result = serialize_obj(&unioned).context("Failed to serialize union receipt")?;
     let output_key = format!("{keccak_receipts_prefix}:{}", request.idx);
-    redis::set_key_with_expiry(&mut conn, &output_key, union_result, Some(agent.args.redis_ttl))
-        .await
-        .context("Failed to set redis key for union receipt")?;
+    redis::set_key_with_expiry(
+        &mut conn,
+        &output_key,
+        union_result,
+        Some(agent.args.redis_ttl),
+    )
+    .await
+    .context("Failed to set redis key for union receipt")?;
 
     tracing::info!("Union complete {job_id} - {}", request.left);
 

@@ -126,7 +126,9 @@ pub async fn create_stream(
     .fetch_one(pool)
     .await?
     .id
-    .ok_or(TaskDbErr::InternalErr("create_stream result missing id field".into()))
+    .ok_or(TaskDbErr::InternalErr(
+        "create_stream result missing id field".into(),
+    ))
 }
 
 pub async fn create_job(
@@ -148,7 +150,9 @@ pub async fn create_job(
     .fetch_one(pool)
     .await?
     .id
-    .ok_or(TaskDbErr::InternalErr("create_job result missing id field".into()))
+    .ok_or(TaskDbErr::InternalErr(
+        "create_job result missing id field".into(),
+    ))
 }
 
 // TODO: fix this clippy allow
@@ -200,11 +204,18 @@ pub async fn update_task_done(
     task_id: &str,
     output: JsonValue,
 ) -> Result<bool, TaskDbErr> {
-    sqlx::query!("SELECT * FROM update_task_done($1, $2, $3) as updated", job_id, task_id, output)
-        .fetch_one(pool)
-        .await?
-        .updated
-        .ok_or(TaskDbErr::InternalErr("update_task_done failed to return FOUND result".into()))
+    sqlx::query!(
+        "SELECT * FROM update_task_done($1, $2, $3) as updated",
+        job_id,
+        task_id,
+        output
+    )
+    .fetch_one(pool)
+    .await?
+    .updated
+    .ok_or(TaskDbErr::InternalErr(
+        "update_task_done failed to return FOUND result".into(),
+    ))
 }
 
 pub async fn update_task_failed(
@@ -213,11 +224,18 @@ pub async fn update_task_failed(
     task_id: &str,
     error: &str,
 ) -> Result<bool, TaskDbErr> {
-    sqlx::query!("SELECT * FROM update_task_failed($1, $2, $3) as updated", job_id, task_id, error)
-        .fetch_one(pool)
-        .await?
-        .updated
-        .ok_or(TaskDbErr::InternalErr("update_task_failed failed to return FOUND result".into()))
+    sqlx::query!(
+        "SELECT * FROM update_task_failed($1, $2, $3) as updated",
+        job_id,
+        task_id,
+        error
+    )
+    .fetch_one(pool)
+    .await?
+    .updated
+    .ok_or(TaskDbErr::InternalErr(
+        "update_task_failed failed to return FOUND result".into(),
+    ))
 }
 
 pub async fn update_task_progress(
@@ -235,7 +253,9 @@ pub async fn update_task_progress(
     .fetch_one(pool)
     .await?
     .updated
-    .ok_or(TaskDbErr::InternalErr("update_task_progress failed to return FOUND result".into()))
+    .ok_or(TaskDbErr::InternalErr(
+        "update_task_progress failed to return FOUND result".into(),
+    ))
 }
 
 pub async fn update_task_retry(
@@ -243,11 +263,17 @@ pub async fn update_task_retry(
     job_id: &Uuid,
     task_id: &str,
 ) -> Result<bool, TaskDbErr> {
-    sqlx::query!("SELECT * FROM update_task_retry($1, $2) as updated", job_id, task_id,)
-        .fetch_one(pool)
-        .await?
-        .updated
-        .ok_or(TaskDbErr::InternalErr("update_task_retry failed to return FOUND result".into()))
+    sqlx::query!(
+        "SELECT * FROM update_task_retry($1, $2) as updated",
+        job_id,
+        task_id,
+    )
+    .fetch_one(pool)
+    .await?
+    .updated
+    .ok_or(TaskDbErr::InternalErr(
+        "update_task_retry failed to return FOUND result".into(),
+    ))
 }
 
 // TODO: would be nice to have limit come with a sane default?
@@ -375,11 +401,20 @@ where
 pub async fn delete_job(pool: &PgPool, job_id: &Uuid) -> Result<(), TaskDbErr> {
     let mut txn = pool.begin().await?;
 
-    sqlx::query("DELETE FROM task_deps WHERE job_id = $1").bind(job_id).execute(&mut *txn).await?;
+    sqlx::query("DELETE FROM task_deps WHERE job_id = $1")
+        .bind(job_id)
+        .execute(&mut *txn)
+        .await?;
 
-    sqlx::query("DELETE FROM tasks WHERE job_id = $1").bind(job_id).execute(&mut *txn).await?;
+    sqlx::query("DELETE FROM tasks WHERE job_id = $1")
+        .bind(job_id)
+        .execute(&mut *txn)
+        .await?;
 
-    sqlx::query("DELETE FROM jobs WHERE id = $1").bind(job_id).execute(&mut *txn).await?;
+    sqlx::query("DELETE FROM jobs WHERE id = $1")
+        .bind(job_id)
+        .execute(&mut *txn)
+        .await?;
 
     txn.commit().await?;
 
@@ -496,10 +531,22 @@ pub mod test_helpers {
 
     pub async fn cleanup(pool: &PgPool) {
         let mut tx = pool.begin().await.unwrap();
-        sqlx::query("DELETE FROM task_deps").execute(&mut *tx).await.unwrap();
-        sqlx::query("DELETE FROM tasks").execute(&mut *tx).await.unwrap();
-        sqlx::query("DELETE FROM jobs").execute(&mut *tx).await.unwrap();
-        sqlx::query("DELETE FROM streams").execute(&mut *tx).await.unwrap();
+        sqlx::query("DELETE FROM task_deps")
+            .execute(&mut *tx)
+            .await
+            .unwrap();
+        sqlx::query("DELETE FROM tasks")
+            .execute(&mut *tx)
+            .await
+            .unwrap();
+        sqlx::query("DELETE FROM jobs")
+            .execute(&mut *tx)
+            .await
+            .unwrap();
+        sqlx::query("DELETE FROM streams")
+            .execute(&mut *tx)
+            .await
+            .unwrap();
 
         tx.commit().await.unwrap();
     }
@@ -515,7 +562,9 @@ mod tests {
     #[sqlx::test()]
     async fn create_stream_test(pool: PgPool) -> sqlx::Result<()> {
         let worker_type = "executor";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, "user1").await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, "user1")
+            .await
+            .unwrap();
         let stream = sqlx::query!("SELECT * FROM streams WHERE id = $1", stream_id)
             .fetch_one(&pool)
             .await
@@ -545,7 +594,9 @@ mod tests {
         let user_id = "user1";
         let task_def = serde_json::json!({"member": "data"});
         let stream_id = create_stream(&pool, "CPU", 1, 1.0, user_id).await.unwrap();
-        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
 
         let job = get_job(&pool, &job_id).await.unwrap();
 
@@ -576,8 +627,9 @@ mod tests {
         let stream_id = create_stream(&pool, "CPU", 1, 1.0, user_id).await.unwrap();
         let task_def = serde_json::json!({"init": "test"});
         let init_timeout = 100;
-        let job_id =
-            create_job(&pool, &stream_id, &task_def, 0, init_timeout, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, init_timeout, user_id)
+            .await
+            .unwrap();
 
         let tasks = get_tasks(&pool).await.unwrap();
         assert_eq!(tasks.len(), 1);
@@ -591,9 +643,18 @@ mod tests {
         let prereqs = serde_json::json!([]);
 
         let task_timeout = 10;
-        create_task(&pool, &job_id, task_name, &stream_id, &task_def, &prereqs, 0, task_timeout)
-            .await
-            .unwrap();
+        create_task(
+            &pool,
+            &job_id,
+            task_name,
+            &stream_id,
+            &task_def,
+            &prereqs,
+            0,
+            task_timeout,
+        )
+        .await
+        .unwrap();
 
         // Technically we should call update_task here to complete the init task after emitting
         // the new sub-task, but in order to only test 1 new method per unit test I left it out.
@@ -620,16 +681,23 @@ mod tests {
     async fn request_work_test(pool: PgPool) -> sqlx::Result<()> {
         let worker_type = "CPU";
         let user_id = "user1";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
-        let _job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let _job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
 
         let work_item = request_work(&pool, worker_type).await.unwrap();
         let work_item = work_item.unwrap();
 
         assert_eq!(work_item.task_id, INIT_TASK);
         assert!(work_item.prereqs.as_array().unwrap().is_empty());
-        assert_eq!(work_item.task_def.get("init").unwrap().as_str().unwrap(), "test");
+        assert_eq!(
+            work_item.task_def.get("init").unwrap().as_str().unwrap(),
+            "test"
+        );
 
         Ok(())
     }
@@ -638,15 +706,21 @@ mod tests {
     async fn update_task(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
-        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
 
         let init = request_work(&pool, worker_type).await.unwrap().unwrap();
 
         let output_res_value = "SUCCESS";
         let output_res = serde_json::json!({"result": output_res_value});
-        assert!(update_task_done(&pool, &job_id, &init.task_id, output_res).await.unwrap());
+        assert!(update_task_done(&pool, &job_id, &init.task_id, output_res)
+            .await
+            .unwrap());
 
         let tasks = get_tasks(&pool).await.unwrap();
 
@@ -655,7 +729,13 @@ mod tests {
 
         assert!(init.error.is_none());
         assert_eq!(
-            init.output.as_ref().unwrap().get("result").unwrap().as_str().unwrap(),
+            init.output
+                .as_ref()
+                .unwrap()
+                .get("result")
+                .unwrap()
+                .as_str()
+                .unwrap(),
             output_res_value
         );
         assert_eq!(init.state, TaskState::Done);
@@ -677,18 +757,23 @@ mod tests {
     async fn update_task_retry_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
 
         let retry_max = 1;
-        let _job_id =
-            create_job(&pool, &stream_id, &task_def, retry_max, 100, user_id).await.unwrap();
+        let _job_id = create_job(&pool, &stream_id, &task_def, retry_max, 100, user_id)
+            .await
+            .unwrap();
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
 
         let retry_task_id = task.task_id.clone();
 
         // Requeue the work
-        assert!(update_task_retry(&pool, &task.job_id, &task.task_id).await.unwrap());
+        assert!(update_task_retry(&pool, &task.job_id, &task.task_id)
+            .await
+            .unwrap());
 
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
         let task_raw = get_task(&pool, &task.job_id, &task.task_id).await.unwrap();
@@ -699,19 +784,27 @@ mod tests {
         assert_eq!(task_raw.state, TaskState::Running);
         assert_eq!(task_raw.task_id, retry_task_id);
 
-        assert_eq!(get_job_unresolved(&pool, &task_raw.job_id).await.unwrap(), 1);
+        assert_eq!(
+            get_job_unresolved(&pool, &task_raw.job_id).await.unwrap(),
+            1
+        );
         let job = get_job(&pool, &task_raw.job_id).await.unwrap();
         assert_eq!(job.state.unwrap(), JobState::Running);
 
         // Attempt to retry over max_retries and fail the job
-        assert!(!update_task_retry(&pool, &task.job_id, &task.task_id).await.unwrap());
+        assert!(!update_task_retry(&pool, &task.job_id, &task.task_id)
+            .await
+            .unwrap());
 
         assert!(request_work(&pool, worker_type).await.unwrap().is_none());
         let task_raw = get_task(&pool, &task.job_id, &task.task_id).await.unwrap();
         assert_eq!(task_raw.state, TaskState::Failed);
 
         let job = get_job(&pool, &task_raw.job_id).await.unwrap();
-        assert_eq!(get_job_unresolved(&pool, &task_raw.job_id).await.unwrap(), 1);
+        assert_eq!(
+            get_job_unresolved(&pool, &task_raw.job_id).await.unwrap(),
+            1
+        );
         assert_eq!(job.error.unwrap(), "retry max hit");
         assert_eq!(job.state.unwrap(), JobState::Failed);
 
@@ -723,23 +816,37 @@ mod tests {
         // Setup
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
-        let _job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let _job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
 
         // Test that you can't update a task to done when its already done
-        assert!(update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
-            .await
-            .unwrap());
-        assert!(!update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
-            .await
-            .unwrap());
+        assert!(
+            update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
+                .await
+                .unwrap()
+        );
+        assert!(
+            !update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
+                .await
+                .unwrap()
+        );
 
         // Validate you can't fail a 'done' task
-        assert!(!update_task_failed(&pool, &task.job_id, &task.task_id, "").await.unwrap());
+        assert!(!update_task_failed(&pool, &task.job_id, &task.task_id, "")
+            .await
+            .unwrap());
         // Validate you can't update progress on a 'done' task
-        assert!(!update_task_progress(&pool, &task.job_id, &task.task_id, 0.5).await.unwrap());
+        assert!(
+            !update_task_progress(&pool, &task.job_id, &task.task_id, 0.5)
+                .await
+                .unwrap()
+        );
 
         Ok(())
     }
@@ -748,22 +855,30 @@ mod tests {
     async fn update_task_prog_failed(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
-        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
 
         let init = request_work(&pool, worker_type).await.unwrap().unwrap();
 
         let task_name = "test_task";
         let task_def = serde_json::json!({"member": "data"});
         let prereqs = serde_json::json!([]);
-        create_task(&pool, &job_id, task_name, &stream_id, &task_def, &prereqs, 0, 10)
-            .await
-            .unwrap();
+        create_task(
+            &pool, &job_id, task_name, &stream_id, &task_def, &prereqs, 0, 10,
+        )
+        .await
+        .unwrap();
 
-        assert!(update_task_done(&pool, &job_id, &init.task_id, JsonValue::default())
-            .await
-            .unwrap());
+        assert!(
+            update_task_done(&pool, &job_id, &init.task_id, JsonValue::default())
+                .await
+                .unwrap()
+        );
 
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
 
@@ -771,14 +886,22 @@ mod tests {
         assert_eq!(task.job_id, job_id);
 
         let progress = 0.5;
-        assert!(update_task_progress(&pool, &task.job_id, &task.task_id, progress).await.unwrap());
+        assert!(
+            update_task_progress(&pool, &task.job_id, &task.task_id, progress)
+                .await
+                .unwrap()
+        );
 
         let task_info = get_task(&pool, &task.job_id, &task.task_id).await.unwrap();
         assert_eq!(task_info.state, TaskState::Running);
         assert_eq!(task_info.progress, 0.5);
 
         let error_msg = "it_broke";
-        assert!(update_task_failed(&pool, &task.job_id, &task.task_id, error_msg).await.unwrap());
+        assert!(
+            update_task_failed(&pool, &task.job_id, &task.task_id, error_msg)
+                .await
+                .unwrap()
+        );
 
         // Check the main task failed correctly
         let task_info = get_task(&pool, &task.job_id, &task.task_id).await.unwrap();
@@ -803,39 +926,65 @@ mod tests {
     async fn prereqs(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
 
         // Start and grab init task
-        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
         let init = request_work(&pool, worker_type).await.unwrap().unwrap();
 
         // Place two segments and a join task into the task queue
         let task_1_name = "segment_1";
         let task_def = JsonValue::default();
         let prereqs = serde_json::json!([]);
-        create_task(&pool, &job_id, task_1_name, &stream_id, &task_def, &prereqs, 0, 10)
-            .await
-            .unwrap();
+        create_task(
+            &pool,
+            &job_id,
+            task_1_name,
+            &stream_id,
+            &task_def,
+            &prereqs,
+            0,
+            10,
+        )
+        .await
+        .unwrap();
 
         let task_2_name = "segment_2";
         let task_def = JsonValue::default();
         let prereqs = serde_json::json!([]);
-        create_task(&pool, &job_id, task_2_name, &stream_id, &task_def, &prereqs, 0, 10)
-            .await
-            .unwrap();
+        create_task(
+            &pool,
+            &job_id,
+            task_2_name,
+            &stream_id,
+            &task_def,
+            &prereqs,
+            0,
+            10,
+        )
+        .await
+        .unwrap();
 
         let join_name = "join_3";
         let task_def = JsonValue::default();
         let prereqs = serde_json::json!([task_1_name, task_2_name]);
-        create_task(&pool, &job_id, join_name, &stream_id, &task_def, &prereqs, 0, 10)
-            .await
-            .unwrap();
+        create_task(
+            &pool, &job_id, join_name, &stream_id, &task_def, &prereqs, 0, 10,
+        )
+        .await
+        .unwrap();
 
         // Close the init task
-        assert!(update_task_done(&pool, &job_id, &init.task_id, JsonValue::default())
-            .await
-            .unwrap());
+        assert!(
+            update_task_done(&pool, &job_id, &init.task_id, JsonValue::default())
+                .await
+                .unwrap()
+        );
 
         // Validate the pending / waiting on fields of the join
         let join_task = get_task(&pool, &job_id, join_name).await.unwrap();
@@ -843,12 +992,20 @@ mod tests {
         assert_eq!(join_task.state, TaskState::Pending);
 
         // Close the segment tasks
-        assert!(update_task_done(&pool, &job_id, task_1_name, JsonValue::default()).await.unwrap());
+        assert!(
+            update_task_done(&pool, &job_id, task_1_name, JsonValue::default())
+                .await
+                .unwrap()
+        );
         let join_task = get_task(&pool, &job_id, join_name).await.unwrap();
         assert_eq!(join_task.waiting_on, 1);
         assert_eq!(join_task.state, TaskState::Pending);
 
-        assert!(update_task_done(&pool, &job_id, task_2_name, JsonValue::default()).await.unwrap());
+        assert!(
+            update_task_done(&pool, &job_id, task_2_name, JsonValue::default())
+                .await
+                .unwrap()
+        );
 
         // Validate that the task is now ready
         let join_task = get_task(&pool, &job_id, join_name).await.unwrap();
@@ -862,27 +1019,44 @@ mod tests {
     async fn prereq_waiting_on(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
 
         // Start and grab init task
-        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
-
-        let task_def = JsonValue::default();
-        let prereqs = serde_json::json!(["init"]);
-        create_task(&pool, &job_id, "task_1", &stream_id, &task_def, &prereqs, 0, 10)
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
             .await
             .unwrap();
 
+        let task_def = JsonValue::default();
+        let prereqs = serde_json::json!(["init"]);
+        create_task(
+            &pool, &job_id, "task_1", &stream_id, &task_def, &prereqs, 0, 10,
+        )
+        .await
+        .unwrap();
+
         let task_def = serde_json::json!({"init": "test"});
-        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
 
         let final_task_id = "task_2";
         let task_def = JsonValue::default();
         let prereqs = serde_json::json!(["init"]);
-        create_task(&pool, &job_id, final_task_id, &stream_id, &task_def, &prereqs, 0, 10)
-            .await
-            .unwrap();
+        create_task(
+            &pool,
+            &job_id,
+            final_task_id,
+            &stream_id,
+            &task_def,
+            &prereqs,
+            0,
+            10,
+        )
+        .await
+        .unwrap();
         let init_task = get_task(&pool, &job_id, final_task_id).await.unwrap();
         assert_eq!(init_task.waiting_on, 1);
 
@@ -893,13 +1067,19 @@ mod tests {
     async fn stream_reservations(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id_0 = create_stream(&pool, worker_type, 0, 1.0, user_id).await.unwrap();
-        let job_id_0 =
-            create_job(&pool, &stream_id_0, &JsonValue::default(), 0, 100, user_id).await.unwrap();
+        let stream_id_0 = create_stream(&pool, worker_type, 0, 1.0, user_id)
+            .await
+            .unwrap();
+        let job_id_0 = create_job(&pool, &stream_id_0, &JsonValue::default(), 0, 100, user_id)
+            .await
+            .unwrap();
 
-        let stream_id_1 = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
-        let job_id_1 =
-            create_job(&pool, &stream_id_1, &JsonValue::default(), 0, 100, user_id).await.unwrap();
+        let stream_id_1 = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
+        let job_id_1 = create_job(&pool, &stream_id_1, &JsonValue::default(), 0, 100, user_id)
+            .await
+            .unwrap();
 
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
         assert_eq!(task.job_id, job_id_1);
@@ -914,9 +1094,12 @@ mod tests {
         let user_id = "user1";
         // Creates two streams.
         let worker_type = "CPU";
-        let stream_id_0 = create_stream(&pool, worker_type, 0, 1.0, user_id).await.unwrap();
-        let job_id_0 =
-            create_job(&pool, &stream_id_0, &JsonValue::default(), 0, 100, user_id).await.unwrap();
+        let stream_id_0 = create_stream(&pool, worker_type, 0, 1.0, user_id)
+            .await
+            .unwrap();
+        let job_id_0 = create_job(&pool, &stream_id_0, &JsonValue::default(), 0, 100, user_id)
+            .await
+            .unwrap();
 
         // populates both streams with two tasks.
         create_task(
@@ -935,9 +1118,12 @@ mod tests {
         // and into best effort.
         let _task = request_work(&pool, worker_type).await.unwrap().unwrap();
 
-        let stream_id_1 = create_stream(&pool, worker_type, 0, 1.1, user_id).await.unwrap();
-        let job_id_1 =
-            create_job(&pool, &stream_id_1, &JsonValue::default(), 0, 100, user_id).await.unwrap();
+        let stream_id_1 = create_stream(&pool, worker_type, 0, 1.1, user_id)
+            .await
+            .unwrap();
+        let job_id_1 = create_job(&pool, &stream_id_1, &JsonValue::default(), 0, 100, user_id)
+            .await
+            .unwrap();
         create_task(
             &pool,
             &job_id_1,
@@ -966,15 +1152,21 @@ mod tests {
         let user_id = "user1";
         let worker_type = "CPU";
         // Create a best effort stream
-        let stream_id_0 = create_stream(&pool, worker_type, 0, 1.0, user_id).await.unwrap();
-        let job_id_0 =
-            create_job(&pool, &stream_id_0, &JsonValue::default(), 0, 100, user_id).await.unwrap();
+        let stream_id_0 = create_stream(&pool, worker_type, 0, 1.0, user_id)
+            .await
+            .unwrap();
+        let job_id_0 = create_job(&pool, &stream_id_0, &JsonValue::default(), 0, 100, user_id)
+            .await
+            .unwrap();
 
         // Create a 2 reservation stream
         let worker_type = "CPU";
-        let stream_id_2 = create_stream(&pool, worker_type, 2, 1.0, user_id).await.unwrap();
-        let job_id_2 =
-            create_job(&pool, &stream_id_2, &JsonValue::default(), 0, 100, user_id).await.unwrap();
+        let stream_id_2 = create_stream(&pool, worker_type, 2, 1.0, user_id)
+            .await
+            .unwrap();
+        let job_id_2 = create_job(&pool, &stream_id_2, &JsonValue::default(), 0, 100, user_id)
+            .await
+            .unwrap();
 
         // Populate the reservation with 2 tasks
         let task_name = "task2";
@@ -1004,23 +1196,29 @@ mod tests {
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
         assert_eq!(task.job_id, job_id_2);
         assert_eq!(task.task_id, INIT_TASK);
-        assert!(update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
-            .await
-            .unwrap());
+        assert!(
+            update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
+                .await
+                .unwrap()
+        );
 
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
         assert_eq!(task.job_id, job_id_2);
         assert_eq!(task.task_id, task_name);
-        assert!(update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
-            .await
-            .unwrap());
+        assert!(
+            update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
+                .await
+                .unwrap()
+        );
 
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
         assert_eq!(task.job_id, job_id_0);
         assert_eq!(task.task_id, INIT_TASK);
-        assert!(update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
-            .await
-            .unwrap());
+        assert!(
+            update_task_done(&pool, &task.job_id, &task.task_id, JsonValue::default())
+                .await
+                .unwrap()
+        );
 
         assert!(request_work(&pool, worker_type).await.unwrap().is_none());
 
@@ -1031,9 +1229,13 @@ mod tests {
     async fn async_req_work(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
-        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 0, 100, user_id)
+            .await
+            .unwrap();
 
         // Create two workers pooling for work
         let mut tasks = tokio::task::JoinSet::new();
@@ -1081,17 +1283,22 @@ mod tests {
     async fn requeue_timeout_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
         let init_timeout = 1;
-        let job_id =
-            create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
 
         // Start the task
         let _task = request_work(&pool, worker_type).await.unwrap().unwrap();
 
         // wait out the timeout
-        std::thread::sleep(std::time::Duration::from_millis((init_timeout * 1000 + 100) as u64));
+        std::thread::sleep(std::time::Duration::from_millis(
+            (init_timeout * 1000 + 100) as u64,
+        ));
 
         // requeue it
         let timed_out_count = requeue_tasks(&pool, 100).await.unwrap();
@@ -1109,11 +1316,14 @@ mod tests {
     async fn get_job_state_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
         let init_timeout = 1;
-        let job_id =
-            create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
 
         let state = get_job_state(&pool, &job_id, user_id).await.unwrap();
         assert_eq!(state, JobState::Running);
@@ -1125,19 +1335,27 @@ mod tests {
     async fn job_count_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
         let init_timeout = 1;
-        create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
 
         let job_count = get_concurrent_jobs(&pool, user_id).await.unwrap();
         assert_eq!(job_count, 1);
 
-        create_job(&pool, &stream_id, &task_def, 1, init_timeout, "user2").await.unwrap();
+        create_job(&pool, &stream_id, &task_def, 1, init_timeout, "user2")
+            .await
+            .unwrap();
         let job_count = get_concurrent_jobs(&pool, user_id).await.unwrap();
         assert_eq!(job_count, 1);
 
-        create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
         let job_count = get_concurrent_jobs(&pool, user_id).await.unwrap();
         assert_eq!(job_count, 2);
 
@@ -1149,7 +1367,10 @@ mod tests {
         let job_id = Uuid::max();
         let res = get_job_state(&pool, &job_id, "test").await;
 
-        assert!(matches!(res, Err(TaskDbErr::SqlError(sqlx::Error::RowNotFound))));
+        assert!(matches!(
+            res,
+            Err(TaskDbErr::SqlError(sqlx::Error::RowNotFound))
+        ));
 
         Ok(())
     }
@@ -1158,9 +1379,14 @@ mod tests {
     async fn get_stream_id_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
 
-        let id = get_stream(&pool, user_id, worker_type).await.unwrap().unwrap();
+        let id = get_stream(&pool, user_id, worker_type)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(stream_id, id);
 
         Ok(())
@@ -1170,15 +1396,19 @@ mod tests {
     async fn get_job_time_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
         let init_timeout = 1;
-        let job_id =
-            create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
 
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
-        let res =
-            update_task_done(&pool, &job_id, &task.task_id, serde_json::Value::Null).await.unwrap();
+        let res = update_task_done(&pool, &job_id, &task.task_id, serde_json::Value::Null)
+            .await
+            .unwrap();
 
         assert!(res);
 
@@ -1193,23 +1423,32 @@ mod tests {
     async fn get_job_failure_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
         let init_timeout = 1;
-        let job_id =
-            create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
 
         let test_err = "TEST";
-        update_task_failed(&pool, &job_id, INIT_TASK, test_err).await.unwrap();
+        update_task_failed(&pool, &job_id, INIT_TASK, test_err)
+            .await
+            .unwrap();
 
         let error = get_job_failure(&pool, &job_id).await.unwrap();
         assert_eq!(error, test_err);
 
-        let job_id =
-            create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
 
         let res = get_job_failure(&pool, &job_id).await;
-        assert!(matches!(res, Err(TaskDbErr::SqlError(sqlx::Error::RowNotFound))));
+        assert!(matches!(
+            res,
+            Err(TaskDbErr::SqlError(sqlx::Error::RowNotFound))
+        ));
 
         Ok(())
     }
@@ -1218,14 +1457,19 @@ mod tests {
     async fn get_task_output_test(pool: PgPool) -> sqlx::Result<()> {
         let user_id = "user1";
         let worker_type = "CPU";
-        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id).await.unwrap();
+        let stream_id = create_stream(&pool, worker_type, 1, 1.0, user_id)
+            .await
+            .unwrap();
         let task_def = serde_json::json!({"init": "test"});
         let init_timeout = 1;
-        let job_id =
-            create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id).await.unwrap();
+        let job_id = create_job(&pool, &stream_id, &task_def, 1, init_timeout, user_id)
+            .await
+            .unwrap();
 
         let output = serde_json::json!({"result": "done"});
-        update_task_done(&pool, &job_id, INIT_TASK, output).await.unwrap();
+        update_task_done(&pool, &job_id, INIT_TASK, output)
+            .await
+            .unwrap();
 
         let task_output: serde_json::Value =
             get_task_output(&pool, &job_id, INIT_TASK).await.unwrap();
@@ -1239,10 +1483,16 @@ mod tests {
 #[sqlx::test()]
 async fn delete_job_test(pool: PgPool) -> sqlx::Result<()> {
     let stream_id = create_stream(&pool, "CPU", 1, 1.0, "user1").await.unwrap();
-    let job_id =
-        create_job(&pool, &stream_id, &serde_json::json!({"init": "test"}), 0, 100, "user1")
-            .await
-            .unwrap();
+    let job_id = create_job(
+        &pool,
+        &stream_id,
+        &serde_json::json!({"init": "test"}),
+        0,
+        100,
+        "user1",
+    )
+    .await
+    .unwrap();
 
     create_task(
         &pool,

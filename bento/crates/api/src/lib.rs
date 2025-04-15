@@ -41,7 +41,10 @@ pub struct ErrMsg {
 }
 impl ErrMsg {
     pub fn new(r#type: &str, msg: &str) -> Self {
-        Self { r#type: r#type.into(), msg: msg.into() }
+        Self {
+            r#type: r#type.into(),
+            msg: msg.into(),
+        }
     }
 }
 impl std::fmt::Display for ErrMsg {
@@ -146,7 +149,14 @@ impl IntoResponse for AppError {
             _ => tracing::error!("api error, code {code}: {self:?}"),
         }
 
-        (code, Json(ErrMsg { r#type: self.type_str(), msg: self.to_string() })).into_response()
+        (
+            code,
+            Json(ErrMsg {
+                r#type: self.type_str(),
+                msg: self.to_string(),
+            }),
+        )
+            .into_response()
     }
 }
 
@@ -255,7 +265,9 @@ async fn image_upload(
         return Err(AppError::ImgAlreadyExists(image_id));
     }
 
-    Ok(Json(ImgUploadRes { url: format!("http://{hostname}/images/upload/{image_id}") }))
+    Ok(Json(ImgUploadRes {
+        url: format!("http://{hostname}/images/upload/{image_id}"),
+    }))
 }
 
 async fn image_upload_put(
@@ -273,11 +285,13 @@ async fn image_upload_put(
         return Err(AppError::ImgAlreadyExists(image_id));
     }
 
-    let body_bytes =
-        to_bytes(body, MAX_UPLOAD_SIZE).await.context("Failed to convert body to bytes")?;
+    let body_bytes = to_bytes(body, MAX_UPLOAD_SIZE)
+        .await
+        .context("Failed to convert body to bytes")?;
 
-    let comp_img_id =
-        compute_image_id(&body_bytes).context("Failed to compute image id")?.to_string();
+    let comp_img_id = compute_image_id(&body_bytes)
+        .context("Failed to compute image id")?
+        .to_string();
     if comp_img_id != image_id {
         return Err(AppError::ImageIdMismatch(image_id, comp_img_id));
     }
@@ -331,8 +345,9 @@ async fn input_upload_put(
     }
 
     // TODO: Support streaming uploads
-    let body_bytes =
-        to_bytes(body, MAX_UPLOAD_SIZE).await.context("Failed to convert body to bytes")?;
+    let body_bytes = to_bytes(body, MAX_UPLOAD_SIZE)
+        .await
+        .context("Failed to convert body to bytes")?;
     state
         .s3_client
         .write_buf_to_s3(&new_input_key, body_bytes.to_vec())
@@ -381,8 +396,9 @@ async fn receipt_upload_put(
     }
 
     // TODO: Support streaming uploads
-    let body_bytes =
-        to_bytes(body, MAX_UPLOAD_SIZE).await.context("Failed to convert body to bytes")?;
+    let body_bytes = to_bytes(body, MAX_UPLOAD_SIZE)
+        .await
+        .context("Failed to convert body to bytes")?;
     state
         .s3_client
         .write_buf_to_s3(&new_receipt_key, body_bytes.to_vec())
@@ -433,7 +449,9 @@ async fn prove_stark(
     .await
     .context("Failed to create exec / init task")?;
 
-    Ok(Json(CreateSessRes { uuid: job_id.to_string() }))
+    Ok(Json(CreateSessRes {
+        uuid: job_id.to_string(),
+    }))
 }
 
 const STARK_STATUS_PATH: &str = "/sessions/status/:job_id";
@@ -524,7 +542,9 @@ async fn receipt_download(
         return Err(AppError::ReceiptMissing(job_id.to_string()));
     }
 
-    Ok(Json(ReceiptDownload { url: format!("http://{hostname}/receipts/stark/receipt/{job_id}") }))
+    Ok(Json(ReceiptDownload {
+        url: format!("http://{hostname}/receipts/stark/receipt/{job_id}"),
+    }))
 }
 
 const GET_JOURNAL_PATH: &str = "/sessions/exec_only_journal/:job_id";
@@ -587,7 +607,9 @@ async fn prove_groth16(
     .await
     .context("Failed to create exec / init task")?;
 
-    Ok(Json(CreateSessRes { uuid: job_id.to_string() }))
+    Ok(Json(CreateSessRes {
+        uuid: job_id.to_string(),
+    }))
 }
 
 const SNARK_STATUS_PATH: &str = "/snark/status/:job_id";
@@ -602,12 +624,19 @@ async fn groth16_status(
         .context("Failed to get job state")?;
     let (error_msg, output) = match job_state {
         JobState::Running => (None, None),
-        JobState::Done => {
-            (None, Some(format!("http://{hostname}/receipts/groth16/receipt/{job_id}")))
-        }
+        JobState::Done => (
+            None,
+            Some(format!(
+                "http://{hostname}/receipts/groth16/receipt/{job_id}"
+            )),
+        ),
         JobState::Failed => (None, None), // TODO error message
     };
-    Ok(Json(SnarkStatusRes { status: job_state.to_string(), error_msg, output }))
+    Ok(Json(SnarkStatusRes {
+        status: job_state.to_string(),
+        error_msg,
+        output,
+    }))
 }
 
 const GET_GROTH16_PATH: &str = "/receipts/groth16/receipt/:job_id";
@@ -654,7 +683,9 @@ pub fn app(state: Arc<AppState>) -> Router {
 }
 
 pub async fn run(args: &Args) -> Result<()> {
-    let app_state = AppState::new(args).await.context("Failed to initialize AppState")?;
+    let app_state = AppState::new(args)
+        .await
+        .context("Failed to initialize AppState")?;
     let listener = tokio::net::TcpListener::bind(&args.bind_addr)
         .await
         .context("Failed to bind a TCP listener")?;
@@ -670,7 +701,9 @@ pub async fn run(args: &Args) -> Result<()> {
 
 async fn shutdown_signal() {
     let ctrl_c = async {
-        tokio::signal::ctrl_c().await.expect("failed to install Ctrl+C handler");
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
     };
 
     #[cfg(unix)]
