@@ -9,24 +9,18 @@ FROM builder AS rust-builder
 ARG S3_CACHE_PREFIX
 
 WORKDIR /src/
-COPY . ./bento/
-
-WORKDIR /src/bento/
-
-COPY ./dockerfiles/sccache-setup.sh .
-RUN ./sccache-setup.sh "x86_64-unknown-linux-musl" "v0.8.2"
-COPY ./dockerfiles/sccache-config.sh .
+COPY . .
+RUN bento/dockerfiles/sccache-setup.sh "x86_64-unknown-linux-musl" "v0.8.2"
 SHELL ["/bin/bash", "-c"]
 
 # Prevent sccache collision in compose-builds
 ENV SCCACHE_SERVER_PORT=4230
 
-RUN \
-    --mount=type=secret,id=ci_cache_creds,target=/root/.aws/credentials \
+RUN --mount=type=secret,id=ci_cache_creds,target=/root/.aws/credentials \
     --mount=type=cache,target=/root/.cache/sccache/,id=bento_api_sccache \
-    source ./sccache-config.sh ${S3_CACHE_PREFIX} && \
-    cargo build --release -p api --bin rest_api && \
-    cp /src/bento/target/release/rest_api /src/rest_api && \
+    source bento/dockerfiles/sccache-config.sh ${S3_CACHE_PREFIX} && \
+    cargo build --manifest-path bento/Cargo.toml --release -p api --bin rest_api && \
+    cp bento/target/release/rest_api /src/rest_api && \
     sccache --show-stats
 
 FROM rust:1.85.0-bookworm AS runtime

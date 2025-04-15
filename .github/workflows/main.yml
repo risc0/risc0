@@ -481,7 +481,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-      - run: cargo doc --no-deps --manifest-path bento/Cargo.toml
+      - run: cargo doc --no-deps --manifest-path bento/Cargo.toml --workspace
       - run: sccache --show-stats
 
   # Run as a separate job because we need to install a different set of tools.
@@ -780,12 +780,11 @@ jobs:
           echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> bento/dockerfiles/ci-cache-creds.txt && \
           echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> bento/dockerfiles/ci-cache-creds.txt && \
           echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> bento/dockerfiles/ci-cache-creds.txt
-      - uses: docker/setup-docker-action@v4.3.0
       - uses: docker/login-action@v3
         if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         with:
           username: ${{ secrets.DOCKERHUB_CI_USER }}
           password: ${{ secrets.DOCKERHUB_CI_PAT }}
       - uses: docker/setup-buildx-action@v3
-      - run: docker compose --env-file bento/sample.env -f bento/compose.yml up -d
+      - run: COMPOSE_BAKE=true docker compose --env-file bento/dockerfiles/sample.env -f compose.yml up -d
       - run: RUST_LOG=info cargo run --manifest-path bento/Cargo.toml --bin bento_cli -- -c 32 -s

@@ -26,33 +26,24 @@ FROM rust-builder AS builder
 ARG NVCC_APPEND_FLAGS=""
 ARG CUDA_OPT_LEVEL=1
 ARG S3_CACHE_PREFIX
-
-WORKDIR /src/
-COPY . ./bento/
-
-WORKDIR /src/bento/
-
 ENV NVCC_APPEND_FLAGS=${NVCC_APPEND_FLAGS}
 ENV RISC0_CUDA_OPT=${CUDA_OPT_LEVEL}
-
-# Prevent sccache collision in compose-builds
 ENV SCCACHE_SERVER_PORT=4227
 # ENV SCCACHE_LOG=trace
 
-COPY ./dockerfiles/sccache-setup.sh .
-RUN ./sccache-setup.sh "x86_64-unknown-linux-musl" "v0.8.2"
-COPY ./dockerfiles/sccache-config.sh .
+WORKDIR /src/
+COPY . .
+RUN bento/dockerfiles/sccache-setup.sh "x86_64-unknown-linux-musl" "v0.8.2"
 SHELL ["/bin/bash", "-c"]
 
 # Consider using if building and running on the same CPU
 # ENV RUSTFLAGS="-C target-cpu=native"
 
-RUN \
-    --mount=type=secret,id=ci_cache_creds,target=/root/.aws/credentials \
+RUN --mount=type=secret,id=ci_cache_creds,target=/root/.aws/credentials \
     --mount=type=cache,target=/root/.cache/sccache/,id=bento_agent_sc \
-    source ./sccache-config.sh ${S3_CACHE_PREFIX} && \
-    cargo build --release -p workflow -F cuda --bin agent && \
-    cp /src/bento/target/release/agent /src/agent && \
+    source bento/dockerfiles/sccache-config.sh ${S3_CACHE_PREFIX} && \
+    cargo build --manifest-path bento/Cargo.toml --release -p workflow -F cuda --bin agent && \
+    cp bento/target/release/agent /src/agent && \
     sccache --show-stats
 
 # Use risczero/risc0-groth16-prover:v2025-01-31.1 as the basis for the prover and witness generator
