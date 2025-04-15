@@ -57,6 +57,7 @@ jobs:
               - Cargo.lock
               - rzup/**
             bento:
+              - *base
               - bonsai/sdk/**
               - risc0/**
               - bento/**
@@ -110,6 +111,8 @@ jobs:
   main-status-check:
     if: always()
     needs:
+      - bento-run
+      - bento-test
       - browser
       - check
       - check-external
@@ -697,3 +700,95 @@ jobs:
         working-directory: web
       - run: bun run test
         working-directory: web
+
+  bento-test:
+    if: needs.changes.outputs.bento == 'true'
+    needs: changes
+    runs-on: [ self-hosted, prod, Linux, X64, cpu ]
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: password
+    env:
+      RISC0_BUILD_LOCKED: 1
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUST_BACKTRACE: full
+      RISC0_DEV_MODE: true
+      DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-cpu
+      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+        with:
+          crate: cargo-binstall
+          version: "1.10.16"
+      - run: cargo binstall cargo-nextest
+      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - name: Install sqlx-cli
+        uses: baptiste0928/cargo-install@904927dbe77864e0f2281519fe9d5bd097a220b3
+        with:
+          crate: sqlx-cli
+          version: '=0.8.2'
+          locked: true
+          args: --no-default-features
+          features: postgres
+      - run: sqlx migrate run --source bento/crates/taskdb/migrations/
+      - run: cargo test --manifest-path bento/Cargo.toml --locked --workspace --all-targets -- --ignored
+      - run: sccache --show-stats
+
+  bento-run:
+    if: needs.changes.outputs.bento == 'true'
+    needs: changes
+    runs-on: [ self-hosted, prod, Linux, X64, docker, nvidia_rtx_a5000 ]
+    env:
+      FEATURE: cuda
+      RISC0_BUILD_LOCKED: 1
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUST_BACKTRACE: full
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cuda
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-cuda
+      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+        with:
+          crate: cargo-binstall
+          version: "1.10.16"
+      - name: Install cargo-nextest
+        run: cargo binstall cargo-nextest
+      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo build --release -p risc0-r0vm -F $FEATURE
+      - uses: aws-actions/configure-aws-credentials@v4
+        id: aws-creds
+        with:
+          aws-region: 'us-west-2'
+          role-to-assume: 'arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_shared_access'
+          output-credentials: true
+      - name: create ci creds file
+        run: |
+          echo "[default]" > ./dockerfiles/ci-cache-creds.txt
+          echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> ./dockerfiles/ci-cache-creds.txt && \
+          echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> ./dockerfiles/ci-cache-creds.txt && \
+          echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> ./dockerfiles/ci-cache-creds.txt
+      - uses: docker/login-action@v3
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+        with:
+          username: ${{ secrets.DOCKERHUB_CI_USER }}
+          password: ${{ secrets.DOCKERHUB_CI_PAT }}
+      - uses: docker/setup-buildx-action@v3
+      - run: docker compose --env-file bento/sample.env -f bento/compose.yml up -d
+      - run: RUST_LOG=info cargo run --manifest-path bento/Cargo.toml --bin bento_cli -- -c 32 -s
