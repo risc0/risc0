@@ -744,7 +744,7 @@ jobs:
   bento-run:
     if: needs.changes.outputs.bento == 'true'
     needs: changes
-    runs-on: [ self-hosted, prod, Linux, X64, docker, nvidia_rtx_a5000 ]
+    runs-on: [ self-hosted, prod, Linux, X64, nvidia_rtx_a5000 ]
     env:
       FEATURE: cuda
       RISC0_BUILD_LOCKED: 1
@@ -776,10 +776,11 @@ jobs:
           output-credentials: true
       - name: create ci creds file
         run: |
-          echo "[default]" > ./dockerfiles/ci-cache-creds.txt
-          echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> ./dockerfiles/ci-cache-creds.txt && \
-          echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> ./dockerfiles/ci-cache-creds.txt && \
-          echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> ./dockerfiles/ci-cache-creds.txt
+          echo "[default]" > bento/dockerfiles/ci-cache-creds.txt
+          echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> bento/dockerfiles/ci-cache-creds.txt && \
+          echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> bento/dockerfiles/ci-cache-creds.txt && \
+          echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> bento/dockerfiles/ci-cache-creds.txt
+      - uses: docker/setup-docker-action@v4.3.0
       - uses: docker/login-action@v3
         if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         with:
