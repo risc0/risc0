@@ -234,11 +234,11 @@ impl VerifyingKeyJson {
 #[derive(Clone)]
 pub struct Vk {
     // TODO: better pattern for access?
-    pub(crate) alpha_g1: crate::LocalG1,
-    pub(crate) beta_g2: crate::LocalG2,
-    pub(crate) gamma_g2: crate::LocalG2,
-    pub(crate) delta_g2: crate::LocalG2,
-    pub(crate) gamma_abc_g1: Vec<crate::LocalG1>,
+    pub(crate) alpha_g1: substrate_bn::G1,
+    pub(crate) beta_g2: substrate_bn::G2,
+    pub(crate) gamma_g2: substrate_bn::G2,
+    pub(crate) delta_g2: substrate_bn::G2,
+    pub(crate) gamma_abc_g1: Vec<substrate_bn::G1>,
 }
 
 /// A prepared groth16 verification key (TODO)
@@ -249,8 +249,8 @@ pub struct Pvk {
     // TODO: better pattern for access?
     pub(crate) vk: Vk,
     pub(crate) alpha_g1_beta_g2: substrate_bn::Gt,
-    pub(crate) gamma_g2_neg_pc: crate::LocalG2,
-    pub(crate) delta_g2_neg_pc: crate::LocalG2,
+    pub(crate) gamma_g2_neg_pc: substrate_bn::G2,
+    pub(crate) delta_g2_neg_pc: substrate_bn::G2,
 }
 
 // TODO: Or is it TryFrom?

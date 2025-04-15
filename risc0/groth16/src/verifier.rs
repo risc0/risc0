@@ -160,20 +160,11 @@ impl Verifier {
 
         let plain_result = substrate_bn::miller_loop_batch(
             // TODO: more clones that are probably unnecessary...
-            // TODO: Use this one
             &[
-                (crate::LocalG2::from_be_bytes(&self.proof.b)?.into(), crate::LocalG1::from_be_bytes(&self.proof.a)?.into()),
+                (crate::g2_from_bytes(&self.proof.b)?, crate::g1_from_bytes(&self.proof.a)?),
                 (self.pvk.gamma_g2_neg_pc.clone().into(), self.prepared_inputs),
-                (self.pvk.delta_g2_neg_pc.clone().into(), crate::LocalG1::from_be_bytes(&self.proof.c)?.into()),
+                (self.pvk.delta_g2_neg_pc.clone().into(), crate::g1_from_bytes(&self.proof.c)?),
             ]
-
-            // TODO: This is deliberately broken! Just testing!
-            // &[
-            //     (crate::LocalG2::from_be_bytes(&self.proof.b)?.into(), crate::LocalG1::from_be_bytes(&self.proof.c)?.into()),
-            //     (self.pvk.gamma_g2_neg_pc.clone().into(), self.prepared_inputs),
-            //     (self.pvk.delta_g2_neg_pc.clone().into(), crate::LocalG1::from_be_bytes(&self.proof.a)?.into()),
-            // ]
-            // /TODO end of deliberate break
         ).expect("TODO better error handling");
         let exponentiated = plain_result.final_exponentiation().ok_or_else(||anyhow!("Unexpected identity in final exponentiation step of verify"))?;
         if exponentiated == self.pvk.alpha_g1_beta_g2 {
@@ -226,6 +217,7 @@ impl Digestible for Fr {
 #[derive(Clone)]
 pub struct VerifyingKey(pub(crate) Vk);
 
+// TODO: This was the arkworks approach:
 // /// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
 // fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
 //     let mut buffer = Vec::<u8>::new();
@@ -237,12 +229,12 @@ pub struct VerifyingKey(pub(crate) Vk);
 //     *S::hash_bytes(&buffer)
 // }
 
-// TODO: As with other uses of LocalG1/LocalG2, we should probably deprecate those and clean this up
-fn hash_g1_point<S: Sha256>(p: &crate::LocalG1) -> Digest {
+fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Digest {
     let mut buffer = [0u8; 64];
-    let pt = p.0.expect("Verifying key contains point at infinity and hence is invalid");
-    pt.y().to_big_endian(&mut buffer[0..32]).expect("output slice length is 32");
-    pt.x().to_big_endian(&mut buffer[32..64]).expect("output slice length is 32");
+    // TODO: Dereference is awkward, review architecture
+    let pt = substrate_bn::AffineG1::from_jacobian(*p).expect("Verifying key contains point at infinity and hence is invalid");
+    pt.y().to_big_endian(&mut buffer[0..32]).expect("output slice length must be 32");
+    pt.x().to_big_endian(&mut buffer[32..64]).expect("output slice length must be 32");
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
@@ -250,13 +242,13 @@ fn hash_g1_point<S: Sha256>(p: &crate::LocalG1) -> Digest {
     *S::hash_bytes(&buffer)
 }
 
-fn hash_g2_point<S: Sha256>(p: &crate::LocalG2) -> Digest {
+fn hash_g2_point<S: Sha256>(p: &substrate_bn::G2) -> Digest {
     let mut buffer = [0u8; 128];
-    let pt = p.0.expect("Verifying key contains point at infinity and hence is invalid");
-    pt.y().real().to_big_endian(&mut buffer[0..32]).expect("output slice length is 32");
-    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).expect("output slice length is 32");
-    pt.x().real().to_big_endian(&mut buffer[64..96]).expect("output slice length is 32");
-    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).expect("output slice length is 32");
+    let pt = substrate_bn::AffineG2::from_jacobian(*p).expect("Verifying key contains point at infinity and hence is invalid");
+    pt.y().real().to_big_endian(&mut buffer[0..32]).expect("output slice length must be 32");
+    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).expect("output slice length must be 32");
+    pt.x().real().to_big_endian(&mut buffer[64..96]).expect("output slice length must be 32");
+    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).expect("output slice length must be 32");
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
@@ -363,26 +355,26 @@ pub fn verifying_key() -> VerifyingKey {
 
 // TODO: Naming
 fn try_vk() -> Result<Vk, Error> {
-    let alpha_g1 = crate::LocalG1::from_be_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
-    let beta_g2 = crate::LocalG2::from_be_bytes(&[
+    let alpha_g1 = crate::g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+    let beta_g2 = crate::g2_from_bytes(&[
         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
     ])?;
-    let gamma_g2 = crate::LocalG2::from_be_bytes(&[
+    let gamma_g2 = crate::g2_from_bytes(&[
         vec![from_u256(GAMMA_X1)?, from_u256(GAMMA_X2)?],
         vec![from_u256(GAMMA_Y1)?, from_u256(GAMMA_Y2)?],
     ])?;
-    let delta_g2 = crate::LocalG2::from_be_bytes(&[
+    let delta_g2 = crate::g2_from_bytes(&[
         vec![from_u256(DELTA_X1)?, from_u256(DELTA_X2)?],
         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
     ])?;
 
-    let ic0 = crate::LocalG1::from_be_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
-    let ic1 = crate::LocalG1::from_be_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
-    let ic2 = crate::LocalG1::from_be_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
-    let ic3 = crate::LocalG1::from_be_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
-    let ic4 = crate::LocalG1::from_be_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
-    let ic5 = crate::LocalG1::from_be_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
+    let ic0 = crate::g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+    let ic1 = crate::g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+    let ic2 = crate::g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+    let ic3 = crate::g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+    let ic4 = crate::g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+    let ic5 = crate::g1_from_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
     let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4, ic5];
 
     Ok(Vk {
