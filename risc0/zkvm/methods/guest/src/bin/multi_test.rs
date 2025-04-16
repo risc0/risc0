@@ -597,7 +597,7 @@ fn main() {
             let actual: &[u32] = &mut [0u32; 8];
             let is_elem = 0x80000000;
 
-            unsafe {sys_poseidon2_compress(state.as_ptr() as *const [u32; 8], input.as_ptr() as *const [u32; 8], actual.as_ptr() as *mut [u32; 8], is_elem | 2);}
+            unsafe {sys_poseidon2_compress(state.as_ptr() as *const [u32; 8], input.as_ptr() as *const [u32; 8], actual.as_ptr() as *mut [u32; 8], is_elem | 1);}
             assert_eq!(expected, actual);
         }
     }
