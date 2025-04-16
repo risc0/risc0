@@ -29,7 +29,7 @@ use crate::{
 
 use super::{
     bigint,
-    pager::{compute_partial_image, PageTraceEvent, PagedMemory},
+    pager::{PageTraceEvent, PagedMemory},
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
@@ -217,11 +217,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     );
                     Risc0Machine::suspend(self)?;
 
-                    let (pre_digest, post_digest) = self.pager.flush();
-                    let partial_img = self
-                        .pager
-                        .image
-                        .to_partial_image(self.pager.page_indexes())?;
+                    let (pre_digest, post_digest) = self.pager.commit();
+                    let partial_img = self.pager.image.partial_image(self.pager.page_indexes())?;
 
                     let req = ComputePartialImageRequest {
                         image: partial_img,
@@ -271,11 +268,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
             let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
-            let (pre_digest, post_digest) = self.pager.flush();
-            let partial_img = self
-                .pager
-                .image
-                .to_partial_image(self.pager.page_indexes())?;
+            let (pre_digest, post_digest) = self.pager.commit();
+            let partial_img = self.pager.image.partial_image(self.pager.page_indexes())?;
             let req = ComputePartialImageRequest {
                 image: partial_img,
                 page_indexes: self.pager.page_indexes(),
@@ -340,9 +334,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 dump_path.to_string_lossy()
             );
 
-            let (image, pre_digest, post_digest) = self.pager.commit();
-            let page_indexes = self.pager.page_indexes();
-            let partial_image = compute_partial_image(image, page_indexes);
+            let (pre_digest, post_digest) = self.pager.commit();
+            let partial_image = self.pager.image.partial_image(self.pager.page_indexes())?;
 
             let segment = Segment {
                 partial_image,
