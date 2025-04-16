@@ -64,13 +64,15 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
+// TODO: Clean dependencies
+
 extern crate alloc;
 
 use alloc::vec::Vec;
 use core::str::FromStr;
 
 use anyhow::{anyhow, Error, Result};
-use ark_serialize::CanonicalDeserialize;
+// use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
 
@@ -89,13 +91,13 @@ pub use seal_to_json::to_json;
 pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
 
 /// Splits the digest in half returning a scalar for each halve.
-pub fn split_digest(d: Digest) -> Result<(substrate_bn::Fr, substrate_bn::Fr), Error> {
+pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
     let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
     let middle = big_endian.len() / 2;
     let (b, a) = big_endian.split_at(middle);
     Ok((
-        substrate_bn::Fr::from_slice(&from_u256_hex(&hex::encode(a))?).map_err(|_|anyhow!("TODO"))?,
-        substrate_bn::Fr::from_slice(&from_u256_hex(&hex::encode(b))?).map_err(|_|anyhow!("TODO"))?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(a))?).map_err(|_|anyhow!("TODO"))?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(b))?).map_err(|_|anyhow!("TODO"))?,
     ))
 }
 
@@ -106,10 +108,11 @@ pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
 
 // Deserialize a scalar field from bytes in big-endian format
 pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
-    let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
-    ark_bn254::Fr::deserialize_uncompressed(&*scalar)
-        .map(Fr)
-        .map_err(|err| anyhow!(err))
+    substrate_bn::Fr::from_slice(scalar).map(Fr).map_err(|_| anyhow!("TODO"))
+    // let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
+    // ark_bn254::Fr::deserialize_uncompressed(&*scalar)
+    //     .map(Fr)
+    //     .map_err(|err| anyhow!(err))
 }
 
 /// Deserialize an element over the G1 group from bytes in big-endian format

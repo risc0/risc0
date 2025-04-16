@@ -14,10 +14,13 @@
 
 extern crate alloc;
 
-use alloc::{vec, vec::Vec};
+// TODO: Clean dependencies
+
+// use alloc::{vec, vec::Vec};
+use alloc::vec;
 
 use anyhow::{anyhow, Error, Result};
-use ark_serialize::CanonicalSerialize;
+// use ark_serialize::CanonicalSerialize;
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
@@ -185,31 +188,34 @@ impl Verifier {
 }
 
 /// Verifying key for Groth16 proofs.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Fr(#[serde(with = "serde_ark")] pub(crate) ark_bn254::Fr);
+// TODO: Want full traits
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+pub struct Fr(pub(crate) substrate_bn::Fr);
 
 impl Fr {
     #[stability::unstable]
-    pub fn ark_fr(&self) -> ark_bn254::Fr {
+    pub fn substrate_fr(&self) -> substrate_bn::Fr {
         self.0
     }
 }
 
-impl Digestible for Fr {
-    /// Compute a tagged hash of the [Fr] value.
-    fn digest<S: Sha256>(&self) -> Digest {
-        let mut buffer = Vec::<u8>::with_capacity(32);
-        // Serialization into a pre-allocated buffer should never fail.
-        self.0.serialize_uncompressed(&mut buffer).unwrap();
-        // Convert to big-endian representation.
-        buffer.reverse();
-        tagged_struct::<S>(
-            "risc0_groth16.Fr",
-            &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
-            &[],
-        )
-    }
-}
+// TODO: Probably need this
+// impl Digestible for Fr {
+//     /// Compute a tagged hash of the [Fr] value.
+//     fn digest<S: Sha256>(&self) -> Digest {
+//         let mut buffer = Vec::<u8>::with_capacity(32);
+//         // Serialization into a pre-allocated buffer should never fail.
+//         self.0.serialize_uncompressed(&mut buffer).unwrap();
+//         // Convert to big-endian representation.
+//         buffer.reverse();
+//         tagged_struct::<S>(
+//             "risc0_groth16.Fr",
+//             &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
+//             &[],
+//         )
+//     }
+// }
 
 /// Verifying key for Groth16 proofs.
 // TODO: Can we get away with fewer derives?
@@ -277,34 +283,35 @@ impl Digestible for VerifyingKey {
     }
 }
 
+// TODO: See if we can adapt any of this to substrate_bn serde
 /// Compatibility module providing simple serde interop
-mod serde_ark {
-    use alloc::vec::Vec;
+// mod serde_ark {
+//     use alloc::vec::Vec;
 
-    use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-    use serde::{
-        de::Error as _, ser::Error as _, Deserialize, Deserializer, Serialize, Serializer,
-    };
+//     use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+//     use serde::{
+//         de::Error as _, ser::Error as _, Deserialize, Deserializer, Serialize, Serializer,
+//     };
 
-    pub fn serialize<S>(key: &impl CanonicalSerialize, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut buffer = Vec::<u8>::new();
-        key.serialize_uncompressed(&mut buffer)
-            .map_err(S::Error::custom)?;
-        buffer.serialize(serializer)
-    }
+//     pub fn serialize<S>(key: &impl CanonicalSerialize, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: Serializer,
+//     {
+//         let mut buffer = Vec::<u8>::new();
+//         key.serialize_uncompressed(&mut buffer)
+//             .map_err(S::Error::custom)?;
+//         buffer.serialize(serializer)
+//     }
 
-    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-        T: CanonicalDeserialize,
-    {
-        let buffer = Vec::<u8>::deserialize(deserializer)?;
-        T::deserialize_uncompressed(buffer.as_slice()).map_err(D::Error::custom)
-    }
-}
+//     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+//     where
+//         D: Deserializer<'de>,
+//         T: CanonicalDeserialize,
+//     {
+//         let buffer = Vec::<u8>::deserialize(deserializer)?;
+//         T::deserialize_uncompressed(buffer.as_slice()).map_err(D::Error::custom)
+//     }
+// }
 
 // /// Default verifying key for RISC Zero recursive verification.
 // pub fn verifying_key() -> VerifyingKey {
