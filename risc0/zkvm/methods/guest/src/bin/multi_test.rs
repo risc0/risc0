@@ -43,7 +43,7 @@ use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TE
 use risc0_zkvm_platform::{
     fileno,
     syscall::{
-        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_poseidon2_compress,
         sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
@@ -589,6 +589,16 @@ fn main() {
             for _i in 0..count {
                 env::risc0_keccak_update(&mut state);
             }
+        }
+        MultiTestSpec::Poseidon2Basic => {
+            let state: &[u32] = &[0u32; DIGEST_WORDS];
+            let input: &[u32] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+            let expected: &[u32] = &[1749308481, 879447913, 499502012, 1842374203, 1869354733, 71489094, 19273002, 690566044];
+            let actual: &[u32] = &mut [0u32; 8];
+            let is_elem = 0x80000000;
+
+            unsafe {sys_poseidon2_compress(state.as_ptr() as *const [u32; 8], input.as_ptr() as *const [u32; 8], actual.as_ptr() as *mut [u32; 8], is_elem | 2);}
+            assert_eq!(expected, actual);
         }
     }
 }
