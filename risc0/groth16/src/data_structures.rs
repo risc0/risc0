@@ -15,6 +15,7 @@
 extern crate alloc;
 
 use alloc::{string::String, vec, vec::Vec};
+use core::fmt;
 
 use anyhow::{anyhow, Error, Result};
 // TODO
@@ -282,7 +283,7 @@ impl<'de> Deserialize<'de> for Vk {
                 impl<'de> serde::de::Visitor<'de> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                         formatter.write_str("`alpha_g1`, `beta_g2`, `gamma_g2`, `delta_g2`, or `gamma_abc_g1`")
                     }
 
@@ -310,7 +311,7 @@ impl<'de> Deserialize<'de> for Vk {
         impl<'de> serde::de::Visitor<'de> for VkVisitor {
             type Value = Vk;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 // TODO: might be nicer message?
                 formatter.write_str("struct Vk")
             }
@@ -452,7 +453,7 @@ impl<'de> Deserialize<'de> for G1data {
         impl<'de> serde::de::Visitor<'de> for G1dataVisitor {
             type Value = G1data;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 // TODO: might be nicer message?
                 formatter.write_str("struct G1data")
             }
@@ -554,7 +555,7 @@ impl<'de> Deserialize<'de> for G2data {
         impl<'de> serde::de::Visitor<'de> for G2dataVisitor {
             type Value = G2data;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 // TODO: might be nicer message?
                 formatter.write_str("struct G2data")
             }
