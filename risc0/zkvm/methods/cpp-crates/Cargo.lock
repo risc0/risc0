@@ -1060,6 +1060,7 @@ dependencies = [
  "serde",
  "sha2",
  "stability",
+ "substrate-bn",
  "tracing",
 ]
 
