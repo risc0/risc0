@@ -744,7 +744,7 @@ jobs:
   bento-run:
     if: needs.changes.outputs.bento == 'true'
     needs: changes
-    runs-on: [ self-hosted, prod, Linux, X64, cuda, g6e.xlarge ]
+    runs-on: [ self-hosted, prod, Linux, X64, cuda, g6e.xlarge, bench ]
     env:
       FEATURE: cuda
       RISC0_BUILD_LOCKED: 1
