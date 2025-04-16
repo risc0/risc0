@@ -452,6 +452,39 @@ impl PagedMemory {
         (pre_image, pre_state, post_state)
     }
 
+    /// Similar to commit, but does not clone and return the pre-image.
+    pub(crate) fn flush(&mut self) -> (Digest, Digest) {
+        // tracing::trace!("commit: {self:#?}");
+
+        self.write_registers();
+
+        let pre_state = self.image.image_id();
+
+        let mut sorted_keys: Vec<_> = self.page_states.keys().collect();
+        sorted_keys.sort();
+
+        for node_idx in sorted_keys {
+            if node_idx < MEMORY_PAGES as u32 {
+                continue;
+            }
+
+            let page_state = self.page_states.get(node_idx);
+            let page_idx = page_idx(node_idx);
+            tracing::trace!("commit: {page_idx:#08x}, state: {page_state:?}");
+
+            // Update dirty pages into the image that accumulates over a session.
+            if page_state == PageState::Dirty {
+                let cache_idx = self.page_table.get(page_idx).unwrap();
+                let page = &self.page_cache[cache_idx];
+                self.image.set_page(page_idx, page.clone());
+            }
+        }
+        self.image.update_digests();
+
+        let post_state = self.image.image_id();
+        (pre_state, post_state)
+    }
+
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
         tracing::trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
@@ -519,6 +552,16 @@ pub(crate) fn compute_partial_image(
 
     for node_idx in &indexes {
         if *node_idx < MEMORY_PAGES as u32 {
+            let lhs_idx = *node_idx * 2;
+            let rhs_idx = *node_idx * 2 + 1;
+
+            // Otherwise, add whichever child digest (if any) is not loaded
+            if !indexes.contains(&lhs_idx) {
+                image.set_digest(lhs_idx, *input_image.get_existing_digest(lhs_idx));
+            }
+            if !indexes.contains(&rhs_idx) {
+                image.set_digest(rhs_idx, *input_image.get_existing_digest(rhs_idx));
+            }
             continue;
         }
 
@@ -528,26 +571,6 @@ pub(crate) fn compute_partial_image(
         image.set_page(page_idx, input_image.get_existing_page(page_idx));
     }
 
-    // Add minimal needed 'uncles'
-    for node_idx in &indexes {
-        // If this is a leaf, break
-        if *node_idx >= MEMORY_PAGES as u32 {
-            break;
-        }
-
-        let lhs_idx = *node_idx * 2;
-        let rhs_idx = *node_idx * 2 + 1;
-
-        // Otherwise, add whichever child digest (if any) is not loaded
-        if !indexes.contains(&lhs_idx) {
-            image.set_digest(lhs_idx, *input_image.get_existing_digest(lhs_idx));
-        }
-        if !indexes.contains(&rhs_idx) {
-            image.set_digest(rhs_idx, *input_image.get_existing_digest(rhs_idx));
-        }
-    }
-
     image.update_digests();
-
     image
 }

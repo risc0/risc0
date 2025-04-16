@@ -94,6 +94,7 @@ pub struct SimpleSession {
 
 struct ComputePartialImageRequest {
     image: MemoryImage,
+    #[allow(dead_code)]
     page_indexes: BTreeSet<u32>,
 
     input_digest: Digest,
@@ -118,9 +119,9 @@ fn compute_partial_images(
     mut callback: impl FnMut(Segment) -> Result<()>,
 ) -> Result<()> {
     while let Ok(req) = recv.recv() {
-        let partial_image = compute_partial_image(req.image, req.page_indexes);
+        // let partial_image = compute_partial_image(req.image, req.page_indexes);
         callback(Segment {
-            partial_image,
+            partial_image: req.image,
             claim: Rv32imV2Claim {
                 pre_state: req.pre_digest,
                 post_state: req.post_digest,
@@ -187,7 +188,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let (commit_sender, commit_recv) =
             std::sync::mpsc::sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
-
         let post_digest = std::thread::scope(|scope| {
             let partial_images_thread =
                 scope.spawn(move || compute_partial_images(commit_recv, callback));
@@ -217,10 +217,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     );
                     Risc0Machine::suspend(self)?;
 
-                    let (pre_image, pre_digest, post_digest) = self.pager.commit();
+                    let (pre_digest, post_digest) = self.pager.flush();
+                    let partial_img = self
+                        .pager
+                        .image
+                        .to_partial_image(self.pager.page_indexes())?;
 
                     let req = ComputePartialImageRequest {
-                        image: pre_image,
+                        image: partial_img,
                         page_indexes: self.pager.page_indexes(),
                         input_digest: self.input_digest,
                         output_digest: self.output_digest,
@@ -267,9 +271,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
             let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
-            let (pre_image, pre_digest, post_digest) = self.pager.commit();
+            let (pre_digest, post_digest) = self.pager.flush();
+            let partial_img = self
+                .pager
+                .image
+                .to_partial_image(self.pager.page_indexes())?;
             let req = ComputePartialImageRequest {
-                image: pre_image,
+                image: partial_img,
                 page_indexes: self.pager.page_indexes(),
                 input_digest: self.input_digest,
                 output_digest: self.output_digest,
@@ -296,9 +304,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
 
             drop(commit_sender);
-
             partial_images_thread.join().unwrap()?;
-
             Ok(post_digest)
         })?;
 

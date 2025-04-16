@@ -339,6 +339,49 @@ impl MemoryImage {
             self.digests.insert(idx, parent_digest);
         }
     }
+
+    /// Returns a partial image of a clean image
+    pub fn to_partial_image(&self, indexes: BTreeSet<u32>) -> Result<MemoryImage> {
+        if !self.dirty.is_empty() {
+            bail!("Cannot create partial image with dirty nodes");
+        }
+        let mut image = MemoryImage::default();
+        for node_idx in &indexes {
+            if *node_idx < MEMORY_PAGES as u32 {
+                let lhs_idx = *node_idx * 2;
+                let rhs_idx = *node_idx * 2 + 1;
+
+                // Otherwise, add whichever child digest (if any) is not loaded
+                if !indexes.contains(&lhs_idx) {
+                    // image.set_digest(lhs_idx, *self.get_existing_digest(lhs_idx));
+                    image
+                        .digests
+                        .insert(lhs_idx, *self.get_existing_digest(lhs_idx));
+                }
+                if !indexes.contains(&rhs_idx) {
+                    // image.set_digest(rhs_idx, *self.get_existing_digest(rhs_idx));
+                    image
+                        .digests
+                        .insert(rhs_idx, *self.get_existing_digest(rhs_idx));
+                }
+                continue;
+            }
+
+            let page_idx = *node_idx - MEMORY_PAGES as u32;
+            image
+                .digests
+                .insert(*node_idx, *self.get_existing_digest(*node_idx));
+            // Copy original state of all pages accessed in this segment.
+            image
+                .pages
+                .insert(page_idx, self.get_existing_page(page_idx));
+            // image.set_page(page_idx, self.get_existing_page(page_idx));
+        }
+
+        // image.update_digests();
+        // tracing::info!("Input image: {:?}, Partial image: {:?}", input_image, image,);
+        Ok(image)
+    }
 }
 
 impl Default for Page {
