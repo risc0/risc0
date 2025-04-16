@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
 use enum_map::EnumMap;
@@ -92,56 +92,6 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
-struct ComputePartialImageRequest {
-    image: MemoryImage,
-    #[allow(dead_code)]
-    page_indexes: BTreeSet<u32>,
-
-    input_digest: Digest,
-    output_digest: Option<Digest>,
-    read_record: Vec<Vec<u8>>,
-    write_record: Vec<u32>,
-    user_cycles: u32,
-    pager_cycles: u32,
-    terminate_state: Option<TerminateState>,
-    segment_threshold: u32,
-    pre_digest: Digest,
-    post_digest: Digest,
-    po2: u32,
-    index: u64,
-}
-
-/// Maximum number of segments we can queue up before we block execution
-const MAX_OUTSTANDING_SEGMENTS: usize = 5;
-
-fn compute_partial_images(
-    recv: std::sync::mpsc::Receiver<ComputePartialImageRequest>,
-    mut callback: impl FnMut(Segment) -> Result<()>,
-) -> Result<()> {
-    while let Ok(req) = recv.recv() {
-        // let partial_image = compute_partial_image(req.image, req.page_indexes);
-        callback(Segment {
-            partial_image: req.image,
-            claim: Rv32imV2Claim {
-                pre_state: req.pre_digest,
-                post_state: req.post_digest,
-                input: req.input_digest,
-                output: req.output_digest,
-                terminate_state: req.terminate_state,
-                shutdown_cycle: None,
-            },
-            read_record: req.read_record,
-            write_record: req.write_record,
-            suspend_cycle: req.user_cycles,
-            paging_cycles: req.pager_cycles,
-            po2: req.po2,
-            index: req.index,
-            segment_threshold: req.segment_threshold,
-        })?;
-    }
-    Ok(())
-}
-
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn new(
         image: MemoryImage,
@@ -172,7 +122,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         segment_po2: usize,
         max_insn_cycles: usize,
         max_cycles: Option<u64>,
-        callback: impl FnMut(Segment) -> Result<()> + Send,
+        mut callback: impl FnMut(Segment) -> Result<()> + Send,
     ) -> Result<ExecutorResult> {
         let segment_limit: u32 = 1 << segment_po2;
         assert!(max_insn_cycles < segment_limit as usize);
@@ -186,121 +136,110 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let initial_digest = self.pager.image.image_id();
         tracing::debug!("initial_digest: {initial_digest}");
 
-        let (commit_sender, commit_recv) =
-            std::sync::mpsc::sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
-        let post_digest = std::thread::scope(|scope| {
-            let partial_images_thread =
-                scope.spawn(move || compute_partial_images(commit_recv, callback));
-
-            while self.terminate_state.is_none() {
-                if let Some(max_cycles) = max_cycles {
-                    if self.cycles.user >= max_cycles {
-                        bail!(
-                            "Session limit exceeded: {} >= {max_cycles}",
-                            self.cycles.user
-                        );
-                    }
+        while self.terminate_state.is_none() {
+            if let Some(max_cycles) = max_cycles {
+                if self.cycles.user >= max_cycles {
+                    bail!(
+                        "Session limit exceeded: {} >= {max_cycles}",
+                        self.cycles.user
+                    );
                 }
+            }
 
-                if self.segment_cycles() > segment_threshold {
-                    tracing::debug!(
+            if self.segment_cycles() >= segment_threshold {
+                tracing::debug!(
                         "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
                         self.user_cycles,
                         self.pager.cycles,
                         self.segment_cycles()
                     );
 
-                    assert!(
-                        self.segment_cycles() < segment_limit,
-                        "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
-                        self.pc
-                    );
-                    Risc0Machine::suspend(self)?;
+                assert!(
+                    self.segment_cycles() < segment_limit,
+                    "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                    self.pc
+                );
+                Risc0Machine::suspend(self)?;
 
-                    let (pre_digest, post_digest) = self.pager.commit();
-                    let partial_img = self.pager.image.partial_image(self.pager.page_indexes())?;
+                let (pre_digest, post_digest) = self.pager.commit();
+                let partial_image = self.pager.image.partial_image(self.pager.page_indexes())?;
 
-                    let req = ComputePartialImageRequest {
-                        image: partial_img,
-                        page_indexes: self.pager.page_indexes(),
-                        input_digest: self.input_digest,
-                        output_digest: self.output_digest,
-                        read_record: std::mem::take(&mut self.read_record),
-                        write_record: std::mem::take(&mut self.write_record),
-                        user_cycles: self.user_cycles,
-                        pager_cycles: self.pager.cycles,
+                callback(Segment {
+                    partial_image,
+                    claim: Rv32imV2Claim {
+                        pre_state: pre_digest,
+                        post_state: post_digest,
+                        input: self.input_digest,
+                        output: self.output_digest,
                         terminate_state: self.terminate_state,
-                        segment_threshold,
-                        pre_digest,
-                        post_digest,
-                        po2: segment_po2 as u32,
-                        index: segment_counter,
-                    };
-                    if commit_sender.send(req).is_err() {
-                        return Err(partial_images_thread.join().unwrap().unwrap_err());
-                    }
-
-                    segment_counter += 1;
-                    let total_cycles = 1 << segment_po2;
-                    let pager_cycles = self.pager.cycles as u64;
-                    let user_cycles = self.user_cycles as u64;
-                    self.cycles.total += total_cycles;
-                    self.cycles.paging += pager_cycles;
-                    self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
-                    self.user_cycles = 0;
-                    self.pager.reset();
-
-                    Risc0Machine::resume(self)?;
-                }
-
-                Risc0Machine::step(&mut emu, self).map_err(|err| {
-                    let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
-                    if let Err(inner) = result {
-                        err.context(inner)
-                    } else {
-                        err
-                    }
+                        shutdown_cycle: None,
+                    },
+                    read_record: std::mem::take(&mut self.read_record),
+                    write_record: std::mem::take(&mut self.write_record),
+                    suspend_cycle: self.user_cycles,
+                    paging_cycles: self.pager.cycles,
+                    po2: segment_po2 as u32,
+                    index: segment_counter,
+                    segment_threshold,
                 })?;
+
+                segment_counter += 1;
+                let total_cycles = 1 << segment_po2;
+                let pager_cycles = self.pager.cycles as u64;
+                let user_cycles = self.user_cycles as u64;
+                self.cycles.total += total_cycles;
+                self.cycles.paging += pager_cycles;
+                self.cycles.reserved += total_cycles - pager_cycles - user_cycles;
+                self.user_cycles = 0;
+                self.pager.reset();
+
+                Risc0Machine::resume(self)?;
             }
 
-            Risc0Machine::suspend(self)?;
+            Risc0Machine::step(&mut emu, self).map_err(|err| {
+                let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
+                if let Err(inner) = result {
+                    err.context(inner)
+                } else {
+                    err
+                }
+            })?;
+        }
 
-            let final_cycles = self.segment_cycles().next_power_of_two();
-            let final_po2 = log2_ceil(final_cycles as usize);
-            let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
-            let (pre_digest, post_digest) = self.pager.commit();
-            let partial_img = self.pager.image.partial_image(self.pager.page_indexes())?;
-            let req = ComputePartialImageRequest {
-                image: partial_img,
-                page_indexes: self.pager.page_indexes(),
-                input_digest: self.input_digest,
-                output_digest: self.output_digest,
-                read_record: std::mem::take(&mut self.read_record),
-                write_record: std::mem::take(&mut self.write_record),
-                user_cycles: self.user_cycles,
-                pager_cycles: self.pager.cycles,
+        Risc0Machine::suspend(self)?;
+
+        let (pre_digest, post_digest) = self.pager.commit();
+        let partial_image = self.pager.image.partial_image(self.pager.page_indexes())?;
+
+        let final_cycles = self.segment_cycles().next_power_of_two();
+        let final_po2 = log2_ceil(final_cycles as usize);
+        let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
+
+        callback(Segment {
+            partial_image,
+            claim: Rv32imV2Claim {
+                pre_state: pre_digest,
+                post_state: post_digest,
+                input: self.input_digest,
+                output: self.output_digest,
                 terminate_state: self.terminate_state,
-                segment_threshold,
-                pre_digest,
-                post_digest,
-                po2: final_po2 as u32,
-                index: segment_counter,
-            };
-            if commit_sender.send(req).is_err() {
-                return Err(partial_images_thread.join().unwrap().unwrap_err());
-            }
-
-            let final_cycles = final_cycles as u64;
-            let user_cycles = self.user_cycles as u64;
-            let pager_cycles = self.pager.cycles as u64;
-            self.cycles.total += final_cycles;
-            self.cycles.paging += pager_cycles;
-            self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
-
-            drop(commit_sender);
-            partial_images_thread.join().unwrap()?;
-            Ok(post_digest)
+                shutdown_cycle: None,
+            },
+            read_record: std::mem::take(&mut self.read_record),
+            write_record: std::mem::take(&mut self.write_record),
+            suspend_cycle: self.user_cycles,
+            paging_cycles: self.pager.cycles,
+            po2: segment_po2 as u32,
+            index: segment_counter,
+            segment_threshold,
         })?;
+
+        let final_cycles = final_cycles as u64;
+        let user_cycles = self.user_cycles as u64;
+        let pager_cycles = self.pager.cycles as u64;
+        self.cycles.total += final_cycles;
+        self.cycles.paging += pager_cycles;
+        self.cycles.reserved += final_cycles - pager_cycles - user_cycles;
 
         let session_claim = Rv32imV2Claim {
             pre_state: initial_digest,
