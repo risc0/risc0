@@ -591,13 +591,14 @@ fn main() {
             }
         }
         MultiTestSpec::Poseidon2Basic => {
-            let state: &[u32] = &[0u32; DIGEST_WORDS];
-            let input: &[u32] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+            let input: &[u32; 16] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
             let expected: &[u32] = &[1749308481, 879447913, 499502012, 1842374203, 1869354733, 71489094, 19273002, 690566044];
-            let actual: &[u32] = &mut [0u32; 8];
-            let is_elem = 0x80000000;
+            let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
+            let is_elem = 0x8000_0000;
+            let is_guest = 0x2000_0000;
 
-            unsafe {sys_poseidon2_compress(state.as_ptr() as *const [u32; 8], input.as_ptr() as *const [u32; 8], actual.as_ptr() as *mut [u32; 8], is_elem | 1);}
+            unsafe {sys_poseidon2_compress(core::ptr::null_mut(), input.as_ptr() as *const u8, &mut actual, (is_guest | is_elem)| 1u32);}
+            env::log(&format!("actual's address: {:?}", actual.as_ptr()));
             assert_eq!(expected, actual);
         }
     }
