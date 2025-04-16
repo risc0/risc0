@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
+use std::path::Path;
 
 use anyhow::{bail, Result};
 use enum_map::EnumMap;
@@ -125,7 +126,7 @@ fn compute_partial_images(
 ) -> Result<()> {
     while let Ok(req) = recv.recv() {
         let partial_image = compute_partial_image(req.image, req.page_indexes);
-        callback(Segment {
+        let segment = Segment {
             partial_image,
             claim: Rv32imV2Claim {
                 pre_state: req.pre_digest,
@@ -142,7 +143,15 @@ fn compute_partial_images(
             po2: req.po2,
             index: req.index,
             segment_threshold: req.segment_threshold,
-        })?;
+        };
+        if let Some(seg_dir) = std::env::var_os("RISC0_SEGMENTS_PATH") {
+            let bytes = segment.encode()?;
+            let file_path = Path::new(&seg_dir)
+                .join(format!("segment-{}", segment.index));
+            println!("Writing segment {}", &file_path.to_string_lossy());
+            std::fs::write(file_path, bytes)?;
+        }
+        callback(segment)?;
     }
     Ok(())
 }
