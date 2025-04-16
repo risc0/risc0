@@ -17,7 +17,9 @@ extern crate alloc;
 use alloc::{string::String, vec, vec::Vec};
 
 use anyhow::{anyhow, Error, Result};
-use serde::{Deserialize, Serialize};
+// TODO
+// use serde::{Deserialize, Serialize, ser::SerializeStruct};
+use serde::{ser::SerializeSeq, Deserialize, Serialize};
 
 use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
 
@@ -241,6 +243,110 @@ pub struct Vk {
     pub(crate) gamma_abc_g1: Vec<substrate_bn::G1>,
 }
 
+// TODO: Helper struct for Vk serialization
+struct G1data([u8; 96]);
+
+impl From<substrate_bn::G1> for G1data {
+    fn from(item: substrate_bn::G1) -> Self {
+        // TODO: We could save space with a compressed representation
+        let mut buf = [0u8; 96];
+        item.x().to_big_endian(&mut buf[0..32]).expect("output buffer is 32 bytes");
+        item.y().to_big_endian(&mut buf[32..64]).expect("output buffer is 32 bytes");
+        item.z().to_big_endian(&mut buf[64..96]).expect("output buffer is 32 bytes");
+        G1data(buf)
+    }
+}
+
+// TODO: Swap to TryFrom instead of using unwrap
+impl From<G1data> for substrate_bn::G1 {
+    fn from(item: G1data) -> Self {
+        substrate_bn::G1::new(
+            substrate_bn::Fq::from_slice(&item.0[0..32]).unwrap(),
+            substrate_bn::Fq::from_slice(&item.0[32..64]).unwrap(),
+            substrate_bn::Fq::from_slice(&item.0[64..96]).unwrap(),
+        )
+    }
+}
+
+impl Serialize for G1data {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // serializer.serialize_bytes(&self.0)  // TODO: can only use if `visit_bytes` works
+        // TODO: Deprecate below code and replace with above once `serde_bytes` works
+        let mut seq = serializer.serialize_seq(Some(96))?;
+        for val in self.0 {
+            seq.serialize_element(&val)?;
+        }
+        seq.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for G1data {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct G1dataVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for G1dataVisitor {
+            type Value = G1data;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                // TODO: might be nicer message?
+                formatter.write_str("struct G1data")
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                // TODO: This doesn't get called, and I'm not clear how to use serde_bytes in this context to address that
+                println!("visit_bytes was called!");
+                Ok(G1data(v
+                    .try_into()
+                    .map_err (|_|serde::de::Error::invalid_length(v.len(), &"96 bytes"))?
+                ))
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::SeqAccess<'de>,
+            {
+                // TODO: I would rather use `visit_bytes`, but that requires figuring out the `serde_bytes` crate
+                let mut pos = 0usize;
+                let mut data = G1data([0u8; 96]);
+                for val in data.0.iter_mut() {
+                    *val = seq.next_element()?.ok_or_else(|| serde::de::Error::invalid_length(pos, &"96 bytes"))?;
+                    pos += 1;
+                }
+                match seq.next_element::<u8>()?.is_none() {
+                    true => Ok(data),
+                    // TODO: Cleaner error
+                    false => Err(serde::de::Error::invalid_length(97, &"96 bytes (note: all lengths above 96 bytes are reported as 97 bytes)")),
+                }
+            }
+        }
+        deserializer.deserialize_bytes(G1dataVisitor)
+    }
+}
+
+// impl Serialize for Vk {
+//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: serde::Serializer,
+//     {
+//         let mut state = serializer.serialize_struct("Vk", 5)?;
+//         let mut alpha_g1_x = [0u8; 32];  // TODO: Just experimenting
+//         self.alpha_g1.x().to_big_endian(&mut alpha_g1_x[0..32]);
+//         // self.alpha_g1.x().to_big_endian(&mut alpha_g1[0..32]);
+//         // self.alpha_g1.y().to_big_endian(&mut alpha_g1[32..64]);
+//         // self.alpha_g1.z().to_big_endian(&mut alpha_g1[64..96]);
+//         state.serialize_field("alpha_g1", &alpha_g1_x)?;
+//     }
+// }
+
 /// A prepared groth16 verification key (TODO)
 /// 
 /// TODO: Note that status quo this doesn't contain the original verification key and so can't be regenerated
@@ -288,6 +394,8 @@ impl PublicInputsJson {
 #[cfg(test)]
 mod tests {
     use super::*;
+    // TODO
+    use substrate_bn::Group;
 
     #[test]
     fn test_proof_deserialization() {
@@ -429,5 +537,15 @@ mod tests {
         assert_eq!(vk.curve, "bn128");
         assert_eq!(vk.n_public, 1);
         vk.verifying_key().unwrap();
+    }
+
+    #[test]
+    fn test_g1_serde() {
+        let pt = substrate_bn::G1::one();
+        let serialized = serde_json::to_string(&G1data::from(pt)).unwrap();
+        println!("It's: {}", serialized);
+        let deserialized: G1data = serde_json::from_str(&serialized).unwrap();
+        let roundtripped_pt: substrate_bn::G1 = deserialized.into();
+        assert_eq!(roundtripped_pt, pt);
     }
 }
