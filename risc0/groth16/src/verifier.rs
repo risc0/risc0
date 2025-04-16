@@ -214,7 +214,7 @@ impl Digestible for Fr {
 /// Verifying key for Groth16 proofs.
 // TODO: Can we get away with fewer derives?
 // #[derive(Clone, Debug, Serialize, Deserialize)]
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct VerifyingKey(pub(crate) Vk);
 
 // TODO: This was the arkworks approach:

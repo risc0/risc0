@@ -19,7 +19,7 @@ use alloc::{string::String, vec, vec::Vec};
 use anyhow::{anyhow, Error, Result};
 // TODO
 // use serde::{Deserialize, Serialize, ser::SerializeStruct};
-use serde::{ser::SerializeSeq, Deserialize, Serialize};
+use serde::{ser::{SerializeSeq, SerializeStruct}, Deserialize, Serialize};
 
 use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
 
@@ -233,7 +233,7 @@ impl VerifyingKeyJson {
 /// 
 /// A verification key. It needs to be prepared into a [Pvk] before use. (TODO)
 // TODO: Derives?
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Vk {
     // TODO: better pattern for access?
     pub(crate) alpha_g1: substrate_bn::G1,
@@ -241,6 +241,165 @@ pub struct Vk {
     pub(crate) gamma_g2: substrate_bn::G2,
     pub(crate) delta_g2: substrate_bn::G2,
     pub(crate) gamma_abc_g1: Vec<substrate_bn::G1>,
+}
+
+impl Serialize for Vk {
+    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer
+    {
+        let mut state = serializer.serialize_struct("Vk", 5)?;
+        state.serialize_field("alpha_g1", &G1data::from(self.alpha_g1))?;
+        state.serialize_field("beta_g2", &G2data::from(self.beta_g2))?;
+        state.serialize_field("gamma_g2", &G2data::from(self.gamma_g2))?;
+        state.serialize_field("delta_g2", &G2data::from(self.delta_g2))?;
+        // TODO: This clone can probably be avoided
+        state.serialize_field("gamma_abc_g1", &G1dataVec::from(self.gamma_abc_g1.clone()))?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Vk {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>
+    {
+        enum Field {
+            AlphaG1,
+            BetaG2,
+            GammaG2,
+            DeltaG2,
+            GammaABCG1,
+        }
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>
+            {
+                struct FieldVisitor;
+
+                impl<'de> serde::de::Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("`alpha_g1`, `beta_g2`, `gamma_g2`, `delta_g2`, or `gamma_abc_g1`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "alpha_g1" => Ok(Field::AlphaG1),
+                            "beta_g2" => Ok(Field::BetaG2),
+                            "gamma_g2" => Ok(Field::GammaG2),
+                            "delta_g2" => Ok(Field::DeltaG2),
+                            "gamma_abc_g1" => Ok(Field::GammaABCG1),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS))
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct VkVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for VkVisitor {
+            type Value = Vk;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                // TODO: might be nicer message?
+                formatter.write_str("struct Vk")
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::MapAccess<'de>,
+            {
+                let mut alpha_g1: Option<G1data> = None;
+                let mut beta_g2: Option<G2data> = None;
+                let mut gamma_g2: Option<G2data> = None;
+                let mut delta_g2: Option<G2data> = None;
+                let mut gamma_abc_g1: Option<G1dataVec> = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::AlphaG1 => {
+                            if alpha_g1.is_some() {
+                                return Err(serde::de::Error::duplicate_field("alpha_g1"));
+                            }
+                            alpha_g1 = Some(map.next_value()?);
+                        }
+                        Field::BetaG2 => {
+                            if beta_g2.is_some() {
+                                return Err(serde::de::Error::duplicate_field("beta_g2"));
+                            }
+                            beta_g2 = Some(map.next_value()?);
+                        }
+                        Field::GammaG2 => {
+                            if gamma_g2.is_some() {
+                                return Err(serde::de::Error::duplicate_field("gamma_g2"));
+                            }
+                            gamma_g2 = Some(map.next_value()?);
+                        }
+                        Field::DeltaG2 => {
+                            if delta_g2.is_some() {
+                                return Err(serde::de::Error::duplicate_field("delta_g2"));
+                            }
+                            delta_g2 = Some(map.next_value()?);
+                        }
+                        Field::GammaABCG1 => {
+                            if gamma_abc_g1.is_some() {
+                                return Err(serde::de::Error::duplicate_field("gamma_abc_g1"));
+                            }
+                            gamma_abc_g1 = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let alpha_g1 = alpha_g1.ok_or_else(|| serde::de::Error::missing_field("alpha_g1"))?;
+                let beta_g2 = beta_g2.ok_or_else(|| serde::de::Error::missing_field("beta_g2"))?;
+                let gamma_g2 = gamma_g2.ok_or_else(|| serde::de::Error::missing_field("gamma_g2"))?;
+                let delta_g2 = delta_g2.ok_or_else(|| serde::de::Error::missing_field("delta_g2"))?;
+                let gamma_abc_g1 = gamma_abc_g1.ok_or_else(|| serde::de::Error::missing_field("gamma_abc_g1"))?;
+                Ok(Vk {
+                    alpha_g1: alpha_g1.into(),
+                    beta_g2: beta_g2.into(),
+                    gamma_g2: gamma_g2.into(),
+                    delta_g2: delta_g2.into(),
+                    gamma_abc_g1: gamma_abc_g1.into(),
+                })
+            }
+        }
+        const FIELDS: &[&str] = &["alpha_g1", "beta_g2", "gamma_g2", "delta_g2", "gamma_abc_g1"];
+        deserializer.deserialize_struct("Vk", FIELDS, VkVisitor)
+    }
+}
+
+// TODO: Helper struct for Vk serialization
+// TODO: I don't think this is as efficient of a design as it could be
+#[derive(Serialize, Deserialize)]
+struct G1dataVec(Vec<G1data>);
+
+impl From<Vec<substrate_bn::G1>> for G1dataVec {
+    fn from(item: Vec<substrate_bn::G1>) -> Self {
+        let mut res = G1dataVec(Vec::<G1data>::new());
+        for val in item {
+            res.0.push(val.into());
+        }
+        res
+    }
+}
+
+impl From<G1dataVec> for Vec<substrate_bn::G1> {
+    fn from(item: G1dataVec) -> Self {
+        let mut res = Vec::<substrate_bn::G1>::new();
+        for val in item.0 {
+            res.push(val.into());
+        }
+        res
+    }
 }
 
 // TODO: Helper struct for Vk serialization
@@ -328,6 +487,7 @@ impl<'de> Deserialize<'de> for G1data {
                 }
             }
         }
+        // TODO: Uh, shouldn't this be deserialize_seq?
         deserializer.deserialize_bytes(G1dataVisitor)
     }
 }
@@ -638,14 +798,23 @@ mod tests {
         assert_eq!(vk.protocol, "groth16");
         assert_eq!(vk.curve, "bn128");
         assert_eq!(vk.n_public, 1);
-        vk.verifying_key().unwrap();
+        let vk = vk.verifying_key().unwrap();
+
+        // Now test serde roundtrip
+        let serialized = serde_json::to_string(&vk).unwrap();
+        let roundtripped_vk: VerifyingKey = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(roundtripped_vk, vk);
+
+        // Verifying that a manipulated version doesn't match the roundtrip
+        let mut vk_manipulated = vk.clone();
+        vk_manipulated.0.beta_g2 = vk_manipulated.0.beta_g2 + substrate_bn::G2::one();
+        assert_ne!(roundtripped_vk, vk_manipulated);
     }
 
     #[test]
     fn test_g1_serde_roundtrip() {
         let pt = substrate_bn::G1::one();
         let serialized = serde_json::to_string(&G1data::from(pt)).unwrap();
-        println!("It's: {}", serialized);
         let deserialized: G1data = serde_json::from_str(&serialized).unwrap();
         let roundtripped_pt: substrate_bn::G1 = deserialized.into();
         assert_eq!(roundtripped_pt, pt);
@@ -655,7 +824,15 @@ mod tests {
     fn test_g2_serde_roundtrip() {
         let pt = substrate_bn::G2::one();
         let serialized = serde_json::to_string(&G2data::from(pt)).unwrap();
-        println!("It's: {}", serialized);
+        let deserialized: G2data = serde_json::from_str(&serialized).unwrap();
+        let roundtripped_pt: substrate_bn::G2 = deserialized.into();
+        assert_eq!(roundtripped_pt, pt);
+    }
+
+    #[test]
+    fn test_vk_serde_roundtrip() {
+        let pt = substrate_bn::G2::one();
+        let serialized = serde_json::to_string(&G2data::from(pt)).unwrap();
         let deserialized: G2data = serde_json::from_str(&serialized).unwrap();
         let roundtripped_pt: substrate_bn::G2 = deserialized.into();
         assert_eq!(roundtripped_pt, pt);
