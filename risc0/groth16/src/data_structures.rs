@@ -462,7 +462,6 @@ impl<'de> Deserialize<'de> for G1data {
                 E: serde::de::Error,
             {
                 // TODO: This doesn't get called, and I'm not clear how to use serde_bytes in this context to address that
-                println!("visit_bytes was called!");
                 Ok(G1data(v
                     .try_into()
                     .map_err (|_|serde::de::Error::invalid_length(v.len(), &"96 bytes"))?
@@ -565,7 +564,6 @@ impl<'de> Deserialize<'de> for G2data {
                 E: serde::de::Error,
             {
                 // TODO: This doesn't get called, and I'm not clear how to use serde_bytes in this context to address that
-                println!("visit_bytes was called!");
                 Ok(G2data(v
                     .try_into()
                     .map_err (|_|serde::de::Error::invalid_length(v.len(), &"192 bytes"))?
@@ -642,12 +640,13 @@ pub struct PublicInputsJson {
 
 impl PublicInputsJson {
     /// Converts public inputs to scalars over the field of the G1/G2 groups.
-    pub fn to_scalar(&self) -> Result<Vec<substrate_bn::Fr>, Error> {
+    pub fn to_scalar(&self) -> Result<Vec<crate::Fr>, Error> {
         self.values
             .iter()
             .map(|input| {
                 substrate_bn::Fr::from_str(input)
                     .ok_or_else(||anyhow!("Failed to decode 'public inputs' values"))
+                    .map(crate::Fr)
             })
             .collect()
     }

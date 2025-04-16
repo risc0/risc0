@@ -95,7 +95,7 @@ impl Verifier {
     /// Creates a new Groth16 `Verifier` instance.
     pub fn new(
         seal: &Seal,
-        public_inputs: &[substrate_bn::Fr],
+        public_inputs: &[Fr],
         verifying_key: &VerifyingKey,
     ) -> Result<Self, Error> {
         // let pvk = ark_groth16::prepare_verifying_key(&verifying_key.0);
@@ -394,7 +394,7 @@ fn try_vk() -> Result<Vk, Error> {
 }
 
 // TODO
-pub fn prepare_inputs(pvk: &Pvk, public_inputs: &[substrate_bn::Fr]) -> Result<substrate_bn::G1> {
+pub fn prepare_inputs(pvk: &Pvk, public_inputs: &[Fr]) -> Result<substrate_bn::G1> {
     if (public_inputs.len() + 1) != pvk.vk.gamma_abc_g1.len() {
         return Err(anyhow!("Cannot prepare inputs, verifying key length should be 1 more than number of inputs (instead: {}, {})", pvk.vk.gamma_abc_g1.len(), public_inputs.len()));
     }
@@ -402,7 +402,7 @@ pub fn prepare_inputs(pvk: &Pvk, public_inputs: &[substrate_bn::Fr]) -> Result<s
     // TODO: A whole bunch of cloning that I may be able to avoid with proper types initially
     let mut res: substrate_bn::G1 = pvk.vk.gamma_abc_g1[0].clone().into();
     for (inp, ic) in public_inputs.iter().zip(pvk.vk.gamma_abc_g1.iter().skip(1)) {
-        res = res + substrate_bn::G1::from(ic.clone()) * *inp;
+        res = res + substrate_bn::G1::from(ic.clone()) * inp.0;
     }
 
     Ok(res)
