@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_groth16::{Fr, Seal, Verifier, VerifyingKey};
-use risc0_zkvm::{guest::env, sha::Digestible};
+use risc0_groth16::VerifyingKey;
+use risc0_zkvm::guest::env;
 
 pub fn main() {
     let vk: VerifyingKey = env::read();
