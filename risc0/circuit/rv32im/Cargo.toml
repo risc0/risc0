@@ -78,6 +78,7 @@ execute = [
   "dep:postcard",
   "dep:ringbuffer",
   "dep:smallvec",
+  "dep:rayon",
   "risc0-core/perf",
   "std",
 ]

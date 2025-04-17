@@ -14,13 +14,13 @@
 
 use std::collections::BTreeSet;
 
+use super::{node_idx, platform::*};
 use anyhow::{bail, Result};
 use bit_vec::BitVec;
 use derive_more::Debug;
+use rayon::prelude::*;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
 use risc0_zkp::core::digest::Digest;
-
-use super::{node_idx, platform::*};
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 
@@ -426,24 +426,27 @@ impl PagedMemory {
 
         let pre_state = self.image.image_id();
 
-        let mut sorted_keys: Vec<_> = self.page_states.keys().collect();
-        sorted_keys.sort();
+        let p: Vec<_> = self
+            .page_states
+            .iter()
+            .par_bridge()
+            .filter(|(node_idx, page_state)| {
+                page_state == &PageState::Dirty && *node_idx >= MEMORY_PAGES as u32
+            })
+            .map(|(node_idx, _page_state)| {
+                let page_idx = page_idx(node_idx);
 
-        for node_idx in sorted_keys {
-            if node_idx < MEMORY_PAGES as u32 {
-                continue;
-            }
-
-            let page_state = self.page_states.get(node_idx);
-            let page_idx = page_idx(node_idx);
-            tracing::trace!("commit: {page_idx:#08x}, state: {page_state:?}");
-
-            // Update dirty pages into the image that accumulates over a session.
-            if page_state == PageState::Dirty {
+                // Update dirty pages into the image that accumulates over a session.
                 let cache_idx = self.page_table.get(page_idx).unwrap();
-                let page = &self.page_cache[cache_idx];
-                self.image.set_page(page_idx, page.clone());
-            }
+                let page = self.page_cache[cache_idx].clone();
+                let digest = page.digest();
+                (page_idx, page, digest)
+            })
+            .collect();
+
+        for (page_idx, page, digest) in p {
+            self.image
+                .set_page_and_digest_unchecked(page_idx, page, digest);
         }
         self.image.update_digests();
 
