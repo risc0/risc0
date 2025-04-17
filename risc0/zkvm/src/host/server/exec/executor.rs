@@ -26,9 +26,8 @@ use risc0_binfmt::{
 };
 use risc0_circuit_rv32im::{
     execute::{
-        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
+        platform::WORD_SIZE, CycleLimit, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
-        CycleLimit,
     },
     MAX_INSN_CYCLES,
 };
@@ -182,52 +181,46 @@ impl<'a> ExecutorImpl<'a> {
         );
 
         let start_time = Instant::now();
-        let result = exec.run(
-            segment_limit_po2,
-            MAX_INSN_CYCLES,
-            session_limit,
-            |inner| {
-                let output = inner
-                    .claim
-                    .terminate_state
-                    .is_some()
-                    .then(|| -> Option<Result<_>> {
-                        inner
-                            .claim
-                            .output
-                            .and_then(|digest| {
-                                (digest != Digest::ZERO)
-                                    .then(|| journal.buf.lock().unwrap().clone())
+        let result = exec.run(segment_limit_po2, MAX_INSN_CYCLES, session_limit, |inner| {
+            let output = inner
+                .claim
+                .terminate_state
+                .is_some()
+                .then(|| -> Option<Result<_>> {
+                    inner
+                        .claim
+                        .output
+                        .and_then(|digest| {
+                            (digest != Digest::ZERO).then(|| journal.buf.lock().unwrap().clone())
+                        })
+                        .map(|journal| {
+                            Ok(Output {
+                                journal: journal.into(),
+                                assumptions: Assumptions(
+                                    self.syscall_table
+                                        .assumptions_used
+                                        .lock()
+                                        .unwrap()
+                                        .iter()
+                                        .map(|(a, _)| a.clone().into())
+                                        .collect::<Vec<_>>(),
+                                )
+                                .into(),
                             })
-                            .map(|journal| {
-                                Ok(Output {
-                                    journal: journal.into(),
-                                    assumptions: Assumptions(
-                                        self.syscall_table
-                                            .assumptions_used
-                                            .lock()
-                                            .unwrap()
-                                            .iter()
-                                            .map(|(a, _)| a.clone().into())
-                                            .collect::<Vec<_>>(),
-                                    )
-                                    .into(),
-                                })
-                            })
-                    })
-                    .flatten()
-                    .transpose()?;
+                        })
+                })
+                .flatten()
+                .transpose()?;
 
-                let segment = Segment {
-                    index: inner.index as u32,
-                    inner,
-                    output,
-                };
-                let segment_ref = callback(segment)?;
-                refs.push(segment_ref);
-                Ok(())
-            },
-        )?;
+            let segment = Segment {
+                index: inner.index as u32,
+                inner,
+                output,
+            };
+            let segment_ref = callback(segment)?;
+            refs.push(segment_ref);
+            Ok(())
+        })?;
         let elapsed = start_time.elapsed();
 
         tracing::debug!("output_digest: {:?}", result.claim.output);

@@ -20,7 +20,7 @@ use risc0_binfmt::MemoryImage;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    execute::{Executor, CycleLimit},
+    execute::{CycleLimit, Executor},
     Rv32imV2Claim, MAX_INSN_CYCLES,
 };
 
