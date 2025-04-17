@@ -14,6 +14,7 @@
 
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 use std::path::Path;
+use std::time::Instant;
 
 use anyhow::{bail, Result};
 use enum_map::EnumMap;
@@ -196,6 +197,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.reset();
 
         let mut emu = Emulator::new();
+        let mut segment_before = Instant::now();
         Risc0Machine::resume(self)?;
         let initial_digest = self.pager.image.image_id();
         tracing::debug!("initial_digest: {initial_digest}");
@@ -240,6 +242,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     );
                     Risc0Machine::suspend(self)?;
 
+                    let segment_time = segment_before.elapsed();
+                    println!("segment {}, {:.2?}", segment_counter, segment_time);
+
                     let (pre_image, pre_digest, post_digest) = self.pager.commit();
 
                     let req = ComputePartialImageRequest {
@@ -272,6 +277,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.user_cycles = 0;
                     self.pager.reset();
 
+                    segment_before = Instant::now();
                     Risc0Machine::resume(self)?;
                 }
 
@@ -286,6 +292,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             Risc0Machine::suspend(self)?;
+
+            let segment_time = segment_before.elapsed();
+            println!("segment {}, {:.2?}", segment_counter, segment_time);
 
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
