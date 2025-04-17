@@ -20,7 +20,7 @@ use risc0_binfmt::MemoryImage;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    execute::{testutil, Executor},
+    execute::{CycleLimit, Executor},
     Rv32imV2Claim, MAX_INSN_CYCLES,
 };
 
@@ -73,7 +73,7 @@ impl Segment {
         Executor::new(self.partial_image.clone(), &handler, None, vec![]).run(
             self.po2 as usize,
             MAX_INSN_CYCLES,
-            testutil::DEFAULT_SESSION_LIMIT,
+            CycleLimit::Soft(self.suspend_cycle.into()),
             |_| Ok(()),
         )?;
         Ok(())

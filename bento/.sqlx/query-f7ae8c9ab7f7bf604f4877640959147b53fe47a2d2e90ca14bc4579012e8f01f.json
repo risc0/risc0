@@ -1,0 +1,126 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                job_id,\n                task_id,\n                stream_id,\n                task_def,\n                prerequisites,\n                state as \"state: _\",\n                created_at,\n                started_at,\n                updated_at,\n                waiting_on,\n                progress,\n                retries,\n                max_retries,\n                timeout_secs,\n                output,\n                error\n            FROM tasks WHERE job_id = $1 AND task_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "job_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "task_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "stream_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "task_def",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "prerequisites",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "state: _",
+        "type_info": {
+          "Custom": {
+            "name": "task_state",
+            "kind": {
+              "Enum": [
+                "pending",
+                "ready",
+                "running",
+                "done",
+                "failed"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "started_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "waiting_on",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "progress",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 11,
+        "name": "retries",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "max_retries",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "timeout_secs",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 14,
+        "name": "output",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 15,
+        "name": "error",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "f7ae8c9ab7f7bf604f4877640959147b53fe47a2d2e90ca14bc4579012e8f01f"
+}
