@@ -28,6 +28,7 @@ use risc0_circuit_rv32im::{
     execute::{
         platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
+        CycleLimit,
     },
     MAX_INSN_CYCLES,
 };
@@ -167,6 +168,11 @@ impl<'a> ExecutorImpl<'a> {
             .segment_limit_po2
             .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
 
+        let session_limit = match self.env.session_limit {
+            Some(limit) => CycleLimit::Hard(limit),
+            None => CycleLimit::None,
+        };
+
         let mut refs = Vec::new();
         let mut exec = Executor::new(
             self.image.clone(),
@@ -179,7 +185,7 @@ impl<'a> ExecutorImpl<'a> {
         let result = exec.run(
             segment_limit_po2,
             MAX_INSN_CYCLES,
-            self.env.session_limit,
+            session_limit,
             |inner| {
                 let output = inner
                     .claim

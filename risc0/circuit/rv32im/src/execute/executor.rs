@@ -92,6 +92,11 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
+pub enum CycleLimit {
+    Hard(u64), // it is an error to exceed this limit
+    None,
+}
+
 struct ComputePartialImageRequest {
     image: MemoryImage,
     page_indexes: BTreeSet<u32>,
@@ -170,7 +175,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         &mut self,
         segment_po2: usize,
         max_insn_cycles: usize,
-        max_cycles: Option<u64>,
+        max_cycles: CycleLimit,
         callback: impl FnMut(Segment) -> Result<()> + Send,
     ) -> Result<ExecutorResult> {
         let segment_limit: u32 = 1 << segment_po2;
@@ -193,7 +198,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 scope.spawn(move || compute_partial_images(commit_recv, callback));
 
             while self.terminate_state.is_none() {
-                if let Some(max_cycles) = max_cycles {
+                if let CycleLimit::Hard(max_cycles) = max_cycles {
                     if self.cycles.user >= max_cycles {
                         bail!(
                             "Session limit exceeded: {} >= {max_cycles}",
