@@ -191,6 +191,13 @@ impl Verifier {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct VerifyingKey(pub(crate) Vk);
 
+impl VerifyingKey {
+    /// TODO: Only temporary for ease of temporary testing
+    pub fn clone_vk(&self) -> Vk {
+        self.0.clone()
+    }
+}
+
 // TODO: This was the arkworks approach:
 // /// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
 // fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
