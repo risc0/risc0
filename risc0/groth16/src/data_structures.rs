@@ -317,6 +317,30 @@ impl<'de> Deserialize<'de> for Vk {
                 formatter.write_str("struct Vk")
             }
 
+            // TODO: Add testing for visit_seq (JSON serialization uses the map path instead)
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let alpha_g1: G1data = seq.next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let beta_g2: G2data = seq.next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                let gamma_g2: G2data = seq.next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
+                let delta_g2: G2data = seq.next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(3, &self))?;
+                let gamma_abc_g1: G1dataVec = seq.next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(4, &self))?;
+                Ok(Vk {
+                    alpha_g1: alpha_g1.into(),
+                    beta_g2: beta_g2.into(),
+                    gamma_g2: gamma_g2.into(),
+                    delta_g2: delta_g2.into(),
+                    gamma_abc_g1: gamma_abc_g1.into(),
+                })
+            }
+
             fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
             where
                 V: serde::de::MapAccess<'de>,
