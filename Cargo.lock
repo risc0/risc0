@@ -5865,6 +5865,7 @@ dependencies = [
  "hex",
  "num-bigint 0.4.6",
  "num-traits",
+ "postcard",
  "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
