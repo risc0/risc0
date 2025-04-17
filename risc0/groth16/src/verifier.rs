@@ -188,8 +188,6 @@ impl Verifier {
 }
 
 /// Verifying key for Groth16 proofs.
-// TODO: Can we get away with fewer derives?
-// #[derive(Clone, Debug, Serialize, Deserialize)]
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct VerifyingKey(pub(crate) Vk);
 
@@ -376,4 +374,17 @@ pub fn prepare_inputs(pvk: &Pvk, public_inputs: &[Fr]) -> Result<substrate_bn::G
     }
 
     Ok(res)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_verifying_key_serde_roundtrip() {
+        let val = verifying_key();
+        let serialized = serde_json::to_string(&val).unwrap();
+        let roundtripped_val: VerifyingKey = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(roundtripped_val, val);
+    }
 }
