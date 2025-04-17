@@ -19,7 +19,8 @@ use core::fmt;
 
 use anyhow::{anyhow, Error, Result};
 // TODO
-// use serde::{Deserialize, Serialize, ser::SerializeStruct};
+use risc0_binfmt::{tagged_struct, Digestible};
+use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{ser::{SerializeSeq, SerializeStruct}, Deserialize, Serialize};
 
 use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
@@ -663,22 +664,22 @@ impl<'de> Deserialize<'de> for Fr {
     }
 }
 
-// TODO: Probably need this
-// impl Digestible for Fr {
-//     /// Compute a tagged hash of the [Fr] value.
-//     fn digest<S: Sha256>(&self) -> Digest {
-//         let mut buffer = Vec::<u8>::with_capacity(32);
-//         // Serialization into a pre-allocated buffer should never fail.
-//         self.0.serialize_uncompressed(&mut buffer).unwrap();
-//         // Convert to big-endian representation.
-//         buffer.reverse();
-//         tagged_struct::<S>(
-//             "risc0_groth16.Fr",
-//             &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
-//             &[],
-//         )
-//     }
-// }
+// TODO: Add a test for this?
+impl Digestible for Fr {
+    /// Compute a tagged hash of the [Fr] value.
+    fn digest<S: Sha256>(&self) -> Digest {
+        // TODO: Why not an array?
+        let mut buffer = Vec::<u8>::with_capacity(32);
+        // Serialization into a pre-allocated buffer should never fail.
+        self.0.into_u256().to_big_endian(&mut buffer).unwrap();
+        // TODO: Do we need the exact same digests as before? If so, figure out further what if any changes are needed
+        tagged_struct::<S>(
+            "risc0_groth16.Fr",
+            &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
+            &[],
+        )
+    }
+}
 
 /// A prepared groth16 verification key (TODO)
 /// 
