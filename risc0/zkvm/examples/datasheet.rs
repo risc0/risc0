@@ -557,7 +557,7 @@ impl Datasheet {
         // "shapella" is the name of ethereum block 17034870
         // this test runs one segment of a zeth run on that block
         println!("{}", name);
-        let segment = risc0_circuit_rv32im::execute::Segment::decode(&bytes).unwrap();
+        let segment = risc0_circuit_rv32im::execute::Segment::decode(bytes).unwrap();
 
         let start = Instant::now();
         segment.execute().unwrap();
