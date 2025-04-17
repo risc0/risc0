@@ -589,6 +589,7 @@ impl<'de> Deserialize<'de> for G2data {
                 }
             }
         }
+        // TODO: Shouldn't this be deserialize_seq?
         deserializer.deserialize_bytes(G2dataVisitor)
     }
 }
@@ -603,6 +604,62 @@ impl Fr {
     #[stability::unstable]
     pub fn substrate_fr(&self) -> substrate_bn::Fr {
         self.0
+    }
+}
+
+impl Serialize for Fr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut bytes = [0u8; 32];
+        // Note: Must do `into_u256().to_big_endian()` and not just `.to_big_endian()` because the
+        // latter writes in Montgomery form, and both `from_slice` and `new` expect canonical form
+        self.0.into_u256().to_big_endian(&mut bytes).expect("Only fails if output buffer isn't 32 bytes");
+        // serializer.serialize_bytes(&bytes)  // TODO: can only use if `visit_bytes` works
+        // TODO: Deprecate below code and replace with above once `serde_bytes` works
+        let mut seq = serializer.serialize_seq(Some(32))?;
+        for val in bytes {
+            seq.serialize_element(&val)?;
+        }
+        seq.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Fr {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct FrVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for FrVisitor {
+            type Value = Fr;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                // TODO: might be nicer message?
+                formatter.write_str("struct Fr")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::SeqAccess<'de>,
+            {
+                // TODO: I would rather use `visit_bytes`, but that requires figuring out the `serde_bytes` crate
+                let mut pos = 0usize;
+                let mut data = [0u8; 32];
+                for val in data.iter_mut() {
+                    *val = seq.next_element()?.ok_or_else(|| serde::de::Error::invalid_length(pos, &"32 bytes"))?;
+                    pos += 1;
+                }
+                match seq.next_element::<u8>()?.is_none() {
+                    true => Ok(Fr(substrate_bn::Fr::from_slice(&data).expect("Only fails if input buffer isn't 32 bytes"))),
+                    // TODO: Cleaner error
+                    false => Err(serde::de::Error::invalid_length(33, &"32 bytes (note: all lengths above 32 bytes are reported as 33 bytes)")),
+                }
+            }
+        }
+        deserializer.deserialize_seq(FrVisitor)
     }
 }
 
@@ -828,28 +885,37 @@ mod tests {
 
     #[test]
     fn test_g1_serde_roundtrip() {
-        let pt = substrate_bn::G1::one();
-        let serialized = serde_json::to_string(&G1data::from(pt)).unwrap();
+        let val = substrate_bn::G1::one();
+        let serialized = serde_json::to_string(&G1data::from(val)).unwrap();
         let deserialized: G1data = serde_json::from_str(&serialized).unwrap();
-        let roundtripped_pt: substrate_bn::G1 = deserialized.into();
-        assert_eq!(roundtripped_pt, pt);
+        let roundtripped_val: substrate_bn::G1 = deserialized.into();
+        assert_eq!(roundtripped_val, val);
     }
 
     #[test]
     fn test_g2_serde_roundtrip() {
-        let pt = substrate_bn::G2::one();
-        let serialized = serde_json::to_string(&G2data::from(pt)).unwrap();
+        let val = substrate_bn::G2::one();
+        let serialized = serde_json::to_string(&G2data::from(val)).unwrap();
         let deserialized: G2data = serde_json::from_str(&serialized).unwrap();
-        let roundtripped_pt: substrate_bn::G2 = deserialized.into();
-        assert_eq!(roundtripped_pt, pt);
+        let roundtripped_val: substrate_bn::G2 = deserialized.into();
+        assert_eq!(roundtripped_val, val);
     }
 
     #[test]
     fn test_vk_serde_roundtrip() {
-        let pt = substrate_bn::G2::one();
-        let serialized = serde_json::to_string(&G2data::from(pt)).unwrap();
+        let val = substrate_bn::G2::one();
+        let serialized = serde_json::to_string(&G2data::from(val)).unwrap();
         let deserialized: G2data = serde_json::from_str(&serialized).unwrap();
-        let roundtripped_pt: substrate_bn::G2 = deserialized.into();
-        assert_eq!(roundtripped_pt, pt);
+        let roundtripped_val: substrate_bn::G2 = deserialized.into();
+        assert_eq!(roundtripped_val, val);
+    }
+
+    #[test]
+    fn test_fr_serde_roundtrip() {
+        let val = substrate_bn::Fr::one();
+        let serialized = serde_json::to_string(&Fr(val)).unwrap();
+        let deserialized: Fr = serde_json::from_str(&serialized).unwrap();
+        let roundtripped_val: substrate_bn::Fr = deserialized.0;
+        assert_eq!(roundtripped_val, val);
     }
 }
