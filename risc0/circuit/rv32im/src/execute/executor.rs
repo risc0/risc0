@@ -160,9 +160,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     self.pc
                 );
                 Risc0Machine::suspend(self)?;
-
-                let (pre_digest, post_digest) = self.pager.commit();
                 let partial_image = self.pager.image.partial_image(self.pager.page_indexes())?;
+                let (pre_digest, post_digest) = self.pager.commit();
 
                 callback(Segment {
                     partial_image,
@@ -207,9 +206,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
 
         Risc0Machine::suspend(self)?;
-
-        let (pre_digest, post_digest) = self.pager.commit();
         let partial_image = self.pager.image.partial_image(self.pager.page_indexes())?;
+        let (pre_digest, post_digest) = self.pager.commit();
 
         let final_cycles = self.segment_cycles().next_power_of_two();
         let final_po2 = log2_ceil(final_cycles as usize);
@@ -272,9 +270,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 "Execution failure, saving segment to {}:",
                 dump_path.to_string_lossy()
             );
-
-            let (pre_digest, post_digest) = self.pager.commit();
             let partial_image = self.pager.image.partial_image(self.pager.page_indexes())?;
+            let (pre_digest, post_digest) = self.pager.commit();
 
             let segment = Segment {
                 partial_image,

@@ -340,19 +340,18 @@ impl MemoryImage {
         }
     }
 
-    /// Returns a partial image of a clean image. Panics if indexes are not available and returns error if dirty.
+    /// Returns a partial image of a clean image. Panics if indexes are not available.
     pub fn partial_image(&self, indexes: BTreeSet<u32>) -> Result<MemoryImage> {
-        if !self.dirty.is_empty() {
-            bail!("Cannot create partial image with dirty nodes");
-        }
         let mut image = MemoryImage::default();
         for node_idx in &indexes {
-            // non page (leaf) nodes
             if *node_idx < MEMORY_PAGES as u32 {
                 let lhs_idx = *node_idx * 2;
                 let rhs_idx = *node_idx * 2 + 1;
-
-                // Otherwise, add whichever child digest (if any) is not loaded
+                image
+                    .digests
+                    .insert(*node_idx, *self.get_existing_digest(*node_idx));
+                // TODO(ec2): Can we actually just not do this check?
+                // I've only ever seen the children included in `indexes`
                 if !indexes.contains(&lhs_idx) {
                     image
                         .digests
@@ -365,6 +364,7 @@ impl MemoryImage {
                 }
             } else {
                 let page_idx = *node_idx - MEMORY_PAGES as u32;
+                // Copy original state of all pages accessed in this segment.
                 image
                     .digests
                     .insert(*node_idx, *self.get_existing_digest(*node_idx));
@@ -373,7 +373,6 @@ impl MemoryImage {
                     .insert(page_idx, self.get_existing_page(page_idx));
             }
         }
-
         Ok(image)
     }
 }
