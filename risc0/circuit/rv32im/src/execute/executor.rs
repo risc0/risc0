@@ -146,7 +146,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 }
             }
 
-            if self.segment_cycles() >= segment_threshold {
+            if self.segment_cycles() > segment_threshold {
                 tracing::debug!(
                         "split(phys: {} + pager: {} + reserved: {RESERVED_CYCLES}) = {} >= {segment_threshold}",
                         self.user_cycles,
