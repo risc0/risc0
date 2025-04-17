@@ -593,18 +593,33 @@ impl<'de> Deserialize<'de> for G2data {
     }
 }
 
-// impl Serialize for Vk {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: serde::Serializer,
-//     {
-//         let mut state = serializer.serialize_struct("Vk", 5)?;
-//         let mut alpha_g1_x = [0u8; 32];  // TODO: Just experimenting
-//         self.alpha_g1.x().to_big_endian(&mut alpha_g1_x[0..32]);
-//         // self.alpha_g1.x().to_big_endian(&mut alpha_g1[0..32]);
-//         // self.alpha_g1.y().to_big_endian(&mut alpha_g1[32..64]);
-//         // self.alpha_g1.z().to_big_endian(&mut alpha_g1[64..96]);
-//         state.serialize_field("alpha_g1", &alpha_g1_x)?;
+/// Verifying key for Groth16 proofs.
+// TODO: Want full traits
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+pub struct Fr(pub(crate) substrate_bn::Fr);
+
+impl Fr {
+    #[stability::unstable]
+    pub fn substrate_fr(&self) -> substrate_bn::Fr {
+        self.0
+    }
+}
+
+// TODO: Probably need this
+// impl Digestible for Fr {
+//     /// Compute a tagged hash of the [Fr] value.
+//     fn digest<S: Sha256>(&self) -> Digest {
+//         let mut buffer = Vec::<u8>::with_capacity(32);
+//         // Serialization into a pre-allocated buffer should never fail.
+//         self.0.serialize_uncompressed(&mut buffer).unwrap();
+//         // Convert to big-endian representation.
+//         buffer.reverse();
+//         tagged_struct::<S>(
+//             "risc0_groth16.Fr",
+//             &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
+//             &[],
+//         )
 //     }
 // }
 
