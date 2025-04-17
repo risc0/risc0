@@ -31,6 +31,7 @@ tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", optional = true }
 
 [dev-dependencies]
+postcard = { version = "1.1.1" }
 serde_json = { version = "1.0" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 

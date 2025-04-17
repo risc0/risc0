@@ -317,7 +317,6 @@ impl<'de> Deserialize<'de> for Vk {
                 formatter.write_str("struct Vk")
             }
 
-            // TODO: Add testing for visit_seq (JSON serialization uses the map path instead)
             fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
             where
                 A: serde::de::SeqAccess<'de>,
@@ -904,6 +903,12 @@ mod tests {
         let mut vk_manipulated = vk.clone();
         vk_manipulated.0.beta_g2 = vk_manipulated.0.beta_g2 + substrate_bn::G2::one();
         assert_ne!(roundtripped_vk, vk_manipulated);
+
+        // Now test serde w/ postcard roundtrip
+        // postcard exercises the `visit_seq` path of deserialization
+        let serialized = postcard::to_allocvec(&vk).unwrap();
+        let roundtripped_vk: VerifyingKey = postcard::from_bytes(&serialized).unwrap();
+        assert_eq!(roundtripped_vk, vk);
     }
 
     #[test]
