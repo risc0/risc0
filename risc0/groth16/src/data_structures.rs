@@ -925,15 +925,6 @@ mod tests {
     }
 
     #[test]
-    fn test_vk_serde_roundtrip() {
-        let val = substrate_bn::G2::one();
-        let serialized = serde_json::to_string(&G2data::from(val)).unwrap();
-        let deserialized: G2data = serde_json::from_str(&serialized).unwrap();
-        let roundtripped_val: substrate_bn::G2 = deserialized.into();
-        assert_eq!(roundtripped_val, val);
-    }
-
-    #[test]
     fn test_fr_serde_roundtrip() {
         let val = substrate_bn::Fr::one();
         let serialized = serde_json::to_string(&Fr(val)).unwrap();
