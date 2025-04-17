@@ -620,9 +620,7 @@ impl<'de> Deserialize<'de> for G2data {
 }
 
 /// Verifying key for Groth16 proofs.
-// TODO: Want full traits
-// #[derive(Clone, Debug, Serialize, Deserialize)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Fr(pub(crate) substrate_bn::Fr);
 
 impl Fr {
