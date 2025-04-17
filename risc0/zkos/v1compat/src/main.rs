@@ -41,6 +41,7 @@ mod zkvm {
     const USER_END_ADDR: usize = 0xc000_0000;
     const REG_A0: usize = 10;
     const REG_A1: usize = 11;
+    const REG_A4: usize = 14;
 
     const SHA_K: [u32; 64] = [
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4,
@@ -198,10 +199,16 @@ mod zkvm {
     }
 
     #[no_mangle]
-    unsafe extern "C" fn ecall_software(fd: u32, mut buf: *const u8, mut len: u32) -> ! {
+    unsafe extern "C" fn ecall_software(fd: u32, mut buf: *const u8, mut len: u32) {
         // use no_std_strings::{str256, str_format};
         // let msg = str_format!(str256, "ecall_software_slow({fd:#010x}, {buf:?}, {len})");
         // print(msg.to_str());
+
+        if read_syscall_ptr(fd) != b"risc0_zkvm_platform::syscall::nr::SYS_READ" {
+            panic!(
+                "host_ecall_read with length > 1024 not supported for syscalls other than sys_read"
+            );
+        }
 
         let (mut nbytes, mut last_word) = (0u32, 0u32);
 
@@ -229,11 +236,21 @@ mod zkvm {
 
         set_ureg(REG_A0, nbytes);
         set_ureg(REG_A1, last_word);
+    }
 
-        asm!("mret", options(noreturn))
+    unsafe fn read_syscall_ptr(fd: u32) -> &'static [u8] {
+        let start = fd as *const u8;
+        let mut size = 0;
+        while *start.add(size) != 0 {
+            size += 1;
+        }
+        core::slice::from_raw_parts(start, size)
     }
 
     unsafe fn host_ecall_read(fd: u32, buf: *const u8, len: u32) -> u32 {
+        // For sys_read this also contains the length, so we need to update it.
+        set_ureg(REG_A4, len);
+
         let rlen: u32;
         asm!("ecall",
             in("a7") HOST_ECALL_READ,
