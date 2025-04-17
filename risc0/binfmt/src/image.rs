@@ -340,7 +340,7 @@ impl MemoryImage {
         }
     }
 
-    /// Returns a partial image of a clean image. Panics if indexes are not available.
+    /// Returns a partial image from indices. Panics if indexes are not available.
     pub fn partial_image(&self, indexes: BTreeSet<u32>) -> Result<MemoryImage> {
         let mut image = MemoryImage::default();
         for node_idx in &indexes {
@@ -350,8 +350,6 @@ impl MemoryImage {
                 image
                     .digests
                     .insert(*node_idx, *self.get_existing_digest(*node_idx));
-                // TODO(ec2): Can we actually just not do this check?
-                // I've only ever seen the children included in `indexes`
                 if !indexes.contains(&lhs_idx) {
                     image
                         .digests
