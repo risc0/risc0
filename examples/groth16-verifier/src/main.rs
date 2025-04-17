@@ -14,7 +14,7 @@
 
 use groth16_verifier_methods::{INPUTS_TEST_PUB_INP_ELF, INPUTS_TEST_PUB_INP_ID};
 use groth16_verifier_methods::{INPUTS_TEST_SEAL_ELF, INPUTS_TEST_SEAL_ID};
-use groth16_verifier_methods::{INPUTS_TEST_VK_ELF, INPUTS_TEST_VK_ID};
+use groth16_verifier_methods::{INPUTS_TEST_VERIFYING_KEY_ELF, INPUTS_TEST_VERIFYING_KEY_ID};
 use groth16_verifier_methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
 use risc0_groth16::{
     Fr, ProofJson, PublicInputsJson, Seal, Verifier, VerifyingKey, VerifyingKeyJson,
@@ -74,7 +74,7 @@ fn inputs_test_seal(seal: &Seal) {
     // assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_seal`");
 }
 
-fn inputs_test_vk(vk: &VerifyingKey) {
+fn inputs_test_verifying_key(vk: &VerifyingKey) {
     let env = ExecutorEnv::builder()
         .write(&vk)
         .unwrap()
@@ -83,16 +83,16 @@ fn inputs_test_vk(vk: &VerifyingKey) {
 
     // We run the prover to generate a receipt of correct verification
     let receipt = default_prover()
-        .prove(env, INPUTS_TEST_VK_ELF)
+        .prove(env, INPUTS_TEST_VERIFYING_KEY_ELF)
         .unwrap()
         .receipt;
 
     // We verify the final receipt, which recursively verifies the Groth16 proof.
-    receipt.verify(INPUTS_TEST_VK_ID).unwrap();
+    receipt.verify(INPUTS_TEST_VERIFYING_KEY_ID).unwrap();
 
     let new_vk: VerifyingKey = receipt.journal.decode().unwrap();
     assert_eq!(new_vk, *vk);
-    assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_vk`");
+    assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_verifying_key`");
 }
 
 fn main() {
@@ -111,7 +111,7 @@ fn main() {
 
     inputs_test_seal(&seal);
     inputs_test_pub_inp(&public_inputs);
-    inputs_test_vk(&verifying_key);
+    inputs_test_verifying_key(&verifying_key);
 
     // groth16 proof verification on the host, to check that it is indeed a verifying proof.
     Verifier::new(&seal, &public_inputs, &verifying_key)
