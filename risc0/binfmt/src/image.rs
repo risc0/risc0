@@ -339,6 +339,40 @@ impl MemoryImage {
             self.digests.insert(idx, parent_digest);
         }
     }
+
+    /// Returns a partial image from indices. Panics if indexes are not available.
+    pub fn partial_image(&self, indexes: BTreeSet<u32>) -> Result<MemoryImage> {
+        let mut image = MemoryImage::default();
+        for node_idx in &indexes {
+            if *node_idx < MEMORY_PAGES as u32 {
+                let lhs_idx = *node_idx * 2;
+                let rhs_idx = *node_idx * 2 + 1;
+                image
+                    .digests
+                    .insert(*node_idx, *self.get_existing_digest(*node_idx));
+                if !indexes.contains(&lhs_idx) {
+                    image
+                        .digests
+                        .insert(lhs_idx, *self.get_existing_digest(lhs_idx));
+                }
+                if !indexes.contains(&rhs_idx) {
+                    image
+                        .digests
+                        .insert(rhs_idx, *self.get_existing_digest(rhs_idx));
+                }
+            } else {
+                let page_idx = *node_idx - MEMORY_PAGES as u32;
+                // Copy original state of all pages accessed in this segment.
+                image
+                    .digests
+                    .insert(*node_idx, *self.get_existing_digest(*node_idx));
+                image
+                    .pages
+                    .insert(page_idx, self.get_existing_page(page_idx));
+            }
+        }
+        Ok(image)
+    }
 }
 
 impl Default for Page {

@@ -419,12 +419,11 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn commit(&mut self) -> (MemoryImage, Digest, Digest) {
+    pub(crate) fn commit(&mut self) -> (Digest, Digest) {
         // tracing::trace!("commit: {self:#?}");
 
         self.write_registers();
 
-        let pre_image = self.image.clone();
         let pre_state = self.image.image_id();
 
         let mut sorted_keys: Vec<_> = self.page_states.keys().collect();
@@ -449,7 +448,7 @@ impl PagedMemory {
         self.image.update_digests();
 
         let post_state = self.image.image_id();
-        (pre_image, pre_state, post_state)
+        (pre_state, post_state)
     }
 
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
@@ -509,45 +508,4 @@ impl PagedMemory {
 
 pub(crate) fn page_idx(node_idx: u32) -> u32 {
     node_idx - MEMORY_PAGES as u32
-}
-
-pub(crate) fn compute_partial_image(
-    input_image: MemoryImage,
-    indexes: BTreeSet<u32>,
-) -> MemoryImage {
-    let mut image = MemoryImage::default();
-
-    for node_idx in &indexes {
-        if *node_idx < MEMORY_PAGES as u32 {
-            continue;
-        }
-
-        let page_idx = page_idx(*node_idx);
-
-        // Copy original state of all pages accessed in this segment.
-        image.set_page(page_idx, input_image.get_existing_page(page_idx));
-    }
-
-    // Add minimal needed 'uncles'
-    for node_idx in &indexes {
-        // If this is a leaf, break
-        if *node_idx >= MEMORY_PAGES as u32 {
-            break;
-        }
-
-        let lhs_idx = *node_idx * 2;
-        let rhs_idx = *node_idx * 2 + 1;
-
-        // Otherwise, add whichever child digest (if any) is not loaded
-        if !indexes.contains(&lhs_idx) {
-            image.set_digest(lhs_idx, *input_image.get_existing_digest(lhs_idx));
-        }
-        if !indexes.contains(&rhs_idx) {
-            image.set_digest(rhs_idx, *input_image.get_existing_digest(rhs_idx));
-        }
-    }
-
-    image.update_digests();
-
-    image
 }
