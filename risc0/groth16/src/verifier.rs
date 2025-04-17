@@ -26,7 +26,7 @@ use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    from_u256, ProofJson, PublicInputsJson, Pvk, Seal, VerifyingKeyJson, Vk,
+    from_u256, Fr, ProofJson, PublicInputsJson, Pvk, Seal, VerifyingKeyJson, Vk,
 };
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
@@ -186,36 +186,6 @@ impl Verifier {
         // }
     }
 }
-
-/// Verifying key for Groth16 proofs.
-// TODO: Want full traits
-// #[derive(Clone, Debug, Serialize, Deserialize)]
-#[derive(Clone, Debug)]
-pub struct Fr(pub(crate) substrate_bn::Fr);
-
-impl Fr {
-    #[stability::unstable]
-    pub fn substrate_fr(&self) -> substrate_bn::Fr {
-        self.0
-    }
-}
-
-// TODO: Probably need this
-// impl Digestible for Fr {
-//     /// Compute a tagged hash of the [Fr] value.
-//     fn digest<S: Sha256>(&self) -> Digest {
-//         let mut buffer = Vec::<u8>::with_capacity(32);
-//         // Serialization into a pre-allocated buffer should never fail.
-//         self.0.serialize_uncompressed(&mut buffer).unwrap();
-//         // Convert to big-endian representation.
-//         buffer.reverse();
-//         tagged_struct::<S>(
-//             "risc0_groth16.Fr",
-//             &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
-//             &[],
-//         )
-//     }
-// }
 
 /// Verifying key for Groth16 proofs.
 // TODO: Can we get away with fewer derives?
