@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO: Temporarily allow as part of temporary `pub` nautre of this crate (for tests)
+#![allow(missing_docs)]
+
 extern crate alloc;
 
 use alloc::{string::String, vec, vec::Vec};
@@ -19,6 +22,7 @@ use core::fmt;
 
 use anyhow::{anyhow, Error, Result};
 // TODO
+use substrate_bn::Group;
 use risc0_binfmt::{tagged_struct, Digestible};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{ser::{SerializeSeq, SerializeStruct}, Deserialize, Serialize};
@@ -427,8 +431,18 @@ impl From<G1dataVec> for Vec<substrate_bn::G1> {
     }
 }
 
+// TODO: Temporarily `pub` as scaffolding for some temporary tests
 // TODO: Helper struct for Vk serialization
-struct G1data([u8; 96]);
+// TODO: Not sure I need any of these traits, but nice for testing
+#[derive(Debug, Eq, PartialEq)]
+pub struct G1data([u8; 96]);
+
+// TODO: Temporary, just for some temporary tests
+impl G1data {
+    pub fn one() -> Self {
+        substrate_bn::G1::one().into()
+    }
+}
 
 impl From<substrate_bn::G1> for G1data {
     fn from(item: substrate_bn::G1) -> Self {
@@ -913,10 +927,21 @@ mod tests {
 
     #[test]
     fn test_g1_serde_roundtrip() {
-        let val = substrate_bn::G1::one();
-        let serialized = serde_json::to_string(&G1data::from(val)).unwrap();
-        let deserialized: G1data = serde_json::from_str(&serialized).unwrap();
-        let roundtripped_val: substrate_bn::G1 = deserialized.into();
+        // TODO: Below is the real version
+        // let val = substrate_bn::G1::one();
+        // let serialized = serde_json::to_string(&G1data::from(val)).unwrap();
+        // let deserialized: G1data = serde_json::from_str(&serialized).unwrap();
+        // let roundtripped_val: substrate_bn::G1 = deserialized.into();
+        // TODO: End of the real version, now the temporary version
+        let val = G1data::one();
+        let serialized = serde_json::to_string(&val).unwrap();
+        let roundtripped_val: G1data = serde_json::from_str(&serialized).unwrap();
+        // TODO: End of the temporary version, now shared code
+        assert_eq!(roundtripped_val, val);
+
+        // TODO: Temporarily (?) testing with postcard too
+        let serialized = postcard::to_allocvec(&val).unwrap();
+        let roundtripped_val: G1data = postcard::from_bytes(&serialized).unwrap();
         assert_eq!(roundtripped_val, val);
     }
 

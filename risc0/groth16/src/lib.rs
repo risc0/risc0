@@ -76,7 +76,7 @@ use anyhow::{anyhow, Error, Result};
 use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
 
-mod data_structures;
+pub mod data_structures;  // TODO: Temporarily `pub` for scaffolding for temporary test
 #[cfg(feature = "prove")]
 pub mod docker;
 #[cfg(feature = "prove")]

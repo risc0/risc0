@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use groth16_verifier_methods::{INPUTS_TEST_G1DATA_ELF, INPUTS_TEST_G1DATA_ID};
 use groth16_verifier_methods::{INPUTS_TEST_PUB_INP_ELF, INPUTS_TEST_PUB_INP_ID};
 use groth16_verifier_methods::{INPUTS_TEST_SEAL_ELF, INPUTS_TEST_SEAL_ID};
 use groth16_verifier_methods::{INPUTS_TEST_VERIFYING_KEY_ELF, INPUTS_TEST_VERIFYING_KEY_ID};
@@ -21,7 +22,7 @@ use risc0_groth16::{
     Fr, ProofJson, PublicInputsJson, Seal, Verifier, VerifyingKey, VerifyingKeyJson,
 };
 // TODO: Clean up
-use risc0_groth16::Vk;
+use risc0_groth16::{Vk, data_structures::G1data};
 use risc0_zkvm::{
     default_prover,
     sha::{Digest, Digestible},
@@ -31,6 +32,27 @@ use risc0_zkvm::{
 const PROOF: &str = include_str!("data/proof.json");
 const PUBLIC_INPUTS: &str = include_str!("data/public.json");
 const VERIFICATION_KEY: &str = include_str!("data/verification_key.json");
+
+fn inputs_test_g1data(g1data: &G1data) {
+    let env = ExecutorEnv::builder()
+        .write(&g1data)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    // We run the prover to generate a receipt of correct verification
+    let receipt = default_prover()
+        .prove(env, INPUTS_TEST_G1DATA_ELF)
+        .unwrap()
+        .receipt;
+
+    // We verify the final receipt, which recursively verifies the Groth16 proof.
+    receipt.verify(INPUTS_TEST_G1DATA_ID).unwrap();
+
+    let new_g1data: G1data = receipt.journal.decode().unwrap();
+    assert_eq!(new_g1data, *g1data);
+    assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_g1data`");
+}
 
 fn inputs_test_pub_inp(pub_inp: &Vec<Fr>) {
     let env = ExecutorEnv::builder()
@@ -135,6 +157,7 @@ fn main() {
 
     inputs_test_seal(&seal);
     inputs_test_pub_inp(&public_inputs);
+    inputs_test_g1data(&G1data::one());
     inputs_test_vk(&verifying_key.clone_vk());
     inputs_test_verifying_key(&verifying_key);
 
