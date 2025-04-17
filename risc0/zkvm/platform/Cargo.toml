@@ -20,6 +20,7 @@ embedded-alloc = { version = "0.6.0", features = [
   "allocator_api",
 ], optional = true }
 getrandom = { version = "0.3", optional = true }
+getrandom-v2 = { version = "0.2", package = "getrandom", features = ["custom"], optional = true }
 libm = { version = "0.2", optional = true }
 
 [package.metadata.docs.rs]
@@ -39,7 +40,7 @@ features = [
 default = []
 entrypoint = []
 # exports a `getrandom` implementation that panics
-export-getrandom = ["dep:bytemuck", "dep:getrandom"]
+export-getrandom = ["dep:bytemuck", "dep:getrandom", "dep:getrandom-v2"]
 export-libm = ["dep:libm"]
 export-syscalls = []
 # exports a `getrandom` implementation that uses sys_random
