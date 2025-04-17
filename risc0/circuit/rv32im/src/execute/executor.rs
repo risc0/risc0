@@ -92,6 +92,12 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
+pub enum CycleLimit {
+    Hard(u64), // it is an error to exceed this limit
+    Soft(u64), // stop execution after this cycle count
+    None,
+}
+
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn new(
         image: MemoryImage,
@@ -121,7 +127,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         &mut self,
         segment_po2: usize,
         max_insn_cycles: usize,
-        max_cycles: Option<u64>,
+        max_cycles: CycleLimit,
         mut callback: impl FnMut(Segment) -> Result<()> + Send,
     ) -> Result<ExecutorResult> {
         let segment_limit: u32 = 1 << segment_po2;
@@ -137,13 +143,21 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         tracing::debug!("initial_digest: {initial_digest}");
 
         while self.terminate_state.is_none() {
-            if let Some(max_cycles) = max_cycles {
-                if self.cycles.user >= max_cycles {
-                    bail!(
-                        "Session limit exceeded: {} >= {max_cycles}",
-                        self.cycles.user
-                    );
+            match max_cycles {
+                CycleLimit::Hard(max_cycles) => {
+                    if self.cycles.user >= max_cycles {
+                        bail!(
+                            "Session limit exceeded: {} >= {max_cycles}",
+                            self.cycles.user
+                        );
+                    }
                 }
+                CycleLimit::Soft(max_cycles) => {
+                    if self.cycles.user >= max_cycles {
+                        break;
+                    }
+                }
+                CycleLimit::None => {}
             }
 
             if self.segment_cycles() > segment_threshold {

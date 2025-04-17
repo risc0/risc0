@@ -29,7 +29,7 @@ pub mod testutil;
 
 pub use self::{
     bigint::analyze::analyze as bigint_analyze,
-    executor::{EcallMetric, Executor, ExecutorResult, SimpleSession},
+    executor::{CycleLimit, EcallMetric, Executor, ExecutorResult, SimpleSession},
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},
