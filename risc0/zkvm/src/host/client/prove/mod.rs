@@ -241,7 +241,7 @@ impl ProverOpts {
     /// and does not support compression via recursion.
     pub fn fast() -> Self {
         Self {
-            hashfn: "sha-256".to_string(),
+            hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: Vec::new(),

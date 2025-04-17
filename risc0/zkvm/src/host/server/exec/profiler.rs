@@ -532,12 +532,12 @@ impl Profiler {
                     self.call_stack_path.pop();
                 }
 
-                self.call_stack_path.pop().ok_or_else(|| {
-                    anyhow!("attempted to follow a return with an empty call stack")
-                })?;
-                let popped = self.pop_stack.pop().ok_or_else(|| {
-                    anyhow!("attempted to follow a return with an empty call stack")
-                })?;
+                if self.call_stack_path.pop().is_none() {
+                    break;
+                }
+                let Some(popped) = self.pop_stack.pop() else {
+                    break;
+                };
                 *update_stack = true;
                 if popped == pc - 4 {
                     break;
@@ -549,12 +549,13 @@ impl Profiler {
                         self.call_stack_path.pop();
                     }
 
-                    self.call_stack_path.pop().ok_or_else(|| {
-                        anyhow!("attempted to follow a return with an empty call stack")
-                    })?;
-                    let popped = self.pop_stack.pop().ok_or_else(|| {
-                        anyhow!("attempted to follow a return with an empty call stack")
-                    })?;
+                    if self.call_stack_path.pop().is_none() {
+                        break;
+                    }
+
+                    let Some(popped) = self.pop_stack.pop() else {
+                        break;
+                    };
                     if popped == pc - 4 {
                         break;
                     }
