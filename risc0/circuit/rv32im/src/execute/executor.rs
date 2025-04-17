@@ -94,6 +94,7 @@ pub struct SimpleSession {
 
 pub enum CycleLimit {
     Hard(u64), // it is an error to exceed this limit
+    Soft(u64), // stop execution after this cycle count
     None,
 }
 
@@ -198,13 +199,21 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 scope.spawn(move || compute_partial_images(commit_recv, callback));
 
             while self.terminate_state.is_none() {
-                if let CycleLimit::Hard(max_cycles) = max_cycles {
-                    if self.cycles.user >= max_cycles {
-                        bail!(
-                            "Session limit exceeded: {} >= {max_cycles}",
-                            self.cycles.user
-                        );
+                match max_cycles {
+                    CycleLimit::Hard(max_cycles) => {
+                        if self.cycles.user >= max_cycles {
+                            bail!(
+                                "Session limit exceeded: {} >= {max_cycles}",
+                                self.cycles.user
+                            );
+                        }
                     }
+                    CycleLimit::Soft(max_cycles) => {
+                        if self.cycles.user >= max_cycles {
+                            break;
+                        }
+                    }
+                    CycleLimit::None => {}
                 }
 
                 if self.segment_cycles() > segment_threshold {
