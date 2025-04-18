@@ -629,6 +629,8 @@ impl<'de> Deserialize<'de> for G2data {
     }
 }
 
+// TODO: Verify here (and other places I added `Eq` that we want the traits and they're correct)
+// (Not here, but on the G* types, for instance, are there different projective representations?)
 /// Verifying key for Groth16 proofs.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Fr(pub(crate) substrate_bn::Fr);
