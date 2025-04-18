@@ -700,10 +700,8 @@ impl<'de> Deserialize<'de> for Fr {
 impl Digestible for Fr {
     /// Compute a tagged hash of the [Fr] value.
     fn digest<S: Sha256>(&self) -> Digest {
-        // TODO: Why not an array?
-        let mut buffer = Vec::<u8>::with_capacity(32);
-        // Serialization into a pre-allocated buffer should never fail.
-        self.0.into_u256().to_big_endian(&mut buffer).unwrap();
+        let mut buffer = [0u8; 32];
+        self.0.into_u256().to_big_endian(&mut buffer).expect("can't fail if output buffer is 32 bytes");
         // TODO: Do we need the exact same digests as before? If so, figure out further what if any changes are needed
         tagged_struct::<S>(
             "risc0_groth16.Fr",
