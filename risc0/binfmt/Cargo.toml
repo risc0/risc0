@@ -23,6 +23,7 @@ derive_more = { version = "2.0.1", default-features = false, features = [
 elf = { version = "0.7", default-features = false }
 lazy_static = { version = "1.5.0", features = ["spin_no_std"] }
 postcard = { version = "1", default-features = false, features = ["alloc"] }
+rayon = { version = "1.10" }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 semver = { version = "1", default-features = false, features = ["serde"] }

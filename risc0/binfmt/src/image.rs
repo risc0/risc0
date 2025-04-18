@@ -36,6 +36,8 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
+use rayon::{iter::IndexedParallelIterator, prelude::*};
+
 use crate::{
     addr::{ByteAddr, WordAddr},
     Program, PAGE_BYTES, PAGE_WORDS, WORD_SIZE,
@@ -338,15 +340,22 @@ impl MemoryImage {
     /// After making changes to the image, call this to update all the digests
     /// that need to be updated.
     pub fn update_digests(&mut self) {
-        let dirty: Vec<_> = mem::take(&mut self.dirty).into_iter().collect();
-        for idx in dirty.into_iter().rev() {
-            let lhs_idx = idx * 2;
-            let rhs_idx = idx * 2 + 1;
-            let lhs = *self.digests.get(&lhs_idx).unwrap();
-            let rhs = *self.digests.get(&rhs_idx).unwrap();
+        let dirty = mem::take(&mut self.dirty)
+            .into_iter()
+            .rev()
+            .par_bridge()
+            .map(|idx| {
+                let lhs_idx = idx * 2;
+                let rhs_idx = idx * 2 + 1;
+                let lhs = *self.digests.get(&lhs_idx).unwrap();
+                let rhs = *self.digests.get(&rhs_idx).unwrap();
 
-            let parent_digest = DigestPair { lhs, rhs }.digest();
-            self.digests.insert(idx, parent_digest);
+                let parent_digest = DigestPair { lhs, rhs }.digest();
+                (idx, parent_digest)
+            })
+            .collect::<Vec<_>>();
+        for (idx, digest) in dirty.into_iter() {
+            self.digests.insert(idx, digest);
         }
     }
 
