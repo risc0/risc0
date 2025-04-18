@@ -11,8 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-use anyhow::Result;
+use anyhow::{bail, Result};
 
 use super::{Syscall, SyscallContext};
 
@@ -22,8 +21,12 @@ impl Syscall for SysCycleCount {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        if !to_guest.is_empty() {
+            bail!("invalid sys_cycle_count call");
+        }
+
         let cycle = ctx.get_cycle();
         let hi = (cycle >> 32) as u32;
         let lo = cycle as u32;

@@ -198,17 +198,17 @@ mod zkvm {
         );
     }
 
+    /// This is called from kernel.s when the ecall_software buffer size if greater than 1024. It
+    /// tries to chunk the host_ecall_read calls up. Only sys_read, sys_random, sys_slice_io
+    /// support this.
+    ///
+    /// Other syscalls either require a buffer of size zero, or they will error if the first call
+    /// doesn't return all the data.
     #[no_mangle]
     unsafe extern "C" fn ecall_software(fd: u32, mut buf: *const u8, mut len: u32) {
         // use no_std_strings::{str256, str_format};
         // let msg = str_format!(str256, "ecall_software_slow({fd:#010x}, {buf:?}, {len})");
         // print(msg.to_str());
-
-        if read_syscall_ptr(fd) != b"risc0_zkvm_platform::syscall::nr::SYS_READ" {
-            panic!(
-                "host_ecall_read with length > 1024 not supported for syscalls other than sys_read"
-            );
-        }
 
         let (mut nbytes, mut last_word) = (0u32, 0u32);
 
@@ -238,17 +238,11 @@ mod zkvm {
         set_ureg(REG_A1, last_word);
     }
 
-    unsafe fn read_syscall_ptr(fd: u32) -> &'static [u8] {
-        let start = fd as *const u8;
-        let mut size = 0;
-        while *start.add(size) != 0 {
-            size += 1;
-        }
-        core::slice::from_raw_parts(start, size)
-    }
-
     unsafe fn host_ecall_read(fd: u32, buf: *const u8, len: u32) -> u32 {
-        // For sys_read this also contains the length, so we need to update it.
+        // For sys_read and sys_getenv this contains the length, so we need to update it.
+        // For sys_argv this register is unused, so it doesn't matter.
+        // For sys_random this register is unused, so it doesn't matter.
+        // For other syscalls, we might clobber something, but they'll error because length is > 0
         set_ureg(REG_A4, len);
 
         let rlen: u32;
