@@ -15,6 +15,7 @@
 use std::cmp::min;
 
 use anyhow::{anyhow, bail, Result};
+use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
 use risc0_zkvm_platform::{
     syscall::{
         nr::{SYS_ARGC, SYS_ARGV},
@@ -36,6 +37,10 @@ impl Syscall for SysArgs {
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         if syscall == SYS_ARGC.as_str() {
+            if !to_guest.is_empty() {
+                bail!("invalid sys_argc call");
+            }
+
             Ok((self.0.len().try_into()?, 0))
         } else if syscall == SYS_ARGV.as_str() {
             // Get the arg or return an error if out of bounds.
@@ -50,6 +55,11 @@ impl Syscall for SysArgs {
             let nbytes = min(to_guest.len() * WORD_SIZE, arg_val.len());
             let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
             to_guest_u8s[0..nbytes].clone_from_slice(&arg_val.as_bytes()[0..nbytes]);
+
+            if arg_val.len() == MAX_IO_BYTES as usize {
+                bail!("sys_argv failure: argv is too large");
+            }
+
             Ok((arg_val.len() as u32, 0))
         } else {
             bail!("Unknown syscall {syscall}")

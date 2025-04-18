@@ -935,7 +935,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",

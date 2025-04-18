@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::{
     syscall::reg_abi::{REG_A3, REG_A4, REG_A5},
@@ -93,8 +93,12 @@ impl Syscall for SysWrite {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        if !to_guest.is_empty() {
+            bail!("invalid sys_write call");
+        }
+
         let fd = ctx.load_register(REG_A3);
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let buf_len = ctx.load_register(REG_A5);

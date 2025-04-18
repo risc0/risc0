@@ -24,8 +24,12 @@ impl Syscall for SysPanic {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        if !to_guest.is_empty() {
+            bail!("invalid sys_panic call");
+        }
+
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;

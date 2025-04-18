@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bytes::Bytes;
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, cmp::min, rc::Rc};
 
 use risc0_binfmt::ByteAddr;
-use risc0_zkvm_platform::{
-    syscall::reg_abi::{REG_A3, REG_A4},
-    WORD_SIZE,
-};
+use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
 use crate::host::client::slice_io::SliceIo;
 
@@ -29,7 +26,7 @@ use super::{Syscall, SyscallContext};
 /// A wrapper around a SliceIo that exposes it as a Syscall handler.
 pub struct SysSliceIo<'a> {
     handler: Rc<RefCell<dyn SliceIo + 'a>>,
-    stored_result: RefCell<Option<Bytes>>,
+    stored_result: RefCell<Option<(Bytes, usize)>>,
 }
 
 impl<'a> SysSliceIo<'a> {
@@ -56,29 +53,38 @@ impl Syscall for SysSliceIo<'_> {
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         let mut stored_result = self.stored_result.borrow_mut();
-        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
         Ok(match stored_result.take() {
             None => {
+                let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
+                let buf_len = ctx.load_register(REG_A4);
+                let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
                 // First call of pair. Send the data from the guest to the SliceIo
                 // and save what it returns.
-                assert_eq!(to_guest.len(), 0);
+                if !to_guest.is_empty() {
+                    bail!("invalid sys_slice_io call");
+                }
+
                 let mut handler = self.handler.borrow_mut();
                 let result = handler.handle_io(syscall, from_guest.into())?;
                 let len = result.len() as u32;
-                *stored_result = Some(result);
+                *stored_result = Some((result, 0));
                 (len, 0)
             }
-            Some(stored) => {
+            Some((stored, mut pos)) => {
                 // Second call of pair. We already have data to send
                 // to the guest; send it to the buffer that the guest
                 // allocated.
                 let to_guest_bytes: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-                assert!(stored.len() <= to_guest_bytes.len());
-                assert!(stored.len() + WORD_SIZE > to_guest_bytes.len());
-                to_guest_bytes[..stored.len()].clone_from_slice(&stored);
-                (0, 0)
+                let size = min(stored.len() - pos, to_guest_bytes.len());
+                to_guest_bytes[..size].clone_from_slice(&stored[pos..(pos + size)]);
+                pos += size;
+
+                if pos < stored.len() {
+                    *stored_result = Some((stored, pos));
+                }
+
+                (size as u32, 0)
             }
         })
     }
