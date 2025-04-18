@@ -106,15 +106,14 @@ pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
     fr_from_bytes(&from_u256_hex(val)?)
 }
 
-// Deserialize a scalar field from bytes in big-endian format
+/// Deserialize a scalar field element from bytes
+///
+/// Input bytes are interpretted as big-endian and in canonical (i.e. non-Montgomery) form
 pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
     substrate_bn::Fr::from_slice(scalar).map(Fr).map_err(|_| anyhow!("TODO"))
-    // let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
-    // ark_bn254::Fr::deserialize_uncompressed(&*scalar)
-    //     .map(Fr)
-    //     .map_err(|err| anyhow!(err))
 }
 
+// TODO: This is one of the places behavior has changed (both output type and expected input format)
 /// Deserialize an element over the G1 group from bytes in big-endian format
 #[stability::unstable]
 pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<substrate_bn::G1, Error> {
@@ -129,6 +128,7 @@ pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<substrate_bn::G1, Error> {
     Ok(substrate_bn::AffineG1::new(x, y).map_err(|_|{anyhow!("TODO")})?.into())
 }
 
+// TODO: This is one of the places behavior has changed (both output type and expected input format)
 /// Deserialize an element over the G2 group from bytes in big-endian format
 #[stability::unstable]
 pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<substrate_bn::G2, Error> {
