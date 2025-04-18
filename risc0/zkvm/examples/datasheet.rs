@@ -23,7 +23,10 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im::{execute::RESERVED_CYCLES, MAX_INSN_CYCLES};
+use risc0_circuit_rv32im::{
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, RESERVED_CYCLES},
+    MAX_INSN_CYCLES,
+};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
@@ -52,8 +55,12 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
-const ITERATIONS_1M_CYCLES: usize = 1024 * 507 + 2;
-const EXPECTED_RESERVED_CYCLES: usize = RESERVED_CYCLES + MAX_INSN_CYCLES;
+/// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
+const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 495 + 790;
+
+/// The maximum number of cycles in a segment that can be reserved (for fitting the
+/// potential next instruction and for lookup table + control when proving)
+const RESERVED_CYCLES_MAX: usize = RESERVED_CYCLES + MAX_INSN_CYCLES;
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
@@ -184,7 +191,7 @@ impl Datasheet {
 
     fn execute(&mut self) {
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
             .build()
             .unwrap();
 
@@ -193,8 +200,18 @@ impl Datasheet {
         let duration = start.elapsed();
 
         // We want to ensure that we're using a full single segment for this benchmark.
-        assert_eq!(session.segments.len(), 1);
-        assert!(session.reserved_cycles as usize <= EXPECTED_RESERVED_CYCLES);
+        assert_eq!(
+            session.segments.len(),
+            1,
+            "{} didn't fit in po2={DEFAULT_SEGMENT_LIMIT_PO2}",
+            session.total_cycles
+        );
+        assert!(
+            session.reserved_cycles as usize <= RESERVED_CYCLES_MAX,
+            "more room in the segment ({} <= {})",
+            session.reserved_cycles,
+            RESERVED_CYCLES_MAX
+        );
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
@@ -546,7 +563,7 @@ impl Datasheet {
         }
 
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
             .build()
             .unwrap();
         execute_elf(env, &LOOP_ELF).unwrap();
