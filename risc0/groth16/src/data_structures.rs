@@ -238,7 +238,6 @@ impl VerifyingKeyJson {
 /// A groth16 verification key (TODO)
 /// 
 /// A verification key. It needs to be prepared into a [Pvk] before use. (TODO)
-// TODO: Derives?
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Vk {
     // TODO: better pattern for access?
@@ -525,8 +524,7 @@ impl<'de> Deserialize<'de> for G1data {
                 }
             }
         }
-        // TODO: Uh, shouldn't this be deserialize_seq?
-        deserializer.deserialize_bytes(G1dataVisitor)
+        deserializer.deserialize_seq(G1dataVisitor)
     }
 }
 
@@ -627,8 +625,7 @@ impl<'de> Deserialize<'de> for G2data {
                 }
             }
         }
-        // TODO: Shouldn't this be deserialize_seq?
-        deserializer.deserialize_bytes(G2dataVisitor)
+        deserializer.deserialize_seq(G2dataVisitor)
     }
 }
 
