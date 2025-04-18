@@ -51,7 +51,7 @@ fn inputs_test_g1data(g1data: &G1data) {
 
     let new_g1data: G1data = receipt.journal.decode().unwrap();
     assert_eq!(new_g1data, *g1data);
-    assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_g1data`");
+    // assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_g1data`");
 }
 
 fn inputs_test_pub_inp(pub_inp: &Vec<Fr>) {
@@ -117,7 +117,7 @@ fn inputs_test_vk(vk: &Vk) {
 
     let new_vk: Vk = receipt.journal.decode().unwrap();
     assert_eq!(new_vk, *vk);
-    assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_vk`");
+    // assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_vk`");
 }
 
 fn inputs_test_verifying_key(vk: &VerifyingKey) {
@@ -138,7 +138,7 @@ fn inputs_test_verifying_key(vk: &VerifyingKey) {
 
     let new_vk: VerifyingKey = receipt.journal.decode().unwrap();
     assert_eq!(new_vk, *vk);
-    assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_verifying_key`");
+    // assert!(false, "TODO: Aborting early to clarify where the failure is; this is the end of `inputs_test_verifying_key`");
 }
 
 fn main() {
