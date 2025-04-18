@@ -85,7 +85,7 @@ mod seal_format;
 mod seal_to_json;
 mod verifier;
 
-pub use data_structures::{Fr, ProofJson, PublicInputsJson, Pvk, Seal, VerifyingKeyJson, Vk};
+pub use data_structures::{Fr, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
 #[cfg(feature = "prove")]
 pub use seal_to_json::to_json;
 pub use verifier::{verifying_key, Verifier, VerifyingKey};
