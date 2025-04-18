@@ -141,6 +141,9 @@ enum Command {
     Groth16,
     #[command(name = "bigint2")]
     BigInt2,
+    ZethShapella30,
+    ZethShapella50,
+    ZethShapella100,
 }
 
 #[derive(Default)]
@@ -186,6 +189,9 @@ impl Datasheet {
             #[cfg(feature = "docker")]
             Command::Groth16 => self.groth16(),
             Command::BigInt2 => self.bigint2(),
+            Command::ZethShapella30 => self.shapella30(),
+            Command::ZethShapella50 => self.shapella50(),
+            Command::ZethShapella100 => self.shapella100(),
         }
     }
 
@@ -545,6 +551,44 @@ impl Datasheet {
         let session = self.bigint2_execute();
         let segment = session.segments[0].resolve().unwrap();
         self.bigint2_prove_segment(&session, &segment);
+    }
+
+    fn shapella_segment(&mut self, name: &str, bytes: &[u8]) {
+        // "shapella" is the name of ethereum block 17034870
+        // this test runs one segment of a zeth run on that block
+        println!("{}", name);
+        let segment = risc0_circuit_rv32im::execute::Segment::decode(bytes).unwrap();
+
+        let start = Instant::now();
+        segment.execute().unwrap();
+        let duration = start.elapsed();
+
+        let total_cycles = segment.suspend_cycle;
+        let throughput = (total_cycles as f64) / duration.as_secs_f64();
+        self.results.push(PerformanceData {
+            name: name.into(),
+            hashfn: "N/A".into(),
+            cycles: total_cycles.into(),
+            duration,
+            ram: 0,
+            seal: 0,
+            throughput,
+        });
+    }
+
+    fn shapella30(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-30.bin");
+        self.shapella_segment("zeth_shapella_30", bytes);
+    }
+
+    fn shapella50(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-50.bin");
+        self.shapella_segment("zeth_shapella_50", bytes);
+    }
+
+    fn shapella100(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-100.bin");
+        self.shapella_segment("zeth_shapella_100", bytes);
     }
 
     fn warmup(&self) {
