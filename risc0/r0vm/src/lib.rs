@@ -72,6 +72,9 @@ struct Cli {
     /// Compute the image_id for the specified ELF
     #[arg(long)]
     id: bool,
+
+    #[arg(long)]
+    with_debugger: bool,
 }
 
 #[derive(Args)]
@@ -170,7 +173,12 @@ pub fn main() {
         } else {
             unreachable!()
         };
-        exec.run().unwrap()
+        if args.with_debugger {
+            exec.run_with_debugger().unwrap();
+            return;
+        } else {
+            exec.run().unwrap()
+        }
     };
 
     let prover = args.get_prover();

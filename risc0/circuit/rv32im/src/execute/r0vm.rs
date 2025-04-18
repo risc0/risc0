@@ -98,6 +98,23 @@ pub(crate) trait Risc0Context {
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
+    fn store_region(&mut self, mut addr: ByteAddr, bytes: &[u8]) -> Result<()> {
+        for &b in bytes {
+            self.store_u8(addr, b)?;
+            addr += 1u32;
+        }
+        Ok(())
+    }
+
+    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+        let byte_offset = addr.subaddr() as usize;
+        let word = self.load_u32(LoadOp::Peek, addr.waddr())?;
+        let mut bytes = word.to_le_bytes();
+        bytes[byte_offset] = byte;
+        let word = u32::from_le_bytes(bytes);
+        self.store_u32(addr.waddr(), word)
+    }
+
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
         self.store_u32(base + idx, word)
     }

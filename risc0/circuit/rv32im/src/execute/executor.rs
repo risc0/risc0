@@ -56,7 +56,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     machine_mode: u32,
     user_cycles: u32,
     pager: PagedMemory,
-    terminate_state: Option<TerminateState>,
+    pub(crate) terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
     write_record: Vec<u32>,
     syscall_handler: &'a S,

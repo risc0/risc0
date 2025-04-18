@@ -72,6 +72,8 @@ bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.7", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 enum-map = { version = "2.7.3", optional = true }
+gdbstub = "0.7"
+gdbstub_arch = "0.3"
 keccak = { version = "0.1.5", optional = true }
 lazy-regex = { version = "3.3", optional = true }
 num-bigint = { version = "0.4", default-features = false, optional = true }
