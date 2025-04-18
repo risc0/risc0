@@ -75,6 +75,8 @@ bytes = { version = "1.10", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 enum-map = { version = "2.7.3", optional = true }
 gimli = { version = "0.31.1", optional = true }
+gdbstub = { version = "0.7", optional = true }
+gdbstub_arch = { version = "0.3", optional = true }
 keccak = { version = "0.1.5", optional = true }
 lazy-regex = { version = "3.3", optional = true }
 num-bigint = { version = "0.4", default-features = false, optional = true }
@@ -175,6 +177,8 @@ prove = [
   "dep:addr2line",
   "dep:bincode",
   "dep:elf",
+  "dep:gdbstub",
+  "dep:gdbstub_arch",
   "dep:gimli",
   "dep:keccak",
   "dep:lazy-regex",
