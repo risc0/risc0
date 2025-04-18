@@ -239,7 +239,7 @@ impl VerifyingKeyJson {
 /// 
 /// A verification key. It needs to be prepared into a [Pvk] before use. (TODO)
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Vk {
+pub(crate) struct Vk {
     // TODO: better pattern for access?
     pub(crate) alpha_g1: substrate_bn::G1,
     pub(crate) beta_g2: substrate_bn::G2,
@@ -717,7 +717,7 @@ impl Digestible for Fr {
 /// 
 /// TODO: Note that status quo this doesn't contain the original verification key and so can't be regenerated
 #[derive(Clone)]
-pub struct Pvk {
+pub(crate) struct Pvk {
     // TODO: better pattern for access?
     pub(crate) vk: Vk,
     pub(crate) alpha_g1_beta_g2: substrate_bn::Gt,

@@ -26,7 +26,7 @@ use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    from_u256, Fr, ProofJson, PublicInputsJson, Pvk, Seal, VerifyingKeyJson, Vk,
+    from_u256, Fr, ProofJson, PublicInputsJson, data_structures::{Pvk, Vk}, Seal, VerifyingKeyJson,
 };
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
@@ -77,6 +77,7 @@ const IC5_Y: &str = "15060583660288623605191393599883223885678013570733629274538
 
 /// Groth16 `Verifier` instance over the BN_254 curve encoded in little endian.
 // #[derive(Clone, Debug, Deserialize, Serialize)]
+// TODO: Probably want to re-enable Debug, Deserialize, and Serialize
 // TODO: Goal ... depending on exact needs may want to still hold onto things as Vec<u8> or Vec<Vec<u8>>
 #[derive(Clone)]
 pub struct Verifier {
@@ -191,14 +192,8 @@ impl Verifier {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct VerifyingKey(pub(crate) Vk);
 
-impl VerifyingKey {
-    /// TODO: Only temporary for ease of temporary testing
-    pub fn clone_vk(&self) -> Vk {
-        self.0.clone()
-    }
-}
-
-// TODO: This was the arkworks approach:
+// TODO: For reference, this was how we approached it with arkworks
+// Use this to align hashing inputs, or drop if we don't need to (see hash_g*_point functions below)
 // /// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
 // fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
 //     let mut buffer = Vec::<u8>::new();
@@ -214,8 +209,8 @@ fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Digest {
     let mut buffer = [0u8; 64];
     // TODO: Dereference is awkward, review architecture
     let pt = substrate_bn::AffineG1::from_jacobian(*p).expect("Verifying key contains point at infinity and hence is invalid");
-    pt.y().to_big_endian(&mut buffer[0..32]).expect("output slice length must be 32");
-    pt.x().to_big_endian(&mut buffer[32..64]).expect("output slice length must be 32");
+    pt.y().to_big_endian(&mut buffer[0..32]).expect("Cannot fail when passed a 32 byte output buffer");
+    pt.x().to_big_endian(&mut buffer[32..64]).expect("Cannot fail when passed a 32 byte output buffer");
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
@@ -226,10 +221,10 @@ fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Digest {
 fn hash_g2_point<S: Sha256>(p: &substrate_bn::G2) -> Digest {
     let mut buffer = [0u8; 128];
     let pt = substrate_bn::AffineG2::from_jacobian(*p).expect("Verifying key contains point at infinity and hence is invalid");
-    pt.y().real().to_big_endian(&mut buffer[0..32]).expect("output slice length must be 32");
-    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).expect("output slice length must be 32");
-    pt.x().real().to_big_endian(&mut buffer[64..96]).expect("output slice length must be 32");
-    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).expect("output slice length must be 32");
+    pt.y().real().to_big_endian(&mut buffer[0..32]).expect("Cannot fail when passed a 32 byte output buffer");
+    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).expect("Cannot fail when passed a 32 byte output buffer");
+    pt.x().real().to_big_endian(&mut buffer[64..96]).expect("Cannot fail when passed a 32 byte output buffer");
+    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).expect("Cannot fail when passed a 32 byte output buffer");
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
