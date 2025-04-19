@@ -30,7 +30,7 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 temp-env = "0.3"
 tokio = { version = "1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-uuid = { version = "1.11", features = ["v4"] }
+uuid = { version = "1.16", features = ["v4"] }
 
 [features]
 default = []
