@@ -3328,7 +3328,7 @@ dependencies = [
  "derive_more 2.0.1",
  "elf",
  "enum-map",
- "getrandom 0.3.1",
+ "getrandom 0.2.15",
  "hex",
  "keccak",
  "lazy-regex",

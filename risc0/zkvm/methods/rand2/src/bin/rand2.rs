@@ -25,4 +25,5 @@ risc0_zkvm::entry!(main);
 fn main() {
     let rand_buf = &mut vec![0u8; 8];
     let _res = getrandom(rand_buf);
+    assert_ne!(&rand_buf, &vec![0u8; 8].as_slice());
 }

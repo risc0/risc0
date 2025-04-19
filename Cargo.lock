@@ -5978,7 +5978,7 @@ dependencies = [
  "enum-iterator",
  "enum-map",
  "flate2",
- "getrandom 0.3.2",
+ "getrandom 0.2.15",
  "hex",
  "hotbench",
  "human-repr",
