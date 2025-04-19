@@ -131,10 +131,10 @@ fn sha256_hashfn_fails() {
         .unwrap()
         .prove(env, MULTI_TEST_ELF)
         .unwrap();
-    let InnerReceipt::Composite(composite_recipt) = &mut info.receipt.inner else {
+    let InnerReceipt::Composite(composite_receipt) = &mut info.receipt.inner else {
         panic!("unexpected receipt type");
     };
-    for seg in &mut composite_recipt.segments {
+    for seg in &mut composite_receipt.segments {
         seg.hashfn = "sha-256".into();
     }
 
