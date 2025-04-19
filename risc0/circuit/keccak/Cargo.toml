@@ -33,7 +33,7 @@ xz2 = { version = "0.1", optional = true, features = ["static"] }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
-rand = { version = "0.8" }
+rand = { version = "0.9" }
 risc0-circuit-keccak-methods = { path = "methods" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
