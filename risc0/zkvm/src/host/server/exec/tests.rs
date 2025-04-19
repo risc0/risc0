@@ -27,8 +27,8 @@ use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF,
-    STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
+    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND2_ELF, RAND_ELF,
+    SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{
     fileno,
@@ -911,6 +911,12 @@ fn random() {
 fn getrandom_panic() {
     let env = ExecutorEnv::default();
     execute_elf(env, RAND_ELF).unwrap();
+}
+
+#[test_log::test]
+fn getrandom2() {
+    let env = ExecutorEnv::default();
+    execute_elf(env, RAND2_ELF).unwrap();
 }
 
 #[test_log::test]
