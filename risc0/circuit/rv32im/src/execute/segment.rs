@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     execute::{CycleLimit, Executor},
-    Rv32imV2Claim, MAX_INSN_CYCLES,
+    Rv32imV2Claim, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
 };
 
 use super::{Syscall, SyscallContext};
@@ -70,9 +70,15 @@ impl Segment {
             read_pos: Cell::new(0),
             write_pos: Cell::new(0),
         };
+
+        let max_insn_cycles = if self.po2 >= 15 {
+            MAX_INSN_CYCLES
+        } else {
+            MAX_INSN_CYCLES_LOWER_PO2
+        };
         Executor::new(self.partial_image.clone(), &handler, None, vec![]).run(
             self.po2 as usize,
-            MAX_INSN_CYCLES,
+            max_insn_cycles,
             CycleLimit::Soft(self.suspend_cycle.into()),
             |_| Ok(()),
         )?;
