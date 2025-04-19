@@ -93,7 +93,6 @@ pub const HOST_ECALL_BIGINT: u32 = 5;
 
 pub const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 pub const PFLAG_CHECK_OUT: u32 = 0x4000_0000;
-pub const PFLAG_FROM_GUEST: u32 = 0x2000_0000;
 
 #[derive(Clone, Copy, Debug, Default, Eq, FromPrimitive, PartialEq)]
 pub enum CycleState {
