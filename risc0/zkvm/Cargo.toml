@@ -64,9 +64,6 @@ tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
 
-#@[target.'cfg(target_arch = "wasm32")'.dependencies]
-#getrandom = { version = "0.3", features = ["wasm_js"] }
-
 # Host dependencies
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 addr2line = { version = "0.22", features = ["rustc-demangle"], optional = true }
