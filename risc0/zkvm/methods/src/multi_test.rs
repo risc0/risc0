@@ -67,6 +67,9 @@ pub enum MultiTestSpec {
     Panic,
     PauseResume(u8),
     Poseidon2Basic,
+    Poseidon2Continue,
+    Poseidon2Long,
+    Poseidon2Short,
     Profiler,
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and

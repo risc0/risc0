@@ -169,8 +169,11 @@ fn libm_build() {
 }
 
 #[test_log::test]
-fn poseidon2_basic() {
+fn poseidon2() {
     multi_test(MultiTestSpec::Poseidon2Basic);
+    multi_test(MultiTestSpec::Poseidon2Continue);
+    multi_test(MultiTestSpec::Poseidon2Short);
+    multi_test(MultiTestSpec::Poseidon2Long);
 }
 
 #[test_log::test]

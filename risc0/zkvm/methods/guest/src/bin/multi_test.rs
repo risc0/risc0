@@ -25,8 +25,9 @@ extern crate alloc;
 use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
+    vec::Vec,
 };
-use core::arch::asm;
+use core::{arch::asm, ptr::null_mut};
 
 use getrandom::getrandom;
 use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
@@ -43,13 +44,15 @@ use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TE
 use risc0_zkvm_platform::{
     fileno,
     syscall::{
-        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_poseidon2_compress,
-        sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
+        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        sys_poseidon2_compress, sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
 
 risc0_zkvm::entry!(main);
+
+const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 
 const KECCAK_UPDATE: KeccakState = [
     0xF1258F7940E1DDE7,
@@ -592,14 +595,88 @@ fn main() {
         }
         MultiTestSpec::Poseidon2Basic => {
             let input: &[u32; 16] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-            let expected: &[u32] = &[1749308481, 879447913, 499502012, 1842374203, 1869354733, 71489094, 19273002, 690566044];
+            let expected: &[u32] = &[
+                1749308481, 879447913, 499502012, 1842374203, 1869354733, 71489094, 19273002,
+                690566044,
+            ];
             let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
-            let is_elem = 0x8000_0000;
-            let is_guest = 0x2000_0000;
 
-            unsafe {sys_poseidon2_compress(core::ptr::null_mut(), input.as_ptr() as *const u8, &mut actual, (is_guest | is_elem)| 1u32);}
-            env::log(&format!("actual's address: {:?}", actual.as_ptr()));
+            unsafe {
+                sys_poseidon2_compress(
+                    null_mut(),
+                    input.as_ptr() as *const u8,
+                    &mut actual,
+                    PFLAG_IS_ELEM | 1u32,
+                );
+            }
             assert_eq!(expected, actual);
+        }
+        MultiTestSpec::Poseidon2Short => {
+            let input: &[u32; 8] = &[
+                0x10000, 0x30002, 0x50004, 0x70006, 0x90008, 0xB000A, 0xD000C, 0xF000E,
+            ];
+            let expected: &[u32] = &[
+                1749308481, 879447913, 499502012, 1842374203, 1869354733, 71489094, 19273002,
+                690566044,
+            ];
+            let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
+            unsafe {
+                sys_poseidon2_compress(null_mut(), input.as_ptr() as *const u8, &mut actual, 1u32);
+            }
+            assert_eq!(expected, actual);
+        }
+        MultiTestSpec::Poseidon2Long => {
+            let input: [u32; 32] = (0u32..32u32)
+                .collect::<Vec<_>>()
+                .try_into()
+                .expect("wrong size iterator");
+
+            let expected: &[u32] = &[
+                1257374621, 1235708219, 1590109606, 1571950965, 936452277, 615799448, 844422484,
+                1109152478,
+            ];
+            let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
+            unsafe {
+                sys_poseidon2_compress(
+                    null_mut(),
+                    input.as_ptr() as *const u8,
+                    &mut actual,
+                    PFLAG_IS_ELEM | 2u32,
+                );
+            }
+            assert_eq!(expected, actual);
+        }
+        MultiTestSpec::Poseidon2Continue => {
+            let input: [u32; 32] = (0u32..32u32)
+                .collect::<Vec<_>>()
+                .try_into()
+                .expect("wrong size iterator");
+
+            let expected: &[u32] = &[
+                1257374621, 1235708219, 1590109606, 1571950965, 936452277, 615799448, 844422484,
+                1109152478,
+            ];
+
+            let mut state: [u32; DIGEST_WORDS] = [0u32; 8];
+            let mut out: [u32; DIGEST_WORDS] = [0u32; 8];
+            unsafe {
+                sys_poseidon2_compress(
+                    &mut state,
+                    input.as_ptr() as *const u8,
+                    &mut out,
+                    PFLAG_IS_ELEM | 1u32,
+                );
+            }
+            unsafe {
+                sys_poseidon2_compress(
+                    &mut state,
+                    input.as_ptr().wrapping_add(16) as *const u8,
+                    &mut out,
+                    PFLAG_IS_ELEM | 1u32,
+                );
+            }
+
+            assert_eq!(expected, out);
         }
     }
 }

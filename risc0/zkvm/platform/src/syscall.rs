@@ -436,7 +436,7 @@ pub unsafe extern "C" fn sys_sha_buffer(
 #[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_poseidon2_compress(
-    state_addr: *const [u32; DIGEST_WORDS],
+    state_addr: *mut [u32; DIGEST_WORDS],
     in_buf_addr: *const u8,
     out_buf_addr: *mut [u32; DIGEST_WORDS],
     bits_count: u32,
