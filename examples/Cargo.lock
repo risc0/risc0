@@ -4037,7 +4037,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -4097,11 +4097,12 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "bytemuck",
  "cfg-if",
  "getrandom 0.2.15",
+ "getrandom 0.3.1",
  "libm",
  "stability",
 ]

@@ -114,7 +114,8 @@ pub(crate) fn build_guest_package_docker(
 /// Overwrites if a dockerfile already exists.
 fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestInfo) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
-    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
+    let mut encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
+    encoded_rust_flags = encoded_rust_flags.replace("\"", "\\\"");
     let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
 
     let common_args = vec![
@@ -268,7 +269,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "4fb18b38d64ce60bfdb6ba7d3d7b8ea63190d3bf27fcb72e8e039ce5aac95628",
+            "9a2a10f17a2f7e14a8128a7edc4b65281e373d16ee9dc45cd06b01494098439a",
         );
     }
 }
