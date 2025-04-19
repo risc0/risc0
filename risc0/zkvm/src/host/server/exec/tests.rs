@@ -169,6 +169,11 @@ fn libm_build() {
 }
 
 #[test_log::test]
+fn poseidon2_basic() {
+    multi_test(MultiTestSpec::Poseidon2Basic);
+}
+
+#[test_log::test]
 fn host_syscall() {
     let expected: Vec<Bytes> = vec![
         "".into(),

@@ -17,7 +17,7 @@ use core::ptr::addr_of;
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
-use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
+use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_poseidon2_compress, DIGEST_WORDS};
 
 use crate::{
     mmr::{GuestPeak, MerkleMountainAccumulator},
@@ -104,19 +104,15 @@ impl KeccakBatcher {
 }
 
 pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
-    const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
-
     let keccak_state_u32 = keccak_state.as_ptr() as *const u32;
-    for i in 0..3 {
         unsafe {
-            sys_sha_compress(
-                claim_state.as_mut(),
+            sys_poseidon2_compress(
                 claim_state.as_ref(),
-                keccak_state_u32.add(i * 16) as *const [u32; DIGEST_WORDS],
-                keccak_state_u32.add(i * 16 + 8) as *const [u32; DIGEST_WORDS],
+                keccak_state.as_ptr() as *const u8,
+                claim_state.as_mut(),
+                0x2000_0000 | 3
             )
         };
-    }
 
     // any last words?
     static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
@@ -126,11 +122,11 @@ pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakS
     }
 
     unsafe {
-        sys_sha_compress(
-            claim_state.as_mut(),
+        sys_poseidon2_compress(
             claim_state.as_ref(),
-            addr_of!(LAST_WORDS),
-            &ZEROES,
+            addr_of!(LAST_WORDS) as *const u8,
+            claim_state.as_mut(),
+            0x2000_0000 | 1
         )
     };
 }
