@@ -23,11 +23,14 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im_v2::execute::DEFAULT_SEGMENT_LIMIT_PO2;
+use risc0_circuit_rv32im::{
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, RESERVED_CYCLES},
+    MAX_INSN_CYCLES,
+};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, Executor2, ExecutorEnv, ProverOpts, ReceiptKind, Segment, Session,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, Segment, Session,
     SimpleSegmentRef, VerifierContext, RECURSION_PO2,
 };
 use serde::Serialize;
@@ -52,7 +55,12 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
-const ITERATIONS_1M_CYCLES: usize = 1024 * 512 - 46;
+/// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
+const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 495 + 790;
+
+/// The maximum number of cycles in a segment that can be reserved (for fitting the
+/// potential next instruction and for lookup table + control when proving)
+const RESERVED_CYCLES_MAX: usize = RESERVED_CYCLES + MAX_INSN_CYCLES;
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
@@ -114,7 +122,7 @@ fn po2_in_range(s: &str) -> Result<usize, String> {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> anyhow::Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -127,16 +135,16 @@ enum Command {
     Join,
     Succinct,
     Identity,
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     StarkToSnark,
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     Groth16,
     #[command(name = "bigint2")]
     BigInt2,
+    ZethShapella30,
+    ZethShapella50,
+    ZethShapella100,
 }
-
-/// This is the number of user cycles we expect for our "execute" benchmarks.
-const EXPECTED_EXECUTE_USER_CYCLES: u64 = (1 << DEFAULT_SEGMENT_LIMIT_PO2 as u64) - 2;
 
 #[derive(Default)]
 struct Datasheet {
@@ -176,26 +184,39 @@ impl Datasheet {
             Command::Join => self.join(),
             Command::Succinct => self.succinct(),
             Command::Identity => self.identity_p254(),
-            #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+            #[cfg(feature = "docker")]
             Command::StarkToSnark => self.stark2snark(),
-            #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+            #[cfg(feature = "docker")]
             Command::Groth16 => self.groth16(),
             Command::BigInt2 => self.bigint2(),
+            Command::ZethShapella30 => self.shapella30(),
+            Command::ZethShapella50 => self.shapella50(),
+            Command::ZethShapella100 => self.shapella100(),
         }
     }
 
     fn execute(&mut self) {
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
             .build()
             .unwrap();
 
         let start = Instant::now();
         let session = execute_elf(env, &LOOP_ELF).unwrap();
         let duration = start.elapsed();
+
+        // We want to ensure that we're using a full single segment for this benchmark.
         assert_eq!(
-            session.user_cycles, EXPECTED_EXECUTE_USER_CYCLES,
-            "actual vs expected"
+            session.segments.len(),
+            1,
+            "{} didn't fit in po2={DEFAULT_SEGMENT_LIMIT_PO2}",
+            session.total_cycles
+        );
+        assert!(
+            session.reserved_cycles as usize <= RESERVED_CYCLES_MAX,
+            "more room in the segment ({} <= {})",
+            session.reserved_cycles,
+            RESERVED_CYCLES_MAX
         );
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
@@ -211,44 +232,43 @@ impl Datasheet {
     }
 
     fn composite(&mut self, args: &Args) {
-        for hashfn in ["sha-256", "poseidon2"] {
-            let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
-            let prover = get_prover_server(&opts).unwrap();
+        let hashfn = "poseidon2";
+        let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
+        let prover = get_prover_server(&opts).unwrap();
 
-            for (po2, iterations) in CYCLES_PO2_ITERS
-                .iter()
-                .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
-            {
-                let expected = 1 << po2;
-                println!("rv32im/{hashfn}: {expected}");
+        for (po2, iterations) in CYCLES_PO2_ITERS
+            .iter()
+            .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
+        {
+            let expected = 1 << po2;
+            println!("rv32im/{hashfn}: {expected}");
 
-                let env = ExecutorEnv::builder()
-                    .segment_limit_po2(args.max_po2 as u32)
-                    .write_slice(&iterations.to_le_bytes())
-                    .build()
-                    .unwrap();
+            let env = ExecutorEnv::builder()
+                .segment_limit_po2(args.max_po2 as u32)
+                .write_slice(&iterations.to_le_bytes())
+                .build()
+                .unwrap();
 
-                tracker().lock().unwrap().reset();
+            tracker().lock().unwrap().reset();
 
-                let start = Instant::now();
-                let info = black_box(prover.prove(env, &LOOP_ELF).unwrap());
-                let duration = start.elapsed();
+            let start = Instant::now();
+            let info = black_box(prover.prove(env, &LOOP_ELF).unwrap());
+            let duration = start.elapsed();
 
-                let ram = tracker().lock().unwrap().peak as u64;
-                assert_eq!(info.stats.total_cycles, expected, "actual vs expected");
-                let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
-                let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
+            let ram = tracker().lock().unwrap().peak as u64;
+            assert_eq!(info.stats.total_cycles, expected, "actual vs expected");
+            let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+            let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
 
-                self.results.push(PerformanceData {
-                    name: "rv32im".into(),
-                    hashfn: hashfn.into(),
-                    cycles: info.stats.total_cycles,
-                    duration,
-                    ram,
-                    seal,
-                    throughput,
-                });
-            }
+            self.results.push(PerformanceData {
+                name: "rv32im".into(),
+                hashfn: hashfn.into(),
+                cycles: info.stats.total_cycles,
+                duration,
+                ram,
+                seal,
+                throughput,
+            });
         }
     }
 
@@ -407,7 +427,7 @@ impl Datasheet {
         });
     }
 
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
@@ -443,7 +463,7 @@ impl Datasheet {
         });
     }
 
-    #[cfg(all(target_arch = "x86_64", feature = "docker"))]
+    #[cfg(feature = "docker")]
     fn groth16(&mut self) {
         println!("groth16");
 
@@ -485,10 +505,6 @@ impl Datasheet {
         let start = Instant::now();
         let session = execute_elf(env, BIGINT2_ELF).unwrap();
         let duration = start.elapsed();
-
-        // We want this to be comparable to the other execute benchmarks
-        let cycle_diff = session.user_cycles.abs_diff(EXPECTED_EXECUTE_USER_CYCLES);
-        assert!(cycle_diff < 20_000, "{cycle_diff} not less than 20_000");
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
@@ -537,11 +553,49 @@ impl Datasheet {
         self.bigint2_prove_segment(&session, &segment);
     }
 
+    fn shapella_segment(&mut self, name: &str, bytes: &[u8]) {
+        // "shapella" is the name of ethereum block 17034870
+        // this test runs one segment of a zeth run on that block
+        println!("{}", name);
+        let segment = risc0_circuit_rv32im::execute::Segment::decode(bytes).unwrap();
+
+        let start = Instant::now();
+        segment.execute().unwrap();
+        let duration = start.elapsed();
+
+        let total_cycles = segment.suspend_cycle;
+        let throughput = (total_cycles as f64) / duration.as_secs_f64();
+        self.results.push(PerformanceData {
+            name: name.into(),
+            hashfn: "N/A".into(),
+            cycles: total_cycles.into(),
+            duration,
+            ram: 0,
+            seal: 0,
+            throughput,
+        });
+    }
+
+    fn shapella30(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-30.bin");
+        self.shapella_segment("zeth_shapella_30", bytes);
+    }
+
+    fn shapella50(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-50.bin");
+        self.shapella_segment("zeth_shapella_50", bytes);
+    }
+
+    fn shapella100(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-100.bin");
+        self.shapella_segment("zeth_shapella_100", bytes);
+    }
+
     fn warmup(&self) {
+        println!("warmup");
+
         #[cfg(any(feature = "cuda", feature = "metal"))]
         {
-            println!("warmup");
-
             let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
 
@@ -553,7 +607,7 @@ impl Datasheet {
         }
 
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
             .build()
             .unwrap();
         execute_elf(env, &LOOP_ELF).unwrap();

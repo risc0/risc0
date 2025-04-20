@@ -39,6 +39,8 @@
 .equ REG_A5, 15
 .equ REG_A6, 16
 .equ REG_T3, 28
+.equ USER_MODE, 0
+.equ MACHINE_MODE, 1
 
 .section .text
 .global _start
@@ -206,6 +208,7 @@ _ecall_bigint2:
 
     # prepare ecall
     lw sp, REG_SP * WORD_SIZE (tp) # stack pointer
+    li t0, USER_MODE
     lw t1, REG_T1 * WORD_SIZE (tp) # nondet_program_ptr
     lw t2, REG_T2 * WORD_SIZE (tp) # verify_program_ptr
     lw t3, REG_T3 * WORD_SIZE (tp) # consts_ptr
@@ -235,4 +238,6 @@ _ecall_bigint:
     lw a3, REG_A3 * WORD_SIZE (tp) # y
     lw a4, REG_A4 * WORD_SIZE (tp) # modulus
 
-    j ecall_bigint_v1compat
+    call ecall_bigint_v1compat
+
+    mret

@@ -20,7 +20,7 @@ use std::{collections::BTreeSet, fs, path::PathBuf};
 use anyhow::{ensure, Result};
 use enum_map::EnumMap;
 use risc0_binfmt::SystemState;
-use risc0_circuit_rv32im_v2::execute::EcallMetric;
+use risc0_circuit_rv32im::execute::EcallMetric;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -122,7 +122,7 @@ pub struct Segment {
     /// The index of this [Segment] within the [Session]
     pub index: u32,
 
-    pub(crate) inner: risc0_circuit_rv32im_v2::execute::Segment,
+    pub(crate) inner: risc0_circuit_rv32im::execute::Segment,
 
     pub(crate) output: Option<Output>,
 }
@@ -136,7 +136,7 @@ impl Segment {
     }
 
     pub(crate) fn user_cycles(&self) -> u32 {
-        self.inner.user_cycles
+        self.inner.suspend_cycle
     }
 }
 
@@ -268,12 +268,6 @@ impl Session {
         for (name, metric) in syscall_metrics.iter().rev() {
             tracing::info!("\t{} {name:?} calls", metric.count);
         }
-
-        // TODO(flaub): figure out why v2 fails this
-        // assert_eq!(
-        //     self.total_cycles,
-        //     self.user_cycles + self.paging_cycles + self.reserved_cycles
-        // );
     }
 
     /// Returns stats for the session

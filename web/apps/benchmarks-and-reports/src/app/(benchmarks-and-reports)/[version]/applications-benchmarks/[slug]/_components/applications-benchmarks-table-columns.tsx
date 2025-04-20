@@ -171,4 +171,34 @@ export const applicationsBenchmarksTableColumns = {
       cell: (info) => <div className="truncate text-right font-mono">{formatBytes(Number(info.getValue()))}</div>,
     }),
   ] as ColumnDef<ApplicationsBenchmarksTableSchema<"release-1.2">, unknown>[],
+  "release-2.0": [
+    columnHelper.main.accessor("name", {
+      header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
+      cell: (info) => <div className="truncate font-mono">{info.getValue()}</div>,
+    }),
+    columnHelper.main.accessor("size", {
+      header: ({ column }) => <TableColumnHeader align="right" column={column} title="Size" />,
+      cell: (info) => <div className="truncate text-right font-mono">{formatNumber(info.getValue())}</div>,
+    }),
+    columnHelper.main.accessor("speed", {
+      header: ({ column }) => <TableColumnHeader align="right" column={column} title="Speed" />,
+      cell: (info) => <div className="truncate text-right font-mono">{formatNumber(Number(info.getValue()))}</div>,
+    }),
+    columnHelper.main.accessor("total_duration", {
+      header: ({ column }) => <TableColumnHeader align="right" column={column} title="Proof Duration" />,
+      cell: (info) => <div className="truncate text-right font-mono">{formatDuration(Number(info.getValue()))}</div>,
+    }),
+    columnHelper.main.accessor("user_cycles", {
+      header: ({ column }) => <TableColumnHeader align="right" column={column} title="User Cycles" />,
+      cell: (info) => <div className="truncate text-right font-mono">{formatNumber(info.getValue())}</div>,
+    }),
+    columnHelper.main.accessor("total_cycles", {
+      header: ({ column }) => <TableColumnHeader align="right" column={column} title="Total Cycles" />,
+      cell: (info) => <div className="truncate text-right font-mono">{formatNumber(info.getValue())}</div>,
+    }),
+    columnHelper.main.accessor("proof_bytes", {
+      header: ({ column }) => <TableColumnHeader align="right" column={column} title="Proof Bytes" />,
+      cell: (info) => <div className="truncate text-right font-mono">{formatBytes(Number(info.getValue()))}</div>,
+    }),
+  ] as ColumnDef<ApplicationsBenchmarksTableSchema<"release-2.0">, unknown>[],
 };

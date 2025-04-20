@@ -33,7 +33,10 @@ use rand::thread_rng;
 use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
-    core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
+    core::{
+        digest::Digest, hash::poseidon2::Poseidon2HashSuite,
+        hash::poseidon_254::Poseidon254HashSuite,
+    },
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem,
@@ -90,8 +93,10 @@ pub struct Prover {
 
 #[cfg(feature = "cuda")]
 mod cuda {
-    pub use crate::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
-    pub use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
+    pub use crate::cuda::{
+        CudaCircuitHalPoseidon2, CudaCircuitHalPoseidon254, CudaCircuitHalSha256,
+    };
+    pub use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalPoseidon254, CudaHalSha256};
 
     use super::{HalPair, Rc};
 
@@ -104,6 +109,12 @@ mod cuda {
     pub fn poseidon2_hal_pair() -> HalPair<CudaHalPoseidon2, CudaCircuitHalPoseidon2> {
         let hal = Rc::new(CudaHalPoseidon2::new());
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+        HalPair { hal, circuit_hal }
+    }
+
+    pub fn poseidon254_hal_pair() -> HalPair<CudaHalPoseidon254, CudaCircuitHalPoseidon254> {
+        let hal = Rc::new(CudaHalPoseidon254::new());
+        let circuit_hal = Rc::new(CudaCircuitHalPoseidon254::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 }
@@ -131,10 +142,11 @@ mod metal {
 }
 
 mod cpu {
-    use risc0_zkp::core::hash::{poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite};
+    use risc0_zkp::core::hash::sha::Sha256HashSuite;
 
     use super::{
-        BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Poseidon2HashSuite, Rc, CIRCUIT,
+        BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Poseidon254HashSuite,
+        Poseidon2HashSuite, Rc, CIRCUIT,
     };
 
     #[allow(dead_code)]
@@ -176,8 +188,8 @@ cfg_if::cfg_if! {
 
         /// Construct a `Hal` and `CircuitHal` pair.
         #[allow(dead_code)]
-        pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cpu::poseidon254_hal_pair()
+        pub fn poseidon254_hal_pair() -> HalPair<cuda::CudaHalPoseidon254, cuda::CudaCircuitHalPoseidon254> {
+            cuda::poseidon254_hal_pair()
         }
     } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
         /// Construct a `Hal` and `CircuitHal` pair.

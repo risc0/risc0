@@ -85,7 +85,7 @@ impl SegmentReceipt {
             });
         }
 
-        let expected = risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO;
+        let expected = risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO;
 
         if params.circuit_info != expected {
             return Err(VerificationError::CircuitInfoMismatch {
@@ -94,8 +94,12 @@ impl SegmentReceipt {
             });
         }
 
+        if self.hashfn != "poseidon2" {
+            return Err(VerificationError::InvalidHashSuite);
+        }
+
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        risc0_circuit_rv32im_v2::verify(&self.seal)?;
+        risc0_circuit_rv32im::verify(&self.seal)?;
         let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)
             .or(Err(VerificationError::ReceiptFormatError))?;
 
@@ -160,7 +164,7 @@ impl Default for SegmentReceiptVerifierParameters {
         Self {
             control_ids: BTreeSet::default(),
             proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_rv32im_v2::CircuitImpl::CIRCUIT_INFO,
+            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
         }
     }
 }

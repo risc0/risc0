@@ -16,77 +16,99 @@ use derive_more::{Add, AddAssign, Debug, Sub};
 
 use crate::{PAGE_WORDS, WORD_SIZE};
 
-/// TODO(flaub)
+/// A memory address expressed in bytes
 #[derive(Add, AddAssign, Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Sub)]
 #[debug("{_0:#010x}")]
 pub struct ByteAddr(pub u32);
 
-/// TODO(flaub)
+/// A memory address expressed in words
+///
+/// Only capable of representing aligned addresses, as adjacent [WordAddr]s are a word apart.
 #[derive(Add, AddAssign, Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Sub)]
 #[debug("${_0:#010x}")]
 pub struct WordAddr(pub u32);
 
 impl ByteAddr {
-    /// TODO(flaub)
+    /// Convert to a [WordAddr]
+    ///
+    /// If the address is not aligned to a word boundary, this will return the highest aligned address smaller than the input address.
     pub const fn waddr(self) -> WordAddr {
         WordAddr(self.0 / WORD_SIZE as u32)
     }
 
-    /// TODO(flaub)
+    /// Convert to a [WordAddr] if aligned
+    ///
+    /// If the address is aligned to a word boundary, this will return the [WordAddr] for this memory location. If it is not aligned, it returns `None`.
     pub fn waddr_aligned(self) -> Option<WordAddr> {
         self.is_aligned().then(|| self.waddr())
     }
 
-    /// TODO(flaub)
+    /// Reports if the address is aligned
+    ///
+    /// Returns `true` if the address is aligned to a word boundary, otherwise returns `false`
     pub const fn is_aligned(&self) -> bool {
         self.0 % WORD_SIZE as u32 == 0
     }
 
-    /// TODO(flaub)
+    /// Reports if the address is null
+    ///
+    /// The address `0x00000000` is null and will return `true`, for all others returns `false`.
     pub const fn is_null(&self) -> bool {
         self.0 == 0
     }
 
-    /// TODO(flaub)
+    /// Add an offset to an address
+    ///
+    /// This will wrap on overflow, e.g. `0xFFFFFFFF + 0x00000001` is `0x00000000`.
     pub fn wrapping_add(self, rhs: u32) -> Self {
         Self(self.0.wrapping_add(rhs))
     }
 
-    /// TODO(flaub)
+    /// The subaddress of this address relative to its containing word
+    ///
+    /// The number of bytes this address is beyond the previous aligned address. So for example an aligned address will have a subaddress of `0`, while the address `0x00003001` will have subaddress `1`.
     pub fn subaddr(&self) -> u32 {
         self.0 % WORD_SIZE as u32
     }
 }
 
 impl WordAddr {
-    /// TODO(flaub)
+    /// Convert to a [ByteAddr]
     pub const fn baddr(self) -> ByteAddr {
         ByteAddr(self.0 * WORD_SIZE as u32)
     }
 
-    /// TODO(flaub)
+    /// Gives the [crate::image::Page] containing this memory address
     pub fn page_idx(&self) -> u32 {
         self.0 / PAGE_WORDS as u32
     }
 
-    /// TODO(flaub)
+    /// The subaddress of this address relative to its containing [crate::image::Page]
+    ///
+    /// The number of words this address is beyond the first word of the page which contains it.
     pub fn page_subaddr(&self) -> WordAddr {
         Self(self.0 % PAGE_WORDS as u32)
     }
 
-    /// TODO(flaub)
+    /// Increments this address to the next word
+    ///
+    /// This increments the address without returning any value.
     pub fn inc(&mut self) {
         self.0 += 1;
     }
 
-    /// TODO(flaub)
+    /// Increments this address to the next word and returns its previous value
+    ///
+    /// This is a postfixing increment, analogous to `addr++` in C; the value this evaluates to is the value prior to the increment.
     pub fn postfix_inc(&mut self) -> Self {
         let cur = *self;
         self.0 += 1;
         cur
     }
 
-    /// TODO(flaub)
+    /// Reports if the address is null
+    ///
+    /// The address `0x00000000` is null and will return `true`, for all others returns `false`.
     pub const fn is_null(&self) -> bool {
         self.0 == 0
     }

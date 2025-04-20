@@ -28,7 +28,7 @@ use alloc::{
 };
 use core::arch::asm;
 
-use getrandom::getrandom;
+use getrandom::fill;
 use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
@@ -184,7 +184,7 @@ fn main() {
             for size in 0..=15 {
                 for alignment in 0..=usize::min(3, size) {
                     let rand_buf = &mut vec![0u8; size][alignment..];
-                    getrandom(rand_buf).expect("random number generation failed");
+                    fill(rand_buf).expect("random number generation failed");
                     env::commit_slice(&rand_buf);
 
                     // If we generated more than 2 bytes, make sure that they are at least not zero.
@@ -266,13 +266,34 @@ fn main() {
             }
             env::log("Busy loop complete");
         }
-        MultiTestSpec::BigInt { x, y, modulus } => {
+        MultiTestSpec::BigInt {
+            count,
+            x,
+            y,
+            modulus,
+        } => {
             let mut result = [0u32; bigint::WIDTH_WORDS];
-            unsafe {
-                sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus);
+            for _ in 0..count {
+                unsafe { sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus) };
             }
             env::commit_slice(&result);
         }
+        MultiTestSpec::BigIntRaw {
+            result,
+            x,
+            y,
+            modulus,
+        } => unsafe {
+            asm!(
+                "ecall",
+                in("t0") ecall::BIGINT,
+                in("a0") result,
+                in("a1") bigint::OP_MULTIPLY,
+                in("a2") x,
+                in("a3") y,
+                in("a4") modulus,
+            );
+        },
         MultiTestSpec::LibM => {
             use core::hint::black_box;
             let f = black_box(1.0_f32);

@@ -164,40 +164,6 @@ impl Client {
         result
     }
 
-    /// Execute the specified ELF binary with `SegmentVersion::V2`.
-    pub fn execute_v2<F>(
-        &self,
-        env: &ExecutorEnv<'_>,
-        binary: Asset,
-        segments_out: AssetRequest,
-        segment_callback: F,
-    ) -> Result<SessionInfo>
-    where
-        F: FnMut(SegmentInfo, Asset) -> Result<()>,
-    {
-        let mut conn = self.connect()?;
-
-        let request = pb::api::ServerRequest {
-            kind: Some(pb::api::server_request::Kind::Execute(
-                pb::api::ExecuteRequest {
-                    env: Some(self.make_execute_env(env, binary.try_into()?)?),
-                    segments_out: Some(segments_out.try_into()?),
-                },
-            )),
-        };
-        // tracing::trace!("tx: {request:?}");
-        conn.send(request)?;
-
-        let result = self.execute_handler(segment_callback, &mut conn, env);
-
-        let code = conn.close()?;
-        if code != 0 {
-            bail!("Child finished with: {code}");
-        }
-
-        result
-    }
-
     /// Prove the specified segment.
     pub fn prove_segment(
         &self,
@@ -611,8 +577,8 @@ impl Client {
     /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
     /// verifier, referred to as the "STARK-to-SNARK" operation.
     ///
-    /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
-    /// x86 hosts, and requires Docker to be installed. See issue
+    /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) requires
+    /// Docker to be installed. See issue
     /// [#1749](https://github.com/risc0/risc0/issues/1749) for more information.
     ///
     /// If the receipt is already at least as compressed as the requested compression level (e.g.
@@ -765,7 +731,7 @@ impl Client {
                         AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {
                             kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
-                                    pb::core::InnerReceipt::from(inner.clone())
+                                    pb::core::InnerReceipt::try_from(inner.clone())?
                                         .encode_to_vec()
                                         .into(),
                                 )
@@ -775,7 +741,7 @@ impl Client {
                         AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
                             kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::Assumption::from(assumption.clone())
+                                    pb::core::Assumption::try_from(assumption.clone())?
                                         .encode_to_vec()
                                         .into(),
                                 )

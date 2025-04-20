@@ -15,8 +15,9 @@
 use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
+use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
-    compute_image_id, get_prover_server, ApiServer, Executor2, ExecutorEnv, ProverOpts,
+    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
     ProverServer, VerifierContext,
 };
 
@@ -86,6 +87,9 @@ struct Mode {
     /// The image to execute
     #[arg(long)]
     image: Option<PathBuf>,
+
+    #[arg(long)]
+    segment: Option<PathBuf>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -125,6 +129,13 @@ pub fn main() {
         return;
     }
 
+    if let Some(path) = args.mode.segment {
+        let bytes = std::fs::read(path).unwrap();
+        let segment = Segment::decode(&bytes).unwrap();
+        segment.execute().unwrap();
+        return;
+    }
+
     let env = {
         let mut builder = ExecutorEnv::builder();
 
@@ -151,11 +162,11 @@ pub fn main() {
     let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = fs::read(elf_path).unwrap();
-            Executor2::from_elf(env, &elf_contents).unwrap()
+            ExecutorImpl::from_elf(env, &elf_contents).unwrap()
         } else if let Some(ref image_path) = args.mode.image {
             let image_contents = fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
-            Executor2::new(env, image).unwrap()
+            ExecutorImpl::new(env, image).unwrap()
         } else {
             unreachable!()
         };

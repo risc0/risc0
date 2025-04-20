@@ -21,14 +21,14 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage2, Program, ProgramBinary};
-use risc0_circuit_rv32im_v2::TerminateState;
+use risc0_binfmt::{ExitCode, MemoryImage, Program, ProgramBinary};
+use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF,
-    STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
+    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND2_ELF, RAND_ELF,
+    SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{
     fileno,
@@ -40,7 +40,7 @@ use sha2::{Digest as _, Sha256};
 
 use crate::{
     host::server::exec::{
-        executor2::Executor2,
+        executor::ExecutorImpl,
         profiler::Profiler,
         syscall::{Syscall, SyscallContext},
     },
@@ -50,7 +50,7 @@ use crate::{
 };
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -90,13 +90,13 @@ fn insufficient_segment_limit() {
 
 #[test_log::test]
 fn basic() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::user::basic();
+    let program = risc0_circuit_rv32im::execute::testutil::user::basic();
     let env = ExecutorEnv::default();
     let kernel = Program::load_elf(V1COMPAT_ELF, u32::MAX).unwrap();
-    let mut image = MemoryImage2::with_kernel(program, kernel);
+    let mut image = MemoryImage::with_kernel(program, kernel);
     let pre_image_id = image.image_id();
 
-    let mut exec = Executor2::new(env, image).unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
         .unwrap();
@@ -117,15 +117,15 @@ fn basic() {
 
 #[test_log::test]
 fn system_split_v2() {
-    let program = risc0_circuit_rv32im_v2::execute::testutil::kernel::simple_loop(200);
-    let mut image = MemoryImage2::new_kernel(program);
+    let program = risc0_circuit_rv32im::execute::testutil::kernel::simple_loop(200);
+    let mut image = MemoryImage::new_kernel(program);
     let pre_image_id = image.image_id();
 
     let env = ExecutorEnv::builder()
         .segment_limit_po2(13) // 8K cycles
         .build()
         .unwrap();
-    let mut exec = Executor2::new(env, image).unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
         .unwrap();
@@ -248,6 +248,7 @@ fn bigint_accel() {
     for case in cases {
         println!("Running BigInt circuit test case: {:x?}", case);
         let input = MultiTestSpec::BigInt {
+            count: 1,
             x: case.x,
             y: case.y,
             modulus: case.modulus,
@@ -268,8 +269,10 @@ fn bigint_accel() {
 }
 
 #[test_log::test]
+#[should_panic(expected = "IllegalInstruction")]
 fn bigint_accel_mod_zero_product_too_large() {
     let input = MultiTestSpec::BigInt {
+        count: 1,
         x: [u32::MAX; bigint::WIDTH_WORDS],
         y: [u32::MAX; bigint::WIDTH_WORDS],
         modulus: [0u32; bigint::WIDTH_WORDS],
@@ -280,8 +283,80 @@ fn bigint_accel_mod_zero_product_too_large() {
         .unwrap()
         .build()
         .unwrap();
-    let error = execute_elf(env, MULTI_TEST_ELF).map(|_| ()).unwrap_err();
-    assert!(error.to_string().contains("IllegalInstruction"), "{error}");
+    execute_elf(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test_log::test]
+fn bigint_repeat() {
+    let input = MultiTestSpec::BigInt {
+        count: 100,
+        x: [1, 2, 3, 4, 5, 6, 7, 8],
+        y: [9, 10, 11, 12, 13, 14, 15, 16],
+        modulus: [17, 18, 19, 20, 21, 22, 23, 24],
+    };
+
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+const BIGINT_LEGAL_ADDR: u32 = 0x3000_0000;
+const BIGINT_ILLEGAL_ADDR: u32 = 0xc000_0000;
+
+#[rstest]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_ILLEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_ILLEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_ILLEGAL_ADDR,
+    BIGINT_LEGAL_ADDR
+)]
+#[should_panic(expected = "IllegalInstruction")]
+#[case(
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_LEGAL_ADDR,
+    BIGINT_ILLEGAL_ADDR
+)]
+#[test_log::test]
+fn bigint_raw(#[case] result: u32, #[case] x: u32, #[case] y: u32, #[case] modulus: u32) {
+    let input = MultiTestSpec::BigIntRaw {
+        result,
+        x,
+        y,
+        modulus,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 #[test_log::test]
@@ -831,6 +906,12 @@ fn getrandom_panic() {
 }
 
 #[test_log::test]
+fn getrandom2() {
+    let env = ExecutorEnv::default();
+    execute_elf(env, RAND2_ELF).unwrap();
+}
+
+#[test_log::test]
 #[should_panic(expected = "Guest panicked: sys_getenv is disabled")]
 fn sys_getenv_panic() {
     let env = ExecutorEnv::default();
@@ -889,7 +970,7 @@ fn profiler() {
         .trace_callback(&mut profiler)
         .build()
         .unwrap();
-    Executor2::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -999,7 +1080,7 @@ fn profiler() {
         }
     }
 
-    let elf_mem = Program::load_elf(binary.user_elf, u32::MAX).unwrap().image;
+    let program = Program::load_elf(binary.user_elf, u32::MAX).unwrap();
 
     // Check that the addresses for these two functions point to the right place
     for func_name in ["profile_test_func2", "profile_test_func3"] {
@@ -1009,8 +1090,8 @@ fn profiler() {
             .unwrap();
 
         let addr = test_func.frames[0].address;
-        let inst = *elf_mem
-            .get(&(addr as u32))
+        let inst = program
+            .read_u32(&(addr as u32))
             .unwrap_or_else(|| panic!("0x{addr:x} found in elf"));
 
         // check its nop
@@ -1109,7 +1190,8 @@ fn post_state_digest_randomization() {
         .map(|_| {
             // Run the guest and extract the post state digest.
 
-            let mut exec = Executor2::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            let mut exec =
+                ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
             // Override the default randomness syscall using crate-internal API.
             exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
             exec.run()
@@ -1236,7 +1318,7 @@ mod docker {
                 })
                 .build()
                 .unwrap();
-            Executor2::from_elf(env, MULTI_TEST_ELF)
+            ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
                 .unwrap()
                 .run()
                 .unwrap();

@@ -41,6 +41,7 @@ macro_rules! trace_if_enabled {
 }
 
 #[derive(Clone, Copy, Debug)]
+#[non_exhaustive]
 pub struct MixState<EE: ExtElem> {
     pub tot: EE,
     pub mul: EE,
@@ -198,6 +199,7 @@ pub struct PolyExtStepDef {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum PolyExtStep {
     Const(u32),
     ConstExt(u32, u32, u32, u32),

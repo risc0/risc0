@@ -47,10 +47,10 @@ impl Syscall for SysArgs {
                 )
             })?;
 
-            let nbytes = min(to_guest.len() * WORD_SIZE, arg_val.as_bytes().len());
+            let nbytes = min(to_guest.len() * WORD_SIZE, arg_val.len());
             let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
             to_guest_u8s[0..nbytes].clone_from_slice(&arg_val.as_bytes()[0..nbytes]);
-            Ok((arg_val.as_bytes().len() as u32, 0))
+            Ok((arg_val.len() as u32, 0))
         } else {
             bail!("Unknown syscall {syscall}")
         }

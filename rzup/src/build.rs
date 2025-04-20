@@ -115,7 +115,7 @@ fn git_clone(src: &str, dest: &Path) -> Result<()> {
 }
 
 fn git_checkout(path: &Path, tag_or_commit: &str) -> Result<()> {
-    run_command("git", &["checkout", tag_or_commit], Some(path), &[])?;
+    run_command("git", &["checkout", "-f", tag_or_commit], Some(path), &[])?;
     Ok(())
 }
 
@@ -170,26 +170,33 @@ fn find_build_directories(build_dir: &Path) -> Result<(PathBuf, PathBuf)> {
 pub fn build_rust_toolchain(
     env: &Environment,
     repo_url: &str,
-    tag_or_commit: &str,
+    tag_or_commit: &Option<String>,
+    path: &Option<String>,
 ) -> Result<Version> {
     env.emit(RzupEvent::BuildingRustToolchain);
 
-    let _lock_file = env.flock("rust-toolchain-build", "building a Rust toolchain")?;
+    let _lock_file = env.flock("rust-toolchain-build")?;
 
-    env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "cloning git repository".into(),
-    });
-
-    let repo_dir = env.tmp_dir().join("build-rust-toolchain");
-
-    if !repo_dir.join(".git").exists() {
-        git_clone(repo_url, &repo_dir)?;
-    } else {
-        git_fetch(&repo_dir)?;
-    }
-    git_checkout(&repo_dir, tag_or_commit)?;
-    git_reset_hard(&repo_dir)?;
-    git_submodule_update(&repo_dir)?;
+    // if building from commit
+    let repo_dir = match path {
+        None => {
+            let repo_dir = env.tmp_dir().join("build-rust-toolchain");
+            if !repo_dir.join(".git").exists() {
+                env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                    message: "cloning git repository".into(),
+                });
+                git_clone(repo_url, &repo_dir)?;
+            } else {
+                git_fetch(&repo_dir)?;
+            }
+            let tag_or_commit = tag_or_commit.as_ref().unwrap();
+            git_checkout(&repo_dir, tag_or_commit)?;
+            git_reset_hard(&repo_dir)?;
+            git_submodule_update(&repo_dir)?;
+            repo_dir
+        }
+        Some(path) => path.into(),
+    };
 
     let commit = git_short_rev_parse(&repo_dir, "HEAD")?;
 
@@ -212,13 +219,20 @@ pub fn build_rust_toolchain(
         message: "./x build".into(),
     });
 
+    let req = semver::VersionReq::parse(">=1.82.0")?;
+    let lower_atomic = if req.matches(&version) {
+        "-Cpasses=lower-atomic"
+    } else {
+        "-Cpasses=loweratomic"
+    };
+
     run_command_and_stream_output(
         "./x",
         &["build"],
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            "-Cpasses=loweratomic",
+            lower_atomic,
         )],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {
@@ -238,7 +252,7 @@ pub fn build_rust_toolchain(
         Some(&repo_dir),
         &[(
             "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            "-Cpasses=loweratomic",
+            lower_atomic,
         )],
         |line| {
             env.emit(RzupEvent::BuildingRustToolchainUpdate {

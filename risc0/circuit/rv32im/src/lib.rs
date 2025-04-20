@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,81 +12,132 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub mod control_id;
-mod info;
-pub mod layout;
-pub mod poly_ext;
+#[cfg(feature = "execute")]
+pub mod execute;
 #[cfg(feature = "prove")]
 pub mod prove;
-mod taps;
 pub mod trace;
+mod zirgen;
 
+use core::num::TryFromIntError;
+
+use anyhow::{anyhow, ensure, Result};
+use derive_more::Debug;
 use risc0_zkp::{
-    adapter::{CircuitCoreDef, TapsProvider},
-    core::digest::Digest,
-    field::baby_bear::BabyBear,
-    taps::TapSet,
+    adapter::CircuitInfo as _,
+    core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
+    layout::Tree,
+    verify::VerificationError,
 };
+use serde::{Deserialize, Serialize};
 
-use control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS};
+use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
 
-pub struct CircuitImpl;
+pub use self::zirgen::CircuitImpl;
 
-pub const REGISTER_GROUP_ACCUM: usize = 0;
-pub const REGISTER_GROUP_CODE: usize = 1;
-pub const REGISTER_GROUP_CTRL: usize = 1;
-pub const REGISTER_GROUP_DATA: usize = 2;
+pub const RV32IM_SEAL_VERSION: u32 = 1;
 
-pub const GLOBAL_MIX: usize = 0;
-pub const GLOBAL_OUT: usize = 1;
-pub const CIRCUIT: CircuitImpl = CircuitImpl::new();
+/// This number was picked by running `bigint2-analyze` on all the current bigint programs
+pub const MAX_INSN_CYCLES: usize = 25_000;
 
-impl CircuitImpl {
-    const fn new() -> Self {
-        CircuitImpl
+/// This is a smaller number used by lower po2's < 15 which can't fit a large bigint program.
+pub const MAX_INSN_CYCLES_LOWER_PO2: usize = 2_000;
+
+pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
+    tracing::debug!("verify");
+
+    // We don't have a `code' buffer to verify.
+    let check_code_fn = |_: u32, _: &Digest| Ok(());
+
+    if seal[0] != RV32IM_SEAL_VERSION {
+        return Err(VerificationError::ReceiptFormatError);
+    }
+
+    let seal = &seal[1..];
+
+    let hash_suite = Poseidon2HashSuite::new_suite();
+    risc0_zkp::verify::verify(&CircuitImpl, &hash_suite, seal, check_code_fn)
+}
+
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct HighLowU16(pub u16, pub u16);
+
+impl From<HighLowU16> for u32 {
+    fn from(x: HighLowU16) -> Self {
+        ((x.0 as u32) << 16) | (x.1 as u32)
     }
 }
 
-impl TapsProvider for CircuitImpl {
-    fn get_taps(&self) -> &'static TapSet<'static> {
-        taps::TAPSET
+impl From<u32> for HighLowU16 {
+    fn from(x: u32) -> Self {
+        Self((x >> 16) as u16, (x & 0xffff) as u16)
     }
 }
 
-impl CircuitCoreDef<BabyBear> for CircuitImpl {}
-
-/// Fetch a control ID with the given hash, by name, and cycle limit as a power of two (po2) from
-/// the precomputed table. If the hash function is not precomputed, or the po2 is out of range,
-/// this function will return `None`.
-///
-/// Supported values for hash_name are "sha-256", "poseidon2", and "blake2b".
-#[inline]
-pub fn control_id(hash_name: impl AsRef<str>, po2: usize) -> Option<Digest> {
-    if !(risc0_zkp::MIN_CYCLES_PO2..=risc0_zkp::MAX_CYCLES_PO2).contains(&po2) {
-        return None;
-    }
-    let idx = po2 - risc0_zkp::MIN_CYCLES_PO2;
-    match hash_name.as_ref() {
-        "sha-256" => Some(SHA256_CONTROL_IDS[idx]),
-        "poseidon2" => Some(POSEIDON2_CONTROL_IDS[idx]),
-        "blake2b" => Some(BLAKE2B_CONTROL_IDS[idx]),
-        _ => None,
-    }
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct TerminateState {
+    pub a0: HighLowU16,
+    pub a1: HighLowU16,
 }
 
-/// Fetch all precomputed control IDs using the given hash, by name, and up to the cycle limit as a
-/// power of two (po2). If po2 is larger than the max supported, only supported po2s will be
-/// returned.
-pub fn control_ids(
-    hash_name: impl AsRef<str> + 'static,
-    po2_max: usize,
-) -> impl Iterator<Item = Digest> {
-    // Using `take_while` here ensures termination when po2_max is much greater than the highest po2.
-    (risc0_zkp::MIN_CYCLES_PO2..=po2_max)
-        .map(move |po2| control_id(hash_name.as_ref(), po2))
-        .take_while(Option::is_some)
-        .map(Option::unwrap)
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Rv32imV2Claim {
+    pub pre_state: Digest,
+    pub post_state: Digest,
+    pub input: Digest,
+    pub output: Option<Digest>,
+    pub terminate_state: Option<TerminateState>,
+    pub shutdown_cycle: Option<u32>,
+}
+
+impl Rv32imV2Claim {
+    pub fn decode(seal: &[u32]) -> Result<Rv32imV2Claim> {
+        ensure!(seal[0] == RV32IM_SEAL_VERSION, "seal version mismatch");
+        let seal = &seal[1..];
+
+        let io: &[Val] = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
+        let global = Tree::new(io, LAYOUT_GLOBAL);
+
+        let pre_state = global.map(|c| c.state_in).get_digest_from_shorts()?;
+        let post_state = global.map(|c| c.state_out).get_digest_from_shorts()?;
+        let input = global.map(|c| c.input).get_digest_from_shorts()?;
+        let output = global.map(|c| c.output).get_digest_from_shorts()?;
+        let is_terminate = global.map(|c| c.is_terminate).get_u32_from_elem()?;
+        let term_a0_high = global.map(|c| c.term_a0high).get_u32_from_elem()?;
+        let term_a0_low = global.map(|c| c.term_a0low).get_u32_from_elem()?;
+        let term_a1_high = global.map(|c| c.term_a1high).get_u32_from_elem()?;
+        let term_a1_low = global.map(|c| c.term_a1low).get_u32_from_elem()?;
+        let shutdown_cycle = global.map(|c| c.shutdown_cycle).get_u32_from_elem()?;
+
+        fn try_as_u16(x: u32) -> Result<u16> {
+            x.try_into()
+                .map_err(|err: TryFromIntError| anyhow!("{err}"))
+        }
+
+        let terminate_state = if is_terminate == 1 {
+            Some(TerminateState {
+                a0: HighLowU16(try_as_u16(term_a0_high)?, try_as_u16(term_a0_low)?),
+                a1: HighLowU16(try_as_u16(term_a1_high)?, try_as_u16(term_a1_low)?),
+            })
+        } else {
+            None
+        };
+
+        let output = if is_terminate == 1 {
+            Some(output)
+        } else {
+            None
+        };
+
+        Ok(Rv32imV2Claim {
+            pre_state,
+            post_state,
+            input,
+            output,
+            terminate_state,
+            shutdown_cycle: Some(shutdown_cycle),
+        })
+    }
 }

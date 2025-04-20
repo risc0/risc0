@@ -39,10 +39,10 @@ impl Syscall for SysGetenv {
         match self.0.get(msg) {
             None => Ok((u32::MAX, 0)),
             Some(val) => {
-                let nbytes = min(to_guest.len() * WORD_SIZE, val.as_bytes().len());
+                let nbytes = min(to_guest.len() * WORD_SIZE, val.len());
                 let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
                 to_guest_u8s[0..nbytes].clone_from_slice(&val.as_bytes()[0..nbytes]);
-                Ok((val.as_bytes().len() as u32, 0))
+                Ok((val.len() as u32, 0))
             }
         }
     }

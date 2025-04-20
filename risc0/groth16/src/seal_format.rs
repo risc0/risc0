@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ pub(crate) enum IopType {
     Digest,
 }
 
-pub(crate) const K_SEAL_TYPES: [IopType; K_SEAL_ELEMS] = [
+pub(crate) static K_SEAL_TYPES: [IopType; K_SEAL_ELEMS] = [
     IopType::Fp,
     IopType::Fp,
     IopType::Fp,

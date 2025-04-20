@@ -136,7 +136,7 @@ static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
 /// Used for batching keccak proofs
 #[cfg(feature = "unstable")]
-static mut KECCAK2_BATCHER: OnceCell<batcher::Keccak2Batcher> = OnceCell::new();
+static mut KECCAK_BATCHER: OnceCell<batcher::KeccakBatcher> = OnceCell::new();
 
 /// Initialize globals before program main
 pub(crate) fn init() {
@@ -144,7 +144,7 @@ pub(crate) fn init() {
     unsafe {
         HASHER.set(Sha256::new()).unwrap();
         #[cfg(feature = "unstable")]
-        KECCAK2_BATCHER.set(batcher::Keccak2Batcher::new()).unwrap();
+        KECCAK_BATCHER.set(batcher::KeccakBatcher::new()).unwrap();
         syscall::sys_rand(
             MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
             MEMORY_IMAGE_ENTROPY.len(),
@@ -157,7 +157,7 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     #[allow(static_mut_refs)]
     unsafe {
         #[cfg(feature = "unstable")]
-        KECCAK2_BATCHER.take().unwrap().finalize();
+        KECCAK_BATCHER.take().unwrap().finalize();
 
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
@@ -502,11 +502,12 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 ///
 /// While is accesses a static mutable, this is considered safe because the zkVM
 /// is single-threaded and non-preemptive.
+#[cfg(target_os = "zkvm")]
 #[cfg(feature = "unstable")]
 #[no_mangle]
 pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
     #[allow(static_mut_refs)]
     unsafe {
-        KECCAK2_BATCHER.get_mut().unwrap().update(state)
+        KECCAK_BATCHER.get_mut().unwrap().update(state)
     }
 }

@@ -3,18 +3,13 @@ name: risc0-ethereum CI
 on:
   merge_group:
   pull_request:
-    branches: [main, "release-*"]
+    branches: ["release-*"]
   workflow_dispatch:
     inputs:
       risc0-ethereum-branch:
         description: "risc0-ethereum branch to checkout"
         required: false
         default: 'main'
-      risc0-foundry-template-branch:
-        description: "risc0-foundry-template branch to checkout"
-        required: false
-        # TODO: Switch this back to main when the foundry template is using risc0-build 2
-        default: 'dev'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -27,11 +22,10 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.81.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_PATH: ${{ github.workspace }}/risc0
   RISC0_ETHEREUM_PATH: ${{ github.workspace }}/risc0-ethereum
-  RISC0_FOUNDRY_TEMPLATE_PATH: ${{ github.workspace }}/risc0-foundry-template
 
 jobs:
   changes:
@@ -101,15 +95,7 @@ jobs:
           submodules: recursive
           path: 'risc0-ethereum'
           ref: ${{ github.event.inputs.risc0-ethereum-branch || env.RISC0_ETHEREUM_BRANCH }}
-      # Checkout risc0-foundry-template
-      - name: Checkout foundry-template
-        uses: actions/checkout@v4
-        with:
-          repository: 'risc0/risc0-foundry-template'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: recursive
-          path: 'risc0-foundry-template'
-          ref: ${{ github.event.inputs.risc0-foundry-template-branch || 'dev' }}
+      # Setup rustup and sccache
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
         with:
@@ -124,19 +110,14 @@ jobs:
       - name: Install risczero toolchain
         run: |
           cargo install --locked --force --path risc0/cargo-risczero
-          cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
-          cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+          cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+          cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
         working-directory: risc0
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-5c69a9d9fd4e2ec07fc398ab5ef9d706c33890c2
+      - uses: foundry-rs/foundry-toolchain@v1
       # Apply local patch
       - name: Local patch on risc0-ethereum
-        run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py  .
+        run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py --ignore lib .
         working-directory:  ${{ env.RISC0_ETHEREUM_PATH }}
-      - name: Local patch on risc0-foundry-template
-        run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py  .
-        working-directory:  ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
       # Run Bootstrap-groth16 to update test receipt for checking
       # the latest groth16 prover against the solidity verifier on risc0-ethereum
       - name: Bootstrap-groth16 test receipt
@@ -154,16 +135,4 @@ jobs:
       - name: forge test on risc0-ethereum
         run: forge test -vvv
         working-directory: ${{ env.RISC0_ETHEREUM_PATH }}/contracts
-      # Build and test risc0-foundry-template
-      - name: build risc0-foundry-template
-        run: cargo build
-        working-directory: ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
-      - name: build risc0-foundry-template contracts
-        run: forge build
-        working-directory: ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
-      - name: run foundry tests in dev mode
-        env:
-          RISC0_DEV_MODE: true
-        run: forge test -vvv
-        working-directory: ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
       - run: sccache --show-stats

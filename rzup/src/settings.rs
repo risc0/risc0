@@ -53,6 +53,18 @@ impl Settings {
         let settings: Self = toml::from_str(&contents)
             .map_err(|e| RzupError::Other(format!("invalid TOML in settings.toml file: {e}")))?;
 
+        // Emit warning for any invalid semver versions in [default_versions]
+        for (component, version_str) in &settings.default_versions {
+            if Version::parse(version_str).is_err() {
+                env.emit(RzupEvent::Print {
+                    message: format!(
+                        "! Warning: settings.toml: invalid semver `{}` for component `{}`",
+                        version_str, component
+                    ),
+                });
+            }
+        }
+
         for table_name in settings.unknown_settings.keys() {
             env.emit(RzupEvent::Print {
                 message: format!("! Warning: settings.toml: unknown table `{table_name}`"),
@@ -207,6 +219,32 @@ mod tests {
             .get_default_version(&Component::RustToolchain)
             .unwrap();
         assert_eq!(version, Version::new(1, 81, 0));
+    }
+
+    /// If the version string in default_versions is not a valid semver,
+    /// it should be ignored without panicking.
+    #[test]
+    fn test_invalid_version_is_ignored() {
+        let (_tmp_dir, mut env) = test_env();
+
+        std::fs::write(
+            env.settings_path(),
+            "[default_versions]\ncargo-risczero = \"not-a-semver\"\n",
+        )
+        .unwrap();
+
+        let settings: Settings = run_and_assert_events(
+            &mut env,
+            |env| Settings::load(env).unwrap(),
+            vec![RzupEvent::Print {
+                message: "! Warning: settings.toml: invalid semver `not-a-semver` for component `cargo-risczero`".into(),
+            }],
+        );
+
+        assert_eq!(
+            settings.get_default_version(&Component::CargoRiscZero),
+            None
+        );
     }
 
     #[test]

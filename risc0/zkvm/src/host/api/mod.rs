@@ -175,7 +175,7 @@ impl ParentProcessConnector {
             let server_suggestion = if client_version.pre.is_empty() {
                 format!(
                     "1. Install r0vm server version {}.{}\n",
-                    server_version.major, server_version.minor
+                    client_version.major, client_version.minor
                 )
             } else {
                 format!("1. Your risc0 dependencies are using a pre-released version {client_version}.\n   \
@@ -385,6 +385,7 @@ pub enum AssetRequest {
 
 /// Provides information about the result of execution.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
@@ -410,6 +411,7 @@ impl SessionInfo {
 
 /// Provides information about a segment of execution.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,

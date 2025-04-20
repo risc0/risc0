@@ -1,88 +1,100 @@
 [package]
 name = "risc0-circuit-rv32im"
 description = "RISC Zero circuit for rv32im"
-version = { workspace = true }
+version = "2.1.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[[example]]
+name = "rv32im"
+required-features = ["prove"]
+
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+bytemuck = "1.13"
+derive_more = { version = "2.0.1", default-features = false, features = [
+  "add",
+  "add_assign",
+  "debug",
+] }
+paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
-risc0-zkp = { workspace = true }
-risc0-zkvm-platform = { workspace = true }
+risc0-zkp = { workspace = true, default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
 ] }
-smallvec = { version = "1.13", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
 
-[target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
-metal = { workspace = true }
-
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 auto_ops = { version = "0.3", optional = true }
-bytemuck = { version = "1.13", optional = true }
+bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
-crossbeam = { version = "0.8", optional = true }
-crypto-bigint = { version = "0.5", default-features = false, optional = true }
-cust = { version = "0.3", optional = true }
-derive_more = { version = "2.0.1", features = ["debug"], optional = true }
 enum-map = { version = "2.7.3", optional = true }
-lazy-regex = { version = "3.3", optional = true }
 malachite = { version = "0.4", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",
 ] }
-num-derive = { version = "0.4", optional = true }
-num-traits = { version = "0.2", optional = true }
+num-derive = { version = "0.4.2", optional = true }
+num-traits = { version = "0.2.19", optional = true }
+postcard = { version = "1.1.1", optional = true, features = ["use-std"] }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
+ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
-sha2 = { version = "0.10", default-features = false, optional = true }
+smallvec = { version = "1.13", optional = true }
 
 [dev-dependencies]
+clap = { version = "4.5", features = ["derive"] }
+flate2 = "1.0"
+tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = [
-  "dep:cust",
   "prove",
-  "risc0-circuit-rv32im-sys?/cuda",
-  "risc0-sys?/cuda",
+  "risc0-circuit-rv32im-sys/cuda",
+  "risc0-sys/cuda",
   "risc0-zkp/cuda",
-  "std",
 ]
 default = ["prove"]
-metal = ["prove"]
-prove = [
+# entropy_finder = []
+execute = [
+  "anyhow/backtrace",
   "dep:auto_ops",
-  "dep:bytemuck",
   "dep:byteorder",
-  "dep:cfg-if",
-  "dep:crossbeam",
-  "dep:crypto-bigint",
-  "dep:derive_more",
   "dep:enum-map",
-  "dep:lazy-regex",
   "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",
+  "dep:postcard",
+  "dep:ringbuffer",
+  "dep:smallvec",
+  "risc0-core/perf",
+  "std",
+]
+prove = [
+  "dep:cfg-if",
   "dep:rand",
   "dep:rayon",
   "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
-  "dep:sha2",
-  "dep:smallvec",
-  "risc0-core/perf",
+  "execute",
   "risc0-zkp/prove",
-  "std",
 ]
-std = ["risc0-zkp/std", "serde/std"]
+std = [
+  "anyhow/std",
+  "derive_more/std",
+  "risc0-binfmt/std",
+  "risc0-zkp/std",
+  "serde/std",
+]
+witgen_debug = []

@@ -30,7 +30,7 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
     default_prover, get_prover_server,
-    host::server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
+    host::server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     mmr::MerkleMountainAccumulator,
     receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
@@ -165,7 +165,7 @@ fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -398,7 +398,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("1193543e87956d31c39a87145e84332461dab71dc450b74507381f2d18e43447")
+        digest!("539032186827b06719244873b17b2d4c122e2d02cfb1994fe958b2523b844576")
     );
 }
 

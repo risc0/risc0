@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Copy, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize,
 )]
+#[non_exhaustive]
 pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest program. A halted program cannot be

@@ -26,13 +26,13 @@ use crate::{
 
 /// This struct implements the batching of calls to the keccak accelerator.
 #[derive(Debug)]
-pub struct Keccak2Batcher {
+pub(crate) struct KeccakBatcher {
     claim_state: Digest,
     mmr: MerkleMountainAccumulator<GuestPeak>,
     proof_count: u32,
 }
 
-impl Keccak2Batcher {
+impl KeccakBatcher {
     fn input_exists(&self) -> bool {
         self.claim_state != SHA256_INIT
     }
@@ -45,7 +45,8 @@ impl Keccak2Batcher {
         }
     }
 
-    pub fn update(&mut self, keccak_state: &mut KeccakState) {
+    #[allow(dead_code)]
+    pub(crate) fn update(&mut self, keccak_state: &mut KeccakState) {
         sha_single_keccak(&mut self.claim_state, keccak_state);
         let status = unsafe { sys_keccak(keccak_state, keccak_state) };
         // at this point the keccak_state is output state resulting from keccak permutation.
@@ -56,7 +57,7 @@ impl Keccak2Batcher {
         }
     }
 
-    pub fn flush(&mut self) {
+    pub(crate) fn flush(&mut self) {
         if !self.input_exists() {
             // no input so there's nothing to do
             return;
@@ -76,7 +77,7 @@ impl Keccak2Batcher {
         self.reset();
     }
 
-    pub fn finalize(mut self) {
+    pub(crate) fn finalize(mut self) {
         self.flush();
         if let Ok(root_assumption) = self.mmr.root() {
             // if proof_count == 0, self.mmr.root() will return an error.
