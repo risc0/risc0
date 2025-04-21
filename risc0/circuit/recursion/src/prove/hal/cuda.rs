@@ -234,3 +234,31 @@ mod tests {
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
     }
 }
+
+// #[cfg(feature = "cuda")]
+// mod cuda {
+//     pub use crate::cuda::{
+//         CudaCircuitHalPoseidon2, CudaCircuitHalPoseidon254, CudaCircuitHalSha256,
+//     };
+//     pub use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalPoseidon254, CudaHalSha256};
+
+//     use super::{HalPair, Rc};
+
+//     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
+//         let hal = Rc::new(CudaHalSha256::new());
+//         let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+//         HalPair { hal, circuit_hal }
+//     }
+
+//     pub fn poseidon2_hal_pair() -> HalPair<CudaHalPoseidon2, CudaCircuitHalPoseidon2> {
+//         let hal = Rc::new(CudaHalPoseidon2::new());
+//         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+//         HalPair { hal, circuit_hal }
+//     }
+
+//     pub fn poseidon254_hal_pair() -> HalPair<CudaHalPoseidon254, CudaCircuitHalPoseidon254> {
+//         let hal = Rc::new(CudaHalPoseidon254::new());
+//         let circuit_hal = Rc::new(CudaCircuitHalPoseidon254::new(hal.clone()));
+//         HalPair { hal, circuit_hal }
+//     }
+// }

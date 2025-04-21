@@ -12,135 +12,239 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ffi.h"
+#include "context.h"
 #include "fp.h"
 #include "fpext.h"
 
-#include <cstdint>
-#include <stdexcept>
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#endif
+
+#include "vendor/nvtx3/nvtx3.hpp"
+#include "vendor/poolstl.hpp"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
+#include <algorithm>
+#include <exception>
+#include <numeric>
+#include <stdio.h>
+#include <string.h>
 
 using namespace risc0;
+using namespace risc0::circuit::recursion;
 
-#define ACCUM_ARGS_LEN 5
-#define EXEC_ARGS_LEN 3
-#define VERIFY_ARGS_LEN 3
+constexpr size_t kStepModeParallel = 0;
+constexpr size_t kStepModeSeqForward = 1;
+constexpr size_t kStepModeSeqReverse = 2;
 
-extern "C" const char* risc0_circuit_recursion_string_ptr(risc0_string* str) {
-  return str->str.c_str();
-}
+namespace risc0::circuit::recursion {
 
-extern "C" void risc0_circuit_recursion_string_free(risc0_string* str) {
-  delete str;
-}
+Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args);
+Fp step_verify_mem(void* ctx, size_t steps, size_t cycle, Fp** args);
+Fp step_compute_accum(void* ctx, size_t steps, size_t cycle, Fp** args);
+Fp step_verify_accum(void* ctx, size_t steps, size_t cycle, Fp** args);
 
-struct BridgeContext {
-  void* ctx;
-  Callback* callback;
-};
+FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args);
 
-static void bridgeCallback(void* ctx,
-                           const char* name,
-                           const char* extra,
-                           const Fp* args_ptr,
-                           size_t args_len,
-                           Fp* outs_ptr,
-                           size_t outs_len) {
-  BridgeContext* bridgeCtx = reinterpret_cast<BridgeContext*>(ctx);
-  if (!bridgeCtx->callback(bridgeCtx->ctx, name, extra, args_ptr, args_len, outs_ptr, outs_len)) {
-    throw std::runtime_error("Host callback failure");
+MachineContext::MachineContext(ExecBuffers* buffers, PreflightTrace* trace, uint32_t steps)
+    : buffers(buffers)
+    , trace(trace)
+    , steps(steps)
+    , womRows(trace->steps * kMaxWomRowsPerCycle, WomArgumentRow{kInvalidPattern, FpExt::invalid()})
+    , womIndex(trace->steps) {}
+
+void MachineContext::parStepExec(uint32_t cycle) {
+  if (cycle == 0 || isParSafeExec(cycle)) {
+    // printf("step_exec(%u)\n", cycle);
+    step_exec(this, steps, cycle++, args().data());
+    while (cycle < trace->steps && !isParSafeExec(cycle)) {
+      // printf("step_exec(%u)\n", cycle);
+      step_exec(this, steps, cycle++, args().data());
+    }
   }
 }
 
-extern "C" uint32_t risc0_circuit_recursion_step_compute_accum(risc0_error* err,
-                                                               void* ctx,
-                                                               Callback callback,
-                                                               size_t steps,
-                                                               size_t cycle,
-                                                               Fp** args_ptr,
-                                                               size_t args_len) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    if (args_len != ACCUM_ARGS_LEN) {
-      throw std::runtime_error("Invalid arguments length");
+void MachineContext::doStepExec(uint32_t mode) {
+  nvtx3::scoped_range range("stepExec");
+  switch (mode) {
+  case kStepModeParallel: {
+    auto begin = poolstl::iota_iter<uint32_t>(0);
+    auto end = poolstl::iota_iter<uint32_t>(trace->steps);
+    std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) { parStepExec(cycle); });
+  } break;
+  case kStepModeSeqForward: {
+    for (size_t i = 0; i < trace->steps; i++) {
+      // printf("step_exec(%zu)\n", i);
+      step_exec(this, steps, i, args().data());
     }
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::recursion::step_compute_accum(
-               &bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
+  } break;
+  case kStepModeSeqReverse: {
+    for (size_t i = 0; i < trace->steps; i++) {
+      parStepExec(trace->steps - i - 1);
+    }
+  } break;
+  }
+}
+
+void MachineContext::doStepVerifyWom(uint32_t mode) {
+  nvtx3::scoped_range range("stepVerifyWom");
+  switch (mode) {
+  case kStepModeParallel: {
+    auto begin = poolstl::iota_iter<uint32_t>(0);
+    auto end = poolstl::iota_iter<uint32_t>(trace->steps);
+    std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+      step_verify_mem(this, steps, cycle, args().data());
+    });
+  } break;
+  case kStepModeSeqForward: {
+    for (size_t i = 0; i < trace->steps; i++) {
+      // printf("step_verify_mem(%zu)\n", i);
+      step_verify_mem(this, steps, i, args().data());
+    }
+  } break;
+  case kStepModeSeqReverse: {
+    for (size_t i = 0; i < trace->steps; i++) {
+      size_t cycle = trace->steps - i - 1;
+      // printf("step_verify_mem(%zu)\n", cycle);
+      step_verify_mem(this, steps, cycle, args().data());
+    }
+  } break;
+  }
+}
+
+void MachineContext::verifyWom(uint32_t mode) {
+  nvtx3::scoped_range range("verifyWom");
+
+  {
+    nvtx3::scoped_range range("sortWom");
+    std::sort(poolstl::par, womRows.begin(), womRows.end());
+  }
+
+  {
+    nvtx3::scoped_range range("scan");
+    std::exclusive_scan(poolstl::par, womIndex.begin(), womIndex.end(), womIndex.begin(), 0);
+  }
+
+  injectWomBacks();
+  doStepVerifyWom(mode);
+}
+
+void MachineContext::injectWomBacks() {
+  nvtx3::scoped_range range("injectWomBacks");
+  auto begin = poolstl::iota_iter<uint32_t>(1);
+  auto end = poolstl::iota_iter<uint32_t>(trace->steps);
+  Fp* data = buffers->data;
+  std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+    uint32_t idx = womIndex[cycle];
+    if (idx) {
+      const WomArgumentRow& prev = womRows[idx - 1];
+      data[0 * steps + cycle - 1] = prev.addr;
+      data[1 * steps + cycle - 1] = prev.value.elems[0];
+      data[2 * steps + cycle - 1] = prev.value.elems[1];
+      data[3 * steps + cycle - 1] = prev.value.elems[2];
+      data[4 * steps + cycle - 1] = prev.value.elems[3];
+    } else {
+      data[0 * steps + cycle - 1] = 0;
+      data[1 * steps + cycle - 1] = 0;
+      data[2 * steps + cycle - 1] = 0;
+      data[3 * steps + cycle - 1] = 0;
+      data[4 * steps + cycle - 1] = 0;
+    }
   });
 }
 
-extern "C" uint32_t risc0_circuit_recursion_step_verify_accum(risc0_error* err,
-                                                              void* ctx,
-                                                              Callback callback,
-                                                              size_t steps,
-                                                              size_t cycle,
-                                                              Fp** args_ptr,
-                                                              size_t args_len) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    if (args_len != ACCUM_ARGS_LEN) {
-      throw std::runtime_error("Invalid arguments length");
-    }
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::recursion::step_verify_accum(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
-  });
+AccumContext::AccumContext(AccumBuffers* buffers, uint32_t steps, uint32_t cycles)
+    : buffers(buffers), steps(steps), cycles(cycles) {}
+
+void AccumContext::computeAccum() {
+  nvtx3::scoped_range range("computeAccum");
+  for (size_t i = 0; i < steps; i++) {
+    // printf("step_compute_accum(%zu)\n", i);
+    step_compute_accum(this, cycles, i, args().data());
+  }
 }
 
-extern "C" uint32_t risc0_circuit_recursion_step_exec(risc0_error* err,
-                                                      void* ctx,
-                                                      Callback callback,
-                                                      size_t steps,
-                                                      size_t cycle,
-                                                      Fp** args_ptr,
-                                                      size_t args_len) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    if (args_len != EXEC_ARGS_LEN) {
-      throw std::runtime_error("Invalid arguments length");
-    }
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::recursion::step_exec(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
-  });
+void AccumContext::calcPrefixProducts() {
+  nvtx3::scoped_range range("calcPrefixProducts");
+  std::inclusive_scan(
+      accum.begin(), accum.end(), accum.begin(), std::multiplies<FpExt>{}, FpExt(1));
 }
 
-extern "C" uint32_t risc0_circuit_recursion_step_verify_bytes(risc0_error* err,
-                                                              void* ctx,
-                                                              Callback callback,
-                                                              size_t steps,
-                                                              size_t cycle,
-                                                              Fp** args_ptr,
-                                                              size_t args_len) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    if (args_len != VERIFY_ARGS_LEN) {
-      throw std::runtime_error("Invalid arguments length");
-    }
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::recursion::step_verify_bytes(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
-  });
+void AccumContext::verifyAccum() {
+  nvtx3::scoped_range range("verifyAccum");
+  for (size_t i = 0; i < steps; i++) {
+    // printf("step_verify_accum(%zu)\n", i);
+    step_verify_accum(this, cycles, i, args().data());
+  }
 }
 
-extern "C" uint32_t risc0_circuit_recursion_step_verify_mem(risc0_error* err,
-                                                            void* ctx,
-                                                            Callback callback,
-                                                            size_t steps,
-                                                            size_t cycle,
-                                                            Fp** args_ptr,
-                                                            size_t args_len) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    if (args_len != VERIFY_ARGS_LEN) {
-      throw std::runtime_error("Invalid arguments length");
-    }
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::recursion::step_verify_mem(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
-  });
+} // namespace risc0::circuit::recursion
+
+extern "C" {
+
+const char* risc0_circuit_recursion_cpu_witgen(uint32_t mode,
+                                               ExecBuffers* buffers,
+                                               PreflightTrace* trace,
+                                               uint32_t steps) {
+  try {
+    MachineContext ctx(buffers, trace, steps);
+    ctx.doStepExec(mode);
+    ctx.verifyWom(mode);
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  }
+  return nullptr;
 }
 
-extern "C" void risc0_circuit_recursion_poly_fp(
-    risc0_error* err, size_t cycle, size_t steps, FpExt* poly_mix, Fp** args, FpExt* result) {
-  ffi_wrap<uint32_t>(err, 0, [&] {
-    *result = circuit::recursion::poly_fp(cycle, steps, poly_mix, args);
-    return 0;
-  });
+const char*
+risc0_circuit_recursion_cpu_accum(AccumBuffers* buffers, uint32_t steps, uint32_t cycles) {
+  try {
+    AccumContext ctx(buffers, steps, cycles);
+    ctx.computeAccum();
+    ctx.calcPrefixProducts();
+    ctx.verifyAccum();
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  }
+  return nullptr;
 }
+
+const char* risc0_circuit_recursion_cpu_eval_check(
+    AccumBuffers* buffers, FpExt* poly_mix, Fp* check, Fp rou, uint32_t po2, uint32_t steps) {
+  try {
+    nvtx3::scoped_range range("evalCheck");
+    std::array<Fp*, 5> args{
+        buffers->ctrl,
+        buffers->global,
+        buffers->data,
+        buffers->mix,
+        buffers->accum,
+    };
+    auto begin = poolstl::iota_iter<uint32_t>(0);
+    auto end = poolstl::iota_iter<uint32_t>(steps);
+    std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+      FpExt tot = poly_fp(cycle, steps, poly_mix, args.data());
+      Fp x = pow(rou, cycle);
+      Fp y = pow(Fp(3) * x, 1 << po2);
+      FpExt ret = tot * inv(y - Fp(1));
+      check[steps * 0 + cycle] = ret.elems[0];
+      check[steps * 1 + cycle] = ret.elems[1];
+      check[steps * 2 + cycle] = ret.elems[2];
+      check[steps * 3 + cycle] = ret.elems[3];
+    });
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  }
+  return nullptr;
+}
+
+} // extern "C"

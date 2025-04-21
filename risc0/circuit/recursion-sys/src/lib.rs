@@ -12,4 +12,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod ffi;
+use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
+
+#[repr(C)]
+pub struct RawExecBuffers {
+    pub ctrl: *const BabyBearElem,
+    pub data: *const BabyBearElem,
+    pub global: *const BabyBearElem,
+}
+
+#[repr(C)]
+pub struct RawAccumBuffers {
+    pub ctrl: *const BabyBearElem,
+    pub global: *const BabyBearElem,
+    pub data: *const BabyBearElem,
+    pub mix: *const BabyBearElem,
+    pub accum: *const BabyBearElem,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[repr(C)]
+pub struct RawPreflightCycle {
+    pub iop_idx: u32,
+    pub is_par_safe: bool,
+}
+
+#[repr(C)]
+pub struct RawPreflightTrace {
+    pub wom: *const BabyBearExtElem,
+    pub cycles: *const RawPreflightCycle,
+    pub iops: *const BabyBearExtElem,
+    pub steps: u32,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+#[repr(u32)]
+pub enum StepMode {
+    Parallel,
+    SeqForward,
+    SeqReverse,
+}
+
+extern "C" {
+    pub fn risc0_circuit_recursion_cpu_witgen(
+        mode: StepMode,
+        buffers: *const RawExecBuffers,
+        preflight: *const RawPreflightTrace,
+        steps: u32,
+    ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_recursion_cpu_accum(
+        buffers: *const RawAccumBuffers,
+        steps: u32,
+        cycles: u32,
+    ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_recursion_cpu_eval_check(
+        buffers: *const RawAccumBuffers,
+        poly_mix: *const BabyBearExtElem,
+        check: *const BabyBearElem,
+        rou: BabyBearElem,
+        po2: u32,
+        steps: u32,
+    ) -> *const std::os::raw::c_char;
+}

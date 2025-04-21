@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, path::Path};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -29,29 +32,19 @@ fn main() {
 }
 
 fn build_cpu_kernels() {
+    rerun_if_changed("cxx");
     KernelBuild::new(KernelType::Cpp)
-        .files([
-            "cxx/ffi.cpp",
-            "cxx/poly_fp.cpp",
-            "cxx/step_compute_accum.cpp",
-            "cxx/step_exec.cpp",
-            "cxx/step_verify_accum.cpp",
-            "cxx/step_verify_bytes.cpp",
-            "cxx/step_verify_mem.cpp",
-        ])
+        .files(glob_paths("cxx/*.cpp"))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("risc0_recursion_cpu");
 }
 
 fn build_cuda_kernels() {
+    println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+    println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
+    rerun_if_changed("kernels/cuda");
     KernelBuild::new(KernelType::Cuda)
-        .files([
-            "kernels/cuda/eval_check.cu",
-            "kernels/cuda/ffi.cu",
-            "kernels/cuda/ffi_supra.cu",
-            "kernels/cuda/step_compute_accum.cu",
-            "kernels/cuda/step_verify_accum.cu",
-        ])
+        .files(glob_paths("kernels/cuda/*.cu"))
         .deps(["kernels/cuda"])
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
@@ -71,4 +64,12 @@ fn build_metal_kernels() {
     KernelBuild::new(KernelType::Metal)
         .files(src_paths)
         .compile("metal_kernel");
+}
+
+fn rerun_if_changed<P: AsRef<Path>>(path: P) {
+    println!("cargo:rerun-if-changed={}", path.as_ref().display());
+}
+
+fn glob_paths(pattern: &str) -> Vec<PathBuf> {
+    glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
 }

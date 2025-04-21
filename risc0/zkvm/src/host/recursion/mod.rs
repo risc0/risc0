@@ -37,6 +37,4 @@ pub use self::prove::test_zkr;
 #[cfg(feature = "prove")]
 pub use self::prove::{identity_p254, join, lift, resolve, Prover, RECURSION_PO2};
 #[cfg(feature = "prove")]
-pub use risc0_circuit_recursion::prove::{
-    poseidon254_hal_pair, poseidon2_hal_pair, sha256_hal_pair, Program,
-};
+pub use risc0_circuit_recursion::prove::Program;
