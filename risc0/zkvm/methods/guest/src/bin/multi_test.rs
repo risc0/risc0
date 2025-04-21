@@ -28,7 +28,7 @@ use alloc::{
 };
 use core::arch::asm;
 
-use getrandom::getrandom;
+use getrandom::fill;
 use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
@@ -184,7 +184,7 @@ fn main() {
             for size in 0..=15 {
                 for alignment in 0..=usize::min(3, size) {
                     let rand_buf = &mut vec![0u8; size][alignment..];
-                    getrandom(rand_buf).expect("random number generation failed");
+                    fill(rand_buf).expect("random number generation failed");
                     env::commit_slice(&rand_buf);
 
                     // If we generated more than 2 bytes, make sure that they are at least not zero.

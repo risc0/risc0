@@ -18,13 +18,12 @@
 extern crate alloc;
 
 use alloc::vec;
-
-use getrandom::fill;
+use getrandom::getrandom;
 
 risc0_zkvm::entry!(main);
 
 fn main() {
-    // This should panic
     let rand_buf = &mut vec![0u8; 8];
-    let _res = fill(rand_buf);
+    let _res = getrandom(rand_buf);
+    assert_ne!(&rand_buf, &vec![0u8; 8].as_slice());
 }
