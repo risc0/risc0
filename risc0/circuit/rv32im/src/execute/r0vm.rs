@@ -41,6 +41,7 @@ pub enum EcallKind {
     Terminate,
     User,
     Write,
+    Memcpy,
 }
 
 pub(crate) trait Risc0Context {
@@ -194,6 +195,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
             HOST_ECALL_POSEIDON2 => self.ecall_poseidon2(),
             HOST_ECALL_SHA2 => self.ecall_sha2(),
             HOST_ECALL_BIGINT => self.ecall_bigint(),
+            HOST_ECALL_MEMCPY => self.ecall_memcpy(),
             _ => unimplemented!(),
         }
     }
@@ -231,6 +233,31 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
             0,
             EcallKind::Terminate,
         )?;
+        Ok(false)
+    }
+
+    fn ecall_memcpy(&mut self) -> Result<bool> {
+        self.next_pc();
+        self.ctx.on_ecall_cycle(
+            CycleState::MachineEcall,
+            CycleState::Memcpy,
+            0,
+            0,
+            0,
+            EcallKind::Memcpy,
+        )?;
+        let src = ByteAddr(self.load_register(REG_A0)?);
+        let mut dst = ByteAddr(self.load_register(REG_A1)?);
+        let len = self.load_register(REG_A2)?;
+        if len > WORD_SIZE as u32 * 4 {
+            bail!("length ({len}) exceeds max {}", WORD_SIZE * 4);
+        }
+        let bytes = self.ctx.load_region(LoadOp::Peek, src, len as usize)?;
+
+        for i in 0..len {
+            self.store_u8(dst, bytes[i as usize])?;
+            dst = dst.wrapping_add(1);
+        }
         Ok(false)
     }
 

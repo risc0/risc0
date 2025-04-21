@@ -90,6 +90,7 @@ pub const HOST_ECALL_WRITE: u32 = 2;
 pub const HOST_ECALL_POSEIDON2: u32 = 3;
 pub const HOST_ECALL_SHA2: u32 = 4;
 pub const HOST_ECALL_BIGINT: u32 = 5;
+pub const HOST_ECALL_MEMCPY: u32 = 6;
 
 pub const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 pub const PFLAG_CHECK_OUT: u32 = 0x4000_0000;
@@ -125,6 +126,7 @@ pub enum CycleState {
     BigIntEcall = 40,
     BigIntStep = 41,
     Decode = 48,
+    Memcpy = 49,
 }
 
 pub const SYSCALL_MAX: u32 = 512;
