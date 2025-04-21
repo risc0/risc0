@@ -56,7 +56,7 @@ impl Syscall for SysArgs {
             let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
             to_guest_u8s[0..nbytes].clone_from_slice(&arg_val.as_bytes()[0..nbytes]);
 
-            if arg_val.len() == MAX_IO_BYTES as usize {
+            if arg_val.len() >= MAX_IO_BYTES as usize {
                 bail!("sys_argv failure: argv is too large");
             }
 

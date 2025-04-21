@@ -44,7 +44,7 @@ impl Syscall for SysGetenv {
                 let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
                 to_guest_u8s[0..nbytes].clone_from_slice(&val.as_bytes()[0..nbytes]);
 
-                if val.len() == MAX_IO_BYTES as usize {
+                if val.len() >= MAX_IO_BYTES as usize {
                     bail!("sys_getenv failure: value is too large");
                 }
 
