@@ -167,6 +167,11 @@ pub use self::{
     },
 };
 
+#[cfg(feature = "std")]
+mod dev_mode;
+#[cfg(feature = "std")]
+pub use dev_mode::{is_dev_mode, DevModeContext};
+
 use semver::Version;
 
 /// Reports the current version of this crate.
@@ -176,23 +181,6 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// [semver::Version].
 pub fn get_version() -> Result<Version, semver::Error> {
     Version::parse(VERSION)
-}
-
-/// Returns `true` if dev mode is enabled.
-#[cfg(feature = "std")]
-pub fn is_dev_mode() -> bool {
-    let is_env_set = std::env::var("RISC0_DEV_MODE")
-        .ok()
-        .map(|x| x.to_lowercase())
-        .filter(|x| x == "1" || x == "true" || x == "yes")
-        .is_some();
-
-    if cfg!(feature = "disable-dev-mode") && is_env_set {
-        panic!("zkVM: Inconsistent settings -- please resolve. \
-            The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
-    }
-
-    cfg!(not(feature = "disable-dev-mode")) && is_env_set
 }
 
 #[cfg(feature = "metal")]
