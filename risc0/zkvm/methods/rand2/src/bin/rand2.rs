@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,25 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use anyhow::{bail, Result};
 
-use super::{Syscall, SyscallContext};
+#![no_std]
+#![no_main]
 
-pub(crate) struct SysCycleCount;
-impl Syscall for SysCycleCount {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        if !to_guest.is_empty() {
-            bail!("invalid sys_cycle_count call");
-        }
+extern crate alloc;
 
-        let cycle = ctx.get_cycle();
-        let hi = (cycle >> 32) as u32;
-        let lo = cycle as u32;
-        Ok((hi, lo))
-    }
+use alloc::vec;
+use getrandom::getrandom;
+
+risc0_zkvm::entry!(main);
+
+fn main() {
+    let rand_buf = &mut vec![0u8; 8];
+    let _res = getrandom(rand_buf);
+    assert_ne!(&rand_buf, &vec![0u8; 8].as_slice());
 }

@@ -225,7 +225,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let final_cycles = self.segment_cycles().next_power_of_two();
         let final_po2 = log2_ceil(final_cycles as usize);
-        let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
 
         callback(Segment {
             partial_image,
@@ -241,9 +240,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             write_record: std::mem::take(&mut self.write_record),
             suspend_cycle: self.user_cycles,
             paging_cycles: self.pager.cycles,
-            po2: segment_po2 as u32,
+            po2: final_po2 as u32,
             index: segment_counter,
-            segment_threshold,
+            segment_threshold: 0, // meaningless for final segment
         })?;
 
         let final_cycles = final_cycles as u64;

@@ -7,20 +7,20 @@
 resolver = "2"
 
 [package]
-name = "risc0-zkvm-methods-rand"
+name = "risc0-zkvm-methods-rand2"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-getrandom = "0.3"
-risc0-zkvm = { path = "../..", default-features = false }
+getrandom = "0.2"
+risc0-zkvm = { path = "../..", default-features = false, features = ["getrandom"] }
 
 [profile.release]
 lto = true
 opt-level = 3
 debug = 1
 
-[profile.release.package.risc0-zkvm-methods-rand]
+[profile.release.package.risc0-zkvm-methods-rand2]
 # Include debug symbols so we can test the profiler.
 debug = 1
 

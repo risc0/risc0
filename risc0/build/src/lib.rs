@@ -487,6 +487,8 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
             "link-arg=--fatal-warnings",
             "-C",
             "panic=abort",
+            "--cfg",
+            "getrandom_backend=\"custom\"",
         ],
     ]
     .concat()

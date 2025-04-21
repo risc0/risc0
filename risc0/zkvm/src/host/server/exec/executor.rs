@@ -29,7 +29,7 @@ use risc0_circuit_rv32im::{
         platform::WORD_SIZE, CycleLimit, Executor, Syscall as CircuitSyscall,
         SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
     },
-    MAX_INSN_CYCLES,
+    MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
@@ -180,8 +180,14 @@ impl<'a> ExecutorImpl<'a> {
             self.env.trace.clone(),
         );
 
+        let max_insn_cycles = if segment_limit_po2 >= 15 {
+            MAX_INSN_CYCLES
+        } else {
+            MAX_INSN_CYCLES_LOWER_PO2
+        };
+
         let start_time = Instant::now();
-        let result = exec.run(segment_limit_po2, MAX_INSN_CYCLES, session_limit, |inner| {
+        let result = exec.run(segment_limit_po2, max_insn_cycles, session_limit, |inner| {
             let output = inner
                 .claim
                 .terminate_state

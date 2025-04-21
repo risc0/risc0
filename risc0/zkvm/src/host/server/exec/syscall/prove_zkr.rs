@@ -14,7 +14,7 @@
 
 // Manages system calls for accelerators and other proof composition
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::{
     syscall::reg_abi::{REG_A3, REG_A4, REG_A5, REG_A6, REG_A7},
@@ -36,8 +36,12 @@ impl Syscall for SysProveZkr {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        if !to_guest.is_empty() {
+            bail!("invalid sys_prove_zkr call");
+        }
+
         let claim_digest = ctx.load_digest_from_register(REG_A3)?;
         let control_id = ctx.load_digest_from_register(REG_A4)?;
         let control_root = ctx.load_digest_from_register(REG_A5)?;
