@@ -3778,7 +3778,6 @@ dependencies = [
  "elf",
  "lazy_static",
  "postcard",
- "rayon",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "semver",
