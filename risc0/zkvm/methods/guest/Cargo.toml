@@ -13,7 +13,7 @@ edition = "2021"
 
 [dependencies]
 bytemuck = "1.12"
-getrandom = "0.2"
+getrandom = "0.3"
 risc0-circuit-keccak = { path = "../../../circuit/keccak", default-features = false }
 risc0-zkp = { path = "../../../zkp", default-features = false }
 risc0-zkvm = { path = "../..", default-features = false, features = [
