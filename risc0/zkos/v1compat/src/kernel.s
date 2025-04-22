@@ -192,7 +192,11 @@ _ecall_software:
     # return back to userspace
     mret
 1:
-    j ecall_software
+    call ecall_software
+
+    # return back to userspace
+    mret
+
 
 _ecall_sha:
     lw a0, REG_A0 * WORD_SIZE (tp) # out_state
