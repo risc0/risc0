@@ -769,12 +769,14 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - uses: aws-actions/configure-aws-credentials@v4
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         id: aws-creds
         with:
           aws-region: 'us-west-2'
           role-to-assume: 'arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access'
           output-credentials: true
       - name: create ci creds file
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         run: |
           echo "[default]" > bento/dockerfiles/ci-cache-creds.txt
           echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> bento/dockerfiles/ci-cache-creds.txt && \
