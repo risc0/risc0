@@ -152,59 +152,6 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
         steps: usize,
     ) {
         unimplemented!()
-
-        //     {
-        //         let args = &[
-        //             ctrl.as_slice_sync(),
-        //             io.as_slice_sync(),
-        //             data.as_slice_sync(),
-        //             mix.as_slice_sync(),
-        //             accum.as_slice_sync(),
-        //         ];
-
-        //         let accumulator: Mutex<Accum<BabyBearExtElem>> = Mutex::new(Accum::new(steps));
-        //         scope!("step_compute_accum", {
-        //             (0..steps - ZK_CYCLES).into_par_iter().for_each_init(
-        //                 || Handler::<BabyBear>::new(&accumulator),
-        //                 |handler, cycle| {
-        //                     self.circuit
-        //                         .step_compute_accum(
-        //                             &CircuitStepContext { size: steps, cycle },
-        //                             handler,
-        //                             args,
-        //                         )
-        //                         .unwrap();
-        //                 },
-        //             );
-        //         });
-        //         scope!("calc_prefix_products", {
-        //             accumulator.lock().unwrap().calc_prefix_products();
-        //         });
-        //         scope!("step_verify_accum", {
-        //             (0..steps - ZK_CYCLES).into_par_iter().for_each_init(
-        //                 || Handler::<BabyBear>::new(&accumulator),
-        //                 |handler, cycle| {
-        //                     self.circuit
-        //                         .step_verify_accum(
-        //                             &CircuitStepContext { size: steps, cycle },
-        //                             handler,
-        //                             args,
-        //                         )
-        //                         .unwrap();
-        //                 },
-        //             );
-        //         });
-        //     }
-
-        //     {
-        //         // Zero out 'invalid' entries in accum and io
-        //         let mut accum_slice = accum.as_slice_mut();
-        //         let mut io = io.as_slice_mut();
-        //         for value in accum_slice.iter_mut().chain(io.iter_mut()) {
-        //             *value = value.valid_or_zero();
-        //         }
-        //     }
-        // }
     }
 }
 

@@ -138,20 +138,15 @@ void extern_plonkWriteAccum_wom(void* ctx,
                                 const char* extra,
                                 std::array<Fp, 4> args) {
   // printf("extern_plonkWriteAccum_wom\n");
-
   AccumContext* actx = static_cast<AccumContext*>(ctx);
-  FpExt value(args[0], args[1], args[2], args[3]);
-  actx->accum.push_back(value);
+  actx->accum[cycle] = FpExt(args[0], args[1], args[2], args[3]);
 }
 
 std::array<Fp, 4>
 extern_plonkReadAccum_wom(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args) {
   AccumContext* actx = static_cast<AccumContext*>(ctx);
-  uint32_t idx = actx->idx++;
-  const FpExt& value = actx->accum[idx];
-
+  const FpExt& value = actx->accum[cycle];
   // printf("extern_plonkReadAccum_wom\n");
-
   return {
       value.elems[0],
       value.elems[1],

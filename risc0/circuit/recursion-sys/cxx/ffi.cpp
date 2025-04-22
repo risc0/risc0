@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "ffi.h"
 #include "context.h"
 #include "fp.h"
 #include "fpext.h"
@@ -47,13 +48,6 @@ constexpr size_t kStepModeSeqForward = 1;
 constexpr size_t kStepModeSeqReverse = 2;
 
 namespace risc0::circuit::recursion {
-
-Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args);
-Fp step_verify_mem(void* ctx, size_t steps, size_t cycle, Fp** args);
-Fp step_compute_accum(void* ctx, size_t steps, size_t cycle, Fp** args);
-Fp step_verify_accum(void* ctx, size_t steps, size_t cycle, Fp** args);
-
-FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args);
 
 MachineContext::MachineContext(ExecBuffers* buffers, PreflightTrace* trace, uint32_t steps)
     : buffers(buffers)
@@ -163,14 +157,16 @@ void MachineContext::injectWomBacks() {
 }
 
 AccumContext::AccumContext(AccumBuffers* buffers, uint32_t steps, uint32_t cycles)
-    : buffers(buffers), steps(steps), cycles(cycles) {}
+    : buffers(buffers), steps(steps), cycles(cycles), accum(steps, FpExt(1)) {}
 
 void AccumContext::computeAccum() {
   nvtx3::scoped_range range("computeAccum");
-  for (size_t i = 0; i < steps; i++) {
-    // printf("step_compute_accum(%zu)\n", i);
-    step_compute_accum(this, cycles, i, args().data());
-  }
+  auto begin = poolstl::iota_iter<uint32_t>(0);
+  auto end = poolstl::iota_iter<uint32_t>(steps);
+  std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+    // printf("step_compute_accum(%zu)\n", cycle);
+    step_compute_accum(this, cycles, cycle, args().data());
+  });
 }
 
 void AccumContext::calcPrefixProducts() {
@@ -181,10 +177,12 @@ void AccumContext::calcPrefixProducts() {
 
 void AccumContext::verifyAccum() {
   nvtx3::scoped_range range("verifyAccum");
-  for (size_t i = 0; i < steps; i++) {
-    // printf("step_verify_accum(%zu)\n", i);
-    step_verify_accum(this, cycles, i, args().data());
-  }
+  auto begin = poolstl::iota_iter<uint32_t>(0);
+  auto end = poolstl::iota_iter<uint32_t>(steps);
+  std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+    // printf("step_verify_accum(%zu)\n", cycle);
+    step_verify_accum(this, cycles, cycle, args().data());
+  });
 }
 
 } // namespace risc0::circuit::recursion

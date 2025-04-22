@@ -101,7 +101,6 @@ struct AccumContext {
   uint32_t steps;
   uint32_t cycles;
   std::vector<FpExt> accum;
-  uint32_t idx = 0;
 
   AccumContext(AccumBuffers* buffers, uint32_t steps, uint32_t cycles);
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use anyhow::{Context as _, Result};
+use rand::thread_rng;
 use risc0_circuit_recursion_sys::{RawPreflightTrace, StepMode};
 use risc0_core::scope;
 use risc0_zkp::{
@@ -22,6 +23,7 @@ use risc0_zkp::{
         Elem as _,
     },
     hal::Hal,
+    ZK_CYCLES,
 };
 
 use crate::{CircuitImpl, CIRCUIT};
@@ -115,7 +117,26 @@ where
         circuit_hal: &C,
         mix: &[BabyBearElem],
     ) -> Result<H::Buffer<H::Elem>> {
+        scope!("accum");
+
         let mix = hal.copy_from_elem("mix", mix);
+
+        // Add random noise to end of accum
+        scope!("noise", {
+            let mut rng = thread_rng();
+            let cycles = self.cycles as usize;
+            let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.accum_size()];
+            hal.eltwise_copy_elem_slice(
+                &self.accum,
+                &noise,
+                CIRCUIT.accum_size(), // from_rows
+                ZK_CYCLES,            // from_cols
+                0,                    // from_offset
+                ZK_CYCLES,            // from_stride
+                cycles - ZK_CYCLES,   // into_offset
+                cycles,               // into_stride
+            );
+        });
 
         circuit_hal.accumulate(
             self.steps,
@@ -130,43 +151,6 @@ where
         scope!("zeroize", {
             hal.eltwise_zeroize_elem(&self.accum);
         });
-
-        // let steps = adapter.get_steps();
-
-        // let accum = scope!(
-        //     "alloc(accum)",
-        //     hal.alloc_elem_init(
-        //         "accum",
-        //         steps * CIRCUIT.accum_size(),
-        //         BabyBearElem::INVALID,
-        //     )
-        // );
-
-        // Add random noise to end of accum
-        // scope!("noise(accum)", {
-        //     let mut rng = thread_rng();
-        //     let noise =
-        //         vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.accum_size()];
-        //     hal.eltwise_copy_elem_slice(
-        //         &witgen.accum,
-        //         &noise,
-        //         CIRCUIT.accum_size(), // from_rows
-        //         ZK_CYCLES,            // from_cols
-        //         0,                    // from_offset
-        //         ZK_CYCLES,            // from_stride
-        //         steps - ZK_CYCLES,    // into_offset
-        //         steps,                // into_stride
-        //     );
-        // });
-
-        // let io = scope!(
-        //     "copy(io)",
-        //     hal.copy_from_elem("io", &adapter.get_io().as_slice())
-        // );
-
-        // The recursion circuit doesn't make use of the preflight.
-        // let preflight = AccumPreflight::default();
-        // circuit_hal.accumulate(&preflight, &ctrl, &io, &data, &mix, &accum, steps);
 
         Ok(mix)
     }
