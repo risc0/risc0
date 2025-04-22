@@ -37,6 +37,7 @@ impl DevModeContext {
     /// # Examples
     ///
     /// ```
+    /// # if cfg!(feature = "disable-dev-mode") { return; }
     /// # use risc0_zkvm::{DevModeContext, is_dev_mode};
     /// {
     ///     let _dev_mode_ctx = DevModeContext::enter();
@@ -169,7 +170,9 @@ const TEST_DEV_MODE_CONTEXT_IS_NOT_SEND: () = ();
 
 #[cfg(test)]
 mod tests {
-    use crate::{dev_mode::is_dev_mode_env_set, dev_mode_enabled, is_dev_mode, DevModeContext};
+    #[cfg(not(feature = "disable-dev-mode"))]
+    use crate::{dev_mode::is_dev_mode_env_set, DevModeContext};
+    use crate::{dev_mode_enabled, is_dev_mode};
 
     #[test]
     #[cfg(not(feature = "disable-dev-mode"))]
