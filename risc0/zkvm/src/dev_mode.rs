@@ -13,8 +13,6 @@
 // limitations under the License.
 
 //! Module containing functions for using dev mode. See [self::is_dev_mode].
-//!
-//! Use the [`dev_mode_enabled`] attribute macro to enable dev mode for a block or function.
 
 use core::{cell::RefCell, marker::PhantomData};
 
@@ -53,6 +51,9 @@ impl DevModeContext {
     /// ```
     #[must_use]
     pub fn enter() -> Self {
+        if cfg!(feature = "disable-dev-mode") {
+            panic!("DevModeContext::enter() called when disable-dev-mode feature is enabled. These are inconsistent configurations.");
+        }
         DEV_MODE_CONTEXT_DEPTH.with_borrow_mut(|x| *x += 1);
         Self(PhantomData)
     }
@@ -127,38 +128,9 @@ fn is_dev_mode_context_active() -> bool {
 
     if cfg!(feature = "disable-dev-mode") && enabled {
         panic!("zkVM: Inconsistent settings -- please resolve. \
-            RISC Zero dev mode is enabled by DevModeContext but dev mode has been disabled by feature flag.\
-            Remove the usage of DevModeContext or the dev_mode_enabled macro.");
+            RISC Zero dev mode is enabled by DevModeContext but dev mode has been disabled by feature flag.");
     }
     enabled
-}
-
-/// Macro for enabling dev mode for a function or block of code.
-///
-/// This macro creates a [`DevModeContext`] that exists for the duration of the
-/// function or block. When the function returns or block ends, the context is
-/// automatically dropped and dev mode is disabled (unless another context exists).
-///
-/// # Examples
-///
-/// ```no_run
-/// # use risc0_zkvm::{default_prover, dev_mode_enabled, ExecutorEnv};
-/// # const EXMAPLE_ELF: &'static [u8] = b"";
-/// # const EXMAPLE_ID: [u8; 32] = [0u8; 32];
-/// // Enable dev mode for a block
-/// dev_mode_enabled! {
-///     let receipt = default_prover().prove(ExecutorEnv::default(), EXMAPLE_ELF).unwrap().receipt;
-///     receipt.verify(EXMAPLE_ID)
-/// };
-/// ```
-#[macro_export]
-macro_rules! dev_mode_enabled {
-    {$($body:tt)*} => {
-        {
-            let _dev_mode_ctx = $crate::DevModeContext::enter();
-            $($body)*
-        }
-    };
 }
 
 /// ```compile_fail
@@ -193,19 +165,6 @@ mod tests {
 
         {
             let _dev_mode_ctx = DevModeContext::enter();
-            assert_eq!(true, is_dev_mode());
-        }
-        assert_eq!(ambient, is_dev_mode());
-    }
-
-    #[test]
-    #[cfg(not(feature = "disable-dev-mode"))]
-    fn dev_mode_enabled_macro() {
-        // Check the ambient dev mode setting, as controlled by the environment variable.
-        let ambient = is_dev_mode_env_set();
-        assert_eq!(ambient, is_dev_mode());
-
-        dev_mode_enabled! {
             assert_eq!(true, is_dev_mode());
         }
         assert_eq!(ambient, is_dev_mode());
