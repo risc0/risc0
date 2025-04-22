@@ -4082,7 +4082,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "borsh",
  "ciborium",
@@ -4109,7 +4109,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "2.0.0"
+version = "2.0.2"
 
 [[package]]
 name = "rkyv"
