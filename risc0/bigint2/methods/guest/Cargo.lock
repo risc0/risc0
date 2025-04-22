@@ -1032,7 +1032,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.1"
+version = "1.4.2"
 dependencies = [
  "include_bytes_aligned",
  "num-bigint",
@@ -1048,13 +1048,13 @@ dependencies = [
  "k256",
  "num-bigint",
  "num-bigint-dig",
- "risc0-bigint2 1.4.1",
+ "risc0-bigint2 1.4.2",
  "risc0-zkvm",
 ]
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "borsh",
@@ -1071,7 +1071,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1085,7 +1085,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1098,7 +1098,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.2"
+version = "2.0.3"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -1123,7 +1123,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1150,7 +1150,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "blake2",
