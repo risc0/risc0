@@ -58,8 +58,11 @@ impl DevModeContext {
         Self(PhantomData)
     }
 
-    /// Exit a dev mode context. When the last [DevModeContext] is exited, dev mode will be
-    /// disabled.
+    /// Exit a dev mode context.
+    ///
+    /// When the last [DevModeContext] is exited, dev mode will be disabled. Exiting the context
+    /// happens automatically on drop, so you should not need to call this function manually unless
+    /// you want to explicitly end the context early.
     pub fn exit(self) {
         drop(self);
     }
