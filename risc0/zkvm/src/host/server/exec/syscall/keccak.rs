@@ -16,6 +16,7 @@ use crate::host::client::env::ProveKeccakRequest;
 use anyhow::{bail, Result};
 use risc0_binfmt::ByteAddr;
 use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
+use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
 use risc0_zkvm_platform::syscall::{
     keccak_mode::{KECCAK_PERMUTE, KECCAK_PROVE},
     reg_abi::*,
@@ -73,6 +74,10 @@ impl SysKeccak {
             bail!("keccak batch is full, prove must be called");
         }
 
+        if to_guest.len() >= MAX_IO_BYTES as usize {
+            bail!("invalid sys_keccak_permute");
+        }
+
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let from_guest = &ctx.load_region(buf_ptr, 25 * 8)?;
         let mut from_guest: KeccakState = bytemuck::cast_slice(from_guest).try_into()?;
@@ -91,8 +96,12 @@ impl SysKeccak {
     fn keccak_prove(
         &mut self,
         ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        if !to_guest.is_empty() {
+            bail!("invalid sys_keccak_prove");
+        }
+
         let claim = ctx.load_digest_from_register(REG_A4)?;
         let control_root = ctx.load_digest_from_register(REG_A5)?;
 
