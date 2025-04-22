@@ -431,7 +431,7 @@ pub unsafe extern "C" fn sys_sha_buffer(
 
 /// # Safety
 ///
-/// `state_addr`, `in_buf_addr`, and `out_buf_addr` must be aligned and
+/// `state_addr`, `in_buf_addr`, and `out_buf_addr` must be word-aligned and
 /// dereferenceable.
 #[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
@@ -441,11 +441,15 @@ pub unsafe extern "C" fn sys_poseidon2_compress(
     out_buf_addr: *mut [u32; DIGEST_WORDS],
     bits_count: u32,
 ) {
+    assert!(state_addr as usize % WORD_SIZE == 0);
+    assert!(in_buf_addr as usize % WORD_SIZE == 0);
+    assert!(out_buf_addr as usize % WORD_SIZE == 0);
+
     ecall_3(
         ecall::POSEIDON2,
-        state_addr as u32,
-        in_buf_addr as u32,
-        out_buf_addr as u32,
+        state_addr as u32 / WORD_SIZE as u32,
+        in_buf_addr as u32 / WORD_SIZE as u32,
+        out_buf_addr as u32 / WORD_SIZE as u32,
         bits_count,
     );
 }

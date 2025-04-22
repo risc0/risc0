@@ -56,13 +56,10 @@ impl Poseidon2State {
     fn new_ecall(state_addr: u32, buf_in_addr: u32, buf_out_addr: u32, bits_count: u32) -> Self {
         let is_elem = bits_count & PFLAG_IS_ELEM;
         let check_out = bits_count & PFLAG_CHECK_OUT;
-        let state_waddr = state_addr / WORD_SIZE as u32;
-        let buf_in_waddr = buf_in_addr / WORD_SIZE as u32;
-        let buf_out_waddr = buf_out_addr / WORD_SIZE as u32;
         Self {
-            state_addr: state_waddr,
-            buf_in_addr: buf_in_waddr,
-            buf_out_addr: buf_out_waddr,
+            state_addr,
+            buf_in_addr,
+            buf_out_addr,
             has_state: if state_addr == 0 { 0 } else { 1 },
             is_elem: if is_elem == 0 { 0 } else { 1 },
             check_out: if check_out == 0 { 0 } else { 1 },
