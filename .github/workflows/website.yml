@@ -125,10 +125,12 @@ jobs:
         with:
           key: Linux-default
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RISC0_RUST_TOOLCHAIN_VERSION: 1.81.0
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
           RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
       - name: build
