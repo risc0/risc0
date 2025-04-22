@@ -53,7 +53,8 @@ impl Drop for DevModeContext {
     /// Exit the dev mode context on drop.
     fn drop(&mut self) {
         DEV_MODE_CONTEXT_DEPTH.with_borrow_mut(|x| {
-            x.checked_sub(1)
+            *x = x
+                .checked_sub(1)
                 .expect("underflow of DEV_MODE_CONTEXT_DEPTH occurred")
         });
     }
@@ -73,31 +74,34 @@ impl Drop for DevModeContext {
 ///
 /// Dev mode can be fully disabled by setting thte `dev-mode-disabled` feature flag on this crate.
 pub fn is_dev_mode() -> bool {
-    let is_env_set = std::env::var("RISC0_DEV_MODE")
-        .ok()
-        .map(|x| x.to_lowercase())
-        .filter(|x| x == "1" || x == "true" || x == "yes")
-        .is_some();
-
-    let in_context = {
-        #[cfg(not(feature = "disable-dev-mode"))]
-        {
-            DEV_MODE_CONTEXT_DEPTH.with_borrow(|x| *x > 0)
-        }
-        #[cfg(feature = "disable-dev-mode")]
-        {
-            false
-        }
-    };
-
-    let enabled = is_env_set || in_context;
+    let enabled = is_dev_mode_env_set() || is_dev_mode_context_active();
 
     if cfg!(feature = "disable-dev-mode") && enabled {
+        // NOTE: This is only reachable when RISC0_DEV_MODE is set.
         panic!("zkVM: Inconsistent settings -- please resolve. \
             The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
     }
 
     cfg!(not(feature = "disable-dev-mode")) && enabled
+}
+
+fn is_dev_mode_env_set() -> bool {
+    std::env::var("RISC0_DEV_MODE")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some()
+}
+
+fn is_dev_mode_context_active() -> bool {
+    #[cfg(not(feature = "disable-dev-mode"))]
+    {
+        DEV_MODE_CONTEXT_DEPTH.with_borrow(|x| *x > 0)
+    }
+    #[cfg(feature = "disable-dev-mode")]
+    {
+        false
+    }
 }
 
 /// Macro for enabling dev mode for a function or block of code.
@@ -134,3 +138,47 @@ macro_rules! dev_mode_enabled {
 /// ```
 #[allow(unused)]
 const TEST_DEV_MODE_CONTEXT_IS_NOT_SEND: () = ();
+
+#[cfg(test)]
+mod tests {
+    use crate::{dev_mode::is_dev_mode_env_set, dev_mode_enabled, is_dev_mode, DevModeContext};
+
+    #[test]
+    #[cfg(not(feature = "disable-dev-mode"))]
+    fn dev_mode_context() {
+        // Check the ambient dev mode setting, as controlled by the environment variable.
+        let ambient = is_dev_mode_env_set();
+        assert_eq!(ambient, is_dev_mode());
+
+        let _dev_mode_ctx = DevModeContext::enter();
+        assert_eq!(true, is_dev_mode());
+        _dev_mode_ctx.exit();
+        assert_eq!(ambient, is_dev_mode());
+
+        let _dev_mode_ctx = DevModeContext::enter();
+        assert_eq!(true, is_dev_mode());
+        drop(_dev_mode_ctx);
+        assert_eq!(ambient, is_dev_mode());
+
+        {
+            let _dev_mode_ctx = DevModeContext::enter();
+            assert_eq!(true, is_dev_mode());
+        }
+        assert_eq!(ambient, is_dev_mode());
+    }
+
+    #[test]
+    #[cfg(not(feature = "disable-dev-mode"))]
+    fn dev_mode_enabled_macro() {
+        // Check the ambient dev mode setting, as controlled by the environment variable.
+        let ambient = is_dev_mode_env_set();
+        assert_eq!(ambient, is_dev_mode());
+
+        dev_mode_enabled! {
+            assert_eq!(true, is_dev_mode());
+        }
+        assert_eq!(ambient, is_dev_mode());
+    }
+
+    // TODO: Add a test for disable dev mode
+}
