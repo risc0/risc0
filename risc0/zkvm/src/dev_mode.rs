@@ -21,7 +21,7 @@ thread_local! {
     ///
     /// NOTE: This is thread-local because it entering a DevModeContext in one thread should not
     /// effect other threads.
-    static DEV_MODE_CONTEXT_DEPTH: RefCell<u32> = RefCell::new(0);
+    static DEV_MODE_CONTEXT_DEPTH: RefCell<u32> = const { RefCell::new(0) };
 }
 
 // PhantomData<*cont ()> prevents Rust from automatically implementing Send. This is important
