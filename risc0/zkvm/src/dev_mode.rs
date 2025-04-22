@@ -16,28 +16,43 @@
 //!
 //! Use the [`dev_mode_enabled`] attribute macro to enable dev mode for a block or function.
 
-use core::marker::PhantomData;
+use core::{cell::RefCell, marker::PhantomData};
 
 thread_local! {
-    /// Counter that is determine when the code is in a dev mode context.
+    /// Thread-local counter that is determine when the code is in a dev mode context.
     ///
-    /// NOTE: This is a thread-local except in the zkVM.
-    #[cfg(not(feature = "disable-dev-mode"))]
-    static DEV_MODE_CONTEXT_DEPTH: core::cell::RefCell<u32> = core::cell::RefCell::new(0);
+    /// NOTE: This is thread-local because it entering a DevModeContext in one thread should not
+    /// effect other threads.
+    static DEV_MODE_CONTEXT_DEPTH: RefCell<u32> = RefCell::new(0);
 }
 
-// PhantomData<*cont ()> prevents Rust from automatically implementing Send.
+// PhantomData<*cont ()> prevents Rust from automatically implementing Send. This is important
+// because we don't want this to be held across an `.await`.
 /// When a [DevModeContext] exists on a the stack, dev mode will be enabled.
 pub struct DevModeContext(PhantomData<*const ()>);
 
 impl DevModeContext {
     /// Enter a dev mode context. While this value is held, dev mode will be enabled.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use risc0_zkvm::{DevModeContext, is_dev_mode};
+    /// {
+    ///     let _dev_mode_ctx = DevModeContext::enter();
+    ///     assert_eq!(true, is_dev_mode());
+    /// }
+    ///
+    /// // Enter dev mode based on a runtime condition.
+    /// {
+    ///     let enter_dev_mode: bool = rand::random();
+    ///     let _dev_mode_ctx = enter_dev_mode.then(DevModeContext::enter);
+    ///     assert_eq!(enter_dev_mode, is_dev_mode());
+    /// }
+    /// ```
     #[must_use]
     pub fn enter() -> Self {
-        #[cfg(not(feature = "disable-dev-mode"))]
-        {
-            DEV_MODE_CONTEXT_DEPTH.with_borrow_mut(|x| *x += 1);
-        }
+        DEV_MODE_CONTEXT_DEPTH.with_borrow_mut(|x| *x += 1);
         Self(PhantomData)
     }
 
@@ -48,7 +63,6 @@ impl DevModeContext {
     }
 }
 
-#[cfg(not(feature = "disable-dev-mode"))]
 impl Drop for DevModeContext {
     /// Exit the dev mode context on drop.
     fn drop(&mut self) {
@@ -74,34 +88,48 @@ impl Drop for DevModeContext {
 ///
 /// Dev mode can be fully disabled by setting thte `dev-mode-disabled` feature flag on this crate.
 pub fn is_dev_mode() -> bool {
-    let enabled = is_dev_mode_env_set() || is_dev_mode_context_active();
+    let enabled = {
+        #[cfg(not(target_os = "zkvm"))]
+        {
+            is_dev_mode_env_set() || is_dev_mode_context_active()
+        }
+        #[cfg(target_os = "zkvm")]
+        {
+            is_dev_mode_context_active()
+        }
+    };
+    cfg!(not(feature = "disable-dev-mode")) && enabled
+}
+
+/// Check the RISC0_DEV_MODE env var.
+///
+/// NOTE: Using the env var to enable dev mode is not allowed in the zkVM because the zkVM does not
+/// have the same semantics around environment variables being trusted.
+#[cfg(not(target_os = "zkvm"))]
+fn is_dev_mode_env_set() -> bool {
+    let enabled = std::env::var("RISC0_DEV_MODE")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some();
 
     if cfg!(feature = "disable-dev-mode") && enabled {
-        // NOTE: This is only reachable when RISC0_DEV_MODE is set.
         panic!("zkVM: Inconsistent settings -- please resolve. \
             The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
     }
 
-    cfg!(not(feature = "disable-dev-mode")) && enabled
-}
-
-fn is_dev_mode_env_set() -> bool {
-    std::env::var("RISC0_DEV_MODE")
-        .ok()
-        .map(|x| x.to_lowercase())
-        .filter(|x| x == "1" || x == "true" || x == "yes")
-        .is_some()
+    enabled
 }
 
 fn is_dev_mode_context_active() -> bool {
-    #[cfg(not(feature = "disable-dev-mode"))]
-    {
-        DEV_MODE_CONTEXT_DEPTH.with_borrow(|x| *x > 0)
+    let enabled = DEV_MODE_CONTEXT_DEPTH.with_borrow(|x| *x > 0);
+
+    if cfg!(feature = "disable-dev-mode") && enabled {
+        panic!("zkVM: Inconsistent settings -- please resolve. \
+            RISC Zero dev mode is enabled by DevModeContext but dev mode has been disabled by feature flag.\
+            Remove the usage of DevModeContext or the dev_mode_enabled macro.");
     }
-    #[cfg(feature = "disable-dev-mode")]
-    {
-        false
-    }
+    enabled
 }
 
 /// Macro for enabling dev mode for a function or block of code.
@@ -180,5 +208,12 @@ mod tests {
         assert_eq!(ambient, is_dev_mode());
     }
 
-    // TODO: Add a test for disable dev mode
+    #[test]
+    #[cfg(feature = "disable-dev-mode")]
+    #[should_panic = "DevModeContext"]
+    fn dev_mode_context_disable_dev_mode() {
+        dev_mode_enabled! {
+            is_dev_mode();
+        }
+    }
 }
