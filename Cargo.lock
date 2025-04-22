@@ -5619,7 +5619,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2-methods"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "risc0-build",
 ]
@@ -6017,7 +6017,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "2.0.0"
+version = "2.0.2"
 dependencies = [
  "bincode",
  "borsh",
@@ -6047,7 +6047,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "2.0.0"
+version = "2.0.2"
 
 [[package]]
 name = "rlsf"
