@@ -394,12 +394,10 @@ fn env_stdio() {
 fn posix_style_read() {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
-    let buf: Vec<u8> = (b'a'..=b'z')
-        .chain(b'0'..=b'9')
-        .chain(b"!@#$%^&*()".iter().cloned())
-        .collect();
+    let buf: Vec<u8> = (b'a'..=b'z').cycle().take(8192).collect();
+
     // Input to read bytes from.
-    let readbuf: Vec<u8> = (b'A'..=b'Z').collect();
+    let readbuf: Vec<u8> = (b'A'..=b'Z').cycle().take(8192).collect();
 
     let run = |pos_and_len: Vec<(u32, u32)>| {
         let mut expected = buf.to_vec();
@@ -455,7 +453,7 @@ fn posix_style_read() {
             let mut pos_and_len: Vec<(u32, u32)> = Vec::new();
 
             // Make up a bunch of reads to overwrite parts of the buffer.
-            for nwords in 0..3 {
+            for nwords in [0, 1, 2, 3, 8, 16, 32, 64, 128, 256, 512] {
                 pos = next_offset(pos, start_offset);
                 let start = pos;
                 pos += nwords * WORD_SIZE as u32;
@@ -464,7 +462,8 @@ fn posix_style_read() {
                 pos_and_len.push((pos, len));
                 assert!(
                     pos + len < buf.len() as u32,
-                    "Ran out of space to test writes. pos: {pos} len: {len} end: {end_offset} start = {start_offset}"
+                    "Ran out of space to test writes. \
+                    pos: {pos} len: {len} end: {end_offset} start = {start_offset}"
                 );
                 // Make sure there's at least one non-overwritten character between reads.
                 pos += 1;
