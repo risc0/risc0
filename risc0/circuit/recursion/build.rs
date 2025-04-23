@@ -20,7 +20,7 @@ fn main() {
 #[cfg(feature = "prove")]
 fn download_zkr() {
     use std::{
-        fs,
+        env, fs,
         path::{Path, PathBuf},
         str::FromStr,
     };
