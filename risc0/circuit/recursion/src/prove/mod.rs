@@ -44,8 +44,7 @@ use self::{
     witgen::WitnessGenerator,
 };
 use crate::{
-    taps::TAPSET, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
-    REGISTER_GROUP_DATA,
+    taps::TAPSET, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 pub use self::program::Program;
@@ -56,6 +55,7 @@ pub use self::program::Program;
 const RECURSION_CODE_SIZE: usize = 23;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct RecursionReceipt {
     pub seal: Vec<u32>,
     pub output: Vec<u32>,

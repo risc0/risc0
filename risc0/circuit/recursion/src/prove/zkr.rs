@@ -12,20 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::REGISTER_GROUP_CODE;
-use anyhow::Result;
-use risc0_zkp::{adapter::TapsProvider, field::baby_bear::BabyBearElem};
+use std::io::{Cursor, Read as _};
 
-use super::{Program, CIRCUIT, RECURSION_CODE_SIZE};
+use anyhow::{Context as _, Result};
+
+use super::Program;
+
+const ZKR_ZIP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/recursion_zkr.zip"));
 
 pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
-    let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
-    assert_eq!(code_size, RECURSION_CODE_SIZE);
+    let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
+    let encoded = extract_zkr(&mut zip, name)?;
+    Ok(Program::from_encoded(&encoded, po2))
+}
 
-    let u32s = crate::zkr::get_zkr(name)?;
-    Ok(Program {
-        code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
-        code_size,
-        po2,
-    })
+/// Iterate over all provided zkr programs.
+///
+/// ```rust
+/// let listing = risc0_circuit_recursion::zkr::get_all_zkrs().unwrap();
+/// println!("{}", listing.into_iter().map(|(name, _)| name).collect::<Vec<_>>().join("\n"));
+/// ```
+pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
+    let mut zip = zip::ZipArchive::new(Cursor::new(ZKR_ZIP))?;
+    let files: Vec<_> = zip.file_names().map(|name| name.to_string()).collect();
+    files
+        .into_iter()
+        .map(|name| {
+            let encoded = extract_zkr(&mut zip, &name)?;
+            Ok((name, encoded))
+        })
+        .collect()
+}
+
+fn extract_zkr(zip: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str) -> Result<Vec<u32>> {
+    let mut f = zip
+        .by_name(name)
+        .with_context(|| format!("Failed to read {name}"))?;
+
+    let mut bytes = Vec::new();
+    f.read_to_end(&mut bytes)?;
+
+    Ok(Vec::from(bytemuck::cast_slice(bytes.as_slice())))
 }

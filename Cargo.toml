@@ -50,8 +50,8 @@ risc0-build = { version = "2.1.1", default-features = false, path = "risc0/build
 risc0-build-kernel = { version = "2.0.0", default-features = false, path = "risc0/build_kernel" }
 risc0-circuit-keccak = { version = "2.0.1", default-features = false, path = "risc0/circuit/keccak" }
 risc0-circuit-keccak-sys = { version = "2.0.1", default-features = false, path = "risc0/circuit/keccak-sys" }
-risc0-circuit-recursion = { version = "2.0.1", default-features = false, path = "risc0/circuit/recursion" }
-risc0-circuit-recursion-sys = { version = "2.0.1", default-features = false, path = "risc0/circuit/recursion-sys" }
+risc0-circuit-recursion = { version = "3.0.0", default-features = false, path = "risc0/circuit/recursion" }
+risc0-circuit-recursion-sys = { version = "3.0.0", default-features = false, path = "risc0/circuit/recursion-sys" }
 risc0-circuit-rv32im = { version = "2.1.0", default-features = false, path = "risc0/circuit/rv32im" }
 risc0-circuit-rv32im-sys = { version = "2.0.2", default-features = false, path = "risc0/circuit/rv32im-sys" }
 risc0-core = { version = "2.0.0", default-features = false, path = "risc0/core" }

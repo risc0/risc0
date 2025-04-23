@@ -61,7 +61,7 @@ pub(crate) struct PreflightTrace {
     pub iops: Vec<FpExt>,
 }
 
-pub struct Preflight {
+pub(crate) struct Preflight {
     pub trace: PreflightTrace,
     input: VecDeque<u32>,
 
