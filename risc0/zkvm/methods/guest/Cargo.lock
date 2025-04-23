@@ -1433,7 +1433,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1509,7 +1509,7 @@ name = "risc0-zkvm-methods-guest"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "getrandom 0.2.15",
+ "getrandom 0.3.1",
  "hex-literal",
  "risc0-circuit-keccak",
  "risc0-zkp",
@@ -1521,11 +1521,12 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "bytemuck",
  "cfg-if",
  "getrandom 0.2.15",
+ "getrandom 0.3.1",
  "libm",
  "stability",
 ]

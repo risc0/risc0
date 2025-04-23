@@ -27,8 +27,8 @@ use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF,
-    STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
+    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND2_ELF, RAND_ELF,
+    SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{
     fileno,
@@ -386,12 +386,10 @@ fn env_stdio() {
 fn posix_style_read() {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
-    let buf: Vec<u8> = (b'a'..=b'z')
-        .chain(b'0'..=b'9')
-        .chain(b"!@#$%^&*()".iter().cloned())
-        .collect();
+    let buf: Vec<u8> = (b'a'..=b'z').cycle().take(8192).collect();
+
     // Input to read bytes from.
-    let readbuf: Vec<u8> = (b'A'..=b'Z').collect();
+    let readbuf: Vec<u8> = (b'A'..=b'Z').cycle().take(8192).collect();
 
     let run = |pos_and_len: Vec<(u32, u32)>| {
         let mut expected = buf.to_vec();
@@ -447,7 +445,7 @@ fn posix_style_read() {
             let mut pos_and_len: Vec<(u32, u32)> = Vec::new();
 
             // Make up a bunch of reads to overwrite parts of the buffer.
-            for nwords in 0..3 {
+            for nwords in [0, 1, 2, 3, 8, 16, 32, 64, 128, 256, 512] {
                 pos = next_offset(pos, start_offset);
                 let start = pos;
                 pos += nwords * WORD_SIZE as u32;
@@ -456,7 +454,8 @@ fn posix_style_read() {
                 pos_and_len.push((pos, len));
                 assert!(
                     pos + len < buf.len() as u32,
-                    "Ran out of space to test writes. pos: {pos} len: {len} end: {end_offset} start = {start_offset}"
+                    "Ran out of space to test writes. \
+                    pos: {pos} len: {len} end: {end_offset} start = {start_offset}"
                 );
                 // Make sure there's at least one non-overwritten character between reads.
                 pos += 1;
@@ -903,6 +902,12 @@ fn random() {
 fn getrandom_panic() {
     let env = ExecutorEnv::default();
     execute_elf(env, RAND_ELF).unwrap();
+}
+
+#[test_log::test]
+fn getrandom2() {
+    let env = ExecutorEnv::default();
+    execute_elf(env, RAND2_ELF).unwrap();
 }
 
 #[test_log::test]
