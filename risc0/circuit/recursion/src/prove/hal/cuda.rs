@@ -184,6 +184,27 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
     }
 }
 
+pub(crate) fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
+    match hashfn {
+        "poseidon2" => {
+            let hal = Rc::new(CudaHalPoseidon2::new());
+            let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        "poseidon_254" => {
+            let hal = Rc::new(CudaHalPoseidon254::new());
+            let circuit_hal = Rc::new(CudaCircuitHalPoseidon254::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        "sha-256" => {
+            let hal = Rc::new(CudaHalSha256::new());
+            let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        _ => bail!("Unsupported hashfn: {hashfn}"),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::rc::Rc;
@@ -205,26 +226,5 @@ mod tests {
         let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaCircuitHalSha256::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
-    }
-}
-
-pub fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
-    match hashfn {
-        "poseidon2" => {
-            let hal = Rc::new(CudaHalPoseidon2::new());
-            let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
-            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
-        }
-        "poseidon_254" => {
-            let hal = Rc::new(CudaHalPoseidon254::new());
-            let circuit_hal = Rc::new(CudaCircuitHalPoseidon254::new(hal.clone()));
-            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
-        }
-        "sha-256" => {
-            let hal = Rc::new(CudaHalSha256::new());
-            let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
-        }
-        _ => bail!("Unsupported hashfn: {hashfn}"),
     }
 }
