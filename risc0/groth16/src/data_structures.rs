@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Temporarily allow as part of temporary `pub` nautre of this crate (for tests)
-#![allow(missing_docs)]
+//#![allow(missing_docs)]
 
 extern crate alloc;
 
@@ -430,7 +429,7 @@ impl From<G1dataVec> for Vec<substrate_bn::G1> {
     }
 }
 
-// TODO: Temporarily `pub` as scaffolding for some temporary tests
+/// TODO: Temporarily `pub` as scaffolding for some temporary tests
 // TODO: Helper struct for Vk serialization
 // TODO: Not sure I need any of these traits, but nice for testing
 #[derive(Debug, Eq, PartialEq)]
@@ -438,6 +437,7 @@ pub struct G1data([u8; 96]);
 
 // TODO: Temporary, just for some temporary tests
 impl G1data {
+    /// one
     pub fn one() -> Self {
         substrate_bn::G1::one().into()
     }
@@ -454,7 +454,7 @@ impl From<substrate_bn::G1> for G1data {
     }
 }
 
-// TODO: Swap to TryFrom instead of using unwrap
+// TryFrom instead of unwrap possible but consumes more cycles (see groth16-tryfrom branch)
 impl From<G1data> for substrate_bn::G1 {
     fn from(item: G1data) -> Self {
         substrate_bn::G1::new(
@@ -546,7 +546,7 @@ impl From<substrate_bn::G2> for G2data {
     }
 }
 
-// TODO: Swap to TryFrom instead of using unwrap
+// TryFrom instead of unwrap possible but consumes more cycles (see groth16-tryfrom branch)
 impl From<G2data> for substrate_bn::G2 {
     fn from(item: G2data) -> Self {
         substrate_bn::G2::new(
@@ -729,10 +729,10 @@ pub(crate) struct Pvk {
 impl From<Vk> for Pvk {
     fn from(item: Vk) -> Self {
         Pvk {
-            vk: item.clone(),  // TODO: Hmm do I really need to clone?
             alpha_g1_beta_g2: substrate_bn::pairing(item.alpha_g1.into(), item.beta_g2.into()),  // Note: `pairing` includes final exponentiation
             gamma_g2_neg_pc: -item.gamma_g2,
             delta_g2_neg_pc: -item.delta_g2,
+            vk: item,
         }
     }
 }

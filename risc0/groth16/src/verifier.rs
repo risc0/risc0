@@ -20,7 +20,6 @@ extern crate alloc;
 use alloc::vec;
 
 use anyhow::{anyhow, Error, Result};
-// use ark_serialize::CanonicalSerialize;
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
@@ -291,7 +290,7 @@ impl Digestible for VerifyingKey {
 // TODO: Ok that the type changed?
 // TODO: I don't think the allow(dead_code) should be needed...
 /// Default verifying key for RISC Zero recursive verification.
-#[allow(dead_code)]
+//#[allow(dead_code)]
 pub fn verifying_key() -> VerifyingKey {
     // TODO: We should probably be wrapping this as a VerifyingKey for compatability
     VerifyingKey(try_vk().unwrap())

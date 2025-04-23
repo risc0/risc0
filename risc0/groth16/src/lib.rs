@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Redo intro docs
+// TODO: Redo intro docs (see risc0/examples/groth16-verifier)
 
 //! # Groth16
 //!
@@ -72,11 +72,11 @@ use alloc::vec::Vec;
 use core::str::FromStr;
 
 use anyhow::{anyhow, Error, Result};
-// use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
 
-pub mod data_structures;  // TODO: Temporarily `pub` for scaffolding for temporary test
+/// Temporarily `pub` for scaffolding for temporary test (TODO)
+pub mod data_structures;
 #[cfg(feature = "prove")]
 pub mod docker;
 #[cfg(feature = "prove")]
