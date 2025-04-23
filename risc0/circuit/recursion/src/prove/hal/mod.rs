@@ -29,7 +29,7 @@ pub(crate) trait CircuitWitnessGenerator<H: Hal> {
     fn generate_witness(
         &self,
         mode: StepMode,
-        cycles: u32,
+        total_cycles: u32,
         preflight: &RawPreflightTrace,
         ctrl: &H::Buffer<H::Elem>,
         data: &H::Buffer<H::Elem>,
@@ -41,8 +41,8 @@ pub(crate) trait CircuitAccumulator<H: Hal> {
     #[allow(clippy::too_many_arguments)]
     fn accumulate(
         &self,
-        steps: u32,
-        cycles: u32,
+        work_cycles: u32,
+        total_cycles: u32,
         ctrl: &H::Buffer<H::Elem>,
         global: &H::Buffer<H::Elem>,
         data: &H::Buffer<H::Elem>,

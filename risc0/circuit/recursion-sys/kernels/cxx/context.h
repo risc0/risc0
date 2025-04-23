@@ -50,14 +50,16 @@ struct ExecBuffers {
 
 struct PreflightCycle {
   uint32_t iopIdx;
-  bool isParSafe;
+  uint32_t isParSafe;
 };
 
 struct PreflightTrace {
   FpExt* wom;
   PreflightCycle* cycles;
   FpExt* iops;
-  uint32_t steps;
+  uint32_t numWoms;
+  uint32_t numCycles;
+  uint32_t numIops;
 };
 
 struct MachineContext {

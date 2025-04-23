@@ -14,7 +14,7 @@
 
 use std::rc::Rc;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_circuit_recursion_sys::{
     risc0_circuit_recursion_cpu_accum, risc0_circuit_recursion_cpu_eval_check,
     risc0_circuit_recursion_cpu_witgen, RawAccumBuffers, RawExecBuffers, RawPreflightTrace,
@@ -22,7 +22,12 @@ use risc0_circuit_recursion_sys::{
 };
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
-    core::{hash::HashSuite, log2_ceil},
+    core::{
+        hash::{
+            poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
+        },
+        log2_ceil,
+    },
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         map_pow, RootsOfUnity as _,
@@ -41,13 +46,13 @@ use super::{CircuitAccumulator, CircuitWitnessGenerator};
 type CpuHal = risc0_zkp::hal::cpu::CpuHal<BabyBear>;
 
 #[derive(Default)]
-pub struct CpuCircuitHal;
+pub(crate) struct CpuCircuitHal;
 
 impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
     fn generate_witness(
         &self,
         mode: StepMode,
-        cycles: u32,
+        total_cycles: u32,
         preflight: &RawPreflightTrace,
         ctrl: &CpuBuffer<BabyBearElem>,
         data: &CpuBuffer<BabyBearElem>,
@@ -62,7 +67,7 @@ impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
             global: global.as_ptr(),
         };
         ffi_wrap(|| unsafe {
-            risc0_circuit_recursion_cpu_witgen(mode, &buffers, preflight, cycles)
+            risc0_circuit_recursion_cpu_witgen(mode, &buffers, preflight, total_cycles)
         })
     }
 }
@@ -70,8 +75,8 @@ impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
 impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
     fn accumulate(
         &self,
-        steps: u32,
-        cycles: u32,
+        work_cycles: u32,
+        total_cycles: u32,
         ctrl: &CpuBuffer<BabyBearElem>,
         global: &CpuBuffer<BabyBearElem>,
         data: &CpuBuffer<BabyBearElem>,
@@ -90,7 +95,9 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
             mix: mix.as_ptr(),
             accum: accum.as_ptr(),
         };
-        ffi_wrap(|| unsafe { risc0_circuit_recursion_cpu_accum(&buffers, steps, cycles) })
+        ffi_wrap(|| unsafe {
+            risc0_circuit_recursion_cpu_accum(&buffers, work_cycles, total_cycles)
+        })
     }
 }
 
@@ -156,7 +163,14 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
 }
 
 #[allow(dead_code)]
-pub fn recursion_prover(suite: HashSuite<BabyBear>) -> Result<Box<dyn RecursionProver>> {
+pub fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
+    let suite = match hashfn {
+        "poseidon2" => Poseidon2HashSuite::new_suite(),
+        "poseidon_254" => Poseidon254HashSuite::new_suite(),
+        "sha-256" => Sha256HashSuite::new_suite(),
+        _ => bail!("Unsupported hashfn: {hashfn}"),
+    };
+
     let hal = Rc::new(CpuHal::new(suite));
     let circuit_hal = Rc::new(CpuCircuitHal);
     Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))

@@ -14,36 +14,100 @@
 
 use std::rc::Rc;
 
-use cust::{memory::GpuBuffer as _, prelude::*};
-use risc0_core::scope;
-use risc0_sys::{cuda::SpparkError, ffi_wrap};
+use anyhow::{bail, Result};
+use risc0_circuit_recursion_sys::{
+    risc0_circuit_recursion_cuda_accum, risc0_circuit_recursion_cuda_eval_check,
+    risc0_circuit_recursion_cuda_witgen, RawAccumBuffers, RawExecBuffers, RawPreflightTrace,
+    StepMode,
+};
+use risc0_sys::ffi_wrap;
 use risc0_zkp::{
     core::log2_ceil,
     field::{
         baby_bear::{BabyBearElem, BabyBearExtElem},
-        map_pow, Elem, ExtElem, RootsOfUnity,
+        map_pow, RootsOfUnity,
     },
     hal::{
         cuda::{
-            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashPoseidon254,
-            CudaHashSha256, DeviceExtElem,
+            BufferImpl as CudaBuffer, CudaHal, CudaHalPoseidon2, CudaHalPoseidon254, CudaHalSha256,
+            CudaHash, CudaHashPoseidon2, CudaHashPoseidon254, CudaHashSha256,
         },
-        AccumPreflight, Buffer, CircuitHal, Hal,
+        AccumPreflight, Buffer, CircuitHal,
     },
-    INV_RATE, ZK_CYCLES,
+    INV_RATE,
 };
 
 use crate::{
+    prove::{RecursionProver, RecursionProverImpl},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
-pub struct CudaCircuitHal<CH: CudaHash> {
-    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+use super::{CircuitAccumulator, CircuitWitnessGenerator};
+
+type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
+type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
+type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
+
+struct CudaCircuitHal<CH: CudaHash> {
+    _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
-    pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
-        Self { hal }
+    pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+        Self { _hal }
+    }
+}
+
+impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
+    fn generate_witness(
+        &self,
+        mode: StepMode,
+        total_cycles: u32,
+        preflight: &RawPreflightTrace,
+        ctrl: &CudaBuffer<BabyBearElem>,
+        data: &CudaBuffer<BabyBearElem>,
+        global: &CudaBuffer<BabyBearElem>,
+    ) -> Result<()> {
+        let ctrl = ctrl.as_device_ptr();
+        let data = data.as_device_ptr();
+        let global = global.as_device_ptr();
+        let buffers = RawExecBuffers {
+            ctrl: ctrl.as_ptr() as *const BabyBearElem,
+            data: data.as_ptr() as *const BabyBearElem,
+            global: global.as_ptr() as *const BabyBearElem,
+        };
+        ffi_wrap(|| unsafe {
+            risc0_circuit_recursion_cuda_witgen(mode, &buffers, preflight, total_cycles)
+        })
+    }
+}
+
+impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
+    fn accumulate(
+        &self,
+        work_cycles: u32,
+        total_cycles: u32,
+        ctrl: &CudaBuffer<BabyBearElem>,
+        global: &CudaBuffer<BabyBearElem>,
+        data: &CudaBuffer<BabyBearElem>,
+        mix: &CudaBuffer<BabyBearElem>,
+        accum: &CudaBuffer<BabyBearElem>,
+    ) -> Result<()> {
+        let ctrl = ctrl.as_device_ptr();
+        let global = global.as_device_ptr();
+        let data = data.as_device_ptr();
+        let mix = mix.as_device_ptr();
+        let accum = accum.as_device_ptr();
+        let buffers = RawAccumBuffers {
+            ctrl: ctrl.as_ptr() as *const BabyBearElem,
+            global: global.as_ptr() as *const BabyBearElem,
+            data: data.as_ptr() as *const BabyBearElem,
+            mix: mix.as_ptr() as *const BabyBearElem,
+            accum: accum.as_ptr() as *const BabyBearElem,
+        };
+        ffi_wrap(|| unsafe {
+            risc0_circuit_recursion_cuda_accum(&buffers, work_cycles, total_cycles)
+        })
     }
 }
 
@@ -79,36 +143,23 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
-
         let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
-        let poly_mix_pows: &[u32; BabyBearExtElem::EXT_SIZE * crate::info::NUM_POLY_MIX_POWERS] =
-            BabyBearExtElem::as_u32_slice(poly_mix_pows.as_slice())
-                .try_into()
-                .unwrap();
 
-        extern "C" {
-            fn risc0_circuit_recursion_cuda_eval_check(
-                check: DevicePointer<u8>,
-                ctrl: DevicePointer<u8>,
-                data: DevicePointer<u8>,
-                accum: DevicePointer<u8>,
-                mix: DevicePointer<u8>,
-                io: DevicePointer<u8>,
-                rou: *const BabyBearElem,
-                po2: u32,
-                domain: u32,
-                poly_mix_pows: *const u32,
-            ) -> *const std::os::raw::c_char;
-        }
+        let check = check.as_device_ptr();
+        let ctrl = ctrl.as_device_ptr();
+        let data = data.as_device_ptr();
+        let accum = accum.as_device_ptr();
+        let mix = mix.as_device_ptr();
+        let out = out.as_device_ptr();
 
         ffi_wrap(|| unsafe {
             risc0_circuit_recursion_cuda_eval_check(
-                check.as_device_ptr(),
-                ctrl.as_device_ptr(),
-                data.as_device_ptr(),
-                accum.as_device_ptr(),
-                mix.as_device_ptr(),
-                out.as_device_ptr(),
+                check.as_ptr() as *const BabyBearElem,
+                ctrl.as_ptr() as *const BabyBearElem,
+                data.as_ptr() as *const BabyBearElem,
+                accum.as_ptr() as *const BabyBearElem,
+                mix.as_ptr() as *const BabyBearElem,
+                out.as_ptr() as *const BabyBearElem,
                 &rou as *const BabyBearElem,
                 po2 as u32,
                 domain as u32,
@@ -118,6 +169,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         .unwrap();
     }
 
+    #[allow(unused)]
     fn accumulate(
         &self,
         _preflight: &AccumPreflight,
@@ -128,87 +180,9 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         accum: &CudaBuffer<BabyBearElem>,
         steps: usize,
     ) {
-        let count = steps - ZK_CYCLES;
-
-        let wom = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
-        let wom = DeviceBuffer::from_slice(&wom).unwrap();
-
-        scope!("step_compute_accum", {
-            extern "C" {
-                fn risc0_circuit_recursion_cuda_step_compute_accum(
-                    ctrl: DevicePointer<u8>,
-                    data: DevicePointer<u8>,
-                    mix: DevicePointer<u8>,
-                    wom: DevicePointer<DeviceExtElem>,
-                    steps: u32,
-                    count: u32,
-                ) -> *const std::os::raw::c_char;
-            }
-
-            ffi_wrap(|| unsafe {
-                risc0_circuit_recursion_cuda_step_compute_accum(
-                    ctrl.as_device_ptr(),
-                    data.as_device_ptr(),
-                    mix.as_device_ptr(),
-                    wom.as_device_ptr(),
-                    steps as u32,
-                    count as u32,
-                )
-            })
-            .unwrap();
-        });
-
-        scope!("prefix_products", {
-            extern "C" {
-                fn sppark_prefix_product(
-                    d_elems: DevicePointer<DeviceExtElem>,
-                    count: u32,
-                ) -> SpparkError;
-            }
-
-            let err = unsafe { sppark_prefix_product(wom.as_device_ptr(), steps as u32) };
-            if err.code != 0 {
-                panic!("Failure during sppark_prefix_product: {err}");
-            }
-        });
-
-        scope!("step_verify_accum", {
-            extern "C" {
-                fn risc0_circuit_recursion_cuda_step_verify_accum(
-                    ctrl: DevicePointer<u8>,
-                    data: DevicePointer<u8>,
-                    mix: DevicePointer<u8>,
-                    wom: DevicePointer<DeviceExtElem>,
-                    accum: DevicePointer<u8>,
-                    steps: u32,
-                    count: u32,
-                ) -> *const std::os::raw::c_char;
-            }
-
-            ffi_wrap(|| unsafe {
-                risc0_circuit_recursion_cuda_step_verify_accum(
-                    ctrl.as_device_ptr(),
-                    data.as_device_ptr(),
-                    mix.as_device_ptr(),
-                    wom.as_device_ptr(),
-                    accum.as_device_ptr(),
-                    steps as u32,
-                    count as u32,
-                )
-            })
-            .unwrap();
-        });
-
-        scope!("zeroize", {
-            self.hal.eltwise_zeroize_elem(accum);
-            self.hal.eltwise_zeroize_elem(io);
-        });
+        unimplemented!()
     }
 }
-
-pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
-pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
-pub type CudaCircuitHalPoseidon254 = CudaCircuitHal<CudaHashPoseidon254>;
 
 #[cfg(test)]
 mod tests {
@@ -221,44 +195,36 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::{cpu::CpuCircuitHal, CircuitImpl};
+    use crate::prove::hal::cpu::CpuCircuitHal;
 
     #[test]
     fn eval_check() {
         const PO2: usize = 4;
-        let circuit = CircuitImpl::new();
         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
-        let cpu_eval = CpuCircuitHal::new(&circuit);
+        let cpu_eval = CpuCircuitHal;
         let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaCircuitHalSha256::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
     }
 }
 
-// #[cfg(feature = "cuda")]
-// mod cuda {
-//     pub use crate::cuda::{
-//         CudaCircuitHalPoseidon2, CudaCircuitHalPoseidon254, CudaCircuitHalSha256,
-//     };
-//     pub use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalPoseidon254, CudaHalSha256};
-
-//     use super::{HalPair, Rc};
-
-//     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
-//         let hal = Rc::new(CudaHalSha256::new());
-//         let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-//         HalPair { hal, circuit_hal }
-//     }
-
-//     pub fn poseidon2_hal_pair() -> HalPair<CudaHalPoseidon2, CudaCircuitHalPoseidon2> {
-//         let hal = Rc::new(CudaHalPoseidon2::new());
-//         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
-//         HalPair { hal, circuit_hal }
-//     }
-
-//     pub fn poseidon254_hal_pair() -> HalPair<CudaHalPoseidon254, CudaCircuitHalPoseidon254> {
-//         let hal = Rc::new(CudaHalPoseidon254::new());
-//         let circuit_hal = Rc::new(CudaCircuitHalPoseidon254::new(hal.clone()));
-//         HalPair { hal, circuit_hal }
-//     }
-// }
+pub fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
+    match hashfn {
+        "poseidon2" => {
+            let hal = Rc::new(CudaHalPoseidon2::new());
+            let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        "poseidon_254" => {
+            let hal = Rc::new(CudaHalPoseidon254::new());
+            let circuit_hal = Rc::new(CudaCircuitHalPoseidon254::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        "sha-256" => {
+            let hal = Rc::new(CudaHalSha256::new());
+            let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+            Ok(Box::new(RecursionProverImpl::new(hal, circuit_hal)))
+        }
+        _ => bail!("Unsupported hashfn: {hashfn}"),
+    }
+}

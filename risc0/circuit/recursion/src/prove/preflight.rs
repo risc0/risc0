@@ -200,7 +200,7 @@ impl Preflight {
 
         self.trace.cycles.push(RawPreflightCycle {
             iop_idx: self.iop_idx,
-            is_par_safe,
+            is_par_safe: is_par_safe as u32,
         });
 
         self.iop_idx = self.trace.iops.len() as u32;

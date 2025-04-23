@@ -24,17 +24,12 @@ pub mod zkr;
 
 use std::{collections::VecDeque, fmt::Debug, rc::Rc};
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use cfg_if::cfg_if;
 use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::{
-        digest::Digest,
-        hash::{
-            poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
-        },
-    },
+    core::digest::Digest,
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem as _,
@@ -78,20 +73,13 @@ pub trait RecursionProver {
 }
 
 pub fn recursion_prover(hashfn: &str) -> Result<Box<dyn RecursionProver>> {
-    let suite = match hashfn {
-        "poseidon2" => Poseidon2HashSuite::new_suite(),
-        "poseidon_254" => Poseidon254HashSuite::new_suite(),
-        "sha-256" => Sha256HashSuite::new_suite(),
-        _ => bail!("Unsupported hashfn: {hashfn}"),
-    };
-
     cfg_if! {
         if #[cfg(feature = "cuda")] {
             self::hal::cuda::recursion_prover(hashfn)
         // } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
         // self::hal::metal::recursion_prover(hashfn)
         } else {
-            self::hal::cpu::recursion_prover(suite)
+            self::hal::cpu::recursion_prover(hashfn)
         }
     }
 }

@@ -34,7 +34,7 @@ pub struct RawAccumBuffers {
 #[repr(C)]
 pub struct RawPreflightCycle {
     pub iop_idx: u32,
-    pub is_par_safe: bool,
+    pub is_par_safe: u32,
 }
 
 #[repr(C)]
@@ -42,7 +42,9 @@ pub struct RawPreflightTrace {
     pub wom: *const BabyBearExtElem,
     pub cycles: *const RawPreflightCycle,
     pub iops: *const BabyBearExtElem,
-    pub steps: u32,
+    pub num_woms: u32,
+    pub num_cycles: u32,
+    pub num_iops: u32,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -58,13 +60,13 @@ extern "C" {
         mode: StepMode,
         buffers: *const RawExecBuffers,
         preflight: *const RawPreflightTrace,
-        steps: u32,
+        total_cycles: u32,
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_recursion_cpu_accum(
         buffers: *const RawAccumBuffers,
-        steps: u32,
-        cycles: u32,
+        work_cycles: u32,
+        total_cycles: u32,
     ) -> *const std::os::raw::c_char;
 
     pub fn risc0_circuit_recursion_cpu_eval_check(
@@ -74,5 +76,34 @@ extern "C" {
         rou: BabyBearElem,
         po2: u32,
         steps: u32,
+    ) -> *const std::os::raw::c_char;
+}
+
+#[cfg(feature = "cuda")]
+extern "C" {
+    pub fn risc0_circuit_recursion_cuda_witgen(
+        mode: StepMode,
+        buffers: *const RawExecBuffers,
+        preflight: *const RawPreflightTrace,
+        steps: u32,
+    ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_recursion_cuda_accum(
+        buffers: *const RawAccumBuffers,
+        steps: u32,
+        cycles: u32,
+    ) -> *const std::os::raw::c_char;
+
+    pub fn risc0_circuit_recursion_cuda_eval_check(
+        check: *const BabyBearElem,
+        ctrl: *const BabyBearElem,
+        data: *const BabyBearElem,
+        accum: *const BabyBearElem,
+        mix: *const BabyBearElem,
+        out: *const BabyBearElem,
+        rou: *const BabyBearElem,
+        po2: u32,
+        domain: u32,
+        poly_mix: *const BabyBearExtElem,
     ) -> *const std::os::raw::c_char;
 }

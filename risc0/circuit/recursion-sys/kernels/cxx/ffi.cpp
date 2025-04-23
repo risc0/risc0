@@ -53,14 +53,15 @@ MachineContext::MachineContext(ExecBuffers* buffers, PreflightTrace* trace, uint
     : buffers(buffers)
     , trace(trace)
     , steps(steps)
-    , womRows(trace->steps * kMaxWomRowsPerCycle, WomArgumentRow{kInvalidPattern, FpExt::invalid()})
-    , womIndex(trace->steps) {}
+    , womRows(trace->numCycles * kMaxWomRowsPerCycle,
+              WomArgumentRow{kInvalidPattern, FpExt::invalid()})
+    , womIndex(trace->numCycles) {}
 
 void MachineContext::parStepExec(uint32_t cycle) {
   if (cycle == 0 || isParSafeExec(cycle)) {
     // printf("step_exec(%u)\n", cycle);
     step_exec(this, steps, cycle++, args().data());
-    while (cycle < trace->steps && !isParSafeExec(cycle)) {
+    while (cycle < trace->numCycles && !isParSafeExec(cycle)) {
       // printf("step_exec(%u)\n", cycle);
       step_exec(this, steps, cycle++, args().data());
     }
@@ -72,18 +73,18 @@ void MachineContext::doStepExec(uint32_t mode) {
   switch (mode) {
   case kStepModeParallel: {
     auto begin = poolstl::iota_iter<uint32_t>(0);
-    auto end = poolstl::iota_iter<uint32_t>(trace->steps);
+    auto end = poolstl::iota_iter<uint32_t>(trace->numCycles);
     std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) { parStepExec(cycle); });
   } break;
   case kStepModeSeqForward: {
-    for (size_t i = 0; i < trace->steps; i++) {
+    for (size_t i = 0; i < trace->numCycles; i++) {
       // printf("step_exec(%zu)\n", i);
       step_exec(this, steps, i, args().data());
     }
   } break;
   case kStepModeSeqReverse: {
-    for (size_t i = 0; i < trace->steps; i++) {
-      parStepExec(trace->steps - i - 1);
+    for (size_t i = 0; i < trace->numCycles; i++) {
+      parStepExec(trace->numCycles - i - 1);
     }
   } break;
   }
@@ -94,20 +95,20 @@ void MachineContext::doStepVerifyWom(uint32_t mode) {
   switch (mode) {
   case kStepModeParallel: {
     auto begin = poolstl::iota_iter<uint32_t>(0);
-    auto end = poolstl::iota_iter<uint32_t>(trace->steps);
+    auto end = poolstl::iota_iter<uint32_t>(trace->numCycles);
     std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
       step_verify_mem(this, steps, cycle, args().data());
     });
   } break;
   case kStepModeSeqForward: {
-    for (size_t i = 0; i < trace->steps; i++) {
+    for (size_t i = 0; i < trace->numCycles; i++) {
       // printf("step_verify_mem(%zu)\n", i);
       step_verify_mem(this, steps, i, args().data());
     }
   } break;
   case kStepModeSeqReverse: {
-    for (size_t i = 0; i < trace->steps; i++) {
-      size_t cycle = trace->steps - i - 1;
+    for (size_t i = 0; i < trace->numCycles; i++) {
+      size_t cycle = trace->numCycles - i - 1;
       // printf("step_verify_mem(%zu)\n", cycle);
       step_verify_mem(this, steps, cycle, args().data());
     }
@@ -135,7 +136,7 @@ void MachineContext::verifyWom(uint32_t mode) {
 void MachineContext::injectWomBacks() {
   nvtx3::scoped_range range("injectWomBacks");
   auto begin = poolstl::iota_iter<uint32_t>(1);
-  auto end = poolstl::iota_iter<uint32_t>(trace->steps);
+  auto end = poolstl::iota_iter<uint32_t>(trace->numCycles);
   Fp* data = buffers->data;
   std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
     uint32_t idx = womIndex[cycle];
