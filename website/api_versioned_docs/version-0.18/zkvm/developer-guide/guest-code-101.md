@@ -33,7 +33,7 @@ To support various use cases, there are a number of functions that can be called
 There are also a number of functions available to support with debugging and performance analysis. As above, we refer to the [`guest` module] for a full list, but include some highlights here:
 
 - **Count Cycles** <br />
-  [`env::get_cycle_count`]
+  [`env::cycle_count`]
 - **Print a debug message**<br />
   [`env::log`]
 
@@ -57,7 +57,7 @@ Hopefully, this guide and the [zkVM Quick Start] page will be sufficient for you
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.get_cycle_count.html
+[`env::cycle_count`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.get_cycle_count.html
 [`env::log`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.log.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.read.html
