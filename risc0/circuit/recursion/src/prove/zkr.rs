@@ -29,7 +29,7 @@ pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
 /// Iterate over all provided zkr programs.
 ///
 /// ```rust
-/// let listing = risc0_circuit_recursion::zkr::get_all_zkrs().unwrap();
+/// let listing = risc0_circuit_recursion::prove::zkr::get_all_zkrs().unwrap();
 /// println!("{}", listing.into_iter().map(|(name, _)| name).collect::<Vec<_>>().join("\n"));
 /// ```
 pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
