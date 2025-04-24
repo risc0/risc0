@@ -435,15 +435,15 @@ pub unsafe extern "C" fn sys_sha_buffer(
 /// dereferenceable.
 #[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe extern "C" fn sys_poseidon2_compress(
+pub unsafe extern "C" fn sys_poseidon2(
     state_addr: *mut [u32; DIGEST_WORDS],
     in_buf_addr: *const u8,
     out_buf_addr: *mut [u32; DIGEST_WORDS],
     bits_count: u32,
 ) {
-    assert!(state_addr as usize % WORD_SIZE == 0);
-    assert!(in_buf_addr as usize % WORD_SIZE == 0);
-    assert!(out_buf_addr as usize % WORD_SIZE == 0);
+    debug_assert!(state_addr as usize % WORD_SIZE == 0);
+    debug_assert!(in_buf_addr as usize % WORD_SIZE == 0);
+    debug_assert!(out_buf_addr as usize % WORD_SIZE == 0);
 
     ecall_3(
         ecall::POSEIDON2,

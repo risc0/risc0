@@ -45,7 +45,7 @@ use risc0_zkvm_platform::{
     fileno,
     syscall::{
         bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
-        sys_poseidon2_compress, sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
+        sys_poseidon2, sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
@@ -602,7 +602,7 @@ fn main() {
             let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
 
             unsafe {
-                sys_poseidon2_compress(
+                sys_poseidon2(
                     null_mut(),
                     input.as_ptr() as *const u8,
                     &mut actual,
@@ -621,7 +621,7 @@ fn main() {
             ];
             let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
             unsafe {
-                sys_poseidon2_compress(null_mut(), input.as_ptr() as *const u8, &mut actual, 1u32);
+                sys_poseidon2(null_mut(), input.as_ptr() as *const u8, &mut actual, 1u32);
             }
             assert_eq!(expected, actual);
         }
@@ -637,7 +637,7 @@ fn main() {
             ];
             let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
             unsafe {
-                sys_poseidon2_compress(
+                sys_poseidon2(
                     null_mut(),
                     input.as_ptr() as *const u8,
                     &mut actual,
@@ -660,7 +660,7 @@ fn main() {
             let mut state: [u32; DIGEST_WORDS] = [0u32; 8];
             let mut out: [u32; DIGEST_WORDS] = [0u32; 8];
             unsafe {
-                sys_poseidon2_compress(
+                sys_poseidon2(
                     &mut state,
                     input.as_ptr() as *const u8,
                     &mut out,
@@ -668,7 +668,7 @@ fn main() {
                 );
             }
             unsafe {
-                sys_poseidon2_compress(
+                sys_poseidon2(
                     &mut state,
                     input.as_ptr().wrapping_add(16) as *const u8,
                     &mut out,

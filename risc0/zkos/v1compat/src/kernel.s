@@ -22,7 +22,7 @@
 .equ ECALL_TABLE_SIZE, 8
 .equ HOST_ECALL_TERMINATE, 0
 .equ HOST_ECALL_READ, 1
-.equ HOST_ECALL_POSEIDON, 3
+.equ HOST_ECALL_POSEIDON2, 3
 .equ HOST_ECALL_SHA, 4
 .equ HOST_ECALL_BIGINT, 5
 .equ WORD_SIZE, 4
@@ -85,7 +85,7 @@ _ecall_table:
     j _ecall_bigint
     fence # user
     j _ecall_bigint2
-    j _ecall_poseidon
+    j _ecall_poseidon2
 
 _ecall_dispatch:
     # load t0 from userspace
@@ -206,14 +206,17 @@ _ecall_sha:
     lw a2, REG_A2 * WORD_SIZE (tp) # block_ptr1
     lw a3, REG_A3 * WORD_SIZE (tp) # block_ptr2
     lw a4, REG_A4 * WORD_SIZE (tp) # count
-    j ecall_sha
+    call ecall_sha
 
-_ecall_poseidon:
+    # return back to userspace
+    mret
+
+_ecall_poseidon2:
     lw a0, REG_A0 * WORD_SIZE (tp) # state_addr
     lw a1, REG_A1 * WORD_SIZE (tp) # buf_in_addr
     lw a2, REG_A2 * WORD_SIZE (tp) # buf_out_addr
     lw a3, REG_A3 * WORD_SIZE (tp) # bits_count
-    li a7, HOST_ECALL_POSEIDON
+    li a7, HOST_ECALL_POSEIDON2
     ecall
 
     # return back to userspace
@@ -257,4 +260,5 @@ _ecall_bigint:
 
     call ecall_bigint_v1compat
 
+    # return back to userspace
     mret
