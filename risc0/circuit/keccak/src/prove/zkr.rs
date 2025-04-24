@@ -20,14 +20,7 @@ use xz2::read::XzDecoder;
 
 use crate::{KECCAK_PO2_RANGE, RECURSION_PO2};
 
-// The compressed bytes and their size uncompressed in bytes
-const ZKRS: &[(&[u8], usize)] = &[
-    (include_bytes!("keccak_lift_14.zkr.xz"), 18_207_076),
-    (include_bytes!("keccak_lift_15.zkr.xz"), 19_064_516),
-    (include_bytes!("keccak_lift_16.zkr.xz"), 20_236_412),
-    (include_bytes!("keccak_lift_17.zkr.xz"), 20_475_244),
-    (include_bytes!("keccak_lift_18.zkr.xz"), 21_276_564),
-];
+include!(concat!(env!("OUT_DIR"), "/zkr_table.rs"));
 
 pub fn get_keccak_zkr(po2: usize) -> Result<Program> {
     let idx = po2 - KECCAK_PO2_RANGE.min().unwrap();
