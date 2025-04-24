@@ -39,7 +39,6 @@ bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 derive_more = { version = "2.0.1", default-features = false, features = [
   "debug",
 ] }
-getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-binfmt = { workspace = true }
 risc0-circuit-keccak = { workspace = true }

@@ -2846,7 +2846,6 @@ dependencies = [
  "borsh",
  "bytemuck",
  "derive_more 2.0.1",
- "getrandom 0.2.16",
  "hex",
  "risc0-binfmt",
  "risc0-circuit-keccak",
