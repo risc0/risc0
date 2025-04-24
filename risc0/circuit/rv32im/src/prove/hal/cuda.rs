@@ -240,7 +240,7 @@ pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
 mod tests {
     use std::rc::Rc;
 
-    use rand::{thread_rng, Rng};
+    use rand::Rng;
     use risc0_core::field::baby_bear::BabyBear;
     use risc0_zkp::{
         adapter::CircuitInfo as _,
@@ -269,7 +269,7 @@ mod tests {
 
     impl EvalCheckParams {
         pub fn new(po2: usize) -> Self {
-            let mut rng = thread_rng();
+            let mut rng = rand::rng();
             let steps = 1 << po2;
             let domain = steps * INV_RATE;
             let code_size = TAPSET.group_size(REGISTER_GROUP_CODE);

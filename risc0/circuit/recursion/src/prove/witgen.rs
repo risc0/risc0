@@ -127,7 +127,7 @@ where
         // Add random noise to end of accum
         scope!("noise", {
             use risc0_zkp::ZK_CYCLES;
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let total_cycles = self.total_cycles as usize;
             let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.accum_size()];
             hal.eltwise_copy_elem_slice(

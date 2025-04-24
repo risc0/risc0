@@ -313,8 +313,8 @@ mod test {
 
     /// Build and return a random Merkle tree with 1028 u32 elements.
     fn random_merkle_tree() -> MerkleTree<u32> {
-        let item_count: usize = rand::thread_rng().gen_range((1 << 10)..(1 << 12));
-        let items: Vec<u32> = (0..item_count).map(|_| rand::thread_rng().gen()).collect();
+        let item_count: usize = rand::rng().random_range((1 << 10)..(1 << 12));
+        let items: Vec<u32> = (0..item_count).map(|_| rand::rng().random()).collect();
         MerkleTree::<u32>::new(items)
     }
 

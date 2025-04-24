@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use rand::seq::IndexedRandom as _;
+
 pub static WORDS: [&str; 775] = [
     "abate", "abbey", "abhor", "abide", "abort", "abuse", "abyss", "acorn", "actor", "acute",
     "adage", "adapt", "adept", "admit", "adopt", "adore", "adorn", "affix", "again", "agile",
@@ -94,6 +96,5 @@ pub static WORDS: [&str; 775] = [
 ];
 
 pub fn pick_word() -> &'static str {
-    use rand::seq::SliceRandom;
-    WORDS.choose(&mut rand::thread_rng()).unwrap()
+    WORDS.choose(&mut rand::rng()).unwrap()
 }

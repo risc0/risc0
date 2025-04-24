@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 password-checker-core = { path = "core" }
 password-checker-methods = { path = "methods" }
-rand = "0.8"
+rand = "0.9.1"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
 [features]

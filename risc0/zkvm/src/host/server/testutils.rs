@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 use core::mem;
 
 use crypto_bigint::{
-    rand_core::CryptoRngCore, CheckedMul, Encoding, NonZero, Random, RandomMod, U256, U512,
+    rand_core::RngCore, CheckedMul, Encoding, NonZero, Random, RandomMod, U256, U512,
 };
 use risc0_zkvm_platform::syscall::bigint;
 
@@ -54,9 +54,9 @@ impl BigIntTestCase {
         let z: U256 = if n == U256::ZERO {
             x.checked_mul(&y).unwrap()
         } else {
-            let (w_lo, w_hi) = x.mul_wide(&y);
+            let (w_lo, w_hi) = x.split_mul(&y);
             let w = w_hi.concat(&w_lo);
-            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
+            let z = w.rem(&NonZero::<U512>::new(n.resize()).unwrap());
             z.resize()
         };
 
@@ -67,7 +67,7 @@ impl BigIntTestCase {
     // test case generator. It is likely more important to test inputs of different
     // byte-lengths, with zero and 0xff bytes, and other boundary values than
     // testing values in the middle.
-    fn sample(rng: &mut impl CryptoRngCore) -> BigIntTestCase {
+    fn sample(rng: &mut impl RngCore) -> BigIntTestCase {
         let modulus = NonZero::<U256>::random(rng);
         let mut x = U256::random(rng);
         let mut y = U256::random_mod(rng, &modulus);
@@ -88,10 +88,7 @@ impl BigIntTestCase {
 
 /// Generate the test cases for the BigInt accelerator circuit that are applied
 /// to both the simulator and circuit implementations.
-pub fn generate_bigint_test_cases(
-    rng: &mut impl CryptoRngCore,
-    rand_count: usize,
-) -> Vec<BigIntTestCase> {
+pub fn generate_bigint_test_cases(rand_count: usize) -> Vec<BigIntTestCase> {
     let zero = [0, 0, 0, 0, 0, 0, 0, 0];
     let one = [1, 0, 0, 0, 0, 0, 0, 0];
 
@@ -123,6 +120,7 @@ pub fn generate_bigint_test_cases(
         },
     ];
 
-    cases.extend((0..rand_count).map(|_| BigIntTestCase::sample(rng)));
+    let mut rng = crypto_bigint::rand_core::OsRng;
+    cases.extend((0..rand_count).map(|_| BigIntTestCase::sample(&mut rng)));
     cases
 }

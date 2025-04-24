@@ -213,8 +213,8 @@ mod tests {
             }
         }
         if manipulate_proof {
-            let mut rng = rand::thread_rng();
-            let manip_idx = rng.gen::<usize>() % iop.proof.len();
+            let mut rng = rand::rng();
+            let manip_idx = rng.random_range(0..iop.proof.len());
             iop.proof[manip_idx] ^= 1;
         }
         let mut r_iop = ReadIOP::new(&iop.proof, rng);
@@ -282,10 +282,12 @@ mod tests {
         // Chooses random values of `rows`, `cols`, and `queries` such that:
         // `rows` is a power of 2
         // `cols` & `queries` have a wide distribution but tend to take small values
-        let mut rng = rand::thread_rng();
-        let rows = 1 << (rng.gen::<u8>() % 10);
-        let cols = (rng.gen::<usize>() % (1 << (rng.gen::<u8>() % 10))) + 1;
-        let queries = (rng.gen::<usize>() % (1 << (rng.gen::<u8>() % 10))) + 1;
+        let mut rng = rand::rng();
+        let rows = 1 << (rng.random_range(0..10));
+        let cols_po2 = rng.random_range(0..10);
+        let cols = (rng.random_range(0..(1 << cols_po2))) + 1;
+        let queries_po2 = rng.random_range(0..10);
+        let queries = (rng.random_range(0..(1 << queries_po2))) + 1;
         (rows, cols, queries)
     }
 
@@ -341,21 +343,21 @@ mod tests {
 
     #[test]
     fn merkle_cpu_4_4_2_bad_query() {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let queries = 2;
         // Test a complete verification with a bad query
-        let bad_query = rng.gen::<usize>() % queries;
+        let bad_query = rng.random_range(0..queries);
         possibly_bad_verify_all(4, 4, queries, bad_query, false);
     }
 
     #[test]
     fn merkle_cpu_randomized_bad_query() {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let (rows, cols, queries) = randomize_sizes();
         // At least two rows are required to test querying an incorrect row
         let rows = if rows == 1 { 2 } else { rows };
         // Test a complete verification with a bad query
-        let bad_query = rng.gen::<usize>() % queries;
+        let bad_query = rng.random_range(0..queries);
         possibly_bad_verify_all(rows, cols, queries, bad_query, false);
     }
 

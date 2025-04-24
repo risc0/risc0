@@ -321,7 +321,7 @@ impl MemoryTracker {
 mod testutil {
     use std::rc::Rc;
 
-    use rand::{thread_rng, RngCore};
+    use rand::RngCore;
     use risc0_core::field::{
         baby_bear::{BabyBearElem, BabyBearExtElem},
         Elem, ExtElem,
@@ -352,7 +352,7 @@ mod testutil {
     }
 
     pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
@@ -366,7 +366,7 @@ mod testutil {
     }
 
     pub(crate) fn batch_evaluate_any<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
@@ -387,7 +387,7 @@ mod testutil {
     }
 
     pub(crate) fn batch_expand_into_evaluate_ntt<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
@@ -404,7 +404,7 @@ mod testutil {
     }
 
     pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
@@ -418,7 +418,7 @@ mod testutil {
     }
 
     pub(crate) fn gather_sample<H: Hal>(hal: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let rows = 1000;
         let cols = 900;
         let idx = 400;
@@ -456,7 +456,7 @@ mod testutil {
             let o = hal_gpu.alloc_elem("o", *count);
             let mut golden = Vec::with_capacity(*count);
 
-            let mut rng = thread_rng();
+            let mut rng = rand::rng();
             a.view_mut(|a| {
                 b.view_mut(|b| {
                     assert_eq!(a.len(), b.len());
@@ -481,7 +481,7 @@ mod testutil {
     }
 
     pub(crate) fn eltwise_copy_elem<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         for count in COUNTS {
             let input = generate_elem(&hal_gpu, &mut rng, count);
             let output = hal_gpu.alloc_elem("output", count);
@@ -495,7 +495,7 @@ mod testutil {
     pub(crate) fn eltwise_sum_extelem<H: Hal>(hal_gpu: H) {
         const COUNT: usize = 1024 * 1024;
 
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
@@ -505,7 +505,7 @@ mod testutil {
     }
 
     pub(crate) fn fri_fold<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         for count in COUNTS {
@@ -520,7 +520,7 @@ mod testutil {
     }
 
     pub(crate) fn mix_poly_coeffs<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
@@ -551,7 +551,7 @@ mod testutil {
     pub(crate) fn hash_fold<H: Hal>(hal_gpu: H) {
         const INPUTS: usize = 1024;
         const OUTPUTS: usize = INPUTS / 2;
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         let io = hal.alloc_digest("io", INPUTS * 2);
@@ -573,7 +573,7 @@ mod testutil {
     }
 
     pub(crate) fn hash_rows<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         let rows = [1, 2, 3, 4, 10];
@@ -589,7 +589,7 @@ mod testutil {
     }
 
     pub(crate) fn slice<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
@@ -603,7 +603,7 @@ mod testutil {
     }
 
     pub(crate) fn zk_shift<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         let counts = [(1000, (1 << 8)), (900, (1 << 12))];

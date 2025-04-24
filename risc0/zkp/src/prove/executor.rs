@@ -15,7 +15,6 @@
 use core::cmp::max;
 
 use anyhow::Result;
-use rand::thread_rng;
 use rayon::prelude::*;
 use risc0_core::{
     field::{Elem, Field},
@@ -122,7 +121,7 @@ where
     }
 
     fn compute_verify(&mut self) {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let code_buf = self.code.as_slice_sync();
         let io_buf = self.io.as_slice_sync();
         let data_buf = self.data.as_slice_sync();

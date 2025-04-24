@@ -29,7 +29,7 @@ metal = { workspace = true }
 bytemuck = "1.12"
 cust = { version = "0.3", optional = true }
 lazy-regex = { version = "3.3", optional = true }
-rand = { version = "0.8", optional = true }
+rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
