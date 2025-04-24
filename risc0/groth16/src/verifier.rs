@@ -19,7 +19,7 @@ extern crate alloc;
 // use alloc::{vec, vec::Vec};
 use alloc::vec;
 
-use anyhow::{anyhow, Error, Result};
+use anyhow::{anyhow, Context, Error, Result};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
@@ -204,31 +204,31 @@ pub struct VerifyingKey(pub(crate) Vk);
 //     *S::hash_bytes(&buffer)
 // }
 
-fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Digest {
+fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Result<Digest> {
     let mut buffer = [0u8; 64];
     // TODO: Dereference is awkward, review architecture
-    let pt = substrate_bn::AffineG1::from_jacobian(*p).expect("Verifying key contains point at infinity and hence is invalid");
-    pt.y().to_big_endian(&mut buffer[0..32]).expect("Cannot fail when passed a 32 byte output buffer");
-    pt.x().to_big_endian(&mut buffer[32..64]).expect("Cannot fail when passed a 32 byte output buffer");
+    let pt = substrate_bn::AffineG1::from_jacobian(*p).context("Verifying key contains point at infinity and hence is invalid")?;
+    pt.y().to_big_endian(&mut buffer[0..32]).map_err(|e| anyhow!("{e:?}"))?;
+    pt.x().to_big_endian(&mut buffer[32..64]).map_err(|e| anyhow!("{e:?}"))?;
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
     //    > If this doesn't matter, drop the `buffer.reverse()`!
-    *S::hash_bytes(&buffer)
+    Ok(*S::hash_bytes(&buffer))
 }
 
-fn hash_g2_point<S: Sha256>(p: &substrate_bn::G2) -> Digest {
+fn hash_g2_point<S: Sha256>(p: &substrate_bn::G2) -> Result<Digest> {
     let mut buffer = [0u8; 128];
-    let pt = substrate_bn::AffineG2::from_jacobian(*p).expect("Verifying key contains point at infinity and hence is invalid");
-    pt.y().real().to_big_endian(&mut buffer[0..32]).expect("Cannot fail when passed a 32 byte output buffer");
-    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).expect("Cannot fail when passed a 32 byte output buffer");
-    pt.x().real().to_big_endian(&mut buffer[64..96]).expect("Cannot fail when passed a 32 byte output buffer");
-    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).expect("Cannot fail when passed a 32 byte output buffer");
+    let pt = substrate_bn::AffineG2::from_jacobian(*p).context("Verifying key contains point at infinity and hence is invalid")?;
+    pt.y().real().to_big_endian(&mut buffer[0..32]).map_err(|e| anyhow!("{e:?}"))?;
+    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).map_err(|e| anyhow!("{e:?}"))?;
+    pt.x().real().to_big_endian(&mut buffer[64..96]).map_err(|e| anyhow!("{e:?}"))?;
+    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).map_err(|e| anyhow!("{e:?}"))?;
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
     //    > If this doesn't matter, drop the `buffer.reverse()`!
-    *S::hash_bytes(&buffer)
+    Ok(*S::hash_bytes(&buffer))
 }
 
 // TODO: Presumably we need this somewhere?
@@ -238,13 +238,13 @@ impl Digestible for VerifyingKey {
         tagged_struct::<S>(
             "risc0_groth16.VerifyingKey",
             &[
-                hash_g1_point::<S>(&self.0.alpha_g1),
-                hash_g2_point::<S>(&self.0.beta_g2),
-                hash_g2_point::<S>(&self.0.gamma_g2),
-                hash_g2_point::<S>(&self.0.delta_g2),
+                hash_g1_point::<S>(&self.0.alpha_g1).unwrap(),
+                hash_g2_point::<S>(&self.0.beta_g2).unwrap(),
+                hash_g2_point::<S>(&self.0.gamma_g2).unwrap(),
+                hash_g2_point::<S>(&self.0.delta_g2).unwrap(),
                 tagged_iter::<S>(
                     "risc0_groth16.VerifyingKey.IC",
-                    self.0.gamma_abc_g1.iter().map(|p| hash_g1_point::<S>(p)),
+                    self.0.gamma_abc_g1.iter().map(|p| hash_g1_point::<S>(p).unwrap()),
                 ),
             ],
             &[],
