@@ -253,12 +253,12 @@ impl Serialize for Vk {
         S: serde::Serializer
     {
         let mut state = serializer.serialize_struct("Vk", 5)?;
-        state.serialize_field("alpha_g1", &G1data::from(self.alpha_g1))?;
-        state.serialize_field("beta_g2", &G2data::from(self.beta_g2))?;
-        state.serialize_field("gamma_g2", &G2data::from(self.gamma_g2))?;
-        state.serialize_field("delta_g2", &G2data::from(self.delta_g2))?;
+        state.serialize_field("alpha_g1", &G1data::try_from(self.alpha_g1).map_err(|e| serde::ser::Error::custom(e))?)?;
+        state.serialize_field("beta_g2", &G2data::try_from(self.beta_g2).map_err(|e| serde::ser::Error::custom(e))?)?;
+        state.serialize_field("gamma_g2", &G2data::try_from(self.gamma_g2).map_err(|e| serde::ser::Error::custom(e))?)?;
+        state.serialize_field("delta_g2", &G2data::try_from(self.delta_g2).map_err(|e| serde::ser::Error::custom(e))?)?;
         // TODO: This clone can probably be avoided
-        state.serialize_field("gamma_abc_g1", &G1dataVec::from(self.gamma_abc_g1.clone()))?;
+        state.serialize_field("gamma_abc_g1", &G1dataVec::try_from(self.gamma_abc_g1.clone()).map_err(|e| serde::ser::Error::custom(e))?)?;
         state.end()
     }
 }
@@ -334,11 +334,11 @@ impl<'de> Deserialize<'de> for Vk {
                 let gamma_abc_g1: G1dataVec = seq.next_element()?
                     .ok_or_else(|| serde::de::Error::invalid_length(4, &self))?;
                 Ok(Vk {
-                    alpha_g1: alpha_g1.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    beta_g2: beta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    gamma_g2: gamma_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    delta_g2: delta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    gamma_abc_g1: gamma_abc_g1.into(),
+                    alpha_g1: alpha_g1.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    beta_g2: beta_g2.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_g2: gamma_g2.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    delta_g2: delta_g2.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_abc_g1: gamma_abc_g1.try_into().map_err(|e| serde::de::Error::custom(e))?,
                 })
             }
 
@@ -391,11 +391,11 @@ impl<'de> Deserialize<'de> for Vk {
                 let delta_g2 = delta_g2.ok_or_else(|| serde::de::Error::missing_field("delta_g2"))?;
                 let gamma_abc_g1 = gamma_abc_g1.ok_or_else(|| serde::de::Error::missing_field("gamma_abc_g1"))?;
                 Ok(Vk {
-                    alpha_g1: alpha_g1.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    beta_g2: beta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    gamma_g2: gamma_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    delta_g2: delta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
-                    gamma_abc_g1: gamma_abc_g1.into(),
+                    alpha_g1: alpha_g1.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    beta_g2: beta_g2.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_g2: gamma_g2.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    delta_g2: delta_g2.try_into().map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_abc_g1: gamma_abc_g1.try_into().map_err(|e| serde::de::Error::custom(e))?,
                 })
             }
         }
@@ -409,23 +409,25 @@ impl<'de> Deserialize<'de> for Vk {
 #[derive(Serialize, Deserialize)]
 struct G1dataVec(Vec<G1data>);
 
-impl From<Vec<substrate_bn::G1>> for G1dataVec {
-    fn from(item: Vec<substrate_bn::G1>) -> Self {
+impl TryFrom<Vec<substrate_bn::G1>> for G1dataVec {
+    type Error = anyhow::Error;
+    fn try_from(item: Vec<substrate_bn::G1>) -> Result<Self, Error> {
         let mut res = G1dataVec(Vec::<G1data>::new());
         for val in item {
-            res.0.push(val.into());
+            res.0.push(val.try_into()?);
         }
-        res
+        Ok(res)
     }
 }
 
-impl From<G1dataVec> for Vec<substrate_bn::G1> {
-    fn from(item: G1dataVec) -> Self {
+impl TryFrom<G1dataVec> for Vec<substrate_bn::G1> {
+    type Error = anyhow::Error;
+    fn try_from(item: G1dataVec) -> Result<Self, Error> {
         let mut res = Vec::<substrate_bn::G1>::new();
         for val in item.0 {
-            res.push(val.try_into().unwrap());
+            res.push(val.try_into()?);
         }
-        res
+        Ok(res)
     }
 }
 
@@ -439,18 +441,19 @@ pub struct G1data([u8; 96]);
 impl G1data {
     /// one
     pub fn one() -> Self {
-        substrate_bn::G1::one().into()
+        G1data::try_from(substrate_bn::G1::one()).unwrap()
     }
 }
 
-impl From<substrate_bn::G1> for G1data {
-    fn from(item: substrate_bn::G1) -> Self {
+impl TryFrom<substrate_bn::G1> for G1data {
+    type Error = anyhow::Error;
+    fn try_from(item: substrate_bn::G1) -> Result<Self, Error> {
         // TODO: We could save space with a compressed representation
         let mut buf = [0u8; 96];
-        item.x().to_big_endian(&mut buf[0..32]).expect("output buffer is 32 bytes");
-        item.y().to_big_endian(&mut buf[32..64]).expect("output buffer is 32 bytes");
-        item.z().to_big_endian(&mut buf[64..96]).expect("output buffer is 32 bytes");
-        G1data(buf)
+        item.x().to_big_endian(&mut buf[0..32]).map_err(|e| anyhow!("{e:?}"))?;
+        item.y().to_big_endian(&mut buf[32..64]).map_err(|e| anyhow!("{e:?}"))?;
+        item.z().to_big_endian(&mut buf[64..96]).map_err(|e| anyhow!("{e:?}"))?;
+        Ok(G1data(buf))
     }
 }
 
@@ -533,17 +536,19 @@ impl<'de> Deserialize<'de> for G1data {
 // TODO: Helper struct for Vk serialization
 struct G2data([u8; 192]);
 
-impl From<substrate_bn::G2> for G2data {
-    fn from(item: substrate_bn::G2) -> Self {
+impl TryFrom<substrate_bn::G2> for G2data {
+    type Error = anyhow::Error;
+    fn try_from(item: substrate_bn::G2) -> Result<Self, Error> {
         // TODO: We could save space with a compressed representation
         let mut buf = [0u8; 192];
-        item.x().real().to_big_endian(&mut buf[0..32]).expect("output buffer is 32 bytes");
-        item.x().imaginary().to_big_endian(&mut buf[32..64]).expect("output buffer is 32 bytes");
-        item.y().real().to_big_endian(&mut buf[64..96]).expect("output buffer is 32 bytes");
-        item.y().imaginary().to_big_endian(&mut buf[96..128]).expect("output buffer is 32 bytes");
-        item.z().real().to_big_endian(&mut buf[128..160]).expect("output buffer is 32 bytes");
-        item.z().imaginary().to_big_endian(&mut buf[160..192]).expect("output buffer is 32 bytes");
-        G2data(buf)
+//            substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|e| anyhow!("{e:?}"))?,
+        item.x().real().to_big_endian(&mut buf[0..32]).map_err(|e| anyhow!("{e:?}"))?;
+        item.x().imaginary().to_big_endian(&mut buf[32..64]).map_err(|e| anyhow!("{e:?}"))?;
+        item.y().real().to_big_endian(&mut buf[64..96]).map_err(|e| anyhow!("{e:?}"))?;
+        item.y().imaginary().to_big_endian(&mut buf[96..128]).map_err(|e| anyhow!("{e:?}"))?;
+        item.z().real().to_big_endian(&mut buf[128..160]).map_err(|e| anyhow!("{e:?}"))?;
+        item.z().imaginary().to_big_endian(&mut buf[160..192]).map_err(|e| anyhow!("{e:?}"))?;
+        Ok(G2data(buf))
     }
 }
 
