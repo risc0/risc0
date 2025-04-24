@@ -12,7 +12,8 @@ release = false
 
 [dependencies]
 anyhow = { workspace = true }
-axum = "0.7"
+axum = "0.8.3"
+axum-extra = "0.10.1"
 bonsai-sdk = { workspace = true }
 clap = { workspace = true, features = ["env", "derive"] }
 risc0-zkvm = { workspace = true }

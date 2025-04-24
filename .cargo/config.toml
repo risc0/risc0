@@ -1,6 +1,6 @@
 [alias]
 risc0 = "run --bin cargo-risczero -- risczero"
-xfast = "run --package xtask --"
+xfast = "run --package xtask --no-default-features --"
 xtask = "run --package xtask --release --"
 
 [build]
