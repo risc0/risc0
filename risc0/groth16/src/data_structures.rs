@@ -729,7 +729,7 @@ pub(crate) struct Pvk {
 impl From<Vk> for Pvk {
     fn from(item: Vk) -> Self {
         Pvk {
-            alpha_g1_beta_g2: substrate_bn::pairing(item.alpha_g1.into(), item.beta_g2.into()),  // Note: `pairing` includes final exponentiation
+            alpha_g1_beta_g2: substrate_bn::pairing(item.alpha_g1, item.beta_g2),  // Note: `pairing` includes final exponentiation
             gamma_g2_neg_pc: -item.gamma_g2,
             delta_g2_neg_pc: -item.delta_g2,
             vk: item,

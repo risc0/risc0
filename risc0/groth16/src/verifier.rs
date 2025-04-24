@@ -165,8 +165,8 @@ impl Verifier {
             // TODO: more clones that are probably unnecessary...
             &[
                 (crate::g2_from_bytes(&self.proof.b)?, crate::g1_from_bytes(&self.proof.a)?),
-                (self.pvk.gamma_g2_neg_pc.clone().into(), self.prepared_inputs),
-                (self.pvk.delta_g2_neg_pc.clone().into(), crate::g1_from_bytes(&self.proof.c)?),
+                (self.pvk.gamma_g2_neg_pc.clone(), self.prepared_inputs),
+                (self.pvk.delta_g2_neg_pc.clone(), crate::g1_from_bytes(&self.proof.c)?),
             ]
         ).expect("TODO better error handling");
         let exponentiated = plain_result.final_exponentiation().ok_or_else(||anyhow!("Unexpected identity in final exponentiation step of verify"))?;
@@ -369,7 +369,7 @@ pub fn prepare_inputs(pvk: &Pvk, public_inputs: &[Fr]) -> Result<substrate_bn::G
     }
 
     // TODO: A whole bunch of cloning that I may be able to avoid with proper types initially
-    let mut res: substrate_bn::G1 = pvk.vk.gamma_abc_g1[0].clone().into();
+    let mut res: substrate_bn::G1 = pvk.vk.gamma_abc_g1[0].clone();
     for (inp, ic) in public_inputs.iter().zip(pvk.vk.gamma_abc_g1.iter().skip(1)) {
         res = res + substrate_bn::G1::from(ic.clone()) * inp.0;
     }
