@@ -168,7 +168,7 @@ impl Verifier {
                 (self.pvk.gamma_g2_neg_pc.clone(), self.prepared_inputs),
                 (self.pvk.delta_g2_neg_pc.clone(), crate::g1_from_bytes(&self.proof.c)?),
             ]
-        ).expect("TODO better error handling");
+        ).map_err(|e| anyhow!("{e:?}"))?;
         let exponentiated = plain_result.final_exponentiation().ok_or_else(||anyhow!("Unexpected identity in final exponentiation step of verify"))?;
         if exponentiated == self.pvk.alpha_g1_beta_g2 {
             Ok(())
