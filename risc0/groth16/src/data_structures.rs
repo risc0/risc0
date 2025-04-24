@@ -459,9 +459,9 @@ impl TryFrom<G1data> for substrate_bn::G1 {
     type Error = anyhow::Error;
     fn try_from(item: G1data) -> Result<Self, Error> {
         Ok(substrate_bn::G1::new(
-            substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|_| Error::msg("from_G1"))?,
-            substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|_| Error::msg("from_G1"))?,
-            substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|_| Error::msg("from_G1"))?,
+            substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|e| anyhow!("{e:?}"))?,
+            substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|e| anyhow!("{e:?}"))?,
+            substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|e| anyhow!("{e:?}"))?,
         ))
     }
 }
@@ -553,16 +553,16 @@ impl TryFrom<G2data> for substrate_bn::G2 {
     fn try_from(item: G2data) -> Result<Self, Error> {
         Ok(substrate_bn::G2::new(
             substrate_bn::Fq2::new(
-                substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|_| Error::msg("from_G2"))?,
-                substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|_| Error::msg("from_G2"))?,
+                substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|e| anyhow!("{e:?}"))?,
+                substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|e| anyhow!("{e:?}"))?,
             ),
             substrate_bn::Fq2::new(
-                substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|_| Error::msg("from_G2"))?,
-                substrate_bn::Fq::from_slice(&item.0[96..128]).map_err(|_| Error::msg("from_G2"))?,
+                substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|e| anyhow!("{e:?}"))?,
+                substrate_bn::Fq::from_slice(&item.0[96..128]).map_err(|e| anyhow!("{e:?}"))?,
             ),
             substrate_bn::Fq2::new(
-                substrate_bn::Fq::from_slice(&item.0[128..160]).map_err(|_| Error::msg("from_G2"))?,
-                substrate_bn::Fq::from_slice(&item.0[160..192]).map_err(|_| Error::msg("from_G2"))?,
+                substrate_bn::Fq::from_slice(&item.0[128..160]).map_err(|e| anyhow!("{e:?}"))?,
+                substrate_bn::Fq::from_slice(&item.0[160..192]).map_err(|e| anyhow!("{e:?}"))?,
             ),
         ))
     }
