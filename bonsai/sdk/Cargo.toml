@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-duplicate = "1.0"
+duplicate = "2.0.0"
 maybe-async = "0.2"
 reqwest = { version = "0.12", default-features = false, features = [
   "blocking",
@@ -17,7 +17,7 @@ reqwest = { version = "0.12", default-features = false, features = [
   "stream",
 ] }
 serde = { version = "1.0", features = ["derive"] }
-thiserror = "1.0"
+thiserror = "2.0.12"
 tokio = { version = "1", features = ["fs"], optional = true }
 
 [dev-dependencies]

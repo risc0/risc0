@@ -18,21 +18,25 @@ install = ["dep:reqwest", "dep:tar", "dep:xz", "dep:flate2", "dep:fs2"]
 
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"], optional = true }
-colored = { version = "2.2.0", optional = true }
+colored = { version = "3.0.0", optional = true }
 flate2 = { version = "1.0.35", optional = true }
 fs2 = { version = "0.4.3", optional = true }
 indicatif = { version = "0.17.9", optional = true }
 is-terminal = { version = "0.4.15", optional = true }
-reqwest = { version = "0.12.15", default-features = false, features = ["rustls-tls", "blocking", "json"], optional = true }
+reqwest = { version = "0.12.15", default-features = false, features = [
+  "rustls-tls",
+  "blocking",
+  "json",
+], optional = true }
 semver = "1.0.23"
 serde = { version = "1.0.215", features = ["derive"] }
-strum = { version = "0.26.3", features = ["derive"] }
+strum = { version = "0.27.1", features = ["derive"] }
 tar = { version = "0.4.43", optional = true }
 tempfile = "3.14.0"
 thiserror = "2.0.6"
 toml = "0.8.19"
 xz = { version = "0.1.0", optional = true }
-yaml-rust2 = "0.9.0"
+yaml-rust2 = "0.10.1"
 
 [dev-dependencies]
 http-body-util = "0.1.3"
