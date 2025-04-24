@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 
 // This code is automatically generated
 
+#include "extern.h"
 #include "ffi.h"
 #include "fp.h"
 
@@ -32,12 +33,10 @@ namespace risc0::circuit::recursion {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
+Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::array<Fp, 96> host_args;
-  std::array<Fp, 32> host_outs;
   // loc(unknown)
-  Fp x0(0);
+  constexpr Fp x0(0);
   return x0;
 }
 

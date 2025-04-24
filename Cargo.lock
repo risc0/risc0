@@ -5755,7 +5755,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "2.0.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5782,7 +5782,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "2.0.1"
+version = "3.0.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -8246,6 +8246,7 @@ dependencies = [
  "prost-build",
  "protobuf-src",
  "regex",
+ "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-core",
