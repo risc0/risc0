@@ -19,6 +19,7 @@
 fn main() {}
 
 #[cfg(target_os = "zkvm")]
+#[allow(static_mut_refs)]
 mod zkvm {
     use core::{
         arch::{asm, global_asm},
