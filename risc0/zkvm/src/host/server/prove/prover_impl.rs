@@ -78,12 +78,20 @@ impl ProverServer for ProverImpl {
         );
 
         let mut segments = Vec::new();
-        for segment_ref in session.segments.iter() {
+        for (i, segment_ref) in session.segments.iter().enumerate() {
             let segment = segment_ref.resolve()?;
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
-            segments.push(self.prove_segment(ctx, &segment)?);
+            let r = self.prove_segment(ctx, &segment)?;
+            let s = bincode::serialize(&r).unwrap();
+            std::fs::write(
+                format!("/home/remi/src/zeth/zeth_segment_receipts/receipt{i}.bin"),
+                s,
+            )
+            .unwrap();
+
+            segments.push(r);
             for hook in &session.hooks {
                 hook.on_post_prove_segment(&segment);
             }
