@@ -334,10 +334,10 @@ impl<'de> Deserialize<'de> for Vk {
                 let gamma_abc_g1: G1dataVec = seq.next_element()?
                     .ok_or_else(|| serde::de::Error::invalid_length(4, &self))?;
                 Ok(Vk {
-                    alpha_g1: alpha_g1.into(),
-                    beta_g2: beta_g2.into(),
-                    gamma_g2: gamma_g2.into(),
-                    delta_g2: delta_g2.into(),
+                    alpha_g1: alpha_g1.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
+                    beta_g2: beta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
+                    gamma_g2: gamma_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
+                    delta_g2: delta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
                     gamma_abc_g1: gamma_abc_g1.into(),
                 })
             }
@@ -391,10 +391,10 @@ impl<'de> Deserialize<'de> for Vk {
                 let delta_g2 = delta_g2.ok_or_else(|| serde::de::Error::missing_field("delta_g2"))?;
                 let gamma_abc_g1 = gamma_abc_g1.ok_or_else(|| serde::de::Error::missing_field("gamma_abc_g1"))?;
                 Ok(Vk {
-                    alpha_g1: alpha_g1.into(),
-                    beta_g2: beta_g2.into(),
-                    gamma_g2: gamma_g2.into(),
-                    delta_g2: delta_g2.into(),
+                    alpha_g1: alpha_g1.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
+                    beta_g2: beta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
+                    gamma_g2: gamma_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
+                    delta_g2: delta_g2.try_into().map_err(|e: anyhow::Error| serde::de::Error::custom(e))?,
                     gamma_abc_g1: gamma_abc_g1.into(),
                 })
             }
@@ -423,7 +423,7 @@ impl From<G1dataVec> for Vec<substrate_bn::G1> {
     fn from(item: G1dataVec) -> Self {
         let mut res = Vec::<substrate_bn::G1>::new();
         for val in item.0 {
-            res.push(val.into());
+            res.push(val.try_into().unwrap());
         }
         res
     }
@@ -454,14 +454,15 @@ impl From<substrate_bn::G1> for G1data {
     }
 }
 
-// TryFrom instead of unwrap possible but consumes more cycles (see groth16-tryfrom branch)
-impl From<G1data> for substrate_bn::G1 {
-    fn from(item: G1data) -> Self {
-        substrate_bn::G1::new(
-            substrate_bn::Fq::from_slice(&item.0[0..32]).unwrap(),
-            substrate_bn::Fq::from_slice(&item.0[32..64]).unwrap(),
-            substrate_bn::Fq::from_slice(&item.0[64..96]).unwrap(),
-        )
+// TODO
+impl TryFrom<G1data> for substrate_bn::G1 {
+    type Error = anyhow::Error;
+    fn try_from(item: G1data) -> Result<Self, Error> {
+        Ok(substrate_bn::G1::new(
+            substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|_| Error::msg("from_G1"))?,
+            substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|_| Error::msg("from_G1"))?,
+            substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|_| Error::msg("from_G1"))?,
+        ))
     }
 }
 
@@ -546,23 +547,24 @@ impl From<substrate_bn::G2> for G2data {
     }
 }
 
-// TryFrom instead of unwrap possible but consumes more cycles (see groth16-tryfrom branch)
-impl From<G2data> for substrate_bn::G2 {
-    fn from(item: G2data) -> Self {
-        substrate_bn::G2::new(
+// TODO
+impl TryFrom<G2data> for substrate_bn::G2 {
+    type Error = anyhow::Error;
+    fn try_from(item: G2data) -> Result<Self, Error> {
+        Ok(substrate_bn::G2::new(
             substrate_bn::Fq2::new(
-                substrate_bn::Fq::from_slice(&item.0[0..32]).unwrap(),
-                substrate_bn::Fq::from_slice(&item.0[32..64]).unwrap(),
+                substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|_| Error::msg("from_G2"))?,
+                substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|_| Error::msg("from_G2"))?,
             ),
             substrate_bn::Fq2::new(
-                substrate_bn::Fq::from_slice(&item.0[64..96]).unwrap(),
-                substrate_bn::Fq::from_slice(&item.0[96..128]).unwrap(),
+                substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|_| Error::msg("from_G2"))?,
+                substrate_bn::Fq::from_slice(&item.0[96..128]).map_err(|_| Error::msg("from_G2"))?,
             ),
             substrate_bn::Fq2::new(
-                substrate_bn::Fq::from_slice(&item.0[128..160]).unwrap(),
-                substrate_bn::Fq::from_slice(&item.0[160..192]).unwrap(),
+                substrate_bn::Fq::from_slice(&item.0[128..160]).map_err(|_| Error::msg("from_G2"))?,
+                substrate_bn::Fq::from_slice(&item.0[160..192]).map_err(|_| Error::msg("from_G2"))?,
             ),
-        )
+        ))
     }
 }
 
