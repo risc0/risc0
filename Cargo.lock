@@ -1575,11 +1575,10 @@ checksum = "43da5946c66ffcc7745f48db692ffbb10a83bfe0afd96235c5c2a4fb23994929"
 
 [[package]]
 name = "crypto-bigint"
-version = "0.6.1"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96272c2ff28b807e09250b180ad1fb7889a3258f7455759b5c3c58b719467130"
+checksum = "0dc92fb57ca44df6db8059111ab3af99a63d5d0f8375d9972e319a379c6bab76"
 dependencies = [
- "num-traits",
  "rand_core 0.6.4",
  "subtle",
 ]
@@ -3418,9 +3417,9 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "hex-literal"
-version = "1.0.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcaaec4551594c969335c98c903c1397853d4198408ea609190f420500f6be71"
+checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
 
 [[package]]
 name = "hmac"
@@ -5892,7 +5891,7 @@ dependencies = [
  "enum-iterator",
  "enum-map",
  "flate2",
- "getrandom 0.3.2",
+ "getrandom 0.2.16",
  "hex",
  "hotbench",
  "human-repr",

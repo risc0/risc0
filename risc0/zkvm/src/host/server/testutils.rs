@@ -15,7 +15,7 @@
 use core::mem;
 
 use crypto_bigint::{
-    rand_core::RngCore, CheckedMul, Encoding, NonZero, Random, RandomMod, U256, U512,
+    rand_core::CryptoRngCore, CheckedMul, Encoding, NonZero, Random, RandomMod, U256, U512,
 };
 use risc0_zkvm_platform::syscall::bigint;
 
@@ -54,9 +54,9 @@ impl BigIntTestCase {
         let z: U256 = if n == U256::ZERO {
             x.checked_mul(&y).unwrap()
         } else {
-            let (w_lo, w_hi) = x.split_mul(&y);
+            let (w_lo, w_hi) = x.mul_wide(&y);
             let w = w_hi.concat(&w_lo);
-            let z = w.rem(&NonZero::<U512>::new(n.resize()).unwrap());
+            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
             z.resize()
         };
 
@@ -67,7 +67,7 @@ impl BigIntTestCase {
     // test case generator. It is likely more important to test inputs of different
     // byte-lengths, with zero and 0xff bytes, and other boundary values than
     // testing values in the middle.
-    fn sample(rng: &mut impl RngCore) -> BigIntTestCase {
+    fn sample(rng: &mut impl CryptoRngCore) -> BigIntTestCase {
         let modulus = NonZero::<U256>::random(rng);
         let mut x = U256::random(rng);
         let mut y = U256::random_mod(rng, &modulus);

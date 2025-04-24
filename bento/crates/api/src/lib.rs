@@ -75,7 +75,7 @@ where
             }
         };
 
-        return Ok(ExtractApiKey(api_key_str.to_string()));
+        Ok(ExtractApiKey(api_key_str.to_string()))
     }
 }
 

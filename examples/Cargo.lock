@@ -49,7 +49,7 @@ version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "once_cell",
  "version_check",
 ]
@@ -745,7 +745,7 @@ version = "0.1.0"
 dependencies = [
  "c-kzg-core",
  "c-kzg-methods",
- "hex-literal 0.4.1",
+ "hex-literal",
  "risc0-zkvm",
 ]
 
@@ -1865,9 +1865,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.15"
+version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
+checksum = "335ff9f135e4384c8150d6f27c6daed433577f86b4750418338c01a1a2528592"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -2061,12 +2061,6 @@ name = "hex-literal"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
-
-[[package]]
-name = "hex-literal"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcaaec4551594c969335c98c903c1397853d4198408ea609190f420500f6be71"
 
 [[package]]
 name = "hmac"
@@ -3518,7 +3512,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2fe5ef3495d7d2e377ff17b1a8ce2ee2ec2a18cde8b6ad6619d65d0701c135d"
 dependencies = [
  "bytes",
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "rand 0.8.5",
  "ring",
  "rustc-hash",
@@ -3613,7 +3607,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
 ]
 
 [[package]]
@@ -3666,7 +3660,7 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd6f9d3d47bdd2ad6945c5015a226ec6155d0bcdfd8f7cd29f86b71f8de99d2b"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "libredox",
  "thiserror 2.0.12",
 ]
@@ -3797,7 +3791,7 @@ checksum = "70ac5d832aa16abd7d1def883a8545280c20a60f523a370aa3a9617c2b8550ee"
 dependencies = [
  "cc",
  "cfg-if",
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
@@ -4059,7 +4053,7 @@ dependencies = [
  "digest",
  "ff",
  "hex",
- "hex-literal 1.0.0",
+ "hex-literal",
  "metal",
  "ndarray",
  "parking_lot",
@@ -4090,7 +4084,7 @@ dependencies = [
  "derive_more 2.0.1",
  "elf",
  "enum-map",
- "getrandom 0.3.2",
+ "getrandom 0.2.16",
  "hex",
  "keccak",
  "lazy-regex",
@@ -4142,7 +4136,7 @@ version = "2.0.2"
 dependencies = [
  "bytemuck",
  "cfg-if",
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "getrandom 0.3.2",
  "libm",
  "stability",

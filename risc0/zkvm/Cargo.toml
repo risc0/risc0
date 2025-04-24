@@ -39,7 +39,7 @@ bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 derive_more = { version = "2.0.1", default-features = false, features = [
   "debug",
 ] }
-getrandom = "0.3.2"
+getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-binfmt = { workspace = true }
 risc0-circuit-keccak = { workspace = true }
@@ -105,7 +105,7 @@ tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
-crypto-bigint = { version = "0.6.1", default-features = false, features = [
+crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ] }
 enum-iterator = "2.1"
