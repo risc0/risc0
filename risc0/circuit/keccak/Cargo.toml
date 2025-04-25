@@ -38,6 +38,9 @@ risc0-circuit-keccak-methods = { path = "methods" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+[build-dependencies]
+xz2 = { version = "0.1", optional = true, features = ["static"] }
+
 [features]
 # Enables CUDA GPU support
 cuda = [
