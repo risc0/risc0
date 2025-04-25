@@ -48,7 +48,7 @@ risc0-bigint2 = { version = "1.4.2", default-features = false, path = "risc0/big
 risc0-binfmt = { version = "2.0.1", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "2.1.1", default-features = false, path = "risc0/build" }
 risc0-build-kernel = { version = "2.0.1", default-features = false, path = "risc0/build_kernel" }
-risc0-circuit-keccak = { version = "2.0.1", default-features = false, path = "risc0/circuit/keccak" }
+risc0-circuit-keccak = { version = "3.0.0", default-features = false, path = "risc0/circuit/keccak" }
 risc0-circuit-keccak-sys = { version = "2.0.1", default-features = false, path = "risc0/circuit/keccak-sys" }
 risc0-circuit-recursion = { version = "3.0.0", default-features = false, path = "risc0/circuit/recursion" }
 risc0-circuit-recursion-sys = { version = "3.0.0", default-features = false, path = "risc0/circuit/recursion-sys" }
@@ -60,7 +60,7 @@ risc0-r0vm = { version = "2.0.2", default-features = false, path = "risc0/r0vm" 
 risc0-sys = { version = "1.5.0", default-features = false, path = "risc0/sys" }
 risc0-zkp = { version = "2.1.0", default-features = false, path = "risc0/zkp" }
 risc0-zkos-v1compat = { version = "2.0.1", path = "risc0/zkos/v1compat" }
-risc0-zkvm = { version = "2.0.2", default-features = false, path = "risc0/zkvm" }
+risc0-zkvm = { version = "3.0.0", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "2.0.2", default-features = false, path = "risc0/zkvm/platform" }
 rzup = { version = "0.4.2", default-features = false, path = "rzup" }
 sppark = "0.1.11"

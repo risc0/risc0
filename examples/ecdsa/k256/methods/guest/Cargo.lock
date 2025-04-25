@@ -1065,7 +1065,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "2.0.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1167,7 +1167,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "borsh",
