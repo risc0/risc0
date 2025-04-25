@@ -1082,7 +1082,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bincode",
@@ -5878,7 +5878,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -5927,7 +5927,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.1.0"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -5960,7 +5960,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",

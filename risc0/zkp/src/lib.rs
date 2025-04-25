@@ -30,15 +30,6 @@ pub mod prove;
 pub mod taps;
 pub mod verify;
 
-#[cfg(not(feature = "prove"))]
-pub mod hal {
-    pub mod cpu {
-        use core::marker::PhantomData;
-        // TODO: Don't depend on SyncSlice in non-proving code.
-        pub struct SyncSlice<T>(PhantomData<T>);
-    }
-}
-
 pub use risc0_core::field;
 
 pub const MIN_CYCLES_PO2: usize = 13;
