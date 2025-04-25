@@ -17,7 +17,7 @@ use std::{io::Read, ops::Rem};
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
 use malachite::{
-    base::num::{arithmetic::traits::ModInverse, basic::traits::Zero},
+    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
     Integer, Natural,
 };
 use num_derive::FromPrimitive;
