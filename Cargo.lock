@@ -1073,7 +1073,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bincode",
@@ -5794,7 +5794,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
