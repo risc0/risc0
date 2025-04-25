@@ -21,7 +21,7 @@
 use anyhow::{anyhow, bail, Context as _, Result};
 use cargo_semver_checks::{Check, GlobalConfig, Rustdoc};
 use clap::Parser;
-use semver::Version;
+use semver::{Version, VersionReq};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr};
 use tempfile::tempdir;
@@ -255,7 +255,10 @@ fn compare_published_package_to_vendored_version(
     version: &Version,
     vendored_packages: &Path,
 ) -> Result<(), anyhow::Error> {
-    println!("Comparing {package} v{version} to crates.io version to see if it needs a patch version bump");
+    println!(
+        "Comparing {package} v{version} to crates.io version \
+        to see if it needs a patch version bump"
+    );
 
     // Have cargo package up the package for publishing
     run_command(
@@ -268,7 +271,10 @@ fn compare_published_package_to_vendored_version(
                 package,
             ])
             .current_dir(workspace_root),
-        &format!("failed to create publishable version of {package}"),
+        &format!(
+            "Failed to create publishable version of {package}. \
+            Patch version bump likely required."
+        ),
     )?;
     let published_crate = workspace_root.join(format!("target/package/{package}-{version}"));
 
@@ -295,30 +301,155 @@ fn compare_published_package_to_vendored_version(
             .arg(vendored_packages.join(package))
             .arg(published_crate),
         &format!(
-            "Differences found between published {package} and main. Patch version bump required."
+            "Differences found between published {package} and local version. \
+            Patch version bump required."
         ),
     )?;
 
     Ok(())
 }
 
+fn combine_errors(errors: Vec<anyhow::Error>, message: &str) -> Result<()> {
+    if errors.is_empty() {
+        return Ok(());
+    }
+
+    let div = std::iter::repeat("=")
+        .take(message.len() + 1)
+        .collect::<Vec<_>>()
+        .join("");
+    let mut message = format!("{div}\n{message}:\n{div}\n");
+    for (n, error) in errors.iter().enumerate() {
+        message += &format!("{}. {error}\n", n + 1);
+    }
+
+    bail!("{}", message);
+}
+
 /// Compare all the given packages with their crates.io versions to see if they differ
 fn check_for_patch_version_bump(
     workspace_root: &Path,
-    cargo_vendor: impl FnOnce(&Path) -> Result<()>,
+    vendored_packages: &Path,
     packages: &[(String, Version)],
 ) -> Result<()> {
-    let tempdir = tempdir().unwrap();
-    let vendored_packages = vendor_packages(cargo_vendor, &tempdir, packages)?;
-
+    let mut errors = vec![];
     for (package, version) in packages {
-        compare_published_package_to_vendored_version(
+        let res = compare_published_package_to_vendored_version(
             workspace_root,
             package,
             version,
-            &vendored_packages,
-        )?;
+            vendored_packages,
+        );
+
+        if let Err(error) = res {
+            errors.push(error);
+        }
     }
+
+    combine_errors(errors, "Patch version bump check issues")?;
+
+    Ok(())
+}
+
+/// XXX remi: This is a kind-of lame way of comparing these things.
+fn version_req_bumps_major(before: &VersionReq, after: &VersionReq) -> Result<bool> {
+    if before.comparators.len() != 1 || after.comparators.len() != 1 {
+        bail!("version requirement too complicated for current understanding");
+    }
+    for op in [before.comparators[0].op, after.comparators[0].op] {
+        if op != semver::Op::Caret {
+            bail!("version requirement uses unsupported operator: {op:?}");
+        }
+    }
+    Ok(before.comparators[0].major != after.comparators[0].major)
+}
+
+fn check_for_major_version_bump_due_to_version_req_in_single_package(
+    packages: &BTreeMap<String, cargo_metadata::Package>,
+    package_name: &str,
+    vendor_packages: &Path,
+) -> Result<()> {
+    println!(
+        "Comparing {package_name} dependencies with crates.io version dependencies \
+        to see if it needs a major version bump"
+    );
+
+    let current_package = packages
+        .get(package_name)
+        .ok_or_else(|| anyhow!("package {package_name} missing from workspace metadata"))?;
+
+    let baseline_metadata = cargo_metadata::MetadataCommand::new()
+        .current_dir(vendor_packages.join(package_name))
+        .exec()
+        .context("failed to run `cargo metadata`")?;
+    let baseline_package = baseline_metadata
+        .packages
+        .iter()
+        .find(|p| p.name == package_name)
+        .ok_or_else(|| anyhow!("vendored crate missing any package"))?;
+
+    let mut problem_deps = vec![];
+    for current_dep in &current_package.dependencies {
+        let current_dep_name = &current_dep.name;
+        if !packages.contains_key(current_dep_name) {
+            // only consider dependencies to other workspace crates
+            continue;
+        }
+
+        let Some(baseline_dep) = baseline_package
+            .dependencies
+            .iter()
+            .find(|dep| &dep.name == current_dep_name)
+        else {
+            // baseline package doesn't have this dependency
+            continue;
+        };
+
+        if version_req_bumps_major(&baseline_dep.req, &current_dep.req)
+            .with_context(|| format!("failed to parse version requirement for {package_name}"))?
+        {
+            problem_deps.push(format!(
+                "{current_dep_name}: {} -> {}",
+                baseline_dep.req, current_dep.req
+            ));
+        }
+    }
+
+    if !problem_deps.is_empty() {
+        bail!(
+            "Package {package_name} has a major change in version requirement in dependencies: {}",
+            problem_deps.join(", ")
+        );
+    }
+
+    Ok(())
+}
+
+/// Compare the given package's version requirements with their crates.io versions. If any of the
+/// packages have a bump of a version requirement for another risc0 crate, we need to make sure
+/// that crates has also had a major version bump.
+fn check_for_major_version_bump_due_to_version_req(
+    baseline_packages_without_major_version_bump: &Vec<String>,
+    packages: &BTreeMap<String, cargo_metadata::Package>,
+    vendor_packages: &Path,
+) -> Result<()> {
+    let mut errors = vec![];
+    for package_name in baseline_packages_without_major_version_bump {
+        let res = check_for_major_version_bump_due_to_version_req_in_single_package(
+            packages,
+            package_name,
+            vendor_packages,
+        );
+        if let Err(error) = res {
+            errors.push(error);
+        }
+    }
+
+    combine_errors(
+        errors,
+        "Major version bump version requirement change issues",
+    )?;
+
     Ok(())
 }
 
@@ -519,6 +650,22 @@ fn run_inner(
 
     write_semver_lock_file(workspace_root, &output_baselines)?;
 
+    let baseline_packages_without_major_version_bump = semver_output
+        .crate_versions
+        .iter()
+        .filter_map(|(name, versions)| {
+            (versions.current.major <= versions.baseline.major)
+                .then_some((name.clone(), versions.baseline.clone()))
+        })
+        .collect::<Vec<_>>();
+
+    let tempdir = tempdir().unwrap();
+    let vendored_packages = vendor_packages(
+        cargo_vendor,
+        &tempdir,
+        &baseline_packages_without_major_version_bump,
+    )?;
+
     let unbumped_packages: Vec<_> = semver_output
         .crate_versions
         .into_iter()
@@ -528,8 +675,17 @@ fn run_inner(
         .collect();
 
     if !unbumped_packages.is_empty() {
-        check_for_patch_version_bump(workspace_root, cargo_vendor, &unbumped_packages)?;
+        check_for_patch_version_bump(workspace_root, &vendored_packages, &unbumped_packages)?;
     }
+
+    check_for_major_version_bump_due_to_version_req(
+        &baseline_packages_without_major_version_bump
+            .into_iter()
+            .map(|(p, _)| p)
+            .collect(),
+        &packages,
+        &vendored_packages,
+    )?;
 
     Ok(())
 }
@@ -554,6 +710,7 @@ impl SemverChecks {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
 
     #[test]
     fn sermver_output_parsing() {
@@ -601,18 +758,30 @@ mod tests {
         assert_eq!(output, SemverOutput { crate_versions })
     }
 
-    fn write_cargo_toml(path: &Path, name: &str, version: &Version) {
-        std::fs::write(
-            path.join("Cargo.toml"),
-            format!(
-                "\
-                    [package]\n\
-                    name = \"{name}\"\n\
-                    version = \"{version}\"\n\
-                    "
-            ),
-        )
-        .unwrap();
+    fn write_cargo_toml(
+        path: &Path,
+        name: &str,
+        version: &Version,
+        dependencies: &HashMap<String, String>,
+    ) {
+        let mut contents = format!(
+            "\
+            [package]\n\
+            name = \"{name}\"\n\
+            version = \"{version}\"\n\
+            "
+        );
+        if !dependencies.is_empty() {
+            contents += &format!(
+                "[dependencies]\n{}",
+                dependencies
+                    .iter()
+                    .map(|(k, v)| format!("{k} = {v}\n"))
+                    .collect::<Vec<_>>()
+                    .join("")
+            )
+        }
+        std::fs::write(path.join("Cargo.toml"), contents).unwrap();
     }
 
     fn publish_baseline_crate(
@@ -659,51 +828,85 @@ mod tests {
         .unwrap();
     }
 
-    fn create_baseline(
-        tempdir: &tempfile::TempDir,
-        baseline_name: &str,
-        baseline_contents: &str,
-        baseline_version: Version,
-    ) {
+    struct CrateSpec {
+        name: String,
+        contents: String,
+        version: Version,
+        dependencies: HashMap<String, String>,
+    }
+
+    impl CrateSpec {
+        fn new(name: &str, contents: &str, version: Version) -> Self {
+            Self {
+                name: name.into(),
+                contents: contents.into(),
+                version,
+                dependencies: HashMap::new(),
+            }
+        }
+
+        fn with_dep(mut self, key: &str, value: &str) -> Self {
+            self.dependencies.insert(key.into(), value.into());
+            self
+        }
+    }
+
+    fn create_baseline(tempdir: &tempfile::TempDir, baseline_name: &str, crates: &[CrateSpec]) {
         std::fs::create_dir_all(tempdir.path().join(baseline_name)).unwrap();
         std::fs::write(
             tempdir.path().join(baseline_name).join("Cargo.toml"),
-            "
-            [workspace]
-            members = [\"foobar\"]
-            resolve = \"2\"
-            ",
+            format!(
+                "
+                [workspace]
+                members = [{}]
+                resolve = \"2\"
+                ",
+                crates
+                    .iter()
+                    .map(|c| format!("\"{}\"", &c.name))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         )
         .unwrap();
 
-        let baseline_foobar = tempdir.path().join(baseline_name).join("foobar");
-        std::fs::create_dir_all(baseline_foobar.join("src")).unwrap();
-        write_cargo_toml(&baseline_foobar, "foobar", &baseline_version);
-        std::fs::write(baseline_foobar.join("src/lib.rs"), baseline_contents).unwrap();
+        for c in crates {
+            let crate_path = tempdir.path().join(baseline_name).join(&c.name);
+            std::fs::create_dir_all(crate_path.join("src")).unwrap();
+            write_cargo_toml(&crate_path, &c.name, &c.version, &c.dependencies);
+            std::fs::write(crate_path.join("src/lib.rs"), &c.contents).unwrap();
+        }
 
-        publish_baseline_crate(tempdir, baseline_name, &baseline_version, "foobar");
+        for c in crates {
+            publish_baseline_crate(tempdir, baseline_name, &c.version, &c.name);
+        }
     }
 
-    fn create_current(
-        tempdir: &tempfile::TempDir,
-        current_contents: &str,
-        current_version: Version,
-    ) {
+    fn create_current(tempdir: &tempfile::TempDir, crates: &[CrateSpec]) {
         std::fs::create_dir_all(tempdir.path().join("current")).unwrap();
         std::fs::write(
             tempdir.path().join("current").join("Cargo.toml"),
-            "
-            [workspace]
-            members = [\"foobar\"]
-            resolve = \"2\"
-            ",
+            format!(
+                "
+                [workspace]
+                members = [{}]
+                resolve = \"2\"
+                ",
+                crates
+                    .iter()
+                    .map(|c| format!("\"{}\"", &c.name))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         )
         .unwrap();
 
-        let current_foobar = tempdir.path().join("current/foobar");
-        std::fs::create_dir_all(current_foobar.join("src")).unwrap();
-        write_cargo_toml(&current_foobar, "foobar", &current_version);
-        std::fs::write(current_foobar.join("src/lib.rs"), current_contents).unwrap();
+        for c in crates {
+            let crate_path = tempdir.path().join("current").join(&c.name);
+            std::fs::create_dir_all(crate_path.join("src")).unwrap();
+            write_cargo_toml(&crate_path, &c.name, &c.version, &c.dependencies);
+            std::fs::write(crate_path.join("src/lib.rs"), &c.contents).unwrap();
+        }
     }
 
     fn run_with_temp_dir(
@@ -739,7 +942,17 @@ mod tests {
                     std::fs::create_dir_all(d.join("vendor")).unwrap();
 
                     let dep_path = d.join("vendor").join(dep_name);
-                    std::fs::rename(published_baseline, &dep_path).unwrap();
+                    let cp_status = Command::new("cp")
+                        .arg("-r")
+                        .args([&published_baseline, &dep_path])
+                        .status()
+                        .unwrap();
+                    assert!(
+                        cp_status.success(),
+                        "cp -r {} {}: failed",
+                        published_baseline.display(),
+                        dep_path.display()
+                    );
                     std::fs::write(dep_path.join(".cargo-checksum.json"), "").unwrap();
                 }
 
@@ -757,10 +970,21 @@ mod tests {
         current_contents: &str,
         current_version: Version,
     ) -> Result<()> {
-        create_current(tempdir, current_contents, current_version);
+        create_current(
+            tempdir,
+            &[CrateSpec::new("foobar", current_contents, current_version)][..],
+        );
         let baseline_name = format!("baseline_{baseline_version}");
 
-        create_baseline(tempdir, &baseline_name, baseline_contents, baseline_version);
+        create_baseline(
+            tempdir,
+            &baseline_name,
+            &[CrateSpec::new(
+                "foobar",
+                baseline_contents,
+                baseline_version,
+            )],
+        );
         run_with_temp_dir(
             tempdir,
             &baseline_name,
@@ -795,7 +1019,11 @@ mod tests {
             )
             .unwrap_err()
             .to_string(),
-            "Differences found between published foobar and main. Patch version bump required."
+            "================================\n\
+             Patch version bump check issues:\n\
+             ================================\n\
+             1. Differences found between published foobar and local version. \
+                Patch version bump required.\n"
         );
     }
 
@@ -885,14 +1113,20 @@ mod tests {
     ) -> Result<()> {
         let tempdir = tempdir().unwrap();
 
-        create_current(&tempdir, current_contents, current_version);
+        create_current(
+            &tempdir,
+            &[CrateSpec::new("foobar", current_contents, current_version)][..],
+        );
 
         let baseline1_name = format!("baseline_{baseline1_version}");
         create_baseline(
             &tempdir,
             &baseline1_name,
-            baseline1_contents,
-            baseline1_version,
+            &[CrateSpec::new(
+                "foobar",
+                baseline1_contents,
+                baseline1_version,
+            )][..],
         );
 
         // Run once to populate the lock-file
@@ -910,8 +1144,11 @@ mod tests {
         create_baseline(
             &tempdir,
             &baseline2_name,
-            baseline2_contents,
-            baseline2_version,
+            &[CrateSpec::new(
+                "foobar",
+                baseline2_contents,
+                baseline2_version,
+            )][..],
         );
 
         run_with_temp_dir(&tempdir, &baseline2_name, update, locked)
@@ -1004,15 +1241,25 @@ mod tests {
     fn locked_fails_due_to_empty_lockfile() {
         let tempdir = tempdir().unwrap();
 
-        create_current(&tempdir, "pub fn foo() {}", Version::new(2, 0, 0));
+        create_current(
+            &tempdir,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo() {}",
+                Version::new(2, 0, 0),
+            )][..],
+        );
 
         let baseline1_version = Version::new(1, 0, 0);
         let baseline1_name = format!("baseline_{baseline1_version}");
         create_baseline(
             &tempdir,
             &baseline1_name,
-            "pub fn foo(_a: u32) {}",
-            baseline1_version,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo(_a: u32) {}",
+                baseline1_version,
+            )][..],
         );
 
         assert_eq!(
@@ -1032,15 +1279,25 @@ mod tests {
     fn add_new_crate() {
         let tempdir = tempdir().unwrap();
 
-        create_current(&tempdir, "pub fn foo() {}", Version::new(2, 0, 0));
+        create_current(
+            &tempdir,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo() {}",
+                Version::new(2, 0, 0),
+            )][..],
+        );
 
         let baseline1_version = Version::new(1, 0, 0);
         let baseline1_name = format!("baseline_{baseline1_version}");
         create_baseline(
             &tempdir,
             &baseline1_name,
-            "pub fn foo(_a: u32) {}",
-            baseline1_version,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo(_a: u32) {}",
+                baseline1_version,
+            )][..],
         );
 
         // Run once to populate the lock-file
@@ -1073,7 +1330,7 @@ mod tests {
 
         let current_baz = tempdir.path().join("current/baz");
         std::fs::create_dir_all(current_baz.join("src")).unwrap();
-        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0));
+        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0), &HashMap::new());
         std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
 
         run_with_temp_dir(
@@ -1089,15 +1346,25 @@ mod tests {
     fn update_with_new_crate() {
         let tempdir = tempdir().unwrap();
 
-        create_current(&tempdir, "pub fn foo() {}", Version::new(2, 0, 0));
+        create_current(
+            &tempdir,
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo() {}",
+                Version::new(2, 0, 0),
+            )][..],
+        );
 
         let baseline1_version = Version::new(1, 0, 0);
         let baseline1_name = format!("baseline_{baseline1_version}");
         create_baseline(
             &tempdir,
             &baseline1_name,
-            "pub fn foo(_a: u32) {}",
-            baseline1_version.clone(),
+            &[CrateSpec::new(
+                "foobar",
+                "pub fn foo(_a: u32) {}",
+                baseline1_version.clone(),
+            )][..],
         );
 
         // Run once to populate the lock-file
@@ -1130,7 +1397,7 @@ mod tests {
 
         let current_baz = tempdir.path().join("current/baz");
         std::fs::create_dir_all(current_baz.join("src")).unwrap();
-        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0));
+        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0), &HashMap::new());
         std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
 
         // create baseline version of baz
@@ -1146,7 +1413,7 @@ mod tests {
 
         let baseline_baz = tempdir.path().join(&baseline1_name).join("baz");
         std::fs::create_dir_all(baseline_baz.join("src")).unwrap();
-        write_cargo_toml(&baseline_baz, "baz", &baseline1_version);
+        write_cargo_toml(&baseline_baz, "baz", &baseline1_version, &HashMap::new());
         std::fs::write(baseline_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
 
         publish_baseline_crate(&tempdir, &baseline1_name, &baseline1_version, "baz");
@@ -1170,5 +1437,80 @@ mod tests {
             .versions
             .insert("baz".into(), Version::new(1, 0, 0).into());
         assert_eq!(baselines, expected);
+    }
+
+    fn dependency_version_check_test(serde_version: Version, baseline_has_dep: bool) -> Result<()> {
+        let tempdir = tempdir().unwrap();
+
+        create_current(
+            &tempdir,
+            &[
+                CrateSpec::new("foobar", "pub fn foo() {}", Version::new(1, 0, 1))
+                    .with_dep("syn", "\"2.0.0\"")
+                    .with_dep(
+                        "serde",
+                        &format!("{{ version = \"{serde_version}\", path = \"../serde\" }}"),
+                    ),
+                CrateSpec::new("serde", "pub fn baz() {}", serde_version),
+            ][..],
+        );
+
+        let baseline_version = Version::new(1, 0, 0);
+        let baseline_name = format!("baseline_{baseline_version}");
+
+        let mut baseline_foobar =
+            CrateSpec::new("foobar", "pub fn foo() {}", baseline_version.clone())
+                .with_dep("syn", "\"1.0.0\"");
+        if baseline_has_dep {
+            baseline_foobar =
+                baseline_foobar.with_dep("serde", "{ version = \"1.0.0\", path = \"../serde\" }");
+        }
+        create_baseline(
+            &tempdir,
+            &baseline_name,
+            &[
+                baseline_foobar,
+                CrateSpec::new("serde", "pub fn baz() {}", baseline_version),
+            ][..],
+        );
+
+        run_with_temp_dir(
+            &tempdir,
+            &baseline_name,
+            false, /* update */
+            false, /* locked */
+        )
+    }
+
+    #[test]
+    fn version_req_dependency_check_passes_patch_version_bump() {
+        dependency_version_check_test(Version::new(1, 0, 1), true /* baseline_has_dep */).unwrap();
+    }
+
+    #[test]
+    fn version_req_dependency_check_passes_minor_version_bump() {
+        dependency_version_check_test(Version::new(1, 1, 0), true /* baseline_has_dep */).unwrap();
+    }
+
+    #[test]
+    fn version_req_dependency_check_passes_major_version_bump_but_new_dependency() {
+        dependency_version_check_test(Version::new(2, 0, 0), false /* baseline_has_dep */).unwrap();
+    }
+
+    #[test]
+    fn version_req_dependency_check_fails() {
+        let err =
+            dependency_version_check_test(Version::new(2, 0, 0), true /* baseline_has_dep */)
+                .unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "\
+            =====================================================\n\
+            Major version bump version requirement change issues:\n\
+            =====================================================\n\
+            1. Package foobar has a major change in version requirement in dependencies\
+                : serde: ^1.0.0 -> ^2.0.0\n\
+            "
+        );
     }
 }
