@@ -122,7 +122,7 @@ risc0-circuit-keccak-methods = { path = "../circuit/keccak/methods" }
 risc0-zkvm-methods = { path = "methods", features = ["std"] }
 serde_json = "1.0"
 serde_with = "3.12"
-tabled = "0.18.0"
+tabled = "0.19.0"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
