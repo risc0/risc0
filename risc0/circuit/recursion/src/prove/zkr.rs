@@ -14,7 +14,7 @@
 
 use std::io::{Cursor, Read as _};
 
-use anyhow::{Context as _, Result};
+use anyhow::{bail, Context as _, Result};
 
 use super::Program;
 
@@ -48,9 +48,14 @@ fn extract_zkr(zip: &mut zip::ZipArchive<Cursor<&[u8]>>, name: &str) -> Result<V
     let mut f = zip
         .by_name(name)
         .with_context(|| format!("Failed to read {name}"))?;
+    let uncompressed_size = f.size() as usize;
 
-    let mut bytes = Vec::new();
-    f.read_to_end(&mut bytes)?;
+    if uncompressed_size % std::mem::size_of::<u32>() != 0 {
+        bail!(".zkr is incorrect size");
+    }
 
-    Ok(Vec::from(bytemuck::cast_slice(bytes.as_slice())))
+    let mut u32s = vec![0u32; uncompressed_size / std::mem::size_of::<u32>()];
+    f.read_exact(bytemuck::cast_slice_mut(&mut u32s[..]))?;
+
+    Ok(u32s)
 }

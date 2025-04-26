@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,25 +14,24 @@
 
 use std::io::Read as _;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_circuit_recursion::prove::Program;
 use xz2::read::XzDecoder;
 
 use crate::{KECCAK_PO2_RANGE, RECURSION_PO2};
 
-const ZKRS: &[&[u8]] = &[
-    include_bytes!("keccak_lift_14.zkr.xz"),
-    include_bytes!("keccak_lift_15.zkr.xz"),
-    include_bytes!("keccak_lift_16.zkr.xz"),
-    include_bytes!("keccak_lift_17.zkr.xz"),
-    include_bytes!("keccak_lift_18.zkr.xz"),
-];
+include!(concat!(env!("OUT_DIR"), "/zkr_table.rs"));
 
 pub fn get_keccak_zkr(po2: usize) -> Result<Program> {
     let idx = po2 - KECCAK_PO2_RANGE.min().unwrap();
-    let mut decoder = XzDecoder::new(ZKRS[idx]);
-    let mut bytes = vec![];
-    decoder.read_to_end(&mut bytes)?;
-    let u32s = bytemuck::cast_slice(&bytes);
-    Ok(Program::from_encoded(u32s, RECURSION_PO2))
+    let (xz_bytes, uncompressed_size) = ZKRS[idx];
+
+    if uncompressed_size % std::mem::size_of::<u32>() != 0 {
+        bail!(".zkr is incorrect size");
+    }
+
+    let mut decoder = XzDecoder::new(xz_bytes);
+    let mut u32s = vec![0u32; uncompressed_size / std::mem::size_of::<u32>()];
+    decoder.read_exact(bytemuck::cast_slice_mut(&mut u32s))?;
+    Ok(Program::from_encoded(&u32s, RECURSION_PO2))
 }
