@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO: Redo intro docs (see risc0/examples/groth16-verifier)
+
 //! # Groth16
 //!
 //! This library implements a verifier for the Groth16 protocol over the BN_254 elliptic curve.
@@ -62,18 +64,19 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
+// TODO: Clean dependencies
+
 extern crate alloc;
 
 use alloc::vec::Vec;
 use core::str::FromStr;
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::{G1Affine, G2Affine};
-use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
 
-mod data_structures;
+/// Temporarily `pub` for scaffolding for temporary test (TODO)
+pub mod data_structures;
 #[cfg(feature = "prove")]
 pub mod docker;
 #[cfg(feature = "prove")]
@@ -82,10 +85,10 @@ mod seal_format;
 mod seal_to_json;
 mod verifier;
 
-pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
+pub use data_structures::{Fr, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
 #[cfg(feature = "prove")]
 pub use seal_to_json::to_json;
-pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
+pub use verifier::{verifying_key, Verifier, VerifyingKey};
 
 /// Splits the digest in half returning a scalar for each halve.
 pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
@@ -93,8 +96,8 @@ pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
     let middle = big_endian.len() / 2;
     let (b, a) = big_endian.split_at(middle);
     Ok((
-        fr_from_bytes(&from_u256_hex(&hex::encode(a))?)?,
-        fr_from_bytes(&from_u256_hex(&hex::encode(b))?)?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(a))?).map_err(|_| anyhow!("TODO"))?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(b))?).map_err(|_| anyhow!("TODO"))?,
     ))
 }
 
@@ -103,46 +106,51 @@ pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
     fr_from_bytes(&from_u256_hex(val)?)
 }
 
-// Deserialize a scalar field from bytes in big-endian format
+/// Deserialize a scalar field element from bytes
+///
+/// Input bytes are interpretted as big-endian and in canonical (i.e. non-Montgomery) form
 pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
-    let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
-    ark_bn254::Fr::deserialize_uncompressed(&*scalar)
+    substrate_bn::Fr::from_slice(scalar)
         .map(Fr)
-        .map_err(|err| anyhow!(err))
+        .map_err(|_| anyhow!("TODO"))
 }
 
+// TODO: This is one of the places behavior has changed (both output type and expected input format)
 /// Deserialize an element over the G1 group from bytes in big-endian format
 #[stability::unstable]
-pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
+pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<substrate_bn::G1, Error> {
     if elem.len() != 2 {
         return Err(anyhow!("Malformed G1 field element"));
     }
-    let g1_affine: Vec<u8> = elem[0]
-        .iter()
-        .rev()
-        .chain(elem[1].iter().rev())
-        .cloned()
-        .collect();
-
-    G1Affine::deserialize_uncompressed(&*g1_affine).map_err(|err| anyhow!(err))
+    // TODO: Better error forwarding
+    let x = substrate_bn::Fq::from_slice(&elem[0]).map_err(|_| anyhow!("TODO"))?;
+    let y = substrate_bn::Fq::from_slice(&elem[1]).map_err(|_| anyhow!("TODO"))?;
+    // Note that AffineG1::new checks that the point is on the curve
+    // TODO: Is it more efficient to create new G1 directly?
+    Ok(substrate_bn::AffineG1::new(x, y)
+        .map_err(|_| anyhow!("TODO"))?
+        .into())
 }
 
+// TODO: This is one of the places behavior has changed (both output type and expected input format)
 /// Deserialize an element over the G2 group from bytes in big-endian format
 #[stability::unstable]
-pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
+pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<substrate_bn::G2, Error> {
     if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
         return Err(anyhow!("Malformed G2 field element"));
     }
-    let g2_affine: Vec<u8> = elem[0][1]
-        .iter()
-        .rev()
-        .chain(elem[0][0].iter().rev())
-        .chain(elem[1][1].iter().rev())
-        .chain(elem[1][0].iter().rev())
-        .cloned()
-        .collect();
-
-    G2Affine::deserialize_uncompressed(&*g2_affine).map_err(|err| anyhow!(err))
+    // TODO: Better error forwarding
+    let x_re = substrate_bn::Fq::from_slice(&elem[0][1]).map_err(|_| anyhow!("TODO"))?;
+    let x_im = substrate_bn::Fq::from_slice(&elem[0][0]).map_err(|_| anyhow!("TODO"))?;
+    let x = substrate_bn::Fq2::new(x_re, x_im);
+    let y_re = substrate_bn::Fq::from_slice(&elem[1][1]).map_err(|_| anyhow!("TODO"))?;
+    let y_im = substrate_bn::Fq::from_slice(&elem[1][0]).map_err(|_| anyhow!("TODO"))?;
+    let y = substrate_bn::Fq2::new(y_re, y_im);
+    // Note that AffineG2::new checks that the point is on the curve and in the subgroup
+    // TODO: Is it more efficient to create new G2 directly?
+    Ok(substrate_bn::AffineG2::new(x, y)
+        .map_err(|_| anyhow!("TODO"))?
+        .into())
 }
 
 // Convert the U256 value to a byte array in big-endian format

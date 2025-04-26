@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO: Clean up imports
+
 use alloc::vec::Vec;
 
 use anyhow::Result;
@@ -91,6 +93,7 @@ where
             .map_err(|_| VerificationError::ReceiptFormatError)?;
         let mut id_bn554: Digest = params.bn254_control_id;
         id_bn554.as_mut_bytes().reverse();
+
         let id_bn254_fr = fr_from_hex_string(&hex::encode(id_bn554))
             .map_err(|_| VerificationError::ReceiptFormatError)?;
         Verifier::new(

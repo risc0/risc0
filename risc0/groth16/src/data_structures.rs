@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//#![allow(missing_docs)]
+
 extern crate alloc;
 
 use alloc::{string::String, vec, vec::Vec};
+use core::fmt;
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::Bn254;
-use core::str::FromStr;
-use serde::{Deserialize, Serialize};
+// TODO
+use risc0_binfmt::{tagged_struct, Digestible};
+use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
+use serde::{
+    ser::{SerializeSeq, SerializeStruct},
+    Deserialize, Serialize,
+};
+use substrate_bn::Group;
 
-use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
 
 /// Groth16 seal object encoded in big endian.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -219,13 +227,619 @@ impl VerifyingKeyJson {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(VerifyingKey(ark_groth16::VerifyingKey::<Bn254> {
+        Ok(VerifyingKey(Vk {
             alpha_g1,
             beta_g2,
             gamma_g2,
             delta_g2,
             gamma_abc_g1,
         }))
+    }
+}
+
+/// A groth16 verification key (TODO)
+///
+/// A verification key. It needs to be prepared into a [Pvk] before use. (TODO)
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct Vk {
+    // TODO: better pattern for access?
+    pub(crate) alpha_g1: substrate_bn::G1,
+    pub(crate) beta_g2: substrate_bn::G2,
+    pub(crate) gamma_g2: substrate_bn::G2,
+    pub(crate) delta_g2: substrate_bn::G2,
+    pub(crate) gamma_abc_g1: Vec<substrate_bn::G1>,
+}
+
+impl Serialize for Vk {
+    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_struct("Vk", 5)?;
+        state.serialize_field(
+            "alpha_g1",
+            &G1data::try_from(self.alpha_g1).map_err(|e| serde::ser::Error::custom(e))?,
+        )?;
+        state.serialize_field(
+            "beta_g2",
+            &G2data::try_from(self.beta_g2).map_err(|e| serde::ser::Error::custom(e))?,
+        )?;
+        state.serialize_field(
+            "gamma_g2",
+            &G2data::try_from(self.gamma_g2).map_err(|e| serde::ser::Error::custom(e))?,
+        )?;
+        state.serialize_field(
+            "delta_g2",
+            &G2data::try_from(self.delta_g2).map_err(|e| serde::ser::Error::custom(e))?,
+        )?;
+        // TODO: This clone can probably be avoided
+        state.serialize_field(
+            "gamma_abc_g1",
+            &G1dataVec::try_from(self.gamma_abc_g1.clone())
+                .map_err(|e| serde::ser::Error::custom(e))?,
+        )?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Vk {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        enum Field {
+            AlphaG1,
+            BetaG2,
+            GammaG2,
+            DeltaG2,
+            GammaABCG1,
+        }
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> serde::de::Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                        formatter.write_str(
+                            "`alpha_g1`, `beta_g2`, `gamma_g2`, `delta_g2`, or `gamma_abc_g1`",
+                        )
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "alpha_g1" => Ok(Field::AlphaG1),
+                            "beta_g2" => Ok(Field::BetaG2),
+                            "gamma_g2" => Ok(Field::GammaG2),
+                            "delta_g2" => Ok(Field::DeltaG2),
+                            "gamma_abc_g1" => Ok(Field::GammaABCG1),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct VkVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for VkVisitor {
+            type Value = Vk;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                // TODO: might be nicer message?
+                formatter.write_str("struct Vk")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let alpha_g1: G1data = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let beta_g2: G2data = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                let gamma_g2: G2data = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
+                let delta_g2: G2data = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(3, &self))?;
+                let gamma_abc_g1: G1dataVec = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(4, &self))?;
+                Ok(Vk {
+                    alpha_g1: alpha_g1
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    beta_g2: beta_g2
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_g2: gamma_g2
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    delta_g2: delta_g2
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_abc_g1: gamma_abc_g1
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                })
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::MapAccess<'de>,
+            {
+                let mut alpha_g1: Option<G1data> = None;
+                let mut beta_g2: Option<G2data> = None;
+                let mut gamma_g2: Option<G2data> = None;
+                let mut delta_g2: Option<G2data> = None;
+                let mut gamma_abc_g1: Option<G1dataVec> = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::AlphaG1 => {
+                            if alpha_g1.is_some() {
+                                return Err(serde::de::Error::duplicate_field("alpha_g1"));
+                            }
+                            alpha_g1 = Some(map.next_value()?);
+                        }
+                        Field::BetaG2 => {
+                            if beta_g2.is_some() {
+                                return Err(serde::de::Error::duplicate_field("beta_g2"));
+                            }
+                            beta_g2 = Some(map.next_value()?);
+                        }
+                        Field::GammaG2 => {
+                            if gamma_g2.is_some() {
+                                return Err(serde::de::Error::duplicate_field("gamma_g2"));
+                            }
+                            gamma_g2 = Some(map.next_value()?);
+                        }
+                        Field::DeltaG2 => {
+                            if delta_g2.is_some() {
+                                return Err(serde::de::Error::duplicate_field("delta_g2"));
+                            }
+                            delta_g2 = Some(map.next_value()?);
+                        }
+                        Field::GammaABCG1 => {
+                            if gamma_abc_g1.is_some() {
+                                return Err(serde::de::Error::duplicate_field("gamma_abc_g1"));
+                            }
+                            gamma_abc_g1 = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let alpha_g1 =
+                    alpha_g1.ok_or_else(|| serde::de::Error::missing_field("alpha_g1"))?;
+                let beta_g2 = beta_g2.ok_or_else(|| serde::de::Error::missing_field("beta_g2"))?;
+                let gamma_g2 =
+                    gamma_g2.ok_or_else(|| serde::de::Error::missing_field("gamma_g2"))?;
+                let delta_g2 =
+                    delta_g2.ok_or_else(|| serde::de::Error::missing_field("delta_g2"))?;
+                let gamma_abc_g1 =
+                    gamma_abc_g1.ok_or_else(|| serde::de::Error::missing_field("gamma_abc_g1"))?;
+                Ok(Vk {
+                    alpha_g1: alpha_g1
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    beta_g2: beta_g2
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_g2: gamma_g2
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    delta_g2: delta_g2
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                    gamma_abc_g1: gamma_abc_g1
+                        .try_into()
+                        .map_err(|e| serde::de::Error::custom(e))?,
+                })
+            }
+        }
+        const FIELDS: &[&str] = &[
+            "alpha_g1",
+            "beta_g2",
+            "gamma_g2",
+            "delta_g2",
+            "gamma_abc_g1",
+        ];
+        deserializer.deserialize_struct("Vk", FIELDS, VkVisitor)
+    }
+}
+
+// TODO: Helper struct for Vk serialization
+// TODO: I don't think this is as efficient of a design as it could be
+#[derive(Serialize, Deserialize)]
+struct G1dataVec(Vec<G1data>);
+
+impl TryFrom<Vec<substrate_bn::G1>> for G1dataVec {
+    type Error = anyhow::Error;
+    fn try_from(item: Vec<substrate_bn::G1>) -> Result<Self, Error> {
+        let mut res = G1dataVec(Vec::<G1data>::new());
+        for val in item {
+            res.0.push(val.try_into()?);
+        }
+        Ok(res)
+    }
+}
+
+impl TryFrom<G1dataVec> for Vec<substrate_bn::G1> {
+    type Error = anyhow::Error;
+    fn try_from(item: G1dataVec) -> Result<Self, Error> {
+        let mut res = Vec::<substrate_bn::G1>::new();
+        for val in item.0 {
+            res.push(val.try_into()?);
+        }
+        Ok(res)
+    }
+}
+
+/// TODO: Temporarily `pub` as scaffolding for some temporary tests
+// TODO: Helper struct for Vk serialization
+// TODO: Not sure I need any of these traits, but nice for testing
+#[derive(Debug, Eq, PartialEq)]
+pub struct G1data([u8; 96]);
+
+// TODO: Temporary, just for some temporary tests
+impl G1data {
+    /// one
+    pub fn one() -> Self {
+        G1data::try_from(substrate_bn::G1::one()).unwrap()
+    }
+}
+
+impl TryFrom<substrate_bn::G1> for G1data {
+    type Error = anyhow::Error;
+    fn try_from(item: substrate_bn::G1) -> Result<Self, Error> {
+        // TODO: We could save space with a compressed representation
+        let mut buf = [0u8; 96];
+        item.x()
+            .to_big_endian(&mut buf[0..32])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        item.y()
+            .to_big_endian(&mut buf[32..64])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        item.z()
+            .to_big_endian(&mut buf[64..96])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        Ok(G1data(buf))
+    }
+}
+
+// TODO
+impl TryFrom<G1data> for substrate_bn::G1 {
+    type Error = anyhow::Error;
+    fn try_from(item: G1data) -> Result<Self, Error> {
+        Ok(substrate_bn::G1::new(
+            substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|e| anyhow!("{e:?}"))?,
+            substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|e| anyhow!("{e:?}"))?,
+            substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|e| anyhow!("{e:?}"))?,
+        ))
+    }
+}
+
+impl Serialize for G1data {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // serializer.serialize_bytes(&self.0)  // TODO: can only use if `visit_bytes` works
+        // TODO: Deprecate below code and replace with above once `serde_bytes` works
+        let mut seq = serializer.serialize_seq(Some(96))?;
+        for val in self.0 {
+            seq.serialize_element(&val)?;
+        }
+        seq.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for G1data {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct G1dataVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for G1dataVisitor {
+            type Value = G1data;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                // TODO: might be nicer message?
+                formatter.write_str("struct G1data")
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                // TODO: This doesn't get called, and I'm not clear how to use serde_bytes in this context to address that
+                Ok(G1data(v.try_into().map_err(|_| {
+                    serde::de::Error::invalid_length(v.len(), &"96 bytes")
+                })?))
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::SeqAccess<'de>,
+            {
+                // TODO: I would rather use `visit_bytes`, but that requires figuring out the `serde_bytes` crate
+                let mut pos = 0usize;
+                let mut data = G1data([0u8; 96]);
+                for val in data.0.iter_mut() {
+                    *val = seq
+                        .next_element()?
+                        .ok_or_else(|| serde::de::Error::invalid_length(pos, &"96 bytes"))?;
+                    pos += 1;
+                }
+                match seq.next_element::<u8>()?.is_none() {
+                    true => Ok(data),
+                    // TODO: Cleaner error
+                    false => Err(serde::de::Error::invalid_length(
+                        97,
+                        &"96 bytes (note: all lengths above 96 bytes are reported as 97 bytes)",
+                    )),
+                }
+            }
+        }
+        deserializer.deserialize_seq(G1dataVisitor)
+    }
+}
+
+// TODO: Helper struct for Vk serialization
+struct G2data([u8; 192]);
+
+impl TryFrom<substrate_bn::G2> for G2data {
+    type Error = anyhow::Error;
+    fn try_from(item: substrate_bn::G2) -> Result<Self, Error> {
+        // TODO: We could save space with a compressed representation
+        let mut buf = [0u8; 192];
+        //            substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|e| anyhow!("{e:?}"))?,
+        item.x()
+            .real()
+            .to_big_endian(&mut buf[0..32])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        item.x()
+            .imaginary()
+            .to_big_endian(&mut buf[32..64])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        item.y()
+            .real()
+            .to_big_endian(&mut buf[64..96])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        item.y()
+            .imaginary()
+            .to_big_endian(&mut buf[96..128])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        item.z()
+            .real()
+            .to_big_endian(&mut buf[128..160])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        item.z()
+            .imaginary()
+            .to_big_endian(&mut buf[160..192])
+            .map_err(|e| anyhow!("{e:?}"))?;
+        Ok(G2data(buf))
+    }
+}
+
+// TODO
+impl TryFrom<G2data> for substrate_bn::G2 {
+    type Error = anyhow::Error;
+    fn try_from(item: G2data) -> Result<Self, Error> {
+        Ok(substrate_bn::G2::new(
+            substrate_bn::Fq2::new(
+                substrate_bn::Fq::from_slice(&item.0[0..32]).map_err(|e| anyhow!("{e:?}"))?,
+                substrate_bn::Fq::from_slice(&item.0[32..64]).map_err(|e| anyhow!("{e:?}"))?,
+            ),
+            substrate_bn::Fq2::new(
+                substrate_bn::Fq::from_slice(&item.0[64..96]).map_err(|e| anyhow!("{e:?}"))?,
+                substrate_bn::Fq::from_slice(&item.0[96..128]).map_err(|e| anyhow!("{e:?}"))?,
+            ),
+            substrate_bn::Fq2::new(
+                substrate_bn::Fq::from_slice(&item.0[128..160]).map_err(|e| anyhow!("{e:?}"))?,
+                substrate_bn::Fq::from_slice(&item.0[160..192]).map_err(|e| anyhow!("{e:?}"))?,
+            ),
+        ))
+    }
+}
+
+impl Serialize for G2data {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // serializer.serialize_bytes(&self.0)  // TODO: can only use if `visit_bytes` works
+        // TODO: Deprecate below code and replace with above once `serde_bytes` works
+        let mut seq = serializer.serialize_seq(Some(192))?;
+        for val in self.0 {
+            seq.serialize_element(&val)?;
+        }
+        seq.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for G2data {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct G2dataVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for G2dataVisitor {
+            type Value = G2data;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                // TODO: might be nicer message?
+                formatter.write_str("struct G2data")
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                // TODO: This doesn't get called, and I'm not clear how to use serde_bytes in this context to address that
+                Ok(G2data(v.try_into().map_err(|_| {
+                    serde::de::Error::invalid_length(v.len(), &"192 bytes")
+                })?))
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::SeqAccess<'de>,
+            {
+                // TODO: I would rather use `visit_bytes`, but that requires figuring out the `serde_bytes` crate
+                let mut pos = 0usize;
+                let mut data = G2data([0u8; 192]);
+                for val in data.0.iter_mut() {
+                    *val = seq
+                        .next_element()?
+                        .ok_or_else(|| serde::de::Error::invalid_length(pos, &"192 bytes"))?;
+                    pos += 1;
+                }
+                match seq.next_element::<u8>()?.is_none() {
+                    true => Ok(data),
+                    // TODO: Cleaner error
+                    false => Err(serde::de::Error::invalid_length(
+                        193,
+                        &"192 bytes (note: all lengths above 192 bytes are reported as 193 bytes)",
+                    )),
+                }
+            }
+        }
+        deserializer.deserialize_seq(G2dataVisitor)
+    }
+}
+
+// TODO: Verify here (and other places I added `Eq` that we want the traits and they're correct)
+// (Not here, but on the G* types, for instance, are there different projective representations?)
+/// Verifying key for Groth16 proofs.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Fr(pub(crate) substrate_bn::Fr);
+
+impl Fr {
+    #[stability::unstable]
+    pub fn substrate_fr(&self) -> substrate_bn::Fr {
+        self.0
+    }
+}
+
+impl Serialize for Fr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut bytes = [0u8; 32];
+        // Note: Must do `into_u256().to_big_endian()` and not just `.to_big_endian()` because the
+        // latter writes in Montgomery form, and both `from_slice` and `new` expect canonical form
+        self.0
+            .into_u256()
+            .to_big_endian(&mut bytes)
+            .expect("Only fails if output buffer isn't 32 bytes");
+        // serializer.serialize_bytes(&bytes)  // TODO: can only use if `visit_bytes` works
+        // TODO: Deprecate below code and replace with above once `serde_bytes` works
+        let mut seq = serializer.serialize_seq(Some(32))?;
+        for val in bytes {
+            seq.serialize_element(&val)?;
+        }
+        seq.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Fr {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct FrVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for FrVisitor {
+            type Value = Fr;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                // TODO: might be nicer message?
+                formatter.write_str("struct Fr")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::SeqAccess<'de>,
+            {
+                // TODO: I would rather use `visit_bytes`, but that requires figuring out the `serde_bytes` crate
+                let mut pos = 0usize;
+                let mut data = [0u8; 32];
+                for val in data.iter_mut() {
+                    *val = seq
+                        .next_element()?
+                        .ok_or_else(|| serde::de::Error::invalid_length(pos, &"32 bytes"))?;
+                    pos += 1;
+                }
+                match seq.next_element::<u8>()?.is_none() {
+                    true => Ok(Fr(substrate_bn::Fr::from_slice(&data)
+                        .expect("Only fails if input buffer isn't 32 bytes"))),
+                    // TODO: Cleaner error
+                    false => Err(serde::de::Error::invalid_length(
+                        33,
+                        &"32 bytes (note: all lengths above 32 bytes are reported as 33 bytes)",
+                    )),
+                }
+            }
+        }
+        deserializer.deserialize_seq(FrVisitor)
+    }
+}
+
+// TODO: Add a test for this?
+impl Digestible for Fr {
+    /// Compute a tagged hash of the [Fr] value.
+    fn digest<S: Sha256>(&self) -> Digest {
+        let mut buffer = [0u8; 32];
+        self.0
+            .into_u256()
+            .to_big_endian(&mut buffer)
+            .expect("can't fail if output buffer is 32 bytes");
+        // TODO: Do we need the exact same digests as before? If so, figure out further what if any changes are needed
+        tagged_struct::<S>(
+            "risc0_groth16.Fr",
+            &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
+            &[],
+        )
+    }
+}
+
+/// A prepared groth16 verification key (TODO)
+///
+/// TODO: Note that status quo this doesn't contain the original verification key and so can't be regenerated
+#[derive(Clone)]
+pub(crate) struct Pvk {
+    // TODO: better pattern for access?
+    pub(crate) vk: Vk,
+    pub(crate) alpha_g1_beta_g2: substrate_bn::Gt,
+    pub(crate) gamma_g2_neg_pc: substrate_bn::G2,
+    pub(crate) delta_g2_neg_pc: substrate_bn::G2,
+}
+
+impl From<Vk> for Pvk {
+    fn from(item: Vk) -> Self {
+        Pvk {
+            // Note: `pairing` includes final exponentiation
+            alpha_g1_beta_g2: substrate_bn::pairing(item.alpha_g1, item.beta_g2),
+            gamma_g2_neg_pc: -item.gamma_g2,
+            delta_g2_neg_pc: -item.delta_g2,
+            vk: item,
+        }
     }
 }
 
@@ -238,13 +852,13 @@ pub struct PublicInputsJson {
 
 impl PublicInputsJson {
     /// Converts public inputs to scalars over the field of the G1/G2 groups.
-    pub fn to_scalar(&self) -> Result<Vec<Fr>, Error> {
+    pub fn to_scalar(&self) -> Result<Vec<crate::Fr>, Error> {
         self.values
             .iter()
             .map(|input| {
-                ark_bn254::Fr::from_str(input)
-                    .map(Fr)
-                    .map_err(|_| anyhow!("Failed to decode 'public inputs' values"))
+                substrate_bn::Fr::from_str(input)
+                    .ok_or_else(|| anyhow!("Failed to decode 'public inputs' values"))
+                    .map(crate::Fr)
             })
             .collect()
     }
@@ -253,6 +867,8 @@ impl PublicInputsJson {
 #[cfg(test)]
 mod tests {
     use super::*;
+    // TODO
+    use substrate_bn::Group;
 
     #[test]
     fn test_proof_deserialization() {
@@ -393,6 +1009,60 @@ mod tests {
         assert_eq!(vk.protocol, "groth16");
         assert_eq!(vk.curve, "bn128");
         assert_eq!(vk.n_public, 1);
-        vk.verifying_key().unwrap();
+        let vk = vk.verifying_key().unwrap();
+
+        // Now test serde roundtrip
+        let serialized = serde_json::to_string(&vk).unwrap();
+        let roundtripped_vk: VerifyingKey = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(roundtripped_vk, vk);
+
+        // Verifying that a manipulated version doesn't match the roundtrip
+        let mut vk_manipulated = vk.clone();
+        vk_manipulated.0.beta_g2 = vk_manipulated.0.beta_g2 + substrate_bn::G2::one();
+        assert_ne!(roundtripped_vk, vk_manipulated);
+
+        // Now test serde w/ postcard roundtrip
+        // postcard exercises the `visit_seq` path of deserialization
+        let serialized = postcard::to_allocvec(&vk).unwrap();
+        let roundtripped_vk: VerifyingKey = postcard::from_bytes(&serialized).unwrap();
+        assert_eq!(roundtripped_vk, vk);
+    }
+
+    #[test]
+    fn test_g1_serde_roundtrip() {
+        // TODO: Below is the real version
+        // let val = substrate_bn::G1::one();
+        // let serialized = serde_json::to_string(&G1data::from(val)).unwrap();
+        // let deserialized: G1data = serde_json::from_str(&serialized).unwrap();
+        // let roundtripped_val: substrate_bn::G1 = deserialized.into();
+        // TODO: End of the real version, now the temporary version
+        let val = G1data::one();
+        let serialized = serde_json::to_string(&val).unwrap();
+        let roundtripped_val: G1data = serde_json::from_str(&serialized).unwrap();
+        // TODO: End of the temporary version, now shared code
+        assert_eq!(roundtripped_val, val);
+
+        // TODO: Temporarily (?) testing with postcard too
+        let serialized = postcard::to_allocvec(&val).unwrap();
+        let roundtripped_val: G1data = postcard::from_bytes(&serialized).unwrap();
+        assert_eq!(roundtripped_val, val);
+    }
+
+    #[test]
+    fn test_g2_serde_roundtrip() {
+        let val = substrate_bn::G2::one();
+        let serialized = serde_json::to_string(&G2data::from(val)).unwrap();
+        let deserialized: G2data = serde_json::from_str(&serialized).unwrap();
+        let roundtripped_val: substrate_bn::G2 = deserialized.into();
+        assert_eq!(roundtripped_val, val);
+    }
+
+    #[test]
+    fn test_fr_serde_roundtrip() {
+        let val = substrate_bn::Fr::one();
+        let serialized = serde_json::to_string(&Fr(val)).unwrap();
+        let deserialized: Fr = serde_json::from_str(&serialized).unwrap();
+        let roundtripped_val: substrate_bn::Fr = deserialized.0;
+        assert_eq!(roundtripped_val, val);
     }
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod bn254;
 mod secp256k1;
 mod secp384r1;
 #[cfg(test)]

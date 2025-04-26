@@ -14,19 +14,19 @@
 
 extern crate alloc;
 
-use alloc::{vec, vec::Vec};
+// TODO: Clean dependencies
 
-use anyhow::{anyhow, Error, Result};
-use ark_bn254::{Bn254, G1Projective};
-use ark_ec::AffineRepr;
-use ark_groth16::{Groth16, PreparedVerifyingKey, Proof};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+// use alloc::{vec, vec::Vec};
+use alloc::vec;
+
+use anyhow::{anyhow, Context, Error, Result};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    from_u256, g1_from_bytes, g2_from_bytes, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson,
+    data_structures::{Pvk, Vk},
+    from_u256, Fr, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson,
 };
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
@@ -75,14 +75,20 @@ const IC5_X: &str = "68345789116817925521103175892220109694913368702766231052494
 const IC5_Y: &str = "15060583660288623605191393599883223885678013570733629274538391874953353488393";
 
 /// Groth16 `Verifier` instance over the BN_254 curve encoded in little endian.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+// #[derive(Clone, Debug, Deserialize, Serialize)]
+// TODO: Probably want to re-enable Debug, Deserialize, and Serialize
+// TODO: Goal ... depending on exact needs may want to still hold onto things as Vec<u8> or Vec<Vec<u8>>
+#[derive(Clone)]
 pub struct Verifier {
-    /// prepared verifying key little endian encoded.
-    encoded_pvk: Vec<u8>,
-    /// proof little endian encoded.
-    encoded_proof: Vec<u8>,
-    /// prepared public inputs little endian encoded.
-    encoded_prepared_inputs: Vec<u8>,
+    // /// prepared verifying key little endian encoded.
+    // encoded_pvk: Vec<u8>,
+    // /// proof little endian encoded.
+    // encoded_proof: Vec<u8>,
+    // /// prepared public inputs little endian encoded.
+    // encoded_prepared_inputs: Vec<u8>,
+    pvk: Pvk,
+    proof: Seal,
+    prepared_inputs: substrate_bn::G1,
 }
 
 impl Verifier {
@@ -92,35 +98,40 @@ impl Verifier {
         public_inputs: &[Fr],
         verifying_key: &VerifyingKey,
     ) -> Result<Self, Error> {
-        let pvk = ark_groth16::prepare_verifying_key(&verifying_key.0);
-        let mut encoded_pvk = Vec::new();
-        pvk.serialize_uncompressed(&mut encoded_pvk)
-            .map_err(|err| anyhow!(err))?;
+        // let pvk = ark_groth16::prepare_verifying_key(&verifying_key.0);
+        let pvk = Pvk::from(verifying_key.0.clone()); // TODO: Is clone the right approach here? Or don't borrow the parameter?
 
-        let mut encoded_proof = Vec::new();
-        let proof = Proof::<Bn254> {
-            a: g1_from_bytes(&seal.a)?,
-            b: g2_from_bytes(&seal.b)?,
-            c: g1_from_bytes(&seal.c)?,
-        };
-        proof
-            .serialize_uncompressed(&mut encoded_proof)
-            .map_err(|err| anyhow!(err))?;
+        // let mut encoded_pvk = Vec::new();
+        // pvk.serialize_uncompressed(&mut encoded_pvk)
+        //     .map_err(|err| anyhow!(err))?;
 
-        let mut encoded_prepared_inputs = Vec::new();
-        let prepared_inputs = Groth16::<Bn254>::prepare_inputs(
-            &pvk,
-            &public_inputs.iter().map(|x| x.0).collect::<Vec<_>>(),
-        )
-        .map_err(|err| anyhow!(err))?;
-        prepared_inputs
-            .serialize_uncompressed(&mut encoded_prepared_inputs)
-            .map_err(|err| anyhow!(err))?;
+        // let mut encoded_proof = Vec::new();
+        // let proof = Proof::<Bn254> {
+        //     a: g1_from_bytes(&seal.a)?,
+        //     b: g2_from_bytes(&seal.b)?,
+        //     c: g1_from_bytes(&seal.c)?,
+        // };
+        // proof
+        //     .serialize_uncompressed(&mut encoded_proof)
+        //     .map_err(|err| anyhow!(err))?;
+
+        // let mut encoded_prepared_inputs = Vec::new();
+        // let prepared_inputs = Groth16::<Bn254>::prepare_inputs(
+        //     &pvk,
+        //     &public_inputs.iter().map(|x| x.0).collect::<Vec<_>>(),
+        // )
+        // .map_err(|err| anyhow!(err))?;
+        // prepared_inputs
+        //     .serialize_uncompressed(&mut encoded_prepared_inputs)
+        //     .map_err(|err| anyhow!(err))?;
+
+        // TODO: Use this error handling approach elsewhere?
+        let prepared_inputs = prepare_inputs(&pvk, public_inputs).map_err(|err| anyhow!(err))?;
 
         Ok(Self {
-            encoded_pvk,
-            encoded_proof,
-            encoded_prepared_inputs,
+            pvk,
+            proof: seal.clone(),
+            prepared_inputs,
         })
     }
 
@@ -140,84 +151,127 @@ impl Verifier {
 
     /// Verifies the Groth16 proof.
     pub fn verify(&self) -> Result<(), Error> {
-        let pvk = &PreparedVerifyingKey::deserialize_uncompressed(&*self.encoded_pvk)
-            .map_err(|err| anyhow!(err))?;
-        let proof =
-            &Proof::deserialize_uncompressed(&*self.encoded_proof).map_err(|err| anyhow!(err))?;
-        let prepared_inputs =
-            &G1Projective::deserialize_uncompressed(self.encoded_prepared_inputs.as_slice())
-                .map_err(|err| anyhow!(err))?;
-        match Groth16::<Bn254>::verify_proof_with_prepared_inputs(pvk, proof, prepared_inputs)
-            .map_err(|err| anyhow!(err))?
-        {
-            true => Ok(()),
-            false => Err(anyhow!("Invalid proof")),
-        }
-    }
-}
+        // let pvk = &PreparedVerifyingKey::deserialize_uncompressed(&*self.encoded_pvk)
+        //     .map_err(|err| anyhow!(err))?;
+        // let proof =
+        //     &Proof::deserialize_uncompressed(&*self.encoded_proof).map_err(|err| anyhow!(err))?;
+        // let prepared_inputs =
+        //     &G1Projective::deserialize_uncompressed(self.encoded_prepared_inputs.as_slice())
+        //         .map_err(|err| anyhow!(err))?;
+        // TODO: May need deserialization? Depends on approach we take
 
-/// Verifying key for Groth16 proofs.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Fr(#[serde(with = "serde_ark")] pub(crate) ark_bn254::Fr);
-
-impl Fr {
-    #[stability::unstable]
-    pub fn ark_fr(&self) -> ark_bn254::Fr {
-        self.0
-    }
-}
-
-impl Digestible for Fr {
-    /// Compute a tagged hash of the [Fr] value.
-    fn digest<S: Sha256>(&self) -> Digest {
-        let mut buffer = Vec::<u8>::with_capacity(32);
-        // Serialization into a pre-allocated buffer should never fail.
-        self.0.serialize_uncompressed(&mut buffer).unwrap();
-        // Convert to big-endian representation.
-        buffer.reverse();
-        tagged_struct::<S>(
-            "risc0_groth16.Fr",
-            &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
-            &[],
+        let plain_result = substrate_bn::miller_loop_batch(
+            // TODO: more clones that are probably unnecessary...
+            &[
+                (
+                    crate::g2_from_bytes(&self.proof.b)?,
+                    crate::g1_from_bytes(&self.proof.a)?,
+                ),
+                (self.pvk.gamma_g2_neg_pc.clone(), self.prepared_inputs),
+                (
+                    self.pvk.delta_g2_neg_pc.clone(),
+                    crate::g1_from_bytes(&self.proof.c)?,
+                ),
+            ],
         )
+        .map_err(|e| anyhow!("{e:?}"))?;
+        let exponentiated = plain_result
+            .final_exponentiation()
+            .ok_or_else(|| anyhow!("Unexpected identity in final exponentiation step of verify"))?;
+        if exponentiated == self.pvk.alpha_g1_beta_g2 {
+            Ok(())
+        } else {
+            Err(anyhow!("Groth16 proof failed verification"))
+        }
+
+        // match Groth16::<Bn254>::verify_proof_with_prepared_inputs(pvk, proof, prepared_inputs)
+        //     .map_err(|err| anyhow!(err))?
+        // {
+        //     true => Ok(()),
+        //     false => Err(anyhow!("Invalid proof")),
+        // }
     }
 }
 
 /// Verifying key for Groth16 proofs.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct VerifyingKey(#[serde(with = "serde_ark")] pub(crate) ark_groth16::VerifyingKey<Bn254>);
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VerifyingKey(pub(crate) Vk);
 
-/// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
-fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
-    let mut buffer = Vec::<u8>::new();
-    // If p is the point at infinity, the verifying key is invalid. Panic.
-    let (x, y) = p.xy().unwrap();
-    y.serialize_uncompressed(&mut buffer).unwrap();
-    x.serialize_uncompressed(&mut buffer).unwrap();
+// TODO: For reference, this was how we approached it with arkworks
+// Use this to align hashing inputs, or drop if we don't need to (see hash_g*_point functions below)
+// /// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
+// fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
+//     let mut buffer = Vec::<u8>::new();
+//     // If p is the point at infinity, the verifying key is invalid. Panic.
+//     let (x, y) = p.xy().unwrap();
+//     y.serialize_uncompressed(&mut buffer).unwrap();
+//     x.serialize_uncompressed(&mut buffer).unwrap();
+//     buffer.reverse();
+//     *S::hash_bytes(&buffer)
+// }
+
+fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Result<Digest> {
+    let mut buffer = [0u8; 64];
+    // TODO: Dereference is awkward, review architecture
+    let pt = substrate_bn::AffineG1::from_jacobian(*p)
+        .context("Verifying key contains point at infinity and hence is invalid")?;
+    pt.y()
+        .to_big_endian(&mut buffer[0..32])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.x()
+        .to_big_endian(&mut buffer[32..64])
+        .map_err(|e| anyhow!("{e:?}"))?;
     buffer.reverse();
-    *S::hash_bytes(&buffer)
+    // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
+    //    > If this matters, test it, and fix any bugs!
+    //    > If this doesn't matter, drop the `buffer.reverse()`!
+    Ok(*S::hash_bytes(&buffer))
 }
 
-impl VerifyingKey {
-    #[stability::unstable]
-    pub fn ark_verifying_key(&self) -> ark_groth16::VerifyingKey<Bn254> {
-        self.0.clone()
-    }
+fn hash_g2_point<S: Sha256>(p: &substrate_bn::G2) -> Result<Digest> {
+    let mut buffer = [0u8; 128];
+    let pt = substrate_bn::AffineG2::from_jacobian(*p)
+        .context("Verifying key contains point at infinity and hence is invalid")?;
+    pt.y()
+        .real()
+        .to_big_endian(&mut buffer[0..32])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.y()
+        .imaginary()
+        .to_big_endian(&mut buffer[32..64])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.x()
+        .real()
+        .to_big_endian(&mut buffer[64..96])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.x()
+        .imaginary()
+        .to_big_endian(&mut buffer[96..128])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    buffer.reverse();
+    // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
+    //    > If this matters, test it, and fix any bugs!
+    //    > If this doesn't matter, drop the `buffer.reverse()`!
+    Ok(*S::hash_bytes(&buffer))
 }
 
+// TODO: Presumably we need this somewhere?
 impl Digestible for VerifyingKey {
     /// Hash the [VerifyingKey] to get a struct digest.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0_groth16.VerifyingKey",
             &[
-                hash_point::<S>(self.0.alpha_g1),
-                hash_point::<S>(self.0.beta_g2),
-                hash_point::<S>(self.0.gamma_g2),
-                hash_point::<S>(self.0.delta_g2),
+                hash_g1_point::<S>(&self.0.alpha_g1).unwrap(),
+                hash_g2_point::<S>(&self.0.beta_g2).unwrap(),
+                hash_g2_point::<S>(&self.0.gamma_g2).unwrap(),
+                hash_g2_point::<S>(&self.0.delta_g2).unwrap(),
                 tagged_iter::<S>(
                     "risc0_groth16.VerifyingKey.IC",
-                    self.0.gamma_abc_g1.iter().map(|p| hash_point::<S>(*p)),
+                    self.0
+                        .gamma_abc_g1
+                        .iter()
+                        .map(|p| hash_g1_point::<S>(p).unwrap()),
                 ),
             ],
             &[],
@@ -225,69 +279,140 @@ impl Digestible for VerifyingKey {
     }
 }
 
+// TODO: See if we can adapt any of this to substrate_bn serde
 /// Compatibility module providing simple serde interop
-mod serde_ark {
-    use alloc::vec::Vec;
+// mod serde_ark {
+//     use alloc::vec::Vec;
 
-    use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-    use serde::{
-        de::Error as _, ser::Error as _, Deserialize, Deserializer, Serialize, Serializer,
-    };
+//     use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+//     use serde::{
+//         de::Error as _, ser::Error as _, Deserialize, Deserializer, Serialize, Serializer,
+//     };
 
-    pub fn serialize<S>(key: &impl CanonicalSerialize, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut buffer = Vec::<u8>::new();
-        key.serialize_uncompressed(&mut buffer)
-            .map_err(S::Error::custom)?;
-        buffer.serialize(serializer)
-    }
+//     pub fn serialize<S>(key: &impl CanonicalSerialize, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: Serializer,
+//     {
+//         let mut buffer = Vec::<u8>::new();
+//         key.serialize_uncompressed(&mut buffer)
+//             .map_err(S::Error::custom)?;
+//         buffer.serialize(serializer)
+//     }
 
-    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-        T: CanonicalDeserialize,
-    {
-        let buffer = Vec::<u8>::deserialize(deserializer)?;
-        T::deserialize_uncompressed(buffer.as_slice()).map_err(D::Error::custom)
-    }
-}
+//     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+//     where
+//         D: Deserializer<'de>,
+//         T: CanonicalDeserialize,
+//     {
+//         let buffer = Vec::<u8>::deserialize(deserializer)?;
+//         T::deserialize_uncompressed(buffer.as_slice()).map_err(D::Error::custom)
+//     }
+// }
 
+// /// Default verifying key for RISC Zero recursive verification.
+// pub fn verifying_key() -> VerifyingKey {
+//     try_verifying_key().unwrap()
+// }
+
+// TODO: Ok that the type changed?
+// TODO: I don't think the allow(dead_code) should be needed...
 /// Default verifying key for RISC Zero recursive verification.
+//#[allow(dead_code)]
 pub fn verifying_key() -> VerifyingKey {
-    try_verifying_key().unwrap()
+    // TODO: We should probably be wrapping this as a VerifyingKey for compatability
+    VerifyingKey(try_vk().unwrap())
 }
 
-// try_verifying_key executes entirely over const data and so should never error.
-fn try_verifying_key() -> Result<VerifyingKey, Error> {
-    let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
-    let beta_g2 = g2_from_bytes(&[
+// // try_verifying_key executes entirely over const data and so should never error.
+// fn try_verifying_key() -> Result<VerifyingKey, Error> {
+//     let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+//     let beta_g2 = g2_from_bytes(&[
+//         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
+//         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
+//     ])?;
+//     let gamma_g2 = g2_from_bytes(&[
+//         vec![from_u256(GAMMA_X1)?, from_u256(GAMMA_X2)?],
+//         vec![from_u256(GAMMA_Y1)?, from_u256(GAMMA_Y2)?],
+//     ])?;
+//     let delta_g2 = g2_from_bytes(&[
+//         vec![from_u256(DELTA_X1)?, from_u256(DELTA_X2)?],
+//         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
+//     ])?;
+
+//     let ic0 = g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+//     let ic1 = g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+//     let ic2 = g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+//     let ic3 = g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+//     let ic4 = g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+//     let ic5 = g1_from_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
+//     let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4, ic5];
+
+//     Ok(VerifyingKey(ark_groth16::VerifyingKey::<Bn254> {
+//         alpha_g1,
+//         beta_g2,
+//         gamma_g2,
+//         delta_g2,
+//         gamma_abc_g1,
+//     }))
+// }
+
+// TODO: Naming
+fn try_vk() -> Result<Vk, Error> {
+    let alpha_g1 = crate::g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+    let beta_g2 = crate::g2_from_bytes(&[
         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
     ])?;
-    let gamma_g2 = g2_from_bytes(&[
+    let gamma_g2 = crate::g2_from_bytes(&[
         vec![from_u256(GAMMA_X1)?, from_u256(GAMMA_X2)?],
         vec![from_u256(GAMMA_Y1)?, from_u256(GAMMA_Y2)?],
     ])?;
-    let delta_g2 = g2_from_bytes(&[
+    let delta_g2 = crate::g2_from_bytes(&[
         vec![from_u256(DELTA_X1)?, from_u256(DELTA_X2)?],
         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
     ])?;
 
-    let ic0 = g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
-    let ic1 = g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
-    let ic2 = g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
-    let ic3 = g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
-    let ic4 = g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
-    let ic5 = g1_from_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
+    let ic0 = crate::g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+    let ic1 = crate::g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+    let ic2 = crate::g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+    let ic3 = crate::g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+    let ic4 = crate::g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+    let ic5 = crate::g1_from_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
     let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4, ic5];
 
-    Ok(VerifyingKey(ark_groth16::VerifyingKey::<Bn254> {
+    Ok(Vk {
         alpha_g1,
         beta_g2,
         gamma_g2,
         delta_g2,
         gamma_abc_g1,
-    }))
+    })
+}
+
+// TODO
+pub fn prepare_inputs(pvk: &Pvk, public_inputs: &[Fr]) -> Result<substrate_bn::G1> {
+    if (public_inputs.len() + 1) != pvk.vk.gamma_abc_g1.len() {
+        return Err(anyhow!("Cannot prepare inputs, verifying key length should be 1 more than number of inputs (instead: {}, {})", pvk.vk.gamma_abc_g1.len(), public_inputs.len()));
+    }
+
+    // TODO: A whole bunch of cloning that I may be able to avoid with proper types initially
+    let mut res: substrate_bn::G1 = pvk.vk.gamma_abc_g1[0].clone();
+    for (inp, ic) in public_inputs.iter().zip(pvk.vk.gamma_abc_g1.iter().skip(1)) {
+        res = res + substrate_bn::G1::from(ic.clone()) * inp.0;
+    }
+
+    Ok(res)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_verifying_key_serde_roundtrip() {
+        let val = verifying_key();
+        let serialized = serde_json::to_string(&val).unwrap();
+        let roundtripped_val: VerifyingKey = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(roundtripped_val, val);
+    }
 }

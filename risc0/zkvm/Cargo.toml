@@ -60,6 +60,7 @@ serde = { version = "1.0", default-features = false, features = [
   "derive",
 ] }
 stability = "0.2"
+substrate-bn = "0.6.0"   # TODO: Also turn on acceleration
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
