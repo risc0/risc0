@@ -285,9 +285,9 @@ mod tests {
         let mut rng = rand::rng();
         let rows = 1 << (rng.random_range(0..10));
         let cols_po2 = rng.random_range(0..10);
-        let cols = rng.random_range(1..(1 << cols_po2));
+        let cols = (rng.random_range(0..(1 << cols_po2))) + 1;
         let queries_po2 = rng.random_range(0..10);
-        let queries = rng.random_range(1..(1 << queries_po2));
+        let queries = (rng.random_range(0..(1 << queries_po2))) + 1;
         (rows, cols, queries)
     }
 
