@@ -96,8 +96,8 @@ pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
     let middle = big_endian.len() / 2;
     let (b, a) = big_endian.split_at(middle);
     Ok((
-        fr_from_bytes(&from_u256_hex(&hex::encode(a))?).map_err(|_|anyhow!("TODO"))?,
-        fr_from_bytes(&from_u256_hex(&hex::encode(b))?).map_err(|_|anyhow!("TODO"))?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(a))?).map_err(|_| anyhow!("TODO"))?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(b))?).map_err(|_| anyhow!("TODO"))?,
     ))
 }
 
@@ -110,7 +110,9 @@ pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
 ///
 /// Input bytes are interpretted as big-endian and in canonical (i.e. non-Montgomery) form
 pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
-    substrate_bn::Fr::from_slice(scalar).map(Fr).map_err(|_| anyhow!("TODO"))
+    substrate_bn::Fr::from_slice(scalar)
+        .map(Fr)
+        .map_err(|_| anyhow!("TODO"))
 }
 
 // TODO: This is one of the places behavior has changed (both output type and expected input format)
@@ -121,11 +123,13 @@ pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<substrate_bn::G1, Error> {
         return Err(anyhow!("Malformed G1 field element"));
     }
     // TODO: Better error forwarding
-    let x = substrate_bn::Fq::from_slice(&elem[0]).map_err(|_|{anyhow!("TODO")})?;
-    let y = substrate_bn::Fq::from_slice(&elem[1]).map_err(|_|{anyhow!("TODO")})?;
+    let x = substrate_bn::Fq::from_slice(&elem[0]).map_err(|_| anyhow!("TODO"))?;
+    let y = substrate_bn::Fq::from_slice(&elem[1]).map_err(|_| anyhow!("TODO"))?;
     // Note that AffineG1::new checks that the point is on the curve
     // TODO: Is it more efficient to create new G1 directly?
-    Ok(substrate_bn::AffineG1::new(x, y).map_err(|_|{anyhow!("TODO")})?.into())
+    Ok(substrate_bn::AffineG1::new(x, y)
+        .map_err(|_| anyhow!("TODO"))?
+        .into())
 }
 
 // TODO: This is one of the places behavior has changed (both output type and expected input format)
@@ -136,15 +140,17 @@ pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<substrate_bn::G2, Error> {
         return Err(anyhow!("Malformed G2 field element"));
     }
     // TODO: Better error forwarding
-    let x_re = substrate_bn::Fq::from_slice(&elem[0][1]).map_err(|_|{anyhow!("TODO")})?;
-    let x_im = substrate_bn::Fq::from_slice(&elem[0][0]).map_err(|_|{anyhow!("TODO")})?;
+    let x_re = substrate_bn::Fq::from_slice(&elem[0][1]).map_err(|_| anyhow!("TODO"))?;
+    let x_im = substrate_bn::Fq::from_slice(&elem[0][0]).map_err(|_| anyhow!("TODO"))?;
     let x = substrate_bn::Fq2::new(x_re, x_im);
-    let y_re = substrate_bn::Fq::from_slice(&elem[1][1]).map_err(|_|{anyhow!("TODO")})?;
-    let y_im = substrate_bn::Fq::from_slice(&elem[1][0]).map_err(|_|{anyhow!("TODO")})?;
+    let y_re = substrate_bn::Fq::from_slice(&elem[1][1]).map_err(|_| anyhow!("TODO"))?;
+    let y_im = substrate_bn::Fq::from_slice(&elem[1][0]).map_err(|_| anyhow!("TODO"))?;
     let y = substrate_bn::Fq2::new(y_re, y_im);
     // Note that AffineG2::new checks that the point is on the curve and in the subgroup
     // TODO: Is it more efficient to create new G2 directly?
-    Ok(substrate_bn::AffineG2::new(x, y).map_err(|_|{anyhow!("TODO")})?.into())
+    Ok(substrate_bn::AffineG2::new(x, y)
+        .map_err(|_| anyhow!("TODO"))?
+        .into())
 }
 
 // Convert the U256 value to a byte array in big-endian format

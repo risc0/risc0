@@ -25,7 +25,8 @@ use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    from_u256, Fr, ProofJson, PublicInputsJson, data_structures::{Pvk, Vk}, Seal, VerifyingKeyJson,
+    data_structures::{Pvk, Vk},
+    from_u256, Fr, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson,
 };
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
@@ -73,7 +74,6 @@ const IC4_Y: &str = "21663537384585072695701846972542344484111393047775983928357
 const IC5_X: &str = "6834578911681792552110317589222010969491336870276623105249474534788043166867";
 const IC5_Y: &str = "15060583660288623605191393599883223885678013570733629274538391874953353488393";
 
-
 /// Groth16 `Verifier` instance over the BN_254 curve encoded in little endian.
 // #[derive(Clone, Debug, Deserialize, Serialize)]
 // TODO: Probably want to re-enable Debug, Deserialize, and Serialize
@@ -99,7 +99,7 @@ impl Verifier {
         verifying_key: &VerifyingKey,
     ) -> Result<Self, Error> {
         // let pvk = ark_groth16::prepare_verifying_key(&verifying_key.0);
-        let pvk = Pvk::from(verifying_key.0.clone());  // TODO: Is clone the right approach here? Or don't borrow the parameter?
+        let pvk = Pvk::from(verifying_key.0.clone()); // TODO: Is clone the right approach here? Or don't borrow the parameter?
 
         // let mut encoded_pvk = Vec::new();
         // pvk.serialize_uncompressed(&mut encoded_pvk)
@@ -160,23 +160,29 @@ impl Verifier {
         //         .map_err(|err| anyhow!(err))?;
         // TODO: May need deserialization? Depends on approach we take
 
-
         let plain_result = substrate_bn::miller_loop_batch(
             // TODO: more clones that are probably unnecessary...
             &[
-                (crate::g2_from_bytes(&self.proof.b)?, crate::g1_from_bytes(&self.proof.a)?),
+                (
+                    crate::g2_from_bytes(&self.proof.b)?,
+                    crate::g1_from_bytes(&self.proof.a)?,
+                ),
                 (self.pvk.gamma_g2_neg_pc.clone(), self.prepared_inputs),
-                (self.pvk.delta_g2_neg_pc.clone(), crate::g1_from_bytes(&self.proof.c)?),
-            ]
-        ).map_err(|e| anyhow!("{e:?}"))?;
-        let exponentiated = plain_result.final_exponentiation().ok_or_else(||anyhow!("Unexpected identity in final exponentiation step of verify"))?;
+                (
+                    self.pvk.delta_g2_neg_pc.clone(),
+                    crate::g1_from_bytes(&self.proof.c)?,
+                ),
+            ],
+        )
+        .map_err(|e| anyhow!("{e:?}"))?;
+        let exponentiated = plain_result
+            .final_exponentiation()
+            .ok_or_else(|| anyhow!("Unexpected identity in final exponentiation step of verify"))?;
         if exponentiated == self.pvk.alpha_g1_beta_g2 {
             Ok(())
         } else {
             Err(anyhow!("Groth16 proof failed verification"))
         }
-
-
 
         // match Groth16::<Bn254>::verify_proof_with_prepared_inputs(pvk, proof, prepared_inputs)
         //     .map_err(|err| anyhow!(err))?
@@ -207,9 +213,14 @@ pub struct VerifyingKey(pub(crate) Vk);
 fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Result<Digest> {
     let mut buffer = [0u8; 64];
     // TODO: Dereference is awkward, review architecture
-    let pt = substrate_bn::AffineG1::from_jacobian(*p).context("Verifying key contains point at infinity and hence is invalid")?;
-    pt.y().to_big_endian(&mut buffer[0..32]).map_err(|e| anyhow!("{e:?}"))?;
-    pt.x().to_big_endian(&mut buffer[32..64]).map_err(|e| anyhow!("{e:?}"))?;
+    let pt = substrate_bn::AffineG1::from_jacobian(*p)
+        .context("Verifying key contains point at infinity and hence is invalid")?;
+    pt.y()
+        .to_big_endian(&mut buffer[0..32])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.x()
+        .to_big_endian(&mut buffer[32..64])
+        .map_err(|e| anyhow!("{e:?}"))?;
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
@@ -219,11 +230,24 @@ fn hash_g1_point<S: Sha256>(p: &substrate_bn::G1) -> Result<Digest> {
 
 fn hash_g2_point<S: Sha256>(p: &substrate_bn::G2) -> Result<Digest> {
     let mut buffer = [0u8; 128];
-    let pt = substrate_bn::AffineG2::from_jacobian(*p).context("Verifying key contains point at infinity and hence is invalid")?;
-    pt.y().real().to_big_endian(&mut buffer[0..32]).map_err(|e| anyhow!("{e:?}"))?;
-    pt.y().imaginary().to_big_endian(&mut buffer[32..64]).map_err(|e| anyhow!("{e:?}"))?;
-    pt.x().real().to_big_endian(&mut buffer[64..96]).map_err(|e| anyhow!("{e:?}"))?;
-    pt.x().imaginary().to_big_endian(&mut buffer[96..128]).map_err(|e| anyhow!("{e:?}"))?;
+    let pt = substrate_bn::AffineG2::from_jacobian(*p)
+        .context("Verifying key contains point at infinity and hence is invalid")?;
+    pt.y()
+        .real()
+        .to_big_endian(&mut buffer[0..32])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.y()
+        .imaginary()
+        .to_big_endian(&mut buffer[32..64])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.x()
+        .real()
+        .to_big_endian(&mut buffer[64..96])
+        .map_err(|e| anyhow!("{e:?}"))?;
+    pt.x()
+        .imaginary()
+        .to_big_endian(&mut buffer[96..128])
+        .map_err(|e| anyhow!("{e:?}"))?;
     buffer.reverse();
     // TODO: This _might_ preserve how these hash relative to the arkworks version, but it's not tested
     //    > If this matters, test it, and fix any bugs!
@@ -244,7 +268,10 @@ impl Digestible for VerifyingKey {
                 hash_g2_point::<S>(&self.0.delta_g2).unwrap(),
                 tagged_iter::<S>(
                     "risc0_groth16.VerifyingKey.IC",
-                    self.0.gamma_abc_g1.iter().map(|p| hash_g1_point::<S>(p).unwrap()),
+                    self.0
+                        .gamma_abc_g1
+                        .iter()
+                        .map(|p| hash_g1_point::<S>(p).unwrap()),
                 ),
             ],
             &[],
