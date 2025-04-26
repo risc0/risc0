@@ -1,0 +1,12 @@
+[package]
+name = "bigint2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+k256 = { version = "0.13", features = ["serde"] }
+risc0-zkvm = { path = "../../../risc0/zkvm" }
+
+[features]
+default = []
+prove = ["risc0-zkvm/prove"]

@@ -17,11 +17,15 @@ use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 use clap::Parser;
 use risc0_circuit_keccak::{prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
 use risc0_circuit_recursion::prove::zkr::{get_all_zkrs, get_zkr};
-use risc0_zkp::core::{
-    digest::Digest,
-    hash::{
-        hash_suite_from_name, poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite,
+use risc0_zkp::{
+    core::{
+        digest::Digest,
+        hash::{
+            hash_suite_from_name, poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite,
+        },
+        log2_ceil,
     },
+    ZK_CYCLES,
 };
 use risc0_zkvm::{
     recursion::{MerkleGroup, Program},
@@ -35,6 +39,7 @@ const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.
 const CONTROL_ID_PATH_KECCAK: &str = "risc0/circuit/keccak/src/control_id.rs";
 
 const MIN_LIFT_PO2: usize = 14;
+const RECURSION_CODE_SIZE: usize = 23;
 
 impl Bootstrap {
     // Format a list of control IDs, including a description as comments.
@@ -83,6 +88,15 @@ impl Bootstrap {
                 .map(str::to_string)
                 .into_iter()
                 .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+                .chain(
+                    (MIN_LIFT_PO2..=DEFAULT_MAX_PO2)
+                        .map(|i| format!("lift_join_rv32im_v2_{i}.zkr")),
+                )
+                .chain(
+                    (MIN_LIFT_PO2..=DEFAULT_MAX_PO2)
+                        .map(|i| (2..11).map(move |n| format!("lift_join{n}_rv32im_v2_{i}.zkr")))
+                        .flatten(),
+                )
                 .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
@@ -152,9 +166,14 @@ impl Bootstrap {
 
         zkrs.iter()
             .map(|(name, encoded_program)| {
-                let program = Program::from_encoded(encoded_program, RECURSION_PO2);
+                let padded_cycles =
+                    ((encoded_program.len() + ZK_CYCLES) / RECURSION_CODE_SIZE).next_power_of_two();
+                let recursion_po2 = log2_ceil(padded_cycles);
+                let program = Program::from_encoded(encoded_program, recursion_po2);
 
-                tracing::info!("computing control ID for {name} with {hashfn}");
+                tracing::info!(
+                    "computing control ID for {name} with {hashfn} and po2={recursion_po2}"
+                );
                 let control_id = program.compute_control_id(hash_suite.clone());
 
                 tracing::debug!("{name} control id: {control_id:?}");

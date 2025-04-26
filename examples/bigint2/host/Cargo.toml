@@ -1,0 +1,19 @@
+[package]
+name = "host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+methods = { path = "../methods" }
+risc0-zkvm = { path = "/home/parker/src/risc0/risc0/zkvm/", features = ["unstable", "prove"] }
+# risc0-zkvm = { version = "1.2.1", features = ["unstable", "prove"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde = "1.0"
+k256 = { version = "0.13.3", features = ["serde", "pem"] }
+rand_core = "0.6.4"
+bincode = "1.3.3"
+
+[features]
+default = []
+cuda = ["risc0-zkvm/cuda"]

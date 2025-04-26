@@ -15,7 +15,10 @@
 use risc0_zkp::{
     core::{digest::Digest, hash::HashSuite},
     field::baby_bear::{BabyBear, BabyBearElem},
-    hal::{cpu::CpuHal, Hal},
+    hal::{
+        cuda::{CudaHal, CudaHash, CudaHashPoseidon2, CudaHashPoseidon254, CudaHashSha256},
+        Hal,
+    },
     prove::poly_group::PolyGroup,
     ZK_CYCLES,
 };
@@ -70,7 +73,15 @@ impl Program {
     /// of the code group. This uniquely identifies the program running on the recursion circuit
     /// (e.g. lift_20 or join)
     pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
-        let hal = CpuHal::new(hash_suite);
+        match &hash_suite.name[..] {
+            "poseidon2" => self.compute_control_id_inner(&CudaHal::<CudaHashPoseidon2>::new()),
+            "poseidon254" => self.compute_control_id_inner(&CudaHal::<CudaHashPoseidon254>::new()),
+            "sha-256" => self.compute_control_id_inner(&CudaHal::<CudaHashSha256>::new()),
+            other => unimplemented!("unsupported hash_fn {other}"),
+        }
+    }
+
+    fn compute_control_id_inner(&self, hal: &CudaHal<impl CudaHash>) -> Digest {
         let cycles = 1 << self.po2;
 
         let mut code = vec![BabyBearElem::default(); cycles * self.code_size];
@@ -85,7 +96,7 @@ impl Program {
         hal.batch_interpolate_ntt(&coeffs, self.code_size);
         hal.zk_shift(&coeffs, self.code_size);
         // Make the poly-group & extract the root
-        let code_group = PolyGroup::new(&hal, coeffs, self.code_size, cycles, "code");
+        let code_group = PolyGroup::new(hal, coeffs, self.code_size, cycles, "code");
         let root = *code_group.merkle.root();
         tracing::trace!("Computed recursion code: {root:?}");
         root
