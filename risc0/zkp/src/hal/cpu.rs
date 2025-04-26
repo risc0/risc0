@@ -104,7 +104,7 @@ enum SyncSliceRef<'a, T: Default + Clone> {
 /// A buffer which can be used across multiple threads.  Users are
 /// responsible for ensuring that no two threads access the same
 /// element at the same time.
-pub struct SyncSlice<'a, T: Default + Clone> {
+pub(crate) struct SyncSlice<'a, T: Default + Clone> {
     _buf: SyncSliceRef<'a, T>,
     ptr: *mut T,
     size: usize,
@@ -205,7 +205,7 @@ impl<T: Default + Clone> CpuBuffer<T> {
         RwLockWriteGuard::map(vec, |vec| &mut vec.0[self.region.range()])
     }
 
-    pub fn as_slice_sync(&self) -> SyncSlice<'_, T> {
+    pub(crate) fn as_slice_sync(&self) -> SyncSlice<'_, T> {
         SyncSlice::new(self.as_slice_mut())
     }
 }
