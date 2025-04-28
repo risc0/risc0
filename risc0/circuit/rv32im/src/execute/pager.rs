@@ -38,9 +38,9 @@ const POSEIDON_ENTRY: u32 = 1;
 pub(crate) const POSEIDON_BLOCK_WORDS: u32 = 8;
 pub(crate) const POSEIDON_PAGE_ROUNDS: u32 = PAGE_WORDS as u32 / POSEIDON_BLOCK_WORDS;
 
-const PAGE_CYCLES: u32 = POSEIDON_PAGING + 10 * POSEIDON_PAGE_ROUNDS + POSEIDON_DO_OUT;
+pub(crate) const PAGE_CYCLES: u32 = POSEIDON_PAGING + 10 * POSEIDON_PAGE_ROUNDS + POSEIDON_DO_OUT;
 
-const NODE_CYCLES: u32 =
+pub(crate) const NODE_CYCLES: u32 =
     POSEIDON_PAGING + POSEIDON_LOAD_IN + POSEIDON_EXTERNAL + POSEIDON_INTERNAL + POSEIDON_DO_OUT;
 
 pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
@@ -358,8 +358,8 @@ impl PagedMemory {
     }
 
     fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
         let page_idx = addr.page_idx();
+        // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
         let page = self.page_for_writing(page_idx)?;
         page.store(addr, word);
         Ok(())

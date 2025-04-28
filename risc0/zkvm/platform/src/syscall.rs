@@ -26,6 +26,7 @@ pub mod ecall {
     pub const BIGINT: u32 = 4;
     pub const USER: u32 = 5;
     pub const BIGINT2: u32 = 6;
+    pub const POSEIDON2: u32 = 7;
 }
 
 pub mod halt {
@@ -281,6 +282,25 @@ fn ecall_1(t0: u32, a0: u32, a1: u32) {
     }
 }
 
+fn ecall_3(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32) {
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!(
+            "ecall",
+            in("t0") t0,
+            in("a0") a0,
+            in("a1") a1,
+            in("a2") a2,
+            in("a3") a3,
+        )
+    };
+    #[cfg(not(target_os = "zkvm"))]
+    {
+        core::hint::black_box((t0, a0, a1, a2, a3));
+        unimplemented!()
+    }
+}
+
 fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
     #[cfg(target_os = "zkvm")]
     unsafe {
@@ -407,6 +427,31 @@ pub unsafe extern "C" fn sys_sha_buffer(
         ptr = ptr.add(2 * DIGEST_BYTES * count as usize);
         in_state = out_state;
     }
+}
+
+/// # Safety
+///
+/// `state_addr`, `in_buf_addr`, and `out_buf_addr` must be word-aligned and
+/// dereferenceable.
+#[inline(always)]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub unsafe extern "C" fn sys_poseidon2(
+    state_addr: *mut [u32; DIGEST_WORDS],
+    in_buf_addr: *const u8,
+    out_buf_addr: *mut [u32; DIGEST_WORDS],
+    bits_count: u32,
+) {
+    debug_assert!(state_addr as usize % WORD_SIZE == 0);
+    debug_assert!(in_buf_addr as usize % WORD_SIZE == 0);
+    debug_assert!(out_buf_addr as usize % WORD_SIZE == 0);
+
+    ecall_3(
+        ecall::POSEIDON2,
+        state_addr as u32 / WORD_SIZE as u32,
+        in_buf_addr as u32 / WORD_SIZE as u32,
+        out_buf_addr as u32 / WORD_SIZE as u32,
+        bits_count,
+    );
 }
 
 /// # Safety

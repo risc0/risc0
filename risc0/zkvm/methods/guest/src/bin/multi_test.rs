@@ -25,10 +25,11 @@ extern crate alloc;
 use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
+    vec::Vec,
 };
-use core::arch::asm;
+use core::{arch::asm, ptr::null_mut};
 
-use getrandom::getrandom;
+use getrandom::fill;
 use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
@@ -44,12 +45,14 @@ use risc0_zkvm_platform::{
     fileno,
     syscall::{
         bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
-        sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
+        sys_poseidon2, sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
 
 risc0_zkvm::entry!(main);
+
+const PFLAG_IS_ELEM: u32 = 0x8000_0000;
 
 const KECCAK_UPDATE: KeccakState = [
     0xF1258F7940E1DDE7,
@@ -184,7 +187,7 @@ fn main() {
             for size in 0..=15 {
                 for alignment in 0..=usize::min(3, size) {
                     let rand_buf = &mut vec![0u8; size][alignment..];
-                    getrandom(rand_buf).expect("random number generation failed");
+                    fill(rand_buf).expect("random number generation failed");
                     env::commit_slice(&rand_buf);
 
                     // If we generated more than 2 bytes, make sure that they are at least not zero.
@@ -266,13 +269,34 @@ fn main() {
             }
             env::log("Busy loop complete");
         }
-        MultiTestSpec::BigInt { x, y, modulus } => {
+        MultiTestSpec::BigInt {
+            count,
+            x,
+            y,
+            modulus,
+        } => {
             let mut result = [0u32; bigint::WIDTH_WORDS];
-            unsafe {
-                sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus);
+            for _ in 0..count {
+                unsafe { sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus) };
             }
             env::commit_slice(&result);
         }
+        MultiTestSpec::BigIntRaw {
+            result,
+            x,
+            y,
+            modulus,
+        } => unsafe {
+            asm!(
+                "ecall",
+                in("t0") ecall::BIGINT,
+                in("a0") result,
+                in("a1") bigint::OP_MULTIPLY,
+                in("a2") x,
+                in("a3") y,
+                in("a4") modulus,
+            );
+        },
         MultiTestSpec::LibM => {
             use core::hint::black_box;
             let f = black_box(1.0_f32);
@@ -568,6 +592,91 @@ fn main() {
             for _i in 0..count {
                 env::risc0_keccak_update(&mut state);
             }
+        }
+        MultiTestSpec::Poseidon2Basic => {
+            let input: &[u32; 16] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+            let expected: &[u32] = &[
+                1749308481, 879447913, 499502012, 1842374203, 1869354733, 71489094, 19273002,
+                690566044,
+            ];
+            let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
+
+            unsafe {
+                sys_poseidon2(
+                    null_mut(),
+                    input.as_ptr() as *const u8,
+                    &mut actual,
+                    PFLAG_IS_ELEM | 1u32,
+                );
+            }
+            assert_eq!(expected, actual);
+        }
+        MultiTestSpec::Poseidon2Short => {
+            let input: &[u32; 8] = &[
+                0x10000, 0x30002, 0x50004, 0x70006, 0x90008, 0xB000A, 0xD000C, 0xF000E,
+            ];
+            let expected: &[u32] = &[
+                1749308481, 879447913, 499502012, 1842374203, 1869354733, 71489094, 19273002,
+                690566044,
+            ];
+            let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
+            unsafe {
+                sys_poseidon2(null_mut(), input.as_ptr() as *const u8, &mut actual, 1u32);
+            }
+            assert_eq!(expected, actual);
+        }
+        MultiTestSpec::Poseidon2Long => {
+            let input: [u32; 32] = (0u32..32u32)
+                .collect::<Vec<_>>()
+                .try_into()
+                .expect("wrong size iterator");
+
+            let expected: &[u32] = &[
+                1257374621, 1235708219, 1590109606, 1571950965, 936452277, 615799448, 844422484,
+                1109152478,
+            ];
+            let mut actual: [u32; DIGEST_WORDS] = [0u32; 8];
+            unsafe {
+                sys_poseidon2(
+                    null_mut(),
+                    input.as_ptr() as *const u8,
+                    &mut actual,
+                    PFLAG_IS_ELEM | 2u32,
+                );
+            }
+            assert_eq!(expected, actual);
+        }
+        MultiTestSpec::Poseidon2Continue => {
+            let input: [u32; 32] = (0u32..32u32)
+                .collect::<Vec<_>>()
+                .try_into()
+                .expect("wrong size iterator");
+
+            let expected: &[u32] = &[
+                1257374621, 1235708219, 1590109606, 1571950965, 936452277, 615799448, 844422484,
+                1109152478,
+            ];
+
+            let mut state: [u32; DIGEST_WORDS] = [0u32; 8];
+            let mut out: [u32; DIGEST_WORDS] = [0u32; 8];
+            unsafe {
+                sys_poseidon2(
+                    &mut state,
+                    input.as_ptr() as *const u8,
+                    &mut out,
+                    PFLAG_IS_ELEM | 1u32,
+                );
+            }
+            unsafe {
+                sys_poseidon2(
+                    &mut state,
+                    input.as_ptr().wrapping_add(16) as *const u8,
+                    &mut out,
+                    PFLAG_IS_ELEM | 1u32,
+                );
+            }
+
+            assert_eq!(expected, out);
         }
     }
 }

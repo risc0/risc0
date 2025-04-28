@@ -22,11 +22,11 @@ each fork's repository on GitHub.
 | [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases)                 | 0.10.8, 0.10.7, 0.10.6, 0.9.9  | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }`           | No                      |
 | [`tiny-keccak`](https://github.com/risc0/tiny-keccak/releases)                | 2.0.2                          | `tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }`    | [Yes]                   |
 | [`k256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.4, 0.13.3, 0.13.2, 0.13.1 | `k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.3-risczero.1" }`  | [Yes]                   |
-| [`p256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.2                         | `p256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "p256/v0.13.2-risczero.0" }`  | [Yes]                   |
+| [`p256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases)        | 0.13.2                         | `p256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "p256/v0.13.2-risczero.1" }`  | [Yes]                   |
 | [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases)      | 4.1.2, 4.1.1, 4.1.0            | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-dalek", tag = "curve25519-4.1.2-risczero.0" }`  | No                      |
 | [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases)                     | 0.9.6                          | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }`                     | [Yes]                   |
 | [`substrate-bn`](https://github.com/risc0/paritytech-bn/releases)             | 0.6.0                          | `substrate-bn = { git = "https://github.com/risc0/paritytech-bn", tag = "v0.6.0-risczero.0" }`             | [Yes]                   |
-| [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases/)          | 0.8.0                          | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "v0.8.0-risczero.0" }`           | [Yes]                   |
+| [`bls12_381`](https://github.com/risc0/zkcrypto-bls12_381/releases)           | 0.8.0                          | `bls12_381 = { git = "https://github.com/risc0/zkcrypto-bls12_381", tag = "v0.8.0-risczero.0" }`           | [Yes]                   |
 | [`crypto-bigint`](https://github.com/risc0/RustCrypto-crypto-bigint/releases) | 0.5.5, 0.5.4, 0.5.3, 0.5.2     | `crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }` | [Yes]                   |
 
 Make sure that your dependency gives the same patch version of the crate as listed in
@@ -92,7 +92,7 @@ precompiles that are still undergoing revision and review, and so users must opt
 features by setting the `"unstable"` [feature flag][feature-flag] on the `risc0-zkvm` crate used by
 the zkVM guest and by the `risc0-build` crate used to build the guest. These also require using
 versions `>=1.2.0` of `risc0` crates. For users who need a stable, production-ready version we are
-working on stablizing these precompiles as soon as possible, and the `"unstable"` feature flag will
+working on stabilizing these precompiles as soon as possible, and the `"unstable"` feature flag will
 no longer be required.
 
 ## Timing Attacks
@@ -110,7 +110,7 @@ a message within the zkvm where an observer can measure the proving time or view
 [commit-lockfile]: https://blog.rust-lang.org/2023/08/29/committing-lockfiles.html
 [discord-url]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-1.2/examples/ecdsa
-[ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/methods/guest/Cargo.toml#L13-L18
+[ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/k256/methods/guest/Cargo.toml#L13-L18
 [feature-flag]: https://doc.rust-lang.org/cargo/reference/features.html#dependency-features
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.3..k256/v0.13.3-risczero.1

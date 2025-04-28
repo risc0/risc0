@@ -2447,6 +2447,7 @@ struct Sha0Layout {
 };
 struct BigIntStateLayout {
   NondetRegLayout isEcall;
+  NondetRegLayout mode;
   NondetRegLayout pc;
   NondetRegLayout polyOp;
   NondetRegLayout coeff;
@@ -2460,9 +2461,11 @@ struct _Arguments_BigInt0StateLayout {
   MemoryArgLayout12LayoutArray memoryArg;
   CycleArgLayout6LayoutArray cycleArg;
   ArgU8Layout18LayoutArray argU8;
+  ArgU16Layout4LayoutArray argU16;
 };
 struct BigIntEcallLayout {
   BigIntStateLayout _super;
+  MemoryReadLayout mode;
   ReadAddrLayout pc;
 };
 struct BigInt0StateArm0Layout {
@@ -2475,13 +2478,13 @@ struct BigInt0StateArm0Layout {
   MemoryArgLayout _extra5;
   MemoryArgLayout _extra6;
   MemoryArgLayout _extra7;
-  MemoryArgLayout _extra8;
-  MemoryArgLayout _extra9;
+  CycleArgLayout _extra8;
+  CycleArgLayout _extra9;
   CycleArgLayout _extra10;
   CycleArgLayout _extra11;
-  CycleArgLayout _extra12;
-  CycleArgLayout _extra13;
-  CycleArgLayout _extra14;
+  ArgU8Layout _extra12;
+  ArgU8Layout _extra13;
+  ArgU8Layout _extra14;
   ArgU8Layout _extra15;
   ArgU8Layout _extra16;
   ArgU8Layout _extra17;
@@ -2497,14 +2500,20 @@ struct BigInt0StateArm0Layout {
   ArgU8Layout _extra27;
   ArgU8Layout _extra28;
   ArgU8Layout _extra29;
-  ArgU8Layout _extra30;
-  ArgU8Layout _extra31;
-  ArgU8Layout _extra32;
+  ArgU16Layout _extra30;
+  ArgU16Layout _extra31;
+  ArgU16Layout _extra32;
+  ArgU16Layout _extra33;
 };
 struct _Arguments_BigIntStepBytesLayout {
+  ArgU16Layout2LayoutArray argU16;
   ArgU8Layout16LayoutArray argU8;
   MemoryArgLayout8LayoutArray memoryArg;
   CycleArgLayout4LayoutArray cycleArg;
+};
+struct BigIntAddrLayout {
+  AddrDecomposeBitsLayout _super;
+  IsZeroLayout _0;
 };
 struct SplitU32Layout {
   SplitWordLayout low;
@@ -2516,6 +2525,7 @@ struct BigIntReadWords_SuperLayout {
 };
 using BigIntReadWords_SuperLayout4LayoutArray = std::array<BigIntReadWords_SuperLayout, 4>;
 struct BigIntReadLayout {
+  BigIntAddrLayout addr;
   BigIntReadWords_SuperLayout4LayoutArray words;
 };
 using NondetU8RegLayout16LayoutArray = std::array<NondetU8RegLayout, 16>;
@@ -2528,22 +2538,25 @@ struct BigIntWrite__0_SuperLayout {
 using BigIntWrite__0_SuperLayout4LayoutArray = std::array<BigIntWrite__0_SuperLayout, 4>;
 struct BigIntWriteLayout {
   BigIntWitnessLayout _super;
+  BigIntAddrLayout addr;
   BigIntWrite__0_SuperLayout4LayoutArray _1;
 };
 struct BigIntStepBytesArm2Layout {
   BigIntWitnessLayout _super;
-  MemoryArgLayout _extra0;
-  MemoryArgLayout _extra1;
+  ArgU16Layout _extra0;
+  ArgU16Layout _extra1;
   MemoryArgLayout _extra2;
   MemoryArgLayout _extra3;
   MemoryArgLayout _extra4;
   MemoryArgLayout _extra5;
   MemoryArgLayout _extra6;
   MemoryArgLayout _extra7;
-  CycleArgLayout _extra8;
-  CycleArgLayout _extra9;
+  MemoryArgLayout _extra8;
+  MemoryArgLayout _extra9;
   CycleArgLayout _extra10;
   CycleArgLayout _extra11;
+  CycleArgLayout _extra12;
+  CycleArgLayout _extra13;
 };
 struct BigIntStepBytesLayout {
   BigIntReadLayout arm0;
@@ -2558,11 +2571,12 @@ struct BigIntStepLayout {
   NondetRegLayout memOp;
   NondetRegLayout5LayoutArray regBits;
   NondetRegLayout3LayoutArray coeffBits;
-  ReadAddrLayout _2;
+  MemoryReadLayout baseAddrU32;
+  NormalizeU32Layout dataAddrU32;
   OneHot_3_Layout memOpOneHot;
   _Arguments_BigIntStepBytesLayout _arguments_BigIntStepBytes;
   BigIntStepBytesLayout bytes;
-  IsZeroLayout _3;
+  IsZeroLayout _2;
 };
 struct BigInt0StateArm2Layout {
   BigIntStateLayout _super;
@@ -2602,6 +2616,10 @@ struct BigInt0StateArm2Layout {
   ArgU8Layout _extra33;
   ArgU8Layout _extra34;
   ArgU8Layout _extra35;
+  ArgU16Layout _extra36;
+  ArgU16Layout _extra37;
+  ArgU16Layout _extra38;
+  ArgU16Layout _extra39;
 };
 struct BigInt0StateArm3Layout {
   BigIntStateLayout _super;
@@ -2641,6 +2659,10 @@ struct BigInt0StateArm3Layout {
   ArgU8Layout _extra33;
   ArgU8Layout _extra34;
   ArgU8Layout _extra35;
+  ArgU16Layout _extra36;
+  ArgU16Layout _extra37;
+  ArgU16Layout _extra38;
+  ArgU16Layout _extra39;
 };
 struct BigInt0StateArm4Layout {
   BigIntStateLayout _super;
@@ -2680,6 +2702,10 @@ struct BigInt0StateArm4Layout {
   ArgU8Layout _extra33;
   ArgU8Layout _extra34;
   ArgU8Layout _extra35;
+  ArgU16Layout _extra36;
+  ArgU16Layout _extra37;
+  ArgU16Layout _extra38;
+  ArgU16Layout _extra39;
 };
 struct BigInt0StateArm5Layout {
   BigIntStateLayout _super;
@@ -2719,6 +2745,10 @@ struct BigInt0StateArm5Layout {
   ArgU8Layout _extra33;
   ArgU8Layout _extra34;
   ArgU8Layout _extra35;
+  ArgU16Layout _extra36;
+  ArgU16Layout _extra37;
+  ArgU16Layout _extra38;
+  ArgU16Layout _extra39;
 };
 struct BigInt0StateArm6Layout {
   BigIntStateLayout _super;
@@ -2758,6 +2788,10 @@ struct BigInt0StateArm6Layout {
   ArgU8Layout _extra33;
   ArgU8Layout _extra34;
   ArgU8Layout _extra35;
+  ArgU16Layout _extra36;
+  ArgU16Layout _extra37;
+  ArgU16Layout _extra38;
+  ArgU16Layout _extra39;
 };
 struct BigInt0StateArm7Layout {
   BigIntStateLayout _super;
@@ -2797,6 +2831,10 @@ struct BigInt0StateArm7Layout {
   ArgU8Layout _extra33;
   ArgU8Layout _extra34;
   ArgU8Layout _extra35;
+  ArgU16Layout _extra36;
+  ArgU16Layout _extra37;
+  ArgU16Layout _extra38;
+  ArgU16Layout _extra39;
 };
 struct BigInt0StateLayout {
   BigIntStateLayout _super;
@@ -2946,7 +2984,7 @@ struct DenormedValU32Struct {
 };
 struct NormalizeU32Struct {
   ValU32Struct _super;
-  NondetRegStruct carry;
+  NondetRegStruct highCarry;
 };
 struct AddrDecomposeStruct {
   Val _super;
@@ -2957,7 +2995,6 @@ struct AddrDecomposeBitsStruct {
   NondetRegStruct low0;
   NondetRegStruct low1;
   Val low2;
-  Val addr;
 };
 struct CmpEqualStruct {
   NondetRegStruct isEqual;
@@ -3027,7 +3064,6 @@ using Val8Array = std::array<Val, 8>;
 using NondetRegStruct8Array = std::array<NondetRegStruct, 8>;
 struct OneHot_8_Struct {
   NondetRegStruct8Array _super;
-  NondetRegStruct8Array bits;
 };
 struct InstInputStruct {
   Val minor;
@@ -3063,7 +3099,6 @@ struct MultiplyAccumulateStruct {
 };
 struct DivInputStruct {
   InstInputStruct _super;
-  InstInputStruct ii;
   DecoderStruct decoded;
   GetDataStruct rs1;
   GetDataStruct rs2;
@@ -3087,7 +3122,6 @@ struct InstOutputBaseStruct {
 };
 struct MiscInputStruct {
   InstInputStruct _super;
-  InstInputStruct ii;
   DecoderStruct decoded;
   GetDataStruct rs1;
   GetDataStruct rs2;
@@ -3099,7 +3133,6 @@ struct MiscOutputStruct {
 };
 struct MulInputStruct {
   InstInputStruct _super;
-  InstInputStruct ii;
   DecoderStruct decoded;
   GetDataStruct rs1;
   GetDataStruct rs2;
@@ -3152,7 +3185,6 @@ using Val6Array = std::array<Val, 6>;
 using NondetRegStruct6Array = std::array<NondetRegStruct, 6>;
 struct OneHot_6_Struct {
   NondetRegStruct6Array _super;
-  NondetRegStruct6Array bits;
 };
 struct ECallOutputStruct {
   Val state;
@@ -3283,6 +3315,7 @@ struct ShaStateStruct {
 };
 struct BigIntStateStruct {
   NondetRegStruct isEcall;
+  NondetRegStruct mode;
   NondetRegStruct pc;
   NondetRegStruct polyOp;
   NondetRegStruct coeff;

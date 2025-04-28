@@ -324,6 +324,7 @@ impl Rzup {
 mod tests {
     use super::*;
     use crate::distribution::Os;
+    use std::collections::HashMap;
     use std::convert::Infallible;
     use std::io::Write as _;
     use std::net::SocketAddr;
@@ -428,13 +429,13 @@ mod tests {
         }
 
         Ok(match &req.uri().to_string()[..] {
-            "/gihub_api/repos/risc0/risc0/releases/latest" => {
+            "/github_api/repos/risc0/risc0/releases/latest" => {
                 json_response("{\"tag_name\":\"v1.1.0\"}")
             }
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
-            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0-rc.1/\
@@ -447,21 +448,21 @@ mod tests {
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
                 rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-osx-arm64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-osx-arm64"),
-            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
-            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.1.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0/install" => text_response(install_script.clone()),
@@ -500,7 +501,7 @@ mod tests {
             Self {
                 base_urls: BaseUrls {
                     risc0_github_base_url: format!("http://{address}/risc0_github"),
-                    github_api_base_url: format!("http://{address}/gihub_api"),
+                    github_api_base_url: format!("http://{address}/github_api"),
                     risc0_base_url: format!("http://{address}/risc0"),
                 },
             }
@@ -794,8 +795,10 @@ mod tests {
             let entry = entry.unwrap();
             if entry.file_type().is_file() {
                 let entry_path = entry.path();
-                let entry_relative_path = entry_path.strip_prefix(path).unwrap();
-                found_files.push(entry_relative_path.to_str().unwrap().to_owned());
+                if entry_path.extension().is_none_or(|ext| ext != "lock") {
+                    let entry_relative_path = entry_path.strip_prefix(path).unwrap();
+                    found_files.push(entry_relative_path.to_str().unwrap().to_owned());
+                }
             }
         }
 
@@ -2298,7 +2301,7 @@ mod tests {
         std::fs::set_permissions(path, perms).unwrap();
     }
 
-    fn create_fake_rust_repo(tmp_dir: &TempDir) -> (PathBuf, Version) {
+    fn create_fake_rust_repo(tmp_dir: &TempDir, rust_version: Version) -> (PathBuf, Version) {
         let test_repo = tmp_dir.path().join("test-repo");
         std::fs::create_dir(&test_repo).unwrap();
         build::run_command(
@@ -2313,7 +2316,7 @@ mod tests {
         .unwrap();
 
         std::fs::create_dir(test_repo.join("src")).unwrap();
-        std::fs::write(test_repo.join("src/version"), "1.34.0").unwrap();
+        std::fs::write(test_repo.join("src/version"), rust_version.to_string()).unwrap();
         write_script(
             &test_repo.join("x"),
             "\
@@ -2359,6 +2362,8 @@ mod tests {
             touch build/foo/stage2-tools-bin/bar-fmt
             echo 'build output line 1'
             echo 'build output line 2'
+            env >> x_env
+            echo '=====' >> x_env
             ",
         );
 
@@ -2398,7 +2403,7 @@ mod tests {
             Platform::new("x86_64", Os::Linux),
         );
 
-        let (test_repo, version) = create_fake_rust_repo(&tmp_dir);
+        let (test_repo, version) = create_fake_rust_repo(&tmp_dir, Version::new(1, 34, 0));
 
         let repo_url = format!("file://{}", test_repo.display());
 
@@ -2468,7 +2473,7 @@ mod tests {
             Platform::new("x86_64", Os::Linux),
         );
 
-        let (test_repo, master) = create_fake_rust_repo(&tmp_dir);
+        let (test_repo, master) = create_fake_rust_repo(&tmp_dir, Version::new(1, 34, 0));
 
         let repo_url = format!("file://{}", test_repo.display());
         rzup.build_rust_toolchain(&repo_url, &Some("foo".to_string()), &None)
@@ -2492,5 +2497,65 @@ mod tests {
                 format!(".risc0/toolchains/v{foo}-rust-x86_64-unknown-linux-gnu/bin/rustc"),
             ],
         );
+    }
+
+    fn parse_env_output(input: &str) -> Vec<HashMap<&str, &str>> {
+        let Some(last_divider) = input.rfind("====") else {
+            return vec![];
+        };
+
+        input[..last_divider]
+            .split("====")
+            .map(|invocation| {
+                invocation
+                    .split("\n")
+                    .filter_map(|line| line.split_once("="))
+                    .collect()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn build_rust_toolchain_loweratomic_flag() {
+        let expectations = [
+            (Version::new(1, 80, 0), "-Cpasses=loweratomic"),
+            (Version::new(1, 81, 0), "-Cpasses=loweratomic"),
+            (Version::new(1, 81, 1), "-Cpasses=loweratomic"),
+            (Version::new(1, 82, 0), "-Cpasses=lower-atomic"),
+            (Version::new(1, 82, 1), "-Cpasses=lower-atomic"),
+            (Version::new(1, 83, 0), "-Cpasses=lower-atomic"),
+        ];
+
+        for (version, expected_lower_atomic) in expectations {
+            let server = MockDistributionServer::new();
+            let (tmp_dir, mut rzup) = setup_test_env(
+                server.base_urls.clone(),
+                None,
+                Platform::new("x86_64", Os::Linux),
+            );
+
+            let (test_repo, _) = create_fake_rust_repo(&tmp_dir, version.clone());
+            let repo_url = format!("file://{}", test_repo.display());
+
+            rzup.build_rust_toolchain(&repo_url, &Some("master".to_string()), &None)
+                .unwrap();
+
+            // Our fake x script creates this file
+            let env_raw = std::fs::read_to_string(
+                tmp_dir.path().join(".risc0/tmp/build-rust-toolchain/x_env"),
+            )
+            .unwrap();
+            let env = parse_env_output(&env_raw);
+
+            // two ./x invocations
+            assert_eq!(env.len(), 2);
+
+            for e in env {
+                assert_eq!(
+                    e["CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS"], expected_lower_atomic,
+                    "lower atomic unexpected for {version}"
+                );
+            }
+        }
     }
 }

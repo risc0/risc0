@@ -23,12 +23,12 @@ use risc0_zkp::{
 };
 
 use super::{
-    pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor, SimpleSession,
-    SyscallContext,
+    executor::CycleLimit, pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor,
+    SimpleSession, SyscallContext,
 };
 
-pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
-pub const MIN_CYCLES_PO2: usize = log2_ceil(LOOKUP_TABLE_CYCLES + RESERVED_PAGING_CYCLES as usize);
+pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);
+pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
 pub struct NullSyscall;
@@ -50,7 +50,7 @@ pub fn execute<S: Syscall>(
     image: MemoryImage,
     segment_limit_po2: usize,
     max_insn_cycles: usize,
-    max_cycles: Option<u64>,
+    max_cycles: CycleLimit,
     syscall_handler: &S,
     input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {
@@ -325,18 +325,18 @@ fn insn_b(imm: u32, rs2: u32, rs1: u32, funct3: u32, opcode: u32) -> u32 {
     let imm_10_5 = (imm >> 5) & 0b111111;
     let imm_11 = (imm >> 11) & 0b1;
     let imm_4_1 = (imm >> 1) & 0b1111;
-    ((imm_12 << 6 | imm_10_5) << 25)
+    (((imm_12 << 6) | imm_10_5) << 25)
         | (rs2 << 20)
         | (rs1 << 15)
         | (funct3 << 12)
-        | ((imm_4_1 << 1 | imm_11) << 7)
+        | (((imm_4_1 << 1) | imm_11) << 7)
         | opcode
 }
 
 // 31                                   12 | 11        7 | 6    0 |
 //    imm[31:12]                           |      rd     | opcode |
 fn insn_u(imm: u32, rd: u32, opcode: u32) -> u32 {
-    (imm << 12) | rd << 7 | opcode
+    (imm << 12) | (rd << 7) | opcode
 }
 
 fn fence() -> u32 {

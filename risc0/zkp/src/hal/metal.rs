@@ -1014,9 +1014,8 @@ mod tests {
             let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
             let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
-            use rand::thread_rng;
             use risc0_core::field::Elem as _;
-            let mut rng = thread_rng();
+            let mut rng = rand::rng();
             let io: Vec<_> = (0..size)
                 .map(|_| BabyBearExtElem::random(&mut rng))
                 .collect();

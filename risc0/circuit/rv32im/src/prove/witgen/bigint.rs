@@ -20,9 +20,7 @@ use risc0_binfmt::WordAddr;
 
 use crate::{
     execute::{
-        bigint::{
-            BigIntBytes, BigIntWitness, BIGINT_STATE_COUNT, BIGINT_WIDTH_BYTES, BIGINT_WIDTH_WORDS,
-        },
+        bigint::{BigIntBytes, BigIntWitness, BIGINT_WIDTH_BYTES, BIGINT_WIDTH_WORDS},
         r0vm::{LoadOp, Risc0Context},
         CycleState, WORD_SIZE,
     },
@@ -32,10 +30,12 @@ use crate::{
 use super::{byte_poly::BytePolyProgram, preflight::Preflight};
 
 const BIGINT_STATE_LAYOUT: &BigIntStateLayout = LAYOUT_TOP.inst_result.arm12.state;
+const BIGINT_STATE_COUNT: usize = 6 + 16;
 
 #[derive(Clone, Debug)]
 pub(crate) struct BigIntState {
     pub is_ecall: bool,
+    pub mode: u32,
     pub pc: WordAddr,
     pub poly_op: PolyOp,
     pub coeff: u32,
@@ -83,12 +83,12 @@ impl Instruction {
     // mmmmppppcccaaaaaoooooooooooooooo
     pub fn decode(insn: u32) -> Result<Self> {
         Ok(Self {
-            mem_op: MemoryOp::from_u32(insn >> 28 & 0x0f)
+            mem_op: MemoryOp::from_u32((insn >> 28) & 0x0f)
                 .ok_or_else(|| anyhow!("Invalid mem_op in bigint program"))?,
-            poly_op: PolyOp::from_u32(insn >> 24 & 0x0f)
+            poly_op: PolyOp::from_u32((insn >> 24) & 0x0f)
                 .ok_or_else(|| anyhow!("Invalid poly_op in bigint program"))?,
-            coeff: (insn >> 21 & 0x07) as i32 - 4,
-            reg: insn >> 16 & 0x1f,
+            coeff: ((insn >> 21) & 0x07) as i32 - 4,
+            reg: (insn >> 16) & 0x1f,
             offset: insn & 0xffff,
         })
     }
@@ -181,6 +181,7 @@ impl BigIntState {
     pub(crate) const fn offsets() -> [usize; BIGINT_STATE_COUNT] {
         [
             BIGINT_STATE_LAYOUT.is_ecall._super.offset,
+            BIGINT_STATE_LAYOUT.mode._super.offset,
             BIGINT_STATE_LAYOUT.pc._super.offset,
             BIGINT_STATE_LAYOUT.poly_op._super.offset,
             BIGINT_STATE_LAYOUT.coeff._super.offset,
@@ -207,6 +208,7 @@ impl BigIntState {
     pub(crate) fn as_array(&self) -> [u32; BIGINT_STATE_COUNT] {
         [
             self.is_ecall as u32,
+            self.mode,
             self.pc.0,
             self.poly_op as u32,
             self.coeff,
@@ -236,6 +238,7 @@ pub(crate) fn ecall_preflight(ctx: &mut Preflight) -> Result<()> {
 
     let state = BigIntState {
         is_ecall: true,
+        mode: exec.mode,
         pc: exec.verify_program_ptr,
         poly_op: PolyOp::Reset,
         coeff: 0,

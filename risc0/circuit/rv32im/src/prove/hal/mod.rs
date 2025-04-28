@@ -136,7 +136,7 @@ where
                     StepMode::Parallel
                 };
             } else {
-                let mut rng = rand::thread_rng();
+                let mut rng = rand::rng();
                 let rand_z = ExtVal::random(&mut rng);
                 let mode = StepMode::Parallel;
             }

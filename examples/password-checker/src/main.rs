@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
 
 use password_checker_core::PasswordRequest;
 use password_checker_methods::PW_CHECKER_ELF;
-use rand::prelude::*;
+use rand::RngCore as _;
 use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv};
 
 fn main() {
-    let mut rng = StdRng::from_entropy();
+    let mut rng = rand::rng();
     let mut salt = [0u8; 32];
     rng.fill_bytes(&mut salt);
 

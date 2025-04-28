@@ -20,13 +20,14 @@ use risc0_zkp::field::Elem as _;
 use smallvec::{smallvec, SmallVec};
 
 use crate::{
-    execute::bigint::{BIGINT_ACCUM_STATE_COUNT, BIGINT_WIDTH_BYTES},
+    execute::bigint::BIGINT_WIDTH_BYTES,
     zirgen::circuit::{BigIntAccumStateLayout, ExtVal, LAYOUT_TOP_ACCUM},
 };
 
 use super::bigint::{BigIntState, Instruction, PolyOp};
 
 const BIGINT_ACCUM_STATE_LAYOUT: &BigIntAccumStateLayout = LAYOUT_TOP_ACCUM.user._0.state;
+const BIGINT_ACCUM_STATE_COUNT: usize = 3 * 4;
 
 #[derive(Debug)]
 pub(crate) struct BytePolyProgram {

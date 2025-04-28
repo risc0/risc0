@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, io::Cursor};
+pub mod analyze;
 
-use anyhow::Result;
+use std::{collections::BTreeMap, io::Cursor};
+
+use anyhow::{ensure, Result};
 use malachite::Natural;
 use risc0_binfmt::WordAddr;
 
@@ -24,9 +26,6 @@ use super::{
     r0vm::{LoadOp, Risc0Context},
 };
 
-pub(crate) const BIGINT_STATE_COUNT: usize = 5 + 16;
-pub(crate) const BIGINT_ACCUM_STATE_COUNT: usize = 3 * 4;
-
 /// BigInt width, in words, handled by the BigInt accelerator circuit.
 pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;
 
@@ -34,7 +33,7 @@ pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;
 pub(crate) const BIGINT_WIDTH_BYTES: usize = BIGINT_WIDTH_WORDS * WORD_SIZE;
 
 pub(crate) type BigIntBytes = [u8; BIGINT_WIDTH_BYTES];
-pub(crate) type BigIntWitness = HashMap<WordAddr, BigIntBytes>;
+pub(crate) type BigIntWitness = BTreeMap<WordAddr, BigIntBytes>;
 
 fn bytes_le_to_bigint(bytes: &[u8]) -> Natural {
     let mut limbs = Vec::with_capacity((bytes.len() + 3) / 4);
@@ -60,16 +59,26 @@ fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
 
 struct BigIntIOImpl<'a> {
     ctx: &'a mut dyn Risc0Context,
+    mode: u32,
     pub witness: BigIntWitness,
 }
 
 impl<'a> BigIntIOImpl<'a> {
-    pub fn new(ctx: &'a mut dyn Risc0Context) -> Self {
+    pub fn new(ctx: &'a mut dyn Risc0Context, mode: u32) -> Self {
         Self {
             ctx,
-            witness: HashMap::new(),
+            mode,
+            witness: BTreeMap::new(),
         }
     }
+}
+
+fn check_bigint_addr(addr: WordAddr, mode: u32) -> Result<()> {
+    ensure!(
+        addr >= ZERO_PAGE_END_ADDR.waddr() && mode == 1 || addr < USER_BIGINT_END_ADDR.waddr(),
+        "Invalid bigint address"
+    );
+    Ok(())
 }
 
 impl BigIntIO for BigIntIOImpl<'_> {
@@ -79,6 +88,7 @@ impl BigIntIO for BigIntIOImpl<'_> {
             .ctx
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
         let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
+        check_bigint_addr(addr, self.mode)?;
         let bytes = self
             .ctx
             .load_region(LoadOp::Load, addr.baddr(), count as usize)?;
@@ -91,6 +101,7 @@ impl BigIntIO for BigIntIOImpl<'_> {
             .ctx
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
         let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
+        check_bigint_addr(addr, self.mode)?;
         tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})");
 
         let mut witness = vec![0u8; count as usize];
@@ -109,6 +120,7 @@ impl BigIntIO for BigIntIOImpl<'_> {
 }
 
 pub(crate) struct BigIntExec {
+    pub(crate) mode: u32,
     pub(crate) verify_program_ptr: WordAddr,
     pub(crate) verify_program_size: usize,
     pub(crate) witness: BigIntWitness,
@@ -129,6 +141,11 @@ pub fn ecall_execute(ctx: &mut dyn Risc0Context) -> Result<usize> {
 pub(crate) fn ecall(ctx: &mut dyn Risc0Context) -> Result<BigIntExec> {
     tracing::debug!("ecall");
 
+    let mode = ctx.load_machine_register(LoadOp::Record, REG_T0)?;
+    ensure!(
+        mode == 0 || mode == 1,
+        "Invalid mode for bigint ecall: {mode}"
+    );
     let blob_ptr = ctx.load_aligned_addr_from_machine_register(LoadOp::Load, REG_A0)?;
     let nondet_program_ptr = ctx.load_aligned_addr_from_machine_register(LoadOp::Load, REG_T1)?;
     let verify_program_ptr =
@@ -153,7 +170,7 @@ pub(crate) fn ecall(ctx: &mut dyn Risc0Context) -> Result<BigIntExec> {
     let program = bibc::Program::decode(&mut cursor)?;
 
     let witness = {
-        let mut io = BigIntIOImpl::new(ctx);
+        let mut io = BigIntIOImpl::new(ctx, mode);
         program.eval(&mut io)?;
         std::mem::take(&mut io.witness)
     };
@@ -170,6 +187,7 @@ pub(crate) fn ecall(ctx: &mut dyn Risc0Context) -> Result<BigIntExec> {
     )?;
 
     Ok(BigIntExec {
+        mode,
         verify_program_ptr,
         verify_program_size,
         witness,

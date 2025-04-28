@@ -175,7 +175,7 @@ pub fn build_rust_toolchain(
 ) -> Result<Version> {
     env.emit(RzupEvent::BuildingRustToolchain);
 
-    let _lock_file = env.flock("rust-toolchain-build", "building a Rust toolchain")?;
+    let _lock_file = env.flock("rust-toolchain-build")?;
 
     // if building from commit
     let repo_dir = match path {
@@ -219,7 +219,8 @@ pub fn build_rust_toolchain(
         message: "./x build".into(),
     });
 
-    let lower_atomic = if version > semver::Version::new(1, 81, 0) {
+    let req = semver::VersionReq::parse(">=1.82.0")?;
+    let lower_atomic = if req.matches(&version) {
         "-Cpasses=lower-atomic"
     } else {
         "-Cpasses=loweratomic"

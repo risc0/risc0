@@ -270,6 +270,13 @@ template <typename T> __device__ void extern_log(ExecContext& ctx, const char* m
   // printf("%s\n", message);
 }
 
+__device__ inline void extern_assert(ExecContext& ctx, Val cond, const char* message) {
+  // if (cond != 0) {
+  //   printf("assertion failed: %s\n", message);
+  //   assert(0);
+  // }
+}
+
 // Setup the basic field stuff
 #define SET_FIELD(x) /**/
 

@@ -277,6 +277,7 @@ void extern_memoryDelta(
 uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle);
 Val extern_isFirstCycle_0(ExecContext& ctx);
 void extern_log(ExecContext& ctx, const std::string& message, std::vector<Val> vals);
+void extern_assert(ExecContext& ctx, Val cond, const char* message);
 std::array<Val, 4> extern_divide(
     ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType);
 void extern_print(ExecContext& ctx, Val v);

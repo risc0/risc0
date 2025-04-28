@@ -130,9 +130,7 @@ impl ShowCommand {
                 sorted_versions.sort_by(|a, b| b.cmp(a)); // sort newest to oldest
 
                 for version in sorted_versions {
-                    let is_default = default_version
-                        .as_ref()
-                        .map_or(false, |(v, _)| v == &version);
+                    let is_default = default_version.as_ref().is_some_and(|(v, _)| v == &version);
                     let marker = if is_default { "* " } else { "  " };
                     rzup.print(format!("{}{version}", marker.bold()));
                 }
@@ -272,7 +270,7 @@ pub const BUILD_HELP: &str = "Discussion:
     the default version. The resulting component version contains the commit hash.";
 
 #[derive(Parser)]
-#[clap(group(
+#[command(group(
     ArgGroup::new("mode")
         .args(&["tag_or_commit", "path"])
         .required(true)

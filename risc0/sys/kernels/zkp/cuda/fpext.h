@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ struct FpExt {
   Fp elems[4];
 
   /// Default constructor makes the zero elements
-  __device__ constexpr FpExt() {}
+  __host__ __device__ constexpr FpExt() {}
 
   /// Initialize from uint32_t
-  __device__ explicit constexpr FpExt(uint32_t x) {
+  __host__ __device__ explicit constexpr FpExt(uint32_t x) {
     elems[0] = x;
     elems[1] = 0;
     elems[2] = 0;
@@ -46,7 +46,7 @@ struct FpExt {
   }
 
   /// Convert from Fp to FpExt.
-  __device__ explicit constexpr FpExt(Fp x) {
+  __host__ __device__ explicit constexpr FpExt(Fp x) {
     elems[0] = x;
     elems[1] = 0;
     elems[2] = 0;
@@ -54,14 +54,14 @@ struct FpExt {
   }
 
   /// Explicitly construct an FpExt from parts
-  __device__ constexpr FpExt(Fp a, Fp b, Fp c, Fp d) {
+  __host__ __device__ constexpr FpExt(Fp a, Fp b, Fp c, Fp d) {
     elems[0] = a;
     elems[1] = b;
     elems[2] = c;
     elems[3] = d;
   }
 
-  __device__ constexpr inline FpExt zeroize() {
+  __host__ __device__ constexpr inline FpExt zeroize() {
     for (uint32_t i = 0; i < 4; i++) {
       elems[i].zeroize();
     }
@@ -69,66 +69,66 @@ struct FpExt {
   }
 
   // Implement the addition/subtraction overloads
-  __device__ constexpr FpExt operator+=(FpExt rhs) {
+  __host__ __device__ constexpr FpExt operator+=(FpExt rhs) {
     for (uint32_t i = 0; i < 4; i++) {
       elems[i] += rhs.elems[i];
     }
     return *this;
   }
 
-  __device__ constexpr FpExt operator-=(FpExt rhs) {
+  __host__ __device__ constexpr FpExt operator-=(FpExt rhs) {
     for (uint32_t i = 0; i < 4; i++) {
       elems[i] -= rhs.elems[i];
     }
     return *this;
   }
 
-  __device__ constexpr FpExt operator+(FpExt rhs) const {
+  __host__ __device__ constexpr FpExt operator+(FpExt rhs) const {
     FpExt result = *this;
     result += rhs;
     return result;
   }
 
-  __device__ constexpr FpExt operator-(FpExt rhs) const {
+  __host__ __device__ constexpr FpExt operator-(FpExt rhs) const {
     FpExt result = *this;
     result -= rhs;
     return result;
   }
 
-  __device__ constexpr FpExt operator-() const { return FpExt() - *this; }
+  __host__ __device__ constexpr FpExt operator-() const { return FpExt() - *this; }
 
   // Implement the simple multiplication case by the subfield Fp
   // Fp * FpExt is done as a free function due to C++'s operator overloading rules.
-  __device__ constexpr FpExt operator*=(Fp rhs) {
+  __host__ __device__ constexpr FpExt operator*=(Fp rhs) {
     for (uint32_t i = 0; i < 4; i++) {
       elems[i] *= rhs;
     }
     return *this;
   }
 
-  __device__ constexpr FpExt operator*(Fp rhs) const {
+  __host__ __device__ constexpr FpExt operator*(Fp rhs) const {
     FpExt result = *this;
     result *= rhs;
     return result;
   }
 
-  __device__ constexpr FpExt operator+=(Fp rhs) {
+  __host__ __device__ constexpr FpExt operator+=(Fp rhs) {
     elems[0] += rhs;
     return *this;
   }
 
-  __device__ constexpr FpExt operator+(Fp rhs) const {
+  __host__ __device__ constexpr FpExt operator+(Fp rhs) const {
     FpExt result = *this;
     result += rhs;
     return result;
   }
 
-  __device__ constexpr FpExt operator-=(Fp rhs) {
+  __host__ __device__ constexpr FpExt operator-=(Fp rhs) {
     elems[0] -= rhs;
     return *this;
   }
 
-  __device__ constexpr FpExt operator-(Fp rhs) const {
+  __host__ __device__ constexpr FpExt operator-(Fp rhs) const {
     FpExt result = *this;
     result -= rhs;
     return result;
@@ -138,7 +138,7 @@ struct FpExt {
   // representations, and then reduce module x^4 - B, which means powers >= 4 get shifted back 4 and
   // multiplied by -beta.  We could write this as a double loops with some if's and hope it gets
   // unrolled properly, but it's small enough to just hand write.
-  __device__ constexpr FpExt operator*(FpExt rhs) const {
+  __host__ __device__ constexpr FpExt operator*(FpExt rhs) const {
     // Rename the element arrays to something small for readability
 #define a elems
 #define b rhs.elems
@@ -149,13 +149,13 @@ struct FpExt {
 #undef a
 #undef b
   }
-  __device__ constexpr FpExt operator*=(FpExt rhs) {
+  __host__ __device__ constexpr FpExt operator*=(FpExt rhs) {
     *this = *this * rhs;
     return *this;
   }
 
   // Equality
-  __device__ constexpr bool operator==(FpExt rhs) const {
+  __host__ __device__ constexpr bool operator==(FpExt rhs) const {
     for (uint32_t i = 0; i < 4; i++) {
       if (elems[i] != rhs.elems[i]) {
         return false;
@@ -164,28 +164,28 @@ struct FpExt {
     return true;
   }
 
-  __device__ constexpr bool operator!=(FpExt rhs) const { return !(*this == rhs); }
+  __host__ __device__ constexpr bool operator!=(FpExt rhs) const { return !(*this == rhs); }
 
-  __device__ constexpr Fp constPart() const { return elems[0]; }
+  __host__ __device__ constexpr Fp constPart() const { return elems[0]; }
 };
 
 /// Overload for case where LHS is Fp (RHS case is handled as a method)
-__device__ constexpr inline FpExt operator*(Fp a, FpExt b) {
+__host__ __device__ constexpr inline FpExt operator*(Fp a, FpExt b) {
   return b * a;
 }
 
 // Commutate the two arguments
-__device__ constexpr inline FpExt operator+(Fp a, FpExt b) {
+__host__ __device__ constexpr inline FpExt operator+(Fp a, FpExt b) {
   return b + a;
 }
 
 // Add negative b
-__device__ constexpr inline FpExt operator-(Fp a, FpExt b) {
+__host__ __device__ constexpr inline FpExt operator-(Fp a, FpExt b) {
   return a + (-b);
 }
 
 /// Raise an FpExt to a power
-__device__ constexpr inline FpExt pow(FpExt x, size_t n) {
+__host__ __device__ constexpr inline FpExt pow(FpExt x, size_t n) {
   FpExt tot(1);
   while (n != 0) {
     if (n % 2 == 1) {
@@ -198,7 +198,7 @@ __device__ constexpr inline FpExt pow(FpExt x, size_t n) {
 }
 
 /// Compute the multiplicative inverse of an FpExt.
-__device__ constexpr inline FpExt inv(FpExt in) {
+__host__ __device__ constexpr inline FpExt inv(FpExt in) {
 #define a in.elems
   // Compute the multiplicative inverse by basically looking at FpExt as a composite field and using
   // the same basic methods used to invert complex numbers.  We imagine that initially we have a

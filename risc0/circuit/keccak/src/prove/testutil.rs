@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use rand::{thread_rng, Rng};
+use rand::Rng;
 use risc0_zkp::{
     adapter::CircuitInfo as _,
     field::{
@@ -47,7 +47,7 @@ pub struct EvalCheckParams {
 
 impl EvalCheckParams {
     pub fn new(po2: usize) -> Self {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let steps = 1 << po2;
         let domain = steps * INV_RATE;
         let code_size = TAPSET.group_size(REGISTER_GROUP_CODE);

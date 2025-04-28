@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,6 +55,19 @@ extern "C" {
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,
         count: u32,
+        col_size: u32,
+    ) -> sppark::Error;
+
+    pub fn sppark_poseidon254_fold(
+        d_out: DevicePointer<u8>,
+        d_in: DevicePointer<u8>,
+        num_hashes: usize,
+    ) -> sppark::Error;
+
+    pub fn sppark_poseidon254_rows(
+        d_out: DevicePointer<u8>,
+        d_in: DevicePointer<u8>,
+        count: usize,
         col_size: u32,
     ) -> sppark::Error;
 
