@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM update_task_progress($1, $2, $3) as updated",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "updated",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Float4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2bbd0c900dd78c6bbfd9fd26169d514fa9836ccac402906287b8e8065401b4b6"
+}

@@ -27,8 +27,8 @@ impl Syscall for SysRandom {
     ) -> Result<(u32, u32)> {
         tracing::debug!("SYS_RANDOM: {}", to_guest.len());
         let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
-        getrandom::getrandom(rand_buf.as_mut_slice())?;
+        rand::fill(rand_buf.as_mut_slice());
         bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
-        Ok((0, 0))
+        Ok(((to_guest.len() * WORD_SIZE) as u32, 0))
     }
 }

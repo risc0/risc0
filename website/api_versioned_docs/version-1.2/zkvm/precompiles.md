@@ -112,7 +112,7 @@ precompiles that are still undergoing revision and review, and so users must opt
 features by setting the `"unstable"` [feature flag][feature-flag] on the `risc0-zkvm` crate used by
 the zkVM guest and by the `risc0-build` crate used to build the guest. These also require using
 versions `>=1.2.0` of `risc0` crates. For users who need a stable, production-ready version we are
-working on stablizing these precompiles as soon as possible, and the `"unstable"` feature flag will
+working on stabilizing these precompiles as soon as possible, and the `"unstable"` feature flag will
 no longer be required.
 
 [^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA

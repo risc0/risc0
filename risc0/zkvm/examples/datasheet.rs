@@ -23,7 +23,10 @@ use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use risc0_bigint2_methods::ECDSA_ELF as BIGINT2_ELF;
 use risc0_binfmt::ProgramBinary;
-use risc0_circuit_rv32im::{execute::RESERVED_CYCLES, MAX_INSN_CYCLES};
+use risc0_circuit_rv32im::{
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, RESERVED_CYCLES},
+    MAX_INSN_CYCLES,
+};
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
@@ -52,8 +55,12 @@ const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
 
 const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
 
-const ITERATIONS_1M_CYCLES: usize = 1024 * 507 + 2;
-const EXPECTED_RESERVED_CYCLES: usize = RESERVED_CYCLES + MAX_INSN_CYCLES;
+/// The number of iterations of the LOOP_ELF needed to fill up a po2=20 segment.
+const ITERATIONS_FULL_PO2_20_SEGMENT: usize = 1024 * 495 + 790;
+
+/// The maximum number of cycles in a segment that can be reserved (for fitting the
+/// potential next instruction and for lookup table + control when proving)
+const RESERVED_CYCLES_MAX: usize = RESERVED_CYCLES + MAX_INSN_CYCLES;
 
 /// Pre-compiled program that simply loops `count: u32` times (read from stdin).
 static LOOP_ELF: LazyLock<Vec<u8>> = LazyLock::new(|| {
@@ -68,24 +75,24 @@ struct PerformanceData {
     hashfn: String,
 
     /// Cycles per second.
-    #[tabled(display_with = "display::hertz")]
+    #[tabled(display = "display::hertz")]
     throughput: f64,
 
     #[serde_as(as = "DurationNanoSeconds")]
-    #[tabled(display_with = "display::duration")]
+    #[tabled(display = "display::duration")]
     duration: Duration,
 
     /// Either user execution cycle count or the total cycle count.
     ///
     /// When this is the total cycle count, it includes overhead associated with
     /// continuations and padding up to the nearest power of 2.
-    #[tabled(display_with = "display::cycles")]
+    #[tabled(display = "display::cycles")]
     cycles: u64,
 
-    #[tabled(display_with = "display::bytes")]
+    #[tabled(display = "display::bytes")]
     ram: u64,
 
-    #[tabled(display_with = "display::bytes")]
+    #[tabled(display = "display::bytes")]
     seal: u64,
 }
 
@@ -134,6 +141,9 @@ enum Command {
     Groth16,
     #[command(name = "bigint2")]
     BigInt2,
+    ZethShapella30,
+    ZethShapella50,
+    ZethShapella100,
 }
 
 #[derive(Default)]
@@ -179,12 +189,15 @@ impl Datasheet {
             #[cfg(feature = "docker")]
             Command::Groth16 => self.groth16(),
             Command::BigInt2 => self.bigint2(),
+            Command::ZethShapella30 => self.shapella30(),
+            Command::ZethShapella50 => self.shapella50(),
+            Command::ZethShapella100 => self.shapella100(),
         }
     }
 
     fn execute(&mut self) {
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
             .build()
             .unwrap();
 
@@ -193,8 +206,18 @@ impl Datasheet {
         let duration = start.elapsed();
 
         // We want to ensure that we're using a full single segment for this benchmark.
-        assert_eq!(session.segments.len(), 1);
-        assert!(session.reserved_cycles as usize <= EXPECTED_RESERVED_CYCLES);
+        assert_eq!(
+            session.segments.len(),
+            1,
+            "{} didn't fit in po2={DEFAULT_SEGMENT_LIMIT_PO2}",
+            session.total_cycles
+        );
+        assert!(
+            session.reserved_cycles as usize <= RESERVED_CYCLES_MAX,
+            "more room in the segment ({} <= {})",
+            session.reserved_cycles,
+            RESERVED_CYCLES_MAX
+        );
 
         let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
@@ -530,6 +553,44 @@ impl Datasheet {
         self.bigint2_prove_segment(&session, &segment);
     }
 
+    fn shapella_segment(&mut self, name: &str, bytes: &[u8]) {
+        // "shapella" is the name of ethereum block 17034870
+        // this test runs one segment of a zeth run on that block
+        println!("{}", name);
+        let segment = risc0_circuit_rv32im::execute::Segment::decode(bytes).unwrap();
+
+        let start = Instant::now();
+        segment.execute().unwrap();
+        let duration = start.elapsed();
+
+        let total_cycles = segment.suspend_cycle;
+        let throughput = (total_cycles as f64) / duration.as_secs_f64();
+        self.results.push(PerformanceData {
+            name: name.into(),
+            hashfn: "N/A".into(),
+            cycles: total_cycles.into(),
+            duration,
+            ram: 0,
+            seal: 0,
+            throughput,
+        });
+    }
+
+    fn shapella30(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-30.bin");
+        self.shapella_segment("zeth_shapella_30", bytes);
+    }
+
+    fn shapella50(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-50.bin");
+        self.shapella_segment("zeth_shapella_50", bytes);
+    }
+
+    fn shapella100(&mut self) {
+        let bytes: &[u8] = include_bytes!("shapella-100.bin");
+        self.shapella_segment("zeth_shapella_100", bytes);
+    }
+
     fn warmup(&self) {
         println!("warmup");
 
@@ -546,7 +607,7 @@ impl Datasheet {
         }
 
         let env = ExecutorEnv::builder()
-            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
+            .write_slice(&ITERATIONS_FULL_PO2_20_SEGMENT.to_le_bytes())
             .build()
             .unwrap();
         execute_elf(env, &LOOP_ELF).unwrap();

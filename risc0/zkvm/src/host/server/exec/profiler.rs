@@ -37,20 +37,23 @@ use std::{
 use addr2line::{
     fallible_iterator::FallibleIterator,
     gimli::{self, EndianRcSlice, RunTimeEndian},
-    object::{self, File, Object, ObjectSegment},
-    LookupResult, ObjectContext,
+    Context, LookupResult,
 };
 use anyhow::{anyhow, Result};
 use elf::{abi::STT_FUNC, endian::LittleEndian, ElfBytes};
+use object::{Object as _, ObjectSegment as _};
 use prost::Message;
 use risc0_binfmt::ProgramBinary;
 use risc0_zkvm_platform::memory::TEXT_START;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
 
+use self::inline::{InlineFunction, InlineFunctionTable};
 use super::proto;
 use crate::{TraceCallback, TraceEvent};
-use inline::{InlineFunction, InlineFunctionTable};
+
+type GimliReader = EndianRcSlice<RunTimeEndian>;
+type ObjectContext = Context<GimliReader>;
 
 /// Operations effecting the function call stack.
 #[derive(Debug)]
@@ -230,7 +233,7 @@ pub struct Frame {
     pub filename: String,
 }
 
-fn decode_frame(fr: addr2line::Frame<EndianRcSlice<RunTimeEndian>>) -> Option<Frame> {
+fn decode_frame(fr: addr2line::Frame<GimliReader>) -> Option<Frame> {
     Some(Frame {
         name: fr.function.as_ref()?.demangle().ok()?.to_string(),
         lineno: fr.location.as_ref()?.line? as i64,
@@ -306,7 +309,7 @@ impl Profiler {
         filename: Option<&str>,
         enable_inline_functions: bool,
     ) -> Result<Self> {
-        let file = File::parse(binary.user_elf)?;
+        let file = object::File::parse(binary.user_elf)?;
         let dwarf = load_dwarf(&file)?;
 
         let inline_function_table_result = if enable_inline_functions {
