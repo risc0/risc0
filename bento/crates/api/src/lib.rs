@@ -4,14 +4,14 @@
 
 use anyhow::{Context, Error as AnyhowErr, Result};
 use axum::{
+    async_trait,
     body::{to_bytes, Body},
-    extract::{FromRequestParts, Path, State},
+    extract::{FromRequestParts, Host, Path, State},
     http::{request::Parts, StatusCode},
     response::{IntoResponse, Response},
     routing::{get, post, put},
     Json, Router,
 };
-use axum_extra::extract::Host;
 use bonsai_sdk::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, ReceiptDownload, SessionStats, SessionStatusRes,
     SnarkReq, SnarkStatusRes, UploadRes,
@@ -55,6 +55,7 @@ impl std::fmt::Display for ErrMsg {
 
 pub struct ExtractApiKey(pub String);
 
+#[async_trait]
 impl<S> FromRequestParts<S> for ExtractApiKey
 where
     S: Send + Sync,
@@ -75,7 +76,7 @@ where
             }
         };
 
-        Ok(ExtractApiKey(api_key_str.to_string()))
+        return Ok(ExtractApiKey(api_key_str.to_string()));
     }
 }
 
