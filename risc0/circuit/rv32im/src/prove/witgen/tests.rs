@@ -14,7 +14,6 @@
 
 use std::rc::Rc;
 
-use rand::thread_rng;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::field::Elem;
 use test_log::test;
@@ -43,7 +42,7 @@ fn run_preflight(program: Program) {
     let segments = result.segments;
     let segment = segments.first().unwrap();
 
-    let mut rng = thread_rng();
+    let mut rng = rand::rng();
     let rand_z = ExtVal::random(&mut rng);
 
     segment.preflight(rand_z).unwrap();
@@ -90,7 +89,7 @@ fn fwd_rev_ab_test(program: Program) {
         }
     }
 
-    let mut rng = thread_rng();
+    let mut rng = rand::rng();
     let rand_z = ExtVal::random(&mut rng);
 
     let segments = session.segments;
