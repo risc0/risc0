@@ -19,6 +19,7 @@
 fn main() {}
 
 #[cfg(target_os = "zkvm")]
+#[allow(static_mut_refs)]
 mod zkvm {
     use core::{
         arch::{asm, global_asm},
@@ -41,6 +42,7 @@ mod zkvm {
     const USER_END_ADDR: usize = 0xc000_0000;
     const REG_A0: usize = 10;
     const REG_A1: usize = 11;
+    const REG_A4: usize = 14;
 
     const SHA_K: [u32; 64] = [
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4,
@@ -197,8 +199,14 @@ mod zkvm {
         );
     }
 
+    /// This is called from kernel.s when the ecall_software buffer size if greater than 1024. It
+    /// tries to chunk the host_ecall_read calls up. Only sys_read, sys_random, sys_slice_io
+    /// support this.
+    ///
+    /// Other syscalls either require a buffer of size zero, or they will error if the first call
+    /// doesn't return all the data.
     #[no_mangle]
-    unsafe extern "C" fn ecall_software(fd: u32, mut buf: *const u8, mut len: u32) -> ! {
+    unsafe extern "C" fn ecall_software(fd: u32, mut buf: *const u8, mut len: u32) {
         // use no_std_strings::{str256, str_format};
         // let msg = str_format!(str256, "ecall_software_slow({fd:#010x}, {buf:?}, {len})");
         // print(msg.to_str());
@@ -229,11 +237,15 @@ mod zkvm {
 
         set_ureg(REG_A0, nbytes);
         set_ureg(REG_A1, last_word);
-
-        asm!("mret", options(noreturn))
     }
 
     unsafe fn host_ecall_read(fd: u32, buf: *const u8, len: u32) -> u32 {
+        // For sys_read and sys_getenv this contains the length, so we need to update it.
+        // For sys_argv this register is unused, so it doesn't matter.
+        // For sys_random this register is unused, so it doesn't matter.
+        // For other syscalls, we might clobber something, but they'll error because length is > 0
+        set_ureg(REG_A4, len);
+
         let rlen: u32;
         asm!("ecall",
             in("a7") HOST_ECALL_READ,
@@ -300,7 +312,7 @@ mod zkvm {
         block1_ptr: *const u32,
         block2_ptr: *const u32,
         mut count: u32,
-    ) -> ! {
+    ) {
         let mut data_ptr = if block2_ptr == block1_ptr.add(DIGEST_WORDS) {
             block1_ptr
         } else {
@@ -329,7 +341,5 @@ mod zkvm {
             data_ptr = data_ptr.add(chunk as usize * BLOCK_WORDS);
             in_state = out_state;
         }
-
-        asm!("mret", options(noreturn))
     }
 }

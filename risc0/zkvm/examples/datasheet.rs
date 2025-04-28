@@ -75,24 +75,24 @@ struct PerformanceData {
     hashfn: String,
 
     /// Cycles per second.
-    #[tabled(display_with = "display::hertz")]
+    #[tabled(display = "display::hertz")]
     throughput: f64,
 
     #[serde_as(as = "DurationNanoSeconds")]
-    #[tabled(display_with = "display::duration")]
+    #[tabled(display = "display::duration")]
     duration: Duration,
 
     /// Either user execution cycle count or the total cycle count.
     ///
     /// When this is the total cycle count, it includes overhead associated with
     /// continuations and padding up to the nearest power of 2.
-    #[tabled(display_with = "display::cycles")]
+    #[tabled(display = "display::cycles")]
     cycles: u64,
 
-    #[tabled(display_with = "display::bytes")]
+    #[tabled(display = "display::bytes")]
     ram: u64,
 
-    #[tabled(display_with = "display::bytes")]
+    #[tabled(display = "display::bytes")]
     seal: u64,
 }
 

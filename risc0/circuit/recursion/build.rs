@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
-
 fn main() {
-    if env::var("CARGO_FEATURE_PROVE").is_ok()
-        && env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
-    {
-        println!(
-            "cargo:rustc-env=RECURSION_METAL_PATH={}",
-            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL").unwrap()
-        );
-    }
-
     #[cfg(feature = "prove")]
     download_zkr();
 }
@@ -31,7 +20,7 @@ fn main() {
 #[cfg(feature = "prove")]
 fn download_zkr() {
     use std::{
-        fs,
+        env, fs,
         path::{Path, PathBuf},
         str::FromStr,
     };
