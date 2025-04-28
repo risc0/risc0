@@ -6,8 +6,8 @@ FROM rust:1.84-bookworm AS circom
 # Set the working directory
 WORKDIR /usr/src/
 
-# Clone and build Circom version 2.1.9 from a specific commit
-ADD https://github.com/iden3/circom.git#2eaaa6dface934356972b34cab64b25d382e59de circom
+# Clone and build Circom version 2.2.2 from a specific commit
+ADD https://github.com/iden3/circom.git#e410b0d5cd2948a15931df0bc50d79ce56fa8c32 circom
 RUN (cd circom; cargo install --path circom)
 
 # Add the required circuit files
@@ -15,7 +15,7 @@ COPY groth16/risc0.circom groth16/risc0.circom
 COPY groth16/stark_verify.circom groth16/stark_verify.circom
 
 # Compile the circuit using Circom
-RUN (cd groth16; circom --r1cs --c stark_verify.circom)
+RUN (cd groth16; circom --r1cs --c --O2 --no_asm stark_verify.circom)
 
 # Stage 2: Compile the witness generator from scratch
 FROM debian:bookworm AS witgen
@@ -25,11 +25,26 @@ WORKDIR /usr/src/
 # Install necessary build dependencies
 RUN apt-get update -q -y && apt-get install -q -y build-essential clang libgmp-dev nasm nlohmann-json3-dev
 
-# Build the witness generator with Clang instead of GCC and no optimization (-O0)
 COPY --from=circom /usr/src/groth16/stark_verify_cpp/ stark_verify_cpp/
-RUN sed -i 's/g++/clang++/' stark_verify_cpp/Makefile && \
-  echo "stark_verify.o: stark_verify.cpp \$(DEPS_HPP)\n\t\$(CC) -c $< \$(CFLAGS) -O0" >> stark_verify_cpp/Makefile && \
-  (cd stark_verify_cpp; make)
+
+# Install python and slice up the witness generator
+RUN apt-get install -q -y python3-dev
+
+# Break the generated source file into smaller, function-sized pieces.
+COPY scripts/chunk.py scripts/chunk.py
+RUN python3 scripts/chunk.py stark_verify_cpp/stark_verify.cpp
+RUN rm stark_verify_cpp/stark_verify.cpp
+
+# One of the functions will be considerably larger than the rest;
+# break it down further, so it doesn't choke the compiler backend
+COPY scripts/outline.py scripts/outline.py
+RUN (BIG_FILE=$(du -h stark_verify_cpp/*.cpp | sort -rh | head -1 | awk '{ print $2 }'); \
+  python3 scripts/outline.py "$BIG_FILE"; \
+  rm "$BIG_FILE")
+
+COPY scripts/replacement-Makefile stark_verify_cpp/Makefile
+
+RUN (cd stark_verify_cpp; make -j`nproc`)
 
 # Stage 3: Build the Gnark prover
 FROM golang:1.23-bookworm AS gnark

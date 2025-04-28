@@ -34,7 +34,7 @@ pub struct BootstrapGroth16 {
     test_receipt_only: bool,
 }
 
-const SOL_HEADER: &str = r#"// Copyright 2024 RISC Zero, Inc.
+const SOL_HEADER: &str = r#"// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -188,7 +188,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 }
 
 // Return a Groth16 `Receipt` and the imageID used to generate the proof.
-// Requires running Docker on an x86 architecture.
+// Requires running Docker.
 fn generate_receipt() -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Echo {

@@ -90,8 +90,16 @@ pub(crate) trait Risc0Context {
 
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         let mut region = Vec::with_capacity(size);
-        for i in 0..size {
-            region.push(self.load_u8(op, addr + i)?);
+        if addr.is_aligned() && (0 == size % WORD_SIZE) {
+            let mut waddr = addr.waddr();
+            for _ in (0..size).step_by(WORD_SIZE) {
+                let word = self.load_u32(op, waddr.postfix_inc())?;
+                region.extend_from_slice(&word.to_le_bytes());
+            }
+        } else {
+            for i in 0..size {
+                region.push(self.load_u8(op, addr + i)?);
+            }
         }
         Ok(region)
     }

@@ -2,20 +2,19 @@
 
 #include "supra/fp.h"
 
+#include "eval_check.cuh"
+
 #include <cstdint>
 
-namespace risc0::circuit::recursion {
+namespace risc0::circuit::recursion::cuda {
 
-constexpr size_t INV_RATE = 4;
-__constant__ FpExt poly_mix[158];
-
-static __device__ __forceinline__ FpExt poly_fp(uint32_t idx,
-                                                uint32_t size,
-                                                const Fp* ctrl,
-                                                const Fp* out,
-                                                const Fp* data,
-                                                const Fp* mix,
-                                                const Fp* accum) {
+__device__ FpExt poly_fp(uint32_t idx,
+                         uint32_t size,
+                         const Fp* ctrl,
+                         const Fp* out,
+                         const Fp* data,
+                         const Fp* mix,
+                         const Fp* accum) {
   uint32_t mask = size - 1;
   Fp x0(0);
   Fp x1(1);
@@ -12379,26 +12378,4 @@ static __device__ __forceinline__ FpExt poly_fp(uint32_t idx,
   return x12358;
 }
 
-__global__ void eval_check(Fp* check,
-                           const Fp* ctrl,
-                           const Fp* data,
-                           const Fp* accum,
-                           const Fp* mix,
-                           const Fp* out,
-                           const Fp rou,
-                           const uint32_t po2,
-                           const uint32_t domain) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle < domain) {
-    FpExt tot = poly_fp(cycle, domain, ctrl, out, data, mix, accum);
-    Fp x = pow(rou, cycle);
-    Fp y = pow(Fp(3) * x, 1 << po2);
-    FpExt ret = tot * inv(y - Fp(1));
-    check[domain * 0 + cycle] = ret[0];
-    check[domain * 1 + cycle] = ret[1];
-    check[domain * 2 + cycle] = ret[2];
-    check[domain * 3 + cycle] = ret[3];
-  }
-}
-
-} // namespace risc0::circuit::recursion
+} // namespace risc0::circuit::recursion::cuda

@@ -69,6 +69,14 @@ impl ProverServer for ProverImpl {
             session.journal.as_ref().map(hex::encode),
             session.segments.len()
         );
+
+        ensure!(
+            self.opts.hashfn == "poseidon2",
+            "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
+            supported `hashfn` values are: \"poseidon2\".",
+            &self.opts.hashfn
+        );
+
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
@@ -214,6 +222,13 @@ impl ProverServer for ProverImpl {
             "segment po2 exceeds max on ProverOpts: {} > {}",
             segment.po2(),
             self.opts.max_segment_po2
+        );
+
+        ensure!(
+            self.opts.hashfn == "poseidon2",
+            "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
+            supported `hashfn` values are: \"poseidon2\".",
+            &self.opts.hashfn
         );
 
         let seal = risc0_circuit_rv32im::prove::segment_prover()?.prove(&segment.inner)?;

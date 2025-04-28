@@ -193,6 +193,8 @@ impl Registry {
         let component_to_install = component.parent_component().unwrap_or(*component);
         let version = self.version_or_latest(env, &component_to_install, version)?;
 
+        let _lock_file = env.flock(&format!(".{component_to_install}-{version}"))?;
+
         if !force {
             if let Some(path) = Paths::find_version_dir(env, &component_to_install, &version)? {
                 env.emit(RzupEvent::ComponentAlreadyInstalled {

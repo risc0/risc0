@@ -2,8 +2,10 @@
 
 import sys
 import os
+import re
 from pathlib import Path
 import subprocess
+import argparse
 
 PUBLIC_HEADER = """
 // Copyright {YEAR} RISC Zero, Inc.
@@ -19,7 +21,11 @@ PUBLIC_HEADER = """
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-""".strip().splitlines()
+""".strip()
+
+PUBLIC_HEADER_RE = re.compile(
+    "^" + PUBLIC_HEADER.replace("(", "\\(").replace(")", "\\)").replace("{YEAR}", "(?P<year>[0-9]+)"),
+)
 
 EXTENSIONS = [
     ".cpp",
@@ -33,30 +39,47 @@ SKIP_DIRS = [
     str(Path.cwd()) + "/risc0/zkvm/src/host/protos",
     str(Path.cwd()) + "/risc0/zkvm/src/host/server/exec",
     str(Path.cwd()) + "/risc0/cargo-risczero/tests/test_crate",
+    str(Path.cwd()) + "/bento",
 ]
 
 
-def check_header(expected_year, lines_actual):
-    for expected, actual in zip(PUBLIC_HEADER, lines_actual):
-        expected = expected.replace("{YEAR}", expected_year)
-        if expected != actual:
-            return (expected, actual)
-    return None
+def fix_file(file_obj, file_contents, start, end, insert):
+    file_contents = file_contents[:start] + insert + file_contents[end:]
+    file_obj.seek(0)
+    file_obj.truncate()
+    file_obj.write(file_contents)
 
-
-def check_file(root, file):
+def check_file(root, file, fix):
     cmd = ["git", "log", "-1", "--format=%ad", "--date=format:%Y", file]
     expected_year = subprocess.check_output(cmd, encoding="UTF-8").strip()
     rel_path = file.relative_to(root)
-    lines = file.read_text().splitlines()
-    result = check_header(expected_year, lines)
-    if result:
-        print(f"{rel_path}: invalid header!")
-        print(f"  expected: {result[0]}")
-        print(f"    actual: {result[1]}")
-        return 1
-    return 0
 
+    with open(file, "r+") as file_obj:
+        file_contents = file_obj.read()
+        match = PUBLIC_HEADER_RE.match(file_contents)
+
+        if match:
+            actual_year = match.group("year")
+            if actual_year != expected_year:
+                print(f"{rel_path}: invalid header!")
+                print(f"license has wrong year {actual_year}, expected {expected_year}")
+                if fix:
+                    print(f"fixing {rel_path}")
+                    start, end = match.span(1)
+                    fix_file(file_obj, file_contents, start, end, expected_year)
+                else:
+                    return 1
+        else:
+            print(f"{rel_path}: invalid header!")
+            print("license completely missing")
+            if fix:
+                print(f"fixing {rel_path}")
+                header = PUBLIC_HEADER.replace("{YEAR}", expected_year) + '\n'
+                fix_file(file_obj, file_contents, 0, 0, header)
+            else:
+                return 1
+
+    return 0
 
 def repo_root():
     """Return an absolute Path to the repo root"""
@@ -73,6 +96,11 @@ def tracked_files():
 
 
 def main():
+
+    parser = argparse.ArgumentParser(description="to update years, use the --fix option")
+    parser.add_argument("--fix", action="store_true", help="modify files with correct year")
+    args = parser.parse_args()
+
     root = repo_root()
     ret = 0
     for path in tracked_files():
@@ -85,7 +113,7 @@ def main():
             if skip:
                 continue
 
-            ret |= check_file(root, path)
+            ret |= check_file(root, path, args.fix)
     sys.exit(ret)
 
 

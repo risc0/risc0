@@ -104,7 +104,7 @@ enum SyncSliceRef<'a, T: Default + Clone> {
 /// A buffer which can be used across multiple threads.  Users are
 /// responsible for ensuring that no two threads access the same
 /// element at the same time.
-pub struct SyncSlice<'a, T: Default + Clone> {
+pub(crate) struct SyncSlice<'a, T: Default + Clone> {
     _buf: SyncSliceRef<'a, T>,
     ptr: *mut T,
     size: usize,
@@ -205,7 +205,7 @@ impl<T: Default + Clone> CpuBuffer<T> {
         RwLockWriteGuard::map(vec, |vec| &mut vec.0[self.region.range()])
     }
 
-    pub fn as_slice_sync(&self) -> SyncSlice<'_, T> {
+    pub(crate) fn as_slice_sync(&self) -> SyncSlice<'_, T> {
         SyncSlice::new(self.as_slice_mut())
     }
 }
@@ -653,7 +653,6 @@ impl<F: Field> Hal for CpuHal<F> {
 #[cfg(test)]
 mod tests {
     use hex::FromHex;
-    use rand::thread_rng;
     use risc0_core::field::baby_bear::{BabyBear, BabyBearExtElem};
 
     use super::*;
@@ -692,7 +691,7 @@ mod tests {
         let b = hal.alloc_elem("b", count);
         let o = hal.alloc_elem("o", count);
         let mut golden = Vec::with_capacity(count);
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         a.view_mut(|a| {
             b.view_mut(|b| {
                 for i in 0..count {
