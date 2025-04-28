@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ macro_rules! baby_bear_array {
 }
 
 /// The number of state elements (also known as "cells") used in the Poseidon2 hash function.
-/// 
+///
 /// Poseidon2 operates over a fixed-width state, and `CELLS` defines that width. The value of 24
 /// means that the internal state of the hash function consists of 24 elements over the BabyBear field.
 /// This directly affects security level and performance.
@@ -43,7 +43,7 @@ pub const ROUNDS_PARTIAL: usize = 21;
 ///
 /// These constants are added to the state during each round of the permutation.
 /// The number of constants must match the number of total rounds multiplied by the number of cells (`CELLS`).
-/// 
+///
 /// These constants are derived from a trusted setup or generated via secure pseudorandom methods.
 /// See the Poseidon2 paper for details on round constants' role in cryptographic security.
 ///
