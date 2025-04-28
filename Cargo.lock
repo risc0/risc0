@@ -5544,7 +5544,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.2"
+version = "1.4.3"
 dependencies = [
  "anyhow",
  "clap 4.5.37",
@@ -5836,7 +5836,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -5980,7 +5980,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.2"
+version = "2.0.3"
 dependencies = [
  "bytemuck",
  "cfg-if",
