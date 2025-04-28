@@ -653,7 +653,6 @@ impl<F: Field> Hal for CpuHal<F> {
 #[cfg(test)]
 mod tests {
     use hex::FromHex;
-    use rand::thread_rng;
     use risc0_core::field::baby_bear::{BabyBear, BabyBearExtElem};
 
     use super::*;
@@ -692,7 +691,7 @@ mod tests {
         let b = hal.alloc_elem("b", count);
         let o = hal.alloc_elem("o", count);
         let mut golden = Vec::with_capacity(count);
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         a.view_mut(|a| {
             b.view_mut(|b| {
                 for i in 0..count {

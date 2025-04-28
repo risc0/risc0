@@ -37,14 +37,14 @@ bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
 enum-map = { version = "2.7.3", optional = true }
-malachite = { version = "0.4", optional = true, default-features = false, features = [
+malachite = { version = "0.4.22", optional = true, default-features = false, features = [
   "naturals_and_integers",
   "32_bit_limbs",
 ] }
 num-derive = { version = "0.4.2", optional = true }
 num-traits = { version = "0.2.19", optional = true }
 postcard = { version = "1.1.1", optional = true, features = ["use-std"] }
-rand = { version = "0.8", optional = true }
+rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
 ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }

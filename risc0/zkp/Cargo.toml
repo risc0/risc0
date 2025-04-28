@@ -23,7 +23,7 @@ ff = { version = "0.13", features = ["derive", "bits"], optional = true }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 hex-literal = "0.4.1"
 paste = "1.0"
-rand_core = "0.6"
+rand_core = "0.9.3"
 risc0-core = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
@@ -39,13 +39,13 @@ metal = { workspace = true }
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 ndarray = { version = "0.16", features = ["rayon"], optional = true }
 parking_lot = { version = "0.12", optional = true }
-rand = { version = "0.8", optional = true }
+rand = { version = "0.9.1", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-sys = { workspace = true, optional = true }
 
 [dev-dependencies]
 criterion = "0.5"
-rand = { version = "0.8", features = ["small_rng"] }
+rand = { version = "0.9.1", features = ["small_rng"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

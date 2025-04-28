@@ -264,7 +264,7 @@ fn rsa_compat() {
 fn bigint_accel() {
     use crate::host::server::testutils::generate_bigint_test_cases;
 
-    let cases = generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    let cases = generate_bigint_test_cases(10);
     for case in cases {
         println!("Running BigInt circuit test case: {:x?}", case);
         let input = MultiTestSpec::BigInt {

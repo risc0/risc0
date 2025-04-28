@@ -4,7 +4,7 @@
 
 use anyhow::{bail, Context, Result};
 use clap::Parser;
-use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
+use rand::{rngs::StdRng, seq::IndexedRandom as _, Rng, SeedableRng};
 use sqlx::{
     postgres::PgPoolOptions,
     types::{JsonValue, Uuid},
@@ -58,7 +58,7 @@ async fn spawner(shutdown: Arc<AtomicBool>, pool: PgPool, args: Args) -> Result<
     while !shutdown.load(Ordering::Relaxed) {
         // Pick a random
         let ((cpu_stream, gpu_stream), user_id) = customers.choose(&mut r).unwrap();
-        let segment_count = r.gen_range(1..args.max_job_size);
+        let segment_count = r.random_range(1..args.max_job_size);
         let task_def = serde_json::json!({
             "cpu_stream": gpu_stream.to_string(),
             "gpu_stream": gpu_stream.to_string(),
@@ -307,7 +307,7 @@ async fn worker(
                     }
                     "GPU" => {
                         // wait random ms in range
-                        // let seconds = r.gen_range(1..args.gpu_work_speed);
+                        // let seconds = r.random_range(1..args.gpu_work_speed);
                         tracing::info!(
                             "[{worker_id}] GPU running for {} ms, job: {}:{}",
                             args.gpu_work_speed,
@@ -317,7 +317,7 @@ async fn worker(
                         sleep(Duration::from_millis(args.gpu_work_speed)).await;
 
                         // 1 in N chance to fail a task
-                        if r.gen_range(0..args.gpu_fail_rate) == 0 {
+                        if r.random_range(0..args.gpu_fail_rate) == 0 {
                             tracing::error!(
                                 "Intentionally failing job: {}:{}",
                                 task.job_id,
@@ -334,7 +334,7 @@ async fn worker(
                                     task.task_id
                                 );
                             }
-                        } else if r.gen_range(0..args.gpu_retry_rate) == 0 {
+                        } else if r.random_range(0..args.gpu_retry_rate) == 0 {
                             tracing::warn!("Retrying task {}:{}", task.job_id, task.task_id);
 
                             if !update_task_retry(&pool, &task.job_id, &task.task_id)

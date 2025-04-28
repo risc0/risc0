@@ -646,8 +646,8 @@ jobs:
           key: Linux-default
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo xfast install
-      - run: cargo xfast gen-receipt
+      - run: cargo run --bin xtask -- install
+      - run: cargo run --bin xtask -- gen-receipt
       - run: |
           npm install
           npm test -- --firefox

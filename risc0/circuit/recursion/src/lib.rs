@@ -73,7 +73,7 @@ impl CircuitCoreDef<BabyBear> for CircuitImpl {}
 
 #[cfg(feature = "test")]
 pub mod testutil {
-    use rand::{thread_rng, Rng};
+    use rand::Rng;
     use risc0_zkp::{
         adapter::{CircuitInfo, TapsProvider},
         field::{
@@ -100,7 +100,7 @@ pub mod testutil {
 
     impl EvalCheckParams {
         pub fn new(po2: usize) -> Self {
-            let mut rng = thread_rng();
+            let mut rng = rand::rng();
             let steps = 1 << po2;
             let domain = steps * INV_RATE;
             let circuit = CircuitImpl::new();
