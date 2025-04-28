@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ extern crate alloc;
 
 use alloc::vec;
 
-use getrandom::getrandom;
+use getrandom::fill;
 
 risc0_zkvm::entry!(main);
 
 fn main() {
     // This should panic
     let rand_buf = &mut vec![0u8; 8];
-    let _res = getrandom(rand_buf);
+    let _res = fill(rand_buf);
 }

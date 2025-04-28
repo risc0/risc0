@@ -16,7 +16,7 @@ use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 
 use clap::Parser;
 use risc0_circuit_keccak::{prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
-use risc0_circuit_recursion::zkr::{get_all_zkrs, get_zkr};
+use risc0_circuit_recursion::prove::zkr::{get_all_zkrs, get_zkr};
 use risc0_zkp::core::{
     digest::Digest,
     hash::{
@@ -164,8 +164,7 @@ impl Bootstrap {
     }
 
     pub fn generate_identity_bn254_control_id() -> Digest {
-        let encoded_program = get_zkr("identity.zkr").unwrap();
-        let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
+        let program = get_zkr("identity.zkr", RECURSION_PO2).unwrap();
         program.compute_control_id(Poseidon254HashSuite::new_suite())
     }
 

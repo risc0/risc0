@@ -35,22 +35,39 @@ preemption, so there is also no support for atomic instructions. If the
 execution raises an exception such as an unaligned access, the execution
 terminates without executing exception handlers.
 
+## The User/Kernel Split
+
+The RISC Zero zkVM implements user and machine modes. The guest code running
+on the zkVM is divided into two components: the kernel and user-space programs,
+both executing the rv32im instruction set. The kernel functions as an operating
+system kernel, while user programs run in a separate user mode. This separation
+ensures that the kernel's resources remain protected from user-space
+code.
+
+While running, a user program may invoke an ECALL to perform I/O, call
+accelerators, or run custom system call handlers. When an ECALL is run in the
+user code, the zkVM traps the call and transfers control to the kernel.
+The kernel processes the request by dispatching it to the appropriate system
+call handler, which may involve delegating computation to the host. The dispatch
+is implemented in the kernel. Once the host returns the results, the kernel
+processes the response, delivers the result back to the user program, and
+resumes execution in user space.
+
 ## zkVM Memory Layout
 
-The following table summarizes the layout of the zkVM memory
+The following table summarizes the layout of the zkVM guest memory
 
 | Address Range             | Size   | Name          | Description                                                                                   |
 | ------------------------- | ------ | ------------- | --------------------------------------------------------------------------------------------- |
-| `0x00000000 - 0x000003ff` | 1 KB   | Invalid page  | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
-| `0x00000400 - 0x0BFFFFFF` | 192 MB | User Memory   | Contains code, heap, and stack of the guest program                                           |
-| `0x0C000000 - 0x0CFFFFFF` | 16 MB  | System Memory | Contains RISC-V registers and non-leaf Merkle tree nodes for the page table                   |
-| `0x0D000000 - 0x0DFFFFFF` | 16 MB  | Page Table    | Contains the Page Table                                                                       |
+| `0x00000000 - 0x0000FFFF` | 64 KiB | Invalid page  | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
+| `0x00010000 - 0xBFFFFFFF` | \~3 GB | User Memory   | Contains code, heap, and stack of the guest program                                           |
+| `0xC0000000 - 0xFF000000` | \~1 GB | Kernel Memory | Contains kernel code and data such as ecall/trap dispatch, register contents                  |
 
 ## zkVM Memory Model
 
 The zkVM executes instructions in order; in other words, instructions are never
 reordered and the zkVM's memory model is sequentially consistent. Unlike many
 processors, the zkVM has no notion of traditional memory caches and
-cache-coherency protocols implemented in the zkVM.
+cache-coherency protocols.
 
 [OsDevWiki]: https://wiki.osdev.org/Main_Page

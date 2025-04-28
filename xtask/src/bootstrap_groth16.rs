@@ -188,7 +188,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 }
 
 // Return a Groth16 `Receipt` and the imageID used to generate the proof.
-// Requires running Docker on an x86 architecture.
+// Requires running Docker.
 fn generate_receipt() -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Echo {

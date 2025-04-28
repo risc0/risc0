@@ -23,11 +23,11 @@ use risc0_zkp::{
 };
 
 use super::{
-    pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor, SimpleSession,
-    SyscallContext,
+    executor::CycleLimit, pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor,
+    SimpleSession, SyscallContext,
 };
 
-pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
+pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);
 pub const MIN_CYCLES_PO2: usize = log2_ceil(RESERVED_CYCLES + RESERVED_PAGING_CYCLES as usize);
 
 #[derive(Default)]
@@ -50,7 +50,7 @@ pub fn execute<S: Syscall>(
     image: MemoryImage,
     segment_limit_po2: usize,
     max_insn_cycles: usize,
-    max_cycles: Option<u64>,
+    max_cycles: CycleLimit,
     syscall_handler: &S,
     input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {

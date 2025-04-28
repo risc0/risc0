@@ -27,7 +27,10 @@
 
 use crate::{
     ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5},
-    field::{EXT_DEGREE_2, EXT_DEGREE_4, FIELD_256_WIDTH_WORDS, FIELD_384_WIDTH_WORDS},
+    field::{
+        EXT_DEGREE_2, EXT_DEGREE_4, FIELD_256_WIDTH_WORDS, FIELD_384_WIDTH_WORDS,
+        FIELD_4096_WIDTH_WORDS,
+    },
 };
 
 use include_bytes_aligned::include_bytes_aligned;
@@ -38,6 +41,7 @@ const MODINV_256_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_256.blob");
 const MODINV_384_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_384.blob");
 const MODMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_256.blob");
 const MODMUL_384_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_384.blob");
+const MODMUL_4096_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_4096.blob");
 const MODSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_256.blob");
 const MODSUB_384_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_384.blob");
 const EXTFIELD_DEG2_ADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfield_deg2_add_256.blob");
@@ -75,10 +79,10 @@ pub fn modadd_384(
     unsafe {
         sys_bigint2_4(
             MODADD_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -106,9 +110,9 @@ pub fn modinv_384(
     unsafe {
         sys_bigint2_3(
             MODINV_384_BLOB.as_ptr(),
-            inp.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            inp.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -139,10 +143,27 @@ pub fn modmul_384(
     unsafe {
         sys_bigint2_4(
             MODMUL_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
+        );
+    }
+}
+
+pub fn modmul_4096(
+    lhs: &[u32; FIELD_4096_WIDTH_WORDS],
+    rhs: &[u32; FIELD_4096_WIDTH_WORDS],
+    modulus: &[u32; FIELD_4096_WIDTH_WORDS],
+    result: &mut [u32; FIELD_4096_WIDTH_WORDS],
+) {
+    unsafe {
+        sys_bigint2_4(
+            MODMUL_4096_BLOB.as_ptr(),
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
@@ -173,10 +194,10 @@ pub fn modsub_384(
     unsafe {
         sys_bigint2_4(
             MODSUB_384_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            modulus.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
         );
     }
 }
