@@ -39,7 +39,11 @@ pub use self::zirgen::CircuitImpl;
 
 pub const RV32IM_SEAL_VERSION: u32 = 1;
 
-pub const MAX_INSN_CYCLES: usize = 2000; // TODO(flaub): calculate actual value
+/// This number was picked by running `bigint2-analyze` on all the current bigint programs
+pub const MAX_INSN_CYCLES: usize = 25_000;
+
+/// This is a smaller number used by lower po2's < 15 which can't fit a large bigint program.
+pub const MAX_INSN_CYCLES_LOWER_PO2: usize = 2_000;
 
 pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
     tracing::debug!("verify");

@@ -320,7 +320,7 @@ mod tests {
 
         // Compare against many randomly generated numbers to make sure results match
         // the expected results for regular modular arithmetic.
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         for _ in 0..1000 {
             let x: F = non_zero_rand(&mut rng);
@@ -354,7 +354,7 @@ mod tests {
     /// what order they use, and whether they promote from base
     /// elements or not.
     pub fn test_ext_field_ops<E: ExtElem>() {
-        let mut r = rand::thread_rng();
+        let mut r = rand::rng();
         let x = E::random(&mut r);
         let y = E::random(&mut r);
 
