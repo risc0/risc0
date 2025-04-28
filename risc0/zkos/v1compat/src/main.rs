@@ -19,6 +19,7 @@
 fn main() {}
 
 #[cfg(target_os = "zkvm")]
+#[allow(static_mut_refs)]
 mod zkvm {
     use core::{
         arch::{asm, global_asm},
@@ -311,7 +312,7 @@ mod zkvm {
         block1_ptr: *const u32,
         block2_ptr: *const u32,
         mut count: u32,
-    ) -> ! {
+    ) {
         let mut data_ptr = if block2_ptr == block1_ptr.add(DIGEST_WORDS) {
             block1_ptr
         } else {
@@ -340,7 +341,5 @@ mod zkvm {
             data_ptr = data_ptr.add(chunk as usize * BLOCK_WORDS);
             in_state = out_state;
         }
-
-        asm!("mret", options(noreturn))
     }
 }

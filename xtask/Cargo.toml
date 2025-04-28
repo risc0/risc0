@@ -15,6 +15,7 @@ log = "0.4"
 prost-build = "0.12"
 protobuf-src = "1.1"
 regex = "1"
+risc0-binfmt = { workspace = true }
 risc0-circuit-keccak = { workspace = true, features = [
   "prove",
 ], optional = true }

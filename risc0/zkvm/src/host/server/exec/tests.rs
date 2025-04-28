@@ -169,6 +169,26 @@ fn libm_build() {
 }
 
 #[test_log::test]
+fn poseidon2_basic() {
+    multi_test(MultiTestSpec::Poseidon2Basic);
+}
+
+#[test_log::test]
+fn poseidon2_continue() {
+    multi_test(MultiTestSpec::Poseidon2Continue);
+}
+
+#[test_log::test]
+fn poseidon2_short() {
+    multi_test(MultiTestSpec::Poseidon2Short);
+}
+
+#[test_log::test]
+fn poseidon2_long() {
+    multi_test(MultiTestSpec::Poseidon2Long);
+}
+
+#[test_log::test]
 fn host_syscall() {
     let expected: Vec<Bytes> = vec![
         "".into(),
@@ -244,7 +264,7 @@ fn rsa_compat() {
 fn bigint_accel() {
     use crate::host::server::testutils::generate_bigint_test_cases;
 
-    let cases = generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    let cases = generate_bigint_test_cases(10);
     for case in cases {
         println!("Running BigInt circuit test case: {:x?}", case);
         let input = MultiTestSpec::BigInt {

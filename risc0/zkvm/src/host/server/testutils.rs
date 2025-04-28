@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,10 +88,7 @@ impl BigIntTestCase {
 
 /// Generate the test cases for the BigInt accelerator circuit that are applied
 /// to both the simulator and circuit implementations.
-pub fn generate_bigint_test_cases(
-    rng: &mut impl CryptoRngCore,
-    rand_count: usize,
-) -> Vec<BigIntTestCase> {
+pub fn generate_bigint_test_cases(rand_count: usize) -> Vec<BigIntTestCase> {
     let zero = [0, 0, 0, 0, 0, 0, 0, 0];
     let one = [1, 0, 0, 0, 0, 0, 0, 0];
 
@@ -123,6 +120,7 @@ pub fn generate_bigint_test_cases(
         },
     ];
 
-    cases.extend((0..rand_count).map(|_| BigIntTestCase::sample(rng)));
+    let mut rng = crypto_bigint::rand_core::OsRng;
+    cases.extend((0..rand_count).map(|_| BigIntTestCase::sample(&mut rng)));
     cases
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,29 +16,14 @@
 
 #include <cstdint>
 
-namespace risc0::circuit::recursion {
+__device__ void step_exec(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
-extern __constant__ FpExt poly_mix[158];
+__device__ void step_verify_mem(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
-__global__ void step_compute_accum(
-    const Fp* ctrl, const Fp* data, const Fp* mix, FpExt* wom, uint32_t steps, uint32_t count);
+__device__ void step_compute_accum(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
-__global__ void step_verify_accum(const Fp* ctrl,
-                                  const Fp* data,
-                                  const Fp* mix,
-                                  FpExt* wom,
-                                  Fp* accum,
-                                  uint32_t steps,
-                                  uint32_t count);
-
-__global__ void eval_check(Fp* check,
-                           const Fp* ctrl,
-                           const Fp* data,
-                           const Fp* accum,
-                           const Fp* mix,
-                           const Fp* out,
-                           const Fp rou,
-                           uint32_t po2,
-                           uint32_t domain);
-
-} // namespace risc0::circuit::recursion
+__device__ void step_verify_accum(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
