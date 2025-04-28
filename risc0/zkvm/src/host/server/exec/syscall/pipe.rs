@@ -19,7 +19,7 @@ use std::{
     rc::Rc,
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 
 use crate::host::client::posix_io::PosixIo;
 
@@ -38,6 +38,10 @@ impl Syscall for SysPipe {
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        if to_guest.len() != 2 {
+            bail!("invalid sys_pipe call");
+        }
+
         let posix_io = &ctx.syscall_table().posix_io;
         let pipe = Rc::new(RefCell::new(VecDeque::new()));
         (to_guest[0], to_guest[1]) = posix_io

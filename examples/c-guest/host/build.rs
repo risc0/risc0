@@ -16,20 +16,24 @@ use std::{fs, path::PathBuf, process::Command};
 
 fn cpp_toolchain() -> PathBuf {
     let rzup = rzup::Rzup::new().unwrap();
-    let (version, path) = rzup
+    let Some((version, path)) = rzup
         .get_default_version(&rzup::Component::CppToolchain)
         .unwrap()
-        .expect("Risc Zero C++ toolchain installed");
+    else {
+        panic!("Risc Zero C++ toolchain not found. Try running `rzup install cpp`");
+    };
     println!("Using C++ toolchain version {version}");
     path
 }
 
 fn rust_toolchain() -> PathBuf {
     let rzup = rzup::Rzup::new().unwrap();
-    let (version, path) = rzup
+    let Some((version, path)) = rzup
         .get_default_version(&rzup::Component::RustToolchain)
         .unwrap()
-        .expect("Risc Zero Rust toolchain installed");
+    else {
+        panic!("Risc Zero Rust toolchain not found. Try running `rzup install rust`");
+    };
     println!("Using Rust toolchain version {version}");
     path
 }

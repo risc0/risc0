@@ -12,407 +12,456 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "context.h"
 #include "cuda.h"
-#include "fp.h"
-#include "fpext.h"
-#include "kernels.h"
+#include "steps.cuh"
+#include "witgen.h"
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#endif
 
 #include "vendor/nvtx3/nvtx3.hpp"
 
-#include <cstring>
-#include <cuda_runtime.h>
-#include <exception>
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
+#include <cstdint>
+#include <cstdio>
+#include <cuda/std/array>
+#include <string.h>
 #include <thrust/execution_policy.h>
-#include <thrust/host_vector.h>
-#include <thrust/sort.h>
+#include <thrust/scan.h>
 
-constexpr size_t kStepModeSeqParallel = 0;
-constexpr size_t kStepModeSeqForward = 1;
-constexpr size_t kStepModeSeqReverse = 2;
+namespace risc0::circuit::rv32im_v2::cuda {
 
-namespace {
+constexpr size_t kUserAccumSplit = kLayout_TopAccum.columns[0].col;
 
-using Reg = size_t;
+struct ExecBuffers {
+  Buffer global;
+  Buffer data;
+};
 
-#include "layout.cu.inc"
+struct DeviceExecContext {
+  Buffer* data;
+  Buffer* global;
+  PreflightTrace* preflight;
+  LookupTables* tables;
+};
 
-} // namespace
+struct HostExecContext {
+  DeviceExecContext* ctx;
+  PreflightTrace d_preflight;
+  LookupTables d_tables;
 
-// constexpr size_t kVerifyMemBodyKind = 1;
-constexpr size_t kVerifyMemHaltKind = 2;
+  HostExecContext(ExecBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
+    CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceExecContext)));
 
-struct HostContext {
-  MachineContext* ctx;
+    CUDA_OK(cudaMalloc(&ctx->data, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->data, &buffers->data, sizeof(Buffer), cudaMemcpyHostToDevice));
 
-  HostContext(PreflightTrace* trace, size_t steps) {
-    CUDA_OK(cudaMallocManaged(&ctx, sizeof(MachineContext)));
-    ctx->steps = steps;
+    CUDA_OK(cudaMalloc(&ctx->global, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->global, &buffers->global, sizeof(Buffer), cudaMemcpyHostToDevice));
 
-    CUDA_OK(cudaMallocManaged(&ctx->trace, sizeof(PreflightTrace)));
-    ctx->trace->isTrace = trace->isTrace;
-
-    ctx->trace->numCycles = trace->numCycles;
-    // printf("numCycles: %u\n", trace->numCycles);
-    CUDA_OK(cudaMalloc(&ctx->trace->cycles, trace->numCycles * sizeof(PreflightCycle)));
-    CUDA_OK(cudaMemcpy(ctx->trace->cycles,
-                       trace->cycles,
-                       trace->numCycles * sizeof(PreflightCycle),
+    CUDA_OK(cudaMalloc(&d_preflight.cycles, cycles * sizeof(PreflightCycle)));
+    CUDA_OK(cudaMemcpy(d_preflight.cycles,
+                       preflight->cycles,
+                       cycles * sizeof(PreflightCycle),
                        cudaMemcpyHostToDevice));
 
-    ctx->trace->numTxns = trace->numTxns;
-    // printf("numTxns: %u\n", trace->numTxns);
-    CUDA_OK(cudaMalloc(&ctx->trace->txns, trace->numTxns * sizeof(MemoryTransaction)));
-    CUDA_OK(cudaMemcpy(ctx->trace->txns,
-                       trace->txns,
-                       trace->numTxns * sizeof(MemoryTransaction),
+    CUDA_OK(cudaMalloc(&d_preflight.txns, preflight->txnsLen * sizeof(MemoryTransaction)));
+    CUDA_OK(cudaMemcpy(d_preflight.txns,
+                       preflight->txns,
+                       preflight->txnsLen * sizeof(MemoryTransaction),
                        cudaMemcpyHostToDevice));
 
-    ctx->trace->numExtras = trace->numExtras;
-    // printf("numExtras: %u\n", trace->numExtras);
-    CUDA_OK(cudaMalloc(&ctx->trace->extras, trace->numExtras * sizeof(uint32_t)));
-    CUDA_OK(cudaMemcpy(ctx->trace->extras,
-                       trace->extras,
-                       trace->numExtras * sizeof(uint32_t),
+    CUDA_OK(cudaMalloc(&d_preflight.bigintBytes, preflight->bigintBytesLen));
+    CUDA_OK(cudaMemcpy(d_preflight.bigintBytes,
+                       preflight->bigintBytes,
+                       preflight->bigintBytesLen,
                        cudaMemcpyHostToDevice));
 
-    CUDA_OK(cudaMalloc(&ctx->ramRows, steps * kMaxRamRowsPerCycle * sizeof(RamArgumentRow)));
-    CUDA_OK(cudaMemset(
-        ctx->ramRows, kInvalidPattern, steps * kMaxRamRowsPerCycle * sizeof(RamArgumentRow)));
+    d_preflight.txnsLen = preflight->txnsLen;
+    d_preflight.bigintBytesLen = preflight->bigintBytesLen;
+    d_preflight.tableSplitCycle = preflight->tableSplitCycle;
 
-    CUDA_OK(cudaMalloc(&ctx->ramIndex, steps * sizeof(uint32_t)));
-    CUDA_OK(cudaMemset(ctx->ramIndex, 0, steps * sizeof(uint32_t)));
-
-    CUDA_OK(cudaMalloc(&ctx->pairs, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
+    CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
     CUDA_OK(
-        cudaMemset(ctx->pairs, kInvalidPattern, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
+        cudaMemcpy(ctx->preflight, &d_preflight, sizeof(PreflightTrace), cudaMemcpyHostToDevice));
 
-    CUDA_OK(cudaMalloc(&ctx->pairsIndex, steps * sizeof(uint32_t)));
-    CUDA_OK(cudaMemset(ctx->pairsIndex, 0, steps * sizeof(uint32_t)));
+    CUDA_OK(cudaMalloc(&d_tables.tableU8, (1 << 8) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU8, 0, (1 << 8) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&d_tables.tableU16, (1 << 16) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU16, 0, (1 << 16) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&ctx->tables, sizeof(LookupTables)));
+    CUDA_OK(cudaMemcpy(ctx->tables, &d_tables, sizeof(LookupTables), cudaMemcpyHostToDevice));
   }
 
-  ~HostContext() {
-    // printf("~HostContext\n");
-    cudaFree(ctx->trace->cycles);
-    cudaFree(ctx->trace->txns);
-    cudaFree(ctx->trace->extras);
-    cudaFree(ctx->trace);
-    cudaFree(ctx->ramRows);
-    cudaFree(ctx->ramIndex);
-    cudaFree(ctx->pairs);
-    cudaFree(ctx->pairsIndex);
+  ~HostExecContext() {
+    cudaFree(d_tables.tableU16);
+    cudaFree(d_tables.tableU8);
+    cudaFree(ctx->tables);
+    cudaFree(d_preflight.bigintBytes);
+    cudaFree(d_preflight.txns);
+    cudaFree(d_preflight.cycles);
+    cudaFree(ctx->preflight);
+    cudaFree(ctx->global);
+    cudaFree(ctx->data);
     cudaFree(ctx);
   }
 };
 
-__device__ bool MachineContext::isParSafeExec(uint32_t cycle) const {
-  return trace->cycles[cycle].isSafeExec;
-}
-
-__device__ uint8_t MachineContext::isParSafeVerifyMem(uint32_t cycle) const {
-  return trace->cycles[cycle].isSafeVerifyMem;
-}
-
-struct StepExec {
-  __host__ __device__ static const char* name() { return "step_exec"; }
-
-  __device__ static bool is_safe(MachineContext* ctx, uint32_t cycle) {
-    return ctx->isParSafeExec(cycle);
-  }
-
-  __device__ static void
-  step(MachineContext* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2) {
-    step_exec(ctx, steps, cycle, arg0, arg1, arg2, nullptr, nullptr);
-  }
+struct AccumBuffers {
+  Buffer data;
+  Buffer accum;
+  Buffer global;
+  Buffer mix;
 };
 
-struct StepVerifyMem {
-  __host__ __device__ static const char* name() { return "step_verify_mem"; }
-
-  __device__ static bool is_safe(MachineContext* ctx, uint32_t cycle) {
-    return ctx->isParSafeVerifyMem(cycle);
-  }
-
-  __device__ static void
-  step(MachineContext* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2) {
-    step_verify_mem(ctx, steps, cycle, arg0, arg1, arg2, nullptr, nullptr);
-  }
+struct DeviceAccumContext {
+  Buffer* data;
+  Buffer* accum;
+  Buffer* global;
+  Buffer* mix;
+  PreflightTrace* preflight;
+  LookupTables* tables;
 };
 
-struct StepVerifyBytes {
-  __host__ __device__ static const char* name() { return "step_verify_bytes"; }
+struct HostAccumContext {
+  DeviceAccumContext* ctx;
+  PreflightTrace d_preflight;
+  LookupTables d_tables;
 
-  __device__ static bool is_safe(MachineContext* ctx, uint32_t cycle) { return true; }
+  HostAccumContext(AccumBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
+    CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceAccumContext)));
 
-  __device__ static void
-  step(MachineContext* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2) {
-    step_verify_bytes(ctx, steps, cycle, arg0, arg1, arg2, nullptr, nullptr);
-  }
-};
+    CUDA_OK(cudaMalloc(&ctx->data, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->data, &buffers->data, sizeof(Buffer), cudaMemcpyHostToDevice));
 
-template <typename Stage>
-__device__ void next_step(MachineContext* ctx,
-                          uint32_t steps,
-                          uint32_t count,
-                          uint32_t cycle,
-                          Fp* arg0,
-                          Fp* arg1,
-                          Fp* arg2) {
-  if (cycle == 0 || Stage::is_safe(ctx, cycle)) {
-    // printf("%s(%u)\n", Stage::name(), cycle);
-    Stage::step(ctx, steps, cycle++, arg0, arg1, arg2);
-    while (cycle < count && !Stage::is_safe(ctx, cycle)) {
-      // printf("next, %s(%u)\n", Stage::name(), cycle);
-      Stage::step(ctx, steps, cycle++, arg0, arg1, arg2);
-    }
-  }
-}
+    CUDA_OK(cudaMalloc(&ctx->accum, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->accum, &buffers->accum, sizeof(Buffer), cudaMemcpyHostToDevice));
 
-template <typename Stage>
-__global__ void
-par_step(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
-  next_step<Stage>(ctx, steps, count, cycle, arg0, arg1, arg2);
-}
+    CUDA_OK(cudaMalloc(&ctx->global, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->global, &buffers->global, sizeof(Buffer), cudaMemcpyHostToDevice));
 
-template <typename Stage>
-__global__ void
-fwd_step(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
+    CUDA_OK(cudaMalloc(&ctx->mix, sizeof(Buffer)));
+    CUDA_OK(cudaMemcpy(ctx->mix, &buffers->mix, sizeof(Buffer), cudaMemcpyHostToDevice));
 
-  if (cycle == 0) {
-    while (cycle < count) {
-      Stage::step(ctx, steps, cycle++, arg0, arg1, arg2);
-    }
-  }
-}
-
-template <typename Stage>
-__global__ void
-rev_step(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
-
-  if (cycle == count - 1) {
-    for (uint32_t i = 0; i < count; i++) {
-      uint32_t cycle = count - i - 1;
-      next_step<Stage>(ctx, steps, count, cycle, arg0, arg1, arg2);
-    }
-  }
-}
-
-void MachineContext::sortRam() {
-  // printf("sortRam\n");
-  nvtx3::scoped_range range("sortRam");
-  {
-    nvtx3::scoped_range range("sort");
-    thrust::sort(thrust::device, ramRows, ramRows + steps * kMaxRamRowsPerCycle);
-  }
-
-  {
-    thrust::host_vector<RamArgumentRow> h_ramRows(steps * kMaxRamRowsPerCycle);
-
-    nvtx3::scoped_range range("dirty");
-    CUDA_OK(cudaMemcpy(h_ramRows.data(),
-                       ramRows,
-                       h_ramRows.size() * sizeof(RamArgumentRow),
-                       cudaMemcpyDeviceToHost));
-
-    uint32_t prevDirty = 0;
-    for (size_t i = 0; i < steps * kMaxRamRowsPerCycle; i++) {
-      RamArgumentRow& row = h_ramRows[i];
-      switch (row.getMemOp()) {
-      case 0: // pageIo
-        row.dirty = 0;
-        break;
-      case 1: // read
-        row.dirty = prevDirty;
-        break;
-      case 2: // write
-        row.dirty = 1;
-        break;
-      }
-      prevDirty = row.dirty;
-    }
-
-    CUDA_OK(cudaMemcpy(ramRows,
-                       h_ramRows.data(),
-                       h_ramRows.size() * sizeof(RamArgumentRow),
+    CUDA_OK(cudaMalloc(&d_preflight.cycles, cycles * sizeof(PreflightCycle)));
+    CUDA_OK(cudaMemcpy(d_preflight.cycles,
+                       preflight->cycles,
+                       cycles * sizeof(PreflightCycle),
                        cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&d_preflight.txns, preflight->txnsLen * sizeof(MemoryTransaction)));
+    CUDA_OK(cudaMemcpy(d_preflight.txns,
+                       preflight->txns,
+                       preflight->txnsLen * sizeof(MemoryTransaction),
+                       cudaMemcpyHostToDevice));
+
+    d_preflight.txnsLen = preflight->txnsLen;
+    d_preflight.tableSplitCycle = preflight->tableSplitCycle;
+
+    CUDA_OK(cudaMalloc(&ctx->preflight, sizeof(PreflightTrace)));
+    CUDA_OK(
+        cudaMemcpy(ctx->preflight, &d_preflight, sizeof(PreflightTrace), cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&d_tables.tableU8, (1 << 8) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU8, 0, (1 << 8) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&d_tables.tableU16, (1 << 16) * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(d_tables.tableU16, 0, (1 << 16) * sizeof(uint32_t)));
+
+    CUDA_OK(cudaMalloc(&ctx->tables, sizeof(LookupTables)));
+    CUDA_OK(cudaMemcpy(ctx->tables, &d_tables, sizeof(LookupTables), cudaMemcpyHostToDevice));
   }
 
-  {
-    nvtx3::scoped_range range("scan");
-    thrust::exclusive_scan(thrust::device, ramIndex, ramIndex + steps, ramIndex);
+  ~HostAccumContext() {
+    cudaFree(d_tables.tableU16);
+    cudaFree(d_tables.tableU8);
+    cudaFree(ctx->tables);
+    cudaFree(d_preflight.txns);
+    cudaFree(d_preflight.cycles);
+    cudaFree(ctx->preflight);
+    cudaFree(ctx->mix);
+    cudaFree(ctx->global);
+    cudaFree(ctx->accum);
+    cudaFree(ctx->data);
+    cudaFree(ctx);
+  }
+};
+
+__device__ ::cuda::std::array<uint32_t, 2>
+divide_rv32im(uint32_t numer, uint32_t denom, uint32_t signType) {
+  uint32_t onesComp = (signType == 2);
+  bool negNumer = signType && int32_t(numer) < 0;
+  bool negDenom = signType == 1 && int32_t(denom) < 0;
+  if (negNumer) {
+    numer = -numer - onesComp;
+  }
+  if (negDenom) {
+    denom = -denom - onesComp;
+  }
+  uint32_t quot;
+  uint32_t rem;
+  if (denom == 0) {
+    quot = 0xffffffff;
+    rem = numer;
+  } else {
+    quot = numer / denom;
+    rem = numer % denom;
+  }
+  uint32_t quotNegOut = (negNumer ^ negDenom) - ((denom == 0) * negNumer);
+  uint32_t remNegOut = negNumer;
+  if (quotNegOut) {
+    quot = -quot - onesComp;
+  }
+  if (remNegOut) {
+    rem = -rem - onesComp;
+  }
+  return {quot, rem};
+}
+
+__device__ ::cuda::std::array<Val, 5> extern_getMemoryTxn(ExecContext& ctx, Val addrElem) {
+  uint32_t addr = addrElem.asUInt32();
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx++;
+  const MemoryTransaction& txn = ctx.preflight.txns[txnIdx];
+  // printf("getMemoryTxn(%lu, 0x%08x): txn(%u, 0x%08x, 0x%08x)\n",
+  //        ctx.cycle,
+  //        addr,
+  //        txn.cycle,
+  //        txn.addr,
+  //        txn.word);
+
+  if (txn.cycle / 2 != ctx.cycle) {
+    printf("txn.cycle: %u, ctx.cycle: %zu\n", txn.cycle, ctx.cycle);
+    assert(false && "txn cycle mismatch");
+  }
+
+  if (txn.addr != addr) {
+    printf("txn.addr: 0x%08x, addr: 0x%08x\n", txn.addr, addr);
+    assert(false && "memory peek not in preflight");
+  }
+  return {
+      txn.prevCycle,
+      txn.prevWord & 0xffff,
+      txn.prevWord >> 16,
+      txn.word & 0xffff,
+      txn.word >> 16,
+  };
+}
+
+__device__ void extern_lookupDelta(ExecContext& ctx, Val table, Val index, Val count) {
+  // printf("lookupDelta(table: %u, index: %u, count: %u, P: %u)\n",
+  //        table.asUInt32(),
+  //        index.asUInt32(),
+  //        count.asUInt32(),
+  //        Fp::P);
+  ctx.tables.lookupDelta(table, index, count);
+}
+
+__device__ Val extern_lookupCurrent(ExecContext& ctx, Val table, Val index) {
+  Val ret = ctx.tables.lookupCurrent(table, index);
+  // printf("lookupCurrent(table: %u, index: %u): %u\n",
+  //        table.asUInt32(),
+  //        index.asUInt32(),
+  //        ret.asUInt32());
+  return ret;
+}
+
+__device__ void
+extern_memoryDelta(ExecContext& ctx, Val addr, Val cycle, Val dataLow, Val dataHigh, Val count) {
+  // printf("memoryDelta\n");
+  // ctx.tables.memoryDelta(
+  //     addr.asUInt32(), cycle.asUInt32(), dataLow.asUInt32() | (dataHigh.asUInt32() << 16),
+  //     count);
+}
+
+__device__ uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle) {
+  // printf("getDiffCount\n");
+  uint32_t cycleU32 = cycle.asUInt32();
+  return ctx.preflight.cycles[cycleU32 / 2].diffCount[cycleU32 % 2];
+}
+
+__device__ Val extern_isFirstCycle_0(ExecContext& ctx) {
+  // printf("isFirstCycle\n");
+  return ctx.cycle == 0;
+}
+
+__device__ ::cuda::std::array<Val, 4> extern_divide(
+    ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType) {
+  // printf("divide\n");
+  uint32_t numer = numerLow.asUInt32() | (numerHigh.asUInt32() << 16);
+  uint32_t denom = denomLow.asUInt32() | (denomHigh.asUInt32() << 16);
+  auto [quot, rem] = divide_rv32im(numer, denom, signType.asUInt32());
+  ::cuda::std::array<Val, 4> ret;
+  ret[0] = quot & 0xffff;
+  ret[1] = quot >> 16;
+  ret[2] = rem & 0xffff;
+  ret[3] = rem >> 16;
+  return ret;
+}
+
+__device__ void extern_print(ExecContext& ctx, Val v) {
+  // printf("LOG: %u\n", v.asUInt32());
+}
+
+__device__ ::cuda::std::array<Val, 2> extern_getMajorMinor(ExecContext& ctx) {
+  uint8_t major = ctx.preflight.cycles[ctx.cycle].major;
+  uint8_t minor = ctx.preflight.cycles[ctx.cycle].minor;
+  // printf("getMajorMinor: %u, %u\n", major, minor);
+  return {major, minor};
+}
+
+__device__ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len) {
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  uint32_t word = ctx.preflight.txns[txnIdx].word;
+  // printf("[%lu]: hostReadPrepare(txnIdx: %zu, word: 0x%08x)\n", ctx.cycle, txnIdx, word);
+  return word;
+}
+
+__device__ Val
+extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal) {
+  // printf("hostWrite\n");
+  size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
+  return ctx.preflight.txns[txnIdx].word;
+}
+
+__device__ ::cuda::std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
+  uint32_t pagingIdx = ctx.preflight.cycles[ctx.cycle].pagingIdx;
+  uint32_t machineMode = ctx.preflight.cycles[ctx.cycle].machineMode;
+  // printf("nextPagingIdx: (0x%05x, %u)\n", pagingIdx, machineMode);
+  return {pagingIdx, machineMode};
+}
+
+__device__ ::cuda::std::array<Val, 16> extern_bigIntExtern(ExecContext& ctx) {
+  ::cuda::std::array<Val, 16> ret;
+  size_t bigintIdx = ctx.preflight.cycles[ctx.cycle].bigintIdx;
+  for (size_t i = 0; i < 16; i++) {
+    ret[i] = ctx.preflight.bigintBytes[bigintIdx + i];
+  }
+  return ret;
+}
+
+__device__ void nextStep(DeviceExecContext* ctx, uint32_t cycle) {
+  // printf("nextStep: %u\n", cycle);
+  ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
+  MutableBufObj data(*ctx->data);
+  GlobalBufObj global(*ctx->global);
+  step_Top(execCtx, &data, &global);
+}
+
+__global__ void par_stepExec(DeviceExecContext* ctx, uint32_t start, uint32_t count) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= count) {
+    return;
+  }
+  nextStep(ctx, start + cycle);
+}
+
+__global__ void rev_stepExec(DeviceExecContext* ctx, uint32_t split, uint32_t lastCycle) {
+  for (uint32_t cycle = split; cycle-- > 0;) {
+    nextStep(ctx, cycle);
+  }
+  for (uint32_t cycle = lastCycle; cycle-- > split;) {
+    nextStep(ctx, cycle);
   }
 }
 
-__global__ void inject_backs_ram(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* data) {
+__global__ void fwd_stepExec(DeviceExecContext* ctx, uint32_t count) {
+  for (uint32_t cycle = 0; cycle < count; cycle++) {
+    nextStep(ctx, cycle);
+  }
+}
+
+__global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
   }
 
-  uint8_t kind = ctx->isParSafeVerifyMem(cycle);
-  if (cycle > 2 && kind) {
-    uint32_t idx = ctx->ramIndex[cycle];
-    assert(idx != 0);
+  ExecContext execCtx(*ctx->preflight, *ctx->tables, cycle);
+  MutableBufObj data(*ctx->data);
+  MutableBufObj accum(*ctx->accum, /*zeroBack=*/kUserAccumSplit);
+  GlobalBufObj mix(*ctx->mix);
+  GlobalBufObj global(*ctx->global);
+  step_TopAccum(execCtx, &accum, &data, &global, &mix);
+}
 
-    const RamArgumentRow& back1 = ctx->ramRows[idx - 1];
-    constexpr auto header = kDataLayout.mux.body.header;
-    constexpr auto a = header.element;
-    constexpr auto v = header.verifier;
-    data[a.addr * steps + cycle - 1] = back1.addr;                 // a->addr
-    data[a.cycle * steps + cycle - 1] = back1.getMemCycle();       // a->cycle
-    data[a.memOp * steps + cycle - 1] = back1.getMemOp();          // a->memOp
-    data[a.data[0] * steps + cycle - 1] = back1.word & 0xff;       // a->data[0]
-    data[a.data[1] * steps + cycle - 1] = back1.word >> 8 & 0xff;  // a->data[1]
-    data[a.data[2] * steps + cycle - 1] = back1.word >> 16 & 0xff; // a->data[2]
-    data[a.data[3] * steps + cycle - 1] = back1.word >> 24 & 0xff; // a->data[3]
-    data[v.dirty * steps + cycle - 1] = back1.dirty;               // prevVerifier->dirty
-    if (kind == kVerifyMemHaltKind) {
-      const RamArgumentRow& back2 = ctx->ramRows[idx - 2];
-      uint32_t isNewAddr = back2.addr != back1.addr;
-      uint32_t cmp;
-      if (isNewAddr) {
-        cmp = back1.addr - back2.addr - 1;
-      } else {
-        cmp =
-            back1.getMemCycle() * 3 + back1.getMemOp() - back2.getMemCycle() * 3 + back2.getMemOp();
-      }
-      uint32_t diff[3];
-      for (size_t i = 0; i < 3; i++) {
-        diff[i] = cmp & 0xff;
-        cmp = cmp >> 8;
-      }
-      uint32_t extra = cmp;
-      data[v.isNewAddr * steps + cycle - 1] = isNewAddr; // isNewAddr
-      data[v.diff[0] * steps + cycle - 1] = diff[0];     // diff[0]
-      data[v.diff[1] * steps + cycle - 1] = diff[1];     // diff[1]
-      data[v.diff[2] * steps + cycle - 1] = diff[2];     // diff[2]
-      data[v.extra * steps + cycle - 1] = extra;         // extra
+__global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= lastCycle) {
+    return;
+  }
+
+  Buffer& accum = *ctx->accum;
+
+  size_t machineColumns = (accum.cols - kUserAccumSplit) / 4;
+  size_t back1 = (cycle + lastCycle - 1) % lastCycle;
+  Fp prev[4];
+  for (size_t k = 0; k < 4; k++) {
+    prev[k] = accum.get(back1, accum.cols - 4 + k);
+  }
+  for (size_t j = 0; j < machineColumns - 1; j++) {
+    for (size_t k = 0; k < 4; k++) {
+      size_t col = kUserAccumSplit + j * 4 + k;
+      accum.set(cycle, col, accum.get(cycle, col) + prev[k]);
     }
   }
 }
 
-void MachineContext::sortBytes() {
-  nvtx3::scoped_range range("sortBytes");
+} // namespace risc0::circuit::rv32im_v2::cuda
 
-  {
-    nvtx3::scoped_range range("sort");
-    thrust::sort(thrust::device, pairs, pairs + steps * kMaxBytePairsPerCycle);
-  }
-
-  {
-    nvtx3::scoped_range range("scan");
-    thrust::exclusive_scan(thrust::device, pairsIndex, pairsIndex + steps, pairsIndex);
-  }
-}
-
-__global__ void inject_backs_bytes(MachineContext* ctx, size_t steps, size_t count, Fp* data) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle == 0 || cycle >= count) {
-    return;
-  }
-
-  uint32_t idx = ctx->pairsIndex[cycle];
-  uint32_t pair;
-  if (idx) {
-    pair = ctx->pairs[idx - 1];
-  } else {
-    pair = 0;
-  }
-  // printf("inject_backs_bytes[%u]> 0x%x\n", cycle, pair);
-  data[0 * steps + cycle - 1] = pair >> 8 & 0xff;
-  data[1 * steps + cycle - 1] = pair & 0xff;
-}
-
-template <typename Stage>
-void run_stage(CudaStream& stream,
-               LaunchConfig& cfg,
-               MachineContext* ctx,
-               uint32_t mode,
-               uint32_t last_cycle,
-               Fp* ctrl,
-               Fp* io,
-               Fp* data) {
-  // printf("%s\n", stage);
-  nvtx3::scoped_range range(Stage::name());
-  switch (mode) {
-  case kStepModeSeqParallel: {
-    par_step<Stage>
-        <<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
-    CUDA_OK(cudaStreamSynchronize(stream));
-  } break;
-  case kStepModeSeqForward: {
-    fwd_step<Stage>
-        <<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
-    CUDA_OK(cudaStreamSynchronize(stream));
-  } break;
-  case kStepModeSeqReverse: {
-    rev_step<Stage>
-        <<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
-    CUDA_OK(cudaStreamSynchronize(stream));
-  } break;
-  }
-}
+constexpr size_t kStepModeParallel = 0;
+constexpr size_t kStepModeSeqForward = 1;
+constexpr size_t kStepModeSeqReverse = 2;
 
 extern "C" {
 
+using namespace risc0::circuit::rv32im_v2::cuda;
+
 const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
-                                             PreflightTrace* trace,
-                                             uint32_t steps,
-                                             uint32_t last_cycle,
-                                             Fp* ctrl,
-                                             Fp* io,
-                                             Fp* data) {
+                                             ExecBuffers* buffers,
+                                             PreflightTrace* preflight,
+                                             uint32_t lastCycle) {
   try {
-    nvtx3::scoped_range range("witgen");
-
-    // printf("risc0_circuit_rv32im_cuda_witgen\n");
-    CUDA_OK(cudaDeviceSynchronize());
-
-    HostContext ctx(trace, steps);
-
+    HostExecContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
-    LaunchConfig cfg = getSimpleConfig(last_cycle);
+    size_t split = preflight->tableSplitCycle;
 
-    run_stage<StepExec>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
-
-    {
-      nvtx3::scoped_range range("verify_ram");
-      ctx.ctx->sortRam();
-
+    switch (mode) {
+    case kStepModeParallel: {
+      auto cfg1 = getSimpleConfig(split);
+      size_t phase2Count = lastCycle - split;
+      // printf("phase1: %zu, phase2: %zu\n", split, phase2Count);
+      auto cfg2 = getSimpleConfig(phase2Count);
       {
-        // printf("inject_backs_ram\n");
-        nvtx3::scoped_range range("inject_backs_ram");
-        inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+        nvtx3::scoped_range range("phase1");
+        par_stepExec<<<cfg1.grid, cfg1.block, 0, stream>>>(ctx.ctx, 0, split);
         CUDA_OK(cudaStreamSynchronize(stream));
       }
-
-      run_stage<StepVerifyMem>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
-    }
-
-    {
-      nvtx3::scoped_range range("verify_bytes");
-      ctx.ctx->sortBytes();
-
       {
-        // printf("inject_backs_bytes\n");
-        nvtx3::scoped_range range("inject_backs_bytes");
-        inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+        nvtx3::scoped_range range("phase2");
+        par_stepExec<<<cfg2.grid, cfg2.block, 0, stream>>>(ctx.ctx, split, phase2Count);
         CUDA_OK(cudaStreamSynchronize(stream));
       }
-
-      run_stage<StepVerifyBytes>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
+    } break;
+    case kStepModeSeqForward:
+      fwd_stepExec<<<1, 1, 0, stream>>>(ctx.ctx, lastCycle);
+      CUDA_OK(cudaStreamSynchronize(stream));
+      break;
+    case kStepModeSeqReverse:
+      rev_stepExec<<<1, 1, 0, stream>>>(ctx.ctx, split, lastCycle);
+      CUDA_OK(cudaStreamSynchronize(stream));
+      break;
     }
   } catch (const std::exception& err) {
     return strdup(err.what());
@@ -422,83 +471,38 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
   return nullptr;
 }
 
-__global__ void par_step_compute_accum(AccumContext* ctx,
-                                       uint32_t steps,
-                                       uint32_t count,
-                                       Fp* arg0,
-                                       Fp* arg1,
-                                       Fp* arg2,
-                                       Fp* arg3,
-                                       Fp* arg4) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
+const char* risc0_circuit_rv32im_cuda_accum(AccumBuffers* buffers,
+                                            PreflightTrace* preflight,
+                                            uint32_t lastCycle) {
+  try {
+    HostAccumContext ctx(buffers, preflight, lastCycle);
+    CudaStream stream;
+    auto cfg = getSimpleConfig(lastCycle);
 
-  if (cycle == 0 || ctx->isParSafe[cycle]) {
-    step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
-    while (cycle < count && !ctx->isParSafe[cycle]) {
-      step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
+    {
+      nvtx3::scoped_range range("phase1");
+      stepAccum<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
+      CUDA_OK(cudaStreamSynchronize(stream));
     }
-  }
-}
 
-const char* risc0_circuit_rv32im_cuda_step_compute_accum(AccumContext* ctx,
-                                                         uint32_t steps,
-                                                         uint32_t count,
-                                                         Fp* ctrl,
-                                                         Fp* io,
-                                                         Fp* data,
-                                                         Fp* mix,
-                                                         Fp* accum) {
-  try {
-    CUDA_OK(cudaDeviceSynchronize());
+    {
+      nvtx3::scoped_range range("phase2");
+      size_t rows = buffers->accum.rows;
+      for (size_t j = 0; j < 4; j++) {
+        size_t col = buffers->accum.cols - 4 + j;
+        Fp* itBegin = buffers->accum.buf + col * rows;
+        Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
+        thrust::inclusive_scan(thrust::device, itBegin, itEnd, itBegin);
+      }
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
 
-    CudaStream stream;
-    auto cfg = getSimpleConfig(count);
+    {
+      nvtx3::scoped_range range("phase3");
+      finalizeAccum<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
 
-    par_step_compute_accum<<<cfg.grid, cfg.block, 0, stream>>>(
-        ctx, steps, count, ctrl, io, data, mix, accum);
-    CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::exception& err) {
-    return strdup(err.what());
-  } catch (...) {
-    return strdup("Generic exception");
-  }
-  return nullptr;
-}
-
-__global__ void par_step_verify_accum(AccumContext* ctx,
-                                      uint32_t steps,
-                                      uint32_t count,
-                                      Fp* arg0,
-                                      Fp* arg1,
-                                      Fp* arg2,
-                                      Fp* arg3,
-                                      Fp* arg4) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
-  step_verify_accum(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
-}
-
-const char* risc0_circuit_rv32im_cuda_step_verify_accum(AccumContext* ctx,
-                                                        uint32_t steps,
-                                                        uint32_t count,
-                                                        Fp* ctrl,
-                                                        Fp* io,
-                                                        Fp* data,
-                                                        Fp* mix,
-                                                        Fp* accum) {
-  try {
-    CUDA_OK(cudaDeviceSynchronize());
-
-    CudaStream stream;
-    auto cfg = getSimpleConfig(count);
-    par_step_verify_accum<<<cfg.grid, cfg.block, 0, stream>>>(
-        ctx, steps, count, ctrl, io, data, mix, accum);
-    CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());
   } catch (...) {

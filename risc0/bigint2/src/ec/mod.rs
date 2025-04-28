@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod secp256k1;
+mod secp384r1;
 #[cfg(test)]
 mod tests;
 
@@ -21,11 +22,15 @@ use include_bytes_aligned::include_bytes_aligned;
 use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
 
 pub use secp256k1::Secp256k1Curve;
+pub use secp384r1::Secp384r1Curve;
 
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
+pub const EC_384_WIDTH_WORDS: usize = 384 / 32;
 
-const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
-const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
+const ADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
+const DOUBLE_256_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
+const ADD_384_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_384.blob");
+const DOUBLE_384_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_384.blob");
 
 /// Generic static curve configuration.
 pub trait Curve<const WIDTH: usize> {
@@ -257,12 +262,27 @@ fn double_raw<const WIDTH: usize>(
     // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
     // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
     // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-    unsafe {
-        sys_bigint2_3(
-            DOUBLE_BLOB.as_ptr(),
-            point.as_ptr() as *const u32,
-            curve.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+    if WIDTH <= EC_256_WIDTH_WORDS {
+        unsafe {
+            sys_bigint2_3(
+                DOUBLE_256_BLOB.as_ptr(),
+                point.as_ptr() as *const u32,
+                curve.as_ptr() as *const u32,
+                result.as_mut_ptr() as *mut u32,
+            );
+        }
+    } else if WIDTH <= EC_384_WIDTH_WORDS {
+        unsafe {
+            sys_bigint2_3(
+                DOUBLE_384_BLOB.as_ptr(),
+                point.as_ptr() as *const u32,
+                curve.as_ptr() as *const u32,
+                result.as_mut_ptr() as *mut u32,
+            );
+        }
+    } else {
+        unimplemented!(
+            "Bitwidths above 384 bits not currently supported for elliptic curve precompiles"
         );
     }
 }
@@ -280,13 +300,29 @@ fn add_raw<const WIDTH: usize>(
     // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
     // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
     // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-    unsafe {
-        sys_bigint2_4(
-            ADD_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            curve.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
+    if WIDTH <= EC_256_WIDTH_WORDS {
+        unsafe {
+            sys_bigint2_4(
+                ADD_256_BLOB.as_ptr(),
+                lhs.as_ptr() as *const u32,
+                rhs.as_ptr() as *const u32,
+                curve.as_ptr() as *const u32,
+                result.as_mut_ptr() as *mut u32,
+            );
+        }
+    } else if WIDTH <= EC_384_WIDTH_WORDS {
+        unsafe {
+            sys_bigint2_4(
+                ADD_384_BLOB.as_ptr(),
+                lhs.as_ptr() as *const u32,
+                rhs.as_ptr() as *const u32,
+                curve.as_ptr() as *const u32,
+                result.as_mut_ptr() as *mut u32,
+            );
+        }
+    } else {
+        unimplemented!(
+            "Bitwidths above 384 bits not currently supported for elliptic curve precompiles"
         );
     }
 }

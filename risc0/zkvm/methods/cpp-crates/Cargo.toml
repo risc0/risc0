@@ -13,7 +13,7 @@ edition = "2021"
 
 [dependencies]
 blst = { version = "0.3.11", features = ["no-threads"] }
-rand = "0.8.5"
+rand = "0.9.1"
 risc0-zkvm = { path = "../..", default-features = false, features = [
   "std",
   "getrandom",

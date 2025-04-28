@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde, Executor2, ExecutorEnv, ReceiptClaim};
+use risc0_zkvm::{serde, ExecutorEnv, ExecutorImpl, ReceiptClaim};
 use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF, BENCH_ID};
 
 fn run_guest(msg: &str, spec: BenchmarkSpec) {
@@ -21,13 +21,13 @@ fn run_guest(msg: &str, spec: BenchmarkSpec) {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = Executor2::from_elf(env, BENCH_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
 }
 
 fn run_guest_with(msg: &str, env: ExecutorEnv) {
-    let mut exec = Executor2::from_elf(env, BENCH_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
 }
@@ -39,7 +39,7 @@ fn run_guest_framed(msg: &str, spec: BenchmarkSpec, payload: &[u8]) {
         .write_frame(payload)
         .build()
         .unwrap();
-    let mut exec = Executor2::from_elf(env, BENCH_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     println!("{msg}: {}, {}", session.user_cycles, session.total_cycles);
 }

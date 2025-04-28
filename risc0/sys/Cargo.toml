@@ -1,7 +1,7 @@
 [package]
 name = "risc0-sys"
 description = "Generated / Native / HAL code for RISC Zero"
-version = { workspace = true }
+version = "1.5.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -13,10 +13,11 @@ risc0-build-kernel = { workspace = true }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+blst = { version = "~0.3.11", optional = true }
 cust = { version = "0.3", optional = true }
 sppark = { workspace = true, optional = true }
 
 [features]
 default = []
-cuda = ["dep:cust", "dep:sppark"]
+cuda = ["dep:blst", "dep:cust", "dep:sppark"]
 metal = []

@@ -14,8 +14,9 @@
 
 use std::{cmp::min, collections::HashMap};
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_binfmt::ByteAddr;
+use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
 use risc0_zkvm_platform::{
     syscall::reg_abi::{REG_A3, REG_A4},
     WORD_SIZE,
@@ -39,10 +40,15 @@ impl Syscall for SysGetenv {
         match self.0.get(msg) {
             None => Ok((u32::MAX, 0)),
             Some(val) => {
-                let nbytes = min(to_guest.len() * WORD_SIZE, val.as_bytes().len());
+                let nbytes = min(to_guest.len() * WORD_SIZE, val.len());
                 let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
                 to_guest_u8s[0..nbytes].clone_from_slice(&val.as_bytes()[0..nbytes]);
-                Ok((val.as_bytes().len() as u32, 0))
+
+                if val.len() >= MAX_IO_BYTES as usize {
+                    bail!("sys_getenv failure: value is too large");
+                }
+
+                Ok((val.len() as u32, 0))
             }
         }
     }

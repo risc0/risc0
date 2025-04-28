@@ -343,7 +343,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use rand::thread_rng;
     use risc0_core::field::{baby_bear::BabyBearElem, Elem, RootsOfUnity};
 
     use crate::core::ntt::{bit_reverse, evaluate_ntt, interpolate_ntt};
@@ -353,7 +352,7 @@ mod tests {
     fn cmp_evaluate() {
         const N: usize = 6;
         const SIZE: usize = 1 << N;
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         // Randomly fill input
         let mut buf = [BabyBearElem::random(&mut rng); SIZE];
         // Compute the hard way
@@ -384,7 +383,7 @@ mod tests {
         const N: usize = 10;
         const SIZE: usize = 1 << N;
         // Randomly fill buffer
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let mut buf = [BabyBearElem::random(&mut rng); SIZE];
         // Copy it
         let orig = buf;
@@ -404,7 +403,7 @@ mod tests {
         const L: usize = 2;
         const SIZE_IN: usize = 1 << (N - L);
         const SIZE_OUT: usize = 1 << N;
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         let mut cmp = [BabyBearElem::random(&mut rng); SIZE_IN];
         let mut buf = [BabyBearElem::ZERO; SIZE_OUT];
         // Do plain interpolate on cmp

@@ -126,8 +126,8 @@ pub trait Prover {
     /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
     /// verifier, referred to as the "STARK-to-SNARK" operation.
     ///
-    /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
-    /// x86 hosts, and requires Docker to be installed. See issue
+    /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) requires
+    /// Docker to be installed. See issue
     /// [#1749](https://github.com/risc0/risc0/issues/1749) for more information.
     ///
     /// If the receipt is already at least as compressed as the requested compression level (e.g.
@@ -241,7 +241,7 @@ impl ProverOpts {
     /// and does not support compression via recursion.
     pub fn fast() -> Self {
         Self {
-            hashfn: "sha-256".to_string(),
+            hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: Vec::new(),
@@ -276,7 +276,7 @@ impl ProverOpts {
     /// Choose the prover that generates Groth16 receipts which are constant size in the length of
     /// the execution and small enough to verify on blockchains, like Ethereum.
     ///
-    /// Only supported for x86_64 Linux with Docker installed.
+    /// Only supported with Docker installed.
     pub fn groth16() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
@@ -416,6 +416,12 @@ pub fn default_executor() -> Rc<dyn Executor> {
     }
 
     Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
+}
+
+/// Return a local [Executor].
+#[cfg(feature = "prove")]
+pub fn local_executor() -> Rc<dyn Executor> {
+    Rc::new(self::local::LocalProver::new("local"))
 }
 
 pub(crate) fn get_r0vm_path() -> Result<PathBuf> {

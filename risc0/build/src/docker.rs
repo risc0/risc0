@@ -114,7 +114,7 @@ pub(crate) fn build_guest_package_docker(
 /// Overwrites if a dockerfile already exists.
 fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestInfo) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
-    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
+    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata, true);
     let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
 
     let common_args = vec![
@@ -142,8 +142,14 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
     .concat()
     .join(" ");
 
+    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
+    let docker_tag = format!(
+        "risczero/risc0-guest-builder:{}",
+        docker_opts.docker_container_tag()
+    );
+
     let mut build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
+        .from_alias("build", &docker_tag)
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -158,11 +164,10 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
     build = build
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
-            "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
+            "/root/.risc0/cpp/bin/riscv32-unknown-elf-gcc",
         )])
         .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
 
-    let docker_opts = guest_info.options.use_docker.clone().unwrap_or_default();
     let docker_env = docker_opts.env();
     if !docker_env.is_empty() {
         build = build.env(&docker_env);
@@ -263,7 +268,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "9d4aeeba4d9d7992e76bac675276569ce0678acfc97a61983964c7a716375dbf",
+            "029a85d834cb44d0bfe5d402fd0ae723c094f796368563fd1f7fe4908e29dc68",
         );
     }
 }

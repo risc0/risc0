@@ -16,10 +16,7 @@ use std::collections::VecDeque;
 
 use anyhow::Result;
 use risc0_binfmt::tagged_struct;
-use risc0_circuit_recursion::{
-    prove::{poseidon254_hal_pair, poseidon2_hal_pair},
-    CircuitImpl,
-};
+use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::digest::{digest, Digest, DIGEST_SHORTS},
@@ -30,7 +27,7 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
     default_prover, get_prover_server,
-    host::server::{exec::executor2::Executor2, prove::union_peak::UnionPeak},
+    host::server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     mmr::MerkleMountainAccumulator,
     receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
@@ -40,45 +37,10 @@ use crate::{
 };
 
 #[test_log::test]
-fn test_recursion_poseidon254() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
-
-    let suite = Poseidon2HashSuite::new_suite();
-    let hal_pair = poseidon254_hal_pair();
-    let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
-
-    // First, run the simple test of the recursion circuit.  This
-    // control tree just combines two hashes.
-    let digest1 = Digest::from([0, 1, 2, 3, 4, 5, 6, 7]);
-    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
-    let folded = *suite.hashfn.hash_pair(&digest1, &digest2);
-    let expected_claim = tagged_struct::<sha::Impl>("risc0.TestRecursionCircuit", &[folded], &[]);
-    let mut prover =
-        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
-    let receipt = prover
-        .run_with_hal(hal, circuit_hal)
-        .expect("Running prover failed");
-
-    // Uncomment to write seal...
-    // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
-    // std::fs::write("recursion.seal", seal);
-
-    assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
-    let output_elems: &[BabyBearElem] =
-        bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
-    let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
-
-    tracing::debug!("Receipt output: {:?}", output_digest);
-    assert_eq!(output_digest, expected_claim);
-}
-
-#[test_log::test]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
     let suite = Poseidon2HashSuite::new_suite();
-    let hal_pair = poseidon2_hal_pair();
-    let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
     // First, run the simple test of the recursion circuit.  This
     // control tree just combines two hashes.
@@ -90,9 +52,7 @@ fn test_recursion_poseidon2() {
         Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
 
     tracing::info!("Begin");
-    let receipt = prover
-        .run_with_hal(hal, circuit_hal)
-        .expect("Running prover failed");
+    let receipt = prover.run().expect("Running prover failed");
     tracing::info!("End");
 
     // Uncomment to write seal...
@@ -165,7 +125,7 @@ fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
 }
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
-    Executor2::from_elf(env, elf)
+    ExecutorImpl::from_elf(env, elf)
         .unwrap()
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
@@ -398,7 +358,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("1193543e87956d31c39a87145e84332461dab71dc450b74507381f2d18e43447")
+        digest!("539032186827b06719244873b17b2d4c122e2d02cfb1994fe958b2523b844576")
     );
 }
 

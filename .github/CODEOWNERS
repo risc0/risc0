@@ -7,7 +7,7 @@
 
 /bonsai/                               @risc0/bonsai
 /examples/                             @risc0/devrel @risc0/demos @risc0/platform
-/risc0/bigint2/                        @risc0/platform @tzerrell
+/risc0/bigint2/                        @risc0/platform @tzerrell @iddo-bentov @flaub
 /rzup/                                 @risc0/platform @hmrtn
 /web/                                  @risc0/platform @nahoc
 /website/                              @risc0/platform @risc0/devrel @pdg744

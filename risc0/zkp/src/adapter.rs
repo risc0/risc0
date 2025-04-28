@@ -17,11 +17,10 @@
 use alloc::{str::from_utf8, vec::Vec};
 use core::fmt;
 
-use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
 use serde::{Deserialize, Serialize};
 
-use crate::{hal::cpu::SyncSlice, taps::TapSet};
+use crate::taps::TapSet;
 
 // TODO: Remove references to these constants so we don't depend on a
 // fixed set of register groups.
@@ -41,64 +40,10 @@ macro_rules! trace_if_enabled {
 }
 
 #[derive(Clone, Copy, Debug)]
+#[non_exhaustive]
 pub struct MixState<EE: ExtElem> {
     pub tot: EE,
     pub mul: EE,
-}
-
-pub trait CircuitStepHandler<E: Elem> {
-    fn call(
-        &mut self,
-        cycle: usize,
-        name: &str,
-        extra: &str,
-        args: &[E],
-        outs: &mut [E],
-    ) -> Result<()>;
-
-    fn sort(&mut self, name: &str);
-}
-
-pub struct CircuitStepContext {
-    pub size: usize,
-    pub cycle: usize,
-}
-
-pub trait CircuitStep<E: Elem> {
-    fn step_exec<S: CircuitStepHandler<E>>(
-        &self,
-        ctx: &CircuitStepContext,
-        custom: &mut S,
-        args: &[SyncSlice<E>],
-    ) -> Result<E>;
-
-    fn step_verify_bytes<S: CircuitStepHandler<E>>(
-        &self,
-        ctx: &CircuitStepContext,
-        custom: &mut S,
-        args: &[SyncSlice<E>],
-    ) -> Result<E>;
-
-    fn step_verify_mem<S: CircuitStepHandler<E>>(
-        &self,
-        ctx: &CircuitStepContext,
-        custom: &mut S,
-        args: &[SyncSlice<E>],
-    ) -> Result<E>;
-
-    fn step_compute_accum<S: CircuitStepHandler<E>>(
-        &self,
-        ctx: &CircuitStepContext,
-        custom: &mut S,
-        args: &[SyncSlice<E>],
-    ) -> Result<E>;
-
-    fn step_verify_accum<S: CircuitStepHandler<E>>(
-        &self,
-        ctx: &CircuitStepContext,
-        custom: &mut S,
-        args: &[SyncSlice<E>],
-    ) -> Result<E>;
 }
 
 pub trait PolyFp<F: Field> {
@@ -183,12 +128,6 @@ pub trait CircuitInfo {
 /// traits implemented by generated rust code used in both prover and verifier
 pub trait CircuitCoreDef<F: Field>: CircuitInfo + PolyExt<F> + TapsProvider {}
 
-/// traits implemented by generated rust code used in only the prover
-pub trait CircuitProveDef<F: Field>:
-    CircuitStep<F::Elem> + PolyFp<F> + CircuitCoreDef<F> + Sync
-{
-}
-
 pub type Arg = usize;
 pub type Var = usize;
 
@@ -198,6 +137,7 @@ pub struct PolyExtStepDef {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum PolyExtStep {
     Const(u32),
     ConstExt(u32, u32, u32, u32),

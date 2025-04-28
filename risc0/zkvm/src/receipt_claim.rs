@@ -29,7 +29,7 @@ use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
-use risc0_circuit_rv32im_v2::{HighLowU16, Rv32imV2Claim};
+use risc0_circuit_rv32im::{HighLowU16, Rv32imV2Claim};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};

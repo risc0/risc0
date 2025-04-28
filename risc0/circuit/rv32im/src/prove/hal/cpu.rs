@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,132 +14,191 @@
 
 use std::rc::Rc;
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use rayon::prelude::*;
-use risc0_circuit_rv32im_sys::ffi::{risc0_circuit_rv32im_cpu_witgen, RawPreflightTrace};
-use risc0_core::{
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        map_pow, Elem, ExtElem, RootsOfUnity,
-    },
-    scope,
+use risc0_circuit_rv32im_sys::{
+    risc0_circuit_rv32im_cpu_accum, risc0_circuit_rv32im_cpu_poly_fp,
+    risc0_circuit_rv32im_cpu_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers, RawPreflightTrace,
 };
+use risc0_core::scope;
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
-    adapter::PolyFp,
-    core::{
-        hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
-        log2_ceil,
-    },
-    field::baby_bear::BabyBear,
-    hal::{
-        cpu::{CpuBuffer, CpuHal},
-        AccumPreflight, CircuitHal, Hal,
-    },
-    INV_RATE, ZK_CYCLES,
+    core::{hash::poseidon2::Poseidon2HashSuite, log2_ceil},
+    field::{map_pow, Elem, ExtElem as _, RootsOfUnity as _},
+    hal::{cpu::CpuBuffer, AccumPreflight, CircuitHal},
+    INV_RATE,
 };
 
+use super::{
+    CircuitAccumulator, CircuitWitnessGenerator, MetaBuffer, SegmentProver, SegmentProverImpl,
+    StepMode,
+};
 use crate::{
-    prove::{engine::SegmentProverImpl, SegmentProver},
-    CIRCUIT, GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
-    REGISTER_GROUP_DATA,
+    prove::{witgen::preflight::PreflightTrace, GLOBAL_MIX, GLOBAL_OUT},
+    zirgen::{
+        circuit::{CircuitField, ExtVal, Val, REGISTER_GROUP_ACCUM, REGISTER_GROUP_DATA},
+        info::POLY_MIX_POWERS,
+    },
 };
 
-use super::{CircuitWitnessGenerator, StepMode};
+type CpuHal = risc0_zkp::hal::cpu::CpuHal<CircuitField>;
 
 #[derive(Default)]
 pub struct CpuCircuitHal;
 
-impl CpuCircuitHal {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
+impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
     fn generate_witness(
         &self,
         mode: StepMode,
-        trace: &RawPreflightTrace,
-        steps: usize,
-        count: usize,
-        ctrl: &CpuBuffer<BabyBearElem>,
-        io: &CpuBuffer<BabyBearElem>,
-        data: &CpuBuffer<BabyBearElem>,
-    ) {
+        preflight: &PreflightTrace,
+        global: &MetaBuffer<CpuHal>,
+        data: &MetaBuffer<CpuHal>,
+    ) -> Result<()> {
         scope!("cpu_witgen");
-        tracing::debug!("witgen: {steps}, {count}");
+        let cycles = preflight.cycles.len();
+        tracing::debug!("witgen: {cycles}");
+        let global_buf = global.buf.as_slice();
+        let data_buf = data.buf.as_slice();
+        let buffers = RawExecBuffers {
+            global: RawBuffer {
+                buf: global_buf.as_ptr(),
+                rows: global.rows,
+                cols: global.cols,
+                checked: global.checked,
+            },
+            data: RawBuffer {
+                buf: data_buf.as_ptr(),
+                rows: data.rows,
+                cols: data.cols,
+                checked: data.checked,
+            },
+        };
+        let preflight = RawPreflightTrace {
+            cycles: preflight.cycles.as_ptr(),
+            txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
+            txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
+            table_split_cycle: preflight.table_split_cycle,
+        };
         ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_cpu_witgen(
-                mode as u32,
-                trace,
-                steps as u32,
-                count as u32,
-                ctrl.as_slice().as_ptr(),
-                io.as_slice().as_ptr(),
-                data.as_slice().as_ptr(),
-            )
+            risc0_circuit_rv32im_cpu_witgen(mode as u32, &buffers, &preflight, cycles as u32)
         })
-        .unwrap();
     }
 }
 
-impl<H> CircuitHal<H> for CpuCircuitHal
-where
-    H: Hal<
-        Elem = BabyBearElem,
-        ExtElem = BabyBearExtElem,
-        Buffer<<H as Hal>::Elem> = CpuBuffer<BabyBearElem>,
-    >,
-{
+impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
+    fn step_accum(
+        &self,
+        preflight: &PreflightTrace,
+        data: &MetaBuffer<CpuHal>,
+        accum: &MetaBuffer<CpuHal>,
+        global: &MetaBuffer<CpuHal>,
+        mix: &MetaBuffer<CpuHal>,
+    ) -> Result<()> {
+        scope!("accumulate");
+        let cycles = preflight.cycles.len();
+        tracing::debug!("accumulate: {cycles}");
+        let data_buf = data.buf.as_slice();
+        let accum_buf = accum.buf.as_slice();
+        let global_buf = global.buf.as_slice();
+        let mix_buf = mix.buf.as_slice();
+        let buffers = RawAccumBuffers {
+            data: RawBuffer {
+                buf: data_buf.as_ptr(),
+                rows: data.rows,
+                cols: data.cols,
+                checked: data.checked,
+            },
+            accum: RawBuffer {
+                buf: accum_buf.as_ptr(),
+                rows: accum.rows,
+                cols: accum.cols,
+                checked: accum.checked,
+            },
+            global: RawBuffer {
+                buf: global_buf.as_ptr(),
+                rows: global.rows,
+                cols: global.cols,
+                checked: global.checked,
+            },
+            mix: RawBuffer {
+                buf: mix_buf.as_ptr(),
+                rows: mix.rows,
+                cols: mix.cols,
+                checked: mix.checked,
+            },
+        };
+        let preflight = RawPreflightTrace {
+            cycles: preflight.cycles.as_ptr(),
+            txns: preflight.txns.as_ptr(),
+            bigint_bytes: preflight.bigint_bytes.as_ptr(),
+            txns_len: preflight.txns.len() as u32,
+            bigint_bytes_len: preflight.bigint_bytes.len() as u32,
+            table_split_cycle: preflight.table_split_cycle,
+        };
+        ffi_wrap(|| unsafe { risc0_circuit_rv32im_cpu_accum(&buffers, &preflight, cycles as u32) })
+    }
+}
+
+impl CircuitHal<CpuHal> for CpuCircuitHal {
     fn eval_check(
         &self,
-        check: &CpuBuffer<BabyBearElem>,
-        groups: &[&CpuBuffer<BabyBearElem>],
-        globals: &[&CpuBuffer<BabyBearElem>],
-        poly_mix: BabyBearExtElem,
+        check: &CpuBuffer<Val>,
+        groups: &[&CpuBuffer<Val>],
+        globals: &[&CpuBuffer<Val>],
+        poly_mix: ExtVal,
         po2: usize,
         steps: usize,
     ) {
+        scope!("eval_check");
+
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
-
-        let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
+        let poly_mix_pows = map_pow(poly_mix, POLY_MIX_POWERS);
 
         // SAFETY: Convert a borrow of a cell into a raw const slice so that we can pass
         // it over the thread boundary. This should be safe because the scope of the
         // usage is within this function and each thread access will not overlap with
         // each other.
 
-        let ctrl = groups[REGISTER_GROUP_CTRL].as_slice();
-        let ctrl = unsafe { std::slice::from_raw_parts(ctrl.as_ptr(), ctrl.len()) };
         let data = groups[REGISTER_GROUP_DATA].as_slice();
-        let data = unsafe { std::slice::from_raw_parts(data.as_ptr(), data.len()) };
         let accum = groups[REGISTER_GROUP_ACCUM].as_slice();
-        let accum = unsafe { std::slice::from_raw_parts(accum.as_ptr(), accum.len()) };
         let mix = globals[GLOBAL_MIX].as_slice();
-        let mix = unsafe { std::slice::from_raw_parts(mix.as_ptr(), mix.len()) };
         let out = globals[GLOBAL_OUT].as_slice();
-        let out = unsafe { std::slice::from_raw_parts(out.as_ptr(), out.len()) };
         let check = check.as_slice();
+
+        let data = unsafe { std::slice::from_raw_parts(data.as_ptr(), data.len()) };
+        let accum = unsafe { std::slice::from_raw_parts(accum.as_ptr(), accum.len()) };
+        let mix = unsafe { std::slice::from_raw_parts(mix.as_ptr(), mix.len()) };
+        let out = unsafe { std::slice::from_raw_parts(out.as_ptr(), out.len()) };
         let check = unsafe { std::slice::from_raw_parts(check.as_ptr(), check.len()) };
         let poly_mix_pows = poly_mix_pows.as_slice();
 
-        let args: &[&[BabyBearElem]] = &[ctrl, out, data, mix, accum];
+        let args: &[&[Val]] = &[accum, data, out, mix];
 
         (0..domain).into_par_iter().for_each(|cycle| {
-            let tot = CIRCUIT.poly_fp(cycle, domain, poly_mix_pows, args);
-            let x = BabyBearElem::ROU_FWD[po2 + EXP_PO2].pow(cycle);
+            let args: Vec<*const Val> = args.iter().map(|x| (*x).as_ptr()).collect();
+            let mut tot = ExtVal::ZERO;
+            unsafe {
+                risc0_circuit_rv32im_cpu_poly_fp(
+                    cycle,
+                    domain,
+                    poly_mix_pows.as_ptr(),
+                    args.as_ptr(),
+                    &mut tot,
+                )
+            };
+            let x = Val::ROU_FWD[po2 + EXP_PO2].pow(cycle);
             // TODO: what is this magic number 3?
-            let y = (BabyBearElem::new(3) * x).pow(1 << po2);
-            let ret = tot * (y - BabyBearElem::new(1)).inv();
+            let y = (Val::new(3) * x).pow(1 << po2);
+            let ret = tot * (y - Val::new(1)).inv();
 
             // SAFETY: This conversion is to make the check slice mutable, which should be
             // safe because each thread access will not overlap with each other.
-            let check = unsafe {
-                std::slice::from_raw_parts_mut(check.as_ptr() as *mut BabyBearElem, check.len())
-            };
-            for i in 0..BabyBearExtElem::EXT_SIZE {
+            let check =
+                unsafe { std::slice::from_raw_parts_mut(check.as_ptr() as *mut Val, check.len()) };
+            for i in 0..ExtVal::EXT_SIZE {
                 check[i * domain + cycle] = ret.elems()[i];
             }
         });
@@ -147,64 +206,22 @@ where
 
     fn accumulate(
         &self,
-        preflight: &AccumPreflight,
-        ctrl: &CpuBuffer<BabyBearElem>,
-        io: &CpuBuffer<BabyBearElem>,
-        data: &CpuBuffer<BabyBearElem>,
-        mix: &CpuBuffer<BabyBearElem>,
-        accum: &CpuBuffer<BabyBearElem>,
-        steps: usize,
+        _preflight: &AccumPreflight,
+        _ctrl: &CpuBuffer<Val>,
+        _global: &CpuBuffer<Val>,
+        _data: &CpuBuffer<Val>,
+        _mix: &CpuBuffer<Val>,
+        _accum: &CpuBuffer<Val>,
+        _steps: usize,
     ) {
-        {
-            let args = &[
-                ctrl.as_slice_sync(),
-                io.as_slice_sync(),
-                data.as_slice_sync(),
-                mix.as_slice_sync(),
-                accum.as_slice_sync(),
-            ];
-
-            let accum_ctx = CIRCUIT.alloc_accum_ctx(steps, &preflight.is_par_safe);
-
-            // TODO: use preflight
-            scope!("step_compute_accum", {
-                for cycle in 0..(steps - ZK_CYCLES) {
-                    CIRCUIT
-                        .par_step_compute_accum(steps, cycle, &accum_ctx, args)
-                        .unwrap();
-                }
-            });
-            scope!("calc_prefix_products", {
-                CIRCUIT.calc_prefix_products(&accum_ctx).unwrap();
-            });
-            scope!("step_verify_accum", {
-                (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
-                    CIRCUIT
-                        .par_step_verify_accum(steps, cycle, &accum_ctx, args)
-                        .unwrap();
-                });
-            });
-        }
-
-        {
-            // Zero out 'invalid' entries in accum and io
-            let mut accum_slice = accum.as_slice_mut();
-            let mut io = io.as_slice_mut();
-            for value in accum_slice.iter_mut().chain(io.iter_mut()) {
-                *value = value.valid_or_zero();
-            }
-        }
+        unimplemented!()
     }
 }
 
-pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
-    let suite = match hashfn {
-        "sha-256" => Sha256HashSuite::new_suite(),
-        "poseidon2" => Poseidon2HashSuite::new_suite(),
-        _ => bail!("Unsupported hashfn: {hashfn}"),
-    };
-
+#[allow(dead_code)]
+pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
+    let suite = Poseidon2HashSuite::new_suite();
     let hal = Rc::new(CpuHal::new(suite));
-    let circuit_hal = Rc::new(CpuCircuitHal::new());
+    let circuit_hal = Rc::new(CpuCircuitHal);
     Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
 }

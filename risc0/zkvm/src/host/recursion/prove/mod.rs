@@ -27,14 +27,14 @@ use risc0_circuit_recursion::{
     prove::{DigestKind, RecursionReceipt},
     CircuitImpl,
 };
+use risc0_circuit_rv32im::RV32IM_SEAL_VERSION;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
         digest::{Digest, DIGEST_SHORTS},
         hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    hal::{CircuitHal, Hal},
+    field::baby_bear::BabyBearElem,
     verify::ReadIOP,
 };
 use serde::Serialize;
@@ -462,11 +462,18 @@ impl Prover {
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
-        let out_size = risc0_circuit_rv32im_v2::CircuitImpl::OUTPUT_SIZE;
+        let out_size = risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE;
+
+        ensure!(
+            segment.seal[0] == RV32IM_SEAL_VERSION,
+            "seal version mismatch"
+        );
+
+        let seal = &segment.seal[1..];
 
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.
-        let mut iop = ReadIOP::new(&segment.seal, inner_hash_suite.rng.as_ref());
+        let mut iop = ReadIOP::new(seal, inner_hash_suite.rng.as_ref());
         iop.read_field_elem_slice::<BabyBearElem>(out_size);
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
@@ -475,7 +482,7 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_input(&segment.seal);
+        prover.add_input(seal);
 
         Ok(prover)
     }
@@ -731,15 +738,5 @@ impl Prover {
     /// program and input.
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         self.prover.run()
-    }
-
-    /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
-    /// program and input, using the specified HAL.
-    pub fn run_with_hal<H, C>(&mut self, hal: &H, circuit_hal: &C) -> Result<RecursionReceipt>
-    where
-        H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        C: CircuitHal<H>,
-    {
-        self.prover.run_with_hal(hal, circuit_hal)
     }
 }

@@ -25,9 +25,15 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 #### [RISC Zero toolchain](https://dev.risczero.com/api/zkvm/quickstart#1-install-the-risc-zero-toolchain)
 
-The RISC Zero toolchain must match the version of crates you are compiling.
+Run `rzup install` to install the latest Rust and C++ toolchains.
+```bash
+cargo run --bin rzup install rust
+cargo run --bin rzup install cpp
+```
 
-When testing and running examples within this library, you can install `cargo-risczero` from source:
+The versions of `r0vm` and `cargo-risczero` must match the source code. Compile and install these
+from source when using a development branch. The `cargo-risczero` package includes both the `r0vm`
+and `cargo-risczero` binaries.
 
 ```bash
 cargo install --force --path risc0/cargo-risczero
@@ -39,14 +45,6 @@ Otherwise, if using a stable version branch, you can install `cargo-risczero` th
 curl -L https://risczero.com/install | bash
 rzup install
 ```
-
-Optionally, you can specify which version of `cargo-risczero` to install with:
-
-```bash
-rzup install cargo-risczero $VERSION
-```
-
-Where the `$VERSION` is a [release tag](https://github.com/risc0/risc0/releases) (e.g `v1.1.1`).
 
 > NOTE: It is only important that you install `cargo-risczero` with a matching version of the `zkvm` crate when interacting with the proof system as a separate, pre-built process ([`ExternalProver`](https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExternalProver.html)), which is currently the default. If you are using the `prove` feature on the `risc0-zkvm` crate for the host, this will compile the proving system into the host binary.
 

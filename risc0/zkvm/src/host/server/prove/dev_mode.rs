@@ -16,12 +16,15 @@ use anyhow::{bail, Result};
 use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 
 use crate::{
-    host::{prove_info::ProveInfo, server::session::null_callback},
+    host::{
+        prove_info::ProveInfo,
+        server::{exec::executor::ExecutorImpl, session::null_callback},
+    },
     mmr::{GuestPeak, MerkleMountainAccumulator},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::{UnionClaim, Unknown},
-    Assumption, AssumptionReceipt, Executor2, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
-    ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned, ProverOpts,
+    ProverServer, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -134,7 +137,7 @@ impl ProverServer for DevModeProver {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<ProveInfo> {
-        let session = Executor2::from_elf(env, elf)
+        let session = ExecutorImpl::from_elf(env, elf)
             .unwrap()
             .run_with_callback(null_callback)?;
         self.prove_session(ctx, &session)

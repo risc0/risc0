@@ -54,6 +54,7 @@ pub use self::{
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
+const DEFAULT_DOCKER_TAG: &str = "r0.1.85.0";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -358,22 +359,23 @@ fn sanitized_cmd(tool: &str) -> Command {
     cmd
 }
 
-fn cpp_toolchain() -> PathBuf {
+fn cpp_toolchain() -> Option<PathBuf> {
     let rzup = rzup::Rzup::new().unwrap();
     let (version, path) = rzup
         .get_default_version(&rzup::Component::CppToolchain)
-        .unwrap()
-        .expect("Risc Zero C++ toolchain installed");
+        .unwrap()?;
     println!("Using C++ toolchain version {version}");
-    path
+    Some(path)
 }
 
 fn rust_toolchain() -> PathBuf {
     let rzup = rzup::Rzup::new().unwrap();
-    let (version, path) = rzup
+    let Some((version, path)) = rzup
         .get_default_version(&rzup::Component::RustToolchain)
         .unwrap()
-        .expect("Risc Zero Rust toolchain installed");
+    else {
+        panic!("Risc Zero Rust toolchain not found. Try running `rzup install rust`");
+    };
     println!("Using Rust toolchain version {version}");
     path
 }
@@ -407,11 +409,24 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
-    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
+    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata, false);
 
     if !cpp_toolchain_override() {
-        cmd.env("CC", cpp_toolchain().join("bin/riscv32-unknown-elf-gcc"))
-            .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+        if let Some(toolchain_path) = cpp_toolchain() {
+            cmd.env("CC", toolchain_path.join("bin/riscv32-unknown-elf-gcc"));
+        } else {
+            // If you aren't compiling any C/C++ code, it might be just fine to not have a C++
+            // toolchain installed, but if you are then your compilation will surely fail. To avoid
+            // a potentially confusing error message, set the CC path to a bogus path that will
+            // hopefully make the issue obvious.
+            cmd.env(
+                "CC",
+                "/no_risc0_cpp_toolchain_installed_run_rzup_install_cpp",
+            );
+        }
+
+        cmd.env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
         // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
         // would be seamless if there was a reliable way to tell whether it is enabled in
@@ -426,8 +441,25 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
     cmd
 }
 
+fn get_rust_toolchain_version() -> semver::Version {
+    let rzup = rzup::Rzup::new().unwrap();
+    let Some((version, _)) = rzup
+        .get_default_version(&rzup::Component::RustToolchain)
+        .unwrap()
+    else {
+        panic!("Risc Zero Rust toolchain not found. Try running `rzup install rust`");
+    };
+    version
+}
+
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
-pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
+pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata, escape_special_chars: bool) -> String {
+    // llvm changed `loweratomic` to `lower-atomic`
+    let lower_atomic = if get_rust_toolchain_version() > semver::Version::new(1, 81, 0) {
+        "passes=lower-atomic"
+    } else {
+        "passes=loweratomic"
+    };
     let rustc_flags = guest_meta.rustc_flags.clone().unwrap_or_default();
     let rustc_flags: Vec<_> = rustc_flags.iter().map(|s| s.as_str()).collect();
     let text_addr = if guest_meta.kernel {
@@ -441,7 +473,7 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
         &[
             // Replace atomic ops with nonatomic versions since the guest is single threaded.
             "-C",
-            "passes=loweratomic",
+            lower_atomic,
             // Specify where to start loading the program in
             // memory.  The clang linker understands the same
             // command line arguments as the GNU linker does; see
@@ -455,9 +487,20 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
             "link-arg=--fatal-warnings",
             "-C",
             "panic=abort",
+            "--cfg",
+            "getrandom_backend=\"custom\"",
         ],
     ]
     .concat()
+    .iter()
+    .map(|x| {
+        if escape_special_chars {
+            x.escape_default().to_string()
+        } else {
+            x.to_string()
+        }
+    })
+    .collect::<Vec<String>>()
     .join("\x1f")
 }
 
@@ -803,25 +846,6 @@ pub fn embed_methods() -> Vec<GuestListEntry> {
     embed_methods_with_options(HashMap::new())
 }
 
-/// Embed the current crate's binary targets built for RISC-V.
-pub fn embed_self() -> Vec<GuestListEntry> {
-    if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
-        // Guest shouldn't recursively depend on itself.
-        return vec![];
-    }
-
-    let pkg = current_package();
-    let target_dir = get_out_dir().join(&pkg.name);
-    let pkgs = vec![GuestPackageWithOptions {
-        name: pkg.name.clone(),
-        pkg,
-        opts: GuestOptions::default(),
-        target_dir,
-    }];
-
-    build_methods(&pkgs)
-}
-
 /// Build a guest package into the specified `target_dir` using the specified
 /// `GuestOptions`.
 pub fn build_package(
@@ -844,5 +868,57 @@ pub fn build_package(
     } else {
         build_guest_package(pkg, &target_dir, &guest_info);
         Ok(guest_methods(pkg, &target_dir, &guest_info, profile))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const RUSTC_FLAGS: &[&str] = &[
+        "--cfg",
+        "foo=\"bar\"",
+        "--cfg",
+        "foo='bar'",
+        "-C",
+        "link-args=--fatal-warnings",
+    ];
+
+    #[test]
+    fn encodes_rustc_flags() {
+        let guest_meta = GuestMetadata {
+            rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
+            ..Default::default()
+        };
+        let encoded = encode_rust_flags(&guest_meta, false);
+        let expected = [
+            "--cfg",
+            "foo=\"bar\"",
+            "--cfg",
+            "foo='bar'",
+            "-C",
+            "link-args=--fatal-warnings",
+        ]
+        .join("\x1f");
+        assert!(encoded.contains(&expected));
+    }
+
+    #[test]
+    fn escapes_strings_when_encoding_when_requested() {
+        let guest_meta = GuestMetadata {
+            rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
+            ..Default::default()
+        };
+        let encoded = encode_rust_flags(&guest_meta, true);
+        let expected = [
+            "--cfg",
+            "foo=\\\"bar\\\"",
+            "--cfg",
+            "foo=\\\'bar\\\'",
+            "-C",
+            "link-args=--fatal-warnings",
+        ]
+        .join("\x1f");
+        assert!(encoded.contains(&expected));
     }
 }

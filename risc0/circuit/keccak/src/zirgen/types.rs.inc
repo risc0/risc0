@@ -11,6 +11,36 @@ impl risc0_zkp::layout::Component for NondetRegLayout {
         Ok(())
     }
 }
+pub struct IsZeroLayout {
+    pub _super: &'static NondetRegLayout,
+    pub inv: &'static NondetRegLayout,
+}
+impl risc0_zkp::layout::Component for IsZeroLayout {
+    fn ty_name(&self) -> &'static str {
+        "IsZeroLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("inv", self.inv)?;
+        Ok(())
+    }
+}
+pub struct CycleCounterLayout {
+    pub _super: &'static NondetRegLayout,
+    pub is_first_cycle: &'static IsZeroLayout,
+}
+impl risc0_zkp::layout::Component for CycleCounterLayout {
+    fn ty_name(&self) -> &'static str {
+        "CycleCounterLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("is_first_cycle", self.is_first_cycle)?;
+        Ok(())
+    }
+}
 pub type NondetRegLayout12LayoutArray = [&'static NondetRegLayout; 12];
 pub struct WrapOneHotLayout {
     pub _super: &'static NondetRegLayout12LayoutArray,
@@ -75,21 +105,6 @@ impl risc0_zkp::layout::Component for KeccackNextRound_SuperLayout {
         v.visit_component("_super", self._super)?;
         v.visit_component("arm0", self.arm0)?;
         v.visit_component("arm1", self.arm1)?;
-        Ok(())
-    }
-}
-pub struct IsZeroLayout {
-    pub _super: &'static NondetRegLayout,
-    pub inv: &'static NondetRegLayout,
-}
-impl risc0_zkp::layout::Component for IsZeroLayout {
-    fn ty_name(&self) -> &'static str {
-        "IsZeroLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("_super", self._super)?;
-        v.visit_component("inv", self.inv)?;
         Ok(())
     }
 }
@@ -711,7 +726,7 @@ impl risc0_zkp::layout::Component for DigestRegLayout {
     }
 }
 pub struct TopLayout {
-    pub is_first: &'static NondetRegLayout,
+    pub cycle: &'static CycleCounterLayout,
     pub cycle_mux: &'static WrapOneHotLayout,
     pub control_state: &'static ControlStateLayout,
     pub control_state_redef: &'static TopControlStateLayout,
@@ -725,7 +740,7 @@ impl risc0_zkp::layout::Component for TopLayout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("is_first", self.is_first)?;
+        v.visit_component("cycle", self.cycle)?;
         v.visit_component("cycle_mux", self.cycle_mux)?;
         v.visit_component("control_state", self.control_state)?;
         v.visit_component("control_state_redef", self.control_state_redef)?;
@@ -737,6 +752,7 @@ impl risc0_zkp::layout::Component for TopLayout {
 }
 pub struct _globalLayout {
     pub final_digest: &'static DigestRegLayout,
+    pub total_cycles: &'static NondetRegLayout,
 }
 impl risc0_zkp::layout::Component for _globalLayout {
     fn ty_name(&self) -> &'static str {
@@ -745,6 +761,7 @@ impl risc0_zkp::layout::Component for _globalLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("final_digest", self.final_digest)?;
+        v.visit_component("total_cycles", self.total_cycles)?;
         Ok(())
     }
 }
@@ -755,6 +772,12 @@ pub struct NondetRegStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct NondetBitRegStruct {
     pub _super: NondetRegStruct,
+}
+#[derive(Copy, Clone, Debug)]
+pub struct ComponentStruct {}
+#[derive(Copy, Clone, Debug)]
+pub struct CycleCounterStruct {
+    pub is_first_cycle: NondetRegStruct,
 }
 pub type Val5Array = [Val; 5];
 pub type Val64Array = [Val; 64];
@@ -863,8 +886,6 @@ pub struct ShaStateStruct {
     pub e: Val32Array4Array,
     pub w: Val32Array16Array,
 }
-#[derive(Copy, Clone, Debug)]
-pub struct ComponentStruct {}
 pub type ComponentStruct32Array = [ComponentStruct; 32];
 #[derive(Copy, Clone, Debug)]
 pub struct DoShaStepStruct {

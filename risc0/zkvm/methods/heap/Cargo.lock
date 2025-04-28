@@ -335,9 +335,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck_derive"
-version = "1.7.1"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0cc8b54b395f2fcfbb3d90c47b01c7f444d94d05bdeb775811dec868ac3bbc26"
+checksum = "7ecc273b49b3205b83d648f0690daa588925572cc5063745bfe547fe7ec8e1a1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -361,6 +361,12 @@ name = "cfg_aliases"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
+
+[[package]]
+name = "cobs"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67ba02a97a2bd10f4b59b25c7973101c79642302776489e030cd13cdab09ed15"
 
 [[package]]
 name = "const-default"
@@ -513,6 +519,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "embedded-io"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
+
+[[package]]
+name = "embedded-io"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
+
+[[package]]
 name = "enum-ordinalize"
 version = "4.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -589,7 +607,19 @@ checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
 dependencies = [
  "cfg-if",
  "libc",
- "wasi",
+ "wasi 0.11.0+wasi-snapshot-preview1",
+]
+
+[[package]]
+name = "getrandom"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73fea8450eea4bac3940448fb7ae50d91f034f941199fcd9d909a5a07aa455f0"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "r-efi",
+ "wasi 0.14.2+wasi-0.2.4",
 ]
 
 [[package]]
@@ -709,7 +739,7 @@ checksum = "58c38e2799fc0978b65dfff8023ec7843e2330bb462f19198840b34b6582397d"
 dependencies = [
  "byteorder",
  "keccak",
- "rand_core",
+ "rand_core 0.6.4",
  "zeroize",
 ]
 
@@ -790,6 +820,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bda66fc9667c18cb2758a2ac84d1167245054bcf85d5d1aaa6923f45801bdd02"
 
 [[package]]
+name = "postcard"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "170a2601f67cc9dba8edd8c4870b15f71a6a2dc196daec8c83f72b59dff628a8"
+dependencies = [
+ "cobs",
+ "embedded-io 0.4.0",
+ "embedded-io 0.6.1",
+ "serde",
+]
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -849,13 +891,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "r-efi"
+version = "5.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "74765f6d916ee2faa39bc8e68e4f3ed8949b48cccdac59983d287a7cb71ce9c5"
+
+[[package]]
 name = "rand"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
 dependencies = [
  "rand_chacha",
- "rand_core",
+ "rand_core 0.6.4",
 ]
 
 [[package]]
@@ -865,7 +913,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
 dependencies = [
  "ppv-lite86",
- "rand_core",
+ "rand_core 0.6.4",
 ]
 
 [[package]]
@@ -875,23 +923,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
+name = "rand_core"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99d9a13982dcf210057a8a78572b2217b667c3beacbf3a0d8b454f6f82837d38"
+
+[[package]]
 name = "risc0-binfmt"
-version = "1.4.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "borsh",
  "derive_more",
  "elf",
  "lazy_static",
+ "postcard",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "semver",
  "serde",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.4.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -905,7 +961,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.4.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -917,8 +973,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-rv32im-v2"
-version = "0.1.0"
+name = "risc0-circuit-rv32im"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -934,15 +990,16 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.4.0-alpha.1"
+version = "2.0.1"
 dependencies = [
  "bytemuck",
- "rand_core",
+ "bytemuck_derive",
+ "rand_core 0.9.3",
 ]
 
 [[package]]
 name = "risc0-groth16"
-version = "1.4.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -961,7 +1018,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "0.1.0"
+version = "2.0.1"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -969,7 +1026,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.4.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -981,7 +1038,7 @@ dependencies = [
  "hex-literal",
  "metal",
  "paste",
- "rand_core",
+ "rand_core 0.9.3",
  "risc0-core",
  "risc0-zkvm-platform",
  "serde",
@@ -992,18 +1049,17 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.0-alpha.1"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
  "derive_more",
- "getrandom",
  "hex",
  "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
- "risc0-circuit-rv32im-v2",
+ "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkos-v1compat",
@@ -1027,13 +1083,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.4.0-alpha.1"
+version = "2.0.2"
 dependencies = [
  "bytemuck",
  "cfg-if",
  "critical-section",
  "embedded-alloc",
- "getrandom",
+ "getrandom 0.2.15",
+ "getrandom 0.3.2",
  "libm",
  "stability",
 ]
@@ -1065,6 +1122,9 @@ name = "semver"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "serde"
@@ -1268,12 +1328,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
+name = "wasi"
+version = "0.14.2+wasi-0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9683f9a5a998d873c0d21fcbe3c083009670149a8fab228644b8bd36b2c48cb3"
+dependencies = [
+ "wit-bindgen-rt",
+]
+
+[[package]]
 name = "winnow"
 version = "0.5.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f593a95398737aeed53e489c785df13f3618e41dbcd6718c6addbf1395aa6876"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "wit-bindgen-rt"
+version = "0.39.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f42320e61fe2cfd34354ecb597f86f413484a798ba44a8ca1165c58d42da6c1"
+dependencies = [
+ "bitflags 2.6.0",
 ]
 
 [[package]]
