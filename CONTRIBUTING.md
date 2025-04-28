@@ -27,8 +27,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Run `rzup install` to install the latest Rust and C++ toolchains.
 ```bash
-cargo run --bin rzup install rust
-cargo run --bin rzup install cpp
+curl -L https://risczero.com/install | bash
+rzup install
 ```
 
 The versions of `r0vm` and `cargo-risczero` must match the source code. Compile and install these
