@@ -59,7 +59,7 @@ The final step in the recursion process is `compress()`, which outputs a [Groth1
 [`Prover::prove_with_opts`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html
-[proof system]: /proof-system/proof-system-sequence-diagram
+[proof system]: https://github.com/risc0/risc0/blob/main/website/docs/proof-system/proof-system-sequence-diagram.md
 [Prover]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [reports.risczero.com]: https://reports.risczero.com
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
