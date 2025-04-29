@@ -34,8 +34,7 @@ use risc0_zkp::{
         digest::{Digest, DIGEST_SHORTS},
         hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    hal::{CircuitHal, Hal},
+    field::baby_bear::BabyBearElem,
     verify::ReadIOP,
 };
 use serde::Serialize;
@@ -739,15 +738,5 @@ impl Prover {
     /// program and input.
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         self.prover.run()
-    }
-
-    /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
-    /// program and input, using the specified HAL.
-    pub fn run_with_hal<H, C>(&mut self, hal: &H, circuit_hal: &C) -> Result<RecursionReceipt>
-    where
-        H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        C: CircuitHal<H>,
-    {
-        self.prover.run_with_hal(hal, circuit_hal)
     }
 }

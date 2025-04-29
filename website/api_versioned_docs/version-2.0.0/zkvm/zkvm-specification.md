@@ -60,8 +60,8 @@ The following table summarizes the layout of the zkVM guest memory
 | Address Range             | Size   | Name          | Description                                                                                   |
 | ------------------------- | ------ | ------------- | --------------------------------------------------------------------------------------------- |
 | `0x00000000 - 0x0000FFFF` | 64 KiB | Invalid page  | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
-| `0x00010000 - 0xBFFFFFFF` | ~3 GB  | User Memory   | Contains code, heap, and stack of the guest program                                           |
-| `0xC0000000 - 0xFF000000` | ~1 GB  | Kernel Memory | Contains kernel code and data such as ecall/trap dispatch, register contents                  |
+| `0x00010000 - 0xBFFFFFFF` | \~3 GB | User Memory   | Contains code, heap, and stack of the guest program                                           |
+| `0xC0000000 - 0xFF000000` | \~1 GB | Kernel Memory | Contains kernel code and data such as ecall/trap dispatch, register contents                  |
 
 ## zkVM Memory Model
 

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,4 +14,13 @@
 
 // This code is automatically generated
 
-// This is intentionally blank
+#include "extern.cuh"
+
+__device__ void step_verify_bytes(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4) {
+  uint32_t mask = steps - 1;
+  Fp extern_args[96];
+  Fp extern_outs[32];
+  // loc(unknown)
+  Fp x0(0);
+}

@@ -93,6 +93,12 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
+pub enum CycleLimit {
+    Hard(u64), // it is an error to exceed this limit
+    Soft(u64), // stop execution after this cycle count
+    None,
+}
+
 struct ComputePartialImageRequest {
     image: MemoryImage,
     page_indexes: BTreeSet<u32>,
@@ -171,7 +177,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         &mut self,
         segment_po2: usize,
         max_insn_cycles: usize,
-        max_cycles: Option<u64>,
+        max_cycles: CycleLimit,
         callback: impl FnMut(Segment) -> Result<()> + Send,
     ) -> Result<ExecutorResult> {
         let segment_limit: u32 = 1 << segment_po2;
@@ -194,13 +200,21 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 scope.spawn(move || compute_partial_images(commit_recv, callback));
 
             while self.terminate_state.is_none() {
-                if let Some(max_cycles) = max_cycles {
-                    if self.cycles.user >= max_cycles {
-                        bail!(
-                            "Session limit exceeded: {} >= {max_cycles}",
-                            self.cycles.user
-                        );
+                match max_cycles {
+                    CycleLimit::Hard(max_cycles) => {
+                        if self.cycles.user >= max_cycles {
+                            bail!(
+                                "Session limit exceeded: {} >= {max_cycles}",
+                                self.cycles.user
+                            );
+                        }
                     }
+                    CycleLimit::Soft(max_cycles) => {
+                        if self.cycles.user >= max_cycles {
+                            break;
+                        }
+                    }
+                    CycleLimit::None => {}
                 }
 
                 if self.segment_cycles() > segment_threshold {
@@ -267,7 +281,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
-            let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
             let (pre_image, pre_digest, post_digest) = self.pager.commit();
             let req = ComputePartialImageRequest {
                 image: pre_image,
@@ -279,7 +292,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 user_cycles: self.user_cycles,
                 pager_cycles: self.pager.cycles,
                 terminate_state: self.terminate_state,
-                segment_threshold,
+                segment_threshold: 0, // meaningless for final segment
                 pre_digest,
                 post_digest,
                 po2: final_po2 as u32,

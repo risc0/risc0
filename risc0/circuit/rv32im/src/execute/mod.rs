@@ -28,7 +28,8 @@ mod tests;
 pub mod testutil;
 
 pub use self::{
-    executor::{EcallMetric, Executor, ExecutorResult, SimpleSession},
+    bigint::analyze::analyze as bigint_analyze,
+    executor::{CycleLimit, EcallMetric, Executor, ExecutorResult, SimpleSession},
     platform::*,
     segment::Segment,
     syscall::{Syscall, SyscallContext},

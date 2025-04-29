@@ -409,7 +409,7 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
-    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata);
+    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata, false);
 
     if !cpp_toolchain_override() {
         if let Some(toolchain_path) = cpp_toolchain() {
@@ -453,7 +453,7 @@ fn get_rust_toolchain_version() -> semver::Version {
 }
 
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
-pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
+pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata, escape_special_chars: bool) -> String {
     // llvm changed `loweratomic` to `lower-atomic`
     let lower_atomic = if get_rust_toolchain_version() > semver::Version::new(1, 81, 0) {
         "passes=lower-atomic"
@@ -487,9 +487,20 @@ pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata) -> String {
             "link-arg=--fatal-warnings",
             "-C",
             "panic=abort",
+            "--cfg",
+            "getrandom_backend=\"custom\"",
         ],
     ]
     .concat()
+    .iter()
+    .map(|x| {
+        if escape_special_chars {
+            x.escape_default().to_string()
+        } else {
+            x.to_string()
+        }
+    })
+    .collect::<Vec<String>>()
     .join("\x1f")
 }
 
@@ -857,5 +868,57 @@ pub fn build_package(
     } else {
         build_guest_package(pkg, &target_dir, &guest_info);
         Ok(guest_methods(pkg, &target_dir, &guest_info, profile))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const RUSTC_FLAGS: &[&str] = &[
+        "--cfg",
+        "foo=\"bar\"",
+        "--cfg",
+        "foo='bar'",
+        "-C",
+        "link-args=--fatal-warnings",
+    ];
+
+    #[test]
+    fn encodes_rustc_flags() {
+        let guest_meta = GuestMetadata {
+            rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
+            ..Default::default()
+        };
+        let encoded = encode_rust_flags(&guest_meta, false);
+        let expected = [
+            "--cfg",
+            "foo=\"bar\"",
+            "--cfg",
+            "foo='bar'",
+            "-C",
+            "link-args=--fatal-warnings",
+        ]
+        .join("\x1f");
+        assert!(encoded.contains(&expected));
+    }
+
+    #[test]
+    fn escapes_strings_when_encoding_when_requested() {
+        let guest_meta = GuestMetadata {
+            rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
+            ..Default::default()
+        };
+        let encoded = encode_rust_flags(&guest_meta, true);
+        let expected = [
+            "--cfg",
+            "foo=\\\"bar\\\"",
+            "--cfg",
+            "foo=\\\'bar\\\'",
+            "-C",
+            "link-args=--fatal-warnings",
+        ]
+        .join("\x1f");
+        assert!(encoded.contains(&expected));
     }
 }

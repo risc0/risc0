@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,19 +52,19 @@ private:
   // doing inline assembly or some crazy CUDA stuff.
 
   // Add two numbers
-  static __device__ constexpr uint32_t add(uint32_t a, uint32_t b) {
+  static __host__ __device__ constexpr uint32_t add(uint32_t a, uint32_t b) {
     uint32_t r = a + b;
     return (r >= P ? r - P : r);
   }
 
   // Subtract two numbers
-  static __device__ constexpr uint32_t sub(uint32_t a, uint32_t b) {
+  static __host__ __device__ constexpr uint32_t sub(uint32_t a, uint32_t b) {
     uint32_t r = a - b;
     return (r > P ? r + P : r);
   }
 
   // Multiply two numbers
-  static __device__ constexpr uint32_t mul(uint32_t a, uint32_t b) {
+  static __host__ __device__ constexpr uint32_t mul(uint32_t a, uint32_t b) {
     uint64_t o64 = uint64_t(a) * uint64_t(b);
     uint32_t low = -uint32_t(o64);
     uint32_t red = M * low;
@@ -74,36 +74,36 @@ private:
   }
 
   // Encode / Decode
-  static __device__ constexpr uint32_t encode(uint32_t a) { return mul(R2, a); }
+  static __host__ __device__ constexpr uint32_t encode(uint32_t a) { return mul(R2, a); }
 
-  static __device__ constexpr uint32_t decode(uint32_t a) { return mul(1, a); }
+  static __host__ __device__ constexpr uint32_t decode(uint32_t a) { return mul(1, a); }
 
   // A private constructor that take the 'internal' form.
-  __device__ constexpr Fp(uint32_t val, bool ignore) : val(val) {}
+  __host__ __device__ constexpr Fp(uint32_t val, bool ignore) : val(val) {}
 
 public:
   /// Default constructor, sets value to 0.
-  __device__ constexpr Fp() : val(0) {}
+  __host__ __device__ constexpr Fp() : val(0) {}
 
   /// Construct an FP from a uint32_t, wrap if needed
-  __device__ constexpr Fp(uint32_t val) : val(encode(val)) {}
+  __host__ __device__ constexpr Fp(uint32_t val) : val(encode(val)) {}
 
   /// Construct an Fp from an already-encoded raw value
-  __device__ static constexpr Fp fromRaw(uint32_t val) { return Fp(val, true); }
+  __host__ __device__ static constexpr Fp fromRaw(uint32_t val) { return Fp(val, true); }
 
   /// Convert to a uint32_t
-  __device__ constexpr uint32_t asUInt32() const { return decode(val); }
+  __host__ __device__ constexpr uint32_t asUInt32() const { return decode(val); }
 
   /// Return the raw underlying word
-  __device__ constexpr uint32_t asRaw() const { return val; }
+  __host__ __device__ constexpr uint32_t asRaw() const { return val; }
 
   /// Get the largest value, basically P - 1.
-  __device__ static constexpr Fp maxVal() { return P - 1; }
+  __host__ __device__ static constexpr Fp maxVal() { return P - 1; }
 
   /// Get an 'invalid' Fp value
-  __device__ static constexpr Fp invalid() { return Fp(INVALID, true); }
+  __host__ __device__ static constexpr Fp invalid() { return Fp(INVALID, true); }
 
-  __device__ constexpr inline Fp zeroize() {
+  __host__ __device__ constexpr inline Fp zeroize() {
     if (val == INVALID) {
       val = 0;
     }
@@ -111,70 +111,78 @@ public:
   }
 
   // Implement all the various overloads
-  __device__ constexpr void operator=(uint32_t rhs) { val = encode(rhs); }
+  __host__ __device__ constexpr void operator=(uint32_t rhs) { val = encode(rhs); }
 
-  __device__ constexpr Fp operator+(Fp rhs) const { return Fp(add(val, rhs.val), true); }
+  __host__ __device__ constexpr Fp operator+(Fp rhs) const { return Fp(add(val, rhs.val), true); }
 
-  __device__ constexpr Fp operator-() const { return Fp(sub(0, val), true); }
+  __host__ __device__ constexpr Fp operator-() const { return Fp(sub(0, val), true); }
 
-  __device__ constexpr Fp operator-(Fp rhs) const { return Fp(sub(val, rhs.val), true); }
+  __host__ __device__ constexpr Fp operator-(Fp rhs) const { return Fp(sub(val, rhs.val), true); }
 
-  __device__ constexpr Fp operator*(Fp rhs) const { return Fp(mul(val, rhs.val), true); }
+  __host__ __device__ constexpr Fp operator*(Fp rhs) const { return Fp(mul(val, rhs.val), true); }
 
-  __device__ constexpr Fp operator+=(Fp rhs) {
+  __host__ __device__ constexpr Fp operator+=(Fp rhs) {
     val = add(val, rhs.val);
     return *this;
   }
 
-  __device__ constexpr Fp operator-=(Fp rhs) {
+  __host__ __device__ constexpr Fp operator-=(Fp rhs) {
     val = sub(val, rhs.val);
     return *this;
   }
 
-  __device__ constexpr Fp operator*=(Fp rhs) {
+  __host__ __device__ constexpr Fp operator*=(Fp rhs) {
     val = mul(val, rhs.val);
     return *this;
   }
 
-  __device__ constexpr bool operator==(Fp rhs) const { return val == rhs.val; }
+  __host__ __device__ constexpr bool operator==(Fp rhs) const { return val == rhs.val; }
 
-  __device__ constexpr bool operator!=(Fp rhs) const { return val != rhs.val; }
+  __host__ __device__ constexpr bool operator!=(Fp rhs) const { return val != rhs.val; }
 
-  __device__ constexpr bool operator<(Fp rhs) const { return decode(val) < decode(rhs.val); }
+  __host__ __device__ constexpr bool operator<(Fp rhs) const {
+    return decode(val) < decode(rhs.val);
+  }
 
-  __device__ constexpr bool operator<=(Fp rhs) const { return decode(val) <= decode(rhs.val); }
+  __host__ __device__ constexpr bool operator<=(Fp rhs) const {
+    return decode(val) <= decode(rhs.val);
+  }
 
-  __device__ constexpr bool operator>(Fp rhs) const { return decode(val) > decode(rhs.val); }
+  __host__ __device__ constexpr bool operator>(Fp rhs) const {
+    return decode(val) > decode(rhs.val);
+  }
 
-  __device__ constexpr bool operator>=(Fp rhs) const { return decode(val) >= decode(rhs.val); }
+  __host__ __device__ constexpr bool operator>=(Fp rhs) const {
+    return decode(val) >= decode(rhs.val);
+  }
 
   // Post-inc/dec
-  __device__ constexpr Fp operator++(int) {
+  __host__ __device__ constexpr Fp operator++(int) {
     Fp r = *this;
     val = add(val, encode(1));
     return r;
   }
 
-  __device__ constexpr Fp operator--(int) {
+  __host__ __device__ constexpr Fp operator--(int) {
     Fp r = *this;
     val = sub(val, encode(1));
     return r;
   }
 
   // Pre-inc/dec
-  __device__ constexpr Fp operator++() {
+  __host__ __device__ constexpr Fp operator++() {
     val = add(val, encode(1));
     return *this;
   }
 
-  __device__ constexpr Fp operator--() {
+  __host__ __device__ constexpr Fp operator--() {
     val = sub(val, encode(1));
     return *this;
   }
 };
 
 /// Raise a value to a power
-__device__ constexpr inline Fp pow(Fp x, size_t n) {
+__host__ __device__ constexpr inline Fp pow(Fp x, size_t n) {
   Fp tot = 1;
   while (n != 0) {
     if (n % 2 == 1) {
@@ -191,6 +199,6 @@ __device__ constexpr inline Fp pow(Fp x, size_t n) {
 /// x^(P-2) == 1 (mod P)` for x != 0.  That is, `x^(P-2)` is the multiplicative inverse of x.
 /// Computed this way, the 'inverse' of zero comes out as zero, which is convenient in many cases,
 /// so we leave it.
-__device__ constexpr inline Fp inv(Fp x) {
+__host__ __device__ constexpr inline Fp inv(Fp x) {
   return pow(x, Fp::P - 2);
 }

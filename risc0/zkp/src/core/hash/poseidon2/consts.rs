@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,34 @@ macro_rules! baby_bear_array {
     }
 }
 
-// TODO: Document
-#[doc(hidden)]
+/// The number of state elements (also known as "cells") used in the Poseidon2 hash function.
+///
+/// Poseidon2 operates over a fixed-width state, and `CELLS` defines that width. The value of 24
+/// means that the internal state of the hash function consists of 24 elements over the BabyBear field.
+/// This directly affects security level and performance.
 pub const CELLS: usize = 24;
 
-#[doc(hidden)]
+/// The number of full S-box rounds in the first and last half of the Poseidon2 permutation.
+///
+/// These are the rounds in which the S-box (nonlinear transformation) is applied to *all* state elements.
+/// The total number of full rounds is `2 * ROUNDS_HALF_FULL`.
 pub const ROUNDS_HALF_FULL: usize = 4;
 
-#[doc(hidden)]
+/// The number of partial S-box rounds in the middle of the Poseidon2 permutation.
+///
+/// During partial rounds, the S-box is applied only to a subset (often just one) of the state elements,
+/// improving performance while still maintaining security against known cryptanalytic attacks.
 pub const ROUNDS_PARTIAL: usize = 21;
 
-#[doc(hidden)]
+/// Round constants used in the Poseidon2 permutation.
+///
+/// These constants are added to the state during each round of the permutation.
+/// The number of constants must match the number of total rounds multiplied by the number of cells (`CELLS`).
+///
+/// These constants are derived from a trusted setup or generated via secure pseudorandom methods.
+/// See the Poseidon2 paper for details on round constants' role in cryptographic security.
+///
+/// This array is hidden from the public API but is essential to the internal functioning of the hash.
 pub const ROUND_CONSTANTS: &[Elem] = &baby_bear_array![
     0x0FA20C37, 0x0795BB97, 0x12C60B9C, 0x0EABD88E, 0x096485CA, 0x07093527, 0x1B1D4E50, 0x30A01ACE,
     0x3BD86F5A, 0x69AF7C28, 0x3F94775F, 0x731560E8, 0x465A0ECD, 0x574EF807, 0x62FD4870, 0x52CCFE44,
