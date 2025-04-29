@@ -109,7 +109,7 @@ tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
-crypto-bigint = { version = "0.5", default-features = false, features = [
+crypto-bigint = { version = "0.6", default-features = false, features = [
   "rand",
 ] }
 enum-iterator = "2.1"
