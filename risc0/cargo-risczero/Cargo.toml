@@ -28,7 +28,7 @@ risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, features = ["unstable"] }
 semver = "1"
 serde_json = "1"
-syn = "2.0.87"
+syn = "2.0.101"
 tempfile = "3"
 text_io = "0.1.12"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
