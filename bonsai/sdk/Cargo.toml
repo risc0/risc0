@@ -22,7 +22,7 @@ tokio = { version = "1", features = ["fs"], optional = true }
 
 [dev-dependencies]
 anyhow = "1.0"
-bincode = "1.3"
+bincode = "2.0"
 bytemuck = "1.14"
 hex = "0.4"
 httpmock = "0.7"
