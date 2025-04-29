@@ -1195,7 +1195,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkos-v1compat"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "include_bytes_aligned",
  "no_std_strings",
@@ -1252,7 +1252,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.2"
+version = "2.0.3"
 dependencies = [
  "bytemuck",
  "cfg-if",
