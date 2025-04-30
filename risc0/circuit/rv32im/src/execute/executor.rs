@@ -16,6 +16,7 @@ use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 
 use anyhow::{bail, Result};
 use enum_map::EnumMap;
+use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
@@ -23,6 +24,7 @@ use risc0_zkp::core::{
 };
 
 use crate::{
+    execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
     Rv32imV2Claim, TerminateState,
 };
@@ -33,7 +35,7 @@ use super::{
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-    rv32im::{Emulator, InsnKind},
+    rv32im::{DecodedInstruction, Emulator, InsnKind},
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
@@ -65,6 +67,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
     ecall_metrics: EcallMetrics,
+    ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
 }
 
 #[non_exhaustive]
@@ -159,7 +162,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
-            pager: PagedMemory::new(image, !trace.is_empty() /* tracing_enabled */),
+            pager: PagedMemory::new(image, /*tracing_enabled=*/ !trace.is_empty()),
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
@@ -169,6 +172,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             trace,
             cycles: SessionCycles::default(),
             ecall_metrics: EcallMetrics::default(),
+            ring: AllocRingBuffer::new(10),
         }
     }
 
@@ -267,6 +271,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 }
 
                 Risc0Machine::step(&mut emu, self).map_err(|err| {
+                    self.dump();
                     let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
                     if let Err(inner) = result {
                         err.context(inner)
@@ -333,6 +338,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             reserved_cycles: self.cycles.reserved,
             claim: session_claim,
         })
+    }
+
+    fn dump(&self) {
+        tracing::debug!("Dumping last {} instructions:", self.ring.len());
+        for (pc, kind, decoded) in self.ring.iter() {
+            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(*kind, decoded));
+        }
     }
 
     fn dump_segment(
@@ -428,14 +440,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
-    #[cfg(feature = "trace")]
     #[cold]
-    fn trace_instruction(
-        &self,
-        cycle: u64,
-        kind: InsnKind,
-        decoded: &super::rv32im::DecodedInstruction,
-    ) {
+    fn trace_instruction(&mut self, cycle: u64, kind: InsnKind, decoded: &DecodedInstruction) {
         if tracing::enabled!(tracing::Level::TRACE) {
             tracing::trace!(
                 "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
@@ -445,6 +451,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 decoded.insn,
                 super::rv32im::disasm(kind, decoded)
             );
+        }
+        if tracing::enabled!(tracing::Level::DEBUG) {
+            self.ring.push((self.pc, kind, decoded.clone()));
         }
     }
 }
@@ -478,12 +487,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
-    #[cfg(feature = "trace")]
-    fn on_insn_start(
-        &mut self,
-        kind: InsnKind,
-        decoded: &super::rv32im::DecodedInstruction,
-    ) -> Result<()> {
+    fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
         self.trace_instruction(cycle, kind, decoded);
         if !self.trace.is_empty() {
@@ -491,10 +495,9 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
                 cycle,
                 pc: self.pc.0,
                 insn: decoded.insn,
-            })
-        } else {
-            Ok(())
+            })?;
         }
+        Ok(())
     }
 
     fn on_insn_end(&mut self, _kind: InsnKind) -> Result<()> {

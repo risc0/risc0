@@ -59,7 +59,6 @@ pub(crate) trait Risc0Context {
     /// Set the machine mode
     fn set_machine_mode(&mut self, mode: u32);
 
-    #[cfg(feature = "trace")]
     fn on_insn_start(
         &mut self,
         kind: InsnKind,
@@ -163,25 +162,23 @@ fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
         .ok_or_else(|| anyhow!("{addr:?} is an unaligned address"))
 }
 
-pub struct Risc0Machine<'a, T: Risc0Context> {
-    ctx: &'a mut T,
+pub struct Risc0Machine<'a, C: Risc0Context> {
+    ctx: &'a mut C,
 }
 
-impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
-    pub fn step(emu: &mut Emulator, ctx: &'a mut T) -> Result<()> {
-        emu.step(&mut Risc0Machine { ctx }).inspect_err(|_| {
-            emu.dump();
-        })
+impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
+    pub fn step(emu: &mut Emulator, ctx: &'a mut C) -> Result<()> {
+        emu.step(&mut Risc0Machine { ctx })
     }
 
-    pub fn suspend(ctx: &'a mut T) -> Result<()> {
+    pub fn suspend(ctx: &'a mut C) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         this.store_memory(SUSPEND_PC_ADDR.waddr(), this.ctx.get_pc().0)?;
         this.store_memory(SUSPEND_MODE_ADDR.waddr(), this.ctx.get_machine_mode())?;
         this.ctx.suspend()
     }
 
-    pub fn resume(ctx: &'a mut T) -> Result<()> {
+    pub fn resume(ctx: &'a mut C) -> Result<()> {
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
@@ -527,7 +524,6 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         Ok(false)
     }
 
-    #[cfg(feature = "trace")]
     fn on_insn_decoded(
         &mut self,
         kind: InsnKind,

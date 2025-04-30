@@ -14,7 +14,6 @@
 
 use anyhow::Result;
 use derive_more::Debug;
-use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::platform::{REG_MAX, REG_ZERO, WORD_SIZE};
@@ -30,7 +29,6 @@ pub trait EmuContext {
     fn trap(&mut self, cause: Exception) -> Result<bool>;
 
     // Callback when instructions are decoded
-    #[cfg(feature = "trace")]
     fn on_insn_decoded(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()>;
 
     // Callback when instructions end normally
@@ -64,10 +62,8 @@ pub trait EmuContext {
     fn check_data_store(&self, addr: ByteAddr) -> bool;
 }
 
-// #[derive(Default)]
-pub struct Emulator {
-    ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
-}
+#[derive(Default)]
+pub struct Emulator;
 
 #[derive(Debug)]
 #[repr(u32)]
@@ -213,28 +209,15 @@ impl DecodedInstruction {
 
 impl Emulator {
     pub fn new() -> Self {
-        Self {
-            ring: AllocRingBuffer::new(10),
-        }
+        Self {}
     }
 
-    pub fn dump(&self) {
-        tracing::debug!("Dumping last {} instructions:", self.ring.len());
-        for (pc, kind, decoded) in self.ring.iter() {
-            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(*kind, decoded));
-        }
-    }
-
-    #[cfg(feature = "trace")]
     fn trace_instruction<C: EmuContext>(
         &mut self,
         ctx: &mut C,
         kind: InsnKind,
         decoded: &DecodedInstruction,
     ) -> Result<()> {
-        if tracing::enabled!(tracing::Level::DEBUG) {
-            self.ring.push((ctx.get_pc(), kind, decoded.clone()));
-        }
         ctx.on_insn_decoded(kind, decoded)
     }
 
@@ -333,7 +316,6 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
-        #[cfg(feature = "trace")]
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let pc = ctx.get_pc();
@@ -459,7 +441,6 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
-        #[cfg(feature = "trace")]
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
@@ -513,7 +494,6 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
-        #[cfg(feature = "trace")]
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
@@ -561,7 +541,6 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
-        #[cfg(feature = "trace")]
         self.trace_instruction(ctx, kind, &decoded)?;
 
         Ok(match kind {

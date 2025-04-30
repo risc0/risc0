@@ -30,7 +30,7 @@ use crate::{
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-        rv32im::{Emulator, InsnKind},
+        rv32im::{disasm, Emulator, InsnKind},
         segment::Segment,
         sha2::Sha2State,
     },
@@ -514,23 +514,23 @@ impl Risc0Context for Preflight<'_> {
         Ok(())
     }
 
-    #[cfg(feature = "trace")]
     fn on_insn_start(
         &mut self,
-        _kind: InsnKind,
-        _decoded: &crate::execute::rv32im::DecodedInstruction,
+        kind: InsnKind,
+        decoded: &crate::execute::rv32im::DecodedInstruction,
     ) -> Result<()> {
+        if tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "[{}]: {:?}> {}",
+                self.trace.cycles.len(),
+                self.pc,
+                disasm(kind, decoded)
+            );
+        }
         Ok(())
     }
 
     fn on_insn_end(&mut self, kind: InsnKind) -> Result<()> {
-        /*
-        tracing::trace!(
-            "[{}]: {:?}> {}",
-            self.trace.cycles.len(),
-            self.pc,
-            disasm(insn, decoded)
-        );*/
         self.add_cycle_insn(CycleState::Decode, self.pc.0, kind);
         self.user_cycle += 1;
         self.user_cycles += 1;
@@ -700,7 +700,9 @@ impl PagingActivity {
 
 impl PagedMemory {
     pub(crate) fn loaded_pages(&self) -> PagingActivity {
-        tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
+        if tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
+        }
         PagingActivity::new(self.image.get_page_indexes())
     }
 
