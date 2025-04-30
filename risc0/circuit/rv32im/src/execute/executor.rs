@@ -23,7 +23,6 @@ use risc0_zkp::core::{
 };
 
 use crate::{
-    execute::rv32im::InsnKind,
     trace::{TraceCallback, TraceEvent},
     Rv32imV2Claim, TerminateState,
 };
@@ -34,7 +33,7 @@ use super::{
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-    rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
+    rv32im::{Emulator, InsnKind},
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
@@ -429,17 +428,24 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
+    #[cfg(feature = "trace")]
     #[cold]
-    #[allow(dead_code)]
-    fn trace_instruction(&self, cycle: u64, insn: &Instruction, decoded: &DecodedInstruction) {
-        tracing::trace!(
-            "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-            self.user_cycles + 1,
-            self.segment_cycles() + 1,
-            self.pc,
-            decoded.insn,
-            disasm(insn, decoded)
-        );
+    fn trace_instruction(
+        &self,
+        cycle: u64,
+        kind: InsnKind,
+        decoded: &super::rv32im::DecodedInstruction,
+    ) {
+        if tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
+                self.user_cycles + 1,
+                self.segment_cycles() + 1,
+                self.pc,
+                decoded.insn,
+                super::rv32im::disasm(kind, decoded)
+            );
+        }
     }
 }
 
@@ -472,11 +478,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
-    fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
+    #[cfg(feature = "trace")]
+    fn on_insn_start(
+        &mut self,
+        kind: InsnKind,
+        decoded: &super::rv32im::DecodedInstruction,
+    ) -> Result<()> {
         let cycle = self.cycles.user;
-        if tracing::enabled!(tracing::Level::TRACE) {
-            self.trace_instruction(cycle, insn, decoded);
-        }
+        self.trace_instruction(cycle, kind, decoded);
         if !self.trace.is_empty() {
             self.trace(TraceEvent::InstructionStart {
                 cycle,

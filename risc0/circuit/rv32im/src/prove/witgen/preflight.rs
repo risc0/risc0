@@ -30,7 +30,7 @@ use crate::{
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-        rv32im::{DecodedInstruction, Emulator, InsnKind, Instruction},
+        rv32im::{Emulator, InsnKind},
         segment::Segment,
         sha2::Sha2State,
     },
@@ -514,7 +514,12 @@ impl Risc0Context for Preflight<'_> {
         Ok(())
     }
 
-    fn on_insn_start(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
+    #[cfg(feature = "trace")]
+    fn on_insn_start(
+        &mut self,
+        _kind: InsnKind,
+        _decoded: &crate::execute::rv32im::DecodedInstruction,
+    ) -> Result<()> {
         Ok(())
     }
 

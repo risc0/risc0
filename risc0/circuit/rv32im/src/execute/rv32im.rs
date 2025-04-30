@@ -29,6 +29,10 @@ pub trait EmuContext {
     // Handle a trap
     fn trap(&mut self, cause: Exception) -> Result<bool>;
 
+    // Callback when instructions are decoded
+    #[cfg(feature = "trace")]
+    fn on_insn_decoded(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()>;
+
     // Callback when instructions end normally
     fn on_normal_end(&mut self, kind: InsnKind) -> Result<()>;
 
@@ -62,7 +66,7 @@ pub trait EmuContext {
 
 // #[derive(Default)]
 pub struct Emulator {
-    ring: AllocRingBuffer<(ByteAddr, Instruction, DecodedInstruction)>,
+    ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
 }
 
 #[derive(Debug)]
@@ -102,16 +106,6 @@ pub struct DecodedInstruction {
     func3: u32,
     rd: u32,
     opcode: u32,
-}
-
-#[derive(Clone, Copy, Debug)]
-#[allow(dead_code)]
-enum InsnCategory {
-    Compute,
-    Load,
-    Store,
-    System,
-    Invalid,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -174,16 +168,6 @@ pub enum InsnKind {
     Invalid = 255,
 }
 
-#[derive(Clone, Copy, Debug)]
-#[allow(dead_code)]
-pub struct Instruction {
-    pub kind: InsnKind,
-    category: InsnCategory,
-    pub opcode: u32,
-    pub func3: u32,
-    pub func7: u32,
-}
-
 impl DecodedInstruction {
     fn new(insn: u32) -> Self {
         Self {
@@ -236,15 +220,22 @@ impl Emulator {
 
     pub fn dump(&self) {
         tracing::debug!("Dumping last {} instructions:", self.ring.len());
-        for (pc, insn, decoded) in self.ring.iter() {
-            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(insn, decoded));
+        for (pc, kind, decoded) in self.ring.iter() {
+            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(*kind, decoded));
         }
     }
 
-    #[cold]
-    #[allow(dead_code)]
-    fn ring_push(&mut self, pc: ByteAddr, insn: Instruction, decoded: DecodedInstruction) {
-        self.ring.push((pc, insn, decoded));
+    #[cfg(feature = "trace")]
+    fn trace_instruction<C: EmuContext>(
+        &mut self,
+        ctx: &mut C,
+        kind: InsnKind,
+        decoded: &DecodedInstruction,
+    ) -> Result<()> {
+        if tracing::enabled!(tracing::Level::DEBUG) {
+            self.ring.push((ctx.get_pc(), kind, decoded.clone()));
+        }
+        ctx.on_insn_decoded(kind, decoded)
     }
 
     #[inline(always)]
@@ -342,6 +333,9 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
+        #[cfg(feature = "trace")]
+        self.trace_instruction(ctx, kind, &decoded)?;
+
         let pc = ctx.get_pc();
         let mut new_pc = pc + WORD_SIZE;
         let mut rd = decoded.rd;
@@ -465,6 +459,9 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
+        #[cfg(feature = "trace")]
+        self.trace_instruction(ctx, kind, &decoded)?;
+
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
@@ -516,6 +513,9 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
+        #[cfg(feature = "trace")]
+        self.trace_instruction(ctx, kind, &decoded)?;
+
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let rs2 = ctx.load_register(decoded.rs2 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_s()));
@@ -561,6 +561,9 @@ impl Emulator {
         kind: InsnKind,
         decoded: DecodedInstruction,
     ) -> Result<Option<InsnKind>> {
+        #[cfg(feature = "trace")]
+        self.trace_instruction(ctx, kind, &decoded)?;
+
         Ok(match kind {
             InsnKind::Eany => match decoded.rs2 {
                 0 => ctx.ecall(),
@@ -592,13 +595,13 @@ impl std::fmt::Display for Register {
     }
 }
 
-pub fn disasm(insn: &Instruction, decoded: &DecodedInstruction) -> String {
+pub fn disasm(kind: InsnKind, decoded: &DecodedInstruction) -> String {
     let (rd, rs1, rs2) = (
         Register(decoded.rd),
         Register(decoded.rs1),
         Register(decoded.rs2),
     );
-    match insn.kind {
+    match kind {
         InsnKind::Invalid => "illegal".to_string(),
         InsnKind::Add => format!("add {rd}, {rs1}, {rs2}"),
         InsnKind::Sub => format!("sub {rd}, {rs1}, {rs2}"),

@@ -207,5 +207,6 @@ std = [
   "serde/std",
   "sha2/std",
 ]
+trace = ["risc0-circuit-rv32im/trace"]
 unstable = ["risc0-zkvm-platform/unstable"]
 witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]

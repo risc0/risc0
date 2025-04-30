@@ -97,4 +97,5 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
+trace = []
 witgen_debug = []

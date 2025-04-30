@@ -21,7 +21,7 @@ use risc0_binfmt::{ByteAddr, WordAddr};
 use super::{
     platform::*,
     poseidon2::{Poseidon2, Poseidon2State},
-    rv32im::{DecodedInstruction, EmuContext, Emulator, Exception, InsnKind, Instruction},
+    rv32im::{EmuContext, Emulator, Exception, InsnKind},
     sha2::{self, Sha2State},
 };
 
@@ -59,8 +59,12 @@ pub(crate) trait Risc0Context {
     /// Set the machine mode
     fn set_machine_mode(&mut self, mode: u32);
 
-    #[allow(dead_code)]
-    fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()>;
+    #[cfg(feature = "trace")]
+    fn on_insn_start(
+        &mut self,
+        kind: InsnKind,
+        decoded: &super::rv32im::DecodedInstruction,
+    ) -> Result<()>;
 
     fn on_insn_end(&mut self, kind: InsnKind) -> Result<()>;
 
@@ -181,7 +185,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         let mut this = Risc0Machine { ctx };
         let pc = guest_addr(this.load_memory(SUSPEND_PC_ADDR.waddr())?)?;
         let machine_mode = this.load_memory(SUSPEND_MODE_ADDR.waddr())?;
-        tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
+        // tracing::debug!("resume(entry: {pc:?}, mode: {machine_mode})");
         this.ctx.set_pc(pc);
         this.ctx.set_machine_mode(machine_mode);
         this.ctx.resume()
@@ -209,7 +213,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
 
     fn user_ecall(&mut self) -> Result<bool> {
         let dispatch_addr = guest_addr(self.load_memory(ECALL_DISPATCH_ADDR.waddr())?)?;
-        tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
+        // tracing::trace!("user_ecall> addr: {dispatch_addr:?}");
         if !dispatch_addr.is_aligned() || !is_kernel_memory(dispatch_addr) {
             return self.trap(Exception::UserEnvCall(dispatch_addr));
         }
@@ -219,7 +223,7 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
     }
 
     fn ecall_terminate(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_terminate");
+        // tracing::trace!("ecall_terminate");
         self.ctx.on_ecall_cycle(
             CycleState::MachineEcall,
             CycleState::Terminate,
@@ -265,11 +269,11 @@ impl<'a, T: Risc0Context> Risc0Machine<'a, T> {
         if len > 0 {
             guest_addr(ptr.0)?;
         }
-        tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
+        // tracing::trace!("ecall_read({fd}, {ptr:?}, {len})");
         let mut bytes = vec![0u8; len as usize];
         let mut rlen = self.ctx.host_read(fd, &mut bytes)?;
         self.store_register(REG_A0, rlen)?;
-        tracing::trace!("rlen: {rlen}");
+        // tracing::trace!("rlen: {rlen}");
         if rlen == 0 {
             self.next_pc();
         }
@@ -521,6 +525,15 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         self.enter_trap(dispatch_addr)?;
         self.ctx.trap(cause);
         Ok(false)
+    }
+
+    #[cfg(feature = "trace")]
+    fn on_insn_decoded(
+        &mut self,
+        kind: InsnKind,
+        decoded: &super::rv32im::DecodedInstruction,
+    ) -> Result<()> {
+        self.ctx.on_insn_start(kind, decoded)
     }
 
     fn on_normal_end(&mut self, kind: InsnKind) -> Result<()> {
