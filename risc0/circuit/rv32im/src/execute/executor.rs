@@ -122,6 +122,27 @@ struct ComputePartialImageRequest {
 /// Maximum number of segments we can queue up before we block execution
 const MAX_OUTSTANDING_SEGMENTS: usize = 5;
 
+#[inline]
+#[cold]
+fn cold() {}
+
+#[inline]
+#[allow(dead_code)]
+fn likely(b: bool) -> bool {
+    if !b {
+        cold()
+    }
+    b
+}
+
+#[inline]
+fn unlikely(b: bool) -> bool {
+    if b {
+        cold()
+    }
+    b
+}
+
 fn compute_partial_images(
     recv: std::sync::mpsc::Receiver<ComputePartialImageRequest>,
     mut callback: impl FnMut(Segment) -> Result<()>,
@@ -440,9 +461,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
-    #[cold]
     fn trace_instruction(&mut self, cycle: u64, kind: InsnKind, decoded: &DecodedInstruction) {
-        if tracing::enabled!(tracing::Level::TRACE) {
+        if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
             tracing::trace!(
                 "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
                 self.user_cycles + 1,
@@ -452,7 +472,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 super::rv32im::disasm(kind, decoded)
             );
         }
-        if tracing::enabled!(tracing::Level::DEBUG) {
+        if unlikely(tracing::enabled!(tracing::Level::DEBUG)) {
             self.ring.push((self.pc, kind, decoded.clone()));
         }
     }

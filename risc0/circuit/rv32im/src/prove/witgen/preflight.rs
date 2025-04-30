@@ -519,14 +519,12 @@ impl Risc0Context for Preflight<'_> {
         kind: InsnKind,
         decoded: &crate::execute::rv32im::DecodedInstruction,
     ) -> Result<()> {
-        if tracing::enabled!(tracing::Level::TRACE) {
-            tracing::trace!(
-                "[{}]: {:?}> {}",
-                self.trace.cycles.len(),
-                self.pc,
-                disasm(kind, decoded)
-            );
-        }
+        tracing::trace!(
+            "[{}]: {:?}> {}",
+            self.trace.cycles.len(),
+            self.pc,
+            disasm(kind, decoded)
+        );
         Ok(())
     }
 
@@ -700,9 +698,7 @@ impl PagingActivity {
 
 impl PagedMemory {
     pub(crate) fn loaded_pages(&self) -> PagingActivity {
-        if tracing::enabled!(tracing::Level::TRACE) {
-            tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
-        }
+        tracing::trace!("loaded_pages: {:#010x?}", self.image.get_page_indexes());
         PagingActivity::new(self.image.get_page_indexes())
     }
 
