@@ -30,7 +30,7 @@ use crate::{
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-        rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
+        rv32im::{disasm, Emulator, InsnKind},
         segment::Segment,
         sha2::Sha2State,
     },
@@ -514,18 +514,22 @@ impl Risc0Context for Preflight<'_> {
         Ok(())
     }
 
-    fn on_insn_start(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
-        Ok(())
-    }
-
-    fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
+    fn on_insn_start(
+        &mut self,
+        kind: InsnKind,
+        decoded: &crate::execute::rv32im::DecodedInstruction,
+    ) -> Result<()> {
         tracing::trace!(
             "[{}]: {:?}> {}",
             self.trace.cycles.len(),
             self.pc,
-            disasm(insn, decoded)
+            disasm(kind, decoded)
         );
-        self.add_cycle_insn(CycleState::Decode, self.pc.0, insn.kind);
+        Ok(())
+    }
+
+    fn on_insn_end(&mut self, kind: InsnKind) -> Result<()> {
+        self.add_cycle_insn(CycleState::Decode, self.pc.0, kind);
         self.user_cycle += 1;
         self.user_cycles += 1;
         Ok(())
