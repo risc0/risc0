@@ -78,7 +78,7 @@ runs:
     - if: >
         runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
         github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-      uses: risc0/actions-cache@cba095d7af782a955b8f4fa13396fbf0ab62bd4b
+      uses: risc0/actions-cache@3
       with:
         path: |
           ~/.cache/risc0
