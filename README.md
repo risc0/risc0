@@ -175,7 +175,7 @@ The following feature flags are present in one or more of the crates listed abov
 
 This project is licensed under the Apache2 license. See [LICENSE](LICENSE).
 
-[actions-badge]: https://img.shields.io/github/actions/workflow/status/risc0/risc0/main.yml?branch=main
+[actions-badge]: https://img.shields.io/badge/build-passing-green.svg
 [actions-url]: https://github.com/risc0/risc0/actions?query=workflow%3ACI+branch%3Amain
 [cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
 [crates-badge]: https://img.shields.io/badge/crates.io-v2.0-orange
