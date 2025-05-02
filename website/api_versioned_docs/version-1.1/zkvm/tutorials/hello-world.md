@@ -17,7 +17,6 @@ project from the command line. The `cargo-risczero` tool provides a
 program:
 
 ```bash
-cargo risczero new hello-world --guest-name hello_guest
 cd risc0/examples/hello-world
 ```
 
