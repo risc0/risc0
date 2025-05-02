@@ -370,7 +370,7 @@ pub fn test_zkr(
 
     let program = get_zkr("test_recursion_circuit.zkr", po2)?;
     let suite = Poseidon2HashSuite::new_suite();
-    let control_id = program.compute_control_id(suite.clone());
+    let control_id = program.compute_control_id(suite.clone()).unwrap();
     let opts = ProverOpts::succinct().with_control_ids(vec![control_id]);
 
     let mut prover = Prover::new(program, control_id, opts.clone());

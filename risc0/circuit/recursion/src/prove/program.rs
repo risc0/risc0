@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
+
 use risc0_zkp::{
     core::{digest::Digest, hash::HashSuite},
     field::baby_bear::{BabyBear, BabyBearElem},
-    hal::{cpu::CpuHal, Hal},
+    hal::{self, Hal},
     prove::poly_group::PolyGroup,
     ZK_CYCLES,
 };
@@ -69,8 +71,18 @@ impl Program {
     /// Given a [Program] for the recursion circuit, compute the control ID as the FRI Merkle root
     /// of the code group. This uniquely identifies the program running on the recursion circuit
     /// (e.g. lift_20 or join)
-    pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
-        let hal = CpuHal::new(hash_suite);
+    pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Result<Digest> {
+        #[cfg(feature = "cuda")]
+        let digest =
+            self.compute_control_id_inner(&hal::cuda::CudaHal::new_from_hash_suite(hash_suite)?);
+
+        #[cfg(not(feature = "cuda"))]
+        let digest = self.compute_control_id_inner(&hal::cpu::CpuHal::new(hash_suite));
+
+        Ok(digest)
+    }
+
+    fn compute_control_id_inner(&self, hal: &impl Hal<Elem = BabyBearElem>) -> Digest {
         let cycles = 1 << self.po2;
 
         let mut code = vec![BabyBearElem::default(); cycles * self.code_size];
@@ -85,7 +97,7 @@ impl Program {
         hal.batch_interpolate_ntt(&coeffs, self.code_size);
         hal.zk_shift(&coeffs, self.code_size);
         // Make the poly-group & extract the root
-        let code_group = PolyGroup::new(&hal, coeffs, self.code_size, cycles, "code");
+        let code_group = PolyGroup::new(hal, coeffs, self.code_size, cycles, "code");
         let root = *code_group.merkle.root();
         tracing::trace!("Computed recursion code: {root:?}");
         root
