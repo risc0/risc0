@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, io, path::PathBuf, rc::Rc};
+mod manager;
+mod protocol;
+mod worker;
+
+use std::{fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
@@ -72,6 +76,10 @@ struct Cli {
     /// Compute the image_id for the specified ELF
     #[arg(long)]
     id: bool,
+
+    /// The address to connect to or listen on.
+    #[arg(long)]
+    addr: Option<SocketAddr>,
 }
 
 #[derive(Args)]
@@ -90,6 +98,12 @@ struct Mode {
 
     #[arg(long)]
     segment: Option<PathBuf>,
+
+    #[arg(long)]
+    manager: bool,
+
+    #[arg(long)]
+    worker: bool,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -133,6 +147,16 @@ pub fn main() {
         let bytes = std::fs::read(path).unwrap();
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
+        return;
+    }
+
+    if args.mode.manager {
+        manager::main(args);
+        return;
+    }
+
+    if args.mode.worker {
+        worker::main(args);
         return;
     }
 
