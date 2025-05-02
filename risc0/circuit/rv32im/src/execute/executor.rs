@@ -31,7 +31,7 @@ use crate::{
 
 use super::{
     bigint,
-    pager::{compute_partial_image, PageTraceEvent, PagedMemory},
+    pager::{compute_partial_image, PageTraceEvent, PagedMemory, WorkingImage},
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
@@ -57,6 +57,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     user_pc: ByteAddr,
     machine_mode: u32,
     user_cycles: u32,
+    initial_image: MemoryImage,
     pager: PagedMemory,
     terminate_state: Option<TerminateState>,
     read_record: Vec<Vec<u8>>,
@@ -101,8 +102,8 @@ pub enum CycleLimit {
     None,
 }
 
-struct ComputePartialImageRequest {
-    image: MemoryImage,
+struct CreateSegmentRequest {
+    partial_image: WorkingImage,
     page_indexes: BTreeSet<u32>,
 
     input_digest: Digest,
@@ -113,8 +114,6 @@ struct ComputePartialImageRequest {
     pager_cycles: u32,
     terminate_state: Option<TerminateState>,
     segment_threshold: u32,
-    pre_digest: Digest,
-    post_digest: Digest,
     po2: u32,
     index: u64,
 }
@@ -143,17 +142,29 @@ fn unlikely(b: bool) -> bool {
     b
 }
 
-fn compute_partial_images(
-    recv: std::sync::mpsc::Receiver<ComputePartialImageRequest>,
+fn create_segments(
+    initial_image: MemoryImage,
+    recv: std::sync::mpsc::Receiver<CreateSegmentRequest>,
     mut callback: impl FnMut(Segment) -> Result<()>,
-) -> Result<()> {
+) -> Result<(Digest, Digest, MemoryImage)> {
+    let mut existing_image = initial_image;
+    let initial_digest = existing_image.image_id();
+
     while let Ok(req) = recv.recv() {
-        let partial_image = compute_partial_image(req.image, req.page_indexes);
+        let pre_digest = existing_image.image_id();
+        let partial_image = compute_partial_image(&mut existing_image, req.page_indexes);
+
+        for (idx, page) in req.partial_image.pages {
+            existing_image.set_page(idx, page);
+        }
+        existing_image.update_digests();
+        let post_digest = existing_image.image_id();
+
         callback(Segment {
             partial_image,
             claim: Rv32imV2Claim {
-                pre_state: req.pre_digest,
-                post_state: req.post_digest,
+                pre_state: pre_digest,
+                post_state: post_digest,
                 input: req.input_digest,
                 output: req.output_digest,
                 terminate_state: req.terminate_state,
@@ -168,7 +179,7 @@ fn compute_partial_images(
             segment_threshold: req.segment_threshold,
         })?;
     }
-    Ok(())
+    Ok((initial_digest, existing_image.image_id(), existing_image))
 }
 
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
@@ -183,7 +194,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
-            pager: PagedMemory::new(image, /*tracing_enabled=*/ !trace.is_empty()),
+            pager: PagedMemory::new(image.clone(), /*tracing_enabled=*/ !trace.is_empty()),
+            initial_image: image,
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
@@ -213,15 +225,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
-        let initial_digest = self.pager.image.image_id();
-        tracing::debug!("initial_digest: {initial_digest}");
 
         let (commit_sender, commit_recv) =
             std::sync::mpsc::sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
 
-        let post_digest = std::thread::scope(|scope| {
-            let partial_images_thread =
-                scope.spawn(move || compute_partial_images(commit_recv, callback));
+        let initial_image = self.initial_image.clone();
+        let (initial_digest, post_digest, post_image) = std::thread::scope(|scope| {
+            let segment_callback_thread =
+                scope.spawn(move || create_segments(initial_image, commit_recv, callback));
 
             while self.terminate_state.is_none() {
                 match max_cycles {
@@ -256,10 +267,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     );
                     Risc0Machine::suspend(self)?;
 
-                    let (pre_image, pre_digest, post_digest) = self.pager.commit();
+                    let partial_image = self.pager.commit();
 
-                    let req = ComputePartialImageRequest {
-                        image: pre_image,
+                    let req = CreateSegmentRequest {
+                        partial_image,
                         page_indexes: self.pager.page_indexes(),
                         input_digest: self.input_digest,
                         output_digest: self.output_digest,
@@ -269,13 +280,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         pager_cycles: self.pager.cycles,
                         terminate_state: self.terminate_state,
                         segment_threshold,
-                        pre_digest,
-                        post_digest,
                         po2: segment_po2 as u32,
                         index: segment_counter,
                     };
                     if commit_sender.send(req).is_err() {
-                        return Err(partial_images_thread.join().unwrap().unwrap_err());
+                        return Err(segment_callback_thread.join().unwrap().unwrap_err());
                     }
 
                     segment_counter += 1;
@@ -306,9 +315,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
-            let (pre_image, pre_digest, post_digest) = self.pager.commit();
-            let req = ComputePartialImageRequest {
-                image: pre_image,
+            let partial_image = self.pager.commit();
+            let req = CreateSegmentRequest {
+                partial_image,
                 page_indexes: self.pager.page_indexes(),
                 input_digest: self.input_digest,
                 output_digest: self.output_digest,
@@ -318,13 +327,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 pager_cycles: self.pager.cycles,
                 terminate_state: self.terminate_state,
                 segment_threshold: 0, // meaningless for final segment
-                pre_digest,
-                post_digest,
                 po2: final_po2 as u32,
                 index: segment_counter,
             };
             if commit_sender.send(req).is_err() {
-                return Err(partial_images_thread.join().unwrap().unwrap_err());
+                return Err(segment_callback_thread.join().unwrap().unwrap_err());
             }
 
             let final_cycles = final_cycles as u64;
@@ -336,9 +343,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             drop(commit_sender);
 
-            partial_images_thread.join().unwrap()?;
-
-            Ok(post_digest)
+            segment_callback_thread.join().unwrap()
         })?;
 
         let session_claim = Rv32imV2Claim {
@@ -352,7 +357,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         Ok(ExecutorResult {
             segments: segment_counter + 1,
-            post_image: self.pager.image.clone(),
+            post_image,
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
             paging_cycles: self.cycles.paging,
@@ -370,11 +375,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     fn dump_segment(
         &mut self,
-        po2: usize,
-        segment_threshold: u32,
-        index: u64,
+        _po2: usize,
+        _segment_threshold: u32,
+        _index: u64,
     ) -> anyhow::Result<()> {
-        if let Some(dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
+        if let Some(_dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
+            /*
             tracing::error!(
                 "Execution failure, saving segment to {}:",
                 dump_path.to_string_lossy()
@@ -408,6 +414,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             tracing::error!("serialized {} bytes", bytes.len());
 
             std::fs::write(dump_path, bytes)?;
+            */
+            todo!()
         }
         Ok(())
     }

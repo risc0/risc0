@@ -3221,6 +3221,7 @@ dependencies = [
  "cfg-if",
  "derive_more",
  "enum-map",
+ "lazy_static",
  "malachite",
  "num-derive",
  "num-traits",

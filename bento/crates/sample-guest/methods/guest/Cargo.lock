@@ -954,6 +954,7 @@ dependencies = [
  "bit-vec",
  "bytemuck",
  "derive_more",
+ "lazy_static",
  "paste",
  "risc0-binfmt",
  "risc0-core",
