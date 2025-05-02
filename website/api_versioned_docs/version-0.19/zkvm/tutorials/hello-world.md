@@ -16,7 +16,7 @@ Secondly, using the `cargo-risczero` tool create a `hello-world` project from th
 ```bash
 ## Create a project from our starter template
 cargo risczero new hello-world --guest-name hello_guest
-cd hello-world
+cd risc0/examples/hello-world
 ```
 
 In the project folder, `hello-world`, build and run the project using `cargo run --release`.
