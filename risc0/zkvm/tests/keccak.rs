@@ -75,7 +75,7 @@ fn compute_control_ids() -> Vec<Digest> {
     for po2 in KECCAK_PO2_RANGE {
         let program = get_keccak_zkr(po2).unwrap();
         let hash_suite = Poseidon2HashSuite::new_suite();
-        ret.push(program.compute_control_id(hash_suite))
+        ret.push(program.compute_control_id(hash_suite).unwrap())
     }
     ret
 }
