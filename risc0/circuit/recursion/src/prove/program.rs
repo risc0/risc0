@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
+
 use risc0_zkp::{
     core::{digest::Digest, hash::HashSuite},
     field::baby_bear::{BabyBear, BabyBearElem},
@@ -69,15 +71,15 @@ impl Program {
     /// Given a [Program] for the recursion circuit, compute the control ID as the FRI Merkle root
     /// of the code group. This uniquely identifies the program running on the recursion circuit
     /// (e.g. lift_20 or join)
-    pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
+    pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Result<Digest> {
         #[cfg(feature = "cuda")]
         let digest =
-            self.compute_control_id_inner(&hal::cuda::CudaHal::new_from_hash_suite(hash_suite));
+            self.compute_control_id_inner(&hal::cuda::CudaHal::new_from_hash_suite(hash_suite)?);
 
         #[cfg(not(feature = "cuda"))]
         let digest = self.compute_control_id_inner(&hal::cpu::CpuHal::new(hash_suite));
 
-        digest
+        Ok(digest)
     }
 
     fn compute_control_id_inner(&self, hal: &impl Hal<Elem = BabyBearElem>) -> Digest {

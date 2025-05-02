@@ -14,7 +14,7 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
 
-use anyhow::Context as _;
+use anyhow::{bail, Context as _, Result};
 use cust::{
     device::DeviceAttribute,
     memory::{DeviceCopy, DevicePointer, GpuBuffer},
@@ -447,14 +447,14 @@ impl<CH: CudaHash + ?Sized> CudaHal<CH> {
 }
 
 impl CudaHal<dyn CudaHash> {
-    pub fn new_from_hash_suite(hash_suite: HashSuite<BabyBear>) -> Self {
+    pub fn new_from_hash_suite(hash_suite: HashSuite<BabyBear>) -> Result<Self> {
         let hash_suite_box = match &hash_suite.name[..] {
             "poseidon2" => Box::new(CudaHashPoseidon2::new()) as Box<dyn CudaHash>,
             "poseidon254" => Box::new(CudaHashPoseidon254::new()) as Box<dyn CudaHash>,
             "sha-256" => Box::new(CudaHashSha256::new()) as Box<dyn CudaHash>,
-            other => unimplemented!("unsupported hash_fn {other}"),
+            other => bail!("unsupported hash_fn {other}"),
         };
-        Self::new_from_hash(hash_suite_box)
+        Ok(Self::new_from_hash(hash_suite_box))
     }
 }
 
