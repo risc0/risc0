@@ -12,7 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::BTreeSet,
+    rc::Rc,
+    sync::mpsc::{sync_channel, SyncSender},
+    thread::{self, ScopedJoinHandle},
+};
 
 use anyhow::{bail, Result};
 use enum_map::EnumMap;
@@ -116,6 +122,8 @@ struct CreateSegmentRequest {
     segment_threshold: u32,
     po2: u32,
     index: u64,
+
+    dump_path: Option<std::ffi::OsString>,
 }
 
 /// Maximum number of segments we can queue up before we block execution
@@ -160,7 +168,7 @@ fn create_segments(
         existing_image.update_digests();
         let post_digest = existing_image.image_id();
 
-        callback(Segment {
+        let segment = Segment {
             partial_image,
             claim: Rv32imV2Claim {
                 pre_state: pre_digest,
@@ -177,7 +185,19 @@ fn create_segments(
             po2: req.po2,
             index: req.index,
             segment_threshold: req.segment_threshold,
-        })?;
+        };
+
+        if let Some(dump_path) = req.dump_path {
+            tracing::error!("{segment:?}");
+
+            let bytes = segment.encode()?;
+            tracing::error!("serialized {} bytes", bytes.len());
+
+            std::fs::write(dump_path, bytes)?;
+            break;
+        }
+
+        callback(segment)?;
     }
     Ok((initial_digest, existing_image.image_id(), existing_image))
 }
@@ -226,11 +246,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let mut emu = Emulator::new();
         Risc0Machine::resume(self)?;
 
-        let (commit_sender, commit_recv) =
-            std::sync::mpsc::sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
+        let (commit_sender, commit_recv) = sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
 
         let initial_image = self.initial_image.clone();
-        let (initial_digest, post_digest, post_image) = std::thread::scope(|scope| {
+        let (initial_digest, post_digest, post_image) = thread::scope(|scope| {
             let segment_callback_thread =
                 scope.spawn(move || create_segments(initial_image, commit_recv, callback));
 
@@ -282,6 +301,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         segment_threshold,
                         po2: segment_po2 as u32,
                         index: segment_counter,
+                        dump_path: None,
                     };
                     if commit_sender.send(req).is_err() {
                         return Err(segment_callback_thread.join().unwrap().unwrap_err());
@@ -300,15 +320,23 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     Risc0Machine::resume(self)?;
                 }
 
-                Risc0Machine::step(&mut emu, self).map_err(|err| {
+                let result = Risc0Machine::step(&mut emu, self);
+
+                if let Err(err) = result {
                     self.dump();
-                    let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
-                    if let Err(inner) = result {
+                    let result = self.dump_segment(
+                        commit_sender,
+                        segment_callback_thread,
+                        segment_po2,
+                        segment_threshold,
+                        segment_counter,
+                    );
+                    return Err(if let Err(inner) = result {
                         err.context(inner)
                     } else {
                         err
-                    }
-                })?;
+                    });
+                }
             }
 
             Risc0Machine::suspend(self)?;
@@ -329,6 +357,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 segment_threshold: 0, // meaningless for final segment
                 po2: final_po2 as u32,
                 index: segment_counter,
+                dump_path: None,
             };
             if commit_sender.send(req).is_err() {
                 return Err(segment_callback_thread.join().unwrap().unwrap_err());
@@ -373,49 +402,39 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
     }
 
-    fn dump_segment(
+    fn dump_segment<RetT>(
         &mut self,
-        _po2: usize,
-        _segment_threshold: u32,
-        _index: u64,
+        commit_sender: SyncSender<CreateSegmentRequest>,
+        segment_callback_thread: ScopedJoinHandle<'_, Result<RetT>>,
+        po2: usize,
+        segment_threshold: u32,
+        index: u64,
     ) -> anyhow::Result<()> {
-        if let Some(_dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
-            /*
+        if let Some(dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
             tracing::error!(
                 "Execution failure, saving segment to {}:",
                 dump_path.to_string_lossy()
             );
 
-            let (image, pre_digest, post_digest) = self.pager.commit();
-            let page_indexes = self.pager.page_indexes();
-            let partial_image = compute_partial_image(image, page_indexes);
+            let partial_image = self.pager.commit();
 
-            let segment = Segment {
+            let req = CreateSegmentRequest {
                 partial_image,
-                claim: Rv32imV2Claim {
-                    pre_state: pre_digest,
-                    post_state: post_digest,
-                    input: self.input_digest,
-                    output: self.output_digest,
-                    terminate_state: self.terminate_state,
-                    shutdown_cycle: None,
-                },
+                page_indexes: self.pager.page_indexes(),
+                input_digest: self.input_digest,
+                output_digest: self.output_digest,
                 read_record: std::mem::take(&mut self.read_record),
                 write_record: std::mem::take(&mut self.write_record),
-                suspend_cycle: self.user_cycles,
-                paging_cycles: self.pager.cycles,
+                user_cycles: self.user_cycles,
+                pager_cycles: self.pager.cycles,
+                terminate_state: self.terminate_state,
+                segment_threshold,
                 po2: po2 as u32,
                 index,
-                segment_threshold,
+                dump_path: Some(dump_path),
             };
-            tracing::error!("{segment:?}");
-
-            let bytes = segment.encode()?;
-            tracing::error!("serialized {} bytes", bytes.len());
-
-            std::fs::write(dump_path, bytes)?;
-            */
-            todo!()
+            let _ = commit_sender.send(req);
+            let _ = segment_callback_thread.join().unwrap()?;
         }
         Ok(())
     }
