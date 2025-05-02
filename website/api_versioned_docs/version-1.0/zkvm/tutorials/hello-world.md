@@ -18,7 +18,7 @@ program:
 
 ```bash
 cargo risczero new hello-world --guest-name hello_guest
-cd hello-world
+cd risc0/examples/hello-world
 ```
 
 In the project folder, `hello-world`, build and run the project using `cargo run --release`. Use this command any time you'd like to check your progress.
