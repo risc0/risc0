@@ -335,7 +335,7 @@ fn test_po2_16() {
     let suite = Poseidon2HashSuite::new_suite();
     let program =
         risc0_circuit_recursion::prove::zkr::get_zkr("test_recursion_circuit.zkr", po2).unwrap();
-    let control_id = program.compute_control_id(suite.clone());
+    let control_id = program.compute_control_id(suite.clone()).unwrap();
     let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
     let control_root = control_tree.calc_root(suite.hashfn.as_ref());
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
