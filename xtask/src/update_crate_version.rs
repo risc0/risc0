@@ -79,7 +79,7 @@ fn update_version(args: &UpdateCrateVersion, old_version: &semver::Version) -> s
 
     if let Some(rc_num) = args.add_rc {
         new_version.pre = semver::Prerelease::new(&format!("rc.{rc_num}"))
-            .expect("should always be a vaild pre-release value");
+            .expect("should always be a valid pre-release value");
     }
 
     new_version

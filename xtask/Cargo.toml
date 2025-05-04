@@ -43,6 +43,7 @@ release = false
 
 [features]
 default = ["zkvm"]
+cuda = ["risc0-zkvm/cuda"]
 zkvm = [
   "dep:risc0-circuit-keccak",
   "dep:risc0-circuit-recursion",

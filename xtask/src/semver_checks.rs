@@ -396,9 +396,15 @@ fn check_for_major_version_bump_due_to_version_req_in_single_package(
             continue;
         }
 
+        if current_dep.kind == cargo_metadata::DependencyKind::Development {
+            // don't consider dev-dependencies, they are only used to build tests and benchmarks
+            continue;
+        }
+
         let Some(baseline_dep) = baseline_package
             .dependencies
             .iter()
+            .filter(|dep| dep.kind != cargo_metadata::DependencyKind::Development)
             .find(|dep| &dep.name == current_dep_name)
         else {
             // baseline package doesn't have this dependency
@@ -763,6 +769,7 @@ mod tests {
         name: &str,
         version: &Version,
         dependencies: &HashMap<String, String>,
+        dev_dependencies: &HashMap<String, String>,
     ) {
         let mut contents = format!(
             "\
@@ -775,6 +782,16 @@ mod tests {
             contents += &format!(
                 "[dependencies]\n{}",
                 dependencies
+                    .iter()
+                    .map(|(k, v)| format!("{k} = {v}\n"))
+                    .collect::<Vec<_>>()
+                    .join("")
+            )
+        }
+        if !dev_dependencies.is_empty() {
+            contents += &format!(
+                "[dev-dependencies]\n{}",
+                dev_dependencies
                     .iter()
                     .map(|(k, v)| format!("{k} = {v}\n"))
                     .collect::<Vec<_>>()
@@ -832,6 +849,7 @@ mod tests {
         name: String,
         contents: String,
         version: Version,
+        dev_dependencies: HashMap<String, String>,
         dependencies: HashMap<String, String>,
     }
 
@@ -841,12 +859,17 @@ mod tests {
                 name: name.into(),
                 contents: contents.into(),
                 version,
+                dev_dependencies: HashMap::new(),
                 dependencies: HashMap::new(),
             }
         }
 
-        fn with_dep(mut self, key: &str, value: &str) -> Self {
-            self.dependencies.insert(key.into(), value.into());
+        fn with_dep(mut self, key: &str, value: &str, dev_dep: bool) -> Self {
+            if dev_dep {
+                self.dev_dependencies.insert(key.into(), value.into());
+            } else {
+                self.dependencies.insert(key.into(), value.into());
+            }
             self
         }
     }
@@ -873,7 +896,13 @@ mod tests {
         for c in crates {
             let crate_path = tempdir.path().join(baseline_name).join(&c.name);
             std::fs::create_dir_all(crate_path.join("src")).unwrap();
-            write_cargo_toml(&crate_path, &c.name, &c.version, &c.dependencies);
+            write_cargo_toml(
+                &crate_path,
+                &c.name,
+                &c.version,
+                &c.dependencies,
+                &c.dev_dependencies,
+            );
             std::fs::write(crate_path.join("src/lib.rs"), &c.contents).unwrap();
         }
 
@@ -904,7 +933,13 @@ mod tests {
         for c in crates {
             let crate_path = tempdir.path().join("current").join(&c.name);
             std::fs::create_dir_all(crate_path.join("src")).unwrap();
-            write_cargo_toml(&crate_path, &c.name, &c.version, &c.dependencies);
+            write_cargo_toml(
+                &crate_path,
+                &c.name,
+                &c.version,
+                &c.dependencies,
+                &c.dev_dependencies,
+            );
             std::fs::write(crate_path.join("src/lib.rs"), &c.contents).unwrap();
         }
     }
@@ -1330,7 +1365,13 @@ mod tests {
 
         let current_baz = tempdir.path().join("current/baz");
         std::fs::create_dir_all(current_baz.join("src")).unwrap();
-        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0), &HashMap::new());
+        write_cargo_toml(
+            &current_baz,
+            "baz",
+            &Version::new(1, 0, 0),
+            &HashMap::new(),
+            &HashMap::new(),
+        );
         std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
 
         run_with_temp_dir(
@@ -1397,7 +1438,13 @@ mod tests {
 
         let current_baz = tempdir.path().join("current/baz");
         std::fs::create_dir_all(current_baz.join("src")).unwrap();
-        write_cargo_toml(&current_baz, "baz", &Version::new(1, 0, 0), &HashMap::new());
+        write_cargo_toml(
+            &current_baz,
+            "baz",
+            &Version::new(1, 0, 0),
+            &HashMap::new(),
+            &HashMap::new(),
+        );
         std::fs::write(current_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
 
         // create baseline version of baz
@@ -1413,7 +1460,13 @@ mod tests {
 
         let baseline_baz = tempdir.path().join(&baseline1_name).join("baz");
         std::fs::create_dir_all(baseline_baz.join("src")).unwrap();
-        write_cargo_toml(&baseline_baz, "baz", &baseline1_version, &HashMap::new());
+        write_cargo_toml(
+            &baseline_baz,
+            "baz",
+            &baseline1_version,
+            &HashMap::new(),
+            &HashMap::new(),
+        );
         std::fs::write(baseline_baz.join("src/lib.rs"), "pub fn baz() {}").unwrap();
 
         publish_baseline_crate(&tempdir, &baseline1_name, &baseline1_version, "baz");
@@ -1439,17 +1492,23 @@ mod tests {
         assert_eq!(baselines, expected);
     }
 
-    fn dependency_version_check_test(serde_version: Version, baseline_has_dep: bool) -> Result<()> {
+    fn dependency_version_check_test(
+        serde_version: Version,
+        baseline_has_dep: bool,
+        current_dev_dep: bool,
+        baseline_dev_dep: bool,
+    ) -> Result<()> {
         let tempdir = tempdir().unwrap();
 
         create_current(
             &tempdir,
             &[
                 CrateSpec::new("foobar", "pub fn foo() {}", Version::new(1, 0, 1))
-                    .with_dep("syn", "\"2.0.0\"")
+                    .with_dep("syn", "\"2.0.0\"", false /* dev_dep */)
                     .with_dep(
                         "serde",
                         &format!("{{ version = \"{serde_version}\", path = \"../serde\" }}"),
+                        current_dev_dep,
                     ),
                 CrateSpec::new("serde", "pub fn baz() {}", serde_version),
             ][..],
@@ -1458,12 +1517,18 @@ mod tests {
         let baseline_version = Version::new(1, 0, 0);
         let baseline_name = format!("baseline_{baseline_version}");
 
-        let mut baseline_foobar =
-            CrateSpec::new("foobar", "pub fn foo() {}", baseline_version.clone())
-                .with_dep("syn", "\"1.0.0\"");
+        let mut baseline_foobar = CrateSpec::new(
+            "foobar",
+            "pub fn foo() {}",
+            baseline_version.clone(),
+        )
+        .with_dep("syn", "\"1.0.0\"", false /* dev_dep */);
         if baseline_has_dep {
-            baseline_foobar =
-                baseline_foobar.with_dep("serde", "{ version = \"1.0.0\", path = \"../serde\" }");
+            baseline_foobar = baseline_foobar.with_dep(
+                "serde",
+                "{ version = \"1.0.0\", path = \"../serde\" }",
+                baseline_dev_dep,
+            );
         }
         create_baseline(
             &tempdir,
@@ -1484,24 +1549,46 @@ mod tests {
 
     #[test]
     fn version_req_dependency_check_passes_patch_version_bump() {
-        dependency_version_check_test(Version::new(1, 0, 1), true /* baseline_has_dep */).unwrap();
+        dependency_version_check_test(
+            Version::new(1, 0, 1),
+            true,  /* baseline_has_dep */
+            false, /* current_dev_dep */
+            false, /* baseline_dev_dep */
+        )
+        .unwrap();
     }
 
     #[test]
     fn version_req_dependency_check_passes_minor_version_bump() {
-        dependency_version_check_test(Version::new(1, 1, 0), true /* baseline_has_dep */).unwrap();
+        dependency_version_check_test(
+            Version::new(1, 1, 0),
+            true,  /* baseline_has_dep */
+            false, /* current_dev_dep */
+            false, /* baseline_dev_dep */
+        )
+        .unwrap();
     }
 
     #[test]
     fn version_req_dependency_check_passes_major_version_bump_but_new_dependency() {
-        dependency_version_check_test(Version::new(2, 0, 0), false /* baseline_has_dep */).unwrap();
+        dependency_version_check_test(
+            Version::new(2, 0, 0),
+            false, /* baseline_has_dep */
+            false, /* current_dev_dep */
+            false, /* baseline_dev_dep */
+        )
+        .unwrap();
     }
 
     #[test]
     fn version_req_dependency_check_fails() {
-        let err =
-            dependency_version_check_test(Version::new(2, 0, 0), true /* baseline_has_dep */)
-                .unwrap_err();
+        let err = dependency_version_check_test(
+            Version::new(2, 0, 0),
+            true,  /* baseline_has_dep */
+            false, /* current_dev_dep */
+            false, /* baseline_dev_dep */
+        )
+        .unwrap_err();
         assert_eq!(
             err.to_string(),
             "\
@@ -1512,5 +1599,38 @@ mod tests {
                 : serde: ^1.0.0 -> ^2.0.0\n\
             "
         );
+    }
+
+    #[test]
+    fn version_req_dependency_check_passes_major_version_bump_but_dev_dep() {
+        dependency_version_check_test(
+            Version::new(2, 0, 0),
+            true, /* baseline_has_dep */
+            true, /* current_dev_dep */
+            true, /* baseline_dev_dep */
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn version_req_dependency_check_passes_major_version_bump_but_new_normal_dependency() {
+        dependency_version_check_test(
+            Version::new(2, 0, 0),
+            true,  /* baseline_has_dep */
+            false, /* current_dev_dep */
+            true,  /* baseline_dev_dep */
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn version_req_dependency_check_passes_major_version_bump_but_baseline_has_normal_dep() {
+        dependency_version_check_test(
+            Version::new(2, 0, 0),
+            true,  /* baseline_has_dep */
+            true,  /* current_dev_dep */
+            false, /* baseline_dev_dep */
+        )
+        .unwrap();
     }
 }

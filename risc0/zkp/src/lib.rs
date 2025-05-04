@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,15 +29,6 @@ mod merkle;
 pub mod prove;
 pub mod taps;
 pub mod verify;
-
-#[cfg(not(feature = "prove"))]
-pub mod hal {
-    pub mod cpu {
-        use core::marker::PhantomData;
-        // TODO: Don't depend on SyncSlice in non-proving code.
-        pub struct SyncSlice<T>(PhantomData<T>);
-    }
-}
 
 pub use risc0_core::field;
 
