@@ -14,68 +14,81 @@
 
 #![allow(unused)]
 
-use std::{
-    io::Read,
-    net::{SocketAddr, TcpStream},
-    str::FromStr,
-};
+use std::{error::Error as StdError, time::Duration};
 
+use anyhow::Context as _;
+use kameo::{prelude::*, remote::dial_opts::DialOpts};
 use risc0_zkvm::{ExecutorEnv, ExecutorImpl, NullSegmentRef, Segment};
+use tokio::task::JoinHandle;
 
 use crate::{
-    protocol::{ExecuteTask, Message, Task, TaskKind, TaskManagerMessage},
+    manager::TaskManagerActor,
+    protocol::{ExecuteTaskRequest, SegmentReady, SessionDone, SessionWrapper},
     Cli,
 };
 
-pub(crate) fn main(args: Cli) {
-    let addr = args
-        .addr
-        .unwrap_or(SocketAddr::from_str("127.0.0.1:9000").unwrap());
-    println!("worker: {addr}");
+const CONCURRENT_SEGMENTS: usize = 50; // This peaks around ~4GB
 
-    let mut worker = Worker::connect(addr);
-    worker.run();
-}
+pub(crate) async fn main(args: Cli) -> Result<(), Box<dyn StdError>> {
+    ActorSwarm::bootstrap()?
+        .dial(
+            DialOpts::unknown_peer_id()
+                .address("/ip4/127.0.0.1/udp/9000/quic-v1".parse()?)
+                .build(),
+        )
+        .await?;
 
-struct Worker {
-    stream: TcpStream,
-}
+    tokio::time::sleep(Duration::from_millis(50)).await;
 
-impl Worker {
-    pub fn connect(addr: SocketAddr) -> Self {
-        let stream = TcpStream::connect(addr).unwrap();
-        Self { stream }
-    }
+    let task_mgr = RemoteActorRef::<TaskManagerActor>::lookup("task_mgr")
+        .await?
+        .unwrap();
 
-    pub fn run(&mut self) {
-        loop {
-            let msg = TaskManagerMessage::GetTask(TaskKind::Execute);
-            msg.write(&self.stream);
+    let task = task_mgr.ask(&ExecuteTaskRequest).await?;
+    println!("ELF: {} bytes", task.binary.len());
 
-            let msg = Task::read(&self.stream);
-            match msg {
-                Task::Execute(task) => self.execute(task),
-                Task::ProveSegment(segment) => todo!(),
-                Task::Lift => todo!(),
-                Task::Join => todo!(),
-            }
+    let (segment_tx, mut segment_rx) = tokio::sync::mpsc::channel::<Segment>(CONCURRENT_SEGMENTS);
+
+    let task_mgr_relay = task_mgr.clone();
+    let segment_relay = tokio::task::spawn(async move {
+        while let Some(segment) = segment_rx.recv().await {
+            task_mgr_relay.tell(&SegmentReady(segment)).await.unwrap();
         }
-    }
+    });
 
-    fn execute(&mut self, task: ExecuteTask) {
-        let env = ExecutorEnv::builder()
-            .write_slice(&task.input)
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, &task.binary).unwrap();
-        let session = exec
-            .run_with_callback(|segment| {
-                let msg = TaskManagerMessage::Segment(segment);
-                msg.write(&self.stream);
-                Ok(Box::new(NullSegmentRef {}))
-            })
-            .unwrap();
-    }
+    let result: JoinHandle<anyhow::Result<SessionWrapper>> =
+        tokio::task::spawn_blocking(move || {
+            let env = ExecutorEnv::builder()
+                .write_slice(&task.input)
+                .build()
+                .unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, &task.binary).unwrap();
+            let session = exec.run_with_callback(|segment| {
+                segment_tx.blocking_send(segment).unwrap();
+                Ok(Box::new(NullSegmentRef))
+            })?;
 
-    fn prove_segment(&mut self, segment: Segment) {}
+            // This will cause the segment_relay loop to terminate.
+            drop(segment_tx);
+
+            let session = SessionWrapper {
+                segment_count: session.segments.len(),
+                user_cycles: session.user_cycles,
+                total_cycles: session.total_cycles,
+                journal: session.journal,
+            };
+
+            Ok(session)
+        });
+
+    let session = result
+        .await
+        .context("Failed to join executor run_with_callback task")?
+        .context("execution failed")?;
+
+    segment_relay.await?;
+
+    task_mgr.tell(&SessionDone(session)).await?;
+
+    Ok(())
 }

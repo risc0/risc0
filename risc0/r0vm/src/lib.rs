@@ -16,7 +16,7 @@ mod manager;
 mod protocol;
 mod worker;
 
-use std::{fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
+use std::{error::Error as StdError, fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
@@ -100,7 +100,7 @@ struct Mode {
     segment: Option<PathBuf>,
 
     #[arg(long)]
-    manager: bool,
+    manager: Option<PathBuf>,
 
     #[arg(long)]
     worker: bool,
@@ -124,7 +124,7 @@ enum ReceiptKind {
     Groth16,
 }
 
-pub fn main() {
+pub async fn main() -> Result<(), Box<dyn StdError>> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
@@ -135,29 +135,27 @@ pub fn main() {
         let blob = fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
         println!("{image_id}");
-        return;
+        return Ok(());
     }
 
     if let Some(port) = args.mode.port {
         run_server(port);
-        return;
+        return Ok(());
     }
 
     if let Some(path) = args.mode.segment {
         let bytes = std::fs::read(path).unwrap();
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
-        return;
+        return Ok(());
     }
 
-    if args.mode.manager {
-        manager::main(args);
-        return;
+    if let Some(ref path) = args.mode.manager {
+        return manager::main(&args, path).await;
     }
 
     if args.mode.worker {
-        worker::main(args);
-        return;
+        return worker::main(args).await;
     }
 
     let env = {
@@ -213,6 +211,8 @@ pub fn main() {
             );
         }
     }
+
+    Ok(())
 }
 
 impl Cli {

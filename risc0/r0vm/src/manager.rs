@@ -14,151 +14,85 @@
 
 #![allow(unused)]
 
-use core::task;
-use std::{
-    collections::BTreeMap,
-    io::Read as _,
-    net::{Shutdown, SocketAddr, TcpListener, TcpStream},
-    str::FromStr,
-    sync::mpsc::{channel, Receiver, Sender},
-    thread::{self, JoinHandle},
-};
+use std::{collections::BTreeMap, error::Error as StdError, path::Path};
 
-use bytes::{Buf, BufMut, Bytes};
-use risc0_zkvm::Segment;
+use kameo::prelude::*;
 
 use crate::{
-    protocol::{Message as _, Task, TaskManagerMessage},
+    protocol::{ExecuteTask, ExecuteTaskRequest, SegmentReady, SessionDone},
     Cli,
 };
 
-pub(crate) fn main(args: Cli) {
-    let addr = args
-        .addr
-        .unwrap_or(SocketAddr::from_str("[::]:9000").unwrap());
+pub(crate) async fn main(args: &Cli, path: &Path) -> Result<(), Box<dyn StdError>> {
+    let addr = "/ip4/0.0.0.0/udp/9000/quic-v1".parse()?;
+    println!("addr: {addr}");
 
-    let listener = TcpListener::bind(addr).unwrap();
-    println!("manager: {}", listener.local_addr().unwrap());
+    ActorSwarm::bootstrap()?.listen_on(addr).await?;
 
-    let (task_mgr, join_handle) = TaskManager::new();
+    let binary = std::fs::read(path).unwrap();
 
-    for stream in listener.incoming() {
-        let task_mgr = task_mgr.clone();
-        match stream {
-            Ok(stream) => {
-                thread::spawn(move || {
-                    handle_client(stream, task_mgr);
-                });
-            }
-            Err(err) => eprintln!("Connection failed: {err}"),
-        }
-    }
+    let task_mgr = kameo::spawn(TaskManagerActor::new(binary));
+    task_mgr.register("task_mgr").await?;
 
-    join_handle.join().unwrap();
+    task_mgr.wait_for_stop().await;
+
+    Ok(())
 }
 
-fn handle_client(mut stream: TcpStream, task_mgr: TaskManager) {
-    println!("Connection from: {}", stream.peer_addr().unwrap());
-    // let (client, join_handle) = Client::new(stream);
-    loop {
-        let msg = TaskManagerMessage::read(&stream);
-        if let TaskManagerMessage::Bye = msg {
-            break;
-        }
-        task_mgr.on_message(msg);
-    }
-    stream.shutdown(Shutdown::Both).unwrap();
-}
-
-struct TaskManagerActor {
-    rx: Receiver<TaskManagerMessage>,
+#[derive(Actor, RemoteActor)]
+pub(crate) struct TaskManagerActor {
+    binary: Vec<u8>,
     tasks: BTreeMap<u32, u32>,
 }
 
 impl TaskManagerActor {
-    pub fn new(rx: Receiver<TaskManagerMessage>) -> Self {
+    pub fn new(binary: Vec<u8>) -> Self {
         Self {
-            rx,
+            binary,
             tasks: BTreeMap::new(),
         }
     }
+}
 
-    pub fn run(&mut self) {
-        while let Ok(msg) = self.rx.recv() {
-            if !self.on_message(msg) {
-                break;
-            }
-        }
-    }
+#[remote_message("4e3fe8bd-9bcf-4315-bd7b-37440a81d323")]
+impl Message<ExecuteTaskRequest> for TaskManagerActor {
+    type Reply = ExecuteTask;
 
-    fn on_message(&mut self, msg: TaskManagerMessage) -> bool {
-        match msg {
-            TaskManagerMessage::GetTask(kind) => {
-                println!("GetTask: {kind:?}");
-                true
-            }
-            TaskManagerMessage::Segment(ref segment) => true,
-            TaskManagerMessage::Bye => true,
-            TaskManagerMessage::Executed => todo!(),
-            TaskManagerMessage::Lifted => todo!(),
-            TaskManagerMessage::Joined => todo!(),
+    async fn handle(
+        &mut self,
+        msg: ExecuteTaskRequest,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        ExecuteTask {
+            binary: self.binary.clone(),
+            input: vec![],
         }
     }
 }
 
-#[derive(Clone)]
-struct TaskManager {
-    tx: Sender<TaskManagerMessage>,
-}
+#[remote_message("8557f8c6-b117-4077-95d8-3ce979ba1b4e")]
+impl Message<SegmentReady> for TaskManagerActor {
+    type Reply = ();
 
-impl TaskManager {
-    pub fn new() -> (Self, JoinHandle<()>) {
-        let (tx, rx) = channel();
-        let mut task_mgr = TaskManagerActor::new(rx);
-        let handle = std::thread::spawn(move || {
-            task_mgr.run();
-        });
-        (Self { tx }, handle)
-    }
-
-    pub fn on_message(&self, msg: TaskManagerMessage) {
-        self.tx.send(msg).unwrap();
+    async fn handle(
+        &mut self,
+        msg: SegmentReady,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        tracing::info!("Got segment: {}", msg.0.index);
     }
 }
 
-struct ClientActor {
-    rx: Receiver<Task>,
-    stream: TcpStream,
-}
+#[remote_message("92ede8bb-7428-498f-99ca-805f763bfcab")]
+impl Message<SessionDone> for TaskManagerActor {
+    type Reply = ();
 
-impl ClientActor {
-    pub fn new(rx: Receiver<Task>, stream: TcpStream) -> Self {
-        Self { rx, stream }
-    }
-
-    pub fn run(&mut self) {
-        while let Ok(msg) = self.rx.recv() {
-            msg.write(&self.stream);
-        }
-    }
-}
-
-#[derive(Clone)]
-struct Client {
-    tx: Sender<Task>,
-}
-
-impl Client {
-    pub fn new(stream: TcpStream) -> (Self, JoinHandle<()>) {
-        let (tx, rx) = channel();
-        let mut client = ClientActor::new(rx, stream);
-        let handle = std::thread::spawn(move || {
-            client.run();
-        });
-        (Self { tx }, handle)
-    }
-
-    pub fn on_message(&self, msg: Task) {
-        self.tx.send(msg).unwrap();
+    async fn handle(
+        &mut self,
+        msg: SessionDone,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        tracing::info!("Session done");
+        ctx.actor_ref().stop_gracefully().await.unwrap();
     }
 }

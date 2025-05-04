@@ -12,15 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(unused)]
-
-use std::{
-    io::{Read, Write},
-    net::TcpStream,
-};
-
-use bytes::{Buf, BufMut, Bytes};
-use risc0_zkvm::{DeserializeOwned, Segment};
+use kameo::Reply;
+use risc0_zkvm::{Journal, Segment};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,47 +24,28 @@ pub(crate) enum TaskKind {
     Join,
 }
 
-#[derive(Serialize, Deserialize)]
-pub(crate) enum TaskManagerMessage {
-    GetTask(TaskKind),
-    Segment(Segment),
-    Executed,
-    Lifted,
-    Joined,
-    Bye,
-}
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct TaskRequest(pub TaskKind);
 
-#[derive(Serialize, Deserialize)]
-pub(crate) enum Task {
-    Execute(ExecuteTask),
-    ProveSegment(Segment),
-    Lift,
-    Join,
-}
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct ExecuteTaskRequest;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct ExecuteTask {
     pub binary: Vec<u8>,
     pub input: Vec<u8>,
 }
 
-pub(crate) trait Message: Serialize + DeserializeOwned {
-    fn read<R: Read>(mut reader: R) -> Self {
-        let mut header = [0; 4];
-        reader.read_exact(&mut header).unwrap();
-        let len = u32::from_le_bytes(header) as usize;
-        let mut body = vec![0; len];
-        reader.read_exact(&mut body).unwrap();
-        bincode::deserialize(&body).unwrap()
-    }
+#[derive(Serialize, Deserialize)]
+pub(crate) struct SegmentReady(pub Segment);
 
-    fn write<W: Write>(&self, mut writer: W) {
-        let len = bincode::serialized_size(self).unwrap() as u32;
-        writer.write_all(&len.to_le_bytes());
-        let body = bincode::serialize(self).unwrap();
-        writer.write_all(&body).unwrap();
-    }
+#[derive(Serialize, Deserialize)]
+pub(crate) struct SessionWrapper {
+    pub(crate) segment_count: usize,
+    pub(crate) user_cycles: u64,
+    pub(crate) total_cycles: u64,
+    pub(crate) journal: Option<Journal>,
 }
 
-impl Message for TaskManagerMessage {}
-impl Message for Task {}
+#[derive(Serialize, Deserialize)]
+pub(crate) struct SessionDone(pub SessionWrapper);
