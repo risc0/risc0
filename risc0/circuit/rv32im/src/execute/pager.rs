@@ -54,8 +54,7 @@ pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
     + POSEIDON_PAGING
     + STORE_ROOT_CYCLES;
 
-const PAGE_SIZE: usize = 1024;
-const NUM_PAGES: usize = 4 * PAGE_SIZE * PAGE_SIZE;
+const NUM_PAGES: usize = 4 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub(crate) enum PageState {
