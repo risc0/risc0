@@ -45,7 +45,7 @@ use super::{
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
-    SyscallContext,
+    unlikely, SyscallContext,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -128,27 +128,6 @@ struct CreateSegmentRequest {
 
 /// Maximum number of segments we can queue up before we block execution
 const MAX_OUTSTANDING_SEGMENTS: usize = 5;
-
-#[inline]
-#[cold]
-fn cold() {}
-
-#[inline]
-#[allow(dead_code)]
-fn likely(b: bool) -> bool {
-    if !b {
-        cold()
-    }
-    b
-}
-
-#[inline]
-fn unlikely(b: bool) -> bool {
-    if b {
-        cold()
-    }
-    b
-}
 
 fn create_segments(
     initial_image: MemoryImage,
@@ -488,6 +467,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
+    #[inline(always)]
     fn trace_instruction(&mut self, cycle: u64, kind: InsnKind, decoded: &DecodedInstruction) {
         if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
             tracing::trace!(
@@ -534,10 +514,11 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
+    #[inline(always)]
     fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
         self.trace_instruction(cycle, kind, decoded);
-        if !self.trace.is_empty() {
+        if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::InstructionStart {
                 cycle,
                 pc: self.pc.0,
@@ -547,9 +528,10 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
+    #[inline(always)]
     fn on_insn_end(&mut self, _kind: InsnKind) -> Result<()> {
         self.inc_user_cycles(1, None);
-        if !self.trace.is_empty() {
+        if unlikely(!self.trace.is_empty()) {
             self.trace_pager()?;
         }
         Ok(())
@@ -598,7 +580,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         //     addr.baddr(),
         //     self.pc
         // );
-        if !self.trace.is_empty() {
+        if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::MemorySet {
                 addr: addr.baddr().0,
                 region: word.to_be_bytes().to_vec(),
@@ -610,7 +592,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
     #[inline(always)]
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
         // tracing::trace!("store_register({:?}, {word:#010x})", addr.baddr());
-        if !self.trace.is_empty() {
+        if unlikely(!self.trace.is_empty()) {
             self.trace(TraceEvent::MemorySet {
                 addr: (base + idx).baddr().0,
                 region: word.to_be_bytes().to_vec(),

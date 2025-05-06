@@ -376,6 +376,7 @@ impl Page {
     /// Thus, if you pass a [WordAddr] belonging to a different page,
     /// [Page::load] will load from the address in _this_ page with the same
     /// [WordAddr::page_subaddr].
+    #[inline(always)]
     pub fn load(&self, addr: WordAddr) -> u32 {
         let byte_addr = addr.page_subaddr().baddr().0 as usize;
         let mut bytes = [0u8; WORD_SIZE];
@@ -387,11 +388,13 @@ impl Page {
     }
 
     #[cfg(feature = "std")]
+    #[inline(always)]
     fn ensure_writable(&mut self) -> &mut [u8] {
         &mut Arc::make_mut(&mut self.0)[..]
     }
 
     #[cfg(not(feature = "std"))]
+    #[inline(always)]
     fn ensure_writable(&mut self) -> &mut [u8] {
         &mut self.0
     }
@@ -403,6 +406,7 @@ impl Page {
     /// this page. Thus, if you pass a [WordAddr] belonging to a different page,
     /// [Page::store] will store to the address in _this_ page with the same
     /// [WordAddr::page_subaddr].
+    #[inline(always)]
     pub fn store(&mut self, addr: WordAddr, word: u32) {
         let writable_ref = self.ensure_writable();
 
@@ -412,6 +416,7 @@ impl Page {
     }
 
     /// Get a shared reference to the underlying data in the page
+    #[inline(always)]
     pub fn data(&self) -> &Vec<u8> {
         &self.0
     }

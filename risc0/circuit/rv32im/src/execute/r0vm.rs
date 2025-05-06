@@ -173,6 +173,7 @@ pub struct Risc0Machine<'a, C: Risc0Context> {
 }
 
 impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
+    #[inline(always)]
     pub fn step(emu: &mut Emulator, ctx: &'a mut C) -> Result<()> {
         emu.step(&mut Risc0Machine { ctx })
     }

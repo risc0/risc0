@@ -23,6 +23,7 @@ use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
 
 use super::{node_idx, platform::*};
+use crate::execute::unlikely;
 
 pub const PAGE_WORDS: usize = PAGE_BYTES / WORD_SIZE;
 
@@ -83,6 +84,7 @@ impl PageStates {
         }
     }
 
+    #[inline(always)]
     pub(crate) fn set(&mut self, index: u32, value: PageState) {
         let set_before = self.get(index) != PageState::Unloaded;
         match value {
@@ -103,6 +105,7 @@ impl PageStates {
         }
     }
 
+    #[inline(always)]
     pub(crate) fn get(&self, index: u32) -> PageState {
         if self.states.get(index as usize * 2).unwrap() {
             // b10 | b11 => Dirty
@@ -181,11 +184,13 @@ impl PageTable {
         }
     }
 
+    #[inline(always)]
     fn get(&self, index: u32) -> Option<usize> {
         let value = self.table[index as usize] as usize;
         value.checked_sub(1)
     }
 
+    #[inline(always)]
     fn set(&mut self, index: u32, value: usize) {
         self.table[index as usize] = (value + 1) as u32
     }
@@ -228,6 +233,7 @@ pub(crate) struct WorkingImage {
 }
 
 impl WorkingImage {
+    #[inline(always)]
     fn get_page(&mut self, page_idx: u32) -> Result<Page> {
         // If page exists, return it
         if let Some(page) = self.pages.get(&page_idx) {
@@ -299,6 +305,7 @@ impl PagedMemory {
         self.page_states.keys().collect()
     }
 
+    #[inline(always)]
     fn try_load_register(&self, addr: WordAddr) -> Option<u32> {
         if addr >= USER_REGS_ADDR.waddr() && addr < USER_REGS_ADDR.waddr() + REG_MAX {
             let reg_idx = addr - USER_REGS_ADDR.waddr();
@@ -338,7 +345,7 @@ impl PagedMemory {
     }
 
     pub(crate) fn peek(&mut self, addr: WordAddr) -> Result<u32> {
-        if addr >= MEMORY_END_ADDR {
+        if unlikely(addr >= MEMORY_END_ADDR) {
             bail!("Invalid peek address: {addr:?}");
         }
 
@@ -373,8 +380,9 @@ impl PagedMemory {
         Ok(self.page_cache[cache_idx].load(addr))
     }
 
+    #[inline(always)]
     pub(crate) fn load(&mut self, addr: WordAddr) -> Result<u32> {
-        if addr >= MEMORY_END_ADDR {
+        if unlikely(addr >= MEMORY_END_ADDR) {
             bail!("Invalid load address: {addr:?}");
         }
 
@@ -384,6 +392,7 @@ impl PagedMemory {
         }
     }
 
+    #[inline(always)]
     pub(crate) fn load_register(&mut self, base: WordAddr, idx: usize) -> u32 {
         if base == USER_REGS_ADDR.waddr() {
             self.user_registers[idx]
@@ -405,7 +414,7 @@ impl PagedMemory {
 
     #[inline(always)]
     pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
-        if addr >= MEMORY_END_ADDR {
+        if unlikely(addr >= MEMORY_END_ADDR) {
             bail!("Invalid store address: {addr:?}");
         }
 
@@ -416,6 +425,7 @@ impl PagedMemory {
         }
     }
 
+    #[inline(always)]
     pub(crate) fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) {
         if base == USER_REGS_ADDR.waddr() {
             self.user_registers[idx] = word;
@@ -426,6 +436,7 @@ impl PagedMemory {
         }
     }
 
+    #[inline(always)]
     fn page_for_writing(&mut self, page_idx: u32) -> Result<&mut Page> {
         let node_idx = node_idx(page_idx);
         let mut state = self.page_states.get(node_idx);
@@ -533,14 +544,16 @@ impl PagedMemory {
         self.trace_events.clear();
     }
 
+    #[inline(always)]
     fn trace_page_in(&mut self, cycles: u32) {
-        if self.tracing_enabled {
+        if unlikely(self.tracing_enabled) {
             self.trace_events.push(PageTraceEvent::PageIn { cycles });
         }
     }
 
+    #[inline(always)]
     fn trace_page_out(&mut self, cycles: u32) {
-        if self.tracing_enabled {
+        if unlikely(self.tracing_enabled) {
             self.trace_events.push(PageTraceEvent::PageOut { cycles });
         }
     }
