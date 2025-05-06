@@ -574,6 +574,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
+    #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         let word = match op {
             LoadOp::Peek => self.pager.peek(addr)?,
@@ -583,12 +584,14 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(word)
     }
 
+    #[inline(always)]
     fn load_register(&mut self, _op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         let word = self.pager.load_register(base, idx);
         // tracing::trace!("load_register({:?}) -> {word:#010x}", addr.baddr());
         Ok(word)
     }
 
+    #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         // tracing::trace!(
         //     "store_u32({:?}, {word:#010x}), pc: {:?}",
@@ -604,6 +607,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         self.pager.store(addr, word)
     }
 
+    #[inline(always)]
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
         // tracing::trace!("store_register({:?}, {word:#010x})", addr.baddr());
         if !self.trace.is_empty() {

@@ -311,6 +311,7 @@ impl PagedMemory {
         }
     }
 
+    #[inline(always)]
     fn try_store_register(&mut self, addr: WordAddr, word: u32) -> bool {
         if addr >= USER_REGS_ADDR.waddr() && addr < USER_REGS_ADDR.waddr() + REG_MAX {
             let reg_idx = addr - USER_REGS_ADDR.waddr();
@@ -357,6 +358,7 @@ impl PagedMemory {
         }
     }
 
+    #[inline(always)]
     fn load_ram(&mut self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         let node_idx = node_idx(page_idx);
@@ -392,6 +394,7 @@ impl PagedMemory {
         }
     }
 
+    #[inline(always)]
     fn store_ram(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let page_idx = addr.page_idx();
         // tracing::trace!("store: {addr:?}, page: {page_idx:#08x}, word: {word:#010x}");
@@ -400,6 +403,7 @@ impl PagedMemory {
         Ok(())
     }
 
+    #[inline(always)]
     pub(crate) fn store(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         if addr >= MEMORY_END_ADDR {
             bail!("Invalid store address: {addr:?}");
@@ -485,6 +489,7 @@ impl PagedMemory {
         partial_image
     }
 
+    #[inline(always)]
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
         tracing::trace!("load_page: {page_idx:#08x}");
         let page = self.image.get_page(page_idx)?;
@@ -496,6 +501,7 @@ impl PagedMemory {
         Ok(())
     }
 
+    #[inline(always)]
     fn fixup_costs(&mut self, mut node_idx: u32, goal: PageState) {
         tracing::trace!("fixup: {node_idx:#010x}: {goal:?}");
         while node_idx != 0 {

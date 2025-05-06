@@ -289,6 +289,7 @@ impl Emulator {
         }
     }
 
+    #[inline(always)]
     pub fn step<C: EmuContext>(&mut self, ctx: &mut C) -> Result<()> {
         let pc = ctx.get_pc();
 
@@ -310,6 +311,7 @@ impl Emulator {
         Ok(())
     }
 
+    #[inline(always)]
     fn step_compute<M: EmuContext>(
         &mut self,
         ctx: &mut M,

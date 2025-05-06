@@ -69,14 +69,17 @@ pub(crate) trait Risc0Context {
 
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32>;
 
+    #[inline(always)]
     fn load_register(&mut self, op: LoadOp, base: WordAddr, idx: usize) -> Result<u32> {
         self.load_u32(op, base + idx)
     }
 
+    #[inline(always)]
     fn load_machine_register(&mut self, op: LoadOp, idx: usize) -> Result<u32> {
         self.load_register(op, MACHINE_REGS_ADDR.waddr(), idx)
     }
 
+    #[inline(always)]
     fn load_aligned_addr_from_machine_register(
         &mut self,
         op: LoadOp,
@@ -85,6 +88,7 @@ pub(crate) trait Risc0Context {
         check_aligned_addr(ByteAddr(self.load_machine_register(op, idx)?))
     }
 
+    #[inline(always)]
     fn load_u8(&mut self, op: LoadOp, addr: ByteAddr) -> Result<u8> {
         let word = self.load_u32(op, addr.waddr())?;
         let bytes = word.to_le_bytes();
@@ -92,6 +96,7 @@ pub(crate) trait Risc0Context {
         Ok(bytes[byte_offset])
     }
 
+    #[inline(always)]
     fn load_region(&mut self, op: LoadOp, addr: ByteAddr, size: usize) -> Result<Vec<u8>> {
         let mut region = Vec::with_capacity(size);
         if addr.is_aligned() && (0 == size % WORD_SIZE) {
@@ -110,6 +115,7 @@ pub(crate) trait Risc0Context {
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
+    #[inline(always)]
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
         self.store_u32(base + idx, word)
     }
@@ -544,12 +550,14 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         self.ctx.set_pc(addr);
     }
 
+    #[inline(always)]
     fn load_register(&mut self, idx: usize) -> Result<u32> {
         // tracing::trace!("load_reg: x{idx}");
         let base = self.regs_base_addr();
         self.ctx.load_register(LoadOp::Record, base, idx)
     }
 
+    #[inline(always)]
     fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
         // tracing::trace!("store_reg: x{idx} <= {word:#010x}");
         let base = self.regs_base_addr();
@@ -563,10 +571,12 @@ impl<T: Risc0Context> EmuContext for Risc0Machine<'_, T> {
         }
     }
 
+    #[inline(always)]
     fn load_memory(&mut self, addr: WordAddr) -> Result<u32> {
         self.ctx.load_u32(LoadOp::Record, addr)
     }
 
+    #[inline(always)]
     fn store_memory(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         self.ctx.store_u32(addr, word)
     }
