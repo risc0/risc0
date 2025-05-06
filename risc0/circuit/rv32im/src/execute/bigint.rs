@@ -57,14 +57,14 @@ fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
     out
 }
 
-struct BigIntIOImpl<'a> {
-    ctx: &'a mut dyn Risc0Context,
+struct BigIntIOImpl<'a, Risc0ContextT> {
+    ctx: &'a mut Risc0ContextT,
     mode: u32,
     pub witness: BigIntWitness,
 }
 
-impl<'a> BigIntIOImpl<'a> {
-    pub fn new(ctx: &'a mut dyn Risc0Context, mode: u32) -> Self {
+impl<'a, Risc0ContextT> BigIntIOImpl<'a, Risc0ContextT> {
+    pub fn new(ctx: &'a mut Risc0ContextT, mode: u32) -> Self {
         Self {
             ctx,
             mode,
@@ -81,7 +81,7 @@ fn check_bigint_addr(addr: WordAddr, mode: u32) -> Result<()> {
     Ok(())
 }
 
-impl BigIntIO for BigIntIOImpl<'_> {
+impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<Natural> {
         tracing::trace!("load(arena: {arena}, offset: {offset}, count: {count})");
         let base = self
@@ -126,7 +126,7 @@ pub(crate) struct BigIntExec {
     pub(crate) witness: BigIntWitness,
 }
 
-pub fn ecall_execute(ctx: &mut dyn Risc0Context) -> Result<usize> {
+pub fn ecall_execute(ctx: &mut impl Risc0Context) -> Result<usize> {
     let exec = ecall(ctx)?;
     let cycles = exec.verify_program_size + 1;
     for (addr, bytes) in exec.witness {
@@ -138,7 +138,7 @@ pub fn ecall_execute(ctx: &mut dyn Risc0Context) -> Result<usize> {
     Ok(cycles)
 }
 
-pub(crate) fn ecall(ctx: &mut dyn Risc0Context) -> Result<BigIntExec> {
+pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
     tracing::debug!("ecall");
 
     let mode = ctx.load_machine_register(LoadOp::Record, REG_T0)?;
