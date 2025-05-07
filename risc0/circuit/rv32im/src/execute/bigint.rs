@@ -19,6 +19,7 @@ use std::{collections::BTreeMap, io::Cursor};
 use anyhow::{ensure, Result};
 use malachite::Natural;
 use risc0_binfmt::WordAddr;
+use smallvec::SmallVec;
 
 use super::{
     bibc::{self, BigIntIO},
@@ -34,18 +35,6 @@ pub(crate) const BIGINT_WIDTH_BYTES: usize = BIGINT_WIDTH_WORDS * WORD_SIZE;
 
 pub(crate) type BigIntBytes = [u8; BIGINT_WIDTH_BYTES];
 pub(crate) type BigIntWitness = BTreeMap<WordAddr, BigIntBytes>;
-
-fn bytes_le_to_bigint(bytes: &[u8]) -> Natural {
-    let mut limbs = Vec::with_capacity((bytes.len() + 3) / 4);
-
-    for chunk in bytes.chunks(4) {
-        let mut arr = [0u8; 4];
-        arr[..chunk.len()].copy_from_slice(chunk);
-        limbs.push(u32::from_le_bytes(arr));
-    }
-
-    Natural::from_limbs_asc(&limbs)
-}
 
 fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
     let limbs = value.to_limbs_asc();
@@ -87,13 +76,27 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
         let base = self
             .ctx
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
-        let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
-        check_bigint_addr(addr, self.mode)?;
-        let bytes = self
-            .ctx
-            .load_region(LoadOp::Load, addr.baddr(), count as usize)?;
-        let val = bytes_le_to_bigint(&bytes);
-        Ok(val)
+        let start_addr = base + offset * BIGINT_WIDTH_WORDS as u32;
+        check_bigint_addr(start_addr, self.mode)?;
+
+        let word_count = (count + 3) / 4;
+        let mut limbs = SmallVec::<[u32; 8]>::with_capacity(word_count as usize);
+        let mut addr = start_addr;
+        while addr < start_addr + word_count {
+            limbs.push(self.ctx.load_u32(LoadOp::Load, addr)?);
+            addr.inc();
+        }
+
+        if let Some(last_limb) = limbs.last_mut() {
+            match count % 4 {
+                1 => *last_limb &= 0x000000FF,
+                2 => *last_limb &= 0x0000FFFF,
+                3 => *last_limb &= 0x00FFFFFF,
+                _ => {}
+            }
+        }
+
+        Ok(Natural::from_limbs_asc(&limbs))
     }
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &Natural) -> Result<()> {
