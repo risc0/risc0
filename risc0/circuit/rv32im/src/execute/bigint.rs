@@ -36,16 +36,6 @@ pub(crate) const BIGINT_WIDTH_BYTES: usize = BIGINT_WIDTH_WORDS * WORD_SIZE;
 pub(crate) type BigIntBytes = [u8; BIGINT_WIDTH_BYTES];
 pub(crate) type BigIntWitness = BTreeMap<WordAddr, BigIntBytes>;
 
-fn bigint_to_bytes_le(value: &Natural) -> Vec<u8> {
-    let limbs = value.to_limbs_asc();
-    let mut out = Vec::with_capacity(limbs.len() * 4);
-
-    for limb in limbs {
-        out.extend_from_slice(&limb.to_le_bytes());
-    }
-    out
-}
-
 struct BigIntIOImpl<'a, Risc0ContextT> {
     ctx: &'a mut Risc0ContextT,
     mode: u32,
@@ -105,24 +95,36 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
             .load_aligned_addr_from_machine_register(LoadOp::Load, arena as usize)?;
         let addr = base + offset * BIGINT_WIDTH_WORDS as u32;
         check_bigint_addr(addr, self.mode)?;
+
         tracing::trace!("store(arena: {arena}, offset: {offset}, count: {count}, addr: {addr:?}, value: {value})");
 
-        let mut witness = vec![0u8; count as usize];
-        let bytes = bigint_to_bytes_le(value);
+        let limbs = value.to_limbs_asc();
         ensure!(
-            witness.len() >= bytes.len(),
-            "count ({} bytes) too small for value ({} bytes)",
-            witness.len(),
-            bytes.len()
+            count as usize >= limbs.len() * WORD_SIZE,
+            "bigint_store: count ({count} bytes) too small for value ({} bytes)",
+            limbs.len() * WORD_SIZE
         );
-        witness[..bytes.len()].copy_from_slice(&bytes);
+        ensure!(
+            count as usize % BIGINT_WIDTH_BYTES == 0,
+            "bigint_store: count ({count}) is not a multiple of {BIGINT_WIDTH_BYTES}"
+        );
 
-        let chunks = witness.chunks_exact(BIGINT_WIDTH_BYTES);
-        assert_eq!(chunks.len(), count as usize / BIGINT_WIDTH_BYTES);
-        for (i, chunk) in chunks.enumerate() {
-            let addr = addr + i * BIGINT_WIDTH_WORDS;
-            let chunk = chunk.try_into().unwrap();
-            self.witness.insert(addr, chunk);
+        let mut filled_chunks = 0;
+        for (c_i, chunk) in limbs.chunks(BIGINT_WIDTH_WORDS).enumerate() {
+            let mut new_chunk = [0; BIGINT_WIDTH_BYTES];
+            for (w_i, word) in chunk.iter().enumerate() {
+                let s = w_i * WORD_SIZE;
+                new_chunk[s..(s + WORD_SIZE)].copy_from_slice(&word.to_le_bytes());
+            }
+            let addr = addr + c_i * BIGINT_WIDTH_WORDS;
+            self.witness.insert(addr, new_chunk);
+            filled_chunks += 1;
+        }
+
+        let padding = (count as usize / BIGINT_WIDTH_BYTES) - filled_chunks;
+        for i in 0..padding {
+            let addr = addr + (filled_chunks + i) * BIGINT_WIDTH_WORDS;
+            self.witness.insert(addr, [0; BIGINT_WIDTH_BYTES]);
         }
 
         Ok(())
@@ -273,18 +275,22 @@ mod tests {
     }
 
     #[test]
-    fn bigint_write_bigint_unaligned_count_larger_writes_only_smaller_length() {
-        bigint_write(
-            vec![0x1, 0x2, 0x3, 0x4],
-            20,
-            vec![
-                0x1, 0x0, 0x0, 0x0, // u32
-                0x2, 0x0, 0x0, 0x0, // u32
-                0x3, 0x0, 0x0, 0x0, // u32
-                0x4, 0x0, 0x0, 0x0, // u32
-            ],
-        )
-        .unwrap();
+    fn bigint_write_bigint_unaligned_count_errors() {
+        assert_eq!(
+            bigint_write(
+                vec![0x1, 0x2, 0x3, 0x4],
+                20,
+                vec![
+                    0x1, 0x0, 0x0, 0x0, // u32
+                    0x2, 0x0, 0x0, 0x0, // u32
+                    0x3, 0x0, 0x0, 0x0, // u32
+                    0x4, 0x0, 0x0, 0x0, // u32
+                ],
+            )
+            .unwrap_err()
+            .to_string(),
+            "bigint_store: count (20) is not a multiple of 16"
+        );
     }
 
     #[test]
@@ -350,7 +356,7 @@ mod tests {
             bigint_write(vec![0x1, 0x2, 0x3, 0x4], 14, vec![])
                 .unwrap_err()
                 .to_string(),
-            "count (14 bytes) too small for value (16 bytes)"
+            "bigint_store: count (14 bytes) too small for value (16 bytes)"
         );
     }
 
