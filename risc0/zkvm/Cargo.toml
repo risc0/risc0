@@ -152,6 +152,7 @@ cuda = [
   "risc0-circuit-rv32im/cuda",
   "risc0-zkp/cuda",
 ]
+skip-cuda-components = ["risc0-circuit-keccak-sys/skip-cuda-keccak"]
 default = ["client", "bonsai"]
 r0vm-ver-compat = []
 disable-dev-mode = []
