@@ -14,13 +14,13 @@ use std::path::PathBuf;
 #[command(author, version, about, long_about = None)]
 pub struct Args {
     /// Risc0 ZKVM elf file on disk
-    #[clap(short = 'f', long)]
+    #[arg(short = 'f', long)]
     elf_file: Option<PathBuf>,
 
     /// ZKVM encoded input to be supplied to ExecEnv .write() method
     ///
     /// Should be `risc0_zkvm::serde::to_vec` encoded binary data
-    #[clap(short, long, conflicts_with = "iter_count")]
+    #[arg(short, long, conflicts_with = "iter_count")]
     input_file: Option<PathBuf>,
 
     /// Optional test vector to run the sample guest with the supplied iteration count
@@ -28,21 +28,21 @@ pub struct Args {
     /// Allows for rapid testing of arbitrary large cycle count guests
     ///
     /// NOTE: TODO remove this flag and simplify client
-    #[clap(short = 'c', long, conflicts_with = "input_file")]
+    #[arg(short = 'c', long, conflicts_with = "input_file")]
     iter_count: Option<u64>,
 
     /// Optionally Create a SNARK proof
-    #[clap(short, long, default_value_t = false, conflicts_with = "exec_only")]
+    #[arg(short, long, default_value_t = false, conflicts_with = "exec_only")]
     snarkify: bool,
 
     /// Run a execute only job, aka preflight
     ///
     /// Useful for capturing metrics on a STARK proof like cycles.
-    #[clap(short, long, default_value_t = false, conflicts_with = "snarkify")]
+    #[arg(short, long, default_value_t = false, conflicts_with = "snarkify")]
     exec_only: bool,
 
     /// Bento HTTP API Endpoint
-    #[clap(short = 't', long, default_value = "http://localhost:8081")]
+    #[arg(short = 't', long, default_value = "http://localhost:8081")]
     endpoint: String,
 }
 

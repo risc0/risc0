@@ -49,92 +49,92 @@ pub struct Args {
     pub poll_time: u64,
 
     /// taskdb postgres DATABASE_URL
-    #[clap(env)]
+    #[arg(env)]
     pub database_url: String,
 
     /// redis connection URL
-    #[clap(env)]
+    #[arg(env)]
     pub redis_url: String,
 
     /// risc0 segment po2 arg
-    #[clap(short, long, default_value_t = 20)]
+    #[arg(short, long, default_value_t = 20)]
     pub segment_po2: u32,
 
     /// max connections to SQL db in connection pool
-    #[clap(long, default_value_t = 1)]
+    #[arg(long, default_value_t = 1)]
     pub db_max_connections: u32,
 
     /// Redis TTL, seconds before objects expire automatically
     ///
     /// Defaults to 8 hours
-    #[clap(long, default_value_t = 8 * 60 * 60)]
+    #[arg(long, default_value_t = 8 * 60 * 60)]
     pub redis_ttl: u64,
 
     /// Executor limit, in millions of cycles
-    #[clap(short, long, default_value_t = 100_000)]
+    #[arg(short, long, default_value_t = 100_000)]
     pub exec_cycle_limit: u64,
 
     /// S3 / Minio bucket
-    #[clap(env)]
+    #[arg(env)]
     pub s3_bucket: String,
 
     /// S3 / Minio access key
-    #[clap(env)]
+    #[arg(env)]
     pub s3_access_key: String,
 
     /// S3 / Minio secret key
-    #[clap(env)]
+    #[arg(env)]
     pub s3_secret_key: String,
 
     /// S3 / Minio url
-    #[clap(env)]
+    #[arg(env)]
     pub s3_url: String,
 
     /// Enables a background thread to monitor for tasks that need to be retried / timed-out
-    #[clap(long, default_value_t = false)]
+    #[arg(long, default_value_t = false)]
     monitor_requeue: bool,
 
     // Task flags
     /// How many times a prove+lift can fail before hard failure
-    #[clap(long, default_value_t = 3)]
+    #[arg(long, default_value_t = 3)]
     prove_retries: i32,
 
     /// How long can a prove+lift can be running for, before it is marked as timed-out
-    #[clap(long, default_value_t = 30)]
+    #[arg(long, default_value_t = 30)]
     prove_timeout: i32,
 
     /// How many times a join can fail before hard failure
-    #[clap(long, default_value_t = 3)]
+    #[arg(long, default_value_t = 3)]
     join_retries: i32,
 
     /// How long can a join can be running for, before it is marked as timed-out
-    #[clap(long, default_value_t = 10)]
+    #[arg(long, default_value_t = 10)]
     join_timeout: i32,
 
     /// How many times a resolve can fail before hard failure
-    #[clap(long, default_value_t = 3)]
+    #[arg(long, default_value_t = 3)]
     resolve_retries: i32,
 
     /// How long can a resolve can be running for, before it is marked as timed-out
-    #[clap(long, default_value_t = 10)]
+    #[arg(long, default_value_t = 10)]
     resolve_timeout: i32,
 
     /// How many times a finalize can fail before hard failure
-    #[clap(long, default_value_t = 0)]
+    #[arg(long, default_value_t = 0)]
     finalize_retries: i32,
 
     /// How long can a finalize can be running for, before it is marked as timed-out
     ///
     /// NOTE: This value is multiplied by the assumption count
-    #[clap(long, default_value_t = 10)]
+    #[arg(long, default_value_t = 10)]
     finalize_timeout: i32,
 
     /// Snark timeout in seconds
-    #[clap(long, default_value_t = 60 * 4)]
+    #[arg(long, default_value_t = 60 * 4)]
     snark_timeout: i32,
 
     /// Snark retries
-    #[clap(long, default_value_t = 0)]
+    #[arg(long, default_value_t = 0)]
     snark_retries: i32,
 }
 

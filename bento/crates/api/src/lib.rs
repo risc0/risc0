@@ -161,50 +161,50 @@ impl IntoResponse for AppError {
 }
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[arg(author, version, about, long_about = None)]
 pub struct Args {
     /// Bind address for REST api
-    #[clap(long, default_value = "0.0.0.0:8080")]
+    #[arg(long, default_value = "0.0.0.0:8080")]
     bind_addr: String,
 
     /// SQL DB Connection pool connections
-    #[clap(long, default_value_t = 10)]
+    #[arg(long, default_value_t = 10)]
     db_max_connections: u32,
 
     /// taskdb postgres DATABASE_URL
-    #[clap(env)]
+    #[arg(env)]
     database_url: String,
 
     /// S3 / Minio bucket
-    #[clap(env)]
+    #[arg(env)]
     s3_bucket: String,
 
     /// S3 / Minio access key
-    #[clap(env)]
+    #[arg(env)]
     s3_access_key: String,
 
     /// S3 / Minio secret key
-    #[clap(env)]
+    #[arg(env)]
     s3_secret_key: String,
 
     /// S3 / Minio url
-    #[clap(env)]
+    #[arg(env)]
     s3_url: String,
 
     /// Executor timeout in seconds
-    #[clap(long, default_value_t = 4 * 60 * 60)]
+    #[arg(long, default_value_t = 4 * 60 * 60)]
     exec_timeout: i32,
 
     /// Executor retries
-    #[clap(long, default_value_t = 0)]
+    #[arg(long, default_value_t = 0)]
     exec_retries: i32,
 
     /// Snark timeout in seconds
-    #[clap(long, default_value_t = 60 * 2)]
+    #[arg(long, default_value_t = 60 * 2)]
     snark_timeout: i32,
 
     /// Snark retries
-    #[clap(long, default_value_t = 0)]
+    #[arg(long, default_value_t = 0)]
     snark_retries: i32,
 }
 

@@ -44,13 +44,13 @@ pub enum GuestSubCommands {
 #[derive(Debug, Args)]
 pub struct CommonArgs {
     /// Path to the Cargo.toml file for the crate to be built.
-    #[clap(long, default_value = "./Cargo.toml")]
+    #[arg(long, default_value = "./Cargo.toml")]
     pub manifest_path: PathBuf,
 
     /// Output directory for build artifacts.
     ///
     /// Determined from package metadata if not supplied.
-    #[clap(long)]
+    #[arg(long)]
     pub target_dir: Option<PathBuf>,
 
     /// Additional arguments to pass to "cargo build" on the guest
