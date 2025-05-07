@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod manager;
-mod protocol;
-mod worker;
+mod actors;
 
 use std::{error::Error as StdError, fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
 
@@ -151,11 +149,11 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
     }
 
     if let Some(ref path) = args.mode.manager {
-        return manager::main(&args, path).await;
+        return self::actors::manager::main(&args, path).await;
     }
 
     if args.mode.worker {
-        return worker::main(args).await;
+        return self::actors::worker::main(args).await;
     }
 
     let env = {

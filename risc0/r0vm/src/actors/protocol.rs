@@ -16,18 +16,7 @@ use kameo::Reply;
 use risc0_zkvm::{Journal, Segment};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) enum TaskKind {
-    Execute,
-    ProveSegment,
-    Lift,
-    Join,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct TaskRequest(pub TaskKind);
-
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct ExecuteTaskRequest;
 
 #[derive(Reply, Serialize, Deserialize)]
@@ -49,3 +38,11 @@ pub(crate) struct SessionWrapper {
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct SessionDone(pub SessionWrapper);
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ProveSegmentTaskRequest;
+
+#[derive(Reply, Serialize, Deserialize)]
+pub(crate) struct ProveSegmentTask {
+    pub segment: Segment,
+}

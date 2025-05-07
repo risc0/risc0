@@ -12,24 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(unused)]
-
-use std::{collections::BTreeMap, error::Error as StdError, path::Path};
+use std::{collections::VecDeque, error::Error as StdError, path::Path};
 
 use kameo::prelude::*;
+use risc0_zkvm::Segment;
 
-use crate::{
-    protocol::{ExecuteTask, ExecuteTaskRequest, SegmentReady, SessionDone},
-    Cli,
+use crate::Cli;
+
+use super::protocol::{
+    ExecuteTask, ExecuteTaskRequest, ProveSegmentTask, ProveSegmentTaskRequest, SegmentReady,
+    SessionDone,
 };
 
-pub(crate) async fn main(args: &Cli, path: &Path) -> Result<(), Box<dyn StdError>> {
+pub(crate) async fn main(_args: &Cli, path: &Path) -> Result<(), Box<dyn StdError>> {
     let addr = "/ip4/0.0.0.0/udp/9000/quic-v1".parse()?;
     println!("addr: {addr}");
 
     ActorSwarm::bootstrap()?.listen_on(addr).await?;
 
-    let binary = std::fs::read(path).unwrap();
+    let binary = std::fs::read(path)?;
 
     let task_mgr = kameo::spawn(TaskManagerActor::new(binary));
     task_mgr.register("task_mgr").await?;
@@ -42,14 +43,14 @@ pub(crate) async fn main(args: &Cli, path: &Path) -> Result<(), Box<dyn StdError
 #[derive(Actor, RemoteActor)]
 pub(crate) struct TaskManagerActor {
     binary: Vec<u8>,
-    tasks: BTreeMap<u32, u32>,
+    segments: VecDeque<Segment>,
 }
 
 impl TaskManagerActor {
     pub fn new(binary: Vec<u8>) -> Self {
         Self {
             binary,
-            tasks: BTreeMap::new(),
+            segments: VecDeque::new(),
         }
     }
 }
@@ -60,8 +61,8 @@ impl Message<ExecuteTaskRequest> for TaskManagerActor {
 
     async fn handle(
         &mut self,
-        msg: ExecuteTaskRequest,
-        ctx: &mut Context<Self, Self::Reply>,
+        _msg: ExecuteTaskRequest,
+        _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         ExecuteTask {
             binary: self.binary.clone(),
@@ -76,10 +77,11 @@ impl Message<SegmentReady> for TaskManagerActor {
 
     async fn handle(
         &mut self,
-        msg: SegmentReady,
-        ctx: &mut Context<Self, Self::Reply>,
+        SegmentReady(segment): SegmentReady,
+        _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        tracing::info!("Got segment: {}", msg.0.index);
+        tracing::info!("Got segment: {}", segment.index);
+        self.segments.push_back(segment);
     }
 }
 
@@ -89,10 +91,26 @@ impl Message<SessionDone> for TaskManagerActor {
 
     async fn handle(
         &mut self,
-        msg: SessionDone,
+        _msg: SessionDone,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         tracing::info!("Session done");
         ctx.actor_ref().stop_gracefully().await.unwrap();
+    }
+}
+
+#[remote_message("f063c58a-9747-48a9-b05d-1e745be982c6")]
+impl Message<ProveSegmentTaskRequest> for TaskManagerActor {
+    type Reply = DelegatedReply<ProveSegmentTask>;
+
+    async fn handle(
+        &mut self,
+        _msg: ProveSegmentTaskRequest,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        // let (delegated_reply, reply_sender) = ctx.reply_sender();
+        // ProveSegmentTask { segment: todo!() }
+        // delegated_reply
+        todo!()
     }
 }
