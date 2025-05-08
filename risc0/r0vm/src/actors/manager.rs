@@ -12,16 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::VecDeque, error::Error as StdError, path::Path};
+#![allow(unused)]
+
+use std::{collections::VecDeque, error::Error as StdError, path::Path, sync::Arc};
 
 use kameo::prelude::*;
-use risc0_zkvm::Segment;
+use risc0_zkvm::{ProveKeccakRequest, Segment, SegmentReceipt};
 
-use crate::Cli;
-
-use super::protocol::{
-    ExecuteTask, ExecuteTaskRequest, ProveSegmentTask, ProveSegmentTaskRequest, SegmentReady,
-    SessionDone,
+use crate::{
+    actors::{
+        factory::FactoryActor,
+        protocol::{
+            factory::{
+                SegmentReady, SessionDone, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskStatus,
+                TaskStatusMsg,
+            },
+            ExecuteTask, LiftTask, ProofRequest, ProveKeccakTask, ProveSegmentTask, Task, TaskKind,
+        },
+    },
+    Cli,
 };
 
 pub(crate) async fn main(_args: &Cli, path: &Path) -> Result<(), Box<dyn StdError>> {
@@ -30,87 +39,138 @@ pub(crate) async fn main(_args: &Cli, path: &Path) -> Result<(), Box<dyn StdErro
 
     ActorSwarm::bootstrap()?.listen_on(addr).await?;
 
-    let binary = std::fs::read(path)?;
+    let factory = kameo::spawn(FactoryActor::new());
+    factory.register("factory").await?;
 
-    let task_mgr = kameo::spawn(TaskManagerActor::new(binary));
-    task_mgr.register("task_mgr").await?;
+    let task_mgr = kameo::spawn(TaskManagerActor::new(factory.clone()));
+
+    let binary = std::fs::read(path)?;
+    task_mgr
+        .tell(ProofRequest {
+            binary,
+            input: vec![],
+        })
+        .await;
 
     task_mgr.wait_for_stop().await;
+
+    factory.wait_for_stop().await;
 
     Ok(())
 }
 
 #[derive(Actor, RemoteActor)]
 pub(crate) struct TaskManagerActor {
-    binary: Vec<u8>,
+    factory: ActorRef<FactoryActor>,
     segments: VecDeque<Segment>,
+    next_task_id: u64,
 }
 
 impl TaskManagerActor {
-    pub fn new(binary: Vec<u8>) -> Self {
+    pub fn new(factory: ActorRef<FactoryActor>) -> Self {
         Self {
-            binary,
+            factory,
             segments: VecDeque::new(),
+            next_task_id: 0,
         }
+    }
+
+    fn next_task_id(&mut self) -> u64 {
+        self.next_task_id += 1;
+        self.next_task_id
+    }
+
+    async fn prove_segment(&mut self, task_mgr: ActorRef<Self>, segment: Segment) {
+        let task = SubmitTaskMsg {
+            task_mgr,
+            task_id: self.next_task_id(),
+            task_kind: TaskKind::ProveSegment,
+            task: Task::ProveSegment(Arc::new(ProveSegmentTask { segment })),
+        };
+        self.factory.tell(task).await;
+    }
+
+    async fn prove_segment_done(&mut self, task_mgr: ActorRef<Self>, receipt: SegmentReceipt) {
+        let task = SubmitTaskMsg {
+            task_mgr,
+            task_id: self.next_task_id(),
+            task_kind: TaskKind::Lift,
+            task: Task::Lift(Arc::new(LiftTask { receipt })),
+        };
+        self.factory.tell(task).await;
+    }
+
+    async fn prove_keccak(&mut self, task_mgr: ActorRef<Self>, request: ProveKeccakRequest) {
+        let task = SubmitTaskMsg {
+            task_mgr,
+            task_id: self.next_task_id(),
+            task_kind: TaskKind::ProveKeccak,
+            task: Task::ProveKeccak(Arc::new(ProveKeccakTask { request })),
+        };
+        self.factory.tell(task).await;
     }
 }
 
-#[remote_message("4e3fe8bd-9bcf-4315-bd7b-37440a81d323")]
-impl Message<ExecuteTaskRequest> for TaskManagerActor {
-    type Reply = ExecuteTask;
-
-    async fn handle(
-        &mut self,
-        _msg: ExecuteTaskRequest,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        ExecuteTask {
-            binary: self.binary.clone(),
-            input: vec![],
-        }
-    }
-}
-
-#[remote_message("8557f8c6-b117-4077-95d8-3ce979ba1b4e")]
-impl Message<SegmentReady> for TaskManagerActor {
+impl Message<ProofRequest> for TaskManagerActor {
     type Reply = ();
 
     async fn handle(
         &mut self,
-        SegmentReady(segment): SegmentReady,
-        _ctx: &mut Context<Self, Self::Reply>,
-    ) -> Self::Reply {
-        tracing::info!("Got segment: {}", segment.index);
-        self.segments.push_back(segment);
-    }
-}
-
-#[remote_message("92ede8bb-7428-498f-99ca-805f763bfcab")]
-impl Message<SessionDone> for TaskManagerActor {
-    type Reply = ();
-
-    async fn handle(
-        &mut self,
-        _msg: SessionDone,
+        msg: ProofRequest,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        tracing::info!("Session done");
-        ctx.actor_ref().stop_gracefully().await.unwrap();
+        tracing::info!("ProofRequest");
+
+        let task = SubmitTaskMsg {
+            task_mgr: ctx.actor_ref(),
+            task_id: self.next_task_id(),
+            task_kind: TaskKind::Execute,
+            task: Task::Execute(Arc::new(ExecuteTask {
+                binary: msg.binary,
+                input: msg.input,
+            })),
+        };
+        self.factory.tell(task).await;
     }
 }
 
-#[remote_message("f063c58a-9747-48a9-b05d-1e745be982c6")]
-impl Message<ProveSegmentTaskRequest> for TaskManagerActor {
-    type Reply = DelegatedReply<ProveSegmentTask>;
+impl Message<TaskStatusMsg> for TaskManagerActor {
+    type Reply = ();
 
     async fn handle(
         &mut self,
-        _msg: ProveSegmentTaskRequest,
-        _ctx: &mut Context<Self, Self::Reply>,
+        msg: TaskStatusMsg,
+        ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        // let (delegated_reply, reply_sender) = ctx.reply_sender();
-        // ProveSegmentTask { segment: todo!() }
-        // delegated_reply
-        todo!()
+        tracing::info!("TaskStatusMsg");
+        let task_mgr = ctx.actor_ref();
+        match msg.body {
+            TaskStatus::Segment(segment) => self.prove_segment(task_mgr, segment).await,
+            TaskStatus::Keccak(request) => self.prove_keccak(task_mgr, request).await,
+        }
+    }
+}
+
+impl Message<TaskDoneMsg> for TaskManagerActor {
+    type Reply = ();
+
+    async fn handle(
+        &mut self,
+        msg: TaskDoneMsg,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        tracing::info!("TaskDoneMsg");
+        match msg.body {
+            TaskDone::Session(session) => todo!(),
+            TaskDone::ProveSegment(receipt) => {
+                self.prove_segment_done(ctx.actor_ref(), receipt.as_ref().clone())
+                    .await
+            }
+            TaskDone::ProveKeccak(receipt) => todo!(),
+            TaskDone::Lift(receipt) => todo!(),
+            TaskDone::Join(receipt) => todo!(),
+            TaskDone::Union(receipt) => todo!(),
+            TaskDone::Resolve(receipt) => todo!(),
+        }
     }
 }

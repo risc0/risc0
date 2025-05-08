@@ -1531,6 +1531,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c74b8349d32d297c9134b8c88677813a227df8f779daa29bfc29c183fe3dca6"
 
 [[package]]
+name = "convert_case"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baaaa0ecca5b51987b9423ccdc971514dd8b0bb7b4060b983d3664dad3f1f89f"
+dependencies = [
+ "unicode-segmentation",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1841,7 +1850,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d162beedaa69905488a8da94f5ac3edb4dd4788b732fadb7bd120b2625c1976"
 dependencies = [
  "data-encoding",
- "syn 1.0.109",
+ "syn 2.0.100",
 ]
 
 [[package]]
@@ -5284,6 +5293,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "multi_index_map"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cff801dbc0502b452379c4f91907e857799aa92591f67ce69527e8d986bb756a"
+dependencies = [
+ "multi_index_map_derive",
+ "rustc-hash",
+ "slab",
+]
+
+[[package]]
+name = "multi_index_map_derive"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b4573b2dbd7e64a2da3287e3ef7ff8180752e5e620ab2ba7deee4f19d4fd861"
+dependencies = [
+ "convert_case",
+ "proc-macro-error2",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "multiaddr"
 version = "0.18.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6925,6 +6958,7 @@ dependencies = [
  "bytemuck",
  "clap 4.5.37",
  "kameo",
+ "multi_index_map",
  "risc0-circuit-rv32im",
  "risc0-zkvm",
  "risc0-zkvm-methods",
