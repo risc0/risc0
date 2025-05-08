@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    sync::OnceLock,
+};
 
 use anyhow::{bail, Result};
 use bit_vec::BitVec;
 use derive_more::Debug;
-use lazy_static::lazy_static;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
 
 use super::{node_idx, platform::*};
@@ -215,8 +217,9 @@ fn page_table() {
     }
 }
 
-lazy_static! {
-    static ref ZERO_PAGE: Page = Page::default();
+fn zero_page() -> &'static Page {
+    static ZERO_PAGE: OnceLock<Page> = OnceLock::new();
+    ZERO_PAGE.get_or_init(Page::default)
 }
 
 #[derive(Default, Debug)]
@@ -231,9 +234,9 @@ impl WorkingImage {
         if let Some(page) = self.pages.get(&page_idx) {
             return Ok(page.clone());
         }
-        self.pages.insert(page_idx, ZERO_PAGE.clone());
+        self.pages.insert(page_idx, zero_page().clone());
 
-        Ok(ZERO_PAGE.clone())
+        Ok(zero_page().clone())
     }
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
