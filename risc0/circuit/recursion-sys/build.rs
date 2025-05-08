@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, path::Path};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -22,53 +25,32 @@ fn main() {
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
         build_cuda_kernels();
     }
-
-    if env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios") {
-        build_metal_kernels();
-    }
 }
 
 fn build_cpu_kernels() {
+    rerun_if_changed("kernels/cxx");
     KernelBuild::new(KernelType::Cpp)
-        .files([
-            "cxx/ffi.cpp",
-            "cxx/poly_fp.cpp",
-            "cxx/step_compute_accum.cpp",
-            "cxx/step_exec.cpp",
-            "cxx/step_verify_accum.cpp",
-            "cxx/step_verify_bytes.cpp",
-            "cxx/step_verify_mem.cpp",
-        ])
+        .files(glob_paths("kernels/cxx/*.cpp"))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("risc0_recursion_cpu");
 }
 
 fn build_cuda_kernels() {
+    rerun_if_changed("kernels/cuda");
     KernelBuild::new(KernelType::Cuda)
-        .files([
-            "kernels/cuda/eval_check.cu",
-            "kernels/cuda/ffi.cu",
-            "kernels/cuda/ffi_supra.cu",
-            "kernels/cuda/step_compute_accum.cu",
-            "kernels/cuda/step_verify_accum.cu",
-        ])
+        .files(glob_paths("kernels/cuda/*.cu"))
         .deps(["kernels/cuda"])
+        .flag("-DFEATURE_BABY_BEAR")
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
+        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_recursion_cuda");
 }
 
-fn build_metal_kernels() {
-    const SRCS: &[&str] = &[
-        "eval_check.metal",
-        "step_compute_accum.metal",
-        "step_verify_accum.metal",
-    ];
+fn rerun_if_changed<P: AsRef<Path>>(path: P) {
+    println!("cargo:rerun-if-changed={}", path.as_ref().display());
+}
 
-    let dir = Path::new("kernels").join("metal");
-    let src_paths = SRCS.iter().map(|x| dir.join(x));
-
-    KernelBuild::new(KernelType::Metal)
-        .files(src_paths)
-        .compile("metal_kernel");
+fn glob_paths(pattern: &str) -> Vec<PathBuf> {
+    glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
 }

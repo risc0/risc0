@@ -14,7 +14,7 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
 
-use anyhow::Context as _;
+use anyhow::{bail, Context as _, Result};
 use cust::{
     device::DeviceAttribute,
     memory::{DeviceCopy, DevicePointer, GpuBuffer},
@@ -61,7 +61,9 @@ unsafe impl DeviceCopy for DeviceExtElem {}
 
 pub trait CudaHash {
     /// Create a hash implementation
-    fn new() -> Self;
+    fn new() -> Self
+    where
+        Self: Sized;
 
     /// Run the hash_fold function
     fn hash_fold(&self, io: &BufferImpl<Digest>, output_size: usize);
@@ -219,7 +221,7 @@ impl CudaHash for CudaHashPoseidon254 {
     }
 }
 
-pub struct CudaHal<Hash: CudaHash> {
+pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     hash: Option<Box<Hash>>,
     _context: Context,
@@ -384,8 +386,15 @@ impl<CH: CudaHash> Default for CudaHal<CH> {
     }
 }
 
-impl<CH: CudaHash> CudaHal<CH> {
-    pub fn new() -> Self {
+impl<CH: CudaHash + ?Sized> CudaHal<CH> {
+    pub fn new() -> Self
+    where
+        CH: Sized,
+    {
+        Self::new_from_hash(Box::new(CH::new()))
+    }
+
+    fn new_from_hash(hash: Box<CH>) -> Self {
         let _lock = singleton().lock();
 
         let err = unsafe { sppark_init() };
@@ -407,7 +416,6 @@ impl<CH: CudaHash> CudaHal<CH> {
             hash: None,
             _lock,
         };
-        let hash = Box::new(CH::new());
         hal.hash = Some(hash);
         hal
     }
@@ -438,7 +446,19 @@ impl<CH: CudaHash> CudaHal<CH> {
     }
 }
 
-impl<CH: CudaHash> Hal for CudaHal<CH> {
+impl CudaHal<dyn CudaHash> {
+    pub fn new_from_hash_suite(hash_suite: HashSuite<BabyBear>) -> Result<Self> {
+        let hash_suite_box = match &hash_suite.name[..] {
+            "poseidon2" => Box::new(CudaHashPoseidon2::new()) as Box<dyn CudaHash>,
+            "poseidon254" => Box::new(CudaHashPoseidon254::new()) as Box<dyn CudaHash>,
+            "sha-256" => Box::new(CudaHashSha256::new()) as Box<dyn CudaHash>,
+            other => bail!("unsupported hash_fn {other}"),
+        };
+        Ok(Self::new_from_hash(hash_suite_box))
+    }
+}
+
+impl<CH: CudaHash + ?Sized> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;

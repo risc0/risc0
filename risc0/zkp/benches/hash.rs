@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::core::hash::poseidon2::{poseidon2_mix, CELLS as POSEIDON2_CELLS};
 
 fn benchmark_poseidon2_mix(c: &mut Criterion) {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut cells = [BabyBearElem::random(&mut rng); POSEIDON2_CELLS];
     c.bench_function("poseidon2_mix", |b| b.iter(|| poseidon2_mix(&mut cells)));
 }

@@ -131,10 +131,10 @@ fn sha256_hashfn_fails() {
         .unwrap()
         .prove(env, MULTI_TEST_ELF)
         .unwrap();
-    let InnerReceipt::Composite(composite_recipt) = &mut info.receipt.inner else {
+    let InnerReceipt::Composite(composite_receipt) = &mut info.receipt.inner else {
         panic!("unexpected receipt type");
     };
-    for seg in &mut composite_recipt.segments {
+    for seg in &mut composite_receipt.segments {
         seg.hashfn = "sha-256".into();
     }
 
@@ -217,7 +217,7 @@ fn sha_iter() {
 
 #[test_log::test]
 fn bigint_accel() {
-    let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    let cases = testutils::generate_bigint_test_cases(10);
     for case in cases {
         println!("Running BigInt circuit test case: {:08x?}", case);
         let input = MultiTestSpec::BigInt {

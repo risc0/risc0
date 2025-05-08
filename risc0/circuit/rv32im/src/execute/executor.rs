@@ -16,6 +16,7 @@ use std::{cell::RefCell, collections::BTreeSet, rc::Rc};
 
 use anyhow::{bail, Result};
 use enum_map::EnumMap;
+use ringbuffer::{AllocRingBuffer, RingBuffer};
 use risc0_binfmt::{ByteAddr, MemoryImage, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
@@ -23,6 +24,7 @@ use risc0_zkp::core::{
 };
 
 use crate::{
+    execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
     Rv32imV2Claim, TerminateState,
 };
@@ -33,7 +35,7 @@ use super::{
     platform::*,
     poseidon2::Poseidon2State,
     r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-    rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
+    rv32im::{DecodedInstruction, Emulator, InsnKind},
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
@@ -65,6 +67,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
     ecall_metrics: EcallMetrics,
+    ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
 }
 
 #[non_exhaustive]
@@ -92,6 +95,12 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
+pub enum CycleLimit {
+    Hard(u64), // it is an error to exceed this limit
+    Soft(u64), // stop execution after this cycle count
+    None,
+}
+
 struct ComputePartialImageRequest {
     image: MemoryImage,
     page_indexes: BTreeSet<u32>,
@@ -112,6 +121,27 @@ struct ComputePartialImageRequest {
 
 /// Maximum number of segments we can queue up before we block execution
 const MAX_OUTSTANDING_SEGMENTS: usize = 5;
+
+#[inline]
+#[cold]
+fn cold() {}
+
+#[inline]
+#[allow(dead_code)]
+fn likely(b: bool) -> bool {
+    if !b {
+        cold()
+    }
+    b
+}
+
+#[inline]
+fn unlikely(b: bool) -> bool {
+    if b {
+        cold()
+    }
+    b
+}
 
 fn compute_partial_images(
     recv: std::sync::mpsc::Receiver<ComputePartialImageRequest>,
@@ -153,7 +183,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
-            pager: PagedMemory::new(image, !trace.is_empty() /* tracing_enabled */),
+            pager: PagedMemory::new(image, /*tracing_enabled=*/ !trace.is_empty()),
             terminate_state: None,
             read_record: Vec::new(),
             write_record: Vec::new(),
@@ -163,6 +193,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             trace,
             cycles: SessionCycles::default(),
             ecall_metrics: EcallMetrics::default(),
+            ring: AllocRingBuffer::new(10),
         }
     }
 
@@ -170,7 +201,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         &mut self,
         segment_po2: usize,
         max_insn_cycles: usize,
-        max_cycles: Option<u64>,
+        max_cycles: CycleLimit,
         callback: impl FnMut(Segment) -> Result<()> + Send,
     ) -> Result<ExecutorResult> {
         let segment_limit: u32 = 1 << segment_po2;
@@ -193,13 +224,21 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 scope.spawn(move || compute_partial_images(commit_recv, callback));
 
             while self.terminate_state.is_none() {
-                if let Some(max_cycles) = max_cycles {
-                    if self.cycles.user >= max_cycles {
-                        bail!(
-                            "Session limit exceeded: {} >= {max_cycles}",
-                            self.cycles.user
-                        );
+                match max_cycles {
+                    CycleLimit::Hard(max_cycles) => {
+                        if self.cycles.user >= max_cycles {
+                            bail!(
+                                "Session limit exceeded: {} >= {max_cycles}",
+                                self.cycles.user
+                            );
+                        }
                     }
+                    CycleLimit::Soft(max_cycles) => {
+                        if self.cycles.user >= max_cycles {
+                            break;
+                        }
+                    }
+                    CycleLimit::None => {}
                 }
 
                 if self.segment_cycles() > segment_threshold {
@@ -253,6 +292,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 }
 
                 Risc0Machine::step(&mut emu, self).map_err(|err| {
+                    self.dump();
                     let result = self.dump_segment(segment_po2, segment_threshold, segment_counter);
                     if let Err(inner) = result {
                         err.context(inner)
@@ -266,7 +306,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
             let final_cycles = self.segment_cycles().next_power_of_two();
             let final_po2 = log2_ceil(final_cycles as usize);
-            let segment_threshold = (1 << final_po2) - max_insn_cycles as u32;
             let (pre_image, pre_digest, post_digest) = self.pager.commit();
             let req = ComputePartialImageRequest {
                 image: pre_image,
@@ -278,7 +317,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 user_cycles: self.user_cycles,
                 pager_cycles: self.pager.cycles,
                 terminate_state: self.terminate_state,
-                segment_threshold,
+                segment_threshold: 0, // meaningless for final segment
                 pre_digest,
                 post_digest,
                 po2: final_po2 as u32,
@@ -320,6 +359,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             reserved_cycles: self.cycles.reserved,
             claim: session_claim,
         })
+    }
+
+    fn dump(&self) {
+        tracing::debug!("Dumping last {} instructions:", self.ring.len());
+        for (pc, kind, decoded) in self.ring.iter() {
+            tracing::debug!("{pc:?}> {:#010x}  {}", decoded.insn, disasm(*kind, decoded));
+        }
     }
 
     fn dump_segment(
@@ -415,16 +461,20 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
-    #[cold]
-    fn trace_instruction(&self, cycle: u64, insn: &Instruction, decoded: &DecodedInstruction) {
-        tracing::trace!(
-            "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
-            self.user_cycles + 1,
-            self.segment_cycles() + 1,
-            self.pc,
-            decoded.insn,
-            disasm(insn, decoded)
-        );
+    fn trace_instruction(&mut self, cycle: u64, kind: InsnKind, decoded: &DecodedInstruction) {
+        if unlikely(tracing::enabled!(tracing::Level::TRACE)) {
+            tracing::trace!(
+                "[{}:{}:{cycle}] {:?}> {:#010x}  {}",
+                self.user_cycles + 1,
+                self.segment_cycles() + 1,
+                self.pc,
+                decoded.insn,
+                super::rv32im::disasm(kind, decoded)
+            );
+        }
+        if unlikely(tracing::enabled!(tracing::Level::DEBUG)) {
+            self.ring.push((self.pc, kind, decoded.clone()));
+        }
     }
 }
 
@@ -457,23 +507,20 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         Ok(())
     }
 
-    fn on_insn_start(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
+    fn on_insn_start(&mut self, kind: InsnKind, decoded: &DecodedInstruction) -> Result<()> {
         let cycle = self.cycles.user;
-        if tracing::enabled!(tracing::Level::TRACE) {
-            self.trace_instruction(cycle, insn, decoded);
-        }
+        self.trace_instruction(cycle, kind, decoded);
         if !self.trace.is_empty() {
             self.trace(TraceEvent::InstructionStart {
                 cycle,
                 pc: self.pc.0,
                 insn: decoded.insn,
-            })
-        } else {
-            Ok(())
+            })?;
         }
+        Ok(())
     }
 
-    fn on_insn_end(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
+    fn on_insn_end(&mut self, _kind: InsnKind) -> Result<()> {
         self.inc_user_cycles(1, None);
         if !self.trace.is_empty() {
             self.trace_pager()?;

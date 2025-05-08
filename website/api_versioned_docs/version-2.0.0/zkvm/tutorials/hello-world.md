@@ -17,7 +17,7 @@ Once installed, clone the `risc0` monorepo and change into the `hello-world` exa
 
 ```sh
 git clone https://github.com/risc0/risc0
-cd examples/hello-world
+cd risc0/examples/hello-world
 ```
 
 Next, check the version of `cargo risczero` installed:
