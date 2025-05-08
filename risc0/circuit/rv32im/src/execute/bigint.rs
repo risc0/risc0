@@ -106,7 +106,14 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
 
         let mut witness = vec![0u8; count as usize];
         let bytes = bigint_to_bytes_le(value);
+        ensure!(
+            witness.len() >= bytes.len(),
+            "count ({} bytes) too small for value ({} bytes)",
+            witness.len(),
+            bytes.len()
+        );
         witness[..bytes.len()].copy_from_slice(&bytes);
+
         let chunks = witness.chunks_exact(BIGINT_WIDTH_BYTES);
         assert_eq!(chunks.len(), count as usize / BIGINT_WIDTH_BYTES);
         for (i, chunk) in chunks.enumerate() {
@@ -126,15 +133,21 @@ pub(crate) struct BigIntExec {
     pub(crate) witness: BigIntWitness,
 }
 
-pub fn ecall_execute(ctx: &mut impl Risc0Context) -> Result<usize> {
-    let exec = ecall(ctx)?;
-    let cycles = exec.verify_program_size + 1;
-    for (addr, bytes) in exec.witness {
+fn write_witness_to_memory(witness: BigIntWitness, ctx: &mut impl Risc0Context) -> Result<()> {
+    for (addr, bytes) in witness {
         for (i, chunk) in bytes.chunks_exact(WORD_SIZE).enumerate() {
             let word = u32::from_le_bytes(chunk.try_into().unwrap());
             ctx.store_u32(addr + i, word)?;
         }
     }
+    Ok(())
+}
+
+pub fn ecall_execute(ctx: &mut impl Risc0Context) -> Result<usize> {
+    let exec = ecall(ctx)?;
+    let cycles = exec.verify_program_size + 1;
+    write_witness_to_memory(exec.witness, ctx)?;
+
     Ok(cycles)
 }
 
@@ -192,4 +205,181 @@ pub(crate) fn ecall(ctx: &mut impl Risc0Context) -> Result<BigIntExec> {
         verify_program_size,
         witness,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::execute::r0vm::TestRisc0Context;
+    use risc0_binfmt::ByteAddr;
+
+    fn bigint_write(value: Vec<u32>, count: u32, expected: Vec<u8>) -> Result<()> {
+        let mut test_context = TestRisc0Context::default();
+        let arena = REG_A0;
+        let base_addr = ByteAddr(0x1234);
+        test_context
+            .store_register(MACHINE_REGS_ADDR.waddr(), arena, base_addr.0)
+            .unwrap();
+        let mut io = BigIntIOImpl::new(&mut test_context, /*mod=*/ 0);
+
+        let natural_in = Natural::from_limbs_asc(&value);
+        io.store(arena as u32, 0, count, &natural_in)?;
+
+        write_witness_to_memory(io.witness, &mut test_context).unwrap();
+
+        let actual = test_context
+            .load_region(LoadOp::Load, base_addr, expected.len())
+            .unwrap();
+
+        // Make sure we didn't write past the end of where we are checking
+        test_context.assert_uninit(base_addr + expected.len());
+
+        assert_eq!(actual, expected);
+        Ok(())
+    }
+
+    fn bigint_read(input: Vec<u8>, count: u32, expected: Vec<u32>) -> Result<()> {
+        let mut test_context = TestRisc0Context::default();
+        let arena = REG_A0;
+        let base_addr = ByteAddr(0x1234);
+        test_context
+            .store_register(MACHINE_REGS_ADDR.waddr(), arena, base_addr.0)
+            .unwrap();
+
+        test_context.store_region(base_addr, &input)?;
+
+        let mut io = BigIntIOImpl::new(&mut test_context, /*mod=*/ 0);
+        let natural_out = io.load(arena as u32, 0, count).unwrap();
+        assert_eq!(natural_out.to_limbs_asc(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn bigint_write_basic_case() {
+        bigint_write(
+            vec![0x1000001, 0x1000002, 0x1000003, 0x1000004],
+            16,
+            vec![
+                0x1, 0x0, 0x0, 0x1, // u32
+                0x2, 0x0, 0x0, 0x1, // u32
+                0x3, 0x0, 0x0, 0x1, // u32
+                0x4, 0x0, 0x0, 0x1, // u32
+            ],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_bigint_unaligned_count_larger_writes_only_smaller_length() {
+        bigint_write(
+            vec![0x1, 0x2, 0x3, 0x4],
+            20,
+            vec![
+                0x1, 0x0, 0x0, 0x0, // u32
+                0x2, 0x0, 0x0, 0x0, // u32
+                0x3, 0x0, 0x0, 0x0, // u32
+                0x4, 0x0, 0x0, 0x0, // u32
+            ],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_bigint_aligned_count_larger_pads() {
+        bigint_write(
+            vec![0x1, 0x2, 0x3, 0x4],
+            16 * 2,
+            vec![
+                0x1, 0x0, 0x0, 0x0, // u32
+                0x2, 0x0, 0x0, 0x0, // u32
+                0x3, 0x0, 0x0, 0x0, // u32
+                0x4, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+            ],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_small_unaligned_value() {
+        bigint_write(
+            vec![0x1],
+            16 * 2,
+            vec![
+                0x1, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+            ],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_unaligned_larger_value() {
+        bigint_write(
+            vec![0x1, 0x2, 0x3, 0x4, 0x5, 0x6],
+            16 * 2,
+            vec![
+                0x1, 0x0, 0x0, 0x0, // u32
+                0x2, 0x0, 0x0, 0x0, // u32
+                0x3, 0x0, 0x0, 0x0, // u32
+                0x4, 0x0, 0x0, 0x0, // u32
+                0x5, 0x0, 0x0, 0x0, // u32
+                0x6, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+                0x0, 0x0, 0x0, 0x0, // u32
+            ],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_write_count_too_small_errors() {
+        assert_eq!(
+            bigint_write(vec![0x1, 0x2, 0x3, 0x4], 14, vec![])
+                .unwrap_err()
+                .to_string(),
+            "count (14 bytes) too small for value (16 bytes)"
+        );
+    }
+
+    #[test]
+    fn bigint_read_basic_case() {
+        bigint_read(
+            vec![
+                0x1, 0x0, 0x0, 0x1, // u32
+                0x2, 0x0, 0x0, 0x1, // u32
+                0x3, 0x0, 0x0, 0x1, // u32
+                0x4, 0x0, 0x0, 0x1, // u32
+            ],
+            16,
+            vec![0x1000001, 0x1000002, 0x1000003, 0x1000004],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn bigint_read_unaligned() {
+        for (count, last) in [(13, 0x4), (14, 0x304), (15, 0x20304)] {
+            bigint_read(
+                vec![
+                    0x1, 0x0, 0x0, 0x1, // u32
+                    0x2, 0x0, 0x0, 0x1, // u32
+                    0x3, 0x0, 0x0, 0x1, // u32
+                    0x4, 0x3, 0x2, 0x1, // u32
+                ],
+                count,
+                vec![0x1000001, 0x1000002, 0x1000003, last],
+            )
+            .unwrap();
+        }
+    }
 }

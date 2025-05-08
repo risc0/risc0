@@ -163,6 +163,135 @@ pub(crate) trait Risc0Context {
     fn ecall_bigint(&mut self) -> Result<()>;
 }
 
+#[cfg(test)]
+pub struct TestRisc0Context {
+    pc: ByteAddr,
+    user_pc: ByteAddr,
+    machine_mode: u32,
+    memory: std::collections::BTreeMap<WordAddr, u32>,
+}
+
+#[cfg(test)]
+impl Default for TestRisc0Context {
+    fn default() -> Self {
+        Self {
+            pc: ByteAddr(0),
+            user_pc: ByteAddr(0),
+            machine_mode: 0,
+            memory: Default::default(),
+        }
+    }
+}
+
+#[cfg(test)]
+impl TestRisc0Context {
+    pub fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
+        for (i, byte) in input.iter().enumerate() {
+            self.store_u8(addr + i, *byte)?;
+        }
+        Ok(())
+    }
+
+    pub fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+        let byte_offset = addr.subaddr() as usize;
+        let word = self.memory.get(&addr.waddr()).copied().unwrap_or(0);
+        let mut bytes = word.to_le_bytes();
+        bytes[byte_offset] = byte;
+        let word = u32::from_le_bytes(bytes);
+        self.store_u32(addr.waddr(), word)
+    }
+
+    pub fn assert_uninit(&self, addr: ByteAddr) {
+        assert_eq!(self.memory.get(&addr.waddr()), None);
+    }
+}
+
+#[cfg(test)]
+impl Risc0Context for TestRisc0Context {
+    fn get_pc(&self) -> ByteAddr {
+        self.pc
+    }
+
+    fn set_pc(&mut self, addr: ByteAddr) {
+        self.pc = addr;
+    }
+
+    fn set_user_pc(&mut self, addr: ByteAddr) {
+        self.user_pc = addr;
+    }
+
+    fn get_machine_mode(&self) -> u32 {
+        self.machine_mode
+    }
+
+    fn set_machine_mode(&mut self, mode: u32) {
+        self.machine_mode = mode;
+    }
+
+    fn on_insn_start(
+        &mut self,
+        _kind: InsnKind,
+        _decoded: &super::rv32im::DecodedInstruction,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    fn on_insn_end(&mut self, _kind: InsnKind) -> Result<()> {
+        Ok(())
+    }
+
+    fn load_u32(&mut self, _op: LoadOp, addr: WordAddr) -> Result<u32> {
+        Ok(self.memory.get(&addr).copied().unwrap_or_else(|| {
+            panic!(
+                "load_u32 of address 0x{:x} which has not been written to",
+                addr.0
+            )
+        }))
+    }
+
+    fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
+        self.memory.insert(addr, word);
+        Ok(())
+    }
+
+    fn host_read(&mut self, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
+        unimplemented!()
+    }
+
+    fn host_write(&mut self, _fd: u32, _buf: &[u8]) -> Result<u32> {
+        unimplemented!()
+    }
+
+    fn on_terminate(&mut self, _a0: u32, _a1: u32) -> Result<()> {
+        Ok(())
+    }
+
+    fn on_ecall_cycle(
+        &mut self,
+        _cur: CycleState,
+        _next: CycleState,
+        _s0: u32,
+        _s1: u32,
+        _s2: u32,
+        _kind: super::r0vm::EcallKind,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    fn on_sha2_cycle(&mut self, _cur_state: CycleState, _sha2: &super::sha2::Sha2State) {}
+
+    fn on_poseidon2_cycle(
+        &mut self,
+        _cur_state: CycleState,
+        _p2: &super::poseidon2::Poseidon2State,
+    ) {
+    }
+
+    fn ecall_bigint(&mut self) -> Result<()> {
+        unimplemented!()
+    }
+}
+
 fn check_aligned_addr(addr: ByteAddr) -> Result<WordAddr> {
     addr.waddr_aligned()
         .ok_or_else(|| anyhow!("{addr:?} is an unaligned address"))
