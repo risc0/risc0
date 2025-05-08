@@ -222,6 +222,15 @@ impl MemoryImage {
         self.mark_dirty(digest_idx);
     }
 
+    /// Set the data for a page and with the given digest
+    pub fn set_page_with_digest(&mut self, page_idx: u32, page: Page, digest: Digest) {
+        let digest_idx = MEMORY_PAGES as u32 + page_idx;
+        self.expand_if_zero(digest_idx);
+        self.digests.insert(digest_idx, digest);
+        self.pages.insert(page_idx, page);
+        self.mark_dirty(digest_idx);
+    }
+
     /// Get a digest, fails if unavailable
     pub fn get_digest(&mut self, digest_idx: u32) -> Result<&Digest> {
         // Expand if needed

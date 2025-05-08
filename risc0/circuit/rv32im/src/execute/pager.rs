@@ -569,26 +569,19 @@ pub(crate) fn compute_partial_image(
 ) -> MemoryImage {
     let mut image = MemoryImage::default();
 
-    for node_idx in &indexes {
-        if *node_idx < MEMORY_PAGES as u32 {
-            continue;
-        }
-
-        let page_idx = page_idx(*node_idx);
+    for &node_idx in indexes.range((MEMORY_PAGES as u32)..) {
+        let page_idx = page_idx(node_idx);
 
         // Copy original state of all pages accessed in this segment.
-        image.set_page(page_idx, input_image.get_page(page_idx).unwrap());
+        let page = input_image.get_page(page_idx).unwrap();
+        let page_digest = *input_image.get_digest(node_idx).unwrap();
+        image.set_page_with_digest(page_idx, page, page_digest);
     }
 
     // Add minimal needed 'uncles'
-    for node_idx in &indexes {
-        // If this is a leaf, break
-        if *node_idx >= MEMORY_PAGES as u32 {
-            break;
-        }
-
-        let lhs_idx = *node_idx * 2;
-        let rhs_idx = *node_idx * 2 + 1;
+    for &node_idx in indexes.range(..(MEMORY_PAGES as u32)) {
+        let lhs_idx = node_idx * 2;
+        let rhs_idx = node_idx * 2 + 1;
 
         // Otherwise, add whichever child digest (if any) is not loaded
         if !indexes.contains(&lhs_idx) {
