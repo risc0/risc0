@@ -431,7 +431,7 @@ where
     /// RISC0_DEV_MODE environment variable is not set) this will always reject. When in dev mode,
     /// this will always pass.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
-        #[cfg(all(feature = "std", not(target_os = "zkvm")))]
+        #[cfg(feature = "std")]
         if crate::is_dev_mode() {
             return Ok(());
         }
