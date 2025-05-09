@@ -912,7 +912,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.4.1"
+version = "1.4.1-rc.1"
 dependencies = [
  "anyhow",
  "bincode",
@@ -5614,7 +5614,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.1"
+version = "2.0.1-rc.1"
 dependencies = [
  "cc",
  "directories",
@@ -5825,7 +5825,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-tools"
-version = "2.0.0"
+version = "3.0.0-rc.1"
 dependencies = [
  "assert_cmd",
  "clap 4.5.37",

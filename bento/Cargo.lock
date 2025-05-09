@@ -928,7 +928,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.4.1"
+version = "1.4.1-rc.1"
 dependencies = [
  "duplicate",
  "maybe-async",
@@ -3889,7 +3889,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "2.0.1"
+version = "2.0.1-rc.1"
 dependencies = [
  "cc",
  "directories",
