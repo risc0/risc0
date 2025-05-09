@@ -1,6 +1,6 @@
 # Where's Waldo
 
-_**Check out our [blogpost](https://www.risczero.com/news/waldo) about this example!**_
+_**Check out our [blogpost](https://risczero.com/news/waldo) about this example!**_
 
 [Where's Waldo] is a [favorite analogy] for zero-knowledge proofs. In
 particular, there is this visual that if you take a Where's Waldo image and
