@@ -73,7 +73,7 @@ impl Poseidon2State {
 
     fn step(
         &mut self,
-        ctx: &mut dyn Risc0Context,
+        ctx: &mut impl Risc0Context,
         cur_state: &mut CycleState,
         next_state: CycleState,
         sub_state: u32,
@@ -86,7 +86,7 @@ impl Poseidon2State {
 
     pub(crate) fn rest(
         &mut self,
-        ctx: &mut dyn Risc0Context,
+        ctx: &mut impl Risc0Context,
         final_state: CycleState,
     ) -> Result<()> {
         let mut cur_state = self.next_state;
@@ -282,7 +282,7 @@ fn sbox2(x: u32) -> u32 {
 pub(crate) struct Poseidon2;
 
 impl Poseidon2 {
-    pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
+    pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
         tracing::trace!("ecall");
         let state_addr = ctx.load_machine_register(LoadOp::Record, REG_A0)?;
         let buf_in_addr = ctx.load_machine_register(LoadOp::Record, REG_A1)?;
