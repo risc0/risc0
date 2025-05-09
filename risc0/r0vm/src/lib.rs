@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, io, path::PathBuf, rc::Rc};
+mod actors;
+
+use std::{error::Error as StdError, fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
@@ -72,6 +74,10 @@ struct Cli {
     /// Compute the image_id for the specified ELF
     #[arg(long)]
     id: bool,
+
+    /// The address to connect to or listen on.
+    #[arg(long)]
+    addr: Option<SocketAddr>,
 }
 
 #[derive(Args)]
@@ -90,6 +96,12 @@ struct Mode {
 
     #[arg(long)]
     segment: Option<PathBuf>,
+
+    #[arg(long)]
+    manager: Option<PathBuf>,
+
+    #[arg(long)]
+    worker: bool,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -110,7 +122,7 @@ enum ReceiptKind {
     Groth16,
 }
 
-pub fn main() {
+pub async fn main() -> Result<(), Box<dyn StdError>> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
@@ -121,19 +133,27 @@ pub fn main() {
         let blob = fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
         println!("{image_id}");
-        return;
+        return Ok(());
     }
 
     if let Some(port) = args.mode.port {
         run_server(port);
-        return;
+        return Ok(());
     }
 
     if let Some(path) = args.mode.segment {
         let bytes = std::fs::read(path).unwrap();
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
-        return;
+        return Ok(());
+    }
+
+    if let Some(ref path) = args.mode.manager {
+        return self::actors::manager::main(&args, path).await;
+    }
+
+    if args.mode.worker {
+        return self::actors::worker::main(args).await;
     }
 
     let env = {
@@ -189,6 +209,8 @@ pub fn main() {
             );
         }
     }
+
+    Ok(())
 }
 
 impl Cli {
