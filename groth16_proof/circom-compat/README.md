@@ -6,7 +6,7 @@ Gnark bindings to Circom's R1CS, WTNS, and ZKEY for Groth16 proof generation in 
 
 - Go 1.22 or newer
 - Circom circuit files:
-   - [stark_verify.r1cs](http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify.r1cs)
+   - [stark_verify.r1cs](https://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify.r1cs)
    - [stark_verify_final.zkey](https://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify_final.zkey)
 - Witness file
 - (Small examples provided under [test/data](test/data))
