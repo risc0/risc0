@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-risc0-build = "1.0.5"
+risc0-build = "3.0.0"
 # Use this only for testing locally before a release.
 # risc0-build = { path = "../../../risc0/build" }
 
