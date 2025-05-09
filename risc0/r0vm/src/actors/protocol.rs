@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Arc;
+use std::{ops::Range, sync::Arc};
 
 use kameo::{
     actor::{ActorID, ActorRef},
@@ -72,6 +72,12 @@ pub(crate) struct ProveKeccakTask {
     pub request: ProveKeccakRequest,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub(crate) struct SegmentRange {
+    pub start: usize,
+    pub end: usize,
+}
+
 #[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct LiftTask {
     pub receipt: SegmentReceipt,
@@ -79,6 +85,7 @@ pub(crate) struct LiftTask {
 
 #[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct JoinTask {
+    pub range: SegmentRange,
     pub receipts: Vec<SuccinctReceipt<ReceiptClaim>>,
 }
 
@@ -134,20 +141,16 @@ pub mod factory {
         Session(Arc<Session>),
         ProveSegment(Arc<SegmentReceipt>),
         ProveKeccak(Arc<SuccinctReceipt<Unknown>>),
-        Lift(Arc<SuccinctReceipt<ReceiptClaim>>),
-        Join(Arc<SuccinctReceipt<ReceiptClaim>>),
+        Lift(Arc<JoinNode>),
+        Join(Arc<JoinNode>),
         Union(Arc<SuccinctReceipt<UnionClaim>>),
         Resolve(Arc<SuccinctReceipt<ReceiptClaim>>),
     }
 
     #[derive(Serialize, Deserialize)]
-    pub(crate) struct SegmentReady {
-        pub segment: Segment,
-    }
-
-    #[derive(Serialize, Deserialize)]
-    pub(crate) struct SessionDone {
-        pub session: Session,
+    pub(crate) struct JoinNode {
+        pub range: SegmentRange,
+        pub receipt: SuccinctReceipt<ReceiptClaim>,
     }
 
     #[derive(Serialize, Deserialize)]
@@ -168,5 +171,23 @@ pub mod worker {
         pub task_id: TaskId,
         pub task_kind: TaskKind,
         pub task: Task,
+    }
+}
+
+impl From<Range<usize>> for SegmentRange {
+    fn from(value: Range<usize>) -> Self {
+        Self {
+            start: value.start,
+            end: value.end,
+        }
+    }
+}
+
+impl From<Range<u32>> for SegmentRange {
+    fn from(value: Range<u32>) -> Self {
+        Self {
+            start: value.start as usize,
+            end: value.end as usize,
+        }
     }
 }

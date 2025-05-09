@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(unused)]
-
 use std::{
-    collections::{BTreeMap, HashMap, VecDeque},
+    collections::{HashMap, VecDeque},
     ops::ControlFlow,
 };
 
@@ -66,15 +64,15 @@ impl FactoryActor {
 impl Actor for FactoryActor {
     type Error = Infallible;
 
-    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
         // start timer
         Ok(())
     }
 
     async fn on_stop(
         &mut self,
-        actor_ref: WeakActorRef<Self>,
-        reason: ActorStopReason,
+        _actor_ref: WeakActorRef<Self>,
+        _reason: ActorStopReason,
     ) -> Result<(), Self::Error> {
         // stop timer
         Ok(())
@@ -82,9 +80,9 @@ impl Actor for FactoryActor {
 
     async fn on_link_died(
         &mut self,
-        actor_ref: WeakActorRef<Self>,
+        _actor_ref: WeakActorRef<Self>,
         id: ActorID,
-        reason: ActorStopReason,
+        _reason: ActorStopReason,
     ) -> Result<ControlFlow<ActorStopReason>, Self::Error> {
         self.workers.remove_by_actor_id(&id);
         Ok(ControlFlow::Continue(()))
@@ -94,11 +92,11 @@ impl Actor for FactoryActor {
 impl Message<TaskMsg> for FactoryActor {
     type Reply = ();
 
-    async fn handle(&mut self, msg: TaskMsg, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
+    async fn handle(&mut self, msg: TaskMsg, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
         let workers = self.workers.get_by_task_kind(&msg.task_kind);
         if let Some(worker) = workers.first() {
             self.active_tasks.insert(msg.task_id, msg.clone());
-            worker.actor_ref.tell(msg).await;
+            worker.actor_ref.tell(msg).await.unwrap();
         } else {
             self.pending_tasks(msg.task_kind).push_back(msg);
         }
@@ -111,7 +109,7 @@ impl Message<SubmitTaskMsg> for FactoryActor {
     async fn handle(
         &mut self,
         msg: SubmitTaskMsg,
-        ctx: &mut Context<Self, Self::Reply>,
+        _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         let job_id = msg.task_mgr.id();
         self.task_mgrs.insert(job_id, msg.task_mgr);
@@ -125,7 +123,7 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         let workers = self.workers.get_by_task_kind(&msg.task_kind);
         if let Some(worker) = workers.first() {
             self.active_tasks.insert(task.task_id, task.clone());
-            worker.actor_ref.tell(task).await;
+            worker.actor_ref.tell(task).await.unwrap();
         } else {
             self.pending_tasks(task.task_kind).push_back(task);
         }
@@ -151,8 +149,8 @@ impl Message<GetTask> for FactoryActor {
         let (delegated_reply, reply_sender) = ctx.reply_sender();
         let worker_ref = spawn_link(&ctx.actor_ref(), WorkerProxyActor { reply_sender }).await;
 
+        tracing::info!("new worker: {:?}", msg.kinds);
         for task_kind in msg.kinds {
-            tracing::info!("new worker: {task_kind:?}");
             let worker = Worker {
                 task_kind,
                 actor_id: worker_ref.id(),
@@ -205,6 +203,6 @@ impl Message<TaskMsg> for WorkerProxyActor {
 
     async fn handle(&mut self, msg: TaskMsg, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
         self.reply_sender.take().unwrap().send(msg);
-        ctx.actor_ref().stop_gracefully().await;
+        ctx.actor_ref().stop_gracefully().await.unwrap();
     }
 }

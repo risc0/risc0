@@ -6966,6 +6966,7 @@ dependencies = [
  "temp-env",
  "test-log",
  "tokio",
+ "tokio-util",
  "tracing",
  "tracing-subscriber 0.3.19",
 ]
