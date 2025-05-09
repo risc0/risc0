@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeSet;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    sync::OnceLock,
+};
 
 use anyhow::{bail, Result};
 use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
-use risc0_zkp::core::digest::Digest;
 
 use super::{node_idx, platform::*};
 
@@ -214,9 +216,40 @@ fn page_table() {
     }
 }
 
+fn zero_page() -> &'static Page {
+    static ZERO_PAGE: OnceLock<Page> = OnceLock::new();
+    ZERO_PAGE.get_or_init(Page::default)
+}
+
+#[derive(Default, Debug)]
+pub(crate) struct WorkingImage {
+    #[debug(skip)]
+    pub(crate) pages: BTreeMap<u32, Page>,
+}
+
+impl WorkingImage {
+    fn get_page(&mut self, page_idx: u32) -> Result<Page> {
+        // If page exists, return it
+        if let Some(page) = self.pages.get(&page_idx) {
+            return Ok(page.clone());
+        }
+        self.pages.insert(page_idx, zero_page().clone());
+
+        Ok(zero_page().clone())
+    }
+
+    fn set_page(&mut self, page_idx: u32, page: Page) {
+        self.pages.insert(page_idx, page);
+    }
+
+    pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
+        self.pages.keys().copied().collect()
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct PagedMemory {
-    pub image: MemoryImage,
+    pub(crate) image: WorkingImage,
     #[debug(skip)]
     page_table: PageTable,
     #[debug(skip)]
@@ -241,7 +274,9 @@ impl PagedMemory {
         }
 
         Self {
-            image,
+            image: WorkingImage {
+                pages: image.into_pages(),
+            },
             page_table: PageTable::new(),
             page_cache: Vec::new(),
             page_states: PageStates::new(NUM_PAGE_STATES),
@@ -419,13 +454,12 @@ impl PagedMemory {
         }
     }
 
-    pub(crate) fn commit(&mut self) -> (MemoryImage, Digest, Digest) {
+    pub(crate) fn commit(&mut self) -> WorkingImage {
         // tracing::trace!("commit: {self:#?}");
 
         self.write_registers();
 
-        let pre_image = self.image.clone();
-        let pre_state = self.image.image_id();
+        let mut partial_image = WorkingImage::default();
 
         let mut sorted_keys: Vec<_> = self.page_states.keys().collect();
         sorted_keys.sort();
@@ -444,12 +478,11 @@ impl PagedMemory {
                 let cache_idx = self.page_table.get(page_idx).unwrap();
                 let page = &self.page_cache[cache_idx];
                 self.image.set_page(page_idx, page.clone());
+                partial_image.set_page(page_idx, page.clone());
             }
         }
-        self.image.update_digests();
 
-        let post_state = self.image.image_id();
-        (pre_image, pre_state, post_state)
+        partial_image
     }
 
     fn load_page(&mut self, page_idx: u32) -> Result<()> {
@@ -512,7 +545,7 @@ pub(crate) fn page_idx(node_idx: u32) -> u32 {
 }
 
 pub(crate) fn compute_partial_image(
-    input_image: MemoryImage,
+    input_image: &mut MemoryImage,
     indexes: BTreeSet<u32>,
 ) -> MemoryImage {
     let mut image = MemoryImage::default();
@@ -525,7 +558,7 @@ pub(crate) fn compute_partial_image(
         let page_idx = page_idx(*node_idx);
 
         // Copy original state of all pages accessed in this segment.
-        image.set_page(page_idx, input_image.get_existing_page(page_idx));
+        image.set_page(page_idx, input_image.get_page(page_idx).unwrap());
     }
 
     // Add minimal needed 'uncles'
@@ -540,10 +573,10 @@ pub(crate) fn compute_partial_image(
 
         // Otherwise, add whichever child digest (if any) is not loaded
         if !indexes.contains(&lhs_idx) {
-            image.set_digest(lhs_idx, *input_image.get_existing_digest(lhs_idx));
+            image.set_digest(lhs_idx, *input_image.get_digest(lhs_idx).unwrap());
         }
         if !indexes.contains(&rhs_idx) {
-            image.set_digest(rhs_idx, *input_image.get_existing_digest(rhs_idx));
+            image.set_digest(rhs_idx, *input_image.get_digest(rhs_idx).unwrap());
         }
     }
 
