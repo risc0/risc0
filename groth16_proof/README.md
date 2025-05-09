@@ -21,8 +21,13 @@ All the following commands must be run from the `groth16_proof` directory.
 
 1. Run the ceremony (optional):
    ```bash
-   wget -O groth16/pot23.ptau https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_23.ptau
-   docker build -f docker/ceremony.Dockerfile . -t snark-ceremony
+   # Option 1: Download from alternative source
+   wget -O groth16/pot23.ptau https://storage.googleapis.com/zkcrypto/powersOfTau28_hez_final_23.ptau
+   
+   # Option 2: If the above fails, you can use a local copy or generate a new one
+   # Place your powersOfTau28_hez_final_23.ptau file in the groth16 directory
+   
+docker build -f docker/ceremony.Dockerfile . -t snark-ceremony
    docker run --rm -v $(pwd)/groth16:/ceremony/groth16 snark-ceremony
    ```
 2. Build the prover image:
