@@ -46,7 +46,7 @@ hotbench = { path = "tools/hotbench" }
 metal = "0.29"
 risc0-bigint2 = { version = "1.4.3-rc.1", default-features = false, path = "risc0/bigint2" }
 risc0-binfmt = { version = "3.0.0-rc.1", default-features = false, path = "risc0/binfmt" }
-risc0-build = { version = "3.0.0-rc.1", default-features = false, path = "risc0/build" }
+risc0-build = { version = "3.0.1-rc.1", default-features = false, path = "risc0/build" }
 risc0-build-kernel = { version = "2.0.0", default-features = false, path = "risc0/build_kernel" }
 risc0-circuit-keccak = { version = "3.0.0-rc.1", default-features = false, path = "risc0/circuit/keccak" }
 risc0-circuit-keccak-sys = { version = "2.0.1-rc.1", default-features = false, path = "risc0/circuit/keccak-sys" }

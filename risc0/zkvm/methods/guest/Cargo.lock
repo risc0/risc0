@@ -1350,7 +1350,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "3.0.0-rc.1"
+version = "3.0.1-rc.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
