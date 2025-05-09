@@ -1,4 +1,4 @@
-RISC0_LIB_HASH=$(git hash-object -- compact_proof/groth16/risc0.circom | awk '{ print $1 }')
+RISC0_LIB_HASH=$(git hash-object -- groth16_proof/groth16/risc0.circom | awk '{ print $1 }')
 RISC0_LIB_EXPECTED_HASH="87af73e7d1b24bff3df350136ec6637245a2330a"
 if [ $RISC0_LIB_HASH != $RISC0_LIB_EXPECTED_HASH ]; then
     echo "Unexpected hash of risc0.circom: $RISC0_LIB_HASH"
