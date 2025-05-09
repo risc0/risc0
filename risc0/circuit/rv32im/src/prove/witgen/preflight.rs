@@ -56,17 +56,17 @@ pub(crate) enum Back {
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct PreflightTrace {
+pub struct PreflightTrace {
     #[debug("{}", cycles.len())]
-    pub cycles: Vec<RawPreflightCycle>,
+    pub(crate) cycles: Vec<RawPreflightCycle>,
     #[debug("{}", txns.len())]
-    pub txns: Vec<RawMemoryTransaction>,
+    pub(crate) txns: Vec<RawMemoryTransaction>,
     #[debug("{}", bigint_bytes.len())]
-    pub bigint_bytes: Vec<u8>,
+    pub(crate) bigint_bytes: Vec<u8>,
     #[debug("{}", backs.len())]
-    pub backs: Vec<Back>,
-    pub table_split_cycle: u32,
-    pub rand_z: ExtVal,
+    pub(crate) backs: Vec<Back>,
+    pub(crate) table_split_cycle: u32,
+    pub(crate) rand_z: ExtVal,
 }
 
 pub(crate) struct Preflight<'a> {
@@ -87,7 +87,7 @@ pub(crate) struct Preflight<'a> {
 }
 
 impl Segment {
-    pub(crate) fn preflight(&self, rand_z: ExtVal) -> Result<PreflightTrace> {
+    pub fn preflight(&self, rand_z: ExtVal) -> Result<PreflightTrace> {
         scope!("preflight");
         tracing::debug!("preflight: {self:#?}");
 

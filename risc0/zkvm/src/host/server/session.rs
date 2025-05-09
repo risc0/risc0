@@ -122,7 +122,8 @@ pub struct Segment {
     /// The index of this [Segment] within the [Session]
     pub index: u32,
 
-    pub(crate) inner: risc0_circuit_rv32im::execute::Segment,
+    /// yeah
+    pub inner: risc0_circuit_rv32im::execute::Segment,
 
     pub(crate) output: Option<Output>,
 }

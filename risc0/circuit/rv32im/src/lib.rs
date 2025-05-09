@@ -33,6 +33,7 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
+pub use self::zirgen::circuit::ExtVal;
 use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
 
 pub use self::zirgen::CircuitImpl;
