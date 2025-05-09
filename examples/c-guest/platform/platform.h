@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 /**
- * Maximum size of a BER/DER-encoded OID in bytes.
- */
-#define ObjectIdentifier_MAX_SIZE 39
-
-/**
  * Size of a zkVM memory page.
  */
 #define PAGE_SIZE 1024
 
-#define MEM_BITS 28
+#define GUEST_MIN_MEM 16384
 
-#define MEM_SIZE (1 << MEM_BITS)
-
-#define GUEST_MIN_MEM 1024
-
-#define GUEST_MAX_MEM (SYSTEM).start
+#define GUEST_MAX_MEM 3221225472
 
 /**
  * Top of stack; stack grows down from this location.
@@ -49,6 +41,12 @@
 #define DIGEST_WORDS 8
 
 #define DIGEST_BYTES (WORD_SIZE * DIGEST_WORDS)
+
+#define KECCACK_STATE_BYTES 200
+
+#define KECCACK_STATE_WORDS (200 / WORD_SIZE)
+
+#define KECCACK_STATE_DWORDS (200 / 8)
 
 /**
  * Number of words in each cycle received using the SOFTWARE ecall
@@ -70,6 +68,10 @@
 #define SHA 3
 
 #define BIGINT 4
+
+#define USER 5
+
+#define BIGINT2 6
 
 #define TERMINATE 0
 
@@ -145,6 +147,10 @@
 
 #define REG_MAX 32
 
+#define KECCAK_PERMUTE 0
+
+#define KECCAK_PROVE 1
+
 #define OP_MULTIPLY 0
 
 /**
@@ -166,48 +172,6 @@
 #define STDERR 2
 
 #define JOURNAL 3
-
-/**
- * An enum representing the available verbosity levels of the logger.
- *
- * Typical usage includes: checking if a certain `Level` is enabled with
- * [`log_enabled!`](macro.log_enabled.html), specifying the `Level` of
- * [`log!`](macro.log.html), and comparing a `Level` directly to a
- * [`LevelFilter`](enum.LevelFilter.html).
- */
-enum Level {
-  /**
-   * The "error" level.
-   *
-   * Designates very serious errors.
-   */
-  Error = 1,
-  /**
-   * The "warn" level.
-   *
-   * Designates hazardous situations.
-   */
-  Warn,
-  /**
-   * The "info" level.
-   *
-   * Designates useful information.
-   */
-  Info,
-  /**
-   * The "debug" level.
-   *
-   * Designates lower priority information.
-   */
-  Debug,
-  /**
-   * The "trace" level.
-   *
-   * Designates very low priority, often extremely verbose, information.
-   */
-  Trace,
-};
-typedef uintptr_t Level;
 
 /**
  * Wrapper around [`BufferKindUser`].
@@ -244,15 +208,9 @@ typedef struct sha256_state {
  */
 typedef uint32_t Digest[DIGEST_WORDS];
 
-
-
-
-
-
-
-
-
-
+#if defined(DEFINE_ZKVM)
+void init_allocator(void);
+#endif
 
 struct sha256_state *init_sha256(void);
 
@@ -307,9 +265,27 @@ void env_commit(struct sha256_state *hasher, const uint8_t *bytes_ptr, uint32_t 
  * # Safety
  * Assumes that the buffer has at least `len` bytes allocated.
  */
-uint32_t env_read(uint8_t *bytes_ptr, uint32_t len);
+uintptr_t env_read(uint8_t *bytes_ptr, uint32_t len);
 
-#if defined(DEFINE_SYSCALLS)
+#if (defined(DEFINE_SYSCALLS) && !defined(DEFINE_ZKVM))
+/**
+ * # Safety
+ *
+ * This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+ */
+uint8_t *sys_alloc_aligned(uintptr_t bytes, uintptr_t align);
+#endif
+
+#if (defined(DEFINE_SYSCALLS) && defined(DEFINE_ZKVM))
+/**
+ * # Safety
+ *
+ * This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+ */
+uint8_t *sys_alloc_aligned(uintptr_t bytes, uintptr_t align);
+#endif
+
+#if (defined(DEFINE_SYSCALLS) && defined(DEFINE_ZKVM))
 /**
  * # Safety
  *
@@ -330,11 +306,77 @@ uint8_t *sys_alloc_aligned(uintptr_t bytes, uintptr_t align);
  * # Safety
  *
  * `claim_digest` must be aligned and dereferenceable.
+ * `control_root` must be aligned and dereferenceable.
  */
-void sys_verify_integrity(const uint32_t (*claim_digest)[DIGEST_WORDS]);
+void sys_verify_integrity(const uint32_t (*claim_digest)[DIGEST_WORDS],
+                          const uint32_t (*control_root)[DIGEST_WORDS]);
 #endif
 
+#if defined(DEFINE_SYSCALLS)
+/**
+ * TODO: Send a ReceiptClaim digest to the host to request verification. Meant for proofs that use union.
+ *
+ * # Safety
+ *
+ * `claim_digest` must be aligned and dereferenceable.
+ * `control_root` must be aligned and dereferenceable.
+ */
+void sys_verify_integrity2(const uint32_t (*claim_digest)[DIGEST_WORDS],
+                           const uint32_t (*control_root)[DIGEST_WORDS]);
+#endif
+
+#if !defined(DEFINE_SYSCALLS)
 extern uint8_t *sys_alloc_aligned(uintptr_t nwords, uintptr_t align);
+#endif
+
+#if defined(DEFINE_SYSCALLS)
+/**
+ * `sys_fork()` creates a new process by duplicating the calling process. The
+ * new process is referred to as the child process. The calling process is
+ * referred to as the parent process.
+ *
+ * The child process and the parent process run in separate memory spaces. At
+ * the time of `sys_fork()` both memory spaces have the same content.
+ *
+ * # Return Value
+ *
+ * On success, the PID of the child process (1) is returned in the parent, and
+ * 0 is returned in the child. On failure, -1 is returned in the parent, no
+ * child process is created.
+ */
+int32_t sys_fork(void);
+#endif
+
+#if defined(DEFINE_SYSCALLS)
+/**
+ * `sys_pipe()` creates a pipe, a unidirectional data channel that can be used
+ * for interprocess communication. The pointer `pipefd` is used to return two
+ * file descriptors referring to the ends of the pipe. `pipefd[0]` refers to
+ * the read end of the pipe. `pipefd[1]` refers to the write end of the pipe.
+ * Data written to the write end of the pipe is buffered by the host until it
+ * is read from the read end of the pipe.
+ *
+ * # Return Value
+ *
+ * On success, zero is returned.  On error, -1 is returned, and `pipefd` is
+ * left unchanged.
+ *
+ * # Safety
+ *
+ * `pipefd` must be aligned, dereferenceable, and have capacity for 2 u32
+ * values.
+ */
+int32_t sys_pipe(uint32_t *pipefd);
+#endif
+
+#if defined(DEFINE_SYSCALLS)
+/**
+ * `sys_exit()` causes normal process termination.
+ *
+ * Currently the `status` is unused and ignored.
+ */
+void sys_exit(int32_t status);
+#endif
 
 #if (defined(DEFINE_LIBM) && defined(DEFINE_ZKVM))
 float acosf(float x);
