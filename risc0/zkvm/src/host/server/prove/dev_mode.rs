@@ -23,8 +23,9 @@ use crate::{
     mmr::{GuestPeak, MerkleMountainAccumulator},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::{UnionClaim, Unknown},
-    Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned, ProverOpts,
-    ProverServer, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
+    ProveKeccakRequest, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
+    VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -49,11 +50,7 @@ use crate::{
 pub struct DevModeProver;
 
 impl ProverServer for DevModeProver {
-    #[cfg(feature = "unstable")]
-    fn prove_keccak(
-        &self,
-        _request: &crate::ProveKeccakRequest,
-    ) -> Result<SuccinctReceipt<Unknown>> {
+    fn prove_keccak(&self, _request: &ProveKeccakRequest) -> Result<SuccinctReceipt<Unknown>> {
         unimplemented!("keccak proving unsupported for dev mode");
     }
 

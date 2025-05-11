@@ -23,6 +23,8 @@ use risc0_zkvm::{
     ProverServer, VerifierContext,
 };
 
+use self::actors::protocol::TaskKind;
+
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
 #[command(about, version, author)]
@@ -78,10 +80,14 @@ struct Cli {
     /// The address to connect to or listen on.
     #[arg(long)]
     addr: Option<SocketAddr>,
+
+    /// Client mode.
+    #[arg(long)]
+    client: bool,
 }
 
 #[derive(Args)]
-#[group(required = true, multiple = false)]
+#[group(required = true)]
 struct Mode {
     #[arg(long)]
     port: Option<u16>,
@@ -94,14 +100,17 @@ struct Mode {
     #[arg(long)]
     image: Option<PathBuf>,
 
+    /// Prove a pre-recorded segment.
     #[arg(long)]
     segment: Option<PathBuf>,
 
+    /// Start the manager.
     #[arg(long)]
-    manager: Option<PathBuf>,
+    manager: bool,
 
-    #[arg(long)]
-    worker: bool,
+    /// Start a worker.
+    #[arg(long, value_enum, value_delimiter(','))]
+    worker: Vec<TaskKind>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -148,12 +157,12 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
         return Ok(());
     }
 
-    if let Some(ref path) = args.mode.manager {
-        return self::actors::manager::main(&args, path).await;
+    if args.client {
+        return self::actors::client_main(&args).await;
     }
 
-    if args.mode.worker {
-        return self::actors::worker::main(args).await;
+    if args.mode.manager || !args.mode.worker.is_empty() {
+        return self::actors::main(&args).await;
     }
 
     let env = {

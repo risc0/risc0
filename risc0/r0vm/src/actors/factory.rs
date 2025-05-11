@@ -21,11 +21,11 @@ use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
 
 use super::{
-    manager::TaskManagerActor,
+    job::JobActor,
     protocol::{
-        factory::{GetTask, SubmitTaskMsg, TaskDoneMsg, TaskStatusMsg},
+        factory::{GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
-        TaskId, TaskKind,
+        GlobalId, TaskKind,
     },
 };
 
@@ -40,16 +40,16 @@ struct Worker {
 
 #[derive(RemoteActor)]
 pub(crate) struct FactoryActor {
-    task_mgrs: HashMap<ActorID, ActorRef<TaskManagerActor>>,
+    jobs: HashMap<ActorID, ActorRef<JobActor>>,
     workers: MultiIndexWorkerMap,
     pending_tasks: HashMap<TaskKind, VecDeque<TaskMsg>>,
-    active_tasks: HashMap<TaskId, TaskMsg>,
+    active_tasks: HashMap<GlobalId, TaskMsg>,
 }
 
 impl FactoryActor {
     pub fn new() -> Self {
         Self {
-            task_mgrs: HashMap::default(),
+            jobs: HashMap::default(),
             workers: MultiIndexWorkerMap::default(),
             pending_tasks: HashMap::default(),
             active_tasks: HashMap::default(),
@@ -93,12 +93,12 @@ impl Message<TaskMsg> for FactoryActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: TaskMsg, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        let workers = self.workers.get_by_task_kind(&msg.task_kind);
+        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
         if let Some(worker) = workers.first() {
-            self.active_tasks.insert(msg.task_id, msg.clone());
+            self.active_tasks.insert(msg.header.global_id, msg.clone());
             worker.actor_ref.tell(msg).await.unwrap();
         } else {
-            self.pending_tasks(msg.task_kind).push_back(msg);
+            self.pending_tasks(msg.header.task_kind).push_back(msg);
         }
     }
 }
@@ -111,21 +111,19 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         msg: SubmitTaskMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        let job_id = msg.task_mgr.id();
-        self.task_mgrs.insert(job_id, msg.task_mgr);
+        self.jobs.insert(msg.job.id(), msg.job);
         let task = TaskMsg {
-            job_id,
-            task_id: msg.task_id,
-            task_kind: msg.task_kind,
+            header: msg.header.clone(),
             task: msg.task,
         };
 
-        let workers = self.workers.get_by_task_kind(&msg.task_kind);
+        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
         if let Some(worker) = workers.first() {
-            self.active_tasks.insert(task.task_id, task.clone());
+            self.active_tasks
+                .insert(task.header.global_id, task.clone());
             worker.actor_ref.tell(task).await.unwrap();
         } else {
-            self.pending_tasks(task.task_kind).push_back(task);
+            self.pending_tasks(task.header.task_kind).push_back(task);
         }
     }
 }
@@ -135,13 +133,14 @@ impl Message<GetTask> for FactoryActor {
     type Reply = DelegatedReply<TaskMsg>;
 
     async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        tracing::info!("GetTask");
+        // tracing::info!("GetTask");
         for kind in msg.kinds.iter() {
             let pending_tasks = self.pending_tasks(*kind);
             if !pending_tasks.is_empty() {
-                tracing::info!("pending: {kind:?}");
+                // tracing::info!("pending: {kind:?}");
                 let task = pending_tasks.pop_front().unwrap();
-                self.active_tasks.insert(task.task_id, task.clone());
+                self.active_tasks
+                    .insert(task.header.global_id, task.clone());
                 return ctx.reply(task);
             }
         }
@@ -149,7 +148,7 @@ impl Message<GetTask> for FactoryActor {
         let (delegated_reply, reply_sender) = ctx.reply_sender();
         let worker_ref = spawn_link(&ctx.actor_ref(), WorkerProxyActor { reply_sender }).await;
 
-        tracing::info!("new worker: {:?}", msg.kinds);
+        // tracing::info!("new worker: {:?}", msg.kinds);
         for task_kind in msg.kinds {
             let worker = Worker {
                 task_kind,
@@ -164,17 +163,17 @@ impl Message<GetTask> for FactoryActor {
 }
 
 #[remote_message("cb686d44-b971-401c-acc6-9eef9c0fff3f")]
-impl Message<TaskStatusMsg> for FactoryActor {
+impl Message<TaskUpdateMsg> for FactoryActor {
     type Reply = ();
 
     async fn handle(
         &mut self,
-        msg: TaskStatusMsg,
+        msg: TaskUpdateMsg,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         // refresh active worker
-        let task_mgr = self.task_mgrs.get(&msg.job_id).unwrap();
-        ctx.forward(task_mgr, msg).await;
+        let job = self.jobs.get(&msg.header.global_id.job_id).unwrap();
+        ctx.forward(job, msg).await;
     }
 }
 
@@ -187,9 +186,9 @@ impl Message<TaskDoneMsg> for FactoryActor {
         msg: TaskDoneMsg,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.active_tasks.remove(&msg.task_id);
-        let task_mgr = self.task_mgrs.get(&msg.job_id).unwrap();
-        ctx.forward(task_mgr, msg).await;
+        self.active_tasks.remove(&msg.header.global_id);
+        let job = self.jobs.get(&msg.header.global_id.job_id).unwrap();
+        ctx.forward(job, msg).await;
     }
 }
 

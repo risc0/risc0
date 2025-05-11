@@ -37,8 +37,8 @@ use crate::{
     },
     receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
-    stark_to_snark, ExecutorEnv, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment, Session,
-    VerifierContext,
+    stark_to_snark, ExecutorEnv, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim,
+    ReceiptKind, Segment, Session, VerifierContext,
 };
 
 mod private {
@@ -52,11 +52,6 @@ mod private {
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
 /// [Receipt][crate::Receipt] that can be used to verify correct computation.
 pub trait ProverServer: private::Sealed {
-    /// Prove the specified keccak request
-    #[cfg(feature = "unstable")]
-    fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
-        -> Result<SuccinctReceipt<Unknown>>;
-
     /// Prove the specified ELF binary.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(env, &VerifierContext::default(), elf)
@@ -75,6 +70,9 @@ pub trait ProverServer: private::Sealed {
 
     /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
+
+    /// Prove the specified keccak request
+    fn prove_keccak(&self, request: &ProveKeccakRequest) -> Result<SuccinctReceipt<Unknown>>;
 
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>>;

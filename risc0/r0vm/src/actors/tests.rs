@@ -12,31 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use kameo::{actor::RemoteActorRef, remote::ActorSwarm};
+use kameo::prelude::*;
 use risc0_zkvm_methods::FIB_ELF;
 
-use crate::actors::{
-    factory::FactoryActor,
-    manager::TaskManagerActor,
+use super::{
+    manager::ManagerActor,
     protocol::{ProofRequest, TaskKind},
-    worker::Worker,
+    retry_lookup, App,
 };
 
 #[test_log::test(tokio::test(flavor = "multi_thread"))]
 async fn basic() {
     tracing::info!("basic");
-
-    ActorSwarm::bootstrap().unwrap();
-
-    let factory = kameo::spawn(FactoryActor::new());
-    factory.register("factory").await.unwrap();
-
-    let task_mgr = kameo::spawn(TaskManagerActor::new(factory.clone()));
-
-    let factory_ref = RemoteActorRef::<FactoryActor>::lookup("factory")
-        .await
-        .unwrap()
-        .unwrap();
 
     let task_kinds = vec![
         TaskKind::Execute,
@@ -44,26 +31,18 @@ async fn basic() {
         TaskKind::Lift,
         TaskKind::Join,
     ];
-    let mut worker = Worker::new(factory_ref, task_kinds);
-    worker.start();
+
+    let app = App::new_test(true, task_kinds).await.unwrap();
 
     const ITERATIONS: u32 = 300_000;
-    task_mgr
-        .tell(ProofRequest {
-            binary: FIB_ELF.to_vec(),
-            input: u32::to_le_bytes(ITERATIONS).to_vec(),
-        })
-        .await
-        .unwrap();
-    task_mgr.wait_for_stop().await;
-    tracing::info!("task_mgr stopped");
+    let proof_request = ProofRequest {
+        binary: FIB_ELF.to_vec(),
+        input: u32::to_le_bytes(ITERATIONS).to_vec(),
+    };
 
-    tracing::info!("waiting on worker");
-    worker.stop().await;
-    tracing::info!("worker stopped");
+    let manager: RemoteActorRef<ManagerActor> = retry_lookup("manager").await.unwrap().unwrap();
+    let reply = manager.ask(&proof_request).await.unwrap();
+    reply.receipt.verify_integrity().unwrap();
 
-    factory.stop_gracefully().await.unwrap();
-    tracing::info!("waiting on factory");
-    factory.wait_for_stop().await;
-    tracing::info!("factory stopped");
+    app.stop().await;
 }

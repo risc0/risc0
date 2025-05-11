@@ -1,0 +1,287 @@
+// Copyright 2025 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+};
+
+use kameo::{error::Infallible, prelude::*};
+use opentelemetry::{
+    global::{BoxedSpan, BoxedTracer},
+    trace::{Span, SpanKind, TraceContextExt as _, Tracer},
+};
+use risc0_zkvm::{
+    ProveKeccakRequest, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, UnionClaim, Unknown,
+};
+
+use super::{
+    factory::FactoryActor,
+    protocol::{
+        factory::{
+            JoinNode, Session, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg,
+        },
+        ExecuteTask, GlobalId, JoinTask, LiftTask, ProofReply, ProofRequest, ProveKeccakTask,
+        ProveSegmentTask, SegmentRange, Task, TaskHeader, TaskId,
+    },
+};
+
+pub(crate) struct JobActor {
+    self_ref: Option<WeakActorRef<Self>>,
+    factory: ActorRef<FactoryActor>,
+    joins: BTreeMap<SegmentRange, Arc<SuccinctReceipt<ReceiptClaim>>>,
+    next_task_id: u64,
+    session: Option<Box<Session>>,
+    ctx: opentelemetry::Context,
+    tracer: BoxedTracer,
+    pending_spans: HashMap<TaskId, BoxedSpan>,
+    reply_sender: Option<ReplySender<ProofReply>>,
+}
+
+impl Actor for JobActor {
+    type Error = Infallible;
+
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+        self.self_ref = Some(actor_ref.downgrade());
+        Ok(())
+    }
+
+    async fn on_stop(
+        &mut self,
+        _actor_ref: WeakActorRef<Self>,
+        _reason: ActorStopReason,
+    ) -> Result<(), Self::Error> {
+        self.ctx.span().end();
+        Ok(())
+    }
+}
+
+impl JobActor {
+    pub fn new(factory: ActorRef<FactoryActor>) -> Self {
+        let tracer = opentelemetry::global::tracer("job");
+        let span = tracer
+            .span_builder("job")
+            .with_kind(SpanKind::Client)
+            .start(&tracer);
+        let ctx = opentelemetry::Context::current_with_span(span);
+        Self {
+            self_ref: None,
+            factory,
+            joins: BTreeMap::new(),
+            next_task_id: 0,
+            session: None,
+            ctx,
+            tracer,
+            pending_spans: HashMap::new(),
+            reply_sender: None,
+        }
+    }
+
+    fn self_ref(&self) -> ActorRef<Self> {
+        self.self_ref.as_ref().unwrap().upgrade().unwrap()
+    }
+
+    fn next_task_id(&mut self) -> u64 {
+        self.next_task_id += 1;
+        self.next_task_id
+    }
+
+    fn span_start<T>(&mut self, task_id: TaskId, name: T)
+    where
+        T: Into<Cow<'static, str>>,
+    {
+        self.pending_spans
+            .insert(task_id, self.tracer.start_with_context(name, &self.ctx));
+    }
+
+    fn span_end(&mut self, task_id: TaskId) {
+        self.pending_spans.remove(&task_id).as_mut().unwrap().end();
+    }
+
+    async fn task_start(&mut self, header: TaskHeader) {
+        self.pending_spans
+            .get_mut(&header.global_id.task_id)
+            .unwrap()
+            .add_event("start", vec![]);
+    }
+
+    async fn prove_segment(&mut self, segment: Segment) {
+        tracing::info!("ProveSegment: {:?}", segment.index);
+        self.submit_task(Task::ProveSegment(Arc::new(ProveSegmentTask { segment })))
+            .await;
+    }
+
+    async fn prove_keccak(&mut self, request: ProveKeccakRequest) {
+        tracing::info!("ProveKeccak: {:?} hashes", request.input.len());
+        self.submit_task(Task::ProveKeccak(Arc::new(ProveKeccakTask { request })))
+            .await;
+    }
+
+    async fn session_done(&mut self, header: TaskHeader, session: Box<Session>) {
+        tracing::info!("SessionDone");
+        self.span_end(header.global_id.task_id);
+        self.session = Some(session);
+        self.maybe_finish().await;
+    }
+
+    async fn prove_segment_done(&mut self, header: TaskHeader, receipt: Box<SegmentReceipt>) {
+        self.span_end(header.global_id.task_id);
+        tracing::info!("ProveSegmentDone: {:?}", receipt.index);
+        self.submit_task(Task::Lift(Arc::new(LiftTask { receipt: *receipt })))
+            .await;
+    }
+
+    async fn prove_keccak_done(&mut self, _receipt: Box<SuccinctReceipt<Unknown>>) {
+        // Union MMR
+        todo!()
+    }
+
+    async fn lift_done(&mut self, header: TaskHeader, node: Box<JoinNode>) {
+        tracing::info!("LiftDone: {:?}", node.range);
+        self.span_end(header.global_id.task_id);
+        self.joins.insert(node.range, Arc::new(node.receipt));
+        self.maybe_join().await;
+        self.maybe_finish().await;
+    }
+
+    async fn join_done(&mut self, header: TaskHeader, node: Box<JoinNode>) {
+        tracing::info!("JoinDone: {:?}", node.range);
+        self.span_end(header.global_id.task_id);
+        self.joins.insert(node.range, Arc::new(node.receipt));
+        self.maybe_join().await;
+        self.maybe_finish().await;
+    }
+
+    async fn union_done(&mut self, _receipt: Box<SuccinctReceipt<UnionClaim>>) {
+        todo!()
+    }
+
+    async fn resolve_done(&mut self, _receipt: Box<SuccinctReceipt<ReceiptClaim>>) {
+        todo!()
+    }
+
+    async fn submit_task(&mut self, task: Task) {
+        let task_mgr = self.self_ref();
+        let job_id = task_mgr.id();
+        let task_id = self.next_task_id();
+        self.span_start(task_id, task.name());
+        let msg = SubmitTaskMsg {
+            job: task_mgr,
+            header: TaskHeader {
+                global_id: GlobalId { job_id, task_id },
+                task_kind: task.kind(),
+            },
+            task,
+        };
+        self.factory.tell(msg).await.unwrap();
+    }
+
+    async fn maybe_join(&mut self) {
+        if let Some(((a_range, a_receipt), (b_range, b_receipt))) = self
+            .joins
+            .iter()
+            .zip(self.joins.iter().skip(1))
+            .filter(|((a, _), (b, _))| a.end == b.start)
+            .map(|((a_range, a_receipt), (b_range, b_receipt))| {
+                ((*a_range, a_receipt.clone()), (*b_range, b_receipt.clone()))
+            })
+            .take(1)
+            .next()
+        {
+            self.joins.remove(&a_range);
+            self.joins.remove(&b_range);
+            let range = (a_range.start..b_range.end).into();
+            let receipts = vec![(*a_receipt).clone(), (*b_receipt).clone()];
+            self.submit_task(Task::Join(Arc::new(JoinTask { range, receipts })))
+                .await;
+        }
+    }
+
+    async fn maybe_finish(&mut self) {
+        if let Some(ref session) = self.session {
+            // tracing::info!("maybe_finish: session done");
+            if let Some((range, receipt)) = self.joins.first_key_value() {
+                if range.start == 0 && range.end == session.segment_count {
+                    // tracing::info!("maybe_finish: complete range");
+                    let reply_sender = self.reply_sender.take();
+                    reply_sender.unwrap().send(ProofReply {
+                        receipt: receipt.clone(),
+                    });
+                    self.self_ref().stop_gracefully().await.unwrap();
+                }
+            }
+        }
+    }
+}
+
+impl Message<ProofRequest> for JobActor {
+    type Reply = DelegatedReply<ProofReply>;
+
+    async fn handle(
+        &mut self,
+        msg: ProofRequest,
+        ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        tracing::info!("ProofRequest");
+        let (delegated_reply, reply_sender) = ctx.reply_sender();
+        self.reply_sender = reply_sender;
+
+        self.submit_task(Task::Execute(Arc::new(ExecuteTask {
+            binary: msg.binary,
+            input: msg.input,
+        })))
+        .await;
+
+        delegated_reply
+    }
+}
+
+impl Message<TaskUpdateMsg> for JobActor {
+    type Reply = ();
+
+    async fn handle(
+        &mut self,
+        msg: TaskUpdateMsg,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        // tracing::info!("TaskUpdateMsg: {:?}", msg.header.global_id.task_id);
+        match msg.body {
+            TaskUpdate::Start => self.task_start(msg.header).await,
+            TaskUpdate::Segment(segment) => self.prove_segment(segment).await,
+            TaskUpdate::Keccak(request) => self.prove_keccak(request).await,
+        }
+    }
+}
+
+impl Message<TaskDoneMsg> for JobActor {
+    type Reply = ();
+
+    async fn handle(
+        &mut self,
+        msg: TaskDoneMsg,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        // tracing::info!("TaskDoneMsg: {:?}", msg.header.global_id.task_id);
+        match msg.body {
+            TaskDone::Session(session) => self.session_done(msg.header, session).await,
+            TaskDone::ProveSegment(receipt) => self.prove_segment_done(msg.header, receipt).await,
+            TaskDone::ProveKeccak(receipt) => self.prove_keccak_done(receipt).await,
+            TaskDone::Lift(node) => self.lift_done(msg.header, node).await,
+            TaskDone::Join(node) => self.join_done(msg.header, node).await,
+            TaskDone::Union(receipt) => self.union_done(receipt).await,
+            TaskDone::Resolve(receipt) => self.resolve_done(receipt).await,
+        }
+    }
+}

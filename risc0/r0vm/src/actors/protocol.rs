@@ -14,6 +14,7 @@
 
 use std::{ops::Range, sync::Arc};
 
+use clap::ValueEnum;
 use kameo::{
     actor::{ActorID, ActorRef},
     Reply,
@@ -24,7 +25,7 @@ use risc0_zkvm::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::actors::manager::TaskManagerActor;
+use super::job::JobActor;
 
 pub(crate) type TaskId = u64;
 
@@ -34,7 +35,12 @@ pub(crate) struct ProofRequest {
     pub input: Vec<u8>,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Reply, Serialize, Deserialize)]
+pub(crate) struct ProofReply {
+    pub receipt: Arc<SuccinctReceipt<ReceiptClaim>>,
+}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
 pub(crate) enum TaskKind {
     Execute,
     ProveSegment,
@@ -43,6 +49,18 @@ pub(crate) enum TaskKind {
     Join,
     Union,
     Resolve,
+}
+
+#[derive(Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct GlobalId {
+    pub job_id: ActorID,
+    pub task_id: TaskId,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) struct TaskHeader {
+    pub global_id: GlobalId,
+    pub task_kind: TaskKind,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -103,48 +121,46 @@ pub(crate) struct ResolveTask {
 pub mod factory {
     use super::*;
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub(crate) struct GetTask {
         pub kinds: Vec<TaskKind>,
     }
 
     #[derive(Clone, Reply)]
     pub(crate) struct SubmitTaskMsg {
-        pub task_mgr: ActorRef<TaskManagerActor>,
-        pub task_id: TaskId,
-        pub task_kind: TaskKind,
+        pub job: ActorRef<JobActor>,
+        pub header: TaskHeader,
         pub task: Task,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub(crate) struct TaskStatusMsg {
-        pub job_id: ActorID,
-        pub task_id: TaskId,
-        pub body: TaskStatus,
+    pub(crate) struct TaskUpdateMsg {
+        pub header: TaskHeader,
+        pub body: TaskUpdate,
     }
 
     #[derive(Reply, Serialize, Deserialize)]
     pub(crate) struct TaskDoneMsg {
-        pub job_id: ActorID,
-        pub task_id: TaskId,
+        pub header: TaskHeader,
         pub body: TaskDone,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub(crate) enum TaskStatus {
+    pub(crate) enum TaskUpdate {
+        Start,
         Segment(Segment),
         Keccak(ProveKeccakRequest),
     }
 
     #[derive(Serialize, Deserialize)]
     pub(crate) enum TaskDone {
-        Session(Arc<Session>),
-        ProveSegment(Arc<SegmentReceipt>),
-        ProveKeccak(Arc<SuccinctReceipt<Unknown>>),
-        Lift(Arc<JoinNode>),
-        Join(Arc<JoinNode>),
-        Union(Arc<SuccinctReceipt<UnionClaim>>),
-        Resolve(Arc<SuccinctReceipt<ReceiptClaim>>),
+        Session(Box<Session>),
+        ProveSegment(Box<SegmentReceipt>),
+        ProveKeccak(Box<SuccinctReceipt<Unknown>>),
+        Lift(Box<JoinNode>),
+        Join(Box<JoinNode>),
+        Union(Box<SuccinctReceipt<UnionClaim>>),
+        Resolve(Box<SuccinctReceipt<ReceiptClaim>>),
     }
 
     #[derive(Serialize, Deserialize)]
@@ -167,9 +183,7 @@ pub mod worker {
 
     #[derive(Clone, Reply, Serialize, Deserialize)]
     pub(crate) struct TaskMsg {
-        pub job_id: ActorID,
-        pub task_id: TaskId,
-        pub task_kind: TaskKind,
+        pub header: TaskHeader,
         pub task: Task,
     }
 }
@@ -188,6 +202,32 @@ impl From<Range<u32>> for SegmentRange {
         Self {
             start: value.start as usize,
             end: value.end as usize,
+        }
+    }
+}
+
+impl Task {
+    pub fn kind(&self) -> TaskKind {
+        match self {
+            Task::Execute(_) => TaskKind::Execute,
+            Task::ProveSegment(_) => TaskKind::ProveSegment,
+            Task::ProveKeccak(_) => TaskKind::ProveKeccak,
+            Task::Lift(_) => TaskKind::Lift,
+            Task::Join(_) => TaskKind::Join,
+            Task::Union(_) => TaskKind::Union,
+            Task::Resolve(_) => TaskKind::Resolve,
+        }
+    }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            Task::Execute(_) => "execute",
+            Task::ProveSegment(_) => "prove",
+            Task::ProveKeccak(_) => "keccak",
+            Task::Lift(_) => "lift",
+            Task::Join(_) => "join",
+            Task::Union(_) => "union",
+            Task::Resolve(_) => "resolve",
         }
     }
 }

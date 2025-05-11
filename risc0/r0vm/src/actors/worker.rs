@@ -12,66 +12,94 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{error::Error as StdError, sync::Arc, time::Duration};
+use std::sync::Arc;
 
-use kameo::{error::RegistryError, prelude::*, remote::dial_opts::DialOpts};
+use anyhow::anyhow;
+use kameo::prelude::*;
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, NullSegmentRef, ProverOpts, VerifierContext,
 };
-use tokio::{task::JoinHandle, time::sleep};
+use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 
-use crate::{
-    actors::{
-        factory::FactoryActor,
-        protocol::{
-            factory::{
-                GetTask, JoinNode, Session, TaskDone, TaskDoneMsg, TaskStatus, TaskStatusMsg,
-            },
-            worker::TaskMsg,
-            ExecuteTask, JoinTask, LiftTask, ProveSegmentTask, Task, TaskId, TaskKind,
-        },
+use super::{
+    factory::FactoryActor,
+    protocol::{
+        factory::{GetTask, JoinNode, Session, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
+        worker::TaskMsg,
+        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Task,
+        TaskHeader, TaskKind, UnionTask,
     },
-    Cli,
 };
 
-pub(crate) async fn main(_args: Cli) -> Result<(), Box<dyn StdError>> {
-    ActorSwarm::bootstrap()?
-        .dial(
-            DialOpts::unknown_peer_id()
-                .address("/ip4/127.0.0.1/udp/9000/quic-v1".parse()?)
-                .build(),
-        )
-        .await?;
+pub(crate) enum GenericActorRef<A: Actor> {
+    Local(ActorRef<A>),
+    Remote(RemoteActorRef<A>),
+}
 
-    let factory = retry_lookup().await?.unwrap();
-    let task_kinds = vec![
-        TaskKind::Execute,
-        TaskKind::ProveSegment,
-        TaskKind::Lift,
-        TaskKind::Join,
-    ];
-    let mut worker = Worker::new(factory, task_kinds);
-    worker.start();
-    sleep(Duration::from_secs(5)).await;
-    worker.stop().await;
+impl<A: Actor> Clone for GenericActorRef<A> {
+    fn clone(&self) -> Self {
+        match self {
+            Self::Local(arg0) => Self::Local(arg0.clone()),
+            Self::Remote(arg0) => Self::Remote(arg0.clone()),
+        }
+    }
+}
 
-    Ok(())
+impl<A> GenericActorRef<A>
+where
+    A: Actor + RemoteActor,
+{
+    pub async fn tell<M>(&self, msg: M) -> anyhow::Result<()>
+    where
+        A: Message<M> + RemoteMessage<M>,
+        M: serde::Serialize + Send + Sync + 'static,
+        <A::Reply as Reply>::Error: serde::de::DeserializeOwned,
+    {
+        match self {
+            GenericActorRef::Local(actor_ref) => Ok(actor_ref
+                .tell(msg)
+                .await
+                .map_err(|err| anyhow!("{err:?}"))?),
+            GenericActorRef::Remote(actor_ref) => Ok(actor_ref
+                .tell(&msg)
+                .await
+                .map_err(|err| anyhow!("{err:?}"))?),
+        }
+    }
+
+    pub async fn ask<M>(&self, msg: M) -> anyhow::Result<<A::Reply as Reply>::Ok>
+    where
+        A: Message<M> + RemoteMessage<M>,
+        M: serde::Serialize + Send + Sync + 'static,
+        <A::Reply as Reply>::Ok: serde::de::DeserializeOwned,
+        <A::Reply as Reply>::Error: serde::de::DeserializeOwned,
+    {
+        match self {
+            GenericActorRef::Local(actor_ref) => {
+                Ok(actor_ref.ask(msg).await.map_err(|err| anyhow!("{err:?}"))?)
+            }
+            GenericActorRef::Remote(actor_ref) => Ok(actor_ref
+                .ask(&msg)
+                .await
+                .map_err(|err| anyhow!("{err:?}"))?),
+        }
+    }
 }
 
 struct Processor {
-    factory: RemoteActorRef<FactoryActor>,
+    factory: GenericActorRef<FactoryActor>,
 }
 
 pub(crate) struct Worker {
-    factory: RemoteActorRef<FactoryActor>,
+    factory: GenericActorRef<FactoryActor>,
     task_kinds: Vec<TaskKind>,
     token: CancellationToken,
     join_handle: Option<JoinHandle<()>>,
 }
 
 impl Worker {
-    pub fn new(factory: RemoteActorRef<FactoryActor>, task_kinds: Vec<TaskKind>) -> Self {
+    pub fn new(factory: GenericActorRef<FactoryActor>, task_kinds: Vec<TaskKind>) -> Self {
         Self {
             factory,
             task_kinds,
@@ -100,7 +128,7 @@ impl Worker {
                         tracing::info!("stopping");
                         break;
                     }
-                    msg = factory.ask(&request) => {
+                    msg = factory.ask(request.clone()) => {
                         processor.process_task(msg.unwrap()).await.unwrap();
                     }
                 }
@@ -119,29 +147,36 @@ impl Worker {
 impl Processor {
     async fn process_task(&self, msg: TaskMsg) -> anyhow::Result<()> {
         match msg.task {
-            Task::Execute(task) => self.execute(msg.job_id, msg.task_id, task).await,
-            Task::ProveSegment(task) => self.prove_segment(msg.job_id, msg.task_id, task).await,
-            Task::Lift(task) => self.lift(msg.job_id, msg.task_id, task).await,
-            Task::Join(task) => self.join(msg.job_id, msg.task_id, task).await,
-            _ => unimplemented!(),
+            Task::Execute(task) => self.execute(msg.header, task).await,
+            Task::ProveSegment(task) => self.prove_segment(msg.header, task).await,
+            Task::Lift(task) => self.lift(msg.header, task).await,
+            Task::Join(task) => self.join(msg.header, task).await,
+            Task::ProveKeccak(task) => self.prove_keccak(msg.header, task).await,
+            Task::Union(task) => self.union(msg.header, task).await,
+            Task::Resolve(task) => self.resolve(msg.header, task).await,
         }
     }
 
-    async fn execute(
-        &self,
-        job_id: ActorID,
-        task_id: TaskId,
-        task: Arc<ExecuteTask>,
-    ) -> anyhow::Result<()> {
+    async fn task_start(&self, header: TaskHeader) -> anyhow::Result<()> {
+        self.factory
+            .tell(TaskUpdateMsg {
+                header,
+                body: TaskUpdate::Start,
+            })
+            .await?;
+        Ok(())
+    }
+
+    async fn execute(&self, header: TaskHeader, task: Arc<ExecuteTask>) -> anyhow::Result<()> {
         tracing::info!("ELF: {} bytes", task.binary.len());
+        self.task_start(header.clone()).await?;
 
         let relay = RelayActor::spawn(self.factory.clone());
         let executor = ExecutorActor::spawn_in_thread(relay.clone());
 
         let msg = ExecuteTaskMsg {
-            job_id,
-            task_id,
-            task: Arc::into_inner(task).unwrap(),
+            header: header.clone(),
+            task,
         };
         let session = executor.ask(msg).await?;
 
@@ -149,10 +184,9 @@ impl Processor {
         relay.wait_for_stop().await;
 
         self.factory
-            .tell(&TaskDoneMsg {
-                job_id,
-                task_id,
-                body: TaskDone::Session(Arc::new(session)),
+            .tell(TaskDoneMsg {
+                header,
+                body: TaskDone::Session(Box::new(session)),
             })
             .await?;
 
@@ -161,11 +195,11 @@ impl Processor {
 
     async fn prove_segment(
         &self,
-        job_id: ActorID,
-        task_id: TaskId,
+        header: TaskHeader,
         task: Arc<ProveSegmentTask>,
     ) -> anyhow::Result<()> {
         tracing::info!("ProveSegment: {}", task.segment.index);
+        self.task_start(header.clone()).await?;
         let receipt = tokio::task::spawn_blocking(move || {
             let ctx = VerifierContext::default();
             let prover = get_prover_server(&ProverOpts::default())?;
@@ -173,22 +207,38 @@ impl Processor {
         })
         .await??;
         self.factory
-            .tell(&TaskDoneMsg {
-                job_id,
-                task_id,
-                body: TaskDone::ProveSegment(Arc::new(receipt)),
+            .tell(TaskDoneMsg {
+                header,
+                body: TaskDone::ProveSegment(Box::new(receipt)),
             })
             .await?;
         Ok(())
     }
 
-    async fn lift(
+    async fn prove_keccak(
         &self,
-        job_id: ActorID,
-        task_id: TaskId,
-        task: Arc<LiftTask>,
+        header: TaskHeader,
+        task: Arc<ProveKeccakTask>,
     ) -> anyhow::Result<()> {
+        tracing::info!("ProveKeccak: {}", header.global_id.task_id);
+        self.task_start(header.clone()).await?;
+        let receipt = tokio::task::spawn_blocking(move || {
+            let prover = get_prover_server(&ProverOpts::default())?;
+            prover.prove_keccak(&task.request)
+        })
+        .await??;
+        self.factory
+            .tell(TaskDoneMsg {
+                header,
+                body: TaskDone::ProveKeccak(Box::new(receipt)),
+            })
+            .await?;
+        Ok(())
+    }
+
+    async fn lift(&self, header: TaskHeader, task: Arc<LiftTask>) -> anyhow::Result<()> {
         tracing::info!("Lift: {}", task.receipt.index);
+        self.task_start(header.clone()).await?;
         let segment_idx = task.receipt.index;
         let receipt = tokio::task::spawn_blocking(move || {
             let prover = get_prover_server(&ProverOpts::default())?;
@@ -196,10 +246,9 @@ impl Processor {
         })
         .await??;
         self.factory
-            .tell(&TaskDoneMsg {
-                job_id,
-                task_id,
-                body: TaskDone::Lift(Arc::new(JoinNode {
+            .tell(TaskDoneMsg {
+                header,
+                body: TaskDone::Lift(Box::new(JoinNode {
                     range: (segment_idx..segment_idx + 1).into(),
                     receipt,
                 })),
@@ -208,44 +257,62 @@ impl Processor {
         Ok(())
     }
 
-    async fn join(
-        &self,
-        job_id: ActorID,
-        task_id: TaskId,
-        task: Arc<JoinTask>,
-    ) -> anyhow::Result<()> {
+    async fn join(&self, header: TaskHeader, task: Arc<JoinTask>) -> anyhow::Result<()> {
         let range = task.range;
         tracing::info!("Join: {range:?}");
+        self.task_start(header.clone()).await?;
         let receipt = tokio::task::spawn_blocking(move || {
             let prover = get_prover_server(&ProverOpts::default())?;
             prover.join(&task.receipts[0], &task.receipts[1])
         })
         .await??;
         self.factory
-            .tell(&TaskDoneMsg {
-                job_id,
-                task_id,
-                body: TaskDone::Join(Arc::new(JoinNode { range, receipt })),
+            .tell(TaskDoneMsg {
+                header,
+                body: TaskDone::Join(Box::new(JoinNode { range, receipt })),
+            })
+            .await?;
+        Ok(())
+    }
+
+    async fn union(&self, header: TaskHeader, task: Arc<UnionTask>) -> anyhow::Result<()> {
+        tracing::info!("Union: {:?}", header.global_id.task_id);
+        self.task_start(header.clone()).await?;
+        let receipt = tokio::task::spawn_blocking(move || {
+            let prover = get_prover_server(&ProverOpts::default())?;
+            prover.union(&task.receipts[0], &task.receipts[1])
+        })
+        .await??;
+        self.factory
+            .tell(TaskDoneMsg {
+                header,
+                body: TaskDone::Union(Box::new(receipt)),
+            })
+            .await?;
+        Ok(())
+    }
+
+    async fn resolve(&self, header: TaskHeader, task: Arc<ResolveTask>) -> anyhow::Result<()> {
+        tracing::info!("Resolve: {:?}", header.global_id.task_id);
+        self.task_start(header.clone()).await?;
+        let receipt = tokio::task::spawn_blocking(move || {
+            let prover = get_prover_server(&ProverOpts::default())?;
+            prover.resolve(&task.conditional, &task.assumption)
+        })
+        .await??;
+        self.factory
+            .tell(TaskDoneMsg {
+                header,
+                body: TaskDone::Resolve(Box::new(receipt)),
             })
             .await?;
         Ok(())
     }
 }
 
-async fn retry_lookup() -> Result<Option<RemoteActorRef<FactoryActor>>, RegistryError> {
-    for _ in 0..5 {
-        if let Some(actor) = RemoteActorRef::<FactoryActor>::lookup("factory").await? {
-            return Ok(Some(actor));
-        }
-        sleep(Duration::from_millis(100)).await;
-    }
-    Ok(None)
-}
-
-pub(crate) struct ExecuteTaskMsg {
-    pub job_id: ActorID,
-    pub task_id: TaskId,
-    pub task: ExecuteTask,
+struct ExecuteTaskMsg {
+    pub header: TaskHeader,
+    pub task: Arc<ExecuteTask>,
 }
 
 #[derive(Actor)]
@@ -272,10 +339,9 @@ impl Message<ExecuteTaskMsg> for ExecutorActor {
             .build()?;
         let mut exec = ExecutorImpl::from_elf(env, &msg.task.binary)?;
         let session = exec.run_with_callback(|segment| {
-            let msg = TaskStatusMsg {
-                job_id: msg.job_id,
-                task_id: msg.task_id,
-                body: TaskStatus::Segment(segment),
+            let msg = TaskUpdateMsg {
+                header: msg.header.clone(),
+                body: TaskUpdate::Segment(segment),
             };
             self.relay.tell(msg).blocking_send()?;
             Ok(Box::new(NullSegmentRef))
@@ -294,24 +360,24 @@ impl Message<ExecuteTaskMsg> for ExecutorActor {
 
 #[derive(Actor)]
 struct RelayActor {
-    factory: RemoteActorRef<FactoryActor>,
+    factory: GenericActorRef<FactoryActor>,
 }
 
 impl RelayActor {
-    pub fn spawn(factory: RemoteActorRef<FactoryActor>) -> ActorRef<Self> {
+    pub fn spawn(factory: GenericActorRef<FactoryActor>) -> ActorRef<Self> {
         spawn(Self { factory })
     }
 }
 
-impl Message<TaskStatusMsg> for RelayActor {
+impl Message<TaskUpdateMsg> for RelayActor {
     type Reply = ();
 
     async fn handle(
         &mut self,
-        msg: TaskStatusMsg,
+        msg: TaskUpdateMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.factory.tell(&msg).await.unwrap();
+        self.factory.tell(msg).await.unwrap();
     }
 }
 
@@ -323,6 +389,6 @@ impl Message<TaskDoneMsg> for RelayActor {
         msg: TaskDoneMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.factory.tell(&msg).await.unwrap();
+        self.factory.tell(msg).await.unwrap();
     }
 }
