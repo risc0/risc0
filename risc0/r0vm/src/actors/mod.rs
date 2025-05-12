@@ -22,12 +22,10 @@ pub(crate) mod worker;
 
 use std::{error::Error as StdError, net::SocketAddr};
 
-use factory::{FactoryRouterActor, RemoteFactoryActor};
 use futures::{SinkExt as _, StreamExt};
 use kameo::prelude::*;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
-use protocol::ProofReply;
 use serde::{Deserialize, Serialize};
 use tokio::{
     net::{TcpListener, TcpStream},
@@ -41,12 +39,12 @@ use tokio_util::{
 use crate::Cli;
 
 use self::{
-    factory::FactoryActor,
+    factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     job::JobActor,
     manager::ManagerActor,
     protocol::{
         factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
-        ProofRequest, TaskKind,
+        ProofReply, ProofRequest, TaskKind,
     },
     worker::Worker,
 };
