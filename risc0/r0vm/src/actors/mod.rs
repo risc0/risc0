@@ -31,7 +31,7 @@ use serde::{Deserialize, Serialize};
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
     net::{TcpListener, TcpStream},
-    task::JoinHandle,
+    task::{JoinHandle, JoinSet},
 };
 use tokio_util::{
     bytes::{Buf as _, BytesMut},
@@ -69,6 +69,7 @@ pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         tokio::signal::ctrl_c()
             .await
             .expect("failed to listen for ctrl-c");
+        println!();
     }
 
     app.stop().await;
@@ -161,27 +162,27 @@ impl App {
     }
 
     pub async fn stop(mut self) {
-        println!("stopping");
+        tracing::info!("app: stop");
 
         if let Some(server) = self.server.take() {
-            println!("server: stop");
+            tracing::info!("server: stop");
             server.stop().await;
         }
 
         if let Some(manager) = self.manager.take() {
             manager.stop_gracefully().await.unwrap();
-            println!("manager: wait for stop");
+            tracing::info!("manager: wait for stop");
             manager.wait_for_stop().await;
         }
 
         if let Some(worker) = self.worker.take() {
-            println!("worker: stop");
+            tracing::info!("worker: stop");
             worker.stop().await;
         }
 
         if let Some(factory) = self.factory {
             factory.stop_gracefully().await.unwrap();
-            println!("factory: wait for stop");
+            tracing::info!("factory: wait for stop");
             factory.wait_for_stop().await;
         }
 
@@ -231,20 +232,37 @@ impl Server {
         let addr = self.addr.unwrap();
         let manager = self.manager.clone();
         let factory = self.factory.clone();
-        let listener = TcpListener::bind(addr).await?;
         let token = self.token.clone();
+        let listener = TcpListener::bind(addr).await?;
 
         self.join_handle = Some(tokio::spawn(async move {
-            while let Ok((mut stream, _addr)) = listener.accept().await {
+            let mut join_set = JoinSet::new();
+            loop {
+                let result = tokio::select! {
+                    _ = token.cancelled() => {
+                        tracing::info!("tcp listener: stop");
+                        break;
+                    }
+                    result = listener.accept() => result
+                };
+
+                let (mut stream, _addr) = match result {
+                    Ok(result) => result,
+                    Err(err) => {
+                        tracing::error!("{err}");
+                        break;
+                    }
+                };
+
                 let manager = manager.clone();
                 let factory = factory.clone();
                 let token = token.clone();
-                tokio::spawn(async move {
+                join_set.spawn(async move {
                     let mut session = RemoteSession { manager, factory };
                     loop {
                         tokio::select! {
                             _ = token.cancelled() => {
-                                tracing::info!("stopping");
+                                tracing::info!("tcp session: stop");
                                 break;
                             }
                             request = recv_request(&mut stream) => {
@@ -254,6 +272,7 @@ impl Server {
                     }
                 });
             }
+            join_set.join_all().await;
         }));
 
         Ok(())
