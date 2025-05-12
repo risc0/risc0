@@ -12,14 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use kameo::prelude::*;
 use risc0_zkvm_methods::FIB_ELF;
 
-use super::{
-    manager::ManagerActor,
-    protocol::{ProofRequest, TaskKind},
-    retry_lookup, App,
-};
+use super::{protocol::TaskKind, App};
 
 #[test_log::test(tokio::test(flavor = "multi_thread"))]
 async fn basic() {
@@ -32,16 +27,15 @@ async fn basic() {
         TaskKind::Join,
     ];
 
-    let app = App::new_test(true, task_kinds).await.unwrap();
+    let mut app = App::new(true, task_kinds, None, true).await.unwrap();
 
     const ITERATIONS: u32 = 300_000;
-    let proof_request = ProofRequest {
-        binary: FIB_ELF.to_vec(),
-        input: u32::to_le_bytes(ITERATIONS).to_vec(),
-    };
 
-    let manager: RemoteActorRef<ManagerActor> = retry_lookup("manager").await.unwrap().unwrap();
-    let reply = manager.ask(&proof_request).await.unwrap();
+    let reply = app
+        .run_binary(FIB_ELF.to_vec(), u32::to_le_bytes(ITERATIONS).to_vec())
+        .await
+        .unwrap();
+
     reply.receipt.verify_integrity().unwrap();
 
     app.stop().await;

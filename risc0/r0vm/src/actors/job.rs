@@ -214,7 +214,7 @@ impl JobActor {
             // tracing::info!("maybe_finish: session done");
             if let Some((range, receipt)) = self.joins.first_key_value() {
                 if range.start == 0 && range.end == session.segment_count {
-                    // tracing::info!("maybe_finish: complete range");
+                    tracing::info!("done");
                     let reply_sender = self.reply_sender.take();
                     reply_sender.unwrap().send(ProofReply {
                         receipt: receipt.clone(),

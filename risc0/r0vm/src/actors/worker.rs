@@ -14,7 +14,6 @@
 
 use std::sync::Arc;
 
-use anyhow::anyhow;
 use kameo::prelude::*;
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, NullSegmentRef, ProverOpts, VerifierContext,
@@ -23,7 +22,7 @@ use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 
 use super::{
-    factory::FactoryActor,
+    factory::FactoryRouterActor,
     protocol::{
         factory::{GetTask, JoinNode, Session, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
         worker::TaskMsg,
@@ -32,74 +31,19 @@ use super::{
     },
 };
 
-pub(crate) enum GenericActorRef<A: Actor> {
-    Local(ActorRef<A>),
-    Remote(RemoteActorRef<A>),
-}
-
-impl<A: Actor> Clone for GenericActorRef<A> {
-    fn clone(&self) -> Self {
-        match self {
-            Self::Local(arg0) => Self::Local(arg0.clone()),
-            Self::Remote(arg0) => Self::Remote(arg0.clone()),
-        }
-    }
-}
-
-impl<A> GenericActorRef<A>
-where
-    A: Actor + RemoteActor,
-{
-    pub async fn tell<M>(&self, msg: M) -> anyhow::Result<()>
-    where
-        A: Message<M> + RemoteMessage<M>,
-        M: serde::Serialize + Send + Sync + 'static,
-        <A::Reply as Reply>::Error: serde::de::DeserializeOwned,
-    {
-        match self {
-            GenericActorRef::Local(actor_ref) => Ok(actor_ref
-                .tell(msg)
-                .await
-                .map_err(|err| anyhow!("{err:?}"))?),
-            GenericActorRef::Remote(actor_ref) => Ok(actor_ref
-                .tell(&msg)
-                .await
-                .map_err(|err| anyhow!("{err:?}"))?),
-        }
-    }
-
-    pub async fn ask<M>(&self, msg: M) -> anyhow::Result<<A::Reply as Reply>::Ok>
-    where
-        A: Message<M> + RemoteMessage<M>,
-        M: serde::Serialize + Send + Sync + 'static,
-        <A::Reply as Reply>::Ok: serde::de::DeserializeOwned,
-        <A::Reply as Reply>::Error: serde::de::DeserializeOwned,
-    {
-        match self {
-            GenericActorRef::Local(actor_ref) => {
-                Ok(actor_ref.ask(msg).await.map_err(|err| anyhow!("{err:?}"))?)
-            }
-            GenericActorRef::Remote(actor_ref) => Ok(actor_ref
-                .ask(&msg)
-                .await
-                .map_err(|err| anyhow!("{err:?}"))?),
-        }
-    }
-}
-
 struct Processor {
-    factory: GenericActorRef<FactoryActor>,
+    factory: ActorRef<FactoryRouterActor>,
 }
 
 pub(crate) struct Worker {
-    factory: GenericActorRef<FactoryActor>,
+    factory: ActorRef<FactoryRouterActor>,
     task_kinds: Vec<TaskKind>,
     token: CancellationToken,
     join_handle: Option<JoinHandle<()>>,
 }
 
 impl Worker {
-    pub fn new(factory: GenericActorRef<FactoryActor>, task_kinds: Vec<TaskKind>) -> Self {
+    pub fn new(factory: ActorRef<FactoryRouterActor>, task_kinds: Vec<TaskKind>) -> Self {
         Self {
             factory,
             task_kinds,
@@ -123,13 +67,14 @@ impl Worker {
         let token = self.token.clone();
         self.join_handle = Some(tokio::spawn(async move {
             loop {
+                let request = request.clone();
                 tokio::select! {
                     _ = token.cancelled() => {
                         tracing::info!("stopping");
                         break;
                     }
-                    msg = factory.ask(request.clone()) => {
-                        processor.process_task(msg.unwrap()).await.unwrap();
+                    reply = factory.ask(request) => {
+                        processor.process_task(reply.unwrap()).await.unwrap();
                     }
                 }
             }
@@ -158,13 +103,15 @@ impl Processor {
     }
 
     async fn task_start(&self, header: TaskHeader) -> anyhow::Result<()> {
-        self.factory
-            .tell(TaskUpdateMsg {
-                header,
-                body: TaskUpdate::Start,
-            })
-            .await?;
-        Ok(())
+        self.send_update(header, TaskUpdate::Start).await
+    }
+
+    async fn send_update(&self, header: TaskHeader, body: TaskUpdate) -> anyhow::Result<()> {
+        Ok(self.factory.tell(TaskUpdateMsg { header, body }).await?)
+    }
+
+    async fn send_done(&self, header: TaskHeader, body: TaskDone) -> anyhow::Result<()> {
+        Ok(self.factory.tell(TaskDoneMsg { header, body }).await?)
     }
 
     async fn execute(&self, header: TaskHeader, task: Arc<ExecuteTask>) -> anyhow::Result<()> {
@@ -183,11 +130,7 @@ impl Processor {
         relay.stop_gracefully().await?;
         relay.wait_for_stop().await;
 
-        self.factory
-            .tell(TaskDoneMsg {
-                header,
-                body: TaskDone::Session(Box::new(session)),
-            })
+        self.send_done(header, TaskDone::Session(Box::new(session)))
             .await?;
 
         Ok(())
@@ -206,11 +149,7 @@ impl Processor {
             prover.prove_segment(&ctx, &task.segment)
         })
         .await??;
-        self.factory
-            .tell(TaskDoneMsg {
-                header,
-                body: TaskDone::ProveSegment(Box::new(receipt)),
-            })
+        self.send_done(header, TaskDone::ProveSegment(Box::new(receipt)))
             .await?;
         Ok(())
     }
@@ -227,11 +166,7 @@ impl Processor {
             prover.prove_keccak(&task.request)
         })
         .await??;
-        self.factory
-            .tell(TaskDoneMsg {
-                header,
-                body: TaskDone::ProveKeccak(Box::new(receipt)),
-            })
+        self.send_done(header, TaskDone::ProveKeccak(Box::new(receipt)))
             .await?;
         Ok(())
     }
@@ -245,15 +180,14 @@ impl Processor {
             prover.lift(&task.receipt)
         })
         .await??;
-        self.factory
-            .tell(TaskDoneMsg {
-                header,
-                body: TaskDone::Lift(Box::new(JoinNode {
-                    range: (segment_idx..segment_idx + 1).into(),
-                    receipt,
-                })),
-            })
-            .await?;
+        self.send_done(
+            header,
+            TaskDone::Lift(Box::new(JoinNode {
+                range: (segment_idx..segment_idx + 1).into(),
+                receipt,
+            })),
+        )
+        .await?;
         Ok(())
     }
 
@@ -266,12 +200,11 @@ impl Processor {
             prover.join(&task.receipts[0], &task.receipts[1])
         })
         .await??;
-        self.factory
-            .tell(TaskDoneMsg {
-                header,
-                body: TaskDone::Join(Box::new(JoinNode { range, receipt })),
-            })
-            .await?;
+        self.send_done(
+            header,
+            TaskDone::Join(Box::new(JoinNode { range, receipt })),
+        )
+        .await?;
         Ok(())
     }
 
@@ -283,11 +216,7 @@ impl Processor {
             prover.union(&task.receipts[0], &task.receipts[1])
         })
         .await??;
-        self.factory
-            .tell(TaskDoneMsg {
-                header,
-                body: TaskDone::Union(Box::new(receipt)),
-            })
+        self.send_done(header, TaskDone::Union(Box::new(receipt)))
             .await?;
         Ok(())
     }
@@ -300,11 +229,7 @@ impl Processor {
             prover.resolve(&task.conditional, &task.assumption)
         })
         .await??;
-        self.factory
-            .tell(TaskDoneMsg {
-                header,
-                body: TaskDone::Resolve(Box::new(receipt)),
-            })
+        self.send_done(header, TaskDone::Resolve(Box::new(receipt)))
             .await?;
         Ok(())
     }
@@ -360,11 +285,11 @@ impl Message<ExecuteTaskMsg> for ExecutorActor {
 
 #[derive(Actor)]
 struct RelayActor {
-    factory: GenericActorRef<FactoryActor>,
+    factory: ActorRef<FactoryRouterActor>,
 }
 
 impl RelayActor {
-    pub fn spawn(factory: GenericActorRef<FactoryActor>) -> ActorRef<Self> {
+    pub fn spawn(factory: ActorRef<FactoryRouterActor>) -> ActorRef<Self> {
         spawn(Self { factory })
     }
 }

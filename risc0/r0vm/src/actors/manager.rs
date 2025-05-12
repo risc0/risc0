@@ -21,7 +21,7 @@ use super::{
     protocol::{ProofReply, ProofRequest},
 };
 
-#[derive(Actor, RemoteActor)]
+#[derive(Actor)]
 pub(crate) struct ManagerActor {
     factory: ActorRef<FactoryActor>,
     join_set: JoinSet<()>,
@@ -36,7 +36,6 @@ impl ManagerActor {
     }
 }
 
-#[remote_message("e7a0c110-630b-40a3-902e-dd9fb13f66fe")]
 impl Message<ProofRequest> for ManagerActor {
     type Reply = DelegatedReply<ProofReply>;
 

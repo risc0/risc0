@@ -20,12 +20,23 @@ pub(crate) mod protocol;
 mod tests;
 pub(crate) mod worker;
 
-use std::{error::Error as StdError, time::Duration};
+use std::{error::Error as StdError, net::SocketAddr};
 
-use kameo::{error::RegistryError, prelude::*, remote::ActorSwarm};
+use factory::{FactoryRouterActor, RemoteFactoryActor};
+use kameo::prelude::*;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
-use tokio::time::sleep;
+use protocol::ProofReply;
+use serde::{Deserialize, Serialize};
+use tokio::{
+    io::{AsyncReadExt as _, AsyncWriteExt as _},
+    net::{TcpListener, TcpStream},
+    task::JoinHandle,
+};
+use tokio_util::{
+    bytes::{Buf as _, BytesMut},
+    sync::CancellationToken,
+};
 
 use crate::Cli;
 
@@ -33,16 +44,17 @@ use self::{
     factory::FactoryActor,
     job::JobActor,
     manager::ManagerActor,
-    protocol::{ProofRequest, TaskKind},
-    worker::{GenericActorRef, Worker},
+    protocol::{
+        factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
+        ProofRequest, TaskKind,
+    },
+    worker::Worker,
 };
-
-const LISTEN_ADDR: &str = "/ip4/0.0.0.0/udp/9000/quic-v1";
 
 pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     let is_manager = args.mode.manager;
     let task_kinds = args.mode.worker.clone();
-    let mut app = App::new(is_manager, task_kinds).await?;
+    let mut app = App::new(is_manager, task_kinds, args.addr, false).await?;
 
     if let Some(ref bin_path) = args.mode.elf {
         let binary = std::fs::read(bin_path)?;
@@ -51,7 +63,7 @@ pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         } else {
             vec![]
         };
-        app.run_binary(binary, input).await;
+        app.run_binary(binary, input).await.unwrap();
     } else {
         println!("Use Ctrl-C to stop");
         tokio::signal::ctrl_c()
@@ -65,8 +77,6 @@ pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
 }
 
 pub(crate) async fn client_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
-    ActorSwarm::bootstrap()?;
-
     let bin_path = args.mode.elf.as_ref().unwrap();
     let binary = std::fs::read(bin_path)?;
     let input = if let Some(ref input_path) = args.initial_input {
@@ -75,76 +85,70 @@ pub(crate) async fn client_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         vec![]
     };
 
-    let manager: RemoteActorRef<ManagerActor> = retry_lookup("manager").await?.unwrap();
-    let reply = manager.ask(&ProofRequest { binary, input }).await?;
+    tracing::info!("Sending request");
+    let mut tcp = TcpStream::connect(args.addr.unwrap()).await?;
+    send(&mut tcp, ProofRequest { binary, input }).await?;
+    let reply: ProofReply = recv(&mut tcp).await?;
     reply.receipt.verify_integrity()?;
+    tracing::info!("Receipt verified");
 
     Ok(())
+}
+
+#[derive(Serialize, Deserialize)]
+enum RemoteRequest {
+    ProofRequest(ProofRequest),
+    GetTask(GetTask),
+    TaskUpdate(TaskUpdateMsg),
+    TaskDone(TaskDoneMsg),
 }
 
 pub(crate) struct App {
     provider: SdkTracerProvider,
     manager: Option<ActorRef<ManagerActor>>,
-    factory: Option<GenericActorRef<FactoryActor>>,
+    factory: Option<ActorRef<FactoryActor>>,
     worker: Option<Worker>,
+    server: Option<Server>,
 }
 
 impl App {
     pub async fn new(
         is_manager: bool,
         task_kinds: Vec<TaskKind>,
-    ) -> Result<Self, Box<dyn StdError>> {
-        Self::new_inner(is_manager, false, task_kinds).await
-    }
-
-    #[cfg(test)]
-    pub async fn new_test(
-        is_manager: bool,
-        task_kinds: Vec<TaskKind>,
-    ) -> Result<Self, Box<dyn StdError>> {
-        Self::new_inner(is_manager, true, task_kinds).await
-    }
-
-    async fn new_inner(
-        is_manager: bool,
+        addr: Option<SocketAddr>,
         is_test: bool,
-        task_kinds: Vec<TaskKind>,
     ) -> Result<Self, Box<dyn StdError>> {
         let provider = init_tracer_provider();
         let mut manager = None;
         let mut factory = None;
         let mut worker = None;
-
-        let swarm = ActorSwarm::bootstrap()?;
+        let mut server = None;
 
         if is_manager {
-            if !is_test {
-                swarm.listen_on(LISTEN_ADDR.parse()?).await?;
-            }
-
             let factory_ref = kameo::spawn(FactoryActor::new());
-            factory_ref.register("factory").await?;
-            factory = Some(GenericActorRef::Local(factory_ref.clone()));
+            factory = Some(factory_ref.clone());
 
-            let manager_ref = kameo::spawn(ManagerActor::new(factory_ref));
-            manager_ref.register("manager").await?;
-            manager = Some(manager_ref);
+            let manager_ref = kameo::spawn(ManagerActor::new(factory_ref.clone()));
+            manager = Some(manager_ref.clone());
+
+            if !is_test {
+                server = Some(Server::new(addr, manager_ref, factory_ref));
+                server.as_mut().unwrap().start().await?;
+            }
         }
 
         if !task_kinds.is_empty() {
             let factory_ref = match factory {
-                Some(factory) => factory,
+                Some(ref factory) => kameo::spawn(FactoryRouterActor::Local(factory.clone())),
                 None => {
-                    let factory = retry_lookup("factory").await?.unwrap();
-                    GenericActorRef::Remote(factory)
+                    let remote = kameo::spawn(RemoteFactoryActor::new(addr.unwrap()).await?);
+                    kameo::spawn(FactoryRouterActor::Remote(remote))
                 }
             };
 
             tracing::info!("Starting worker: {task_kinds:?}");
-            worker = Some(Worker::new(factory_ref.clone(), task_kinds));
+            worker = Some(Worker::new(factory_ref, task_kinds));
             worker.as_mut().unwrap().start();
-
-            factory = Some(factory_ref);
         }
 
         Ok(Self {
@@ -152,39 +156,144 @@ impl App {
             manager,
             factory,
             worker,
+            server,
         })
     }
 
     pub async fn stop(mut self) {
         println!("stopping");
 
+        if let Some(server) = self.server.take() {
+            println!("server: stop");
+            server.stop().await;
+        }
+
         if let Some(manager) = self.manager.take() {
             manager.stop_gracefully().await.unwrap();
-            println!("waiting for manager");
+            println!("manager: wait for stop");
             manager.wait_for_stop().await;
         }
 
         if let Some(worker) = self.worker.take() {
-            println!("waiting for worker");
+            println!("worker: stop");
             worker.stop().await;
         }
 
-        if let Some(GenericActorRef::Local(factory)) = self.factory {
+        if let Some(factory) = self.factory {
             factory.stop_gracefully().await.unwrap();
-            println!("waiting for factory");
+            println!("factory: wait for stop");
             factory.wait_for_stop().await;
         }
 
         self.provider.shutdown().unwrap();
     }
 
-    pub async fn run_binary(&mut self, binary: Vec<u8>, input: Vec<u8>) {
-        let Some(GenericActorRef::Local(ref factory)) = self.factory else {
-            unreachable!()
-        };
-        let job = kameo::spawn(JobActor::new(factory.clone()));
-        job.tell(ProofRequest { binary, input }).await.unwrap();
+    pub async fn run_binary(
+        &mut self,
+        binary: Vec<u8>,
+        input: Vec<u8>,
+    ) -> anyhow::Result<ProofReply> {
+        let job = kameo::spawn(JobActor::new(self.factory.as_ref().unwrap().clone()));
+        let reply = job.ask(ProofRequest { binary, input }).await?;
         job.wait_for_stop().await;
+        Ok(reply)
+    }
+}
+
+struct Server {
+    addr: Option<SocketAddr>,
+    manager: ActorRef<ManagerActor>,
+    factory: ActorRef<FactoryActor>,
+    token: CancellationToken,
+    join_handle: Option<JoinHandle<()>>,
+}
+
+impl Server {
+    pub fn new(
+        addr: Option<SocketAddr>,
+        manager: ActorRef<ManagerActor>,
+        factory: ActorRef<FactoryActor>,
+    ) -> Self {
+        Self {
+            addr,
+            manager,
+            factory,
+            token: CancellationToken::new(),
+            join_handle: None,
+        }
+    }
+
+    pub async fn start(&mut self) -> anyhow::Result<()> {
+        if self.join_handle.is_some() {
+            return Ok(());
+        }
+
+        let addr = self.addr.unwrap();
+        let manager = self.manager.clone();
+        let factory = self.factory.clone();
+        let listener = TcpListener::bind(addr).await?;
+        let token = self.token.clone();
+
+        self.join_handle = Some(tokio::spawn(async move {
+            while let Ok((mut stream, _addr)) = listener.accept().await {
+                let manager = manager.clone();
+                let factory = factory.clone();
+                let token = token.clone();
+                tokio::spawn(async move {
+                    let mut session = RemoteSession { manager, factory };
+                    loop {
+                        tokio::select! {
+                            _ = token.cancelled() => {
+                                tracing::info!("stopping");
+                                break;
+                            }
+                            request = recv_request(&mut stream) => {
+                                session.handle_request(&mut stream, request).await;
+                            }
+                        }
+                    }
+                });
+            }
+        }));
+
+        Ok(())
+    }
+
+    pub async fn stop(self) {
+        if let Some(join_handle) = self.join_handle {
+            self.token.cancel();
+            join_handle.await.unwrap();
+        }
+    }
+}
+
+async fn recv_request(stream: &mut TcpStream) -> RemoteRequest {
+    recv(stream).await.unwrap()
+}
+
+struct RemoteSession {
+    manager: ActorRef<ManagerActor>,
+    factory: ActorRef<FactoryActor>,
+}
+
+impl RemoteSession {
+    pub async fn handle_request(&mut self, stream: &mut TcpStream, request: RemoteRequest) {
+        match request {
+            RemoteRequest::ProofRequest(msg) => {
+                let reply = self.manager.ask(msg).await.unwrap();
+                send(stream, reply).await.unwrap();
+            }
+            RemoteRequest::GetTask(msg) => {
+                let reply = self.factory.ask(msg).await.unwrap();
+                send(stream, reply).await.unwrap();
+            }
+            RemoteRequest::TaskUpdate(msg) => {
+                self.factory.tell(msg).await.unwrap();
+            }
+            RemoteRequest::TaskDone(msg) => {
+                self.factory.tell(msg).await.unwrap();
+            }
+        }
     }
 }
 
@@ -206,15 +315,24 @@ fn init_tracer_provider() -> SdkTracerProvider {
     provider
 }
 
-async fn retry_lookup<A>(name: &str) -> Result<Option<RemoteActorRef<A>>, RegistryError>
-where
-    A: Actor + RemoteActor,
-{
-    for _ in 0..5 {
-        if let Some(actor) = RemoteActorRef::lookup(name).await? {
-            return Ok(Some(actor));
-        }
-        sleep(Duration::from_millis(100)).await;
-    }
-    Ok(None)
+pub(crate) async fn send<T: serde::Serialize>(
+    stream: &mut TcpStream,
+    msg: T,
+) -> anyhow::Result<()> {
+    let len = bincode::serialized_size(&msg)?;
+    stream.write_u32(len as u32).await?;
+    let bytes = bincode::serialize(&msg)?;
+    Ok(stream.write_all(&bytes).await?)
+}
+
+pub(crate) async fn recv<T: serde::de::DeserializeOwned>(
+    stream: &mut TcpStream,
+) -> anyhow::Result<T> {
+    let mut buf = BytesMut::with_capacity(1024);
+    buf.resize(size_of::<u32>(), 0);
+    stream.read_exact(&mut buf).await?;
+    let len = buf.get_u32() as usize;
+    buf.resize(len, 0);
+    stream.read_exact(&mut buf).await?;
+    Ok(bincode::deserialize(&buf)?)
 }
