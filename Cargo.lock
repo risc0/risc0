@@ -5965,6 +5965,7 @@ dependencies = [
  "bincode",
  "bytemuck",
  "clap 4.5.37",
+ "futures",
  "kameo",
  "multi_index_map",
  "opentelemetry",

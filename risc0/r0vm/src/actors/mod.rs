@@ -23,18 +23,18 @@ pub(crate) mod worker;
 use std::{error::Error as StdError, net::SocketAddr};
 
 use factory::{FactoryRouterActor, RemoteFactoryActor};
+use futures::{SinkExt as _, StreamExt};
 use kameo::prelude::*;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
 use protocol::ProofReply;
 use serde::{Deserialize, Serialize};
 use tokio::{
-    io::{AsyncReadExt as _, AsyncWriteExt as _},
     net::{TcpListener, TcpStream},
     task::{JoinHandle, JoinSet},
 };
 use tokio_util::{
-    bytes::{Buf as _, BytesMut},
+    codec::{FramedRead, FramedWrite, LengthDelimitedCodec},
     sync::CancellationToken,
 };
 
@@ -88,8 +88,9 @@ pub(crate) async fn client_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
 
     tracing::info!("Sending request");
     let mut tcp = TcpStream::connect(args.addr.unwrap()).await?;
-    send(&mut tcp, ProofRequest { binary, input }).await?;
-    let reply: ProofReply = recv(&mut tcp).await?;
+    let msg = RemoteRequest::ProofRequest(ProofRequest { binary, input });
+    send(&mut tcp, msg).await?;
+    let reply: ProofReply = recv(&mut tcp).await?.unwrap();
     reply.receipt.verify_integrity()?;
     tracing::info!("Receipt verified");
 
@@ -260,14 +261,17 @@ impl Server {
                 join_set.spawn(async move {
                     let mut session = RemoteSession { manager, factory };
                     loop {
-                        tokio::select! {
+                        let result = tokio::select! {
                             _ = token.cancelled() => {
                                 tracing::info!("tcp session: stop");
                                 break;
                             }
-                            request = recv_request(&mut stream) => {
-                                session.handle_request(&mut stream, request).await;
-                            }
+                            result = recv_request(&mut stream) => result
+                        }
+                        .unwrap();
+                        match result {
+                            Some(request) => session.handle_request(&mut stream, request).await,
+                            None => break,
                         }
                     }
                 });
@@ -286,8 +290,8 @@ impl Server {
     }
 }
 
-async fn recv_request(stream: &mut TcpStream) -> RemoteRequest {
-    recv(stream).await.unwrap()
+async fn recv_request(stream: &mut TcpStream) -> anyhow::Result<Option<RemoteRequest>> {
+    recv(stream).await
 }
 
 struct RemoteSession {
@@ -338,20 +342,25 @@ pub(crate) async fn send<T: serde::Serialize>(
     stream: &mut TcpStream,
     msg: T,
 ) -> anyhow::Result<()> {
-    let len = bincode::serialized_size(&msg)?;
-    stream.write_u32(len as u32).await?;
+    let encoder = LengthDelimitedCodec::new();
+    let mut writer = FramedWrite::new(stream, encoder);
+
     let bytes = bincode::serialize(&msg)?;
-    Ok(stream.write_all(&bytes).await?)
+    writer.send(bytes.into()).await?;
+
+    Ok(())
 }
 
 pub(crate) async fn recv<T: serde::de::DeserializeOwned>(
     stream: &mut TcpStream,
-) -> anyhow::Result<T> {
-    let mut buf = BytesMut::with_capacity(1024);
-    buf.resize(size_of::<u32>(), 0);
-    stream.read_exact(&mut buf).await?;
-    let len = buf.get_u32() as usize;
-    buf.resize(len, 0);
-    stream.read_exact(&mut buf).await?;
-    Ok(bincode::deserialize(&buf)?)
+) -> anyhow::Result<Option<T>> {
+    let decoder = LengthDelimitedCodec::new();
+
+    let mut reader = FramedRead::new(stream, decoder);
+    let frame = match reader.next().await {
+        Some(result) => result?,
+        None => return Ok(None),
+    };
+
+    Ok(Some(bincode::deserialize(&frame)?))
 }

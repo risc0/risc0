@@ -29,6 +29,7 @@ use super::{
         worker::TaskMsg,
         GlobalId, TaskKind,
     },
+    RemoteRequest,
 };
 
 #[derive(MultiIndexMap)]
@@ -283,9 +284,10 @@ impl Message<GetTask> for RemoteFactoryActor {
     type Reply = DelegatedReply<TaskMsg>;
 
     async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
+        let msg = RemoteRequest::GetTask(msg);
         super::send(&mut self.tcp, msg).await.unwrap();
         let (delegated_reply, reply_sender) = ctx.reply_sender();
-        let reply: TaskMsg = super::recv(&mut self.tcp).await.unwrap();
+        let reply: TaskMsg = super::recv(&mut self.tcp).await.unwrap().unwrap();
         reply_sender.unwrap().send(reply);
         delegated_reply
     }
@@ -299,6 +301,7 @@ impl Message<TaskUpdateMsg> for RemoteFactoryActor {
         msg: TaskUpdateMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
+        let msg = RemoteRequest::TaskUpdate(msg);
         super::send(&mut self.tcp, msg).await.unwrap();
     }
 }
@@ -311,6 +314,7 @@ impl Message<TaskDoneMsg> for RemoteFactoryActor {
         msg: TaskDoneMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
+        let msg = RemoteRequest::TaskDone(msg);
         super::send(&mut self.tcp, msg).await.unwrap();
     }
 }
