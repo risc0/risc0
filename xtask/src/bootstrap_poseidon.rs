@@ -146,8 +146,7 @@ fn run_sage() -> String {
         .arg(SECURITY.to_string()) // Desired security level
         .arg(format!("{:x}", FIELD)) // P in hex i.e. 15*2^27 + 1
         .stdout(Stdio::piped()) // Pipe output
-        .spawn().expect("Failed to spawn Sage process. Is Sage installed?")
-        .unwrap();
+        .spawn().expect("Failed to spawn Sage process. Is Sage installed?");
 
     // Convert the output to a bunch of lines
     let sage_output = sage_child.wait_with_output().unwrap();
