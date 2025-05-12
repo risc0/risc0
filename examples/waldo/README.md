@@ -99,7 +99,7 @@ could be used to produce a provable blur, image down-scaling, and more.
 First, make sure [rustup](https://rustup.rs) is installed. This project uses a
 [nightly](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html) version
 of [Rust](https://doc.rust-lang.org/book/ch01-01-installation.html). The
-[`rust-toolchain`](rust-toolchain) file will be used by `cargo` to automatically
+[`rust-toolchain`](../rust-toolchain.toml) file will be used by `cargo` to automatically
 install the correct version.
 
 To build and run this example, try using the following commands.
