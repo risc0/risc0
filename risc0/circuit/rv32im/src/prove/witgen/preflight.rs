@@ -540,6 +540,7 @@ impl Risc0Context for Preflight<'_> {
     }
 
     // Pass memory ops to pager + record
+    #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         if op == LoadOp::Peek {
             return self.pager.peek(addr);
@@ -570,6 +571,7 @@ impl Risc0Context for Preflight<'_> {
         Ok(word)
     }
 
+    #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let cycle = (2 * self.trace.cycles.len() + 1) as u32;
         let prev_word = if addr >= MEMORY_END_ADDR {
