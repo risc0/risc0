@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use std::cmp::max;
+use std::ops::{Add, Mul};
 
 use anyhow::{ensure, Result};
-use auto_ops::impl_op_ex;
 use risc0_zkp::field::Elem as _;
 use smallvec::{smallvec, SmallVec};
 
@@ -144,6 +144,7 @@ impl BytePolynomial {
     }
 }
 
+#[inline(always)]
 fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
     let mut ret = smallvec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
     for (i, coeff) in ret.iter_mut().enumerate() {
@@ -157,6 +158,7 @@ fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
     BytePolynomial { coeffs: ret }
 }
 
+#[inline(always)]
 fn byte_poly_mul(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
     let mut ret = smallvec![0; lhs.coeffs.len() + rhs.coeffs.len()];
     for (i, lhs) in lhs.coeffs.iter().enumerate() {
@@ -167,6 +169,7 @@ fn byte_poly_mul(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
     BytePolynomial { coeffs: ret }
 }
 
+#[inline(always)]
 fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
     let mut ret = lhs.coeffs.clone();
     for coeff in ret.iter_mut() {
@@ -175,9 +178,95 @@ fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
     BytePolynomial { coeffs: ret }
 }
 
-impl_op_ex!(+|a: &BytePolynomial, b: &BytePolynomial| -> BytePolynomial { byte_poly_add(a, b) });
-impl_op_ex!(*|a: &BytePolynomial, b: &BytePolynomial| -> BytePolynomial { byte_poly_mul(a, b) });
-impl_op_ex!(*|a: &BytePolynomial, b: i32| -> BytePolynomial { byte_poly_mul_const(a, b) });
+impl Add<&BytePolynomial> for &BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn add(self, rhs: &BytePolynomial) -> Self::Output {
+        byte_poly_add(self, rhs)
+    }
+}
+
+impl Add<BytePolynomial> for &BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn add(self, rhs: BytePolynomial) -> Self::Output {
+        byte_poly_add(self, &rhs)
+    }
+}
+
+impl Add<&BytePolynomial> for BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn add(self, rhs: &BytePolynomial) -> Self::Output {
+        byte_poly_add(&self, rhs)
+    }
+}
+
+impl Add<BytePolynomial> for BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn add(self, rhs: BytePolynomial) -> Self::Output {
+        byte_poly_add(&self, &rhs)
+    }
+}
+
+impl Mul<&BytePolynomial> for &BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn mul(self, rhs: &BytePolynomial) -> Self::Output {
+        byte_poly_mul(self, rhs)
+    }
+}
+
+impl Mul<BytePolynomial> for &BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn mul(self, rhs: BytePolynomial) -> Self::Output {
+        byte_poly_mul(self, &rhs)
+    }
+}
+
+impl Mul<&BytePolynomial> for BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn mul(self, rhs: &BytePolynomial) -> Self::Output {
+        byte_poly_mul(&self, rhs)
+    }
+}
+
+impl Mul<BytePolynomial> for BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn mul(self, rhs: BytePolynomial) -> Self::Output {
+        byte_poly_mul(&self, &rhs)
+    }
+}
+
+impl Mul<i32> for &BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn mul(self, rhs: i32) -> Self::Output {
+        byte_poly_mul_const(self, rhs)
+    }
+}
+
+impl Mul<i32> for BytePolynomial {
+    type Output = BytePolynomial;
+
+    #[inline(always)]
+    fn mul(self, rhs: i32) -> Self::Output {
+        byte_poly_mul_const(&self, rhs)
+    }
+}
 
 const MAX_POWERS: usize = BIGINT_WIDTH_BYTES + 1;
 

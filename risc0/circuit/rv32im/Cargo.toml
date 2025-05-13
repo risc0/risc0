@@ -34,7 +34,6 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-auto_ops = { version = "0.3", optional = true }
 bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
@@ -71,7 +70,6 @@ default = ["prove"]
 # entropy_finder = []
 execute = [
   "anyhow/backtrace",
-  "dep:auto_ops",
   "dep:byteorder",
   "dep:enum-map",
   "dep:malachite",
