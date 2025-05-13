@@ -293,6 +293,7 @@ jobs:
         run: cargo binstall cargo-nextest
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force gdb $RISC0_CPP_TOOLCHAIN_VERSION
       - name: build workspace
         run: cargo test --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --no-run --exclude doc-test
       - name: test workspace
