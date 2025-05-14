@@ -979,6 +979,7 @@ dependencies = [
  "risc0-zkp",
  "serde",
  "tracing",
+ "wide",
 ]
 
 [[package]]
@@ -1093,6 +1094,15 @@ checksum = "b4382d3af3a4ebdae7f64ba6edd9114fff92c89808004c4943b393377a25d001"
 dependencies = [
  "downcast-rs",
  "paste",
+]
+
+[[package]]
+name = "safe_arch"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96b02de82ddbe1b636e6170c21be622223aea188ef2e139be0a5b219ec215323"
+dependencies = [
+ "bytemuck",
 ]
 
 [[package]]
@@ -1293,6 +1303,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9683f9a5a998d873c0d21fcbe3c083009670149a8fab228644b8bd36b2c48cb3"
 dependencies = [
  "wit-bindgen-rt",
+]
+
+[[package]]
+name = "wide"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41b5576b9a81633f3e8df296ce0063042a73507636cbe956c61133dd7034ab22"
+dependencies = [
+ "bytemuck",
+ "safe_arch",
 ]
 
 [[package]]

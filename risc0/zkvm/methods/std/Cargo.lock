@@ -646,7 +646,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.59.0",
+ "windows-sys",
 ]
 
 [[package]]
@@ -739,7 +739,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33d852cb9b869c2a9b3df2f71a3074817f01e1844f839a144f5fcef059a4eb5d"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys",
 ]
 
 [[package]]
@@ -1403,6 +1403,7 @@ dependencies = [
  "risc0-zkp",
  "serde",
  "tracing",
+ "wide",
 ]
 
 [[package]]
@@ -1578,7 +1579,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys",
 ]
 
 [[package]]
@@ -1604,6 +1605,15 @@ dependencies = [
  "thiserror",
  "toml",
  "yaml-rust2",
+]
+
+[[package]]
+name = "safe_arch"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96b02de82ddbe1b636e6170c21be622223aea188ef2e139be0a5b219ec215323"
+dependencies = [
+ "bytemuck",
 ]
 
 [[package]]
@@ -1792,7 +1802,7 @@ dependencies = [
  "getrandom 0.2.15",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys",
 ]
 
 [[package]]
@@ -1987,6 +1997,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "wide"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41b5576b9a81633f3e8df296ce0063042a73507636cbe956c61133dd7034ab22"
+dependencies = [
+ "bytemuck",
+ "safe_arch",
+]
+
+[[package]]
 name = "winapi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2007,15 +2027,6 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
-
-[[package]]
-name = "windows-sys"
-version = "0.52.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
-dependencies = [
- "windows-targets",
-]
 
 [[package]]
 name = "windows-sys"

@@ -1437,6 +1437,7 @@ dependencies = [
  "risc0-zkp",
  "serde",
  "tracing",
+ "wide",
 ]
 
 [[package]]
@@ -1663,6 +1664,15 @@ dependencies = [
  "thiserror",
  "toml",
  "yaml-rust2",
+]
+
+[[package]]
+name = "safe_arch"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96b02de82ddbe1b636e6170c21be622223aea188ef2e139be0a5b219ec215323"
+dependencies = [
+ "bytemuck",
 ]
 
 [[package]]
@@ -2040,6 +2050,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26816d2e1a4a36a2940b96c5296ce403917633dff8f3440e9b236ed6f6bacad2"
 dependencies = [
  "wit-bindgen-rt",
+]
+
+[[package]]
+name = "wide"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41b5576b9a81633f3e8df296ce0063042a73507636cbe956c61133dd7034ab22"
+dependencies = [
+ "bytemuck",
+ "safe_arch",
 ]
 
 [[package]]

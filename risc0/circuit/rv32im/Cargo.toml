@@ -51,6 +51,7 @@ ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
+wide = "0.7"
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
