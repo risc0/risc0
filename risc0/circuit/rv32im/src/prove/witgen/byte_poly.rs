@@ -50,9 +50,14 @@ impl BytePolyProgram {
     }
 
     pub(crate) fn step(&mut self, insn: &Instruction, witness: &[u8]) -> Result<()> {
-        let coeffs = witness.iter().map(|x| *x as i32);
         let delta_poly = BytePolynomial {
-            coeffs: SmallVec::from_iter(coeffs),
+            coeffs: SmallVec::from_iter(witness.chunks(BytePolyChunk::LANES as usize).map(|w| {
+                let mut chunk = BytePolyChunk::ZERO;
+                for (c, w) in chunk.as_array_mut().iter_mut().zip(w.iter()) {
+                    *c = *w as i32;
+                }
+                chunk
+            })),
         };
 
         let new_poly = &self.poly + &delta_poly;
@@ -73,17 +78,23 @@ impl BytePolyProgram {
                 self.poly = BytePolynomial::zero();
             }
             PolyOp::Carry1 => {
-                let neg_poly = BytePolynomial {
-                    coeffs: SmallVec::from_elem(-128, BIGINT_WIDTH_BYTES),
-                };
+                let mut coeffs = smallvec![];
+                for _ in 0..(BIGINT_WIDTH_BYTES / BytePolyChunk::LANES as usize) {
+                    coeffs.push(BytePolyChunk::splat(-128));
+                }
+                let neg_poly = BytePolynomial { coeffs };
+
                 self.poly += (&delta_poly + neg_poly) * 64 * 256;
             }
             PolyOp::Carry2 => {
                 self.poly += &delta_poly * 256;
             }
             PolyOp::EqZero => {
+                let mut chunk = BytePolyChunk::ZERO;
+                chunk.as_array_mut()[0] = -256;
+                chunk.as_array_mut()[1] = 1;
                 let bp = BytePolynomial {
-                    coeffs: SmallVec::from_slice(&[-256, 1]),
+                    coeffs: smallvec![chunk],
                 };
                 self.total += bp * &new_poly;
                 self.total.eqz()?;
@@ -94,11 +105,11 @@ impl BytePolyProgram {
 
         tracing::trace!(
             "delta_poly[0]: {}, new_poly[0]: {}, poly[0]: {}, term[0]: {}, total[0]: {}",
-            &delta_poly.coeffs[0],
-            new_poly.coeffs[0],
-            self.poly.coeffs[0],
-            self.term.coeffs[0],
-            self.total.coeffs[0],
+            delta_poly.get(0),
+            new_poly.get(0),
+            self.poly.get(0),
+            self.term.get(0),
+            self.total.get(0),
         );
 
         Ok(())
@@ -111,42 +122,84 @@ impl BytePolyProgram {
     }
 }
 
+type BytePolyChunk = wide::i32x4;
+
 #[derive(Clone, Debug, Default)]
 pub(crate) struct BytePolynomial {
-    pub coeffs: SmallVec<[i32; 64]>,
+    coeffs: SmallVec<[BytePolyChunk; 64 / BytePolyChunk::LANES as usize]>,
 }
 
 impl BytePolynomial {
     pub(crate) fn one() -> Self {
+        let mut chunk = BytePolyChunk::ZERO;
+        chunk.as_array_mut()[0] = 1;
         Self {
-            coeffs: smallvec![1],
+            coeffs: smallvec![chunk],
         }
     }
 
     pub(crate) fn zero() -> Self {
         Self {
-            coeffs: smallvec![0],
+            coeffs: smallvec![BytePolyChunk::ZERO],
         }
     }
 
     pub(crate) fn shift(&self) -> Self {
         let mut ret = self.clone();
-        ret.coeffs.insert_from_slice(0, &[0; BIGINT_WIDTH_BYTES]);
+        for _ in 0..(BIGINT_WIDTH_BYTES / BytePolyChunk::LANES as usize) {
+            ret.coeffs.insert(0, BytePolyChunk::ZERO);
+        }
         ret
     }
 
     pub(crate) fn eqz(&self) -> Result<()> {
         ensure!(
-            self.coeffs.iter().all(|&coeff| coeff == 0),
+            self.coeffs
+                .iter()
+                .all(|&coeff| coeff == BytePolyChunk::ZERO),
             "Invalid eqz in bigint program"
         );
         Ok(())
+    }
+
+    #[inline(always)]
+    pub(crate) fn len(&self) -> usize {
+        self.coeffs.len() * BytePolyChunk::LANES as usize
+    }
+
+    #[inline(always)]
+    pub(crate) fn get(&self, idx: usize) -> &i32 {
+        assert!(idx < self.len());
+        unsafe { self.get_unchecked(idx) }
+    }
+
+    #[inline(always)]
+    pub(crate) unsafe fn get_unchecked(&self, idx: usize) -> &i32 {
+        let i = idx / BytePolyChunk::LANES as usize;
+        let j = idx % BytePolyChunk::LANES as usize;
+        self.coeffs.get_unchecked(i).as_array_ref().get_unchecked(j)
+    }
+
+    #[inline(always)]
+    pub(crate) fn get_mut(&mut self, idx: usize) -> &mut i32 {
+        assert!(idx < self.len());
+        unsafe { self.get_unchecked_mut(idx) }
+    }
+
+    #[inline(always)]
+    pub(crate) unsafe fn get_unchecked_mut(&mut self, idx: usize) -> &mut i32 {
+        let i = idx / BytePolyChunk::LANES as usize;
+        let j = idx % BytePolyChunk::LANES as usize;
+        self.coeffs
+            .get_unchecked_mut(i)
+            .as_array_mut()
+            .get_unchecked_mut(j)
     }
 }
 
 #[inline(always)]
 fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = smallvec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
+    let mut ret = smallvec![BytePolyChunk::ZERO; max(lhs.coeffs.len(), rhs.coeffs.len())];
     for (i, coeff) in ret.iter_mut().enumerate() {
         if i < lhs.coeffs.len() {
             *coeff += lhs.coeffs[i];
@@ -161,7 +214,7 @@ fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
 #[inline(always)]
 fn byte_poly_add_assign(lhs: &mut BytePolynomial, rhs: &BytePolynomial) {
     lhs.coeffs
-        .resize(max(lhs.coeffs.len(), rhs.coeffs.len()), 0);
+        .resize(max(lhs.coeffs.len(), rhs.coeffs.len()), BytePolyChunk::ZERO);
 
     for (coeff, &rhs) in lhs.coeffs.iter_mut().zip(rhs.coeffs.iter()) {
         *coeff += rhs;
@@ -170,20 +223,37 @@ fn byte_poly_add_assign(lhs: &mut BytePolynomial, rhs: &BytePolynomial) {
 
 #[inline(always)]
 fn byte_poly_mul(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = smallvec![0; lhs.coeffs.len() + rhs.coeffs.len()];
-    for (i, lhs) in lhs.coeffs.iter().enumerate() {
-        for (j, rhs) in rhs.coeffs.iter().enumerate() {
-            ret[i + j] += lhs * rhs;
+    let mut ret = BytePolynomial {
+        coeffs: smallvec![BytePolyChunk::ZERO; lhs.coeffs.len() + rhs.coeffs.len()],
+    };
+
+    for i in 0..lhs.len() {
+        let lhs_chunk = BytePolyChunk::splat(*lhs.get(i));
+
+        if i % BytePolyChunk::LANES as usize == 0 {
+            let start = i / BytePolyChunk::LANES as usize;
+            for (ret_chunk, rhs_chunk) in ret.coeffs[start..].iter_mut().zip(rhs.coeffs.iter()) {
+                *ret_chunk += *rhs_chunk * lhs_chunk;
+            }
+        } else {
+            for (j, rhs_chunk) in rhs.coeffs.iter().enumerate() {
+                let new_chunk = *rhs_chunk * lhs_chunk;
+                for (k, v) in new_chunk.as_array_ref().iter().enumerate() {
+                    unsafe {
+                        *ret.get_unchecked_mut(i + j * BytePolyChunk::LANES as usize + k) += v
+                    };
+                }
+            }
         }
     }
-    BytePolynomial { coeffs: ret }
+    ret
 }
 
 #[inline(always)]
 fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
     let mut ret = lhs.coeffs.clone();
     for coeff in ret.iter_mut() {
-        *coeff *= rhs;
+        *coeff *= BytePolyChunk::splat(rhs);
     }
     BytePolynomial { coeffs: ret }
 }
@@ -191,7 +261,7 @@ fn byte_poly_mul_const(lhs: &BytePolynomial, rhs: i32) -> BytePolynomial {
 #[inline(always)]
 fn byte_poly_mul_assign_const(lhs: &mut BytePolynomial, rhs: i32) {
     for coeff in &mut lhs.coeffs {
-        *coeff *= rhs;
+        *coeff *= BytePolyChunk::splat(rhs);
     }
 }
 
