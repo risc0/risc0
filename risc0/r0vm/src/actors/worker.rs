@@ -24,10 +24,10 @@ use tokio_util::sync::CancellationToken;
 use super::{
     factory::FactoryRouterActor,
     protocol::{
-        factory::{GetTask, JoinNode, Session, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
+        factory::{GetTask, JoinNode, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
         worker::TaskMsg,
-        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Task,
-        TaskHeader, TaskKind, UnionTask,
+        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
+        Task, TaskHeader, TaskKind, UnionTask,
     },
 };
 
@@ -106,12 +106,12 @@ impl Processor {
         self.send_update(header, TaskUpdate::Start).await
     }
 
-    async fn send_update(&self, header: TaskHeader, body: TaskUpdate) -> anyhow::Result<()> {
-        Ok(self.factory.tell(TaskUpdateMsg { header, body }).await?)
+    async fn send_update(&self, header: TaskHeader, payload: TaskUpdate) -> anyhow::Result<()> {
+        Ok(self.factory.tell(TaskUpdateMsg { header, payload }).await?)
     }
 
-    async fn send_done(&self, header: TaskHeader, body: TaskDone) -> anyhow::Result<()> {
-        Ok(self.factory.tell(TaskDoneMsg { header, body }).await?)
+    async fn send_done(&self, header: TaskHeader, payload: TaskDone) -> anyhow::Result<()> {
+        Ok(self.factory.tell(TaskDoneMsg { header, payload }).await?)
     }
 
     async fn execute(&self, header: TaskHeader, task: Arc<ExecuteTask>) -> anyhow::Result<()> {
@@ -130,7 +130,7 @@ impl Processor {
         relay.stop_gracefully().await?;
         relay.wait_for_stop().await;
 
-        self.send_done(header, TaskDone::Session(Box::new(session)))
+        self.send_done(header, TaskDone::Session(Arc::new(session)))
             .await?;
 
         Ok(())
@@ -266,7 +266,7 @@ impl Message<ExecuteTaskMsg> for ExecutorActor {
         let session = exec.run_with_callback(|segment| {
             let msg = TaskUpdateMsg {
                 header: msg.header.clone(),
-                body: TaskUpdate::Segment(segment),
+                payload: TaskUpdate::Segment(segment),
             };
             self.relay.tell(msg).blocking_send()?;
             Ok(Box::new(NullSegmentRef))

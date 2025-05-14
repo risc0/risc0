@@ -14,6 +14,8 @@
 
 use risc0_zkvm_methods::FIB_ELF;
 
+use crate::actors::protocol::JobStatus;
+
 use super::{protocol::TaskKind, App};
 
 #[test_log::test(tokio::test(flavor = "multi_thread"))]
@@ -27,16 +29,20 @@ async fn basic() {
         TaskKind::Join,
     ];
 
-    let mut app = App::new(true, task_kinds, None, true).await.unwrap();
+    let mut app = App::new(true, task_kinds, None, None, true).await.unwrap();
 
     const ITERATIONS: u32 = 300_000;
 
-    let reply = app
+    let info = app
         .run_binary(FIB_ELF.to_vec(), u32::to_le_bytes(ITERATIONS).to_vec())
         .await
         .unwrap();
 
-    reply.receipt.verify_integrity().unwrap();
+    let JobStatus::Succeeded(result) = info.status else {
+        panic!("Invalid status");
+    };
+
+    result.receipt.verify_integrity().unwrap();
 
     app.stop().await;
 }

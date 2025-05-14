@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod actors;
+mod api;
 
 use std::{error::Error as StdError, fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
 
@@ -84,6 +85,9 @@ struct Cli {
     /// Client mode.
     #[arg(long)]
     client: bool,
+
+    #[arg(long)]
+    api: Option<SocketAddr>,
 }
 
 #[derive(Args)]

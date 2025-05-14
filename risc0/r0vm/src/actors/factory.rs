@@ -27,7 +27,7 @@ use super::{
     protocol::{
         factory::{GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
-        GlobalId, TaskKind,
+        GlobalId, JobId, TaskKind,
     },
     RemoteRequest,
 };
@@ -42,7 +42,7 @@ struct Worker {
 }
 
 pub(crate) struct FactoryActor {
-    jobs: HashMap<ActorID, ActorRef<JobActor>>,
+    jobs: HashMap<JobId, ActorRef<JobActor>>,
     workers: MultiIndexWorkerMap,
     pending_tasks: HashMap<TaskKind, VecDeque<TaskMsg>>,
     active_tasks: HashMap<GlobalId, TaskMsg>,
@@ -91,20 +91,6 @@ impl Actor for FactoryActor {
     }
 }
 
-impl Message<TaskMsg> for FactoryActor {
-    type Reply = ();
-
-    async fn handle(&mut self, msg: TaskMsg, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
-        if let Some(worker) = workers.first() {
-            self.active_tasks.insert(msg.header.global_id, msg.clone());
-            worker.actor_ref.tell(msg).await.unwrap();
-        } else {
-            self.pending_tasks(msg.header.task_kind).push_back(msg);
-        }
-    }
-}
-
 impl Message<SubmitTaskMsg> for FactoryActor {
     type Reply = ();
 
@@ -113,7 +99,7 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         msg: SubmitTaskMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.jobs.insert(msg.job.id(), msg.job);
+        self.jobs.insert(msg.job_id, msg.job);
         let task = TaskMsg {
             header: msg.header.clone(),
             task: msg.task,
@@ -318,36 +304,3 @@ impl Message<TaskDoneMsg> for RemoteFactoryActor {
         super::send(&mut self.tcp, msg).await.unwrap();
     }
 }
-
-// pub(crate) struct VirtualReply<R> {
-//     phantom: PhantomData<R>,
-// }
-
-// impl<R> VirtualReply<R> {
-//     pub(crate) fn new() -> Self {
-//         Self {
-//             phantom: PhantomData,
-//         }
-//     }
-// }
-
-// impl<R> Reply for VirtualReply<R>
-// where
-//     R: Reply,
-// {
-//     type Ok = R::Ok;
-//     type Error = R::Error;
-//     type Value = R::Value;
-
-//     fn to_result(self) -> Result<Self::Ok, Self::Error> {
-//         unimplemented!()
-//     }
-
-//     fn into_any_err(self) -> Option<Box<dyn ReplyError>> {
-//         None
-//     }
-
-//     fn into_value(self) -> Self::Value {
-//         unimplemented!()
-//     }
-// }

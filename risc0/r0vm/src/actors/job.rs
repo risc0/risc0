@@ -22,32 +22,37 @@ use kameo::{error::Infallible, prelude::*};
 use opentelemetry::{
     global::{BoxedSpan, BoxedTracer},
     trace::{Span, SpanKind, TraceContextExt as _, Tracer},
+    KeyValue,
 };
 use risc0_zkvm::{
     ProveKeccakRequest, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, UnionClaim, Unknown,
 };
+use tokio::time::Instant;
+
+use crate::actors::protocol::ProofResult;
 
 use super::{
     factory::FactoryActor,
     protocol::{
-        factory::{
-            JoinNode, Session, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg,
-        },
-        ExecuteTask, GlobalId, JoinTask, LiftTask, ProofReply, ProofRequest, ProveKeccakTask,
-        ProveSegmentTask, SegmentRange, Task, TaskHeader, TaskId,
+        factory::{JoinNode, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
+        ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
+        JoinTask, LiftTask, ProofRequest, ProveKeccakTask, ProveSegmentTask, SegmentRange, Session,
+        Task, TaskHeader, TaskId,
     },
 };
 
 pub(crate) struct JobActor {
+    job_id: JobId,
     self_ref: Option<WeakActorRef<Self>>,
     factory: ActorRef<FactoryActor>,
     joins: BTreeMap<SegmentRange, Arc<SuccinctReceipt<ReceiptClaim>>>,
     next_task_id: u64,
-    session: Option<Box<Session>>,
+    session: Option<Arc<Session>>,
     ctx: opentelemetry::Context,
     tracer: BoxedTracer,
     pending_spans: HashMap<TaskId, BoxedSpan>,
-    reply_sender: Option<ReplySender<ProofReply>>,
+    reply_sender: Option<ReplySender<JobStatusReply>>,
+    start_time: Instant,
 }
 
 impl Actor for JobActor {
@@ -69,14 +74,16 @@ impl Actor for JobActor {
 }
 
 impl JobActor {
-    pub fn new(factory: ActorRef<FactoryActor>) -> Self {
+    pub fn new(job_id: JobId, factory: ActorRef<FactoryActor>) -> Self {
         let tracer = opentelemetry::global::tracer("job");
         let span = tracer
             .span_builder("job")
             .with_kind(SpanKind::Client)
+            .with_attributes([KeyValue::new("job_id", job_id.to_string())])
             .start(&tracer);
         let ctx = opentelemetry::Context::current_with_span(span);
         Self {
+            job_id,
             self_ref: None,
             factory,
             joins: BTreeMap::new(),
@@ -86,6 +93,7 @@ impl JobActor {
             tracer,
             pending_spans: HashMap::new(),
             reply_sender: None,
+            start_time: Instant::now(),
         }
     }
 
@@ -129,7 +137,7 @@ impl JobActor {
             .await;
     }
 
-    async fn session_done(&mut self, header: TaskHeader, session: Box<Session>) {
+    async fn session_done(&mut self, header: TaskHeader, session: Arc<Session>) {
         tracing::info!("SessionDone");
         self.span_end(header.global_id.task_id);
         self.session = Some(session);
@@ -173,14 +181,16 @@ impl JobActor {
     }
 
     async fn submit_task(&mut self, task: Task) {
-        let task_mgr = self.self_ref();
-        let job_id = task_mgr.id();
         let task_id = self.next_task_id();
         self.span_start(task_id, task.name());
         let msg = SubmitTaskMsg {
-            job: task_mgr,
+            job: self.self_ref(),
+            job_id: self.job_id,
             header: TaskHeader {
-                global_id: GlobalId { job_id, task_id },
+                global_id: GlobalId {
+                    job_id: self.job_id,
+                    task_id,
+                },
                 task_kind: task.kind(),
             },
             task,
@@ -215,10 +225,18 @@ impl JobActor {
             if let Some((range, receipt)) = self.joins.first_key_value() {
                 if range.start == 0 && range.end == session.segment_count {
                     tracing::info!("done");
-                    let reply_sender = self.reply_sender.take();
-                    reply_sender.unwrap().send(ProofReply {
+                    let result = ProofResult {
+                        session: session.clone(),
                         receipt: receipt.clone(),
-                    });
+                    };
+                    let info = JobInfo {
+                        status: JobStatus::Succeeded(result),
+                        elapsed_time: self.start_time.elapsed(),
+                    };
+                    self.reply_sender
+                        .take()
+                        .unwrap()
+                        .send(JobStatusReply { info: Some(info) });
                     self.self_ref().stop_gracefully().await.unwrap();
                 }
             }
@@ -227,7 +245,7 @@ impl JobActor {
 }
 
 impl Message<ProofRequest> for JobActor {
-    type Reply = DelegatedReply<ProofReply>;
+    type Reply = DelegatedReply<JobStatusReply>;
 
     async fn handle(
         &mut self,
@@ -257,7 +275,7 @@ impl Message<TaskUpdateMsg> for JobActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         // tracing::info!("TaskUpdateMsg: {:?}", msg.header.global_id.task_id);
-        match msg.body {
+        match msg.payload {
             TaskUpdate::Start => self.task_start(msg.header).await,
             TaskUpdate::Segment(segment) => self.prove_segment(segment).await,
             TaskUpdate::Keccak(request) => self.prove_keccak(request).await,
@@ -274,7 +292,7 @@ impl Message<TaskDoneMsg> for JobActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         // tracing::info!("TaskDoneMsg: {:?}", msg.header.global_id.task_id);
-        match msg.body {
+        match msg.payload {
             TaskDone::Session(session) => self.session_done(msg.header, session).await,
             TaskDone::ProveSegment(receipt) => self.prove_segment_done(msg.header, receipt).await,
             TaskDone::ProveKeccak(receipt) => self.prove_keccak_done(receipt).await,
@@ -282,6 +300,23 @@ impl Message<TaskDoneMsg> for JobActor {
             TaskDone::Join(node) => self.join_done(msg.header, node).await,
             TaskDone::Union(receipt) => self.union_done(receipt).await,
             TaskDone::Resolve(receipt) => self.resolve_done(receipt).await,
+        }
+    }
+}
+
+impl Message<JobStatusRequest> for JobActor {
+    type Reply = JobStatusReply;
+
+    async fn handle(
+        &mut self,
+        _msg: JobStatusRequest,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        JobStatusReply {
+            info: Some(JobInfo {
+                status: JobStatus::Running("TODO".to_string()),
+                elapsed_time: self.start_time.elapsed(),
+            }),
         }
     }
 }
