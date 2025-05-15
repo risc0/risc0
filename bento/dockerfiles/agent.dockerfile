@@ -23,7 +23,7 @@ RUN rustup install 1.81
 
 FROM rust-builder AS builder
 
-ARG NVCC_APPEND_FLAGS=""
+ARG NVCC_APPEND_FLAGS="--gpu-architecture=compute_75 --gpu-code=compute_75,sm_75 --generate-code arch=compute_75,code=sm_75"
 ARG CUDA_OPT_LEVEL=1
 ARG S3_CACHE_PREFIX
 ENV NVCC_APPEND_FLAGS=${NVCC_APPEND_FLAGS}
