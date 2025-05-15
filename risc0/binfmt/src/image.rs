@@ -100,7 +100,7 @@ pub struct Page(Vec<u8>);
 
 /// A memory image
 ///
-/// A full memory image of a zkVM guest. Includes functio∑nality for accessing
+/// A full memory image of a zkVM guest. Includes functionality for accessing
 /// memory and associated digests, and for initializing the memory state for a
 /// [Program].
 #[derive(Clone, Debug, Serialize, Deserialize)]
