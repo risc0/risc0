@@ -14,7 +14,7 @@
 
 use std::{io::Read, ops::Rem};
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, ensure, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
 use malachite::{
     num::{arithmetic::traits::ModInverse, basic::traits::Zero},
@@ -205,10 +205,18 @@ impl Program {
                     let lhs = lhs.unsigned_abs_ref();
                     let rhs = rhs.unsigned_abs_ref();
 
-                    *dst = lhs
-                        .rem(rhs)
+                    ensure!(
+                        rhs != &Natural::ZERO,
+                        "Modular inverse: Modulus cannot be zero"
+                    );
+                    let m = lhs.rem(rhs);
+                    ensure!(
+                        m != Natural::ZERO,
+                        "Modular inverse: Inverse of zero is undefined"
+                    );
+                    *dst = m
                         .mod_inverse(rhs)
-                        .ok_or_else(|| anyhow!("divide by zero"))?
+                        .ok_or_else(|| anyhow!("Modular inverse: Inverse does not exist"))?
                         .into();
                 }
             }
