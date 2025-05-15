@@ -54,7 +54,9 @@
 //! | client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
 //! | cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 //! | disable-dev-mode | all except rv32im |            | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
+//! | keccak           | all except rv32im |            | Enables keccak circuit support (enabled by default). Can be disabled to reduce compile times when not needed.                                                |
 //! | metal            | macos             | prove, std | Deprecated - Metal GPU acceleration for the prover is now enabled by default on Apple Silicon.                                                               |
+//! | no-keccak        | all except rv32im |            | Disables keccak circuit support to drastically reduce CUDA compile times when keccak isn't needed for your application.                                      |
 //! | prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 //! | std              | all               |            | Support for the Rust stdlib.                                                                                                                                 |
 //!
@@ -193,6 +195,18 @@ pub fn is_dev_mode() -> bool {
     }
 
     cfg!(not(feature = "disable-dev-mode")) && is_env_set
+}
+
+/// Returns `true` if keccak should be enabled.
+///
+/// This function manages the interaction between `keccak` and `no-keccak` features:
+/// - If only `keccak` is set, returns true
+/// - If only `no-keccak` is set, returns false
+/// - If both are set, `keccak` takes precedence and returns true
+/// - If neither is set, returns true since keccak is enabled by default
+#[cfg(not(target_os = "zkvm"))]
+pub fn is_keccak_enabled() -> bool {
+    cfg!(feature = "keccak") || (!cfg!(feature = "no-keccak"))
 }
 
 #[cfg(feature = "metal")]
