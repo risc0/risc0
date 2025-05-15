@@ -12,7 +12,7 @@
 
 /* ---- Include required platform headers ---- */
 
-#if defined(_WIN32) 
+#if defined(_WIN32)
 
 #include <Windows.h>
 
@@ -20,7 +20,7 @@
 #include <unistd.h>
 
 #if defined(__ANDROID__)
-#include <android/api-level.h> 
+#include <android/api-level.h>
 #endif
 
 #if defined(__linux__) || defined(__CYGWIN__)
@@ -138,7 +138,7 @@ typedef struct nvtxGlobals_t
 
     nvtxNameCudaDeviceA_impl_fntype nvtxNameCudaDeviceA_impl_fnptr;
     nvtxNameCudaDeviceW_impl_fntype nvtxNameCudaDeviceW_impl_fnptr;
-    nvtxNameCudaStreamA_fakeimpl_fntype nvtxNameCudaStreamA_impl_fnptr;
+    nvtxNameCudaStreamA_impl_fntype nvtxNameCudaStreamA_impl_fnptr;
     nvtxNameCudaStreamW_fakeimpl_fntype nvtxNameCudaStreamW_impl_fnptr;
     nvtxNameCudaEventA_fakeimpl_fntype nvtxNameCudaEventA_impl_fnptr;
     nvtxNameCudaEventW_fakeimpl_fntype nvtxNameCudaEventW_impl_fnptr;
