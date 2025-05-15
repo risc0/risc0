@@ -34,7 +34,6 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-auto_ops = { version = "0.3", optional = true }
 bit-vec = "0.8"
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
@@ -52,6 +51,7 @@ ringbuffer = { version = "0.15.0", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 smallvec = { version = "1.13", optional = true }
+wide = { version = "0.7", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
@@ -71,7 +71,6 @@ default = ["prove"]
 # entropy_finder = []
 execute = [
   "anyhow/backtrace",
-  "dep:auto_ops",
   "dep:byteorder",
   "dep:enum-map",
   "dep:malachite",
@@ -89,6 +88,7 @@ prove = [
   "dep:rayon",
   "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
+  "dep:wide",
   "execute",
   "risc0-zkp/prove",
 ]
