@@ -196,7 +196,11 @@ impl App {
     }
 
     pub async fn run_binary(&mut self, binary: Vec<u8>, input: Vec<u8>) -> anyhow::Result<JobInfo> {
-        let request = ProofRequest { binary, input };
+        let request = ProofRequest {
+            binary,
+            input,
+            assumptions: vec![],
+        };
         let reply = self.manager.as_ref().unwrap().ask(request).await?;
         Ok(reply.info.unwrap())
     }

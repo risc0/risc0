@@ -31,7 +31,7 @@ use crate::{
     recursion::prove::union,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
-    ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -279,7 +279,11 @@ impl ProverServer for ProverImpl {
         identity_p254(a)
     }
 
-    fn prove_keccak(&self, request: &ProveKeccakRequest) -> Result<SuccinctReceipt<Unknown>> {
+    #[cfg(feature = "unstable")]
+    fn prove_keccak(
+        &self,
+        request: &crate::ProveKeccakRequest,
+    ) -> Result<SuccinctReceipt<Unknown>> {
         prove_keccak(request)
     }
 

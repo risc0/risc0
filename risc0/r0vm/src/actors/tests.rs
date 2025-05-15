@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm_methods::FIB_ELF;
+use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 use crate::actors::protocol::JobStatus;
 
@@ -42,7 +42,7 @@ async fn basic() {
         panic!("Invalid status");
     };
 
-    result.receipt.verify_integrity().unwrap();
+    result.receipt.verify(FIB_ID).unwrap();
 
     app.stop().await;
 }

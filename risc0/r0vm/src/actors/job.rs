@@ -25,7 +25,8 @@ use opentelemetry::{
     KeyValue,
 };
 use risc0_zkvm::{
-    ProveKeccakRequest, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, UnionClaim, Unknown,
+    InnerReceipt, ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt,
+    SuccinctReceipt, UnionClaim, Unknown,
 };
 use tokio::time::Instant;
 
@@ -254,12 +255,16 @@ impl JobActor {
     async fn maybe_finish(&mut self) {
         if let Some(ref session) = self.session {
             // tracing::info!("maybe_finish: session done");
-            if let Some((range, receipt)) = self.joins.first_key_value() {
+            if let Some((range, succinct_receipt)) = self.joins.first_key_value() {
                 if range.start == 0 && range.end == session.segment_count {
                     tracing::info!("done");
+                    let receipt = Receipt::new(
+                        InnerReceipt::Succinct(succinct_receipt.as_ref().clone()),
+                        session.journal.clone().unwrap().bytes,
+                    );
                     let result = ProofResult {
                         session: session.clone(),
-                        receipt: receipt.clone(),
+                        receipt: Arc::new(receipt),
                     };
                     self.status = JobStatus::Succeeded(result);
                     self.self_ref().stop_gracefully().await.unwrap();
@@ -274,19 +279,14 @@ impl Message<ProofRequest> for JobActor {
 
     async fn handle(
         &mut self,
-        msg: ProofRequest,
+        request: ProofRequest,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         tracing::info!("ProofRequest");
         let (delegated_reply, reply_sender) = ctx.reply_sender();
         self.reply_sender = reply_sender;
-
-        self.submit_task(Task::Execute(Arc::new(ExecuteTask {
-            binary: msg.binary,
-            input: msg.input,
-        })))
-        .await;
-
+        self.submit_task(Task::Execute(Arc::new(ExecuteTask { request })))
+            .await;
         delegated_reply
     }
 }

@@ -17,7 +17,8 @@ use std::sync::Arc;
 use anyhow::Context;
 use kameo::prelude::*;
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, NullSegmentRef, ProverOpts, VerifierContext,
+    get_prover_server, CoprocessorCallback, ExecutorEnv, ExecutorImpl, NullSegmentRef,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, VerifierContext,
 };
 use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
@@ -142,13 +143,29 @@ impl Processor {
         header: TaskHeader,
         task: Arc<ExecuteTask>,
     ) -> Result<TaskDone, TaskError> {
-        tracing::info!("ELF: {} bytes", task.binary.len());
+        tracing::info!("ELF: {} bytes", task.request.binary.len());
         self.task_start(header.clone()).await?;
         let factory = self.factory.clone();
         let header_copy = header.clone();
         let session: anyhow::Result<Session> = tokio::task::spawn_blocking(move || {
-            let env = ExecutorEnv::builder().write_slice(&task.input).build()?;
-            let mut exec = ExecutorImpl::from_elf(env, &task.binary)?;
+            let coproc = Coprocessor {
+                factory: factory.clone(),
+                header,
+            };
+
+            let mut env = ExecutorEnv::builder();
+            for assumption in task.request.assumptions.iter() {
+                env.add_assumption(assumption.clone());
+            }
+            let env = env
+                // .stdout(writer) // TODO
+                .write_slice(&task.request.input)
+                .coprocessor_callback(coproc)
+                // .session_limit(limit) // TODO
+                // .segment_limit_po2(limit) // TODO
+                .build()?;
+
+            let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
             let session = exec.run_with_callback(|segment| {
                 let msg = TaskUpdateMsg {
                     header: header_copy.clone(),
@@ -260,5 +277,26 @@ impl Processor {
         .await
         .context("JoinHandle error: resolve task")??;
         Ok(TaskDone::Resolve(Box::new(receipt)))
+    }
+}
+
+struct Coprocessor {
+    factory: ActorRef<FactoryRouterActor>,
+    header: TaskHeader,
+}
+
+impl CoprocessorCallback for Coprocessor {
+    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> anyhow::Result<()> {
+        unimplemented!()
+    }
+
+    fn prove_keccak(&mut self, request: ProveKeccakRequest) -> anyhow::Result<()> {
+        self.factory
+            .tell(TaskUpdateMsg {
+                header: self.header.clone(),
+                payload: TaskUpdate::Keccak(request),
+            })
+            .blocking_send()
+            .context("Failed to send ProveKeccakRequest")
     }
 }

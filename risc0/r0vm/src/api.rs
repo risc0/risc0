@@ -36,7 +36,7 @@ use bonsai_sdk::responses::{
     SnarkReq, SnarkStatusRes, UploadRes,
 };
 use kameo::actor::ActorRef;
-use risc0_zkvm::compute_image_id;
+use risc0_zkvm::{compute_image_id, Receipt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::net::TcpListener;
@@ -377,19 +377,26 @@ async fn prove_stark(
         .await
         .context("Failed to read input from object store")?;
 
-    // TODO
-    // for assumption in proof_req.assumptions {
-    //     let receipt_path = validate_path(&state.receipts_dir(), &assumption)
-    //         .ok_or_else(|| AppError::InternalErr(anyhow!("Invalid assumption")))?;
-    //     let receipt = tokio::fs::read(receipt_path)
-    //         .await
-    //         .context("Failed to read receipt")?;
-    // }
+    let mut assumptions = vec![];
+    for assumption in proof_req.assumptions {
+        let receipt_path = validate_path(&state.receipts_dir(), &assumption)
+            .ok_or_else(|| AppError::InternalErr(anyhow!("Invalid assumption")))?;
+        let bytes = tokio::fs::read(receipt_path)
+            .await
+            .context("Failed to read receipt")?;
+        let receipt: Receipt =
+            bincode::deserialize(&bytes).context("Failed to deserialize assumption")?;
+        assumptions.push(receipt);
+    }
 
     let reply = state
         .manager
         .ask(CreateJobRequest {
-            request: ProofRequest { binary, input },
+            request: ProofRequest {
+                binary,
+                input,
+                assumptions,
+            },
         })
         .await
         .context("Failed to create job")?;

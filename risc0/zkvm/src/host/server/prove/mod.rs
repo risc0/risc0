@@ -37,8 +37,8 @@ use crate::{
     },
     receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
-    stark_to_snark, ExecutorEnv, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim,
-    ReceiptKind, Segment, Session, VerifierContext,
+    stark_to_snark, ExecutorEnv, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment, Session,
+    VerifierContext,
 };
 
 mod private {
@@ -72,7 +72,9 @@ pub trait ProverServer: private::Sealed {
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
 
     /// Prove the specified keccak request
-    fn prove_keccak(&self, request: &ProveKeccakRequest) -> Result<SuccinctReceipt<Unknown>>;
+    #[cfg(feature = "unstable")]
+    fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
+        -> Result<SuccinctReceipt<Unknown>>;
 
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>>;

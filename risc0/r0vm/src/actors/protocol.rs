@@ -17,7 +17,7 @@ use std::{ops::Range, sync::Arc, time::Duration};
 use clap::ValueEnum;
 use kameo::{actor::ActorRef, Reply};
 use risc0_zkvm::{
-    Journal, ProveKeccakRequest, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
+    Journal, ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
     UnionClaim, Unknown,
 };
 use serde::{Deserialize, Serialize};
@@ -65,13 +65,14 @@ pub(crate) struct JobInfo {
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct ProofResult {
     pub session: Arc<Session>,
-    pub receipt: Arc<SuccinctReceipt<ReceiptClaim>>,
+    pub receipt: Arc<Receipt>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ProofRequest {
     pub binary: Vec<u8>,
     pub input: Vec<u8>,
+    pub assumptions: Vec<Receipt>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -118,8 +119,7 @@ pub(crate) enum Task {
 
 #[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct ExecuteTask {
-    pub binary: Vec<u8>,
-    pub input: Vec<u8>,
+    pub request: ProofRequest,
 }
 
 #[derive(Reply, Serialize, Deserialize)]

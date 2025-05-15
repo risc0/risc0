@@ -23,7 +23,7 @@ opentelemetry-otlp = "0.29.0"
 opentelemetry_sdk = "0.29.0"
 opentelemetry-stdout = { version = "0.29.0", features = ["trace"] }
 risc0-circuit-rv32im = { workspace = true }
-risc0-zkvm = { workspace = true, features = ["prove"] }
+risc0-zkvm = { workspace = true, features = ["prove", "unstable"] }
 serde = { version = "1.0.219", features = ["rc"] }
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = [

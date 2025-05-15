@@ -129,7 +129,7 @@ pub use {
             SessionInfo,
         },
         client::{
-            env::{ExecutorEnv, ExecutorEnvBuilder, ProveKeccakRequest},
+            env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
                 default_executor, default_prover, external::ExternalProver, Executor, Prover,
                 ProverOpts, ReceiptKind,
@@ -142,7 +142,7 @@ pub use {
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 #[cfg(feature = "unstable")]
-pub use self::host::client::env::{CoprocessorCallback, ProveZkrRequest};
+pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {

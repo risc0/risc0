@@ -30,7 +30,7 @@ use bytes::Bytes;
 use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tempfile::TempDir;
 
 use crate::{
@@ -78,7 +78,8 @@ pub struct ProveZkrRequest {
 }
 
 /// A Keccak proof request.
-#[derive(Clone, Serialize, Deserialize)]
+#[stability::unstable]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct ProveKeccakRequest {
     /// The digest of the claim that this keccak input is expected to produce.
     pub claim_digest: Digest,

@@ -15,7 +15,6 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use kameo::prelude::*;
-use risc0_zkvm::{InnerReceipt, Receipt};
 use tokio::task::JoinSet;
 
 use super::{
@@ -103,11 +102,7 @@ impl Message<JobDone> for ManagerActor {
     async fn handle(&mut self, msg: JobDone, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
         tracing::info!("JobDone: {}", msg.job_id);
         if let JobStatus::Succeeded(ref result) = msg.info.status {
-            let receipt = Receipt::new(
-                InnerReceipt::Succinct((*result.receipt).clone()),
-                result.session.journal.clone().unwrap().bytes,
-            );
-            let encoded = bincode::serialize(&receipt).unwrap();
+            let encoded = bincode::serialize(result.receipt.as_ref()).unwrap();
             let receipt_path = self
                 .storage_root
                 .join("receipts")
