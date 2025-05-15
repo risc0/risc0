@@ -42,6 +42,7 @@ derive_more = { version = "2.0.1", default-features = false, features = [
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-binfmt = { workspace = true }
 risc0-circuit-keccak = { workspace = true }
+risc0-circuit-keccak-sys = { workspace = true, features = [] }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
@@ -152,8 +153,13 @@ cuda = [
   "risc0-circuit-rv32im/cuda",
   "risc0-zkp/cuda",
 ]
-skip-cuda-components = ["risc0-circuit-keccak-sys/skip-cuda-keccak"]
-default = ["client", "bonsai"]
+# When no-keccak is enabled, keccak components won't be built with CUDA support
+# This can dramatically reduce build times when keccak isn't needed
+no-keccak = []
+# The keccak feature enables the keccak circuit functionality
+# This takes precedence over no-keccak if both are enabled
+keccak = ["risc0-circuit-keccak-sys/keccak"]
+default = ["client", "bonsai", "keccak"]
 r0vm-ver-compat = []
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
