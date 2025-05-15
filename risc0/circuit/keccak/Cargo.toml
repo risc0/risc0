@@ -17,6 +17,7 @@ paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, features = ["default"] }
+risc0-zkvm = { workspace = true, optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -48,6 +49,7 @@ cuda = [
   "risc0-circuit-keccak-sys/cuda",
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
+  "risc0_zkvm",
 ]
 default = ["prove"]
 # Enables ZKR registration to actually generate proofs.
@@ -60,3 +62,5 @@ prove = [
   "dep:xz2",
   "risc0-circuit-recursion/prove",
 ]
+# Enables risc0-zkvm support for checking feature enablement
+risc0_zkvm = ["dep:risc0-zkvm"]
