@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    collections::{HashMap, VecDeque},
-    net::SocketAddr,
-    ops::ControlFlow,
-};
+use std::{collections::HashMap, net::SocketAddr, ops::ControlFlow};
 
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
@@ -25,15 +21,26 @@ use tokio::{io::AsyncWriteExt as _, net::TcpStream};
 use super::{
     job::JobActor,
     protocol::{
-        factory::{GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
+        factory::{DropJob, GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
-        GlobalId, JobId, TaskKind,
+        GlobalId, JobId, Task, TaskHeader, TaskKind,
     },
     RemoteRequest,
 };
 
+#[derive(Clone, MultiIndexMap)]
+struct TaskRow {
+    #[multi_index(hashed_non_unique)]
+    job_id: JobId,
+    #[multi_index(hashed_unique)]
+    global_id: GlobalId,
+    #[multi_index(hashed_non_unique)]
+    task_kind: TaskKind,
+    task: Task,
+}
+
 #[derive(MultiIndexMap)]
-struct Worker {
+struct WorkerRow {
     #[multi_index(hashed_non_unique)]
     task_kind: TaskKind,
     #[multi_index(hashed_non_unique)]
@@ -43,8 +50,8 @@ struct Worker {
 
 pub(crate) struct FactoryActor {
     jobs: HashMap<JobId, ActorRef<JobActor>>,
-    workers: MultiIndexWorkerMap,
-    pending_tasks: HashMap<TaskKind, VecDeque<TaskMsg>>,
+    workers: MultiIndexWorkerRowMap,
+    pending_tasks: MultiIndexTaskRowMap,
     active_tasks: HashMap<GlobalId, TaskMsg>,
 }
 
@@ -52,14 +59,10 @@ impl FactoryActor {
     pub fn new() -> Self {
         Self {
             jobs: HashMap::default(),
-            workers: MultiIndexWorkerMap::default(),
-            pending_tasks: HashMap::default(),
+            workers: Default::default(),
+            pending_tasks: Default::default(),
             active_tasks: HashMap::default(),
         }
-    }
-
-    fn pending_tasks(&mut self, task_kind: TaskKind) -> &mut VecDeque<TaskMsg> {
-        self.pending_tasks.entry(task_kind).or_default()
     }
 }
 
@@ -77,6 +80,7 @@ impl Actor for FactoryActor {
         _reason: ActorStopReason,
     ) -> Result<(), Self::Error> {
         // stop timer
+        tracing::info!("Factory: on_stop");
         Ok(())
     }
 
@@ -91,6 +95,15 @@ impl Actor for FactoryActor {
     }
 }
 
+impl Message<DropJob> for FactoryActor {
+    type Reply = ();
+
+    async fn handle(&mut self, msg: DropJob, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
+        self.jobs.remove(&msg.job_id);
+        self.pending_tasks.remove_by_job_id(&msg.job_id);
+    }
+}
+
 impl Message<SubmitTaskMsg> for FactoryActor {
     type Reply = ();
 
@@ -102,7 +115,7 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         self.jobs.insert(msg.job_id, msg.job);
         let task = TaskMsg {
             header: msg.header.clone(),
-            task: msg.task,
+            task: msg.task.clone(),
         };
 
         let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
@@ -111,7 +124,12 @@ impl Message<SubmitTaskMsg> for FactoryActor {
                 .insert(task.header.global_id, task.clone());
             worker.actor_ref.tell(task).await.unwrap();
         } else {
-            self.pending_tasks(task.header.task_kind).push_back(task);
+            self.pending_tasks.insert(TaskRow {
+                job_id: msg.header.global_id.job_id,
+                global_id: msg.header.global_id,
+                task_kind: msg.header.task_kind,
+                task: msg.task,
+            });
         }
     }
 }
@@ -121,14 +139,24 @@ impl Message<GetTask> for FactoryActor {
 
     async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
         // tracing::info!("GetTask");
-        for kind in msg.kinds.iter() {
-            let pending_tasks = self.pending_tasks(*kind);
-            if !pending_tasks.is_empty() {
-                // tracing::info!("pending: {kind:?}");
-                let task = pending_tasks.pop_front().unwrap();
-                self.active_tasks
-                    .insert(task.header.global_id, task.clone());
-                return ctx.reply(task);
+        for &task_kind in msg.kinds.iter() {
+            let row = self
+                .pending_tasks
+                .get_by_task_kind(&task_kind)
+                .first()
+                .cloned()
+                .cloned();
+            if let Some(row) = row {
+                let task_msg = TaskMsg {
+                    header: TaskHeader {
+                        global_id: row.global_id,
+                        task_kind,
+                    },
+                    task: row.task.clone(),
+                };
+                self.pending_tasks.remove_by_global_id(&row.global_id);
+                self.active_tasks.insert(row.global_id, task_msg.clone());
+                return ctx.reply(task_msg);
             }
         }
 
@@ -137,7 +165,7 @@ impl Message<GetTask> for FactoryActor {
 
         // tracing::info!("new worker: {:?}", msg.kinds);
         for task_kind in msg.kinds {
-            let worker = Worker {
+            let worker = WorkerRow {
                 task_kind,
                 actor_id: worker_ref.id(),
                 actor_ref: worker_ref.clone(),
@@ -158,8 +186,9 @@ impl Message<TaskUpdateMsg> for FactoryActor {
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         // refresh active worker
-        let job = self.jobs.get(&msg.header.global_id.job_id).unwrap();
-        ctx.forward(job, msg).await;
+        if let Some(job) = self.jobs.get(&msg.header.global_id.job_id) {
+            ctx.forward(job, msg).await;
+        }
     }
 }
 
@@ -172,8 +201,9 @@ impl Message<TaskDoneMsg> for FactoryActor {
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         self.active_tasks.remove(&msg.header.global_id);
-        let job = self.jobs.get(&msg.header.global_id.job_id).unwrap();
-        ctx.forward(job, msg).await;
+        if let Some(job) = self.jobs.get(&msg.header.global_id.job_id) {
+            ctx.forward(job, msg).await;
+        }
     }
 }
 

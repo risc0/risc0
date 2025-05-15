@@ -44,7 +44,7 @@ use uuid::Uuid;
 
 use crate::actors::{
     manager::ManagerActor,
-    protocol::{CreateJobRequest, JobStatus, JobStatusRequest, ProofRequest},
+    protocol::{CreateJobRequest, JobStatus, JobStatusRequest, ProofRequest, TaskError},
 };
 
 // TODO: Add authn/z to get a userID
@@ -420,7 +420,9 @@ async fn stark_status(
     };
 
     let error_msg = if let JobStatus::Failed(ref err) = info.status {
-        Some(err.clone())
+        match err {
+            TaskError::Generic(err) => Some(err.clone()),
+        }
     } else {
         None
     };

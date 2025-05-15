@@ -51,7 +51,7 @@ pub(crate) struct JobStatusReply {
 pub(crate) enum JobStatus {
     Running(String),
     Succeeded(ProofResult),
-    Failed(String),
+    Failed(TaskError),
     TimedOut,
     Aborted,
 }
@@ -160,6 +160,11 @@ pub(crate) struct ResolveTask {
     pub assumption: SuccinctReceipt<Unknown>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) enum TaskError {
+    Generic(String),
+}
+
 pub mod factory {
     use super::*;
 
@@ -185,7 +190,12 @@ pub mod factory {
     #[derive(Reply, Serialize, Deserialize)]
     pub(crate) struct TaskDoneMsg {
         pub header: TaskHeader,
-        pub payload: TaskDone,
+        pub payload: Result<TaskDone, TaskError>,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub(crate) struct DropJob {
+        pub job_id: JobId,
     }
 
     #[derive(Serialize, Deserialize)]

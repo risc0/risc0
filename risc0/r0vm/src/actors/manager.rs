@@ -63,7 +63,7 @@ impl ManagerActor {
     ) -> JobId {
         let job_id = JobId::new_v4();
         let actor_ref = actor_ref.clone();
-        let job = spawn_link(&actor_ref, JobActor::new(job_id, self.factory.clone())).await;
+        let job = kameo::spawn(JobActor::new(job_id, self.factory.clone()));
         self.jobs.insert(job_id, JobEntry::Active(job.clone()));
         self.join_set.spawn(async move {
             let reply = job.ask(request).await.unwrap();
@@ -101,6 +101,7 @@ impl Message<JobDone> for ManagerActor {
     type Reply = ();
 
     async fn handle(&mut self, msg: JobDone, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
+        tracing::info!("JobDone: {}", msg.job_id);
         if let JobStatus::Succeeded(ref result) = msg.info.status {
             let receipt = Receipt::new(
                 InnerReceipt::Succinct((*result.receipt).clone()),

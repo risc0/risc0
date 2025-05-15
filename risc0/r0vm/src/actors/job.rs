@@ -29,15 +29,17 @@ use risc0_zkvm::{
 };
 use tokio::time::Instant;
 
-use crate::actors::protocol::ProofResult;
+use crate::actors::protocol::TaskError;
 
 use super::{
     factory::FactoryActor,
     protocol::{
-        factory::{JoinNode, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
+        factory::{
+            DropJob, JoinNode, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg,
+        },
         ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
-        JoinTask, LiftTask, ProofRequest, ProveKeccakTask, ProveSegmentTask, SegmentRange, Session,
-        Task, TaskHeader, TaskId,
+        JoinTask, LiftTask, ProofRequest, ProofResult, ProveKeccakTask, ProveSegmentTask,
+        SegmentRange, Session, Task, TaskHeader, TaskId,
     },
 };
 
@@ -53,6 +55,7 @@ pub(crate) struct JobActor {
     pending_spans: HashMap<TaskId, BoxedSpan>,
     reply_sender: Option<ReplySender<JobStatusReply>>,
     start_time: Instant,
+    status: JobStatus,
 }
 
 impl Actor for JobActor {
@@ -66,9 +69,37 @@ impl Actor for JobActor {
     async fn on_stop(
         &mut self,
         _actor_ref: WeakActorRef<Self>,
-        _reason: ActorStopReason,
+        reason: ActorStopReason,
     ) -> Result<(), Self::Error> {
-        self.ctx.span().end();
+        let _ = self
+            .factory
+            .tell(DropJob {
+                job_id: self.job_id,
+            })
+            .await;
+
+        let elapsed_time = self.start_time.elapsed();
+        let span = self.ctx.span();
+
+        if let ActorStopReason::Panicked(err) = reason {
+            tracing::error!("{err}");
+            span.record_error(&err);
+            if let Some(reply_sender) = self.reply_sender.take() {
+                let info = JobInfo {
+                    status: JobStatus::Failed(TaskError::Generic(err.to_string())),
+                    elapsed_time,
+                };
+                reply_sender.send(JobStatusReply { info: Some(info) });
+            }
+        } else if let Some(reply_sender) = self.reply_sender.take() {
+            let info = JobInfo {
+                status: self.status.clone(),
+                elapsed_time,
+            };
+            reply_sender.send(JobStatusReply { info: Some(info) });
+        }
+
+        span.end();
         Ok(())
     }
 }
@@ -94,6 +125,7 @@ impl JobActor {
             pending_spans: HashMap::new(),
             reply_sender: None,
             start_time: Instant::now(),
+            status: JobStatus::Running("init".to_string()),
         }
     }
 
@@ -229,14 +261,7 @@ impl JobActor {
                         session: session.clone(),
                         receipt: receipt.clone(),
                     };
-                    let info = JobInfo {
-                        status: JobStatus::Succeeded(result),
-                        elapsed_time: self.start_time.elapsed(),
-                    };
-                    self.reply_sender
-                        .take()
-                        .unwrap()
-                        .send(JobStatusReply { info: Some(info) });
+                    self.status = JobStatus::Succeeded(result);
                     self.self_ref().stop_gracefully().await.unwrap();
                 }
             }
@@ -292,7 +317,15 @@ impl Message<TaskDoneMsg> for JobActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         // tracing::info!("TaskDoneMsg: {:?}", msg.header.global_id.task_id);
-        match msg.payload {
+        let task_done = match msg.payload {
+            Ok(task_done) => task_done,
+            Err(err) => {
+                self.status = JobStatus::Failed(err);
+                let _ = _ctx.actor_ref().stop_gracefully().await;
+                return;
+            }
+        };
+        match task_done {
             TaskDone::Session(session) => self.session_done(msg.header, session).await,
             TaskDone::ProveSegment(receipt) => self.prove_segment_done(msg.header, receipt).await,
             TaskDone::ProveKeccak(receipt) => self.prove_keccak_done(receipt).await,
@@ -314,7 +347,7 @@ impl Message<JobStatusRequest> for JobActor {
     ) -> Self::Reply {
         JobStatusReply {
             info: Some(JobInfo {
-                status: JobStatus::Running("TODO".to_string()),
+                status: self.status.clone(),
                 elapsed_time: self.start_time.elapsed(),
             }),
         }
