@@ -20,12 +20,16 @@ use std::{
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
-    if env::var("CARGO_FEATURE_CUDA").is_ok() && env::var("CARGO_FEATURE_SKIP_CUDA_KECCAK").is_err() {
+    // Build CUDA kernels only if both cuda and keccak features are enabled
+    let cuda_enabled = env::var("CARGO_FEATURE_CUDA").is_ok();
+    let keccak_enabled = env::var("CARGO_FEATURE_KECCAK").is_ok();
+
+    if cuda_enabled && keccak_enabled {
         build_cuda_kernels();
-    } else if env::var("CARGO_FEATURE_CUDA").is_ok() && env::var("CARGO_FEATURE_SKIP_CUDA_KECCAK").is_ok() {
-        // Skip CUDA compilation but create a stub library to satisfy dependencies
+    } else if cuda_enabled && !keccak_enabled {
+        // Create a stub library when CUDA is enabled but keccak is disabled
         create_stub_cuda_library();
-        println!("cargo:warning=Skipping CUDA keccak compilation as requested by skip-cuda-keccak feature");
+        println!("cargo:warning=Skipping CUDA keccak compilation as keccak feature is disabled");
     }
 
     build_cpu_kernels();
