@@ -425,10 +425,11 @@ impl JobActor {
             return true;
         }
 
-        if self.keccak_phase == KeccakPhase::Build
-            && !self.unions.is_empty()
-            && self.unions[0].len() == self.keccak_count
-        {
+        if self.keccak_phase == KeccakPhase::Build {
+            if self.unions.is_empty() || self.unions[0].len() != self.keccak_count {
+                return false;
+            }
+
             println!("required: {:?}", self.required_keccak_layers);
             println!(
                 "actual:   {:?}",
