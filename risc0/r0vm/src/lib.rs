@@ -78,6 +78,9 @@ struct Cli {
     #[arg(long)]
     id: bool,
 
+    #[arg(long)]
+    with_debugger: bool,
+
     /// The address to connect to or listen on.
     #[arg(long)]
     addr: Option<SocketAddr>,
@@ -203,7 +206,12 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
         } else {
             unreachable!()
         };
-        exec.run().unwrap()
+        if args.with_debugger {
+            exec.run_with_debugger().unwrap();
+            return;
+        } else {
+            exec.run().unwrap()
+        }
     };
 
     let prover = args.get_prover();

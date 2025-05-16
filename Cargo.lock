@@ -740,12 +740,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "auto_ops"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7460f7dd8e100147b82a63afca1a20eb6c231ee36b90ba7272e14951cb58af59"
-
-[[package]]
 name = "autocfg"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2465,6 +2459,30 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "gdbstub"
+version = "0.7.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8062b93565ea9fe2e60a0dd3c252f0d48c27cf223dad7ead028e361181a2c1a5"
+dependencies = [
+ "bitflags 2.9.0",
+ "cfg-if",
+ "log",
+ "managed",
+ "num-traits",
+ "paste",
+]
+
+[[package]]
+name = "gdbstub_arch"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "328a9e9425db13770d0d11de6332a608854266e44c53d12776be7b4aa427e3de"
+dependencies = [
+ "gdbstub",
+ "num-traits",
 ]
 
 [[package]]
@@ -4390,6 +4408,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "managed"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ca88d725a0a943b096803bd34e73a4437208b6077654cc4ecb2947a5f91618d"
+
+[[package]]
 name = "maplit"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5957,7 +5981,6 @@ name = "risc0-circuit-rv32im"
 version = "3.0.0"
 dependencies = [
  "anyhow",
- "auto_ops",
  "bit-vec 0.8.0",
  "bytemuck",
  "byteorder",
@@ -5966,6 +5989,8 @@ dependencies = [
  "derive_more",
  "enum-map",
  "flate2",
+ "gdbstub",
+ "gdbstub_arch",
  "malachite",
  "num-derive",
  "num-traits",
@@ -5985,6 +6010,7 @@ dependencies = [
  "test-log",
  "tracing",
  "tracing-subscriber 0.3.19",
+ "wide",
 ]
 
 [[package]]
@@ -6154,6 +6180,8 @@ dependencies = [
  "enum-iterator",
  "enum-map",
  "flate2",
+ "gdbstub",
+ "gdbstub_arch",
  "gimli",
  "hex",
  "hotbench",
@@ -6171,6 +6199,7 @@ dependencies = [
  "rand 0.9.1",
  "rayon",
  "redis",
+ "regex",
  "risc0-bigint2-methods",
  "risc0-binfmt",
  "risc0-build",
@@ -6523,7 +6552,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "rzup"
-version = "0.4.2"
+version = "0.5.0"
 dependencies = [
  "clap 4.5.37",
  "colored",
@@ -6547,6 +6576,15 @@ dependencies = [
  "walkdir",
  "xz",
  "yaml-rust2",
+]
+
+[[package]]
+name = "safe_arch"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96b02de82ddbe1b636e6170c21be622223aea188ef2e139be0a5b219ec215323"
+dependencies = [
+ "bytemuck",
 ]
 
 [[package]]
@@ -8110,6 +8148,16 @@ dependencies = [
  "env_home",
  "rustix 1.0.5",
  "winsafe",
+]
+
+[[package]]
+name = "wide"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41b5576b9a81633f3e8df296ce0063042a73507636cbe956c61133dd7034ab22"
+dependencies = [
+ "bytemuck",
+ "safe_arch",
 ]
 
 [[package]]
