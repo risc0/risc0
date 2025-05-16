@@ -31,7 +31,7 @@ members = [
   "website/doc-test/main",
   "xtask",
 ]
-exclude = ["tools/crates-validator"]
+exclude = ["tools/crates-validator", "risc0/r0vm/aws"]
 
 [workspace.package]
 version = "3.0.0"

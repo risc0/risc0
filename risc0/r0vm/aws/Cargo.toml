@@ -1,0 +1,18 @@
+[workspace]
+
+[package]
+name = "r0vm-aws"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.98"
+async-compression = { version = "0.4.23", features = ["lzma", "tokio"] }
+async-ssh2-tokio = "0.8.14"
+aws-config = { version = "1.6.2", features = ["behavior-version-latest"] }
+aws-sdk-ec2 = "1.129.0"
+aws-sdk-s3 = "1.86.0"
+clap = { version = "4.5.38", features = ["derive"] }
+sha256 = "1.6.0"
+tokio = { version = "1.45.0", features = ["rt", "macros"] }
+tokio-tar = "0.3.1"
