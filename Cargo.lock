@@ -1163,6 +1163,7 @@ dependencies = [
  "syn 2.0.100",
  "tempfile",
  "text_io",
+ "tokio",
  "tracing-subscriber 0.3.19",
  "zip",
 ]
@@ -6248,6 +6249,7 @@ dependencies = [
  "rstest 0.24.0",
  "semver",
  "test-log",
+ "tokio",
 ]
 
 [[package]]
