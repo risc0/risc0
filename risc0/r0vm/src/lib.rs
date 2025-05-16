@@ -208,7 +208,7 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
         };
         if args.with_debugger {
             exec.run_with_debugger().unwrap();
-            return;
+            return Ok(());
         } else {
             exec.run().unwrap()
         }
