@@ -6,7 +6,7 @@ use anyhow::{bail, Context, Result};
 use bonsai_sdk::non_blocking::Client as ProvingClient;
 use clap::Parser;
 use risc0_zkvm::{compute_image_id, serde::to_vec, Receipt};
-use sample_guest_common::IterReq::{CompositionKeccakUnion, Iter};
+use sample_guest_common::IterReq;
 use sample_guest_methods::METHOD_NAME_ID;
 use std::path::PathBuf;
 
@@ -65,7 +65,7 @@ async fn main() -> Result<()> {
         )?;
         (image, input)
     } else if let Some(iter_count) = args.iter_count {
-        let input = to_vec(&Iter(iter_count)).expect("Failed to r0 to_vec");
+        let input = to_vec(&IterReq::Iter(iter_count)).expect("Failed to r0 to_vec");
         let input = bytemuck::cast_slice(&input).to_vec();
         (sample_guest_methods::METHOD_NAME_ELF.to_vec(), input)
     } else {
@@ -82,13 +82,13 @@ async fn main() -> Result<()> {
     }
 
     // second round -- composition and keccak
-    let input = CompositionKeccakUnion(args.iter_count.unwrap(), METHOD_NAME_ID.into(), 5);
+    let input = IterReq::CompositionKeccakUnion(args.iter_count.unwrap(), METHOD_NAME_ID.into(), 5);
     let input: Vec<u8> =
         bytemuck::cast_slice(&to_vec(&input).expect("Failed to r0 to_vec")).to_vec();
     let (session_uuid, _receipt_id) =
         stark_workflow(&client, image, input, vec![receipt_id], args.exec_only)
             .await
-            .context("Failed to stark STARK proving")?;
+            .context("STARK proof workflow failure")?;
 
     // snarkify
     if args.snarkify {
@@ -125,7 +125,7 @@ async fn stark_workflow(
     let session = client
         .create_session(image_id_str.clone(), input_id, assumptions, exec_only)
         .await
-        .context("Failed to stark STARK proving")?;
+        .context("STARK proof failure")?;
     tracing::info!("STARK job_id: {}", session.uuid);
 
     let mut receipt_id = String::new();

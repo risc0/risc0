@@ -26,7 +26,10 @@ use tokio_util::sync::CancellationToken;
 use super::{
     factory::FactoryRouterActor,
     protocol::{
-        factory::{GetTask, JoinNode, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
+        factory::{
+            GetTask, JoinNode, ProveKeccakDone, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg,
+            UnionDone,
+        },
         worker::TaskMsg,
         ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
         Task, TaskError, TaskHeader, TaskKind, UnionTask,
@@ -175,11 +178,18 @@ impl Processor {
                 Ok(Box::new(NullSegmentRef))
             })?;
 
+            let assumptions = session
+                .assumptions
+                .into_iter()
+                .map(|(_, receipt)| Arc::new(receipt))
+                .collect();
+
             let session = Session {
                 segment_count: session.segments.len(),
                 user_cycles: session.user_cycles,
                 total_cycles: session.total_cycles,
                 journal: session.journal,
+                assumptions,
             };
 
             Ok(session)
@@ -211,7 +221,8 @@ impl Processor {
         header: TaskHeader,
         task: Arc<ProveKeccakTask>,
     ) -> Result<TaskDone, TaskError> {
-        tracing::info!("ProveKeccak: {}", header.global_id.task_id);
+        let index = task.index;
+        tracing::info!("ProveKeccak: {index}");
         self.task_start(header.clone()).await?;
         let receipt = tokio::task::spawn_blocking(move || {
             let prover = get_prover_server(&ProverOpts::default())?;
@@ -219,7 +230,10 @@ impl Processor {
         })
         .await
         .context("JoinHandle error: prove_keccak task")??;
-        Ok(TaskDone::ProveKeccak(Box::new(receipt)))
+        Ok(TaskDone::ProveKeccak(Arc::new(ProveKeccakDone {
+            index,
+            receipt,
+        })))
     }
 
     async fn lift(&self, header: TaskHeader, task: Arc<LiftTask>) -> Result<TaskDone, TaskError> {
@@ -252,7 +266,9 @@ impl Processor {
     }
 
     async fn union(&self, header: TaskHeader, task: Arc<UnionTask>) -> Result<TaskDone, TaskError> {
-        tracing::info!("Union: {:?}", header.global_id.task_id);
+        let height = task.height;
+        let pos = task.pos;
+        tracing::info!("Union: {height}/{pos}");
         self.task_start(header.clone()).await?;
         let receipt = tokio::task::spawn_blocking(move || {
             let prover = get_prover_server(&ProverOpts::default())?;
@@ -260,7 +276,11 @@ impl Processor {
         })
         .await
         .context("JoinHandle error: union task")??;
-        Ok(TaskDone::Union(Box::new(receipt)))
+        Ok(TaskDone::Union(Arc::new(UnionDone {
+            height,
+            pos,
+            receipt,
+        })))
     }
 
     async fn resolve(
@@ -276,7 +296,7 @@ impl Processor {
         })
         .await
         .context("JoinHandle error: resolve task")??;
-        Ok(TaskDone::Resolve(Box::new(receipt)))
+        Ok(TaskDone::Resolve(Arc::new(receipt)))
     }
 }
 

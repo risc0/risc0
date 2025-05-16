@@ -17,8 +17,8 @@ use std::{ops::Range, sync::Arc, time::Duration};
 use clap::ValueEnum;
 use kameo::{actor::ActorRef, Reply};
 use risc0_zkvm::{
-    Journal, ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
-    UnionClaim, Unknown,
+    AssumptionReceipt, Journal, ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt,
+    SuccinctReceipt, UnionClaim, Unknown,
 };
 use serde::{Deserialize, Serialize};
 
@@ -81,6 +81,7 @@ pub(crate) struct Session {
     pub(crate) user_cycles: u64,
     pub(crate) total_cycles: u64,
     pub(crate) journal: Option<Journal>,
+    pub(crate) assumptions: Vec<Arc<AssumptionReceipt>>,
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
@@ -129,6 +130,7 @@ pub(crate) struct ProveSegmentTask {
 
 #[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct ProveKeccakTask {
+    pub index: usize,
     pub request: ProveKeccakRequest,
 }
 
@@ -151,13 +153,15 @@ pub(crate) struct JoinTask {
 
 #[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct UnionTask {
-    pub receipts: Vec<SuccinctReceipt<Unknown>>,
+    pub height: usize,
+    pub pos: usize,
+    pub receipts: Vec<Arc<SuccinctReceipt<Unknown>>>,
 }
 
 #[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct ResolveTask {
-    pub conditional: SuccinctReceipt<ReceiptClaim>,
-    pub assumption: SuccinctReceipt<Unknown>,
+    pub conditional: Arc<SuccinctReceipt<ReceiptClaim>>,
+    pub assumption: Arc<SuccinctReceipt<Unknown>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -176,7 +180,6 @@ pub mod factory {
     #[derive(Clone, Reply)]
     pub(crate) struct SubmitTaskMsg {
         pub job: ActorRef<JobActor>,
-        pub job_id: JobId,
         pub header: TaskHeader,
         pub task: Task,
     }
@@ -209,17 +212,30 @@ pub mod factory {
     pub(crate) enum TaskDone {
         Session(Arc<Session>),
         ProveSegment(Box<SegmentReceipt>),
-        ProveKeccak(Box<SuccinctReceipt<Unknown>>),
+        ProveKeccak(Arc<ProveKeccakDone>),
         Lift(Box<JoinNode>),
         Join(Box<JoinNode>),
-        Union(Box<SuccinctReceipt<UnionClaim>>),
-        Resolve(Box<SuccinctReceipt<ReceiptClaim>>),
+        Union(Arc<UnionDone>),
+        Resolve(Arc<SuccinctReceipt<ReceiptClaim>>),
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub(crate) struct ProveKeccakDone {
+        pub index: usize,
+        pub receipt: SuccinctReceipt<Unknown>,
     }
 
     #[derive(Serialize, Deserialize)]
     pub(crate) struct JoinNode {
         pub range: SegmentRange,
         pub receipt: SuccinctReceipt<ReceiptClaim>,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub(crate) struct UnionDone {
+        pub height: usize,
+        pub pos: usize,
+        pub receipt: SuccinctReceipt<UnionClaim>,
     }
 }
 

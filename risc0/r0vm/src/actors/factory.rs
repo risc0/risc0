@@ -112,7 +112,7 @@ impl Message<SubmitTaskMsg> for FactoryActor {
         msg: SubmitTaskMsg,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.jobs.insert(msg.job_id, msg.job);
+        self.jobs.insert(msg.header.global_id.job_id, msg.job);
         let task = TaskMsg {
             header: msg.header.clone(),
             task: msg.task.clone(),
