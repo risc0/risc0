@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    risc0_r0vm::main()
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    risc0_r0vm::main().await
 }

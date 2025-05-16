@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, io, path::PathBuf, rc::Rc};
+mod actors;
+mod api;
+
+use std::{error::Error as StdError, fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
@@ -20,6 +23,8 @@ use risc0_zkvm::{
     compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
     ProverServer, VerifierContext,
 };
+
+use self::actors::protocol::TaskKind;
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -75,10 +80,21 @@ struct Cli {
 
     #[arg(long)]
     with_debugger: bool,
+
+    /// The address to connect to or listen on.
+    #[arg(long)]
+    addr: Option<SocketAddr>,
+
+    /// Client mode.
+    #[arg(long)]
+    client: bool,
+
+    #[arg(long)]
+    api: Option<SocketAddr>,
 }
 
 #[derive(Args)]
-#[group(required = true, multiple = false)]
+#[group(required = true)]
 struct Mode {
     #[arg(long)]
     port: Option<u16>,
@@ -91,8 +107,17 @@ struct Mode {
     #[arg(long)]
     image: Option<PathBuf>,
 
+    /// Prove a pre-recorded segment.
     #[arg(long)]
     segment: Option<PathBuf>,
+
+    /// Start the manager.
+    #[arg(long)]
+    manager: bool,
+
+    /// Start a worker.
+    #[arg(long, value_enum, value_delimiter(','))]
+    worker: Vec<TaskKind>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -113,7 +138,7 @@ enum ReceiptKind {
     Groth16,
 }
 
-pub fn main() {
+pub async fn main() -> Result<(), Box<dyn StdError>> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
@@ -124,19 +149,27 @@ pub fn main() {
         let blob = fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
         println!("{image_id}");
-        return;
+        return Ok(());
     }
 
     if let Some(port) = args.mode.port {
         run_server(port);
-        return;
+        return Ok(());
     }
 
     if let Some(path) = args.mode.segment {
         let bytes = std::fs::read(path).unwrap();
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
-        return;
+        return Ok(());
+    }
+
+    if args.client {
+        return self::actors::client_main(&args).await;
+    }
+
+    if args.mode.manager || !args.mode.worker.is_empty() {
+        return self::actors::main(&args).await;
     }
 
     let env = {
@@ -175,7 +208,7 @@ pub fn main() {
         };
         if args.with_debugger {
             exec.run_with_debugger().unwrap();
-            return;
+            return Ok(());
         } else {
             exec.run().unwrap()
         }
@@ -197,6 +230,8 @@ pub fn main() {
             );
         }
     }
+
+    Ok(())
 }
 
 impl Cli {
