@@ -76,13 +76,13 @@ pub(crate) struct JobActor {
 type UnknownReceipt = Arc<SuccinctReceipt<Unknown>>;
 
 impl JobActor {
-    async fn prove_keccak_done(&mut self, _header: TaskHeader, done: Arc<ProveKeccakDone>) {
+    async fn prove_keccak_done(&mut self, done: Arc<ProveKeccakDone>) {
         tracing::info!("ProveKeccakDone: {}", done.index);
         let receipt = Arc::new(done.receipt.clone());
         self.process_union(done.index, 0, receipt).await;
     }
 
-    async fn union_done(&mut self, _header: TaskHeader, done: Arc<UnionDone>) {
+    async fn union_done(&mut self, done: Arc<UnionDone>) {
         let receipt = Arc::new(done.receipt.clone().into_unknown());
         match self.keccak_phase {
             KeccakPhase::Build => {
@@ -271,9 +271,8 @@ impl JobActor {
         .await;
     }
 
-    async fn session_done(&mut self, header: TaskHeader, session: Arc<Session>) {
+    async fn session_done(&mut self, session: Arc<Session>) {
         tracing::info!("SessionDone");
-        self.span_end(header.global_id.task_id);
         for ref receipt in session.assumptions.iter() {
             tracing::info!("{receipt:#?}");
         }
@@ -282,24 +281,21 @@ impl JobActor {
         self.maybe_finish().await;
     }
 
-    async fn prove_segment_done(&mut self, header: TaskHeader, receipt: Box<SegmentReceipt>) {
-        self.span_end(header.global_id.task_id);
+    async fn prove_segment_done(&mut self, receipt: Box<SegmentReceipt>) {
         tracing::info!("ProveSegmentDone: {}", receipt.index);
         self.submit_task(Task::Lift(Arc::new(LiftTask { receipt: *receipt })))
             .await;
     }
 
-    async fn lift_done(&mut self, header: TaskHeader, node: Box<JoinNode>) {
+    async fn lift_done(&mut self, node: Box<JoinNode>) {
         tracing::info!("LiftDone: {:?}", node.range);
-        self.span_end(header.global_id.task_id);
         self.joins.insert(node.range, Arc::new(node.receipt));
         self.maybe_join().await;
         self.maybe_finish().await;
     }
 
-    async fn join_done(&mut self, header: TaskHeader, node: Box<JoinNode>) {
+    async fn join_done(&mut self, node: Box<JoinNode>) {
         tracing::info!("JoinDone: {:?}", node.range);
-        self.span_end(header.global_id.task_id);
         self.joins.insert(node.range, Arc::new(node.receipt));
         self.maybe_join().await;
         self.maybe_finish().await;
@@ -528,13 +524,14 @@ impl Message<TaskDoneMsg> for JobActor {
                 return;
             }
         };
+        self.span_end(msg.header.global_id.task_id);
         match task_done {
-            TaskDone::Session(session) => self.session_done(msg.header, session).await,
-            TaskDone::ProveSegment(receipt) => self.prove_segment_done(msg.header, receipt).await,
-            TaskDone::ProveKeccak(done) => self.prove_keccak_done(msg.header, done).await,
-            TaskDone::Lift(node) => self.lift_done(msg.header, node).await,
-            TaskDone::Join(node) => self.join_done(msg.header, node).await,
-            TaskDone::Union(done) => self.union_done(msg.header, done).await,
+            TaskDone::Session(session) => self.session_done(session).await,
+            TaskDone::ProveSegment(receipt) => self.prove_segment_done(receipt).await,
+            TaskDone::ProveKeccak(done) => self.prove_keccak_done(done).await,
+            TaskDone::Lift(node) => self.lift_done(node).await,
+            TaskDone::Join(node) => self.join_done(node).await,
+            TaskDone::Union(done) => self.union_done(done).await,
             TaskDone::Resolve(receipt) => self.resolve_done(receipt).await,
         }
     }
