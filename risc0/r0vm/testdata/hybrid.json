@@ -1,0 +1,47 @@
+{
+	"pools": [
+		{
+			"count": 1,
+			"profile": {
+				"prove_segment": 1,
+				"prove_keccak": 1,
+				"lift": 1,
+				"join": 1,
+				"union": 1,
+				"resolve": 1
+			},
+			"task_kinds": ["Execute"]
+		},
+		{
+			"count": 36,
+			"profile": {
+				"prove_segment": 0.8,
+				"prove_keccak": 0.25,
+				"lift": 0.15,
+				"join": 0.25,
+				"union": 0.25,
+				"resolve": 0.25
+			},
+			"task_kinds": [
+				"ProveSegment",
+				"ProveKeccak",
+				"Lift",
+				"Join",
+				"Union",
+				"Resolve"
+			]
+		},
+		{
+			"count": 50,
+			"profile": {
+				"prove_segment": 1.6,
+				"prove_keccak": 0.35,
+				"lift": 0.25,
+				"join": 0.35,
+				"union": 0.35,
+				"resolve": 0.35
+			},
+			"task_kinds": ["ProveKeccak", "Lift", "Join", "Union", "Resolve"]
+		}
+	]
+}

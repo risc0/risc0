@@ -27,6 +27,7 @@ use kameo::prelude::*;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
 use protocol::{JobInfo, ProofRequest};
+use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tokio::{
     net::{TcpListener, TcpStream},
@@ -49,10 +50,38 @@ use self::{
     worker::Worker,
 };
 
+#[derive(Serialize, Deserialize)]
+pub(crate) struct SimulationConfig {
+    pub pools: Vec<PoolConfig>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct PoolConfig {
+    pub count: usize,
+    pub profile: DevModeDelay,
+    pub task_kinds: Vec<TaskKind>,
+}
+
 pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     let is_manager = args.mode.manager;
     let task_kinds = args.mode.worker.clone();
-    let mut app = App::new(is_manager, task_kinds, args.addr, args.api, false).await?;
+
+    let config = if let Some(ref path) = args.simulate {
+        let json = std::fs::read_to_string(path)?;
+        Some(serde_json::from_str(&json)?)
+    } else {
+        None
+    };
+
+    let mut app = App::new(
+        is_manager,
+        task_kinds,
+        args.addr,
+        args.api,
+        args.storage.clone(),
+        config,
+    )
+    .await?;
 
     if let Some(ref bin_path) = args.mode.elf {
         let binary = std::fs::read(bin_path)?;
@@ -75,26 +104,6 @@ pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     Ok(())
 }
 
-pub(crate) async fn client_main(_args: &Cli) -> Result<(), Box<dyn StdError>> {
-    // let bin_path = args.mode.elf.as_ref().unwrap();
-    // let binary = std::fs::read(bin_path)?;
-    // let input = if let Some(ref input_path) = args.initial_input {
-    //     std::fs::read(input_path)?
-    // } else {
-    //     vec![]
-    // };
-
-    // tracing::info!("Sending request");
-    // let mut tcp = TcpStream::connect(args.addr.unwrap()).await?;
-    // let msg = RemoteRequest::ProofRequest(ProofRequest { binary, input });
-    // send(&mut tcp, msg).await?;
-    // let reply: ProofReply = recv(&mut tcp).await?.unwrap();
-    // reply.receipt.verify_integrity()?;
-    // tracing::info!("Receipt verified");
-
-    Ok(())
-}
-
 #[derive(Serialize, Deserialize)]
 enum RemoteRequest {
     GetTask(GetTask),
@@ -106,7 +115,7 @@ pub(crate) struct App {
     provider: SdkTracerProvider,
     manager: Option<ActorRef<ManagerActor>>,
     factory: Option<ActorRef<FactoryActor>>,
-    worker: Option<Worker>,
+    workers: Vec<Worker>,
     server: Option<Server>,
 }
 
@@ -116,16 +125,17 @@ impl App {
         task_kinds: Vec<TaskKind>,
         addr: Option<SocketAddr>,
         api_addr: Option<SocketAddr>,
-        is_test: bool,
+        storage_root: Option<PathBuf>,
+        sim_config: Option<SimulationConfig>,
     ) -> Result<Self, Box<dyn StdError>> {
         let provider = init_tracer_provider();
         let mut manager = None;
         let mut factory = None;
-        let mut worker = None;
+        let mut workers = vec![];
         let mut server = None;
 
         if is_manager {
-            let storage_root = PathBuf::from("/home/flaub/src/risc0/tmp/bucket"); // TODO
+            let storage_root = storage_root.unwrap_or_else(default_storage_root);
 
             let factory_ref = kameo::spawn(FactoryActor::new());
             factory = Some(factory_ref.clone());
@@ -134,7 +144,7 @@ impl App {
                 kameo::spawn(ManagerActor::new(factory_ref.clone(), storage_root.clone()));
             manager = Some(manager_ref.clone());
 
-            if !is_test {
+            if let Some(addr) = addr {
                 server = Some(Server::new(addr, factory_ref));
                 server.as_mut().unwrap().start().await?;
             }
@@ -144,25 +154,43 @@ impl App {
             }
         }
 
-        if !task_kinds.is_empty() {
-            let factory_ref = match factory {
-                Some(ref factory) => kameo::spawn(FactoryRouterActor::Local(factory.clone())),
-                None => {
-                    let remote = kameo::spawn(RemoteFactoryActor::new(addr.unwrap()).await?);
-                    kameo::spawn(FactoryRouterActor::Remote(remote))
-                }
-            };
+        let factory_ref = match factory {
+            Some(ref factory) => kameo::spawn(FactoryRouterActor::Local(factory.clone())),
+            None => {
+                let remote = kameo::spawn(RemoteFactoryActor::new(addr.unwrap()).await?);
+                kameo::spawn(FactoryRouterActor::Remote(remote))
+            }
+        };
 
+        if let Some(config) = sim_config {
+            for pool in config.pools {
+                tracing::info!(
+                    "Starting simulated worker pool: {}, task_kinds: {:?}",
+                    pool.count,
+                    pool.task_kinds
+                );
+                for _ in 0..pool.count {
+                    let mut worker = Worker::new(
+                        factory_ref.clone(),
+                        pool.task_kinds.clone(),
+                        Some(pool.profile),
+                    );
+                    worker.start();
+                    workers.push(worker);
+                }
+            }
+        } else if !task_kinds.is_empty() {
             tracing::info!("Starting worker: {task_kinds:?}");
-            worker = Some(Worker::new(factory_ref, task_kinds));
-            worker.as_mut().unwrap().start();
+            let mut worker = Worker::new(factory_ref.clone(), task_kinds.clone(), None);
+            worker.start();
+            workers.push(worker);
         }
 
         Ok(Self {
             provider,
             manager,
             factory,
-            worker,
+            workers,
             server,
         })
     }
@@ -181,8 +209,8 @@ impl App {
             manager.wait_for_stop().await;
         }
 
-        if let Some(worker) = self.worker.take() {
-            tracing::info!("worker: stop");
+        tracing::info!("worker: stop");
+        for worker in self.workers {
             worker.stop().await;
         }
 
@@ -207,14 +235,14 @@ impl App {
 }
 
 struct Server {
-    addr: Option<SocketAddr>,
+    addr: SocketAddr,
     factory: ActorRef<FactoryActor>,
     token: CancellationToken,
     join_handle: Option<JoinHandle<()>>,
 }
 
 impl Server {
-    pub fn new(addr: Option<SocketAddr>, factory: ActorRef<FactoryActor>) -> Self {
+    pub fn new(addr: SocketAddr, factory: ActorRef<FactoryActor>) -> Self {
         Self {
             addr,
             factory,
@@ -228,10 +256,9 @@ impl Server {
             return Ok(());
         }
 
-        let addr = self.addr.unwrap();
         let factory = self.factory.clone();
         let token = self.token.clone();
-        let listener = TcpListener::bind(addr).await?;
+        let listener = TcpListener::bind(self.addr).await?;
 
         self.join_handle = Some(tokio::spawn(async move {
             loop {
@@ -308,6 +335,10 @@ async fn handle_request(
     }
 }
 
+fn default_storage_root() -> PathBuf {
+    dirs::home_dir().unwrap().join(".risc0").join("r0vm")
+}
+
 fn init_tracer_provider() -> SdkTracerProvider {
     let otlp_exporter = opentelemetry_otlp::SpanExporter::builder()
         .with_http()
@@ -333,6 +364,7 @@ pub(crate) async fn send<T: serde::Serialize>(
     let mut writer = FramedWrite::new(stream, encoder);
 
     let bytes = bincode::serialize(&msg)?;
+    tracing::info!("tx {} bytes", bytes.len());
     writer.send(bytes.into()).await?;
 
     Ok(())
@@ -349,5 +381,6 @@ pub(crate) async fn recv<T: serde::de::DeserializeOwned>(
         None => return Ok(None),
     };
 
+    tracing::info!("rx {} bytes", frame.len());
     Ok(Some(bincode::deserialize(&frame)?))
 }

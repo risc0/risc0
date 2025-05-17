@@ -26,6 +26,7 @@ use super::job::JobActor;
 
 pub(crate) type JobId = uuid::Uuid;
 pub(crate) type TaskId = u64;
+pub(crate) type WorkerId = uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct CreateJobRequest {
@@ -174,6 +175,7 @@ pub mod factory {
 
     #[derive(Clone, Serialize, Deserialize)]
     pub(crate) struct GetTask {
+        pub worker_id: WorkerId,
         pub kinds: Vec<TaskKind>,
     }
 

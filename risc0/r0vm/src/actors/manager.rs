@@ -103,10 +103,9 @@ impl Message<JobDone> for ManagerActor {
         tracing::info!("JobDone: {}", msg.job_id);
         if let JobStatus::Succeeded(ref result) = msg.info.status {
             let encoded = bincode::serialize(result.receipt.as_ref()).unwrap();
-            let receipt_path = self
-                .storage_root
-                .join("receipts")
-                .join(msg.job_id.to_string());
+            let receipts_dir = self.storage_root.join("receipts");
+            std::fs::create_dir_all(&receipts_dir).unwrap();
+            let receipt_path = receipts_dir.join(msg.job_id.to_string());
             tokio::fs::write(receipt_path, encoded).await.unwrap();
         }
         self.jobs.insert(msg.job_id, JobEntry::Inactive(msg.info));

@@ -14,7 +14,7 @@
 
 //! Run the zkVM guest and prove its results.
 
-mod dev_mode;
+pub(crate) mod dev_mode;
 pub(crate) mod keccak;
 mod prover_impl;
 #[cfg(test)]
@@ -251,7 +251,7 @@ impl Session {
 pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
     if is_dev_mode() {
         eprintln!("WARNING: proving in dev mode. This will not generate valid, secure proofs.");
-        return Ok(Rc::new(DevModeProver));
+        return Ok(Rc::new(DevModeProver::new()));
     }
 
     Ok(Rc::new(ProverImpl::new(opts.clone())))

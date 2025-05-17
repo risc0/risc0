@@ -15,6 +15,7 @@
 #![allow(unused)]
 
 use std::{
+    fs::DirBuilder,
     net::SocketAddr,
     path::{Component, Path as FsPath, PathBuf},
     sync::Arc,
@@ -213,15 +214,21 @@ impl AppState {
     }
 
     fn images_dir(&self) -> PathBuf {
-        self.storage_root.join("images")
+        let dir = self.storage_root.join("images");
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
     }
 
     fn inputs_dir(&self) -> PathBuf {
-        self.storage_root.join("inputs")
+        let dir = self.storage_root.join("inputs");
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
     }
 
     fn receipts_dir(&self) -> PathBuf {
-        self.storage_root.join("receipts")
+        let dir = self.storage_root.join("receipts");
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
     }
 }
 

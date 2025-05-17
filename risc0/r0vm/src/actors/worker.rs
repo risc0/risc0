@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Arc;
+use std::{rc::Rc, sync::Arc};
 
 use anyhow::Context;
 use kameo::prelude::*;
 use risc0_zkvm::{
-    get_prover_server, CoprocessorCallback, ExecutorEnv, ExecutorImpl, NullSegmentRef,
-    ProveKeccakRequest, ProveZkrRequest, ProverOpts, VerifierContext,
+    get_prover_server, CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl,
+    NullSegmentRef, ProveKeccakRequest, ProveZkrRequest, ProverOpts, ProverServer, VerifierContext,
 };
 use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
@@ -32,28 +32,37 @@ use super::{
         },
         worker::TaskMsg,
         ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
-        Task, TaskError, TaskHeader, TaskKind, UnionTask,
+        Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
     },
 };
 
 struct Processor {
     factory: ActorRef<FactoryRouterActor>,
+    delay: Option<DevModeDelay>,
 }
 
 pub(crate) struct Worker {
+    worker_id: WorkerId,
     factory: ActorRef<FactoryRouterActor>,
     task_kinds: Vec<TaskKind>,
     token: CancellationToken,
     join_handle: Option<JoinHandle<()>>,
+    delay: Option<DevModeDelay>,
 }
 
 impl Worker {
-    pub fn new(factory: ActorRef<FactoryRouterActor>, task_kinds: Vec<TaskKind>) -> Self {
+    pub fn new(
+        factory: ActorRef<FactoryRouterActor>,
+        task_kinds: Vec<TaskKind>,
+        delay: Option<DevModeDelay>,
+    ) -> Self {
         Self {
+            worker_id: WorkerId::new_v4(),
             factory,
             task_kinds,
             token: CancellationToken::new(),
             join_handle: None,
+            delay,
         }
     }
 
@@ -63,11 +72,13 @@ impl Worker {
         }
 
         let request = GetTask {
+            worker_id: self.worker_id,
             kinds: self.task_kinds.clone(),
         };
         let factory = self.factory.clone();
         let processor = Processor {
             factory: factory.clone(),
+            delay: self.delay,
         };
         let token = self.token.clone();
         self.join_handle = Some(tokio::spawn(async move {
@@ -75,7 +86,7 @@ impl Worker {
                 let request = request.clone();
                 tokio::select! {
                     _ = token.cancelled() => {
-                        tracing::info!("stopping");
+                        // tracing::info!("stopping");
                         break;
                     }
                     reply = factory.ask(request) => {
@@ -97,6 +108,20 @@ impl Worker {
 impl From<anyhow::Error> for TaskError {
     fn from(value: anyhow::Error) -> Self {
         Self::Generic(value.to_string())
+    }
+}
+
+struct Prover {
+    delay: Option<DevModeDelay>,
+}
+
+impl Prover {
+    fn get(&self) -> anyhow::Result<Rc<dyn ProverServer>> {
+        if let Some(delay) = self.delay {
+            Ok(Rc::new(DevModeProver::with_delay(delay)))
+        } else {
+            get_prover_server(&ProverOpts::default())
+        }
     }
 }
 
@@ -206,10 +231,10 @@ impl Processor {
     ) -> Result<TaskDone, TaskError> {
         tracing::info!("ProveSegment: {}", task.segment.index);
         self.task_start(header.clone()).await?;
+        let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || {
             let ctx = VerifierContext::default();
-            let prover = get_prover_server(&ProverOpts::default())?;
-            prover.prove_segment(&ctx, &task.segment)
+            prover.get()?.prove_segment(&ctx, &task.segment)
         })
         .await
         .context("JoinHandle error: prove_segment task")??;
@@ -224,12 +249,11 @@ impl Processor {
         let index = task.index;
         tracing::info!("ProveKeccak: {index}");
         self.task_start(header.clone()).await?;
-        let receipt = tokio::task::spawn_blocking(move || {
-            let prover = get_prover_server(&ProverOpts::default())?;
-            prover.prove_keccak(&task.request)
-        })
-        .await
-        .context("JoinHandle error: prove_keccak task")??;
+        let prover = Prover { delay: self.delay };
+        let receipt =
+            tokio::task::spawn_blocking(move || prover.get()?.prove_keccak(&task.request))
+                .await
+                .context("JoinHandle error: prove_keccak task")??;
         Ok(TaskDone::ProveKeccak(Arc::new(ProveKeccakDone {
             index,
             receipt,
@@ -240,12 +264,10 @@ impl Processor {
         tracing::info!("Lift: {}", task.receipt.index);
         self.task_start(header.clone()).await?;
         let segment_idx = task.receipt.index;
-        let receipt = tokio::task::spawn_blocking(move || {
-            let prover = get_prover_server(&ProverOpts::default())?;
-            prover.lift(&task.receipt)
-        })
-        .await
-        .context("JoinHandle error: lift task")??;
+        let prover = Prover { delay: self.delay };
+        let receipt = tokio::task::spawn_blocking(move || prover.get()?.lift(&task.receipt))
+            .await
+            .context("JoinHandle error: lift task")??;
         Ok(TaskDone::Lift(Box::new(JoinNode {
             range: (segment_idx..segment_idx + 1).into(),
             receipt,
@@ -256,9 +278,9 @@ impl Processor {
         let range = task.range;
         tracing::info!("Join: {range:?}");
         self.task_start(header.clone()).await?;
+        let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || {
-            let prover = get_prover_server(&ProverOpts::default())?;
-            prover.join(&task.receipts[0], &task.receipts[1])
+            prover.get()?.join(&task.receipts[0], &task.receipts[1])
         })
         .await
         .context("JoinHandle error: join task")??;
@@ -270,9 +292,9 @@ impl Processor {
         let pos = task.pos;
         tracing::info!("Union: {height}/{pos}");
         self.task_start(header.clone()).await?;
+        let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || {
-            let prover = get_prover_server(&ProverOpts::default())?;
-            prover.union(&task.receipts[0], &task.receipts[1])
+            prover.get()?.union(&task.receipts[0], &task.receipts[1])
         })
         .await
         .context("JoinHandle error: union task")??;
@@ -290,9 +312,9 @@ impl Processor {
     ) -> Result<TaskDone, TaskError> {
         tracing::info!("Resolve: {:?}", header.global_id.task_id);
         self.task_start(header.clone()).await?;
+        let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || {
-            let prover = get_prover_server(&ProverOpts::default())?;
-            prover.resolve(&task.conditional, &task.assumption)
+            prover.get()?.resolve(&task.conditional, &task.assumption)
         })
         .await
         .context("JoinHandle error: resolve task")??;

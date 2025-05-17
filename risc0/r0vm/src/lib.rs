@@ -85,12 +85,14 @@ struct Cli {
     #[arg(long)]
     addr: Option<SocketAddr>,
 
-    /// Client mode.
-    #[arg(long)]
-    client: bool,
-
     #[arg(long)]
     api: Option<SocketAddr>,
+
+    #[arg(long)]
+    storage: Option<PathBuf>,
+
+    #[arg(long)]
+    simulate: Option<PathBuf>,
 }
 
 #[derive(Args)]
@@ -162,10 +164,6 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
         return Ok(());
-    }
-
-    if args.client {
-        return self::actors::client_main(&args).await;
     }
 
     if args.mode.manager || !args.mode.worker.is_empty() {

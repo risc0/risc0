@@ -12,11 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
+use std::time::Duration;
 
-use crate::actors::protocol::JobStatus;
+use risc0_zkvm::DevModeDelay;
+use risc0_zkvm_methods::FIB_ELF;
+
+use crate::actors::{protocol::JobStatus, PoolConfig, SimulationConfig};
 
 use super::{protocol::TaskKind, App};
+
+const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
+    prove_segment: Duration::from_millis(800),
+    prove_keccak: Duration::from_millis(250),
+    lift: Duration::from_millis(150),
+    join: Duration::from_millis(250),
+    union: Duration::from_millis(250),
+    resolve: Duration::from_millis(250),
+};
+
+// const PROFILE_L40S: DevModeDelay = DevModeDelay {
+//     prove_segment: Duration::from_millis(1600),
+//     prove_keccak: Duration::from_millis(350),
+//     lift: Duration::from_millis(250),
+//     join: Duration::from_millis(350),
+//     union: Duration::from_millis(350),
+//     resolve: Duration::from_millis(350),
+// };
 
 #[test_log::test(tokio::test(flavor = "multi_thread"))]
 async fn basic() {
@@ -29,20 +50,37 @@ async fn basic() {
         TaskKind::Join,
     ];
 
-    let mut app = App::new(true, task_kinds, None, None, true).await.unwrap();
+    let storage_root = assert_fs::TempDir::new().unwrap();
 
-    const ITERATIONS: u32 = 300_000;
+    let config = SimulationConfig {
+        pools: vec![PoolConfig {
+            count: 100,
+            profile: PROFILE_RTX_5090,
+            task_kinds: task_kinds.clone(),
+        }],
+    };
+
+    let mut app = App::new(
+        true,
+        task_kinds,
+        None,
+        None,
+        Some(storage_root.to_path_buf()),
+        Some(config),
+    )
+    .await
+    .unwrap();
+
+    const ITERATIONS: u32 = 30_000_000;
 
     let info = app
         .run_binary(FIB_ELF.to_vec(), u32::to_le_bytes(ITERATIONS).to_vec())
         .await
         .unwrap();
 
-    let JobStatus::Succeeded(result) = info.status else {
+    let JobStatus::Succeeded(_result) = info.status else {
         panic!("Invalid status");
     };
-
-    result.receipt.verify(FIB_ID).unwrap();
 
     app.stop().await;
 }

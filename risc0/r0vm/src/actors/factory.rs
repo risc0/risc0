@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, net::SocketAddr, ops::ControlFlow};
+use std::{collections::HashMap, net::SocketAddr};
 
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
@@ -23,7 +23,7 @@ use super::{
     protocol::{
         factory::{DropJob, GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
-        GlobalId, JobId, Task, TaskHeader, TaskKind,
+        GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
     },
     RemoteRequest,
 };
@@ -44,8 +44,7 @@ struct WorkerRow {
     #[multi_index(hashed_non_unique)]
     task_kind: TaskKind,
     #[multi_index(hashed_non_unique)]
-    actor_id: ActorID,
-    actor_ref: ActorRef<WorkerProxyActor>,
+    worker_id: WorkerId,
 }
 
 pub(crate) struct FactoryActor {
@@ -53,6 +52,7 @@ pub(crate) struct FactoryActor {
     workers: MultiIndexWorkerRowMap,
     pending_tasks: MultiIndexTaskRowMap,
     active_tasks: HashMap<GlobalId, TaskMsg>,
+    reply_senders: HashMap<WorkerId, ReplySender<TaskMsg>>,
 }
 
 impl FactoryActor {
@@ -62,6 +62,7 @@ impl FactoryActor {
             workers: Default::default(),
             pending_tasks: Default::default(),
             active_tasks: HashMap::default(),
+            reply_senders: HashMap::default(),
         }
     }
 }
@@ -82,16 +83,6 @@ impl Actor for FactoryActor {
         // stop timer
         tracing::info!("Factory: on_stop");
         Ok(())
-    }
-
-    async fn on_link_died(
-        &mut self,
-        _actor_ref: WeakActorRef<Self>,
-        id: ActorID,
-        _reason: ActorStopReason,
-    ) -> Result<ControlFlow<ActorStopReason>, Self::Error> {
-        self.workers.remove_by_actor_id(&id);
-        Ok(ControlFlow::Continue(()))
     }
 }
 
@@ -120,9 +111,10 @@ impl Message<SubmitTaskMsg> for FactoryActor {
 
         let workers = self.workers.get_by_task_kind(&msg.header.task_kind);
         if let Some(worker) = workers.first() {
-            self.active_tasks
-                .insert(task.header.global_id, task.clone());
-            worker.actor_ref.tell(task).await.unwrap();
+            let worker_id = worker.worker_id;
+            self.workers.remove_by_worker_id(&worker_id);
+            let reply_sender = self.reply_senders.remove(&worker_id).unwrap();
+            reply_sender.send(task);
         } else {
             self.pending_tasks.insert(TaskRow {
                 job_id: msg.header.global_id.job_id,
@@ -138,7 +130,6 @@ impl Message<GetTask> for FactoryActor {
     type Reply = DelegatedReply<TaskMsg>;
 
     async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        // tracing::info!("GetTask");
         for &task_kind in msg.kinds.iter() {
             let row = self
                 .pending_tasks
@@ -161,14 +152,18 @@ impl Message<GetTask> for FactoryActor {
         }
 
         let (delegated_reply, reply_sender) = ctx.reply_sender();
-        let worker_ref = spawn_link(&ctx.actor_ref(), WorkerProxyActor { reply_sender }).await;
+        if reply_sender.is_none() {
+            tracing::error!("No reply sender for GetTask!!");
+            return delegated_reply;
+        }
 
-        // tracing::info!("new worker: {:?}", msg.kinds);
+        self.reply_senders
+            .insert(msg.worker_id, reply_sender.unwrap());
+
         for task_kind in msg.kinds {
             let worker = WorkerRow {
                 task_kind,
-                actor_id: worker_ref.id(),
-                actor_ref: worker_ref.clone(),
+                worker_id: msg.worker_id,
             };
             self.workers.insert(worker);
         }
@@ -204,20 +199,6 @@ impl Message<TaskDoneMsg> for FactoryActor {
         if let Some(job) = self.jobs.get(&msg.header.global_id.job_id) {
             ctx.forward(job, msg).await;
         }
-    }
-}
-
-#[derive(Actor)]
-struct WorkerProxyActor {
-    reply_sender: Option<ReplySender<TaskMsg>>,
-}
-
-impl Message<TaskMsg> for WorkerProxyActor {
-    type Reply = ();
-
-    async fn handle(&mut self, msg: TaskMsg, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        self.reply_sender.take().unwrap().send(msg);
-        ctx.actor_ref().stop_gracefully().await.unwrap();
     }
 }
 
