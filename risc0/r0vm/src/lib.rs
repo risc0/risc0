@@ -93,6 +93,9 @@ struct Cli {
 
     #[arg(long)]
     simulate: Option<PathBuf>,
+
+    #[arg(long)]
+    po2: Option<usize>,
 }
 
 #[derive(Args)]

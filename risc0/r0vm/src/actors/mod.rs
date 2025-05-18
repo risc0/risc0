@@ -27,6 +27,7 @@ use kameo::prelude::*;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
 use protocol::{JobInfo, ProofRequest};
+use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tokio::{
@@ -80,6 +81,7 @@ pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         args.api,
         args.storage.clone(),
         config,
+        args.po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2),
     )
     .await?;
 
@@ -127,6 +129,7 @@ impl App {
         api_addr: Option<SocketAddr>,
         storage_root: Option<PathBuf>,
         sim_config: Option<SimulationConfig>,
+        po2: usize,
     ) -> Result<Self, Box<dyn StdError>> {
         let provider = init_tracer_provider();
         let mut manager = None;
@@ -174,6 +177,7 @@ impl App {
                         factory_ref.clone(),
                         pool.task_kinds.clone(),
                         Some(pool.profile),
+                        po2,
                     );
                     worker.start();
                     workers.push(worker);
@@ -181,7 +185,7 @@ impl App {
             }
         } else if !task_kinds.is_empty() {
             tracing::info!("Starting worker: {task_kinds:?}");
-            let mut worker = Worker::new(factory_ref.clone(), task_kinds.clone(), None);
+            let mut worker = Worker::new(factory_ref.clone(), task_kinds.clone(), None, po2);
             worker.start();
             workers.push(worker);
         }

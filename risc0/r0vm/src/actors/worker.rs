@@ -39,6 +39,7 @@ use super::{
 struct Processor {
     factory: ActorRef<FactoryRouterActor>,
     delay: Option<DevModeDelay>,
+    po2: usize,
 }
 
 pub(crate) struct Worker {
@@ -48,6 +49,7 @@ pub(crate) struct Worker {
     token: CancellationToken,
     join_handle: Option<JoinHandle<()>>,
     delay: Option<DevModeDelay>,
+    po2: usize,
 }
 
 impl Worker {
@@ -55,6 +57,7 @@ impl Worker {
         factory: ActorRef<FactoryRouterActor>,
         task_kinds: Vec<TaskKind>,
         delay: Option<DevModeDelay>,
+        po2: usize,
     ) -> Self {
         Self {
             worker_id: WorkerId::new_v4(),
@@ -63,6 +66,7 @@ impl Worker {
             token: CancellationToken::new(),
             join_handle: None,
             delay,
+            po2,
         }
     }
 
@@ -79,6 +83,7 @@ impl Worker {
         let processor = Processor {
             factory: factory.clone(),
             delay: self.delay,
+            po2: self.po2,
         };
         let token = self.token.clone();
         self.join_handle = Some(tokio::spawn(async move {
@@ -175,6 +180,7 @@ impl Processor {
         self.task_start(header.clone()).await?;
         let factory = self.factory.clone();
         let header_copy = header.clone();
+        let po2 = self.po2 as u32;
         let session: anyhow::Result<Session> = tokio::task::spawn_blocking(move || {
             let coproc = Coprocessor {
                 factory: factory.clone(),
@@ -190,7 +196,7 @@ impl Processor {
                 .write_slice(&task.request.input)
                 .coprocessor_callback(coproc)
                 // .session_limit(limit) // TODO
-                // .segment_limit_po2(limit) // TODO
+                .segment_limit_po2(po2)
                 .build()?;
 
             let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
