@@ -364,7 +364,9 @@ pub(crate) async fn send<T: serde::Serialize>(
     stream: &mut TcpStream,
     msg: T,
 ) -> anyhow::Result<()> {
-    let encoder = LengthDelimitedCodec::new();
+    let encoder = LengthDelimitedCodec::builder()
+        .max_frame_length(1024 * 1024 * 1024)
+        .new_codec();
     let mut writer = FramedWrite::new(stream, encoder);
 
     let bytes = bincode::serialize(&msg)?;
@@ -377,7 +379,9 @@ pub(crate) async fn send<T: serde::Serialize>(
 pub(crate) async fn recv<T: serde::de::DeserializeOwned>(
     stream: &mut TcpStream,
 ) -> anyhow::Result<Option<T>> {
-    let decoder = LengthDelimitedCodec::new();
+    let decoder = LengthDelimitedCodec::builder()
+        .max_frame_length(1024 * 1024 * 1024)
+        .new_codec();
 
     let mut reader = FramedRead::new(stream, decoder);
     let frame = match reader.next().await {
