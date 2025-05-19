@@ -31,7 +31,7 @@ env:
 
 jobs:
   bench:
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
@@ -44,7 +44,7 @@ jobs:
           - os: Linux
             arch: X64
             feature: cuda
-            device: nvidia_rtx_3090_ti
+            device: nvidia_rtx_4090
           - os: Linux
             arch: X64
             feature: cuda
@@ -56,7 +56,7 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
-      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
+      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_4090' }}
 
     steps:
       - uses: actions/checkout@v4
