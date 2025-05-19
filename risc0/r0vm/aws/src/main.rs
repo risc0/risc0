@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -41,6 +42,7 @@ struct Instance {
     ssh: SshClient,
     id: String,
     ip: String,
+    tag: &'static str,
 }
 
 impl Instance {
@@ -50,6 +52,7 @@ impl Instance {
         let service_contents = format!(
             "\
             [Service]\n\
+            Environment=RUST_LOG=info RISC0_INFO=1
             ExecStart=/home/ubuntu/r0vm {r0vm_args}\n\
             \n\
             [Install]\n\
@@ -123,14 +126,27 @@ fn is_not_found_error(error: &SdkError<DescribeInstancesError, HttpResponse>) ->
         .is_some_and(|e| e.meta().code() == Some("InvalidInstanceID.NotFound"))
 }
 
+#[derive(Debug)]
+struct InstanceFailedToStart(String);
+
+impl std::error::Error for InstanceFailedToStart {}
+
+impl std::fmt::Display for InstanceFailedToStart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: instance failed to start", self.0)
+    }
+}
+
 async fn set_up_instance(
     ec2_client: Ec2Client,
+    tag: &'static str,
     key_material: &str,
     id: &str,
     r0vm_name: &str,
 ) -> Result<Instance> {
     println!("{id}: waiting for running");
 
+    let mut tries = 20;
     let instance_description = loop {
         let describe_output = match ec2_client
             .describe_instances()
@@ -139,15 +155,26 @@ async fn set_up_instance(
             .await
         {
             Ok(o) => o,
-            Err(error) if is_not_found_error(&error) => continue,
+            Err(error) if is_not_found_error(&error) => {
+                println!("{id}: instance not found, retrying..");
+                continue;
+            }
             Err(error) => return Err(error.into()),
         };
 
         let instance_description = &describe_output.reservations()[0].instances()[0];
-        if instance_description.state().unwrap().name().unwrap() == &InstanceStateName::Running {
+        let instance_state = instance_description.state().unwrap().name().unwrap();
+        if instance_state == &InstanceStateName::Running {
             break instance_description.clone();
+        } else {
+            println!("{id}: state = {instance_state:?}");
         }
 
+        if tries == 0 {
+            return Err(InstanceFailedToStart(id.into()).into());
+        }
+
+        tries -= 1;
         tokio::time::sleep(Duration::from_secs(1)).await;
     };
 
@@ -193,6 +220,7 @@ async fn set_up_instance(
         ssh,
         id: id.into(),
         ip: ip.into(),
+        tag,
     })
 }
 
@@ -328,83 +356,142 @@ async fn main() -> Result<()> {
 
     println!("requesting AWS EC2 machines");
     let count = args.num_workers;
-    let gpu_instances = client
-        .run_instances()
-        .min_count(count)
-        .max_count(count)
-        .image_id(UBUNTU_DEEP_LEARNING_AMI)
-        .key_name(key_name.clone())
-        .security_group_ids(SECURITY_GROUP)
-        .instance_type(InstanceType::G6eXlarge)
-        .iam_instance_profile(
-            IamInstanceProfileSpecification::builder()
-                .arn(CLUSTER_ARN)
-                .build(),
-        )
-        .tag_specifications(
-            TagSpecification::builder()
-                .resource_type(ResourceType::Instance)
-                .tags(Tag::builder().key("name").value(&args.cluster_name).build())
-                .build(),
-        )
-        .send()
-        .await?;
+    let mut gpu_instances = vec![];
+    while gpu_instances.len() < count as usize {
+        gpu_instances.extend(
+            client
+                .run_instances()
+                .min_count(1)
+                .max_count((count as usize - gpu_instances.len()) as i32)
+                .image_id(UBUNTU_DEEP_LEARNING_AMI)
+                .key_name(key_name.clone())
+                .security_group_ids(SECURITY_GROUP)
+                .instance_type(InstanceType::G6eXlarge)
+                .iam_instance_profile(
+                    IamInstanceProfileSpecification::builder()
+                        .arn(CLUSTER_ARN)
+                        .build(),
+                )
+                .tag_specifications(
+                    TagSpecification::builder()
+                        .resource_type(ResourceType::Instance)
+                        .tags(Tag::builder().key("name").value(&args.cluster_name).build())
+                        .build(),
+                )
+                .send()
+                .await?
+                .instances()
+                .iter()
+                .map(|i| i.instance_id.clone().unwrap()),
+        );
+        println!("got {}/{count} instances", gpu_instances.len());
+    }
 
-    let count = 2;
-    let cpu_instances = client
-        .run_instances()
-        .min_count(count)
-        .max_count(count)
-        .image_id(UBUNTU_DEEP_LEARNING_AMI)
-        .key_name(key_name.clone())
-        .security_group_ids(SECURITY_GROUP)
-        .instance_type(InstanceType::C5n2xlarge)
-        .iam_instance_profile(
-            IamInstanceProfileSpecification::builder()
-                .arn(CLUSTER_ARN)
-                .build(),
-        )
-        .tag_specifications(
-            TagSpecification::builder()
-                .resource_type(ResourceType::Instance)
-                .tags(Tag::builder().key("name").value(&args.cluster_name).build())
-                .build(),
-        )
-        .send()
-        .await?;
+    println!("got {} worker instances", gpu_instances.len());
 
-    let mut handles = vec![];
-    for i in cpu_instances
-        .instances()
-        .iter()
-        .chain(gpu_instances.instances().iter())
-    {
+    let mut cpu_instances = vec![];
+    for tag in [
+        format!("{}-manager", &args.cluster_name),
+        args.cluster_name.clone(),
+    ] {
+        cpu_instances.extend(
+            client
+                .run_instances()
+                .min_count(1)
+                .max_count(1)
+                .image_id(UBUNTU_DEEP_LEARNING_AMI)
+                .key_name(key_name.clone())
+                .security_group_ids(SECURITY_GROUP)
+                .instance_type(InstanceType::R7i4xlarge)
+                .iam_instance_profile(
+                    IamInstanceProfileSpecification::builder()
+                        .arn(CLUSTER_ARN)
+                        .build(),
+                )
+                .tag_specifications(
+                    TagSpecification::builder()
+                        .resource_type(ResourceType::Instance)
+                        .tags(Tag::builder().key("name").value(tag).build())
+                        .build(),
+                )
+                .send()
+                .await?
+                .instances()
+                .iter()
+                .map(|i| i.instance_id.clone().unwrap()),
+        );
+    }
+
+    let all_ids: Vec<_> = cpu_instances
+        .into_iter()
+        .chain(gpu_instances.into_iter())
+        .collect();
+    let mut join_set = tokio::task::JoinSet::new();
+    for (i, id) in all_ids.iter().enumerate() {
         let client = client.clone();
-        let id = i.instance_id().unwrap().to_owned();
         let r0vm_name = r0vm_name.clone();
         let key_material = key_material.clone();
-        let handle = tokio::task::spawn(async move {
-            set_up_instance(client, &key_material, &id, &r0vm_name).await
+        let id = id.clone();
+        let tag = match i {
+            0 => "manager",
+            1 => "executor",
+            _ => "worker",
+        };
+        join_set.spawn(async move {
+            set_up_instance(client, tag, &key_material, &id, &r0vm_name).await
         });
-        handles.push(handle);
     }
 
+    let mut remaining_machines: BTreeSet<_> = all_ids.into_iter().collect();
     let mut instances = vec![];
-    for handle in handles {
-        instances.push(handle.await.unwrap()?);
+    while let Some(res) = join_set.join_next().await {
+        match res.unwrap() {
+            Ok(instance) => {
+                remaining_machines.remove(&instance.id);
+                instances.push(instance);
+                println!("machines still being set-up: {:?}", &remaining_machines);
+            }
+            Err(error) => {
+                if let Some(InstanceFailedToStart(instance_id)) =
+                    error.downcast_ref::<InstanceFailedToStart>()
+                {
+                    println!("{instance_id}: failed to start");
+                    remaining_machines.remove(instance_id);
+                    println!("machines still being set-up: {:?}", &remaining_machines);
+                } else {
+                    return Err(error);
+                }
+            }
+        }
     }
 
-    let manager = &instances[0];
+    let manager = instances.iter().find(|m| m.tag == "manager").unwrap();
     manager.start_jaeger().await?;
     manager
         .start_r0vm("--manager --addr 0.0.0.0:9000 --api 0.0.0.0:9001")
         .await?;
-    let manager_ip = &manager.ip;
+    let manager_ip = manager.ip.clone();
 
-    let executor = &instances[1];
+    let executor = instances.iter().find(|m| m.tag == "executor").unwrap();
     executor
-        .start_r0vm(&format!("--worker=execute --addr {manager_ip}:9000"))
+        .start_r0vm(&format!(
+            "--worker=execute --addr {manager_ip}:9000 --po2=22"
+        ))
         .await?;
+
+    let mut join_set = tokio::task::JoinSet::new();
+    for worker in instances.into_iter().filter(|i| i.tag == "worker") {
+        let args = format!(
+            "\
+            --worker=\"prove-segment,prove-keccak,lift,join,union,resolve\" \
+            --addr {manager_ip}:9000\
+            "
+        );
+        join_set.spawn(async move { worker.start_r0vm(&args).await });
+    }
+    while let Some(res) = join_set.join_next().await {
+        res.unwrap()?;
+    }
 
     println!("jaeger ui = http://{manager_ip}:16686/");
     println!("export BONSAI_API_URL=http://{manager_ip}:9001");
@@ -413,16 +500,6 @@ async fn main() -> Result<()> {
         "ssh to manager = `ssh -i {}.pem ubuntu@{manager_ip}`",
         args.cluster_name
     );
-
-    for worker in &instances[2..] {
-        let args = format!(
-            "\
-            --worker=\"prove-segment,prove-keccak,lift,join,union,resolve\" \
-            --addr {manager_ip}:9000\
-            "
-        );
-        worker.start_r0vm(&args).await?;
-    }
 
     Ok(())
 }
