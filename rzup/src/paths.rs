@@ -26,7 +26,9 @@ impl Paths {
             Component::RustToolchain | Component::CppToolchain => {
                 env.risc0_dir().join("toolchains")
             }
-            Component::CargoRiscZero | Component::R0Vm => env.risc0_dir().join("extensions"),
+            Component::CargoRiscZero | Component::R0Vm | Component::Gdb => {
+                env.risc0_dir().join("extensions")
+            }
         }
     }
 

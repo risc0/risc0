@@ -116,6 +116,35 @@ pub(crate) trait Risc0Context {
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
 
     #[inline(always)]
+    fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
+        let size = input.len();
+        if addr.is_aligned() && (0 == size % WORD_SIZE) {
+            let mut waddr = addr.waddr();
+            for i in (0..size).step_by(WORD_SIZE) {
+                self.store_u32(
+                    waddr.postfix_inc(),
+                    u32::from_le_bytes(input[i..(i + WORD_SIZE)].try_into().unwrap()),
+                )?;
+            }
+        } else {
+            for (i, byte) in input.iter().enumerate() {
+                self.store_u8(addr + i, *byte)?;
+            }
+        }
+        Ok(())
+    }
+
+    #[inline(always)]
+    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+        let byte_offset = addr.subaddr() as usize;
+        let word = self.load_u32(LoadOp::Record, addr.waddr())?;
+        let mut bytes = word.to_le_bytes();
+        bytes[byte_offset] = byte;
+        let word = u32::from_le_bytes(bytes);
+        self.store_u32(addr.waddr(), word)
+    }
+
+    #[inline(always)]
     fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
         self.store_u32(base + idx, word)
     }
@@ -185,22 +214,6 @@ impl Default for TestRisc0Context {
 
 #[cfg(test)]
 impl TestRisc0Context {
-    pub fn store_region(&mut self, addr: ByteAddr, input: &[u8]) -> Result<()> {
-        for (i, byte) in input.iter().enumerate() {
-            self.store_u8(addr + i, *byte)?;
-        }
-        Ok(())
-    }
-
-    pub fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
-        let byte_offset = addr.subaddr() as usize;
-        let word = self.memory.get(&addr.waddr()).copied().unwrap_or(0);
-        let mut bytes = word.to_le_bytes();
-        bytes[byte_offset] = byte;
-        let word = u32::from_le_bytes(bytes);
-        self.store_u32(addr.waddr(), word)
-    }
-
     pub fn assert_uninit(&self, addr: ByteAddr) {
         assert_eq!(self.memory.get(&addr.waddr()), None);
     }
@@ -252,6 +265,17 @@ impl Risc0Context for TestRisc0Context {
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         self.memory.insert(addr, word);
         Ok(())
+    }
+
+    /// We need our own implementation in order to avoid uninitialized read of the u32 containing
+    /// the u8.
+    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+        let byte_offset = addr.subaddr() as usize;
+        let word = self.memory.get(&addr.waddr()).copied().unwrap_or(0);
+        let mut bytes = word.to_le_bytes();
+        bytes[byte_offset] = byte;
+        let word = u32::from_le_bytes(bytes);
+        self.store_u32(addr.waddr(), word)
     }
 
     fn host_read(&mut self, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
@@ -442,7 +466,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
 
         while rlen > 0 && !ptr.is_aligned() {
             // tracing::trace!("prefix");
-            self.store_u8(ptr, bytes[i])?;
+            self.ctx.store_u8(ptr, bytes[i])?;
             ptr += 1u32;
             i += 1;
             rlen -= 1;
@@ -480,7 +504,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
 
         while rlen > 0 {
             // tracing::trace!("suffix");
-            self.store_u8(ptr, bytes[i])?;
+            self.ctx.store_u8(ptr, bytes[i])?;
             ptr += 1u32;
             i += 1;
             rlen -= 1;
@@ -581,15 +605,6 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
         self.ctx.set_user_pc(pc);
         self.ctx.set_machine_mode(1);
         Ok(())
-    }
-
-    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
-        let byte_offset = addr.subaddr() as usize;
-        let word = self.load_memory(addr.waddr())?;
-        let mut bytes = word.to_le_bytes();
-        bytes[byte_offset] = byte;
-        let word = u32::from_le_bytes(bytes);
-        self.store_memory(addr.waddr(), word)
     }
 
     fn regs_base_addr(&self) -> WordAddr {
