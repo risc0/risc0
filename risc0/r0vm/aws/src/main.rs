@@ -228,6 +228,9 @@ struct Cli {
 
     #[arg(long)]
     tail_scale_key: String,
+
+    #[arg(long)]
+    po2: u32,
 }
 
 async fn create_key(client: &Ec2Client, cluster_name: &str) -> Result<(String, String)> {
@@ -481,7 +484,8 @@ async fn main() -> Result<()> {
     let executor = instances.iter().find(|m| m.tag == "executor").unwrap();
     executor
         .start_r0vm(&format!(
-            "--worker=execute --addr {manager_ip}:9000 --po2=22"
+            "--worker=execute --addr {manager_ip}:9000 --po2={}",
+            args.po2
         ))
         .await?;
 
