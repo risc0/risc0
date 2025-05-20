@@ -41,7 +41,7 @@ jobs:
               - risc0/**
 
   bench:
-    runs-on: [self-hosted, test, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     if: needs.changes.outputs.trigger-bench == 'true'
     needs: changes
     strategy:
