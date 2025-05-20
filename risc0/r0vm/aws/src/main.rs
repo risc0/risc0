@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -420,6 +420,7 @@ async fn main() -> Result<()> {
     let mut join_set = tokio::task::JoinSet::new();
 
     let mut remaining_machines: BTreeSet<_> = all_ids.clone().into_iter().collect();
+    let mut retry_limits: BTreeMap<String, u32> = BTreeMap::new();
     while !remaining_machines.is_empty() {
         let describe_output = match client
             .describe_instances()
@@ -458,6 +459,11 @@ async fn main() -> Result<()> {
                     });
                 } else {
                     println!("{id}: state = {instance_state:?}");
+                    *retry_limits.entry(id.into()).or_default() += 1;
+                    if *retry_limits.entry(id.into()).or_default() > 30 {
+                        println!("{id}: giving up waiting");
+                        remaining_machines.remove(id);
+                    }
                 }
             }
         }
