@@ -24,8 +24,8 @@ use aws_sdk_ec2::operation::describe_instances::DescribeInstancesError;
 use aws_sdk_ec2::{
     error::SdkError,
     types::{
-        IamInstanceProfileSpecification, InstanceStateName, InstanceType, ResourceType, Tag,
-        TagSpecification,
+        IamInstanceProfileSpecification, Instance, InstanceStateName, InstanceType, ResourceType,
+        Tag, TagSpecification,
     },
     Client as Ec2Client,
 };
@@ -36,7 +36,7 @@ const UBUNTU_DEEP_LEARNING_AMI: &str = "ami-05849253e8f2c10d8";
 const SECURITY_GROUP: &str = "sg-0d81367b2160f98f7";
 const CLUSTER_ARN: &str = "arn:aws:iam::778447792808:instance-profile/r0vm-cluster";
 
-struct Instance {
+struct Machine {
     #[allow(dead_code)]
     ec2_client: Ec2Client,
     ssh: SshClient,
@@ -45,14 +45,17 @@ struct Instance {
     tag: &'static str,
 }
 
-impl Instance {
+impl Machine {
     async fn start_r0vm(&self, r0vm_args: &str) -> Result<()> {
         println!("{}: installing r0vm service", self.id);
 
         let service_contents = format!(
             "\
             [Service]\n\
-            Environment=RUST_LOG=info RISC0_INFO=1
+            Environment=\
+                RUST_LOG=info \
+                RISC0_INFO=1 \
+                OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger-poc:4318\n\
             ExecStart=/home/ubuntu/r0vm {r0vm_args}\n\
             \n\
             [Install]\n\
@@ -71,6 +74,7 @@ impl Instance {
         Ok(())
     }
 
+    #[allow(dead_code)]
     async fn start_jaeger(&self) -> Result<()> {
         println!("{}: starting jaeger container", self.id);
 
@@ -104,6 +108,34 @@ impl Instance {
 
         Ok(())
     }
+
+    async fn join_tailscale(&self, tail_scale_key: &str) -> Result<()> {
+        println!("{}: joining tailscale", self.id);
+
+        ssh_execute_check(
+            &self.ssh,
+            "curl -fsSL https://tailscale.com/install.sh | sh",
+        )
+        .await?;
+
+        ssh_execute_check(
+            &self.ssh,
+            &format!("sudo tailscale up --auth-key={tail_scale_key}"),
+        )
+        .await?;
+
+        println!("{}: waiting for jaeger to be available", self.id);
+        loop {
+            let res = self.ssh.execute(&format!("nc -z jaeger-poc 4318")).await?;
+            if res.exit_status == 0 {
+                break;
+            }
+
+            tokio::time::sleep(Duration::from_secs(1)).await;
+        }
+
+        Ok(())
+    }
 }
 
 async fn ssh_execute_check(ssh: &SshClient, cmd: &str) -> Result<()> {
@@ -126,59 +158,15 @@ fn is_not_found_error(error: &SdkError<DescribeInstancesError, HttpResponse>) ->
         .is_some_and(|e| e.meta().code() == Some("InvalidInstanceID.NotFound"))
 }
 
-#[derive(Debug)]
-struct InstanceFailedToStart(String);
-
-impl std::error::Error for InstanceFailedToStart {}
-
-impl std::fmt::Display for InstanceFailedToStart {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: instance failed to start", self.0)
-    }
-}
-
 async fn set_up_instance(
     ec2_client: Ec2Client,
     tag: &'static str,
     key_material: &str,
-    id: &str,
+    instance: Instance,
     r0vm_name: &str,
-) -> Result<Instance> {
-    println!("{id}: waiting for running");
-
-    let mut tries = 20;
-    let instance_description = loop {
-        let describe_output = match ec2_client
-            .describe_instances()
-            .instance_ids(id)
-            .send()
-            .await
-        {
-            Ok(o) => o,
-            Err(error) if is_not_found_error(&error) => {
-                println!("{id}: instance not found, retrying..");
-                continue;
-            }
-            Err(error) => return Err(error.into()),
-        };
-
-        let instance_description = &describe_output.reservations()[0].instances()[0];
-        let instance_state = instance_description.state().unwrap().name().unwrap();
-        if instance_state == &InstanceStateName::Running {
-            break instance_description.clone();
-        } else {
-            println!("{id}: state = {instance_state:?}");
-        }
-
-        if tries == 0 {
-            return Err(InstanceFailedToStart(id.into()).into());
-        }
-
-        tries -= 1;
-        tokio::time::sleep(Duration::from_secs(1)).await;
-    };
-
-    let ip = instance_description.public_ip_address().unwrap();
+) -> Result<Machine> {
+    let id = instance.instance_id().unwrap();
+    let ip = instance.public_ip_address().unwrap();
     println!("{id}: got ip = {ip}, waiting for ssh to come up");
 
     let ssh = loop {
@@ -215,7 +203,7 @@ async fn set_up_instance(
         ssh_execute_check(&ssh, &format!("sudo mkdir -p {storage_root}/{sub_dir}")).await?;
     }
 
-    Ok(Instance {
+    Ok(Machine {
         ec2_client,
         ssh,
         id: id.into(),
@@ -237,6 +225,9 @@ struct Cli {
 
     #[arg(long)]
     aws_profile: String,
+
+    #[arg(long)]
+    tail_scale_key: String,
 }
 
 async fn create_key(client: &Ec2Client, cluster_name: &str) -> Result<(String, String)> {
@@ -384,16 +375,11 @@ async fn main() -> Result<()> {
                 .iter()
                 .map(|i| i.instance_id.clone().unwrap()),
         );
-        println!("got {}/{count} instances", gpu_instances.len());
+        println!("got {}/{count} gpu instances", gpu_instances.len());
     }
 
-    println!("got {} worker instances", gpu_instances.len());
-
     let mut cpu_instances = vec![];
-    for tag in [
-        format!("{}-manager", &args.cluster_name),
-        args.cluster_name.clone(),
-    ] {
+    for _ in 0..2 {
         cpu_instances.extend(
             client
                 .run_instances()
@@ -411,7 +397,7 @@ async fn main() -> Result<()> {
                 .tag_specifications(
                     TagSpecification::builder()
                         .resource_type(ResourceType::Instance)
-                        .tags(Tag::builder().key("name").value(tag).build())
+                        .tags(Tag::builder().key("name").value(&args.cluster_name).build())
                         .build(),
                 )
                 .send()
@@ -421,52 +407,72 @@ async fn main() -> Result<()> {
                 .map(|i| i.instance_id.clone().unwrap()),
         );
     }
+    println!("got 2/2 cpu instances");
 
     let all_ids: Vec<_> = cpu_instances
         .into_iter()
         .chain(gpu_instances.into_iter())
         .collect();
+
     let mut join_set = tokio::task::JoinSet::new();
-    for (i, id) in all_ids.iter().enumerate() {
-        let client = client.clone();
-        let r0vm_name = r0vm_name.clone();
-        let key_material = key_material.clone();
-        let id = id.clone();
-        let tag = match i {
-            0 => "manager",
-            1 => "executor",
-            _ => "worker",
+
+    let mut remaining_machines: BTreeSet<_> = all_ids.clone().into_iter().collect();
+    while !remaining_machines.is_empty() {
+        let describe_output = match client
+            .describe_instances()
+            .set_instance_ids(Some(all_ids.clone()))
+            .send()
+            .await
+        {
+            Ok(o) => o,
+            Err(error) if is_not_found_error(&error) => {
+                continue;
+            }
+            Err(error) => return Err(error.into()),
         };
-        join_set.spawn(async move {
-            set_up_instance(client, tag, &key_material, &id, &r0vm_name).await
-        });
+
+        for reservation in describe_output.reservations() {
+            for instance in reservation.instances() {
+                let id = instance.instance_id().unwrap();
+                let instance_state = instance.state().unwrap().name().unwrap();
+                if instance_state == &InstanceStateName::Running {
+                    if !remaining_machines.remove(id) {
+                        continue;
+                    }
+
+                    println!("{id}: has started");
+                    let client = client.clone();
+                    let r0vm_name = r0vm_name.clone();
+                    let key_material = key_material.clone();
+                    let tag = match all_ids.iter().position(|id_| id_ == &id).unwrap() {
+                        0 => "manager",
+                        1 => "executor",
+                        _ => "worker",
+                    };
+                    let instance = instance.clone();
+                    join_set.spawn(async move {
+                        set_up_instance(client, tag, &key_material, instance, &r0vm_name).await
+                    });
+                } else {
+                    println!("{id}: state = {instance_state:?}");
+                }
+            }
+        }
+
+        tokio::time::sleep(Duration::from_secs(1)).await;
     }
 
     let mut remaining_machines: BTreeSet<_> = all_ids.into_iter().collect();
     let mut instances = vec![];
     while let Some(res) = join_set.join_next().await {
-        match res.unwrap() {
-            Ok(instance) => {
-                remaining_machines.remove(&instance.id);
-                instances.push(instance);
-                println!("machines still being set-up: {:?}", &remaining_machines);
-            }
-            Err(error) => {
-                if let Some(InstanceFailedToStart(instance_id)) =
-                    error.downcast_ref::<InstanceFailedToStart>()
-                {
-                    println!("{instance_id}: failed to start");
-                    remaining_machines.remove(instance_id);
-                    println!("machines still being set-up: {:?}", &remaining_machines);
-                } else {
-                    return Err(error);
-                }
-            }
-        }
+        let instance = res.unwrap()?;
+        remaining_machines.remove(&instance.id);
+        instances.push(instance);
+        println!("machines still being set-up: {:?}", &remaining_machines);
     }
 
     let manager = instances.iter().find(|m| m.tag == "manager").unwrap();
-    manager.start_jaeger().await?;
+    manager.join_tailscale(&args.tail_scale_key).await?;
     manager
         .start_r0vm("--manager --addr 0.0.0.0:9000 --api 0.0.0.0:9001")
         .await?;
@@ -493,7 +499,7 @@ async fn main() -> Result<()> {
         res.unwrap()?;
     }
 
-    println!("jaeger ui = http://{manager_ip}:16686/");
+    // println!("jaeger ui = http://{manager_ip}:16686/");
     println!("export BONSAI_API_URL=http://{manager_ip}:9001");
     println!("export BONSAI_API_KEY=anything");
     println!(
