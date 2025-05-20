@@ -451,11 +451,17 @@ mod tests {
             "/github_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
+            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-gdb-linux-x86_64.tar.xz" =>
+                dummy_tar_xz_response("."),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-osx-arm64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-osx-arm64"),
+            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-gdb-osx-arm64.tar.xz" =>
+                dummy_tar_xz_response("."),
             "/github_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
+            "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-gdb-linux-x86_64.tar.xz" =>
+                dummy_tar_xz_response("."),
             "/github_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
@@ -1214,6 +1220,51 @@ mod tests {
         );
     }
 
+    fn test_install_gdb(platform: Platform, target_double: &str, target_triple: &str) {
+        let server = MockDistributionServer::new();
+
+        install_test(
+            server.base_urls.clone(),
+            Component::Gdb,
+            Component::Gdb,
+            Version::new(2024, 1, 5),
+            format!(
+                "{base_url}/toolchain/releases/download/2024.01.05/\
+                riscv32im-gdb-{target_double}.tar.xz",
+                base_url = server.base_urls.risc0_github_base_url
+            ),
+            128, /* download_size */
+            vec![format!(
+                ".risc0/extensions/v2024.1.5-gdb-{target_triple}/tar_contents.bin"
+            )],
+            vec![(
+                ".risc0/bin/riscv32im-gdb".into(),
+                format!(".risc0/extensions/v2024.1.5-gdb-{target_triple}/riscv32im-gdb"),
+            )],
+            &format!(".risc0/extensions/v2024.1.5-gdb-{target_triple}"),
+            false, /* use_github_token */
+            platform,
+        )
+    }
+
+    #[test]
+    fn install_gdb_x86_64_linux() {
+        test_install_gdb(
+            Platform::new("x86_64", Os::Linux),
+            "linux-x86_64",
+            "x86_64-unknown-linux-gnu",
+        );
+    }
+
+    #[test]
+    fn install_gdb_aarch64_mac() {
+        test_install_gdb(
+            Platform::new("aarch64", Os::MacOs),
+            "osx-arm64",
+            "aarch64-apple-darwin",
+        );
+    }
+
     #[test]
     fn install_with_github_token() {
         let server = MockDistributionServer::new_with_required_bearer_token();
@@ -1294,6 +1345,15 @@ mod tests {
     fn list_multiple_versions_cpp() {
         test_list_multiple_versions(
             Component::CppToolchain,
+            Version::new(2024, 1, 5),
+            Version::new(2024, 1, 6),
+        );
+    }
+
+    #[test]
+    fn list_multiple_versions_gdb() {
+        test_list_multiple_versions(
+            Component::Gdb,
             Version::new(2024, 1, 5),
             Version::new(2024, 1, 6),
         );
@@ -1552,6 +1612,32 @@ mod tests {
         );
     }
 
+    #[test]
+    fn set_default_version_gdb() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
+            Component::Gdb,
+            Version::new(2024, 1, 5),
+            Version::new(2024, 1, 6),
+            vec![(
+                ".risc0/bin/riscv32im-gdb".into(),
+                ".risc0/extensions/v2024.1.5-gdb-x86_64-unknown-linux-gnu/riscv32im-gdb".into(),
+            )],
+            vec![(
+                ".risc0/bin/riscv32im-gdb".into(),
+                ".risc0/extensions/v2024.1.6-gdb-x86_64-unknown-linux-gnu/riscv32im-gdb".into(),
+            )],
+        );
+    }
+
     fn default_version_after_uninstall(
         tmp_dir: &TempDir,
         rzup: &mut Rzup,
@@ -1693,6 +1779,30 @@ mod tests {
     }
 
     #[test]
+    fn default_version_after_uninstall_gdb() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        for uninstall_with_rm in [true, false] {
+            default_version_after_uninstall(
+                &tmp_dir,
+                &mut rzup,
+                Component::Gdb,
+                Version::new(2024, 1, 5),
+                Version::new(2024, 1, 6),
+                uninstall_with_rm,
+                &tmp_dir
+                    .path()
+                    .join(".risc0/extensions/v2024.1.6-gdb-x86_64-unknown-linux-gnu"),
+            );
+        }
+    }
+
+    #[test]
     fn install_non_existent() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(
@@ -1779,6 +1889,11 @@ mod tests {
     #[test]
     fn uninstall_cpp() {
         uninstall_test(Component::CppToolchain, Version::new(2024, 1, 5));
+    }
+
+    #[test]
+    fn uninstall_gdb() {
+        uninstall_test(Component::Gdb, Version::new(2024, 1, 5));
     }
 
     #[test]
