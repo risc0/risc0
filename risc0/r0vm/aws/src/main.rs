@@ -391,7 +391,7 @@ async fn main() -> Result<()> {
                 .image_id(UBUNTU_DEEP_LEARNING_AMI)
                 .key_name(key_name.clone())
                 .security_group_ids(SECURITY_GROUP)
-                .instance_type(InstanceType::R7i4xlarge)
+                .instance_type(InstanceType::R7izMetal16xl)
                 .iam_instance_profile(
                     IamInstanceProfileSpecification::builder()
                         .arn(CLUSTER_ARN)
