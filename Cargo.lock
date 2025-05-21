@@ -6065,6 +6065,7 @@ dependencies = [
  "bonsai-sdk",
  "bytemuck",
  "clap 4.5.37",
+ "derive_more",
  "dirs",
  "futures",
  "kameo",

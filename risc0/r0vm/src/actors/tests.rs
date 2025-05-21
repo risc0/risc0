@@ -79,6 +79,8 @@ async fn basic() {
         .await
         .unwrap();
 
+    tracing::info!("{info:#?}");
+
     assert!(matches!(info.status, JobStatus::Succeeded(_result)));
 
     app.stop().await;

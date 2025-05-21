@@ -15,6 +15,7 @@
 use std::{ops::Range, sync::Arc, time::Duration};
 
 use clap::ValueEnum;
+use derive_more::Debug;
 use kameo::{actor::ActorRef, Reply};
 use risc0_zkvm::{
     AssumptionReceipt, Journal, ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt,
@@ -48,7 +49,7 @@ pub(crate) struct JobStatusReply {
     pub info: Option<JobInfo>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) enum JobStatus {
     Running(String),
     Succeeded(ProofResult),
@@ -57,13 +58,13 @@ pub(crate) enum JobStatus {
     Aborted,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct JobInfo {
     pub status: JobStatus,
     pub elapsed_time: Duration,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct ProofResult {
     pub session: Arc<Session>,
     pub receipt: Arc<Receipt>,
@@ -76,7 +77,7 @@ pub(crate) struct ProofRequest {
     pub assumptions: Vec<Receipt>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Session {
     pub(crate) segment_count: usize,
     pub(crate) user_cycles: u64,
