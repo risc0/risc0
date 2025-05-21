@@ -39,7 +39,7 @@ use tempfile::tempdir;
 use crate::{
     host::{client::env::SegmentPath, server::session::Session},
     receipt_claim::exit_code_from_rv32im_v2_claim,
-    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
+    Assumptions, ExecutorEnv, SimpleSegmentRef, Output, Segment, SegmentRef,
 };
 
 use super::{
@@ -144,8 +144,7 @@ impl<'a> ExecutorImpl<'a> {
             self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
         }
 
-        let path = self.env.segment_path.clone().unwrap();
-        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
+        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
     /// Run the executor until [crate::ExitCode::Halted] or
