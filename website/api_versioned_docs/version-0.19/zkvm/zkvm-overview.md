@@ -85,26 +85,26 @@ Read the [article](https://risczero.com/news/zeth-release).
 [alloy]: https://github.com/alloy-rs
 [Bonsai]: ../bonsai/bonsai-overview.md
 [continuations]: https://www.risczero.com/news/continuations
-[ELF binary]: /terminology#elf-binary
+[ELF binary]: /website/docs/terminology.md#elf-binary
 [ethers]: https://github.com/ethers-io/ethers.js
-[executor]: /terminology#executor
+[executor]: /website/docs/terminology.md#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: developer-guide/guest-code-101.md
 [Host Code 101]: developer-guide/host-code-101.md
-[imageID]: /terminology#image-id
+[imageID]: /website/docs/terminology.md#image-id
 [performance benchmarks]: benchmarks.md
 [proofs about private data]: https://github.com/risc0/risc0/tree/release-0.19/examples/json#json-example
-[prove]: /terminology#validity-proof
+[prove]: /website/docs/terminology.md#validity-proof
 [prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
 [prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess#zk-checkmate
 [prove you can find Waldo]: https://www.risczero.com/news/waldo
-[prover]: /terminology#prover
-[publicly shared outputs]: /terminology#journal
+[prover]: /website/docs/terminology.md#prover
+[publicly shared outputs]: /website/docs/terminology.md#journal
 [receipt]: developer-guide/receipts.md
 [revm]: https://github.com/bluealloy/revm
-[segments]: /terminology#segment
-[session]: /terminology#session
-[verify]: /terminology#verify
+[segments]: /website/docs/terminology.md#segment
+[session]: /website/docs/terminology.md#session
+[verify]: /website/docs/terminology.md#verify
 [zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [zkVM Quick Start]: ./quickstart.md
-[zkVM-term]: /terminology#zero-knowledge-virtual-machine-zkvm
+[zkVM-term]: /website/docs/terminology.md#zero-knowledge-virtual-machine-zkvm
