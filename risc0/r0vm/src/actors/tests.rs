@@ -40,6 +40,7 @@ const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
 // };
 
 #[test_log::test(tokio::test(flavor = "multi_thread"))]
+#[cfg_attr(feature = "disable-dev-mode", ignore)]
 async fn basic() {
     tracing::info!("basic");
 
