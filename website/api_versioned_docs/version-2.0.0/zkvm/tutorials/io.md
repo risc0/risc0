@@ -311,7 +311,7 @@ Happy coding!
 [source-env::commit_slice]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.commit_slice.html
 [source-env::read]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.read.html
 [source-env::read_slice]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.read_slice.html
-[source-env::write]: https://docs.rs/risc0-zkvm/2.0/guest/env/fn.write.html
+[source-env::write]: https://docs.rs/risc0-zkvm/2.0.2/risc0_zkvm/guest/env/fn.write.html
 [source-executor-env]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnv.html
 [source-ExecutorEnvBuilder::stderr]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.stderr
 [source-ExecutorEnvBuilder::stdout]: https://docs.rs/risc0-zkvm/2.0/struct.ExecutorEnvBuilder.html#method.stdout
