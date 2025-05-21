@@ -15,7 +15,7 @@
 mod actors;
 mod api;
 
-use std::{error::Error as StdError, fs, io, net::SocketAddr, path::PathBuf, rc::Rc};
+use std::{io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
@@ -143,7 +143,7 @@ enum ReceiptKind {
     Groth16,
 }
 
-pub async fn main() -> Result<(), Box<dyn StdError>> {
+pub fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
@@ -151,26 +151,27 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
     let args = Cli::parse();
 
     if args.id {
-        let blob = fs::read(args.mode.elf.unwrap()).unwrap();
+        let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
         println!("{image_id}");
-        return Ok(());
+        return;
     }
 
     if let Some(port) = args.mode.port {
         run_server(port);
-        return Ok(());
+        return;
     }
 
     if let Some(path) = args.mode.segment {
         let bytes = std::fs::read(path).unwrap();
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
-        return Ok(());
+        return;
     }
 
     if args.mode.manager || !args.mode.worker.is_empty() {
-        return self::actors::main(&args).await;
+        self::actors::async_main(&args).unwrap();
+        return;
     }
 
     let env = {
@@ -184,7 +185,7 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
         }
 
         if let Some(input) = args.initial_input.as_ref() {
-            builder.stdin(fs::File::open(input).unwrap());
+            builder.stdin(std::fs::File::open(input).unwrap());
         } else {
             builder.stdin(io::stdin());
         }
@@ -198,10 +199,10 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
 
     let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
-            let elf_contents = fs::read(elf_path).unwrap();
+            let elf_contents = std::fs::read(elf_path).unwrap();
             ExecutorImpl::from_elf(env, &elf_contents).unwrap()
         } else if let Some(ref image_path) = args.mode.image {
-            let image_contents = fs::read(image_path).unwrap();
+            let image_contents = std::fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
             ExecutorImpl::new(env, image).unwrap()
         } else {
@@ -209,7 +210,7 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
         };
         if args.with_debugger {
             exec.run_with_debugger().unwrap();
-            return Ok(());
+            return;
         } else {
             exec.run().unwrap()
         }
@@ -222,7 +223,7 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
     let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);
     if let Some(receipt_file) = args.receipt.as_ref() {
-        fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");
+        std::fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");
         if args.verbose > 0 {
             eprintln!(
                 "Wrote {} bytes of receipt to {}",
@@ -231,8 +232,6 @@ pub async fn main() -> Result<(), Box<dyn StdError>> {
             );
         }
     }
-
-    Ok(())
 }
 
 impl Cli {

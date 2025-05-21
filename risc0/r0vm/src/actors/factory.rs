@@ -152,13 +152,12 @@ impl Message<GetTask> for FactoryActor {
         }
 
         let (delegated_reply, reply_sender) = ctx.reply_sender();
-        if reply_sender.is_none() {
+        let Some(reply_sender) = reply_sender else {
             tracing::error!("No reply sender for GetTask!!");
             return delegated_reply;
-        }
+        };
 
-        self.reply_senders
-            .insert(msg.worker_id, reply_sender.unwrap());
+        self.reply_senders.insert(msg.worker_id, reply_sender);
 
         for task_kind in msg.kinds {
             let worker = WorkerRow {

@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     #[cfg(feature = "r0vm")]
-    risc0_r0vm::main().await?;
-    Ok(())
+    risc0_r0vm::main();
 }

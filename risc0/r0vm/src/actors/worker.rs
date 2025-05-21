@@ -21,7 +21,6 @@ use risc0_zkvm::{
     NullSegmentRef, ProveKeccakRequest, ProveZkrRequest, ProverOpts, ProverServer, VerifierContext,
 };
 use tokio::task::JoinHandle;
-use tokio_util::sync::CancellationToken;
 
 use super::{
     factory::FactoryRouterActor,
@@ -46,7 +45,6 @@ pub(crate) struct Worker {
     worker_id: WorkerId,
     factory: ActorRef<FactoryRouterActor>,
     task_kinds: Vec<TaskKind>,
-    token: CancellationToken,
     join_handle: Option<JoinHandle<()>>,
     delay: Option<DevModeDelay>,
     po2: usize,
@@ -63,7 +61,6 @@ impl Worker {
             worker_id: WorkerId::new_v4(),
             factory,
             task_kinds,
-            token: CancellationToken::new(),
             join_handle: None,
             delay,
             po2,
@@ -85,27 +82,17 @@ impl Worker {
             delay: self.delay,
             po2: self.po2,
         };
-        let token = self.token.clone();
         self.join_handle = Some(tokio::spawn(async move {
             loop {
-                let request = request.clone();
-                tokio::select! {
-                    _ = token.cancelled() => {
-                        // tracing::info!("stopping");
-                        break;
-                    }
-                    reply = factory.ask(request) => {
-                        processor.process_task(reply).await;
-                    }
-                }
+                let reply = factory.ask(request.clone()).await;
+                processor.process_task(reply).await;
             }
         }));
     }
 
     pub async fn stop(self) {
         if let Some(join_handle) = self.join_handle {
-            self.token.cancel();
-            join_handle.await.unwrap();
+            join_handle.abort();
         }
     }
 }

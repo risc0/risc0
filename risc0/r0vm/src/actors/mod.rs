@@ -34,10 +34,7 @@ use tokio::{
     net::{TcpListener, TcpStream},
     task::JoinHandle,
 };
-use tokio_util::{
-    codec::{FramedRead, FramedWrite, LengthDelimitedCodec},
-    sync::CancellationToken,
-};
+use tokio_util::codec::{FramedRead, FramedWrite, LengthDelimitedCodec};
 
 use crate::Cli;
 
@@ -63,12 +60,13 @@ pub(crate) struct PoolConfig {
     pub task_kinds: Vec<TaskKind>,
 }
 
-pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
+#[tokio::main]
+pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     let is_manager = args.mode.manager;
     let task_kinds = args.mode.worker.clone();
 
     let config = if let Some(ref path) = args.simulate {
-        let json = std::fs::read_to_string(path)?;
+        let json = tokio::fs::read_to_string(path).await?;
         Some(serde_json::from_str(&json)?)
     } else {
         None
@@ -86,9 +84,9 @@ pub(crate) async fn main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     .await?;
 
     if let Some(ref bin_path) = args.mode.elf {
-        let binary = std::fs::read(bin_path)?;
+        let binary = tokio::fs::read(bin_path).await?;
         let input = if let Some(ref input_path) = args.initial_input {
-            std::fs::read(input_path)?
+            tokio::fs::read(input_path).await?
         } else {
             vec![]
         };
@@ -114,7 +112,7 @@ enum RemoteRequest {
 }
 
 pub(crate) struct App {
-    provider: SdkTracerProvider,
+    provider: Option<SdkTracerProvider>,
     manager: Option<ActorRef<ManagerActor>>,
     factory: Option<ActorRef<FactoryActor>>,
     workers: Vec<Worker>,
@@ -131,7 +129,12 @@ impl App {
         sim_config: Option<SimulationConfig>,
         po2: usize,
     ) -> Result<Self, Box<dyn StdError>> {
-        let provider = init_tracer_provider();
+        let provider = if sim_config.is_none() {
+            Some(init_tracer_provider())
+        } else {
+            None
+        };
+
         let mut manager = None;
         let mut factory = None;
         let mut workers = vec![];
@@ -208,9 +211,10 @@ impl App {
         }
 
         if let Some(manager) = self.manager.take() {
-            manager.stop_gracefully().await.unwrap();
-            tracing::info!("manager: wait for stop");
-            manager.wait_for_stop().await;
+            if manager.stop_gracefully().await.is_ok() {
+                tracing::info!("manager: wait for stop");
+                manager.wait_for_stop().await;
+            }
         }
 
         tracing::info!("worker: stop");
@@ -219,12 +223,15 @@ impl App {
         }
 
         if let Some(factory) = self.factory {
-            factory.stop_gracefully().await.unwrap();
-            tracing::info!("factory: wait for stop");
-            factory.wait_for_stop().await;
+            if factory.stop_gracefully().await.is_ok() {
+                tracing::info!("factory: wait for stop");
+                factory.wait_for_stop().await;
+            }
         }
 
-        self.provider.shutdown().unwrap();
+        if let Some(provider) = self.provider {
+            let _ = provider.shutdown();
+        }
     }
 
     pub async fn run_binary(&mut self, binary: Vec<u8>, input: Vec<u8>) -> anyhow::Result<JobInfo> {
@@ -241,7 +248,6 @@ impl App {
 struct Server {
     addr: SocketAddr,
     factory: ActorRef<FactoryActor>,
-    token: CancellationToken,
     join_handle: Option<JoinHandle<()>>,
 }
 
@@ -250,7 +256,6 @@ impl Server {
         Self {
             addr,
             factory,
-            token: CancellationToken::new(),
             join_handle: None,
         }
     }
@@ -261,20 +266,11 @@ impl Server {
         }
 
         let factory = self.factory.clone();
-        let token = self.token.clone();
         let listener = TcpListener::bind(self.addr).await?;
 
         self.join_handle = Some(tokio::spawn(async move {
             loop {
-                let result = tokio::select! {
-                    _ = token.cancelled() => {
-                        tracing::info!("tcp listener: stop");
-                        break;
-                    }
-                    result = listener.accept() => result
-                };
-
-                let (mut stream, _addr) = match result {
+                let (mut stream, _addr) = match listener.accept().await {
                     Ok(result) => result,
                     Err(err) => {
                         tracing::error!("{err}");
@@ -283,23 +279,9 @@ impl Server {
                 };
 
                 let factory = factory.clone();
-                let token = token.clone();
                 tokio::spawn(async move {
-                    loop {
-                        let result = tokio::select! {
-                            _ = token.cancelled() => {
-                                tracing::info!("tcp session: stop");
-                                break;
-                            }
-                            result = recv_request(&mut stream) => result
-                        }
-                        .unwrap();
-                        match result {
-                            Some(request) => {
-                                handle_request(&mut stream, request, factory.clone()).await
-                            }
-                            None => break,
-                        }
+                    while let Some(request) = recv_request(&mut stream).await.unwrap() {
+                        handle_request(&mut stream, request, factory.clone()).await
                     }
                 });
             }
@@ -310,8 +292,7 @@ impl Server {
 
     pub async fn stop(self) {
         if let Some(join_handle) = self.join_handle {
-            self.token.cancel();
-            join_handle.await.unwrap();
+            join_handle.abort();
         }
     }
 }
