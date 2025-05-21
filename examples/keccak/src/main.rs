@@ -17,7 +17,7 @@ use keccak_methods::{KECCAK_ELF, KECCAK_ID};
 use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
 
 /// Hash the given bytes, returning the digest and a [Receipt] that can
-/// be used to verify that the that the hash was computed correctly (i.e. that
+/// be used to verify that the hash was computed correctly (i.e. that
 /// the Prover knows a preimage for the given keccak-256 hash)
 ///
 /// KECCAK_ELF uses the `tiny-keccak` crate, patched to use the RISC
