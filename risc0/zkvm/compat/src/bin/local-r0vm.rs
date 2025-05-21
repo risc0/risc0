@@ -13,5 +13,5 @@
 // limitations under the License.
 
 fn main() {
-    risc0_r0vm::main()
+    risc0_r0vm::main();
 }

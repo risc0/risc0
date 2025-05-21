@@ -12,14 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::{
-    executor::Executor,
-    platform::*,
-    r0vm::{LoadOp, Risc0Context as _, Risc0Machine},
-    rv32im::Emulator,
-    Syscall,
-};
-use crate::TerminateState;
 use anyhow::Result;
 use gdbstub::{
     common::Signal,
@@ -37,6 +29,16 @@ use gdbstub::{
     },
 };
 use risc0_binfmt::ByteAddr;
+
+use crate::TerminateState;
+
+use super::{
+    executor::Executor,
+    platform::*,
+    r0vm::{LoadOp, Risc0Context as _, Risc0Machine},
+    rv32im::Emulator,
+    Syscall,
+};
 
 pub enum ExecState {
     Step(u32),

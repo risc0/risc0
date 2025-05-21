@@ -19,8 +19,8 @@ derive_more = { version = "2.0.1", default-features = false, features = [
   "add_assign",
   "debug",
 ] }
-gdbstub = "0.7"
-gdbstub_arch = "0.3"
+gdbstub = { version = "0.7", optional = true }
+gdbstub_arch = { version = "0.3", optional = true }
 paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
@@ -67,12 +67,14 @@ cuda = [
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
 ]
-default = ["prove"]
+default = []
 # entropy_finder = []
 execute = [
   "anyhow/backtrace",
   "dep:byteorder",
   "dep:enum-map",
+  "dep:gdbstub",
+  "dep:gdbstub_arch",
   "dep:malachite",
   "dep:num-derive",
   "dep:num-traits",
