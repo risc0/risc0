@@ -79,9 +79,7 @@ async fn basic() {
         .await
         .unwrap();
 
-    let JobStatus::Succeeded(_result) = info.status else {
-        panic!("Invalid status");
-    };
+    assert!(matches!(info.status, JobStatus::Succeeded(_result)));
 
     app.stop().await;
 }
