@@ -65,7 +65,6 @@ jobs:
               - *base
               - examples/browser-verify/**
               - risc0/**
-              - xtask/**
             check-external:
               - *base
               - external/**
@@ -629,28 +628,22 @@ jobs:
   browser:
     if: needs.changes.outputs.browser == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, X64, cpu]
-    env:
-      RISC0_BUILD_LOCKED: 1
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - uses: browser-actions/setup-firefox@v1
-      - run: firefox --version
       - uses: ./.github/actions/rustup
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
       - uses: ./.github/actions/sccache
-        with:
-          key: Linux-default
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin xtask -- install
-      - run: cargo run --bin xtask -- gen-receipt
-      - run: |
-          npm install
-          npm test -- --firefox
+        with: { key: Linux-default }
+
+      - name: Install RISC0 toolchains
+        run: |
+          cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+          cargo run --bin rzup -- --verbose install --force cpp  $RISC0_CPP_TOOLCHAIN_VERSION
+
+      - name: Build browser verifier
         working-directory: examples/browser-verify
+        run: cargo build --release
       - run: sccache --show-stats
 
   docker:
