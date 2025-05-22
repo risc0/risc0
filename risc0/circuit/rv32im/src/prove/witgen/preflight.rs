@@ -121,10 +121,17 @@ impl<'a> Preflight<'a> {
                 page_memory.insert(&(node_addr + i), digest.as_words()[i]);
             }
         }
+
+        // Estimate capacities to avoid reallocations
+        let estimated_txns = total_cycles / 2; // rough estimate based on typical usage
+        let estimated_bigint_bytes = total_cycles * 32; // rough estimate for bigint operations
+
         Self {
             trace: PreflightTrace {
                 cycles: Vec::with_capacity(total_cycles),
                 backs: Vec::with_capacity(total_cycles),
+                txns: Vec::with_capacity(estimated_txns),
+                bigint_bytes: Vec::with_capacity(estimated_bigint_bytes),
                 rand_z,
                 ..Default::default()
             },
@@ -377,6 +384,7 @@ impl<'a> Preflight<'a> {
         // tracing::trace!("[{}]: {cycle:?}", self.trace.cycles.len());
         self.trace.cycles.push(cycle);
         self.trace.backs.push(back);
+        // Update indices once at the end
         self.txn_idx = self.trace.txns.len() as u32;
         self.bigint_idx = self.trace.bigint_bytes.len() as u32;
     }
@@ -519,12 +527,15 @@ impl Risc0Context for Preflight<'_> {
         kind: InsnKind,
         decoded: &crate::execute::rv32im::DecodedInstruction,
     ) -> Result<()> {
-        tracing::trace!(
-            "[{}]: {:?}> {}",
-            self.trace.cycles.len(),
-            self.pc,
-            disasm(kind, decoded)
-        );
+        // Only compute expensive disasm if tracing is enabled
+        if cfg!(debug_assertions) && tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "[{}]: {:?}> {}",
+                self.trace.cycles.len(),
+                self.pc,
+                disasm(kind, decoded)
+            );
+        }
         Ok(())
     }
 
