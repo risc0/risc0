@@ -1,16 +1,19 @@
-[package]
-name = "browser-verify"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = ["guest", "guest/fibonacci", "host", "verifier"]
 
-[lib]
-crate-type = ["cdylib"]
+[patch.crates-io]
+risc0-zkvm  = { path = "../../risc0/zkvm" }
+risc0-build = { path = "../../risc0/build" }
 
-[dependencies]
-risc0-zkvm = { path = "../../risc0/zkvm", default-features = false }
-risc0-zkvm-receipts = { path = "../../risc0/zkvm/receipts" }
+[workspace.dependencies]
+risc0-zkvm  = { path = "../../risc0/zkvm", default-features = false }
+risc0-build = { path = "../../risc0/build" }
+borsh = { version = "1.5.7", default-features = false }
 
-# These crates are used for running unit tests.
-[dev-dependencies]
-bincode = "1.3"
-wasm-bindgen-test = "0.3"
+[profile.dev]
+opt-level = 3
+
+[profile.release]
+debug = 1
+lto = true

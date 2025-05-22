@@ -1,0 +1,12 @@
+[package]
+name = "host"
+version = "0.1.0"
+edition = "2021"
+default-run = "host"
+
+[dependencies]
+borsh.workspace = true
+guest = { path = "../guest" }
+risc0-zkvm = { workspace = true, features = ["prove"] }
+serde = "1.0"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

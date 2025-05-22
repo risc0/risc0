@@ -1,0 +1,10 @@
+[package]
+name = "guest"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+risc0-build = { workspace = true }
+
+[package.metadata.risc0]
+methods = ["fibonacci"]
