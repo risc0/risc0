@@ -92,14 +92,17 @@ impl BytePolyProgram {
             }
         }
 
-        tracing::trace!(
-            "delta_poly[0]: {}, new_poly[0]: {}, poly[0]: {}, term[0]: {}, total[0]: {}",
-            &delta_poly.coeffs[0],
-            new_poly.coeffs[0],
-            self.poly.coeffs[0],
-            self.term.coeffs[0],
-            self.total.coeffs[0],
-        );
+        // Only compute expensive trace formatting when tracing is enabled
+        if cfg!(debug_assertions) && tracing::enabled!(tracing::Level::TRACE) {
+            tracing::trace!(
+                "delta_poly[0]: {}, new_poly[0]: {}, poly[0]: {}, term[0]: {}, total[0]: {}",
+                &delta_poly.coeffs[0],
+                new_poly.coeffs[0],
+                self.poly.coeffs[0],
+                self.term.coeffs[0],
+                self.total.coeffs[0],
+            );
+        }
 
         Ok(())
     }
@@ -130,9 +133,9 @@ impl BytePolynomial {
     }
 
     pub(crate) fn shift(&self) -> Self {
-        let mut ret = self.clone();
-        ret.coeffs.insert_from_slice(0, &[0; BIGINT_WIDTH_BYTES]);
-        ret
+        let mut coeffs = smallvec![0; BIGINT_WIDTH_BYTES];
+        coeffs.extend_from_slice(&self.coeffs);
+        Self { coeffs }
     }
 
     pub(crate) fn eqz(&self) -> Result<()> {
@@ -145,15 +148,22 @@ impl BytePolynomial {
 }
 
 fn byte_poly_add(lhs: &BytePolynomial, rhs: &BytePolynomial) -> BytePolynomial {
-    let mut ret = smallvec![0; max(lhs.coeffs.len(), rhs.coeffs.len())];
-    for (i, coeff) in ret.iter_mut().enumerate() {
-        if i < lhs.coeffs.len() {
-            *coeff += lhs.coeffs[i];
-        }
-        if i < rhs.coeffs.len() {
-            *coeff += rhs.coeffs[i];
-        }
+    let max_len = max(lhs.coeffs.len(), rhs.coeffs.len());
+    let min_len = lhs.coeffs.len().min(rhs.coeffs.len());
+    let mut ret = smallvec![0; max_len];
+
+    // Add overlapping parts
+    for i in 0..min_len {
+        ret[i] = lhs.coeffs[i] + rhs.coeffs[i];
     }
+
+    // Copy remaining parts
+    if lhs.coeffs.len() > min_len {
+        ret[min_len..].copy_from_slice(&lhs.coeffs[min_len..]);
+    } else if rhs.coeffs.len() > min_len {
+        ret[min_len..].copy_from_slice(&rhs.coeffs[min_len..]);
+    }
+
     BytePolynomial { coeffs: ret }
 }
 

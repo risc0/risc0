@@ -16,7 +16,7 @@ use anyhow::Result;
 use risc0_circuit_rv32im_sys::RawMemoryTransaction;
 use risc0_zkp::{
     core::digest::DIGEST_WORDS,
-    field::{baby_bear, Elem as _},
+    field::{Elem as _},
 };
 
 use crate::{
@@ -134,7 +134,14 @@ impl Poseidon2State {
     }
 
     pub(crate) fn as_array(&self) -> [u32; P2_STATE_SIZE] {
-        let zcheck = self.zcheck.elems();
+        let zcheck_elems = self.zcheck.elems();
+        let [z0, z1, z2, z3] = [
+            zcheck_elems[0].into(),
+            zcheck_elems[1].into(),
+            zcheck_elems[2].into(),
+            zcheck_elems[3].into(),
+        ];
+
         [
             self.has_state,
             self.state_addr,
@@ -171,62 +178,51 @@ impl Poseidon2State {
             self.inner[21],
             self.inner[22],
             self.inner[23],
-            zcheck[0].into(),
-            zcheck[1].into(),
-            zcheck[2].into(),
-            zcheck[3].into(),
+            z0, z1, z2, z3,
         ]
     }
 }
 
 impl Poseidon2 {
     pub fn read_start(ctx: &mut dyn Risc0Context) -> Result<()> {
-        // tracing::trace!("read_start");
         let p2 = Poseidon2State::new_start(0);
         ctx.on_poseidon2_cycle(CycleState::PoseidonEntry, &p2);
         Ok(())
     }
 
     pub fn read_node(ctx: &mut dyn Risc0Context, node_idx: u32) -> Result<()> {
-        // tracing::trace!("read_node: {node_idx:#010x}");
         let mut p2 = Poseidon2State::new_node(node_idx, true);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn read_page(ctx: &mut dyn Risc0Context, page_idx: u32) -> Result<()> {
-        // tracing::trace!("read_page: {page_idx:#010x}");
         let mut p2 = Poseidon2State::new_page(page_idx, true);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn read_done(ctx: &mut dyn Risc0Context) -> Result<()> {
-        // tracing::trace!("read_done");
         let p2 = Poseidon2State::new_done(MERKLE_TREE_START_ADDR.0, CycleState::Resume, 2);
         ctx.on_poseidon2_cycle(CycleState::PoseidonPaging, &p2);
         Ok(())
     }
 
     pub fn write_start(ctx: &mut dyn Risc0Context) -> Result<()> {
-        // tracing::trace!("write_start");
         let p2 = Poseidon2State::new_start(3);
         ctx.on_poseidon2_cycle(CycleState::PoseidonEntry, &p2);
         Ok(())
     }
 
     pub fn write_node(ctx: &mut dyn Risc0Context, node_idx: u32) -> Result<()> {
-        // tracing::trace!("write_node: {node_idx:#010x}");
         let mut p2 = Poseidon2State::new_node(node_idx, false);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn write_page(ctx: &mut dyn Risc0Context, page_idx: u32) -> Result<()> {
-        // tracing::trace!("write_page: {page_idx:#010x}");
         let mut p2 = Poseidon2State::new_page(page_idx, false);
         p2.rest(ctx, CycleState::PoseidonPaging)
     }
 
     pub fn write_done(ctx: &mut dyn Risc0Context) -> Result<()> {
-        // tracing::trace!("write_done");
         let p2 = Poseidon2State::new_done(MERKLE_TREE_END_ADDR.0, CycleState::StoreRoot, 5);
         ctx.on_poseidon2_cycle(CycleState::PoseidonPaging, &p2);
         Ok(())
@@ -246,7 +242,7 @@ impl Checksum {
             *power = cur;
             cur *= *rand_z;
         }
-        // tracing::trace!("powers: {powers:?}");
+
 
         Self {
             powers,
@@ -263,23 +259,30 @@ impl Checksum {
     }
 
     pub(crate) fn add(&mut self, tx_kind: u32, idx: usize, txn: &RawMemoryTransaction) {
-        let mut coeffs = match tx_kind {
-            tx::READ => (0, 1),
-            tx::PAGE_IN => (0, txn.cycle as i32 - txn.prev_cycle as i32),
-            tx::PAGE_OUT => (
-                (txn.word & 0xffff) as i32 - (txn.prev_word & 0xffff) as i32,
-                (txn.word >> 16) as i32 - (txn.prev_word >> 16) as i32,
-            ),
+        let coeffs = match tx_kind {
+            tx::READ => (0u32, 1u32),
+            tx::PAGE_IN => {
+                let diff = txn.cycle.wrapping_sub(txn.prev_cycle);
+                (0u32, diff)
+            },
+            tx::PAGE_OUT => {
+                // Use wrapping arithmetic to avoid branches
+                let word_low = txn.word & 0xffff;
+                let prev_word_low = txn.prev_word & 0xffff;
+                let word_high = txn.word >> 16;
+                let prev_word_high = txn.prev_word >> 16;
+
+                let diff_low = word_low.wrapping_sub(prev_word_low);
+                let diff_high = word_high.wrapping_sub(prev_word_high);
+
+                (diff_low, diff_high)
+            },
             _ => unreachable!(),
         };
-        if coeffs.0 < 0 {
-            coeffs.0 += baby_bear::P as i32;
-        }
-        if coeffs.1 < 0 {
-            coeffs.1 += baby_bear::P as i32;
-        }
-        let coeffs = (coeffs.0 as u32, coeffs.1 as u32);
-        self.zcheck += self.powers[2 * idx] * ExtVal::from_u32(coeffs.0);
-        self.zcheck += self.powers[2 * idx + 1] * ExtVal::from_u32(coeffs.1);
+
+        // Combine the two multiplications for better instruction-level parallelism
+        let idx2 = 2 * idx;
+        self.zcheck += self.powers[idx2] * ExtVal::from_u32(coeffs.0)
+                    + self.powers[idx2 + 1] * ExtVal::from_u32(coeffs.1);
     }
 }

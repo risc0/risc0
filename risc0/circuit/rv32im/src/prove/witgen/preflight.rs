@@ -381,7 +381,7 @@ impl<'a> Preflight<'a> {
             bigint_idx: self.bigint_idx,
             diff_count: [0, 0],
         };
-        // tracing::trace!("[{}]: {cycle:?}", self.trace.cycles.len());
+
         self.trace.cycles.push(cycle);
         self.trace.backs.push(back);
         // Update indices once at the end
@@ -556,7 +556,7 @@ impl Risc0Context for Preflight<'_> {
             return self.pager.peek(addr);
         }
 
-        // tracing::trace!("load_u32: {addr:?}");
+
         let cycle = (2 * self.trace.cycles.len()) as u32;
         let word = if addr >= MERKLE_TREE_START_ADDR {
             self.page_memory
@@ -575,7 +575,7 @@ impl Risc0Context for Preflight<'_> {
                 prev_cycle,
                 prev_word: word,
             };
-            // tracing::trace!("txn: {txn:?}");
+
             self.trace.txns.push(txn);
         }
         Ok(word)
@@ -600,7 +600,7 @@ impl Risc0Context for Preflight<'_> {
             prev_cycle,
             prev_word,
         };
-        // tracing::trace!("txn: {txn:?}");
+
         self.trace.txns.push(txn);
         Ok(())
     }
