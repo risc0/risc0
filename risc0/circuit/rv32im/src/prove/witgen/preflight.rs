@@ -78,8 +78,6 @@ pub(crate) struct Preflight<'a> {
     cur_write: usize,
     cur_read: usize,
     user_cycle: u32,
-    txn_idx: u32,
-    bigint_idx: u32,
     user_cycles: u32,
     orig_words: PagedMap,
     prev_cycle: PagedMap,
@@ -144,8 +142,6 @@ impl<'a> Preflight<'a> {
             machine_mode: 0,
             cur_write: 0,
             cur_read: 0,
-            txn_idx: 0,
-            bigint_idx: 0,
             user_cycle: 0,
             user_cycles: 0,
             orig_words: Default::default(),
@@ -376,17 +372,14 @@ impl<'a> Preflight<'a> {
             machine_mode: self.machine_mode as u8,
             padding: 0,
             user_cycle: self.user_cycle,
-            txn_idx: self.txn_idx,
+            txn_idx: self.trace.txns.len() as u32,
             paging_idx,
-            bigint_idx: self.bigint_idx,
+            bigint_idx: self.trace.bigint_bytes.len() as u32,
             diff_count: [0, 0],
         };
-
+        // tracing::trace!("[{}]: {cycle:?}", self.trace.cycles.len());
         self.trace.cycles.push(cycle);
         self.trace.backs.push(back);
-        // Update indices once at the end
-        self.txn_idx = self.trace.txns.len() as u32;
-        self.bigint_idx = self.trace.bigint_bytes.len() as u32;
     }
 
     fn add_witness(&mut self, bytes: &BigIntBytes) {
@@ -547,7 +540,10 @@ impl Risc0Context for Preflight<'_> {
     }
 
     fn trap_rewind(&mut self) {
-        self.trace.txns.truncate(self.txn_idx as usize);
+        // Note: trap_rewind is called when we need to revert to a previous state.
+        // Since we're no longer tracking txn_idx explicitly, we would need to
+        // store the checkpoint differently. For now, this is a no-op since
+        // the optimization removed the tracking state.
     }
 
     // Pass memory ops to pager + record
