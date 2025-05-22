@@ -1,0 +1,86 @@
+{
+	"pools": [
+		{
+			"count": 1,
+			"profile": {
+				"prove_segment": 1,
+				"prove_keccak": 1,
+				"lift": 1,
+				"join": 1,
+				"union": 1,
+				"resolve": 1
+			},
+			"task_kinds": ["Execute"]
+		},
+		{
+			"count": 36,
+			"profile": {
+				"prove_segment": 0.9,
+				"prove_keccak": 0.35,
+				"lift": 0.18,
+				"join": 0.28,
+				"union": 0.25,
+				"resolve": 0.25
+			},
+			"task_kinds": [
+				"ProveSegment",
+				"ProveKeccak",
+				"Lift",
+				"Join",
+				"Union",
+				"Resolve"
+			]
+		},
+		{
+			"count": 36,
+			"profile": {
+				"prove_segment": 0.9,
+				"prove_keccak": 0.35,
+				"lift": 0.18,
+				"join": 0.28,
+				"union": 0.25,
+				"resolve": 0.25
+			},
+			"task_kinds": [
+				"Lift",
+				"Join",
+				"Union",
+				"Resolve"
+			]
+		},
+		{
+			"count": 0,
+			"profile": {
+				"prove_segment": 0.9,
+				"prove_keccak": 0.35,
+				"lift": 0.18,
+				"join": 0.28,
+				"union": 0.25,
+				"resolve": 0.25
+			},
+			"task_kinds": [
+				"Lift",
+				"Join",
+				"Union",
+				"Resolve"
+			]
+		},
+		{
+			"count": 0,
+			"profile": {
+				"prove_segment": 1.6,
+				"prove_keccak": 0.35,
+				"lift": 0.35,
+				"join": 0.45,
+				"union": 0.35,
+				"resolve": 0.35
+			},
+			"task_kinds": [
+        "Lift",
+        "Join",
+        "Union",
+        "Resolve"
+      ]
+		}
+	]
+}

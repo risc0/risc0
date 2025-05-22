@@ -14,7 +14,7 @@
 
 //! Run the zkVM guest and prove its results.
 
-mod dev_mode;
+pub(crate) mod dev_mode;
 pub(crate) mod keccak;
 mod prover_impl;
 #[cfg(test)]
@@ -52,11 +52,6 @@ mod private {
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
 /// [Receipt][crate::Receipt] that can be used to verify correct computation.
 pub trait ProverServer: private::Sealed {
-    /// Prove the specified keccak request
-    #[cfg(feature = "unstable")]
-    fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
-        -> Result<SuccinctReceipt<Unknown>>;
-
     /// Prove the specified ELF binary.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(env, &VerifierContext::default(), elf)
@@ -75,6 +70,11 @@ pub trait ProverServer: private::Sealed {
 
     /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
+
+    /// Prove the specified keccak request
+    #[cfg(feature = "unstable")]
+    fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
+        -> Result<SuccinctReceipt<Unknown>>;
 
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>>;
@@ -251,7 +251,7 @@ impl Session {
 pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
     if is_dev_mode() {
         eprintln!("WARNING: proving in dev mode. This will not generate valid, secure proofs.");
-        return Ok(Rc::new(DevModeProver));
+        return Ok(Rc::new(DevModeProver::new()));
     }
 
     Ok(Rc::new(ProverImpl::new(opts.clone())))

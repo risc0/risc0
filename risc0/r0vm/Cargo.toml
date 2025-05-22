@@ -8,12 +8,38 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+anyhow = "1.0.98"
+axum = "0.8.4"
+axum-extra = "0.10.1"
 bincode = "1.3"
+bonsai-sdk = { workspace = true }
 bytemuck = "1.12"
 clap = { version = "4.5", features = ["derive", "env"] }
+derive_more = { version = "2.0.1", default-features = false, features = [
+  "debug",
+] }
+dirs = "6.0.0"
+futures = "0.3.31"
+kameo = "0.16"
+multi_index_map = "0.13.0"
+opentelemetry = "0.29.1"
+opentelemetry-otlp = "0.29.0"
+opentelemetry_sdk = "0.29.0"
 risc0-circuit-rv32im = { workspace = true }
-risc0-zkvm = { workspace = true, features = ["prove"] }
+risc0-zkvm = { workspace = true, features = ["prove", "unstable"] }
+serde = { version = "1.0.219", features = ["rc"] }
+serde_json = "1.0.140"
+thiserror = "2.0.12"
+tokio = { version = "1.44.2", features = [
+  "macros",
+  "io-util",
+  "rt-multi-thread",
+  "signal",
+] }
+tokio-util = { version = "0.7.15", features = ["codec"] }
+tracing = "0.1.41"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1.16.0", features = ["serde", "v4"] }
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -22,7 +48,6 @@ assert_fs = "1.0"
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 temp-env = "0.3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
-tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]

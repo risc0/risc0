@@ -12,6 +12,7 @@ release = false
 
 [dependencies]
 anyhow = { workspace = true }
+bincode = "1.3.3"
 bonsai-sdk = { workspace = true }
 bytemuck = { workspace = true }
 clap = { workspace = true, features = ["env", "derive"] }

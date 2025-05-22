@@ -55,7 +55,7 @@ jobs:
           - os: Linux
             arch: X64
             feature: cuda
-            device: nvidia_rtx_3090_ti
+            device: nvidia_rtx_4090
           - os: macOS
             arch: ARM64
             feature: prove
@@ -63,7 +63,7 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
-      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
+      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_4090' }}
       S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/${{ github.base_ref || github.ref_name }}/fib/${{ matrix.os }}-${{ matrix.device }}
 
     steps:

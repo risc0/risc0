@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,5 +14,5 @@
 
 fn main() {
     #[cfg(feature = "r0vm")]
-    risc0_r0vm::main()
+    risc0_r0vm::main();
 }

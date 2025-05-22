@@ -79,7 +79,7 @@ pub struct ProveZkrRequest {
 
 /// A Keccak proof request.
 #[stability::unstable]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct ProveKeccakRequest {
     /// The digest of the claim that this keccak input is expected to produce.
     pub claim_digest: Digest,

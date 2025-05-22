@@ -21,10 +21,10 @@ pub(crate) mod segment;
 pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
-use core::fmt::Debug;
 
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{
@@ -273,6 +273,7 @@ impl Receipt {
 )]
 pub struct Journal {
     /// The raw bytes of the journal.
+    #[debug("{} bytes", bytes.len())]
     pub bytes: Vec<u8>,
 }
 
@@ -408,7 +409,7 @@ impl InnerReceipt {
 #[non_exhaustive]
 pub struct FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Claim containing information about the computation that this receipt pretends to prove.
     ///
@@ -418,7 +419,7 @@ where
 
 impl<Claim> FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Create a new [FakeReceipt] for the given claim.
     pub fn new(claim: impl Into<MaybePruned<Claim>>) -> Self {
@@ -518,7 +519,7 @@ impl From<InnerAssumptionReceipt> for AssumptionReceipt {
 
 impl<Claim> From<SuccinctReceipt<Claim>> for AssumptionReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Create a proven assumption from a [InnerAssumptionReceipt].
     fn from(receipt: SuccinctReceipt<Claim>) -> Self {

@@ -104,7 +104,10 @@ pub use {
         },
         server::{
             exec::executor::ExecutorImpl,
-            prove::{get_prover_server, HalPair, ProverServer},
+            prove::{
+                dev_mode::{DevModeDelay, DevModeProver},
+                get_prover_server, HalPair, ProverServer,
+            },
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
                 SimpleSegmentRef,

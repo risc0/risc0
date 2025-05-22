@@ -595,7 +595,7 @@ mod docker {
             receipt.clone().journal.bytes,
         );
 
-        let prover = DevModeProver;
+        let prover = DevModeProver::new();
         let receipt = prover.compress(&ProverOpts::composite(), &fake).unwrap();
         ensure_fake(receipt);
         let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
