@@ -1,3 +1,8 @@
+[package]
+name    = "browser-verify"
+version = "0.1.0"
+edition = "2021"
+
 [patch.crates-io]
 risc0-zkvm  = { path = "../../risc0/zkvm" }
 risc0-build = { path = "../../risc0/build" }
