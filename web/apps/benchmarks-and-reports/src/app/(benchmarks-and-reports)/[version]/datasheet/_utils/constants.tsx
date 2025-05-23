@@ -10,6 +10,7 @@ export const DATASHEET_FILENAMES_TO_TITLES: {
   main: {
     "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
     "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
+    "Linux-nvidia_rtx_4090.json": "CUDA on NVIDIA RTX 4090",
     "Linux-g6.xlarge.json": (
       <>
         CUDA on{" "}
@@ -108,6 +109,23 @@ export const DATASHEET_FILENAMES_TO_TITLES: {
     ),
   },
   "release-2.0": {
+    "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
+    "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
+    "Linux-cpu.json": (
+      <>
+        CPU only on{" "}
+        <Link
+          rel="noopener noreferrer"
+          target="_blank"
+          href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge"
+          className="link"
+        >
+          c6i.8xlarge
+        </Link>
+      </>
+    ),
+  },
+  "release-3.0": {
     "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
     "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
     "Linux-cpu.json": (
