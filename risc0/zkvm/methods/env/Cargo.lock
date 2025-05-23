@@ -582,9 +582,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73fea8450eea4bac3940448fb7ae50d91f034f941199fcd9d909a5a07aa455f0"
+checksum = "26145e563e54f2cadc477553f1ec5ee650b00862f0a58bcd12cbdc5f0ea2d2f4"
 dependencies = [
  "cfg-if",
  "libc",
@@ -1048,7 +1048,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "getrandom 0.2.15",
- "getrandom 0.3.2",
+ "getrandom 0.3.3",
  "libm",
  "stability",
 ]

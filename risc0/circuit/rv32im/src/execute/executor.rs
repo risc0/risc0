@@ -374,6 +374,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })
     }
 
+    pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
+        self.terminate_state.as_ref()
+    }
+
     fn dump(&self) {
         tracing::debug!("Dumping last {} instructions:", self.ring.len());
         for (pc, kind, decoded) in self.ring.iter() {
