@@ -14,7 +14,7 @@
 
 use std::collections::BTreeSet;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
@@ -216,7 +216,8 @@ impl<'a> Preflight<'a> {
                 txn.prev_cycle = self.prev_cycle.get(&addr).unwrap();
             } else {
                 // Otherwise, compute cycle diff and another diff
-                let diff = txn.cycle - txn.prev_cycle;
+                ensure!(txn.cycle != txn.prev_cycle);
+                let diff = txn.cycle - 1 - txn.prev_cycle;
                 self.trace.cycles[(diff / 2) as usize].diff_count[(diff % 2) as usize] += 1;
             }
 
