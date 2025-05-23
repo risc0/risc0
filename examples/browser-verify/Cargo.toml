@@ -1,12 +1,8 @@
-[workspace]
-resolver = "2"
-members = ["guest", "guest/fibonacci", "host", "verifier"]
-
 [patch.crates-io]
 risc0-zkvm  = { path = "../../risc0/zkvm" }
 risc0-build = { path = "../../risc0/build" }
 
-[workspace.dependencies]
+[dependencies]
 risc0-zkvm  = { path = "../../risc0/zkvm", default-features = false }
 risc0-build = { path = "../../risc0/build" }
 borsh = { version = "1.5.7", default-features = false }
