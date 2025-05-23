@@ -7,7 +7,6 @@ members = [
   "browser-verify",
   "browser-verify/guest",
   "browser-verify/guest/fibonacci",
-  "browser-verify/host",
   "browser-verify/verifier",
   "c-guest/host",
   "c-guest/platform",
