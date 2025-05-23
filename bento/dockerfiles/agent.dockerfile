@@ -23,7 +23,12 @@ RUN rustup install 1.81
 
 FROM rust-builder AS builder
 
-ARG NVCC_APPEND_FLAGS="--gpu-architecture=compute_75 --gpu-code=compute_75,sm_75 --generate-code arch=compute_75,code=sm_75"
+ARG NVCC_APPEND_FLAGS="\
+  --generate-code arch=compute_75,code=sm_75 \
+  --generate-code arch=compute_80,code=sm_80 \
+  --generate-code arch=compute_86,code=sm_86 \
+  --generate-code arch=compute_89,code=sm_89 \
+  --generate-code arch=compute_90,code=sm_90"
 ARG CUDA_OPT_LEVEL=1
 ARG S3_CACHE_PREFIX
 ENV NVCC_APPEND_FLAGS=${NVCC_APPEND_FLAGS}
@@ -52,6 +57,10 @@ FROM risczero/risc0-groth16-prover@sha256:2829419e1bee4b87a2ade42569d9dffb4a304b
 FROM ${CUDA_RUNTIME_IMG} AS runtime
 
 RUN apt-get update -q -y && apt-get install -q -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
+
+# Set CUDA debug environment variables
+ENV CUDA_LAUNCH_BLOCKING=1
+ENV CUDA_DEBUG_SYNC=1
 
 # Copy the witness generator and data files from the binary stage
 COPY --from=binaries /usr/local/bin/stark_verify /app/stark_verify
