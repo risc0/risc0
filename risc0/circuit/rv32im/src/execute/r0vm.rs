@@ -491,7 +491,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
                     rlen -= WORD_SIZE as u32;
                 } else {
                     // tracing::trace!("store: {:#010x} -> null", 0);
-                    self.store_memory(SAFE_WRITE_ADDR.waddr(), 0)?;
+                    self.store_memory(SAFE_WRITE_ADDR.waddr() + j, 0)?;
                 }
             }
 
