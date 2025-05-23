@@ -1,0 +1,37 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const sys_halt: (a: number, b: number) => void;
+export const sys_pause: (a: number, b: number) => void;
+export const sys_input: (a: number) => number;
+export const sys_sha_compress: (a: number, b: number, c: number, d: number) => void;
+export const sys_sha_buffer: (a: number, b: number, c: number, d: number) => void;
+export const sys_bigint: (a: number, b: number, c: number, d: number, e: number) => void;
+export const sys_rand: (a: number, b: number) => void;
+export const sys_log: (a: number, b: number) => void;
+export const sys_cycle_count: () => bigint;
+export const sys_read: (a: number, b: number, c: number) => number;
+export const sys_read_words: (a: number, b: number, c: number) => number;
+export const sys_write: (a: number, b: number, c: number) => void;
+export const sys_getenv: (a: number, b: number, c: number, d: number) => number;
+export const sys_argc: () => number;
+export const sys_argv: (a: number, b: number, c: number) => number;
+export const sys_alloc_words: (a: number) => number;
+export const sys_alloc_aligned: (a: number, b: number) => number;
+export const sys_verify_integrity: (a: number, b: number) => void;
+export const sys_fork: () => number;
+export const sys_pipe: (a: number) => number;
+export const sys_exit: (a: number) => void;
+export const syscall_0: (a: number, b: number, c: number, d: number) => void;
+export const syscall_1: (a: number, b: number, c: number, d: number, e: number) => void;
+export const syscall_2: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+export const syscall_3: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
+export const syscall_4: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => void;
+export const syscall_5: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => void;
+export const verify_proof: (a: number, b: number, c: number, d: number) => [number, number, number];
+export const sys_panic: (a: number, b: number) => void;
+export const sys_verify_integrity2: (a: number, b: number) => void;
+export const __wbindgen_export_0: WebAssembly.Table;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __externref_table_dealloc: (a: number) => void;
+export const __wbindgen_start: () => void;
