@@ -6089,6 +6089,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-root"
+version = "3.0.0"
+
+[[package]]
 name = "risc0-sys"
 version = "1.5.0"
 dependencies = [

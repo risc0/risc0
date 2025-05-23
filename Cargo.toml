@@ -74,3 +74,15 @@ opt-level = 3
 
 [profile.release]
 lto = true
+
+[package]
+name = "risc0-root"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+description = "RISC Zero: A zero-knowledge verifiable general computing platform"
+
+[dependencies]
+# No dependencies needed for the root package
