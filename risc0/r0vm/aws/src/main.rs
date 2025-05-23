@@ -197,6 +197,7 @@ async fn set_up_instance(
     )
     .await?;
     ssh_execute_check(&ssh, &format!("tar -xJf /home/ubuntu/{r0vm_name}")).await?;
+    ssh_execute_check(&ssh, "chmod +x /home/ubuntu/r0vm").await?;
 
     let storage_root = "/home/flaub/src/risc0/tmp/bucket";
     for sub_dir in ["images", "inputs", "receipts"] {
