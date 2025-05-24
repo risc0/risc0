@@ -98,7 +98,7 @@ jobs:
             test:
               - *base
               - bonsai/sdk/**
-              - compact_proof/**
+              - groth16_proof/**
               - external/**
               - risc0/**
             test-crates:
