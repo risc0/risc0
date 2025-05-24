@@ -29,7 +29,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
     // Add a list of assumptions
     let assumptions: Vec<String> = vec![];
 
-    // Wether to run in execute only mode
+    // Whether to run in execute only mode
     let execute_only = false;
 
     // Start a session running the prover
