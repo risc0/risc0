@@ -35,7 +35,7 @@ each fork's repository on GitHub.
 
 | Crate                                                                    | Versions supported  | Patch Statement Example                                                                                   | Requires Unstable Flag? |
 | ------------------------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------- |
-| [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-dalek", tag = "curve25519-4.1.2-risczero.0" }` | No                      |
+| [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-consensus", tag = "curve25519-4.1.2-risczero.0" }` | No                      |
 
 ### RSA
 
@@ -124,7 +124,7 @@ no longer be required.
 [commit-lockfile]: https://blog.rust-lang.org/2023/08/29/committing-lockfiles.html
 [discord-url]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-1.2/examples/ecdsa
-[ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/methods/guest/Cargo.toml#L13-L18
+[ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/p256/methods/guest/Cargo.toml#L13-L18
 [feature-flag]: https://doc.rust-lang.org/cargo/reference/features.html#dependency-features
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.3..k256/v0.13.3-risczero.1
