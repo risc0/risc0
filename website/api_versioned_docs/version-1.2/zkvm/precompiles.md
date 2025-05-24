@@ -35,7 +35,7 @@ each fork's repository on GitHub.
 
 | Crate                                                                    | Versions supported  | Patch Statement Example                                                                                   | Requires Unstable Flag? |
 | ------------------------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------- |
-| [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-consensus", tag = "curve25519-4.1.2-risczero.0" }` | No                      |
+| [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", tag = "curve25519-4.1.2-risczero.0" }` | No                      |
 
 ### RSA
 
