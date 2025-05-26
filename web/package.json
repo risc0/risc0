@@ -21,16 +21,16 @@
     "react": "19",
     "react-dom": "19",
     "react-rainbow-ascii": "1.0.3",
-    "zustand": "5.0.3"
+    "zustand": "5.0.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "6.6.3",
     "@types/jest": "29.5.14",
     "@types/lodash-es": "4.17.12",
-    "@types/node": "22.13.13",
-    "@vitejs/plugin-react-swc": "3.8.1",
+    "@types/node": "22.15.21",
+    "@vitejs/plugin-react-swc": "3.10.0",
     "happy-dom": "16.6.0",
     "vitest": "2.1.9"
   },
-  "packageManager": "bun@1.2.6"
+  "packageManager": "bun@1.2.14"
 }
