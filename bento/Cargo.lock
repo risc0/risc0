@@ -817,6 +817,7 @@ name = "bento-client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "bonsai-sdk",
  "bytemuck",
  "clap",

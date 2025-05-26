@@ -352,14 +352,9 @@ jobs:
         run: cargo binstall cargo-nextest
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - name: build risc0-r0vm
-        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
-      - name: build risc0-zkvm tests without the prove feature
-        run: cargo test --release -p risc0-zkvm -F $FEATURE --no-run
-      - name: build risc0-zkvm tests with the metal feature
-        if: matrix.os == 'macOS'
-        run: cargo test -p risc0-zkvm -F metal --no-run
       - name: test risc0-r0vm
+        run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE
+      - name: test risc0-r0vm (disable-dev-mode)
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: ${{ matrix.test_command }} --release -p cargo-risczero -F experimental
       - name: run fibonacci benchmark

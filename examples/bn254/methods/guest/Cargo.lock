@@ -591,30 +591,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aa9a19cbb55df58761df49b23516a86d432839add4af60fc256da840f66ed35b"
 
 [[package]]
-name = "gdbstub"
-version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8062b93565ea9fe2e60a0dd3c252f0d48c27cf223dad7ead028e361181a2c1a5"
-dependencies = [
- "bitflags 2.8.0",
- "cfg-if",
- "log",
- "managed",
- "num-traits",
- "paste",
-]
-
-[[package]]
-name = "gdbstub_arch"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "328a9e9425db13770d0d11de6332a608854266e44c53d12776be7b4aa427e3de"
-dependencies = [
- "gdbstub",
- "num-traits",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -737,12 +713,6 @@ checksum = "62bb907fe88d54d8d9ce32a3cceab4218ed2f6b7d35617cafe9adf84e43919cb"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "managed"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ca88d725a0a943b096803bd34e73a4437208b6077654cc4ecb2947a5f91618d"
 
 [[package]]
 name = "memchr"
@@ -989,8 +959,6 @@ dependencies = [
  "bit-vec",
  "bytemuck",
  "derive_more",
- "gdbstub",
- "gdbstub_arch",
  "paste",
  "risc0-binfmt",
  "risc0-core",
