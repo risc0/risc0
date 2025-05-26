@@ -3,7 +3,9 @@ name = "fibonacci"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+
 [dependencies]
-risc0-zkvm = { path = "../../../../risc0/zkvm", features = ["std"] }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 num-bigint = "0.4"
 num-traits = "0.2"

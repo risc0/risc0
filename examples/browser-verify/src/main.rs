@@ -34,7 +34,7 @@ fn main() {
     let receipt_bytes = to_vec(&receipt).expect("Serialization failed");
 
     // compute the image ID
-    let image_id_digest = compute_image_id(&FIBONACCI_ELF).expect("Compute Image ID failed");
+    let image_id_digest = compute_image_id(FIBONACCI_ELF).expect("Compute Image ID failed");
     let image_id_bytes = image_id_digest.as_bytes();
 
     // make sure data dir exists

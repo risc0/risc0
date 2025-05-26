@@ -638,7 +638,6 @@ version = "0.1.0"
 dependencies = [
  "borsh",
  "guest",
- "risc0-build",
  "risc0-zkvm",
  "serde",
  "tracing-subscriber 0.3.19",
@@ -1651,15 +1650,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "fibonacci"
-version = "0.1.0"
-dependencies = [
- "num-bigint 0.4.6",
- "num-traits",
- "risc0-zkvm",
 ]
 
 [[package]]
