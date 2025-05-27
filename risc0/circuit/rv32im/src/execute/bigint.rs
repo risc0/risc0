@@ -70,7 +70,7 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
         check_bigint_addr(start_addr, self.mode)?;
 
         let word_count = (count + 3) / 4;
-        let mut limbs = SmallVec::<[u32; 8]>::with_capacity(word_count as usize);
+        let mut limbs = SmallVec::<[u32; 12]>::with_capacity(word_count as usize);
         let mut addr = start_addr;
         while addr < start_addr + word_count {
             limbs.push(self.ctx.load_u32(LoadOp::Load, addr)?);
