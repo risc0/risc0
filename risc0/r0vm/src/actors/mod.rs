@@ -21,16 +21,29 @@ pub(crate) mod rpc;
 mod tests;
 pub(crate) mod worker;
 
-use std::{error::Error as StdError, net::SocketAddr, path::PathBuf};
+use std::{error::Error as StdError, net::SocketAddr, path::PathBuf, time::Duration};
 
+use futures::{SinkExt as _, StreamExt as _};
 use kameo::prelude::*;
+use opentelemetry::metrics::Counter;
 use opentelemetry_otlp::WithExportConfig as _;
-use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
+use opentelemetry_sdk::{
+    logs::SdkLoggerProvider,
+    metrics::{PeriodicReader, SdkMeterProvider},
+    propagation::TraceContextPropagator,
+    trace::SdkTracerProvider,
+    Resource,
+};
 use protocol::{JobInfo, ProofRequest};
 use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
-use tokio::{net::TcpListener, task::JoinHandle};
+use tokio::{
+    net::{TcpListener, TcpStream},
+    task::JoinHandle,
+};
+use tokio_util::codec::{FramedRead, FramedWrite, LengthDelimitedCodec};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
 use crate::Cli;
 
@@ -45,12 +58,12 @@ use self::{
     worker::Worker,
 };
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct SimulationConfig {
     pub pools: Vec<PoolConfig>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct PoolConfig {
     pub count: usize,
     pub profile: DevModeDelay,
@@ -63,11 +76,12 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     let task_kinds = args.mode.worker.clone();
 
     let config = if let Some(ref path) = args.simulate {
-        let json = tokio::fs::read_to_string(path).await?;
-        Some(serde_json::from_str(&json)?)
+        let str = tokio::fs::read_to_string(path).await?;
+        Some(toml::from_str(&str)?)
     } else {
         None
     };
+    tracing::info!("{config:#?}");
 
     let mut app = App::new(
         is_manager,
@@ -109,7 +123,7 @@ enum RemoteRequest {
 }
 
 pub(crate) struct App {
-    provider: Option<SdkTracerProvider>,
+    provider: Option<OpenTelemetryProvider>,
     manager: Option<ActorRef<ManagerActor>>,
     factory: Option<ActorRef<FactoryActor>>,
     workers: Vec<Worker>,
@@ -126,11 +140,12 @@ impl App {
         sim_config: Option<SimulationConfig>,
         po2: usize,
     ) -> Result<Self, Box<dyn StdError>> {
-        let provider = if sim_config.is_none() {
-            Some(init_tracer_provider())
-        } else {
-            None
-        };
+        // let provider = if sim_config.is_none() {
+        //     Some(init_tracer_provider())
+        // } else {
+        //     None
+        // };
+        let provider = Some(OpenTelemetryProvider::new());
 
         let mut manager = None;
         let mut factory = None;
@@ -227,7 +242,7 @@ impl App {
         }
 
         if let Some(provider) = self.provider {
-            let _ = provider.shutdown();
+            provider.stop();
         }
     }
 
@@ -325,23 +340,147 @@ async fn handle_request(
     }
 }
 
+struct TcpSession {
+    pub(crate) stream: TcpStream,
+    codec: LengthDelimitedCodec,
+    tx_messages: Counter<u64>,
+    tx_bytes: Counter<u64>,
+    rx_messages: Counter<u64>,
+    rx_bytes: Counter<u64>,
+}
+
+impl TcpSession {
+    #[expect(dead_code)]
+    pub(crate) fn new(stream: TcpStream) -> Self {
+        let codec = LengthDelimitedCodec::builder()
+            .max_frame_length(1024 * 1024 * 1024)
+            .new_codec();
+        let meter = opentelemetry::global::meter("r0vm");
+        let tx_messages = meter.u64_counter("tx_messages").build();
+        let tx_bytes = meter.u64_counter("tx_bytes").with_unit("bytes").build();
+        let rx_messages = meter.u64_counter("rx_messages").build();
+        let rx_bytes = meter.u64_counter("rx_bytes").with_unit("bytes").build();
+        Self {
+            stream,
+            codec,
+            tx_messages,
+            tx_bytes,
+            rx_messages,
+            rx_bytes,
+        }
+    }
+
+    #[expect(dead_code)]
+    pub(crate) async fn send<T: serde::Serialize>(&mut self, msg: T) -> anyhow::Result<()> {
+        let mut writer = FramedWrite::new(&mut self.stream, self.codec.clone());
+
+        let frame = bincode::serialize(&msg)?;
+        self.tx_bytes.add(frame.len() as u64, &[]);
+        self.tx_messages.add(1, &[]);
+        tracing::info!("tx {} bytes", frame.len());
+
+        writer.send(frame.into()).await?;
+
+        Ok(())
+    }
+
+    #[expect(dead_code)]
+    pub(crate) async fn recv<T: serde::de::DeserializeOwned>(
+        &mut self,
+    ) -> anyhow::Result<Option<T>> {
+        let mut reader = FramedRead::new(&mut self.stream, self.codec.clone());
+        let frame = match reader.next().await {
+            Some(result) => result?,
+            None => return Ok(None),
+        };
+
+        self.rx_bytes.add(frame.len() as u64, &[]);
+        self.rx_messages.add(1, &[]);
+        tracing::info!("rx {} bytes", frame.len());
+
+        Ok(Some(bincode::deserialize(&frame)?))
+    }
+}
+
 fn default_storage_root() -> PathBuf {
     dirs::home_dir().unwrap().join(".risc0").join("r0vm")
 }
 
-fn init_tracer_provider() -> SdkTracerProvider {
-    let otlp_exporter = opentelemetry_otlp::SpanExporter::builder()
-        .with_http()
-        .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-        .build()
-        .unwrap();
+struct OpenTelemetryProvider {
+    tracer_provider: SdkTracerProvider,
+    meter_provider: SdkMeterProvider,
+    logger_provider: SdkLoggerProvider,
+}
 
-    let provider = SdkTracerProvider::builder()
-        .with_batch_exporter(otlp_exporter)
-        .with_resource(Resource::builder().with_service_name("r0vm").build())
-        .build();
-    opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
-    opentelemetry::global::set_tracer_provider(provider.clone());
+impl OpenTelemetryProvider {
+    pub(crate) fn new() -> Self {
+        let resource = Resource::builder().with_service_name("r0vm").build();
 
-    provider
+        let logger_provider = SdkLoggerProvider::builder()
+            .with_resource(resource.clone())
+            .with_batch_exporter(
+                opentelemetry_otlp::LogExporter::builder()
+                    .with_http()
+                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
+                    .build()
+                    .unwrap(),
+            )
+            .build();
+
+        tracing_subscriber::registry()
+            // .with(OpenTelemetryTracingBridge::new(&logger_provider))
+            .with(tracing_subscriber::fmt::layer().with_filter(EnvFilter::from_default_env()))
+            .init();
+
+        let tracer_provider = SdkTracerProvider::builder()
+            .with_batch_exporter(
+                opentelemetry_otlp::SpanExporter::builder()
+                    .with_http()
+                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
+                    .build()
+                    .unwrap(),
+            )
+            .with_resource(resource.clone())
+            .build();
+
+        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
+        opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+
+        let meter_provider = SdkMeterProvider::builder()
+            .with_reader(
+                PeriodicReader::builder(
+                    opentelemetry_otlp::MetricExporter::builder()
+                        .with_http()
+                        .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
+                        .build()
+                        .unwrap(),
+                )
+                .with_interval(Duration::from_secs(1))
+                .build(),
+            )
+            .with_resource(resource.clone())
+            .build();
+
+        opentelemetry::global::set_meter_provider(meter_provider.clone());
+
+        Self {
+            tracer_provider,
+            meter_provider,
+            logger_provider,
+        }
+    }
+
+    pub(crate) fn stop(self) {
+        tokio::task::spawn_blocking(move || {
+            let _ = self.meter_provider.shutdown().inspect_err(|err| {
+                tracing::warn!("{err:?}");
+            });
+            let _ = self.tracer_provider.shutdown().inspect_err(|err| {
+                tracing::warn!("{err:?}");
+            });
+            let _ = self.logger_provider.shutdown().inspect_err(|err| {
+                tracing::warn!("{err:?}");
+            });
+        });
+    }
 }

@@ -307,7 +307,6 @@ impl Message<GetTask> for RemoteFactoryActor {
             })
             .await
             .unwrap();
-
         delegated_reply
     }
 }

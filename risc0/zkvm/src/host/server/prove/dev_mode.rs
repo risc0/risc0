@@ -37,7 +37,7 @@ const ERR_DEV_MODE_DISABLED: &str =
     "zkVM: dev mode is disabled. Unset RISC0_DEV_MODE environment variable to produce valid proofs";
 
 /// Configuration for simulated DevMode delay.
-#[derive(Clone, Copy, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct DevModeDelay {
     /// Delay for prove_segment
     #[serde(deserialize_with = "duration_secs")]
