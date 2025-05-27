@@ -3787,7 +3787,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.1.1"
+version = "2.1.2"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3822,7 +3822,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3856,7 +3856,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3891,7 +3891,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.3"
+version = "2.0.4"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -3921,7 +3921,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "cc",
  "cust",
@@ -4037,7 +4037,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.0.2"
+version = "2.1.0"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -4082,7 +4082,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "2.0.2"
+version = "2.1.0"
 dependencies = [
  "borsh",
  "ciborium",
@@ -4109,7 +4109,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "2.0.2"
+version = "2.1.0"
 
 [[package]]
 name = "rkyv"
