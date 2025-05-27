@@ -31,7 +31,7 @@ env:
 
 jobs:
   bench:
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}", "${{ matrix.benchmark_label }}"]
 
     strategy:
       fail-fast: false
@@ -45,6 +45,7 @@ jobs:
             arch: X64
             feature: cuda
             device: nvidia_rtx_4090
+            benchmark_label: benchmark_trends
           - os: Linux
             arch: X64
             feature: cuda
