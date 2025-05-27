@@ -244,18 +244,27 @@ impl JobActor {
             .insert(task_id, self.tracer.start_with_context(name, &self.ctx));
     }
 
+    fn span_event<T>(&mut self, header: TaskHeader, name: T)
+    where
+        T: Into<Cow<'static, str>>,
+    {
+        self.pending_spans
+            .get_mut(&header.global_id.task_id)
+            .unwrap()
+            .add_event(name, vec![]);
+    }
+
     fn span_end(&mut self, task_id: TaskId) {
         self.pending_spans.remove(&task_id).as_mut().unwrap().end();
     }
 
-    async fn task_start(&mut self, header: TaskHeader) {
-        self.pending_spans
-            .get_mut(&header.global_id.task_id)
-            .unwrap()
-            .add_event("start", vec![]);
+    fn task_start(&mut self, header: TaskHeader) {
+        let name = format!("{:?}", header.task_kind);
+        self.span_start(header.global_id.task_id, name);
     }
 
-    async fn prove_segment(&mut self, segment: Segment) {
+    async fn prove_segment(&mut self, header: TaskHeader, segment: Segment) {
+        self.span_event(header, "segment");
         tracing::info!("ProveSegment: {}", segment.index);
         self.submit_task(Task::ProveSegment(Arc::new(ProveSegmentTask { segment })))
             .await;
@@ -308,7 +317,7 @@ impl JobActor {
 
     async fn submit_task(&mut self, task: Task) {
         let task_id = self.next_task_id();
-        self.span_start(task_id, task.name());
+        // self.span_start(task_id, task.name());
         let msg = SubmitTaskMsg {
             job: self.self_ref(),
             header: TaskHeader {
@@ -501,8 +510,8 @@ impl Message<TaskUpdateMsg> for JobActor {
     ) -> Self::Reply {
         // tracing::info!("TaskUpdateMsg: {}", msg.header.global_id.task_id);
         match msg.payload {
-            TaskUpdate::Start => self.task_start(msg.header).await,
-            TaskUpdate::Segment(segment) => self.prove_segment(segment).await,
+            TaskUpdate::Start => self.task_start(msg.header),
+            TaskUpdate::Segment(segment) => self.prove_segment(msg.header, segment).await,
             TaskUpdate::Keccak(request) => self.prove_keccak(request).await,
         }
     }

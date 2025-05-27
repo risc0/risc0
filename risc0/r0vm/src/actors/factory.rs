@@ -25,7 +25,7 @@ use super::{
         worker::TaskMsg,
         GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
     },
-    RemoteRequest,
+    RemoteRequest, TcpSession,
 };
 
 #[derive(Clone, MultiIndexMap)]
@@ -249,13 +249,14 @@ impl Message<TaskDoneMsg> for FactoryRouterActor {
 }
 
 pub(crate) struct RemoteFactoryActor {
-    tcp: TcpStream,
+    session: TcpSession,
 }
 
 impl RemoteFactoryActor {
     pub(crate) async fn new(addr: SocketAddr) -> anyhow::Result<Self> {
-        let tcp = TcpStream::connect(addr).await?;
-        Ok(Self { tcp })
+        let stream = TcpStream::connect(addr).await?;
+        let session = TcpSession::new(stream);
+        Ok(Self { session })
     }
 }
 
@@ -271,7 +272,7 @@ impl Actor for RemoteFactoryActor {
         _actor_ref: WeakActorRef<Self>,
         _reason: ActorStopReason,
     ) -> Result<(), Self::Error> {
-        self.tcp.shutdown().await?;
+        self.session.stream.shutdown().await?;
         Ok(())
     }
 }
@@ -281,9 +282,9 @@ impl Message<GetTask> for RemoteFactoryActor {
 
     async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
         let msg = RemoteRequest::GetTask(msg);
-        super::send(&mut self.tcp, msg).await.unwrap();
+        self.session.send(msg).await.unwrap();
         let (delegated_reply, reply_sender) = ctx.reply_sender();
-        let reply: TaskMsg = super::recv(&mut self.tcp).await.unwrap().unwrap();
+        let reply: TaskMsg = self.session.recv().await.unwrap().unwrap();
         reply_sender.unwrap().send(reply);
         delegated_reply
     }
@@ -298,7 +299,7 @@ impl Message<TaskUpdateMsg> for RemoteFactoryActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         let msg = RemoteRequest::TaskUpdate(msg);
-        super::send(&mut self.tcp, msg).await.unwrap();
+        self.session.send(msg).await.unwrap();
     }
 }
 
@@ -311,6 +312,6 @@ impl Message<TaskDoneMsg> for RemoteFactoryActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         let msg = RemoteRequest::TaskDone(msg);
-        super::send(&mut self.tcp, msg).await.unwrap();
+        self.session.send(msg).await.unwrap();
     }
 }

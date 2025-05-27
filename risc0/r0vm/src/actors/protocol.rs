@@ -282,18 +282,6 @@ impl Task {
             Task::Resolve(_) => TaskKind::Resolve,
         }
     }
-
-    pub fn name(&self) -> &'static str {
-        match self {
-            Task::Execute(_) => "execute",
-            Task::ProveSegment(_) => "prove",
-            Task::ProveKeccak(_) => "keccak",
-            Task::Lift(_) => "lift",
-            Task::Join(_) => "join",
-            Task::Union(_) => "union",
-            Task::Resolve(_) => "resolve",
-        }
-    }
 }
 
 impl JobStatus {
