@@ -45,12 +45,12 @@ use self::{
     worker::Worker,
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct SimulationConfig {
     pub pools: Vec<PoolConfig>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct PoolConfig {
     pub count: usize,
     pub profile: DevModeDelay,
@@ -120,7 +120,7 @@ impl App {
     pub async fn new(
         is_manager: bool,
         task_kinds: Vec<TaskKind>,
-        addr: Option<SocketAddr>,
+        mut addr: Option<SocketAddr>,
         api_addr: Option<SocketAddr>,
         storage_root: Option<PathBuf>,
         sim_config: Option<SimulationConfig>,
@@ -147,9 +147,9 @@ impl App {
                 kameo::spawn(ManagerActor::new(factory_ref.clone(), storage_root.clone()));
             manager = Some(manager_ref.clone());
 
-            if let Some(addr) = addr {
-                server = Some(Server::new(addr, factory_ref));
-                server.as_mut().unwrap().start().await?;
+            if let Some(listen_addr) = addr {
+                server = Some(Server::new(listen_addr, factory_ref));
+                addr = Some(server.as_mut().unwrap().start().await?.unwrap());
             }
 
             if let Some(addr) = api_addr {
@@ -157,12 +157,12 @@ impl App {
             }
         }
 
-        let factory_ref = match factory {
-            Some(ref factory) => kameo::spawn(FactoryRouterActor::Local(factory.clone())),
-            None => {
-                let remote = kameo::spawn(RemoteFactoryActor::new(addr.unwrap()).await?);
+        let factory_ref = match addr {
+            Some(addr) => {
+                let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
                 kameo::spawn(FactoryRouterActor::Remote(remote))
             }
+            None => kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone())),
         };
 
         if let Some(config) = sim_config {
@@ -243,27 +243,28 @@ impl App {
 }
 
 struct Server {
-    addr: SocketAddr,
+    listen_addr: SocketAddr,
     factory: ActorRef<FactoryActor>,
     join_handle: Option<JoinHandle<()>>,
 }
 
 impl Server {
-    pub fn new(addr: SocketAddr, factory: ActorRef<FactoryActor>) -> Self {
+    pub fn new(listen_addr: SocketAddr, factory: ActorRef<FactoryActor>) -> Self {
         Self {
-            addr,
+            listen_addr,
             factory,
             join_handle: None,
         }
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<()> {
+    pub async fn start(&mut self) -> anyhow::Result<Option<SocketAddr>> {
         if self.join_handle.is_some() {
-            return Ok(());
+            return Ok(None);
         }
 
         let factory = self.factory.clone();
-        let listener = TcpListener::bind(self.addr).await?;
+        let listener = TcpListener::bind(self.listen_addr).await?;
+        let local_addr = listener.local_addr()?;
 
         self.join_handle = Some(tokio::spawn(async move {
             loop {
@@ -291,7 +292,7 @@ impl Server {
             }
         }));
 
-        Ok(())
+        Ok(Some(local_addr))
     }
 
     pub async fn stop(self) {
