@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(dead_code)]
-
 use std::collections::HashMap;
 use std::num::NonZeroU32;
 use std::sync::{Arc, Mutex};
@@ -74,7 +72,7 @@ impl RpcSender {
     }
 
     /// Shutdown the write side of the socket.
-    async fn shutdown(&self) -> Result<()> {
+    pub async fn shutdown(&self) -> Result<()> {
         self.stream.lock().await.shutdown().await?;
         Ok(())
     }
@@ -135,7 +133,7 @@ impl RpcMessageId {
     }
 }
 
-#[warn(clippy::enum_variant_names)]
+#[allow(clippy::enum_variant_names)]
 #[derive(Serialize, Deserialize)]
 enum RpcMessageKind {
     ExpectsResponse,
