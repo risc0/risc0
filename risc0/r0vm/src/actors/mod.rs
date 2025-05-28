@@ -89,6 +89,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         args.storage.clone(),
         config,
         args.po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2),
+        false,
     )
     .await?;
 
@@ -129,6 +130,7 @@ pub(crate) struct App {
 }
 
 impl App {
+    #[allow(clippy::too_many_arguments)]
     pub async fn new(
         is_manager: bool,
         task_kinds: Vec<TaskKind>,
@@ -137,13 +139,9 @@ impl App {
         storage_root: Option<PathBuf>,
         sim_config: Option<SimulationConfig>,
         po2: usize,
+        is_test: bool,
     ) -> Result<Self, Box<dyn StdError>> {
-        // let provider = if sim_config.is_none() {
-        //     Some(init_tracer_provider())
-        // } else {
-        //     None
-        // };
-        let provider = Some(OpenTelemetryProvider::new());
+        let provider = (!is_test).then(OpenTelemetryProvider::new);
 
         let mut manager = None;
         let mut factory = None;

@@ -69,6 +69,7 @@ async fn basic() {
         Some(storage_root.to_path_buf()),
         Some(config),
         21,
+        true,
     )
     .await
     .unwrap();
