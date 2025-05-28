@@ -16,6 +16,7 @@ pub(crate) mod factory;
 pub(crate) mod job;
 pub(crate) mod manager;
 pub(crate) mod protocol;
+pub(crate) mod rpc;
 #[cfg(test)]
 mod tests;
 pub(crate) mod worker;
