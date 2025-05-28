@@ -70,6 +70,7 @@ impl<Risc0ContextT: Risc0Context> BigIntIO for BigIntIOImpl<'_, Risc0ContextT> {
         check_bigint_addr(start_addr, self.mode)?;
 
         let word_count = (count + 3) / 4;
+        // Note: Inline cap of 12 is chosen because blst_fp are 6 u64 limbs, so 12 u32 limbs
         let mut limbs = SmallVec::<[u32; 12]>::with_capacity(word_count as usize);
         let mut addr = start_addr;
         while addr < start_addr + word_count {
