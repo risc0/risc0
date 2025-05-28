@@ -24,7 +24,7 @@ You can find out more info in the relevant issues [#1520] and [#1749].
 > TIP: In cases where memory is constrained (i.e. less than 10 GB is available), it may be necessary to change the [segment size limit][segment-limit-docs].
 > You can find information about expected memory consumption on our [benchmarks page][datasheet].
 
-> NOTE: When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.
+> NOTE: When run for the first time, the GPU (e.g. CUDA) kernels may need to be JIT compiled.
 > This can take a few minutes, but should only happen once.
 
 ### CPU
@@ -65,14 +65,8 @@ cargo run --bin rzup install
 RUSTFLAGS="-C target-cpu=native" cargo run -F cuda -r --example datasheet
 ```
 
-### Apple Metal
-
-On MacOS, when using a machine with Apple Silicon (such as the M-series MacBooks), RISC Zero will use the integrated [Metal][apple-metal] compute cores.
-No options need to be configured to take advantage of acceleration through the use of Metal.
-
 [#1520]: https://github.com/risc0/risc0/issues/1520
 [#1749]: https://github.com/risc0/risc0/issues/1749
-[apple-metal]: https://developer.apple.com/metal
 [Bonsai]: ./remote-proving.md
 [datasheet]: https://benchmarks.risczero.com/main/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags

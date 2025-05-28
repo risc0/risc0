@@ -26,18 +26,12 @@ cargo run --release --example datasheet
 This will produce the benchmark data shown in the [datasheet] for your system
 (using the CPU) on the checked out version of the RISC Zero zkVM.
 
-If you want to benchmark a GPU, you will need to build with the `cuda` or
-`metal` feature enabled (whichever is appropriate for your hardware). To do
-this, use the following commands:
+If you want to benchmark a GPU, you will need to build with the `cuda` feature
+enabled. To do this, use the following command:
 
-- **Metal**
-  ```bash
-  cargo run --release -F metal --example datasheet
-  ```
-- **CUDA**
-  ```bash
-  cargo run --release -F cuda --example datasheet
-  ```
+```bash
+cargo run --release -F cuda --example datasheet
+```
 
 We also have a benchmark based on running a simple Fibonacci guest program,
 which you can run with:
@@ -50,7 +44,7 @@ This will compute the 100th, 1000th, and 10000th Fibonacci numbers modulo 2^64
 (ten times for each). It will report both time and throughput (how many numbers
 were added per second) with separate statistics for [execution] and
 [proving][prover]. As with the loop benchmark, the Fibonacci benchmark will use
-the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
+the CPU by default, and you can benchmark a CUDA GPU by setting the
 appropriate feature flag.
 
 [cycle count]: /terminology#clock-cycles

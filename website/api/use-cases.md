@@ -41,7 +41,7 @@ for the ZK software world: projects that would take months or years to build on
 other platforms can be solved trivially on our platform.
 
 In addition to being far easier to build on, we're also delivering on
-[performance]. The zkVM has GPU acceleration for CUDA and Metal, and with
+[performance]. The zkVM has GPU acceleration for CUDA, and with
 [continuations] we've enabled parallel proving of large programs.
 
 **Ready to start building?** <br />
