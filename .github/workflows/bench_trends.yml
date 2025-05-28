@@ -45,7 +45,7 @@ jobs:
             arch: X64
             feature: cuda
             device: nvidia_rtx_4090
-            benchmark_label: benchmark_trends
+            benchmark_label: benchmark_pin
           - os: Linux
             arch: X64
             feature: cuda
