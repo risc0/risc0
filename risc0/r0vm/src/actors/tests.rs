@@ -67,6 +67,7 @@ async fn do_test(remote: bool) {
         Some(storage_root.to_path_buf()),
         Some(config),
         21,
+        true,
     )
     .await
     .unwrap();
