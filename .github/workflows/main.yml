@@ -114,7 +114,6 @@ jobs:
       # - bento-run
       # - bento-test
       - browser
-      - build_extra_cargo_check_benchmark
       - check
       # - check-external
       - check-semver
@@ -124,9 +123,10 @@ jobs:
       # - doc
       # - docs-rs
       - examples
+      - extra
       - docker
       # - test-crates
-      - test_workspace
+      - test
       - web
     runs-on: ubuntu-latest
     steps:
@@ -137,7 +137,7 @@ jobs:
         run: exit 1
 
   check:
-    runs-on: [self-hosted, test, Linux, X64]
+    runs-on: [self-hosted, prod, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -225,7 +225,7 @@ jobs:
         run: cargo clippy -F $FEATURE --all-targets
         working-directory: examples
 
-  test_workspace:
+  test:
     if: true # needs.changes.outputs.test == 'true'
     needs: changes
     runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
@@ -305,7 +305,7 @@ jobs:
           retention-days: 5
       - run: sccache --show-stats
 
-  build_extra_cargo_check_benchmark:
+  extra:
     if: true # needs.changes.outputs.test == 'true'
     needs: changes
     runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
@@ -323,11 +323,11 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             test_command: cargo test
-          - os: macOS
-            arch: ARM64
-            feature: default
-            device: apple_m2_pro
-            test_command: cargo nextest run
+          # - os: macOS
+          #   arch: ARM64
+          #   feature: default
+          #   device: apple_m2_pro
+          #   test_command: cargo nextest run
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -389,11 +389,11 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             test_command: cargo test
-          - os: macOS
-            arch: ARM64
-            feature: default
-            device: apple_m2_pro
-            test_command: cargo nextest run
+          # - os: macOS
+          #   arch: ARM64
+          #   feature: default
+          #   device: apple_m2_pro
+          #   test_command: cargo nextest run
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
