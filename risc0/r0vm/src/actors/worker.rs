@@ -41,11 +41,13 @@ struct Processor {
     po2: usize,
 }
 
+/// Number of tasks we pull off the network and queue up in memory before processing
+const RECEIVE_QUEUE_DEPTH: usize = 1;
+
 pub(crate) struct Worker {
-    worker_id: WorkerId,
     factory: ActorRef<FactoryRouterActor>,
     task_kinds: Vec<TaskKind>,
-    join_handle: Option<JoinHandle<()>>,
+    join_handles: Vec<JoinHandle<()>>,
     delay: Option<DevModeDelay>,
     po2: usize,
 }
@@ -58,40 +60,57 @@ impl Worker {
         po2: usize,
     ) -> Self {
         Self {
-            worker_id: WorkerId::new_v4(),
             factory,
             task_kinds,
-            join_handle: None,
+            join_handles: vec![],
             delay,
             po2,
         }
     }
 
     pub fn start(&mut self) {
-        if self.join_handle.is_some() {
+        if !self.join_handles.is_empty() {
             return;
         }
 
-        let request = GetTask {
-            worker_id: self.worker_id,
-            kinds: self.task_kinds.clone(),
-        };
+        let task_kinds = self.task_kinds.clone();
         let factory = self.factory.clone();
+        let (send, mut recv) = tokio::sync::mpsc::channel(RECEIVE_QUEUE_DEPTH);
+        self.join_handles.push(tokio::spawn(async move {
+            while let Ok(permit) = send.reserve().await {
+                let task = factory
+                    .ask(GetTask {
+                        worker_id: WorkerId::new_v4(),
+                        kinds: task_kinds.clone(),
+                    })
+                    .await;
+                permit.send(task);
+            }
+        }));
+
         let processor = Processor {
-            factory: factory.clone(),
+            factory: self.factory.clone(),
             delay: self.delay,
             po2: self.po2,
         };
-        self.join_handle = Some(tokio::spawn(async move {
+        self.join_handles.push(tokio::spawn(async move {
             loop {
-                let reply = factory.ask(request.clone()).await;
-                processor.process_task(reply).await;
+                let Some(msg) = recv.recv().await else { break };
+                let msg = match msg {
+                    Ok(msg) => msg,
+                    Err(err) => {
+                        tracing::error!("GetTask reply error: {err}");
+                        break;
+                    }
+                };
+
+                processor.process_task(msg).await;
             }
         }));
     }
 
-    pub async fn stop(self) {
-        if let Some(join_handle) = self.join_handle {
+    pub async fn stop(mut self) {
+        for join_handle in std::mem::take(&mut self.join_handles) {
             join_handle.abort();
         }
     }
@@ -118,14 +137,7 @@ impl Prover {
 }
 
 impl Processor {
-    async fn process_task(&self, msg: Result<TaskMsg, SendError<GetTask, SendError<GetTask>>>) {
-        let msg = match msg {
-            Ok(msg) => msg,
-            Err(err) => {
-                tracing::error!("GetTask reply error: {err}");
-                return;
-            }
-        };
+    async fn process_task(&self, msg: TaskMsg) {
         let header = msg.header.clone();
         let result = match msg.task {
             Task::Execute(task) => self.execute(msg.header, task).await,
