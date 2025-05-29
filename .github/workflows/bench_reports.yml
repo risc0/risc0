@@ -16,11 +16,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# this is needed to gain access via OIDC to the S3 bucket for caching
-permissions:
-  id-token: write
-  contents: read
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
@@ -29,7 +24,7 @@ env:
 
 jobs:
   bench:
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
@@ -37,16 +32,8 @@ jobs:
         include:
           - os: Linux
             arch: X64
-            feature: prove
-            device: cpu
-          - os: Linux
-            arch: X64
             feature: cuda
             device: nvidia_rtx_4090
-          - os: Linux
-            arch: X64
-            feature: cuda
-            device: g6.xlarge
           - os: macOS
             arch: ARM64
             feature: prove

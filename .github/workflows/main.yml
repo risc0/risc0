@@ -10,11 +10,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# this is needed to gain access via OIDC to the S3 bucket for caching
-permissions:
-  id-token: write
-  contents: read
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
@@ -112,16 +107,16 @@ jobs:
     if: always()
     needs:
       # - bento-run
-      # - bento-test
+      - bento-test
       - browser
       - check
-      # - check-external
+      - check-external
       - check-semver
       - check-template
       - clippy
-      # - crates-validation
-      # - doc
-      # - docs-rs
+      - crates-validation
+      - doc
+      - docs-rs
       - examples
       - extra
       - docker
@@ -137,7 +132,7 @@ jobs:
         run: exit 1
 
   check:
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, cluster, Linux, cpu]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -189,7 +184,7 @@ jobs:
   clippy:
     if: needs.changes.outputs.risc0 == 'true'
     needs: changes
-    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -200,9 +195,9 @@ jobs:
           - os: Linux
             arch: X64
             feature: cuda
-          # - os: macOS
-          #   arch: ARM64
-          #   feature: default
+          - os: macOS
+            arch: ARM64
+            feature: default
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_SKIP_BUILD: 1
@@ -228,7 +223,7 @@ jobs:
   test:
     if: true # needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -251,18 +246,18 @@ jobs:
             device: nvidia_rtx_4000_ada
             test_command: cargo test
             partition: 1
-          # - os: macOS
-          #   arch: ARM64
-          #   feature: default
-          #   device: apple_m2_pro
-          #   test_command: cargo nextest run --partition hash:1/2
-          #   partition: 1
-          # - os: macOS
-          #   arch: ARM64
-          #   feature: default
-          #   device: apple_m2_pro
-          #   test_command: cargo nextest run --partition hash:2/2
-          #   partition: 2
+          - os: macOS
+            arch: ARM64
+            feature: default
+            device: apple_m2_pro
+            test_command: cargo nextest run --partition hash:1/2
+            partition: 1
+          - os: macOS
+            arch: ARM64
+            feature: default
+            device: apple_m2_pro
+            test_command: cargo nextest run --partition hash:2/2
+            partition: 2
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -308,7 +303,7 @@ jobs:
   extra:
     if: true # needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -323,11 +318,11 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             test_command: cargo test
-          # - os: macOS
-          #   arch: ARM64
-          #   feature: default
-          #   device: apple_m2_pro
-          #   test_command: cargo nextest run
+          - os: macOS
+            arch: ARM64
+            feature: default
+            device: apple_m2_pro
+            test_command: cargo nextest run
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -374,7 +369,7 @@ jobs:
   examples:
     if: true # needs.changes.outputs.examples == 'true'
     needs: changes
-    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -389,11 +384,11 @@ jobs:
             feature: cuda
             device: nvidia_rtx_4000_ada
             test_command: cargo test
-          # - os: macOS
-          #   arch: ARM64
-          #   feature: default
-          #   device: apple_m2_pro
-          #   test_command: cargo nextest run
+          - os: macOS
+            arch: ARM64
+            feature: default
+            device: apple_m2_pro
+            test_command: cargo nextest run
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -435,7 +430,7 @@ jobs:
   test-crates:
     if: false # needs.changes.outputs.test-crates == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu]
+    runs-on: [self-hosted, cluster, Linux, cpu]
     strategy:
       fail-fast: false
     steps:
@@ -459,9 +454,9 @@ jobs:
       - run: sccache --show-stats
 
   doc:
-    if: false # needs.changes.outputs.doc == 'true'
+    if: true # needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -475,9 +470,9 @@ jobs:
   # Run as a separate job because we need to install a different set of tools.
   # In particular, it uses nightly Rust and _does not_ install cargo risczero.
   docs-rs:
-    if: false # needs.changes.outputs.doc == 'true'
+    if: true # needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, cluster, macOS, cpu]
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
     steps:
@@ -494,9 +489,9 @@ jobs:
       - run: sccache --show-stats
 
   check-external:
-    if: false # needs.changes.outputs.check-external == 'true'
+    if: true # needs.changes.outputs.check-external == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -508,15 +503,15 @@ jobs:
   check-semver:
     if: true # needs.changes.outputs.check-semver == 'true'
     needs: changes
-    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
-          # - os: macOS
-          #   arch: ARM64
+          - os: macOS
+            arch: ARM64
     steps:
       - uses: actions/checkout@v4
         with:
@@ -536,15 +531,15 @@ jobs:
   check-template:
     if: true # needs.changes.outputs.check-template == 'true'
     needs: changes
-    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
-          # - os: macOS
-          #   arch: ARM64
+          - os: macOS
+            arch: ARM64
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -573,9 +568,9 @@ jobs:
       - run: sccache --show-stats
 
   crates-validation:
-    if: false # needs.changes.outputs.crates-validation == 'true'
+    if: true # needs.changes.outputs.crates-validation == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, X64, cpu]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu]
     env:
       RUST_BACKTRACE: full
       RUST_LOG: info
@@ -610,7 +605,7 @@ jobs:
   browser:
     if: true # needs.changes.outputs.browser == 'true'
     needs: changes
-    runs-on: [self-hosted, test, Linux, X64, cpu]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
@@ -635,7 +630,7 @@ jobs:
   docker:
     if: true # needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, test, Linux, X64, cpu, docker]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -659,9 +654,9 @@ jobs:
       - run: sccache --show-stats
 
   web:
-    if: false # needs.changes.outputs.web == 'true'
+    if: true # needs.changes.outputs.web == 'true'
     needs: changes
-    runs-on: [self-hosted, test, Linux, X64, cpu]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu]
     steps:
       - uses: actions/checkout@v4
       - name: 🍞 Setup Bun
@@ -678,9 +673,9 @@ jobs:
         working-directory: web
 
   bento-test:
-    if: false # needs.changes.outputs.bento == 'true'
+    if: true # needs.changes.outputs.bento == 'true'
     needs: changes
-    runs-on: [ self-hosted, prod, Linux, X64, cpu ]
+    runs-on: [ self-hosted, cluster, Linux, X64, cpu ]
     services:
       postgres:
         image: postgres:latest
@@ -718,7 +713,7 @@ jobs:
   bento-run:
     if: false # needs.changes.outputs.bento == 'true'
     needs: changes
-    runs-on: [ self-hosted, prod, Linux, X64, cuda, g6e.xlarge, bench ]
+    runs-on: [ self-hosted, cluster, Linux, X64, cuda, g6e.xlarge, bench ]
     env:
       FEATURE: cuda
       RISC0_BUILD_LOCKED: 1
