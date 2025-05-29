@@ -15,6 +15,7 @@
 pub(crate) mod factory;
 pub(crate) mod job;
 pub(crate) mod manager;
+pub(crate) mod metrics;
 pub(crate) mod protocol;
 pub(crate) mod rpc;
 #[cfg(test)]
@@ -23,9 +24,7 @@ pub(crate) mod worker;
 
 use std::{error::Error as StdError, net::SocketAddr, path::PathBuf, time::Duration};
 
-use futures::{SinkExt as _, StreamExt as _};
 use kameo::prelude::*;
-use opentelemetry::metrics::Counter;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{
     logs::SdkLoggerProvider,
@@ -39,10 +38,9 @@ use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tokio::{
-    net::{tcp, TcpListener, TcpStream},
+    net::{tcp, TcpListener},
     task::JoinHandle,
 };
-use tokio_util::codec::{FramedRead, FramedWrite, LengthDelimitedCodec};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
 use crate::Cli;
@@ -289,9 +287,11 @@ impl Server {
                     }
                 };
 
+                let meter = opentelemetry::global::meter("r0vm");
+                let stream = metrics::StreamWithMetrics::new(stream, meter.clone());
                 let factory = factory.clone();
                 tokio::spawn(async move {
-                    let (rpc_sender, mut rpc_receiver) = rpc_system(stream);
+                    let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
                     rpc_receiver
                         .receive_many(move |req, message_id| {
                             let rpc_sender = rpc_sender.clone();
@@ -315,8 +315,10 @@ impl Server {
     }
 }
 
+type WriteStream = metrics::OwnedWriteHalfWithMetrics<tcp::OwnedWriteHalf>;
+
 async fn handle_request(
-    rpc_sender: RpcSender<tcp::OwnedWriteHalf>,
+    rpc_sender: RpcSender<WriteStream>,
     request: RemoteRequest,
     message_id: Option<RpcMessageId>,
     factory: ActorRef<FactoryActor>,
@@ -335,68 +337,6 @@ async fn handle_request(
             assert!(message_id.is_none());
             factory.tell(msg).await.unwrap();
         }
-    }
-}
-
-struct TcpSession {
-    pub(crate) stream: TcpStream,
-    codec: LengthDelimitedCodec,
-    tx_messages: Counter<u64>,
-    tx_bytes: Counter<u64>,
-    rx_messages: Counter<u64>,
-    rx_bytes: Counter<u64>,
-}
-
-impl TcpSession {
-    #[expect(dead_code)]
-    pub(crate) fn new(stream: TcpStream) -> Self {
-        let codec = LengthDelimitedCodec::builder()
-            .max_frame_length(1024 * 1024 * 1024)
-            .new_codec();
-        let meter = opentelemetry::global::meter("r0vm");
-        let tx_messages = meter.u64_counter("tx_messages").build();
-        let tx_bytes = meter.u64_counter("tx_bytes").with_unit("bytes").build();
-        let rx_messages = meter.u64_counter("rx_messages").build();
-        let rx_bytes = meter.u64_counter("rx_bytes").with_unit("bytes").build();
-        Self {
-            stream,
-            codec,
-            tx_messages,
-            tx_bytes,
-            rx_messages,
-            rx_bytes,
-        }
-    }
-
-    #[expect(dead_code)]
-    pub(crate) async fn send<T: serde::Serialize>(&mut self, msg: T) -> anyhow::Result<()> {
-        let mut writer = FramedWrite::new(&mut self.stream, self.codec.clone());
-
-        let frame = bincode::serialize(&msg)?;
-        self.tx_bytes.add(frame.len() as u64, &[]);
-        self.tx_messages.add(1, &[]);
-        tracing::info!("tx {} bytes", frame.len());
-
-        writer.send(frame.into()).await?;
-
-        Ok(())
-    }
-
-    #[expect(dead_code)]
-    pub(crate) async fn recv<T: serde::de::DeserializeOwned>(
-        &mut self,
-    ) -> anyhow::Result<Option<T>> {
-        let mut reader = FramedRead::new(&mut self.stream, self.codec.clone());
-        let frame = match reader.next().await {
-            Some(result) => result?,
-            None => return Ok(None),
-        };
-
-        self.rx_bytes.add(frame.len() as u64, &[]);
-        self.rx_messages.add(1, &[]);
-        tracing::info!("rx {} bytes", frame.len());
-
-        Ok(Some(bincode::deserialize(&frame)?))
     }
 }
 

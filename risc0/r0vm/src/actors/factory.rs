@@ -23,6 +23,7 @@ use tokio::{
 
 use super::{
     job::JobActor,
+    metrics,
     protocol::{
         factory::{DropJob, GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
@@ -252,15 +253,19 @@ impl Message<TaskDoneMsg> for FactoryRouterActor {
     }
 }
 
+type WriteStream = metrics::OwnedWriteHalfWithMetrics<tcp::OwnedWriteHalf>;
+
 pub(crate) struct RemoteFactoryActor {
-    rpc_sender: RpcSender<tcp::OwnedWriteHalf>,
+    rpc_sender: RpcSender<WriteStream>,
     rpc_receiver_handle: JoinHandle<()>,
 }
 
 impl RemoteFactoryActor {
     pub(crate) async fn new(addr: SocketAddr) -> anyhow::Result<Self> {
-        let stream = TcpStream::connect(addr).await?;
-        let (rpc_sender, mut rpc_receiver) = rpc_system(stream);
+        let meter = opentelemetry::global::meter("r0vm");
+        let stream =
+            metrics::StreamWithMetrics::new(TcpStream::connect(addr).await?, meter.clone());
+        let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
 
         let rpc_receiver_handle = tokio::task::spawn(async move {
             rpc_receiver

@@ -46,6 +46,8 @@ uuid = { version = "1.16.0", features = ["serde", "v4"] }
 anyhow = "1.0"
 assert_cmd = "2.0"
 assert_fs = "1.0"
+assert_matches = "1.5"
+opentelemetry_sdk = { version = "0.30.0", features = ["testing"] }
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 temp-env = "0.3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }

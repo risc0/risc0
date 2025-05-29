@@ -17,6 +17,7 @@ use std::num::NonZeroU32;
 use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, bail, Context as _, Result};
+use opentelemetry::metrics::{Counter, Meter};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tokio::io::{AsyncRead, AsyncReadExt as _, AsyncWrite, AsyncWriteExt as _};
 use tokio::net::{tcp, unix, TcpStream, UnixStream};
@@ -26,6 +27,7 @@ use tokio::sync::Mutex as TokioMutex;
 /// side, the recevier is used to get responses and remote requests.
 pub fn rpc_system<StreamT: RpcStream>(
     stream: StreamT,
+    meter: Meter,
 ) -> (
     RpcSender<StreamT::WriteHalf>,
     RpcReceiver<StreamT::ReadHalf>,
@@ -35,8 +37,8 @@ pub fn rpc_system<StreamT: RpcStream>(
     let registry = Arc::new(Mutex::new(RpcRegistry::new()));
 
     (
-        RpcSender::new(write_half, registry.clone()),
-        RpcReceiver::new(read_half, registry),
+        RpcSender::new(write_half, registry.clone(), meter.clone()),
+        RpcReceiver::new(read_half, registry, meter),
     )
 }
 
@@ -226,6 +228,7 @@ impl RpcRegistry {
 pub struct RpcSender<StreamT> {
     stream: Arc<TokioMutex<StreamT>>,
     registry: Arc<Mutex<RpcRegistry>>,
+    tx_messages: Counter<u64>,
 }
 
 impl<StreamT> Clone for RpcSender<StreamT> {
@@ -233,14 +236,18 @@ impl<StreamT> Clone for RpcSender<StreamT> {
         Self {
             stream: self.stream.clone(),
             registry: self.registry.clone(),
+            tx_messages: self.tx_messages.clone(),
         }
     }
 }
 
 impl<StreamT: AsyncWrite + Unpin> RpcSender<StreamT> {
-    fn new(stream: StreamT, registry: Arc<Mutex<RpcRegistry>>) -> Self {
+    fn new(stream: StreamT, registry: Arc<Mutex<RpcRegistry>>, meter: Meter) -> Self {
+        let tx_messages = meter.u64_counter("tx_messages").build();
+
         Self {
             stream: Arc::new(TokioMutex::new(stream)),
+            tx_messages,
             registry,
         }
     }
@@ -276,6 +283,8 @@ impl<StreamT: AsyncWrite + Unpin> RpcSender<StreamT> {
             .await
             .context("error sending RPC message")?;
 
+        self.tx_messages.add(1, &[]);
+
         Ok(())
     }
 }
@@ -306,11 +315,18 @@ async fn read_detecting_clean_eof(
 pub struct RpcReceiver<StreamT> {
     stream: StreamT,
     registry: Arc<Mutex<RpcRegistry>>,
+    rx_messages: Counter<u64>,
 }
 
 impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
-    fn new(stream: StreamT, registry: Arc<Mutex<RpcRegistry>>) -> Self {
-        Self { stream, registry }
+    fn new(stream: StreamT, registry: Arc<Mutex<RpcRegistry>>, meter: Meter) -> Self {
+        let rx_messages = meter.u64_counter("rx_messages").build();
+
+        Self {
+            stream,
+            registry,
+            rx_messages,
+        }
     }
 
     /// Reads and handles one RPC message. Returns true if the socket is still open.
@@ -341,6 +357,8 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
             .read_exact(&mut body)
             .await
             .context("error reading RPC body")?;
+
+        self.rx_messages.add(1, &[]);
 
         match header.kind {
             RpcMessageKind::ExpectsResponse => {
@@ -396,6 +414,13 @@ impl RpcStream for UnixStream {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_matches::assert_matches;
+    use opentelemetry::metrics::MeterProvider as _;
+    use opentelemetry_sdk::metrics::{
+        data::{AggregatedMetrics, MetricData, ResourceMetrics},
+        in_memory_exporter::InMemoryMetricExporter,
+        PeriodicReader, SdkMeterProvider,
+    };
     use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver};
 
     #[test]
@@ -422,23 +447,46 @@ mod tests {
         message: String,
     }
 
+    fn get_metric(metrics: &[ResourceMetrics], name: &str) -> u64 {
+        let metric = metrics[0]
+            .scope_metrics()
+            .next()
+            .unwrap()
+            .metrics()
+            .find(|m| m.name() == name)
+            .unwrap();
+        let sum = assert_matches!(metric.data(), AggregatedMetrics::U64(MetricData::Sum(s)) => s);
+        sum.data_points().map(|p| p.value()).sum()
+    }
+
     struct Fixture {
         sender_a: RpcSender<unix::OwnedWriteHalf>,
         sender_b: RpcSender<unix::OwnedWriteHalf>,
         receiver_a: RpcReceiver<unix::OwnedReadHalf>,
         receiver_b: RpcReceiver<unix::OwnedReadHalf>,
+
+        exporter: InMemoryMetricExporter,
+        meter_provider: SdkMeterProvider,
     }
 
     impl Fixture {
         async fn new() -> Self {
+            let exporter = InMemoryMetricExporter::default();
+            let meter_provider = SdkMeterProvider::builder()
+                .with_reader(PeriodicReader::builder(exporter.clone()).build())
+                .build();
+            let meter = meter_provider.meter("r0vm");
+
             let (a, b) = UnixStream::pair().unwrap();
-            let (sender_a, receiver_a) = rpc_system(a);
-            let (sender_b, receiver_b) = rpc_system(b);
+            let (sender_a, receiver_a) = rpc_system(a, meter.clone());
+            let (sender_b, receiver_b) = rpc_system(b, meter);
             Self {
                 sender_a,
                 sender_b,
                 receiver_a,
                 receiver_b,
+                exporter,
+                meter_provider,
             }
         }
 
@@ -490,6 +538,15 @@ mod tests {
             assert!(socket_open);
             Ok(())
         }
+
+        fn tx_and_rx_mesages_metrics(&self) -> (u64, u64) {
+            self.meter_provider.force_flush().unwrap();
+            let finished_metrics = self.exporter.get_finished_metrics().unwrap();
+            (
+                get_metric(&finished_metrics, "tx_messages"),
+                get_metric(&finished_metrics, "rx_messages"),
+            )
+        }
     }
 
     #[tokio::test]
@@ -517,6 +574,8 @@ mod tests {
                 message: "hello A".into()
             }
         );
+
+        assert_eq!(fix.tx_and_rx_mesages_metrics(), (2, 2));
     }
 
     #[tokio::test]
@@ -528,6 +587,8 @@ mod tests {
         let (req, message_id): (Request, _) = fix.receive_b().await.unwrap();
         assert_eq!(req, Request::A);
         assert!(message_id.is_none());
+
+        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
     }
 
     #[tokio::test]
@@ -547,6 +608,8 @@ mod tests {
             fix.receive_b_response().await.unwrap_err().to_string(),
             "received response RPC which didn't have matching request"
         );
+
+        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
     }
 
     #[tokio::test]
