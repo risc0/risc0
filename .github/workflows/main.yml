@@ -221,7 +221,7 @@ jobs:
         working-directory: examples
 
   test:
-    if: true # needs.changes.outputs.test == 'true'
+    if: needs.changes.outputs.test == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
@@ -287,7 +287,7 @@ jobs:
       - run: sccache --show-stats
 
   extra:
-    if: true # needs.changes.outputs.test == 'true'
+    if: needs.changes.outputs.test == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
@@ -346,7 +346,7 @@ jobs:
       - run: sccache --show-stats
 
   examples:
-    if: true # needs.changes.outputs.examples == 'true'
+    if: needs.changes.outputs.examples == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
@@ -427,7 +427,7 @@ jobs:
       - run: sccache --show-stats
 
   doc:
-    if: true # needs.changes.outputs.doc == 'true'
+    if: needs.changes.outputs.doc == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
@@ -443,7 +443,7 @@ jobs:
   # Run as a separate job because we need to install a different set of tools.
   # In particular, it uses nightly Rust and _does not_ install cargo risczero.
   docs-rs:
-    if: true # needs.changes.outputs.doc == 'true'
+    if: needs.changes.outputs.doc == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, macOS, cpu]
     env:
@@ -462,7 +462,7 @@ jobs:
       - run: sccache --show-stats
 
   check-external:
-    if: true # needs.changes.outputs.check-external == 'true'
+    if: needs.changes.outputs.check-external == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
@@ -474,7 +474,7 @@ jobs:
       - run: sccache --show-stats
 
   check-semver:
-    if: true # needs.changes.outputs.check-semver == 'true'
+    if: needs.changes.outputs.check-semver == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
@@ -502,7 +502,7 @@ jobs:
       - run: sccache --show-stats
 
   check-template:
-    if: true # needs.changes.outputs.check-template == 'true'
+    if: needs.changes.outputs.check-template == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
@@ -541,7 +541,7 @@ jobs:
       - run: sccache --show-stats
 
   crates-validation:
-    if: true # needs.changes.outputs.crates-validation == 'true'
+    if: needs.changes.outputs.crates-validation == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, Linux, X64, cpu]
     env:
@@ -576,7 +576,7 @@ jobs:
       - run: sccache --show-stats
 
   browser:
-    if: true # needs.changes.outputs.browser == 'true'
+    if: needs.changes.outputs.browser == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, Linux, X64, cpu]
     env:
@@ -604,7 +604,7 @@ jobs:
       - run: sccache --show-stats
 
   docker:
-    if: true # needs.changes.outputs.test == 'true'
+    if: needs.changes.outputs.test == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
     steps:
@@ -630,9 +630,9 @@ jobs:
       - run: sccache --show-stats
 
   web:
-    if: true # needs.changes.outputs.web == 'true'
+    if: needs.changes.outputs.web == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: 🍞 Setup Bun
@@ -649,7 +649,7 @@ jobs:
         working-directory: web
 
   bento-test:
-    if: true # needs.changes.outputs.bento == 'true'
+    if: needs.changes.outputs.bento == 'true'
     needs: changes
     runs-on: [ self-hosted, cluster, Linux, X64, cpu ]
     services:
