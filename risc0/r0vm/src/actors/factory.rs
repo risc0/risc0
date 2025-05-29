@@ -16,7 +16,10 @@ use std::{collections::HashMap, net::SocketAddr};
 
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
-use tokio::{net::TcpStream, task::JoinHandle};
+use tokio::{
+    net::{tcp, TcpStream},
+    task::JoinHandle,
+};
 
 use super::{
     job::JobActor,
@@ -250,7 +253,7 @@ impl Message<TaskDoneMsg> for FactoryRouterActor {
 }
 
 pub(crate) struct RemoteFactoryActor {
-    rpc_sender: RpcSender,
+    rpc_sender: RpcSender<tcp::OwnedWriteHalf>,
     rpc_receiver_handle: JoinHandle<()>,
 }
 

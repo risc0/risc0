@@ -39,7 +39,7 @@ use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tokio::{
-    net::{TcpListener, TcpStream},
+    net::{tcp, TcpListener, TcpStream},
     task::JoinHandle,
 };
 use tokio_util::codec::{FramedRead, FramedWrite, LengthDelimitedCodec};
@@ -316,7 +316,7 @@ impl Server {
 }
 
 async fn handle_request(
-    rpc_sender: RpcSender,
+    rpc_sender: RpcSender<tcp::OwnedWriteHalf>,
     request: RemoteRequest,
     message_id: Option<RpcMessageId>,
     factory: ActorRef<FactoryActor>,
