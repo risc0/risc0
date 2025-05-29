@@ -170,11 +170,11 @@ async fn stark_workflow(
 }
 
 async fn stark_2_snark(session_id: String, client: ProvingClient) -> Result<()> {
-    tracing::info!("STARK 2 SNARK job_id: {}", session_id);
     let snark_session = client
         .create_snark(session_id)
         .await
         .context("Failed to create SNARK session")?;
+    tracing::info!("STARK 2 SNARK job_id: {}", snark_session.uuid);
     loop {
         let res = snark_session
             .status(&client)
