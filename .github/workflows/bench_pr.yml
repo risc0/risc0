@@ -4,8 +4,8 @@ on:
   merge_group:
   push:
     branches: [main, "release-*"]
-  pull_request:
-    branches: [main, "release-*"]
+  # pull_request:
+  #   branches: [main, "release-*"]
   workflow_dispatch:
 
 concurrency:
@@ -73,9 +73,6 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
-          disable_s3: ${{ env.DISABLE_S3 }}
 
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION

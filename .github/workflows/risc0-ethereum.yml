@@ -98,8 +98,6 @@ jobs:
       # Setup rustup and sccache
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
-        with:
-          key: Linux-default
       # Installing dev tooling
       - name: Set up Python
         uses: actions/setup-python@v5
