@@ -153,7 +153,7 @@ where
             }
         }
 
-        let po2 = preflight_results.po2;
+        let po2 = preflight_results.po2();
         let witgen = WitnessGenerator::new(
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),

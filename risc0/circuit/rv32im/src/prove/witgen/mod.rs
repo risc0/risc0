@@ -57,7 +57,7 @@ pub struct PreflightResults {
     injector: Injector,
     cycles: usize,
     trace: PreflightTrace,
-    pub(crate) po2: u32,
+    po2: u32,
 }
 
 impl PreflightResults {
@@ -83,6 +83,10 @@ impl PreflightResults {
             trace,
             po2: segment.po2,
         })
+    }
+
+    pub fn po2(&self) -> u32 {
+        self.po2
     }
 }
 
@@ -127,6 +131,7 @@ where
         })
     }
 
+    #[allow(clippy::type_complexity)]
     fn hal_generate_witness<C: CircuitWitnessGenerator<H>>(
         hal: &H,
         circuit_hal: &C,
