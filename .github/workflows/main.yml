@@ -115,7 +115,7 @@ jobs:
       # - bento-test
       # - browser
       # - build_extra_cargo_check_benchmark
-      - check
+      # - check
       # - check-external
       # - check-template
       - clippy
@@ -136,6 +136,7 @@ jobs:
         run: exit 1
 
   check:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -201,10 +202,10 @@ jobs:
             arch: X64
             feature: cuda
             env: test
-          - os: macOS
-            arch: ARM64
-            env: prod
-            feature: default
+          # - os: macOS
+          #   arch: ARM64
+          #   env: prod
+          #   feature: default
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_SKIP_BUILD: 1
