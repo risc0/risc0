@@ -228,18 +228,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - os: Linux
-          #   arch: X64
-          #   feature: default
-          #   device: cpu
-          #   test_command: cargo nextest run --partition hash:1/2
-          #   partition: 1
-          # - os: Linux
-          #   arch: X64
-          #   feature: default
-          #   device: cpu
-          #   test_command: cargo nextest run --partition hash:2/2
-          #   partition: 2
           - os: Linux
             arch: X64
             feature: cuda
@@ -306,11 +294,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - os: Linux
-          #   arch: X64
-          #   feature: default
-          #   device: cpu
-          #   test_command: cargo nextest run
           - os: Linux
             arch: X64
             feature: cuda
@@ -370,11 +353,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - os: Linux
-          #   arch: X64
-          #   feature: default
-          #   device: cpu
-          #   test_command: cargo nextest run
           - os: Linux
             arch: X64
             feature: cuda
@@ -386,6 +364,7 @@ jobs:
             device: apple_m2_pro
             test_command: cargo nextest run
     env:
+      CARGO_BUILD_JOBS: 32
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RISC0_EXECUTOR: ipc
