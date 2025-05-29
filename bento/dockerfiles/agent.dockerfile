@@ -58,10 +58,6 @@ FROM ${CUDA_RUNTIME_IMG} AS runtime
 
 RUN apt-get update -q -y && apt-get install -q -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
 
-# Set CUDA debug environment variables
-ENV CUDA_LAUNCH_BLOCKING=1
-ENV CUDA_DEBUG_SYNC=1
-
 # Copy the witness generator and data files from the binary stage
 COPY --from=binaries /usr/local/bin/stark_verify /app/stark_verify
 COPY --from=binaries /app/stark_verify.dat /app/stark_verify.dat
