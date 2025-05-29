@@ -27,8 +27,8 @@ clap = { version = "4.5", features = ["derive", "env"] }
 deadpool-redis = "0.15"
 hex = { version = "0.4", default-features = false, features = ["alloc"] }
 redis = { version = "0.25", features = ["tokio-comp"] }
-risc0-build = { path = "../risc0/build" }
-risc0-zkvm = { path = "../risc0/zkvm", default-features = false }
+risc0-build = { git = "https://github.com/risc0/risc0.git", rev = "0f60032dce731863eba197c8494bdf455445c4af" }
+risc0-zkvm = { git = "https://github.com/risc0/risc0.git", rev = "0f60032dce731863eba197c8494bdf455445c4af", default-features = false }
 sample-guest-common = { path = "crates/sample-guest/common" }
 sample-guest-methods = { path = "crates/sample-guest/methods" }
 serde = { version = "1.0", features = ["derive"] }
