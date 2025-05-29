@@ -74,158 +74,19 @@ where
         scope!("witgen");
 
         let trace = segment.preflight(rand_z)?;
-        let cycles = trace.cycles.len();
 
         tracing::trace!("{segment:#?}");
         tracing::trace!("{trace:#?}");
 
-        // assert_eq!(
-        //     segment.suspend_cycle + segment.paging_cycles + LOOKUP_TABLE_CYCLES as u32 + 1,
-        //     cycles as u32,
-        //     "suspend_cycle: {} + paging_cycles: {} + {LOOKUP_TABLE_CYCLES} + 1 == trace.cycles",
-        //     segment.suspend_cycle,
-        //     segment.paging_cycles
-        // );
-        // assert_eq!(cycles, 1 << segment.po2, "cycles == 1 << segment.po2");
+        let cycles = trace.cycles.len();
         assert!(cycles <= 1 << segment.po2, "cycles <= 1 << segment.po2");
         let cycles = 1 << segment.po2;
 
-        let mut global = vec![Val::INVALID; REGCOUNT_GLOBAL];
+        let global = build_global_vec(segment, &trace);
+        let injector = build_injector(&trace, cycles);
 
-        // state in
-        for (i, word) in segment.claim.pre_state.as_words().iter().enumerate() {
-            let low = word & 0xffff;
-            let high = word >> 16;
-            global[LAYOUT_GLOBAL.state_in.values[i].low._super.offset] = low.into();
-            global[LAYOUT_GLOBAL.state_in.values[i].high._super.offset] = high.into();
-        }
-
-        // input digest
-        for (i, word) in segment.claim.input.as_words().iter().enumerate() {
-            let low = word & 0xffff;
-            let high = word >> 16;
-            global[LAYOUT_GLOBAL.input.values[i].low._super.offset] = low.into();
-            global[LAYOUT_GLOBAL.input.values[i].high._super.offset] = high.into();
-        }
-
-        // rand_z
-        for (i, &elem) in trace.rand_z.elems().iter().enumerate() {
-            global[LAYOUT_GLOBAL.rng._super.offset + i] = elem;
-        }
-
-        // is_terminate
-        let is_terminate = if segment.claim.terminate_state.is_some() {
-            1u32
-        } else {
-            0u32
-        };
-        global[LAYOUT_GLOBAL.is_terminate._super.offset] = is_terminate.into();
-
-        // shutdown_cycle
-        global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
-
-        let global = MetaBuffer {
-            buf: hal.copy_from_elem("global", &global),
-            rows: 1,
-            cols: REGCOUNT_GLOBAL,
-            checked: true,
-        };
-
-        let code = MetaBuffer::new("code", hal, cycles, REGCOUNT_CODE, false);
-
-        let data = scope!(
-            "alloc(data)",
-            MetaBuffer::new("data", hal, cycles, REGCOUNT_DATA, true)
-        );
-
-        // Set stateful columns from 'top'
-        let mut injector = Injector::new(cycles);
-        for (row, back) in trace.backs.iter().enumerate() {
-            let cycle = &trace.cycles[row];
-            // tracing::trace!(
-            //     "[{row}] pc: {:#010x}, state: {:?}",
-            //     cycle.pc,
-            //     crate::execute::CycleState::from_u32(cycle.state).unwrap()
-            // );
-            match back {
-                Back::None => {}
-                Back::Ecall(s0, s1, s2) => {
-                    const ECALL_S0: usize = LAYOUT_TOP.inst_result.arm8.s0._super.offset;
-                    const ECALL_S1: usize = LAYOUT_TOP.inst_result.arm8.s1._super.offset;
-                    const ECALL_S2: usize = LAYOUT_TOP.inst_result.arm8.s2._super.offset;
-                    injector.set(row, ECALL_S0, *s0);
-                    injector.set(row, ECALL_S1, *s1);
-                    injector.set(row, ECALL_S2, *s2);
-                }
-                Back::Poseidon2(p2_state) => {
-                    for (col, value) in zip(Poseidon2State::offsets(), p2_state.as_array()) {
-                        injector.set(row, col, value);
-                    }
-                }
-                Back::Sha2(sha2_state) => {
-                    for (col, value) in zip(Sha2State::fp_offsets(), sha2_state.fp_array()) {
-                        injector.set(row, col, value);
-                    }
-                    for (col, value) in zip(Sha2State::u32_offsets(), sha2_state.u32_array()) {
-                        injector.set_u32_bits(row, col, value);
-                    }
-                }
-                Back::BigInt(state) => {
-                    for (col, value) in zip(BigIntState::offsets(), state.as_array()) {
-                        injector.set(row, col, value);
-                    }
-                }
-            }
-            injector.set_cycle(row, cycle);
-        }
-
-        hal.scatter(
-            &data.buf,
-            &injector.index,
-            &injector.offsets,
-            &injector.values,
-        );
-
-        circuit_hal
-            .generate_witness(mode, &trace, &global, &data)
-            .context("witness generation failure")?;
-
-        // Zero out 'invalid' entries in data and output.
-        scope!("zeroize", {
-            hal.eltwise_zeroize_elem(&global.buf);
-            hal.eltwise_zeroize_elem(&code.buf);
-            hal.eltwise_zeroize_elem(&data.buf);
-        });
-
-        // #[cfg(feature = "entropy_finder")]
-        // if let Ok(dump_path) = std::env::var("DATA_DUMP") {
-        //     let raw = data.buf.to_vec();
-
-        //     let old = if std::fs::exists(&dump_path).unwrap() {
-        //         Some(std::fs::read(&dump_path).unwrap())
-        //     } else {
-        //         None
-        //     };
-
-        //     std::fs::write(dump_path, bytemuck::cast_slice(&raw)).unwrap();
-        //     if let Some(old) = old {
-        //         let old = bytemuck::cast_slice(&old);
-        //         for cycle in 0..cycles {
-        //             for col in 0..REGCOUNT_DATA {
-        //                 assert_eq!(
-        //                     H::Elem::new_raw(old[col * cycles + cycle]),
-        //                     raw[col * cycles + cycle],
-        //                     "cycle: {cycle}, col: {col}",
-        //                 );
-        //             }
-        //         }
-        //     }
-        // }
-
-        let accum = scope!(
-            "alloc(accum)",
-            MetaBuffer::new("accum", hal, cycles, REGCOUNT_ACCUM, true)
-        );
+        let (global, code, data, accum) =
+            Self::hal_generate_witness(hal, circuit_hal, mode, &trace, global, cycles, injector)?;
 
         Ok(Self {
             cycles,
@@ -235,6 +96,49 @@ where
             accum,
             trace,
         })
+    }
+
+    fn hal_generate_witness<C: CircuitWitnessGenerator<H>>(
+        hal: &H,
+        circuit_hal: &C,
+        mode: StepMode,
+        trace: &PreflightTrace,
+        global: Vec<Val>,
+        cycles: usize,
+        injector: Injector,
+    ) -> Result<(MetaBuffer<H>, MetaBuffer<H>, MetaBuffer<H>, MetaBuffer<H>), anyhow::Error> {
+        scope!("hal_generate_witness");
+
+        let global = MetaBuffer {
+            buf: hal.copy_from_elem("global", &global),
+            rows: 1,
+            cols: REGCOUNT_GLOBAL,
+            checked: true,
+        };
+        let code = MetaBuffer::new("code", hal, cycles, REGCOUNT_CODE, false);
+        let data = scope!(
+            "alloc(data)",
+            MetaBuffer::new("data", hal, cycles, REGCOUNT_DATA, true)
+        );
+        hal.scatter(
+            &data.buf,
+            &injector.index,
+            &injector.offsets,
+            &injector.values,
+        );
+        circuit_hal
+            .generate_witness(mode, trace, &global, &data)
+            .context("witness generation failure")?;
+        scope!("zeroize", {
+            hal.eltwise_zeroize_elem(&global.buf);
+            hal.eltwise_zeroize_elem(&code.buf);
+            hal.eltwise_zeroize_elem(&data.buf);
+        });
+        let accum = scope!(
+            "alloc(accum)",
+            MetaBuffer::new("accum", hal, cycles, REGCOUNT_ACCUM, true)
+        );
+        Ok((global, code, data, accum))
     }
 
     pub fn accum<C: CircuitAccumulator<H>>(
@@ -283,6 +187,92 @@ where
 
         Ok(mix)
     }
+}
+
+fn build_injector(trace: &PreflightTrace, cycles: usize) -> Injector {
+    scope!("build_injector");
+
+    // Set stateful columns from 'top'
+    let mut injector = Injector::new(cycles);
+    for (row, back) in trace.backs.iter().enumerate() {
+        let cycle = &trace.cycles[row];
+        // tracing::trace!(
+        //     "[{row}] pc: {:#010x}, state: {:?}",
+        //     cycle.pc,
+        //     crate::execute::CycleState::from_u32(cycle.state).unwrap()
+        // );
+        match back {
+            Back::None => {}
+            Back::Ecall(s0, s1, s2) => {
+                const ECALL_S0: usize = LAYOUT_TOP.inst_result.arm8.s0._super.offset;
+                const ECALL_S1: usize = LAYOUT_TOP.inst_result.arm8.s1._super.offset;
+                const ECALL_S2: usize = LAYOUT_TOP.inst_result.arm8.s2._super.offset;
+                injector.set(row, ECALL_S0, *s0);
+                injector.set(row, ECALL_S1, *s1);
+                injector.set(row, ECALL_S2, *s2);
+            }
+            Back::Poseidon2(p2_state) => {
+                for (col, value) in zip(Poseidon2State::offsets(), p2_state.as_array()) {
+                    injector.set(row, col, value);
+                }
+            }
+            Back::Sha2(sha2_state) => {
+                for (col, value) in zip(Sha2State::fp_offsets(), sha2_state.fp_array()) {
+                    injector.set(row, col, value);
+                }
+                for (col, value) in zip(Sha2State::u32_offsets(), sha2_state.u32_array()) {
+                    injector.set_u32_bits(row, col, value);
+                }
+            }
+            Back::BigInt(state) => {
+                for (col, value) in zip(BigIntState::offsets(), state.as_array()) {
+                    injector.set(row, col, value);
+                }
+            }
+        }
+        injector.set_cycle(row, cycle);
+    }
+    injector
+}
+
+fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
+    scope!("build_global_vec");
+
+    let mut global = vec![Val::INVALID; REGCOUNT_GLOBAL];
+
+    // state in
+    for (i, word) in segment.claim.pre_state.as_words().iter().enumerate() {
+        let low = word & 0xffff;
+        let high = word >> 16;
+        global[LAYOUT_GLOBAL.state_in.values[i].low._super.offset] = low.into();
+        global[LAYOUT_GLOBAL.state_in.values[i].high._super.offset] = high.into();
+    }
+
+    // input digest
+    for (i, word) in segment.claim.input.as_words().iter().enumerate() {
+        let low = word & 0xffff;
+        let high = word >> 16;
+        global[LAYOUT_GLOBAL.input.values[i].low._super.offset] = low.into();
+        global[LAYOUT_GLOBAL.input.values[i].high._super.offset] = high.into();
+    }
+
+    // rand_z
+    for (i, &elem) in trace.rand_z.elems().iter().enumerate() {
+        global[LAYOUT_GLOBAL.rng._super.offset + i] = elem;
+    }
+
+    // is_terminate
+    let is_terminate = if segment.claim.terminate_state.is_some() {
+        1u32
+    } else {
+        0u32
+    };
+    global[LAYOUT_GLOBAL.is_terminate._super.offset] = is_terminate.into();
+
+    // shutdown_cycle
+    global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
+
+    global
 }
 
 #[derive(Debug)]
