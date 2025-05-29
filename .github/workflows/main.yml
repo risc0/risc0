@@ -113,20 +113,21 @@ jobs:
     needs:
       # - bento-run
       # - bento-test
-      # - browser
-      # - build_extra_cargo_check_benchmark
-      # - check
+      - browser
+      - build_extra_cargo_check_benchmark
+      - check
       # - check-external
-      # - check-template
+      - check-semver
+      - check-template
       - clippy
       # - crates-validation
       # - doc
       # - docs-rs
-      # - examples
-      # - docker
+      - examples
+      - docker
       # - test-crates
       - test_workspace
-      # - web
+      - web
     runs-on: ubuntu-latest
     steps:
       - name: Check all job status
@@ -136,8 +137,7 @@ jobs:
         run: exit 1
 
   check:
-    if: false
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, test, Linux, X64]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -189,7 +189,7 @@ jobs:
   clippy:
     if: needs.changes.outputs.risc0 == 'true'
     needs: changes
-    runs-on: [self-hosted, "${{ matrix.env }}", "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -197,14 +197,11 @@ jobs:
           - os: Linux
             arch: X64
             feature: default
-            env: test
           - os: Linux
             arch: X64
             feature: cuda
-            env: test
           # - os: macOS
           #   arch: ARM64
-          #   env: prod
           #   feature: default
     env:
       FEATURE: ${{ matrix.feature }}
@@ -236,18 +233,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: Linux
-            arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run --partition hash:1/2
-            partition: 1
-          - os: Linux
-            arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run --partition hash:2/2
-            partition: 2
+          # - os: Linux
+          #   arch: X64
+          #   feature: default
+          #   device: cpu
+          #   test_command: cargo nextest run --partition hash:1/2
+          #   partition: 1
+          # - os: Linux
+          #   arch: X64
+          #   feature: default
+          #   device: cpu
+          #   test_command: cargo nextest run --partition hash:2/2
+          #   partition: 2
           - os: Linux
             arch: X64
             feature: cuda
@@ -309,18 +306,18 @@ jobs:
       - run: sccache --show-stats
 
   build_extra_cargo_check_benchmark:
-    if: false # needs.changes.outputs.test == 'true'
+    if: true # needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: Linux
-            arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run
+          # - os: Linux
+          #   arch: X64
+          #   feature: default
+          #   device: cpu
+          #   test_command: cargo nextest run
           - os: Linux
             arch: X64
             feature: cuda
@@ -375,18 +372,18 @@ jobs:
       - run: sccache --show-stats
 
   examples:
-    if: false # needs.changes.outputs.examples == 'true'
+    if: true # needs.changes.outputs.examples == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: Linux
-            arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run
+          # - os: Linux
+          #   arch: X64
+          #   feature: default
+          #   device: cpu
+          #   test_command: cargo nextest run
           - os: Linux
             arch: X64
             feature: cuda
@@ -435,31 +432,31 @@ jobs:
         working-directory: examples/profiling
       - run: sccache --show-stats
 
-  # test-crates:
-  #   if: needs.changes.outputs.test-crates == 'true'
-  #   needs: changes
-  #   runs-on: [self-hosted, prod, Linux, cpu]
-  #   strategy:
-  #     fail-fast: false
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         path: 'risc0'
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         repository: risc0/RustCrypto-crypto-bigint
-  #         path: 'RustCrypto-crypto-bigint'
-  #     - uses: ./risc0/.github/actions/rustup
-  #     - uses: ./risc0/.github/actions/sccache
-  #     - name: Install risczero toolchain
-  #       run: |
-  #         cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-  #         cargo install --force --path risc0/cargo-risczero -F experimental
-  #       working-directory: risc0
-  #     - name: run cargo risczero test
-  #       working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
-  #       run: cargo risczero test
-  #     - run: sccache --show-stats
+  test-crates:
+    if: false # needs.changes.outputs.test-crates == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'risc0'
+      - uses: actions/checkout@v4
+        with:
+          repository: risc0/RustCrypto-crypto-bigint
+          path: 'RustCrypto-crypto-bigint'
+      - uses: ./risc0/.github/actions/rustup
+      - uses: ./risc0/.github/actions/sccache
+      - name: Install risczero toolchain
+        run: |
+          cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+          cargo install --force --path risc0/cargo-risczero -F experimental
+        working-directory: risc0
+      - name: run cargo risczero test
+        working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
+        run: cargo risczero test
+      - run: sccache --show-stats
 
   doc:
     if: false # needs.changes.outputs.doc == 'true'
@@ -509,17 +506,17 @@ jobs:
       - run: sccache --show-stats
 
   check-semver:
-    if: false # needs.changes.outputs.check-semver == 'true'
+    if: true # needs.changes.outputs.check-semver == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
-          - os: macOS
-            arch: ARM64
+          # - os: macOS
+          #   arch: ARM64
     steps:
       - uses: actions/checkout@v4
         with:
@@ -537,17 +534,17 @@ jobs:
       - run: sccache --show-stats
 
   check-template:
-    if: false # needs.changes.outputs.check-template == 'true'
+    if: true # needs.changes.outputs.check-template == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
-          - os: macOS
-            arch: ARM64
+          # - os: macOS
+          #   arch: ARM64
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -611,9 +608,9 @@ jobs:
       - run: sccache --show-stats
 
   browser:
-    if: false # needs.changes.outputs.browser == 'true'
+    if: true # needs.changes.outputs.browser == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, X64, cpu]
+    runs-on: [self-hosted, test, Linux, X64, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
@@ -636,9 +633,9 @@ jobs:
       - run: sccache --show-stats
 
   docker:
-    if: false # needs.changes.outputs.test == 'true'
+    if: true # needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, X64, cpu, docker]
+    runs-on: [self-hosted, test, Linux, X64, cpu, docker]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -664,7 +661,7 @@ jobs:
   web:
     if: false # needs.changes.outputs.web == 'true'
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, test, Linux, X64, cpu]
     steps:
       - uses: actions/checkout@v4
       - name: 🍞 Setup Bun
@@ -718,50 +715,50 @@ jobs:
       - run: cargo test --manifest-path bento/Cargo.toml --locked --workspace --all-targets -- --ignored
       - run: sccache --show-stats
 
-#  bento-run:
-#    if: needs.changes.outputs.bento == 'true'
-#    needs: changes
-#    runs-on: [ self-hosted, prod, Linux, X64, cuda, g6e.xlarge, bench ]
-#    env:
-#      FEATURE: cuda
-#      RISC0_BUILD_LOCKED: 1
-#      RISC0_EXECUTOR: ipc
-#      RISC0_PROVER: ipc
-#      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
-#      RUST_BACKTRACE: full
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: ./.github/actions/cuda
-#      - uses: ./.github/actions/rustup
-#      - uses: ./.github/actions/sccache
-#      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
-#        with:
-#          crate: cargo-binstall
-#          version: "1.10.16"
-#      - name: Install cargo-nextest
-#        run: cargo binstall cargo-nextest
-#      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-#      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-#      - run: cargo build --release -p risc0-r0vm -F $FEATURE
-#      - uses: aws-actions/configure-aws-credentials@v4
-#        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-#        id: aws-creds
-#        with:
-#          aws-region: 'us-west-2'
-#          role-to-assume: 'arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access'
-#          output-credentials: true
-#      - name: create ci creds file
-#        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-#        run: |
-#          echo "[default]" > bento/dockerfiles/ci-cache-creds.txt
-#          echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> bento/dockerfiles/ci-cache-creds.txt && \
-#          echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> bento/dockerfiles/ci-cache-creds.txt && \
-#          echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> bento/dockerfiles/ci-cache-creds.txt
-#      - uses: docker/login-action@v3
-#        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-#        with:
-#          username: ${{ secrets.DOCKERHUB_CI_USER }}
-#          password: ${{ secrets.DOCKERHUB_CI_PAT }}
-#      - uses: docker/setup-buildx-action@v3
-#      - run: COMPOSE_BAKE=true docker compose --env-file bento/dockerfiles/sample.env -f compose.yml up -d
-#      - run: RUST_LOG=info cargo run --manifest-path bento/Cargo.toml --bin bento_cli -- -c 32 -s
+  bento-run:
+    if: false # needs.changes.outputs.bento == 'true'
+    needs: changes
+    runs-on: [ self-hosted, prod, Linux, X64, cuda, g6e.xlarge, bench ]
+    env:
+      FEATURE: cuda
+      RISC0_BUILD_LOCKED: 1
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUST_BACKTRACE: full
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cuda
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+        with:
+          crate: cargo-binstall
+          version: "1.10.16"
+      - name: Install cargo-nextest
+        run: cargo binstall cargo-nextest
+      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo build --release -p risc0-r0vm -F $FEATURE
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+        id: aws-creds
+        with:
+          aws-region: 'us-west-2'
+          role-to-assume: 'arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access'
+          output-credentials: true
+      - name: create ci creds file
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+        run: |
+          echo "[default]" > bento/dockerfiles/ci-cache-creds.txt
+          echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> bento/dockerfiles/ci-cache-creds.txt && \
+          echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> bento/dockerfiles/ci-cache-creds.txt && \
+          echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> bento/dockerfiles/ci-cache-creds.txt
+      - uses: docker/login-action@v3
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+        with:
+          username: ${{ secrets.DOCKERHUB_CI_USER }}
+          password: ${{ secrets.DOCKERHUB_CI_PAT }}
+      - uses: docker/setup-buildx-action@v3
+      - run: COMPOSE_BAKE=true docker compose --env-file bento/dockerfiles/sample.env -f compose.yml up -d
+      - run: RUST_LOG=info cargo run --manifest-path bento/Cargo.toml --bin bento_cli -- -c 32 -s
