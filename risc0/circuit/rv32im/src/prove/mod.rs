@@ -22,6 +22,8 @@ use cfg_if::cfg_if;
 
 use crate::execute::segment::Segment;
 
+pub use witgen::PreflightResults;
+
 const GLOBAL_MIX: usize = 0;
 const GLOBAL_OUT: usize = 1;
 

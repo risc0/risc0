@@ -51,6 +51,39 @@ use crate::{
     },
 };
 
+#[derive(Clone, Default)]
+pub struct PreflightResults {
+    global: Vec<Val>,
+    injector: Injector,
+    cycles: usize,
+    trace: PreflightTrace,
+}
+
+impl PreflightResults {
+    pub fn new(segment: &Segment, rand_z: ExtVal) -> Result<Self> {
+        scope!("preflight_result_new");
+
+        let trace = segment.preflight(rand_z)?;
+
+        tracing::trace!("{segment:#?}");
+        tracing::trace!("{trace:#?}");
+
+        let cycles = trace.cycles.len();
+        assert!(cycles <= 1 << segment.po2, "cycles <= 1 << segment.po2");
+        let cycles = 1 << segment.po2;
+
+        let global = build_global_vec(segment, &trace);
+        let injector = build_injector(&trace, cycles);
+
+        Ok(Self {
+            global,
+            injector,
+            cycles,
+            trace,
+        })
+    }
+}
+
 pub(crate) struct WitnessGenerator<H: Hal> {
     cycles: usize,
     pub global: MetaBuffer<H>,
@@ -67,34 +100,28 @@ where
     pub fn new<C: CircuitWitnessGenerator<H>>(
         hal: &H,
         circuit_hal: &C,
-        segment: &Segment,
+        preflight_results: PreflightResults,
         mode: StepMode,
-        rand_z: ExtVal,
     ) -> Result<Self> {
-        scope!("witgen");
+        scope!("witness_generator_new");
 
-        let trace = segment.preflight(rand_z)?;
-
-        tracing::trace!("{segment:#?}");
-        tracing::trace!("{trace:#?}");
-
-        let cycles = trace.cycles.len();
-        assert!(cycles <= 1 << segment.po2, "cycles <= 1 << segment.po2");
-        let cycles = 1 << segment.po2;
-
-        let global = build_global_vec(segment, &trace);
-        let injector = build_injector(&trace, cycles);
-
-        let (global, code, data, accum) =
-            Self::hal_generate_witness(hal, circuit_hal, mode, &trace, global, cycles, injector)?;
+        let (global, code, data, accum) = Self::hal_generate_witness(
+            hal,
+            circuit_hal,
+            mode,
+            &preflight_results.trace,
+            preflight_results.global,
+            preflight_results.cycles,
+            preflight_results.injector,
+        )?;
 
         Ok(Self {
-            cycles,
+            cycles: preflight_results.cycles,
             global,
             code,
             data,
             accum,
-            trace,
+            trace: preflight_results.trace,
         })
     }
 
@@ -275,7 +302,7 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     global
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Default)]
 struct Injector {
     rows: usize,
     offsets: Vec<u32>,

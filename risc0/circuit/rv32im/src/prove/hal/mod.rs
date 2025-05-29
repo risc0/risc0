@@ -28,7 +28,7 @@ use risc0_zkp::{
 };
 
 use super::{
-    witgen::{preflight::PreflightTrace, WitnessGenerator},
+    witgen::{preflight::PreflightTrace, PreflightResults, WitnessGenerator},
     Seal, SegmentProver,
 };
 use crate::{
@@ -142,12 +142,13 @@ where
             }
         }
 
+        let preflight_results = PreflightResults::new(segment, rand_z)?;
+
         let witgen = WitnessGenerator::new(
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),
-            segment,
+            preflight_results,
             mode,
-            rand_z,
         )?;
 
         let code = &witgen.code.buf;
