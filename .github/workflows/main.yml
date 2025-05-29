@@ -125,7 +125,7 @@ jobs:
       # - examples
       # - docker
       # - test-crates
-      # - test_workspace
+      - test_workspace
       # - web
     runs-on: ubuntu-latest
     steps:
@@ -229,7 +229,7 @@ jobs:
         working-directory: examples
 
   test_workspace:
-    if: false # needs.changes.outputs.test == 'true'
+    if: true # needs.changes.outputs.test == 'true'
     needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
@@ -251,21 +251,21 @@ jobs:
           - os: Linux
             arch: X64
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_4000_ada
             test_command: cargo test
             partition: 1
-          - os: macOS
-            arch: ARM64
-            feature: default
-            device: apple_m2_pro
-            test_command: cargo nextest run --partition hash:1/2
-            partition: 1
-          - os: macOS
-            arch: ARM64
-            feature: default
-            device: apple_m2_pro
-            test_command: cargo nextest run --partition hash:2/2
-            partition: 2
+          # - os: macOS
+          #   arch: ARM64
+          #   feature: default
+          #   device: apple_m2_pro
+          #   test_command: cargo nextest run --partition hash:1/2
+          #   partition: 1
+          # - os: macOS
+          #   arch: ARM64
+          #   feature: default
+          #   device: apple_m2_pro
+          #   test_command: cargo nextest run --partition hash:2/2
+          #   partition: 2
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -324,7 +324,7 @@ jobs:
           - os: Linux
             arch: X64
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_4000_ada
             test_command: cargo test
           - os: macOS
             arch: ARM64
@@ -390,7 +390,7 @@ jobs:
           - os: Linux
             arch: X64
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_4000_ada
             test_command: cargo test
           - os: macOS
             arch: ARM64
