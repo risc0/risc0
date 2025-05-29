@@ -57,6 +57,7 @@ pub struct PreflightResults {
     injector: Injector,
     cycles: usize,
     trace: PreflightTrace,
+    pub(crate) po2: u32,
 }
 
 impl PreflightResults {
@@ -80,6 +81,7 @@ impl PreflightResults {
             injector,
             cycles,
             trace,
+            po2: segment.po2,
         })
     }
 }

@@ -124,26 +124,36 @@ where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H> + CircuitAccumulator<H>,
 {
-    fn prove(&self, segment: &Segment) -> Result<Seal> {
-        scope!("prove");
+    fn preflight(&self, segment: &Segment) -> Result<PreflightResults> {
+        scope!("preflight");
 
         cfg_if::cfg_if! {
             if #[cfg(feature = "witgen_debug")] {
                 let rand_z = ExtVal::ONE;
+            } else {
+                let mut rng = rand::rng();
+                let rand_z = ExtVal::random(&mut rng);
+            }
+        }
+        PreflightResults::new(segment, rand_z)
+    }
+
+    fn prove_core(&self, preflight_results: PreflightResults) -> Result<Seal> {
+        scope!("prove_core");
+
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "witgen_debug")] {
                 let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
                     StepMode::SeqForward
                 } else {
                     StepMode::Parallel
                 };
             } else {
-                let mut rng = rand::rng();
-                let rand_z = ExtVal::random(&mut rng);
                 let mode = StepMode::Parallel;
             }
         }
 
-        let preflight_results = PreflightResults::new(segment, rand_z)?;
-
+        let po2 = preflight_results.po2;
         let witgen = WitnessGenerator::new(
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),
@@ -155,8 +165,8 @@ where
         let data = &witgen.data.buf;
         let global = &witgen.global.buf;
 
-        Ok(scope!("prove", {
-            tracing::debug!("prove");
+        Ok(scope!("prove_inner", {
+            tracing::debug!("prove_inner");
 
             let mut prover = Prover::new(self.hal.as_ref(), TAPSET);
             let hashfn = &self.hal.get_hash_suite().hashfn;
@@ -188,13 +198,13 @@ where
                         *elem = elem.valid_or_zero();
                         header[i] = *elem;
                     }
-                    header[global_len] = Val::new_raw(segment.po2);
+                    header[global_len] = Val::new_raw(po2);
                 });
 
                 let header_digest = hashfn.hash_elem_slice(&header);
                 prover.iop().commit(&header_digest);
                 prover.iop().write_field_elem_slice(header.as_slice());
-                prover.set_po2(segment.po2 as usize);
+                prover.set_po2(po2 as usize);
 
                 prover.commit_group(REGISTER_GROUP_CODE, code);
                 prover.commit_group(REGISTER_GROUP_DATA, data);
