@@ -100,29 +100,31 @@ pub(crate) trait CircuitAccumulator<H: Hal> {
     ) -> Result<()>;
 }
 
-pub(crate) struct SegmentProverImpl<H, C>
+pub(crate) struct SegmentProverImpl<H, C, F>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H>,
+    F: Fn() -> (Rc<H>, Rc<C>),
 {
-    hal: Rc<H>,
-    circuit_hal: Rc<C>,
+    hal_factory: F,
 }
 
-impl<H, C> SegmentProverImpl<H, C>
+impl<H, C, F> SegmentProverImpl<H, C, F>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H>,
+    F: Fn() -> (Rc<H>, Rc<C>),
 {
-    pub fn new(hal: Rc<H>, circuit_hal: Rc<C>) -> Self {
-        Self { hal, circuit_hal }
+    pub fn new(hal_factory: F) -> Self {
+        Self { hal_factory }
     }
 }
 
-impl<H, C> SegmentProver for SegmentProverImpl<H, C>
+impl<H, C, F> SegmentProver for SegmentProverImpl<H, C, F>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H> + CircuitAccumulator<H>,
+    F: Fn() -> (Rc<H>, Rc<C>),
 {
     fn preflight(&self, segment: &Segment) -> Result<PreflightResults> {
         scope!("preflight");
@@ -153,13 +155,11 @@ where
             }
         }
 
+        let (hal, circuit_hal) = (self.hal_factory)();
+
         let po2 = preflight_results.po2();
-        let witgen = WitnessGenerator::new(
-            self.hal.as_ref(),
-            self.circuit_hal.as_ref(),
-            preflight_results,
-            mode,
-        )?;
+        let witgen =
+            WitnessGenerator::new(hal.as_ref(), circuit_hal.as_ref(), preflight_results, mode)?;
 
         let code = &witgen.code.buf;
         let data = &witgen.data.buf;
@@ -168,8 +168,8 @@ where
         Ok(scope!("prove_inner", {
             tracing::debug!("prove_inner");
 
-            let mut prover = Prover::new(self.hal.as_ref(), TAPSET);
-            let hashfn = &self.hal.get_hash_suite().hashfn;
+            let mut prover = Prover::new(hal.as_ref(), TAPSET);
+            let hashfn = &hal.get_hash_suite().hashfn;
 
             // Add a version tag to the start of the seal. It's not intended for
             // this value to be consumed by downstream lift predicates. Instead
@@ -212,14 +212,14 @@ where
                 // Make the mixing values
                 let mix: [Val; REGCOUNT_MIX] = std::array::from_fn(|_| prover.iop().random_elem());
 
-                let mix = witgen.accum(self.hal.as_ref(), self.circuit_hal.as_ref(), &mix)?;
+                let mix = witgen.accum(hal.as_ref(), circuit_hal.as_ref(), &mix)?;
 
                 prover.commit_group(REGISTER_GROUP_ACCUM, &witgen.accum.buf);
 
                 mix
             });
 
-            prover.finalize(&[&mix.buf, global], self.circuit_hal.as_ref())
+            prover.finalize(&[&mix.buf, global], circuit_hal.as_ref())
         }))
     }
 }

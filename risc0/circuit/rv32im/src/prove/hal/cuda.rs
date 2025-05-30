@@ -231,9 +231,12 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
-    let hal = Rc::new(CudaHalPoseidon2::new());
-    let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
-    Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+    let hal_factory = || {
+        let hal = Rc::new(CudaHalPoseidon2::new());
+        let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+        (hal, circuit_hal)
+    };
+    Ok(Box::new(SegmentProverImpl::new(hal_factory)))
 }
 
 #[cfg(test)]
