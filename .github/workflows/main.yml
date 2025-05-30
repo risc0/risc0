@@ -234,6 +234,7 @@ jobs:
             arch: X64
             feature: cuda
             device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
             test_command: cargo test
             partition: 1
           - os: macOS
@@ -250,6 +251,7 @@ jobs:
             partition: 2
     env:
       FEATURE: ${{ matrix.feature }}
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
@@ -300,6 +302,7 @@ jobs:
             arch: X64
             feature: cuda
             device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
             test_command: cargo test
           - os: macOS
             arch: ARM64
@@ -308,6 +311,7 @@ jobs:
             test_command: cargo nextest run
     env:
       FEATURE: ${{ matrix.feature }}
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
@@ -361,6 +365,7 @@ jobs:
             arch: X64
             feature: cuda
             device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
             test_command: cargo test
           - os: macOS
             arch: ARM64
@@ -370,6 +375,7 @@ jobs:
     env:
       CARGO_BUILD_JOBS: 32
       FEATURE: ${{ matrix.feature }}
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_BUILD_LOCKED: 1
       RISC0_EXECUTOR: ipc
       RISC0_PROVER: ipc
