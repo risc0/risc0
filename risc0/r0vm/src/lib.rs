@@ -144,11 +144,16 @@ enum ReceiptKind {
 }
 
 pub fn main() {
+    let args = Cli::parse();
+
+    if args.mode.manager || !args.mode.worker.is_empty() {
+        self::actors::async_main(&args).unwrap();
+        return;
+    }
+
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-
-    let args = Cli::parse();
 
     if args.id {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
@@ -166,11 +171,6 @@ pub fn main() {
         let bytes = std::fs::read(path).unwrap();
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
-        return;
-    }
-
-    if args.mode.manager || !args.mode.worker.is_empty() {
-        self::actors::async_main(&args).unwrap();
         return;
     }
 
