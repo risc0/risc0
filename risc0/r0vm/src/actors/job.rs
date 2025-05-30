@@ -533,7 +533,6 @@ impl Message<TaskDoneMsg> for JobActor {
                 return;
             }
         };
-        let name = format!("{:?}", msg.header.task_kind);
         self.span_end(msg.header.global_id.task_id);
         match task_done {
             TaskDone::Session(session) => self.session_done(session).await,
