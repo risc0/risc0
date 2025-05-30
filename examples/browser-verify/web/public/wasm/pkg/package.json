@@ -1,0 +1,15 @@
+{
+  "name": "verifier",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "verifier_bg.wasm",
+    "verifier.js",
+    "verifier.d.ts"
+  ],
+  "main": "verifier.js",
+  "types": "verifier.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
