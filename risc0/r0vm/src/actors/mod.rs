@@ -296,9 +296,7 @@ impl Server {
                         .receive_many(move |req, message_id| {
                             let rpc_sender = rpc_sender.clone();
                             let factory = factory.clone();
-                            tokio::task::spawn(async move {
-                                handle_request(rpc_sender, req, message_id, factory).await
-                            });
+                            handle_request(rpc_sender, req, message_id, factory)
                         })
                         .await;
                 });
@@ -326,8 +324,18 @@ async fn handle_request(
     match request {
         RemoteRequest::GetTask(msg) => {
             let message_id = message_id.expect("request not expecting response");
-            let reply = factory.ask(msg).await.unwrap();
-            rpc_sender.respond(&reply, message_id).await.unwrap();
+
+            // The PendingReply isn't Send, so I have to do this :/
+            let (tx, rx) = tokio::sync::oneshot::channel();
+            tokio::task::spawn(async move {
+                let pending_reply = factory.ask(msg).enqueue().await.unwrap();
+                tx.send(()).unwrap();
+                let reply = pending_reply.await.unwrap();
+                rpc_sender.respond(&reply, message_id).await.unwrap();
+            });
+
+            // wait until message has been enqueued in mailbox to preserve ordering.
+            let _ = rx.await;
         }
         RemoteRequest::TaskUpdate(msg) => {
             assert!(message_id.is_none());

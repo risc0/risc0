@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::collections::HashMap;
+use std::future::Future;
 use std::num::NonZeroU32;
 use std::sync::{Arc, Mutex};
 
@@ -104,9 +105,9 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
     /// Receive RPC messages until the socket is closed. The given callback is called when we
     /// receive a message which isn't a reply to an ask. That is, its called when the other-side
     /// sends us an asks or tell.
-    pub async fn receive_many<RemoteMsgT: DeserializeOwned>(
+    pub async fn receive_many<RemoteMsgT: DeserializeOwned, FutT: Future<Output = ()>>(
         &mut self,
-        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) + Send + 'static,
+        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) -> FutT,
     ) {
         loop {
             match self.receive_one(&mut remote_msg_callback).await {
@@ -330,9 +331,9 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
     }
 
     /// Reads and handles one RPC message. Returns true if the socket is still open.
-    async fn receive_one<RemoteMsgT: DeserializeOwned>(
+    async fn receive_one<RemoteMsgT: DeserializeOwned, FutT: Future<Output = ()>>(
         &mut self,
-        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) + Send,
+        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) -> FutT,
     ) -> Result<bool> {
         // Read the header
         let mut buffer = [0; RPC_HEADER_SIZE];
@@ -368,7 +369,7 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
                         std::any::type_name::<RemoteMsgT>()
                     )
                 })?;
-                remote_msg_callback(msg, Some(header.message_id));
+                remote_msg_callback(msg, Some(header.message_id)).await;
             }
             RpcMessageKind::ExpectsNoResponse => {
                 let msg: RemoteMsgT = bincode::deserialize(&body).with_context(|| {
@@ -377,7 +378,7 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
                         std::any::type_name::<RemoteMsgT>()
                     )
                 })?;
-                remote_msg_callback(msg, None);
+                remote_msg_callback(msg, None).await;
             }
             RpcMessageKind::IsResponse => {
                 let callback = self
@@ -512,7 +513,10 @@ mod tests {
             let socket_open = self
                 .receiver_b
                 .receive_one(move |req: RequestT, message_id| {
-                    send.send((req, message_id)).unwrap();
+                    let send = send.clone();
+                    async move {
+                        send.send((req, message_id)).unwrap();
+                    }
                 })
                 .await?;
             assert!(socket_open);
@@ -523,7 +527,7 @@ mod tests {
         async fn receive_b_response(&mut self) -> Result<()> {
             let socket_open = self
                 .receiver_b
-                .receive_one(move |_: (), _| panic!())
+                .receive_one(move |_: (), _| async { panic!() })
                 .await?;
             assert!(socket_open);
 
@@ -533,7 +537,7 @@ mod tests {
         async fn receive_a_response(&mut self) -> Result<()> {
             let socket_open = self
                 .receiver_a
-                .receive_one(move |_: (), _| panic!())
+                .receive_one(move |_: (), _| async { panic!() })
                 .await?;
             assert!(socket_open);
             Ok(())
@@ -620,7 +624,7 @@ mod tests {
 
         let socket_open = fix
             .receiver_b
-            .receive_one(move |_: (), _| panic!())
+            .receive_one(move |_: (), _| async { panic!() })
             .await
             .unwrap();
         assert!(!socket_open);

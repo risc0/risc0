@@ -269,7 +269,7 @@ impl RemoteFactoryActor {
 
         let rpc_receiver_handle = tokio::task::spawn(async move {
             rpc_receiver
-                .receive_many(|_: (), _| {
+                .receive_many(|_: (), _| async {
                     tracing::error!("received unexpected unsolicited RPC message");
                 })
                 .await

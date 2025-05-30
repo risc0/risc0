@@ -317,7 +317,6 @@ impl JobActor {
 
     async fn submit_task(&mut self, task: Task) {
         let task_id = self.next_task_id();
-        // self.span_start(task_id, task.name());
         let msg = SubmitTaskMsg {
             job: self.self_ref(),
             header: TaskHeader {
@@ -534,6 +533,7 @@ impl Message<TaskDoneMsg> for JobActor {
                 return;
             }
         };
+        let name = format!("{:?}", msg.header.task_kind);
         self.span_end(msg.header.global_id.task_id);
         match task_done {
             TaskDone::Session(session) => self.session_done(session).await,
