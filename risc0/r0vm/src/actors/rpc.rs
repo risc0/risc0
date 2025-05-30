@@ -13,26 +13,42 @@
 // limitations under the License.
 
 use std::collections::HashMap;
+use std::future::Future;
 use std::num::NonZeroU32;
 use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, bail, Context as _, Result};
+use opentelemetry::metrics::{Counter, Meter};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use tokio::io::{AsyncRead, AsyncReadExt as _, AsyncWriteExt as _};
-use tokio::net::{tcp, TcpStream};
+use tokio::io::{AsyncRead, AsyncReadExt as _, AsyncWrite, AsyncWriteExt as _};
+use tokio::net::{tcp, unix, TcpStream, UnixStream};
 use tokio::sync::Mutex as TokioMutex;
 
 /// Create a pair of RPC sender and receiver. The sender is used to send messages to the remote
 /// side, the recevier is used to get responses and remote requests.
-pub fn rpc_system(stream: TcpStream) -> (RpcSender, RpcReceiver) {
+pub fn rpc_system<StreamT: RpcStream>(
+    stream: StreamT,
+    meter: Meter,
+) -> (
+    RpcSender<StreamT::WriteHalf>,
+    RpcReceiver<StreamT::ReadHalf>,
+) {
     let (read_half, write_half) = stream.into_split();
 
     let registry = Arc::new(Mutex::new(RpcRegistry::new()));
 
     (
-        RpcSender::new(write_half, registry.clone()),
-        RpcReceiver::new(read_half, registry),
+        RpcSender::new(write_half, registry.clone(), meter.clone()),
+        RpcReceiver::new(read_half, registry, meter),
     )
+}
+
+/// A stream fit for use with the RPC system.
+pub trait RpcStream: Sized {
+    type ReadHalf: AsyncRead + Unpin;
+    type WriteHalf: AsyncWrite + Unpin;
+
+    fn into_split(self) -> (Self::ReadHalf, Self::WriteHalf);
 }
 
 //  ____                 _
@@ -46,7 +62,7 @@ pub fn rpc_system(stream: TcpStream) -> (RpcSender, RpcReceiver) {
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct RpcMessageId(NonZeroU32);
 
-impl RpcSender {
+impl<StreamT: AsyncWrite + Unpin> RpcSender<StreamT> {
     /// Send a message to the remote machine and expect a response. When the response is received,
     /// the given callback will be called.
     pub async fn ask<ResponseT: DeserializeOwned>(
@@ -85,13 +101,13 @@ impl RpcSender {
 // |_| \_\___|\___\___|_| \_/ \___|
 //
 
-impl RpcReceiver {
+impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
     /// Receive RPC messages until the socket is closed. The given callback is called when we
     /// receive a message which isn't a reply to an ask. That is, its called when the other-side
     /// sends us an asks or tell.
-    pub async fn receive_many<RemoteMsgT: DeserializeOwned>(
+    pub async fn receive_many<RemoteMsgT: DeserializeOwned, FutT: Future<Output = ()>>(
         &mut self,
-        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) + Send + 'static,
+        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) -> FutT,
     ) {
         loop {
             match self.receive_one(&mut remote_msg_callback).await {
@@ -210,16 +226,29 @@ impl RpcRegistry {
     }
 }
 
-#[derive(Clone)]
-pub struct RpcSender {
-    stream: Arc<TokioMutex<tcp::OwnedWriteHalf>>,
+pub struct RpcSender<StreamT> {
+    stream: Arc<TokioMutex<StreamT>>,
     registry: Arc<Mutex<RpcRegistry>>,
+    tx_messages: Counter<u64>,
 }
 
-impl RpcSender {
-    fn new(stream: tcp::OwnedWriteHalf, registry: Arc<Mutex<RpcRegistry>>) -> Self {
+impl<StreamT> Clone for RpcSender<StreamT> {
+    fn clone(&self) -> Self {
+        Self {
+            stream: self.stream.clone(),
+            registry: self.registry.clone(),
+            tx_messages: self.tx_messages.clone(),
+        }
+    }
+}
+
+impl<StreamT: AsyncWrite + Unpin> RpcSender<StreamT> {
+    fn new(stream: StreamT, registry: Arc<Mutex<RpcRegistry>>, meter: Meter) -> Self {
+        let tx_messages = meter.u64_counter("tx_messages").build();
+
         Self {
             stream: Arc::new(TokioMutex::new(stream)),
+            tx_messages,
             registry,
         }
     }
@@ -255,6 +284,8 @@ impl RpcSender {
             .await
             .context("error sending RPC message")?;
 
+        self.tx_messages.add(1, &[]);
+
         Ok(())
     }
 }
@@ -282,20 +313,27 @@ async fn read_detecting_clean_eof(
     Ok(false)
 }
 
-pub struct RpcReceiver {
-    stream: tcp::OwnedReadHalf,
+pub struct RpcReceiver<StreamT> {
+    stream: StreamT,
     registry: Arc<Mutex<RpcRegistry>>,
+    rx_messages: Counter<u64>,
 }
 
-impl RpcReceiver {
-    fn new(stream: tcp::OwnedReadHalf, registry: Arc<Mutex<RpcRegistry>>) -> Self {
-        Self { stream, registry }
+impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
+    fn new(stream: StreamT, registry: Arc<Mutex<RpcRegistry>>, meter: Meter) -> Self {
+        let rx_messages = meter.u64_counter("rx_messages").build();
+
+        Self {
+            stream,
+            registry,
+            rx_messages,
+        }
     }
 
     /// Reads and handles one RPC message. Returns true if the socket is still open.
-    async fn receive_one<RemoteMsgT: DeserializeOwned>(
+    async fn receive_one<RemoteMsgT: DeserializeOwned, FutT: Future<Output = ()>>(
         &mut self,
-        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) + Send,
+        mut remote_msg_callback: impl FnMut(RemoteMsgT, Option<RpcMessageId>) -> FutT,
     ) -> Result<bool> {
         // Read the header
         let mut buffer = [0; RPC_HEADER_SIZE];
@@ -321,6 +359,8 @@ impl RpcReceiver {
             .await
             .context("error reading RPC body")?;
 
+        self.rx_messages.add(1, &[]);
+
         match header.kind {
             RpcMessageKind::ExpectsResponse => {
                 let msg: RemoteMsgT = bincode::deserialize(&body).with_context(|| {
@@ -329,7 +369,7 @@ impl RpcReceiver {
                         std::any::type_name::<RemoteMsgT>()
                     )
                 })?;
-                remote_msg_callback(msg, Some(header.message_id));
+                remote_msg_callback(msg, Some(header.message_id)).await;
             }
             RpcMessageKind::ExpectsNoResponse => {
                 let msg: RemoteMsgT = bincode::deserialize(&body).with_context(|| {
@@ -338,7 +378,7 @@ impl RpcReceiver {
                         std::any::type_name::<RemoteMsgT>()
                     )
                 })?;
-                remote_msg_callback(msg, None);
+                remote_msg_callback(msg, None).await;
             }
             RpcMessageKind::IsResponse => {
                 let callback = self
@@ -354,9 +394,34 @@ impl RpcReceiver {
     }
 }
 
+impl RpcStream for TcpStream {
+    type ReadHalf = tcp::OwnedReadHalf;
+    type WriteHalf = tcp::OwnedWriteHalf;
+
+    fn into_split(self) -> (Self::ReadHalf, Self::WriteHalf) {
+        TcpStream::into_split(self)
+    }
+}
+
+impl RpcStream for UnixStream {
+    type ReadHalf = unix::OwnedReadHalf;
+    type WriteHalf = unix::OwnedWriteHalf;
+
+    fn into_split(self) -> (Self::ReadHalf, Self::WriteHalf) {
+        UnixStream::into_split(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_matches::assert_matches;
+    use opentelemetry::metrics::MeterProvider as _;
+    use opentelemetry_sdk::metrics::{
+        data::{AggregatedMetrics, MetricData, ResourceMetrics},
+        in_memory_exporter::InMemoryMetricExporter,
+        PeriodicReader, SdkMeterProvider,
+    };
     use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver};
 
     #[test]
@@ -372,15 +437,6 @@ mod tests {
         assert_eq!(serialized.len(), RPC_HEADER_SIZE);
     }
 
-    async fn tcp_pair() -> (TcpStream, TcpStream) {
-        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let a = TcpStream::connect(listener.local_addr().unwrap())
-            .await
-            .unwrap();
-        let (b, _) = listener.accept().await.unwrap();
-        (a, b)
-    }
-
     #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
     enum Request {
         A,
@@ -392,23 +448,46 @@ mod tests {
         message: String,
     }
 
+    fn get_metric(metrics: &[ResourceMetrics], name: &str) -> u64 {
+        let metric = metrics[0]
+            .scope_metrics()
+            .next()
+            .unwrap()
+            .metrics()
+            .find(|m| m.name() == name)
+            .unwrap();
+        let sum = assert_matches!(metric.data(), AggregatedMetrics::U64(MetricData::Sum(s)) => s);
+        sum.data_points().map(|p| p.value()).sum()
+    }
+
     struct Fixture {
-        sender_a: RpcSender,
-        sender_b: RpcSender,
-        receiver_a: RpcReceiver,
-        receiver_b: RpcReceiver,
+        sender_a: RpcSender<unix::OwnedWriteHalf>,
+        sender_b: RpcSender<unix::OwnedWriteHalf>,
+        receiver_a: RpcReceiver<unix::OwnedReadHalf>,
+        receiver_b: RpcReceiver<unix::OwnedReadHalf>,
+
+        exporter: InMemoryMetricExporter,
+        meter_provider: SdkMeterProvider,
     }
 
     impl Fixture {
         async fn new() -> Self {
-            let (a, b) = tcp_pair().await;
-            let (sender_a, receiver_a) = rpc_system(a);
-            let (sender_b, receiver_b) = rpc_system(b);
+            let exporter = InMemoryMetricExporter::default();
+            let meter_provider = SdkMeterProvider::builder()
+                .with_reader(PeriodicReader::builder(exporter.clone()).build())
+                .build();
+            let meter = meter_provider.meter("r0vm");
+
+            let (a, b) = UnixStream::pair().unwrap();
+            let (sender_a, receiver_a) = rpc_system(a, meter.clone());
+            let (sender_b, receiver_b) = rpc_system(b, meter);
             Self {
                 sender_a,
                 sender_b,
                 receiver_a,
                 receiver_b,
+                exporter,
+                meter_provider,
             }
         }
 
@@ -434,7 +513,10 @@ mod tests {
             let socket_open = self
                 .receiver_b
                 .receive_one(move |req: RequestT, message_id| {
-                    send.send((req, message_id)).unwrap();
+                    let send = send.clone();
+                    async move {
+                        send.send((req, message_id)).unwrap();
+                    }
                 })
                 .await?;
             assert!(socket_open);
@@ -445,7 +527,7 @@ mod tests {
         async fn receive_b_response(&mut self) -> Result<()> {
             let socket_open = self
                 .receiver_b
-                .receive_one(move |_: (), _| panic!())
+                .receive_one(move |_: (), _| async { panic!() })
                 .await?;
             assert!(socket_open);
 
@@ -455,10 +537,19 @@ mod tests {
         async fn receive_a_response(&mut self) -> Result<()> {
             let socket_open = self
                 .receiver_a
-                .receive_one(move |_: (), _| panic!())
+                .receive_one(move |_: (), _| async { panic!() })
                 .await?;
             assert!(socket_open);
             Ok(())
+        }
+
+        fn tx_and_rx_mesages_metrics(&self) -> (u64, u64) {
+            self.meter_provider.force_flush().unwrap();
+            let finished_metrics = self.exporter.get_finished_metrics().unwrap();
+            (
+                get_metric(&finished_metrics, "tx_messages"),
+                get_metric(&finished_metrics, "rx_messages"),
+            )
         }
     }
 
@@ -487,6 +578,8 @@ mod tests {
                 message: "hello A".into()
             }
         );
+
+        assert_eq!(fix.tx_and_rx_mesages_metrics(), (2, 2));
     }
 
     #[tokio::test]
@@ -498,6 +591,8 @@ mod tests {
         let (req, message_id): (Request, _) = fix.receive_b().await.unwrap();
         assert_eq!(req, Request::A);
         assert!(message_id.is_none());
+
+        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
     }
 
     #[tokio::test]
@@ -517,6 +612,8 @@ mod tests {
             fix.receive_b_response().await.unwrap_err().to_string(),
             "received response RPC which didn't have matching request"
         );
+
+        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
     }
 
     #[tokio::test]
@@ -527,7 +624,7 @@ mod tests {
 
         let socket_open = fix
             .receiver_b
-            .receive_one(move |_: (), _| panic!())
+            .receive_one(move |_: (), _| async { panic!() })
             .await
             .unwrap();
         assert!(!socket_open);
