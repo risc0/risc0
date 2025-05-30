@@ -75,6 +75,7 @@ extern InstInputStruct exec_InstInput(ExecContext& ctx,Val arg0, Val arg1_0, Val
 extern DoCycleTableStruct exec_DoCycleTable(ExecContext& ctx,NondetRegStruct arg0, BoundLayout<DoCycleTableLayout> layout1)  ;
 extern DecoderStruct exec_DecodeInst(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<DecodeInstLayout> layout2)  ;
 extern GetDataStruct exec_ReadReg(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, Val arg2_0, BoundLayout<ReadRegLayout> layout3)  ;
+extern ReadSourceRegsStruct exec_ReadSourceRegs(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, DecoderStruct arg2_0, BoundLayout<ReadSourceRegsLayout> layout3)  ;
 extern WriteRdStruct exec_WriteRd(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, DecoderStruct arg2_0, Val arg3, ValU32Struct arg4, BoundLayout<WriteRdLayout> layout5)  ;
 extern ExpandU32Struct exec_ExpandU32(ExecContext& ctx,ValU32Struct arg0, Val arg1_0, BoundLayout<ExpandU32Layout> layout2)  ;
 extern SplitTotalStruct exec_SplitTotal(ExecContext& ctx,Val arg0, BoundLayout<SplitTotalLayout> layout1)  ;
@@ -226,7 +227,7 @@ extern OneHot_13_Struct exec_OneHot_13_(ExecContext& ctx,Val arg0, BoundLayout<O
 extern TopStruct exec_Top(ExecContext& ctx,BoundLayout<TopLayout> layout0, GlobalBuf global1)  ;
 extern void step_Top(ExecContext& ctx,MutableBuf data0, GlobalBuf global1)  ;
 extern AccumStruct exec_Accum(ExecContext& ctx,BigIntTopStateStruct arg0, ExtVal1Array arg1_0, BoundLayout<AccumLayout> layout2)  ;
-extern BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,BoundLayout<TopLayout> arg0, GlobalBuf global1)  ;
+extern BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,BoundLayout<TopLayout> layout0, GlobalBuf global1)  ;
 extern AccumStruct execUser_Accum(ExecContext& ctx,BoundLayout<TopLayout> arg0, ExtVal1Array arg1_0, BoundLayout<AccumLayout> layout2, GlobalBuf global3)  ;
 extern ComponentStruct exec_TopAccum(ExecContext& ctx,BoundLayout<TopLayout> arg0, BoundLayout<LayoutAccumLayout> layout1, GlobalBuf global2, GlobalBuf mix3)  ;
 extern void step_TopAccum(ExecContext& ctx,MutableBuf accum0, MutableBuf data1, GlobalBuf global2, GlobalBuf mix3)  ;

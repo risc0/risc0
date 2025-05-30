@@ -311,6 +311,19 @@ impl Emulator {
         Ok(())
     }
 
+    fn load_rs2<M: EmuContext>(
+        &self,
+        ctx: &mut M,
+        decoded: &DecodedInstruction,
+        rs1: u32,
+    ) -> Result<u32> {
+        if decoded.rs1 == decoded.rs2 {
+            Ok(rs1)
+        } else {
+            ctx.load_register(decoded.rs2 as usize)
+        }
+    }
+
     #[inline(always)]
     fn step_compute<M: EmuContext>(
         &mut self,
@@ -324,7 +337,7 @@ impl Emulator {
         let mut new_pc = pc + WORD_SIZE;
         let mut rd = decoded.rd;
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
-        let rs2 = ctx.load_register(decoded.rs2 as usize)?;
+        let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
         let imm_i = decoded.imm_i();
         let mut br_cond = |cond| -> u32 {
             rd = 0;
@@ -501,7 +514,7 @@ impl Emulator {
         self.trace_instruction(ctx, kind, &decoded)?;
 
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
-        let rs2 = ctx.load_register(decoded.rs2 as usize)?;
+        let rs2 = self.load_rs2(ctx, &decoded, rs1)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_s()));
         let shift = 8 * (addr.0 & 3);
         if !ctx.check_data_store(addr) {

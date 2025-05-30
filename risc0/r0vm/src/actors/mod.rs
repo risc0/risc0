@@ -16,13 +16,13 @@ pub(crate) mod factory;
 pub(crate) mod job;
 pub(crate) mod manager;
 pub(crate) mod protocol;
+pub(crate) mod rpc;
 #[cfg(test)]
 mod tests;
 pub(crate) mod worker;
 
 use std::{error::Error as StdError, net::SocketAddr, path::PathBuf};
 
-use futures::{SinkExt as _, StreamExt};
 use kameo::prelude::*;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
@@ -30,11 +30,7 @@ use protocol::{JobInfo, ProofRequest};
 use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
-use tokio::{
-    net::{TcpListener, TcpStream},
-    task::JoinHandle,
-};
-use tokio_util::codec::{FramedRead, FramedWrite, LengthDelimitedCodec};
+use tokio::{net::TcpListener, task::JoinHandle};
 
 use crate::Cli;
 
@@ -45,15 +41,16 @@ use self::{
         factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
         TaskKind,
     },
+    rpc::{rpc_system, RpcMessageId, RpcSender},
     worker::Worker,
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct SimulationConfig {
     pub pools: Vec<PoolConfig>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct PoolConfig {
     pub count: usize,
     pub profile: DevModeDelay,
@@ -123,7 +120,7 @@ impl App {
     pub async fn new(
         is_manager: bool,
         task_kinds: Vec<TaskKind>,
-        addr: Option<SocketAddr>,
+        mut addr: Option<SocketAddr>,
         api_addr: Option<SocketAddr>,
         storage_root: Option<PathBuf>,
         sim_config: Option<SimulationConfig>,
@@ -150,9 +147,9 @@ impl App {
                 kameo::spawn(ManagerActor::new(factory_ref.clone(), storage_root.clone()));
             manager = Some(manager_ref.clone());
 
-            if let Some(addr) = addr {
-                server = Some(Server::new(addr, factory_ref));
-                server.as_mut().unwrap().start().await?;
+            if let Some(listen_addr) = addr {
+                server = Some(Server::new(listen_addr, factory_ref));
+                addr = Some(server.as_mut().unwrap().start().await?.unwrap());
             }
 
             if let Some(addr) = api_addr {
@@ -160,12 +157,12 @@ impl App {
             }
         }
 
-        let factory_ref = match factory {
-            Some(ref factory) => kameo::spawn(FactoryRouterActor::Local(factory.clone())),
-            None => {
-                let remote = kameo::spawn(RemoteFactoryActor::new(addr.unwrap()).await?);
+        let factory_ref = match addr {
+            Some(addr) => {
+                let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
                 kameo::spawn(FactoryRouterActor::Remote(remote))
             }
+            None => kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone())),
         };
 
         if let Some(config) = sim_config {
@@ -246,31 +243,32 @@ impl App {
 }
 
 struct Server {
-    addr: SocketAddr,
+    listen_addr: SocketAddr,
     factory: ActorRef<FactoryActor>,
     join_handle: Option<JoinHandle<()>>,
 }
 
 impl Server {
-    pub fn new(addr: SocketAddr, factory: ActorRef<FactoryActor>) -> Self {
+    pub fn new(listen_addr: SocketAddr, factory: ActorRef<FactoryActor>) -> Self {
         Self {
-            addr,
+            listen_addr,
             factory,
             join_handle: None,
         }
     }
 
-    pub async fn start(&mut self) -> anyhow::Result<()> {
+    pub async fn start(&mut self) -> anyhow::Result<Option<SocketAddr>> {
         if self.join_handle.is_some() {
-            return Ok(());
+            return Ok(None);
         }
 
         let factory = self.factory.clone();
-        let listener = TcpListener::bind(self.addr).await?;
+        let listener = TcpListener::bind(self.listen_addr).await?;
+        let local_addr = listener.local_addr()?;
 
         self.join_handle = Some(tokio::spawn(async move {
             loop {
-                let (mut stream, _addr) = match listener.accept().await {
+                let (stream, _addr) = match listener.accept().await {
                     Ok(result) => result,
                     Err(err) => {
                         tracing::error!("{err}");
@@ -280,14 +278,21 @@ impl Server {
 
                 let factory = factory.clone();
                 tokio::spawn(async move {
-                    while let Some(request) = recv_request(&mut stream).await.unwrap() {
-                        handle_request(&mut stream, request, factory.clone()).await
-                    }
+                    let (rpc_sender, mut rpc_receiver) = rpc_system(stream);
+                    rpc_receiver
+                        .receive_many(move |req, message_id| {
+                            let rpc_sender = rpc_sender.clone();
+                            let factory = factory.clone();
+                            tokio::task::spawn(async move {
+                                handle_request(rpc_sender, req, message_id, factory).await
+                            });
+                        })
+                        .await;
                 });
             }
         }));
 
-        Ok(())
+        Ok(Some(local_addr))
     }
 
     pub async fn stop(self) {
@@ -297,24 +302,24 @@ impl Server {
     }
 }
 
-async fn recv_request(stream: &mut TcpStream) -> anyhow::Result<Option<RemoteRequest>> {
-    recv(stream).await
-}
-
 async fn handle_request(
-    stream: &mut TcpStream,
+    rpc_sender: RpcSender,
     request: RemoteRequest,
+    message_id: Option<RpcMessageId>,
     factory: ActorRef<FactoryActor>,
 ) {
     match request {
         RemoteRequest::GetTask(msg) => {
+            let message_id = message_id.expect("request not expecting response");
             let reply = factory.ask(msg).await.unwrap();
-            send(stream, reply).await.unwrap();
+            rpc_sender.respond(&reply, message_id).await.unwrap();
         }
         RemoteRequest::TaskUpdate(msg) => {
+            assert!(message_id.is_none());
             factory.tell(msg).await.unwrap();
         }
         RemoteRequest::TaskDone(msg) => {
+            assert!(message_id.is_none());
             factory.tell(msg).await.unwrap();
         }
     }
@@ -339,37 +344,4 @@ fn init_tracer_provider() -> SdkTracerProvider {
     opentelemetry::global::set_tracer_provider(provider.clone());
 
     provider
-}
-
-pub(crate) async fn send<T: serde::Serialize>(
-    stream: &mut TcpStream,
-    msg: T,
-) -> anyhow::Result<()> {
-    let encoder = LengthDelimitedCodec::builder()
-        .max_frame_length(1024 * 1024 * 1024)
-        .new_codec();
-    let mut writer = FramedWrite::new(stream, encoder);
-
-    let bytes = bincode::serialize(&msg)?;
-    tracing::info!("tx {} bytes", bytes.len());
-    writer.send(bytes.into()).await?;
-
-    Ok(())
-}
-
-pub(crate) async fn recv<T: serde::de::DeserializeOwned>(
-    stream: &mut TcpStream,
-) -> anyhow::Result<Option<T>> {
-    let decoder = LengthDelimitedCodec::builder()
-        .max_frame_length(1024 * 1024 * 1024)
-        .new_codec();
-
-    let mut reader = FramedRead::new(stream, decoder);
-    let frame = match reader.next().await {
-        Some(result) => result?,
-        None => return Ok(None),
-    };
-
-    tracing::info!("rx {} bytes", frame.len());
-    Ok(Some(bincode::deserialize(&frame)?))
 }

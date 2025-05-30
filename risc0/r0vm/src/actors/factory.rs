@@ -16,7 +16,7 @@ use std::{collections::HashMap, net::SocketAddr};
 
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
-use tokio::{io::AsyncWriteExt as _, net::TcpStream};
+use tokio::{net::TcpStream, task::JoinHandle};
 
 use super::{
     job::JobActor,
@@ -25,6 +25,7 @@ use super::{
         worker::TaskMsg,
         GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
     },
+    rpc::{rpc_system, RpcSender},
     RemoteRequest,
 };
 
@@ -249,13 +250,27 @@ impl Message<TaskDoneMsg> for FactoryRouterActor {
 }
 
 pub(crate) struct RemoteFactoryActor {
-    tcp: TcpStream,
+    rpc_sender: RpcSender,
+    rpc_receiver_handle: JoinHandle<()>,
 }
 
 impl RemoteFactoryActor {
     pub(crate) async fn new(addr: SocketAddr) -> anyhow::Result<Self> {
-        let tcp = TcpStream::connect(addr).await?;
-        Ok(Self { tcp })
+        let stream = TcpStream::connect(addr).await?;
+        let (rpc_sender, mut rpc_receiver) = rpc_system(stream);
+
+        let rpc_receiver_handle = tokio::task::spawn(async move {
+            rpc_receiver
+                .receive_many(|_: (), _| {
+                    tracing::error!("received unexpected unsolicited RPC message");
+                })
+                .await
+        });
+
+        Ok(Self {
+            rpc_sender,
+            rpc_receiver_handle,
+        })
     }
 }
 
@@ -271,7 +286,9 @@ impl Actor for RemoteFactoryActor {
         _actor_ref: WeakActorRef<Self>,
         _reason: ActorStopReason,
     ) -> Result<(), Self::Error> {
-        self.tcp.shutdown().await?;
+        self.rpc_sender.shutdown().await?;
+        self.rpc_receiver_handle.abort();
+
         Ok(())
     }
 }
@@ -280,11 +297,17 @@ impl Message<GetTask> for RemoteFactoryActor {
     type Reply = DelegatedReply<TaskMsg>;
 
     async fn handle(&mut self, msg: GetTask, ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        let msg = RemoteRequest::GetTask(msg);
-        super::send(&mut self.tcp, msg).await.unwrap();
         let (delegated_reply, reply_sender) = ctx.reply_sender();
-        let reply: TaskMsg = super::recv(&mut self.tcp).await.unwrap().unwrap();
-        reply_sender.unwrap().send(reply);
+
+        let reply_sender = reply_sender.unwrap();
+        let msg = RemoteRequest::GetTask(msg);
+        self.rpc_sender
+            .ask(&msg, move |response: TaskMsg| {
+                reply_sender.send(response);
+            })
+            .await
+            .unwrap();
+
         delegated_reply
     }
 }
@@ -298,7 +321,7 @@ impl Message<TaskUpdateMsg> for RemoteFactoryActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         let msg = RemoteRequest::TaskUpdate(msg);
-        super::send(&mut self.tcp, msg).await.unwrap();
+        self.rpc_sender.tell(&msg).await.unwrap();
     }
 }
 
@@ -311,6 +334,6 @@ impl Message<TaskDoneMsg> for RemoteFactoryActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         let msg = RemoteRequest::TaskDone(msg);
-        super::send(&mut self.tcp, msg).await.unwrap();
+        self.rpc_sender.tell(&msg).await.unwrap();
     }
 }

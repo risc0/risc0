@@ -51,7 +51,7 @@ pub async fn keccak(
         );
     }
 
-    tracing::info!("Keccak proving {}", request.claim_digest);
+    tracing::debug!("Keccak proving {}", request.claim_digest);
 
     let keccak_receipt = agent
         .prover
@@ -74,7 +74,7 @@ pub async fn keccak(
     .await
     .context("Failed to write keccak receipt to redis")?;
 
-    tracing::info!("Completed keccak proving {}", request.claim_digest);
+    tracing::debug!("Completed keccak proving {}", request.claim_digest);
 
     Ok(())
 }

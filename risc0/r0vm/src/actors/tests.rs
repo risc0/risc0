@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::net::{Ipv4Addr, SocketAddrV4};
 use std::time::Duration;
 
 use risc0_zkvm::DevModeDelay;
@@ -39,11 +40,7 @@ const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
 //     resolve: Duration::from_millis(350),
 // };
 
-#[test_log::test(tokio::test(flavor = "multi_thread"))]
-#[cfg_attr(feature = "disable-dev-mode", ignore)]
-async fn basic() {
-    tracing::info!("basic");
-
+async fn do_test(remote: bool) {
     let task_kinds = vec![
         TaskKind::Execute,
         TaskKind::ProveSegment,
@@ -61,11 +58,12 @@ async fn basic() {
         }],
     };
 
+    let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
     let mut app = App::new(
-        true,
+        /* is_manager */ true,
         task_kinds,
-        None,
-        None,
+        addr,
+        /* api_addr */ None,
         Some(storage_root.to_path_buf()),
         Some(config),
         21,
@@ -85,4 +83,20 @@ async fn basic() {
     assert!(matches!(info.status, JobStatus::Succeeded(_result)));
 
     app.stop().await;
+}
+
+#[test_log::test(tokio::test(flavor = "multi_thread"))]
+#[cfg_attr(feature = "disable-dev-mode", ignore)]
+async fn basic_local() {
+    tracing::info!("basic (local)");
+
+    do_test(/* remote */ false).await
+}
+
+#[test_log::test(tokio::test(flavor = "multi_thread"))]
+#[cfg_attr(feature = "disable-dev-mode", ignore)]
+async fn basic_remote() {
+    tracing::info!("basic (remote)");
+
+    do_test(/* remote */ true).await
 }
