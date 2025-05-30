@@ -21,7 +21,7 @@ env:
 
 jobs:
   release:
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
     strategy:
       fail-fast: false
       matrix:
@@ -41,8 +41,6 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: ${{ env.TARGET }}
       - if: matrix.os == 'Linux'
         run: docker build -f .github/containers/release/Dockerfile --output tmp/pkg .
       - if: matrix.os == 'macOS'
@@ -64,7 +62,7 @@ jobs:
       # otherwise cargo-binstall sometimes errors with 404.
       - run: sleep 90
 
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+      - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-binstall
           version: "1.10.16"
