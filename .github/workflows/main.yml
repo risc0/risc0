@@ -275,8 +275,6 @@ jobs:
       - name: Install gdb dependencies
         run: brew install zstd gettext lz4 mpfr gmp
         if: matrix.os == 'macOS'
-      - name: build workspace
-        run: cargo test --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --no-run --exclude doc-test
       - name: test workspace
         run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - uses: actions/upload-artifact@v4
@@ -385,9 +383,6 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
-      - name: build
-        run: cargo test --release --locked -F $FEATURE --no-run
-        working-directory: examples
       - name: test in dev mode
         run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
         working-directory: examples
