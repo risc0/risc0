@@ -149,6 +149,13 @@ pub struct PreflightResults {
     pub(crate) segment_index: u32,
 }
 
+impl PreflightResults {
+    /// The index of the [Segment] this [PreflightResults] came from.
+    pub fn segment_index(&self) -> u32 {
+        self.segment_index
+    }
+}
+
 /// A reference to a [Segment].
 ///
 /// This allows implementers to determine the best way to represent this in an
