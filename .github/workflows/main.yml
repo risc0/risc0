@@ -206,6 +206,8 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
+      - if: matrix.feature == 'cuda'
+        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - name: "root: cargo clippy"
@@ -255,6 +257,8 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
+      - if: matrix.feature == 'cuda'
+        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - name: Login to Docker Hub
@@ -311,6 +315,8 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
+      - if: matrix.feature == 'cuda'
+        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: baptiste0928/cargo-install@v3
@@ -374,6 +380,8 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
+      - if: matrix.feature == 'cuda'
+        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: baptiste0928/cargo-install@v3
