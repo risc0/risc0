@@ -60,7 +60,7 @@ pub async fn finalize(agent: &Agent, job_id: &Uuid, request: &FinalizeReq) -> Re
     }
 
     let key = &format!("{RECEIPT_BUCKET_DIR}/{STARK_BUCKET_DIR}/{job_id}.bincode");
-    tracing::info!("Uploading rollup receipt to S3: {}", key);
+    tracing::debug!("Uploading rollup receipt to S3: {}", key);
     agent
         .s3_client
         .write_to_s3(key, rollup_receipt)
