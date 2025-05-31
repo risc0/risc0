@@ -2,7 +2,8 @@
 count = 1
 task_kinds = ["Execute"]
 [pools.profile]
-prove_segment = 1
+prove_segment_core = 1
+segment_preflight = 1
 prove_keccak = 1
 lift = 1
 join = 1
@@ -13,7 +14,8 @@ resolve = 1
 count = 300
 task_kinds = ["ProveSegment", "ProveKeccak", "Lift", "Join", "Union", "Resolve"]
 [pools.profile]
-prove_segment = 2.147
+prove_segment_core = 1.847
+segment_preflight = 0.300
 prove_keccak = 1.394
 lift = 0.297
 join = 0.345

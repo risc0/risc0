@@ -29,7 +29,7 @@ use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
-use risc0_circuit_rv32im::{HighLowU16, Rv32imV2Claim};
+use risc0_circuit_rv32im::{HighLowU16, Rv32imV2Claim, TerminateState};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
@@ -161,7 +161,7 @@ impl ReceiptClaim {
         //     ensure!(claim.shutdown_cycle.unwrap() == segment_threshold as u32);
         // }
 
-        let exit_code = exit_code_from_rv32im_v2_claim(&claim)?;
+        let exit_code = exit_code_from_terminate_state(&claim.terminate_state)?;
         let post_state = match exit_code {
             ExitCode::Halted(_) => Digest::ZERO,
             _ => claim.post_state,
@@ -183,8 +183,10 @@ impl ReceiptClaim {
     }
 }
 
-pub(crate) fn exit_code_from_rv32im_v2_claim(claim: &Rv32imV2Claim) -> anyhow::Result<ExitCode> {
-    let exit_code = if let Some(term) = claim.terminate_state {
+pub(crate) fn exit_code_from_terminate_state(
+    terminate_state: &Option<TerminateState>,
+) -> anyhow::Result<ExitCode> {
+    let exit_code = if let Some(term) = terminate_state {
         let HighLowU16(user_exit, halt_type) = term.a0;
         match halt_type as u32 {
             halt::TERMINATE => ExitCode::Halted(user_exit as u32),

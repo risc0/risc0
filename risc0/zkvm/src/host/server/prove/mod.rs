@@ -37,8 +37,8 @@ use crate::{
     },
     receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
-    stark_to_snark, ExecutorEnv, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment, Session,
-    VerifierContext,
+    stark_to_snark, ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
+    Segment, Session, VerifierContext,
 };
 
 mod private {
@@ -69,7 +69,20 @@ pub trait ProverServer: private::Sealed {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
 
     /// Prove the specified [Segment].
-    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        let results = self.segment_preflight(segment)?;
+        self.prove_segment_core(ctx, results)
+    }
+
+    /// Run preflight on the specified [Segment].
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults>;
+
+    /// Prove the specified [Segment] which has had preflight run on it.
+    fn prove_segment_core(
+        &self,
+        ctx: &VerifierContext,
+        preflight_results: PreflightResults,
+    ) -> Result<SegmentReceipt>;
 
     /// Prove the specified keccak request
     #[cfg(feature = "unstable")]

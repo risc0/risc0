@@ -109,8 +109,8 @@ pub use {
                 get_prover_server, HalPair, ProverServer,
             },
             session::{
-                FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
-                SimpleSegmentRef,
+                FileSegmentRef, NullSegmentRef, PreflightResults, Segment, SegmentRef, Session,
+                SessionEvents, SimpleSegmentRef,
             },
         },
     },

@@ -38,7 +38,7 @@ use tempfile::tempdir;
 
 use crate::{
     host::{client::env::SegmentPath, server::session::Session},
-    receipt_claim::exit_code_from_rv32im_v2_claim,
+    receipt_claim::exit_code_from_terminate_state,
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
 
@@ -246,7 +246,7 @@ impl<'a> ExecutorImpl<'a> {
 
         tracing::debug!("output_digest: {:?}", result.claim.output);
 
-        let exit_code = exit_code_from_rv32im_v2_claim(&result.claim)?;
+        let exit_code = exit_code_from_terminate_state(&result.claim.terminate_state)?;
 
         // Set the session_journal to the committed data iff the guest set a non-zero output.
         let session_journal = result.claim.output.and_then(|digest| {
