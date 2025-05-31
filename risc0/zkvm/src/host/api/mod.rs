@@ -222,11 +222,17 @@ fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
 impl Connector for ParentProcessConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         let addr = self.listener.local_addr()?;
-        let child = Command::new(&self.server_path)
-            .arg("--port")
-            .arg(addr.port().to_string())
-            .spawn()
-            .with_context(|| self.spawn_fail())?;
+        let mut cmd = Command::new(&self.server_path);
+        cmd.arg("--port").arg(addr.port().to_string());
+
+        // If dev mode is enabled, enable on the the child process with RISC0_DEV_MODE set. If this
+        // RISC0_DEV_MODE was set on this process, it will be inheritted anyway. If dev mode was
+        // set via DevModeContext, then it would not otherwise be set.
+        if crate::is_dev_mode() {
+            cmd.env("RISC0_DEV_MODE", "true");
+        }
+
+        let child = cmd.spawn().with_context(|| self.spawn_fail())?;
 
         let shutdown = Arc::new(AtomicBool::new(false));
         let server_shutdown = shutdown.clone();
