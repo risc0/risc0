@@ -284,9 +284,8 @@ impl ProverServer for ProverImpl {
         &self,
         a: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        let receipt = identity_p254(a)?;
-        receipt.verify_integrity().context("verify identity_p254")?;
-        Ok(receipt)
+        // TODO: figure out how to verify this
+        identity_p254(a)
     }
 
     #[cfg(feature = "unstable")]
