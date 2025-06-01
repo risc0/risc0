@@ -24,7 +24,7 @@ pub(crate) mod worker;
 
 use std::{
     error::Error as StdError,
-    io::stdin,
+    io::{stdin, Write},
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
     os::{
         fd::{AsRawFd, FromRawFd},
@@ -47,6 +47,7 @@ use opentelemetry_sdk::{
 };
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
+use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
     net::{tcp, TcpListener, UnixStream},
@@ -69,33 +70,43 @@ use self::{
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct SimulationConfig {
+pub(crate) struct WorkerConfig {
     pub pools: Vec<PoolConfig>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl From<Vec<TaskKind>> for WorkerConfig {
+    fn from(task_kinds: Vec<TaskKind>) -> Self {
+        WorkerConfig {
+            pools: vec![PoolConfig {
+                count: 1,
+                profile: None,
+                task_kinds,
+            }],
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct PoolConfig {
     pub count: usize,
-    pub profile: DevModeDelay,
+    pub profile: Option<DevModeDelay>,
     pub task_kinds: Vec<TaskKind>,
 }
 
 #[tokio::main]
 pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     let is_manager = args.mode.manager;
-    let task_kinds = args.mode.worker.clone();
 
-    let config = if let Some(ref path) = args.simulate {
+    let config = if let Some(ref path) = args.mode.config {
         let str = tokio::fs::read_to_string(path).await?;
         Some(toml::from_str(&str)?)
     } else {
-        None
+        Some(args.mode.worker.clone().into())
     };
     tracing::info!("{config:#?}");
 
     let mut app = App::new(
         is_manager,
-        task_kinds,
         args.addr,
         args.api,
         args.storage.clone(),
@@ -134,51 +145,77 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
 
 #[tokio::main]
 pub(crate) async fn rpc_main() -> Result<(), Box<dyn StdError>> {
-    let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
-
     let workers = cuda_devices().unwrap_or(1);
 
-    let task_kinds = if workers == 1 {
-        vec![
-            TaskKind::Execute,
-            TaskKind::ProveSegment,
-            TaskKind::ProveKeccak,
+    let execute_pool = PoolConfig {
+        count: 1,
+        profile: None,
+        task_kinds: vec![TaskKind::Execute],
+    };
+
+    let primary_pool = PoolConfig {
+        count: 1,
+        profile: None,
+        task_kinds: vec![TaskKind::ProveSegment, TaskKind::ProveKeccak],
+    };
+
+    let secondary_pool = PoolConfig {
+        count: 1,
+        profile: None,
+        task_kinds: vec![
             TaskKind::Lift,
             TaskKind::Join,
             TaskKind::Union,
             TaskKind::Resolve,
-        ]
-    } else {
-        vec![TaskKind::Execute]
+        ],
     };
 
+    let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
     let mut app = App::new(
         /* is_manager */ true,
-        task_kinds,
         Some(addr),
         /* api_addr */ None,
         /* storage_root */ None,
-        /* sim_config */ None,
+        Some(WorkerConfig {
+            pools: vec![execute_pool],
+        }),
         /* po2 */ None,
         /* enable_telemetry */ false,
     )
     .await?;
 
+    let local_addr = app.local_addr.unwrap();
+    let r0vm_path = std::env::current_exe()?;
+    let primary_config = TempConfig::new(WorkerConfig {
+        pools: vec![primary_pool],
+    })?;
+    let secondary_config = TempConfig::new(WorkerConfig {
+        pools: vec![secondary_pool],
+    })?;
+
     let mut children = vec![];
-    if workers > 1 {
-        let local_addr = app.local_addr.unwrap();
-        let r0vm_path = std::env::current_exe()?;
-        for device_idx in 0..workers {
-            let child = Command::new(&r0vm_path)
-                .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
-                .arg("--worker")
-                .arg("prove-segment,prove-keccak,lift,join,union,resolve")
-                .arg("--addr")
-                .arg(local_addr.to_string())
-                .spawn()
-                .with_context(|| spawn_fail(&r0vm_path))?;
-            children.push(child);
-        }
+    for device_idx in 0..workers {
+        let child = Command::new(&r0vm_path)
+            .process_group(0)
+            .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+            .arg("--config")
+            .arg(primary_config.file.path())
+            .arg("--addr")
+            .arg(local_addr.to_string())
+            .spawn()
+            .with_context(|| spawn_fail(&r0vm_path))?;
+        children.push(child);
+
+        let child = Command::new(&r0vm_path)
+            .process_group(0)
+            .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+            .arg("--config")
+            .arg(secondary_config.file.path())
+            .arg("--addr")
+            .arg(local_addr.to_string())
+            .spawn()
+            .with_context(|| spawn_fail(&r0vm_path))?;
+        children.push(child);
     }
 
     let stdin_fd = stdin().as_raw_fd();
@@ -212,6 +249,19 @@ pub(crate) async fn rpc_main() -> Result<(), Box<dyn StdError>> {
     socket.write_all(&buf).await?;
 
     Ok(())
+}
+
+struct TempConfig {
+    file: NamedTempFile,
+}
+
+impl TempConfig {
+    fn new(config: WorkerConfig) -> anyhow::Result<Self> {
+        let toml = toml::to_string(&config)?;
+        let mut file = tempfile::NamedTempFile::new()?;
+        write!(file, "{toml}")?;
+        Ok(Self { file })
+    }
 }
 
 fn cuda_devices() -> anyhow::Result<usize> {
@@ -252,11 +302,10 @@ impl App {
     #[allow(clippy::too_many_arguments)]
     pub async fn new(
         is_manager: bool,
-        task_kinds: Vec<TaskKind>,
-        addr: Option<SocketAddr>,
+        mut addr: Option<SocketAddr>,
         api_addr: Option<SocketAddr>,
         storage_root: Option<PathBuf>,
-        sim_config: Option<SimulationConfig>,
+        worker_config: Option<WorkerConfig>,
         po2: Option<u32>,
         enable_telemetry: bool,
     ) -> Result<Self, Box<dyn StdError>> {
@@ -284,7 +333,8 @@ impl App {
 
             if let Some(listen_addr) = addr {
                 server = Some(Server::new(listen_addr, factory_ref));
-                local_addr = server.as_mut().unwrap().start().await?;
+                addr = server.as_mut().unwrap().start().await?;
+                local_addr = addr;
             }
 
             if let Some(addr) = api_addr {
@@ -297,7 +347,7 @@ impl App {
             }
         }
 
-        let factory_ref = match local_addr {
+        let factory_ref = match addr {
             Some(addr) => {
                 let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
                 kameo::spawn(FactoryRouterActor::Remote(remote))
@@ -305,28 +355,20 @@ impl App {
             None => kameo::spawn(FactoryRouterActor::Local(factory.as_ref().unwrap().clone())),
         };
 
-        if let Some(config) = sim_config {
+        if let Some(config) = worker_config {
             for pool in config.pools {
                 tracing::info!(
-                    "Starting simulated worker pool: {}, task_kinds: {:?}",
+                    "Starting worker pool: {}, task_kinds: {:?}",
                     pool.count,
                     pool.task_kinds
                 );
                 for _ in 0..pool.count {
-                    let mut worker = Worker::new(
-                        factory_ref.clone(),
-                        pool.task_kinds.clone(),
-                        Some(pool.profile),
-                    );
+                    let mut worker =
+                        Worker::new(factory_ref.clone(), pool.task_kinds.clone(), pool.profile);
                     worker.start();
                     workers.push(worker);
                 }
             }
-        } else if !task_kinds.is_empty() {
-            tracing::info!("Starting worker: {task_kinds:?}");
-            let mut worker = Worker::new(factory_ref.clone(), task_kinds.clone(), None);
-            worker.start();
-            workers.push(worker);
         }
 
         Ok(Self {

@@ -20,7 +20,7 @@ use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
     protocol::{JobStatus, ProofRequest, TaskKind},
-    App, PoolConfig, SimulationConfig,
+    App, PoolConfig, WorkerConfig,
 };
 
 const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
@@ -51,10 +51,10 @@ async fn do_test(remote: bool) {
 
     let storage_root = assert_fs::TempDir::new().unwrap();
 
-    let config = SimulationConfig {
+    let config = WorkerConfig {
         pools: vec![PoolConfig {
             count: 100,
-            profile: PROFILE_RTX_5090,
+            profile: Some(PROFILE_RTX_5090),
             task_kinds: task_kinds.clone(),
         }],
     };
@@ -63,7 +63,6 @@ async fn do_test(remote: bool) {
     let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
     let mut app = App::new(
         /* is_manager */ true,
-        task_kinds,
         addr,
         /* api_addr */ None,
         Some(storage_root.to_path_buf()),
