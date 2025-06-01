@@ -24,7 +24,8 @@ use super::{
 };
 
 const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
-    prove_segment: Duration::from_millis(800),
+    prove_segment_core: Duration::from_millis(500),
+    segment_preflight: Duration::from_millis(300),
     prove_keccak: Duration::from_millis(250),
     lift: Duration::from_millis(150),
     join: Duration::from_millis(250),
