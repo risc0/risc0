@@ -33,6 +33,7 @@ fn main() {
         .unwrap();
 
     let receipt = default_prover()
+        .unwrap()
         .prove(env, EXPONENTIATE_ELF)
         .unwrap()
         .receipt;

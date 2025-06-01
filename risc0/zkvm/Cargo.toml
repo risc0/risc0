@@ -57,6 +57,7 @@ semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
+  "rc",
 ] }
 sha2 = { version = "0.10", default-features = false }
 stability = "0.2"

@@ -32,7 +32,7 @@ fn provably_hash(input: &str) -> (Digest, Receipt) {
         .unwrap();
 
     // Obtain the default prover.
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, KECCAK_ELF).unwrap().receipt;

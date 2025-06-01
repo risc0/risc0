@@ -62,7 +62,7 @@ fn predict() -> Vec<u32> {
     // ```
     // RISC0_DEV_MODE=1 cargo run -r
     // ```
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // This initiates a session, runs the STARK prover on the resulting execution
     // trace, and produces a receipt.

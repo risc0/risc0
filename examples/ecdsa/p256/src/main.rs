@@ -37,7 +37,7 @@ fn prove_ecdsa_verification(
         .unwrap();
 
     // Obtain the default prover.
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // Produce a receipt by proving the specified ELF binary.
     prover.prove(env, P256_VERIFY_ELF).unwrap().receipt

@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
         .write_slice(&7u32.to_le_bytes())
         .write_slice(&11u32.to_le_bytes())
         .build()?;
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, &consensus_elf)?.receipt;

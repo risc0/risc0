@@ -51,7 +51,7 @@ fn prove_pairing() -> Receipt {
         .build()
         .unwrap();
 
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     prover.prove(env, BN254_VERIFY_ELF).unwrap().receipt
 }

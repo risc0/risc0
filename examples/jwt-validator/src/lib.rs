@@ -50,7 +50,7 @@ pub fn prove_token_validation(claims: &CustomClaims) -> (Receipt, String) {
         .build()
         .expect("failed to build env");
 
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     let receipt = prover
         .prove(env, VALIDATOR_ELF)

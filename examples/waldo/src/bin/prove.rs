@@ -128,7 +128,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Obtain the default prover.
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, IMAGE_CROP_ELF).unwrap().receipt;

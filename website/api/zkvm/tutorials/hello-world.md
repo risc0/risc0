@@ -68,8 +68,6 @@ pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
         .unwrap()
         .build()
         .unwrap();
-    
-    ...
 }
 ```
 
@@ -145,7 +143,7 @@ pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
         .unwrap();
 
     // Obtain the default prover.
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, MULTIPLY_ELF).unwrap().receipt;

@@ -50,7 +50,7 @@ fn predict() -> f64 {
     // ```
     // RISC0_DEV_MODE=True cargo run -r
     // ```
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, XGBOOST_ELF).unwrap().receipt;
