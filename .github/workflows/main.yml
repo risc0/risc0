@@ -204,10 +204,6 @@ jobs:
       RISC0_SKIP_BUILD_KERNELS: 1
     steps:
       - uses: actions/checkout@v4
-      - if: matrix.feature == 'cuda'
-        uses: ./.github/actions/cuda
-      - if: matrix.feature == 'cuda'
-        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - name: "root: cargo clippy"
