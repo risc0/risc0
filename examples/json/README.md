@@ -9,7 +9,7 @@ First, follow the [examples guide] to install dependencies and check out the cor
 Then, run the example with:
 
 ```bash
-cargo run --release
+cargo run --release --bin json-example
 ```
 
 ## Video Tutorial
