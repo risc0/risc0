@@ -38,7 +38,6 @@ use super::{
 struct Processor {
     factory: ActorRef<FactoryRouterActor>,
     delay: Option<DevModeDelay>,
-    po2: usize,
 }
 
 /// Number of tasks we pull off the network and queue up in memory before processing
@@ -49,7 +48,6 @@ pub(crate) struct Worker {
     task_kinds: Vec<TaskKind>,
     join_handles: Vec<JoinHandle<()>>,
     delay: Option<DevModeDelay>,
-    po2: usize,
 }
 
 impl Worker {
@@ -57,14 +55,12 @@ impl Worker {
         factory: ActorRef<FactoryRouterActor>,
         task_kinds: Vec<TaskKind>,
         delay: Option<DevModeDelay>,
-        po2: usize,
     ) -> Self {
         Self {
             factory,
             task_kinds,
             join_handles: vec![],
             delay,
-            po2,
         }
     }
 
@@ -91,7 +87,6 @@ impl Worker {
         let processor = Processor {
             factory: self.factory.clone(),
             delay: self.delay,
-            po2: self.po2,
         };
         self.join_handles.push(tokio::spawn(async move {
             loop {
@@ -173,7 +168,6 @@ impl Processor {
         self.task_start(header.clone()).await?;
         let factory = self.factory.clone();
         let header_copy = header.clone();
-        let po2 = self.po2 as u32;
         let session: anyhow::Result<Session> = tokio::task::spawn_blocking(move || {
             let coproc = Coprocessor {
                 factory: factory.clone(),
@@ -184,12 +178,14 @@ impl Processor {
             for assumption in task.request.assumptions.iter() {
                 env.add_assumption(assumption.clone());
             }
+            if let Some(po2) = task.request.segment_limit_po2 {
+                env.segment_limit_po2(po2);
+            }
             let env = env
                 // .stdout(writer) // TODO
                 .write_slice(&task.request.input)
                 .coprocessor_callback(coproc)
                 // .session_limit(limit) // TODO
-                .segment_limit_po2(po2)
                 .build()?;
 
             let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;

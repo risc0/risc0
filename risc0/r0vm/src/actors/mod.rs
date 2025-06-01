@@ -45,7 +45,6 @@ use opentelemetry_sdk::{
     trace::SdkTracerProvider,
     Resource,
 };
-use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tokio::{
@@ -101,7 +100,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         args.api,
         args.storage.clone(),
         config,
-        args.po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2),
+        args.po2,
         /* enable_telemetry */ true,
     )
     .await?;
@@ -117,6 +116,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
             binary,
             input,
             assumptions: vec![],
+            segment_limit_po2: None,
         };
         app.proof_request(request).await.unwrap();
     } else {
@@ -133,7 +133,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
 }
 
 #[tokio::main]
-pub(crate) async fn rpc_main(po2: Option<usize>) -> Result<(), Box<dyn StdError>> {
+pub(crate) async fn rpc_main() -> Result<(), Box<dyn StdError>> {
     let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
 
     let workers = cuda_devices().unwrap_or(1);
@@ -159,7 +159,7 @@ pub(crate) async fn rpc_main(po2: Option<usize>) -> Result<(), Box<dyn StdError>
         /* api_addr */ None,
         /* storage_root */ None,
         /* sim_config */ None,
-        po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2),
+        /* po2 */ None,
         /* enable_telemetry */ false,
     )
     .await?;
@@ -257,7 +257,7 @@ impl App {
         api_addr: Option<SocketAddr>,
         storage_root: Option<PathBuf>,
         sim_config: Option<SimulationConfig>,
-        po2: usize,
+        po2: Option<u32>,
         enable_telemetry: bool,
     ) -> Result<Self, Box<dyn StdError>> {
         let provider = enable_telemetry.then(OpenTelemetryProvider::new);
@@ -288,7 +288,12 @@ impl App {
             }
 
             if let Some(addr) = api_addr {
-                tokio::spawn(crate::api::run(addr, storage_root.unwrap(), manager_ref));
+                tokio::spawn(crate::api::run(
+                    addr,
+                    storage_root.unwrap(),
+                    manager_ref,
+                    po2,
+                ));
             }
         }
 
@@ -312,7 +317,6 @@ impl App {
                         factory_ref.clone(),
                         pool.task_kinds.clone(),
                         Some(pool.profile),
-                        po2,
                     );
                     worker.start();
                     workers.push(worker);
@@ -320,7 +324,7 @@ impl App {
             }
         } else if !task_kinds.is_empty() {
             tracing::info!("Starting worker: {task_kinds:?}");
-            let mut worker = Worker::new(factory_ref.clone(), task_kinds.clone(), None, po2);
+            let mut worker = Worker::new(factory_ref.clone(), task_kinds.clone(), None);
             worker.start();
             workers.push(worker);
         }

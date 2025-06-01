@@ -59,6 +59,7 @@ async fn do_test(remote: bool) {
         }],
     };
 
+    let po2 = Some(21);
     let addr = remote.then_some(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into());
     let mut app = App::new(
         /* is_manager */ true,
@@ -67,7 +68,7 @@ async fn do_test(remote: bool) {
         /* api_addr */ None,
         Some(storage_root.to_path_buf()),
         Some(config),
-        21,
+        po2,
         /* enable_telemetry */ false,
     )
     .await
@@ -79,6 +80,7 @@ async fn do_test(remote: bool) {
         binary: FIB_ELF.to_vec(),
         input: u32::to_le_bytes(ITERATIONS).to_vec(),
         assumptions: vec![],
+        segment_limit_po2: po2,
     };
 
     let info = app.proof_request(request).await.unwrap();

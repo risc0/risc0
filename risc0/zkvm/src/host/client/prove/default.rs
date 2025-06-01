@@ -102,6 +102,7 @@ impl Prover for DefaultProver {
             binary: elf.to_vec(),
             input: env.input,
             assumptions: env.assumptions.borrow().0.clone(),
+            segment_limit_po2: env.segment_limit_po2,
         };
 
         let mut buf = vec![0u8; 4];

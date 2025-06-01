@@ -29,6 +29,9 @@ pub struct ProofRequest {
 
     /// TODO
     pub assumptions: Vec<AssumptionReceipt>,
+
+    /// TODO
+    pub segment_limit_po2: Option<u32>,
 }
 
 /// TODO

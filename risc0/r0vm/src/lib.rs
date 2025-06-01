@@ -95,7 +95,7 @@ struct Cli {
     simulate: Option<PathBuf>,
 
     #[arg(long)]
-    po2: Option<usize>,
+    po2: Option<u32>,
 }
 
 #[derive(Args)]
@@ -159,7 +159,7 @@ pub fn main() {
         .init();
 
     if args.mode.rpc {
-        self::actors::rpc_main(args.po2).unwrap();
+        self::actors::rpc_main().unwrap();
         return;
     }
 
