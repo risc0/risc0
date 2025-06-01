@@ -393,7 +393,7 @@ async fn prove_stark(
             .context("Failed to read receipt")?;
         let receipt: Receipt =
             bincode::deserialize(&bytes).context("Failed to deserialize assumption")?;
-        assumptions.push(receipt);
+        assumptions.push(receipt.into());
     }
 
     let reply = state

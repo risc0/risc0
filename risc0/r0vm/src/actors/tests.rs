@@ -18,9 +18,10 @@ use std::time::Duration;
 use risc0_zkvm::DevModeDelay;
 use risc0_zkvm_methods::FIB_ELF;
 
-use crate::actors::{protocol::JobStatus, PoolConfig, SimulationConfig};
-
-use super::{protocol::TaskKind, App};
+use super::{
+    protocol::{JobStatus, ProofRequest, TaskKind},
+    App, PoolConfig, SimulationConfig,
+};
 
 const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
     prove_segment: Duration::from_millis(800),
@@ -67,17 +68,20 @@ async fn do_test(remote: bool) {
         Some(storage_root.to_path_buf()),
         Some(config),
         21,
-        true,
+        /* enable_telemetry */ false,
     )
     .await
     .unwrap();
 
     const ITERATIONS: u32 = 30_000_000;
 
-    let info = app
-        .run_binary(FIB_ELF.to_vec(), u32::to_le_bytes(ITERATIONS).to_vec())
-        .await
-        .unwrap();
+    let request = ProofRequest {
+        binary: FIB_ELF.to_vec(),
+        input: u32::to_le_bytes(ITERATIONS).to_vec(),
+        assumptions: vec![],
+    };
+
+    let info = app.proof_request(request).await.unwrap();
 
     tracing::info!("{info:#?}");
 

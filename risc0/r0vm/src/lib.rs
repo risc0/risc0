@@ -102,6 +102,9 @@ struct Cli {
 #[group(required = true)]
 struct Mode {
     #[arg(long)]
+    rpc: bool,
+
+    #[arg(long)]
     port: Option<u16>,
 
     /// The ELF to execute
@@ -154,6 +157,11 @@ pub fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
+
+    if args.mode.rpc {
+        self::actors::rpc_main(args.po2).unwrap();
+        return;
+    }
 
     if args.id {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();

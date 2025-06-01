@@ -22,9 +22,21 @@ pub(crate) mod rpc;
 mod tests;
 pub(crate) mod worker;
 
-use std::{error::Error as StdError, net::SocketAddr, path::PathBuf, time::Duration};
+use std::{
+    error::Error as StdError,
+    io::stdin,
+    net::{Ipv4Addr, SocketAddr, SocketAddrV4},
+    os::{
+        fd::{AsRawFd, FromRawFd},
+        unix::net::UnixStream as StdUnixStream,
+    },
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
+use anyhow::Context;
 use kameo::prelude::*;
+use nvml_wrapper::Nvml;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{
     logs::SdkLoggerProvider,
@@ -33,12 +45,13 @@ use opentelemetry_sdk::{
     trace::SdkTracerProvider,
     Resource,
 };
-use protocol::{JobInfo, ProofRequest};
 use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tokio::{
-    net::{tcp, TcpListener},
+    io::{AsyncReadExt as _, AsyncWriteExt as _},
+    net::{tcp, TcpListener, UnixStream},
+    process::Command,
     task::JoinHandle,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
@@ -50,7 +63,7 @@ use self::{
     manager::ManagerActor,
     protocol::{
         factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
-        TaskKind,
+        JobInfo, ProofRequest, TaskKind,
     },
     rpc::{rpc_system, RpcMessageId, RpcSender},
     worker::Worker,
@@ -89,7 +102,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         args.storage.clone(),
         config,
         args.po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2),
-        false,
+        /* enable_telemetry */ true,
     )
     .await?;
 
@@ -100,7 +113,12 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         } else {
             vec![]
         };
-        app.run_binary(binary, input).await.unwrap();
+        let request = ProofRequest {
+            binary,
+            input,
+            assumptions: vec![],
+        };
+        app.proof_request(request).await.unwrap();
     } else {
         println!("Use Ctrl-C to stop");
         tokio::signal::ctrl_c()
@@ -112,6 +130,106 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     app.stop().await;
 
     Ok(())
+}
+
+#[tokio::main]
+pub(crate) async fn rpc_main(po2: Option<usize>) -> Result<(), Box<dyn StdError>> {
+    let addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into();
+
+    let workers = cuda_devices().unwrap_or(1);
+
+    let task_kinds = if workers == 1 {
+        vec![
+            TaskKind::Execute,
+            TaskKind::ProveSegment,
+            TaskKind::ProveKeccak,
+            TaskKind::Lift,
+            TaskKind::Join,
+            TaskKind::Union,
+            TaskKind::Resolve,
+        ]
+    } else {
+        vec![TaskKind::Execute]
+    };
+
+    let mut app = App::new(
+        /* is_manager */ true,
+        task_kinds,
+        Some(addr),
+        /* api_addr */ None,
+        /* storage_root */ None,
+        /* sim_config */ None,
+        po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2),
+        /* enable_telemetry */ false,
+    )
+    .await?;
+
+    let mut children = vec![];
+    if workers > 1 {
+        let local_addr = app.local_addr.unwrap();
+        let r0vm_path = std::env::current_exe()?;
+        for device_idx in 0..workers {
+            let child = Command::new(&r0vm_path)
+                .env("CUDA_VISIBLE_DEVICES", device_idx.to_string())
+                .arg("--worker")
+                .arg("prove-segment,prove-keccak,lift,join,union,resolve")
+                .arg("--addr")
+                .arg(local_addr.to_string())
+                .spawn()
+                .with_context(|| spawn_fail(&r0vm_path))?;
+            children.push(child);
+        }
+    }
+
+    let stdin_fd = stdin().as_raw_fd();
+    let socket = unsafe { StdUnixStream::from_raw_fd(stdin_fd) };
+    socket.set_nonblocking(true)?;
+    let mut socket = UnixStream::from_std(socket)?;
+
+    let mut buf = vec![0u8; 4];
+    socket
+        .read_exact(&mut buf)
+        .await
+        .context("error reading RPC header")?;
+    let body_len: u32 = bincode::deserialize(&buf).context("received invalid RPC header")?;
+    let mut buf = vec![0u8; body_len as usize];
+    socket
+        .read_exact(&mut buf)
+        .await
+        .context("error reading RPC body")?;
+    let request: ProofRequest =
+        bincode::deserialize(&buf).context("error deserializing ProofRequest")?;
+
+    let job_info = app
+        .proof_request(request)
+        .await
+        .context("error running ProofRequest")?;
+
+    let mut buf = vec![0u8; 4];
+    bincode::serialize_into(&mut buf, &job_info)?;
+    let body_len = buf.len() as u32 - 4;
+    bincode::serialize_into(&mut buf[0..4], &body_len)?;
+    socket.write_all(&buf).await?;
+
+    Ok(())
+}
+
+fn cuda_devices() -> anyhow::Result<usize> {
+    let nvml = Nvml::init()?;
+    for idx in 0..nvml.device_count()? {
+        let device = nvml.device_by_index(idx)?;
+        tracing::info!("Device {idx}:");
+        tracing::info!("  name: {}", device.name()?);
+        tracing::info!("  arch: {}", device.architecture()?);
+        tracing::info!("  cores: {}", device.num_cores()?);
+        tracing::info!("  {:#?}", device.memory_info()?);
+        tracing::info!("  {:#?}", device.pci_info()?);
+    }
+    Ok(nvml.device_count()? as usize)
+}
+
+fn spawn_fail(path: &Path) -> String {
+    format!("Could not launch \"{}\".", path.to_string_lossy())
 }
 
 #[derive(Serialize, Deserialize)]
@@ -127,6 +245,7 @@ pub(crate) struct App {
     factory: Option<ActorRef<FactoryActor>>,
     workers: Vec<Worker>,
     server: Option<Server>,
+    local_addr: Option<SocketAddr>,
 }
 
 impl App {
@@ -134,22 +253,27 @@ impl App {
     pub async fn new(
         is_manager: bool,
         task_kinds: Vec<TaskKind>,
-        mut addr: Option<SocketAddr>,
+        addr: Option<SocketAddr>,
         api_addr: Option<SocketAddr>,
         storage_root: Option<PathBuf>,
         sim_config: Option<SimulationConfig>,
         po2: usize,
-        is_test: bool,
+        enable_telemetry: bool,
     ) -> Result<Self, Box<dyn StdError>> {
-        let provider = (!is_test).then(OpenTelemetryProvider::new);
+        let provider = enable_telemetry.then(OpenTelemetryProvider::new);
 
         let mut manager = None;
         let mut factory = None;
         let mut workers = vec![];
         let mut server = None;
+        let mut local_addr = None;
 
         if is_manager {
-            let storage_root = storage_root.unwrap_or_else(default_storage_root);
+            let storage_root = if api_addr.is_some() {
+                Some(storage_root.unwrap_or_else(default_storage_root))
+            } else {
+                storage_root
+            };
 
             let factory_ref = kameo::spawn(FactoryActor::new());
             factory = Some(factory_ref.clone());
@@ -160,15 +284,15 @@ impl App {
 
             if let Some(listen_addr) = addr {
                 server = Some(Server::new(listen_addr, factory_ref));
-                addr = Some(server.as_mut().unwrap().start().await?.unwrap());
+                local_addr = server.as_mut().unwrap().start().await?;
             }
 
             if let Some(addr) = api_addr {
-                tokio::spawn(crate::api::run(addr, storage_root, manager_ref));
+                tokio::spawn(crate::api::run(addr, storage_root.unwrap(), manager_ref));
             }
         }
 
-        let factory_ref = match addr {
+        let factory_ref = match local_addr {
             Some(addr) => {
                 let remote = kameo::spawn(RemoteFactoryActor::new(addr).await?);
                 kameo::spawn(FactoryRouterActor::Remote(remote))
@@ -207,6 +331,7 @@ impl App {
             factory,
             workers,
             server,
+            local_addr,
         })
     }
 
@@ -242,12 +367,7 @@ impl App {
         }
     }
 
-    pub async fn run_binary(&mut self, binary: Vec<u8>, input: Vec<u8>) -> anyhow::Result<JobInfo> {
-        let request = ProofRequest {
-            binary,
-            input,
-            assumptions: vec![],
-        };
+    pub async fn proof_request(&mut self, request: ProofRequest) -> anyhow::Result<JobInfo> {
         let reply = self.manager.as_ref().unwrap().ask(request).await?;
         Ok(reply.info.unwrap())
     }

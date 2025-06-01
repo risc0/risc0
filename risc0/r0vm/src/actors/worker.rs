@@ -116,12 +116,6 @@ impl Worker {
     }
 }
 
-impl From<anyhow::Error> for TaskError {
-    fn from(value: anyhow::Error) -> Self {
-        Self::Generic(value.to_string())
-    }
-}
-
 struct Prover {
     delay: Option<DevModeDelay>,
 }
