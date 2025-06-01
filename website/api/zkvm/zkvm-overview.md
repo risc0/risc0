@@ -62,11 +62,11 @@ _Looking for information about remote proving?_ <br />
 Check out [Bonsai].
 
 _Looking for information about blockchain integration?_ <br />
-Check out our [Bonsai on Eth] page.
+Check out our [Risc Zero on Eth] page.
 
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
-[Bonsai on Eth]: ../blockchain-integration/bonsai-on-eth.md
+[Risc Zero on Eth]: ../blockchain-integration/risc-zero-on-eth.md
 [ELF binary]: /terminology#elf-binary
 [examples]: ./examples.md
 [executor]: /terminology#executor
