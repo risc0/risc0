@@ -166,10 +166,9 @@ impl Receipt {
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
         if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
-            return Err(VerificationError::VerifierParametersMismatch {
-                expected: self.inner.verifier_parameters(),
-                received: self.metadata.verifier_parameters,
-            });
+            // inner verifier_parameters do not match metadata.verifier_parameters.
+            // This is an internal inconsistency in the receipt struct.
+            return Err(VerificationError::ReceiptFormatError);
         }
 
         tracing::debug!("Receipt::verify_with_context");
@@ -210,10 +209,9 @@ impl Receipt {
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
         if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
-            return Err(VerificationError::VerifierParametersMismatch {
-                expected: self.inner.verifier_parameters(),
-                received: self.metadata.verifier_parameters,
-            });
+            // inner verifier_parameters do not match metadata.verifier_parameters.
+            // This is an internal inconsistency in the receipt struct.
+            return Err(VerificationError::ReceiptFormatError);
         }
 
         tracing::debug!("Receipt::verify_integrity_with_context");
@@ -813,30 +811,21 @@ mod tests {
 
         assert_eq!(
             mangled_receipt.verify(Digest::ZERO).err().unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_with_context(&Default::default(), Digest::ZERO)
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_integrity_with_context(&Default::default())
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
     }
 
