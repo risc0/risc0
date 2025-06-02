@@ -13,6 +13,9 @@ viuer = "0.6"
 waldo-core = { path = "core" }
 waldo-methods = { path = "methods" }
 
+[dev-dependencies]
+assert_cmd = "2.0"
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
