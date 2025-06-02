@@ -53,3 +53,4 @@ runs:
     # stop server in case new version is installed
     - run: sccache --stop-server
       shell: bash
+      continue-on-error: true
