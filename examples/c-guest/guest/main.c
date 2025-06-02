@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "platform.h"
+#include "out/platform/platform.h"
 #include <assert.h>
 #include <stdint.h>
 
@@ -22,6 +22,7 @@ union u32_cast {
 };
 
 int main() {
+  init_allocator();
   // TODO introduce entropy into memory image (for zk)
   sha256_state* hasher = init_sha256();
 
