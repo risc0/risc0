@@ -49,3 +49,6 @@ runs:
         echo "CXX=sccache clang++" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
+
+    # stop server in case new version is installed
+    - run: sccache --stop-server

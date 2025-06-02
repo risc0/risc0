@@ -14,52 +14,32 @@
 
 use std::process::Command;
 
+use assert_cmd::{assert::OutputAssertExt as _, cargo::CommandCargoExt as _};
+
 #[test]
 fn test_waldo() {
-    let feature = if cfg!(feature = "cuda") {
-        "cuda"
-    } else {
-        "default"
-    };
-
-    Command::new("cargo")
+    Command::cargo_bin("prove")
+        .unwrap()
         .args([
-            "run",
-            "--release",
-            "--features",
-            feature,
-            "--bin",
-            "prove",
-            "--",
-            "--i",
+            "-i",
             "waldo.webp",
             "-x",
             "1150",
             "-y",
             "291",
-            "----width 58",
+            "--width",
+            "58",
             "--height",
             "70",
             "-m",
             "waldo_mask.png",
         ])
-        .output()
-        .expect("failed to run Waldo prove");
+        .assert()
+        .success();
 
-    Command::new("cargo")
-        .args([
-            "run",
-            "--release",
-            "--features",
-            feature,
-            "--bin",
-            "verify",
-            "--",
-            "--i",
-            "waldo.webp",
-            "-r",
-            "receipt.bin",
-        ])
-        .output()
-        .expect("failed to run Waldo verify");
+    Command::cargo_bin("verify")
+        .unwrap()
+        .args(["-i", "waldo.webp", "-r", "receipt.bin"])
+        .assert()
+        .success();
 }
