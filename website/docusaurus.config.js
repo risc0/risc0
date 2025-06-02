@@ -147,8 +147,8 @@ export default async function createConfigAsync() {
 
     scripts: [
       {
-        src: "https://plausible.io/js/script.js",
-        "data-domain": "risczero.com",
+        src: "https://plausible.io/js/script.outbound-links.js",
+        "data-domain": "dev.risczero.com",
         defer: true,
       },
     ],
