@@ -31,7 +31,7 @@ runs:
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
-        SCCACHE_VERSION: v0.7.1
+        SCCACHE_VERSION: v0.10.0
       run: |
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
@@ -49,3 +49,8 @@ runs:
         echo "CXX=sccache clang++" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
+
+    # stop server in case new version is installed
+    - run: sccache --stop-server
+      shell: bash
+      continue-on-error: true
