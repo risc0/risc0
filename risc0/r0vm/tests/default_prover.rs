@@ -12,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use methods::{GUEST_ELF, GUEST_ID};
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use assert_cmd::cargo::cargo_bin;
+use risc0_zkvm::{DefaultProver, ExecutorEnv, Prover as _};
+use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
-fn main() {
-    let segment_limit_po2 = 16; // 64k cycles
-    let cycles: u32 = 1 << segment_limit_po2;
+#[test_log::test]
+fn basic_proof() {
+    let r0vm_path = cargo_bin("r0vm");
+    let prover = DefaultProver::new(r0vm_path).unwrap();
+
+    const ITERATIONS: u32 = 300_000;
     let env = ExecutorEnv::builder()
-        .write(&cycles)
+        .write(&ITERATIONS)
         .unwrap()
         .build()
         .unwrap();
 
-    let prover = default_prover().unwrap();
-    let receipt = prover.prove(env, GUEST_ELF).unwrap().receipt;
-    receipt.verify(GUEST_ID).unwrap();
+    let receipt = prover.prove(env, FIB_ELF).unwrap().receipt;
+    receipt.verify(FIB_ID).unwrap();
 }

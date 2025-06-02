@@ -32,7 +32,7 @@ fn main() {
         .unwrap();
 
     // Obtain the default prover.
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // Proof information by proving the specified ELF binary.
     // This struct contains the receipt along with statistics about execution of the guest

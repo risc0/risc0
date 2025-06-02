@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ pub fn prove_token_validation(claims: &CustomClaims) -> (Receipt, String) {
         .build()
         .expect("failed to build env");
 
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     let receipt = prover
         .prove(env, VALIDATOR_ELF)

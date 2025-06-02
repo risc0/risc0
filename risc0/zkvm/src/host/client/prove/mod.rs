@@ -14,6 +14,7 @@
 
 #[cfg(feature = "bonsai")]
 pub(crate) mod bonsai;
+pub(crate) mod default;
 pub(crate) mod external;
 #[cfg(feature = "prove")]
 pub(crate) mod local;
@@ -28,7 +29,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "bonsai")]
 use {self::bonsai::BonsaiProver, crate::is_dev_mode};
 
-use self::external::ExternalProver;
+use self::{default::DefaultProver, external::ExternalProver};
 
 use crate::{
     get_version, host::prove_info::ProveInfo, receipt::DEFAULT_MAX_PO2, ExecutorEnv, Receipt,
@@ -353,15 +354,15 @@ impl ProverOpts {
 ///   variables are set unless `RISC0_DEV_MODE` is enabled.
 /// * LocalProver if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
-pub fn default_prover() -> Rc<dyn Prover> {
+pub fn default_prover() -> Result<Rc<dyn Prover>> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             #[cfg(feature = "bonsai")]
-            "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
-            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
+            "bonsai" => Ok(Rc::new(BonsaiProver::new("bonsai"))),
+            "ipc" => Ok(Rc::new(ExternalProver::new("ipc", get_r0vm_path()?))),
             #[cfg(feature = "prove")]
-            "local" => Rc::new(self::local::LocalProver::new("local")),
+            "local" => Ok(Rc::new(self::local::LocalProver::new("local"))),
             _ => unimplemented!("Unsupported prover: {explicit}"),
         };
     }
@@ -372,16 +373,16 @@ pub fn default_prover() -> Rc<dyn Prover> {
             && std::env::var("BONSAI_API_URL").is_ok()
             && std::env::var("BONSAI_API_KEY").is_ok()
         {
-            return Rc::new(BonsaiProver::new("bonsai"));
+            return Ok(Rc::new(BonsaiProver::new("bonsai")));
         }
     }
 
     if cfg!(feature = "prove") {
         #[cfg(feature = "prove")]
-        return Rc::new(self::local::LocalProver::new("local"));
+        return Ok(Rc::new(self::local::LocalProver::new("local")));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
+    Ok(Rc::new(DefaultProver::new(get_r0vm_path()?)?))
 }
 
 /// Return a default [Executor] based on environment variables and feature

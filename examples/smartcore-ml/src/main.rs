@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ fn predict() -> Vec<u32> {
     // ```
     // RISC0_DEV_MODE=1 cargo run -r
     // ```
-    let prover = default_prover();
+    let prover = default_prover().unwrap();
 
     // This initiates a session, runs the STARK prover on the resulting execution
     // trace, and produces a receipt.

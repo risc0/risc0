@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,5 +20,7 @@ pub(crate) mod client;
 mod protos;
 pub(crate) mod prove_info;
 pub mod recursion;
+#[cfg(feature = "client")]
+pub(crate) mod rpc;
 #[cfg(feature = "prove")]
 pub(crate) mod server;
