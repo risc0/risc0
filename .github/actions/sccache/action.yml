@@ -1,13 +1,6 @@
 name: sccache install
 description: Install sccache
 
-inputs:
-  key:
-    required: true
-    default: rust-cache-${{ runner.os }}-${{ runner.arch }}
-  disable_s3:
-    default: false
-
 runs:
   using: composite
   steps:
@@ -38,21 +31,13 @@ runs:
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
-        SCCACHE_VERSION: v0.7.1
+        SCCACHE_VERSION: v0.10.0
       run: |
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
         mkdir -p $HOME/.local/bin
         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
         echo "$HOME/.local/bin" >> $GITHUB_PATH
-      shell: bash
-
-    - if: >
-        runner.os == 'Linux' && inputs.disable_s3 == 'false' && startsWith(runner.name, 'i-') == true
-      run: |
-        echo "SCCACHE_REGION=us-west-2" >> $GITHUB_ENV
-        echo "SCCACHE_BUCKET=risc0-ci-cache" >> $GITHUB_ENV
-        echo "SCCACHE_S3_KEY_PREFIX=public/${{ inputs.key }}/sccache" >> $GITHUB_ENV
       shell: bash
 
     - run: |
@@ -65,26 +50,7 @@ runs:
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
 
-    - if: >
-        runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
-        github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-      id: aws-creds
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: us-west-2
-        role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
-        output-credentials: true
-
-    - if: >
-        runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
-        github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-      uses: risc0/actions-cache@cba095d7af782a955b8f4fa13396fbf0ab62bd4b
-      with:
-        path: |
-          ~/.cache/risc0
-        key: public/${{ inputs.key }}/actions-cache
-        bucket: risc0-ci-cache
-        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
-        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
-        sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
-        use-fallback: false
+    # stop server in case new version is installed
+    - run: sccache --stop-server
+      shell: bash
+      continue-on-error: true

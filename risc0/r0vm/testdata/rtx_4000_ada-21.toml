@@ -1,0 +1,21 @@
+[[pools]]
+count = 1
+task_kinds = ["Execute"]
+[pools.profile]
+prove_segment = 1
+prove_keccak = 1
+lift = 1
+join = 1
+union = 1
+resolve = 1
+
+[[pools]]
+count = 300
+task_kinds = ["ProveSegment", "ProveKeccak", "Lift", "Join", "Union", "Resolve"]
+[pools.profile]
+prove_segment = 4.194
+prove_keccak = 1.394
+lift = 0.297
+join = 0.345
+union = 0.345
+resolve = 0.345

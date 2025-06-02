@@ -15,22 +15,33 @@
 pub(crate) mod factory;
 pub(crate) mod job;
 pub(crate) mod manager;
+pub(crate) mod metrics;
 pub(crate) mod protocol;
 pub(crate) mod rpc;
 #[cfg(test)]
 mod tests;
 pub(crate) mod worker;
 
-use std::{error::Error as StdError, net::SocketAddr, path::PathBuf};
+use std::{error::Error as StdError, net::SocketAddr, path::PathBuf, time::Duration};
 
 use kameo::prelude::*;
 use opentelemetry_otlp::WithExportConfig as _;
-use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider, Resource};
+use opentelemetry_sdk::{
+    logs::SdkLoggerProvider,
+    metrics::{PeriodicReader, SdkMeterProvider},
+    propagation::TraceContextPropagator,
+    trace::SdkTracerProvider,
+    Resource,
+};
 use protocol::{JobInfo, ProofRequest};
 use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
-use tokio::{net::TcpListener, task::JoinHandle};
+use tokio::{
+    net::{tcp, TcpListener},
+    task::JoinHandle,
+};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
 use crate::Cli;
 
@@ -45,12 +56,12 @@ use self::{
     worker::Worker,
 };
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct SimulationConfig {
     pub pools: Vec<PoolConfig>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct PoolConfig {
     pub count: usize,
     pub profile: DevModeDelay,
@@ -63,11 +74,12 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     let task_kinds = args.mode.worker.clone();
 
     let config = if let Some(ref path) = args.simulate {
-        let json = tokio::fs::read_to_string(path).await?;
-        Some(serde_json::from_str(&json)?)
+        let str = tokio::fs::read_to_string(path).await?;
+        Some(toml::from_str(&str)?)
     } else {
         None
     };
+    tracing::info!("{config:#?}");
 
     let mut app = App::new(
         is_manager,
@@ -77,6 +89,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
         args.storage.clone(),
         config,
         args.po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2),
+        false,
     )
     .await?;
 
@@ -109,7 +122,7 @@ enum RemoteRequest {
 }
 
 pub(crate) struct App {
-    provider: Option<SdkTracerProvider>,
+    provider: Option<OpenTelemetryProvider>,
     manager: Option<ActorRef<ManagerActor>>,
     factory: Option<ActorRef<FactoryActor>>,
     workers: Vec<Worker>,
@@ -117,6 +130,7 @@ pub(crate) struct App {
 }
 
 impl App {
+    #[allow(clippy::too_many_arguments)]
     pub async fn new(
         is_manager: bool,
         task_kinds: Vec<TaskKind>,
@@ -125,12 +139,9 @@ impl App {
         storage_root: Option<PathBuf>,
         sim_config: Option<SimulationConfig>,
         po2: usize,
+        is_test: bool,
     ) -> Result<Self, Box<dyn StdError>> {
-        let provider = if sim_config.is_none() {
-            Some(init_tracer_provider())
-        } else {
-            None
-        };
+        let provider = (!is_test).then(OpenTelemetryProvider::new);
 
         let mut manager = None;
         let mut factory = None;
@@ -227,7 +238,7 @@ impl App {
         }
 
         if let Some(provider) = self.provider {
-            let _ = provider.shutdown();
+            provider.stop();
         }
     }
 
@@ -276,16 +287,16 @@ impl Server {
                     }
                 };
 
+                let meter = opentelemetry::global::meter("r0vm");
+                let stream = metrics::StreamWithMetrics::new(stream, meter.clone());
                 let factory = factory.clone();
                 tokio::spawn(async move {
-                    let (rpc_sender, mut rpc_receiver) = rpc_system(stream);
+                    let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
                     rpc_receiver
                         .receive_many(move |req, message_id| {
                             let rpc_sender = rpc_sender.clone();
                             let factory = factory.clone();
-                            tokio::task::spawn(async move {
-                                handle_request(rpc_sender, req, message_id, factory).await
-                            });
+                            handle_request(rpc_sender, req, message_id, factory)
                         })
                         .await;
                 });
@@ -302,8 +313,10 @@ impl Server {
     }
 }
 
+type WriteStream = metrics::OwnedWriteHalfWithMetrics<tcp::OwnedWriteHalf>;
+
 async fn handle_request(
-    rpc_sender: RpcSender,
+    rpc_sender: RpcSender<WriteStream>,
     request: RemoteRequest,
     message_id: Option<RpcMessageId>,
     factory: ActorRef<FactoryActor>,
@@ -311,8 +324,18 @@ async fn handle_request(
     match request {
         RemoteRequest::GetTask(msg) => {
             let message_id = message_id.expect("request not expecting response");
-            let reply = factory.ask(msg).await.unwrap();
-            rpc_sender.respond(&reply, message_id).await.unwrap();
+
+            // The PendingReply isn't Send, so I have to do this :/
+            let (tx, rx) = tokio::sync::oneshot::channel();
+            tokio::task::spawn(async move {
+                let pending_reply = factory.ask(msg).enqueue().await.unwrap();
+                tx.send(()).unwrap();
+                let reply = pending_reply.await.unwrap();
+                rpc_sender.respond(&reply, message_id).await.unwrap();
+            });
+
+            // wait until message has been enqueued in mailbox to preserve ordering.
+            let _ = rx.await;
         }
         RemoteRequest::TaskUpdate(msg) => {
             assert!(message_id.is_none());
@@ -329,19 +352,81 @@ fn default_storage_root() -> PathBuf {
     dirs::home_dir().unwrap().join(".risc0").join("r0vm")
 }
 
-fn init_tracer_provider() -> SdkTracerProvider {
-    let otlp_exporter = opentelemetry_otlp::SpanExporter::builder()
-        .with_http()
-        .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
-        .build()
-        .unwrap();
+struct OpenTelemetryProvider {
+    tracer_provider: SdkTracerProvider,
+    meter_provider: SdkMeterProvider,
+    logger_provider: SdkLoggerProvider,
+}
 
-    let provider = SdkTracerProvider::builder()
-        .with_batch_exporter(otlp_exporter)
-        .with_resource(Resource::builder().with_service_name("r0vm").build())
-        .build();
-    opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
-    opentelemetry::global::set_tracer_provider(provider.clone());
+impl OpenTelemetryProvider {
+    pub(crate) fn new() -> Self {
+        let resource = Resource::builder().with_service_name("r0vm").build();
 
-    provider
+        let logger_provider = SdkLoggerProvider::builder()
+            .with_resource(resource.clone())
+            .with_batch_exporter(
+                opentelemetry_otlp::LogExporter::builder()
+                    .with_http()
+                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
+                    .build()
+                    .unwrap(),
+            )
+            .build();
+
+        tracing_subscriber::registry()
+            // .with(OpenTelemetryTracingBridge::new(&logger_provider))
+            .with(tracing_subscriber::fmt::layer().with_filter(EnvFilter::from_default_env()))
+            .init();
+
+        let tracer_provider = SdkTracerProvider::builder()
+            .with_batch_exporter(
+                opentelemetry_otlp::SpanExporter::builder()
+                    .with_http()
+                    .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
+                    .build()
+                    .unwrap(),
+            )
+            .with_resource(resource.clone())
+            .build();
+
+        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
+        opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+
+        let meter_provider = SdkMeterProvider::builder()
+            .with_reader(
+                PeriodicReader::builder(
+                    opentelemetry_otlp::MetricExporter::builder()
+                        .with_http()
+                        .with_protocol(opentelemetry_otlp::Protocol::HttpBinary)
+                        .build()
+                        .unwrap(),
+                )
+                .with_interval(Duration::from_secs(1))
+                .build(),
+            )
+            .with_resource(resource.clone())
+            .build();
+
+        opentelemetry::global::set_meter_provider(meter_provider.clone());
+
+        Self {
+            tracer_provider,
+            meter_provider,
+            logger_provider,
+        }
+    }
+
+    pub(crate) fn stop(self) {
+        tokio::task::spawn_blocking(move || {
+            let _ = self.meter_provider.shutdown().inspect_err(|err| {
+                tracing::warn!("{err:?}");
+            });
+            let _ = self.tracer_provider.shutdown().inspect_err(|err| {
+                tracing::warn!("{err:?}");
+            });
+            let _ = self.logger_provider.shutdown().inspect_err(|err| {
+                tracing::warn!("{err:?}");
+            });
+        });
+    }
 }

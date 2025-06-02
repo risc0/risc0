@@ -220,8 +220,9 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
 
 #[allow(dead_code)]
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
-    let suite = Poseidon2HashSuite::new_suite();
-    let hal = Rc::new(CpuHal::new(suite));
-    let circuit_hal = Rc::new(CpuCircuitHal);
-    Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+    let hal_factory = || {
+        let suite = Poseidon2HashSuite::new_suite();
+        (Rc::new(CpuHal::new(suite)), Rc::new(CpuCircuitHal))
+    };
+    Ok(Box::new(SegmentProverImpl::new(hal_factory)))
 }
