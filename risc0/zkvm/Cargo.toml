@@ -66,6 +66,7 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 # Host dependencies
+[target.'cfg(not(target_os = "zkvm"))'.dependencies]
 addr2line = { version = "0.24.2", optional = true, features = [
   "rustc-demangle",
   "std",

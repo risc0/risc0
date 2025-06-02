@@ -115,7 +115,7 @@ impl Worker {
             }
         }));
 
-        let processor = Processor::new(self.factory.clone(), self.delay, self.po2);
+        let processor = Processor::new(self.factory.clone(), self.delay);
         self.join_handles.push(tokio::spawn(async move {
             loop {
                 let Some(msg) = recv.recv().await else { break };
@@ -159,7 +159,7 @@ struct Processor {
 }
 
 impl Processor {
-    fn new(factory: ActorRef<FactoryRouterActor>, delay: Option<DevModeDelay>, po2: usize) -> Self {
+    fn new(factory: ActorRef<FactoryRouterActor>, delay: Option<DevModeDelay>) -> Self {
         let (gpu_send, gpu_recv) = channel(GPU_QUEUE_DEPTH);
         let (cpu_send, cpu_recv) = channel(CPU_QUEUE_DEPTH);
 
@@ -168,7 +168,7 @@ impl Processor {
             gpu_processor.process_tasks(gpu_recv).await;
         });
 
-        let cpu_processor = CpuProcessor::new(factory.clone(), delay, po2, gpu_send.clone());
+        let cpu_processor = CpuProcessor::new(factory.clone(), delay, gpu_send.clone());
         tokio::task::spawn(async move {
             cpu_processor.process_tasks(cpu_recv).await;
         });
@@ -404,7 +404,6 @@ impl GpuProcessor {
 struct CpuProcessor {
     factory: ActorRef<FactoryRouterActor>,
     delay: Option<DevModeDelay>,
-    po2: usize,
 
     gpu_queue: Sender<GpuTaskMsg>,
 }
@@ -413,13 +412,11 @@ impl CpuProcessor {
     fn new(
         factory: ActorRef<FactoryRouterActor>,
         delay: Option<DevModeDelay>,
-        po2: usize,
         gpu_queue: Sender<GpuTaskMsg>,
     ) -> Self {
         Self {
             factory,
             delay,
-            po2,
             gpu_queue,
         }
     }
@@ -476,7 +473,6 @@ impl CpuProcessor {
         self.task_start(header.clone()).await?;
         let factory = self.factory.clone();
         let header_copy = header.clone();
-        let po2 = self.po2 as u32;
         let session: anyhow::Result<Session> = tokio::task::spawn_blocking(move || {
             let coproc = Coprocessor {
                 factory: factory.clone(),
@@ -487,12 +483,14 @@ impl CpuProcessor {
             for assumption in task.request.assumptions.iter() {
                 env.add_assumption(assumption.clone());
             }
+            if let Some(po2) = task.request.segment_limit_po2 {
+                env.segment_limit_po2(po2);
+            }
             let env = env
                 // .stdout(writer) // TODO
                 .write_slice(&task.request.input)
                 .coprocessor_callback(coproc)
                 // .session_limit(limit) // TODO
-                .segment_limit_po2(po2)
                 .build()?;
 
             let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
