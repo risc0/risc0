@@ -129,7 +129,7 @@ where
     pub fn verify(&self, root: &Node, element: &Element) -> bool {
         // Check that the root of the proof matches the provided root.
         match &self.verified_root(element) {
-            Some(ref verified_root) => verified_root == root,
+            Some(verified_root) => verified_root == root,
             None => false,
         }
     }

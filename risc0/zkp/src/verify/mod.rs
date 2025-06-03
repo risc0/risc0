@@ -422,10 +422,10 @@ impl<'a, F: Field> Verifier<'a, F> {
             Self::CHECK_SIZE,
             "Miscalculated capacity for check_mix_pows"
         );
-        let gen = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
+        let gen_ = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
         let hashfn = self.suite.hashfn.as_ref();
         self.fri_verify(|idx| {
-            let x = gen.pow(idx);
+            let x = gen_.pow(idx);
             let rows= self
                 .merkle_verifiers
                 .iter()

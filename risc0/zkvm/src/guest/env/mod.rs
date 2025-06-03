@@ -502,7 +502,7 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 /// While is accesses a static mutable, this is considered safe because the zkVM
 /// is single-threaded and non-preemptive.
 #[cfg(target_os = "zkvm")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
     #[allow(static_mut_refs)]
     unsafe {

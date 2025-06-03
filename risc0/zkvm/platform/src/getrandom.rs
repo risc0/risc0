@@ -17,11 +17,11 @@ use getrandom::Error;
 /// This is a getrandom handler for the zkvm. It's intended to hook into a
 /// getrandom crate or a dependent of the getrandom crate used by the guest code.
 #[cfg(feature = "getrandom")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "Rust" fn __getrandom_v03_custom(dest_ptr: *mut u8, len: usize) -> Result<(), Error> {
     use crate::{syscall::sys_rand, WORD_SIZE};
 
-    let dest = core::slice::from_raw_parts_mut(dest_ptr, len);
+    let dest = unsafe { core::slice::from_raw_parts_mut(dest_ptr, len) };
 
     if dest.is_empty() {
         return Ok(());
@@ -55,7 +55,7 @@ unsafe extern "Rust" fn __getrandom_v03_custom(dest_ptr: *mut u8, len: usize) ->
 }
 
 #[cfg(not(feature = "getrandom"))]
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "Rust" fn __getrandom_v03_custom(
     _dest_ptr: *mut u8,
     _len: usize,
@@ -91,10 +91,12 @@ crate used for the guest.
 }
 
 /// This entrypoint for getrandom is used for versions < 0.3
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe fn __getrandom_custom(dest: *mut u8, len: usize) -> u32 {
-    __getrandom_v03_custom(dest, len)
-        .map_err(|e| e.raw_os_error().unwrap_or(2))
-        .err()
-        .unwrap_or(0) as u32
+    unsafe {
+        __getrandom_v03_custom(dest, len)
+            .map_err(|e| e.raw_os_error().unwrap_or(2))
+            .err()
+            .unwrap_or(0) as u32
+    }
 }

@@ -108,7 +108,7 @@ struct RawSetupParams {
     pub srs_path: *const c_char,
 }
 
-extern "C" {
+unsafe extern "C" {
     #[cfg(feature = "cuda")]
     fn risc0_groth16_cuda_prove(
         setup: *const RawSetupParams,
@@ -124,7 +124,7 @@ fn ffi_wrap<F>(mut inner: F) -> Result<()>
 where
     F: FnMut() -> *const c_char,
 {
-    extern "C" {
+    unsafe extern "C" {
         fn free(str: *const c_char);
     }
 

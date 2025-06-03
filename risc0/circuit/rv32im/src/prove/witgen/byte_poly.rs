@@ -177,7 +177,7 @@ impl BytePolynomial {
     pub(crate) unsafe fn get_unchecked(&self, idx: usize) -> &i32 {
         let i = idx / BytePolyChunk::LANES as usize;
         let j = idx % BytePolyChunk::LANES as usize;
-        self.coeffs.get_unchecked(i).as_array_ref().get_unchecked(j)
+        unsafe { self.coeffs.get_unchecked(i).as_array_ref().get_unchecked(j) }
     }
 
     #[inline(always)]
@@ -190,10 +190,12 @@ impl BytePolynomial {
     pub(crate) unsafe fn get_unchecked_mut(&mut self, idx: usize) -> &mut i32 {
         let i = idx / BytePolyChunk::LANES as usize;
         let j = idx % BytePolyChunk::LANES as usize;
-        self.coeffs
-            .get_unchecked_mut(i)
-            .as_array_mut()
-            .get_unchecked_mut(j)
+        unsafe {
+            self.coeffs
+                .get_unchecked_mut(i)
+                .as_array_mut()
+                .get_unchecked_mut(j)
+        }
     }
 }
 

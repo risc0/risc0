@@ -370,19 +370,19 @@ impl InnerReceipt {
     /// Extract the [ReceiptClaim] from this receipt.
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
-            Self::Composite(ref inner) => Ok(inner.claim()?.into()),
-            Self::Groth16(ref inner) => Ok(inner.claim.clone()),
-            Self::Succinct(ref inner) => Ok(inner.claim.clone()),
-            Self::Fake(ref inner) => Ok(inner.claim.clone()),
+            Self::Composite(inner) => Ok(inner.claim()?.into()),
+            Self::Groth16(inner) => Ok(inner.claim.clone()),
+            Self::Succinct(inner) => Ok(inner.claim.clone()),
+            Self::Fake(inner) => Ok(inner.claim.clone()),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Composite(ref inner) => inner.verifier_parameters,
-            Self::Groth16(ref inner) => inner.verifier_parameters,
-            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Composite(inner) => inner.verifier_parameters,
+            Self::Groth16(inner) => inner.verifier_parameters,
+            Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
     }
@@ -487,17 +487,17 @@ impl<Claim> GenericReceipt<Claim> {
         Claim: Clone,
     {
         match self {
-            Self::Groth16(ref inner) => inner.claim.clone(),
-            Self::Succinct(ref inner) => inner.claim.clone(),
-            Self::Fake(ref inner) => inner.claim.clone(),
+            Self::Groth16(inner) => inner.claim.clone(),
+            Self::Succinct(inner) => inner.claim.clone(),
+            Self::Fake(inner) => inner.claim.clone(),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Groth16(ref inner) => inner.verifier_parameters,
-            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Groth16(inner) => inner.verifier_parameters,
+            Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
     }
@@ -825,19 +825,19 @@ impl InnerAssumptionReceipt {
     /// Note that only the claim digest is available because the claim type may be unknown.
     pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
-            Self::Composite(ref inner) => Ok(inner.claim()?.digest()),
-            Self::Groth16(ref inner) => Ok(inner.claim.digest()),
-            Self::Succinct(ref inner) => Ok(inner.claim.digest()),
-            Self::Fake(ref inner) => Ok(inner.claim.digest()),
+            Self::Composite(inner) => Ok(inner.claim()?.digest()),
+            Self::Groth16(inner) => Ok(inner.claim.digest()),
+            Self::Succinct(inner) => Ok(inner.claim.digest()),
+            Self::Fake(inner) => Ok(inner.claim.digest()),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            Self::Composite(ref inner) => inner.verifier_parameters,
-            Self::Groth16(ref inner) => inner.verifier_parameters,
-            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Composite(inner) => inner.verifier_parameters,
+            Self::Groth16(inner) => inner.verifier_parameters,
+            Self::Succinct(inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
     }

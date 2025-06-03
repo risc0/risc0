@@ -126,7 +126,7 @@ where
         let final_digest = hashfn.hash_elem_slice(final_coeffs);
         self.iop().commit(&final_digest);
         // Get the generator for the final polynomial evaluations
-        let gen = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
+        let gen_ = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
         // Do queries
         let mut poly_buf: Vec<F::ExtElem> = Vec::with_capacity(degree);
         for _ in 0..QUERIES {
@@ -138,7 +138,7 @@ where
                 self.verify_query(round, &mut pos, &mut goal)?;
             }
             // Do final verification
-            let x = gen.pow(pos);
+            let x = gen_.pow(pos);
 
             poly_buf.clear();
             poly_buf.extend((0..degree).map(|i| {

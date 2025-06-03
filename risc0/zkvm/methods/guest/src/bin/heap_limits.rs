@@ -42,7 +42,7 @@ fn heap_overflow_via_alloc() {
     unreachable!("expected a crash in the memory allocator")
 }
 
-extern "C" {
+unsafe extern "C" {
     fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8;
 }
 

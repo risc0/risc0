@@ -18,7 +18,7 @@ use core::alloc::{GlobalAlloc, Layout};
 #[global_allocator]
 pub static HEAP: BumpPointerAlloc = BumpPointerAlloc;
 
-extern "C" {
+unsafe extern "C" {
     // This symbol is defined by the loader and marks the end
     // of all elf sections, so this is where we start our
     // heap.
@@ -40,7 +40,7 @@ pub struct BumpPointerAlloc;
 
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        alloc_aligned(layout.size(), layout.align())
+        unsafe { alloc_aligned(layout.size(), layout.align()) }
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
@@ -50,7 +50,7 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
         // NOTE: This is safe to avoid zeroing allocated bytes, as the bump allocator does not
         //       re-use memory and the zkVM memory is zero-initialized.
-        self.alloc(layout)
+        unsafe { self.alloc(layout) }
     }
 }
 
@@ -104,7 +104,7 @@ pub(crate) unsafe fn alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
 ///
 /// This function must be called exactly once.
 pub unsafe fn init() {
-    extern "C" {
+    unsafe extern "C" {
         static _end: u8;
     }
     unsafe {

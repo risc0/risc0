@@ -78,7 +78,7 @@ mod zkvm {
         }
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     unsafe extern "C" fn ecall_bigint_v1compat(
         result: *mut [u32; BIGINT_WIDTH_WORDS],
         op: u32,
@@ -205,7 +205,7 @@ mod zkvm {
     ///
     /// Other syscalls either require a buffer of size zero, or they will error if the first call
     /// doesn't return all the data.
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     unsafe extern "C" fn ecall_software(fd: u32, mut buf: *const u8, mut len: u32) {
         // use no_std_strings::{str256, str_format};
         // let msg = str_format!(str256, "ecall_software_slow({fd:#010x}, {buf:?}, {len})");
@@ -305,7 +305,7 @@ mod zkvm {
         illegal_instruction()
     }
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     unsafe extern "C" fn ecall_sha(
         out_state: *const u32,
         mut in_state: *const u32,
