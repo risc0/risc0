@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT job_id, task_id\n        FROM tasks\n        WHERE\n            state = 'running' AND timeout_secs < EXTRACT(EPOCH FROM (now() - GREATEST(started_at, updated_at)))\n        LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "job_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "task_id",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "4c18a58f2978cf38cb21861e588d6baff1e17c78408ada56ba40355232d034fe"
+}
