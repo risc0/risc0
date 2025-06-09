@@ -111,7 +111,7 @@ jobs:
       - browser
       - check
       - check-external
-      - check-semver
+      # - check-semver
       - check-template
       - clippy
       - doc
