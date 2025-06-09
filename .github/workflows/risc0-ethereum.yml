@@ -15,6 +15,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
@@ -63,7 +68,7 @@ jobs:
   test:
     if: ${{ needs.changes.outputs.test == 'true' || github.event_name == 'workflow_dispatch'}}
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
+    runs-on: [self-hosted, prod, Linux, X64, cpu, docker]
     env:
       RUST_BACKTRACE: full
     steps:
@@ -93,6 +98,8 @@ jobs:
       # Setup rustup and sccache
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
+        with:
+          key: Linux-default
       # Installing dev tooling
       - name: Set up Python
         uses: actions/setup-python@v5
