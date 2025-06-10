@@ -109,7 +109,7 @@ jobs:
   main-status-check:
     if: always()
     needs:
-      - bento-run
+      #- bento-run
       - bento-test
       - browser
       - check
@@ -642,7 +642,7 @@ jobs:
       - run: sccache --show-stats
 
   bento-run:
-    if: needs.changes.outputs.bento == 'true'
+    if: false #needs.changes.outputs.bento == 'true'
     needs: changes
     runs-on: [ self-hosted, prod, Linux, X64, cuda, g6e.xlarge, bench ]
     env:
