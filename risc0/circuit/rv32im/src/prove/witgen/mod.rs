@@ -306,6 +306,13 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     // shutdown_cycle
     global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
 
+    // povw nonce
+    // TODO: Fill in with real values
+    for i in 0..DIGEST_WORDS {
+        global[LAYOUT_GLOBAL.povw_nonce.values[i].low._super.offset] = Val::ZERO;
+        global[LAYOUT_GLOBAL.povw_nonce.values[i].high._super.offset] = Val::ZERO;
+    }
+
     global
 }
 

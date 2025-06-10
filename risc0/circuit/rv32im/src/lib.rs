@@ -37,7 +37,8 @@ use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
 
 pub use self::zirgen::CircuitImpl;
 
-pub const RV32IM_SEAL_VERSION: u32 = 1;
+// NOTE: Seal version two introduced with PoVW, changing the output size from 74 to 90.
+pub const RV32IM_SEAL_VERSION: u32 = 2;
 
 /// This number was picked by running `bigint2-analyze` on all the current bigint programs
 pub const MAX_INSN_CYCLES: usize = 25_000;
@@ -102,6 +103,7 @@ impl Rv32imV2Claim {
 
         let pre_state = global.map(|c| c.state_in).get_digest_from_shorts()?;
         let post_state = global.map(|c| c.state_out).get_digest_from_shorts()?;
+        let _povw_nonce = global.map(|c| c.povw_nonce).get_digest_from_shorts()?;
         let input = global.map(|c| c.input).get_digest_from_shorts()?;
         let output = global.map(|c| c.output).get_digest_from_shorts()?;
         let is_terminate = global.map(|c| c.is_terminate).get_u32_from_elem()?;
@@ -110,6 +112,10 @@ impl Rv32imV2Claim {
         let term_a1_high = global.map(|c| c.term_a1high).get_u32_from_elem()?;
         let term_a1_low = global.map(|c| c.term_a1low).get_u32_from_elem()?;
         let shutdown_cycle = global.map(|c| c.shutdown_cycle).get_u32_from_elem()?;
+
+        // DO NOT MERGE
+        #[cfg(feature = "std")]
+        eprintln!("povw_nonce: {_povw_nonce}");
 
         fn try_as_u16(x: u32) -> Result<u16> {
             x.try_into()
