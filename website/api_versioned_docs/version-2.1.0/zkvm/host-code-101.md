@@ -87,7 +87,7 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [examples]: ./examples.md
 [execute]: /terminology#execute
 [executor]: /terminology#executor
-[executor-env]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnv.html
+[executor-env]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.ExecutorEnv.html
 [from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
 [guest]: /terminology#guest
 [guest program]: /terminology#guest-program
@@ -96,7 +96,7 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [Prover]: /terminology#prover
 [quickstart]: ./quickstart.md
 [receipt]: /terminology#receipt
-[receipt-verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
+[receipt-verify]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.Receipt.html#method.verify
 [Receipts]: ./receipts.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [these docs]: https://github.com/risc0/risc0/issues/new/choose

@@ -77,5 +77,5 @@ No options need to be configured to take advantage of acceleration through the u
 [datasheet]: https://benchmarks.risczero.com/main/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [open-source]: https://risczero.com/news/open-source
-[segment-limit-docs]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
+[segment-limit-docs]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
 [zkVM]: ../zkvm/zkvm-overview.md

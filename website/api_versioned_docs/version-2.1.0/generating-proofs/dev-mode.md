@@ -33,6 +33,6 @@ For further reference, take a look at the table below.
 | `RISC0_DEV_MODE=true`           | dev-mode activated       | Prover panic             |
 | `RISC0_DEV_MODE=false` or unset | Default project behavior | Default project behavior |
 
-[fake]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/enum.InnerReceipt.html#variant.Fake
+[fake]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/enum.InnerReceipt.html#variant.Fake
 [feature flag]: https://github.com/risc0/risc0#feature-flags
 [journal]: /terminology#journal

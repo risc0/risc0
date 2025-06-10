@@ -113,7 +113,7 @@ a cost of slowing down the profiler.
 
 [cycle count]: /terminology#clock-cycles
 [devmode]: ../generating-proofs/dev-mode.md
-[example-profiling]: https://github.com/risc0/risc0/tree/main/examples/profiling
+[example-profiling]: https://github.com/risc0/risc0/tree/release-2.1/examples/profiling
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [install]: ./install.md

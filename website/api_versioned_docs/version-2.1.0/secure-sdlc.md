@@ -75,7 +75,7 @@ This phase validates if the objectives of the security plan have been met. This 
 
 [BSIMM 14]: https://www.synopsys.com/software-integrity/software-security-services/bsimm-maturity-model.html
 [Bug bounty]: https://hackenproof.com/programs/risc-zero-zkvm
-[External deep dive audits]: https://github.com/risc0/rz-security/tree/main/audits
+[External deep dive audits]: https://github.com/risc0/rz-security/tree/release-2.1/audits
 [ISO 27002:2022]: https://www.iso.org/standard/75652.html
 [NIST SSDF]: https://csrc.nist.gov/Projects/ssdf
 [OWASP SAAAM]: https://owasp.org/www-project-samm

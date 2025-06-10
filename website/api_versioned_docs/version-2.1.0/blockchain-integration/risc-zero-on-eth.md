@@ -31,19 +31,19 @@ The [Boundless Foundry Template][foundry-template] provides a minimal applicatio
 This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard][governor-standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [\~160 lines of Rust][signature-aggregation], a gas savings of \~77% is achieved with significant room for optimizations.
 
 [article-coprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
-[blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/main/examples
+[blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/release-2.1/examples
 [docs-zkvm]: ../zkvm/zkvm-overview.md
 [foundry-template]: https://github.com/boundless-xyz/boundless-foundry-template
-[governance-example]: https://github.com/risc0/risc0-ethereum/tree/main/examples/governance
+[governance-example]: https://github.com/risc0/risc0-ethereum/tree/release-2.1/examples/governance
 [governor-standard]: https://docs.openzeppelin.com/contracts/5.x/api/governance
 [revm]: https://crates.io/crates/revm
 [risc0-ethereum]: https://github.com/risc0/risc0-ethereum
-[signature-aggregation]: https://github.com/risc0/risc0-ethereum/blob/main/examples/governance/methods/guest/src/bin/finalize_votes.rs
+[signature-aggregation]: https://github.com/risc0/risc0-ethereum/blob/release-2.1/examples/governance/methods/guest/src/bin/finalize_votes.rs
 [steel-blog]: https://risczero.com/blog/introducing-steel-2.0
 [steel-repo]: https://risc0.github.io/risc0-ethereum/risc0_steel/
-[steel-src]: https://github.com/risc0/risc0-ethereum/tree/main/crates/steel
+[steel-src]: https://github.com/risc0/risc0-ethereum/tree/release-2.1/crates/steel
 [term-snark]: /terminology#snark
 [term-stark]: /terminology#stark
-[verifier-contracts]: https://github.com/risc0/risc0-ethereum/tree/main/contracts
+[verifier-contracts]: https://github.com/risc0/risc0-ethereum/tree/release-2.1/contracts
 [zeth-article]: https://www.risczero.com/news/zeth-release
 [zeth-repo]: https://github.com/risc0/zeth

@@ -57,14 +57,14 @@ All of the recursion programs in the previous section output a [SuccinctReceipt]
 
 The final step in the recursion process is `compress()`, which outputs a [Groth16Receipt], which can be verified on-chain using the [RISC Zero Verifier Contract].
 
-[`Prover::prove_with_opts`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[`Prover::prove_with_opts`]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [assumption]: /terminology#assumption
-[composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
-[Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
+[composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/enum.ReceiptKind.html
+[Groth16Receipt]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.Groth16Receipt.html
 [proof composition]: ./zkvm/composition.md
 [proof system]: /proof-system/proof-system-sequence-diagram
-[Prover]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[Prover]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [receipt claim]: /terminology#receipt-claim
 [reports.risczero.com]: https://reports.risczero.com
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
-[SuccinctReceipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html
+[SuccinctReceipt]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.SuccinctReceipt.html

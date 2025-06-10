@@ -98,9 +98,9 @@ This primitive has been heavily battle-tested; it has been included as a precomp
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-[05/20/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/circuits/hexens_v1c_stark2snark_20240520.pdf
-[06/05/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/contracts/hexens_verifiercontract_20240605.pdf
-[10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
+[05/20/2024↗]: https://github.com/risc0/rz-security/blob/release-2.1/audits/circuits/hexens_v1c_stark2snark_20240520.pdf
+[06/05/2024↗]: https://github.com/risc0/rz-security/blob/release-2.1/audits/contracts/hexens_verifiercontract_20240605.pdf
+[10/31/2023↗]: https://github.com/risc0/rz-security/blob/release-2.1/audits/zkVM/hexens_zkVM_20231031.pdf
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [control ID]: /terminology#control-id
@@ -110,12 +110,12 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [examples]: https://www.pcmag.com/news/zuckerbergs-meta-is-spending-billions-to-buy-350000-nvidia-h100-gpus
 [execution trace]: /terminology#execution-trace
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
-[join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
-[lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
+[join]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.ApiClient.html#method.join
+[lift]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.ApiClient.html#method.lift
 [proof-system]: pathname:///proof-system-in-detail.pdf
 [receipt claim]: /terminology#receipt-claim
-[resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
+[resolve]: https://docs.rs/risc0-zkvm/2.1/risc0_zkvm/struct.ApiClient.html#method.resolve
 [RISC Zero zkVM]: ./zkvm
-[security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
+[security calculator]: https://github.com/risc0/risc0/blob/release-2.1/risc0/zkp/src/prove/soundness.rs
 [Verifier Contract]: ./blockchain-integration/contracts/verifier.md
-[VersionManagement@main]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
+[VersionManagement@main]: https://github.com/risc0/risc0-ethereum/blob/release-2.1/contracts/version-management-design.md
