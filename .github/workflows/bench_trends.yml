@@ -18,6 +18,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
@@ -26,7 +31,7 @@ env:
 
 jobs:
   bench:
-    runs-on: [self-hosted, cluster, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
@@ -36,6 +41,10 @@ jobs:
             arch: X64
             feature: cuda
             device: nvidia_rtx_4090
+          - os: Linux
+            arch: X64
+            feature: cuda
+            device: g6.xlarge
           - os: macOS
             arch: ARM64
             feature: prove
@@ -43,6 +52,7 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
+      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_4090' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +61,9 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+          disable_s3: ${{ env.DISABLE_S3 }}
 
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
