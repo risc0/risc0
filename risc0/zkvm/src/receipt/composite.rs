@@ -13,10 +13,10 @@
 // limitations under the License.
 
 use alloc::{vec, vec::Vec};
-use core::fmt::Debug;
 
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
@@ -43,6 +43,7 @@ use crate::{
 #[non_exhaustive]
 pub struct CompositeReceipt {
     /// Segment receipts forming the proof of an execution with continuations.
+    #[debug("{} segments", segments.len())]
     pub segments: Vec<SegmentReceipt>,
 
     /// An ordered list of assumptions, either proven or unresolved, made within
@@ -50,6 +51,7 @@ pub struct CompositeReceipt {
     /// assumptions are unresolved, this receipt is only _conditionally_
     /// valid.
     // TODO(#982): Allow for unresolved assumptions in this list.
+    #[debug("{} assumptions", assumption_receipts.len())]
     pub assumption_receipts: Vec<InnerAssumptionReceipt>,
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
@@ -315,7 +317,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("3daead8f1ec08eb96b60ce6cad42f82eba80f6cf89ba5007ca317e57256b6038")
+            digest!("50ffbc35d194e6c9f5fc8adb030d077f3bf5393d5e9cedc6f303a9f1eede3a32")
         );
     }
 }

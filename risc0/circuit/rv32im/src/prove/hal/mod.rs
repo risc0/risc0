@@ -28,7 +28,7 @@ use risc0_zkp::{
 };
 
 use super::{
-    witgen::{preflight::PreflightTrace, WitnessGenerator},
+    witgen::{preflight::PreflightTrace, PreflightResults, WitnessGenerator},
     Seal, SegmentProver,
 };
 use crate::{
@@ -100,65 +100,76 @@ pub(crate) trait CircuitAccumulator<H: Hal> {
     ) -> Result<()>;
 }
 
-pub(crate) struct SegmentProverImpl<H, C>
+pub(crate) struct SegmentProverImpl<H, C, F>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H>,
+    F: Fn() -> (Rc<H>, Rc<C>),
 {
-    hal: Rc<H>,
-    circuit_hal: Rc<C>,
+    hal_factory: F,
 }
 
-impl<H, C> SegmentProverImpl<H, C>
+impl<H, C, F> SegmentProverImpl<H, C, F>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H>,
+    F: Fn() -> (Rc<H>, Rc<C>),
 {
-    pub fn new(hal: Rc<H>, circuit_hal: Rc<C>) -> Self {
-        Self { hal, circuit_hal }
+    pub fn new(hal_factory: F) -> Self {
+        Self { hal_factory }
     }
 }
 
-impl<H, C> SegmentProver for SegmentProverImpl<H, C>
+impl<H, C, F> SegmentProver for SegmentProverImpl<H, C, F>
 where
     H: Hal<Field = CircuitField, Elem = Val, ExtElem = ExtVal>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H> + CircuitAccumulator<H>,
+    F: Fn() -> (Rc<H>, Rc<C>),
 {
-    fn prove(&self, segment: &Segment) -> Result<Seal> {
-        scope!("prove");
+    fn preflight(&self, segment: &Segment) -> Result<PreflightResults> {
+        scope!("preflight");
 
         cfg_if::cfg_if! {
             if #[cfg(feature = "witgen_debug")] {
                 let rand_z = ExtVal::ONE;
+            } else {
+                let mut rng = rand::rng();
+                let rand_z = ExtVal::random(&mut rng);
+            }
+        }
+        PreflightResults::new(segment, rand_z)
+    }
+
+    fn prove_core(&self, preflight_results: PreflightResults) -> Result<Seal> {
+        scope!("prove_core");
+
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "witgen_debug")] {
                 let mode = if std::env::var_os("RISC0_WITGEN_DEBUG").is_some() {
                     StepMode::SeqForward
                 } else {
                     StepMode::Parallel
                 };
             } else {
-                let mut rng = rand::thread_rng();
-                let rand_z = ExtVal::random(&mut rng);
                 let mode = StepMode::Parallel;
             }
         }
 
-        let witgen = WitnessGenerator::new(
-            self.hal.as_ref(),
-            self.circuit_hal.as_ref(),
-            segment,
-            mode,
-            rand_z,
-        )?;
+        let (hal, circuit_hal) = (self.hal_factory)();
+
+        let po2 = preflight_results.po2();
+        let witgen =
+            WitnessGenerator::new(hal.as_ref(), circuit_hal.as_ref(), preflight_results, mode)?;
 
         let code = &witgen.code.buf;
         let data = &witgen.data.buf;
         let global = &witgen.global.buf;
 
-        Ok(scope!("prove", {
-            tracing::debug!("prove");
+        Ok(scope!("prove_inner", {
+            tracing::debug!("prove_inner");
 
-            let mut prover = Prover::new(self.hal.as_ref(), TAPSET);
-            let hashfn = &self.hal.get_hash_suite().hashfn;
+            let mut prover = Prover::new(hal.as_ref(), TAPSET);
+            let hashfn = &hal.get_hash_suite().hashfn;
 
             // Add a version tag to the start of the seal. It's not intended for
             // this value to be consumed by downstream lift predicates. Instead
@@ -187,13 +198,13 @@ where
                         *elem = elem.valid_or_zero();
                         header[i] = *elem;
                     }
-                    header[global_len] = Val::new_raw(segment.po2);
+                    header[global_len] = Val::new_raw(po2);
                 });
 
                 let header_digest = hashfn.hash_elem_slice(&header);
                 prover.iop().commit(&header_digest);
                 prover.iop().write_field_elem_slice(header.as_slice());
-                prover.set_po2(segment.po2 as usize);
+                prover.set_po2(po2 as usize);
 
                 prover.commit_group(REGISTER_GROUP_CODE, code);
                 prover.commit_group(REGISTER_GROUP_DATA, data);
@@ -201,14 +212,14 @@ where
                 // Make the mixing values
                 let mix: [Val; REGCOUNT_MIX] = std::array::from_fn(|_| prover.iop().random_elem());
 
-                let mix = witgen.accum(self.hal.as_ref(), self.circuit_hal.as_ref(), &mix)?;
+                let mix = witgen.accum(hal.as_ref(), circuit_hal.as_ref(), &mix)?;
 
                 prover.commit_group(REGISTER_GROUP_ACCUM, &witgen.accum.buf);
 
                 mix
             });
 
-            prover.finalize(&[&mix.buf, global], self.circuit_hal.as_ref())
+            prover.finalize(&[&mix.buf, global], circuit_hal.as_ref())
         }))
     }
 }

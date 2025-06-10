@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
-
 fn main() {
-    if env::var("CARGO_FEATURE_PROVE").is_ok()
-        && env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
-    {
-        println!(
-            "cargo:rustc-env=RECURSION_METAL_PATH={}",
-            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL").unwrap()
-        );
-    }
-
     #[cfg(feature = "prove")]
     download_zkr();
 }
@@ -31,7 +20,7 @@ fn main() {
 #[cfg(feature = "prove")]
 fn download_zkr() {
     use std::{
-        fs,
+        env, fs,
         path::{Path, PathBuf},
         str::FromStr,
     };
@@ -41,7 +30,7 @@ fn download_zkr() {
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "5f1762201f5c4afb5d92df4a5b8e5bf5c87b67785991592ba79ce4033719b030";
+    const SHA256_HASH: &str = "b51785b36bff327f8fc7f3983aea343d1daf015a09189dedb5a3e851884db98e";
 
     fn check_sha2(path: &Path) -> bool {
         let data = fs::read(path).unwrap();

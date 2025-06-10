@@ -101,6 +101,10 @@ impl SegmentReceipt {
             });
         }
 
+        if self.hashfn != "poseidon2" {
+            return Err(VerificationError::InvalidHashSuite);
+        }
+
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
         risc0_circuit_rv32im::verify(&self.seal)?;
         let decoded_claim = ReceiptClaim::decode_from_seal_v2(&self.seal, None)

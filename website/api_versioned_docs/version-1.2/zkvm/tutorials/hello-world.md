@@ -11,13 +11,13 @@ following the steps in this guide, you will learn how:
 ## Step 1: Create a New Project
 
 Firstly, visit the [installation][install] page for how to install the
-necessary software. 
+necessary software.
 
 Once installed, clone the `risc0` monorepo and change into the `hello-world` example directory:
 
 ```sh
 git clone https://github.com/risc0/risc0
-cd examples/hello-world
+cd risc0/examples/hello-world
 ```
 
 Next, check the version of `cargo risczero` installed:
@@ -27,7 +27,7 @@ cargo risczero --version
 cargo-risczero $MAJOR.$MINOR.$PATCH # e.g. release-1.2
 ```
 
-To match the example release version with your local installation, check out the corresponding branch of the example: 
+To match the example release version with your local installation, check out the corresponding branch of the example:
 
 ```sh
 git checkout release-$MAJOR.$MINOR # e.g. release-1.2
@@ -49,9 +49,9 @@ Use this command any time you'd like to check your progress.
 
 ## Step 2 (Host): Share Private Data as Input with the Guest
 
-The zkVM (or a [prover]) runs on the [host]. The host code is located in `hello-world/src/main.rs` and `hello-world/src/lib.rs`. 
+The zkVM (or a [prover]) runs on the [host]. The host code is located in `hello-world/src/main.rs` and `hello-world/src/lib.rs`.
 
-The host creates an executor environment `ExecutorEnv` before constructing a prover. This executor environment is responsible for managing guest-readable memory. The host makes the value `input` available to the guest program before execution by adding `input` to the executor environment. 
+The host creates an executor environment `ExecutorEnv` before constructing a prover. This executor environment is responsible for managing guest-readable memory. The host makes the value `input` available to the guest program before execution by adding `input` to the executor environment.
 
 When the prover executes the program, it can access input via the `.write()` method on `ExecutorEnv::builder()`:
 
@@ -172,7 +172,7 @@ To run this example locally, and see if proving completed successfully, run:
 cargo run --release
 ```
 
-If proving is successful, the line `"I know the factors of 391, and I can prove it!"` is printed. 
+If proving is successful, the line `"I know the factors of 391, and I can prove it!"` is printed.
 
 To change the number that is factorized, head to `hello-world/src/main.rs` and change this line:
 

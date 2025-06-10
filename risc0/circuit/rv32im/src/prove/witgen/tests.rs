@@ -14,7 +14,6 @@
 
 use std::rc::Rc;
 
-use rand::thread_rng;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::field::Elem;
 use test_log::test;
@@ -24,7 +23,7 @@ use crate::{
         testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         DEFAULT_SEGMENT_LIMIT_PO2,
     },
-    prove::{hal::StepMode, witgen::WitnessGenerator},
+    prove::{hal::StepMode, witgen::WitnessGenerator, PreflightResults},
     zirgen::circuit::{ExtVal, REGCOUNT_DATA},
     MAX_INSN_CYCLES,
 };
@@ -43,7 +42,7 @@ fn run_preflight(program: Program) {
     let segments = result.segments;
     let segment = segments.first().unwrap();
 
-    let mut rng = thread_rng();
+    let mut rng = rand::rng();
     let rand_z = ExtVal::random(&mut rng);
 
     segment.preflight(rand_z).unwrap();
@@ -90,27 +89,28 @@ fn fwd_rev_ab_test(program: Program) {
         }
     }
 
-    let mut rng = thread_rng();
+    let mut rng = rand::rng();
     let rand_z = ExtVal::random(&mut rng);
 
     let segments = session.segments;
     for segment in segments {
         tracing::debug!("fwd");
+
+        let preflight_results = PreflightResults::new(&segment, rand_z).unwrap();
+
         let fwd_witgen = WitnessGenerator::new(
             hal.as_ref(),
             &circuit_hal,
-            &segment,
+            preflight_results.clone(),
             StepMode::SeqForward,
-            rand_z,
         )
         .unwrap();
         tracing::debug!("rev");
         let rev_witgen = WitnessGenerator::new(
             hal.as_ref(),
             &circuit_hal,
-            &segment,
+            preflight_results.clone(),
             StepMode::SeqReverse,
-            rand_z,
         )
         .unwrap();
         let cycles = 1 << segment.po2;

@@ -26,7 +26,9 @@ impl Paths {
             Component::RustToolchain | Component::CppToolchain => {
                 env.risc0_dir().join("toolchains")
             }
-            Component::CargoRiscZero | Component::R0Vm => env.risc0_dir().join("extensions"),
+            Component::CargoRiscZero | Component::R0Vm | Component::Gdb => {
+                env.risc0_dir().join("extensions")
+            }
         }
     }
 
@@ -117,7 +119,7 @@ impl Paths {
             // Handle legacy rust format from older versions of rzup
             Version::parse(dir_name.strip_prefix("r0.")?.split('-').next()?).ok()
         } else if dir_name.starts_with("rust_") && component == &Component::RustToolchain {
-            // Handle legacy rust format from cargo riszero install
+            // Handle legacy rust format from cargo risczero install
             let version_str = dir_name.split('_').next_back()?;
             Version::parse(version_str.strip_prefix("r0.")?).ok()
         } else if dir_name.starts_with("c_") && component == &Component::CppToolchain {

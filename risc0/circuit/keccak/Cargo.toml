@@ -1,7 +1,7 @@
 [package]
 name = "risc0-circuit-keccak"
 description = "RISC Zero circuit for keccak"
-version = "1.4.1"
+version = "3.0.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -33,10 +33,13 @@ xz2 = { version = "0.1", optional = true, features = ["static"] }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
-rand = { version = "0.8" }
+rand = "0.9.1"
 risc0-circuit-keccak-methods = { path = "methods" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[build-dependencies]
+xz2 = { version = "0.1", optional = true, features = ["static"] }
 
 [features]
 # Enables CUDA GPU support

@@ -31,7 +31,7 @@ use crate::{
     recursion::prove::union,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
-    ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -69,6 +69,14 @@ impl ProverServer for ProverImpl {
             session.journal.as_ref().map(hex::encode),
             session.segments.len()
         );
+
+        ensure!(
+            self.opts.hashfn == "poseidon2",
+            "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
+            supported `hashfn` values are: \"poseidon2\".",
+            &self.opts.hashfn
+        );
+
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
@@ -208,17 +216,40 @@ impl ProverServer for ProverImpl {
         })
     }
 
-    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
         ensure!(
             segment.po2() <= self.opts.max_segment_po2,
             "segment po2 exceeds max on ProverOpts: {} > {}",
             segment.po2(),
             self.opts.max_segment_po2
         );
+        let inner = risc0_circuit_rv32im::prove::segment_prover()?.preflight(&segment.inner)?;
 
-        let seal = risc0_circuit_rv32im::prove::segment_prover()?.prove(&segment.inner)?;
-        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.inner.po2))?;
-        claim.output = segment.output.clone().into();
+        Ok(PreflightResults {
+            inner,
+            terminate_state: segment.inner.claim.terminate_state,
+            output: segment.output.clone(),
+            segment_index: segment.index,
+        })
+    }
+
+    fn prove_segment_core(
+        &self,
+        ctx: &VerifierContext,
+        preflight_results: PreflightResults,
+    ) -> Result<SegmentReceipt> {
+        ensure!(
+            self.opts.hashfn == "poseidon2",
+            "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
+            supported `hashfn` values are: \"poseidon2\".",
+            &self.opts.hashfn
+        );
+
+        let po2 = preflight_results.inner.po2();
+        let seal =
+            risc0_circuit_rv32im::prove::segment_prover()?.prove_core(preflight_results.inner)?;
+        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(po2))?;
+        claim.output = preflight_results.output.into();
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
@@ -227,7 +258,7 @@ impl ProverServer for ProverImpl {
             .digest();
         let receipt = SegmentReceipt {
             seal,
-            index: segment.index,
+            index: preflight_results.segment_index,
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,

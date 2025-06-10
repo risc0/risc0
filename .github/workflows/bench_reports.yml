@@ -37,12 +37,8 @@ jobs:
         include:
           - os: Linux
             arch: X64
-            feature: prove
-            device: cpu
-          - os: Linux
-            arch: X64
             feature: cuda
-            device: nvidia_rtx_3090_ti
+            device: nvidia_rtx_4090
           - os: Linux
             arch: X64
             feature: cuda

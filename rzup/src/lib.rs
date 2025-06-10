@@ -324,6 +324,7 @@ impl Rzup {
 mod tests {
     use super::*;
     use crate::distribution::Os;
+    use std::collections::HashMap;
     use std::convert::Infallible;
     use std::io::Write as _;
     use std::net::SocketAddr;
@@ -428,13 +429,13 @@ mod tests {
         }
 
         Ok(match &req.uri().to_string()[..] {
-            "/gihub_api/repos/risc0/risc0/releases/latest" => {
+            "/github_api/repos/risc0/risc0/releases/latest" => {
                 json_response("{\"tag_name\":\"v1.1.0\"}")
             }
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
-            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0-rc.1/\
@@ -447,21 +448,27 @@ mod tests {
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
                 rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
+            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-gdb-linux-x86_64.tar.xz" =>
+                dummy_tar_xz_response("."),
             "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-osx-arm64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-osx-arm64"),
-            "/gihub_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
+            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-gdb-osx-arm64.tar.xz" =>
+                dummy_tar_xz_response("."),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
             "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
-            "/gihub_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
+            "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-gdb-linux-x86_64.tar.xz" =>
+                dummy_tar_xz_response("."),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
                 rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
-            "/gihub_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.1.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0/install" => text_response(install_script.clone()),
@@ -500,7 +507,7 @@ mod tests {
             Self {
                 base_urls: BaseUrls {
                     risc0_github_base_url: format!("http://{address}/risc0_github"),
-                    github_api_base_url: format!("http://{address}/gihub_api"),
+                    github_api_base_url: format!("http://{address}/github_api"),
                     risc0_base_url: format!("http://{address}/risc0"),
                 },
             }
@@ -1213,6 +1220,51 @@ mod tests {
         );
     }
 
+    fn test_install_gdb(platform: Platform, target_double: &str, target_triple: &str) {
+        let server = MockDistributionServer::new();
+
+        install_test(
+            server.base_urls.clone(),
+            Component::Gdb,
+            Component::Gdb,
+            Version::new(2024, 1, 5),
+            format!(
+                "{base_url}/toolchain/releases/download/2024.01.05/\
+                riscv32im-gdb-{target_double}.tar.xz",
+                base_url = server.base_urls.risc0_github_base_url
+            ),
+            128, /* download_size */
+            vec![format!(
+                ".risc0/extensions/v2024.1.5-gdb-{target_triple}/tar_contents.bin"
+            )],
+            vec![(
+                ".risc0/bin/riscv32im-gdb".into(),
+                format!(".risc0/extensions/v2024.1.5-gdb-{target_triple}/riscv32im-gdb"),
+            )],
+            &format!(".risc0/extensions/v2024.1.5-gdb-{target_triple}"),
+            false, /* use_github_token */
+            platform,
+        )
+    }
+
+    #[test]
+    fn install_gdb_x86_64_linux() {
+        test_install_gdb(
+            Platform::new("x86_64", Os::Linux),
+            "linux-x86_64",
+            "x86_64-unknown-linux-gnu",
+        );
+    }
+
+    #[test]
+    fn install_gdb_aarch64_mac() {
+        test_install_gdb(
+            Platform::new("aarch64", Os::MacOs),
+            "osx-arm64",
+            "aarch64-apple-darwin",
+        );
+    }
+
     #[test]
     fn install_with_github_token() {
         let server = MockDistributionServer::new_with_required_bearer_token();
@@ -1293,6 +1345,15 @@ mod tests {
     fn list_multiple_versions_cpp() {
         test_list_multiple_versions(
             Component::CppToolchain,
+            Version::new(2024, 1, 5),
+            Version::new(2024, 1, 6),
+        );
+    }
+
+    #[test]
+    fn list_multiple_versions_gdb() {
+        test_list_multiple_versions(
+            Component::Gdb,
             Version::new(2024, 1, 5),
             Version::new(2024, 1, 6),
         );
@@ -1551,6 +1612,32 @@ mod tests {
         );
     }
 
+    #[test]
+    fn set_default_version_gdb() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
+            Component::Gdb,
+            Version::new(2024, 1, 5),
+            Version::new(2024, 1, 6),
+            vec![(
+                ".risc0/bin/riscv32im-gdb".into(),
+                ".risc0/extensions/v2024.1.5-gdb-x86_64-unknown-linux-gnu/riscv32im-gdb".into(),
+            )],
+            vec![(
+                ".risc0/bin/riscv32im-gdb".into(),
+                ".risc0/extensions/v2024.1.6-gdb-x86_64-unknown-linux-gnu/riscv32im-gdb".into(),
+            )],
+        );
+    }
+
     fn default_version_after_uninstall(
         tmp_dir: &TempDir,
         rzup: &mut Rzup,
@@ -1692,6 +1779,30 @@ mod tests {
     }
 
     #[test]
+    fn default_version_after_uninstall_gdb() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        for uninstall_with_rm in [true, false] {
+            default_version_after_uninstall(
+                &tmp_dir,
+                &mut rzup,
+                Component::Gdb,
+                Version::new(2024, 1, 5),
+                Version::new(2024, 1, 6),
+                uninstall_with_rm,
+                &tmp_dir
+                    .path()
+                    .join(".risc0/extensions/v2024.1.6-gdb-x86_64-unknown-linux-gnu"),
+            );
+        }
+    }
+
+    #[test]
     fn install_non_existent() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(
@@ -1778,6 +1889,11 @@ mod tests {
     #[test]
     fn uninstall_cpp() {
         uninstall_test(Component::CppToolchain, Version::new(2024, 1, 5));
+    }
+
+    #[test]
+    fn uninstall_gdb() {
+        uninstall_test(Component::Gdb, Version::new(2024, 1, 5));
     }
 
     #[test]
@@ -2300,7 +2416,7 @@ mod tests {
         std::fs::set_permissions(path, perms).unwrap();
     }
 
-    fn create_fake_rust_repo(tmp_dir: &TempDir) -> (PathBuf, Version) {
+    fn create_fake_rust_repo(tmp_dir: &TempDir, rust_version: Version) -> (PathBuf, Version) {
         let test_repo = tmp_dir.path().join("test-repo");
         std::fs::create_dir(&test_repo).unwrap();
         build::run_command(
@@ -2315,7 +2431,7 @@ mod tests {
         .unwrap();
 
         std::fs::create_dir(test_repo.join("src")).unwrap();
-        std::fs::write(test_repo.join("src/version"), "1.34.0").unwrap();
+        std::fs::write(test_repo.join("src/version"), rust_version.to_string()).unwrap();
         write_script(
             &test_repo.join("x"),
             "\
@@ -2361,6 +2477,8 @@ mod tests {
             touch build/foo/stage2-tools-bin/bar-fmt
             echo 'build output line 1'
             echo 'build output line 2'
+            env >> x_env
+            echo '=====' >> x_env
             ",
         );
 
@@ -2400,7 +2518,7 @@ mod tests {
             Platform::new("x86_64", Os::Linux),
         );
 
-        let (test_repo, version) = create_fake_rust_repo(&tmp_dir);
+        let (test_repo, version) = create_fake_rust_repo(&tmp_dir, Version::new(1, 34, 0));
 
         let repo_url = format!("file://{}", test_repo.display());
 
@@ -2470,7 +2588,7 @@ mod tests {
             Platform::new("x86_64", Os::Linux),
         );
 
-        let (test_repo, master) = create_fake_rust_repo(&tmp_dir);
+        let (test_repo, master) = create_fake_rust_repo(&tmp_dir, Version::new(1, 34, 0));
 
         let repo_url = format!("file://{}", test_repo.display());
         rzup.build_rust_toolchain(&repo_url, &Some("foo".to_string()), &None)
@@ -2494,5 +2612,65 @@ mod tests {
                 format!(".risc0/toolchains/v{foo}-rust-x86_64-unknown-linux-gnu/bin/rustc"),
             ],
         );
+    }
+
+    fn parse_env_output(input: &str) -> Vec<HashMap<&str, &str>> {
+        let Some(last_divider) = input.rfind("====") else {
+            return vec![];
+        };
+
+        input[..last_divider]
+            .split("====")
+            .map(|invocation| {
+                invocation
+                    .split("\n")
+                    .filter_map(|line| line.split_once("="))
+                    .collect()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn build_rust_toolchain_loweratomic_flag() {
+        let expectations = [
+            (Version::new(1, 80, 0), "-Cpasses=loweratomic"),
+            (Version::new(1, 81, 0), "-Cpasses=loweratomic"),
+            (Version::new(1, 81, 1), "-Cpasses=loweratomic"),
+            (Version::new(1, 82, 0), "-Cpasses=lower-atomic"),
+            (Version::new(1, 82, 1), "-Cpasses=lower-atomic"),
+            (Version::new(1, 83, 0), "-Cpasses=lower-atomic"),
+        ];
+
+        for (version, expected_lower_atomic) in expectations {
+            let server = MockDistributionServer::new();
+            let (tmp_dir, mut rzup) = setup_test_env(
+                server.base_urls.clone(),
+                None,
+                Platform::new("x86_64", Os::Linux),
+            );
+
+            let (test_repo, _) = create_fake_rust_repo(&tmp_dir, version.clone());
+            let repo_url = format!("file://{}", test_repo.display());
+
+            rzup.build_rust_toolchain(&repo_url, &Some("master".to_string()), &None)
+                .unwrap();
+
+            // Our fake x script creates this file
+            let env_raw = std::fs::read_to_string(
+                tmp_dir.path().join(".risc0/tmp/build-rust-toolchain/x_env"),
+            )
+            .unwrap();
+            let env = parse_env_output(&env_raw);
+
+            // two ./x invocations
+            assert_eq!(env.len(), 2);
+
+            for e in env {
+                assert_eq!(
+                    e["CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS"], expected_lower_atomic,
+                    "lower atomic unexpected for {version}"
+                );
+            }
+        }
     }
 }

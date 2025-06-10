@@ -14,7 +14,7 @@
 
 use std::collections::BTreeSet;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
@@ -30,7 +30,7 @@ use crate::{
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
         r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-        rv32im::{disasm, DecodedInstruction, Emulator, InsnKind, Instruction},
+        rv32im::{disasm, Emulator, InsnKind},
         segment::Segment,
         sha2::Sha2State,
     },
@@ -216,7 +216,8 @@ impl<'a> Preflight<'a> {
                 txn.prev_cycle = self.prev_cycle.get(&addr).unwrap();
             } else {
                 // Otherwise, compute cycle diff and another diff
-                let diff = txn.cycle - txn.prev_cycle;
+                ensure!(txn.cycle != txn.prev_cycle);
+                let diff = txn.cycle - 1 - txn.prev_cycle;
                 self.trace.cycles[(diff / 2) as usize].diff_count[(diff % 2) as usize] += 1;
             }
 
@@ -514,18 +515,22 @@ impl Risc0Context for Preflight<'_> {
         Ok(())
     }
 
-    fn on_insn_start(&mut self, _insn: &Instruction, _decoded: &DecodedInstruction) -> Result<()> {
-        Ok(())
-    }
-
-    fn on_insn_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) -> Result<()> {
+    fn on_insn_start(
+        &mut self,
+        kind: InsnKind,
+        decoded: &crate::execute::rv32im::DecodedInstruction,
+    ) -> Result<()> {
         tracing::trace!(
             "[{}]: {:?}> {}",
             self.trace.cycles.len(),
             self.pc,
-            disasm(insn, decoded)
+            disasm(kind, decoded)
         );
-        self.add_cycle_insn(CycleState::Decode, self.pc.0, insn.kind);
+        Ok(())
+    }
+
+    fn on_insn_end(&mut self, kind: InsnKind) -> Result<()> {
+        self.add_cycle_insn(CycleState::Decode, self.pc.0, kind);
         self.user_cycle += 1;
         self.user_cycles += 1;
         Ok(())
@@ -536,6 +541,7 @@ impl Risc0Context for Preflight<'_> {
     }
 
     // Pass memory ops to pager + record
+    #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         if op == LoadOp::Peek {
             return self.pager.peek(addr);
@@ -566,6 +572,7 @@ impl Risc0Context for Preflight<'_> {
         Ok(word)
     }
 
+    #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let cycle = (2 * self.trace.cycles.len() + 1) as u32;
         let prev_word = if addr >= MEMORY_END_ADDR {

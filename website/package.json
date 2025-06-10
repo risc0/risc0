@@ -15,7 +15,7 @@
     "deploy": "docusaurus deploy",
     "fmt": "prettier . --write",
     "fmt-markdown": "remark . --output --use sort-definitions --use remark-lint-match-punctuation --use remark-lint-no-url-trailing-slash --use remark-mdx --use remark-comment",
-    "lint": "prettier . --check && python ./link-version-check.py && remark . --quiet --frail",
+    "lint": "prettier . --check && python ./link-version-check.py && remark . --use sort-definitions --use remark-lint-match-punctuation --use remark-lint-no-url-trailing-slash --use remark-mdx --use remark-comment --quiet --frail",
     "serve": "docusaurus serve",
     "start": "docusaurus start"
   },

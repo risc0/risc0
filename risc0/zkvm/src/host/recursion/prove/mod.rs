@@ -34,8 +34,7 @@ use risc0_zkp::{
         digest::{Digest, DIGEST_SHORTS},
         hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    hal::{CircuitHal, Hal},
+    field::baby_bear::BabyBearElem,
     verify::ReadIOP,
 };
 use serde::Serialize;
@@ -371,7 +370,7 @@ pub fn test_zkr(
 
     let program = get_zkr("test_recursion_circuit.zkr", po2)?;
     let suite = Poseidon2HashSuite::new_suite();
-    let control_id = program.compute_control_id(suite.clone());
+    let control_id = program.compute_control_id(suite.clone()).unwrap();
     let opts = ProverOpts::succinct().with_control_ids(vec![control_id]);
 
     let mut prover = Prover::new(program, control_id, opts.clone());
@@ -739,15 +738,5 @@ impl Prover {
     /// program and input.
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         self.prover.run()
-    }
-
-    /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
-    /// program and input, using the specified HAL.
-    pub fn run_with_hal<H, C>(&mut self, hal: &H, circuit_hal: &C) -> Result<RecursionReceipt>
-    where
-        H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        C: CircuitHal<H>,
-    {
-        self.prover.run_with_hal(hal, circuit_hal)
     }
 }

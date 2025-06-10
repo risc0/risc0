@@ -940,14 +940,14 @@ mod tests {
             let elem = Elem::random(&mut rng);
             assert_eq!(elem, Elem::from_u32_words(&elem.to_u32_words()));
 
-            let val: u32 = rng.gen();
+            let val: u32 = rng.random();
             assert_eq!(val, Elem::from_u32_words(&[val]).to_u32_words()[0]);
         }
         for _ in 0..100 {
             let elem = ExtElem::random(&mut rng);
             assert_eq!(elem, ExtElem::from_u32_words(&elem.to_u32_words()));
 
-            let vec: Vec<u32> = vec![rng.gen(), rng.gen(), rng.gen(), rng.gen()];
+            let vec: Vec<u32> = vec![rng.random(), rng.random(), rng.random(), rng.random()];
 
             assert_eq!(vec, ExtElem::from_u32_words(&vec).to_u32_words());
         }

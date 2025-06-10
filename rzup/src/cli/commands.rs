@@ -76,7 +76,7 @@ impl InstallCommand {
 
         // special handling for cpp date-based versions
         // TODO: Move away from date version tags to semver
-        if self.name.as_ref().is_some_and(|n| n == "cpp") {
+        if self.name.as_ref().is_some_and(|n| n == "cpp" || n == "gdb") {
             return Ok(Some(parse_cpp_version(v)?));
         }
 
@@ -270,7 +270,7 @@ pub const BUILD_HELP: &str = "Discussion:
     the default version. The resulting component version contains the commit hash.";
 
 #[derive(Parser)]
-#[clap(group(
+#[command(group(
     ArgGroup::new("mode")
         .args(&["tag_or_commit", "path"])
         .required(true)

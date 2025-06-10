@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
@@ -31,8 +31,11 @@ impl Syscall for SysVerify2 {
         &mut self,
         _syscall: &str,
         ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        if !to_guest.is_empty() {
+            bail!("invalid sys_verify2 call");
+        }
         let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
         let from_guest_len = ctx.load_register(REG_A4);
         let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
@@ -44,7 +47,7 @@ impl Syscall for SysVerify2 {
             .try_into()
             .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
 
-        tracing::info!(
+        tracing::debug!(
             "SYS_VERIFY_INTEGRITY2: ({}, {})",
             claim_digest,
             control_root

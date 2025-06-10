@@ -231,16 +231,19 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
-    let hal = Rc::new(CudaHalPoseidon2::new());
-    let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
-    Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+    let hal_factory = || {
+        let hal = Rc::new(CudaHalPoseidon2::new());
+        let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+        (hal, circuit_hal)
+    };
+    Ok(Box::new(SegmentProverImpl::new(hal_factory)))
 }
 
 #[cfg(test)]
 mod tests {
     use std::rc::Rc;
 
-    use rand::{thread_rng, Rng};
+    use rand::Rng;
     use risc0_core::field::baby_bear::BabyBear;
     use risc0_zkp::{
         adapter::CircuitInfo as _,
@@ -269,7 +272,7 @@ mod tests {
 
     impl EvalCheckParams {
         pub fn new(po2: usize) -> Self {
-            let mut rng = thread_rng();
+            let mut rng = rand::rng();
             let steps = 1 << po2;
             let domain = steps * INV_RATE;
             let code_size = TAPSET.group_size(REGISTER_GROUP_CODE);
