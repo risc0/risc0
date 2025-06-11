@@ -21,9 +21,7 @@ env:
 
 jobs:
   release:
-    runs-on:
-      labels: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
-      group: risc0
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
     strategy:
       fail-fast: false
       matrix:
