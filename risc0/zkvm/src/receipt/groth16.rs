@@ -85,6 +85,13 @@ where
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
 
+        if params.digest::<sha::Impl>() != self.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: params.digest::<sha::Impl>(),
+                received: self.verifier_parameters,
+            });
+        }
+
         let (a0, a1) =
             split_digest(params.control_root).map_err(|_| VerificationError::ReceiptFormatError)?;
         let (c0, c1) = split_digest(self.claim.digest::<sha::Impl>())
