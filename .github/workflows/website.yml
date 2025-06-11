@@ -86,7 +86,9 @@ jobs:
   doc-test-main:
     if: needs.changes.outputs.doc-test-main == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
+    runs-on:
+      labels: [self-hosted, cluster, Linux, X64, cpu]
+      group: risc0
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -110,7 +112,9 @@ jobs:
   doc-test-stable:
     if: needs.changes.outputs.doc-test-stable == 'true'
     needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
+    runs-on:
+      labels: [self-hosted, cluster, Linux, X64, cpu]
+      group: risc0
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup

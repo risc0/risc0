@@ -12,7 +12,9 @@ env:
 
 jobs:
   crates_validate:
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
+    runs-on:
+      labels: [self-hosted, cluster, Linux, X64, cpu]
+      group: risc0
     env:
       RUST_BACKTRACE: full
       RUST_LOG: info
