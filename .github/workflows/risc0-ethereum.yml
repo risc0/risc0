@@ -63,7 +63,7 @@ jobs:
   test:
     if: ${{ needs.changes.outputs.test == 'true' || github.event_name == 'workflow_dispatch'}}
     needs: changes
-    runs-on: [self-hosted, cluster2, Linux, X64, cpu, docker]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
     env:
       RUST_BACKTRACE: full
     steps:
