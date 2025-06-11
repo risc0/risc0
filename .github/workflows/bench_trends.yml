@@ -31,7 +31,7 @@ env:
 
 jobs:
   bench:
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster2, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
