@@ -209,6 +209,12 @@ extern __device__ GetDataStruct exec_ReadReg(ExecContext& ctx,
                                              InstInputStruct arg1_0,
                                              Val arg2_0,
                                              BoundLayout<ReadRegLayout> layout3);
+extern __device__ ReadSourceRegsStruct
+exec_ReadSourceRegs(ExecContext& ctx,
+                    NondetRegStruct arg0,
+                    InstInputStruct arg1_0,
+                    DecoderStruct arg2_0,
+                    BoundLayout<ReadSourceRegsLayout> layout3);
 extern __device__ WriteRdStruct exec_WriteRd(ExecContext& ctx,
                                              NondetRegStruct arg0,
                                              InstInputStruct arg1_0,
