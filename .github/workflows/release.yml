@@ -64,7 +64,7 @@ jobs:
       # otherwise cargo-binstall sometimes errors with 404.
       - run: sleep 90
 
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+      - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-binstall
           version: "1.10.16"

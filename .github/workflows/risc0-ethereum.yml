@@ -15,11 +15,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# this is needed to gain access via OIDC to the S3 bucket for caching
-permissions:
-  id-token: write
-  contents: read
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
@@ -98,8 +93,6 @@ jobs:
       # Setup rustup and sccache
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
-        with:
-          key: Linux-default
       # Installing dev tooling
       - name: Set up Python
         uses: actions/setup-python@v5
