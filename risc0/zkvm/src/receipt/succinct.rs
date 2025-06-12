@@ -44,7 +44,7 @@ use crate::{
         VerifierContext,
     },
     receipt_claim::{MaybePruned, Unknown},
-    sha,
+    sha, Assumption,
 };
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM with a [STARK].
@@ -220,6 +220,14 @@ where
         Ok(self
             .control_inclusion_proof
             .root(&self.control_id, hash_suite.hashfn.as_ref()))
+    }
+
+    #[cfg(feature = "prove")]
+    pub(crate) fn assumption(&self) -> anyhow::Result<Assumption> {
+        Ok(Assumption {
+            claim: self.claim.digest::<sha::Impl>(),
+            control_root: self.control_root()?,
+        })
     }
 
     /// Prunes the claim, retaining its digest, and converts into a [SuccinctReceipt] with an unknown
