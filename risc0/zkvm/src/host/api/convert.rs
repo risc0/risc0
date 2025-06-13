@@ -14,7 +14,7 @@
 
 use std::{fmt::Debug, path::PathBuf};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
@@ -292,7 +292,15 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
-            povw_nonce_base: None, // TODO(povw): Add povw_nonce_base to proto
+            povw_job_id: match opts.povw_job_id.is_empty() {
+                true => None,
+                false => Some(
+                    opts.povw_job_id
+                        .as_slice()
+                        .try_into()
+                        .context("failed to parse povw_job_id")?,
+                ),
+            },
         })
     }
 }
@@ -305,6 +313,10 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
             max_segment_po2: opts.max_segment_po2 as u64,
+            povw_job_id: opts
+                .povw_job_id
+                .map(|id| id.to_bytes().to_vec())
+                .unwrap_or_default(),
         }
     }
 }
