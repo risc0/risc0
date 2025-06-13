@@ -197,7 +197,7 @@ pub fn main() {
         builder.build().unwrap()
     };
 
-    // TODO: Add PoVW here.
+    // TODO(povw): Add PoVW here.
     let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = std::fs::read(elf_path).unwrap();

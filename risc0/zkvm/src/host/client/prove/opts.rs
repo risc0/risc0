@@ -203,7 +203,7 @@ impl ProverOpts {
         }
     }
 
-    // TODO: Explain what the work log is and whatnot.
+    // TODO(povw): Explain what the work log is and whatnot.
     /// Return [ProverOpts] with proof of verifiable work (PoVW) enabled, and the specified work
     /// log identifer and job number as the base for PoVW nonces assigned to each segment.
     ///
