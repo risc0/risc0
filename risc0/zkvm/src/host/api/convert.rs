@@ -291,14 +291,14 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
             max_segment_po2: opts
                 .max_segment_po2
                 .try_into()
-                .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
+                .with_context(|| malformed_err("ProverOpts.max_segment_po2"))?,
             povw_job_id: match opts.povw_job_id.is_empty() {
                 true => None,
                 false => Some(
                     opts.povw_job_id
                         .as_slice()
                         .try_into()
-                        .context("failed to parse povw_job_id")?,
+                        .with_context(|| malformed_err("ProverOpts.povw_job_id"))?,
                 ),
             },
         })
@@ -826,7 +826,7 @@ impl TryFrom<pb::base::Digest> for Digest {
         value
             .words
             .try_into()
-            .map_err(|_| anyhow!("invalid digest"))
+            .with_context(|| anyhow!("invalid digest"))
     }
 }
 
