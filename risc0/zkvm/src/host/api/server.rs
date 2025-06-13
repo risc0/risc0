@@ -21,6 +21,7 @@ use std::{
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_binfmt::PovwJobId;
 use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -954,6 +955,16 @@ fn build_env<'a>(
     if request.coprocessor {
         let proxy = CoprocessorProxy::new(conn.clone());
         env_builder.coprocessor_callback(proxy);
+    }
+    if !request.povw_job_id.is_empty() {
+        let id = PovwJobId::from_bytes(
+            request
+                .povw_job_id
+                .as_slice()
+                .try_into()
+                .with_context(|| malformed_err("ExecutorEnv.povw_job_id"))?,
+        );
+        env_builder.with_povw(id.log, id.job);
     }
 
     for assumption in request.assumptions.iter() {

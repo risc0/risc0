@@ -292,15 +292,6 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .with_context(|| malformed_err("ProverOpts.max_segment_po2"))?,
-            povw_job_id: match opts.povw_job_id.is_empty() {
-                true => None,
-                false => Some(
-                    opts.povw_job_id
-                        .as_slice()
-                        .try_into()
-                        .with_context(|| malformed_err("ProverOpts.povw_job_id"))?,
-                ),
-            },
         })
     }
 }
@@ -313,10 +304,6 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
             max_segment_po2: opts.max_segment_po2 as u64,
-            povw_job_id: opts
-                .povw_job_id
-                .map(|id| id.to_bytes().to_vec())
-                .unwrap_or_default(),
         }
     }
 }
@@ -826,7 +813,7 @@ impl TryFrom<pb::base::Digest> for Digest {
         value
             .words
             .try_into()
-            .with_context(|| anyhow!("invalid digest"))
+            .map_err(|_| anyhow!("invalid digest"))
     }
 }
 

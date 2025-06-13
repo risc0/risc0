@@ -756,6 +756,10 @@ impl Client {
                 .as_ref()
                 .map(|x| x.path().to_string_lossy().into())
                 .unwrap_or_default(),
+            povw_job_id: env
+                .povw_job_id
+                .map(|x| x.to_bytes().to_vec())
+                .unwrap_or_default(),
         })
     }
 

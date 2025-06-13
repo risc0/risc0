@@ -227,6 +227,7 @@ message ExecutorEnv {
   string segment_path = 12;
   bool coprocessor = 13;
   optional uint32 keccak_max_po2 = 14;
+  bytes povw_job_id = 15;
 }
 
 message AssumptionReceipt {
@@ -242,7 +243,6 @@ message ProverOpts {
   ReceiptKind receipt_kind = 3;
   repeated base.Digest control_ids = 4;
   uint64 max_segment_po2 = 5;
-  bytes povw_job_id = 6;
 }
 
 enum ReceiptKind {

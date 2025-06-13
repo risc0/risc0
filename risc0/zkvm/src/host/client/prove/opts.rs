@@ -16,7 +16,6 @@
 
 #[cfg(feature = "prove")]
 use anyhow::Result;
-use risc0_binfmt::{PovwJobId, PovwLogId};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
@@ -45,11 +44,6 @@ pub struct ProverOpts {
     /// programs that are allowed to run and is a key field in the
     /// [SuccinctReceiptVerifierParameters][crate::SuccinctReceiptVerifierParameters].
     pub control_ids: Vec<Digest>,
-
-    /// TODO
-    ///
-    /// If None, no proof of verifiable work receipt will be produced.
-    pub povw_job_id: Option<PovwJobId>,
 
     /// Maximum cycle count, as a power of two (po2) that these prover options support.
     pub(crate) max_segment_po2: usize,
@@ -90,7 +84,6 @@ impl Default for ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            povw_job_id: None,
         }
     }
 }
@@ -112,7 +105,6 @@ impl ProverOpts {
                 .unwrap()
                 .collect(),
             max_segment_po2: po2_max,
-            povw_job_id: None,
         }
     }
 
@@ -139,7 +131,6 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            povw_job_id: None,
         }
     }
 
@@ -152,7 +143,6 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            povw_job_id: None,
         }
     }
 
@@ -167,7 +157,6 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
-            povw_job_id: None,
         }
     }
 
@@ -199,24 +188,6 @@ impl ProverOpts {
     pub fn with_control_ids(self, control_ids: Vec<Digest>) -> Self {
         Self {
             control_ids,
-            ..self
-        }
-    }
-
-    // TODO(povw): Explain what the work log is and whatnot.
-    /// Return [ProverOpts] with proof of verifiable work (PoVW) enabled, and the specified work
-    /// log identifer and job number as the base for PoVW nonces assigned to each segment.
-    ///
-    /// ```
-    /// # use risc0_zkvm::ProverOpts;
-    /// use ruint::uint;
-    ///
-    /// let work_log_id = uint!(0xC2A2379b379da8C076d51520C4f6a2fc5AAE3d1e_U160);
-    /// ProverOpts::default().with_povw(work_log_id, rand::random());
-    /// ```
-    pub fn with_povw(self, work_log: PovwLogId, job: u64) -> Self {
-        Self {
-            povw_job_id: Some(PovwJobId { log: work_log, job }),
             ..self
         }
     }

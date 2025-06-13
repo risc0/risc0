@@ -27,6 +27,7 @@ use std::{
 use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
+use risc0_binfmt::{PovwJobId, PovwLogId};
 use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
@@ -131,6 +132,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) pprof_out: Option<PathBuf>,
     pub(crate) input_digest: Option<Digest>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
+    pub(crate) povw_job_id: Option<PovwJobId>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -477,6 +479,22 @@ impl<'a> ExecutorEnvBuilder<'a> {
     #[stability::unstable]
     pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
         self.inner.coprocessor = Some(callback);
+        self
+    }
+
+    // TODO(povw): Explain what the work log is and whatnot.
+    /// Return [ProverOpts] with proof of verifiable work (PoVW) enabled, and the specified work
+    /// log identifer and job number as the base for PoVW nonces assigned to each segment.
+    ///
+    /// ```
+    /// # use risc0_zkvm::ProverOpts;
+    /// use ruint::uint;
+    ///
+    /// let work_log_id = uint!(0xC2A2379b379da8C076d51520C4f6a2fc5AAE3d1e_U160);
+    /// ProverOpts::default().with_povw(work_log_id, rand::random());
+    /// ```
+    pub fn with_povw(&mut self, work_log: PovwLogId, job: u64) -> &mut Self {
+        self.inner.povw_job_id = Some(PovwJobId { log: work_log, job });
         self
     }
 }
