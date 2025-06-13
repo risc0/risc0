@@ -1346,6 +1346,7 @@ dependencies = [
  "postcard",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "ruint",
  "semver",
  "serde",
  "tracing",
@@ -1412,6 +1413,7 @@ dependencies = [
  "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
+ "ruint",
  "serde",
  "tracing",
 ]
@@ -1494,7 +1496,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
- "ruint",
  "semver",
  "serde",
  "sha2",

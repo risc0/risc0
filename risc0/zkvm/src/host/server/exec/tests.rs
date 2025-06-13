@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage, Program, ProgramBinary};
+use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
@@ -1425,4 +1425,42 @@ fn session_limit(
         .build()
         .unwrap();
     execute_elf(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test_log::test]
+fn povw_nonce_assignment() {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let povw_job_id = PovwJobId {
+        log: PovwLogId::from(0x202ce_u64),
+        job: 42,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    for (i, segment_ref) in session.segments.into_iter().enumerate() {
+        let segment = segment_ref.resolve().unwrap();
+        assert_eq!(segment.inner.povw_nonce, Some(povw_job_id.nonce(i as u32)));
+    }
+}
+
+#[test_log::test]
+fn povw_nonce_default_assignment() {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    // If no PoVW work information is set in the ExecutorEnv, the povw_nonce should be None.
+    for segment_ref in session.segments.into_iter() {
+        let segment = segment_ref.resolve().unwrap();
+        assert_eq!(segment.inner.povw_nonce, None);
+    }
 }

@@ -23,7 +23,7 @@ use serde::{Deserialize, Serialize};
 pub type PovwLogId = U160;
 
 /// TODO
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PovwJobId {
     /// TODO
     pub log: PovwLogId,
@@ -61,6 +61,12 @@ impl PovwJobId {
     }
 }
 
+impl From<(PovwLogId, u64)> for PovwJobId {
+    fn from((log, job): (PovwLogId, u64)) -> Self {
+        Self { log, job }
+    }
+}
+
 impl TryFrom<&[u8]> for PovwJobId {
     type Error = core::array::TryFromSliceError;
 
@@ -70,7 +76,7 @@ impl TryFrom<&[u8]> for PovwJobId {
 }
 
 /// TODO
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PovwNonce {
     /// TODO
     pub log: PovwLogId,

@@ -964,7 +964,7 @@ fn build_env<'a>(
                 .try_into()
                 .with_context(|| malformed_err("ExecutorEnv.povw_job_id"))?,
         );
-        env_builder.with_povw(id.log, id.job);
+        env_builder.povw(id);
     }
 
     for assumption in request.assumptions.iter() {
