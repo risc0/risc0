@@ -23,7 +23,7 @@ use std::{
 use anyhow::{bail, Context, Result};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
-use risc0_binfmt::{ByteAddr, MemoryImage, PovwNonce, WordAddr, WorkLogId};
+use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
     log2_ceil,
@@ -75,7 +75,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     cycles: SessionCycles,
     ecall_metrics: EcallMetrics,
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
-    povw_nonce_base: Option<(WorkLogId, u64)>,
+    povw_job_id: Option<PovwJobId>,
 }
 
 #[non_exhaustive]
@@ -190,7 +190,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         syscall_handler: &'a S,
         input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
-        povw_nonce_base: Option<(WorkLogId, u64)>,
+        povw_job_id: Option<PovwJobId>,
     ) -> Self {
         Self {
             pc: ByteAddr(0),
@@ -209,7 +209,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             cycles: SessionCycles::default(),
             ecall_metrics: EcallMetrics::default(),
             ring: AllocRingBuffer::new(10),
-            povw_nonce_base,
+            povw_job_id,
         }
     }
 
@@ -464,11 +464,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn povw_nonce(&self, segment_index: u32) -> Option<PovwNonce> {
-        self.povw_nonce_base.map(|(log, job)| PovwNonce {
-            log,
-            job,
-            segment: segment_index,
-        })
+        self.povw_job_id.map(|job| job.nonce(segment_index))
     }
 
     #[cold]

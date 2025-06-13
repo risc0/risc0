@@ -21,8 +21,8 @@ use std::{
 
 use anyhow::{bail, Context as _, Result};
 use risc0_binfmt::{
-    AbiKind, ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, ProgramBinaryHeader,
-    SystemState, WorkLogId,
+    AbiKind, ByteAddr, ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary,
+    ProgramBinaryHeader, SystemState,
 };
 use risc0_circuit_rv32im::{
     execute::{
@@ -58,7 +58,7 @@ pub struct ExecutorImpl<'a> {
     pub(crate) elf: Option<Vec<u8>>,
     profiler: Option<Rc<RefCell<Profiler>>>,
     return_cache: Cell<(u32, u32)>,
-    povw_nonce_base: Option<(WorkLogId, u64)>,
+    povw_job_id: Option<PovwJobId>,
 }
 
 /// Check to see if the executor is compatible with the given guest program.
@@ -124,13 +124,13 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     /// TODO
-    pub fn with_povw(self, work_log: WorkLogId, job: u64) -> Self {
-        self.with_povw_nonce_base(Some((work_log, job)))
+    pub fn with_povw(self, work_log: PovwLogId, job: u64) -> Self {
+        self.with_povw_job_id(Some(PovwJobId { log: work_log, job }))
     }
 
-    pub(crate) fn with_povw_nonce_base(self, povw_nonce_base: Option<(WorkLogId, u64)>) -> Self {
+    pub(crate) fn with_povw_job_id(self, povw_job_id: Option<PovwJobId>) -> Self {
         Self {
-            povw_nonce_base,
+            povw_job_id,
             ..self
         }
     }
@@ -149,7 +149,7 @@ impl<'a> ExecutorImpl<'a> {
             syscall_table,
             profiler,
             return_cache: Cell::new((0, 0)),
-            povw_nonce_base: None,
+            povw_job_id: None,
         })
     }
 
@@ -206,7 +206,7 @@ impl<'a> ExecutorImpl<'a> {
             self,
             self.env.input_digest,
             self.env.trace.clone(),
-            self.povw_nonce_base,
+            self.povw_job_id,
         );
 
         let max_insn_cycles = if segment_limit_po2 >= 15 {

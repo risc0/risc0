@@ -37,7 +37,7 @@ pub use crate::{
     elf::{AbiKind, Program, ProgramBinary, ProgramBinaryHeader},
     exit_code::{ExitCode, InvalidExitCodeError},
     hash::{tagged_iter, tagged_list, tagged_list_cons, tagged_struct, Digestible},
-    povw::{PovwNonce, WorkLogId},
+    povw::{PovwJobId, PovwLogId, PovwNonce},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
 };
 

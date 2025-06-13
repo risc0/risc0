@@ -14,17 +14,66 @@
 
 //! Core types for function specific to proof of verifiable work (PoVW).
 
-use ruint::aliases::{U160, U256};
+// TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
+
+use ruint::aliases::{U160, U256, U64};
 use serde::{Deserialize, Serialize};
 
 /// TODO
-pub type WorkLogId = U160;
+pub type PovwLogId = U160;
+
+/// TODO
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub struct PovwJobId {
+    /// TODO
+    pub log: PovwLogId,
+    /// TODO
+    pub job: u64,
+}
+
+impl PovwJobId {
+    /// TODO
+    pub fn nonce(self, segment_index: u32) -> PovwNonce {
+        PovwNonce {
+            log: self.log,
+            job: self.job,
+            segment: segment_index,
+        }
+    }
+
+    /// TODO
+    pub fn to_bytes(self) -> [u8; U160::BYTES + U64::BYTES] {
+        [
+            self.job.to_le_bytes().as_slice(),
+            self.log.to_le_bytes::<{ U160::BYTES }>().as_slice(),
+        ]
+        .concat()
+        .try_into()
+        .unwrap()
+    }
+
+    /// TODO
+    pub fn from_bytes(bytes: [u8; U160::BYTES + U64::BYTES]) -> Self {
+        Self {
+            job: u64::from_le_bytes(bytes[..U64::BYTES].try_into().unwrap()),
+            log: U160::from_le_bytes::<{ U160::BYTES }>(bytes[U64::BYTES..].try_into().unwrap()),
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for PovwJobId {
+    type Error = core::array::TryFromSliceError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::from_bytes(value.try_into()?))
+    }
+}
 
 /// TODO
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct PovwNonce {
     /// TODO
-    pub log: WorkLogId,
+    pub log: PovwLogId,
     /// TODO
     pub job: u64,
     /// TODO

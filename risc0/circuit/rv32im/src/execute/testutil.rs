@@ -62,7 +62,7 @@ pub fn execute<S: Syscall>(
 
     let mut segments = Vec::new();
     let trace = Vec::new();
-    // TODO(povw): Provide a real povw_nonce_base here for testing
+    // TODO(povw): Provide a real povw_job_id here for testing
     let result = Executor::new(image, syscall_handler, input_digest, trace, None).run(
         segment_limit_po2,
         max_insn_cycles,

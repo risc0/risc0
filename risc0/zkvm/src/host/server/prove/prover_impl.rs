@@ -59,7 +59,7 @@ impl ProverServer for ProverImpl {
         elf: &[u8],
     ) -> Result<ProveInfo> {
         let session = ExecutorImpl::from_elf(env, elf)?
-            .with_povw_nonce_base(self.opts.povw_nonce_base)
+            .with_povw_job_id(self.opts.povw_job_id)
             .run()?;
         self.prove_session(ctx, &session)
     }
