@@ -292,6 +292,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
+            povw_nonce_base: None, // TODO: Add povw_nonce_base to proto
         })
     }
 }

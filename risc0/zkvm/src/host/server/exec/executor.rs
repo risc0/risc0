@@ -22,7 +22,7 @@ use std::{
 use anyhow::{bail, Context as _, Result};
 use risc0_binfmt::{
     AbiKind, ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, ProgramBinaryHeader,
-    SystemState,
+    SystemState, WorkLogId,
 };
 use risc0_circuit_rv32im::{
     execute::{
@@ -58,6 +58,7 @@ pub struct ExecutorImpl<'a> {
     pub(crate) elf: Option<Vec<u8>>,
     profiler: Option<Rc<RefCell<Profiler>>>,
     return_cache: Cell<(u32, u32)>,
+    povw_nonce_base: Option<(WorkLogId, u64)>,
 }
 
 /// Check to see if the executor is compatible with the given guest program.
@@ -86,7 +87,6 @@ impl<'a> ExecutorImpl<'a> {
     /// work will be done in each segment. This is the execution phase:
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
-    #[allow(dead_code)]
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage) -> Result<Self> {
         Self::with_details(env, None, image, None)
     }
@@ -123,6 +123,18 @@ impl<'a> ExecutorImpl<'a> {
         Self::with_details(env, Some(elf), image, None)
     }
 
+    /// TODO
+    pub fn with_povw(self, work_log: WorkLogId, job: u64) -> Self {
+        self.with_povw_nonce_base(Some((work_log, job)))
+    }
+
+    pub(crate) fn with_povw_nonce_base(self, povw_nonce_base: Option<(WorkLogId, u64)>) -> Self {
+        Self {
+            povw_nonce_base,
+            ..self
+        }
+    }
+
     fn with_details(
         env: ExecutorEnv<'a>,
         elf: Option<&[u8]>,
@@ -137,6 +149,7 @@ impl<'a> ExecutorImpl<'a> {
             syscall_table,
             profiler,
             return_cache: Cell::new((0, 0)),
+            povw_nonce_base: None,
         })
     }
 
@@ -193,6 +206,7 @@ impl<'a> ExecutorImpl<'a> {
             self,
             self.env.input_digest,
             self.env.trace.clone(),
+            self.povw_nonce_base,
         );
 
         let max_insn_cycles = if segment_limit_po2 >= 15 {

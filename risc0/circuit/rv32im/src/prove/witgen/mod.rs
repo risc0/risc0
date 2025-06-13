@@ -33,6 +33,7 @@ use risc0_zkp::{
     field::{Elem as _, ExtElem as _},
     hal::Hal,
 };
+use ruint::aliases::U256;
 
 use self::{
     bigint::BigIntState,
@@ -307,10 +308,24 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
 
     // povw nonce
-    // TODO: Fill in with real values
-    for i in 0..DIGEST_WORDS {
-        global[LAYOUT_GLOBAL.povw_nonce.values[i].low._super.offset] = Val::ZERO;
-        global[LAYOUT_GLOBAL.povw_nonce.values[i].high._super.offset] = Val::ZERO;
+    // Split the U256 nonce into shorts LE shorts and assign to the globals.
+    let nonce = segment.povw_nonce.map(|n| n.into()).unwrap_or(U256::ZERO);
+    let nonce_bytes = nonce.to_le_bytes::<{ U256::BYTES }>();
+    let nonce_shorts = nonce_bytes
+        .chunks_exact(2)
+        .map(|pair| u16::from_le_bytes(pair.try_into().unwrap()));
+    for (i, short) in nonce_shorts.enumerate() {
+        match i % 2 {
+            0 => {
+                global[LAYOUT_GLOBAL.povw_nonce.values[i / 2].low._super.offset] =
+                    Val::from_u64(short as u64);
+            }
+            1 => {
+                global[LAYOUT_GLOBAL.povw_nonce.values[i / 2].high._super.offset] =
+                    Val::from_u64(short as u64);
+            }
+            _ => unreachable!(),
+        }
     }
 
     global
