@@ -314,8 +314,17 @@ pub fn prove_zkr(
     ))?;
 
     let hashfn = opts.hash_suite()?.hashfn;
-    let control_inclusion_proof =
-        MerkleGroup::new(opts.control_ids.clone())?.get_proof(control_id, hashfn.as_ref())?;
+    let control_group = MerkleGroup::new(opts.control_ids.clone())?;
+    let control_root = control_group.calc_root(hashfn.as_ref());
+    let control_inclusion_proof = control_group.get_proof(control_id, hashfn.as_ref())?;
+
+    let verifier_parameters = SuccinctReceiptVerifierParameters {
+        control_root,
+        inner_control_root: None,
+        proof_system_info: PROOF_SYSTEM_INFO,
+        circuit_info: CircuitImpl::CIRCUIT_INFO,
+    }
+    .digest();
 
     Ok(SuccinctReceipt {
         seal: receipt.seal,
@@ -323,7 +332,7 @@ pub fn prove_zkr(
         control_id: *control_id,
         control_inclusion_proof,
         claim: MaybePruned::<Unknown>::Pruned(claim_digest),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+        verifier_parameters,
     })
 }
 

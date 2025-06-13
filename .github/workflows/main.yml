@@ -10,6 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
@@ -126,7 +131,7 @@ jobs:
         run: exit 1
 
   check:
-    runs-on: [self-hosted, cluster, Linux, cpu]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -198,6 +203,8 @@ jobs:
       RISC0_SKIP_BUILD_KERNELS: 1
     steps:
       - uses: actions/checkout@v4
+      - if: matrix.feature == 'cuda'
+        uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - name: "root: cargo clippy"
@@ -635,6 +642,7 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
+          key: Linux-cpu
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: Install sqlx-cli
