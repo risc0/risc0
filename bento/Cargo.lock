@@ -817,6 +817,7 @@ name = "bento-client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "bonsai-sdk",
  "bytemuck",
  "clap",
@@ -4026,7 +4027,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.2"
+version = "2.0.3"
 dependencies = [
  "cc",
  "cust",
