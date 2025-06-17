@@ -48,6 +48,9 @@ pub const TRAP_DISPATCH_ADDR: ByteAddr = ByteAddr(0xffff_2000);
 pub const MEMORY_END_ADDR: WordAddr = WordAddr(0x4000_0000);
 pub const MERKLE_TREE_START_ADDR: WordAddr = WordAddr(0x4000_0000);
 pub const MERKLE_TREE_END_ADDR: WordAddr = WordAddr(0x4400_0000);
+/// Starting word address for where the 8-word PoVW nonce is written to memory.
+pub const POVW_NONCE_START_ADDR: WordAddr = WordAddr(0x4400_0000);
+pub const POVW_NONCE_END_ADDR: WordAddr = WordAddr(0x4400_0008);
 
 pub const REG_ZERO: usize = 0; // zero constant
 pub const REG_RA: usize = 1; // return address
