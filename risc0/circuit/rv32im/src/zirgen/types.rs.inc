@@ -3035,12 +3035,12 @@ impl risc0_zkp::layout::Component for MemoryPageInLayout {
         Ok(())
     }
 }
-pub struct ControlLoadRoot__0_SuperLayout {
+pub struct ControlLoadRoot_SuperArm0_Super__0_SuperLayout {
     pub mem: &'static MemoryPageInLayout,
 }
-impl risc0_zkp::layout::Component for ControlLoadRoot__0_SuperLayout {
+impl risc0_zkp::layout::Component for ControlLoadRoot_SuperArm0_Super__0_SuperLayout {
     fn ty_name(&self) -> &'static str {
-        "ControlLoadRoot__0_SuperLayout"
+        "ControlLoadRoot_SuperArm0_Super__0_SuperLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -3048,9 +3048,81 @@ impl risc0_zkp::layout::Component for ControlLoadRoot__0_SuperLayout {
         Ok(())
     }
 }
-pub type ControlLoadRoot__0_SuperLayout8LayoutArray = [&'static ControlLoadRoot__0_SuperLayout; 8];
+pub type ControlLoadRoot_SuperArm0_Super__0_SuperLayout8LayoutArray =
+    [&'static ControlLoadRoot_SuperArm0_Super__0_SuperLayout; 8];
+pub struct ControlLoadRoot_SuperArm0_SuperLayout {
+    pub _1: &'static ControlLoadRoot_SuperArm0_Super__0_SuperLayout8LayoutArray,
+}
+impl risc0_zkp::layout::Component for ControlLoadRoot_SuperArm0_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ControlLoadRoot_SuperArm0_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_1", self._1)?;
+        Ok(())
+    }
+}
+pub struct ControlLoadRoot_SuperArm1_Super__0_SuperLayout {
+    pub mem: &'static MemoryPageInLayout,
+}
+impl risc0_zkp::layout::Component for ControlLoadRoot_SuperArm1_Super__0_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ControlLoadRoot_SuperArm1_Super__0_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("mem", self.mem)?;
+        Ok(())
+    }
+}
+pub type ControlLoadRoot_SuperArm1_Super__0_SuperLayout8LayoutArray =
+    [&'static ControlLoadRoot_SuperArm1_Super__0_SuperLayout; 8];
+pub struct ControlLoadRoot_SuperArm1_SuperLayout {
+    pub _1: &'static ControlLoadRoot_SuperArm1_Super__0_SuperLayout8LayoutArray,
+}
+impl risc0_zkp::layout::Component for ControlLoadRoot_SuperArm1_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ControlLoadRoot_SuperArm1_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_1", self._1)?;
+        Ok(())
+    }
+}
+pub struct ControlLoadRoot_SuperLayout {
+    pub arm0: &'static ControlLoadRoot_SuperArm0_SuperLayout,
+    pub arm1: &'static ControlLoadRoot_SuperArm1_SuperLayout,
+}
+impl risc0_zkp::layout::Component for ControlLoadRoot_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ControlLoadRoot_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("arm0", self.arm0)?;
+        v.visit_component("arm1", self.arm1)?;
+        Ok(())
+    }
+}
+pub type MemoryArgLayout16LayoutArray = [&'static MemoryArgLayout; 16];
+pub struct _Arguments_ControlLoadRoot_SuperLayout {
+    pub memory_arg: &'static MemoryArgLayout16LayoutArray,
+}
+impl risc0_zkp::layout::Component for _Arguments_ControlLoadRoot_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "_Arguments_ControlLoadRoot_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("memory_arg", self.memory_arg)?;
+        Ok(())
+    }
+}
 pub struct ControlLoadRootLayout {
-    pub _1: &'static ControlLoadRoot__0_SuperLayout8LayoutArray,
+    pub _super: &'static ControlLoadRoot_SuperLayout,
+    pub _arguments_control_load_root__super: &'static _Arguments_ControlLoadRoot_SuperLayout,
 }
 impl risc0_zkp::layout::Component for ControlLoadRootLayout {
     fn ty_name(&self) -> &'static str {
@@ -3058,7 +3130,11 @@ impl risc0_zkp::layout::Component for ControlLoadRootLayout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("_1", self._1)?;
+        v.visit_component("_super", self._super)?;
+        v.visit_component(
+            "_arguments_control_load_root__super",
+            self._arguments_control_load_root__super,
+        )?;
         Ok(())
     }
 }
@@ -3262,7 +3338,6 @@ impl risc0_zkp::layout::Component for ControlResume_SuperLayout {
         Ok(())
     }
 }
-pub type MemoryArgLayout16LayoutArray = [&'static MemoryArgLayout; 16];
 pub type CycleArgLayout8LayoutArray = [&'static CycleArgLayout; 8];
 pub struct _Arguments_ControlResume_SuperLayout {
     pub memory_arg: &'static MemoryArgLayout16LayoutArray,
@@ -8712,8 +8787,13 @@ pub struct DigestRegStruct {
 }
 pub type ValU32Struct8Array = [ValU32Struct; 8];
 #[derive(Copy, Clone, Debug)]
-pub struct ControlLoadRoot__0Struct {}
-pub type ControlLoadRoot__0Struct8Array = [ControlLoadRoot__0Struct; 8];
+pub struct ControlLoadRoot_SuperArm0_Super__0Struct {}
+#[derive(Copy, Clone, Debug)]
+pub struct ControlLoadRoot_SuperArm1_Super__0Struct {}
+pub type ControlLoadRoot_SuperArm0_Super__0Struct8Array =
+    [ControlLoadRoot_SuperArm0_Super__0Struct; 8];
+pub type ControlLoadRoot_SuperArm1_Super__0Struct8Array =
+    [ControlLoadRoot_SuperArm1_Super__0Struct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct ControlResume_SuperArm1_Super__0Struct {}
 pub type ControlResume_SuperArm1_Super__0Struct8Array = [ControlResume_SuperArm1_Super__0Struct; 8];
