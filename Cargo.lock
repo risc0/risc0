@@ -5872,10 +5872,12 @@ version = "3.0.0"
 dependencies = [
  "anyhow",
  "borsh",
+ "bytemuck",
  "derive_more",
  "elf",
  "lazy_static",
  "postcard",
+ "rand 0.9.1",
  "risc0-zkp",
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",

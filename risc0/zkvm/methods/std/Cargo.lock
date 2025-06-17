@@ -1340,6 +1340,7 @@ version = "3.0.0"
 dependencies = [
  "anyhow",
  "borsh",
+ "bytemuck",
  "derive_more",
  "elf",
  "lazy_static",

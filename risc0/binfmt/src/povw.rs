@@ -16,14 +16,20 @@
 
 // TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
 
-use ruint::aliases::{U160, U224, U256, U32, U64, U96};
+use ruint::aliases::{U160, U256, U32, U64};
 use serde::{Deserialize, Serialize};
+
+#[cfg(test)]
+use rand::{
+    distr::{Distribution, StandardUniform},
+    Rng,
+};
 
 /// TODO
 pub type PovwLogId = U160;
 
 /// TODO
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PovwJobId {
     /// TODO
     pub log: PovwLogId,
@@ -42,7 +48,7 @@ impl PovwJobId {
     }
 
     /// TODO
-    pub fn to_bytes(self) -> [u8; U224::BYTES] {
+    pub fn to_bytes(self) -> [u8; U160::BYTES + U64::BYTES] {
         [
             self.job.to_le_bytes().as_slice(),
             self.log.to_le_bytes::<{ U160::BYTES }>().as_slice(),
@@ -53,7 +59,7 @@ impl PovwJobId {
     }
 
     /// TODO
-    pub fn from_bytes(bytes: [u8; U224::BYTES]) -> Self {
+    pub fn from_bytes(bytes: [u8; U160::BYTES + U64::BYTES]) -> Self {
         Self {
             job: u64::from_le_bytes(bytes[..U64::BYTES].try_into().unwrap()),
             log: U160::from_le_bytes::<{ U160::BYTES }>(bytes[U64::BYTES..].try_into().unwrap()),
@@ -75,8 +81,18 @@ impl TryFrom<&[u8]> for PovwJobId {
     }
 }
 
+#[cfg(test)]
+impl Distribution<PovwJobId> for StandardUniform {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PovwJobId {
+        PovwJobId {
+            log: rng.random(),
+            job: rng.random(),
+        }
+    }
+}
+
 /// TODO
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PovwNonce {
     /// TODO
     pub log: PovwLogId,
@@ -103,9 +119,35 @@ impl PovwNonce {
     pub fn from_bytes(bytes: [u8; U256::BYTES]) -> Self {
         Self {
             segment: u32::from_le_bytes(bytes[..U32::BYTES].try_into().unwrap()),
-            job: u64::from_le_bytes(bytes[U32::BYTES..U96::BYTES].try_into().unwrap()),
-            log: U160::from_le_bytes::<{ U160::BYTES }>(bytes[U96::BYTES..].try_into().unwrap()),
+            job: u64::from_le_bytes(
+                bytes[U32::BYTES..U32::BYTES + U64::BYTES]
+                    .try_into()
+                    .unwrap(),
+            ),
+            log: U160::from_le_bytes::<{ U160::BYTES }>(
+                bytes[U32::BYTES + U64::BYTES..].try_into().unwrap(),
+            ),
         }
+    }
+
+    /// TODO
+    pub fn to_u32s(self) -> [u32; 8] {
+        let mut u32s = bytemuck::cast::<_, [u32; 8]>(self.to_bytes());
+        // Bytes are little-endian, so on a big-endian machine, they need to be reversed.
+        for x in u32s.iter_mut() {
+            *x = u32::from_le(*x);
+        }
+        u32s
+    }
+
+    /// TODO
+    pub fn to_u16s(self) -> [u16; 16] {
+        let mut u16s = bytemuck::cast::<_, [u16; 16]>(self.to_bytes());
+        // Bytes are little-endian, so on a big-endian machine, they need to be reversed.
+        for x in u16s.iter_mut() {
+            *x = u16::from_le(*x);
+        }
+        u16s
     }
 }
 
@@ -126,5 +168,37 @@ impl From<U256> for PovwNonce {
             job: ((value >> 32usize) & U256::from(u64::MAX)).to(),
             segment: (value & U256::from(u32::MAX)).to(),
         }
+    }
+}
+
+#[cfg(test)]
+impl Distribution<PovwNonce> for StandardUniform {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PovwNonce {
+        PovwNonce {
+            log: rng.random(),
+            job: rng.random(),
+            segment: rng.random(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{PovwJobId, PovwNonce};
+
+    #[test]
+    fn test_povw_job_id_round_trip() {
+        let original: PovwJobId = rand::random();
+        let bytes = original.to_bytes();
+        let reconstructed = PovwJobId::from_bytes(bytes);
+        assert_eq!(original, reconstructed);
+    }
+
+    #[test]
+    fn test_povw_nonce_round_trip() {
+        let original: PovwNonce = rand::random();
+        let bytes = original.to_bytes();
+        let reconstructed = PovwNonce::from_bytes(bytes);
+        assert_eq!(original, reconstructed);
     }
 }
