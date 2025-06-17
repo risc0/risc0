@@ -16,7 +16,7 @@
 
 // TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
 
-use ruint::aliases::{U160, U256, U64};
+use ruint::aliases::{U160, U224, U256, U32, U64, U96};
 use serde::{Deserialize, Serialize};
 
 /// TODO
@@ -42,7 +42,7 @@ impl PovwJobId {
     }
 
     /// TODO
-    pub fn to_bytes(self) -> [u8; U160::BYTES + U64::BYTES] {
+    pub fn to_bytes(self) -> [u8; U224::BYTES] {
         [
             self.job.to_le_bytes().as_slice(),
             self.log.to_le_bytes::<{ U160::BYTES }>().as_slice(),
@@ -53,7 +53,7 @@ impl PovwJobId {
     }
 
     /// TODO
-    pub fn from_bytes(bytes: [u8; U160::BYTES + U64::BYTES]) -> Self {
+    pub fn from_bytes(bytes: [u8; U224::BYTES]) -> Self {
         Self {
             job: u64::from_le_bytes(bytes[..U64::BYTES].try_into().unwrap()),
             log: U160::from_le_bytes::<{ U160::BYTES }>(bytes[U64::BYTES..].try_into().unwrap()),
@@ -84,6 +84,29 @@ pub struct PovwNonce {
     pub job: u64,
     /// TODO
     pub segment: u32,
+}
+
+impl PovwNonce {
+    /// TODO
+    pub fn to_bytes(self) -> [u8; U256::BYTES] {
+        [
+            self.segment.to_le_bytes().as_slice(),
+            self.job.to_le_bytes().as_slice(),
+            self.log.to_le_bytes::<{ U160::BYTES }>().as_slice(),
+        ]
+        .concat()
+        .try_into()
+        .unwrap()
+    }
+
+    /// TODO
+    pub fn from_bytes(bytes: [u8; U256::BYTES]) -> Self {
+        Self {
+            segment: u32::from_le_bytes(bytes[..U32::BYTES].try_into().unwrap()),
+            job: u64::from_le_bytes(bytes[U32::BYTES..U96::BYTES].try_into().unwrap()),
+            log: U160::from_le_bytes::<{ U160::BYTES }>(bytes[U96::BYTES..].try_into().unwrap()),
+        }
+    }
 }
 
 impl From<PovwNonce> for U256 {
