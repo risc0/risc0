@@ -25,7 +25,7 @@ use tokio::net::{tcp, unix, TcpStream, UnixStream};
 use tokio::sync::Mutex as TokioMutex;
 
 /// Create a pair of RPC sender and receiver. The sender is used to send messages to the remote
-/// side, the recevier is used to get responses and remote requests.
+/// side, the receiver is used to get responses and remote requests.
 pub fn rpc_system<StreamT: RpcStream>(
     stream: StreamT,
     meter: Meter,
