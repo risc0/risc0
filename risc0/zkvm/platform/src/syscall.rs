@@ -558,7 +558,13 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
         let unaligned_at_start = min(nread, WORD_SIZE - ptr_offset);
         // Read unaligned bytes into "firstword".
         let Return(nread_first, firstword) =
-            syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
+            syscall_2(
+                nr::SYS_READ,
+                null_mut(),
+                0,
+                fd,
+                unaligned_at_start as u32,
+            );
         debug_assert_eq!(nread_first as usize, unaligned_at_start);
 
         // Align up to a word boundary to do the main copy.
@@ -806,7 +812,16 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     use core::alloc::GlobalAlloc;
-    crate::heap::embedded::HEAP.alloc(core::alloc::Layout::from_size_align(bytes, align).unwrap())
+    
+    // Validate parameters before creating Layout to avoid panic
+    if !align.is_power_of_two() || align > (1 << 29) || bytes > isize::MAX as usize {
+        return core::ptr::null_mut();
+    }
+    
+    match core::alloc::Layout::from_size_align(bytes, align) {
+        Ok(layout) => crate::heap::embedded::HEAP.alloc(layout),
+        Err(_) => core::ptr::null_mut(),
+    }
 }
 
 /// # Safety
@@ -819,6 +834,11 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 ))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    // Validate parameters before calling allocation function
+    if !align.is_power_of_two() || align > (1 << 29) || bytes > isize::MAX as usize {
+        return core::ptr::null_mut();
+    }
+    
     crate::heap::bump::alloc_aligned(bytes, align)
 }
 
