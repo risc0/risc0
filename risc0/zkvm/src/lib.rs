@@ -134,8 +134,10 @@ pub use {
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
-                default_executor, default_prover, external::ExternalProver, Executor, Prover,
-                ProverOpts, ReceiptKind,
+                default_executor, default_prover,
+                external::ExternalProver,
+                opts::{ProverOpts, ReceiptKind},
+                Executor, Prover,
             },
         },
     },

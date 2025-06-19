@@ -222,6 +222,14 @@ where
             .root(&self.control_id, hash_suite.hashfn.as_ref()))
     }
 
+    #[cfg(feature = "prove")]
+    pub(crate) fn assumption(&self) -> anyhow::Result<crate::Assumption> {
+        Ok(crate::Assumption {
+            claim: self.claim.digest::<sha::Impl>(),
+            control_root: self.control_root()?,
+        })
+    }
+
     /// Prunes the claim, retaining its digest, and converts into a [SuccinctReceipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
     pub fn into_unknown(self) -> SuccinctReceipt<Unknown> {

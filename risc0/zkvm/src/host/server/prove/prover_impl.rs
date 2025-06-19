@@ -19,7 +19,7 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
     host::{
-        client::prove::ReceiptKind,
+        client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
         server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
@@ -181,6 +181,7 @@ impl ProverServer for ProverImpl {
         let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
 
         // Verify the receipt to catch if something is broken in the proving process.
+        // NOTE: If the proof is very large, this could take > 1s, e.g. with 1000 segments.
         composite_receipt.verify_integrity_with_context(ctx)?;
         check_claims(
             &session_claim,

@@ -14,7 +14,7 @@
 
 use std::{fmt::Debug, path::PathBuf};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
@@ -291,7 +291,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
             max_segment_po2: opts
                 .max_segment_po2
                 .try_into()
-                .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
+                .with_context(|| malformed_err("ProverOpts.max_segment_po2"))?,
         })
     }
 }

@@ -271,13 +271,13 @@ impl Digestible for Unknown {
 
 impl BorshSerialize for Unknown {
     fn serialize<W>(&self, _: &mut W) -> core::result::Result<(), borsh::io::Error> {
-        unreachable!("unreachable")
+        match *self { /* unreachable  */ }
     }
 }
 
 impl BorshDeserialize for Unknown {
     fn deserialize_reader<R>(_: &mut R) -> core::result::Result<Self, borsh::io::Error> {
-        unreachable!("unreachable")
+        panic!("BorshDeserialize attempted to deserialize Unknown; data is malformed")
     }
 }
 

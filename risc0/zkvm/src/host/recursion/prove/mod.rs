@@ -141,16 +141,8 @@ pub fn union(
     a: &SuccinctReceipt<Unknown>,
     b: &SuccinctReceipt<Unknown>,
 ) -> Result<SuccinctReceipt<UnionClaim>> {
-    let a_assumption = Assumption {
-        claim: a.claim.digest(),
-        control_root: a.control_root()?,
-    }
-    .digest();
-    let b_assumption = Assumption {
-        claim: b.claim.digest(),
-        control_root: b.control_root()?,
-    }
-    .digest();
+    let a_assumption = a.assumption()?.digest();
+    let b_assumption = b.assumption()?.digest();
 
     let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
         if a_assumption <= b_assumption {
@@ -158,6 +150,7 @@ pub fn union(
         } else {
             ((b_assumption, b), (a_assumption, a))
         };
+
     tracing::debug!("Proving union: left assumption = {:#?}", left_assumption);
     tracing::debug!("Proving union: right assumption = {:#?}", right_assumption);
 
