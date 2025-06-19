@@ -124,7 +124,7 @@ All other documentation can be found at [dev.risczero.com](https://dev.risczero.
 
 You can build and view the Rust documentation locally by using `cargo doc`.
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for dependencies.
-Source code for the documentation website can be found in the [website directory](./website).
+The source code for the documentation website can be found in the [website directory](./website).
 
 ## Building from source
 
