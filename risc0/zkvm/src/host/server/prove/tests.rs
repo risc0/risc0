@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, PovwJobId, PovwLogId, PovwNonce};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -1056,6 +1056,53 @@ fn run_unconstrained() -> Result<()> {
                 "Expecting 2 segments; adjust RUN_UNCONSTRAINED_CYCLES here, or CYCLES_PER_LOOP in multi_test?"
             );
         }
+    }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_nonce_assignment() -> Result<()> {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let povw_job_id = PovwJobId {
+        log: PovwLogId::from(0x202ce_u64),
+        job: 42,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+    let receipt = prove_session(&session).unwrap();
+    let segments = &receipt.inner.composite().unwrap().segments;
+    for (i, segment) in segments.iter().enumerate() {
+        segment
+            .verify_integrity_with_context(&VerifierContext::default())
+            .unwrap();
+        assert_eq!(segment.povw_nonce().unwrap(), povw_job_id.nonce(i as u32));
+    }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_nonce_default_assignment() -> Result<()> {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+    let receipt = prove_session(&session).unwrap();
+    let segments = &receipt.inner.composite().unwrap().segments;
+    for segment in segments.iter() {
+        segment
+            .verify_integrity_with_context(&VerifierContext::default())
+            .unwrap();
+        assert_eq!(segment.povw_nonce().unwrap(), PovwNonce::default());
     }
     Ok(())
 }

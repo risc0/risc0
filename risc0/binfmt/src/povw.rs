@@ -16,7 +16,7 @@
 
 // TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
 
-use ruint::aliases::{U160, U256, U32, U64};
+use ruint::aliases::{U160, U256, U64};
 use serde::{Deserialize, Serialize};
 
 #[cfg(test)]
@@ -105,29 +105,12 @@ pub struct PovwNonce {
 impl PovwNonce {
     /// TODO
     pub fn to_bytes(self) -> [u8; U256::BYTES] {
-        [
-            self.segment.to_le_bytes().as_slice(),
-            self.job.to_le_bytes().as_slice(),
-            self.log.to_le_bytes::<{ U160::BYTES }>().as_slice(),
-        ]
-        .concat()
-        .try_into()
-        .unwrap()
+        <U256 as From<Self>>::from(self).to_le_bytes()
     }
 
     /// TODO
     pub fn from_bytes(bytes: [u8; U256::BYTES]) -> Self {
-        Self {
-            segment: u32::from_le_bytes(bytes[..U32::BYTES].try_into().unwrap()),
-            job: u64::from_le_bytes(
-                bytes[U32::BYTES..U32::BYTES + U64::BYTES]
-                    .try_into()
-                    .unwrap(),
-            ),
-            log: U160::from_le_bytes::<{ U160::BYTES }>(
-                bytes[U32::BYTES + U64::BYTES..].try_into().unwrap(),
-            ),
-        }
+        U256::from_le_bytes::<{ U256::BYTES }>(bytes).into()
     }
 
     /// TODO
@@ -148,6 +131,15 @@ impl PovwNonce {
             *x = u16::from_le(*x);
         }
         u16s
+    }
+
+    /// TODO
+    pub fn from_u16s(mut u16s: [u16; 16]) -> Self {
+        // Bytes need to be little-endian, so on a big-endian machine, they need to be reversed.
+        for x in u16s.iter_mut() {
+            *x = u16::from_le(*x);
+        }
+        Self::from_bytes(bytemuck::cast(u16s))
     }
 }
 
@@ -195,10 +187,18 @@ mod tests {
     }
 
     #[test]
-    fn test_povw_nonce_round_trip() {
+    fn test_povw_nonce_bytes_round_trip() {
         let original: PovwNonce = rand::random();
         let bytes = original.to_bytes();
         let reconstructed = PovwNonce::from_bytes(bytes);
+        assert_eq!(original, reconstructed);
+    }
+
+    #[test]
+    fn test_povw_nonce_u16s_round_trip() {
+        let original: PovwNonce = rand::random();
+        let u16s = original.to_u16s();
+        let reconstructed = PovwNonce::from_u16s(u16s);
         assert_eq!(original, reconstructed);
     }
 }

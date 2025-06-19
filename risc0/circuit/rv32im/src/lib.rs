@@ -25,6 +25,7 @@ use core::num::TryFromIntError;
 
 use anyhow::{anyhow, ensure, Result};
 use derive_more::Debug;
+use risc0_binfmt::PovwNonce;
 use risc0_zkp::{
     adapter::CircuitInfo as _,
     core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
@@ -94,16 +95,20 @@ pub struct Rv32imV2Claim {
 }
 
 impl Rv32imV2Claim {
-    pub fn decode(seal: &[u32]) -> Result<Rv32imV2Claim> {
-        ensure!(seal[0] == RV32IM_SEAL_VERSION, "seal version mismatch");
-        let seal = &seal[1..];
+    pub fn decode(segment_seal: &[u32]) -> Result<Rv32imV2Claim> {
+        ensure!(
+            segment_seal[0] == RV32IM_SEAL_VERSION,
+            "seal version mismatch"
+        );
+        let segment_seal = &segment_seal[1..];
 
-        let io: &[Val] = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
+        let io: &[Val] = bytemuck::checked::cast_slice(&segment_seal[..CircuitImpl::OUTPUT_SIZE]);
         let global = Tree::new(io, LAYOUT_GLOBAL);
 
+        // NOTE: rng and povw are not read from the globals here. Neither need to be checked to
+        // establish the integrity of the Rv32imV2Claim.
         let pre_state = global.map(|c| c.state_in).get_digest_from_shorts()?;
         let post_state = global.map(|c| c.state_out).get_digest_from_shorts()?;
-        let _povw_nonce = global.map(|c| c.povw_nonce).get_digest_from_shorts()?;
         let input = global.map(|c| c.input).get_digest_from_shorts()?;
         let output = global.map(|c| c.output).get_digest_from_shorts()?;
         let is_terminate = global.map(|c| c.is_terminate).get_u32_from_elem()?;
@@ -112,10 +117,6 @@ impl Rv32imV2Claim {
         let term_a1_high = global.map(|c| c.term_a1high).get_u32_from_elem()?;
         let term_a1_low = global.map(|c| c.term_a1low).get_u32_from_elem()?;
         let shutdown_cycle = global.map(|c| c.shutdown_cycle).get_u32_from_elem()?;
-
-        // DO NOT MERGE
-        #[cfg(feature = "std")]
-        eprintln!("povw_nonce: {_povw_nonce}");
 
         fn try_as_u16(x: u32) -> Result<u16> {
             x.try_into()
@@ -146,4 +147,22 @@ impl Rv32imV2Claim {
             shutdown_cycle: Some(shutdown_cycle),
         })
     }
+}
+
+/// TODO
+pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
+    ensure!(
+        segment_seal[0] == RV32IM_SEAL_VERSION,
+        "seal version mismatch"
+    );
+    let segment_seal = &segment_seal[1..];
+
+    let io: &[Val] = bytemuck::checked::cast_slice(&segment_seal[..CircuitImpl::OUTPUT_SIZE]);
+    let global = Tree::new(io, LAYOUT_GLOBAL);
+
+    let povw_nonce_shorts_vec = global.map(|c| c.povw_nonce).get_shorts()?;
+    let povw_nonce_shorts_arr = povw_nonce_shorts_vec
+        .try_into()
+        .map_err(|_| anyhow!("povw nonce global has unexpected length"))?;
+    Ok(PovwNonce::from_u16s(povw_nonce_shorts_arr))
 }
