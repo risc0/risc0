@@ -21,8 +21,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::sha::Sha256;
 
-pub mod maybe_pruned;
-pub mod receipt;
+pub(crate) mod maybe_pruned;
+pub(crate) mod receipt;
+pub(crate) mod work;
 
 /// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
 /// only the digest of the claim is needed, and the full claim value cannot be determined by the
