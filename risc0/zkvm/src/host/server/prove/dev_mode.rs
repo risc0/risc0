@@ -21,7 +21,7 @@ use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{
-    claim::receipt::{exit_code_from_terminate_state, UnionClaim, Unknown},
+    claim::{receipt::{exit_code_from_terminate_state, UnionClaim}, Unknown},
     host::{
         prove_info::ProveInfo,
         server::{exec::executor::ExecutorImpl, session::null_callback},

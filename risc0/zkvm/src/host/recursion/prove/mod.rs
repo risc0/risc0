@@ -40,13 +40,14 @@ use risc0_zkp::{
 use serde::Serialize;
 
 use crate::{
-    claim::receipt::{Assumption, MaybePruned, Merge, UnionClaim},
+    claim::{maybe_pruned::Merge, receipt::{Assumption, UnionClaim}, Unknown},
+    MaybePruned,
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
     sha::Digestible,
-    ProverOpts, ReceiptClaim, Unknown,
+    ProverOpts, ReceiptClaim,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -366,7 +367,7 @@ pub fn test_zkr(
     digest1: &Digest,
     digest2: &Digest,
     po2: usize,
-) -> Result<SuccinctReceipt<crate::receipt_claim::Unknown>> {
+) -> Result<SuccinctReceipt<crate::claim::Unknown>> {
     use risc0_circuit_recursion::prove::zkr::get_zkr;
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 

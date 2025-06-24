@@ -26,9 +26,9 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    claim::receipt::{MaybePruned, Unknown},
+    claim::Unknown,
     receipt::{succinct::allowed_control_root, VerifierContext},
-    sha,
+    sha, MaybePruned,
 };
 
 /// A receipt composed of a Groth16 over the BN_254 curve

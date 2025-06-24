@@ -160,10 +160,7 @@ pub use {
 };
 
 pub use self::{
-    claim::receipt::{
-        Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
-        UnionClaim, Unknown,
-    },
+    claim::{maybe_pruned::{MaybePruned, PrunedValueError}, receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim, UnionClaim}, Unknown},
     receipt::{
         AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
         Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,

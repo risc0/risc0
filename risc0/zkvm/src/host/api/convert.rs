@@ -23,7 +23,7 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
-    claim::receipt::{UnionClaim, Unknown},
+    claim::{receipt::UnionClaim, Unknown},
     host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
         merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,

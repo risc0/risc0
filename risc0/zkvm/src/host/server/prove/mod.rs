@@ -29,7 +29,7 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    claim::receipt::{UnionClaim, Unknown},
+    claim::{receipt::UnionClaim, Unknown},
     host::prove_info::ProveInfo,
     is_dev_mode,
     receipt::{

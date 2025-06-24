@@ -18,7 +18,7 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
-    claim::receipt::{MaybePruned, Merge, UnionClaim, Unknown},
+    claim::maybe_pruned::Merge,
     host::{
         client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
@@ -30,8 +30,9 @@ use crate::{
     receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::prove::union,
     sha::Digestible,
-    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
-    PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
+    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    UnionClaim, Unknown, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.

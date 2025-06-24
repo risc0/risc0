@@ -40,7 +40,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    claim::receipt::Unknown,
+    claim::Unknown,
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumption, Assumptions, MaybePruned, Output, ReceiptClaim,

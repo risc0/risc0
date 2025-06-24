@@ -39,12 +39,12 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    claim::receipt::{MaybePruned, Unknown},
+    claim::Unknown,
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         VerifierContext,
     },
-    sha,
+    sha, MaybePruned,
 };
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM with a [STARK].
