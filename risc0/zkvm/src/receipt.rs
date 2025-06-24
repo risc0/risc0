@@ -40,7 +40,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    receipt_claim::Unknown,
+    claim::receipt::Unknown,
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumption, Assumptions, MaybePruned, Output, ReceiptClaim,
@@ -519,9 +519,19 @@ impl<Claim> From<SuccinctReceipt<Claim>> for AssumptionReceipt
 where
     Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
-    /// Create a proven assumption from a [InnerAssumptionReceipt].
+    /// Create a proven assumption from a [SuccinctReceipt].
     fn from(receipt: SuccinctReceipt<Claim>) -> Self {
         Self::Proven(InnerAssumptionReceipt::Succinct(receipt.into_unknown()))
+    }
+}
+
+impl<Claim> From<FakeReceipt<Claim>> for AssumptionReceipt
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    /// Create a fake proven assumption from a [FakeReceipt].
+    fn from(receipt: FakeReceipt<Claim>) -> Self {
+        Self::Proven(InnerAssumptionReceipt::Fake(receipt.into_unknown()))
     }
 }
 

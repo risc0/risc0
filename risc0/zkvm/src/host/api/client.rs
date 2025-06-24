@@ -24,13 +24,13 @@ use super::{
     SessionInfo,
 };
 use crate::{
+    claim::receipt::UnionClaim,
     get_version,
     host::{
         api::SegmentInfo,
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::UnionClaim,
     ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 

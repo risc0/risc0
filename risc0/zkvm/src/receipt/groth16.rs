@@ -26,8 +26,8 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
+    claim::receipt::{MaybePruned, Unknown},
     receipt::{succinct::allowed_control_root, VerifierContext},
-    receipt_claim::{MaybePruned, Unknown},
     sha,
 };
 

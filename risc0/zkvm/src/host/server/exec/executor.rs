@@ -37,8 +37,8 @@ use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
+    claim::receipt::exit_code_from_terminate_state,
     host::{client::env::SegmentPath, server::session::Session},
-    receipt_claim::exit_code_from_terminate_state,
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
 

@@ -26,10 +26,10 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
+    claim::receipt::{MaybePruned, Unknown},
     default_prover, get_prover_server,
     host::server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     mmr::MerkleMountainAccumulator,
-    receipt_claim::{MaybePruned, Unknown},
     sha::{self, Digestible},
     ExecutorEnv, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, SimpleSegmentRef,
     SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,

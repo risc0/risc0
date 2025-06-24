@@ -21,13 +21,13 @@ use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{
+    claim::receipt::{exit_code_from_terminate_state, UnionClaim, Unknown},
     host::{
         prove_info::ProveInfo,
         server::{exec::executor::ExecutorImpl, session::null_callback},
     },
     mmr::{GuestPeak, MerkleMountainAccumulator},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::{exit_code_from_terminate_state, UnionClaim, Unknown},
     recursion::MerkleProof,
     Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
     PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,

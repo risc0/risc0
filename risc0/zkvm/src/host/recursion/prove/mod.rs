@@ -40,11 +40,11 @@ use risc0_zkp::{
 use serde::Serialize;
 
 use crate::{
+    claim::receipt::{Assumption, MaybePruned, Merge, UnionClaim},
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{Assumption, MaybePruned, Merge, UnionClaim},
     sha::Digestible,
     ProverOpts, ReceiptClaim, Unknown,
 };

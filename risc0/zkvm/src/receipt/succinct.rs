@@ -39,11 +39,11 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    claim::receipt::{MaybePruned, Unknown},
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         VerifierContext,
     },
-    receipt_claim::{MaybePruned, Unknown},
     sha,
 };
 

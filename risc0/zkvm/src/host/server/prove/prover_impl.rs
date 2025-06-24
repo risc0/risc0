@@ -18,6 +18,7 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
+    claim::receipt::{MaybePruned, Merge, UnionClaim, Unknown},
     host::{
         client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
@@ -27,7 +28,6 @@ use crate::{
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
     receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
     recursion::prove::union,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
