@@ -25,7 +25,7 @@ use crate::{
     host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
     ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
-    VerifierContext,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
@@ -96,6 +96,35 @@ fn keccak_union() {
 #[test_log::test]
 fn basic() {
     prove_nothing().unwrap();
+}
+
+#[test_log::test]
+fn verifier_paramters_mismatch() {
+    // Proven with the default parameters.
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let receipt = get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .receipt;
+
+    // Construct a different set of verifier parameters. Doesn't really matter in what way it is
+    // different as long as it is a different control root.
+    let verifier_ctx = VerifierContext::default()
+        .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters::from_max_po2(14));
+    let err = receipt
+        .verify_integrity_with_context(&verifier_ctx)
+        .unwrap_err();
+
+    assert!(matches!(
+        err,
+        VerificationError::VerifierParametersMismatch { .. }
+    ));
 }
 
 /// We don't currently support a hashfn value other than "poseidon2", so we are testing that we get
