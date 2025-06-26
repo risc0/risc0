@@ -61,6 +61,7 @@ impl Default for PagedMap {
 
 impl PagedMap {
     /// Returns the value corresponding to the key.
+    #[inline(always)]
     pub fn get(&mut self, addr: &WordAddr) -> Option<u32> {
         let idx = addr.0 >> 20;
         let mid = self.high.entries.get(idx as usize).unwrap();
@@ -78,6 +79,7 @@ impl PagedMap {
     }
 
     /// Returns a mutable reference to the value corresponding to the key.
+    #[inline(always)]
     pub fn get_mut(&mut self, addr: &WordAddr) -> &mut Option<u32> {
         let high_idx = addr.0 >> 20;
         let mid_idx = (addr.0 >> 10) & PAGED_MAP_MASK;

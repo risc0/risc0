@@ -27,6 +27,7 @@ use strum::EnumIter;
 pub enum Component {
     CargoRiscZero,
     CppToolchain,
+    Gdb,
     R0Vm,
     RustToolchain,
 }
@@ -42,6 +43,7 @@ impl Component {
         match self {
             Self::CargoRiscZero => "cargo-risczero",
             Self::CppToolchain => "cpp",
+            Self::Gdb => "gdb",
             Self::R0Vm => "r0vm",
             Self::RustToolchain => "rust",
         }
@@ -57,6 +59,13 @@ impl Component {
     pub fn iter() -> impl Iterator<Item = Self> {
         <Self as strum::IntoEnumIterator>::iter()
     }
+
+    pub fn install_by_default(&self) -> bool {
+        matches!(
+            self,
+            Self::CargoRiscZero | Self::CppToolchain | Self::R0Vm | Self::RustToolchain
+        )
+    }
 }
 
 impl FromStr for Component {
@@ -66,6 +75,7 @@ impl FromStr for Component {
         match s {
             "cargo-risczero" => Ok(Self::CargoRiscZero),
             "cpp" => Ok(Self::CppToolchain),
+            "gdb" => Ok(Self::Gdb),
             "r0vm" => Ok(Self::R0Vm),
             "rust" => Ok(Self::RustToolchain),
             c => Err(RzupError::ComponentNotFound(c.into())),
@@ -213,6 +223,10 @@ pub fn set_default(env: &Environment, component: &Component, version: &Version) 
         Component::CppToolchain => {
             symlink(&version_dir, &env.risc0_dir().join("cpp"))?;
         }
+        Component::Gdb => symlink(
+            &version_dir.join("riscv32im-gdb"),
+            &env.risc0_dir().join("bin/riscv32im-gdb"),
+        )?,
     };
     Ok(())
 }
@@ -236,6 +250,7 @@ pub fn component_repo_name(component: &Component) -> &'static str {
         Component::CargoRiscZero | Component::R0Vm => "risc0",
         Component::RustToolchain => "rust",
         Component::CppToolchain => "toolchain",
+        Component::Gdb => "toolchain",
     }
 }
 
@@ -246,6 +261,15 @@ pub fn component_asset_name(
     Ok(match component {
         Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
         Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
+        Component::Gdb => match (platform.arch, platform.os) {
+            ("x86_64", Os::Linux) => ("riscv32im-gdb-linux-x86_64".to_string(), "tar.xz"),
+            ("aarch64", Os::MacOs) => ("riscv32im-gdb-osx-arm64".to_string(), "tar.xz"),
+            (other, os) => {
+                return Err(RzupError::UnsupportedPlatform(format!(
+                    "unknown architecture {other} for {os}"
+                )))
+            }
+        },
         Component::CppToolchain => match (platform.arch, platform.os) {
             ("x86_64", Os::Linux) => ("riscv32im-linux-x86_64".to_string(), "tar.xz"),
             ("aarch64", Os::MacOs) => ("riscv32im-osx-arm64".to_string(), "tar.xz"),
@@ -291,6 +315,11 @@ fn component_asset_name_test() {
     );
 
     assert_eq!(
+        component_asset_name(&Component::Gdb, &Platform::new("x86_64", Os::Linux)).unwrap(),
+        ("riscv32im-gdb-linux-x86_64".into(), "tar.xz")
+    );
+
+    assert_eq!(
         component_asset_name(
             &Component::CppToolchain,
             &Platform::new("aarch64", Os::MacOs)
@@ -306,6 +335,10 @@ fn component_asset_name_test() {
         .unwrap_err(),
         RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
     );
+    assert_eq!(
+        component_asset_name(&Component::Gdb, &Platform::new("x86_64", Os::MacOs)).unwrap_err(),
+        RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
+    );
 }
 
 pub fn component_version_str(component: &Component, version: &Version) -> String {
@@ -315,7 +348,7 @@ pub fn component_version_str(component: &Component, version: &Version) -> String
             format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
         }
         // cpp toolchain uses date-based versions
-        Component::CppToolchain => format!(
+        Component::CppToolchain | Component::Gdb => format!(
             "{:04}.{:02}.{:02}",
             version.major, version.minor, version.patch
         ),

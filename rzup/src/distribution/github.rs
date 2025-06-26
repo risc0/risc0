@@ -31,7 +31,7 @@ fn parse_version_from_tag_name(component: &Component, tag_name: &str) -> Result<
                 RzupError::InvalidVersion("Invalid Rust version tag format".into())
             })?)?
         }
-        Component::CppToolchain => parse_cpp_version(tag_name)?,
+        Component::CppToolchain | Component::Gdb => parse_cpp_version(tag_name)?,
         Component::CargoRiscZero | Component::R0Vm => Version::parse(
             tag_name
                 .strip_prefix('v')

@@ -45,7 +45,7 @@ pub(crate) struct Sha2State {
 impl Sha2State {
     fn step(
         &mut self,
-        ctx: &mut dyn Risc0Context,
+        ctx: &mut impl Risc0Context,
         cur_state: &mut CycleState,
         next_state: CycleState,
     ) {
@@ -55,7 +55,7 @@ impl Sha2State {
     }
 }
 
-pub fn ecall(ctx: &mut dyn Risc0Context) -> Result<()> {
+pub fn ecall(ctx: &mut impl Risc0Context) -> Result<()> {
     let state_in_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A0)?)?.waddr();
     let state_out_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A1)?)?.waddr();
     let data_addr = guest_addr(ctx.load_machine_register(LoadOp::Record, REG_A2)?)?.waddr();

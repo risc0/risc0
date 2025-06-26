@@ -21,10 +21,10 @@ pub(crate) mod segment;
 pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
-use core::fmt::Debug;
 
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{
@@ -166,10 +166,9 @@ impl Receipt {
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
         if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
-            return Err(VerificationError::VerifierParametersMismatch {
-                expected: self.inner.verifier_parameters(),
-                received: self.metadata.verifier_parameters,
-            });
+            // inner verifier_parameters do not match metadata.verifier_parameters.
+            // This is an internal inconsistency in the receipt struct.
+            return Err(VerificationError::ReceiptFormatError);
         }
 
         tracing::debug!("Receipt::verify_with_context");
@@ -210,10 +209,9 @@ impl Receipt {
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
         if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
-            return Err(VerificationError::VerifierParametersMismatch {
-                expected: self.inner.verifier_parameters(),
-                received: self.metadata.verifier_parameters,
-            });
+            // inner verifier_parameters do not match metadata.verifier_parameters.
+            // This is an internal inconsistency in the receipt struct.
+            return Err(VerificationError::ReceiptFormatError);
         }
 
         tracing::debug!("Receipt::verify_integrity_with_context");
@@ -273,6 +271,7 @@ impl Receipt {
 )]
 pub struct Journal {
     /// The raw bytes of the journal.
+    #[debug("{} bytes", bytes.len())]
     pub bytes: Vec<u8>,
 }
 
@@ -408,7 +407,7 @@ impl InnerReceipt {
 #[non_exhaustive]
 pub struct FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Claim containing information about the computation that this receipt pretends to prove.
     ///
@@ -418,7 +417,7 @@ where
 
 impl<Claim> FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Create a new [FakeReceipt] for the given claim.
     pub fn new(claim: impl Into<MaybePruned<Claim>>) -> Self {
@@ -518,7 +517,7 @@ impl From<InnerAssumptionReceipt> for AssumptionReceipt {
 
 impl<Claim> From<SuccinctReceipt<Claim>> for AssumptionReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Create a proven assumption from a [InnerAssumptionReceipt].
     fn from(receipt: SuccinctReceipt<Claim>) -> Self {
@@ -812,30 +811,21 @@ mod tests {
 
         assert_eq!(
             mangled_receipt.verify(Digest::ZERO).err().unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_with_context(&Default::default(), Digest::ZERO)
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_integrity_with_context(&Default::default())
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
     }
 

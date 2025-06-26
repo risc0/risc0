@@ -85,6 +85,13 @@ where
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
 
+        if params.digest::<sha::Impl>() != self.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: params.digest::<sha::Impl>(),
+                received: self.verifier_parameters,
+            });
+        }
+
         let (a0, a1) =
             split_digest(params.control_root).map_err(|_| VerificationError::ReceiptFormatError)?;
         let (c0, c1) = split_digest(self.claim.digest::<sha::Impl>())
@@ -195,7 +202,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("9f39696cb3ae9d6038d6b7a55c09017f0cf35e226ad7582b82dbabb0dae53385")
+            digest!("f536085a791bdbc6cb46ab3074f88e9e94eabb192de8daca3caee1f4ed811b08")
         );
     }
 }

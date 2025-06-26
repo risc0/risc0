@@ -241,7 +241,9 @@ impl GuestBuilder for GuestListEntry {
 /// Returns the given cargo Package from the metadata in the Cargo.toml manifest
 /// within the provided `manifest_dir`.
 pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
-    let manifest_dir = manifest_dir.as_ref();
+    // Canonicalize the manifest directory specified by the user.
+    let manifest_dir =
+        fs::canonicalize(manifest_dir.as_ref()).expect("could not canonicalize manifest path");
     let manifest_path = manifest_dir.join("Cargo.toml");
     let manifest_meta = MetadataCommand::new()
         .manifest_path(&manifest_path)

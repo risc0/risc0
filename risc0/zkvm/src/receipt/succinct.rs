@@ -111,6 +111,13 @@ where
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
 
+        if params.digest::<sha::Impl>() != self.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: params.digest::<sha::Impl>(),
+                received: self.verifier_parameters,
+            });
+        }
+
         // Check that the proof system and circuit info strings match what is implemented by this
         // function. Info strings are used a version identifiers, and this verify implementation
         // supports exactly one proof systema and circuit version at a time.
@@ -357,7 +364,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("68ecff4bad7b3348ca3ac642e852b8d66b7158307f7d2a001c13887698fe6019")
+            digest!("bb81f1400f9a2b28b457f9d686c28ec3ffeece08b0b00f1b0d7643a1cc471115")
         );
     }
 

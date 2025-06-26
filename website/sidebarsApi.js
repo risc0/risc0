@@ -170,17 +170,12 @@ export default {
       items: [
         {
           type: "doc",
-          label: "Posting & Verifying Proofs on Ethereum",
-          id: "blockchain-integration/bonsai-on-eth",
+          label: "RISC Zero on Ethereum",
+          id: "blockchain-integration/risc-zero-on-eth",
         },
         {
           type: "doc",
-          label: "Ethereum Examples",
-          id: "blockchain-integration/eth-examples",
-        },
-        {
-          type: "doc",
-          label: "Verifier Contract",
+          label: "Verifier Contracts",
           id: "blockchain-integration/contracts/verifier",
         },
       ],

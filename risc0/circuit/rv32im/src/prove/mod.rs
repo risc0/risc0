@@ -19,8 +19,11 @@ mod witgen;
 
 use anyhow::Result;
 use cfg_if::cfg_if;
+use risc0_core::scope;
 
 use crate::execute::segment::Segment;
+
+pub use witgen::PreflightResults;
 
 const GLOBAL_MIX: usize = 0;
 const GLOBAL_OUT: usize = 1;
@@ -28,7 +31,15 @@ const GLOBAL_OUT: usize = 1;
 pub type Seal = Vec<u32>;
 
 pub trait SegmentProver {
-    fn prove(&self, segment: &Segment) -> Result<Seal>;
+    fn prove(&self, segment: &Segment) -> Result<Seal> {
+        scope!("prove");
+        let results = self.preflight(segment)?;
+        self.prove_core(results)
+    }
+
+    fn preflight(&self, segment: &Segment) -> Result<PreflightResults>;
+
+    fn prove_core(&self, preflight_results: PreflightResults) -> Result<Seal>;
 }
 
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
