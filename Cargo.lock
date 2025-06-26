@@ -6394,6 +6394,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-povw-guests"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "postcard",
+ "rand 0.8.5",
+ "risc0-binfmt",
+ "risc0-build",
+ "risc0-povw",
+ "risc0-zkvm",
+ "ruint",
+]
+
+[[package]]
 name = "risc0-r0vm"
 version = "3.0.0"
 dependencies = [
