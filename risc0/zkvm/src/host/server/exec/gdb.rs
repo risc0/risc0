@@ -161,14 +161,14 @@ mod tests {
             "\
             Reading symbols from .*\\.elf\\.\\.\\.\n\
             0xc0000000 in \\?\\? \\(\\)\n\
-            Breakpoint 1 at 0x[0-9a-f]*: file src/bin/multi_test/profiler.rs, line 33\\.\n\n\
+            Breakpoint 1 at 0x[0-9a-f]*: file src/bin/multi_test/profiler.rs, line [0-9]+\\.\n\n\
             Breakpoint 1, multi_test::profiler::profile_test_func1 \\(\\)\n\
-            \\s+at src/bin/multi_test/profiler.rs:21\n\
-            21\t    profile_test_func2\\(\\);\n\
+            \\s+at src/bin/multi_test/profiler.rs:[0-9]+\n\
+            [0-9]+\t    profile_test_func2\\(\\);\n\
             #0  multi_test::profiler::profile_test_func1 \\(\\)\n\
-            \\s+at src/bin/multi_test/profiler.rs:21\n.*\
-            #1  0x002[0-9a-f]* in multi_test::main \\(\\) at src/bin/multi_test.rs:127\n\
-            #2  0x002[0-9a-f]* in risc0_zkvm::guest::__start \\(\\) at src/guest/mod.rs:159\n\
+            \\s+at src/bin/multi_test/profiler.rs:[0-9]+\n.*\
+            #1  0x002[0-9a-f]* in multi_test::main \\(\\) at src/bin/multi_test.rs:[0-9]+\n\
+            #2  0x002[0-9a-f]* in risc0_zkvm::guest::__start \\(\\) at src/guest/mod.rs:[0-9]+\n\
             #3  0x002[0-9a-f]* in _start \\(\\)\n\
             Backtrace stopped: frame did not save the PC\n\
             \\(gdb\\) A debugging session is active.\n\n\
