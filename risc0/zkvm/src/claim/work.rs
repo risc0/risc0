@@ -14,6 +14,7 @@
 
 //! [WorkClaim] and associated types and functions.
 
+use alloc::vec::Vec;
 use core::fmt;
 
 use risc0_binfmt::{tagged_struct, Digestible, PovwNonce};

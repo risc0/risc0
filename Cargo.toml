@@ -16,6 +16,7 @@ members = [
   "risc0/circuit/rv32im-sys",
   "risc0/core",
   "risc0/groth16",
+  "risc0/povw",
   "risc0/r0vm",
   "risc0/sys",
   "risc0/tools",

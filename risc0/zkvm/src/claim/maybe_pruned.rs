@@ -14,6 +14,7 @@
 
 //! The [MaybePruned] type and related traits, supporting Merkle-ized structs.
 
+#[cfg(feature = "prove")]
 use alloc::vec::Vec;
 use core::fmt;
 
@@ -23,9 +24,11 @@ use risc0_binfmt::Digestible;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
+use crate::sha::{self, Sha256};
+
+#[cfg(feature = "prove")]
 use crate::{
     claim::receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim},
-    sha::{self, Sha256},
     SystemState,
 };
 
@@ -349,8 +352,8 @@ mod tests {
     use hex::FromHex;
 
     use super::{Assumptions, MaybePruned, Merge, Output, ReceiptClaim, SystemState};
-    use crate::ExitCode;
     use crate::sha::{Digest, Digestible};
+    use crate::ExitCode;
 
     /// Testing utility for randomly pruning structs.
     trait RandPrune {
