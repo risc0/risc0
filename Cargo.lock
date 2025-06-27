@@ -6767,7 +6767,9 @@ dependencies = [
  "num-traits",
  "risc0-binfmt",
  "risc0-core",
+ "risc0-groth16-sys",
  "risc0-zkp",
+ "rzup",
  "serde",
  "serde_json",
  "stability",
@@ -6778,7 +6780,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16-sys"
-version = "3.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "blst",

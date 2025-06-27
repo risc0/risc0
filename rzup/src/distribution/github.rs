@@ -11,9 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::components::{
-    component_asset_name, component_repo_name, component_version_str, Component,
-};
+
+use crate::components::Component;
 use crate::distribution::{
     check_for_not_found, download_bytes, download_json, parse_cpp_version, Platform, ProgressWriter,
 };
@@ -37,6 +36,7 @@ fn parse_version_from_tag_name(component: &Component, tag_name: &str) -> Result<
                 .strip_prefix('v')
                 .ok_or_else(|| RzupError::InvalidVersion("Invalid version tag format".into()))?,
         )?,
+        Component::Risc0Groth16 => unimplemented!(),
     })
 }
 
@@ -93,9 +93,9 @@ impl<'a> GithubRelease<'a> {
         version: &Version,
         platform: &Platform,
     ) -> Result<String> {
-        let (asset, ext) = component_asset_name(component, platform)?;
-        let version_str = component_version_str(component, version);
-        let repo = component_repo_name(component);
+        let (asset, ext) = component.asset_name(platform)?;
+        let version_str = component.version_str(version);
+        let repo = component.repo_name();
         Ok(format!(
             "{base_url}/{repo}/releases/download/{version_str}/{asset}.{ext}",
             base_url = self.base_urls.risc0_github_base_url
@@ -103,7 +103,7 @@ impl<'a> GithubRelease<'a> {
     }
 
     pub fn get_archive_name(&self, component: &Component, platform: &Platform) -> Result<PathBuf> {
-        let (asset_name, ext) = component_asset_name(component, platform)?;
+        let (asset_name, ext) = component.asset_name(platform)?;
         Ok(PathBuf::from(format!("{asset_name}.{ext}")))
     }
 
@@ -113,8 +113,8 @@ impl<'a> GithubRelease<'a> {
         component: &Component,
         version: &Version,
     ) -> Result<bool> {
-        let repo = component_repo_name(component);
-        let version_str = component_version_str(component, version);
+        let repo = component.repo_name();
+        let version_str = component.version_str(version);
         let url = format!(
             "{base_url}/repos/risc0/{repo}/releases/tags/{version_str}",
             base_url = self.base_urls.github_api_base_url
@@ -128,7 +128,7 @@ impl<'a> GithubRelease<'a> {
             message: format!("Fetching latest version for {component}"),
         });
 
-        let repo = component_repo_name(component);
+        let repo = component.repo_name();
         let url = format!(
             "{base_url}/repos/risc0/{repo}/releases/latest",
             base_url = self.base_urls.github_api_base_url

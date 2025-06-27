@@ -34,5 +34,4 @@ fn build_cuda_kernels() {
 
     println!("cargo:rustc-link-lib=static=blst");
     println!("cargo:rustc-link-lib=static=sppark_cuda");
-    // println!("cargo:rustc-link-lib=static=risc0_circom_witnesscalc");
 }

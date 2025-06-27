@@ -20,7 +20,9 @@ num-bigint = { version = "0.4", default-features = false }
 num-traits = { version = "0.2", default-features = false }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true, optional = true }
+risc0-groth16-sys = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }
+rzup = { workspace = true }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
@@ -39,6 +41,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 all-features = true
 
 [features]
+cuda = ["dep:risc0-groth16-sys"]
 default = ["std"]
 prove = [
   "dep:risc0-core",
