@@ -23,7 +23,7 @@ clap-cargo = { version = "0.15.1", features = ["cargo_metadata"] }
 const_format = "0.2"
 hex = "0.4"
 regex = "1.11.1"
-risc0-build = { workspace = true }
+risc0-build = { workspace = true, features = ["unstable"] }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, features = ["unstable"] }
 semver = "1"
@@ -58,7 +58,6 @@ experimental = [
   "dep:risc0-build",
   "dep:zip",
   "risc0-zkvm/prove",
-  "risc0-build/unstable",
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
