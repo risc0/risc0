@@ -1,0 +1,29 @@
+[package]
+name = "risc0-groth16-sys"
+description = "C++ code for groth16 proof generation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+links = "risc0-groth16-sys"
+
+[build-dependencies]
+risc0-build-kernel = { workspace = true }
+
+[dependencies]
+anyhow = "1.0.98"
+blst = { version = "0.3.15", optional = true }
+circom-witnesscalc = { git = "https://github.com/supranational/circom-witnesscalc.git", rev = "a2e8f1a2f480bb562575b2d168b69db139fe0027" }
+sppark = { workspace = true, optional = true }
+
+[dev-dependencies]
+tracing = "0.1.41"
+test-log = { version = "0.2.17", default-features = false, features = [
+  "trace",
+] }
+
+[features]
+default = []
+cuda = ["dep:blst", "dep:sppark"]
+metal = []

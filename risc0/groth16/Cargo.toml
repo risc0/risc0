@@ -9,14 +9,15 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-ark-bn254 = { version = "0.5" }
-ark-ec = { version = "0.5" }
+ark-bn254 = "0.5"
+ark-ec = "0.5"
+ark-ff = "0.5.0"
 ark-groth16 = { version = "0.5", default-features = false }
 ark-serialize = { version = "0.5", default-features = false }
-bytemuck = { version = "1.14" }
+bytemuck = "1.14"
 hex = { version = "0.4", default-features = false, features = ["alloc"] }
 num-bigint = { version = "0.4", default-features = false }
-num-traits = { version = "0.2", default-features = false, optional = true }
+num-traits = { version = "0.2", default-features = false }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }
@@ -30,7 +31,7 @@ tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", optional = true }
 
 [dev-dependencies]
-serde_json = { version = "1.0" }
+serde_json = "1.0"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [package.metadata.docs.rs]
@@ -40,7 +41,6 @@ all-features = true
 [features]
 default = ["std"]
 prove = [
-  "dep:num-traits",
   "dep:risc0-core",
   "dep:serde_json",
   "dep:tempfile",
@@ -55,7 +55,7 @@ std = [
   "ark-serialize/std",
   "hex/std",
   "num-bigint/std",
-  "num-traits?/std",
+  "num-traits/std",
   "risc0-zkp/std",
   "serde/std",
 ]

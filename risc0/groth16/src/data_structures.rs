@@ -239,12 +239,23 @@ pub struct PublicInputsJson {
 impl PublicInputsJson {
     /// Converts public inputs to scalars over the field of the G1/G2 groups.
     pub fn to_scalar(&self) -> Result<Vec<Fr>, Error> {
+        use ark_ff::PrimeField as _;
+        use num_traits::Num as _;
         self.values
             .iter()
-            .map(|input| {
-                ark_bn254::Fr::from_str(input)
-                    .map(Fr)
-                    .map_err(|_| anyhow!("Failed to decode 'public inputs' values"))
+            .map(|str| {
+                if let Some(stripped) = str.strip_prefix("0x") {
+                    let biguint = num_bigint::BigUint::from_str_radix(stripped, 16)
+                        .map_err(|err| anyhow!(err))?;
+                    let bigint = biguint.try_into().map_err(|_| anyhow!("Invalid bigint"))?;
+                    ark_bn254::Fr::from_bigint(bigint)
+                        .map(Fr)
+                        .ok_or_else(|| anyhow!("Not a valid field element: {str}"))
+                } else {
+                    ark_bn254::Fr::from_str(str)
+                        .map(Fr)
+                        .map_err(|err| anyhow!("Failed to decode 'public inputs' values: {err:?}"))
+                }
             })
             .collect()
     }
