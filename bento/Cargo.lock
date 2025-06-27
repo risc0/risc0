@@ -4057,6 +4057,7 @@ dependencies = [
  "anyhow",
  "ark-bn254",
  "ark-ec",
+ "ark-ff",
  "ark-groth16",
  "ark-serialize",
  "bytemuck",
@@ -4706,9 +4707,9 @@ dependencies = [
 
 [[package]]
 name = "sppark"
-version = "0.1.11"
+version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16bf457036c0a778140ce4c3bcf9ff30c5c70a9d9c0bb04fe513af025b647b2c"
+checksum = "6bdc4f02f557e3037bbe2a379cac8be6e014a67beb7bf0996b536979392f6361"
 dependencies = [
  "cc",
  "which",
