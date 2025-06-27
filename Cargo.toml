@@ -57,6 +57,7 @@ risc0-circuit-rv32im = { version = "4.0.0", default-features = false, path = "ri
 risc0-circuit-rv32im-sys = { version = "4.0.0", default-features = false, path = "risc0/circuit/rv32im-sys" }
 risc0-core = { version = "2.0.1", default-features = false, path = "risc0/core" }
 risc0-groth16 = { version = "3.0.0", default-features = false, path = "risc0/groth16" }
+risc0-groth16-sys = { version = "0.1.0", default-features = false, path = "risc0/groth16-sys" }
 risc0-r0vm = { version = "3.0.0", default-features = false, path = "risc0/r0vm" }
 risc0-sys = { version = "1.5.0", default-features = false, path = "risc0/sys" }
 risc0-zkp = { version = "3.0.0", default-features = false, path = "risc0/zkp" }
