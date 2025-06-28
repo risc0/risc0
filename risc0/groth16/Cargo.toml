@@ -22,13 +22,12 @@ risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true, optional = true }
 risc0-groth16-sys = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }
-rzup = { workspace = true }
+rzup = { workspace = true, optional = true }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
 ] }
 serde_json = { version = "1.0", optional = true }
-stability = "0.2"
 tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", optional = true }
 
@@ -41,10 +40,11 @@ rustdoc-args = ["--cfg", "docsrs"]
 all-features = true
 
 [features]
-cuda = ["dep:risc0-groth16-sys"]
+cuda = ["dep:risc0-groth16-sys", "prove"]
 default = ["std"]
 prove = [
   "dep:risc0-core",
+  "dep:rzup",
   "dep:serde_json",
   "dep:tempfile",
   "dep:tracing",

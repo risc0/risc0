@@ -25,6 +25,7 @@ use std::rc::Rc;
 
 use anyhow::{anyhow, bail, ensure, Result};
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_groth16::prove::shrink_wrap;
 use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
@@ -36,8 +37,8 @@ use crate::{
     },
     receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
-    stark_to_snark, ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
-    Segment, Session, VerifierContext,
+    ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, Segment,
+    Session, VerifierContext,
 };
 
 mod private {
@@ -175,8 +176,7 @@ pub trait ProverServer: private::Sealed {
     ) -> Result<Groth16Receipt<ReceiptClaim>> {
         let ident_receipt = self.identity_p254(receipt).unwrap();
         let seal_bytes = ident_receipt.get_seal_bytes();
-
-        let seal = stark_to_snark(&seal_bytes)?.to_vec();
+        let seal = shrink_wrap(&seal_bytes)?.to_vec();
         Ok(Groth16Receipt {
             seal,
             claim: receipt.claim.clone(),

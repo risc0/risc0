@@ -15,10 +15,10 @@
 extern crate alloc;
 
 use alloc::{string::String, vec, vec::Vec};
+use core::str::FromStr;
 
 use anyhow::{anyhow, Error, Result};
 use ark_bn254::Bn254;
-use core::str::FromStr;
 use serde::{Deserialize, Serialize};
 
 use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
@@ -28,8 +28,10 @@ use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
 pub struct Seal {
     /// Proof 'a' value
     pub a: Vec<Vec<u8>>,
+
     /// Proof 'b' value
     pub b: Vec<Vec<Vec<u8>>>,
+
     /// Proof 'c' value
     pub c: Vec<Vec<u8>>,
 }
@@ -64,8 +66,8 @@ impl Seal {
         result
     }
 
-    /// Method to convert back from a `Vec<u8>`
-    pub fn from_vec(data: &[u8]) -> Result<Seal, Error> {
+    /// Decode a seal from raw bytes.
+    pub fn decode(data: &[u8]) -> Result<Seal, Error> {
         if data.len() != Self::SIZE {
             return Err(anyhow!("Data length mismatch"));
         }

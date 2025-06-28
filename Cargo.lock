@@ -6772,7 +6772,6 @@ dependencies = [
  "rzup",
  "serde",
  "serde_json",
- "stability",
  "tempfile",
  "test-log",
  "tracing",
