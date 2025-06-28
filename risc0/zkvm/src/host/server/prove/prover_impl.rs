@@ -18,8 +18,9 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
+    claim::maybe_pruned::Merge,
     host::{
-        client::prove::ReceiptKind,
+        client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
         server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
@@ -27,11 +28,11 @@ use crate::{
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
     receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
     recursion::prove::union,
     sha::Digestible,
-    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
-    PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
+    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    UnionClaim, Unknown, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -181,6 +182,7 @@ impl ProverServer for ProverImpl {
         let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
 
         // Verify the receipt to catch if something is broken in the proving process.
+        // NOTE: If the proof is very large, this could take > 1s, e.g. with 1000 segments.
         composite_receipt.verify_integrity_with_context(ctx)?;
         check_claims(
             &session_claim,

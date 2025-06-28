@@ -24,13 +24,13 @@ use super::{
     SessionInfo,
 };
 use crate::{
+    claim::receipt::UnionClaim,
     get_version,
     host::{
         api::SegmentInfo,
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::UnionClaim,
     ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
@@ -755,6 +755,10 @@ impl Client {
                 .segment_path
                 .as_ref()
                 .map(|x| x.path().to_string_lossy().into())
+                .unwrap_or_default(),
+            povw_job_id: env
+                .povw_job_id
+                .map(|x| x.to_bytes().to_vec())
                 .unwrap_or_default(),
         })
     }

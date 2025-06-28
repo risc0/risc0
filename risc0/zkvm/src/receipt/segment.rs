@@ -17,7 +17,7 @@ use alloc::{collections::BTreeSet, string::String, vec::Vec};
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
+use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, PovwNonce};
 use risc0_zkp::{
     adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
@@ -134,6 +134,12 @@ impl SegmentReceipt {
     /// Number of bytes used by the seal for this receipt.
     pub fn seal_size(&self) -> usize {
         core::mem::size_of_val(self.seal.as_slice())
+    }
+
+    // TODO(povw) avoid using anyhow as the result type here?
+    /// TODO
+    pub fn povw_nonce(&self) -> anyhow::Result<PovwNonce> {
+        risc0_circuit_rv32im::decode_povw_nonce(&self.seal)
     }
 }
 

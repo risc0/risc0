@@ -40,13 +40,14 @@ use risc0_zkp::{
 use serde::Serialize;
 
 use crate::{
+    claim::{maybe_pruned::Merge, receipt::{Assumption, UnionClaim}, Unknown},
+    MaybePruned,
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{Assumption, MaybePruned, Merge, UnionClaim},
     sha::Digestible,
-    ProverOpts, ReceiptClaim, Unknown,
+    ProverOpts, ReceiptClaim,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -141,16 +142,8 @@ pub fn union(
     a: &SuccinctReceipt<Unknown>,
     b: &SuccinctReceipt<Unknown>,
 ) -> Result<SuccinctReceipt<UnionClaim>> {
-    let a_assumption = Assumption {
-        claim: a.claim.digest(),
-        control_root: a.control_root()?,
-    }
-    .digest();
-    let b_assumption = Assumption {
-        claim: b.claim.digest(),
-        control_root: b.control_root()?,
-    }
-    .digest();
+    let a_assumption = a.assumption()?.digest();
+    let b_assumption = b.assumption()?.digest();
 
     let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
         if a_assumption <= b_assumption {
@@ -158,6 +151,7 @@ pub fn union(
         } else {
             ((b_assumption, b), (a_assumption, a))
         };
+
     tracing::debug!("Proving union: left assumption = {:#?}", left_assumption);
     tracing::debug!("Proving union: right assumption = {:#?}", right_assumption);
 
@@ -373,7 +367,7 @@ pub fn test_zkr(
     digest1: &Digest,
     digest2: &Digest,
     po2: usize,
-) -> Result<SuccinctReceipt<crate::receipt_claim::Unknown>> {
+) -> Result<SuccinctReceipt<crate::claim::Unknown>> {
     use risc0_circuit_recursion::prove::zkr::get_zkr;
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
