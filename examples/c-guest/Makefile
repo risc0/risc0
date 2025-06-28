@@ -27,13 +27,12 @@ default: execute
 
 .PHONY: platform
 platform:
-	cargo +risc0 rustc -p zkvm-platform --target riscv32im-risc0-zkvm-elf --lib --crate-type staticlib --release --target-dir ./guest/out/platform
+	CARGO_TARGET_DIR=${PWD}/guest/out/platform cargo +risc0 rustc -p zkvm-platform --target riscv32im-risc0-zkvm-elf --lib --crate-type staticlib --release  -vv
 
 # Regenerate the header file. Assumes cbindgen installed locally.
 .PHONY: headers
 headers:
-    # Note: this is currently broken on main, as there is a FFI incompatible type
-	cbindgen --crate zkvm-platform -c ./platform/cbindgen.toml -o ./guest/platform.h
+	cd ./platform && cbindgen --crate zkvm-platform -c ./cbindgen.toml -o ../guest/platform.h
 
 .PHONY: gcc
 gcc:
@@ -42,10 +41,10 @@ gcc:
 	else \
 		echo "riscv32 toolchain already exists, skipping step"; \
     fi
-	 
+
 .PHONY: guest
 guest: gcc platform
-	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/main.c -o ./guest/out/main -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -T ./guest/riscv32im-risc0-zkvm-elf.ld
+	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/main.c -o ./guest/out/main -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -T ./guest/riscv32im-risc0-zkvm-elf.ld -D DEFINE_ZKVM
 
 .PHONY: execute
 execute: guest
