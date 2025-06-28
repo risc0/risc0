@@ -48,7 +48,7 @@
 //!     // Add a list of assumptions
 //!     let assumptions: Vec<String> = vec![];
 //!
-//!     // Wether to run in execute only mode
+//!     // Whether to run in execute only mode
 //!     let execute_only = false;
 //!
 //!     // Start a session running the prover
@@ -442,7 +442,7 @@ pub mod module_type {
             Ok(())
         }
 
-        /// Fetchs a journal from execute_only jobs
+        /// Fetches a journal from execute_only jobs
         ///
         /// After the Execution phase of a execute_only session it is possible to fetch the journal
         /// contents from the executor
