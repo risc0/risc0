@@ -82,6 +82,12 @@ impl Client {
     }
 
     /// Construct a [Client] based on environment variables.
+    ///
+    /// Example:
+    /// ```
+    /// let r0_client = ApiClient::from_env()
+    ///     .expect("An instance of ApiClient should be available to proceed");
+    /// ```
     pub fn from_env() -> Result<Self> {
         Client::new_sub_process(get_r0vm_path()?)
     }
@@ -97,6 +103,27 @@ impl Client {
     }
 
     /// Prove the specified ELF binary.
+    ///
+    /// Example:
+    /// ```
+    /// let r0_client = ApiClient::from_env()
+    ///     .expect("An instance of ApiClient should be available to proceed");
+    /// let input = "zk is eating the world";
+    /// let exec_env = ExecutorEnv::builder()
+    ///     .write(&input)
+    ///     .expect("Input should be available to hash")
+    ///     .build()
+    ///     .expect("An execution environment should be available to proceed");
+    /// // Assume that we have an ELF located in `./elfs/keccak.elf` that expects a `&str` as input
+    /// let keccak_elf: Vec<u8> = std::fs::read("./elfs/keccak.elf")
+    ///     .expect("An ELF should be available to prove");
+    /// let prove_info = r0_client.prove(
+    ///     &exec_env,
+    ///     &ProverOpts::default(),
+    ///     Asset::Inline(keccak_elf.into()),
+    /// )
+    /// .expect("Prove should succeed to obtain a receipt");
+    /// ```
     pub fn prove(
         &self,
         env: &ExecutorEnv<'_>,
@@ -130,7 +157,39 @@ impl Client {
         prove_info_pb.try_into()
     }
 
-    /// Execute the specified ELF binary.
+    /// Execute the specified ELF binary. This is the first step of proving
+    /// also known as trace generation. The result of this operation is N
+    /// items called segments. `execute` allows for a customized proving flow
+    /// where segments are `proved`, `lifted`, and aggregated via `join` into
+    /// the final receipt. Compared to `execute`, `prove` is an umbrella method
+    /// that hides away many details and produces the final receipt in one go.
+    ///
+    /// Example:
+    /// ```
+    /// let r0_client = ApiClient::from_env()
+    ///     .expect("An instance of ApiClient should be available to proceed");
+    /// let input = "zk is eating the world";
+    /// let exec_env = ExecutorEnv::builder()
+    ///     .write(&input)
+    ///     .expect("Input should be available to hash")
+    ///     .build()
+    ///     .expect("An execution environment should be available to proceed");
+    /// let mut segments = Vec::new();
+    /// // Assume that we have an ELF located in `./elfs/keccak.elf` that expects a `&str` as input
+    /// let keccak_elf: Vec<u8> = std::fs::read("./elfs/keccak.elf")
+    ///     .expect("An ELF should be available to prove");
+    /// let session_info = r0_client.execute(
+    ///     &exec_env,
+    ///     Asset::Inline(keccak_elf.into()),
+    ///     AssetRequest::Inline,
+    ///     |segment_info, seg| -> anyhow::Result<()> {
+    ///         println!("Another segment `{segment_info:?}` is ready!");
+    ///         segments.push(seg);
+    ///         Ok(())
+    ///     },
+    /// )
+    /// .expect("Execute should succeed to obtain segments");
+    /// ```
     pub fn execute<F>(
         &self,
         env: &ExecutorEnv<'_>,
@@ -165,6 +224,23 @@ impl Client {
     }
 
     /// Prove the specified segment.
+    ///
+    /// Example:
+    /// ```
+    /// let r0_client = ApiClient::from_env()
+    ///     .expect("An instance of ApiClient should be available to proceed");
+    /// let mut segment_receipts = Vec::new();
+    /// // Assume we have some segments in the 'segments' variable
+    /// for segment in segments.into_iter() {
+    ///     let segment_receipt = r0_client.prove_segment(
+    ///         &ProverOpts::default(),
+    ///         segment,
+    ///         AssetRequest::Inline,
+    ///     )
+    ///     .expect("Segment should be proved to get a segment receipt");
+    ///     segment_receipts.push(segment_receipt);
+    /// }
+    /// ```
     pub fn prove_segment(
         &self,
         opts: &ProverOpts,
@@ -323,6 +399,23 @@ impl Client {
     /// resulting in a recursion circuit STARK proof. This recursion proof has a single
     /// constant-time verification procedure, with respect to the original segment length, and is then
     /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
+    ///
+    /// Example:
+    /// ```
+    /// let r0_client = ApiClient::from_env()
+    ///     .expect("An instance of ApiClient should be available to proceed");
+    /// // Assume we have some proved segments in the 'segment_receipts' variable
+    /// let mut lifted_receipts = Vec::new();
+    /// for segment_receipt in segment_receipts.into_iter() {
+    ///     let succinct_receipt = r0_client.lift(
+    ///         &ProverOpts::default(),
+    ///         segment_receipt.try_into().expect("Segment receipt should be a valid asset"),
+    ///         AssetRequest::Inline,
+    ///     )
+    ///     .expect("Segment receipt should be lifted to get a succinct receipt");
+    ///     lifted_receipts.push(succinct_receipt);
+    /// }    
+    /// ```
     pub fn lift(
         &self,
         opts: &ProverOpts,
@@ -367,6 +460,24 @@ impl Client {
     ///
     /// By repeated application of the join program, any number of receipts for execution spans within
     /// the same session can be compressed into a single receipt for the entire session.
+    ///
+    /// Example:
+    /// ```
+    /// // Once lifted, all receipts should be aggregated into a final receipt. Here we use functional style folding.
+    /// let r0_client = ApiClient::from_env()
+    ///     .expect("An instance of ApiClient should be available to proceed");
+    /// // Assume we have some succinct receipts in the 'lifted_receipts' variable
+    /// let mut iter = lifted_receipts.into_iter();
+    /// let first = iter.next().unwrap();
+    /// let aggregated_receipt = iter
+    ///      .try_fold(first, |agg, right| r0_client.join(
+    ///         &ProverOpts::default(),
+    ///         agg.try_into().expect("Succinct receipt should be a valid asset"),
+    ///         right.try_into().expect("Succinct receipt should be a valid asset"),
+    ///         AssetRequest::Inline,
+    ///     ))
+    ///     .expect("All receipts should be joined to get an aggregated receipt");
+    /// ```
     pub fn join(
         &self,
         opts: &ProverOpts,
@@ -630,6 +741,21 @@ impl Client {
     }
 
     /// Verify a [Receipt].
+    ///
+    /// Example:
+    /// ```
+    /// let r0_client = ApiClient::from_env()
+    ///     .expect("An instance of ApiClient should be available to proceed");
+    /// // Assume the following `image_id` is valid for a guest whose honest execution is recorded in `receipt`
+    /// let image_id = Digest::from_hex("12f3b3543911f1704e0bcba08a1231e92d1c7704397173ffff61b165ce32bfc8")
+    ///     .expect("The hex string should be a valid image id");
+    /// r0_client.verify(
+    ///     receipt.try_into().expect("Receipt should be a valid asset"),
+    ///     image_id,
+    /// )
+    /// .expect("Failed to verify, receipt should be valid");
+    /// println!("Verified!");
+    /// ```
     pub fn verify(&self, receipt: Asset, image_id: impl Into<Digest>) -> Result<()> {
         let mut conn = self.connect().context("connect")?;
         let image_id = image_id.into();
