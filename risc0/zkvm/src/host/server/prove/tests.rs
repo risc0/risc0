@@ -557,6 +557,29 @@ fn sys_input() {
     prove_session(&session).unwrap();
 }
 
+#[cfg(feature = "cuda")]
+mod cuda {
+    use super::*;
+
+    #[test_log::test]
+    fn shrink_wrap() {
+        let env = ExecutorEnv::builder()
+            .write(&MultiTestSpec::DoNothing)
+            .unwrap()
+            .build()
+            .unwrap();
+        let opts = ProverOpts::groth16();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt
+            .inner
+            .groth16()
+            .unwrap(); // ensure that we got a groth16 receipt.
+    }
+}
+
 #[cfg(feature = "docker")]
 mod docker {
     use risc0_zkvm_methods::{MULTI_TEST_ID, VERIFY_ELF};

@@ -70,6 +70,7 @@ pub trait ProverServer: private::Sealed {
 
     /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        tracing::debug!("prove_segment");
         let results = self.segment_preflight(segment)?;
         self.prove_segment_core(ctx, results)
     }

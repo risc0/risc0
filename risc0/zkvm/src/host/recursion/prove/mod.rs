@@ -255,16 +255,20 @@ where
 /// The identity_p254 program is used as the last step in the prover pipeline before running the
 /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
 /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
-pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceipt<ReceiptClaim>> {
+pub fn identity_p254(
+    inner: &SuccinctReceipt<ReceiptClaim>,
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    tracing::debug!("identity_p254");
+
     let opts = ProverOpts::succinct()
         .with_hashfn("poseidon_254".to_string())
         .with_control_ids(vec![BN254_IDENTITY_CONTROL_ID]);
 
-    let mut prover = Prover::new_identity(a, opts.clone())?;
+    let mut prover = Prover::new_identity(inner, opts.clone())?;
     let receipt = prover.prover.run()?;
     let mut out_stream: VecDeque<u32> = VecDeque::new();
     out_stream.extend(receipt.output.iter());
-    let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&a.claim)?;
+    let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&inner.claim)?;
 
     // Include an inclusion proof for control_id to allow verification against a root.
     let hashfn = opts.hash_suite()?.hashfn;
@@ -273,10 +277,11 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     let control_root = control_inclusion_proof.root(&prover.control_id, hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
         control_root,
-        inner_control_root: Some(a.control_root()?),
+        inner_control_root: Some(inner.control_root()?),
         proof_system_info: PROOF_SYSTEM_INFO,
         circuit_info: CircuitImpl::CIRCUIT_INFO,
     };
+
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         hashfn: opts.hashfn,

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! # Groth16
+//! # Groth16 Prover
 
+#[cfg(feature = "cuda")]
+mod cuda;
+#[cfg(not(feature = "cuda"))]
 mod docker;
 mod seal_format;
 mod seal_to_json;
@@ -24,5 +27,11 @@ use crate::Seal;
 
 /// Produce a Groth16 proof from an `identity_p254` seal.
 pub fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
-    self::docker::shrink_wrap(identity_p254_seal_bytes)
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "cuda")] {
+            self::cuda::shrink_wrap(identity_p254_seal_bytes)
+        } else {
+            self::docker::shrink_wrap(identity_p254_seal_bytes)
+        }
+    }
 }

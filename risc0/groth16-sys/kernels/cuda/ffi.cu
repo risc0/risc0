@@ -1,10 +1,17 @@
 #include <cstring>
 #include <iostream>
 
+#define FEATURE_BN254
+
 #include "ff/alt_bn128-fp2.hpp"
 
 #include "ec/affine_t.hpp"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wbitwise-instead-of-logical"
 #include "ec/jacobian_t.hpp"
+#pragma clang diagnostic pop
+
 #include "ec/xyzz_t.hpp"
 
 typedef Affine_t<fp_t> affine_t;
@@ -19,7 +26,11 @@ typedef fr_t scalar_t;
 
 #define SPPARK_DONT_INSTANTIATE_TEMPLATES
 #include "msm/pippenger.cuh"
+
+namespace sppark::bn254 {
 #include "ntt/ntt.cuh"
+} // namespace sppark::bn254
+using namespace sppark::bn254;
 
 #include "util.cuh"
 

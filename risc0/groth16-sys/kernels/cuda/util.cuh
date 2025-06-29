@@ -3,7 +3,7 @@
 #include <sstream>
 
 // for mult method
-#include <msm/pippenger.hpp>
+#include "msm/pippenger.hpp"
 
 #include "chacha.cuh"
 
