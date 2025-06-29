@@ -18,6 +18,8 @@ use std::ffi::{c_char, CStr};
 
 use anyhow::{anyhow, Result};
 
+pub use sppark::Error as SpparkError;
+
 #[repr(C)]
 pub struct RawProverParams {
     pub graph_path: *const c_char,

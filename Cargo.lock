@@ -6762,6 +6762,7 @@ dependencies = [
  "ark-groth16",
  "ark-serialize 0.5.0",
  "bytemuck",
+ "cfg-if",
  "hex",
  "num-bigint 0.4.6",
  "num-traits",

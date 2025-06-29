@@ -27,11 +27,9 @@ fn build_cuda_kernels() {
         .files(["kernels/cuda/ffi.cu"])
         .deps(["kernels/cuda"])
         .flag("-D__ADX__")
-        .flag("-DFEATURE_BN254")
         .include(env::var("DEP_BLST_C_SRC").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_groth16_cuda");
 
     println!("cargo:rustc-link-lib=static=blst");
-    println!("cargo:rustc-link-lib=static=sppark_cuda");
 }
