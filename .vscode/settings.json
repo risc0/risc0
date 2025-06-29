@@ -111,5 +111,8 @@
   "rust-analyzer.check.extraArgs": [
     "--target-dir=target/analyzer"
   ],
-  "biome.lspBin": "web/node_modules/.bin/biome"
+  "biome.lspBin": "web/node_modules/.bin/biome",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
 }
