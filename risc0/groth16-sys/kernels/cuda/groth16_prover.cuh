@@ -1,3 +1,8 @@
+#pragma once
+
+#include "groth16_coeffs.cuh"
+#include "groth16_srs.cuh"
+
 #include <cmath>
 #include <fstream>
 #include <random>

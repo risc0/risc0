@@ -1,9 +1,0 @@
-/cuda/libblst.a
-/cuda/run_prover
-/cuda/setup_prover
-/modified-circuit/stark_verify.circom
-/input-files/stark_verify_final.zkey
-/output-files/
-log_input_signals.txt
-proof.json
-public.json

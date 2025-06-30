@@ -34,10 +34,9 @@ using namespace sppark::bn254;
 
 #include "util.cuh"
 
-#include "groth16_srs.cuh"
-
 #include "groth16_coeffs.cuh"
 #include "groth16_prover.cuh"
+#include "groth16_srs.cuh"
 
 // from circom-witnesscalc
 extern "C" size_t setup_parallel_graph(const char* graph_path);
@@ -46,36 +45,41 @@ extern "C" size_t setup_parallel_graph(const char* graph_path);
 extern "C" void
 calc_witness_with_parallel_graph(const char* graph_path, const char* inputs_file, fr_t* witness);
 
-struct ProveParams {
+struct SetupParams {
   const char* graph_path;
   const char* pcoeffs_path;
   const char* fres_path;
   const char* srs_path;
+};
+
+struct ProveParams {
   const char* inputs_path;
   const char* public_path;
   const char* proof_path;
 };
 
-extern "C" const char* risc0_groth16_cuda_prove(ProveParams* params) {
+extern "C" const char* risc0_groth16_cuda_prove(SetupParams* setup_params,
+                                                ProveParams* prover_params) {
   // SETUP
   std::vector<fr_t> witness;
   auto read_thread = std::thread([&] {
-    size_t witness_size = setup_parallel_graph(params->graph_path);
+    size_t witness_size = setup_parallel_graph(setup_params->graph_path);
     witness.resize(witness_size);
 
-    calc_witness_with_parallel_graph(params->graph_path, params->inputs_path, &witness[0]);
+    calc_witness_with_parallel_graph(
+        setup_params->graph_path, prover_params->inputs_path, &witness[0]);
   });
 
   try {
-    SRS srs(0, params->srs_path);
-    groth16_prover prover(srs, params->pcoeffs_path, params->fres_path);
+    SRS srs(0, setup_params->srs_path);
+    groth16_prover prover(srs, setup_params->pcoeffs_path, setup_params->fres_path);
 
     read_thread.join();
 
     // PROVE
-    groth16_proof proof = prover.prove(params->public_path, witness);
+    groth16_proof proof = prover.prove(prover_params->public_path, witness);
 
-    write_proof_file(params->proof_path, proof);
+    write_proof_file(prover_params->proof_path, proof);
   } catch (const std::exception& err) {
     if (read_thread.joinable()) {
       read_thread.join();
@@ -84,3 +88,18 @@ extern "C" const char* risc0_groth16_cuda_prove(ProveParams* params) {
   }
   return nullptr;
 }
+
+#ifdef SRS_READ_COEFFS
+
+extern "C" const char* risc0_groth16_cuda_setup(SetupParams* params) {
+  try {
+    SRS sw(0, params->srs_path);
+    groth16_prover prover(sw);
+    prover.write_precomputations_to_file(params->fres_path, params->pcoeffs_path);
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  }
+  return nullptr;
+}
+
+#endif // SRS_READ_COEFFS

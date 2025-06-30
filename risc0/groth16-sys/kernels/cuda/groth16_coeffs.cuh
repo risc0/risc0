@@ -1,3 +1,18 @@
+#pragma once
+
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+
+#ifdef __CUDA_ARCH__
+typedef uint8_t byte;
+#endif
+
+struct coeff_t {
+  uint32_t m, c, s;
+  fr_t value;
+};
+
 class preprocessed_coeffs {
 private:
   const gpu_t& gpu;
