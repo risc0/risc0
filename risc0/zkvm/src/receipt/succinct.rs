@@ -380,7 +380,7 @@ mod tests {
     fn allowed_control_root_fn_doesnt_panic() {
         for i in 0..=24 {
             allowed_control_root("poseidon2", i)
-                .unwrap_or_else(|_| panic!("allowed_control_root panicked with i = {}", i));
+                .unwrap_or_else(|_| panic!("allowed_control_root panicked with i = {i}"));
         }
         // When po2_max is greater than 24, this simply returns the same result as 24.
         assert_eq!(

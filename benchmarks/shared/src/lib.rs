@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ pub fn generate_mock_proof(leaf_data: &[u8], n: u32) -> MembershipProof {
     let mut path = Vec::new();
 
     for i in 0..n {
-        let sibling_data = format!("sibling{}", i);
+        let sibling_data = format!("sibling{i}");
         let sibling_hash = *sha::Impl::hash_bytes(sibling_data.as_bytes());
         let direction = if i % 2 == 0 {
             Direction::Left

@@ -67,7 +67,7 @@ fn main() {
         .verify(HASH_ID)
         .expect("receipt verification failed");
 
-    println!("I provably know data whose SHA-256 hash is {}", digest);
+    println!("I provably know data whose SHA-256 hash is {digest}");
 }
 
 #[cfg(test)]
