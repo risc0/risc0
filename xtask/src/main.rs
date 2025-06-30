@@ -23,6 +23,8 @@ mod extract_elf;
 mod gen_receipt;
 mod install;
 mod semver_checks;
+#[cfg(feature = "setup-groth16")]
+mod setup_groth16;
 mod update_crate_version;
 mod update_lock_files;
 
@@ -54,6 +56,8 @@ enum Commands {
     GenReceipt(GenReceipt),
     Install(Install),
     SemverChecks(SemverChecks),
+    #[cfg(feature = "setup-groth16")]
+    SetupGroth16(self::setup_groth16::SetupGroth16),
     UpdateLockFiles(UpdateLockFiles),
     UpdateCrateVersion(UpdateCrateVersion),
     ExtractElf(ExtractElf),
@@ -75,6 +79,8 @@ impl Commands {
             Commands::UpdateLockFiles(cmd) => cmd.run(),
             Commands::UpdateCrateVersion(cmd) => cmd.run(),
             Commands::ExtractElf(cmd) => cmd.run(),
+            #[cfg(feature = "setup-groth16")]
+            Commands::SetupGroth16(cmd) => cmd.run(),
         }
     }
 }

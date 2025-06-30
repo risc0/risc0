@@ -25,7 +25,7 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 
 #[derive(Debug, Parser)]
 pub struct BootstrapGroth16 {
-    /// ris0-ethereum repository path
+    /// risc0-ethereum repository path
     #[arg(long, env)]
     risc0_ethereum_path: String,
 

@@ -1,16 +1,9 @@
+#pragma once
+
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#ifdef __CUDA_ARCH__
-typedef uint8_t byte;
-#endif
-
-struct coeff_t {
-  uint32_t m, c, s;
-  fr_t value;
-};
 
 #pragma pack(push, 1)
 struct coeff_file_t {

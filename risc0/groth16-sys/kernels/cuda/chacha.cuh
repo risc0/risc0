@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 
 struct __align__(16) chacha_state {

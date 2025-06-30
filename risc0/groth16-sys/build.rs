@@ -23,7 +23,11 @@ fn main() {
 }
 
 fn build_cuda_kernels() {
-    KernelBuild::new(KernelType::Cuda)
+    let mut build = KernelBuild::new(KernelType::Cuda);
+    if env::var("CARGO_FEATURE_SETUP").is_ok() {
+        build.flag("-DSRS_READ_COEFFS");
+    }
+    build
         .files(["kernels/cuda/ffi.cu"])
         .deps(["kernels/cuda"])
         .flag("-D__ADX__")

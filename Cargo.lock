@@ -1349,13 +1349,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-platform"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "84982c6c0ae343635a3a4ee6dedef965513735c8b183caa7289fa6e27399ebd4"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "cargo-risczero"
 version = "3.0.0"
 dependencies = [
  "anyhow",
  "bincode 1.3.3",
  "bonsai-sdk",
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "clap 4.5.37",
  "clap-cargo",
  "const_format",
@@ -1386,7 +1395,7 @@ dependencies = [
  "atty",
  "bugreport",
  "cargo-config2",
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "cargo_toml",
  "clap 4.5.37",
  "clap-cargo",
@@ -1414,13 +1423,44 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-util-schemas"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e63d2780ac94487eb9f1fea7b0d56300abc9eb488800854ca217f102f5caccca"
+dependencies = [
+ "semver 1.0.26",
+ "serde",
+ "serde-untagged",
+ "serde-value",
+ "thiserror 1.0.69",
+ "toml",
+ "unicode-xid",
+ "url",
+]
+
+[[package]]
 name = "cargo_metadata"
 version = "0.19.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd5eb614ed4c27c5d706420e4320fbe3216ab31fa1c33cd8246ac36dae4479ba"
 dependencies = [
  "camino",
- "cargo-platform",
+ "cargo-platform 0.1.9",
+ "semver 1.0.26",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.12",
+]
+
+[[package]]
+name = "cargo_metadata"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f7835cfc6135093070e95eb2b53e5d9b5c403dc3a6be6040ee026270aa82502"
+dependencies = [
+ "camino",
+ "cargo-platform 0.2.0",
+ "cargo-util-schemas",
  "semver 1.0.26",
  "serde",
  "serde_json",
@@ -1612,7 +1652,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d546f0e84ff2bfa4da1ce9b54be42285767ba39c688572ca32412a09a73851e5"
 dependencies = [
  "anstyle",
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "clap 4.5.37",
  "serde",
  "serde_json",
@@ -3978,7 +4018,7 @@ dependencies = [
 name = "hotbench"
 version = "0.1.0"
 dependencies = [
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "human-repr",
  "serde",
  "serde_json",
@@ -4486,15 +4526,6 @@ name = "itertools"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
 dependencies = [
  "either",
 ]
@@ -5501,6 +5532,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
+name = "ordered-float"
+version = "2.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68f19d67e5a2795c94e73e0bb1cc1a7edeb2e28efd39e2e1c9b7a40c1108b11c"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "os_info"
 version = "3.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6002,16 +6042,6 @@ dependencies = [
 
 [[package]]
 name = "prost"
-version = "0.12.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "deb1435c188b76130da55f17a466d252ff7b1418b2ad3e037d127b94e3411f29"
-dependencies = [
- "bytes",
- "prost-derive 0.12.6",
-]
-
-[[package]]
-name = "prost"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2796faa41db3ec313a31f7624d9286acf277b52de526150b7e69f3debf891ee5"
@@ -6021,24 +6051,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "prost-build"
-version = "0.12.6"
+name = "prost"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22505a5c94da8e3b7c2996394d1c933236c4d743e81a410bcca4e6989fc066a4"
+checksum = "7231bd9b3d3d33c86b58adbac74b5ec0ad9f496b19d22801d773636feaa95f3d"
 dependencies = [
  "bytes",
- "heck 0.5.0",
- "itertools 0.12.1",
- "log",
- "multimap",
- "once_cell",
- "petgraph",
- "prettyplease",
- "prost 0.12.6",
- "prost-types 0.12.6",
- "regex",
- "syn 2.0.100",
- "tempfile",
+ "prost-derive 0.14.1",
 ]
 
 [[package]]
@@ -6062,16 +6081,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "prost-derive"
-version = "0.12.6"
+name = "prost-build"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81bddcdb20abf9501610992b6759a4c888aef7d1a7247ef75e2404275ac24af1"
+checksum = "ac6c3320f9abac597dcbc668774ef006702672474aad53c6d596b62e487b40b1"
 dependencies = [
- "anyhow",
- "itertools 0.12.1",
- "proc-macro2",
- "quote",
+ "heck 0.5.0",
+ "itertools 0.14.0",
+ "log",
+ "multimap",
+ "once_cell",
+ "petgraph",
+ "prettyplease",
+ "prost 0.14.1",
+ "prost-types 0.14.1",
+ "regex",
  "syn 2.0.100",
+ "tempfile",
 ]
 
 [[package]]
@@ -6088,12 +6114,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "prost-types"
-version = "0.12.6"
+name = "prost-derive"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9091c90b0a32608e984ff2fa4091273cbdd755d54935c51d520887f4a1dbd5b0"
+checksum = "9120690fafc389a67ba3803df527d0ec9cbbc9cc45e4cc20b332996dfb672425"
 dependencies = [
- "prost 0.12.6",
+ "anyhow",
+ "itertools 0.14.0",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.100",
 ]
 
 [[package]]
@@ -6103,6 +6133,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52c2c1bf36ddb1a1c396b3601a3cec27c2462e45f07c386894ec3ccf5332bd16"
 dependencies = [
  "prost 0.13.5",
+]
+
+[[package]]
+name = "prost-types"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9b4db3d6da204ed77bb26ba83b6122a73aeb2e87e25fbf7ad2e84c4ccbf8f72"
+dependencies = [
+ "prost 0.14.1",
 ]
 
 [[package]]
@@ -6575,7 +6614,7 @@ name = "risc0-build"
 version = "3.0.0"
 dependencies = [
  "anyhow",
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "derive_builder",
  "dirs",
  "docker-generate",
@@ -7476,6 +7515,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-untagged"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "299d9c19d7d466db4ab10addd5703e4c615dec2a5a16dbbafe191045e87ee66e"
+dependencies = [
+ "erased-serde",
+ "serde",
+ "typeid",
+]
+
+[[package]]
+name = "serde-value"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3a1a3341211875ef120e117ea7fd5228530ae7e7036a779fdc9117be6b3282c"
+dependencies = [
+ "ordered-float",
+ "serde",
 ]
 
 [[package]]
@@ -8499,7 +8559,7 @@ version = "36.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "289d3e1255938360aa977aacbd64a0f118e29ece178fbe805b3d18239ed725de"
 dependencies = [
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "cargo_toml",
  "rayon",
  "rustc-hash 2.1.1",
@@ -8513,7 +8573,7 @@ version = "37.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a6f167527b612eb70c388aae100bd21d3eb5358679caaaf42a90f5d592b3884"
 dependencies = [
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "cargo_toml",
  "rayon",
  "rustc-hash 2.1.1",
@@ -8527,7 +8587,7 @@ version = "39.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04fe1280e8dfbf7ec9d0f40cec0cfa5b7731dd19bc21c0c67466d4f8e673e377"
 dependencies = [
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "cargo_toml",
  "rayon",
  "rustc-hash 2.1.1",
@@ -8541,7 +8601,7 @@ version = "43.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c1be370d73f9ff2012376a4457104e1408c0db25124115c085f50bd21a3b83b"
 dependencies = [
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "cargo_toml",
  "rayon",
  "rustc-hash 2.1.1",
@@ -8555,7 +8615,7 @@ version = "45.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1309deb9c8f56e5a70509d9311bad2faa44bc068a103a5bf9a114da57a5a519"
 dependencies = [
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "cargo_toml",
  "rayon",
  "rustc-hash 2.1.1",
@@ -8598,7 +8658,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a181ab152425e80f83ede86378acd2eba689845a225e955cc78cc943538bb336"
 dependencies = [
  "anyhow",
- "cargo_metadata",
+ "cargo_metadata 0.19.2",
  "serde",
  "serde_json",
  "thiserror 2.0.12",
@@ -9043,11 +9103,10 @@ dependencies = [
 
 [[package]]
 name = "which"
-version = "7.0.3"
+version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24d643ce3fd3e5b54854602a080f34fb10ab75e0b813ee32d00ca2b44fa74762"
+checksum = "d3fabb953106c3c8eea8306e4393700d7657561cb43122571b172bbfb7c7ba1d"
 dependencies = [
- "either",
  "env_home",
  "rustix 1.0.5",
  "winsafe",
@@ -9468,17 +9527,18 @@ dependencies = [
  "bincode 1.3.3",
  "camino",
  "cargo-semver-checks",
- "cargo_metadata",
+ "cargo_metadata 0.20.0",
  "clap 4.5.37",
  "hex",
  "log",
- "prost-build 0.12.6",
+ "prost-build 0.14.1",
  "protobuf-src",
  "regex",
  "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-core",
+ "risc0-groth16-sys",
  "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-methods",
@@ -9491,7 +9551,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.3.19",
  "walkdir",
- "which 7.0.3",
+ "which 8.0.0",
  "xshell",
 ]
 
