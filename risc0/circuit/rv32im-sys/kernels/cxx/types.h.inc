@@ -630,21 +630,6 @@ struct _Arguments_Div0MulOutputLayout {
   ArgU16Layout16LayoutArray argU16;
   ArgU8Layout13LayoutArray argU8;
 };
-using ArgU16Layout2LayoutArray = std::array<ArgU16Layout, 2>;
-struct _Arguments_DoDiv__1Layout {
-  ArgU16Layout2LayoutArray argU16;
-};
-struct DoDiv__1Arm0Layout {
-  ArgU16Layout _extra0;
-  ArgU16Layout _extra1;
-};
-struct DoDiv__1Arm1_SuperLayout {
-  CmpLessThanUnsignedLayout lt;
-};
-struct DoDiv__1Layout {
-  DoDiv__1Arm0Layout arm0;
-  DoDiv__1Arm1_SuperLayout arm1;
-};
 struct DoDivLayout {
   NondetRegLayout quotLow;
   NondetRegLayout quotHigh;
@@ -652,13 +637,13 @@ struct DoDivLayout {
   NondetU16RegLayout remHigh;
   MultiplyAccumulateLayout mul;
   NondetRegLayout topBitType;
-  IsZeroLayout isZero;
   NondetRegLayout topNum;
   NondetU16RegLayout _0;
   NormalizeU32Layout denomAbs;
   NormalizeU32Layout remNormal;
-  _Arguments_DoDiv__1Layout _arguments_DoDiv__1;
-  DoDiv__1Layout _3;
+  NondetRegLayout isZero;
+  NondetRegLayout signedOverflowCase;
+  CmpLessThanUnsignedLayout lt;
 };
 struct OpSRLLayout {
   DynPo2Layout shiftMul;
@@ -2533,6 +2518,7 @@ struct BigInt0StateArm0Layout {
   ArgU16Layout _extra32;
   ArgU16Layout _extra33;
 };
+using ArgU16Layout2LayoutArray = std::array<ArgU16Layout, 2>;
 struct _Arguments_BigIntStepBytesLayout {
   ArgU16Layout2LayoutArray argU16;
   ArgU8Layout16LayoutArray argU8;
