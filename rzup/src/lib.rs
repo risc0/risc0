@@ -11,30 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 mod build;
 #[cfg(feature = "cli")]
 pub mod cli;
 mod components;
 mod distribution;
 mod env;
+pub mod error;
 mod events;
 mod paths;
 mod registry;
 mod settings;
 
-pub mod error;
-
-use distribution::Platform;
-use env::Environment;
-use events::RzupEvent;
-use paths::Paths;
-use registry::Registry;
-use semver::Version;
-use settings::Settings;
 use std::path::{Path, PathBuf};
 
-pub use components::Component;
-pub use error::{Result, RzupError};
+use self::distribution::Platform;
+use self::env::Environment;
+use self::events::RzupEvent;
+use self::paths::Paths;
+use self::registry::Registry;
+use self::settings::Settings;
+
+pub use self::components::Component;
+pub use self::error::{Result, RzupError};
+pub use semver::Version;
 
 #[derive(Clone, Debug)]
 pub struct BaseUrls {

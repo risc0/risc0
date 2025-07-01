@@ -23,7 +23,7 @@ use risc0_zkp::core::{
     hash::poseidon_254::digest_to_fr,
 };
 
-use crate::seal_format::{IopType, K_SEAL_ELEMS, K_SEAL_TYPES, K_SEAL_WORDS};
+use super::seal_format::{IopType, K_SEAL_ELEMS, K_SEAL_TYPES, K_SEAL_WORDS};
 
 /// Convert a recursion VM seal (i.e. succinct receipt) into a JSON format compatible with the
 /// `stark_verify` witness generator.
