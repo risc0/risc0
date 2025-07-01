@@ -95,7 +95,7 @@ impl GuestBuilder for MinGuestListEntry {
         if !is_skip_build() && !is_kernel {
             // For non-kernel binaries, we need to create the combined binary (.bin file)
             // just like GuestListEntry::build does, but we don't need to store the content
-            let user_elf = std::fs::read(&elf_path)?;
+            let user_elf = std::fs::read(elf_path)?;
             let kernel_elf = guest_info.options.kernel();
             let binary = ProgramBinary::new(&user_elf, &kernel_elf);
             let combined_binary = binary.encode();
@@ -755,7 +755,7 @@ fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
         pkg_opts.push(GuestPackageWithOptions {
-            name: format!("{pkg.name}.{guest_pkg.name}"),
+            name: format!("{}.{}", pkg.name, guest_pkg.name),
             pkg: guest_pkg,
             opts,
             target_dir: guest_dir,
