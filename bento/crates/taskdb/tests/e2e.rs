@@ -279,7 +279,7 @@ async fn e2e(pool: PgPool) -> Result<()> {
     // Mock GPU workers consuming the work items
     let mut idx = 0;
     while let Some(task) = taskdb::request_work(&pool, gpu_worker_type).await.unwrap() {
-        let idx_str = format!("{}", idx);
+        let idx_str = idx.to_string();
         assert_eq!(task.task_id, idx_str);
         match idx {
             // Prove Segments
@@ -311,7 +311,7 @@ async fn e2e(pool: PgPool) -> Result<()> {
                 assert_eq!(join_obj.get("index").unwrap().as_u64().unwrap(), 4);
             }
             // Finalize
-            _ => panic!("idx: {}", idx),
+            _ => panic!("idx: {idx}"),
         }
         // Mark the task as done.
         assert!(

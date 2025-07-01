@@ -114,6 +114,7 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     Ok(())
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize)]
 enum RemoteRequest {
     GetTask(GetTask),

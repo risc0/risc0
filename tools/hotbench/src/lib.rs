@@ -173,7 +173,7 @@ impl Bencher<'_> {
             let delta_max = max_speed / base.max as f32;
             let delta_avg = avg_speed / base.value as f32;
             println!("  change:");
-            println!("    thrpt: [{} {} {}]", delta_min, delta_avg, delta_max);
+            println!("    thrpt: [{delta_min} {delta_avg} {delta_max}]");
         }
 
         let data = BenchmarkData {

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ mod tests {
             &[6, 7, 2013265920, 9, 10],
         );
 
-        println!("digest = {:?}", digest3);
+        println!("digest = {digest3:?}");
         assert_eq!(
             digest3.to_string(),
             "9ff20cc6d365efa2af09181772f49013d05cdee6da896851614cae23aa5dd442"

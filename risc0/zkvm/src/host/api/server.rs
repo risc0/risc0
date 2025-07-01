@@ -14,7 +14,7 @@
 
 use std::{
     error::Error as StdError,
-    io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Read, Write},
+    io::{BufReader, Error as IoError, Read, Write},
     path::{Path, PathBuf},
 };
 
@@ -982,13 +982,13 @@ trait IoOtherError<T> {
 
 impl<T, E: Into<Box<dyn StdError + Send + Sync>>> IoOtherError<T> for Result<T, E> {
     fn map_io_err(self) -> Result<T, IoError> {
-        self.map_err(|err| IoError::new(IoErrorKind::Other, err))
+        self.map_err(|err| IoError::other(err))
     }
 }
 
 impl From<pb::api::GenericError> for IoError {
     fn from(err: pb::api::GenericError) -> Self {
-        IoError::new(IoErrorKind::Other, err.reason)
+        IoError::other(err.reason)
     }
 }
 

@@ -194,7 +194,7 @@ impl Planner {
         if task_number < self.tasks.len() {
             &self.tasks[task_number]
         } else {
-            panic!("Invalid task number {}", task_number);
+            panic!("Invalid task number {task_number}");
         }
     }
 

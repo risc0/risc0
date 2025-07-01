@@ -147,7 +147,7 @@ impl<S: Syscall> SwBreakpoint for Debugger<'_, '_, S> {
         addr: <Self::Arch as gdbstub::arch::Arch>::Usize,
         _kind: <Self::Arch as gdbstub::arch::Arch>::BreakpointKind,
     ) -> gdbstub::target::TargetResult<bool, Self> {
-        eprintln!("setting breakpoint at {:X}", addr);
+        eprintln!("setting breakpoint at {addr:X}");
         self.breakpoints.push(addr);
         Ok(true)
     }

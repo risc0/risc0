@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 #[cfg(not(feature = "std"))]
 #[panic_handler]
-#[no_mangle]
 pub fn panic(_info: &core::panic::PanicInfo) -> ! {
     core::arch::wasm32::unreachable();
 }

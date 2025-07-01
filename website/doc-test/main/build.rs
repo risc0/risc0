@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -118,9 +118,9 @@ impl Level {
             let processed_content = self.remove_footnotes(&content);
 
             self.write_space(dst, level);
-            writeln!(dst, "#[doc = r#\"{}\"#]", processed_content)?;
+            writeln!(dst, "#[doc = r#\"{processed_content}\"#]")?;
             self.write_space(dst, level);
-            writeln!(dst, "pub fn {}_md() {{}}", stem)?;
+            writeln!(dst, "pub fn {stem}_md() {{}}")?;
         }
 
         Ok(())

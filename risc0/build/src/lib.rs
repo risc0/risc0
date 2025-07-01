@@ -557,7 +557,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
         cmd.args(["--features", &(guest_pkg.to_owned() + "/" + feature)]);
     }
 
-    eprintln!("Building staticlib: {:?}", cmd);
+    eprintln!("Building staticlib: {cmd:?}");
 
     // Run the build command and extract the name of the resulting staticlib
     // artifact.
@@ -574,7 +574,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
                 }
             }
             Message::CompilerMessage(msg) => {
-                eprint!("{}", msg);
+                eprint!("{msg}");
             }
             _ => (),
         }

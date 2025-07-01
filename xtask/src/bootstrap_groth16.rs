@@ -92,7 +92,7 @@ fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
     ];
 
     for (i, constant) in solidity_constants.into_iter().enumerate() {
-        let re = Regex::new(&format!(r"uint256 constant\s+{}\s*=\s*(\d+);", constant)).unwrap();
+        let re = Regex::new(&format!(r"uint256 constant\s+{constant}\s*=\s*(\d+);")).unwrap();
         if let Some(caps) = re.captures(&solidity_code) {
             let rust_re = Regex::new(&format!(
                 "const {}: &str =[\\r\\n\\s]*\"\\d+\";",
@@ -106,7 +106,7 @@ fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
                 )
                 .to_string();
         } else {
-            println!("{} not found", constant);
+            println!("{constant} not found");
         }
     }
 
