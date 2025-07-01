@@ -361,8 +361,8 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
 ///
 /// `out_state`, `in_state`, `block1_ptr`, and `block2_ptr` must be aligned and
 /// dereferenceable.
-#[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_sha_compress(
     out_state: *mut [u32; DIGEST_WORDS],
     in_state: *const [u32; DIGEST_WORDS],
@@ -382,8 +382,8 @@ pub unsafe extern "C" fn sys_sha_compress(
 /// # Safety
 ///
 /// `out_state`, `in_state`, and `buf` must be aligned and dereferenceable.
-#[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_sha_buffer(
     out_state: *mut [u32; DIGEST_WORDS],
     in_state: *const [u32; DIGEST_WORDS],
@@ -412,8 +412,8 @@ pub unsafe extern "C" fn sys_sha_buffer(
 /// # Safety
 ///
 /// `result`, `x`, `y`, and `modulus` must be aligned and dereferenceable.
-#[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_bigint(
     result: *mut [u32; bigint::WIDTH_WORDS],
     op: u32,
