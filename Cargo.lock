@@ -1070,7 +1070,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "anyhow",
  "bincode",
@@ -5598,7 +5598,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.3"
+version = "1.4.4"
 dependencies = [
  "anyhow",
  "clap 4.5.32",
@@ -5619,14 +5619,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2-methods"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "risc0-build",
 ]
 
 [[package]]
 name = "risc0-binfmt"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "borsh",
@@ -5646,7 +5646,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.1.2"
+version = "2.2.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -5681,7 +5681,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5713,7 +5713,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "2.0.0"
+version = "3.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -5727,7 +5727,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5754,7 +5754,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "2.0.0"
+version = "3.0.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5765,7 +5765,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "2.0.4"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -5800,7 +5800,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.2"
+version = "3.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -5826,7 +5826,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -5850,7 +5850,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -5898,7 +5898,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "anyhow",
  "blake2",
@@ -5931,7 +5931,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -6017,7 +6017,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "bincode",
  "borsh",
@@ -6033,7 +6033,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.2"
+version = "2.0.3"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -6047,7 +6047,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "2.1.0"
+version = "2.2.0"
 
 [[package]]
 name = "rlsf"
