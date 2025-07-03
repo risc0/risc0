@@ -2438,6 +2438,7 @@ mod tests {
             #!/bin/bash
             mkdir -p build/foo/stage2/bin
             mkdir -p build/foo/stage2-tools-bin
+            mkdir -p build/foo/stage3/lib/rustlib/riscv32im-risc0-zkvm-elf
             touch build/foo/stage2/bin/rustc
             touch build/foo/stage2-tools-bin/cargo-fmt
             echo 'build output line 1'
@@ -2472,6 +2473,7 @@ mod tests {
             #!/bin/bash
             mkdir -p build/foo/stage2/bin
             mkdir -p build/foo/stage2-tools-bin
+            mkdir -p build/foo/stage3/lib/rustlib/riscv32im-risc0-zkvm-elf
             touch build/foo/stage2/bin/rustc
             touch build/foo/stage2-tools-bin/cargo-fmt
             touch build/foo/stage2-tools-bin/bar-fmt
@@ -2544,6 +2546,15 @@ mod tests {
                 },
                 RzupEvent::BuildingRustToolchainUpdate {
                     message: "./x build --stage 2".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "build output line 1".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "build output line 2".into(),
+                },
+                RzupEvent::BuildingRustToolchainUpdate {
+                    message: "./x build --stage 3".into(),
                 },
                 RzupEvent::BuildingRustToolchainUpdate {
                     message: "build output line 1".into(),
@@ -2662,8 +2673,8 @@ mod tests {
             .unwrap();
             let env = parse_env_output(&env_raw);
 
-            // two ./x invocations
-            assert_eq!(env.len(), 2);
+            // three ./x invocations
+            assert_eq!(env.len(), 3);
 
             for e in env {
                 assert_eq!(
