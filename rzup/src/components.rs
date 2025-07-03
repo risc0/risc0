@@ -178,6 +178,7 @@ pub fn install(
 }
 
 #[cfg(feature = "install")]
+#[cfg(unix)]
 fn symlink(original: &Path, link: &Path) -> Result<()> {
     if let Ok(metadata) = std::fs::symlink_metadata(link) {
         if metadata.is_dir() {
@@ -199,6 +200,38 @@ fn symlink(original: &Path, link: &Path) -> Result<()> {
     }
     std::os::unix::fs::symlink(original, link)
         .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
+}
+
+#[cfg(feature = "install")]
+#[cfg(windows)]
+fn symlink(original: &Path, link: &Path) -> Result<()> {
+    use std::fs;
+    use std::os::windows::fs::{symlink_dir, symlink_file};
+    if let Ok(metadata) = std::fs::symlink_metadata(link) {
+        if metadata.is_dir() {
+            fs::remove_dir_all(link)
+        } else {
+            fs::remove_file(link)
+        }
+        .map_err(|e| {
+            RzupError::Other(format!("Failed to remove symlink: {}: {e}", link.display()))
+        })?
+    }
+    if let Some(parent) = link.parent() {
+        fs::create_dir_all(parent).map_err(|e| {
+            RzupError::Other(format!(
+                "Failed to create directory: {}: {e}",
+                parent.display()
+            ))
+        })?
+    }
+    if original.is_dir() {
+        symlink_dir(original, link)
+            .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
+    } else {
+        symlink_file(original, link)
+            .map_err(|e| RzupError::Other(format!("Failed to create symlink: {e}")))
+    }
 }
 
 #[cfg(not(feature = "install"))]
