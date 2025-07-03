@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-risc0-zkvm = { path = "../../../../../risc0/zkvm", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm = { path = "../../../../../risc0/zkvm", default-features = false, features = ["std"] }
 hex-literal = "0.4"
 k256 = { version = "=0.13.3", features = ["arithmetic", "serde", "expose-field", "std", "ecdsa"], default-features = false }
 

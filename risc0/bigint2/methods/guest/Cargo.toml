@@ -13,13 +13,8 @@ num-bigint = { version = "0.4", default-features = false, features = [
 num-bigint-dig = { version = "0.8", default-features = false, features = [
   "serde",
 ], optional = true }
-risc0-bigint2 = { path = "../..", default-features = false, features = [
-  "unstable",
-] }
-risc0-zkvm = { path = "../../../zkvm", default-features = false, features = [
-  "std",
-  "unstable",
-] }
+risc0-bigint2 = { path = "../..", default-features = false }
+risc0-zkvm = { path = "../../../zkvm", default-features = false, features = ["std"] }
 k256 = { version = "=0.13.3" }
 
 [build-dependencies]

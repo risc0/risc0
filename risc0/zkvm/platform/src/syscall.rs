@@ -1089,8 +1089,7 @@ macro_rules! impl_sys_bigint2 {
         /// # Safety
         ///
         /// `blob_ptr` and all arguments must be aligned and dereferenceable.
-        #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-        #[stability::unstable]
+        #[cfg_attr(feature = "export-syscalls", no_mangle)]
         pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
             $(, $a2: *const u32
                 $(, $a3: *const u32

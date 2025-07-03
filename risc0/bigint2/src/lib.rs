@@ -16,20 +16,14 @@
 #[cfg(feature = "num-bigint-dig")]
 extern crate num_bigint_dig as num_bigint;
 
-#[cfg(feature = "unstable")]
 pub mod ec;
-#[cfg(feature = "unstable")]
 pub mod ffi;
-#[cfg(feature = "unstable")]
 pub mod field;
-#[cfg(feature = "unstable")]
 pub mod rsa;
 
-#[allow(dead_code)] // Used by the unstable functions
 pub(crate) const WORD_SIZE: usize = 4;
 
 /// Trait for converting values to a u32 array to be used for bigint2 acceleration.
-#[stability::unstable]
 pub trait ToBigInt2Buffer<const WIDTH: usize> {
     /// Convert value to a u32 array to be used for bigint2 acceleration.
     fn to_u32_array(&self) -> [u32; WIDTH];
@@ -38,7 +32,6 @@ pub trait ToBigInt2Buffer<const WIDTH: usize> {
     fn from_u32_array(array: [u32; WIDTH]) -> Self;
 }
 
-#[cfg(feature = "unstable")]
 #[inline]
 // Checks if two u32 arrays representing big integers with little-endian digit order satisfy lhs < rhs
 fn is_less<const N: usize>(lhs: &[u32; N], rhs: &[u32; N]) -> bool {
@@ -125,11 +118,9 @@ impl<const WIDTH: usize> ToBigInt2Buffer<WIDTH> for num_bigint_dig::BigUint {
 }
 
 #[cfg(test)]
-#[cfg(feature = "unstable")]
 struct BigUintWrap(num_bigint::BigUint);
 
 #[cfg(test)]
-#[cfg(feature = "unstable")]
 impl std::str::FromStr for BigUintWrap {
     type Err = num_bigint::ParseBigIntError;
 

@@ -171,7 +171,6 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
     }
 
     /// Elliptic curve doubling of the affine point.
-    #[stability::unstable]
     pub fn double(&self, result: &mut Self) {
         self.double_internal(result);
 
@@ -203,7 +202,6 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
     }
 
     /// Elliptic curve addition of the affine point.
-    #[stability::unstable]
     pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
         self.add_internal(rhs, result);
 
