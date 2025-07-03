@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 bn254-core = { path = "../../core" }
-risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 substrate-bn = "=0.6.0"
 
 [patch.crates-io]
