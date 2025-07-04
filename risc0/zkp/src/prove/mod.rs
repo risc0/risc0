@@ -15,9 +15,9 @@
 //! Cryptographic algorithms for producing a ZK proof of compute
 //!
 //! This module is not typically used directly. Instead, we recommend the
-//! higher-level tools offered in [`risc0_zkvm::prove`].
+//! higher-level tools offered in [the risc0_zkvm documentation].
 //!
-//! [`risc0_zkvm::prove`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/prove/index.html
+//! [the risc0_zkvm documentation]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/
 
 mod fri;
 mod merkle;
