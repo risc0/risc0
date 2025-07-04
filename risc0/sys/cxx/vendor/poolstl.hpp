@@ -2111,7 +2111,7 @@ namespace std {
 
     /**
      * NOTE: Iterators are expected to be random access.
-     * See std::count_if https://en.cppreference.com/w/cpp/algorithm/count_if
+     * See std::count_if https://en.cppreference.com/w/cpp/algorithm/count.html
      */
     template <class ExecPolicy, class RandIt, class UnaryPredicate>
     poolstl::internal::enable_if_poolstl_policy<ExecPolicy, typename iterator_traits<RandIt>::difference_type>
