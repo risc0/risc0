@@ -14,8 +14,9 @@
 
 use std::fs;
 
+use risc0_binfmt::ProgramBinary;
+use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkvm::{compute_image_id, default_prover, ExecutorEnv};
-
 fn main() -> anyhow::Result<()> {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
@@ -24,7 +25,9 @@ fn main() -> anyhow::Result<()> {
 
     // Load built gcc program and compute it's image ID.
     // TODO have the image ID be calculated at compile time, to avoid potential vulnerabilities
-    let consensus_elf = fs::read("./guest/out/main")?;
+    let guest_elf = fs::read("./guest/out/main")?;
+    let program_binary = ProgramBinary::new(&guest_elf, V1COMPAT_ELF);
+    let consensus_elf = program_binary.encode();
     let consensus_id = compute_image_id(&consensus_elf)?;
 
     let env = ExecutorEnv::builder()
