@@ -236,10 +236,10 @@ You can find detailed information in the [version management design][version-man
 [estop-11155111-etherscan]: https://sepolia.etherscan.io/address/0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F#code
 [estop-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F#code
 [estop-src]: https://github.com/risc0/risc0-ethereum/tree/v2.2.2/contracts/src/RiscZeroVerifierEmergencyStop.sol
-[EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
+[EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/release-2.2/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
-[Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
-[IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
+[Groth16Receipt]: https://docs.rs/risc0-zkvm/2.2/risc0_zkvm/struct.Groth16Receipt.html
+[IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/release-2.2/contracts/src/IRiscZeroVerifier.sol
 [router-1-etherscan]: https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
 [router-10-etherscan]: https://optimistic.etherscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-1101-etherscan]: https://zkevm.polygonscan.com/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
@@ -292,4 +292,4 @@ You can find detailed information in the [version management design][version-man
 [verifier-11155111-etherscan]: https://sepolia.etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
 [verifier-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
 [verifier-src]: https://github.com/risc0/risc0-ethereum/tree/v2.2.2/contracts/src/groth16/RiscZeroGroth16Verifier.sol
-[version-management]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/version-management-design.md
+[version-management]: https://github.com/risc0/risc0-ethereum/blob/release-2.2/contracts/version-management-design.md
