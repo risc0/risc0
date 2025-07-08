@@ -113,7 +113,7 @@ fn target_dir() -> PathBuf {
 }
 
 fn cargo_bin_str(name: &str) -> PathBuf {
-    let env_var = format!("CARGO_BIN_EXE_{}", name);
+    let env_var = format!("CARGO_BIN_EXE_{name}");
     std::env::var_os(env_var)
         .map(|p| p.into())
         .unwrap_or_else(|| target_dir().join(format!("{}{}", name, std::env::consts::EXE_SUFFIX)))

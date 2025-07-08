@@ -247,7 +247,7 @@ impl KernelBuild {
                         for inc_dir in self.inc_dirs.iter() {
                             cmd.arg("-I").arg(inc_dir);
                         }
-                        println!("Running: {:?}", cmd);
+                        println!("Running: {cmd:?}");
                         let status = cmd.status().unwrap();
                         if !status.success() {
                             panic!("Could not build metal kernels");

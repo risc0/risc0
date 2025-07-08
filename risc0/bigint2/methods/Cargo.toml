@@ -4,7 +4,7 @@ version = { workspace = true }
 edition = { workspace = true }
 
 [build-dependencies]
-risc0-build = { workspace = true, features = ["unstable"] }
+risc0-build = { workspace = true }
 
 [package.metadata.release]
 release = false
