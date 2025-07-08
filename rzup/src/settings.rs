@@ -58,8 +58,7 @@ impl Settings {
             if Version::parse(version_str).is_err() {
                 env.emit(RzupEvent::Print {
                     message: format!(
-                        "! Warning: settings.toml: invalid semver `{}` for component `{}`",
-                        version_str, component
+                        "! Warning: settings.toml: invalid semver `{version_str}` for component `{component}`",
                     ),
                 });
             }
