@@ -219,7 +219,6 @@ You can find detailed information in the [version management design][version-man
 
 <br />
 
-[doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [estop-1-etherscan]: https://etherscan.io/address/0x1efDd13f831ceeEa14940806705A53D3211CD698#code
 [estop-10-etherscan]: https://optimistic.etherscan.io/address/0x1efDd13f831ceeEa14940806705A53D3211CD698#code
 [estop-1101-etherscan]: https://zkevm.polygonscan.com/address/0x57880e43BA126a29d81851F3410dF23a2008bF2E#code
@@ -235,7 +234,7 @@ You can find detailed information in the [version management design][version-man
 [estop-560048-etherscan]: https://hoodi.etherscan.io/address/0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F#code
 [estop-11155111-etherscan]: https://sepolia.etherscan.io/address/0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F#code
 [estop-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F#code
-[estop-src]: https://github.com/risc0/risc0-ethereum/tree/v2.2.2/contracts/src/RiscZeroVerifierEmergencyStop.sol
+[estop-src]: https://github.com/risc0/risc0-ethereum/tree/release-2.2/contracts/src/RiscZeroVerifierEmergencyStop.sol
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/release-2.2/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/2.2/risc0_zkvm/struct.Groth16Receipt.html
@@ -255,7 +254,7 @@ You can find detailed information in the [version management design][version-man
 [router-560048-etherscan]: https://hoodi.etherscan.io/address/0x32Db7dc407AC886807277636a1633A1381748DD8#code
 [router-11155111-etherscan]: https://sepolia.etherscan.io/address/0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187#code
 [router-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908#code
-[router-src]: https://github.com/risc0/risc0-ethereum/tree/v2.2.2/contracts/src/RiscZeroVerifierRouter.sol
+[router-src]: https://github.com/risc0/risc0-ethereum/tree/release-2.2/contracts/src/RiscZeroVerifierRouter.sol
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
@@ -291,5 +290,5 @@ You can find detailed information in the [version management design][version-man
 [verifier-560048-etherscan]: https://hoodi.etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
 [verifier-11155111-etherscan]: https://sepolia.etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
 [verifier-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
-[verifier-src]: https://github.com/risc0/risc0-ethereum/tree/v2.2.2/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[verifier-src]: https://github.com/risc0/risc0-ethereum/tree/release-2.2/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [version-management]: https://github.com/risc0/risc0-ethereum/blob/release-2.2/contracts/version-management-design.md
