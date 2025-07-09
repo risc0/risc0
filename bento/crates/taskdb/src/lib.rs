@@ -397,7 +397,7 @@ where
     Ok(serde_json::from_value(output)?)
 }
 
-/// Deletes a job and all its dependant table entries (tasks / task_deps)
+/// Deletes a job and all its dependent table entries (tasks / task_deps)
 pub async fn delete_job(pool: &PgPool, job_id: &Uuid) -> Result<(), TaskDbErr> {
     let mut txn = pool.begin().await?;
 
