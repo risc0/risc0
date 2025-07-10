@@ -625,11 +625,17 @@ mod docker {
         );
 
         let prover = DevModeProver::new();
-        let receipt = prover.compress(&ProverOpts::composite(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::composite().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::succinct().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::groth16(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::groth16().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
     }
 
