@@ -74,6 +74,13 @@ pub trait KeccakProver {
 pub fn keccak_prover() -> Result<Box<dyn KeccakProver>> {
     cfg_if! {
         if #[cfg(feature = "cuda")] {
+            #[cfg(feature = "risc0_zkvm")]
+            {
+                if !risc0_zkvm::is_keccak_enabled() {
+                    // Return CPU implementation if keccak is disabled in zkvm
+                    return self::hal::cpu::keccak_prover();
+                }
+            }
             self::hal::cuda::keccak_prover()
         // } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
         //     self::metal::keccak_prover()

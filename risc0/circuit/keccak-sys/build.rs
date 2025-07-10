@@ -20,8 +20,16 @@ use std::{
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
-    if env::var("CARGO_FEATURE_CUDA").is_ok() {
+    // Build CUDA kernels only if both cuda and keccak features are enabled
+    let cuda_enabled = env::var("CARGO_FEATURE_CUDA").is_ok();
+    let keccak_enabled = env::var("CARGO_FEATURE_KECCAK").is_ok();
+
+    if cuda_enabled && keccak_enabled {
         build_cuda_kernels();
+    } else if cuda_enabled && !keccak_enabled {
+        // Create a stub library when CUDA is enabled but keccak is disabled
+        create_stub_cuda_library();
+        println!("cargo:warning=Skipping CUDA keccak compilation as keccak feature is disabled");
     }
 
     build_cpu_kernels();
@@ -33,6 +41,19 @@ fn build_cpu_kernels() {
         .files(glob_paths("kernels/cxx/*.cpp"))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("risc0_keccak_cpu");
+}
+
+fn create_stub_cuda_library() {
+    let output = "risc0_keccak_cuda";
+    let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
+    let out_path = out_dir.join(format!("lib{output}-skip.a"));
+    std::fs::OpenOptions::new()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .open(&out_path)
+        .unwrap();
+    println!("cargo:{}={}", output, out_path.display());
 }
 
 fn build_cuda_kernels() {
