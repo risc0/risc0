@@ -19,9 +19,8 @@ use bonsai_sdk::blocking::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, is_dev_mode, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt,
-    InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, SessionStats, VerifierContext,
-    VERSION,
+    compute_image_id, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, InnerReceipt,
+    ProveInfo, ProverOpts, Receipt, ReceiptKind, SessionStats, VerifierContext, VERSION,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
@@ -230,7 +229,7 @@ impl Prover for BonsaiProver {
             // Compression is always a no-op in dev mode
             (InnerReceipt::Fake { .. }, _) => {
                 ensure!(
-                    is_dev_mode(),
+                    opts.dev_mode(),
                     "dev mode must be enabled to compress fake receipts"
                 );
                 Ok(receipt.clone())
