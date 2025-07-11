@@ -663,6 +663,11 @@ async fn groth16_download(
     Ok(receipt)
 }
 
+const HEALTH_PATH: &str = "/health";
+async fn health_check() -> Result<(), AppError> {
+    Ok(()) // TODO(ec2): implement health check
+}
+
 pub fn app(state: Arc<AppState>) -> Router {
     Router::new()
         .route(IMAGE_UPLOAD_PATH, get(image_upload))
@@ -679,6 +684,7 @@ pub fn app(state: Arc<AppState>) -> Router {
         .route(SNARK_START_PATH, post(prove_groth16))
         .route(SNARK_STATUS_PATH, get(groth16_status))
         .route(GET_GROTH16_PATH, get(groth16_download))
+        .route(HEALTH_PATH, get(health_check))
         .with_state(state)
 }
 
