@@ -71,8 +71,8 @@ impl ImageMask {
         assert_eq!(image.dimensions(), self.0.dimensions());
 
         let zero_pixel: Rgb<u8> = [0, 0, 0].into();
-        for x in 0..image.width() {
-            for y in 0..image.height() {
+        for y in 0..image.height() {
+            for x in 0..image.width() {
                 let m = self.0.get_pixel(x, y);
                 if m.0[0] == 0 {
                     image.put_pixel(x, y, zero_pixel);
