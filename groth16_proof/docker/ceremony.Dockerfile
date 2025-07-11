@@ -7,8 +7,6 @@ WORKDIR /src/
 RUN apt -qq update && \
   apt install -y -q apt-transport-https build-essential clang cmake curl gnupg libgmp-dev libsodium-dev m4 nasm nlohmann-json3-dev npm
 
-WORKDIR /src/
-
 # Build and install circom
 RUN git clone https://github.com/iden3/circom.git && \
   cd circom && \
@@ -21,7 +19,6 @@ ENV CXX=clang++
 # Cache ahead of the larger build process
 FROM dependencies AS builder
 
-WORKDIR /src/
 COPY groth16/risc0.circom ./groth16/risc0.circom
 COPY groth16/stark_verify.circom ./groth16/stark_verify.circom
 
