@@ -137,8 +137,8 @@ impl<StreamT: AsyncRead + Unpin> RpcReceiver<StreamT> {
 //
 
 impl RpcMessageId {
-    const INITIAL: Self = Self(unsafe { NonZeroU32::new_unchecked(1) });
-    const MAX: Self = Self(unsafe { NonZeroU32::new_unchecked(u32::MAX) });
+    const INITIAL: Self = Self(NonZeroU32::new(1).unwrap());
+    const MAX: Self = Self(NonZeroU32::new(u32::MAX).unwrap());
 
     fn incr(&mut self) {
         if *self == Self::MAX {

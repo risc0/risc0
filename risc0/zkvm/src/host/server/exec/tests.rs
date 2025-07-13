@@ -266,7 +266,7 @@ fn bigint_accel() {
 
     let cases = generate_bigint_test_cases(10);
     for case in cases {
-        println!("Running BigInt circuit test case: {:x?}", case);
+        println!("Running BigInt circuit test case: {case:x?}");
         let input = MultiTestSpec::BigInt {
             count: 1,
             x: case.x,
