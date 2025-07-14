@@ -1220,7 +1220,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "anyhow",
  "borsh",

@@ -1340,7 +1340,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1464,7 +1464,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "anyhow",
  "borsh",

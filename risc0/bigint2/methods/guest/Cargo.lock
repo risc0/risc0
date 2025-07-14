@@ -1032,7 +1032,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.4"
+version = "1.4.5"
 dependencies = [
  "include_bytes_aligned",
  "num-bigint",
@@ -1048,7 +1048,7 @@ dependencies = [
  "k256",
  "num-bigint",
  "num-bigint-dig",
- "risc0-bigint2 1.4.4",
+ "risc0-bigint2 1.4.5",
  "risc0-zkvm",
 ]
 
@@ -1173,7 +1173,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "anyhow",
  "borsh",
