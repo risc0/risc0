@@ -429,7 +429,7 @@ impl Server {
                 .ok_or_else(|| malformed_err("ProveRequest.opts"))?
                 .try_into()?;
             let prover = get_prover_server(&opts)?;
-            let ctx = VerifierContext::default();
+            let ctx = VerifierContext::default().with_dev_mode(opts.dev_mode());
             let prove_info = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
             let prove_info: pb::core::ProveInfo = prove_info.try_into()?;
@@ -480,7 +480,7 @@ impl Server {
             let segment: Segment = bincode::deserialize(&segment_bytes)?;
 
             let prover = get_prover_server(&opts)?;
-            let ctx = VerifierContext::default();
+            let ctx = VerifierContext::default().with_dev_mode(opts.dev_mode());
             let receipt = prover.prove_segment(&ctx, &segment)?;
 
             let receipt_pb: pb::core::SegmentReceipt = receipt.try_into()?;
