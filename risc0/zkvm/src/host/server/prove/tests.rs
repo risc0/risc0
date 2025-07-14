@@ -248,7 +248,7 @@ fn sha_iter() {
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(10);
     for case in cases {
-        println!("Running BigInt circuit test case: {:08x?}", case);
+        println!("Running BigInt circuit test case: {case:08x?}");
         let input = MultiTestSpec::BigInt {
             count: 1,
             x: case.x,
@@ -625,11 +625,17 @@ mod docker {
         );
 
         let prover = DevModeProver::new();
-        let receipt = prover.compress(&ProverOpts::composite(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::composite().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::succinct().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::groth16(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::groth16().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
     }
 

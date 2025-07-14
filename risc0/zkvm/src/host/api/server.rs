@@ -14,7 +14,7 @@
 
 use std::{
     error::Error as StdError,
-    io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Read, Write},
+    io::{BufReader, Error as IoError, Read, Write},
     path::{Path, PathBuf},
 };
 
@@ -431,7 +431,7 @@ impl Server {
                 .ok_or_else(|| malformed_err("ProveRequest.opts"))?
                 .try_into()?;
             let prover = get_prover_server(&opts)?;
-            let ctx = VerifierContext::default();
+            let ctx = VerifierContext::default().with_dev_mode(opts.dev_mode());
             let prove_info = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
             let prove_info: pb::core::ProveInfo = prove_info.try_into()?;
@@ -482,7 +482,7 @@ impl Server {
             let segment: Segment = bincode::deserialize(&segment_bytes)?;
 
             let prover = get_prover_server(&opts)?;
-            let ctx = VerifierContext::default();
+            let ctx = VerifierContext::default().with_dev_mode(opts.dev_mode());
             let receipt = prover.prove_segment(&ctx, &segment)?;
 
             let receipt_pb: pb::core::SegmentReceipt = receipt.try_into()?;
@@ -994,13 +994,13 @@ trait IoOtherError<T> {
 
 impl<T, E: Into<Box<dyn StdError + Send + Sync>>> IoOtherError<T> for Result<T, E> {
     fn map_io_err(self) -> Result<T, IoError> {
-        self.map_err(|err| IoError::new(IoErrorKind::Other, err))
+        self.map_err(|err| IoError::other(err))
     }
 }
 
 impl From<pb::api::GenericError> for IoError {
     fn from(err: pb::api::GenericError) -> Self {
-        IoError::new(IoErrorKind::Other, err.reason)
+        IoError::other(err.reason)
     }
 }
 

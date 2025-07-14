@@ -113,11 +113,18 @@ impl Default for DevModeProver {
 }
 
 impl ProverServer for DevModeProver {
-    fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+        let ctx = VerifierContext::default().with_dev_mode(true);
+        self.prove_with_ctx(env, &ctx, elf)
+    }
+
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         eprintln!(
             "WARNING: Proving in dev mode does not generate a valid receipt. \
             Receipts generated from this process are invalid and should never be used in production."
         );
+
+        ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
 
         ensure!(
             cfg!(not(feature = "disable-dev-mode")),
@@ -218,9 +225,10 @@ impl ProverServer for DevModeProver {
 
     fn prove_segment_core(
         &self,
-        _ctx: &VerifierContext,
+        ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
+        ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
         ensure!(
             cfg!(not(feature = "disable-dev-mode")),
             ERR_DEV_MODE_DISABLED
@@ -339,7 +347,8 @@ impl ProverServer for DevModeProver {
         Ok(fake_succinct_receipt())
     }
 
-    fn compress(&self, _opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
         ensure!(
             cfg!(not(feature = "disable-dev-mode")),
             ERR_DEV_MODE_DISABLED

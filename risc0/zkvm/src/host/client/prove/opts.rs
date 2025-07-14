@@ -47,6 +47,10 @@ pub struct ProverOpts {
 
     /// Maximum cycle count, as a power of two (po2) that these prover options support.
     pub(crate) max_segment_po2: usize,
+
+    /// Whether or not dev-mode is enabled. If enabled, fake receipts may be generated, and fake
+    /// receipts will verify successfully.
+    pub(crate) dev_mode: bool,
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
@@ -84,6 +88,7 @@ impl Default for ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 }
@@ -105,6 +110,7 @@ impl ProverOpts {
                 .unwrap()
                 .collect(),
             max_segment_po2: po2_max,
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 
@@ -131,6 +137,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 
@@ -143,6 +150,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 
@@ -157,6 +165,7 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
             max_segment_po2: DEFAULT_MAX_PO2,
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 
@@ -199,6 +208,20 @@ impl ProverOpts {
             max_segment_po2,
             ..self
         }
+    }
+
+    /// Return [ProverOpts] with dev_mode enabled or disabled.
+    pub fn with_dev_mode(self, dev_mode: bool) -> Self {
+        if cfg!(feature = "disable-dev-mode") && dev_mode {
+            panic!("zkVM: Inconsistent settings -- please resolve. \
+                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+        }
+        Self { dev_mode, ..self }
+    }
+
+    /// Returns `true` if dev-mode is enabled.
+    pub fn dev_mode(&self) -> bool {
+        self.dev_mode
     }
 
     #[cfg(feature = "prove")]

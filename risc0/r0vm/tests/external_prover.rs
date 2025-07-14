@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ fn prove_nothing(opt: &ProverOpts) -> Result<Receipt> {
         .unwrap();
     let r0vm_path = cargo_bin("r0vm");
     let prover = ExternalProver::new("r0vm", r0vm_path);
-    let receipt = prover.prove(env, MULTI_TEST_ELF)?.receipt;
+    let receipt = prover.prove_with_opts(env, MULTI_TEST_ELF, opt)?.receipt;
     prover.compress(opt, &receipt)
 }
 
@@ -42,4 +42,14 @@ fn compressed_proof() {
     let receipt = prove_nothing(&ProverOpts::groth16()).unwrap();
     receipt.verify(MULTI_TEST_ID).unwrap();
     receipt.inner.groth16().unwrap();
+}
+
+#[test_log::test]
+#[cfg(not(feature = "disable-dev-mode"))]
+fn dev_mode() {
+    use assert_matches::assert_matches;
+    use risc0_zkvm::InnerReceipt;
+
+    let receipt = prove_nothing(&ProverOpts::succinct().with_dev_mode(true)).unwrap();
+    assert_matches!(receipt.inner, InnerReceipt::Fake(_));
 }

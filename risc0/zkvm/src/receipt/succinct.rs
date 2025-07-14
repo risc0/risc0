@@ -372,7 +372,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("bb81f1400f9a2b28b457f9d686c28ec3ffeece08b0b00f1b0d7643a1cc471115")
+            digest!("6da21180b0fb9de482aed36931a29b10feeb64fb96de49f2f2e5e119e2bb8cd8")
         );
     }
 
@@ -388,7 +388,7 @@ mod tests {
     fn allowed_control_root_fn_doesnt_panic() {
         for i in 0..=24 {
             allowed_control_root("poseidon2", i)
-                .unwrap_or_else(|_| panic!("allowed_control_root panicked with i = {}", i));
+                .unwrap_or_else(|_| panic!("allowed_control_root panicked with i = {i}"));
         }
         // When po2_max is greater than 24, this simply returns the same result as 24.
         assert_eq!(

@@ -24,7 +24,7 @@ use std::{path::PathBuf, rc::Rc};
 use anyhow::{anyhow, Result};
 
 #[cfg(feature = "bonsai")]
-use {self::bonsai::BonsaiProver, crate::is_dev_mode};
+use self::bonsai::BonsaiProver;
 
 use self::{external::ExternalProver, opts::ProverOpts};
 
@@ -88,7 +88,7 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::default().with_dev_mode(opts.dev_mode());
         self.prove_with_ctx(env, &ctx, elf, opts)
     }
 
@@ -172,7 +172,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
 
     #[cfg(feature = "bonsai")]
     {
-        if !is_dev_mode()
+        if !crate::is_dev_mode_enabled_via_environment()
             && std::env::var("BONSAI_API_URL").is_ok()
             && std::env::var("BONSAI_API_KEY").is_ok()
         {

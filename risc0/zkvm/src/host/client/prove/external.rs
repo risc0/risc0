@@ -18,8 +18,8 @@ use anyhow::{ensure, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, is_dev_mode, ApiClient, Asset, ExecutorEnv, InnerReceipt, ProveInfo,
-    Receipt, ReceiptKind, SessionInfo, VerifierContext,
+    host::api::AssetRequest, ApiClient, Asset, ExecutorEnv, InnerReceipt, ProveInfo, Receipt,
+    ReceiptKind, SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -73,7 +73,7 @@ impl Prover for ExternalProver {
             // Compression is always a no-op in dev mode
             (InnerReceipt::Fake { .. }, _) => {
                 ensure!(
-                    is_dev_mode(),
+                    opts.dev_mode(),
                     "dev mode must be enabled to compress fake receipts"
                 );
                 Ok(receipt.clone())

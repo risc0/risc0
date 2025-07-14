@@ -49,7 +49,7 @@ impl ProverImpl {
 
 impl ProverServer for ProverImpl {
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::default().with_dev_mode(self.opts.dev_mode());
         self.prove_with_ctx(env, &ctx, elf)
     }
 

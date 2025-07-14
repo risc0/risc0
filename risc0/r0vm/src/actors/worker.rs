@@ -319,7 +319,7 @@ impl GpuProcessor {
         self.task_start(header.clone()).await?;
         let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || {
-            let ctx = VerifierContext::default();
+            let ctx = VerifierContext::default().with_dev_mode(prover.delay.is_some());
             prover
                 .get()?
                 .prove_segment_core(&ctx, *task.preflight_results)

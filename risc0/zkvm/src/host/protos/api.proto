@@ -243,6 +243,7 @@ message ProverOpts {
   ReceiptKind receipt_kind = 3;
   repeated base.Digest control_ids = 4;
   uint64 max_segment_po2 = 5;
+  bool is_dev_mode = 6;
 }
 
 enum ReceiptKind {
