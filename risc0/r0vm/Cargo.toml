@@ -19,6 +19,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 anyhow = "1.0"
 assert_cmd = "2.0"
 assert_fs = "1.0"
+assert_matches = "1.5"
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 temp-env = "0.3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }

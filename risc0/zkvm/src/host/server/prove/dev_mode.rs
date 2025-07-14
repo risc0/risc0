@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{bail, ensure, Result};
 use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 
 use crate::{
@@ -26,6 +26,9 @@ use crate::{
     Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned, ProverOpts,
     ProverServer, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
+
+const ERR_DEV_MODE_DISABLED: &str =
+    "zkVM: dev mode is disabled. Unset RISC0_DEV_MODE environment variable to produce valid proofs";
 
 /// An implementation of a [ProverServer] for development and testing purposes.
 ///
@@ -57,17 +60,22 @@ impl ProverServer for DevModeProver {
         unimplemented!("keccak proving unsupported for dev mode");
     }
 
-    fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+        self.prove_with_ctx(env, &VerifierContext::default().with_dev_mode(true), elf)
+    }
+
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         eprintln!(
             "WARNING: Proving in dev mode does not generate a valid receipt. \
             Receipts generated from this process are invalid and should never be used in production."
         );
 
-        if cfg!(feature = "disable-dev-mode") {
-            bail!(
-                "zkVM: dev mode is disabled. Unset RISC0_DEV_MODE environment variable to produce valid proofs"
-            )
-        }
+        ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
+
+        ensure!(
+            cfg!(not(feature = "disable-dev-mode")),
+            ERR_DEV_MODE_DISABLED
+        );
 
         let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
             session.assumptions.iter().cloned().unzip();
@@ -174,7 +182,13 @@ impl ProverServer for DevModeProver {
         unimplemented!("This is unsupported for dev mode.")
     }
 
-    fn compress(&self, _opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
+        ensure!(
+            cfg!(not(feature = "disable-dev-mode")),
+            ERR_DEV_MODE_DISABLED
+        );
+
         Ok(Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
                 claim: receipt.claim()?,
