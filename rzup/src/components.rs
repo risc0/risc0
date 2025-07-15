@@ -19,7 +19,7 @@ use crate::BaseUrls;
 use crate::RzupEvent;
 use semver::Version;
 use std::fmt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use strum::EnumIter;
 
@@ -30,6 +30,7 @@ pub enum Component {
     Gdb,
     R0Vm,
     RustToolchain,
+    Risc0Groth16,
 }
 
 impl fmt::Display for Component {
@@ -46,6 +47,7 @@ impl Component {
             Self::Gdb => "gdb",
             Self::R0Vm => "r0vm",
             Self::RustToolchain => "rust",
+            Self::Risc0Groth16 => "risc0-groth16",
         }
     }
 
@@ -66,6 +68,73 @@ impl Component {
             Self::CargoRiscZero | Self::CppToolchain | Self::R0Vm | Self::RustToolchain
         )
     }
+
+    pub fn repo_name(&self) -> &'static str {
+        match self {
+            Component::CargoRiscZero | Component::R0Vm => "risc0",
+            Component::RustToolchain => "rust",
+            Component::CppToolchain => "toolchain",
+            Component::Gdb => "toolchain",
+            Component::Risc0Groth16 => unimplemented!(),
+        }
+    }
+
+    pub fn asset_name(&self, platform: &Platform) -> Result<(String, &'static str)> {
+        Ok(match self {
+            Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
+            Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
+            Component::Gdb => match (platform.arch, platform.os) {
+                ("x86_64", Os::Linux) => ("riscv32im-gdb-linux-x86_64".to_string(), "tar.xz"),
+                ("aarch64", Os::MacOs) => ("riscv32im-gdb-osx-arm64".to_string(), "tar.xz"),
+                (other, os) => {
+                    return Err(RzupError::UnsupportedPlatform(format!(
+                        "unknown architecture {other} for {os}"
+                    )))
+                }
+            },
+            Component::CppToolchain => match (platform.arch, platform.os) {
+                ("x86_64", Os::Linux) => ("riscv32im-linux-x86_64".to_string(), "tar.xz"),
+                ("aarch64", Os::MacOs) => ("riscv32im-osx-arm64".to_string(), "tar.xz"),
+                (other, os) => {
+                    return Err(RzupError::UnsupportedPlatform(format!(
+                        "unknown architecture {other} for {os}"
+                    )))
+                }
+            },
+            Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
+            Component::Risc0Groth16 => ("risc0-groth16".to_string(), "tar.xz"),
+        })
+    }
+
+    pub fn version_str(&self, version: &Version) -> String {
+        match self {
+            // rust toolchain uses date-based versions with r0. prefix
+            Component::RustToolchain => {
+                format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
+            }
+            // cpp toolchain uses date-based versions
+            Component::CppToolchain | Component::Gdb => format!(
+                "{:04}.{:02}.{:02}",
+                version.major, version.minor, version.patch
+            ),
+            // the remaining use v-prefixed versions
+            Component::CargoRiscZero | Component::R0Vm | Component::Risc0Groth16 => {
+                format!("v{version}")
+            }
+        }
+    }
+
+    pub fn get_dir(&self, env: &Environment) -> PathBuf {
+        match self {
+            Component::RustToolchain | Component::CppToolchain => {
+                env.risc0_dir().join("toolchains")
+            }
+            Component::CargoRiscZero
+            | Component::R0Vm
+            | Component::Gdb
+            | Component::Risc0Groth16 => env.risc0_dir().join("extensions"),
+        }
+    }
 }
 
 impl FromStr for Component {
@@ -78,6 +147,7 @@ impl FromStr for Component {
             "gdb" => Ok(Self::Gdb),
             "r0vm" => Ok(Self::R0Vm),
             "rust" => Ok(Self::RustToolchain),
+            "risc0-groth16" => Ok(Self::Risc0Groth16),
             c => Err(RzupError::ComponentNotFound(c.into())),
         }
     }
@@ -227,6 +297,7 @@ pub fn set_default(env: &Environment, component: &Component, version: &Version) 
             &version_dir.join("riscv32im-gdb"),
             &env.risc0_dir().join("bin/riscv32im-gdb"),
         )?,
+        Component::Risc0Groth16 => unimplemented!(),
     };
     Ok(())
 }
@@ -243,118 +314,6 @@ pub fn get_latest_version(
 ) -> Result<Version> {
     let distribution = GithubRelease::new(base_urls);
     distribution.latest_version(env, component)
-}
-
-pub fn component_repo_name(component: &Component) -> &'static str {
-    match component {
-        Component::CargoRiscZero | Component::R0Vm => "risc0",
-        Component::RustToolchain => "rust",
-        Component::CppToolchain => "toolchain",
-        Component::Gdb => "toolchain",
-    }
-}
-
-pub fn component_asset_name(
-    component: &Component,
-    platform: &Platform,
-) -> Result<(String, &'static str)> {
-    Ok(match component {
-        Component::RustToolchain => (format!("rust-toolchain-{platform}"), "tar.gz"),
-        Component::CargoRiscZero => (format!("cargo-risczero-{platform}"), "tgz"),
-        Component::Gdb => match (platform.arch, platform.os) {
-            ("x86_64", Os::Linux) => ("riscv32im-gdb-linux-x86_64".to_string(), "tar.xz"),
-            ("aarch64", Os::MacOs) => ("riscv32im-gdb-osx-arm64".to_string(), "tar.xz"),
-            (other, os) => {
-                return Err(RzupError::UnsupportedPlatform(format!(
-                    "unknown architecture {other} for {os}"
-                )))
-            }
-        },
-        Component::CppToolchain => match (platform.arch, platform.os) {
-            ("x86_64", Os::Linux) => ("riscv32im-linux-x86_64".to_string(), "tar.xz"),
-            ("aarch64", Os::MacOs) => ("riscv32im-osx-arm64".to_string(), "tar.xz"),
-            (other, os) => {
-                return Err(RzupError::UnsupportedPlatform(format!(
-                    "unknown architecture {other} for {os}"
-                )))
-            }
-        },
-        Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
-    })
-}
-
-#[test]
-fn component_asset_name_test() {
-    assert_eq!(
-        component_asset_name(
-            &Component::RustToolchain,
-            &Platform::new("x86_64", Os::Linux)
-        )
-        .unwrap(),
-        ("rust-toolchain-x86_64-unknown-linux-gnu".into(), "tar.gz")
-    );
-    assert_eq!(
-        component_asset_name(
-            &Component::CargoRiscZero,
-            &Platform::new("x86_64", Os::Linux)
-        )
-        .unwrap(),
-        ("cargo-risczero-x86_64-unknown-linux-gnu".into(), "tgz")
-    );
-    assert_eq!(
-        component_asset_name(
-            &Component::CppToolchain,
-            &Platform::new("x86_64", Os::Linux)
-        )
-        .unwrap(),
-        ("riscv32im-linux-x86_64".into(), "tar.xz")
-    );
-    assert_eq!(
-        component_asset_name(&Component::R0Vm, &Platform::new("x86_64", Os::Linux)).unwrap(),
-        ("r0vm-x86_64-unknown-linux-gnu".into(), "tgz")
-    );
-
-    assert_eq!(
-        component_asset_name(&Component::Gdb, &Platform::new("x86_64", Os::Linux)).unwrap(),
-        ("riscv32im-gdb-linux-x86_64".into(), "tar.xz")
-    );
-
-    assert_eq!(
-        component_asset_name(
-            &Component::CppToolchain,
-            &Platform::new("aarch64", Os::MacOs)
-        )
-        .unwrap(),
-        ("riscv32im-osx-arm64".into(), "tar.xz")
-    );
-    assert_eq!(
-        component_asset_name(
-            &Component::CppToolchain,
-            &Platform::new("x86_64", Os::MacOs)
-        )
-        .unwrap_err(),
-        RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
-    );
-    assert_eq!(
-        component_asset_name(&Component::Gdb, &Platform::new("x86_64", Os::MacOs)).unwrap_err(),
-        RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
-    );
-}
-
-pub fn component_version_str(component: &Component, version: &Version) -> String {
-    match component {
-        // rust toolchain uses date-based versions with r0. prefix
-        Component::RustToolchain => {
-            format!("r0.{}.{}.{}", version.major, version.minor, version.patch)
-        }
-        // cpp toolchain uses date-based versions
-        Component::CppToolchain | Component::Gdb => format!(
-            "{:04}.{:02}.{:02}",
-            version.major, version.minor, version.patch
-        ),
-        // cargo-risczero use v-prefixed versions
-        Component::CargoRiscZero | Component::R0Vm => format!("v{version}"),
-    }
 }
 
 #[cfg(test)]
@@ -425,4 +384,71 @@ mod tests {
     }
 
     http_test_harness!(test_cargo_risczero_install);
+
+    #[test]
+    fn component_asset_name_test() {
+        assert_eq!(
+            Component::RustToolchain
+                .asset_name(&Platform::new("x86_64", Os::Linux))
+                .unwrap(),
+            ("rust-toolchain-x86_64-unknown-linux-gnu".into(), "tar.gz")
+        );
+        assert_eq!(
+            Component::CargoRiscZero
+                .asset_name(&Platform::new("x86_64", Os::Linux))
+                .unwrap(),
+            ("cargo-risczero-x86_64-unknown-linux-gnu".into(), "tgz")
+        );
+        assert_eq!(
+            Component::CppToolchain
+                .asset_name(&Platform::new("x86_64", Os::Linux))
+                .unwrap(),
+            ("riscv32im-linux-x86_64".into(), "tar.xz")
+        );
+        assert_eq!(
+            Component::R0Vm
+                .asset_name(&Platform::new("x86_64", Os::Linux))
+                .unwrap(),
+            ("r0vm-x86_64-unknown-linux-gnu".into(), "tgz")
+        );
+
+        assert_eq!(
+            Component::Gdb
+                .asset_name(&Platform::new("x86_64", Os::Linux))
+                .unwrap(),
+            ("riscv32im-gdb-linux-x86_64".into(), "tar.xz")
+        );
+
+        assert_eq!(
+            Component::CppToolchain
+                .asset_name(&Platform::new("aarch64", Os::MacOs))
+                .unwrap(),
+            ("riscv32im-osx-arm64".into(), "tar.xz")
+        );
+        assert_eq!(
+            Component::CppToolchain
+                .asset_name(&Platform::new("x86_64", Os::MacOs))
+                .unwrap_err(),
+            RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
+        );
+        assert_eq!(
+            Component::Gdb
+                .asset_name(&Platform::new("x86_64", Os::MacOs))
+                .unwrap_err(),
+            RzupError::UnsupportedPlatform("unknown architecture x86_64 for Mac OS".into())
+        );
+
+        assert_eq!(
+            Component::Risc0Groth16
+                .asset_name(&Platform::new("x86_64", Os::Linux))
+                .unwrap(),
+            ("risc0-groth16".into(), "tar.xz")
+        );
+        assert_eq!(
+            Component::Risc0Groth16
+                .asset_name(&Platform::new("aarch64", Os::MacOs))
+                .unwrap(),
+            ("risc0-groth16".into(), "tar.xz")
+        );
+    }
 }
