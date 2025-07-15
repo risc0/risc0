@@ -62,7 +62,9 @@ impl S3Client {
         let client = aws_sdk_s3::Client::from_conf(s3_config);
 
         // Attempt to provision the bucket if it does not exist
-        let cfg = CreateBucketConfiguration::builder().build();
+        let cfg = CreateBucketConfiguration::builder()
+            .location_constraint(MOCK_REGION.into())
+            .build();
         let res = client
             .create_bucket()
             .create_bucket_configuration(cfg)
