@@ -25,13 +25,16 @@ pub mod guest;
 
 // TODO: Break up the following code into modules.
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use consts::{EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS};
 use serde::{Deserialize, Serialize};
 
 type U96 = Uint<96, 2>;
 
 // NOTE: The ruint U256 type is not special here. It's just a convinient bitmap.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(
+    Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize,
+)]
 pub struct Bitmap(U256);
 
 impl Bitmap {
@@ -505,6 +508,28 @@ pub struct Opening<T: Merkleized> {
     path: Box<Array<Digest, T::TreeHeight>>,
 }
 
+impl<T: Merkleized> BorshSerialize for Opening<T>
+where
+    <T::TreeHeight as ArraySize>::ArrayType<Digest>: BorshSerialize,
+{
+    fn serialize<W: borsh::io::Write>(&self, writer: &mut W) -> borsh::io::Result<()> {
+        BorshSerialize::serialize(&self.bitmap, writer)?;
+        BorshSerialize::serialize(&self.path.0, writer)
+    }
+}
+
+impl<T: Merkleized> BorshDeserialize for Opening<T>
+where
+    <T::TreeHeight as ArraySize>::ArrayType<Digest>: BorshDeserialize,
+{
+    fn deserialize_reader<R: borsh::io::Read>(reader: &mut R) -> borsh::io::Result<Self> {
+        Ok(Self {
+            bitmap: BorshDeserialize::deserialize_reader(reader)?,
+            path: Box::new(Array(BorshDeserialize::deserialize_reader(reader)?)),
+        })
+    }
+}
+
 impl<T: Merkleized> Opening<T> {
     pub fn verify_inclusion(&self, commit: Digest, index: T::Index) -> anyhow::Result<()> {
         ensure!(
@@ -556,6 +581,34 @@ where
     <T::TreeHeight as Sub<typenum::U<LEVEL>>>::Output: ArraySize,
 {
     path: Box<Array<Digest, <T::TreeHeight as Sub<typenum::U<LEVEL>>>::Output>>,
+}
+
+impl<T: Merkleized, const LEVEL: usize> BorshSerialize for SubtreeOpening<T, LEVEL>
+where
+    typenum::Const<LEVEL>: typenum::ToUInt,
+    T::TreeHeight: Sub<typenum::U<LEVEL>>,
+    <T::TreeHeight as Sub<typenum::U<LEVEL>>>::Output: ArraySize,
+    <<T::TreeHeight as Sub<typenum::U<LEVEL>>>::Output as ArraySize>::ArrayType<Digest>:
+        BorshSerialize,
+{
+    fn serialize<W: borsh::io::Write>(&self, writer: &mut W) -> borsh::io::Result<()> {
+        BorshSerialize::serialize(&self.path.0, writer)
+    }
+}
+
+impl<T: Merkleized, const LEVEL: usize> BorshDeserialize for SubtreeOpening<T, LEVEL>
+where
+    typenum::Const<LEVEL>: typenum::ToUInt,
+    T::TreeHeight: Sub<typenum::U<LEVEL>>,
+    <T::TreeHeight as Sub<typenum::U<LEVEL>>>::Output: ArraySize,
+    <<T::TreeHeight as Sub<typenum::U<LEVEL>>>::Output as ArraySize>::ArrayType<Digest>:
+        BorshDeserialize,
+{
+    fn deserialize_reader<R: borsh::io::Read>(reader: &mut R) -> borsh::io::Result<Self> {
+        Ok(Self {
+            path: Box::new(Array(BorshDeserialize::deserialize_reader(reader)?)),
+        })
+    }
 }
 
 impl<T: Merkleized, const LEVEL: usize> SubtreeOpening<T, LEVEL>

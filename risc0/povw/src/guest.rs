@@ -2,13 +2,14 @@
 //
 // All rights reserved.
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_zkvm::{Digest, Unknown, WorkClaim};
 use ruint::aliases::U160;
 use serde::{Deserialize, Serialize};
 
 use crate::{Job, SubtreeOpening, WorkLog};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub enum State {
     Initial { work_log_id: U160 },
     Continuation { journal: Journal },
@@ -26,7 +27,7 @@ impl From<Journal> for State {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct Input {
     /// Optional journal from the previous execution of this guest.
     ///
@@ -39,14 +40,14 @@ pub struct Input {
     pub self_image_id: Digest,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct WorkLogUpdate {
     pub claim: WorkClaim<Unknown>,
     // TODO: Add a type-alias or something to make this less ugly.
     pub noninclusion_proof: SubtreeOpening<WorkLog, { Job::TREE_HEIGHT }>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
 pub struct Journal {
     /// Work log ID that this journal corresponds to.
     pub work_log_id: U160,

@@ -17,6 +17,7 @@
 use alloc::vec::Vec;
 use core::fmt;
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_struct, Digestible, PovwNonce};
 use serde::{Deserialize, Serialize};
 
@@ -30,7 +31,7 @@ use crate::{
 /// completed, and the nonces used, in the process of proving the claim.
 ///
 /// This type is instantiated as [WorkClaim<ReceiptClaim>] when PoVW is used with zkVM proving.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct WorkClaim<Claim>
 where
     Claim: Clone + Serialize,
@@ -73,7 +74,7 @@ where
 /// of the work. It is used to represent the work within a single execution.
 // TODO(povw): Rename this to be more clear that this is just one representation of work? (in
 // particular that this is the compact range representation).
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct Work {
     /// Lowest nonce in the range, inclusive.
     pub nonce_min: PovwNonce,

@@ -28,7 +28,7 @@ lazy_static = { version = "1.5.0", features = ["spin_no_std"] }
 postcard = { version = "1", default-features = false, features = ["alloc"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
-ruint = { version = "1.15.0", default-features = false, features = ["serde"] }
+ruint = { version = "1.15.0", default-features = false, features = ["serde", "borsh"] }
 semver = { version = "1", default-features = false, features = ["serde"] }
 serde = { version = "1.0", default-features = false, features = [
   "derive",

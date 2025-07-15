@@ -18,7 +18,7 @@ use ruint::uint;
 
 fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     let mut env_builder = ExecutorEnv::builder();
-    env_builder.write_frame(&postcard::to_allocvec(&input)?);
+    env_builder.write_frame(&borsh::to_vec(&input)?);
 
     for update in &input.updates {
         env_builder.add_assumption(FakeReceipt::new(update.claim.clone()));
@@ -27,7 +27,7 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     if let State::Continuation { ref journal } = input.state {
         env_builder.add_assumption(FakeReceipt::new(ReceiptClaim::ok(
             RISC0_POVW_LOG_BUILDER_ID,
-            postcard::to_allocvec(journal)?,
+            borsh::to_vec(journal)?,
         )));
     }
 
@@ -36,7 +36,7 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     let session_info = default_executor().execute(env, RISC0_POVW_LOG_BUILDER_ELF)?;
     assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
-    let decoded_journal: Journal = postcard::from_bytes(&session_info.journal.bytes)?;
+    let decoded_journal: Journal = borsh::from_slice(&session_info.journal.bytes)?;
     println!("decoded_journal: {decoded_journal:#?}");
 
     Ok(decoded_journal)

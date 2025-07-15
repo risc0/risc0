@@ -13,16 +13,12 @@ use ruint::Uint;
 type U96 = Uint<96, 2>;
 
 fn main() -> anyhow::Result<()> {
-    let input: Input = postcard::from_bytes(&env::read_frame())?;
+    let input: Input = borsh::from_slice(&env::read_frame())?;
 
     let (work_log_id, initial_commit) = match input.state {
         State::Initial { work_log_id } => (work_log_id, WorkLog::EMPTY.commit()),
         State::Continuation { journal } => {
-            env::verify(
-                input.self_image_id,
-                &postcard::to_allocvec(&journal).unwrap(),
-            )
-            .unwrap();
+            env::verify(input.self_image_id, &borsh::to_vec(&journal).unwrap()).unwrap();
 
             // Check that the self image ID and work log ID match the input.
             // NOTE: initial_commit and update_value are unconstrained, as they are not needed.
@@ -71,7 +67,7 @@ fn main() -> anyhow::Result<()> {
         update_value += work.value;
     }
 
-    env::commit_slice(&postcard::to_allocvec(&Journal {
+    env::commit_slice(&borsh::to_vec(&Journal {
         work_log_id,
         self_image_id: input.self_image_id,
         updated_commit: root,

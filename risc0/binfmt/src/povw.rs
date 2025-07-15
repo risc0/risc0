@@ -16,6 +16,7 @@
 
 // TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use ruint::aliases::{U160, U256, U64};
 use serde::{Deserialize, Serialize};
 
@@ -29,7 +30,18 @@ use rand::{
 pub type PovwLogId = U160;
 
 /// TODO
-#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Default,
+    Serialize,
+    Deserialize,
+    BorshSerialize,
+    BorshDeserialize,
+    PartialEq,
+    Eq,
+)]
 pub struct PovwJobId {
     /// TODO
     pub log: PovwLogId,
@@ -92,7 +104,18 @@ impl Distribution<PovwJobId> for StandardUniform {
 }
 
 /// TODO
-#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Default,
+    Serialize,
+    Deserialize,
+    BorshSerialize,
+    BorshDeserialize,
+    PartialEq,
+    Eq,
+)]
 pub struct PovwNonce {
     /// TODO
     pub log: PovwLogId,

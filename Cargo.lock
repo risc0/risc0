@@ -6384,6 +6384,7 @@ name = "risc0-povw"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "borsh",
  "bytemuck",
  "hybrid-array",
  "proptest",
@@ -6398,7 +6399,7 @@ name = "risc0-povw-guests"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "postcard",
+ "borsh",
  "rand 0.8.5",
  "risc0-binfmt",
  "risc0-build",
@@ -6768,6 +6769,7 @@ dependencies = [
  "alloy-rlp",
  "ark-ff 0.3.0",
  "ark-ff 0.4.2",
+ "borsh",
  "bytes",
  "fastrlp 0.3.1",
  "fastrlp 0.4.0",

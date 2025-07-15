@@ -9,7 +9,7 @@ repository = { workspace = true }
 
 [dev-dependencies]
 anyhow = "1.0"
-postcard = "1.1"
+borsh = { version = "1.5", default-features = false, features = ["std"] }
 rand = "0.8"
 risc0-binfmt = { workspace = true }
 risc0-povw = { workspace = true }

@@ -9,6 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = "1.0"
+borsh = { version = "1.5", default-features = false, features = ["derive"] }
 bytemuck = "1.22"
 hybrid-array = { version = "0.3.0", features = ["serde"] }
 risc0-binfmt = { workspace = true }
