@@ -405,10 +405,8 @@ pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars: ::std::collections::HashMap<
-        ::prost::alloc::string::String,
-        ::prost::alloc::string::String,
-    >,
+    pub env_vars:
+        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]

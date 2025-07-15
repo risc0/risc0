@@ -40,14 +40,17 @@ use risc0_zkp::{
 use serde::Serialize;
 
 use crate::{
-    claim::{maybe_pruned::Merge, receipt::{Assumption, UnionClaim}, Unknown},
-    MaybePruned,
+    claim::{
+        maybe_pruned::Merge,
+        receipt::{Assumption, UnionClaim},
+        Unknown,
+    },
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
     sha::Digestible,
-    ProverOpts, ReceiptClaim,
+    MaybePruned, ProverOpts, ReceiptClaim,
 };
 
 use risc0_circuit_recursion::prove::Program;

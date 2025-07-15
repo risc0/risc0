@@ -34,7 +34,10 @@ use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::halt;
 use serde::{Deserialize, Serialize};
 
-use super::{maybe_pruned::{MaybePruned, PrunedValueError}, Unknown};
+use super::{
+    maybe_pruned::{MaybePruned, PrunedValueError},
+    Unknown,
+};
 use crate::{
     sha::{self, Sha256},
     SystemState,
@@ -249,7 +252,6 @@ impl From<InvalidExitCodeError> for DecodeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
-
 
 /// Each UnionClaim can be used as an inner node in a Merkle mountain
 /// accumulator, the root of which commits to a set of claims.
