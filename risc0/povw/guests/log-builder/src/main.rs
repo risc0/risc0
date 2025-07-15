@@ -4,8 +4,8 @@
 
 use anyhow::Context;
 use risc0_povw::{
-    guest::{Input, Journal, State, WorkLogCommit},
-    Job,
+    guest::{Input, Journal, State},
+    Job, WorkLog,
 };
 use risc0_zkvm::{guest::env, sha::Digestible, Digest};
 use ruint::Uint;
@@ -15,8 +15,8 @@ type U96 = Uint<96, 2>;
 fn main() -> anyhow::Result<()> {
     let input: Input = postcard::from_bytes(&env::read_frame())?;
 
-    let initial_commit = match input.state {
-        State::Initial { work_log_id } => WorkLogCommit::empty(work_log_id),
+    let (work_log_id, initial_commit) = match input.state {
+        State::Initial { work_log_id } => (work_log_id, WorkLog::EMPTY.commit()),
         State::Continuation { journal } => {
             env::verify(
                 input.self_image_id,
@@ -28,11 +28,11 @@ fn main() -> anyhow::Result<()> {
             // NOTE: initial_commit and update_value are unconstrained, as they are not needed.
             assert_eq!(input.self_image_id, journal.self_image_id);
 
-            journal.updated_commit
+            (journal.work_log_id, journal.updated_commit)
         }
     };
 
-    let mut root = initial_commit.log_root;
+    let mut root = initial_commit;
     let mut update_value = 0u64;
     for update in input.updates {
         // Verify the WorkClaim and extract the Work struct.
@@ -45,8 +45,8 @@ fn main() -> anyhow::Result<()> {
             .unwrap();
 
         // Assert that the work log ID matches the ID for the log built so far.
-        assert_eq!(work.nonce_min.log, initial_commit.log_id);
-        assert_eq!(work.nonce_max.log, initial_commit.log_id);
+        assert_eq!(work.nonce_min.log, work_log_id);
+        assert_eq!(work.nonce_max.log, work_log_id);
         // Assert that the nonce min and nonce max are part of the same job.
         // NOTE: This is a limitation with the current implementation that could be addressed.
         assert_eq!(work.nonce_min.job, work.nonce_max.job);
@@ -71,13 +71,10 @@ fn main() -> anyhow::Result<()> {
         update_value += work.value;
     }
 
-    let updated_commit = WorkLogCommit {
-        log_root: root,
-        log_id: initial_commit.log_id,
-    };
     env::commit_slice(&postcard::to_allocvec(&Journal {
+        work_log_id,
         self_image_id: input.self_image_id,
-        updated_commit,
+        updated_commit: root,
         initial_commit,
         update_value,
     })?);

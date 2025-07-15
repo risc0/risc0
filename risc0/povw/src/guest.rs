@@ -8,21 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{Job, SubtreeOpening, WorkLog};
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct WorkLogCommit {
-    pub log_id: U160,
-    pub log_root: Digest,
-}
-
-impl WorkLogCommit {
-    pub fn empty(work_log_id: U160) -> Self {
-        Self {
-            log_id: work_log_id,
-            log_root: WorkLog::EMPTY.commit(),
-        }
-    }
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum State {
     Initial { work_log_id: U160 },
@@ -63,12 +48,14 @@ pub struct WorkLogUpdate {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Journal {
+    /// Work log ID that this journal corresponds to.
+    pub work_log_id: U160,
     /// Optional initial work log commitment.
     ///
     /// If the log is initially empty, the empty work log root constant is used.
-    pub initial_commit: WorkLogCommit,
+    pub initial_commit: Digest,
     /// Commitment to the work log after accumulating all work claims.
-    pub updated_commit: WorkLogCommit,
+    pub updated_commit: Digest,
     /// Sum of the values from the work claims included in this update.
     pub update_value: u64,
     /// Image ID of the work log builder guest, included to enable recursive verification.

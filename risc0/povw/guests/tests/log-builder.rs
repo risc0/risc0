@@ -4,7 +4,7 @@
 
 use risc0_binfmt::{PovwLogId, PovwNonce};
 use risc0_povw::{
-    guest::{Input, Journal, State, WorkLogCommit, WorkLogUpdate},
+    guest::{Input, Journal, State, WorkLogUpdate},
     Job, WorkLog,
 };
 use risc0_povw_guests::{RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID};
@@ -14,7 +14,6 @@ use risc0_zkvm::{
 };
 use ruint::uint;
 
-// TODO: Clean up the magic consts
 // TODO: Add rejection tests
 
 fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
@@ -50,14 +49,12 @@ fn make_work(value: u64, work_log_id: PovwLogId, job_num: u64, job: &Job) -> Opt
             log: work_log_id,
             job: job_num,
             segment: 0,
-        }
-        .into(),
+        },
         nonce_max: PovwNonce {
             log: work_log_id,
             job: job_num,
             segment: job.index_max?,
-        }
-        .into(),
+        },
         value,
     }
     .into()
@@ -79,10 +76,11 @@ fn nop() -> anyhow::Result<()> {
     let journal = execute_guest(&input)?;
 
     let expected_journal = Journal {
+        work_log_id,
         self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
         update_value: 0,
-        initial_commit: WorkLogCommit::empty(work_log_id),
-        updated_commit: WorkLogCommit::empty(work_log_id),
+        initial_commit: WorkLog::EMPTY.commit(),
+        updated_commit: WorkLog::EMPTY.commit(),
     };
 
     assert_eq!(journal, expected_journal);
@@ -107,7 +105,7 @@ fn one_update() -> anyhow::Result<()> {
         self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
         state: State::initial(work_log_id),
         updates: vec![WorkLogUpdate {
-            claim: work_claim.into(),
+            claim: work_claim,
             noninclusion_proof: work_log.prove_add(job_num, job.clone())?,
         }],
     };
@@ -115,13 +113,11 @@ fn one_update() -> anyhow::Result<()> {
     let journal = execute_guest(&input)?;
 
     let expected_journal = Journal {
+        work_log_id,
         self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
         update_value: work_value,
-        initial_commit: WorkLogCommit::empty(work_log_id),
-        updated_commit: WorkLogCommit {
-            log_id: work_log_id,
-            log_root: work_log.commit(),
-        },
+        initial_commit: WorkLog::EMPTY.commit(),
+        updated_commit: work_log.commit(),
     };
 
     assert_eq!(journal, expected_journal);
@@ -142,13 +138,11 @@ fn one_continuation_update() -> anyhow::Result<()> {
     work_log.add(job1_num, job1.clone())?;
 
     let initial_journal = Journal {
+        work_log_id,
         self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
         update_value: work1_value,
-        initial_commit: WorkLogCommit::empty(work_log_id),
-        updated_commit: WorkLogCommit {
-            log_id: work_log_id,
-            log_root: work_log.commit(),
-        },
+        initial_commit: WorkLog::EMPTY.commit(),
+        updated_commit: work_log.commit(),
     };
 
     let work_claim = WorkClaim {
@@ -161,7 +155,7 @@ fn one_continuation_update() -> anyhow::Result<()> {
         self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
         state: State::from(initial_journal.clone()),
         updates: vec![WorkLogUpdate {
-            claim: work_claim.into(),
+            claim: work_claim,
             noninclusion_proof: work_log.prove_add(job2_num, job2.clone())?,
         }],
     };
@@ -169,13 +163,11 @@ fn one_continuation_update() -> anyhow::Result<()> {
     let journal = execute_guest(&input)?;
 
     let expected_journal = Journal {
+        work_log_id,
         self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
         update_value: work2_value,
         initial_commit: initial_journal.updated_commit,
-        updated_commit: WorkLogCommit {
-            log_id: work_log_id,
-            log_root: work_log.commit(),
-        },
+        updated_commit: work_log.commit(),
     };
 
     assert_eq!(journal, expected_journal);
@@ -222,13 +214,11 @@ fn two_batched_updates() -> anyhow::Result<()> {
     let journal = execute_guest(&input)?;
 
     let expected_journal = Journal {
+        work_log_id,
         self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
         update_value: work1_value + work2_value,
-        initial_commit: WorkLogCommit::empty(work_log_id),
-        updated_commit: WorkLogCommit {
-            log_id: work_log_id,
-            log_root: work_log.commit(),
-        },
+        initial_commit: WorkLog::EMPTY.commit(),
+        updated_commit: work_log.commit(),
     };
 
     assert_eq!(journal, expected_journal);
