@@ -521,8 +521,8 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_succinct_receipt(a)?;
-        prover.add_succinct_receipt(b)?;
+        prover.add_succinct_generic_receipt(a)?;
+        prover.add_succinct_generic_receipt(b)?;
         Ok(prover)
     }
 
@@ -562,8 +562,8 @@ impl Prover {
         );
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(a)?;
-        prover.add_segment_receipt(b)?;
+        prover.add_succinct_rv32im_receipt(a)?;
+        prover.add_succinct_rv32im_receipt(b)?;
         Ok(prover)
     }
 
@@ -600,7 +600,7 @@ impl Prover {
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&cond.control_root()?, DigestKind::Poseidon2);
-        prover.add_segment_receipt(cond)?;
+        prover.add_succinct_rv32im_receipt(cond)?;
 
         let output = cond
             .claim
@@ -665,7 +665,7 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&a.control_root()?, DigestKind::Poseidon2);
-        prover.add_segment_receipt(a)?;
+        prover.add_succinct_rv32im_receipt(a)?;
         Ok(prover)
     }
 
@@ -719,7 +719,7 @@ impl Prover {
     }
 
     /// Add a receipt covering rv32im execution, and include the first level of ReceiptClaim.
-    fn add_segment_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
+    fn add_succinct_rv32im_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();
         a.claim.as_value()?.encode(&mut data)?;
@@ -729,7 +729,7 @@ impl Prover {
     }
 
     /// Add a receipt for a succinct receipt
-    fn add_succinct_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
+    fn add_succinct_generic_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
     where
         Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     {
