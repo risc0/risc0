@@ -247,7 +247,8 @@ impl AppState {
 
 // TODO: Add authn/z to get a userID
 const USER_ID: &str = "default_user";
-const MAX_UPLOAD_SIZE: usize = 250 * 1024 * 1024; // 250 mb
+// No limit on upload size given API is trusted.
+const MAX_UPLOAD_SIZE: usize = usize::MAX;
 
 const IMAGE_UPLOAD_PATH: &str = "/images/upload/:image_id";
 async fn image_upload(
