@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(dead_code)] // DO NOT MERGE
+
 use anyhow::{anyhow, bail, Result};
 use risc0_circuit_recursion::{
     control_id::{BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
@@ -65,4 +67,32 @@ pub fn identity(hashfn: &str) -> Result<(Program, Digest)> {
 
 pub fn union(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("union.zkr", hashfn)
+}
+
+pub fn lift_povw(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
+    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
+        get_zkr(&format!("lift_rv32im_v2_{po2}_povw.zkr"), hashfn)
+    } else {
+        bail!("No rv32im verifier available for po2={po2}")
+    }
+}
+
+pub fn join_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("join_povw.zkr", hashfn)
+}
+
+pub fn join_unwrap_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("join_unwrap_povw.zkr", hashfn)
+}
+
+pub fn resolve_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("resolve_povw.zkr", hashfn)
+}
+
+pub fn resolve_unwrap_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("resolve_unwrap_povw.zkr", hashfn)
+}
+
+pub fn unwrap(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("unwrap.zkr", hashfn)
 }
