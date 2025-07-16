@@ -250,14 +250,22 @@ pub(crate) fn allowed_control_ids(
     po2_max: usize,
 ) -> anyhow::Result<impl Iterator<Item = Digest>> {
     // Recursion programs (ZKRs) that are to be included in the allowed set.
-    // NOTE: Although the rv32im circuit has control IDs down to po2 13, lift predicates are only
-    // generated for po2 14 and above, hence the magic 14 below.
-    let allowed_zkr_names: BTreeSet<String> =
-        ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
-            .map(str::to_string)
-            .into_iter()
-            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
-            .collect();
+    let allowed_zkr_names: BTreeSet<String> = [
+        "join.zkr",
+        "join_povw.zkr",
+        "join_unwrap_povw.zkr",
+        "resolve.zkr",
+        "resolve_povw.zkr",
+        "resolve_unwrap_povw.zkr",
+        "identity.zkr",
+        "unwrap_povw.zkr",
+        "union.zkr",
+    ]
+    .map(str::to_string)
+    .into_iter()
+    .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+    .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
+    .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
         "sha-256" => SHA256_CONTROL_IDS,
@@ -268,9 +276,12 @@ pub(crate) fn allowed_control_ids(
         ),
     };
 
-    Ok(zkr_control_ids
-        .into_iter()
-        .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)))
+    Ok(allowed_zkr_names.into_iter().map(move |name| {
+        *zkr_control_ids
+            .iter()
+            .find_map(|(zkr_name, digest)| (zkr_name == &name).then_some(digest))
+            .expect("zkr name in allowed_zkr_names not found in zkr_control_ids")
+    }))
 }
 
 /// Constructs the root for the set of allowed control IDs, given a maximum cycle count as a po2.
