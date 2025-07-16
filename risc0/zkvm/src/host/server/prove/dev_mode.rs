@@ -42,6 +42,7 @@ const ERR_DEV_MODE_DISABLED: &str =
 
 /// Configuration for simulated DevMode delay.
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DevModeDelay {
     /// Delay for prove_segment_core
     #[serde(deserialize_with = "duration_secs")]
@@ -97,6 +98,16 @@ pub struct DevModeProver {
     delay: Option<DevModeDelay>,
 }
 
+/// Utility macro to compress repeated checks that dev mode is not disabled.
+macro_rules! ensure_dev_mode_allowed {
+    () => {
+        ensure!(
+            cfg!(not(feature = "disable-dev-mode")),
+            ERR_DEV_MODE_DISABLED
+        );
+    };
+}
+
 impl DevModeProver {
     /// Create a DevModeProver without delay.
     pub fn new() -> Self {
@@ -113,16 +124,6 @@ impl Default for DevModeProver {
     fn default() -> Self {
         Self::new()
     }
-}
-
-/// Utility macro to compress repeated checks that dev mode is not disabled.
-macro_rules! ensure_dev_mode_allowed {
-    () => {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
-    };
 }
 
 impl ProverServer for DevModeProver {
@@ -272,13 +273,7 @@ impl ProverServer for DevModeProver {
     }
 
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure_dev_mode_allowed!();
-
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.lift);
-        }
-
-        Ok(fake_succinct_receipt())
+        fake_recursion(self.delay.map(|d| d.lift))
     }
 
     fn join(
@@ -286,13 +281,7 @@ impl ProverServer for DevModeProver {
         _a: &SuccinctReceipt<ReceiptClaim>,
         _b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure_dev_mode_allowed!();
-
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.join);
-        }
-
-        Ok(fake_succinct_receipt())
+        fake_recursion(self.delay.map(|d| d.join))
     }
 
     fn resolve(
@@ -300,13 +289,7 @@ impl ProverServer for DevModeProver {
         _conditional: &SuccinctReceipt<ReceiptClaim>,
         _assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure_dev_mode_allowed!();
-
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.resolve);
-        }
-
-        Ok(fake_succinct_receipt())
+        fake_recursion(self.delay.map(|d| d.resolve))
     }
 
     fn union(
@@ -314,22 +297,15 @@ impl ProverServer for DevModeProver {
         _a: &SuccinctReceipt<Unknown>,
         _b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        ensure_dev_mode_allowed!();
-
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.union);
-        }
-
-        Ok(fake_succinct_receipt())
+        fake_recursion(self.delay.map(|d| d.union))
     }
 
     fn identity_p254(
         &self,
         _a: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure_dev_mode_allowed!();
-
-        Ok(fake_succinct_receipt())
+        // TODO: Apply a delay here.
+        fake_recursion(None)
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
@@ -343,6 +319,21 @@ impl ProverServer for DevModeProver {
             receipt.journal.bytes.clone(),
         ))
     }
+}
+
+/// Private function used to simulate the delay of a lift.
+/// Return type is generic to handle any type of output claim.
+fn fake_recursion<Claim>(delay: Option<Duration>) -> Result<SuccinctReceipt<Claim>>
+where
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    ensure_dev_mode_allowed!();
+
+    if let Some(delay) = delay {
+        std::thread::sleep(delay);
+    }
+
+    Ok(fake_succinct_receipt())
 }
 
 fn fake_succinct_receipt<Claim>() -> SuccinctReceipt<Claim>
