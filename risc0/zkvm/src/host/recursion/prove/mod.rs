@@ -92,7 +92,9 @@ pub fn lift_povw(
     let mut prover = Prover::new_lift_povw(segment_receipt, ProverOpts::succinct())?;
 
     let receipt = prover.prover.run()?;
-    let claim_decoded = WorkClaim::<ReceiptClaim>::decode_from_seal(&mut receipt.out_stream())?;
+    let mut out_stream = receipt.out_stream();
+    tracing::debug!("Proving lift_povw finished: out = {out_stream:?}");
+    let claim_decoded = WorkClaim::<ReceiptClaim>::decode_from_seal(&mut out_stream)?;
     tracing::debug!("Proving lift_povw finished: decoded claim = {claim_decoded:#?}");
 
     // Merge the full claim from the segment receipt into the decoded work claim.
