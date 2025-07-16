@@ -311,6 +311,24 @@ where
     make_succinct_receipt(prover, receipt, claim)
 }
 
+/// TODO
+pub fn unwrap_povw(
+    a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    tracing::debug!("Proving unwrap_povw: a.claim = {:#?}", a.claim);
+
+    let mut prover = Prover::new_unwrap_povw(a, ProverOpts::succinct())?;
+    let receipt = prover.prover.run()?;
+
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
+    tracing::debug!("Proving unwrap_povw finished: decoded claim = {claim_decoded:#?}");
+
+    // Compute the expected claim and merge it with the decoded claim, checking that they match.
+    let claim = MaybePruned::Value(claim_decoded).merge(&a.claim.as_value()?.claim)?;
+
+    make_succinct_receipt(prover, receipt, claim)
+}
+
 /// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
 ///
 /// The identity_p254 program is used as the last step in the prover pipeline before running the
@@ -426,7 +444,7 @@ pub fn get_registered_zkr(control_id: &Digest) -> Result<Program> {
 fn make_succinct_receipt<Claim>(
     prover: Prover,
     receipt: RecursionReceipt,
-    claim: Claim,
+    claim: impl Into<MaybePruned<Claim>>,
 ) -> Result<SuccinctReceipt<Claim>>
 where
     Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
@@ -436,7 +454,7 @@ where
         hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
         control_inclusion_proof: prover.control_inclusion_proof()?,
-        claim: MaybePruned::Value(claim),
+        claim: claim.into(),
         // TODO(victor): This should be derived from the ProverOpts instead of being default.
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
