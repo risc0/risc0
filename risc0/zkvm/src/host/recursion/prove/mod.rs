@@ -41,7 +41,7 @@ use serde::Serialize;
 
 use crate::{
     claim::{
-        maybe_pruned::Merge,
+        merge::Merge,
         receipt::{Assumption, UnionClaim},
         Unknown,
     },

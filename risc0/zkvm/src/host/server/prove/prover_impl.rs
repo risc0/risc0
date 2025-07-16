@@ -18,7 +18,7 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
-    claim::maybe_pruned::Merge,
+    claim::merge::Merge,
     host::{
         client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,

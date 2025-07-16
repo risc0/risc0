@@ -22,6 +22,8 @@ use serde::{Deserialize, Serialize};
 use crate::sha::Sha256;
 
 pub(crate) mod maybe_pruned;
+#[cfg(feature = "prove")]
+pub(crate) mod merge;
 pub(crate) mod receipt;
 pub(crate) mod work;
 
