@@ -14,30 +14,30 @@
 
 use crate::components::Component;
 use crate::distribution::{
-    check_for_not_found, download_bytes, download_json, parse_cpp_version, Platform, ProgressWriter,
+    check_for_not_found, download_bytes, download_json, parse_cpp_version, DistributionPlatform,
+    Platform, ProgressWriter,
 };
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent};
 
 use semver::Version;
 use serde::Deserialize;
-use std::path::PathBuf;
 
 fn parse_version_from_tag_name(component: &Component, tag_name: &str) -> Result<Version> {
-    Ok(match component {
-        Component::RustToolchain => {
-            Version::parse(tag_name.strip_prefix("r0.").ok_or_else(|| {
-                RzupError::InvalidVersion("Invalid Rust version tag format".into())
-            })?)?
+    match component {
+        Component::RustToolchain => Ok(Version::parse(tag_name.strip_prefix("r0.").ok_or_else(
+            || RzupError::InvalidVersion("Invalid Rust version tag format".into()),
+        )?)?),
+        Component::CppToolchain | Component::Gdb => parse_cpp_version(tag_name),
+        Component::CargoRiscZero | Component::R0Vm => {
+            Ok(Version::parse(tag_name.strip_prefix('v').ok_or_else(
+                || RzupError::InvalidVersion("Invalid version tag format".into()),
+            )?)?)
         }
-        Component::CppToolchain | Component::Gdb => parse_cpp_version(tag_name)?,
-        Component::CargoRiscZero | Component::R0Vm => Version::parse(
-            tag_name
-                .strip_prefix('v')
-                .ok_or_else(|| RzupError::InvalidVersion("Invalid version tag format".into()))?,
-        )?,
-        Component::Risc0Groth16 => unimplemented!(),
-    })
+        Component::Risc0Groth16 => Err(RzupError::UnsupportedDistributionPlatform(
+            "github download not supported for risc0-groth16".into(),
+        )),
+    }
 }
 
 #[test]
@@ -95,16 +95,11 @@ impl<'a> GithubRelease<'a> {
     ) -> Result<String> {
         let (asset, ext) = component.asset_name(platform)?;
         let version_str = component.version_str(version);
-        let repo = component.repo_name();
+        let repo = component.repo_name()?;
         Ok(format!(
             "{base_url}/{repo}/releases/download/{version_str}/{asset}.{ext}",
             base_url = self.base_urls.risc0_github_base_url
         ))
-    }
-
-    pub fn get_archive_name(&self, component: &Component, platform: &Platform) -> Result<PathBuf> {
-        let (asset_name, ext) = component.asset_name(platform)?;
-        Ok(PathBuf::from(format!("{asset_name}.{ext}")))
     }
 
     fn check_release_exists(
@@ -113,7 +108,7 @@ impl<'a> GithubRelease<'a> {
         component: &Component,
         version: &Version,
     ) -> Result<bool> {
-        let repo = component.repo_name();
+        let repo = component.repo_name()?;
         let version_str = component.version_str(version);
         let url = format!(
             "{base_url}/repos/risc0/{repo}/releases/tags/{version_str}",
@@ -122,13 +117,15 @@ impl<'a> GithubRelease<'a> {
 
         check_for_not_found(&url, env.github_token())
     }
+}
 
-    pub fn latest_version(&self, env: &Environment, component: &Component) -> Result<Version> {
+impl<'a> DistributionPlatform for GithubRelease<'a> {
+    fn latest_version(&self, env: &Environment, component: &Component) -> Result<Version> {
         env.emit(RzupEvent::Debug {
             message: format!("Fetching latest version for {component}"),
         });
 
-        let repo = component.repo_name();
+        let repo = component.repo_name()?;
         let url = format!(
             "{base_url}/repos/risc0/{repo}/releases/latest",
             base_url = self.base_urls.github_api_base_url
@@ -139,7 +136,7 @@ impl<'a> GithubRelease<'a> {
         parse_version_from_tag_name(component, &release.tag_name)
     }
 
-    pub fn download_version(
+    fn download_version(
         &self,
         env: &Environment,
         component: &Component,
@@ -157,7 +154,7 @@ impl<'a> GithubRelease<'a> {
         }
 
         let platform = env.platform();
-        let archive_name = self.get_archive_name(component, platform)?;
+        let archive_name = component.archive_name(platform)?;
 
         let download_path = env.tmp_dir().join(archive_name);
         let mut download_file = std::fs::OpenOptions::new()

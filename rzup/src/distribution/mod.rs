@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 pub mod github;
+pub mod s3;
 
 #[cfg_attr(not(feature = "install"), path = "erroring_http.rs")]
 mod http;
 
 pub use self::http::*;
 use crate::error::{Result, RzupError};
-use crate::{Environment, RzupEvent};
+use crate::{Component, Environment, RzupEvent};
 use semver::Version;
 use std::{fmt, io};
 
@@ -130,4 +131,15 @@ impl<WriterT: io::Write> io::Write for ProgressWriter<'_, WriterT> {
     fn flush(&mut self) -> io::Result<()> {
         self.writer.flush()
     }
+}
+
+pub trait DistributionPlatform {
+    fn download_version(
+        &self,
+        env: &Environment,
+        component: &Component,
+        version: &Version,
+    ) -> Result<()>;
+
+    fn latest_version(&self, env: &Environment, component: &Component) -> Result<Version>;
 }

@@ -6588,6 +6588,7 @@ dependencies = [
  "reqwest",
  "semver",
  "serde",
+ "serde_json",
  "strum",
  "tar",
  "tempfile",

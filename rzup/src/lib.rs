@@ -42,6 +42,7 @@ pub struct BaseUrls {
     pub risc0_github_base_url: String,
     pub github_api_base_url: String,
     pub risc0_base_url: String,
+    pub s3_base_url: String,
 }
 
 impl Default for BaseUrls {
@@ -50,6 +51,7 @@ impl Default for BaseUrls {
             risc0_github_base_url: "https://github.com/risc0".into(),
             github_api_base_url: "https://api.github.com".into(),
             risc0_base_url: "https://risczero.com".into(),
+            s3_base_url: "https://risc0-artifacts.s3.us-west-2.amazonaws.com".into(),
         }
     }
 }
@@ -325,6 +327,7 @@ impl Rzup {
 mod tests {
     use super::*;
     use crate::distribution::Os;
+    use serde_json::json;
     use std::collections::HashMap;
     use std::convert::Infallible;
     use std::io::Write as _;
@@ -343,11 +346,13 @@ mod tests {
         require_bearer_token: bool,
         req: hyper::Request<hyper::body::Incoming>,
     ) -> std::result::Result<HyperResponse, Infallible> {
-        fn json_response(json: &'static str) -> HyperResponse {
+        fn json_response(json: impl Into<String>) -> HyperResponse {
             hyper::Response::builder()
                 .status(200)
                 .header("content-type", "application/json")
-                .body(http_body_util::Full::new(hyper::body::Bytes::from(json)))
+                .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                    json.into(),
+                )))
                 .unwrap()
         }
 
@@ -429,6 +434,27 @@ mod tests {
             assert_eq!(value, "Bearer suchsecrettesttoken");
         }
 
+        let risc0_groth16_manifest_json = serde_json::to_string(&json!({
+            "releases": {
+                "1.0.0": {
+                    "target_agnostic": {
+                        "artifact": {
+                            "sha256": "abcdef0001"
+                        },
+                    }
+                },
+                "2.0.0": {
+                    "target_agnostic": {
+                        "artifact": {
+                            "sha256": "abcdef0002"
+                        },
+                    }
+                },
+            },
+            "latest_version": "2.0.0"
+        }))
+        .unwrap();
+
         Ok(match &req.uri().to_string()[..] {
             "/github_api/repos/risc0/risc0/releases/latest" => {
                 json_response("{\"tag_name\":\"v1.1.0\"}")
@@ -473,6 +499,9 @@ mod tests {
             "/risc0_github/risc0/releases/download/v1.1.0/\
                 cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
             "/risc0/install" => text_response(install_script.clone()),
+            "/s3/rzup/components/risc0-groth16/distribution_manifest.json" => json_response(risc0_groth16_manifest_json),
+            "/s3/rzup/components/risc0-groth16/sha256/abcdef0001" => dummy_tar_xz_response("abcdef0001"),
+            "/s3/rzup/components/risc0-groth16/sha256/abcdef0002" => dummy_tar_xz_response("abcdef0002"),
             unknown => panic!("unexpected URI: {unknown}"),
         })
     }
@@ -510,6 +539,7 @@ mod tests {
                     risc0_github_base_url: format!("http://{address}/risc0_github"),
                     github_api_base_url: format!("http://{address}/github_api"),
                     risc0_base_url: format!("http://{address}/risc0"),
+                    s3_base_url: format!("http://{address}/s3"),
                 },
             }
         }
@@ -551,6 +581,7 @@ mod tests {
             risc0_github_base_url: "".into(),
             github_api_base_url: "".into(),
             risc0_base_url: "".into(),
+            s3_base_url: "".into(),
         }
     }
 
@@ -744,6 +775,44 @@ mod tests {
         assert_eq!(
             rzup.get_version_dir(&Component::CppToolchain, &cpp_version),
             Err(RzupError::VersionNotFound(cpp_version.clone()))
+        );
+
+        // groth16
+        let groth16_version = Version::new(1, 0, 0);
+        assert_eq!(
+            rzup.get_version_dir(&Component::Risc0Groth16, &groth16_version),
+            Err(RzupError::VersionNotFound(groth16_version.clone()))
+        );
+        rzup.install_component(
+            &Component::Risc0Groth16,
+            Some(groth16_version.clone()),
+            false,
+        )
+        .unwrap();
+        assert!(rzup
+            .version_exists(&Component::Risc0Groth16, &groth16_version)
+            .unwrap());
+        assert_eq!(
+            rzup.list_versions(&Component::Risc0Groth16).unwrap(),
+            vec![Version::new(1, 0, 0)]
+        );
+        assert!(rzup
+            .get_version_dir(&Component::Risc0Groth16, &groth16_version)
+            .is_ok());
+
+        // Test uninstallation
+        rzup.uninstall_component(&Component::Risc0Groth16, groth16_version.clone())
+            .unwrap();
+        assert!(!rzup
+            .version_exists(&Component::Risc0Groth16, &groth16_version)
+            .unwrap());
+        assert_eq!(
+            rzup.list_versions(&Component::Risc0Groth16).unwrap(),
+            vec![]
+        );
+        assert_eq!(
+            rzup.get_version_dir(&Component::Risc0Groth16, &groth16_version),
+            Err(RzupError::VersionNotFound(groth16_version.clone()))
         );
     }
 
@@ -1266,6 +1335,39 @@ mod tests {
         );
     }
 
+    fn test_install_risc0_groth16(platform: Platform) {
+        let server = MockDistributionServer::new();
+
+        install_test(
+            server.base_urls.clone(),
+            Component::Risc0Groth16,
+            Component::Risc0Groth16,
+            Version::new(1, 0, 0),
+            format!(
+                "{base_url}/rzup/components/risc0-groth16/sha256/abcdef0001",
+                base_url = server.base_urls.s3_base_url
+            ),
+            136, /* download_size */
+            vec![format!(
+                ".risc0/extensions/v1.0.0-risc0-groth16/abcdef0001/tar_contents.bin"
+            )],
+            vec![],
+            ".risc0/extensions/v1.0.0-risc0-groth16",
+            false, /* use_github_token */
+            platform,
+        )
+    }
+
+    #[test]
+    fn install_risc0_groth16_x86_64_linux() {
+        test_install_risc0_groth16(Platform::new("x86_64", Os::Linux));
+    }
+
+    #[test]
+    fn install_risc0_groth16_aarch64_mac() {
+        test_install_risc0_groth16(Platform::new("aarch64", Os::MacOs));
+    }
+
     #[test]
     fn install_with_github_token() {
         let server = MockDistributionServer::new_with_required_bearer_token();
@@ -1357,6 +1459,15 @@ mod tests {
             Component::Gdb,
             Version::new(2024, 1, 5),
             Version::new(2024, 1, 6),
+        );
+    }
+
+    #[test]
+    fn list_multiple_versions_risc0_groth16() {
+        test_list_multiple_versions(
+            Component::Risc0Groth16,
+            Version::new(1, 0, 0),
+            Version::new(2, 0, 0),
         );
     }
 
@@ -1639,6 +1750,26 @@ mod tests {
         );
     }
 
+    #[test]
+    fn set_default_version_risc0_groth16() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        set_default_version_test(
+            &mut rzup,
+            &tmp_dir,
+            Component::Risc0Groth16,
+            Version::new(1, 0, 0),
+            Version::new(2, 0, 0),
+            vec![],
+            vec![],
+        );
+    }
+
     fn default_version_after_uninstall(
         tmp_dir: &TempDir,
         rzup: &mut Rzup,
@@ -1804,6 +1935,30 @@ mod tests {
     }
 
     #[test]
+    fn default_version_after_uninstall_risc0_groth16() {
+        let server = MockDistributionServer::new();
+        let (tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        for uninstall_with_rm in [true, false] {
+            default_version_after_uninstall(
+                &tmp_dir,
+                &mut rzup,
+                Component::Risc0Groth16,
+                Version::new(1, 0, 0),
+                Version::new(2, 0, 0),
+                uninstall_with_rm,
+                &tmp_dir
+                    .path()
+                    .join(".risc0/extensions/v2.0.0-risc0-groth16"),
+            );
+        }
+    }
+
+    #[test]
     fn install_non_existent() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(
@@ -1898,7 +2053,12 @@ mod tests {
     }
 
     #[test]
-    fn get_latest_version() {
+    fn uninstall_risc0_groth16() {
+        uninstall_test(Component::Risc0Groth16, Version::new(1, 0, 0));
+    }
+
+    #[test]
+    fn get_latest_version_cargo_risczero() {
         let server = MockDistributionServer::new();
         let (_tmp_dir, rzup) = setup_test_env(
             server.base_urls.clone(),
@@ -1909,6 +2069,21 @@ mod tests {
         assert_eq!(
             rzup.get_latest_version(&Component::CargoRiscZero).unwrap(),
             Version::new(1, 1, 0)
+        );
+    }
+
+    #[test]
+    fn get_latest_version_risc0_groth16() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        assert_eq!(
+            rzup.get_latest_version(&Component::Risc0Groth16).unwrap(),
+            Version::new(2, 0, 0)
         );
     }
 
