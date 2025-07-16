@@ -50,7 +50,7 @@ use crate::{
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
     sha::Digestible,
-    MaybePruned, ProverOpts, ReceiptClaim,
+    MaybePruned, ProverOpts, ReceiptClaim, WorkClaim,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -100,8 +100,7 @@ pub fn join(
     tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
     tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
 
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_join(a, b, opts.clone())?;
+    let mut prover = Prover::new_join(a, b, ProverOpts::succinct())?;
     let receipt = prover.prover.run()?;
 
     let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
@@ -112,14 +111,11 @@ pub fn join(
         .merge(&a.claim.join(&b.claim)?.value()?)?
         .into();
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: opts.hashfn,
+        hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
-        control_inclusion_proof,
+        control_inclusion_proof: prover.control_inclusion_proof()?,
         claim,
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
@@ -146,8 +142,7 @@ pub fn union(
     tracing::debug!("Proving union: left assumption = {:#?}", left_assumption);
     tracing::debug!("Proving union: right assumption = {:#?}", right_assumption);
 
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_union(left_receipt, right_receipt, opts.clone())?;
+    let mut prover = Prover::new_union(left_receipt, right_receipt, ProverOpts::succinct())?;
     let receipt = prover.prover.run()?;
 
     let claim = UnionClaim {
@@ -155,14 +150,11 @@ pub fn union(
         right: right_assumption,
     };
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: opts.hashfn,
+        hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
-        control_inclusion_proof,
+        control_inclusion_proof: prover.control_inclusion_proof()?,
         claim: MaybePruned::Value(claim),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
@@ -213,20 +205,16 @@ where
         .next()
         .ok_or_else(|| anyhow!("cannot resolve assumption from receipt with no assumptions"))?;
 
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
+    let mut prover = Prover::new_resolve(conditional, assumption, ProverOpts::succinct())?;
     let receipt = prover.prover.run()?;
     let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving resolve finished: decoded claim = {claim_decoded:#?}");
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: opts.hashfn,
+        hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
-        control_inclusion_proof,
+        control_inclusion_proof: prover.control_inclusion_proof()?,
         claim: claim_decoded.merge(&resolved_claim)?.into(),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
@@ -241,16 +229,14 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     let opts = ProverOpts::succinct()
         .with_hashfn("poseidon_254".to_string())
         .with_control_ids(vec![BN254_IDENTITY_CONTROL_ID]);
-
-    let mut prover = Prover::new_identity(a, opts.clone())?;
+    let mut prover = Prover::new_identity(a, opts)?;
     let receipt = prover.prover.run()?;
     let claim =
         MaybePruned::Value(ReceiptClaim::decode(&mut receipt.out_stream())?).merge(&a.claim)?;
 
     // Include an inclusion proof for control_id to allow verification against a root.
-    let hashfn = opts.hash_suite()?.hashfn;
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, hashfn.as_ref())?;
+    let hashfn = prover.opts.hash_suite()?.hashfn;
+    let control_inclusion_proof = prover.control_inclusion_proof()?;
     let control_root = control_inclusion_proof.root(&prover.control_id, hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
         control_root,
@@ -260,7 +246,7 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     };
     Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: opts.hashfn,
+        hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
         control_inclusion_proof,
         claim,
@@ -692,6 +678,18 @@ impl Prover {
         // Resolve program expects an additional boolean to tell it when the control root is zero.
         let zero_root = BabyBearElem::new((assumption.control_root == Digest::ZERO) as u32);
         self.add_input(bytemuck::cast_slice(&[zero_root]));
+        Ok(())
+    }
+
+    fn add_succinct_work_claim_rv32im_receipt(
+        &mut self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<()> {
+        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
+        let mut data = Vec::<u32>::new();
+        a.claim.as_value()?.encode_to_seal(&mut data)?;
+        let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
+        self.add_input(bytemuck::cast_slice(&data_fp));
         Ok(())
     }
 
