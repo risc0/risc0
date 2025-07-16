@@ -42,7 +42,6 @@ const ERR_DEV_MODE_DISABLED: &str =
 
 /// Configuration for simulated DevMode delay.
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
-#[non_exhaustive]
 pub struct DevModeDelay {
     /// Delay for prove_segment_core
     #[serde(deserialize_with = "duration_secs")]
