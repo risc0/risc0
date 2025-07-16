@@ -115,6 +115,16 @@ impl Default for DevModeProver {
     }
 }
 
+/// Utility macro to compress repeated checks that dev mode is not disabled.
+macro_rules! ensure_dev_mode_allowed {
+    () => {
+        ensure!(
+            cfg!(not(feature = "disable-dev-mode")),
+            ERR_DEV_MODE_DISABLED
+        );
+    };
+}
+
 impl ProverServer for DevModeProver {
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         let ctx = VerifierContext::default().with_dev_mode(true);
@@ -128,11 +138,7 @@ impl ProverServer for DevModeProver {
         );
 
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
             session.assumptions.iter().cloned().unzip();
@@ -209,10 +215,7 @@ impl ProverServer for DevModeProver {
     }
 
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.segment_preflight);
@@ -232,10 +235,7 @@ impl ProverServer for DevModeProver {
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_segment_core);
@@ -262,10 +262,7 @@ impl ProverServer for DevModeProver {
         &self,
         _request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_keccak);
@@ -275,10 +272,7 @@ impl ProverServer for DevModeProver {
     }
 
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.lift);
@@ -292,10 +286,7 @@ impl ProverServer for DevModeProver {
         _a: &SuccinctReceipt<ReceiptClaim>,
         _b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.join);
@@ -309,10 +300,7 @@ impl ProverServer for DevModeProver {
         _conditional: &SuccinctReceipt<ReceiptClaim>,
         _assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.resolve);
@@ -326,10 +314,7 @@ impl ProverServer for DevModeProver {
         _a: &SuccinctReceipt<Unknown>,
         _b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.union);
@@ -342,20 +327,14 @@ impl ProverServer for DevModeProver {
         &self,
         _a: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         Ok(fake_succinct_receipt())
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         Ok(Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
