@@ -43,10 +43,6 @@ use crate::{
     SystemState,
 };
 
-// TODO(victor): Add functions to handle the `ReceiptClaim` transformations conducted as part of
-// join, resolve, and eventually resume calls. This will allow these to be used for recursion, as
-// well as dev mode recursion, and composite receipts.
-
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 ///
 /// Also includes important information such as the exit code and the starting and ending system
