@@ -24,7 +24,12 @@ fn main() {
     // ExecutorEnvBuilder::build().
 
     // For example:
-    let input: u32 = 15 * u32::pow(2, 27) + 1;
+    // NTT prime: 15 * 2^27 + 1 = 2013265921
+    // This is a prime number commonly used in Number Theoretic Transform (NTT) operations
+    // within cryptographic computations in the zkVM
+    const NTT_PRIME: u32 = 15 * u32::pow(2, 27) + 1;
+    
+    let input: u32 = NTT_PRIME;
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
