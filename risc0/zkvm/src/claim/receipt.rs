@@ -185,6 +185,26 @@ impl ReceiptClaim {
             output: MaybePruned::Pruned(claim.output.unwrap_or_default()),
         })
     }
+
+    /// Produce the claim for joining two claims of execution in a continuation, asserting the
+    /// reachability of the post state of other from the pre state of self.
+    pub fn join(&self, other: &ReceiptClaim) -> Self {
+        ReceiptClaim {
+            pre: self.pre.clone(),
+            post: other.post.clone(),
+            exit_code: other.exit_code,
+            input: self.input.clone(),
+            output: other.output.clone(),
+        }
+    }
+}
+
+impl MaybePruned<ReceiptClaim> {
+    /// Produce the claim for joining two claims of execution in a continuation, asserting the
+    /// reachability of the post state of other from the pre state of self.
+    pub fn join(&self, other: &MaybePruned<ReceiptClaim>) -> Result<Self, PrunedValueError> {
+        Ok(self.as_value()?.join(other.as_value()?).into())
+    }
 }
 
 pub(crate) fn exit_code_from_terminate_state(

@@ -73,23 +73,17 @@ pub(crate) static ZKR_REGISTRY: Mutex<ZkrRegistry> = Mutex::new(BTreeMap::new())
 /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
     tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_lift(segment_receipt, opts.clone())?;
+    let mut prover = Prover::new_lift(segment_receipt, ProverOpts::succinct())?;
 
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
-    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: opts.hashfn,
+        hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
-        control_inclusion_proof,
+        control_inclusion_proof: prover.control_inclusion_proof()?,
         claim: claim_decoded.merge(&segment_receipt.claim)?.into(),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
@@ -109,20 +103,14 @@ pub fn join(
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_join(a, b, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
 
-    // Construct the expected claim that should have result from the join.
-    let ab_claim = ReceiptClaim {
-        pre: a.claim.as_value()?.pre.clone(),
-        post: b.claim.as_value()?.post.clone(),
-        exit_code: b.claim.as_value()?.exit_code,
-        input: a.claim.as_value()?.input.clone(),
-        output: b.claim.as_value()?.output.clone(),
-    };
-
-    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
+
+    // Compute the expected claim and merge it with the decoded claim, checking that they match.
+    let claim = claim_decoded
+        .merge(&a.claim.join(&b.claim)?.value()?)?
+        .into();
 
     // Include an inclusion proof for control_id to allow verification against a root.
     let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
@@ -132,7 +120,7 @@ pub fn join(
         hashfn: opts.hashfn,
         control_id: prover.control_id,
         control_inclusion_proof,
-        claim: claim_decoded.merge(&ab_claim)?.into(),
+        claim,
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
@@ -228,10 +216,7 @@ where
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
-
-    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving resolve finished: decoded claim = {claim_decoded:#?}");
 
     // Include an inclusion proof for control_id to allow verification against a root.
@@ -259,9 +244,8 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 
     let mut prover = Prover::new_identity(a, opts.clone())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
-    let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&a.claim)?;
+    let claim =
+        MaybePruned::Value(ReceiptClaim::decode(&mut receipt.out_stream())?).merge(&a.claim)?;
 
     // Include an inclusion proof for control_id to allow verification against a root.
     let hashfn = opts.hash_suite()?.hashfn;
@@ -420,6 +404,18 @@ pub fn test_zkr(
 pub struct Prover {
     prover: risc0_circuit_recursion::prove::Prover,
     control_id: Digest,
+    opts: ProverOpts,
+}
+
+/// Utility macro to compress repeated checks that a receipt uses the poseidon2 hash.
+macro_rules! ensure_poseidon2 {
+    ($receipt:expr) => {
+        ensure!(
+            $receipt.hashfn == "poseidon2",
+            "recursion programs only supports poseidon2 hashfn; received {}",
+            $receipt.hashfn
+        );
+    };
 }
 
 impl Prover {
@@ -427,12 +423,24 @@ impl Prover {
         Self {
             prover: risc0_circuit_recursion::prove::Prover::new(program, &opts.hashfn),
             control_id,
+            opts,
         }
     }
 
     /// Returns the control id of the recursion VM program being proven.
     pub fn control_id(&self) -> &Digest {
         &self.control_id
+    }
+
+    /// Returns a Merkle inclusion proof of this prover's control ID in the set of allowed IDs.
+    pub fn control_inclusion_proof(&self) -> Result<MerkleProof> {
+        let hashfn = self
+            .opts
+            .hash_suite()
+            .context("ProverOpts contains invalid hashfn")?
+            .hashfn;
+        MerkleGroup::new(self.opts.control_ids.clone())?
+            .get_proof(&self.control_id, hashfn.as_ref())
     }
 
     /// Initialize a recursion prover with the test recursion program. This program is used in
@@ -457,11 +465,7 @@ impl Prover {
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
     pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        ensure!(
-            segment.hashfn == "poseidon2",
-            "lift recursion program only supports poseidon2 hashfn; received {}",
-            segment.hashfn
-        );
+        ensure_poseidon2!(segment);
 
         let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
             .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
@@ -503,16 +507,9 @@ impl Prover {
         b: &SuccinctReceipt<Unknown>,
         opts: ProverOpts,
     ) -> Result<Self> {
-        ensure!(
-            a.hashfn == "poseidon2",
-            "union recursion program only supports poseidon2 hashfn; received {}",
-            a.hashfn
-        );
-        ensure!(
-            b.hashfn == "poseidon2",
-            "union recursion program only supports poseidon2 hashfn; received {}",
-            b.hashfn
-        );
+        ensure_poseidon2!(a);
+        ensure_poseidon2!(b);
+
         let hash_suite = Poseidon2HashSuite::new_suite();
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
@@ -536,16 +533,8 @@ impl Prover {
         b: &SuccinctReceipt<ReceiptClaim>,
         opts: ProverOpts,
     ) -> Result<Self> {
-        ensure!(
-            a.hashfn == "poseidon2",
-            "join recursion program only supports poseidon2 hashfn; received {}",
-            a.hashfn
-        );
-        ensure!(
-            b.hashfn == "poseidon2",
-            "join recursion program only supports poseidon2 hashfn; received {}",
-            b.hashfn
-        );
+        ensure_poseidon2!(a);
+        ensure_poseidon2!(b);
 
         let (program, control_id) = zkr::join(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
@@ -581,16 +570,8 @@ impl Prover {
     where
         Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     {
-        ensure!(
-            cond.hashfn == "poseidon2",
-            "resolve recursion program only supports poseidon2 hashfn; received {}",
-            cond.hashfn
-        );
-        ensure!(
-            assum.hashfn == "poseidon2",
-            "resolve recursion program only supports poseidon2 hashfn; received {}",
-            assum.hashfn
-        );
+        ensure_poseidon2!(cond);
+        ensure_poseidon2!(assum);
 
         // Load the resolve predicate as a Program and construct the prover.
         let (program, control_id) = zkr::resolve(&opts.hashfn)?;
@@ -655,11 +636,7 @@ impl Prover {
     /// The primary use for this program is to transform the receipt itself, e.g. using a different
     /// hash function for FRI. See [identity_p254] for more information.
     pub fn new_identity(a: &SuccinctReceipt<ReceiptClaim>, opts: ProverOpts) -> Result<Self> {
-        ensure!(
-            a.hashfn == "poseidon2",
-            "identity recursion program only supports poseidon2 hashfn; received {}",
-            a.hashfn
-        );
+        ensure_poseidon2!(a);
 
         let (program, control_id) = zkr::identity(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
