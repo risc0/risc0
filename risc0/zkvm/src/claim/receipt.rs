@@ -22,7 +22,7 @@
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
-use anyhow::{anyhow, bail, ensure};
+use anyhow::{anyhow, bail, ensure, Context};
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_binfmt::{
@@ -197,6 +197,30 @@ impl ReceiptClaim {
             output: other.output.clone(),
         }
     }
+
+    /// Produce the claim for resolving an assumption from the conditional claim (self). The
+    /// conditional claim must have a full (unpruned) assumptions list and the given claim must be
+    /// the head of the list.
+    pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
+        &self,
+        assumption: &Claim,
+    ) -> anyhow::Result<Self> {
+        let mut resolved_claim = self.clone();
+
+        // Open the assumptions on the output of the claim and remove the first assumption.
+        resolved_claim
+            .output
+            .as_value_mut()
+            .context("conditional receipt output is pruned")?
+            .as_mut()
+            .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
+            .assumptions
+            .as_value_mut()
+            .context("conditional receipt has pruned assumptions")?
+            .resolve(&assumption.digest::<sha::Impl>())?;
+
+        Ok(resolved_claim)
+    }
 }
 
 impl MaybePruned<ReceiptClaim> {
@@ -204,6 +228,20 @@ impl MaybePruned<ReceiptClaim> {
     /// reachability of the post state of other from the pre state of self.
     pub fn join(&self, other: &MaybePruned<ReceiptClaim>) -> Result<Self, PrunedValueError> {
         Ok(self.as_value()?.join(other.as_value()?).into())
+    }
+
+    /// Produce the claim for resolving an assumption from the conditional claim (self). The
+    /// conditional claim must have a full (unpruned) assumptions list and the given claim must be
+    /// the head of the list.
+    pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
+        &self,
+        assumption: &Claim,
+    ) -> anyhow::Result<Self> {
+        Ok(self
+            .as_value()
+            .context("conditional claim is pruned")?
+            .resolve(assumption)?
+            .into())
     }
 }
 

@@ -181,41 +181,24 @@ where
         assumption.claim,
     );
 
-    // Construct the resolved claim by copying the conditional receipt claim and resolving
-    // the head assumption. If this fails, then so would the resolve program.
-    let mut resolved_claim = conditional
-        .claim
-        .as_value()
-        .context("conditional receipt claim is pruned")?
-        .clone();
-    // Open the assumptions on the output of the claim and remove the first assumption.
-    // NOTE: Prover::new_resolve will check that the assumption can actually be resolved with the
-    // given receipts.
-    resolved_claim
-        .output
-        .as_value_mut()
-        .context("conditional receipt output is pruned")?
-        .as_mut()
-        .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
-        .assumptions
-        .as_value_mut()
-        .context("conditional receipt assumptions are pruned")?
-        .0
-        .drain(..1)
-        .next()
-        .ok_or_else(|| anyhow!("cannot resolve assumption from receipt with no assumptions"))?;
-
     let mut prover = Prover::new_resolve(conditional, assumption, ProverOpts::succinct())?;
     let receipt = prover.prover.run()?;
     let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving resolve finished: decoded claim = {claim_decoded:#?}");
+
+    let claim = conditional
+        .claim
+        .resolve(&assumption.claim)
+        .context("failed to compute resolved claim")?
+        .merge(&claim_decoded.into())
+        .context("failed to merge resolved and decoded claims")?;
 
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
         control_inclusion_proof: prover.control_inclusion_proof()?,
-        claim: claim_decoded.merge(&resolved_claim)?.into(),
+        claim,
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
