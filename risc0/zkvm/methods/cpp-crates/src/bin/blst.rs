@@ -17,7 +17,7 @@ use rand::RngCore;
 use risc0_zkvm::guest::env;
 
 fn main() {
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng();
     let mut ikm = [0u8; 32];
     rng.fill_bytes(&mut ikm);
 
