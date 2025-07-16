@@ -93,6 +93,6 @@ pub fn resolve_unwrap_povw(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("resolve_unwrap_povw.zkr", hashfn)
 }
 
-pub fn unwrap(hashfn: &str) -> Result<(Program, Digest)> {
-    get_zkr("unwrap.zkr", hashfn)
+pub fn unwrap_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("unwrap_povw.zkr", hashfn)
 }

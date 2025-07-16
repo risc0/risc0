@@ -141,6 +141,11 @@ impl PovwNonce {
     }
 
     /// TODO
+    pub fn to_u256(self) -> U256 {
+        (self.log.to::<U256>() << 96) | (U256::from(self.job) << 32) | U256::from(self.segment)
+    }
+
+    /// TODO
     pub fn to_u32s(self) -> [u32; 8] {
         let mut u32s = bytemuck::cast::<_, [u32; 8]>(self.to_bytes());
         // Bytes are little-endian, so on a big-endian machine, they need to be reversed.
@@ -195,7 +200,7 @@ impl PovwNonce {
 impl From<PovwNonce> for U256 {
     /// Convert a [PovwNonce] to its [U256] representation.
     fn from(value: PovwNonce) -> Self {
-        (value.log.to::<U256>() << 96) | (U256::from(value.job) << 32) | U256::from(value.segment)
+        value.to_u256()
     }
 }
 

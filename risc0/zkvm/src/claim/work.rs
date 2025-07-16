@@ -92,7 +92,7 @@ impl WorkClaim<ReceiptClaim> {
 /// of the work. It is used to represent the work within a single execution.
 // TODO(povw): Rename this to be more clear that this is just one representation of work? (in
 // particular that this is the compact range representation).
-#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
 pub struct Work {
     /// Lowest nonce in the range, inclusive.
     pub nonce_min: PovwNonce,
@@ -102,7 +102,62 @@ pub struct Work {
     pub value: u64,
 }
 
+/// Error returned when the
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub enum WorkClaimError {
+    NonceRangesNotContiguous(Work, Work),
+    PrunedValue(PrunedValueError),
+}
+
+impl fmt::Display for WorkClaimError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            WorkClaimError::NonceRangesNotContiguous(a, b) => {
+                write!(
+                    f,
+                    "work nonce ranges are not contiguous: ({:?}, {:?}) and ({:?}. {:?})",
+                    a.nonce_min, a.nonce_max, b.nonce_min, b.nonce_max
+                )
+            }
+            WorkClaimError::PrunedValue(err) => err.fmt(f),
+        }
+    }
+}
+
+impl From<PrunedValueError> for WorkClaimError {
+    fn from(err: PrunedValueError) -> Self {
+        Self::PrunedValue(err)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for WorkClaimError {}
+
 impl Work {
+    pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
+        // Check that the two nonce ranges are contiguous. This must match the implementation of
+        // the join_povw recursion program.
+        if self
+            .nonce_max
+            .to_u256()
+            .checked_add(1u64.try_into().unwrap())
+            .map(|max| max != other.nonce_min.to_u256())
+            .unwrap_or(false)
+        {
+            return Err(WorkClaimError::NonceRangesNotContiguous(
+                self.clone(),
+                other.clone(),
+            ));
+        }
+
+        Ok(Self {
+            nonce_min: self.nonce_min,
+            nonce_max: other.nonce_max,
+            value: self.value + other.value,
+        })
+    }
+
     pub(crate) fn encode_to_seal(&self, buf: &mut Vec<u32>) {
         buf.extend(self.nonce_min.to_u16s().into_iter().map(u32::from));
         buf.extend(self.nonce_max.to_u16s().into_iter().map(u32::from));
@@ -117,6 +172,12 @@ impl Work {
             nonce_max: PovwNonce::decode_from_seal(buf)?,
             value: decode_work_value_from_seal(buf)?,
         })
+    }
+}
+
+impl MaybePruned<Work> {
+    pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
+        Ok(self.as_value()?.join(other.as_value()?)?.into())
     }
 }
 

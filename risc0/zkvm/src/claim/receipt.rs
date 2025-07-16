@@ -36,11 +36,12 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     maybe_pruned::{MaybePruned, PrunedValueError},
+    work::WorkClaimError,
     Unknown,
 };
 use crate::{
     sha::{self, Sha256},
-    SystemState,
+    SystemState, WorkClaim,
 };
 
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
@@ -184,7 +185,7 @@ impl ReceiptClaim {
 
     /// Produce the claim for joining two claims of execution in a continuation, asserting the
     /// reachability of the post state of other from the pre state of self.
-    pub fn join(&self, other: &ReceiptClaim) -> Self {
+    pub fn join(&self, other: &Self) -> Self {
         ReceiptClaim {
             pre: self.pre.clone(),
             post: other.post.clone(),
@@ -222,7 +223,7 @@ impl ReceiptClaim {
 impl MaybePruned<ReceiptClaim> {
     /// Produce the claim for joining two claims of execution in a continuation, asserting the
     /// reachability of the post state of other from the pre state of self.
-    pub fn join(&self, other: &MaybePruned<ReceiptClaim>) -> Result<Self, PrunedValueError> {
+    pub fn join(&self, other: &Self) -> Result<Self, PrunedValueError> {
         Ok(self.as_value()?.join(other.as_value()?).into())
     }
 
@@ -236,6 +237,46 @@ impl MaybePruned<ReceiptClaim> {
         Ok(self
             .as_value()
             .context("conditional claim is pruned")?
+            .resolve(assumption)?
+            .into())
+    }
+}
+
+impl WorkClaim<ReceiptClaim> {
+    /// TODO
+    pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
+        Ok(Self {
+            claim: self.claim.join(&other.claim)?,
+            work: self.work.join(&other.work)?,
+        })
+    }
+
+    /// TODO
+    pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
+        &self,
+        assumption: &Claim,
+    ) -> anyhow::Result<Self> {
+        Ok(Self {
+            claim: self.claim.resolve(assumption)?.into(),
+            work: self.work.clone(),
+        })
+    }
+}
+
+impl MaybePruned<WorkClaim<ReceiptClaim>> {
+    /// TODO
+    pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
+        Ok(self.as_value()?.join(other.as_value()?)?.into())
+    }
+
+    /// TODO
+    pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
+        &self,
+        assumption: &Claim,
+    ) -> anyhow::Result<Self> {
+        Ok(self
+            .as_value()
+            .context("conditional povw claim is pruned")?
             .resolve(assumption)?
             .into())
     }

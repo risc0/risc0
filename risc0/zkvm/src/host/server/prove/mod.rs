@@ -37,7 +37,7 @@ use crate::{
     },
     sha::Digestible,
     stark_to_snark, ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
-    Segment, Session, VerifierContext,
+    Segment, Session, VerifierContext, WorkClaim,
 };
 
 mod private {
@@ -111,6 +111,57 @@ pub trait ProverServer: private::Sealed {
         &self,
         conditional: &SuccinctReceipt<ReceiptClaim>,
         assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    // TODO(povw): Should this maybe be extracted to a different prover trait that layers with this
+    // one? Or maybe there is a way to create fewer functions here. The main roadblock to having
+    // fewer functions is that each variant (e.g. join, join_povw, join_unwrap_povw) has distinct
+    // arg and return types, and generics can't be used while maintaining dyn compatibility.
+
+    /// Lift a [SegmentReceipt] into a [SuccinctReceipt] with a proof of verifiable work (PoVW) claim.
+    fn lift_povw(
+        &self,
+        receipt: &SegmentReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>;
+
+    /// Join two [SuccinctReceipt] with proof of verifiable work (PoVW) claims into a
+    /// [SuccinctReceipt] a PoVW claim.
+    fn join_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>;
+
+    /// Join two [SuccinctReceipt] with proof of verifiable work (PoVW) claims into a
+    /// [SuccinctReceipt], and unwrap the result (see [ProverServer::unwrap_povw]).
+    fn join_unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    /// Resolve an assumption from a conditional [SuccinctReceipt] with a proof of verifiable work
+    /// (PoVW) claim by providing a [SuccinctReceipt] proving the validity of the assumption.
+    fn resolve_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>;
+
+    /// Resolve an assumption from a conditional [SuccinctReceipt] with a proof of verifiable work
+    /// (PoVW) claim by providing a [SuccinctReceipt] proving the validity of the assumption, and
+    /// unwrap the result (see [ProverServer::unwrap_povw]).
+    fn resolve_unwrap_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    /// Remove the proof of verifiable work (PoVW) information from a [SuccinctReceipt] to produce
+    /// a [SuccinctReceipt] over the underlying claim.
+    fn unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
     /// Convert a [SuccinctReceipt] with a Poseidon hash function that uses a 254-bit field

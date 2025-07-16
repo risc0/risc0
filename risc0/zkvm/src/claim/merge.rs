@@ -23,9 +23,11 @@ use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
 use crate::{
-    claim::maybe_pruned::MaybePruned,
-    claim::receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim},
-    sha, SystemState,
+    claim::{
+        maybe_pruned::MaybePruned,
+        receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim},
+    },
+    sha, SystemState, Work, WorkClaim,
 };
 
 /// Merge two structures containing [MaybePruned] fields to produce a resulting structure with
@@ -68,6 +70,7 @@ trait MergeLeaf: Digestible + PartialEq + Clone + Sized {}
 
 impl MergeLeaf for SystemState {}
 impl MergeLeaf for Assumption {}
+impl MergeLeaf for Work {}
 impl MergeLeaf for Vec<u8> {}
 
 impl<T: MergeLeaf> Merge for T {
@@ -179,6 +182,15 @@ impl Merge for ReceiptClaim {
             exit_code: self.exit_code,
             input: self.input.merge(&other.input)?,
             output: self.output.merge(&other.output)?,
+        })
+    }
+}
+
+impl<Claim: Merge + Clone + Serialize> Merge for WorkClaim<Claim> {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        Ok(Self {
+            claim: self.claim.merge(&other.claim)?,
+            work: self.work.merge(&other.work)?,
         })
     }
 }
