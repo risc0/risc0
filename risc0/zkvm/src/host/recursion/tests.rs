@@ -152,8 +152,8 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
         .iter()
         .map(|x| x.resolve().unwrap())
         .map(|x| prover.prove_segment(&ctx, &x).unwrap())
-        .collect();
-    tracing::info!("Done proving rv32im");
+        .collect::<Vec<_>>();
+    tracing::info!("Done proving rv32im: {} segments", segment_receipts.len());
 
     (session, segment_receipts)
 }
@@ -358,7 +358,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("c7dfa96b76b7992a4a3d3761e3beca218906d40c298444045b24df743f000c23")
+        digest!("0844ab02fd28f72a6173c7671c58b537496dcd64b68b3565d070be0b0a1ab72e")
     );
 }
 
