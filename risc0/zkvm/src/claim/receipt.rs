@@ -22,7 +22,9 @@
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
-use anyhow::{anyhow, bail, ensure, Context};
+#[cfg(feature = "std")]
+use anyhow::Context;
+use anyhow::{anyhow, bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_binfmt::{
@@ -198,6 +200,7 @@ impl ReceiptClaim {
     /// Produce the claim for resolving an assumption from the conditional claim (self). The
     /// conditional claim must have a full (unpruned) assumptions list and the given claim must be
     /// the head of the list.
+    #[cfg(feature = "std")]
     pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
         &self,
         assumption: &Claim,
@@ -230,6 +233,7 @@ impl MaybePruned<ReceiptClaim> {
     /// Produce the claim for resolving an assumption from the conditional claim (self). The
     /// conditional claim must have a full (unpruned) assumptions list and the given claim must be
     /// the head of the list.
+    #[cfg(feature = "std")]
     pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
         &self,
         assumption: &Claim,
@@ -252,6 +256,7 @@ impl WorkClaim<ReceiptClaim> {
     }
 
     /// TODO
+    #[cfg(feature = "std")]
     pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
         &self,
         assumption: &Claim,
@@ -270,6 +275,7 @@ impl MaybePruned<WorkClaim<ReceiptClaim>> {
     }
 
     /// TODO
+    #[cfg(feature = "std")]
     pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
         &self,
         assumption: &Claim,

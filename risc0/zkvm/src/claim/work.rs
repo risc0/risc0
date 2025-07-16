@@ -16,7 +16,7 @@
 
 #![allow(dead_code)] // DO NOT MERGE
 
-use alloc::{collections::VecDeque, vec::Vec};
+use alloc::{boxed::Box, collections::VecDeque, vec::Vec};
 use core::fmt;
 
 use borsh::{BorshDeserialize, BorshSerialize};

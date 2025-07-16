@@ -78,6 +78,7 @@ impl Bootstrap {
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
         // enabled by using a custom VerifierContext.
+        // TODO(povw): Add povw programs to the allowed list here.
         let allowed_zkr_names: HashSet<String> =
             ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
                 .map(str::to_string)
