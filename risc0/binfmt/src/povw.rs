@@ -16,7 +16,7 @@
 
 // TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
 
-use alloc::collections::VecDeque;
+use alloc::{collections::VecDeque, vec::Vec};
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use ruint::aliases::{U160, U256, U64};
