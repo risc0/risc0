@@ -34,7 +34,7 @@ use crate::{
     recursion::MerkleProof,
     Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
     PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
-    VerifierContext,
+    VerifierContext, WorkClaim,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =
@@ -276,10 +276,33 @@ impl ProverServer for DevModeProver {
         fake_recursion(self.delay.map(|d| d.lift))
     }
 
+    fn lift_povw(
+        &self,
+        _receipt: &SegmentReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        fake_recursion(self.delay.map(|d| d.lift))
+    }
+
     fn join(
         &self,
         _a: &SuccinctReceipt<ReceiptClaim>,
         _b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        fake_recursion(self.delay.map(|d| d.join))
+    }
+
+    fn join_povw(
+        &self,
+        _a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        fake_recursion(self.delay.map(|d| d.join))
+    }
+
+    fn join_unwrap_povw(
+        &self,
+        _a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         fake_recursion(self.delay.map(|d| d.join))
     }
@@ -292,12 +315,36 @@ impl ProverServer for DevModeProver {
         fake_recursion(self.delay.map(|d| d.resolve))
     }
 
+    fn resolve_povw(
+        &self,
+        _conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        fake_recursion(self.delay.map(|d| d.resolve))
+    }
+
+    fn resolve_unwrap_povw(
+        &self,
+        _conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        fake_recursion(self.delay.map(|d| d.resolve))
+    }
+
     fn union(
         &self,
         _a: &SuccinctReceipt<Unknown>,
         _b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
         fake_recursion(self.delay.map(|d| d.union))
+    }
+
+    fn unwrap_povw(
+        &self,
+        _a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        // TODO: Apply a delay here. Should be a little smaller than a join.
+        fake_recursion(None)
     }
 
     fn identity_p254(
