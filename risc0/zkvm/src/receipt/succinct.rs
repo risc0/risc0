@@ -223,7 +223,7 @@ where
     }
 
     #[cfg(feature = "prove")]
-    pub(crate) fn assumption(&self) -> anyhow::Result<crate::Assumption> {
+    pub(crate) fn to_assumption(&self) -> anyhow::Result<crate::Assumption> {
         Ok(crate::Assumption {
             claim: self.claim.digest::<sha::Impl>(),
             control_root: self.control_root()?,

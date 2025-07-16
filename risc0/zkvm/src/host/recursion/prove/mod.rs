@@ -79,14 +79,9 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
     let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
 
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: prover.opts.hashfn.clone(),
-        control_id: prover.control_id,
-        control_inclusion_proof: prover.control_inclusion_proof()?,
-        claim: claim_decoded.merge(&segment_receipt.claim)?.into(),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    let claim = claim_decoded.merge(&segment_receipt.claim)?.into();
+
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Run the join program to compress two receipts of the same session into one.
@@ -111,14 +106,7 @@ pub fn join(
         .merge(&a.claim.join(&b.claim)?.value()?)?
         .into();
 
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: prover.opts.hashfn.clone(),
-        control_id: prover.control_id,
-        control_inclusion_proof: prover.control_inclusion_proof()?,
-        claim,
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Run the union program to compress two succinct receipts into one.
@@ -129,8 +117,8 @@ pub fn union(
     a: &SuccinctReceipt<Unknown>,
     b: &SuccinctReceipt<Unknown>,
 ) -> Result<SuccinctReceipt<UnionClaim>> {
-    let a_assumption = a.assumption()?.digest();
-    let b_assumption = b.assumption()?.digest();
+    let a_assumption = a.to_assumption()?.digest();
+    let b_assumption = b.to_assumption()?.digest();
 
     let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
         if a_assumption <= b_assumption {
@@ -150,14 +138,7 @@ pub fn union(
         right: right_assumption,
     };
 
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: prover.opts.hashfn.clone(),
-        control_id: prover.control_id,
-        control_inclusion_proof: prover.control_inclusion_proof()?,
-        claim: MaybePruned::Value(claim),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
@@ -188,19 +169,14 @@ where
 
     let claim = conditional
         .claim
+        .as_value()
+        .context("conditional receipt claim is pruned")?
         .resolve(&assumption.claim)
         .context("failed to compute resolved claim")?
-        .merge(&claim_decoded.into())
+        .merge(&claim_decoded)
         .context("failed to merge resolved and decoded claims")?;
 
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: prover.opts.hashfn.clone(),
-        control_id: prover.control_id,
-        control_inclusion_proof: prover.control_inclusion_proof()?,
-        claim,
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
@@ -312,6 +288,26 @@ pub fn get_registered_zkr(control_id: &Digest) -> Result<Program> {
         .get(control_id)
         .map(|f| f())
         .unwrap_or_else(|| bail!("Control id {control_id} unregistered"))
+}
+
+/// Private utility to make a SuccinctReceipt from a RecursionReceipt, the Prover and the Claim.
+fn make_succinct_receipt<Claim>(
+    prover: Prover,
+    receipt: RecursionReceipt,
+    claim: Claim,
+) -> Result<SuccinctReceipt<Claim>>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: prover.opts.hashfn.clone(),
+        control_id: prover.control_id,
+        control_inclusion_proof: prover.control_inclusion_proof()?,
+        claim: MaybePruned::Value(claim),
+        // TODO(victor): This should be derived from the ProverOpts instead of being default.
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
 }
 
 /// Prove the test_recursion_circuit. This is useful for testing purposes.
