@@ -22,7 +22,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use ruint::aliases::{U160, U256, U64};
 use serde::{Deserialize, Serialize};
 
-#[cfg(test)]
+#[cfg(feature = "rand")]
 use rand::{
     distr::{Distribution, StandardUniform},
     Rng,
@@ -97,7 +97,7 @@ impl TryFrom<&[u8]> for PovwJobId {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "rand")]
 impl Distribution<PovwJobId> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PovwJobId {
         PovwJobId {
@@ -212,7 +212,7 @@ impl From<U256> for PovwNonce {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "rand")]
 impl Distribution<PovwNonce> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PovwNonce {
         PovwNonce {

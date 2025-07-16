@@ -14,6 +14,8 @@
 
 //! [WorkClaim] and associated types and functions.
 
+#![allow(dead_code)] // DO NOT MERGE
+
 use alloc::{collections::VecDeque, vec::Vec};
 use core::fmt;
 
@@ -158,5 +160,71 @@ impl Digestible for Work {
         let mut buf = Vec::new();
         self.encode_to_seal(&mut buf);
         tagged_struct::<S>("risc0.Work", &Vec::<Digest>::new(), &buf)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ReceiptClaim;
+    use alloc::collections::VecDeque;
+
+    #[test]
+    fn test_work_seal_encoding_round_trip() {
+        let original = Work {
+            nonce_min: rand::random(),
+            nonce_max: rand::random(),
+            value: rand::random(),
+        };
+
+        let mut buf = Vec::new();
+        original.encode_to_seal(&mut buf);
+
+        let mut decode_buf = VecDeque::from(buf);
+        let decoded = Work::decode_from_seal(&mut decode_buf).unwrap();
+
+        assert_eq!(original.nonce_min, decoded.nonce_min);
+        assert_eq!(original.nonce_max, decoded.nonce_max);
+        assert_eq!(original.value, decoded.value);
+        assert!(decode_buf.is_empty());
+    }
+
+    #[test]
+    fn test_work_claim_seal_encoding_round_trip() {
+        use crate::sha::Digest;
+
+        let original = WorkClaim {
+            claim: ReceiptClaim::ok(Digest::from([1u8; 32]), vec![1u8, 2u8, 3u8]).into(),
+            work: Work {
+                nonce_min: rand::random(),
+                nonce_max: rand::random(),
+                value: rand::random(),
+            }
+            .into(),
+        };
+
+        let mut buf = Vec::new();
+        original.encode_to_seal(&mut buf).unwrap();
+
+        let mut decode_buf = VecDeque::from(buf);
+        let decoded = WorkClaim::decode_from_seal(&mut decode_buf).unwrap();
+
+        assert_eq!(
+            original.claim.as_value().unwrap(),
+            decoded.claim.as_value().unwrap()
+        );
+        assert_eq!(
+            original.work.as_value().unwrap().nonce_min,
+            decoded.work.as_value().unwrap().nonce_min
+        );
+        assert_eq!(
+            original.work.as_value().unwrap().nonce_max,
+            decoded.work.as_value().unwrap().nonce_max
+        );
+        assert_eq!(
+            original.work.as_value().unwrap().value,
+            decoded.work.as_value().unwrap().value
+        );
+        assert!(decode_buf.is_empty());
     }
 }
