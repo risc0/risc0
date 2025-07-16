@@ -28,11 +28,14 @@ use crate::{
     mmr::MerkleMountainAccumulator,
     prove_registered_zkr,
     receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    recursion::prove::union,
+    recursion::prove::{
+        join_povw, join_unwrap_povw, lift_povw, resolve_povw, resolve_unwrap_povw, union,
+        unwrap_povw,
+    },
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
     MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
-    UnionClaim, Unknown, VerifierContext,
+    UnionClaim, Unknown, VerifierContext, WorkClaim,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -279,6 +282,13 @@ impl ProverServer for ProverImpl {
         lift(receipt)
     }
 
+    fn lift_povw(
+        &self,
+        receipt: &SegmentReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        lift_povw(receipt)
+    }
+
     fn join(
         &self,
         a: &SuccinctReceipt<ReceiptClaim>,
@@ -287,12 +297,44 @@ impl ProverServer for ProverImpl {
         join(a, b)
     }
 
+    fn join_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        join_povw(a, b)
+    }
+
+    fn join_unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        join_unwrap_povw(a, b)
+    }
+
     fn resolve(
         &self,
         conditional: &SuccinctReceipt<ReceiptClaim>,
         assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         resolve(conditional, assumption)
+    }
+
+    fn resolve_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        resolve_povw(conditional, assumption)
+    }
+
+    fn resolve_unwrap_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        resolve_unwrap_povw(conditional, assumption)
     }
 
     fn identity_p254(
@@ -316,6 +358,13 @@ impl ProverServer for ProverImpl {
         b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
         union(a, b)
+    }
+
+    fn unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        unwrap_povw(a)
     }
 }
 
