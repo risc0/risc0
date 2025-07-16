@@ -257,7 +257,7 @@ impl WorkClaim<ReceiptClaim> {
         assumption: &Claim,
     ) -> anyhow::Result<Self> {
         Ok(Self {
-            claim: self.claim.resolve(assumption)?.into(),
+            claim: self.claim.resolve(assumption)?,
             work: self.work.clone(),
         })
     }

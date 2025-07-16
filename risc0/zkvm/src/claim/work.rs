@@ -106,18 +106,18 @@ pub struct Work {
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum WorkClaimError {
-    NonceRangesNotContiguous(Work, Work),
+    NonceRangesNotContiguous(Box<(Work, Work)>),
     PrunedValue(PrunedValueError),
 }
 
 impl fmt::Display for WorkClaimError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            WorkClaimError::NonceRangesNotContiguous(a, b) => {
+            WorkClaimError::NonceRangesNotContiguous(ab) => {
                 write!(
                     f,
                     "work nonce ranges are not contiguous: ({:?}, {:?}) and ({:?}. {:?})",
-                    a.nonce_min, a.nonce_max, b.nonce_min, b.nonce_max
+                    ab.0.nonce_min, ab.0.nonce_max, ab.1.nonce_min, ab.1.nonce_max
                 )
             }
             WorkClaimError::PrunedValue(err) => err.fmt(f),
@@ -135,6 +135,7 @@ impl From<PrunedValueError> for WorkClaimError {
 impl std::error::Error for WorkClaimError {}
 
 impl Work {
+    /// TODO
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         // Check that the two nonce ranges are contiguous. This must match the implementation of
         // the join_povw recursion program.
@@ -145,10 +146,10 @@ impl Work {
             .map(|max| max != other.nonce_min.to_u256())
             .unwrap_or(false)
         {
-            return Err(WorkClaimError::NonceRangesNotContiguous(
+            return Err(WorkClaimError::NonceRangesNotContiguous(Box::new((
                 self.clone(),
                 other.clone(),
-            ));
+            ))));
         }
 
         Ok(Self {
@@ -176,6 +177,7 @@ impl Work {
 }
 
 impl MaybePruned<Work> {
+    /// TODO
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         Ok(self.as_value()?.join(other.as_value()?)?.into())
     }

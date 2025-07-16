@@ -100,7 +100,7 @@ pub fn lift_povw(
     claim
         .claim
         .merge_with(&segment_receipt.claim.clone().into())
-        .context("failed to merge segment receipt claim into decode claim");
+        .context("failed to merge segment receipt claim into decode claim")?;
 
     make_succinct_receipt(prover, receipt, claim)
 }
@@ -793,6 +793,7 @@ impl Prover {
         Ok(prover)
     }
 
+    /// TODO
     pub fn new_resolve_povw<Claim>(
         cond: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
         assum: &SuccinctReceipt<Claim>,
