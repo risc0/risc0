@@ -14,19 +14,18 @@
 
 //! [WorkClaim] and associated types and functions.
 
-use alloc::vec::Vec;
+use alloc::{collections::VecDeque, vec::Vec};
 use core::fmt;
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use risc0_binfmt::{tagged_struct, Digestible, PovwNonce};
+use risc0_binfmt::{tagged_struct, DecodeError, Digestible, PovwNonce};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     sha::{Digest, Sha256},
-    MaybePruned,
+    MaybePruned, PrunedValueError, ReceiptClaim,
 };
 
-// TODO: Move this into the risc0 repo
 /// A wrapper around the underlying claim that additionally includes the amount of verifiable work
 /// completed, and the nonces used, in the process of proving the claim.
 ///
@@ -68,6 +67,23 @@ where
     }
 }
 
+impl WorkClaim<ReceiptClaim> {
+    pub(crate) fn encode_to_seal(&self, buf: &mut Vec<u32>) -> Result<(), PrunedValueError> {
+        self.claim.as_value()?.encode(buf)?;
+        self.work.as_value()?.encode_to_seal(buf);
+        Ok(())
+    }
+
+    pub(crate) fn decode_from_seal(
+        buf: &mut VecDeque<u32>,
+    ) -> Result<Self, crate::claim::receipt::DecodeError> {
+        Ok(Self {
+            claim: ReceiptClaim::decode(buf)?.into(),
+            work: Work::decode_from_seal(buf)?.into(),
+        })
+    }
+}
+
 /// A compact representation of completed work within Proof of Verifiable Work (PoVW).
 ///
 /// This struct contains a compact representation of the range of used nonces, along with the value
@@ -84,6 +100,24 @@ pub struct Work {
     pub value: u64,
 }
 
+impl Work {
+    pub(crate) fn encode_to_seal(&self, buf: &mut Vec<u32>) {
+        buf.extend(self.nonce_min.to_u16s().into_iter().map(u32::from));
+        buf.extend(self.nonce_max.to_u16s().into_iter().map(u32::from));
+        buf.extend(u64_to_u16s(self.value).into_iter().map(u32::from));
+    }
+
+    pub(crate) fn decode_from_seal(
+        buf: &mut VecDeque<u32>,
+    ) -> Result<Self, risc0_binfmt::DecodeError> {
+        Ok(Self {
+            nonce_min: PovwNonce::decode_from_seal(buf)?,
+            nonce_max: PovwNonce::decode_from_seal(buf)?,
+            value: decode_work_value_from_seal(buf)?,
+        })
+    }
+}
+
 fn u64_to_u16s(x: u64) -> [u16; 4] {
     let mut u16s = bytemuck::cast::<_, [u16; 4]>(x.to_le_bytes());
     // Bytes are little-endian, so on a big-endian machine, they need to be reversed.
@@ -93,22 +127,36 @@ fn u64_to_u16s(x: u64) -> [u16; 4] {
     u16s
 }
 
+fn u64_from_u16s(mut u16s: [u16; 4]) -> u64 {
+    // Bytes are little-endian, so on a big-endian machine, they need to be reversed.
+    for x in u16s.iter_mut() {
+        *x = u16::from_le(*x);
+    }
+    u64::from_le_bytes(bytemuck::cast(u16s))
+}
+
+fn decode_work_value_from_seal(buf: &mut VecDeque<u32>) -> Result<u64, risc0_binfmt::DecodeError> {
+    if buf.len() < 4 {
+        return Err(DecodeError::EndOfStream);
+    }
+    fn u16_from_u32(x: u32) -> Result<u16, risc0_binfmt::DecodeError> {
+        x.try_into()
+            .map_err(|_| risc0_binfmt::DecodeError::OutOfRange)
+    }
+    Ok(u64_from_u16s(
+        buf.drain(..4)
+            .map(u16_from_u32)
+            .collect::<Result<Vec<_>, _>>()?
+            .try_into()
+            .unwrap(),
+    ))
+}
+
 impl Digestible for Work {
     /// Hash the [ReceiptClaim] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
-        tagged_struct::<S>(
-            "risc0.Work",
-            &Vec::<Digest>::new(),
-            &[
-                self.nonce_min.to_u16s().as_slice(),
-                self.nonce_max.to_u16s().as_slice(),
-                u64_to_u16s(self.value).as_slice(),
-            ]
-            .into_iter()
-            .flatten()
-            .copied()
-            .map(u32::from)
-            .collect::<Vec<_>>(),
-        )
+        let mut buf = Vec::new();
+        self.encode_to_seal(&mut buf);
+        tagged_struct::<S>("risc0.Work", &Vec::<Digest>::new(), &buf)
     }
 }

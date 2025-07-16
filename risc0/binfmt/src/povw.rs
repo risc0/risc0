@@ -16,6 +16,8 @@
 
 // TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
 
+use alloc::collections::VecDeque;
+
 use borsh::{BorshDeserialize, BorshSerialize};
 use ruint::aliases::{U160, U256, U64};
 use serde::{Deserialize, Serialize};
@@ -25,6 +27,8 @@ use rand::{
     distr::{Distribution, StandardUniform},
     Rng,
 };
+
+use crate::DecodeError;
 
 /// TODO
 pub type PovwLogId = U160;
@@ -163,6 +167,28 @@ impl PovwNonce {
             *x = u16::from_le(*x);
         }
         Self::from_bytes(bytemuck::cast(u16s))
+    }
+
+    /// TODO
+    pub fn encode_to_seal(&self, buf: &mut Vec<u32>) {
+        buf.extend(self.to_u16s().into_iter().map(u32::from));
+    }
+
+    /// TODO
+    pub fn decode_from_seal(buf: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
+        if buf.len() < 16 {
+            return Err(DecodeError::EndOfStream);
+        }
+        fn u16_from_u32(x: u32) -> Result<u16, DecodeError> {
+            x.try_into().map_err(|_| DecodeError::OutOfRange)
+        }
+        Ok(Self::from_u16s(
+            buf.drain(..16)
+                .map(u16_from_u32)
+                .collect::<Result<Vec<_>, _>>()?
+                .try_into()
+                .unwrap(),
+        ))
     }
 }
 
