@@ -927,6 +927,7 @@ dependencies = [
  "elf",
  "lazy_static",
  "postcard",
+ "rand 0.9.1",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "ruint",
