@@ -14,7 +14,10 @@
 pub mod github;
 pub mod s3;
 
-#[cfg_attr(not(feature = "install"), path = "erroring_http.rs")]
+#[cfg_attr(
+    all(not(feature = "install"), not(feature = "publish")),
+    path = "erroring_http.rs"
+)]
 mod http;
 
 pub use self::http::*;
@@ -23,7 +26,7 @@ use crate::{Component, Environment, RzupEvent};
 use semver::Version;
 use std::{fmt, io};
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub(crate) enum Os {
     MacOs,
     Linux,
@@ -38,7 +41,18 @@ impl fmt::Display for Os {
     }
 }
 
-#[derive(Copy, Clone)]
+impl Os {
+    fn target_triple_component(&self) -> &'static str {
+        match self {
+            Self::MacOs => "apple-darwin",
+            Self::Linux => "unknown-linux-gnu",
+        }
+    }
+}
+
+const SUPPORTED_ARCH: [&str; 4] = ["x86", "x86_64", "arm", "aarch64"];
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Platform {
     pub(crate) arch: &'static str,
     pub(crate) os: Os,
@@ -65,11 +79,47 @@ impl Platform {
     }
 
     pub fn target_triple(&self) -> String {
-        match self.os {
-            Os::MacOs => format!("{}-apple-darwin", self.arch),
-            Os::Linux => format!("{}-unknown-linux-gnu", self.arch),
-        }
+        format!("{}-{}", self.arch, self.os.target_triple_component())
     }
+
+    pub fn from_target_triple(tt: &str) -> Option<Self> {
+        for m_os in [Os::MacOs, Os::Linux] {
+            if let Some(arch) = tt.strip_suffix(&format!("-{}", m_os.target_triple_component())) {
+                for m_arch in SUPPORTED_ARCH {
+                    if arch == m_arch {
+                        return Some(Self {
+                            arch: m_arch,
+                            os: m_os,
+                        });
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+#[test]
+fn platform_from_target_triple() {
+    assert_eq!(
+        Some(Platform::new("x86_64", Os::MacOs)),
+        Platform::from_target_triple("x86_64-apple-darwin")
+    );
+
+    assert_eq!(
+        Some(Platform::new("aarch64", Os::MacOs)),
+        Platform::from_target_triple("aarch64-apple-darwin")
+    );
+
+    assert_eq!(
+        Some(Platform::new("x86_64", Os::Linux)),
+        Platform::from_target_triple("x86_64-unknown-linux-gnu")
+    );
+
+    assert_eq!(
+        Some(Platform::new("aarch64", Os::Linux)),
+        Platform::from_target_triple("aarch64-unknown-linux-gnu")
+    );
 }
 
 impl std::fmt::Display for Platform {
@@ -121,15 +171,41 @@ impl<'a, WriterT> ProgressWriter<'a, WriterT> {
 impl<WriterT: io::Write> io::Write for ProgressWriter<'_, WriterT> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         let written = self.writer.write(buf)?;
-        self.env.emit(RzupEvent::DownloadProgress {
+        self.env.emit(RzupEvent::TransferProgress {
             id: self.id.clone(),
-            incr: u64::try_from(buf.len()).unwrap(),
+            incr: u64::try_from(written).unwrap(),
         });
         Ok(written)
     }
 
     fn flush(&mut self) -> io::Result<()> {
         self.writer.flush()
+    }
+}
+
+#[cfg_attr(not(feature = "publish"), allow(dead_code))]
+struct ProgressReader<ReaderT> {
+    id: String,
+    sender: std::sync::mpsc::Sender<RzupEvent>,
+    reader: ReaderT,
+}
+
+#[cfg_attr(not(feature = "publish"), allow(dead_code))]
+impl<ReaderT> ProgressReader<ReaderT> {
+    fn new(id: String, sender: std::sync::mpsc::Sender<RzupEvent>, reader: ReaderT) -> Self {
+        Self { id, sender, reader }
+    }
+}
+
+#[cfg_attr(not(feature = "publish"), allow(dead_code))]
+impl<ReaderT: io::Read> io::Read for ProgressReader<ReaderT> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        let read = self.reader.read(buf)?;
+        let _ = self.sender.send(RzupEvent::TransferProgress {
+            id: self.id.clone(),
+            incr: u64::try_from(read).unwrap(),
+        });
+        Ok(read)
     }
 }
 
