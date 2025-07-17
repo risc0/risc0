@@ -151,10 +151,10 @@ fn generate_busy_loop_segments(
 
     tracing::info!("Executing rv32im");
     let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
-    let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving rv32im");
+    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
+    let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
     let segment_receipts = session
         .segments
@@ -168,6 +168,64 @@ fn generate_busy_loop_segments(
     assert!(segment_receipts.len() >= 3);
 
     (session, segment_receipts)
+}
+
+fn generate_echo_segment(
+    msg: impl AsRef<[u8]>,
+    povw_job: Option<PovwJobId>,
+) -> (Session, SegmentReceipt) {
+    let mut env_builder = ExecutorEnv::builder();
+    env_builder
+        .write(&MultiTestSpec::Echo {
+            bytes: msg.as_ref().to_vec(),
+        })
+        .unwrap();
+    if let Some(job_id) = povw_job {
+        env_builder.povw(job_id);
+    }
+    let env = env_builder.build().unwrap();
+
+    tracing::info!("Executing rv32im for echo");
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+
+    tracing::info!("Proving rv32im");
+    let prover = get_prover_server(&ProverOpts::composite()).unwrap();
+    let ctx = VerifierContext::default();
+    let segment_receipts = session
+        .segments
+        .iter()
+        .map(|x| x.resolve().unwrap())
+        .map(|x| prover.prove_segment(&ctx, &x).unwrap())
+        .collect::<Vec<_>>();
+
+    // The tests below need at least three segments to work with.
+    tracing::info!("Done proving rv32im for echo");
+    assert_eq!(segment_receipts.len(), 1);
+
+    (session, segment_receipts[0].clone())
+}
+
+#[test_log::test]
+fn test_recursion_lift_povw_then_unwrap() {
+    // Prove the base case
+    let (session, segment) = generate_echo_segment(b"hello", Some(rand::random()));
+    let ctx = VerifierContext::default();
+
+    // Lift and join them all (and verify)
+    let lifted: SuccinctReceipt<WorkClaim<ReceiptClaim>> = lift_povw(&segment).unwrap();
+    tracing::info!("lift_povw claim = {:?}", lifted.claim);
+    lifted.verify_integrity_with_context(&ctx).unwrap();
+
+    // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
+    let unwraped: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&lifted).unwrap();
+    tracing::info!("unwrap_povw claim = {:?}", lifted.claim);
+    unwraped.verify_integrity_with_context(&ctx).unwrap();
+
+    let receipt = Receipt::new(
+        InnerReceipt::Succinct(unwraped),
+        session.journal.unwrap().bytes,
+    );
+    receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
 #[test_log::test]
