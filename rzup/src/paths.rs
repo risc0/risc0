@@ -39,7 +39,7 @@ impl Paths {
 
         let matching_path = std::fs::read_dir(component_dir)?
             .filter_map(|entry| entry.ok())
-            .filter(|entry| entry.path().is_dir() && !entry.metadata().unwrap().is_symlink())
+            .filter(|entry| entry.path().is_dir())
             .find_map(|entry| {
                 let dir_name = entry.file_name().to_string_lossy().to_string();
                 let parsed_version = Self::parse_version_from_path(&dir_name, component)?;

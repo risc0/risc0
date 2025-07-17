@@ -14,7 +14,6 @@ risc0-build-kernel = { workspace = true }
 [dependencies]
 anyhow = "1.0.98"
 blst = { version = "0.3.15", optional = true }
-circom-witnesscalc = { git = "https://github.com/supranational/circom-witnesscalc.git", rev = "a2e8f1a2f480bb562575b2d168b69db139fe0027" }
 sppark = { workspace = true, optional = true }
 
 [dev-dependencies]

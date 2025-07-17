@@ -277,15 +277,7 @@ public:
   }
 #endif
 
-  groth16_proof prove(const char* public_file_path, const std::vector<fr_t>& witness) {
-    if (witness.size() != witness_size) {
-      throw sppark_error{
-          EINVAL,
-          "witness size doesn't match the expected witness size. expected %zu, got %zu: ",
-          witness_size,
-          witness.size()};
-    }
-
+  groth16_proof prove(const char* public_file_path, const fr_t* witness) {
     size_t domain_size = (size_t)1 << lg_domain_size;
 
     msm_results results;

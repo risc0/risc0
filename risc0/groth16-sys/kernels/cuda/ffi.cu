@@ -38,52 +38,27 @@ using namespace sppark::bn254;
 #include "groth16_prover.cuh"
 #include "groth16_srs.cuh"
 
-// from circom-witnesscalc
-extern "C" size_t setup_parallel_graph(const char* graph_path);
-
-// from circom-witnesscalc
-extern "C" void
-calc_witness_with_parallel_graph(const char* graph_path, const char* inputs_file, fr_t* witness);
-
 struct SetupParams {
-  const char* graph_path;
   const char* pcoeffs_path;
   const char* fres_path;
   const char* srs_path;
 };
 
 struct ProveParams {
-  const char* inputs_path;
   const char* public_path;
   const char* proof_path;
+  const fr_t* witness;
 };
 
 extern "C" const char* risc0_groth16_cuda_prove(SetupParams* setup_params,
                                                 ProveParams* prover_params) {
-  // SETUP
-  std::vector<fr_t> witness;
-  auto read_thread = std::thread([&] {
-    size_t witness_size = setup_parallel_graph(setup_params->graph_path);
-    witness.resize(witness_size);
-
-    calc_witness_with_parallel_graph(
-        setup_params->graph_path, prover_params->inputs_path, &witness[0]);
-  });
 
   try {
     SRS srs(0, setup_params->srs_path);
     groth16_prover prover(srs, setup_params->pcoeffs_path, setup_params->fres_path);
-
-    read_thread.join();
-
-    // PROVE
-    groth16_proof proof = prover.prove(prover_params->public_path, witness);
-
+    groth16_proof proof = prover.prove(prover_params->public_path, prover_params->witness);
     write_proof_file(prover_params->proof_path, proof);
   } catch (const std::exception& err) {
-    if (read_thread.joinable()) {
-      read_thread.join();
-    }
     return strdup(err.what());
   }
   return nullptr;

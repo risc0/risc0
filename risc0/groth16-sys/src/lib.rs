@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate circom_witnesscalc;
-
 use std::{
     ffi::{c_char, CStr, CString, NulError},
     path::{Path, PathBuf},
@@ -24,24 +22,7 @@ use anyhow::{anyhow, Result};
 #[cfg(feature = "cuda")]
 pub use sppark::Error as SpparkError;
 
-pub struct ProverParams {
-    pub inputs_path: RawPath,
-    pub public_path: RawPath,
-    pub proof_path: RawPath,
-}
-
-impl ProverParams {
-    pub fn new(root_dir: &Path) -> anyhow::Result<Self> {
-        Ok(Self {
-            inputs_path: root_dir.join("input.json").try_into()?,
-            public_path: root_dir.join("public.json").try_into()?,
-            proof_path: root_dir.join("proof.json").try_into()?,
-        })
-    }
-}
-
 pub struct SetupParams {
-    pub graph_path: RawPath,
     pub pcoeffs_path: RawPath,
     pub fres_path: RawPath,
     pub srs_path: RawPath,
@@ -50,7 +31,6 @@ pub struct SetupParams {
 impl SetupParams {
     pub fn new(root_dir: &Path) -> anyhow::Result<Self> {
         Ok(SetupParams {
-            graph_path: root_dir.join("parallel-graph").try_into()?,
             pcoeffs_path: root_dir.join("preprocessed_coeffs.bin").try_into()?,
             fres_path: root_dir.join("fuzzed_msm_results.bin").try_into()?,
             srs_path: root_dir.join("stark_verify_final.zkey").try_into()?,
@@ -58,18 +38,45 @@ impl SetupParams {
     }
 }
 
+pub struct WitnessParams {
+    pub graph_path: PathBuf,
+}
+
+impl WitnessParams {
+    pub fn new(root_dir: &Path) -> Self {
+        WitnessParams {
+            graph_path: root_dir.join("stark_verify_graph.bin"),
+        }
+    }
+}
+
+pub struct ProverParams {
+    pub public_path: RawPath,
+    pub proof_path: RawPath,
+    pub witness: *const u8,
+}
+
+impl ProverParams {
+    pub fn new(root_dir: &Path, witness: *const u8) -> anyhow::Result<Self> {
+        Ok(Self {
+            public_path: root_dir.join("public.json").try_into()?,
+            proof_path: root_dir.join("proof.json").try_into()?,
+            witness,
+        })
+    }
+}
+
 #[cfg(feature = "cuda")]
 pub fn prove(prover_params: &ProverParams, setup_params: &SetupParams) -> anyhow::Result<()> {
     let setup_params = RawSetupParams {
-        graph_path: setup_params.graph_path.c_str.as_ptr(),
         pcoeffs_path: setup_params.pcoeffs_path.c_str.as_ptr(),
         fres_path: setup_params.fres_path.c_str.as_ptr(),
         srs_path: setup_params.srs_path.c_str.as_ptr(),
     };
     let prover_params = RawProverParams {
-        inputs_path: prover_params.inputs_path.c_str.as_ptr(),
         public_path: prover_params.public_path.c_str.as_ptr(),
         proof_path: prover_params.proof_path.c_str.as_ptr(),
+        witness: prover_params.witness,
     };
 
     ffi_wrap(|| unsafe { risc0_groth16_cuda_prove(&setup_params, &prover_params) })
@@ -78,7 +85,6 @@ pub fn prove(prover_params: &ProverParams, setup_params: &SetupParams) -> anyhow
 #[cfg(all(feature = "cuda", feature = "setup"))]
 pub fn setup(params: &SetupParams) -> anyhow::Result<()> {
     let raw_params = RawSetupParams {
-        graph_path: params.graph_path.c_str.as_ptr(),
         pcoeffs_path: params.pcoeffs_path.c_str.as_ptr(),
         fres_path: params.fres_path.c_str.as_ptr(),
         srs_path: params.srs_path.c_str.as_ptr(),
@@ -88,14 +94,13 @@ pub fn setup(params: &SetupParams) -> anyhow::Result<()> {
 
 #[repr(C)]
 struct RawProverParams {
-    pub inputs_path: *const c_char,
     pub public_path: *const c_char,
     pub proof_path: *const c_char,
+    pub witness: *const u8,
 }
 
 #[repr(C)]
 struct RawSetupParams {
-    pub graph_path: *const c_char,
     pub pcoeffs_path: *const c_char,
     pub fres_path: *const c_char,
     pub srs_path: *const c_char,

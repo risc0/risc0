@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::Path;
+use std::{io::Cursor, path::Path};
 
-use anyhow::Result;
-use risc0_groth16_sys::{ProverParams, SetupParams};
+use anyhow::{anyhow, Result};
+use risc0_groth16_sys::{ProverParams, SetupParams, WitnessParams};
 use rzup::{Component, Rzup, Version};
 use tempfile::tempdir;
 
@@ -31,17 +31,37 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
     let tmp_dir = tempdir()?;
     let work_dir = std::env::var("RISC0_WORK_DIR");
     let work_dir = work_dir.as_ref().map(Path::new).unwrap_or(tmp_dir.path());
-
     let setup_params = SetupParams::new(&root_dir)?;
-    let prover_params = ProverParams::new(work_dir)?;
 
-    let mut seal_json = Vec::new();
-    to_json(seal_bytes, &mut seal_json)?;
-    std::fs::write(prover_params.inputs_path.as_path(), seal_json)?;
+    let inputs = to_json(seal_bytes)?;
 
+    let witness_params = WitnessParams::new(&root_dir);
+    let witness = calc_witness(&witness_params.graph_path, &inputs)?;
+
+    let prover_params = ProverParams::new(work_dir, witness.as_ptr())?;
     risc0_groth16_sys::prove(&prover_params, &setup_params)?;
 
     let contents = std::fs::read_to_string(prover_params.proof_path.as_path())?;
     let proof_json: ProofJson = serde_json::from_str(&contents)?;
     proof_json.try_into()
+}
+
+struct CalcWitness {
+    witness: Vec<wtns_file::FieldElement<32>>,
+}
+
+impl CalcWitness {
+    fn as_ptr(&self) -> *const u8 {
+        self.witness.as_ptr() as *const u8
+    }
+}
+
+fn calc_witness(graph_path: &Path, inputs: &str) -> Result<CalcWitness> {
+    let graph = std::fs::read(graph_path)?;
+    let witness_encoded = circom_witnesscalc::calc_witness(inputs, &graph)
+        .map_err(|err| anyhow!("witness failure: {err}"))?;
+    let wtns_f = wtns_file::WtnsFile::read(Cursor::new(witness_encoded))?;
+    Ok(CalcWitness {
+        witness: wtns_f.witness.0,
+    })
 }
