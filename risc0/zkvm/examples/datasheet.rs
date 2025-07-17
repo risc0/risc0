@@ -185,7 +185,7 @@ impl Datasheet {
             Command::Succinct => self.succinct(),
             Command::Identity => self.identity_p254(),
             #[cfg(feature = "docker")]
-            Command::StarkToSnark => self.stark2snark(),
+            Command::StarkToSnark => self.shrink_wrap(),
             #[cfg(feature = "docker")]
             Command::Groth16 => self.groth16(),
             Command::BigInt2 => self.bigint2(),
@@ -428,8 +428,8 @@ impl Datasheet {
     }
 
     #[cfg(feature = "docker")]
-    fn stark2snark(&mut self) {
-        println!("stark2snark");
+    fn shrink_wrap(&mut self) {
+        println!("shrink_wrap");
 
         let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
@@ -445,7 +445,7 @@ impl Datasheet {
         let seal_bytes = receipt.get_seal_bytes();
 
         let start = Instant::now();
-        let seal = black_box(risc0_zkvm::stark_to_snark(&seal_bytes).unwrap());
+        let seal = black_box(risc0_groth16::prove::shrink_wrap(&seal_bytes).unwrap());
         let duration = start.elapsed();
 
         let cycles = 1 << RECURSION_PO2;
@@ -453,7 +453,7 @@ impl Datasheet {
         let encoded = bincode::serialize(&seal).unwrap();
 
         self.results.push(PerformanceData {
-            name: "stark2snark".into(),
+            name: "shrink_wrap".into(),
             hashfn: opts.hashfn,
             cycles,
             duration,

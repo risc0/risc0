@@ -384,7 +384,7 @@ fn check_for_major_version_bump_due_to_version_req_in_single_package(
     let baseline_package = baseline_metadata
         .packages
         .iter()
-        .find(|p| p.name == package_name)
+        .find(|p| p.name.as_str() == package_name)
         .ok_or_else(|| anyhow!("vendored crate missing any package"))?;
 
     let mut problem_deps = vec![];
@@ -483,7 +483,7 @@ fn find_publishable_packages_with_lib(
             continue;
         }
 
-        packages.insert(package.name.clone(), package.clone());
+        packages.insert(package.name.to_string(), package.clone());
     }
 
     Ok(packages)
