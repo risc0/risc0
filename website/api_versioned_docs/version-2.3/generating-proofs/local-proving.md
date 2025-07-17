@@ -58,7 +58,7 @@ source ~/.bashrc
 # clone the risc0 repo
 git clone https://github.com/risc0/risc0.git
 cd risc0
-# install the r0vm
+# install rzup
 cargo run --bin rzup install
 # run a benchmark on your GPU!
 # NOTE: Building the GPU kernels may take a long time.
