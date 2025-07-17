@@ -139,13 +139,13 @@ impl Work {
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         // Check that the two nonce ranges are contiguous. This must match the implementation of
         // the join_povw recursion program.
-        if self
+        let contiguous = self
             .nonce_max
             .to_u256()
             .checked_add(1u64.try_into().unwrap())
-            .map(|max| max != other.nonce_min.to_u256())
-            .unwrap_or(false)
-        {
+            .map(|max| max == other.nonce_min.to_u256())
+            .unwrap_or(false);
+        if !contiguous {
             return Err(WorkClaimError::NonceRangesNotContiguous(Box::new((
                 self.clone(),
                 other.clone(),
