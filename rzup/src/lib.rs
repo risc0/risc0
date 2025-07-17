@@ -28,10 +28,16 @@ use std::path::{Path, PathBuf};
 
 use self::distribution::Platform;
 use self::env::Environment;
-use self::events::RzupEvent;
+use self::events::{RzupEvent, TransferDirection};
 use self::paths::Paths;
 use self::registry::Registry;
 use self::settings::Settings;
+
+#[cfg(feature = "publish")]
+use aws_credential_types::Credentials as AwsCredentials;
+
+#[cfg(not(feature = "publish"))]
+pub struct AwsCredentials;
 
 pub use self::components::Component;
 pub use self::error::{Result, RzupError};
@@ -96,20 +102,24 @@ impl Rzup {
     /// * `cargo_dir` - The path to cargo's home directory (usually ~/.cargo)
     /// * `base_urls` - The base URLs used to communicate with GitHub
     /// * `github_token` - The token to use when communicating with GitHub
-    pub fn with_paths_urls_token_platform_and_event_handler(
+    /// * `aws_creds` - Credentials for communicating with S3
+    #[allow(clippy::too_many_arguments)]
+    pub fn with_paths_urls_creds_platform_and_event_handler(
         risc0_dir: impl Into<PathBuf>,
         rustup_dir: impl AsRef<Path>,
         cargo_dir: impl AsRef<Path>,
         base_urls: BaseUrls,
         github_token: Option<String>,
+        aws_creds: Option<AwsCredentials>,
         platform: Platform,
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
-        let environment = Environment::with_paths_token_platform_and_event_handler(
+        let environment = Environment::with_paths_creds_platform_and_event_handler(
             risc0_dir,
             rustup_dir,
             cargo_dir,
             github_token,
+            aws_creds,
             platform,
             event_handler,
         )?;
@@ -321,6 +331,45 @@ impl Rzup {
         self.set_default_version(&Component::RustToolchain, version)?;
         Ok(())
     }
+
+    /// Upload a new version of a component to S3.
+    ///
+    /// If a component already exists for the given component + platform + version, an error is
+    /// returned, unless `force` is true.
+    #[cfg(feature = "publish")]
+    #[cfg_attr(not(feature = "cli"), expect(dead_code))]
+    pub(crate) fn publish_upload(
+        &mut self,
+        component: &Component,
+        version: &Version,
+        platform: Option<Platform>,
+        payload: &Path,
+        force: bool,
+    ) -> Result<()> {
+        let s3 = distribution::s3::S3Bucket::new(self.registry.base_urls());
+        s3.publish_upload(
+            &self.environment,
+            component,
+            version,
+            platform,
+            payload,
+            force,
+        )
+    }
+
+    /// Set the given version as the latest version for a given component on S3.
+    ///
+    /// If the given release doesn't exist, an error is returned.
+    #[cfg(feature = "publish")]
+    #[cfg_attr(not(feature = "cli"), expect(dead_code))]
+    pub(crate) fn publish_set_latest(
+        &mut self,
+        component: &Component,
+        version: &Version,
+    ) -> Result<()> {
+        let s3 = distribution::s3::S3Bucket::new(self.registry.base_urls());
+        s3.publish_set_latest(&self.environment, component, version)
+    }
 }
 
 #[cfg(test)]
@@ -328,11 +377,13 @@ mod tests {
     use super::*;
     use crate::distribution::Os;
     use serde_json::json;
+    use sha2::Digest as _;
     use std::collections::HashMap;
     use std::convert::Infallible;
     use std::io::Write as _;
     use std::net::SocketAddr;
     use std::path::Path;
+    use std::sync::{Arc, Mutex};
     use tempfile::TempDir;
 
     pub struct MockDistributionServer {
@@ -341,11 +392,7 @@ mod tests {
 
     type HyperResponse = hyper::Response<http_body_util::Full<hyper::body::Bytes>>;
 
-    async fn request_handler(
-        install_script: String,
-        require_bearer_token: bool,
-        req: hyper::Request<hyper::body::Incoming>,
-    ) -> std::result::Result<HyperResponse, Infallible> {
+    fn build_mock_server_data(install_script: String) -> HashMap<String, HyperResponse> {
         fn json_response(json: impl Into<String>) -> HyperResponse {
             hyper::Response::builder()
                 .status(200)
@@ -426,14 +473,6 @@ mod tests {
                 .unwrap()
         }
 
-        if require_bearer_token {
-            let value = req
-                .headers()
-                .get("Authorization")
-                .expect("Authorization provided");
-            assert_eq!(value, "Bearer suchsecrettesttoken");
-        }
-
         let risc0_groth16_manifest_json = serde_json::to_string(&json!({
             "releases": {
                 "1.0.0": {
@@ -455,55 +494,116 @@ mod tests {
         }))
         .unwrap();
 
-        Ok(match &req.uri().to_string()[..] {
-            "/github_api/repos/risc0/risc0/releases/latest" => {
+        maplit::hashmap! {
+            "/github_api/repos/risc0/risc0/releases/latest".into() => {
                 json_response("{\"tag_name\":\"v1.1.0\"}")
-            }
-            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0" => json_response("{}"),
-            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1" => json_response("{}"),
-            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2" => json_response("{}"),
-            "/github_api/repos/risc0/rust/releases/tags/r0.1.79.0" => json_response("{}"),
+            },
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0".into() => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.1".into() => json_response("{}"),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.0.0-rc.2".into() => json_response("{}"),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.79.0".into() => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.0.0/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0-rc.1/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0-rc.2/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/risc0/releases/download/v1.0.0/\
-                cargo-risczero-aarch64-apple-darwin.tgz" => dummy_tar_gz_response(),
+                cargo-risczero-aarch64-apple-darwin.tgz".into() => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
-                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
+                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz".into() => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.79.0/\
-                rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.05" => json_response("{}"),
-            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-linux-x86_64.tar.xz" =>
+                rust-toolchain-aarch64-apple-darwin.tar.gz".into() => dummy_tar_gz_response(),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.05".into() =>
+                json_response("{}"),
+            "/risc0_github/toolchain/releases/download/2024.01.05/\
+                riscv32im-linux-x86_64.tar.xz".into() =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
-            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-gdb-linux-x86_64.tar.xz" =>
-                dummy_tar_xz_response("."),
-            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-osx-arm64.tar.xz" =>
-                dummy_tar_xz_response("riscv32im-osx-arm64"),
-            "/risc0_github/toolchain/releases/download/2024.01.05/riscv32im-gdb-osx-arm64.tar.xz" =>
-                dummy_tar_xz_response("."),
-            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.06" => json_response("{}"),
-            "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-linux-x86_64.tar.xz" =>
+            "/risc0_github/toolchain/releases/download/2024.01.05/\
+                riscv32im-gdb-linux-x86_64.tar.xz".into() => dummy_tar_xz_response("."),
+            "/risc0_github/toolchain/releases/download/2024.01.05/\
+                riscv32im-osx-arm64.tar.xz".into() => dummy_tar_xz_response("riscv32im-osx-arm64"),
+            "/risc0_github/toolchain/releases/download/2024.01.05/\
+                riscv32im-gdb-osx-arm64.tar.xz".into() => dummy_tar_xz_response("."),
+            "/github_api/repos/risc0/toolchain/releases/tags/2024.01.06".into() =>
+                json_response("{}"),
+            "/risc0_github/toolchain/releases/download/2024.01.06/\
+                riscv32im-linux-x86_64.tar.xz".into() =>
                 dummy_tar_xz_response("riscv32im-linux-x86_64"),
-            "/risc0_github/toolchain/releases/download/2024.01.06/riscv32im-gdb-linux-x86_64.tar.xz" =>
-                dummy_tar_xz_response("."),
-            "/github_api/repos/risc0/rust/releases/tags/r0.1.81.0" => json_response("{}"),
+            "/risc0_github/toolchain/releases/download/2024.01.06/\
+                riscv32im-gdb-linux-x86_64.tar.xz".into() => dummy_tar_xz_response("."),
+            "/github_api/repos/risc0/rust/releases/tags/r0.1.81.0".into() => json_response("{}"),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
-                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz" => dummy_tar_gz_response(),
+                rust-toolchain-x86_64-unknown-linux-gnu.tar.gz".into() => dummy_tar_gz_response(),
             "/risc0_github/rust/releases/download/r0.1.81.0/\
-                rust-toolchain-aarch64-apple-darwin.tar.gz" => dummy_tar_gz_response(),
-            "/github_api/repos/risc0/risc0/releases/tags/v5.0.0" => not_found(),
-            "/github_api/repos/risc0/risc0/releases/tags/v1.1.0" => json_response("{}"),
+                rust-toolchain-aarch64-apple-darwin.tar.gz".into() => dummy_tar_gz_response(),
+            "/github_api/repos/risc0/risc0/releases/tags/v5.0.0".into() => not_found(),
+            "/github_api/repos/risc0/risc0/releases/tags/v1.1.0".into() => json_response("{}"),
             "/risc0_github/risc0/releases/download/v1.1.0/\
-                cargo-risczero-x86_64-unknown-linux-gnu.tgz" => dummy_tar_gz_response(),
-            "/risc0/install" => text_response(install_script.clone()),
-            "/s3/rzup/components/risc0-groth16/distribution_manifest.json" => json_response(risc0_groth16_manifest_json),
-            "/s3/rzup/components/risc0-groth16/sha256/abcdef0001" => dummy_tar_xz_response("abcdef0001"),
-            "/s3/rzup/components/risc0-groth16/sha256/abcdef0002" => dummy_tar_xz_response("abcdef0002"),
-            unknown => panic!("unexpected URI: {unknown}"),
-        })
+                cargo-risczero-x86_64-unknown-linux-gnu.tgz".into() => dummy_tar_gz_response(),
+            "/risc0/install".into() => text_response(install_script.clone()),
+            "/s3/rzup/components/risc0-groth16/distribution_manifest.json".into() =>
+                json_response(risc0_groth16_manifest_json),
+            "/s3/rzup/components/risc0-groth16/sha256/abcdef0001".into() => dummy_tar_xz_response("abcdef0001"),
+            "/s3/rzup/components/risc0-groth16/sha256/abcdef0002".into() => dummy_tar_xz_response("abcdef0002"),
+        }
+    }
+
+    async fn request_handler(
+        require_bearer_token: bool,
+        server_data: Arc<Mutex<HashMap<String, HyperResponse>>>,
+        req: hyper::Request<hyper::body::Incoming>,
+    ) -> std::result::Result<HyperResponse, Infallible> {
+        if require_bearer_token {
+            let value = req
+                .headers()
+                .get("Authorization")
+                .expect("Authorization provided");
+            assert_eq!(value, "Bearer suchsecrettesttoken");
+        }
+
+        let req_uri = req.uri().to_string();
+        if req.method() == http::Method::GET {
+            if let Some(response) = server_data.lock().unwrap().get(&req_uri) {
+                Ok(response.clone())
+            } else {
+                panic!("unexpected URI: {req_uri}");
+            }
+        } else if req.method() == http::Method::PUT {
+            use http_body_util::BodyExt as _;
+
+            // required S3 upload headers
+            for h in ["x-amz-date", "authorization", "x-amz-content-sha256"] {
+                req.headers()
+                    .get(h)
+                    .unwrap_or_else(|| panic!("expected header: {h}"));
+            }
+
+            let value = req
+                .headers()
+                .get("content-type")
+                .expect("expected header: content-type");
+            assert_eq!(value, "application/octet-stream");
+
+            let resp = hyper::Response::builder()
+                .status(200)
+                .header("content-type", "application/octet-stream")
+                .body(http_body_util::Full::new(
+                    req.into_body().collect().await.unwrap().to_bytes(),
+                ))
+                .unwrap();
+            server_data.lock().unwrap().insert(req_uri, resp);
+
+            Ok(hyper::Response::builder()
+                .status(200)
+                .header("content-type", "application/xml")
+                .body(http_body_util::Full::new(hyper::body::Bytes::from(
+                    "<xml>ok</xml>",
+                )))
+                .unwrap())
+        } else {
+            panic!("unexpected HTTP method {}", req.method());
+        }
     }
 
     #[tokio::main]
@@ -512,16 +612,18 @@ mod tests {
         require_bearer_token: bool,
         sender: tokio::sync::oneshot::Sender<SocketAddr>,
     ) {
+        let server_data = Arc::new(Mutex::new(build_mock_server_data(install_script)));
+
         let listener = tokio::net::TcpListener::bind("localhost:0").await.unwrap();
         sender.send(listener.local_addr().unwrap()).unwrap();
 
         while let Ok((stream, _)) = listener.accept().await {
-            let install_script = install_script.clone();
+            let server_data = server_data.clone();
             hyper::server::conn::http1::Builder::new()
                 .serve_connection(
                     hyper_util::rt::TokioIo::new(stream),
                     hyper::service::service_fn(move |req| {
-                        request_handler(install_script.clone(), require_bearer_token, req)
+                        request_handler(require_bearer_token, server_data.clone(), req)
                     }),
                 )
                 .await
@@ -588,15 +690,17 @@ mod tests {
     fn setup_test_env(
         base_urls: BaseUrls,
         github_token: Option<String>,
+        aws_creds: Option<AwsCredentials>,
         platform: Platform,
     ) -> (TempDir, Rzup) {
         let tmp_dir = TempDir::new().unwrap();
-        let rzup = Rzup::with_paths_urls_token_platform_and_event_handler(
+        let rzup = Rzup::with_paths_urls_creds_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             base_urls,
             github_token,
+            aws_creds,
             platform,
             |_| {},
         )
@@ -608,6 +712,7 @@ mod tests {
     fn test_rzup_initialization() {
         let (_tmp_dir, rzup) = setup_test_env(
             invalid_base_urls(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -622,7 +727,8 @@ mod tests {
     }
 
     fn test_install_and_uninstall_end_to_end(base_urls: BaseUrls) {
-        let (_tmp_dir, mut rzup) = setup_test_env(base_urls, None, Platform::detect().unwrap());
+        let (_tmp_dir, mut rzup) =
+            setup_test_env(base_urls, None, None, Platform::detect().unwrap());
         let cargo_risczero_version = Version::new(1, 0, 0);
 
         assert_eq!(
@@ -898,7 +1004,7 @@ mod tests {
         platform: Platform,
     ) {
         let github_token = use_github_token.then_some("suchsecrettesttoken".into());
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, platform);
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, None, platform);
 
         run_and_assert_events(
             &mut rzup,
@@ -912,17 +1018,19 @@ mod tests {
                     id: component.to_string(),
                     version: version.to_string(),
                 },
-                RzupEvent::DownloadStarted {
+                RzupEvent::TransferStarted {
+                    direction: TransferDirection::Download,
                     id: component_to_install.to_string(),
                     version: version.to_string(),
                     url: expected_url,
                     len: Some(download_length),
                 },
-                RzupEvent::DownloadProgress {
+                RzupEvent::TransferProgress {
                     id: component_to_install.to_string(),
                     incr: download_length,
                 },
-                RzupEvent::DownloadCompleted {
+                RzupEvent::TransferCompleted {
+                    direction: TransferDirection::Download,
                     id: component_to_install.to_string(),
                     version: version.to_string(),
                 },
@@ -959,7 +1067,7 @@ mod tests {
         platform: Platform,
     ) {
         let github_token = use_github_token.then_some("suchsecrettesttoken".into());
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, platform);
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, None, platform);
 
         rzup.install_component(&component, Some(version.clone()), false)
             .unwrap();
@@ -1005,7 +1113,7 @@ mod tests {
         platform: Platform,
     ) {
         let github_token = use_github_token.then_some("suchsecrettesttoken".into());
-        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, platform);
+        let (tmp_dir, mut rzup) = setup_test_env(base_urls.clone(), github_token, None, platform);
 
         rzup.install_component(&component, Some(version.clone()), false)
             .unwrap();
@@ -1021,17 +1129,19 @@ mod tests {
                     id: component.to_string(),
                     version: version.to_string(),
                 },
-                RzupEvent::DownloadStarted {
+                RzupEvent::TransferStarted {
+                    direction: TransferDirection::Download,
                     id: component_to_install.to_string(),
                     version: version.to_string(),
                     url: expected_url,
                     len: Some(download_length),
                 },
-                RzupEvent::DownloadProgress {
+                RzupEvent::TransferProgress {
                     id: component_to_install.to_string(),
                     incr: download_length,
                 },
-                RzupEvent::DownloadCompleted {
+                RzupEvent::TransferCompleted {
+                    direction: TransferDirection::Download,
                     id: component_to_install.to_string(),
                     version: version.to_string(),
                 },
@@ -1402,6 +1512,7 @@ mod tests {
         let (_tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1513,6 +1624,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1540,6 +1652,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -1580,6 +1693,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -1622,6 +1736,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -1676,6 +1791,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1701,6 +1817,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -1730,6 +1847,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1755,6 +1873,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -1820,6 +1939,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1843,6 +1963,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -1868,6 +1989,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1891,6 +2013,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -1916,6 +2039,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1940,6 +2064,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -1963,6 +2088,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (_tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -2005,6 +2131,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -2063,6 +2190,7 @@ mod tests {
         let (_tmp_dir, rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -2077,6 +2205,7 @@ mod tests {
         let server = MockDistributionServer::new();
         let (_tmp_dir, rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -2099,6 +2228,7 @@ mod tests {
         fn new(rust_dir_name: &str, cargo_risczero_dir_name: &str, cpp_dir_name: &str) -> Self {
             let (tmp_dir, rzup) = setup_test_env(
                 invalid_base_urls(),
+                None,
                 None,
                 Platform::new("x86_64", Os::Linux),
             );
@@ -2262,6 +2392,7 @@ mod tests {
         let (tmp_dir, rzup) = setup_test_env(
             invalid_base_urls(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -2411,6 +2542,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             invalid_base_urls(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -2521,6 +2653,7 @@ mod tests {
         let (_, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -2556,6 +2689,7 @@ mod tests {
         );
         let (_, mut rzup) = setup_test_env(
             server.base_urls.clone(),
+            None,
             None,
             Platform::new("x86_64", Os::Linux),
         );
@@ -2693,6 +2827,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -2772,6 +2907,7 @@ mod tests {
         let (tmp_dir, mut rzup) = setup_test_env(
             server.base_urls.clone(),
             None,
+            None,
             Platform::new("x86_64", Os::Linux),
         );
 
@@ -2833,6 +2969,7 @@ mod tests {
             let (tmp_dir, mut rzup) = setup_test_env(
                 server.base_urls.clone(),
                 None,
+                None,
                 Platform::new("x86_64", Os::Linux),
             );
 
@@ -2859,5 +2996,366 @@ mod tests {
                 );
             }
         }
+    }
+
+    fn create_test_tar_for_upload(tmp_dir: &TempDir, id: u64) -> (u64, PathBuf, String) {
+        let mut tar_bytes = vec![];
+        let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+        let mut header = tar::Header::new_gnu();
+        header.set_size(4);
+        tar_builder
+            .append_data(
+                &mut header,
+                format!("tar_contents{id}.bin"),
+                &[1, 2, 3, 4][..],
+            )
+            .unwrap();
+        tar_builder.finish().unwrap();
+        drop(tar_builder);
+
+        let mut tar_xz_bytes = vec![];
+        let mut encoder = xz::write::XzEncoder::new(&mut tar_xz_bytes, 1);
+        encoder.write_all(&tar_bytes).unwrap();
+        drop(encoder);
+
+        let mut hasher = sha2::Sha256::new();
+        hasher.update(&tar_xz_bytes);
+        let sha256 = format!("{:x}", hasher.finalize());
+
+        let download_size = tar_xz_bytes.len() as u64;
+        let payload = tmp_dir.path().join("upload.tar.xz");
+        std::fs::write(&payload, tar_xz_bytes).unwrap();
+
+        (download_size, payload, sha256)
+    }
+
+    fn upload_test(
+        base_url: &str,
+        download_size: u64,
+        platform: Option<Platform>,
+        payload: &Path,
+        sha256: &str,
+        force: bool,
+        rzup: &mut Rzup,
+    ) {
+        run_and_assert_events(
+            rzup,
+            |rzup| {
+                rzup.publish_upload(
+                    &Component::Risc0Groth16,
+                    &Version::new(4, 0, 0),
+                    platform,
+                    payload,
+                    force,
+                )
+                .unwrap();
+            },
+            vec![
+                RzupEvent::Print {
+                    message: "Calculating sha256 for risc0-groth16 4.0.0".into(),
+                },
+                RzupEvent::TransferStarted {
+                    direction: TransferDirection::Upload,
+                    id: format!("risc0-groth16/{sha256}"),
+                    version: "4.0.0".into(),
+                    url: format!("{base_url}/rzup/components/risc0-groth16/sha256/{sha256}"),
+                    len: Some(download_size),
+                },
+                RzupEvent::TransferProgress {
+                    id: format!("risc0-groth16/{sha256}"),
+                    incr: download_size,
+                },
+                RzupEvent::TransferCompleted {
+                    direction: TransferDirection::Upload,
+                    id: format!("risc0-groth16/{sha256}"),
+                    version: "4.0.0".into(),
+                },
+                RzupEvent::Print {
+                    message: "Updating distribution_manifest.json for risc0-groth16 4.0.0".into(),
+                },
+            ],
+        );
+    }
+
+    fn publish_fixture() -> (MockDistributionServer, Platform, TempDir, Rzup) {
+        let server = MockDistributionServer::new();
+        let aws_creds = AwsCredentials::new(
+            "AKIDEXAMPLE",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            None,
+            None,
+            "hardcoded-credentials",
+        );
+        let platform = Platform::new("x86_64", Os::Linux);
+        let (tmp_dir, rzup) =
+            setup_test_env(server.base_urls.clone(), None, Some(aws_creds), platform);
+        (server, platform, tmp_dir, rzup)
+    }
+
+    fn publish_upload_test(target_specific: bool) {
+        let (server, platform, tmp_dir, mut rzup) = publish_fixture();
+
+        let base_url = &server.base_urls.s3_base_url;
+        let (download_size, payload, sha256) = create_test_tar_for_upload(&tmp_dir, 1);
+        upload_test(
+            base_url,
+            download_size,
+            target_specific.then_some(platform),
+            &payload,
+            &sha256,
+            false, /* force */
+            &mut rzup,
+        );
+
+        install_test(
+            server.base_urls.clone(),
+            Component::Risc0Groth16,
+            Component::Risc0Groth16,
+            Version::new(4, 0, 0),
+            format!(
+                "{base_url}/rzup/components/risc0-groth16/sha256/{sha256}",
+                base_url = server.base_urls.s3_base_url
+            ),
+            download_size,
+            vec![format!(
+                ".risc0/extensions/v4.0.0-risc0-groth16/tar_contents1.bin"
+            )],
+            vec![],
+            ".risc0/extensions/v4.0.0-risc0-groth16",
+            false, /* use_github_token */
+            platform,
+        );
+
+        assert_eq!(
+            rzup.get_latest_version(&Component::Risc0Groth16).unwrap(),
+            Version::new(2, 0, 0)
+        );
+    }
+
+    #[test]
+    fn publish_upload_target_agnostic() {
+        publish_upload_test(true /* target_specific */)
+    }
+
+    #[test]
+    fn publish_upload_target_specific() {
+        publish_upload_test(true /* target_specific */)
+    }
+
+    #[test]
+    fn publish_upload_invalid_tar_xz() {
+        let (_server, _platform, tmp_dir, mut rzup) = publish_fixture();
+
+        let data = b"abcdef";
+        let payload = tmp_dir.path().join("upload_bin");
+        std::fs::write(&payload, data).unwrap();
+
+        let err = rzup
+            .publish_upload(
+                &Component::Risc0Groth16,
+                &Version::new(4, 0, 0),
+                None, /* platform */
+                &payload,
+                false, /* force */
+            )
+            .unwrap_err();
+
+        assert_eq!(
+            err,
+            RzupError::Other("invalid tar.xz file: premature eof".into())
+        );
+    }
+
+    #[test]
+    fn publish_upload_empty_tar_xz() {
+        let (_server, _platform, tmp_dir, mut rzup) = publish_fixture();
+
+        let mut tar_bytes = vec![];
+        let mut tar_builder = tar::Builder::new(&mut tar_bytes);
+        tar_builder.finish().unwrap();
+        drop(tar_builder);
+
+        let mut tar_xz_bytes = vec![];
+        let mut encoder = xz::write::XzEncoder::new(&mut tar_xz_bytes, 1);
+        encoder.write_all(&tar_bytes).unwrap();
+        drop(encoder);
+
+        let payload = tmp_dir.path().join("upload.tar.xz");
+        std::fs::write(&payload, tar_xz_bytes).unwrap();
+
+        let err = rzup
+            .publish_upload(
+                &Component::Risc0Groth16,
+                &Version::new(4, 0, 0),
+                None, /* platform */
+                &payload,
+                false, /* force */
+            )
+            .unwrap_err();
+
+        assert_eq!(err, RzupError::Other("invalid tar.xz file: empty".into()));
+    }
+
+    fn publish_upload_duplicate_force_false_test(
+        a_platform: Option<Platform>,
+        b_platform: Option<Platform>,
+        expected_msg: &str,
+    ) {
+        let (server, _platform, tmp_dir, mut rzup) = publish_fixture();
+
+        let base_url = &server.base_urls.s3_base_url;
+        let (download_size, payload, sha256) = create_test_tar_for_upload(&tmp_dir, 1);
+        upload_test(
+            base_url,
+            download_size,
+            a_platform,
+            &payload,
+            &sha256,
+            false, /* force */
+            &mut rzup,
+        );
+
+        let err = rzup
+            .publish_upload(
+                &Component::Risc0Groth16,
+                &Version::new(4, 0, 0),
+                b_platform,
+                &payload,
+                false, /* force */
+            )
+            .unwrap_err();
+        assert_eq!(err, RzupError::Other(expected_msg.into()));
+    }
+
+    #[test]
+    fn publish_upload_duplicate_force_false() {
+        publish_upload_duplicate_force_false_test(
+            None,
+            None,
+            "artifact already exists for this release, add --force flag to overwrite",
+        );
+        publish_upload_duplicate_force_false_test(
+            Some(Platform::new("x86_64", Os::Linux)),
+            None,
+            "target-specific artifact already exists for this release version, \
+            add --force flag to overwrite",
+        );
+        publish_upload_duplicate_force_false_test(
+            None,
+            Some(Platform::new("x86_64", Os::Linux)),
+            "target-agnostic artifact already exists for this release version, \
+            add --force flag to overwrite",
+        );
+        publish_upload_duplicate_force_false_test(
+            Some(Platform::new("x86_64", Os::Linux)),
+            Some(Platform::new("x86_64", Os::Linux)),
+            "artifact already exists for this release and target, add --force flag to overwrite",
+        );
+    }
+
+    fn publish_upload_duplicate_force_true_test(
+        a_platform: Option<Platform>,
+        b_platform: Option<Platform>,
+    ) {
+        let (server, platform, tmp_dir, mut rzup) = publish_fixture();
+
+        let base_url = &server.base_urls.s3_base_url;
+        let (download_size, payload, sha256) = create_test_tar_for_upload(&tmp_dir, 1);
+        upload_test(
+            base_url,
+            download_size,
+            a_platform,
+            &payload,
+            &sha256,
+            false, /* force */
+            &mut rzup,
+        );
+
+        let (download_size, payload, sha256) = create_test_tar_for_upload(&tmp_dir, 2);
+        upload_test(
+            base_url,
+            download_size,
+            b_platform,
+            &payload,
+            &sha256,
+            true, /* force */
+            &mut rzup,
+        );
+
+        install_test(
+            server.base_urls.clone(),
+            Component::Risc0Groth16,
+            Component::Risc0Groth16,
+            Version::new(4, 0, 0),
+            format!(
+                "{base_url}/rzup/components/risc0-groth16/sha256/{sha256}",
+                base_url = server.base_urls.s3_base_url
+            ),
+            download_size,
+            vec![format!(
+                ".risc0/extensions/v4.0.0-risc0-groth16/tar_contents2.bin"
+            )],
+            vec![],
+            ".risc0/extensions/v4.0.0-risc0-groth16",
+            false, /* use_github_token */
+            platform,
+        );
+    }
+
+    #[test]
+    fn publish_upload_duplicate_force_true() {
+        publish_upload_duplicate_force_true_test(None, None);
+        publish_upload_duplicate_force_true_test(Some(Platform::new("x86_64", Os::Linux)), None);
+        publish_upload_duplicate_force_true_test(None, Some(Platform::new("x86_64", Os::Linux)));
+        publish_upload_duplicate_force_true_test(
+            Some(Platform::new("x86_64", Os::Linux)),
+            Some(Platform::new("x86_64", Os::Linux)),
+        );
+    }
+
+    #[test]
+    fn publish_set_latest() {
+        let (_server, _platform, _tmp_dir, mut rzup) = publish_fixture();
+
+        assert_eq!(
+            rzup.get_latest_version(&Component::Risc0Groth16).unwrap(),
+            Version::new(2, 0, 0)
+        );
+
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                rzup.publish_set_latest(&Component::Risc0Groth16, &Version::new(1, 0, 0))
+                    .unwrap();
+            },
+            vec![RzupEvent::Print {
+                message: "Updating distribution_manifest.json for risc0-groth16, \
+                    setting latest-version to 1.0.0"
+                    .into(),
+            }],
+        );
+
+        assert_eq!(
+            rzup.get_latest_version(&Component::Risc0Groth16).unwrap(),
+            Version::new(1, 0, 0)
+        );
+    }
+
+    #[test]
+    fn publish_set_latest_not_found() {
+        let (_server, _platform, _tmp_dir, mut rzup) = publish_fixture();
+
+        assert_eq!(
+            rzup.get_latest_version(&Component::Risc0Groth16).unwrap(),
+            Version::new(2, 0, 0)
+        );
+
+        let err = rzup
+            .publish_set_latest(&Component::Risc0Groth16, &Version::new(7, 0, 0))
+            .unwrap_err();
+        assert_eq!(
+            err,
+            RzupError::Other("release for risc0-groth16 at version 7.0.0 not found".into())
+        );
     }
 }

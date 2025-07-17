@@ -13,7 +13,6 @@
 // limitations under the License.
 use crate::error::{Result, RzupError};
 use reqwest::{blocking::Client, IntoUrl, Url};
-use serde::Deserialize;
 use std::time::Duration;
 
 fn http_client_get(
@@ -33,12 +32,7 @@ fn http_client_get(
 
     builder
         .send()
-        .map_err(|e| RzupError::Other(format!("{e}: {url}")))
-}
-
-#[derive(Deserialize)]
-struct RemoteResponse {
-    message: String,
+        .map_err(|e| RzupError::Other(format!("{e:?}: {url}")))
 }
 
 fn error_on_status(
@@ -50,15 +44,11 @@ fn error_on_status(
     if !status.is_success() {
         let host = response.url().host_str().expect("URL has a host");
         let host = host.to_owned();
-        if let Ok(RemoteResponse { message }) = response.json() {
-            Err(RzupError::Other(format!(
-                "Remote error: {host}: {message}: {url}"
-            )))
-        } else {
-            Err(RzupError::Other(format!(
-                "Unexpected response: {host}: {status}: {url}"
-            )))
-        }
+        let body = response.text().ok();
+
+        Err(RzupError::Other(format!(
+            "Remote error: {host}: {body:?}: {url}"
+        )))
     } else {
         Ok(response)
     }
@@ -88,7 +78,7 @@ pub fn download_json<RetT: serde::de::DeserializeOwned>(
     let response = error_on_status(response, &url)?;
     response
         .json()
-        .map_err(|e| RzupError::Other(format!("{e}: {url}")))
+        .map_err(|e| RzupError::Other(format!("{e:?}: {url}")))
 }
 
 pub fn download_text(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<String> {
@@ -99,7 +89,7 @@ pub fn download_text(url: impl IntoUrl, bearer_token: &Option<String>) -> Result
     let response = error_on_status(response, &url)?;
     response
         .text()
-        .map_err(|e| RzupError::Other(format!("{e}: {url}")))
+        .map_err(|e| RzupError::Other(format!("{e:?}: {url}")))
 }
 
 pub fn download_bytes(
@@ -112,4 +102,44 @@ pub fn download_bytes(
     let response = http_client_get(&url, bearer_token)?;
     let response = error_on_status(response, &url)?;
     Ok(response)
+}
+
+pub fn upload_bytes<BodyT: std::io::Read + Send + 'static>(
+    url: impl IntoUrl,
+    signer: impl FnOnce(&mut http::Request<reqwest::blocking::Body>) -> Result<()>,
+    body_stream: BodyT,
+    content_length: u64,
+) -> Result<()> {
+    let url = url
+        .into_url()
+        .map_err(|e| RzupError::Other(e.to_string()))?;
+
+    let client = Client::builder()
+        .build()
+        .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e:?}")))?;
+
+    let mut request = http::Request::builder()
+        .method("PUT")
+        .uri(url.as_str())
+        .header("user-agent", "rzup")
+        .header("content-type", "application/octet-stream")
+        .header("content-length", content_length.to_string())
+        .body(reqwest::blocking::Body::sized(body_stream, content_length))
+        .map_err(|e| RzupError::Other(format!("failed to build HTTP request: {e:?}")))?;
+
+    signer(&mut request)?;
+
+    let request = reqwest::blocking::Request::try_from(request).map_err(|e| {
+        RzupError::Other(format!(
+            "failed to convert to reqwest::blocking::Request: {e:?}"
+        ))
+    })?;
+
+    let response = client
+        .execute(request)
+        .map_err(|e| RzupError::Other(format!("{e:?}: {url}")))?;
+
+    error_on_status(response, &url)?;
+
+    Ok(())
 }
