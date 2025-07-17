@@ -206,7 +206,7 @@ fn generate_echo_segment(
 }
 
 #[test_log::test]
-fn test_recursion_lift_povw_then_unwrap() {
+fn test_recursion_lift_then_unwrap_povw() {
     // Prove the base case
     let (session, segment) = generate_echo_segment(b"hello", Some(rand::random()));
     let ctx = VerifierContext::default();
@@ -228,16 +228,20 @@ fn test_recursion_lift_povw_then_unwrap() {
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
+// TODO Add checks for the nonce and the value of the WorkClaim
+
 #[test_log::test]
 fn test_recursion_lift_join_then_unwrap_povw() {
     // Prove the base case
     let (session, segments) = generate_busy_loop_segments("poseidon2", Some(rand::random()));
+    let ctx = VerifierContext::default();
 
     // Lift and join them all (and verify)
     let mut compressed_povw: SuccinctReceipt<WorkClaim<ReceiptClaim>> =
         lift_povw(&segments[0]).unwrap();
     tracing::info!("lift_povw claim = {:?}", compressed_povw.claim);
-    let ctx = VerifierContext::default();
+    compressed_povw.verify_integrity_with_context(&ctx).unwrap();
+
     for receipt in &segments[1..] {
         let rec_receipt = lift_povw(receipt).unwrap();
         tracing::info!("lift_povw claim = {:?}", rec_receipt.claim);
@@ -251,11 +255,6 @@ fn test_recursion_lift_join_then_unwrap_povw() {
     let compressed: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&compressed_povw).unwrap();
     tracing::info!("unwrap_povw claim = {:?}", compressed.claim);
     compressed.verify_integrity_with_context(&ctx).unwrap();
-
-    // Uncomment to write seal...
-    // let seal: Vec<u8> =
-    // bytemuck::cast_slice(snark_receipt.seal.as_slice()).into();
-    // std::fs::write("recursion.seal", seal);
 
     let compressed_receipt = Receipt::new(
         InnerReceipt::Succinct(compressed),
