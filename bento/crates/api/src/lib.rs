@@ -191,7 +191,7 @@ pub struct Args {
     #[clap(env)]
     s3_url: String,
 
-    /// S3 region, can be anything is using minio
+    /// S3 region, can be anything if using minio
     #[clap(env, default_value = "us-west-2")]
     s3_region: String,
 
