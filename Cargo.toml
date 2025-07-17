@@ -56,7 +56,8 @@ risc0-circuit-recursion = { version = "4.0.0", default-features = false, path = 
 risc0-circuit-recursion-sys = { version = "4.0.0", default-features = false, path = "risc0/circuit/recursion-sys" }
 risc0-circuit-rv32im = { version = "4.0.0", default-features = false, path = "risc0/circuit/rv32im" }
 risc0-circuit-rv32im-sys = { version = "4.0.0", default-features = false, path = "risc0/circuit/rv32im-sys" }
-risc0-core = { version = "2.0.1", default-features = false, path = "risc0/core" }
+# DO NOT MERGE: Lowered version requirement on risc0-core to patch integration with boundless repo.
+risc0-core = { version = "2.0.0", default-features = false, path = "risc0/core" }
 risc0-groth16 = { version = "3.0.0", default-features = false, path = "risc0/groth16" }
 risc0-povw = { default-features = false, path = "risc0/povw" }
 risc0-r0vm = { version = "3.0.0", default-features = false, path = "risc0/r0vm" }
