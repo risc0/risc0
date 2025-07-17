@@ -22,11 +22,6 @@ use std::path::PathBuf;
 pub struct Paths;
 
 impl Paths {
-    pub fn get_version_dir(env: &Environment, component: &Component, version: &Version) -> PathBuf {
-        let base_path = component.get_dir(env);
-        base_path.join(format!("v{version}-{component}-{}", env.platform()))
-    }
-
     fn find_version_dir_inner(
         env: &Environment,
         component: &Component,
@@ -247,7 +242,7 @@ mod tests {
         let version = Version::new(1, 0, 0);
         let component = Component::RustToolchain;
 
-        let version_dir = Paths::get_version_dir(&env, &component, &version);
+        let version_dir = component.get_version_dir(&env, &version);
         std::fs::create_dir_all(&version_dir).unwrap();
         assert!(Paths::find_version_dir(&env, &component, &version)
             .unwrap()

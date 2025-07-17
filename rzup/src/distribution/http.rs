@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::error::{Result, RzupError};
-use reqwest::{blocking::Client, IntoUrl};
+use reqwest::{blocking::Client, IntoUrl, Url};
 use serde::Deserialize;
 use std::time::Duration;
 
 fn http_client_get(
-    url: impl IntoUrl,
+    url: &Url,
     bearer_token: &Option<String>,
 ) -> Result<reqwest::blocking::Response> {
     let client = Client::builder()
@@ -25,13 +25,15 @@ fn http_client_get(
         .build()
         .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
 
-    let mut builder = client.get(url).header("User-Agent", "rzup");
+    let mut builder = client.get(url.clone()).header("User-Agent", "rzup");
 
     if let Some(token) = bearer_token {
         builder = builder.header("Authorization", format!("Bearer {token}"));
     }
 
-    builder.send().map_err(|e| RzupError::Other(e.to_string()))
+    builder
+        .send()
+        .map_err(|e| RzupError::Other(format!("{e}: {url}")))
 }
 
 #[derive(Deserialize)]
@@ -39,17 +41,22 @@ struct RemoteResponse {
     message: String,
 }
 
-fn error_on_status(response: reqwest::blocking::Response) -> Result<reqwest::blocking::Response> {
+fn error_on_status(
+    response: reqwest::blocking::Response,
+    url: &Url,
+) -> Result<reqwest::blocking::Response> {
     let status = response.status();
 
     if !status.is_success() {
         let host = response.url().host_str().expect("URL has a host");
         let host = host.to_owned();
         if let Ok(RemoteResponse { message }) = response.json() {
-            Err(RzupError::Other(format!("Remote error: {host}: {message}")))
+            Err(RzupError::Other(format!(
+                "Remote error: {host}: {message}: {url}"
+            )))
         } else {
             Err(RzupError::Other(format!(
-                "Unexpected response: {host}: {status}"
+                "Unexpected response: {host}: {status}: {url}"
             )))
         }
     } else {
@@ -58,12 +65,15 @@ fn error_on_status(response: reqwest::blocking::Response) -> Result<reqwest::blo
 }
 
 pub fn check_for_not_found(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<bool> {
-    let response = http_client_get(url, bearer_token)?;
+    let url = url
+        .into_url()
+        .map_err(|e| RzupError::Other(e.to_string()))?;
+    let response = http_client_get(&url, bearer_token)?;
     let status = response.status();
     if status == reqwest::StatusCode::NOT_FOUND {
         return Ok(false);
     }
-    error_on_status(response)?;
+    error_on_status(response, &url)?;
     Ok(true)
 }
 
@@ -71,22 +81,35 @@ pub fn download_json<RetT: serde::de::DeserializeOwned>(
     url: impl IntoUrl,
     bearer_token: &Option<String>,
 ) -> Result<RetT> {
-    let response = http_client_get(url, bearer_token)?;
-    let response = error_on_status(response)?;
-    response.json().map_err(|e| RzupError::Other(e.to_string()))
+    let url = url
+        .into_url()
+        .map_err(|e| RzupError::Other(e.to_string()))?;
+    let response = http_client_get(&url, bearer_token)?;
+    let response = error_on_status(response, &url)?;
+    response
+        .json()
+        .map_err(|e| RzupError::Other(format!("{e}: {url}")))
 }
 
 pub fn download_text(url: impl IntoUrl, bearer_token: &Option<String>) -> Result<String> {
-    let response = http_client_get(url, bearer_token)?;
-    let response = error_on_status(response)?;
-    response.text().map_err(|e| RzupError::Other(e.to_string()))
+    let url = url
+        .into_url()
+        .map_err(|e| RzupError::Other(e.to_string()))?;
+    let response = http_client_get(&url, bearer_token)?;
+    let response = error_on_status(response, &url)?;
+    response
+        .text()
+        .map_err(|e| RzupError::Other(format!("{e}: {url}")))
 }
 
 pub fn download_bytes(
     url: impl IntoUrl,
     bearer_token: &Option<String>,
 ) -> Result<reqwest::blocking::Response> {
-    let response = http_client_get(url, bearer_token)?;
-    let response = error_on_status(response)?;
+    let url = url
+        .into_url()
+        .map_err(|e| RzupError::Other(e.to_string()))?;
+    let response = http_client_get(&url, bearer_token)?;
+    let response = error_on_status(response, &url)?;
     Ok(response)
 }
