@@ -190,7 +190,7 @@ pub fn is_dev_mode() -> bool {
 
 /// Returns `true` if the dev mode environment variable is enabled, the `disable-dev-mode` cfg flag
 /// is not set, and we are not being compiled as a guest inside the zkvm.
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", not(target_os = "zkvm")))]
 fn is_dev_mode_enabled_via_environment() -> bool {
     let is_env_set = std::env::var("RISC0_DEV_MODE")
         .ok()
@@ -199,19 +199,18 @@ fn is_dev_mode_enabled_via_environment() -> bool {
         .is_some();
 
     let dev_mode_disabled = cfg!(feature = "disable-dev-mode");
-    let inside_zkvm = cfg!(target_os = "zkvm");
 
     if dev_mode_disabled && is_env_set {
         panic!("zkVM: Inconsistent settings -- please resolve. \
             The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
     }
 
-    !dev_mode_disabled && !inside_zkvm && is_env_set
+    !dev_mode_disabled && is_env_set
 }
 
 /// Returns `true` if the dev mode environment variable is enabled, the `disable-dev-mode` cfg flag
 /// is not set, and we are not being compiled as a guest inside the zkvm.
-#[cfg(not(feature = "std"))]
+#[cfg(any(not(feature = "std"), target_os = "zkvm"))]
 fn is_dev_mode_enabled_via_environment() -> bool {
     false
 }
