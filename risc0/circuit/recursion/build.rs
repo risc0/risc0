@@ -32,7 +32,7 @@ fn download_zkr() {
     const SRC_PATH: &str = "src/recursion_zkr.zip";
     // NOTE: This can be calculated with:
     // shasum -a256 risc0/circuit/recursion/src/recursion_zkr.zip
-    const SHA256_HASH: &str = "c6a0285db166e2edcd8fb87a7a07c961139ddfb6a2e56591abf823cc35d0c911";
+    const SHA256_HASH: &str = "150b9f97b8c04241d51735c8b7a9e026ea3e6263e28fd5bf0f80d623ad26a8d0";
 
     fn check_sha2(path: &Path) -> bool {
         let data = fs::read(path).unwrap();
@@ -52,15 +52,25 @@ fn download_zkr() {
         return;
     }
 
-    if out_path.exists() {
-        if check_sha2(&out_path) {
+    // Check the ZKR archive in the out dir and the src dir. Use the out file if it matches the
+    // hash above, but also warn the developer if there exists a copy in the src dir and it does
+    // not match.
+    let zkr_out_valid = out_path.exists() && check_sha2(&out_path);
+
+    if src_path.exists() {
+        if check_sha2(&src_path) {
+            if !zkr_out_valid {
+                fs::copy(&src_path, &out_path).unwrap();
+            }
             return;
+        } else {
+            println!(
+                "cargo::warning={SRC_PATH} exists in src dir, but does not match the expected hash"
+            );
         }
-        fs::remove_file(&out_path).unwrap();
     }
 
-    if src_path.exists() && check_sha2(&src_path) {
-        fs::copy(&src_path, &out_path).unwrap();
+    if zkr_out_valid {
         return;
     }
 
