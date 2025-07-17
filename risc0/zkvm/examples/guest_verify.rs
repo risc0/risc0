@@ -15,6 +15,7 @@
 use risc0_zkvm::{default_executor, get_prover_server, ExecutorEnv, ExitCode, ProverOpts, Receipt};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF};
 
+#[cfg_attr(test, test)]
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
