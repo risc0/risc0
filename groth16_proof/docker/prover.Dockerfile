@@ -7,7 +7,10 @@ FROM rust:1.84-bookworm AS circom
 WORKDIR /usr/src/
 
 # Clone and build Circom version 2.2.2 from a specific commit
-ADD https://github.com/iden3/circom.git#e410b0d5cd2948a15931df0bc50d79ce56fa8c32 circom
+RUN git clone https://github.com/iden3/circom.git && \
+    cd circom && \
+    git checkout e410b0d5cd2948a15931df0bc50d79ce56fa8c32 && \
+    cargo install --path circom
 RUN (cd circom; cargo install --path circom)
 
 # Add the required circuit files
