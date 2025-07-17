@@ -12,17 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use clap::Parser;
 use risc0_zkvm::{default_executor, get_prover_server, ExecutorEnv, ExitCode, ProverOpts, Receipt};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF};
 
-#[cfg_attr(test, test)]
+#[derive(Parser)]
+struct CliOptions {
+    #[arg(long, default_value = "false")]
+    dev_mode: bool,
+}
+
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
+    let cli_options = CliOptions::parse();
 
+    if cli_options.dev_mode {
+        guest_verify_dev_mode()
+    } else {
+        guest_verify();
+    }
+}
+
+#[cfg_attr(test, test)]
+fn guest_verify() {
     let receipt = generate_receipt(&ProverOpts::default());
-    exec_verify(&receipt);
+    exec_verify(&receipt, false /* dev_mode */);
+}
+
+#[cfg_attr(test, test)]
+fn guest_verify_dev_mode() {
+    let receipt = generate_receipt(&ProverOpts::default().with_dev_mode(true));
+    exec_verify(&receipt, true /* dev_mode */);
 }
 
 fn generate_receipt(opts: &ProverOpts) -> Receipt {
@@ -35,8 +57,8 @@ fn generate_receipt(opts: &ProverOpts) -> Receipt {
     prover.prove(env, MULTI_TEST_ELF).unwrap().receipt
 }
 
-fn exec_verify(receipt: &Receipt) {
-    let input = (receipt.clone(), MULTI_TEST_ID);
+fn exec_verify(receipt: &Receipt, dev_mode: bool) {
+    let input = (receipt.clone(), MULTI_TEST_ID, dev_mode);
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
