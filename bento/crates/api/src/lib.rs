@@ -191,6 +191,10 @@ pub struct Args {
     #[clap(env)]
     s3_url: String,
 
+    /// S3 region, can be anything if using minio
+    #[clap(env, default_value = "us-west-2")]
+    s3_region: String,
+
     /// Executor timeout in seconds
     #[clap(long, default_value_t = 4 * 60 * 60)]
     exec_timeout: i32,
@@ -230,6 +234,7 @@ impl AppState {
             &args.s3_bucket,
             &args.s3_access_key,
             &args.s3_secret_key,
+            &args.s3_region,
         )
         .await
         .context("Failed to initialize s3 client / bucket")?;
