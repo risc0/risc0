@@ -23,29 +23,43 @@ pub const MIN_LIFT_PO2: usize = 14;
 pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("0d79bc33b4760b4783cbb96fdc87724c7e0c463eb0ba1b2705d39f43c698bd2d"), // recursion identity.zkr
     digest!("7a8f24092c34ed3eb81b3d0a0b796c588c615d3488ef9e61c21dbd1e4b83ea6e"), // recursion join.zkr
-    digest!("85da7a229d849c2df4b4981b7832d454aafe861565c09077dfe3b370a0df6e58"), // recursion lift_rv32im_v2_14.zkr
-    digest!("e898f63e57c60550cf8a4538ac128b459205bf1932ad8626cf8d3a69a643de3a"), // recursion lift_rv32im_v2_15.zkr
-    digest!("1200206540c0875eda6a093da5f95f3ae39876110b5a2a13bb78122414cd4c47"), // recursion lift_rv32im_v2_16.zkr
-    digest!("65886d687ac8776f3174295d0cf6382d24fdfd6040070d05eeadb604325b1d0d"), // recursion lift_rv32im_v2_17.zkr
-    digest!("2e92d814ded6f733640e8f499cc8ec4446d0b51ae5410964e0cefa278bab3176"), // recursion lift_rv32im_v2_18.zkr
-    digest!("6defb6501a5dd05d6858733427d61010d59201341cc93c1138345137c55a372c"), // recursion lift_rv32im_v2_19.zkr
-    digest!("a207f7229e901538c003ed4a05c7895fb2b22611de5add35ba988450b2537b5d"), // recursion lift_rv32im_v2_20.zkr
-    digest!("5ab2507285106c5b3485a61a36dea7127ba29528ccca18040c6ba05da61a8d1f"), // recursion lift_rv32im_v2_21.zkr
-    digest!("00bba10ac0db121f677243735a888162e909c14b3567a11d5e5b2961080d1b2b"), // recursion lift_rv32im_v2_22.zkr
+    digest!("96cdf605f755f175a5661812810f2d491507c05f2ea4a83e4c3cad693d26651e"), // recursion join_povw.zkr
+    digest!("f74a894ff593584f65847630ead1a23af78c5f5fed2b61090866e01fa5767f12"), // recursion join_unwrap_povw.zkr
+    digest!("7d40e30f18c33757a1a06613d779bf32415a9a577abfe66b4be5a71352ce5011"), // recursion lift_rv32im_v2_14.zkr
+    digest!("86dfe305f9858148efda7f10c7614762b3ba603519d92f2b91c55c220b63e952"), // recursion lift_rv32im_v2_15.zkr
+    digest!("2f61ee3922aa323fb59c7a0268bda909df6c08070f4cf466e5a3440e299a7d69"), // recursion lift_rv32im_v2_16.zkr
+    digest!("35e2b36e7e7b953c18016969cf0aab642f21df617616e450e4de9a778b252025"), // recursion lift_rv32im_v2_17.zkr
+    digest!("6d26ea13c4575577e44eeb371656e60f2c4d6f187ccd15555b29f1062f6af71e"), // recursion lift_rv32im_v2_18.zkr
+    digest!("b712f9541933da35f90d0a5cf3bd95040528056ff9efa203390a224ae63c5232"), // recursion lift_rv32im_v2_19.zkr
+    digest!("5b35585d98a08c611375e365c0fee5401cb8aa1a3a8dbd744b177e0f6dee4837"), // recursion lift_rv32im_v2_20.zkr
+    digest!("0d74121afe5e3511242dee572bec7c50b49fd6031c20052d714d0903688d3f56"), // recursion lift_rv32im_v2_21.zkr
+    digest!("a7d8d52e8ad8ce18c44c3b5e86b80a1f1617ce76dc6a396731e292407322ad01"), // recursion lift_rv32im_v2_22.zkr
+    digest!("cafb932f00329270a7e0fd65fd50b3659202b9281498382b5903996582df0a72"), // recursion lift_rv32im_v2_povw_14.zkr
+    digest!("5302d93dd3b8a10cb4ef026df2150e58603c68118b03f90eb1e14e32dcc6de53"), // recursion lift_rv32im_v2_povw_15.zkr
+    digest!("f08ce649e0bfdb39ca4899497617812287c8df0e3cbc4e21dc9f8940cec98427"), // recursion lift_rv32im_v2_povw_16.zkr
+    digest!("1723360ea2856c54551548213c7ebc430f698c228d066f4cec2bee714a32a375"), // recursion lift_rv32im_v2_povw_17.zkr
+    digest!("753aab0b6ec0ef09f2e8640f8c0d821f70da6c4cbea7b054bf7bad0add8d474d"), // recursion lift_rv32im_v2_povw_18.zkr
+    digest!("a1617b2cb33bb775a827725c850c323415e6425ba519dd21dc699f6fb62ab749"), // recursion lift_rv32im_v2_povw_19.zkr
+    digest!("bd086c5adbaf482acd4ed94ab3e691657325a005d26ff73b0ae7f70df52eb036"), // recursion lift_rv32im_v2_povw_20.zkr
+    digest!("aa81304c6d117c1dbb669670623e6f1959e683068d67c66d44fcf228a081b331"), // recursion lift_rv32im_v2_povw_21.zkr
+    digest!("c3565e5b9879bd74374356267dd92942001cff3f2567c1226e48225e2fb9db19"), // recursion lift_rv32im_v2_povw_22.zkr
     digest!("53a7b23d07f99e5d5685e85874f5181e8486aa267a0ae607ffe9ba47c8bdda4a"), // recursion resolve.zkr
+    digest!("20ac6e29b1806a143b508414140e2e15e461f93e04e3830af39cca362b8f005d"), // recursion resolve_povw.zkr
+    digest!("ba1d7275d5840e4f998e2c5120810c0eb197e90219696e2a64dec7662aa3cb06"), // recursion resolve_unwrap_povw.zkr
     digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"), // recursion union.zkr
+    digest!("1688f04cca489638862dba455c1d5c561513f975c885a3491f0fe12df761c847"), // recursion unwrap_povw.zkr
 ];
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("ce52bf56033842021af3cf6db8a50d1b7535c125a34f1a22c6fdcf002c5a1529");
+    digest!("4c729b33037f061e4e22505266cfdb6b6780a932cb41be4a505d9950c210b507");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
     digest!("c07a65145c3cb48b6101962ea607a4dd93c753bb26975cb47feb00d3666e4404");
 
 /// Control IDs for included recursion programs (ZKRs), using Poseidon2 over BabyBear.
-pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 27] = [
+pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 32] = [
     (
         "identity.zkr",
         digest!("0d79bc33b4760b4783cbb96fdc87724c7e0c463eb0ba1b2705d39f43c698bd2d"),
@@ -55,96 +69,112 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 27] = [
         digest!("7a8f24092c34ed3eb81b3d0a0b796c588c615d3488ef9e61c21dbd1e4b83ea6e"),
     ),
     (
-        "lift_14.zkr",
-        digest!("2f609032975d7931e9d569484cdb5c1e8758af6f6d24c91968e8171b4e48652a"),
+        "join_povw.zkr",
+        digest!("96cdf605f755f175a5661812810f2d491507c05f2ea4a83e4c3cad693d26651e"),
     ),
     (
-        "lift_15.zkr",
-        digest!("53b94f649b8fef3283c730425bf9be1618b82a76e270bd44b351f16eda68d00d"),
-    ),
-    (
-        "lift_16.zkr",
-        digest!("919c664b394f6b3e7500d151204ede5e6afd4d1a3724925ca341971e93cffc46"),
-    ),
-    (
-        "lift_17.zkr",
-        digest!("bc52395cbfbbdc6783e19443161c0a559496a017aeb6370232a5313125032175"),
-    ),
-    (
-        "lift_18.zkr",
-        digest!("442f0a4cef957609ab5ee447a279351e6dc212734cbc6e3e5bbf8b086f1a7818"),
-    ),
-    (
-        "lift_19.zkr",
-        digest!("d621555070b62e383b8e16511aa8b244cb442656c5c396302fe75816c477b902"),
-    ),
-    (
-        "lift_20.zkr",
-        digest!("66f12c252c978962a100976c69ea6a4dfb2b4a2a504d6d5c60fb8e2fff6f4b61"),
-    ),
-    (
-        "lift_21.zkr",
-        digest!("88a6322eccb8f141087c48174211df1d0e071603ebfefb69f0099836569e384a"),
-    ),
-    (
-        "lift_22.zkr",
-        digest!("bb71f46d8931c80fbcf10f3b5314b93cb7b8061d4658c55000c2c26967b58a0c"),
-    ),
-    (
-        "lift_23.zkr",
-        digest!("34a4dd0eb8f410674c09c0419c8bf62ef768a476ccd8e84f5809534e0b0e0065"),
-    ),
-    (
-        "lift_24.zkr",
-        digest!("d8c1dd073822ac1da582bd52bed7ee35f106326dcb7a191d66df420016339571"),
+        "join_unwrap_povw.zkr",
+        digest!("f74a894ff593584f65847630ead1a23af78c5f5fed2b61090866e01fa5767f12"),
     ),
     (
         "lift_rv32im_v2_14.zkr",
-        digest!("85da7a229d849c2df4b4981b7832d454aafe861565c09077dfe3b370a0df6e58"),
+        digest!("7d40e30f18c33757a1a06613d779bf32415a9a577abfe66b4be5a71352ce5011"),
     ),
     (
         "lift_rv32im_v2_15.zkr",
-        digest!("e898f63e57c60550cf8a4538ac128b459205bf1932ad8626cf8d3a69a643de3a"),
+        digest!("86dfe305f9858148efda7f10c7614762b3ba603519d92f2b91c55c220b63e952"),
     ),
     (
         "lift_rv32im_v2_16.zkr",
-        digest!("1200206540c0875eda6a093da5f95f3ae39876110b5a2a13bb78122414cd4c47"),
+        digest!("2f61ee3922aa323fb59c7a0268bda909df6c08070f4cf466e5a3440e299a7d69"),
     ),
     (
         "lift_rv32im_v2_17.zkr",
-        digest!("65886d687ac8776f3174295d0cf6382d24fdfd6040070d05eeadb604325b1d0d"),
+        digest!("35e2b36e7e7b953c18016969cf0aab642f21df617616e450e4de9a778b252025"),
     ),
     (
         "lift_rv32im_v2_18.zkr",
-        digest!("2e92d814ded6f733640e8f499cc8ec4446d0b51ae5410964e0cefa278bab3176"),
+        digest!("6d26ea13c4575577e44eeb371656e60f2c4d6f187ccd15555b29f1062f6af71e"),
     ),
     (
         "lift_rv32im_v2_19.zkr",
-        digest!("6defb6501a5dd05d6858733427d61010d59201341cc93c1138345137c55a372c"),
+        digest!("b712f9541933da35f90d0a5cf3bd95040528056ff9efa203390a224ae63c5232"),
     ),
     (
         "lift_rv32im_v2_20.zkr",
-        digest!("a207f7229e901538c003ed4a05c7895fb2b22611de5add35ba988450b2537b5d"),
+        digest!("5b35585d98a08c611375e365c0fee5401cb8aa1a3a8dbd744b177e0f6dee4837"),
     ),
     (
         "lift_rv32im_v2_21.zkr",
-        digest!("5ab2507285106c5b3485a61a36dea7127ba29528ccca18040c6ba05da61a8d1f"),
+        digest!("0d74121afe5e3511242dee572bec7c50b49fd6031c20052d714d0903688d3f56"),
     ),
     (
         "lift_rv32im_v2_22.zkr",
-        digest!("00bba10ac0db121f677243735a888162e909c14b3567a11d5e5b2961080d1b2b"),
+        digest!("a7d8d52e8ad8ce18c44c3b5e86b80a1f1617ce76dc6a396731e292407322ad01"),
     ),
     (
         "lift_rv32im_v2_23.zkr",
-        digest!("b0ff641317b165613645116689599952631ed33ed94de72217e8ca2ec271b853"),
+        digest!("31c89f6ba1e3d8676f9a3a457794aa4654028474a3d92a0585b0607557ac0273"),
     ),
     (
         "lift_rv32im_v2_24.zkr",
-        digest!("3b3a722b8e6fd90cc0649d17e05744175afbe60fe3543f77a947e9678418bc29"),
+        digest!("bc9ec8079125bd1c20a0c03b2ab80e2593285f693e855312cd3b0c304ce0984c"),
+    ),
+    (
+        "lift_rv32im_v2_povw_14.zkr",
+        digest!("cafb932f00329270a7e0fd65fd50b3659202b9281498382b5903996582df0a72"),
+    ),
+    (
+        "lift_rv32im_v2_povw_15.zkr",
+        digest!("5302d93dd3b8a10cb4ef026df2150e58603c68118b03f90eb1e14e32dcc6de53"),
+    ),
+    (
+        "lift_rv32im_v2_povw_16.zkr",
+        digest!("f08ce649e0bfdb39ca4899497617812287c8df0e3cbc4e21dc9f8940cec98427"),
+    ),
+    (
+        "lift_rv32im_v2_povw_17.zkr",
+        digest!("1723360ea2856c54551548213c7ebc430f698c228d066f4cec2bee714a32a375"),
+    ),
+    (
+        "lift_rv32im_v2_povw_18.zkr",
+        digest!("753aab0b6ec0ef09f2e8640f8c0d821f70da6c4cbea7b054bf7bad0add8d474d"),
+    ),
+    (
+        "lift_rv32im_v2_povw_19.zkr",
+        digest!("a1617b2cb33bb775a827725c850c323415e6425ba519dd21dc699f6fb62ab749"),
+    ),
+    (
+        "lift_rv32im_v2_povw_20.zkr",
+        digest!("bd086c5adbaf482acd4ed94ab3e691657325a005d26ff73b0ae7f70df52eb036"),
+    ),
+    (
+        "lift_rv32im_v2_povw_21.zkr",
+        digest!("aa81304c6d117c1dbb669670623e6f1959e683068d67c66d44fcf228a081b331"),
+    ),
+    (
+        "lift_rv32im_v2_povw_22.zkr",
+        digest!("c3565e5b9879bd74374356267dd92942001cff3f2567c1226e48225e2fb9db19"),
+    ),
+    (
+        "lift_rv32im_v2_povw_23.zkr",
+        digest!("80b82f245716ec711d0c0204fe6a582ea2cd971ec721d22aec0d385ee3792b05"),
+    ),
+    (
+        "lift_rv32im_v2_povw_24.zkr",
+        digest!("0d0bde17a3242b3129deac23a3362816f768a411d88b5a22f9adcf226bb2b934"),
     ),
     (
         "resolve.zkr",
         digest!("53a7b23d07f99e5d5685e85874f5181e8486aa267a0ae607ffe9ba47c8bdda4a"),
+    ),
+    (
+        "resolve_povw.zkr",
+        digest!("20ac6e29b1806a143b508414140e2e15e461f93e04e3830af39cca362b8f005d"),
+    ),
+    (
+        "resolve_unwrap_povw.zkr",
+        digest!("ba1d7275d5840e4f998e2c5120810c0eb197e90219696e2a64dec7662aa3cb06"),
     ),
     (
         "test_recursion_circuit.zkr",
@@ -154,10 +184,14 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 27] = [
         "union.zkr",
         digest!("7771415b778fea1923440e2eb22c4a1e1d7ada2d42cbe03d13402743c0988a31"),
     ),
+    (
+        "unwrap_povw.zkr",
+        digest!("1688f04cca489638862dba455c1d5c561513f975c885a3491f0fe12df761c847"),
+    ),
 ];
 
 /// Control IDs for included recursion programs (ZKRs), using SHA-256.
-pub const SHA256_CONTROL_IDS: [(&str, Digest); 27] = [
+pub const SHA256_CONTROL_IDS: [(&str, Digest); 32] = [
     (
         "identity.zkr",
         digest!("d7ecd18c7d06fc468166147cf20869aa10f32e097a0c166146a5a62dd2d975ea"),
@@ -167,96 +201,112 @@ pub const SHA256_CONTROL_IDS: [(&str, Digest); 27] = [
         digest!("dc44002689aa7852410ad1c840388d66b8b9a2f6d0c4fb6b3ac6ec2ea17d9855"),
     ),
     (
-        "lift_14.zkr",
-        digest!("d164a42f8bb7c70049e4873871fab98d88d04f1914b25a1370a7a877b7ff2ca3"),
+        "join_povw.zkr",
+        digest!("9e97b7ba610dc00ec2628d53274c303eb0d78e6e5c33ef118cf60a5135efa97f"),
     ),
     (
-        "lift_15.zkr",
-        digest!("f2ffb9a1c43b01741e01a2d07d5f65ffe0ce231c70ddb128094f2a22f073c33c"),
-    ),
-    (
-        "lift_16.zkr",
-        digest!("8843478fd585afc7cf84c8905ce16ed8cadbb61c45248619f9b252900e5167c8"),
-    ),
-    (
-        "lift_17.zkr",
-        digest!("4a54533e7ef8b620ca102ed763ebc94e969fd608d669623d466d43775dbec7a1"),
-    ),
-    (
-        "lift_18.zkr",
-        digest!("954ffa89a80c010191f3ade9ca63c1f4f9689410df02faa801dc1b98ac557cfb"),
-    ),
-    (
-        "lift_19.zkr",
-        digest!("87150aa1b6b0fc92b68d9238d0c2a83a17da3d5d3775fd23b2517e0d7fd7697b"),
-    ),
-    (
-        "lift_20.zkr",
-        digest!("00676bedc32cc1e0dd7e490be83f4be39f379beedc35983ace0782061d65d73d"),
-    ),
-    (
-        "lift_21.zkr",
-        digest!("10d8d3a1eee1dec7c6cc0553222ab8ac9b6bfeb0bd1553e097fb29a3ef22a606"),
-    ),
-    (
-        "lift_22.zkr",
-        digest!("fcbe182cb5a235fc28d43ba1137908609958587e18060aa712be08d5833a8af3"),
-    ),
-    (
-        "lift_23.zkr",
-        digest!("f3f8278b8f56e0c2292cf7d0b395405dcf67760638e4ad901b3df406303c90b9"),
-    ),
-    (
-        "lift_24.zkr",
-        digest!("a827fd3663ab862331c47b1ba985fde346c13851535b1d80693b6367771644a7"),
+        "join_unwrap_povw.zkr",
+        digest!("8cae4f60f8b44780351ec5740118fcc348d8fa0d029f07d2c77a3f9239165319"),
     ),
     (
         "lift_rv32im_v2_14.zkr",
-        digest!("8fdb6632219b902a4e290590a6b5d18cba98aca1eb1dc9d51afaf233024fa716"),
+        digest!("05e278dcb9a90117f27096335bbca93f0a1c39a146ef7f0ff3e24788371c9761"),
     ),
     (
         "lift_rv32im_v2_15.zkr",
-        digest!("d1c5699afe0dbf843cd750ba8adce426700afe6322cc9f795339f55803fd5f1b"),
+        digest!("7e38d2117f64c78e27159a356dda2a0b2de70d530a866f6e4c923342149d7956"),
     ),
     (
         "lift_rv32im_v2_16.zkr",
-        digest!("ac56de3ed1f29daddd44698b8ce4f6024db0ac0abdf391a7dcfbab7e4ff687d9"),
+        digest!("0737dbaf9346383bb66795aa9bc5a42472712660c28612af149ddd58271695d9"),
     ),
     (
         "lift_rv32im_v2_17.zkr",
-        digest!("7bac7a1f161c8789ee0653422ec6b791e9303a925a9754af9496582c3fa4e11c"),
+        digest!("80a3e859059f483e2bc4e3eeac4eb9848e7ea5e0c8620398e7d57ae755477024"),
     ),
     (
         "lift_rv32im_v2_18.zkr",
-        digest!("d7c7f79fe812bdec12e27795d892825dbb307036bc6296326bc38b029af89945"),
+        digest!("e48862f9cafea1e66e47e1abb613bfa8a72d4825efd9b5d2424d476ecfe236b8"),
     ),
     (
         "lift_rv32im_v2_19.zkr",
-        digest!("550660dec08c81a8b076f2fcd9bf92a3ac5e2943562f96922be27bbecc48674c"),
+        digest!("60f23f4f8d16cf61c552a55aeb630929b5d4e35653839a0d4c63218859a0c06e"),
     ),
     (
         "lift_rv32im_v2_20.zkr",
-        digest!("9871771f56c6bea04adfe958c7d66aae8e81427b6719d5ee00b2f309d8a3f8ef"),
+        digest!("e00a7eb1edc3124384405a596d1584c55e07c24fd285643bcc6e79be9caa7a86"),
     ),
     (
         "lift_rv32im_v2_21.zkr",
-        digest!("32b412915501d9df535e3de25e3f4b5cca78efc647d288a914b752955c27489a"),
+        digest!("dac9f70bf0f3f5a8d05e89d9f9628a4182c40e63f423a36642e9116ee77d158b"),
     ),
     (
         "lift_rv32im_v2_22.zkr",
-        digest!("1956d254dd700164d267aee2c55f4e953a34834ca37c0f7b2e345403371a9fc7"),
+        digest!("a782f2c9e15371f2ec7b4eb084aea5a41eae636e4c468df7aab45206113852a6"),
     ),
     (
         "lift_rv32im_v2_23.zkr",
-        digest!("11c481d4ec58516eed75460dd44717905f5a338668cd72a52d7987a3f7710fd8"),
+        digest!("e8a5ebe9dba0b85cfdebba2bdefd8389be319a9b56c7e15c28a2420fdbece02f"),
     ),
     (
         "lift_rv32im_v2_24.zkr",
-        digest!("5a52b5f66d844a23c33d1e3e0eb3273470d574e813694792ec1138d37065415d"),
+        digest!("498e5c6db1d5528643b8cdb3a61ef795f8c98a15ae86c5af2ccc43c88ba50ccb"),
+    ),
+    (
+        "lift_rv32im_v2_povw_14.zkr",
+        digest!("19ec9d4704c53dd1d43b380b86a86c2d8cf442daae8b1c1095115e49fdda178d"),
+    ),
+    (
+        "lift_rv32im_v2_povw_15.zkr",
+        digest!("e008a1ad88a785160e8da3f4470ba9bcd256be7f3a1492593aebc68bf31a7f76"),
+    ),
+    (
+        "lift_rv32im_v2_povw_16.zkr",
+        digest!("9107dca5c68e62ecdd062fbb719f8a4bdcff8fa329a4e6b455dfb354fefd1e92"),
+    ),
+    (
+        "lift_rv32im_v2_povw_17.zkr",
+        digest!("34af63bf2a82fbdbe66dfbdcfc548f9317781a70be71b1d85a7822def90dabf2"),
+    ),
+    (
+        "lift_rv32im_v2_povw_18.zkr",
+        digest!("fd654104f9271c7542a58f53bedf8019f6055a59751e300e840dd955738bd306"),
+    ),
+    (
+        "lift_rv32im_v2_povw_19.zkr",
+        digest!("e1a6971d87ce4851b5dbde91e2dc04045b3e2a070f97fd7bb6b534808295b9fe"),
+    ),
+    (
+        "lift_rv32im_v2_povw_20.zkr",
+        digest!("989494d0dd1722328ebabfb5863e7bf56e305a29ba93f991e211842825cb0d2d"),
+    ),
+    (
+        "lift_rv32im_v2_povw_21.zkr",
+        digest!("e86481989c66e5a186db3ce6db9760c6c04e848f02894a23813310ebff7880c6"),
+    ),
+    (
+        "lift_rv32im_v2_povw_22.zkr",
+        digest!("555f26058d1ea6ad8d461cde66e40ed5022d8b9e06496f34b06ab8920924148e"),
+    ),
+    (
+        "lift_rv32im_v2_povw_23.zkr",
+        digest!("d4352fd30d4afea80a4ca229dfa5683228f725b41241f3afd5a9205e53b207ff"),
+    ),
+    (
+        "lift_rv32im_v2_povw_24.zkr",
+        digest!("e796bc07137377a3f687be2b095268f26b5a12ea23af3c1b855ea8178de3921b"),
     ),
     (
         "resolve.zkr",
         digest!("ecc34946284eb02d1e119ef0878ae65ba5e855d6e0b5db4e462a694007b2a0f4"),
+    ),
+    (
+        "resolve_povw.zkr",
+        digest!("51fe537675d705e759c0cb0862f0cb7c5d70ce3dc483efc3cb1646c2b6f0cba3"),
+    ),
+    (
+        "resolve_unwrap_povw.zkr",
+        digest!("1332cc7a1cb90467d849db4ebc4fcc201f81fe0a2ab06d6a398d76b7dd8aa694"),
     ),
     (
         "test_recursion_circuit.zkr",
@@ -265,5 +315,9 @@ pub const SHA256_CONTROL_IDS: [(&str, Digest); 27] = [
     (
         "union.zkr",
         digest!("44bfa51c5030508d7eddc1b1489145a6e519842f7283098a17f13fe9113497dc"),
+    ),
+    (
+        "unwrap_povw.zkr",
+        digest!("3b5de70ddecc2fabcd3b9b9150ff64e7fc084ecb80f97cac2f9ee11e326087d1"),
     ),
 ];

@@ -14,7 +14,7 @@
 
 use std::{fmt::Debug, path::PathBuf};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
@@ -23,12 +23,12 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
+    claim::{receipt::UnionClaim, Unknown},
     host::client::env::{ProveKeccakRequest, ProveZkrRequest},
     receipt::{
         merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
         ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::{UnionClaim, Unknown},
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
     ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
@@ -291,7 +291,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
             max_segment_po2: opts
                 .max_segment_po2
                 .try_into()
-                .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
+                .with_context(|| malformed_err("ProverOpts.max_segment_po2"))?,
             dev_mode: opts.is_dev_mode,
         })
     }

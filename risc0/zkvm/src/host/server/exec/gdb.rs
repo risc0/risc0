@@ -55,6 +55,8 @@ impl<'a, 'b, 'c> GdbExecutor<'a, 'b, 'c> {
             exec,
             exec.env.input_digest,
             exec.env.trace.clone(),
+            // NOTE: PoVW nonce has no effect on execution.
+            None,
         );
         Ok(Self {
             elf,
