@@ -9,7 +9,7 @@
   Waldo blog][waldo-blog]
 - **[ZK Checkmate][example-chess]**: prove that you see a mate-in-one, without
   revealing the winning move
-- **[ZK Proof of Exploit][zkpoex]∑**: prove that you _could_ exploit an Ethereum
+- **[ZK Proof of Exploit][zkpoex]**: prove that you _could_ exploit an Ethereum
   account, without revealing the exploit
 - **[ECDSA signature verification][example-ecdsa]**: prove the validity of an
   ECDSA signature
