@@ -21,7 +21,9 @@ use crate::Rzup;
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 use commands::UninstallCommand;
-use commands::{BuildCommand, CheckCommand, DefaultCommand, InstallCommand, ShowCommand};
+use commands::{
+    BuildCommand, CheckCommand, DefaultCommand, InstallCommand, PublishCommand, ShowCommand,
+};
 use ui::{TerminalUi, TextUi};
 
 #[derive(Subcommand)]
@@ -44,6 +46,9 @@ enum Commands {
     /// Build a component
     #[command(after_help = commands::BUILD_HELP)]
     Build(BuildCommand),
+    /// Publish a component on S3
+    #[command(after_help = commands::PUBLISH_HELP, subcommand)]
+    Publish(PublishCommand),
 }
 
 pub const RZUP_HELP: &str = "Discussion:
@@ -118,6 +123,7 @@ impl Cli {
                 Commands::Check(cmd) => cmd.execute(&rzup),
                 Commands::Uninstall(cmd) => cmd.execute(&mut rzup),
                 Commands::Build(cmd) => cmd.execute(&mut rzup),
+                Commands::Publish(cmd) => cmd.execute(&mut rzup),
             }
         });
 

@@ -370,10 +370,11 @@ mod tests {
 
     fn test_env() -> (TempDir, Environment) {
         let tmp_dir = tempfile::tempdir().unwrap();
-        let env = Environment::with_paths_token_platform_and_event_handler(
+        let env = Environment::with_paths_creds_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
+            None,
             None,
             Platform::detect().unwrap(),
             |_| {},
