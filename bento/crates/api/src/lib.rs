@@ -431,7 +431,7 @@ async fn prove_stark(
         _snark_stream,
     ) = helpers::get_or_create_streams(&state.db_pool, &api_key)
         .await
-        .context("Failed to get / create steams")?;
+        .context("Failed to get / create streams")?;
 
     let task_def = serde_json::to_value(TaskType::Executor(ExecutorReq {
         image: start_req.img,
@@ -594,7 +594,7 @@ async fn prove_groth16(
         snark_stream,
     ) = helpers::get_or_create_streams(&state.db_pool, &api_key)
         .await
-        .context("Failed to get / create steams")?;
+        .context("Failed to get / create streams")?;
 
     let task_def = serde_json::to_value(TaskType::Snark(WorkflowSnarkReq {
         receipt: start_req.session_id,
