@@ -117,7 +117,8 @@ const fn dispatch_index(opcode: u32, func3: u32, func7: u32) -> usize {
             0b001 | 0b101 => func7 & 0x7F, // SllI, SrlI, SraI use func7
             _ => 0, // Other I-format ops ignore func7
         },
-        0b0000011 | 0b0100011 | 0b1100011 | 0b0110111 | 0b0010111 | 0b1101111 | 0b1100111 => 0,
+        0b0000011 | 0b0100011 | 0b1100011 | 0b0110111 | 0b0010111 | 0b1101111 => 0,
+        0b1100111 => 0, // JALR ignores func7 (wildcard in original match)
         _ => func7 & 0x7F,
     };
 
