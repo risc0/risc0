@@ -92,6 +92,122 @@ impl Exception {
     }
 }
 
+// Dispatch table entry
+#[derive(Copy, Clone)]
+struct DispatchEntry {
+    kind: InsnKind,
+    handler_type: HandlerType,
+}
+
+#[derive(Copy, Clone)]
+enum HandlerType {
+    Compute,
+    Load,
+    Store,
+    System,
+}
+
+// Build dispatch index from instruction fields
+#[inline(always)]
+const fn dispatch_index(opcode: u32, func3: u32, func7: u32) -> usize {
+    // We need to handle the wildcards in the original match
+    // For I-format instructions that ignore func7, we'll normalize func7 to 0
+    let normalized_func7 = match opcode {
+        0b0010011 => match func3 {
+            0b001 | 0b101 => func7 & 0x7F, // SllI, SrlI, SraI use func7
+            _ => 0, // Other I-format ops ignore func7
+        },
+        0b0000011 | 0b0100011 | 0b1100011 | 0b0110111 | 0b0010111 | 0b1101111 | 0b1100111 => 0,
+        _ => func7 & 0x7F,
+    };
+
+    // Create a unique index: 7 bits opcode + 3 bits func3 + 7 bits func7 = 17 bits max
+    ((opcode as usize) << 10) | ((func3 as usize) << 7) | (normalized_func7 as usize)
+}
+
+// Build the dispatch table at compile time
+const DISPATCH_TABLE_SIZE: usize = 1 << 17; // 2^17 entries
+static DISPATCH_TABLE: [Option<DispatchEntry>; DISPATCH_TABLE_SIZE] = {
+    let mut table = [None; DISPATCH_TABLE_SIZE];
+
+    // Helper to add entries
+    macro_rules! add_entry {
+        ($opcode:expr, $func3:expr, $func7:expr, $kind:ident, $handler:ident) => {
+            table[dispatch_index($opcode, $func3, $func7)] = Some(DispatchEntry {
+                kind: InsnKind::$kind,
+                handler_type: HandlerType::$handler,
+            });
+        };
+    }
+
+    // R-format arithmetic ops
+    add_entry!(0b0110011, 0b000, 0b0000000, Add, Compute);
+    add_entry!(0b0110011, 0b000, 0b0100000, Sub, Compute);
+    add_entry!(0b0110011, 0b001, 0b0000000, Sll, Compute);
+    add_entry!(0b0110011, 0b010, 0b0000000, Slt, Compute);
+    add_entry!(0b0110011, 0b011, 0b0000000, SltU, Compute);
+    add_entry!(0b0110011, 0b101, 0b0000000, Srl, Compute);
+    add_entry!(0b0110011, 0b100, 0b0000000, Xor, Compute);
+    add_entry!(0b0110011, 0b101, 0b0100000, Sra, Compute);
+    add_entry!(0b0110011, 0b110, 0b0000000, Or, Compute);
+    add_entry!(0b0110011, 0b111, 0b0000000, And, Compute);
+
+    // M-extension
+    add_entry!(0b0110011, 0b000, 0b0000001, Mul, Compute);
+    add_entry!(0b0110011, 0b001, 0b0000001, MulH, Compute);
+    add_entry!(0b0110011, 0b010, 0b0000001, MulHSU, Compute);
+    add_entry!(0b0110011, 0b011, 0b0000001, MulHU, Compute);
+    add_entry!(0b0110011, 0b100, 0b0000001, Div, Compute);
+    add_entry!(0b0110011, 0b101, 0b0000001, DivU, Compute);
+    add_entry!(0b0110011, 0b110, 0b0000001, Rem, Compute);
+    add_entry!(0b0110011, 0b111, 0b0000001, RemU, Compute);
+
+    // I-format arithmetic ops (func7 normalized to 0 except for shifts)
+    add_entry!(0b0010011, 0b000, 0, AddI, Compute);
+    add_entry!(0b0010011, 0b001, 0b0000000, SllI, Compute);
+    add_entry!(0b0010011, 0b010, 0, SltI, Compute);
+    add_entry!(0b0010011, 0b011, 0, SltIU, Compute);
+    add_entry!(0b0010011, 0b100, 0, XorI, Compute);
+    add_entry!(0b0010011, 0b101, 0b0000000, SrlI, Compute);
+    add_entry!(0b0010011, 0b101, 0b0100000, SraI, Compute);
+    add_entry!(0b0010011, 0b110, 0, OrI, Compute);
+    add_entry!(0b0010011, 0b111, 0, AndI, Compute);
+
+    // I-format memory loads (func7 normalized to 0)
+    add_entry!(0b0000011, 0b000, 0, Lb, Load);
+    add_entry!(0b0000011, 0b001, 0, Lh, Load);
+    add_entry!(0b0000011, 0b010, 0, Lw, Load);
+    add_entry!(0b0000011, 0b100, 0, LbU, Load);
+    add_entry!(0b0000011, 0b101, 0, LhU, Load);
+
+    // S-format memory stores (func7 normalized to 0)
+    add_entry!(0b0100011, 0b000, 0, Sb, Store);
+    add_entry!(0b0100011, 0b001, 0, Sh, Store);
+    add_entry!(0b0100011, 0b010, 0, Sw, Store);
+
+    // U-format (func3 and func7 normalized to 0)
+    add_entry!(0b0110111, 0b000, 0, Lui, Compute);
+    add_entry!(0b0010111, 0b000, 0, Auipc, Compute);
+
+    // B-format branches (func7 normalized to 0)
+    add_entry!(0b1100011, 0b000, 0, Beq, Compute);
+    add_entry!(0b1100011, 0b001, 0, Bne, Compute);
+    add_entry!(0b1100011, 0b100, 0, Blt, Compute);
+    add_entry!(0b1100011, 0b101, 0, Bge, Compute);
+    add_entry!(0b1100011, 0b110, 0, BltU, Compute);
+    add_entry!(0b1100011, 0b111, 0, BgeU, Compute);
+
+    // J-format (func3 and func7 normalized to 0)
+    add_entry!(0b1101111, 0b000, 0, Jal, Compute);
+    add_entry!(0b1100111, 0b000, 0, JalR, Compute);
+
+    // System instructions
+    add_entry!(0b1110011, 0b000, 0b0011000, Mret, System);
+    add_entry!(0b1110011, 0b000, 0b0000000, Eany, System);
+
+    table
+};
+
 #[derive(Clone, Debug, Default)]
 pub struct DecodedInstruction {
     pub insn: u32,
@@ -225,67 +341,19 @@ impl Emulator {
     fn exec_rv32im<C: EmuContext>(&mut self, ctx: &mut C, word: u32) -> Result<Option<InsnKind>> {
         let decoded = DecodedInstruction::new(word);
 
-        match (decoded.opcode, decoded.func3, decoded.func7) {
-            // R-format arithmetic ops
-            (0b0110011, 0b000, 0b0000000) => self.step_compute(ctx, InsnKind::Add, decoded),
-            (0b0110011, 0b000, 0b0100000) => self.step_compute(ctx, InsnKind::Sub, decoded),
-            (0b0110011, 0b001, 0b0000000) => self.step_compute(ctx, InsnKind::Sll, decoded),
-            (0b0110011, 0b010, 0b0000000) => self.step_compute(ctx, InsnKind::Slt, decoded),
-            (0b0110011, 0b011, 0b0000000) => self.step_compute(ctx, InsnKind::SltU, decoded),
-            (0b0110011, 0b101, 0b0000000) => self.step_compute(ctx, InsnKind::Srl, decoded),
-            (0b0110011, 0b100, 0b0000000) => self.step_compute(ctx, InsnKind::Xor, decoded),
-            (0b0110011, 0b101, 0b0100000) => self.step_compute(ctx, InsnKind::Sra, decoded),
-            (0b0110011, 0b110, 0b0000000) => self.step_compute(ctx, InsnKind::Or, decoded),
-            (0b0110011, 0b111, 0b0000000) => self.step_compute(ctx, InsnKind::And, decoded),
-            (0b0110011, 0b000, 0b0000001) => self.step_compute(ctx, InsnKind::Mul, decoded),
-            (0b0110011, 0b001, 0b0000001) => self.step_compute(ctx, InsnKind::MulH, decoded),
-            (0b0110011, 0b010, 0b0000001) => self.step_compute(ctx, InsnKind::MulHSU, decoded),
-            (0b0110011, 0b011, 0b0000001) => self.step_compute(ctx, InsnKind::MulHU, decoded),
-            (0b0110011, 0b100, 0b0000001) => self.step_compute(ctx, InsnKind::Div, decoded),
-            (0b0110011, 0b101, 0b0000001) => self.step_compute(ctx, InsnKind::DivU, decoded),
-            (0b0110011, 0b110, 0b0000001) => self.step_compute(ctx, InsnKind::Rem, decoded),
-            (0b0110011, 0b111, 0b0000001) => self.step_compute(ctx, InsnKind::RemU, decoded),
-            // I-format arithmetic ops
-            (0b0010011, 0b000, _) => self.step_compute(ctx, InsnKind::AddI, decoded),
-            (0b0010011, 0b001, 0b0000000) => self.step_compute(ctx, InsnKind::SllI, decoded),
-            (0b0010011, 0b010, _) => self.step_compute(ctx, InsnKind::SltI, decoded),
-            (0b0010011, 0b011, _) => self.step_compute(ctx, InsnKind::SltIU, decoded),
-            (0b0010011, 0b100, _) => self.step_compute(ctx, InsnKind::XorI, decoded),
-            (0b0010011, 0b101, 0b0000000) => self.step_compute(ctx, InsnKind::SrlI, decoded),
-            (0b0010011, 0b101, 0b0100000) => self.step_compute(ctx, InsnKind::SraI, decoded),
-            (0b0010011, 0b110, _) => self.step_compute(ctx, InsnKind::OrI, decoded),
-            (0b0010011, 0b111, _) => self.step_compute(ctx, InsnKind::AndI, decoded),
-            // I-format memory loads
-            (0b0000011, 0b000, _) => self.step_load(ctx, InsnKind::Lb, decoded),
-            (0b0000011, 0b001, _) => self.step_load(ctx, InsnKind::Lh, decoded),
-            (0b0000011, 0b010, _) => self.step_load(ctx, InsnKind::Lw, decoded),
-            (0b0000011, 0b100, _) => self.step_load(ctx, InsnKind::LbU, decoded),
-            (0b0000011, 0b101, _) => self.step_load(ctx, InsnKind::LhU, decoded),
-            // S-format memory stores
-            (0b0100011, 0b000, _) => self.step_store(ctx, InsnKind::Sb, decoded),
-            (0b0100011, 0b001, _) => self.step_store(ctx, InsnKind::Sh, decoded),
-            (0b0100011, 0b010, _) => self.step_store(ctx, InsnKind::Sw, decoded),
-            // U-format lui
-            (0b0110111, _, _) => self.step_compute(ctx, InsnKind::Lui, decoded),
-            // U-format auipc
-            (0b0010111, _, _) => self.step_compute(ctx, InsnKind::Auipc, decoded),
-            // B-format branch
-            (0b1100011, 0b000, _) => self.step_compute(ctx, InsnKind::Beq, decoded),
-            (0b1100011, 0b001, _) => self.step_compute(ctx, InsnKind::Bne, decoded),
-            (0b1100011, 0b100, _) => self.step_compute(ctx, InsnKind::Blt, decoded),
-            (0b1100011, 0b101, _) => self.step_compute(ctx, InsnKind::Bge, decoded),
-            (0b1100011, 0b110, _) => self.step_compute(ctx, InsnKind::BltU, decoded),
-            (0b1100011, 0b111, _) => self.step_compute(ctx, InsnKind::BgeU, decoded),
-            // J-format jal
-            (0b1101111, _, _) => self.step_compute(ctx, InsnKind::Jal, decoded),
-            // I-format jalr
-            (0b1100111, _, _) => self.step_compute(ctx, InsnKind::JalR, decoded),
-            // System instruction
-            (0b1110011, 0b000, 0b0011000) => self.step_system(ctx, InsnKind::Mret, decoded),
-            (0b1110011, 0b000, 0b0000000) => self.step_system(ctx, InsnKind::Eany, decoded),
-            _ => Ok(ctx
+        let index = dispatch_index(decoded.opcode, decoded.func3, decoded.func7);
+
+        if let Some(entry) = &DISPATCH_TABLE[index] {
+            match entry.handler_type {
+                HandlerType::Compute => self.step_compute(ctx, entry.kind, decoded),
+                HandlerType::Load => self.step_load(ctx, entry.kind, decoded),
+                HandlerType::Store => self.step_store(ctx, entry.kind, decoded),
+                HandlerType::System => self.step_system(ctx, entry.kind, decoded),
+            }
+        } else {
+            Ok(ctx
                 .trap(Exception::IllegalInstruction(decoded.insn, line!()))?
-                .then_some(InsnKind::Invalid)),
+                .then_some(InsnKind::Invalid))
         }
     }
 
