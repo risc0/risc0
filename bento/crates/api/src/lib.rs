@@ -191,6 +191,10 @@ pub struct Args {
     #[clap(env)]
     s3_url: String,
 
+    /// S3 region, can be anything if using minio
+    #[clap(env, default_value = "us-west-2")]
+    s3_region: String,
+
     /// Executor timeout in seconds
     #[clap(long, default_value_t = 4 * 60 * 60)]
     exec_timeout: i32,
@@ -230,6 +234,7 @@ impl AppState {
             &args.s3_bucket,
             &args.s3_access_key,
             &args.s3_secret_key,
+            &args.s3_region,
         )
         .await
         .context("Failed to initialize s3 client / bucket")?;
@@ -247,7 +252,8 @@ impl AppState {
 
 // TODO: Add authn/z to get a userID
 const USER_ID: &str = "default_user";
-const MAX_UPLOAD_SIZE: usize = 250 * 1024 * 1024; // 250 mb
+// No limit on upload size given API is trusted.
+const MAX_UPLOAD_SIZE: usize = usize::MAX;
 
 const IMAGE_UPLOAD_PATH: &str = "/images/upload/:image_id";
 async fn image_upload(

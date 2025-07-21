@@ -11,7 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::components::{component_asset_name, Component};
+
+use crate::components::Component;
 use crate::distribution::parse_cpp_version;
 use crate::env::Environment;
 use crate::error::Result;
@@ -21,36 +22,19 @@ use std::path::PathBuf;
 pub struct Paths;
 
 impl Paths {
-    pub fn get_component_dir(env: &Environment, component: &Component) -> PathBuf {
-        match component {
-            Component::RustToolchain | Component::CppToolchain => {
-                env.risc0_dir().join("toolchains")
-            }
-            Component::CargoRiscZero | Component::R0Vm | Component::Gdb => {
-                env.risc0_dir().join("extensions")
-            }
-        }
-    }
-
-    pub fn get_version_dir(env: &Environment, component: &Component, version: &Version) -> PathBuf {
-        let base_path = Self::get_component_dir(env, component);
-        base_path.join(format!("v{version}-{component}-{}", env.platform()))
-    }
-
     fn find_version_dir_inner(
         env: &Environment,
         component: &Component,
         version: &Version,
     ) -> Result<Option<PathBuf>> {
-        let component_dir = Self::get_component_dir(env, component);
+        let component_dir = component.get_dir(env);
         if !component_dir.exists() {
             return Ok(None);
         }
 
         let matching_path = std::fs::read_dir(component_dir)?
             .filter_map(|entry| entry.ok())
-            .filter(|entry| !entry.metadata().unwrap().is_symlink())
-            .filter(|entry| entry.path().is_dir())
+            .filter(|entry| entry.path().is_dir() && !entry.metadata().unwrap().is_symlink())
             .find_map(|entry| {
                 let dir_name = entry.file_name().to_string_lossy().to_string();
                 let parsed_version = Self::parse_version_from_path(&dir_name, component)?;
@@ -74,7 +58,7 @@ impl Paths {
             // The C++ archive has a child directory we want to ignore, but legacy installs
             // don't have it
             if component == &Component::CppToolchain {
-                let (asset_name, _) = component_asset_name(component, env.platform())?;
+                let (asset_name, _) = component.asset_name(env.platform())?;
                 let sub_dir = path.join(asset_name);
                 if sub_dir.exists() {
                     return Ok(Some(sub_dir));
@@ -94,7 +78,7 @@ impl Paths {
             std::fs::remove_dir_all(version_dir)?;
         }
 
-        let component_dir = Self::get_component_dir(env, component);
+        let component_dir = component.get_dir(env);
         if component_dir.exists() && std::fs::read_dir(&component_dir)?.count() == 0 {
             std::fs::remove_dir(component_dir)?;
         }
@@ -172,7 +156,7 @@ mod tests {
         let version = Paths::parse_version_from_path(dir_name, &component).unwrap();
         assert_eq!(&version, &expected_version);
 
-        let expected_path = Paths::get_component_dir(&env, &component).join(dir_name);
+        let expected_path = component.get_dir(&env).join(dir_name);
         std::fs::create_dir_all(&expected_path).unwrap();
 
         let actual_path = Paths::find_version_dir(&env, &component, &version)
@@ -258,7 +242,7 @@ mod tests {
         let version = Version::new(1, 0, 0);
         let component = Component::RustToolchain;
 
-        let version_dir = Paths::get_version_dir(&env, &component, &version);
+        let version_dir = component.get_version_dir(&env, &version);
         std::fs::create_dir_all(&version_dir).unwrap();
         assert!(Paths::find_version_dir(&env, &component, &version)
             .unwrap()
