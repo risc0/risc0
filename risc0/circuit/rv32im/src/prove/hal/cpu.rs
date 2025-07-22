@@ -190,7 +190,9 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
                 )
             };
             let x = Val::ROU_FWD[po2 + EXP_PO2].pow(cycle);
-            // TODO: what is this magic number 3?
+            // Multiply by 3 to shift the evaluation point in the field.
+            // This avoids collisions at roots of unity during polynomial checks,
+            // and is part of the protocol’s algebraic structure.
             let y = (Val::new(3) * x).pow(1 << po2);
             let ret = tot * (y - Val::new(1)).inv();
 
