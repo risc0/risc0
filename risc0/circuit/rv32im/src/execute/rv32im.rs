@@ -62,8 +62,39 @@ pub trait EmuContext {
     fn check_data_store(&self, addr: ByteAddr) -> bool;
 }
 
+// Fixed-size direct-mapped cache (32 entries ≈ one cache line)
+// This cache stores instruction decoding results to avoid repeated
+// dispatch table lookups for frequently executed instructions.
+const CACHE_N: usize = 32;
+
+#[derive(Clone, Copy)]
+struct TraceCacheLine {
+    pc: u32,
+    entry: DispatchEntry,
+}
+
+impl Default for TraceCacheLine {
+    fn default() -> Self {
+        Self {
+            pc: 0,
+            entry: DispatchEntry {
+                kind: InsnKind::Invalid,
+                handler_type: HandlerType::Compute,
+            },
+        }
+    }
+}
+
 #[derive(Default)]
-pub struct Emulator;
+pub struct Emulator {
+    tc: [TraceCacheLine; CACHE_N],
+}
+
+impl Emulator {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
 
 #[derive(Debug)]
 #[repr(u32)]
@@ -97,6 +128,15 @@ impl Exception {
 struct DispatchEntry {
     kind: InsnKind,
     handler_type: HandlerType,
+}
+
+impl Default for DispatchEntry {
+    fn default() -> Self {
+        Self {
+            kind: InsnKind::Invalid,
+            handler_type: HandlerType::Compute,
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -325,10 +365,6 @@ impl DecodedInstruction {
 }
 
 impl Emulator {
-    pub fn new() -> Self {
-        Self {}
-    }
-
     fn trace_instruction<C: EmuContext>(
         &mut self,
         ctx: &mut C,
@@ -339,22 +375,43 @@ impl Emulator {
     }
 
     #[inline(always)]
-    fn exec_rv32im<C: EmuContext>(&mut self, ctx: &mut C, word: u32) -> Result<Option<InsnKind>> {
+    fn fetch_dispatch(&mut self, pc: ByteAddr, word: u32) -> DispatchEntry {
+        let idx = (pc.0 as usize >> 2) & (CACHE_N - 1);
+        let line = self.tc[idx];
+        if line.pc == pc.0 {
+            // Cache hit
+            return line.entry;
+        }
+        // Cache miss - lookup in dispatch table
         let decoded = DecodedInstruction::new(word);
-
         let index = dispatch_index(decoded.opcode, decoded.func3, decoded.func7);
+        let entry = DISPATCH_TABLE[index].unwrap_or(DispatchEntry {
+            kind: InsnKind::Invalid,
+            handler_type: HandlerType::Compute,
+        });
+        // Update cache
+        self.tc[idx] = TraceCacheLine { pc: pc.0, entry };
+        entry
+    }
 
-        if let Some(entry) = &DISPATCH_TABLE[index] {
-            match entry.handler_type {
-                HandlerType::Compute => self.step_compute(ctx, entry.kind, decoded),
-                HandlerType::Load => self.step_load(ctx, entry.kind, decoded),
-                HandlerType::Store => self.step_store(ctx, entry.kind, decoded),
-                HandlerType::System => self.step_system(ctx, entry.kind, decoded),
-            }
-        } else {
-            Ok(ctx
+    #[inline(always)]
+    fn exec_rv32im<C: EmuContext>(&mut self, ctx: &mut C, word: u32) -> Result<Option<InsnKind>> {
+        let pc = ctx.get_pc();
+        let entry = self.fetch_dispatch(pc, word);
+
+        if entry.kind == InsnKind::Invalid {
+            let decoded = DecodedInstruction::new(word);
+            return Ok(ctx
                 .trap(Exception::IllegalInstruction(decoded.insn, line!()))?
-                .then_some(InsnKind::Invalid))
+                .then_some(InsnKind::Invalid));
+        }
+
+        let decoded = DecodedInstruction::new(word);
+        match entry.handler_type {
+            HandlerType::Compute => self.step_compute(ctx, entry.kind, decoded),
+            HandlerType::Load => self.step_load(ctx, entry.kind, decoded),
+            HandlerType::Store => self.step_store(ctx, entry.kind, decoded),
+            HandlerType::System => self.step_system(ctx, entry.kind, decoded),
         }
     }
 
