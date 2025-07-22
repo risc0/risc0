@@ -82,9 +82,16 @@ impl Default for TraceCacheLine {
     }
 }
 
-#[derive(Default)]
 pub struct Emulator {
     tc: [TraceCacheLine; CACHE_N],
+}
+
+impl Default for Emulator {
+    fn default() -> Self {
+        Self {
+            tc: [TraceCacheLine::default(); CACHE_N],
+        }
+    }
 }
 
 impl Emulator {
