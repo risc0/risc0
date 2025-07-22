@@ -375,9 +375,8 @@ impl Emulator {
     fn fetch_dispatch(&mut self, pc: ByteAddr, word: u32) -> DispatchEntry {
         let idx = (pc.0 as usize >> 2) & (CACHE_N - 1);
         let line = self.tc[idx];
-        if line.pc == pc.0 {
-            // Cache hit
-            return line.entry;
+        if line.pc == pc.0 && line.entry.kind != InsnKind::Invalid {
+            return line.entry;         // only a hit when the entry is valid
         }
         // Cache miss - lookup in dispatch table
         let decoded = DecodedInstruction::new(word);
