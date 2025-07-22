@@ -278,7 +278,7 @@ impl PagedMemory {
             user_registers[idx] = page.load(USER_REGS_ADDR.waddr() + idx);
         }
 
-        // Convert BTreeMap to BTreeMap for WorkingImage
+        // Convert BTreeMap to BTreeMap for WorkingImage - direct assignment
         let pages_map = image.into_pages();
 
         Self {
@@ -494,8 +494,9 @@ impl PagedMemory {
             if page_state == PageState::Dirty {
                 let cache_idx = self.page_table.get(page_idx).unwrap();
                 let page = &self.page_cache[cache_idx];
-                self.image.set_page(page_idx, page.clone());
-                partial_image.set_page(page_idx, page.clone());
+                let page_clone = page.clone();
+                self.image.set_page(page_idx, page_clone.clone());
+                partial_image.set_page(page_idx, page_clone);
             }
         }
 
@@ -533,6 +534,9 @@ impl PagedMemory {
                     }
                 }
                 self.page_states.set(node_idx, goal);
+            } else {
+                // No need to continue if we've reached a state that's already >= goal
+                break;
             }
             node_idx /= 2;
         }

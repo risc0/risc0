@@ -144,6 +144,7 @@ fn create_segments(
         for (page_idx, page) in &req.partial_image.pages {
             existing_image.set_page(*page_idx, page.clone());
         }
+        // Only update digests at the end to avoid repeated expensive operations
         existing_image.update_digests();
         let post_digest = existing_image.image_id();
 
