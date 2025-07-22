@@ -556,7 +556,7 @@ impl Datasheet {
     fn shapella_segment(&mut self, name: &str, bytes: &[u8]) {
         // "shapella" is the name of ethereum block 17034870
         // this test runs one segment of a zeth run on that block
-        println!("{}", name);
+        println!("{name}");
         let segment = risc0_circuit_rv32im::execute::Segment::decode(bytes).unwrap();
 
         let start = Instant::now();

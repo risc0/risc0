@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 env:
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   TAG: v1.1.0
   VERSION: "1.1.0"
@@ -41,6 +41,8 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+        with:
+          key: ${{ env.TARGET }}
       - if: matrix.os == 'Linux'
         run: docker build -f .github/containers/release/Dockerfile --output tmp/pkg .
       - if: matrix.os == 'macOS'

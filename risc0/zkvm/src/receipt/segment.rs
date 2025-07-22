@@ -75,6 +75,13 @@ impl SegmentReceipt {
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
 
+        // NOTE: We do not check the verifier_parameters digest here, which is used to detect
+        // version mismatches and display a friendlier error than "invalid proof", because there
+        // exist multiple versions of the verifier context that can verify a given receipt. This is
+        // because the segment receipt verifier context contains a set of control IDs,
+        // and will verify as long as the control ID found in is the set. Many sets can contain the
+        // same control ID.
+
         // Check that the proof system and circuit info strings match what is implemented by this
         // function. Info strings are used a version identifiers, and this verify implementation
         // supports exactly one proof systema and circuit version at a time.

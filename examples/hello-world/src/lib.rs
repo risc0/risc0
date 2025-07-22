@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
     );
 
     // Report the product
-    println!("I know the factors of {}, and I can prove it!", c);
+    println!("I know the factors of {c}, and I can prove it!");
 
     (receipt, c)
 }

@@ -295,7 +295,7 @@ export default async function createConfigAsync() {
         },
         algolia: {
           appId: "TQC8F4X8Z5",
-          apiKey: "96f324a5e3029cd7b5ba98c91068a7a3", // Public API key
+          apiKey: "b9687cf1594ea03ea3a92eaf103b2763", // Public API key
           indexName: "risczero",
           searchPagePath: "search",
 

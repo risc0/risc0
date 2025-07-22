@@ -381,8 +381,8 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
 ///
 /// `out_state`, `in_state`, `block1_ptr`, and `block2_ptr` must be aligned and
 /// dereferenceable.
-#[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_sha_compress(
     out_state: *mut [u32; DIGEST_WORDS],
     in_state: *const [u32; DIGEST_WORDS],
@@ -402,8 +402,8 @@ pub unsafe extern "C" fn sys_sha_compress(
 /// # Safety
 ///
 /// `out_state`, `in_state`, and `buf` must be aligned and dereferenceable.
-#[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_sha_buffer(
     out_state: *mut [u32; DIGEST_WORDS],
     in_state: *const [u32; DIGEST_WORDS],
@@ -433,8 +433,8 @@ pub unsafe extern "C" fn sys_sha_buffer(
 ///
 /// `state_addr`, `in_buf_addr`, and `out_buf_addr` must be word-aligned and
 /// dereferenceable.
-#[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_poseidon2(
     state_addr: *mut [u32; DIGEST_WORDS],
     in_buf_addr: *const u8,
@@ -457,8 +457,8 @@ pub unsafe extern "C" fn sys_poseidon2(
 /// # Safety
 ///
 /// `result`, `x`, `y`, and `modulus` must be aligned and dereferenceable.
-#[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
 pub unsafe extern "C" fn sys_bigint(
     result: *mut [u32; bigint::WIDTH_WORDS],
     op: u32,
@@ -1089,8 +1089,7 @@ macro_rules! impl_sys_bigint2 {
         /// # Safety
         ///
         /// `blob_ptr` and all arguments must be aligned and dereferenceable.
-        #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-        #[stability::unstable]
+        #[cfg_attr(feature = "export-syscalls", no_mangle)]
         pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
             $(, $a2: *const u32
                 $(, $a3: *const u32

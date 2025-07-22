@@ -27,10 +27,11 @@ use crate::{
     },
     mmr::{GuestPeak, MerkleMountainAccumulator},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::{exit_code_from_rv32im_v2_claim, UnionClaim, Unknown},
+    receipt_claim::{exit_code_from_terminate_state, UnionClaim, Unknown},
     recursion::MerkleProof,
-    Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned, ProverOpts,
-    ProverServer, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
+    PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
+    VerifierContext,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =
@@ -39,9 +40,13 @@ const ERR_DEV_MODE_DISABLED: &str =
 /// Configuration for simulated DevMode delay.
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct DevModeDelay {
-    /// Delay for prove_segment
+    /// Delay for prove_segment_core
     #[serde(deserialize_with = "duration_secs")]
-    pub prove_segment: Duration,
+    pub prove_segment_core: Duration,
+
+    /// Delay for segment_preflight
+    #[serde(deserialize_with = "duration_secs")]
+    pub segment_preflight: Duration,
 
     /// Delay for prove_keccak
     #[serde(deserialize_with = "duration_secs")]
@@ -107,11 +112,18 @@ impl Default for DevModeProver {
 }
 
 impl ProverServer for DevModeProver {
-    fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+        let ctx = VerifierContext::default().with_dev_mode(true);
+        self.prove_with_ctx(env, &ctx, elf)
+    }
+
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         eprintln!(
             "WARNING: Proving in dev mode does not generate a valid receipt. \
             Receipts generated from this process are invalid and should never be used in production."
         );
+
+        ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
 
         ensure!(
             cfg!(not(feature = "disable-dev-mode")),
@@ -192,20 +204,43 @@ impl ProverServer for DevModeProver {
         self.prove_session(ctx, &session)
     }
 
-    fn prove_segment(&self, _ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
         ensure!(
             cfg!(not(feature = "disable-dev-mode")),
             ERR_DEV_MODE_DISABLED
         );
 
         if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.prove_segment);
+            std::thread::sleep(delay.segment_preflight);
         }
 
-        let exit_code = exit_code_from_rv32im_v2_claim(&segment.inner.claim)?;
+        Ok(PreflightResults {
+            inner: Default::default(),
+            terminate_state: segment.inner.claim.terminate_state,
+            output: segment.output.clone(),
+            segment_index: segment.index,
+        })
+    }
+
+    fn prove_segment_core(
+        &self,
+        ctx: &VerifierContext,
+        preflight_results: PreflightResults,
+    ) -> Result<SegmentReceipt> {
+        ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
+        ensure!(
+            cfg!(not(feature = "disable-dev-mode")),
+            ERR_DEV_MODE_DISABLED
+        );
+
+        if let Some(ref delay) = self.delay {
+            std::thread::sleep(delay.prove_segment_core);
+        }
+
+        let exit_code = exit_code_from_terminate_state(&preflight_results.terminate_state)?;
         Ok(SegmentReceipt {
             seal: Vec::new(),
-            index: segment.index,
+            index: preflight_results.segment_index,
             hashfn: "fake".into(),
             verifier_parameters: Digest::ZERO,
             claim: ReceiptClaim {
@@ -311,7 +346,8 @@ impl ProverServer for DevModeProver {
         Ok(fake_succinct_receipt())
     }
 
-    fn compress(&self, _opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
         ensure!(
             cfg!(not(feature = "disable-dev-mode")),
             ERR_DEV_MODE_DISABLED

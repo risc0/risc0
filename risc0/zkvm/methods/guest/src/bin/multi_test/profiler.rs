@@ -15,7 +15,6 @@
 use core::arch::asm;
 
 #[inline(never)]
-#[no_mangle]
 pub fn profile_test_func1() {
     // Two functions inlined one after the other to test we get the bounds correct.
     profile_test_func2();
@@ -28,27 +27,23 @@ pub fn profile_test_func1() {
 }
 
 #[inline(always)]
-#[no_mangle]
 fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
 #[inline(always)]
-#[no_mangle]
 fn profile_test_func3() {
     unsafe { asm!("nop") }
 }
 
 /// This contains a jump in the middle that shouldn't be interpreted as a "call" by the profiler.
 #[inline(always)]
-#[no_mangle]
 fn profile_test_func4() {
     unsafe { asm!("la a0, 1f", "jr a0", "1:", "nop") }
 }
 
 /// Inline the same function many times in different locations
 #[inline(never)]
-#[no_mangle]
 fn profile_test_func5() {
     profile_test_func3();
     profile_test_func3();

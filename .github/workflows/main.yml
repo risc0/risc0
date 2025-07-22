@@ -10,9 +10,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
@@ -31,7 +36,6 @@ jobs:
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
-      crates-validation: ${{ steps.filter.outputs.crates-validation }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       risc0: ${{ steps.filter.outputs.risc0 }}
@@ -75,10 +79,6 @@ jobs:
               - *base
               - risc0/**
               - templates/**
-            crates-validation:
-              - *base
-              - risc0/**
-              - tools/crates-validator/**
             doc:
               - *base
               - bonsai/sdk/**
@@ -114,7 +114,6 @@ jobs:
       - check-semver
       - check-template
       - clippy
-      - crates-validation
       - doc
       - docs-rs
       - examples
@@ -132,7 +131,7 @@ jobs:
         run: exit 1
 
   check:
-    runs-on: [self-hosted, cluster, Linux, cpu]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -157,11 +156,11 @@ jobs:
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
-      - run: cargo sort --workspace --check
-      - run: cargo sort --workspace --check bento
-      - run: cargo sort --workspace --check benchmarks
-      - run: cargo sort --workspace --check examples
-      - run: cargo sort --workspace --check tools/crates-validator
+      - run: cargo sort --workspace --grouped --check
+      - run: cargo sort --workspace --grouped --check bento
+      - run: cargo sort --workspace --grouped --check benchmarks
+      - run: cargo sort --workspace --grouped --check examples
+      - run: cargo sort --workspace --grouped --check tools/crates-validator
       - name: cargo rdme in bonsai/sdk
         run: cargo rdme -c
         working-directory: bonsai/sdk
@@ -206,8 +205,6 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
-      - if: matrix.feature == 'cuda'
-        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - name: "root: cargo clippy"
@@ -549,41 +546,6 @@ jobs:
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
       - run: sccache --show-stats
 
-  crates-validation:
-    if: needs.changes.outputs.crates-validation == 'true'
-    needs: changes
-    runs-on: [self-hosted, cluster, Linux, X64, cpu]
-    env:
-      RUST_BACKTRACE: full
-      RUST_LOG: info
-      TOP_N_CRATES: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-      - run: cargo install --force --path risc0/cargo-risczero --locked
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test
-        working-directory: tools/crates-validator/
-      - run: cargo build --release
-        working-directory: tools/crates-validator/
-      - name: Create working directory
-        run: mkdir -p ${{ runner.temp }}/crate-validation/
-      - name: Validate profiles
-        run: |
-          target/release/main \
-          -p ${{ github.workspace }} \
-          -P profiles/profiles-10.yaml \
-          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
-        shell: bash
-        working-directory: tools/crates-validator/
-      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
-        if: always()
-      - run: sccache --show-stats
-
   browser:
     if: needs.changes.outputs.browser == 'true'
     needs: changes
@@ -680,6 +642,7 @@ jobs:
         with:
           crate: cargo-nextest
           version: "0.9.96"
+          key: Linux-cpu
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: Install sqlx-cli

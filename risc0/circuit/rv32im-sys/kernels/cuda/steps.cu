@@ -1288,69 +1288,118 @@ EQZ(x21, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:
 // AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
 Val x22 = (x15.outHigh.high - x20);
 EQZ(x22, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :67:15)))");
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:69)
-NondetRegStruct x23 = exec_IsZero(ctx,(arg1_0.low + arg1_0.high), LAYOUT_LOOKUP(layout4, isZero));
 // builtin Mul
 // Div(<preamble>:19)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:69)
+Val x23 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
+NondetRegStruct x24 = exec_NondetBitReg(ctx,x23, LAYOUT_LOOKUP(layout4, topNum));
+// builtin Sub
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
-Val x24 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
-NondetRegStruct x25 = exec_NondetBitReg(ctx,x24, LAYOUT_LOOKUP(layout4, topNum));
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
-Val x26 = (arg0.high - (x25._super * Val(32768)));
-NondetU16RegStruct x27 = exec_U16Reg(ctx,(x26 * Val(2)), LAYOUT_LOOKUP(layout4, _0));
+Val x25 = (arg0.high - (x24._super * Val(32768)));
+NondetU16RegStruct x26 = exec_U16Reg(ctx,(x25 * Val(2)), LAYOUT_LOOKUP(layout4, _0));
 // builtin Mul
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:74)
-Val x28 = (x25._super * arg2_0);
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:78)
-Val x29 = (x15.bNeg * (Val(65536) - arg1_0.low));
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:72)
+Val x27 = (x24._super * arg2_0);
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:76)
+Val x28 = (x15.bNeg * (Val(65536) - arg1_0.low));
 // builtin Sub
-Val x30 = (Val(1) - x15.bNeg);
+Val x29 = (Val(1) - x15.bNeg);
 // builtin Mul
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:79)
-Val x31 = (x15.bNeg * (Val(65535) - arg1_0.high));
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
-NormalizeU32Struct x32 = exec_NormalizeU32(ctx,DenormedValU32Struct{
-  .low = (x29 + (x30 * arg1_0.low)),   .high = (x31 + (x30 * arg1_0.high))}, LAYOUT_LOOKUP(layout4, denomAbs));
+Val x30 = (x15.bNeg * (Val(65535) - arg1_0.high));
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
+NormalizeU32Struct x31 = exec_NormalizeU32(ctx,DenormedValU32Struct{
+  .low = (x28 + (x29 * arg1_0.low)),   .high = (x30 + (x29 * arg1_0.high))}, LAYOUT_LOOKUP(layout4, denomAbs));
 // builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:83)
-Val x33 = (Val(65536) - x12._super._super);
-Val x34 = (Val(1) - x28);
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:84)
-Val x35 = (Val(65535) - x13._super._super);
-// DenormedValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:20)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:81)
+Val x32 = (Val(65536) - x12._super._super);
+Val x33 = (Val(1) - x27);
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
-DenormedValU32Struct x36 = DenormedValU32Struct{
-  .low = ((x28 * x33) + (x34 * x12._super._super)),   .high = ((x28 * x35) + (x34 * x13._super._super))};
-NormalizeU32Struct x37 = exec_NormalizeU32(ctx,x36, LAYOUT_LOOKUP(layout4, remNormal));
-// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:89)
-Val x38 = (x12._super._super - arg0.low);
-// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
-Val x39 = (x13._super._super - arg0.high);
-// builtin Component
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-ComponentStruct x40 = ComponentStruct{
-};
-ComponentStruct x41;
-if (to_size_t(x23._super)) {
-// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:89)
-EQZ(x38, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :89:17)))");
-// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
-EQZ(x39, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :89:17)))");
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-STORE(LAYOUT_LOOKUP(layout4, _3.arm0._extra0.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout4, _3.arm0._extra0.count._super), 0), "DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)");
-STORE(LAYOUT_LOOKUP(layout4, _3.arm0._extra1.count._super), Val(0));
-EQZ(LOAD(LAYOUT_LOOKUP(layout4, _3.arm0._extra1.count._super), 0), "DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)");
-x41 = x40;
-} else if (to_size_t((Val(1) - x23._super))) {
+Val x34 = (Val(65535) - x13._super._super);
+// DenormedValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:20)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
+DenormedValU32Struct x35 = DenormedValU32Struct{
+  .low = ((x27 * x32) + (x33 * x12._super._super)),   .high = ((x27 * x34) + (x33 * x13._super._super))};
+NormalizeU32Struct x36 = exec_NormalizeU32(ctx,x35, LAYOUT_LOOKUP(layout4, remNormal));
+// builtin Isz
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:90)
+Val x37 = isz((arg1_0.low + arg1_0.high));
+NondetRegStruct x38 = exec_NondetBitReg(ctx,x37, LAYOUT_LOOKUP(layout4, isZero));
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:93)
+Val x39 = (arg0.high - Val(32768));
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:94)
+Val x40 = (arg1_0.low - Val(65535));
+// builtin Mul
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:93)
+Val x41 = (((arg2_0 * isz(arg0.low)) * isz(x39)) * isz(x40));
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:94)
+Val x42 = (arg1_0.high - Val(65535));
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-CmpLessThanUnsignedStruct x42 = exec_CmpLessThanUnsigned(ctx,x37._super, x32._super, LAYOUT_LOOKUP(layout4, _3.arm1.lt));
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:92)
-EQZ((x42.isLessThan - Val(1)), "DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:92)");
-x41 = x40;
+NondetRegStruct x43 = exec_NondetBitReg(ctx,(x41 * isz(x42)), LAYOUT_LOOKUP(layout4, signedOverflowCase));
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+CmpLessThanUnsignedStruct x44 = exec_CmpLessThanUnsigned(ctx,x36._super, x31._super, LAYOUT_LOOKUP(layout4, lt));
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x45 = ((Val(1) - x38._super) - x43._super);
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:101)
+Val x46 = (x12._super._super - arg0.low);
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+Val x47 = (x13._super._super - arg0.high);
+// builtin Component
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:98)
+ComponentStruct x48 = ComponentStruct{
+};
+ComponentStruct x49;
+if (to_size_t(x38._super)) {
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:100)
+EQZ(arg1_0.low, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :100:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+EQZ(arg1_0.high, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :100:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:101)
+EQZ(x46, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :101:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+EQZ(x47, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :101:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:102)
+EQZ((x9._super - Val(65535)), "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :102:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+EQZ((x10._super - Val(65535)), "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :102:17)))");
+x49 = x48;
+} else if (to_size_t(x43._super)) {
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)
+EQZ((arg2_0 - Val(1)), "DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:106)
+EQZ(arg0.low, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :106:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+EQZ(x39, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :106:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:107)
+EQZ(x40, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :107:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+EQZ(x42, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :107:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:108)
+EQZ(x9._super, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :108:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+EQZ((x10._super - Val(32768)), "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :108:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:106)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:109)
+EQZ(x12._super._super, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :106:10) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :109:17)))");
+// AssertEqU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:107)
+EQZ(x13._super._super, "loc(callsite( AssertEqU32 ( zirgen/circuit/rv32im/v2/dsl/u32.zir :107:11) at  DoDiv ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :109:17)))");
+x49 = x48;
+} else if (to_size_t(x45)) {
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:112)
+EQZ((x19._super - x27), "DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:112)");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:113)
+EQZ((x44.isLessThan - Val(1)), "DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:113)");
+x49 = x48;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
@@ -1359,57 +1408,57 @@ return DivideReturnStruct{
 }
 __device__ ValU32Struct exec_OpSRL(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpSRLLayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:113)
+// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:134)
 Val x2 = (arg0.decoded.opcode._super - Val(51));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRL ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :113:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRL ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :134:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(5));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRL ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :113:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRL ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :134:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
-EQZ(arg0.decoded.func7, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRL ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :113:20)))");
-// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:114)
+EQZ(arg0.decoded.func7, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRL ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :134:20)))");
+// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:135)
 ValU32Struct x4 = exec_DynPo2(ctx,arg0.rs2.low, LAYOUT_LOOKUP(layout1, shiftMul));
-// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:115)
+// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:136)
 DivideReturnStruct x5 = exec_DoDiv(ctx,arg0.rs1, x4, Val(0), Val(0), LAYOUT_LOOKUP(layout1, _0));
 return x5.quot;
 }
 __device__ NondetRegStruct exec_TopBit(ExecContext& ctx,ValU32Struct arg0, BoundLayout<TopBitLayout> layout1)   {
 // builtin Mul
 // Div(<preamble>:19)
-// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:98)
+// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:119)
 Val x2 = (bitAnd(arg0.high, Val(32768)) * Val(2013204481));
 NondetRegStruct x3 = exec_NondetBitReg(ctx,x2, LAYOUT_LOOKUP(layout1, _super));
 // builtin Mul
-// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:99)
+// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:120)
 Val x4 = (x3._super * Val(32768));
 Val x5 = ((arg0.high - x4) * Val(2));
 NondetU16RegStruct x6 = exec_NondetU16Reg(ctx,x5, LAYOUT_LOOKUP(layout1, rest));
 // builtin Mul
 // Div(<preamble>:19)
-// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:100)
+// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:121)
 Val x7 = (x6._super._super * Val(1006632961));
-EQZ((arg0.high - (x7 + x4)), "TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:100)");
+EQZ((arg0.high - (x7 + x4)), "TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:121)");
 return x3;
 }
 __device__ ValU32Struct exec_OpSRA(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpSRALayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:119)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:140)
 Val x2 = (arg0.decoded.opcode._super - Val(51));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRA ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :119:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRA ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :140:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(5));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRA ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :119:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRA ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :140:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
 Val x4 = (arg0.decoded.func7 - Val(32));
-EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRA ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :119:20)))");
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:120)
+EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRA ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :140:20)))");
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:141)
 ValU32Struct x5 = exec_DynPo2(ctx,arg0.rs2.low, LAYOUT_LOOKUP(layout1, shiftMul));
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:121)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:142)
 NondetRegStruct x6 = exec_TopBit(ctx,arg0.rs1, LAYOUT_LOOKUP(layout1, flip));
 // builtin Sub
-// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)
-// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:109)
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:122)
+// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:126)
+// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:130)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:143)
 Val x7 = (Val(65535) - arg0.rs1.low);
 Val x8 = (Val(1) - x6._super);
 // builtin Add
@@ -1421,9 +1470,9 @@ Val x11 = ((x6._super * x10) + (x8 * arg0.rs1.high));
 DivideReturnStruct x12 = exec_DoDiv(ctx,ValU32Struct{
   .low = x9,   .high = x11}, x5, Val(0), Val(1), LAYOUT_LOOKUP(layout1, _0));
 // builtin Sub
-// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)
-// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:109)
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:123)
+// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:126)
+// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:130)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:144)
 Val x13 = (Val(65535) - x12.quot.low);
 // builtin Add
 Val x14 = ((x6._super * x13) + (x8 * x12.quot.low));
@@ -1436,39 +1485,39 @@ return ValU32Struct{
 }
 __device__ ValU32Struct exec_OpSRLI(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpSRLILayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:127)
+// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:148)
 Val x2 = (arg0.decoded.opcode._super - Val(19));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRLI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :127:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRLI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :148:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(5));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRLI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :127:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRLI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :148:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
-EQZ(arg0.decoded.func7, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRLI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :127:20)))");
-// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:128)
+EQZ(arg0.decoded.func7, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRLI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :148:20)))");
+// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:149)
 ValU32Struct x4 = exec_DynPo2(ctx,arg0.decoded.rs2, LAYOUT_LOOKUP(layout1, shiftMul));
-// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:129)
+// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:150)
 DivideReturnStruct x5 = exec_DoDiv(ctx,arg0.rs1, x4, Val(0), Val(0), LAYOUT_LOOKUP(layout1, _0));
 return x5.quot;
 }
 __device__ ValU32Struct exec_OpSRAI(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpSRAILayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:133)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:154)
 Val x2 = (arg0.decoded.opcode._super - Val(19));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRAI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :133:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpSRAI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :154:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(5));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRAI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :133:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpSRAI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :154:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
 Val x4 = (arg0.decoded.func7 - Val(32));
-EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRAI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :133:20)))");
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:134)
+EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpSRAI ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :154:20)))");
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:155)
 ValU32Struct x5 = exec_DynPo2(ctx,arg0.decoded.rs2, LAYOUT_LOOKUP(layout1, shiftMul));
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:135)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:156)
 NondetRegStruct x6 = exec_TopBit(ctx,arg0.rs1, LAYOUT_LOOKUP(layout1, flip));
 // builtin Sub
-// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)
-// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:109)
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:136)
+// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:126)
+// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:130)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:157)
 Val x7 = (Val(65535) - arg0.rs1.low);
 Val x8 = (Val(1) - x6._super);
 // builtin Add
@@ -1480,9 +1529,9 @@ Val x11 = ((x6._super * x10) + (x8 * arg0.rs1.high));
 DivideReturnStruct x12 = exec_DoDiv(ctx,ValU32Struct{
   .low = x9,   .high = x11}, x5, Val(0), Val(1), LAYOUT_LOOKUP(layout1, _0));
 // builtin Sub
-// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)
-// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:109)
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:137)
+// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:126)
+// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:130)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:158)
 Val x13 = (Val(65535) - x12.quot.low);
 // builtin Add
 Val x14 = ((x6._super * x13) + (x8 * x12.quot.low));
@@ -1495,61 +1544,61 @@ return ValU32Struct{
 }
 __device__ ValU32Struct exec_OpDIV(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpDIVLayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpDIV(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:141)
+// OpDIV(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:162)
 Val x2 = (arg0.decoded.opcode._super - Val(51));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpDIV ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :141:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpDIV ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :162:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(4));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpDIV ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :141:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpDIV ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :162:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
 Val x4 = (arg0.decoded.func7 - Val(1));
-EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpDIV ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :141:20)))");
-// OpDIV(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:142)
+EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpDIV ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :162:20)))");
+// OpDIV(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:163)
 DivideReturnStruct x5 = exec_DoDiv(ctx,arg0.rs1, arg0.rs2, Val(1), Val(0), LAYOUT_LOOKUP(layout1, _0));
 return x5.quot;
 }
 __device__ ValU32Struct exec_OpDIVU(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpDIVULayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpDIVU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:146)
+// OpDIVU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:167)
 Val x2 = (arg0.decoded.opcode._super - Val(51));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpDIVU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :146:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpDIVU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :167:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(5));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpDIVU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :146:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpDIVU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :167:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
 Val x4 = (arg0.decoded.func7 - Val(1));
-EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpDIVU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :146:20)))");
-// OpDIVU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:147)
+EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpDIVU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :167:20)))");
+// OpDIVU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:168)
 DivideReturnStruct x5 = exec_DoDiv(ctx,arg0.rs1, arg0.rs2, Val(0), Val(0), LAYOUT_LOOKUP(layout1, _0));
 return x5.quot;
 }
 __device__ ValU32Struct exec_OpREM(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpREMLayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpREM(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:151)
+// OpREM(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:172)
 Val x2 = (arg0.decoded.opcode._super - Val(51));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpREM ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :151:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpREM ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :172:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(6));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpREM ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :151:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpREM ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :172:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
 Val x4 = (arg0.decoded.func7 - Val(1));
-EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpREM ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :151:20)))");
-// OpREM(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:152)
+EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpREM ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :172:20)))");
+// OpREM(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:173)
 DivideReturnStruct x5 = exec_DoDiv(ctx,arg0.rs1, arg0.rs2, Val(1), Val(0), LAYOUT_LOOKUP(layout1, _0));
 return x5.rem;
 }
 __device__ ValU32Struct exec_OpREMU(ExecContext& ctx,DivInputStruct arg0, BoundLayout<OpREMULayout> layout1)   {
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:102)
-// OpREMU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:156)
+// OpREMU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:177)
 Val x2 = (arg0.decoded.opcode._super - Val(51));
-EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpREMU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :156:20)))");
+EQZ(x2, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :102:19) at  OpREMU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :177:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:103)
 Val x3 = (arg0.decoded.func3 - Val(7));
-EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpREMU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :156:20)))");
+EQZ(x3, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :103:18) at  OpREMU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :177:20)))");
 // VerifyOpcodeF3F7(zirgen/circuit/rv32im/v2/dsl/inst.zir:104)
 Val x4 = (arg0.decoded.func7 - Val(1));
-EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpREMU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :156:20)))");
-// OpREMU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:157)
+EQZ(x4, "loc(callsite( VerifyOpcodeF3F7 ( zirgen/circuit/rv32im/v2/dsl/inst.zir :104:18) at  OpREMU ( zirgen/circuit/rv32im/v2/dsl/inst_div.zir :177:20)))");
+// OpREMU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:178)
 DivideReturnStruct x5 = exec_DoDiv(ctx,arg0.rs1, arg0.rs2, Val(0), Val(0), LAYOUT_LOOKUP(layout1, _0));
 return x5.rem;
 }
@@ -14277,8 +14326,8 @@ DenormedValU32Struct x17 = DenormedValU32Struct{
 ValU32Struct x18 = ValU32Struct{
   .low = Val(0),   .high = Val(0)};
 // builtin Component
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:115)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:98)
+// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:136)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:26)
 // Top(zirgen/circuit/rv32im/v2/dsl/top.zir:77)
 ComponentStruct x19 = ComponentStruct{
@@ -15934,13 +15983,13 @@ if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout0, instInp
 // ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
 // NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // DynPo2(zirgen/circuit/rv32im/v2/dsl/po2.zir:40)
-// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:114)
+// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:135)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:26)
 Val x565 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super.shiftMul.checkU16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x565), "value out of range!");
 // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:54)
-// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:115)
+// OpSRL(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:136)
 ValU32Struct x566 = ValU32Struct{
   .low = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.quotLow._super), 0),   .high = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.quotHigh._super), 0)};
 // ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
@@ -16034,57 +16083,59 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x585), "value out of range!");
 Val x586 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x586), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x587 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x587), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x588 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x588), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x589 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x589), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x590 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x590), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x591 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x591), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x592 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.isZero._super._super), 0));
-ComponentStruct x593;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.isZero._super._super), 0))) {
-x593 = x19;
-} else if (to_size_t(x592)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x594 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x594), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x592 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x592), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x595 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x595), "value out of range!");
-x593 = x19;
+Val x593 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x593), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x594 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.isZero._super), 0));
+ComponentStruct x595;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.isZero._super), 0))) {
+x595 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.signedOverflowCase._super), 0))) {
+x595 = x19;
+} else if (to_size_t((x594 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm0._super._0.signedOverflowCase._super), 0)))) {
+x595 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
 x564 = x566;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout0, instInput.minorOnehot._super), 1), _super), 0))) {
+// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
+// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // DynPo2(zirgen/circuit/rv32im/v2/dsl/po2.zir:40)
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:120)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:141)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:27)
 Val x596 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1.shiftMul.checkU16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x596), "value out of range!");
-// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:99)
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:121)
+// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:120)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:142)
 Val x597 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1.flip.rest.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x597), "value out of range!");
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:56)
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:122)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:143)
 Val x598 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.remLow.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x598), "value out of range!");
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:57)
@@ -16173,48 +16224,47 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x616), "value out of range!");
 Val x617 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x617), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x618 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x618), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x619 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x619), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x620 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x620), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x621 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x621), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x622 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x622), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x623 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.isZero._super._super), 0));
-ComponentStruct x624;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.isZero._super._super), 0))) {
-x624 = x19;
-} else if (to_size_t(x623)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x625 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x625), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x623 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x623), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x626 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x626), "value out of range!");
-x624 = x19;
+Val x624 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x624), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x625 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.isZero._super), 0));
+ComponentStruct x626;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.isZero._super), 0))) {
+x626 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.signedOverflowCase._super), 0))) {
+x626 = x19;
+} else if (to_size_t((x625 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.signedOverflowCase._super), 0)))) {
+x626 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
-// builtin Sub
-// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)
-// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:109)
-// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:123)
+// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:126)
+// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:130)
+// OpSRA(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:144)
 Val x627 = (Val(65535) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1._0.quotLow._super), 0));
 // builtin Mul
 Val x628 = (LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm1.flip._super._super), 0) * x627);
@@ -16229,13 +16279,13 @@ x564 = ValU32Struct{
 // ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
 // NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // DynPo2(zirgen/circuit/rv32im/v2/dsl/po2.zir:40)
-// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:128)
+// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:149)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:28)
 Val x632 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super.shiftMul.checkU16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x632), "value out of range!");
 // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:54)
-// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:129)
+// OpSRLI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:150)
 ValU32Struct x633 = ValU32Struct{
   .low = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.quotLow._super), 0),   .high = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.quotHigh._super), 0)};
 // ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
@@ -16329,57 +16379,59 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x652), "value out of range!");
 Val x653 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x653), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x654 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x654), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x655 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x655), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x656 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x656), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x657 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x657), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x658 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x658), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x659 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.isZero._super._super), 0));
-ComponentStruct x660;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.isZero._super._super), 0))) {
-x660 = x19;
-} else if (to_size_t(x659)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x661 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x661), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x659 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x659), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x662 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x662), "value out of range!");
-x660 = x19;
+Val x660 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x660), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x661 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.isZero._super), 0));
+ComponentStruct x662;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.isZero._super), 0))) {
+x662 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.signedOverflowCase._super), 0))) {
+x662 = x19;
+} else if (to_size_t((x661 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm2._super._0.signedOverflowCase._super), 0)))) {
+x662 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
 x564 = x633;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout0, instInput.minorOnehot._super), 3), _super), 0))) {
+// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
+// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // DynPo2(zirgen/circuit/rv32im/v2/dsl/po2.zir:40)
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:134)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:155)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:29)
 Val x663 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3.shiftMul.checkU16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x663), "value out of range!");
-// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:99)
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:135)
+// TopBit(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:120)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:156)
 Val x664 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3.flip.rest.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x664), "value out of range!");
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:56)
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:136)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:157)
 Val x665 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.remLow.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x665), "value out of range!");
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:57)
@@ -16468,48 +16520,47 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x683), "value out of range!");
 Val x684 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x684), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x685 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x685), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x686 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x686), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x687 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x687), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x688 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x688), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x689 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x689), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x690 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.isZero._super._super), 0));
-ComponentStruct x691;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.isZero._super._super), 0))) {
-x691 = x19;
-} else if (to_size_t(x690)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x692 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x692), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x690 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x690), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x693 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x693), "value out of range!");
-x691 = x19;
+Val x691 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x691), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x692 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.isZero._super), 0));
+ComponentStruct x693;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.isZero._super), 0))) {
+x693 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.signedOverflowCase._super), 0))) {
+x693 = x19;
+} else if (to_size_t((x692 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.signedOverflowCase._super), 0)))) {
+x693 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
-// builtin Sub
-// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:105)
-// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:109)
-// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:137)
+// FlipU16(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:126)
+// FlipU32(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:130)
+// OpSRAI(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:158)
 Val x694 = (Val(65535) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3._0.quotLow._super), 0));
 // builtin Mul
 Val x695 = (LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm3.flip._super._super), 0) * x694);
@@ -16523,7 +16574,7 @@ x564 = ValU32Struct{
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout0, instInput.minorOnehot._super), 4), _super), 0))) {
 // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:54)
-// OpDIV(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:142)
+// OpDIV(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:163)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:30)
 ValU32Struct x699 = ValU32Struct{
   .low = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.quotLow._super), 0),   .high = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.quotHigh._super), 0)};
@@ -16618,41 +16669,41 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x718), "value out of range!");
 Val x719 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x719), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x720 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x720), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x721 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x721), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x722 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x722), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x723 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x723), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x724 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x724), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x725 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.isZero._super._super), 0));
-ComponentStruct x726;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.isZero._super._super), 0))) {
-x726 = x19;
-} else if (to_size_t(x725)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x727 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x727), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x725 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x725), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x728 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x728), "value out of range!");
-x726 = x19;
+Val x726 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x726), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x727 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.isZero._super), 0));
+ComponentStruct x728;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.isZero._super), 0))) {
+x728 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.signedOverflowCase._super), 0))) {
+x728 = x19;
+} else if (to_size_t((x727 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm4._super._0.signedOverflowCase._super), 0)))) {
+x728 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
@@ -16660,7 +16711,7 @@ x564 = x699;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout0, instInput.minorOnehot._super), 5), _super), 0))) {
 // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:54)
-// OpDIVU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:147)
+// OpDIVU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:168)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:31)
 ValU32Struct x729 = ValU32Struct{
   .low = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.quotLow._super), 0),   .high = LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.quotHigh._super), 0)};
@@ -16755,48 +16806,50 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x748), "value out of range!");
 Val x749 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x749), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x750 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x750), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x751 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x751), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x752 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x752), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x753 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x753), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x754 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x754), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x755 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.isZero._super._super), 0));
-ComponentStruct x756;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.isZero._super._super), 0))) {
-x756 = x19;
-} else if (to_size_t(x755)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x757 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x757), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x755 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x755), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x758 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x758), "value out of range!");
-x756 = x19;
+Val x756 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x756), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x757 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.isZero._super), 0));
+ComponentStruct x758;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.isZero._super), 0))) {
+x758 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.signedOverflowCase._super), 0))) {
+x758 = x19;
+} else if (to_size_t((x757 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm5._super._0.signedOverflowCase._super), 0)))) {
+x758 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
 x564 = x729;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout0, instInput.minorOnehot._super), 6), _super), 0))) {
+// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
+// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:56)
-// OpREM(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:152)
+// OpREM(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:173)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:32)
 Val x759 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.remLow.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x759), "value out of range!");
@@ -16890,48 +16943,50 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x778), "value out of range!");
 Val x779 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x779), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x780 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x780), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x781 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x781), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x782 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x782), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x783 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x783), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x784 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x784), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x785 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.isZero._super._super), 0));
-ComponentStruct x786;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.isZero._super._super), 0))) {
-x786 = x19;
-} else if (to_size_t(x785)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x787 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x787), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x785 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x785), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x788 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x788), "value out of range!");
-x786 = x19;
+Val x786 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x786), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x787 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.isZero._super), 0));
+ComponentStruct x788;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.isZero._super), 0))) {
+x788 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.signedOverflowCase._super), 0))) {
+x788 = x19;
+} else if (to_size_t((x787 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm6._super._0.signedOverflowCase._super), 0)))) {
+x788 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
 x564 = x761;
 } else if (to_size_t(LOAD(LAYOUT_LOOKUP(LAYOUT_SUBSCRIPT(LAYOUT_LOOKUP(layout0, instInput.minorOnehot._super), 7), _super), 0))) {
+// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
+// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:56)
-// OpREMU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:157)
+// OpREMU(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:178)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:33)
 Val x789 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.remLow.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x789), "value out of range!");
@@ -17025,41 +17080,41 @@ INVOKE_EXTERN(ctx,assert, (Val(1) - x808), "value out of range!");
 Val x809 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.mul.s3Out.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x809), "value out of range!");
 // U16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:50)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:73)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:71)
 Val x810 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0._0.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x810), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:77)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:75)
 Val x811 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.denomAbs.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x811), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x812 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.denomAbs.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x812), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:82)
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:80)
 Val x813 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.remNormal.low16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x813), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
 Val x814 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.remNormal.high16.arg.val._super), 0), Val(65536));
 INVOKE_EXTERN(ctx,assert, (Val(1) - x814), "value out of range!");
-// builtin Sub
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:88)
-Val x815 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.isZero._super._super), 0));
-ComponentStruct x816;
-if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.isZero._super._super), 0))) {
-x816 = x19;
-} else if (to_size_t(x815)) {
-// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
-// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // CmpLessThanUnsigned(zirgen/circuit/rv32im/v2/dsl/u32.zir:119)
-// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:91)
-Val x817 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0._3.arm1.lt.diff.low16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x817), "value out of range!");
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:96)
+Val x815 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.lt.diff.low16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x815), "value out of range!");
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:50)
-Val x818 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0._3.arm1.lt.diff.high16.arg.val._super), 0), Val(65536));
-INVOKE_EXTERN(ctx,assert, (Val(1) - x818), "value out of range!");
-x816 = x19;
+Val x816 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.lt.diff.high16.arg.val._super), 0), Val(65536));
+INVOKE_EXTERN(ctx,assert, (Val(1) - x816), "value out of range!");
+// builtin Sub
+// DoDiv(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:97)
+Val x817 = (Val(1) - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.isZero._super), 0));
+ComponentStruct x818;
+if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.isZero._super), 0))) {
+x818 = x19;
+} else if (to_size_t(LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.signedOverflowCase._super), 0))) {
+x818 = x19;
+} else if (to_size_t((x817 - LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.mulOutput.arm7._super._0.signedOverflowCase._super), 0)))) {
+x818 = x19;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
@@ -17067,6 +17122,8 @@ x564 = x791;
 } else {
    assert(0 && "Reached unreachable mux arm");
 }
+// ArgU16(zirgen/circuit/rv32im/v2/dsl/lookups.zir:36)
+// NondetU16Reg(zirgen/circuit/rv32im/v2/dsl/lookups.zir:42)
 // NormalizeU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:44)
 // Div0(zirgen/circuit/rv32im/v2/dsl/inst_div.zir:36)
 Val x819 = inRange(Val(0), LOAD(LAYOUT_LOOKUP(layout0, instResult.arm4.pcAdd.low16.arg.val._super), 0), Val(65536));

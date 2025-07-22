@@ -1176,9 +1176,9 @@ dependencies = [
 
 [[package]]
 name = "cargo-semver-checks"
-version = "0.40.0"
+version = "0.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cc25e15d8ecc6afe4c5253d872f8ad07aef631c49b8a00c75f73f6761b98903"
+checksum = "1dd5b754c3079cc930a66d45b51c225b8b36dec7c7de266ed5e69b3cdaa2cbd6"
 dependencies = [
  "anstream",
  "anstyle",
@@ -5817,7 +5817,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.3"
+version = "1.4.6"
 dependencies = [
  "anyhow",
  "clap 4.5.37",
@@ -5899,7 +5899,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5931,7 +5931,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "2.0.1"
+version = "4.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -5945,7 +5945,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5972,7 +5972,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5983,7 +5983,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "bit-vec 0.8.0",
@@ -6020,7 +6020,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.2"
+version = "4.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -6278,7 +6278,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.3"
+version = "2.0.4"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -6433,15 +6433,6 @@ dependencies = [
 
 [[package]]
 name = "rustdoc-types"
-version = "0.31.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d368a6e25f5445187e8f67a7ec1cdf38f6d361fb26f9476b8b5f0bd91d88fd60"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "rustdoc-types"
 version = "0.32.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fd5cb7a0c0a5a4f6bc429274fc1073d395237c83ef13d0ac728e0f95f5499ca"
@@ -6465,6 +6456,26 @@ name = "rustdoc-types"
 version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf583db9958b3161d7980a56a8ee3c25e1a40708b81259be72584b7e0ea07c95"
+dependencies = [
+ "rustc-hash",
+ "serde",
+]
+
+[[package]]
+name = "rustdoc-types"
+version = "0.39.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3b61d5673c3f4b49d35be6a58c49210596f61b8db580bc3b6d9dee5e9dc5458"
+dependencies = [
+ "rustc-hash",
+ "serde",
+]
+
+[[package]]
+name = "rustdoc-types"
+version = "0.41.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79f6e675de57460d306a273321d3799b010b23713144caffe00b4a4fde83620e"
 dependencies = [
  "rustc-hash",
  "serde",
@@ -6577,6 +6588,7 @@ dependencies = [
  "reqwest",
  "semver",
  "serde",
+ "serde_json",
  "strum",
  "tar",
  "tempfile",
@@ -7670,20 +7682,6 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "35.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85cb60264d09c011f5344afd39263f575a32d82ce99cb391c49d70467603f466"
-dependencies = [
- "cargo_metadata",
- "cargo_toml",
- "rayon",
- "rustc-hash",
- "rustdoc-types 0.31.0",
- "trustfall",
-]
-
-[[package]]
-name = "trustfall-rustdoc-adapter"
 version = "36.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "289d3e1255938360aa977aacbd64a0f118e29ece178fbe805b3d18239ed725de"
@@ -7725,6 +7723,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "trustfall-rustdoc-adapter"
+version = "43.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c1be370d73f9ff2012376a4457104e1408c0db25124115c085f50bd21a3b83b"
+dependencies = [
+ "cargo_metadata",
+ "cargo_toml",
+ "rayon",
+ "rustc-hash",
+ "rustdoc-types 0.39.0",
+ "trustfall",
+]
+
+[[package]]
+name = "trustfall-rustdoc-adapter"
+version = "45.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1309deb9c8f56e5a70509d9311bad2faa44bc068a103a5bf9a114da57a5a519"
+dependencies = [
+ "cargo_metadata",
+ "cargo_toml",
+ "rayon",
+ "rustc-hash",
+ "rustdoc-types 0.41.0",
+ "trustfall",
+]
+
+[[package]]
 name = "trustfall_core"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7754,9 +7780,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.22.0"
+version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df01242d6e71aab9fe80cb5334d12208808a463a5dc683fbbad8100098812f86"
+checksum = "a181ab152425e80f83ede86378acd2eba689845a225e955cc78cc943538bb336"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -7764,10 +7790,11 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.12",
  "trustfall",
- "trustfall-rustdoc-adapter 35.5.3",
  "trustfall-rustdoc-adapter 36.5.5",
  "trustfall-rustdoc-adapter 37.3.5",
  "trustfall-rustdoc-adapter 39.1.5",
+ "trustfall-rustdoc-adapter 43.0.1",
+ "trustfall-rustdoc-adapter 45.0.1",
 ]
 
 [[package]]
