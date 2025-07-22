@@ -448,7 +448,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.machine_mode = 0;
         self.user_cycles = 0;
         self.cycles = SessionCycles::default();
-        self.pc = ByteAddr(0);
         self.ecall_metrics = EcallMetrics::default();
     }
 

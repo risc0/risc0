@@ -76,11 +76,8 @@ struct TraceCacheLine {
 impl Default for TraceCacheLine {
     fn default() -> Self {
         Self {
-            pc: 0,
-            entry: DispatchEntry {
-                kind: InsnKind::Invalid,
-                handler_type: HandlerType::Compute,
-            },
+            pc: u32::MAX,                   // 0xFFFF_FFFF will never match a real PC
+            entry: DispatchEntry::default() // kind == Invalid
         }
     }
 }
