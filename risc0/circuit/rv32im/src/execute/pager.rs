@@ -259,9 +259,8 @@ impl WorkingImage {
     pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
         // Only return indices of pages that actually exist (were accessed)
         // Don't return all vector indices as many may be empty
-        let zero_page = zero_page();
         self.pages.iter().enumerate()
-            .filter(|(_, page)| page != zero_page)
+            .filter(|(_, page)| !page.data().iter().all(|&b| b == 0))
             .map(|(i, _)| i as u32)
             .collect()
     }
