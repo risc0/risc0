@@ -183,13 +183,23 @@ fn create_segments(
 
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn new(
-        image: MemoryImage,
+        mut image: MemoryImage,
         syscall_handler: &'a S,
         input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     ) -> Self {
+        // Initialize program counter for user mode programs
+        let pc = if image.get_page_indexes().contains(&USER_START_ADDR.waddr().page_idx()) {
+            // User mode program - load entry point from USER_START_ADDR
+            let entry_page = image.get_page(USER_START_ADDR.waddr().page_idx()).unwrap();
+            ByteAddr(entry_page.load(USER_START_ADDR.waddr()))
+        } else {
+            // Kernel mode program - will be loaded by resume() from SUSPEND_PC_ADDR
+            ByteAddr(0)
+        };
+
         Self {
-            pc: ByteAddr(0),
+            pc,
             user_pc: ByteAddr(0),
             machine_mode: 0,
             user_cycles: 0,
@@ -223,7 +233,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.reset();
 
         let mut emu = Emulator::new();
-        Risc0Machine::resume(self)?;
+        // Only call resume for kernel mode programs (where PC was initialized to 0)
+        if self.pc == ByteAddr(0) {
+            Risc0Machine::resume(self)?;
+        }
 
         let (commit_sender, commit_recv) = sync_channel(MAX_OUTSTANDING_SEGMENTS - 1);
 
