@@ -87,11 +87,11 @@ fn sha256_for_file(file: &mut File) -> Result<String> {
 
 #[cfg(feature = "publish")]
 fn validate_tar_xz(file: &mut File) -> Result<()> {
+    use liblzma::bufread::XzDecoder;
     use std::io::BufReader;
     use tar::Archive;
-    use xz::bufread::XzDecoder;
 
-    let mut ar = Archive::new(XzDecoder::new(BufReader::new(file)));
+    let mut ar = Archive::new(XzDecoder::new_parallel(BufReader::new(file)));
     let entries = ar
         .entries()
         .map_err(|e| RzupError::Other(format!("invalid tar.xz file: {e}")))?
