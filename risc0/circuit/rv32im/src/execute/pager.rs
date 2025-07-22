@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    collections::{BTreeSet, HashMap},
+    collections::{BTreeMap, BTreeSet},
     sync::OnceLock,
 };
 
@@ -229,30 +229,25 @@ fn zero_page() -> &'static Page {
 #[derive(Default, Debug)]
 pub(crate) struct WorkingImage {
     #[debug(skip)]
-    pub(crate) pages: HashMap<u32, Page>,
+    pub(crate) pages: BTreeMap<u32, Page>,
 }
 
 impl WorkingImage {
     #[inline(always)]
     fn get_page(&mut self, page_idx: u32) -> Result<Page> {
         // If page exists, return it
-        if self.pages.contains_key(&page_idx) {
-            return Ok(self.pages.get(&page_idx).unwrap().clone());
+        if let Some(page) = self.pages.get(&page_idx) {
+            return Ok(page.clone());
         }
-
-        // Extend the vector to accommodate the new page
         self.pages.insert(page_idx, zero_page().clone());
         Ok(zero_page().clone())
     }
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
-        // Ensure the vector is large enough
         self.pages.insert(page_idx, page);
     }
 
     pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
-        // Only return indices of pages that actually exist (were accessed)
-        // Don't return all vector indices as many may be empty
         self.pages.keys().copied().collect()
     }
 }
@@ -283,13 +278,12 @@ impl PagedMemory {
             user_registers[idx] = page.load(USER_REGS_ADDR.waddr() + idx);
         }
 
-        // Convert BTreeMap to HashMap for WorkingImage
+        // Convert BTreeMap to BTreeMap for WorkingImage
         let pages_map = image.into_pages();
-        let pages_hashmap: HashMap<u32, Page> = pages_map.into_iter().collect();
 
         Self {
             image: WorkingImage {
-                pages: pages_hashmap,
+                pages: pages_map,
             },
             page_table: PageTable::new(),
             page_cache: Vec::new(),
