@@ -41,6 +41,9 @@ pub enum RzupError {
 
     #[error("Unsupported platform: {0}")]
     UnsupportedPlatform(String),
+
+    #[error("Unsupported distribution platform: {0}")]
+    UnsupportedDistributionPlatform(String),
 }
 
 impl From<std::io::Error> for RzupError {
