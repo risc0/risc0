@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    collections::BTreeSet,
+    collections::{BTreeSet, HashMap},
     sync::OnceLock,
 };
 
@@ -229,40 +229,31 @@ fn zero_page() -> &'static Page {
 #[derive(Default, Debug)]
 pub(crate) struct WorkingImage {
     #[debug(skip)]
-    pub(crate) pages: Vec<Page>,
+    pub(crate) pages: HashMap<u32, Page>,
 }
 
 impl WorkingImage {
     #[inline(always)]
     fn get_page(&mut self, page_idx: u32) -> Result<Page> {
         // If page exists, return it
-        if page_idx < self.pages.len() as u32 {
-            return Ok(self.pages[page_idx as usize].clone());
+        if self.pages.contains_key(&page_idx) {
+            return Ok(self.pages.get(&page_idx).unwrap().clone());
         }
 
         // Extend the vector to accommodate the new page
-        while self.pages.len() <= page_idx as usize {
-            self.pages.push(zero_page().clone());
-        }
-
+        self.pages.insert(page_idx, zero_page().clone());
         Ok(zero_page().clone())
     }
 
     fn set_page(&mut self, page_idx: u32, page: Page) {
         // Ensure the vector is large enough
-        while self.pages.len() <= page_idx as usize {
-            self.pages.push(zero_page().clone());
-        }
-        self.pages[page_idx as usize] = page;
+        self.pages.insert(page_idx, page);
     }
 
     pub(crate) fn get_page_indexes(&self) -> BTreeSet<u32> {
         // Only return indices of pages that actually exist (were accessed)
         // Don't return all vector indices as many may be empty
-        self.pages.iter().enumerate()
-            .filter(|(_, page)| !page.data().iter().all(|&b| b == 0))
-            .map(|(i, _)| i as u32)
-            .collect()
+        self.pages.keys().copied().collect()
     }
 }
 
@@ -292,17 +283,13 @@ impl PagedMemory {
             user_registers[idx] = page.load(USER_REGS_ADDR.waddr() + idx);
         }
 
-        // Convert BTreeMap to Vec for WorkingImage
+        // Convert BTreeMap to HashMap for WorkingImage
         let pages_map = image.into_pages();
-        let max_page_idx = pages_map.keys().max().copied().unwrap_or(0);
-        let mut pages_vec = vec![zero_page().clone(); (max_page_idx + 1) as usize];
-        for (page_idx, page) in pages_map {
-            pages_vec[page_idx as usize] = page;
-        }
+        let pages_hashmap: HashMap<u32, Page> = pages_map.into_iter().collect();
 
         Self {
             image: WorkingImage {
-                pages: pages_vec,
+                pages: pages_hashmap,
             },
             page_table: PageTable::new(),
             page_cache: Vec::new(),
