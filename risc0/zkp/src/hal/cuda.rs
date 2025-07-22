@@ -44,7 +44,7 @@ use crate::{
 };
 
 // The GPU becomes unstable as the number of concurrent provers grow.
-fn singleton() -> &'static ReentrantMutex<()> {
+pub fn singleton() -> &'static ReentrantMutex<()> {
     static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
     ONCE.get_or_init(|| ReentrantMutex::new(()))
 }

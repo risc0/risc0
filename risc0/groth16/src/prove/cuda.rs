@@ -24,7 +24,7 @@ use crate::{ProofJson, Seal};
 use super::seal_to_json::to_json;
 
 pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
-    tracing::debug!("shrink_wrap: {} seal bytes", seal_bytes.len());
+    tracing::info!("shrink_wrap: {} seal bytes", seal_bytes.len());
 
     let root_dir =
         Rzup::new()?.get_version_dir(&Component::Risc0Groth16, &Version::new(0, 1, 0))?;
@@ -38,12 +38,16 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
     let witness_params = WitnessParams::new(&root_dir);
     let witness = calc_witness(&witness_params.graph_path, &inputs)?;
 
-    let prover_params = ProverParams::new(work_dir, witness.as_ptr())?;
-    risc0_groth16_sys::prove(&prover_params, &setup_params)?;
+    {
+        let _lock = risc0_zkp::hal::cuda::singleton();
 
-    let contents = std::fs::read_to_string(prover_params.proof_path.as_path())?;
-    let proof_json: ProofJson = serde_json::from_str(&contents)?;
-    proof_json.try_into()
+        let prover_params = ProverParams::new(work_dir, witness.as_ptr())?;
+        risc0_groth16_sys::prove(&prover_params, &setup_params)?;
+
+        let contents = std::fs::read_to_string(prover_params.proof_path.as_path())?;
+        let proof_json: ProofJson = serde_json::from_str(&contents)?;
+        proof_json.try_into()
+    }
 }
 
 struct CalcWitness {

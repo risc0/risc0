@@ -45,8 +45,7 @@ pub(crate) fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     std::fs::write(work_dir.join("seal.r0"), identity_p254_seal_bytes)?;
     let seal_path = work_dir.join("input.json");
     let proof_path = work_dir.join("proof.json");
-    let mut seal_json = Vec::new();
-    to_json(identity_p254_seal_bytes, &mut seal_json)?;
+    let seal_json = to_json(identity_p254_seal_bytes)?;
     std::fs::write(seal_path, seal_json)?;
 
     tracing::debug!("risc0-groth16-prover");
