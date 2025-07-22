@@ -179,10 +179,10 @@ impl FromStr for Component {
 #[cfg(feature = "install")]
 fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) -> Result<()> {
     use flate2::bufread::GzDecoder;
+    use liblzma::bufread::XzDecoder;
     use std::fs::File;
     use std::io::BufReader;
     use tar::Archive;
-    use xz::bufread::XzDecoder;
 
     env.emit(RzupEvent::Debug {
         message: format!(
@@ -201,7 +201,7 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
             Archive::new(GzDecoder::new(reader)).unpack(target_dir)?;
         }
         f if f.ends_with(".tar.xz") => {
-            Archive::new(XzDecoder::new(reader)).unpack(target_dir)?;
+            Archive::new(XzDecoder::new_parallel(reader)).unpack(target_dir)?;
         }
         _ => {
             return Err(crate::RzupError::InstallationFailed(format!(

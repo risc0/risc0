@@ -14,7 +14,7 @@ path = "src/bin/rzup.rs"
 [features]
 default = ["cli", "install", "publish"]
 cli = ["dep:clap", "dep:indicatif", "dep:colored", "dep:is-terminal"]
-install = ["dep:reqwest", "dep:tar", "dep:xz", "dep:flate2", "dep:fs2"]
+install = ["dep:reqwest", "dep:tar", "dep:liblzma", "dep:flate2", "dep:fs2"]
 publish = [
     "dep:aws-config",
     "dep:aws-credential-types",
@@ -52,7 +52,7 @@ tempfile = "3.14.0"
 thiserror = "2.0.6"
 tokio = { version = "1.43.0", features = ["rt", "rt-multi-thread", "macros"], optional = true }
 toml = "0.8.19"
-xz = { version = "0.1.0", optional = true }
+liblzma = { version = "0.4", optional = true, features = ["static", "parallel"] }
 yaml-rust2 = "0.10.1"
 
 [dev-dependencies]
