@@ -625,11 +625,17 @@ mod docker {
         );
 
         let prover = DevModeProver::new();
-        let receipt = prover.compress(&ProverOpts::composite(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::composite().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::succinct().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::groth16(), &fake).unwrap();
+        let receipt = prover
+            .compress(&ProverOpts::groth16().with_dev_mode(true), &fake)
+            .unwrap();
         ensure_fake(receipt);
     }
 
@@ -643,8 +649,8 @@ mod docker {
         prover.prove(env, MULTI_TEST_ELF).unwrap().receipt
     }
 
-    fn exec_verify(receipt: &Receipt) {
-        let input: (_, Digest) = (receipt.clone(), MULTI_TEST_ID.into());
+    fn exec_verify(receipt: &Receipt, dev_mode: bool) {
+        let input: (_, Digest, bool) = (receipt.clone(), MULTI_TEST_ID.into(), dev_mode);
         let env = ExecutorEnv::builder()
             .write(&input)
             .unwrap()
@@ -661,19 +667,19 @@ mod docker {
     #[test_log::test]
     fn verify_in_guest() {
         let composite_receipt_sha256 = generate_receipt(ProverOpts::fast());
-        exec_verify(&composite_receipt_sha256);
+        exec_verify(&composite_receipt_sha256, false /* dev_mode */);
         let composite_receipt = generate_receipt(ProverOpts::composite());
-        exec_verify(&composite_receipt);
+        exec_verify(&composite_receipt, false /* dev_mode */);
         let succinct_receipt = get_prover_server(&ProverOpts::succinct())
             .unwrap()
             .compress(&ProverOpts::succinct(), &composite_receipt)
             .unwrap();
-        exec_verify(&succinct_receipt);
+        exec_verify(&succinct_receipt, false /* dev_mode */);
         let groth16_receipt = get_prover_server(&ProverOpts::groth16())
             .unwrap()
             .compress(&ProverOpts::groth16(), &succinct_receipt)
             .unwrap();
-        exec_verify(&groth16_receipt);
+        exec_verify(&groth16_receipt, false /* dev_mode */);
         groth16_receipt.inner.groth16().unwrap();
     }
 

@@ -17,7 +17,7 @@ risc0-zkvm = { path = "../..", default-features = false, features = [
   "getrandom",
 ] }
 risc0-zkvm-methods = { path = "..", features = ["std"] }
-risc0-zkvm-platform = { path = "../../platform", default-features = false, features = ["sys-getenv", "sys-args"] }
+risc0-zkvm-platform = { path = "../../platform", default-features = false }
 
 [profile.release]
 lto = true
