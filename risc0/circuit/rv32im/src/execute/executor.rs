@@ -141,8 +141,8 @@ fn create_segments(
         let pre_digest = existing_image.image_id();
         let partial_image = compute_partial_image(&mut existing_image, req.page_indexes);
 
-        for (idx, page) in req.partial_image.pages {
-            existing_image.set_page(idx, page);
+        for (idx, page) in req.partial_image.pages.iter().enumerate() {
+            existing_image.set_page(idx as u32, page.clone());
         }
         existing_image.update_digests();
         let post_digest = existing_image.image_id();

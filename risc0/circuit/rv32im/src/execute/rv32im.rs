@@ -65,7 +65,7 @@ pub trait EmuContext {
 // Fixed-size direct-mapped cache (256 entries ≈ one cache line)
 // This cache stores instruction decoding results to avoid repeated
 // dispatch table lookups for frequently executed instructions.
-const CACHE_N: usize =256;
+const CACHE_N: usize = 256;
 
 #[derive(Clone, Copy)]
 struct TraceCacheLine {
@@ -88,9 +88,11 @@ pub struct Emulator {
 
 impl Default for Emulator {
     fn default() -> Self {
-        Self {
-            tc: [TraceCacheLine::default(); CACHE_N],
-        }
+        let tc = [TraceCacheLine {
+            pc: u32::MAX,
+            entry: DispatchEntry::default(),
+        }; CACHE_N];
+        Self { tc }
     }
 }
 
