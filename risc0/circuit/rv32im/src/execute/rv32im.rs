@@ -110,20 +110,29 @@ enum HandlerType {
 // Build dispatch index from instruction fields
 #[inline(always)]
 const fn dispatch_index(opcode: u32, func3: u32, func7: u32) -> usize {
-    // We need to handle the wildcards in the original match
-    // For I-format instructions that ignore func7, we'll normalize func7 to 0
     let normalized_func7 = match opcode {
+        // U-format instructions: func3 is part of rd, func7 is part of immediate
+        0b0110111 | 0b0010111 => 0,  // LUI, AUIPC
+        // J-format: func3 is part of immediate
+        0b1101111 => 0,  // JAL
+        // I-format instructions
         0b0010011 => match func3 {
-            0b001 | 0b101 => func7 & 0x7F, // SllI, SrlI, SraI use func7
-            _ => 0, // Other I-format ops ignore func7
+            0b001 | 0b101 => func7 & 0x7F, // Shifts use func7
+            _ => 0,
         },
-        0b0000011 | 0b0100011 | 0b1100011 | 0b0110111 | 0b0010111 | 0b1101111 => 0,
-        0b1100111 => 0, // JALR ignores func7 (wildcard in original match)
+        // Other I-format, S-format, B-format ignore func7
+        0b0000011 | 0b0100011 | 0b1100011 | 0b1100111 => 0,
+        // R-format uses full func7
         _ => func7 & 0x7F,
     };
 
-    // Create a unique index: 7 bits opcode + 3 bits func3 + 7 bits func7 = 17 bits max
-    ((opcode as usize) << 10) | ((func3 as usize) << 7) | (normalized_func7 as usize)
+    // For U-format and J-format, ignore func3 as it's not part of the opcode
+    let normalized_func3 = match opcode {
+        0b0110111 | 0b0010111 | 0b1101111 => 0,
+        _ => func3 & 0x7,
+    };
+
+    ((opcode as usize) << 10) | ((normalized_func3 as usize) << 7) | (normalized_func7 as usize)
 }
 
 // Build the dispatch table at compile time
