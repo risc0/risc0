@@ -22,8 +22,8 @@ use ruint::Uint;
 
 type U96 = Uint<96, 2>;
 
-fn main() -> anyhow::Result<()> {
-    let input: Input = borsh::from_slice(&env::read_frame())?;
+fn main() {
+    let input: Input = borsh::from_slice(&env::read_frame()).unwrap();
 
     let (work_log_id, initial_commit) = match input.state {
         State::Initial { work_log_id } => (work_log_id, WorkLog::EMPTY.commit()),
@@ -77,13 +77,14 @@ fn main() -> anyhow::Result<()> {
         update_value += work.value;
     }
 
-    env::commit_slice(&borsh::to_vec(&Journal {
-        work_log_id,
-        self_image_id: input.self_image_id,
-        updated_commit: root,
-        initial_commit,
-        update_value,
-    })?);
-
-    Ok(())
+    env::commit_slice(
+        &borsh::to_vec(&Journal {
+            work_log_id,
+            self_image_id: input.self_image_id,
+            updated_commit: root,
+            initial_commit,
+            update_value,
+        })
+        .unwrap(),
+    );
 }

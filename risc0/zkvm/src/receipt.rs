@@ -43,7 +43,7 @@ use crate::{
     claim::Unknown,
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
-    Assumption, Assumptions, MaybePruned, Output, ReceiptClaim,
+    Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 
 pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
@@ -453,6 +453,26 @@ where
         FakeReceipt {
             claim: MaybePruned::Pruned(self.claim.digest()),
         }
+    }
+}
+
+impl TryFrom<FakeReceipt<ReceiptClaim>> for Receipt {
+    type Error = PrunedValueError;
+
+    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the jounal must be
+    /// populated on the receipt claim (i.e. it cannot be pruned).
+    fn try_from(fake_receipt: FakeReceipt<ReceiptClaim>) -> Result<Self, Self::Error> {
+        // Attempt to copy the journal from the receipt claim, returning an error if pruned.
+        let journal = fake_receipt
+            .claim
+            .as_value()?
+            .output
+            .as_value()?
+            .as_ref()
+            .map(|output| Ok(output.journal.as_value()?.clone()))
+            .transpose()?
+            .unwrap_or_default();
+        Ok(Receipt::new(InnerReceipt::Fake(fake_receipt), journal))
     }
 }
 
