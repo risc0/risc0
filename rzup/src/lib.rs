@@ -496,6 +496,18 @@ mod tests {
 
     type HyperResponse = hyper::Response<http_body_util::Full<hyper::body::Bytes>>;
 
+    /// pre-calculated SHA256 sum of tar.xz with `hello-world/tar_contents.bin`
+    const HELLO_WORLD_DUMMY_TAR_XZ_SHA256: &str =
+        "fb05f4f1c334bd3d32ccb043626aad6a849467f9e7674856a1f81906d145f5ac";
+
+    /// pre-calculated SHA256 sum of tar.xz with `hello-world2/tar_contents.bin`
+    const HELLO_WORLD2_DUMMY_TAR_XZ_SHA256: &str =
+        "68ec421acb728e69d0b4497fe6a622f7347b116649039b48fd00c5a062ceddb4";
+
+    /// pre-calculated SHA256 sum of tar.xz with `hello-world2/tar_contents.bin`
+    const HELLO_WORLD3_DUMMY_TAR_XZ_SHA256: &str =
+        "ed9efde9a314a9063a9b91d21e9eb1508defce0817ee6a81142d8bf6fb1f045e";
+
     fn build_mock_server_data(install_script: String) -> HashMap<String, HyperResponse> {
         fn json_response(json: impl Into<String>) -> HyperResponse {
             hyper::Response::builder()
@@ -582,14 +594,21 @@ mod tests {
                 "1.0.0": {
                     "target_agnostic": {
                         "artifact": {
-                            "sha256": "abcdef0001"
+                            "sha256": HELLO_WORLD_DUMMY_TAR_XZ_SHA256
                         },
                     }
                 },
                 "2.0.0": {
                     "target_agnostic": {
                         "artifact": {
-                            "sha256": "abcdef0002"
+                            "sha256": HELLO_WORLD2_DUMMY_TAR_XZ_SHA256
+                        },
+                    }
+                },
+                "3.0.0-badsha": {
+                    "target_agnostic": {
+                        "artifact": {
+                            "sha256": HELLO_WORLD3_DUMMY_TAR_XZ_SHA256
                         },
                     }
                 },
@@ -648,8 +667,9 @@ mod tests {
             "/risc0/install".into() => text_response(install_script.clone()),
             "/s3/rzup/components/risc0-groth16/distribution_manifest.json".into() =>
                 json_response(risc0_groth16_manifest_json),
-            "/s3/rzup/components/risc0-groth16/sha256/abcdef0001".into() => dummy_tar_xz_response("abcdef0001"),
-            "/s3/rzup/components/risc0-groth16/sha256/abcdef0002".into() => dummy_tar_xz_response("abcdef0002"),
+            format!("/s3/rzup/components/risc0-groth16/sha256/{HELLO_WORLD_DUMMY_TAR_XZ_SHA256}") => dummy_tar_xz_response("hello-world"),
+            format!("/s3/rzup/components/risc0-groth16/sha256/{HELLO_WORLD2_DUMMY_TAR_XZ_SHA256}") => dummy_tar_xz_response("hello-world2"),
+            format!("/s3/rzup/components/risc0-groth16/sha256/{HELLO_WORLD3_DUMMY_TAR_XZ_SHA256}") => dummy_tar_xz_response("hello-world2"),
         }
     }
 
@@ -1558,12 +1578,12 @@ mod tests {
             Component::Risc0Groth16,
             Version::new(1, 0, 0),
             format!(
-                "{base_url}/rzup/components/risc0-groth16/sha256/abcdef0001",
+                "{base_url}/rzup/components/risc0-groth16/sha256/{HELLO_WORLD_DUMMY_TAR_XZ_SHA256}",
                 base_url = server.base_urls.s3_base_url
             ),
-            136, /* download_size */
+            140, /* download_size */
             vec![format!(
-                ".risc0/extensions/v1.0.0-risc0-groth16/abcdef0001/tar_contents.bin"
+                ".risc0/extensions/v1.0.0-risc0-groth16/hello-world/tar_contents.bin"
             )],
             vec![],
             ".risc0/extensions/v1.0.0-risc0-groth16",
@@ -2227,6 +2247,66 @@ mod tests {
 
         assert_eq!(
             rzup.list_versions(&Component::CargoRiscZero).unwrap(),
+            vec![]
+        );
+    }
+
+    #[test]
+    fn install_bad_shasum() {
+        let server = MockDistributionServer::new();
+        let (_tmp_dir, mut rzup) = setup_test_env(
+            server.base_urls.clone(),
+            None,
+            None,
+            Platform::new("x86_64", Os::Linux),
+        );
+
+        let base_url = &server.base_urls.s3_base_url;
+        run_and_assert_events(
+            &mut rzup,
+            |rzup| {
+                let error = rzup
+                    .install_component(
+                        &Component::Risc0Groth16,
+                        Some("3.0.0-badsha".parse().unwrap()),
+                        false,
+                    )
+                    .unwrap_err();
+                assert_eq!(
+                    error,
+                    RzupError::Sha256Mismatch {
+                        expected: HELLO_WORLD3_DUMMY_TAR_XZ_SHA256.into(),
+                        actual: HELLO_WORLD2_DUMMY_TAR_XZ_SHA256.into()
+                    }
+                );
+            },
+            vec![
+                RzupEvent::InstallationStarted {
+                    id: "risc0-groth16".into(),
+                    version: "3.0.0-badsha".into(),
+                },
+                RzupEvent::TransferStarted {
+                    kind: TransferKind::Download,
+                    id: "risc0-groth16".into(),
+                    version: Some("3.0.0-badsha".into()),
+                    url: Some(format!(
+                        "{base_url}/rzup/components/risc0-groth16/sha256/{HELLO_WORLD3_DUMMY_TAR_XZ_SHA256}"
+                    )),
+                    len: Some(140),
+                },
+                RzupEvent::TransferProgress {
+                    id: "risc0-groth16".into(),
+                    incr: 140,
+                },
+                RzupEvent::InstallationFailed {
+                    id: "risc0-groth16".into(),
+                    version: "3.0.0-badsha".into(),
+                },
+            ],
+        );
+
+        assert_eq!(
+            rzup.list_versions(&Component::Risc0Groth16).unwrap(),
             vec![]
         );
     }

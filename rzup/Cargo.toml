@@ -30,7 +30,6 @@ publish = [
     "dep:liblzma",
     "dep:reqwest",
     "dep:serde_json",
-    "dep:sha2",
     "dep:tokio",
     "dep:walkdir",
     "dep:tar",
@@ -45,6 +44,7 @@ colored = { version = "3.0.0", optional = true }
 flate2 = { version = "1.0.35", optional = true }
 fs2 = { version = "0.4.3", optional = true }
 http = { version = "1", optional = true }
+hex = "0.4"
 indicatif = { version = "0.17.9", optional = true }
 is-terminal = { version = "0.4.15", optional = true }
 reqwest = { version = "0.12.15", default-features = false, features = [
@@ -55,7 +55,8 @@ reqwest = { version = "0.12.15", default-features = false, features = [
 semver = { version = "1.0.23", features = ["serde"] }
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = { version = "1.0", optional = true }
-sha2 = { version = "0.10", optional = true }
+serde_with = "3"
+sha2 = { version = "0.10", default-features = false }
 strum = { version = "0.27.1", features = ["derive"] }
 tar = { version = "0.4.43", optional = true }
 tempfile = "3.14.0"

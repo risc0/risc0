@@ -13,7 +13,11 @@
 // limitations under the License.
 
 use crate::components::Component;
-use crate::distribution::{download_bytes, download_json, DistributionPlatform, ProgressWriter};
+use crate::distribution::{
+    download_bytes, download_json,
+    sha2::{Sha256Digest, Sha256Writer},
+    DistributionPlatform, ProgressWriter,
+};
 #[cfg(feature = "publish")]
 use crate::distribution::{upload_bytes, ProgressReader};
 use crate::env::Environment;
@@ -23,12 +27,12 @@ use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};
 
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, DisplayFromStr};
+
 use std::collections::HashMap;
 use std::fmt;
 #[cfg(feature = "publish")]
-use std::{
-    collections::hash_map::Entry, fs::File, io::Read as _, io::Seek as _, io::SeekFrom, path::Path,
-};
+use std::{collections::hash_map::Entry, fs::File, io::Seek as _, io::SeekFrom, path::Path};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 #[serde(transparent)]
@@ -40,9 +44,11 @@ impl fmt::Display for TargetTriple {
     }
 }
 
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 struct Artifact {
-    sha256: String,
+    #[serde_as(as = "DisplayFromStr")]
+    sha256: Sha256Digest,
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -66,23 +72,6 @@ enum Release {
 struct DistributionManifest {
     releases: HashMap<semver::Version, Release>,
     latest_version: semver::Version,
-}
-
-#[cfg(feature = "publish")]
-fn sha256_for_file(file: &mut File) -> Result<String> {
-    use sha2::Digest as _;
-
-    let mut hasher = sha2::Sha256::new();
-
-    let mut chunk = vec![0u8; 1024 * 1024];
-    loop {
-        let bytes_read = file.read(&mut chunk)?;
-        if bytes_read == 0 {
-            break;
-        }
-        hasher.update(&chunk[..bytes_read]);
-    }
-    Ok(format!("{:x}", hasher.finalize()))
 }
 
 #[cfg(feature = "publish")]
@@ -229,7 +218,7 @@ impl<'a> S3Bucket<'a> {
         &self,
         version: &Version,
         platform: Option<Platform>,
-        sha256: String,
+        sha256: Sha256Digest,
         manifest: &mut DistributionManifest,
     ) {
         let artifact = Artifact { sha256 };
@@ -300,7 +289,7 @@ impl<'a> S3Bucket<'a> {
         creds: &AwsCredentials,
         data_stream: File,
         data_length: u64,
-        sha256: &String,
+        sha256: &Sha256Digest,
     ) -> Result<()> {
         let base_url = &self.base_urls.s3_base_url;
         let upload_url = format!("{base_url}/rzup/components/{component}/sha256/{sha256}");
@@ -372,7 +361,7 @@ impl<'a> S3Bucket<'a> {
         });
 
         let data_length = data_stream.metadata()?.len();
-        let sha256 = sha256_for_file(&mut data_stream)?;
+        let sha256 = Sha256Digest::calculate_for_file(&mut data_stream)?;
         data_stream.seek(SeekFrom::Start(0))?;
 
         // Upload the artifact to S3
@@ -477,6 +466,7 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
         };
 
         let archive_name = component.archive_name(platform)?;
+        let artifact_sha256 = &artifact.sha256;
 
         let download_path = env.tmp_dir().join(archive_name);
         let mut download_file = std::fs::OpenOptions::new()
@@ -486,8 +476,8 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
             .open(&download_path)?;
 
         let base_url = &self.base_urls.s3_base_url;
-        let sha256 = &artifact.sha256;
-        let download_url = format!("{base_url}/rzup/components/{component}/sha256/{sha256}");
+        let download_url =
+            format!("{base_url}/rzup/components/{component}/sha256/{artifact_sha256}");
         let mut resp = download_bytes(&download_url, &None)?;
 
         env.emit(RzupEvent::TransferStarted {
@@ -498,12 +488,26 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
             len: resp.content_length(),
         });
 
-        resp.copy_to(&mut ProgressWriter::new(
+        let mut writer = Sha256Writer::new(ProgressWriter::new(
             component.to_string(),
             env,
             &mut download_file,
-        ))
-        .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+        ));
+        resp.copy_to(&mut writer)
+            .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
+
+        let download_sha = writer.finish();
+
+        if &download_sha != artifact_sha256 {
+            env.emit(RzupEvent::InstallationFailed {
+                id: component.to_string(),
+                version: version.to_string(),
+            });
+            return Err(RzupError::Sha256Mismatch {
+                expected: artifact_sha256.to_string(),
+                actual: download_sha.to_string(),
+            });
+        }
 
         env.emit(RzupEvent::TransferCompleted {
             kind: TransferKind::Download,
