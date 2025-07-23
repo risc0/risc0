@@ -134,11 +134,12 @@ mod tests {
 
     fn setup_test_env() -> (TempDir, Environment) {
         let tmp_dir = TempDir::new().unwrap();
-        let env = Environment::with_paths_token_platform_and_event_handler(
+        let env = Environment::with_paths_creds_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
+            || None,
             Platform::new("x86_64", Os::Linux),
             |_| {},
         )
