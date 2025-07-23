@@ -156,14 +156,14 @@ fn parse_cpp_version_test() {
     assert!(parse_cpp_version("2025.01").is_err());
 }
 
-struct ProgressWriter<'a, WriterT> {
+pub(crate) struct ProgressWriter<'a, WriterT> {
     id: String,
     env: &'a Environment,
     writer: WriterT,
 }
 
 impl<'a, WriterT> ProgressWriter<'a, WriterT> {
-    fn new(id: String, env: &'a Environment, writer: WriterT) -> Self {
+    pub(crate) fn new(id: String, env: &'a Environment, writer: WriterT) -> Self {
         Self { id, env, writer }
     }
 }

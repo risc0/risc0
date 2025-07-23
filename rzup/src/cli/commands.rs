@@ -310,13 +310,17 @@ impl BuildCommand {
 }
 
 pub const PUBLISH_HELP: &str = "Discussion:
-    Publishes a component to S3 at a particular version, or updates the current latest version.
+    Tools for publishing a component to S3.
 
-    Requires that AWS credentials be available in the environment.
+    The create-archive sub-command creates a tar.xz file to send to S3.
 
-    Each version of a component is either tagged with a target, or is target agnostic. A particular
-    version can only have one target-agnostic artifact, or many target specific artifacts, but each
-    target may only have one artifact each.";
+    The upload sub-command uploads the tar.xz file to S3 as a component with a particular version
+    and optional target.
+
+    The set-version sub-command sets the latest version of a component.
+
+    upload and set-version require that AWS credentials be available in the environment.
+";
 
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -354,27 +358,50 @@ pub struct PublishSetLatestCommand {
     version: String,
 }
 
+#[derive(Parser)]
+pub struct PublishCreateArtifactCommand {
+    /// Path to directory or file to create .tar.xz from.
+    #[arg(long)]
+    input: PathBuf,
+    /// Output path to .tar.xz file we are creating
+    #[arg(long)]
+    output: PathBuf,
+    /// The compression level, 0-9
+    #[arg(long, default_value = "6")]
+    compression_level: u32,
+}
+
 #[derive(Subcommand)]
 pub(crate) enum PublishCommand {
+    /// Uploads an artifact to S3 as a component.
+    ///
+    /// Each version of a component is either tagged with a target, or is target agnostic. A
+    /// particular version can only have one target-agnostic artifact, or many target specific
+    /// artifacts, but each target may only have one artifact each.
+    ///
+    /// Requires that AWS credentials be available in the environment.
     Upload(PublishUploadCommand),
+    /// Sets the latest version for a component on S3.
+    ///
+    /// This will cause rzup install and rzup check to consider the given version as the latest.
+    ///
+    /// Requires that AWS credentials be available in the environment.
     SetLatest(PublishSetLatestCommand),
+    /// Creates an artifact by creating a tar.xz file.
+    ///
+    /// The given input path can either be a directory or a file. If the path is a directory, all
+    /// the contents are added and at a path relative to the directory root. If the input is a
+    /// file, the file is added to the root of the archive.
+    CreateArtifact(PublishCreateArtifactCommand),
 }
 
 impl PublishCommand {
-    fn parse_version(&self) -> Result<Version> {
-        match self {
-            Self::Upload(cmd) => parse_version(Some(&cmd.name), &cmd.version),
-            Self::SetLatest(cmd) => parse_version(Some(&cmd.name), &cmd.version),
-        }
-    }
-
     #[cfg_attr(not(feature = "publish"), allow(unused_variables))]
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
-        let version = self.parse_version()?;
-
         #[cfg(feature = "publish")]
         match self {
             Self::Upload(cmd) => {
+                let version = parse_version(Some(&cmd.name), &cmd.version)?;
                 let platform = cmd
                     .target_group
                     .target_triple
@@ -391,8 +418,14 @@ impl PublishCommand {
                 Ok(())
             }
             Self::SetLatest(cmd) => {
+                let version = parse_version(Some(&cmd.name), &cmd.version)?;
                 let name = cmd.name.parse()?;
                 rzup.publish_set_latest(&name, &version)?;
+
+                Ok(())
+            }
+            Self::CreateArtifact(cmd) => {
+                rzup.publish_create_artifact(&cmd.input, &cmd.output, cmd.compression_level)?;
 
                 Ok(())
             }
