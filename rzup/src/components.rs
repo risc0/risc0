@@ -11,7 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::distribution::{github::GithubRelease, Os, Platform};
+use crate::distribution::{
+    github::GithubRelease, s3::S3Bucket, DistributionPlatform, Os, Platform,
+};
 use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::paths::Paths;
@@ -69,13 +71,15 @@ impl Component {
         )
     }
 
-    pub fn repo_name(&self) -> &'static str {
+    pub fn repo_name(&self) -> Result<&'static str> {
         match self {
-            Component::CargoRiscZero | Component::R0Vm => "risc0",
-            Component::RustToolchain => "rust",
-            Component::CppToolchain => "toolchain",
-            Component::Gdb => "toolchain",
-            Component::Risc0Groth16 => unimplemented!(),
+            Component::CargoRiscZero | Component::R0Vm => Ok("risc0"),
+            Component::RustToolchain => Ok("rust"),
+            Component::CppToolchain => Ok("toolchain"),
+            Component::Gdb => Ok("toolchain"),
+            Component::Risc0Groth16 => Err(RzupError::UnsupportedDistributionPlatform(
+                "github download not supported for risc0-groth16".into(),
+            )),
         }
     }
 
@@ -106,6 +110,11 @@ impl Component {
         })
     }
 
+    pub fn archive_name(&self, platform: &Platform) -> Result<String> {
+        let (asset_name, ext) = self.asset_name(platform)?;
+        Ok(format!("{asset_name}.{ext}"))
+    }
+
     pub fn version_str(&self, version: &Version) -> String {
         match self {
             // rust toolchain uses date-based versions with r0. prefix
@@ -133,6 +142,20 @@ impl Component {
             | Component::R0Vm
             | Component::Gdb
             | Component::Risc0Groth16 => env.risc0_dir().join("extensions"),
+        }
+    }
+
+    pub fn get_version_dir(&self, env: &Environment, version: &Version) -> PathBuf {
+        let base_path = self.get_dir(env);
+        match self {
+            Component::Gdb
+            | Component::CargoRiscZero
+            | Component::CppToolchain
+            | Component::R0Vm
+            | Component::RustToolchain => {
+                base_path.join(format!("v{version}-{self}-{}", env.platform()))
+            }
+            Component::Risc0Groth16 => base_path.join(format!("v{version}-{self}")),
         }
     }
 }
@@ -194,6 +217,25 @@ fn extract_archive(_env: &Environment, _archive_path: &Path, _target_dir: &Path)
     Err(RzupError::Other("not built with install support".into()))
 }
 
+/// This function selects where to download a particular component from.
+fn distribution<'a>(
+    base_urls: &'a BaseUrls,
+    component: &Component,
+) -> Box<dyn DistributionPlatform + 'a> {
+    match component {
+        // These components are grandfathered into using GitHub, at some point we should move them
+        // to S3.
+        Component::CargoRiscZero
+        | Component::CppToolchain
+        | Component::Gdb
+        | Component::R0Vm
+        | Component::RustToolchain => Box::new(GithubRelease::new(base_urls)),
+
+        // Any new components should be using S3
+        _ => Box::new(S3Bucket::new(base_urls)),
+    }
+}
+
 pub fn install(
     component: &Component,
     env: &Environment,
@@ -203,15 +245,16 @@ pub fn install(
 ) -> Result<()> {
     let component_to_install = component.parent_component().unwrap_or(*component);
 
-    let distribution = GithubRelease::new(base_urls);
+    let distribution = distribution(base_urls, &component_to_install);
 
     env.emit(RzupEvent::InstallationStarted {
         id: component.to_string(),
         version: version.to_string(),
     });
 
-    let archive_name = distribution.get_archive_name(&component_to_install, env.platform())?;
-    let downloaded_file = env.tmp_dir().join(archive_name);
+    let downloaded_file = env
+        .tmp_dir()
+        .join(component_to_install.archive_name(env.platform())?);
 
     if force {
         Paths::cleanup_version(env, &component_to_install, version)?;
@@ -219,7 +262,7 @@ pub fn install(
 
     // Download and extract
     distribution.download_version(env, &component_to_install, version)?;
-    let version_dir = Paths::get_version_dir(env, &component_to_install, version);
+    let version_dir = component_to_install.get_version_dir(env, version);
 
     if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
         Paths::cleanup_version(env, &component_to_install, version)?;
@@ -297,7 +340,7 @@ pub fn set_default(env: &Environment, component: &Component, version: &Version) 
             &version_dir.join("riscv32im-gdb"),
             &env.risc0_dir().join("bin/riscv32im-gdb"),
         )?,
-        Component::Risc0Groth16 => unimplemented!(),
+        Component::Risc0Groth16 => {}
     };
     Ok(())
 }
@@ -312,7 +355,7 @@ pub fn get_latest_version(
     env: &Environment,
     base_urls: &BaseUrls,
 ) -> Result<Version> {
-    let distribution = GithubRelease::new(base_urls);
+    let distribution = distribution(base_urls, component);
     distribution.latest_version(env, component)
 }
 
@@ -327,11 +370,12 @@ mod tests {
 
     fn test_env() -> (TempDir, Environment) {
         let tmp_dir = tempfile::tempdir().unwrap();
-        let env = Environment::with_paths_token_platform_and_event_handler(
+        let env = Environment::with_paths_creds_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
+            || None,
             Platform::detect().unwrap(),
             |_| {},
         )

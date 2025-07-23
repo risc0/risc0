@@ -27,6 +27,7 @@ required-features = ["prove"]
 [[example]]
 name = "guest_verify"
 required-features = ["prove"]
+test = true
 
 [[example]]
 name = "recursion"

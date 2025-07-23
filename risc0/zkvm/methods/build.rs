@@ -49,6 +49,10 @@ fn main() {
                 .build()
                 .unwrap(),
         ),
+        (
+            "risc0-zkvm-methods-std-ext",
+            GuestOptionsBuilder::default().build().unwrap(),
+        ),
         ("risc0-zkvm-methods-cpp-crates", guest_opts.build().unwrap()),
     ]);
 
