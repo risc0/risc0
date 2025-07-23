@@ -68,13 +68,15 @@ where
 }
 
 impl WorkClaim<ReceiptClaim> {
-    pub(crate) fn encode_to_seal(&self, buf: &mut Vec<u32>) -> Result<(), PrunedValueError> {
+    /// TODO
+    pub fn encode_to_seal(&self, buf: &mut Vec<u32>) -> Result<(), PrunedValueError> {
         self.claim.as_value()?.encode(buf)?;
         self.work.as_value()?.encode_to_seal(buf);
         Ok(())
     }
 
-    pub(crate) fn decode_from_seal(
+    /// TODO
+    pub fn decode_from_seal(
         buf: &mut VecDeque<u32>,
     ) -> Result<Self, crate::claim::receipt::DecodeError> {
         Ok(Self {
