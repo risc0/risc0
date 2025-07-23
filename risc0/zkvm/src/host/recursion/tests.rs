@@ -246,7 +246,6 @@ fn test_recursion_lift_join_then_unwrap_povw() {
         let rec_receipt = lift_povw(receipt).unwrap();
         tracing::info!("lift_povw claim = {:?}", rec_receipt.claim);
         rec_receipt.verify_integrity_with_context(&ctx).unwrap();
-
         compressed_povw = join_povw(&compressed_povw, &rec_receipt).unwrap();
         tracing::info!("join_povw claim = {:?}", compressed_povw.claim);
         compressed_povw.verify_integrity_with_context(&ctx).unwrap();

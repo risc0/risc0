@@ -22,7 +22,7 @@ mod program;
 mod witgen;
 pub mod zkr;
 
-use std::{collections::VecDeque, fmt::Debug, path::Path, rc::Rc};
+use std::{collections::VecDeque, fmt::Debug, rc::Rc};
 
 use anyhow::Result;
 use cfg_if::cfg_if;
@@ -145,16 +145,6 @@ impl Prover {
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         let prover = recursion_prover(&self.hashfn)?;
         prover.prove(self.program.clone(), self.input.clone())
-    }
-
-    // DO NOT MERGE
-    pub fn debug_dump_input(&self, path: impl AsRef<Path>) {
-        use std::io::Write;
-
-        let (front, back) = self.input.as_slices();
-        let mut file = std::fs::File::create(path).unwrap();
-        file.write_all(bytemuck::cast_slice(front)).unwrap();
-        file.write_all(bytemuck::cast_slice(back)).unwrap();
     }
 }
 

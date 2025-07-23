@@ -65,16 +65,6 @@ pub(crate) type ZkrRegistry = BTreeMap<Digest, ZkrRegistryEntry>;
 /// A registry to look up programs by control ID.
 pub(crate) static ZKR_REGISTRY: Mutex<ZkrRegistry> = Mutex::new(BTreeMap::new());
 
-// Comment
-fn debug_print_seal_out(x: &SuccinctReceipt<WorkClaim<ReceiptClaim>>, label: &str) {
-    let opts = ProverOpts::succinct();
-    let mut iop = ReadIOP::new(&x.seal, opts.hash_suite().unwrap().rng.as_ref());
-    let seal_out = iop
-        .read_field_elem_slice::<BabyBearElem>(risc0_circuit_recursion::CircuitImpl::OUTPUT_SIZE);
-    let _po2 = *iop.read_u32s(1).first().unwrap() as usize;
-    tracing::debug!("{label}.seal_out = {seal_out:x?}");
-}
-
 /// Run the lift program to transform an rv32im segment receipt into a recursion receipt.
 ///
 /// The lift program verifies the rv32im circuit STARK proof inside the recursion circuit,
@@ -98,14 +88,12 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
 pub fn lift_povw(
     segment_receipt: &SegmentReceipt,
 ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
-    tracing::debug!(
-        "Proving lift_povw: segment claim = {:#?}",
-        segment_receipt.claim
-    );
+    tracing::debug!("Proving lift_povw: claim = {:#?}", segment_receipt.claim);
     let mut prover = Prover::new_lift_povw(segment_receipt, ProverOpts::succinct())?;
 
     let receipt = prover.prover.run()?;
     let mut out_stream = receipt.out_stream();
+    tracing::debug!("Proving lift_povw finished: out = {out_stream:?}");
     let claim_decoded = WorkClaim::<ReceiptClaim>::decode_from_seal(&mut out_stream)?;
     tracing::debug!("Proving lift_povw finished: decoded claim = {claim_decoded:#?}");
 
@@ -116,9 +104,7 @@ pub fn lift_povw(
         .merge_with(&segment_receipt.claim.clone().into())
         .context("failed to merge segment receipt claim into decode claim")?;
 
-    let succinct_receipt = make_succinct_receipt(prover, receipt, claim)?;
-    debug_print_seal_out(&succinct_receipt, "lift_povw");
-    Ok(succinct_receipt)
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Run the join program to compress two receipts of the same session into one.
@@ -152,19 +138,14 @@ pub fn join_povw(
     tracing::debug!("Proving join_povw: a.claim = {:#?}", a.claim);
     tracing::debug!("Proving join_povw: b.claim = {:#?}", b.claim);
 
-    debug_print_seal_out(a, "a");
-    debug_print_seal_out(b, "b");
-
-    let joined_claim = a.claim.join(&b.claim)?.value()?;
     let mut prover = Prover::new_join_povw(a, b, false, ProverOpts::succinct())?;
-    prover.prover.debug_dump_input("/tmp/join_povw_input.bin");
     let receipt = prover.prover.run()?;
 
     let claim_decoded = WorkClaim::<ReceiptClaim>::decode_from_seal(&mut receipt.out_stream())?;
     tracing::debug!("Proving join_povw finished: decoded claim = {claim_decoded:#?}");
 
     // Compute the expected claim and merge it with the decoded claim, checking that they match.
-    let claim = claim_decoded.merge(&joined_claim)?;
+    let claim = claim_decoded.merge(&a.claim.join(&b.claim)?.value()?)?;
 
     make_succinct_receipt(prover, receipt, claim)
 }
@@ -338,10 +319,7 @@ pub fn unwrap_povw(
 ) -> Result<SuccinctReceipt<ReceiptClaim>> {
     tracing::debug!("Proving unwrap_povw: a.claim = {:#?}", a.claim);
 
-    debug_print_seal_out(&a, "a");
-
     let mut prover = Prover::new_unwrap_povw(a, ProverOpts::succinct())?;
-    prover.prover.debug_dump_input("/tmp/unwrap_povw.bin");
     let receipt = prover.prover.run()?;
 
     let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
