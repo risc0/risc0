@@ -16,6 +16,8 @@
 
 // TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
 
+extern crate alloc;
+
 use alloc::{collections::VecDeque, vec::Vec};
 
 use borsh::{BorshDeserialize, BorshSerialize};

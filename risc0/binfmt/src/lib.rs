@@ -19,8 +19,6 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
-extern crate alloc;
-
 mod addr;
 mod elf;
 mod exit_code;
