@@ -28,7 +28,7 @@ use std::path::{Path, PathBuf};
 
 use self::distribution::Platform;
 use self::env::Environment;
-use self::events::{RzupEvent, TransferDirection};
+use self::events::{RzupEvent, TransferKind};
 use self::paths::Paths;
 use self::registry::Registry;
 use self::settings::Settings;
@@ -369,6 +369,110 @@ impl Rzup {
     ) -> Result<()> {
         let s3 = distribution::s3::S3Bucket::new(self.registry.base_urls());
         s3.publish_set_latest(&self.environment, component, version)
+    }
+
+    /// Creates a tar.xz file.
+    #[cfg(feature = "publish")]
+    #[cfg_attr(not(feature = "cli"), expect(dead_code))]
+    pub(crate) fn publish_create_artifact(
+        &mut self,
+        input: &Path,
+        output: &Path,
+        compression_level: u32,
+    ) -> Result<()> {
+        use liblzma::write::XzEncoder;
+
+        let (estimated_tar_size, paths) = self.recursively_find_paths(input)?;
+
+        let id = format!("artifact {}", output.display());
+        self.environment.emit(RzupEvent::TransferStarted {
+            kind: TransferKind::Compress,
+            id: id.clone(),
+            version: None,
+            url: None,
+            len: Some(estimated_tar_size),
+        });
+
+        let file = std::fs::File::create(output).map_err(|e| {
+            RzupError::Other(format!(
+                "error creating output path {}: {e}",
+                output.display()
+            ))
+        })?;
+        let compressor = XzEncoder::new_parallel(file, compression_level);
+        let writer =
+            crate::distribution::ProgressWriter::new(id.clone(), &self.environment, compressor);
+        let mut builder = tar::Builder::new(writer);
+
+        for (full_path, archive_path) in paths {
+            builder.append_path_with_name(full_path, archive_path)?;
+        }
+
+        builder.finish()?;
+        drop(builder);
+
+        self.environment.emit(RzupEvent::TransferCompleted {
+            kind: TransferKind::Compress,
+            id,
+            version: None,
+        });
+
+        Ok(())
+    }
+
+    /// Walk a given path and find all files for the purpose of creating a tar. It returns a sum of
+    /// the files sizes (with 512 per file for a tar-header) and a listing of (full-path,
+    /// relative-path).
+    ///
+    /// Relative paths are relative to the given input path, or when the input path is to a file,
+    /// relative to the file's parent directory.
+    #[cfg(feature = "publish")]
+    fn recursively_find_paths(&mut self, input: &Path) -> Result<(u64, Vec<(PathBuf, PathBuf)>)> {
+        let mut estimated_tar_size = 0;
+        let mut paths = vec![];
+        if input.is_dir() {
+            self.environment.emit(RzupEvent::Print {
+                message: "Walking input path".into(),
+            });
+            for entry in walkdir::WalkDir::new(input) {
+                let entry = entry.map_err(|e| {
+                    RzupError::Other(format!(
+                        "error reading entry from input path {}: {e}",
+                        input.display()
+                    ))
+                })?;
+                let full_path = entry.path();
+                let entry_metadata = entry.metadata().map_err(|e| {
+                    RzupError::Other(format!("error reading entry {}: {e}", full_path.display()))
+                })?;
+                if entry_metadata.is_dir() {
+                    continue;
+                }
+                let archive_path = full_path
+                    .strip_prefix(input)
+                    .expect("all walked paths are under the input path");
+
+                estimated_tar_size += entry_metadata.len();
+                // each tar header is usually 512 bytes.
+                estimated_tar_size += 512;
+
+                paths.push((full_path.to_owned(), archive_path.to_owned()));
+            }
+        } else {
+            estimated_tar_size += input
+                .metadata()
+                .map_err(|e| {
+                    RzupError::Other(format!("error reading input file: {} {e}", input.display()))
+                })?
+                .len();
+            // each tar header is usually 512 bytes.
+            estimated_tar_size += 512;
+            paths.push((
+                input.to_owned(),
+                PathBuf::from(input.file_name().expect("non-directory has a name")),
+            ));
+        }
+        Ok((estimated_tar_size, paths))
     }
 }
 
@@ -1019,10 +1123,10 @@ mod tests {
                     version: version.to_string(),
                 },
                 RzupEvent::TransferStarted {
-                    direction: TransferDirection::Download,
+                    kind: TransferKind::Download,
                     id: component_to_install.to_string(),
-                    version: version.to_string(),
-                    url: expected_url,
+                    version: Some(version.to_string()),
+                    url: Some(expected_url),
                     len: Some(download_length),
                 },
                 RzupEvent::TransferProgress {
@@ -1030,9 +1134,9 @@ mod tests {
                     incr: download_length,
                 },
                 RzupEvent::TransferCompleted {
-                    direction: TransferDirection::Download,
+                    kind: TransferKind::Download,
                     id: component_to_install.to_string(),
-                    version: version.to_string(),
+                    version: Some(version.to_string()),
                 },
                 RzupEvent::InstallationCompleted {
                     id: component.to_string(),
@@ -1130,10 +1234,10 @@ mod tests {
                     version: version.to_string(),
                 },
                 RzupEvent::TransferStarted {
-                    direction: TransferDirection::Download,
+                    kind: TransferKind::Download,
                     id: component_to_install.to_string(),
-                    version: version.to_string(),
-                    url: expected_url,
+                    version: Some(version.to_string()),
+                    url: Some(expected_url),
                     len: Some(download_length),
                 },
                 RzupEvent::TransferProgress {
@@ -1141,9 +1245,9 @@ mod tests {
                     incr: download_length,
                 },
                 RzupEvent::TransferCompleted {
-                    direction: TransferDirection::Download,
+                    kind: TransferKind::Download,
                     id: component_to_install.to_string(),
-                    version: version.to_string(),
+                    version: Some(version.to_string()),
                 },
                 RzupEvent::InstallationCompleted {
                     id: component.to_string(),
@@ -3055,10 +3159,12 @@ mod tests {
                     message: "Calculating sha256 for risc0-groth16 4.0.0".into(),
                 },
                 RzupEvent::TransferStarted {
-                    direction: TransferDirection::Upload,
+                    kind: TransferKind::Upload,
                     id: format!("risc0-groth16/{sha256}"),
-                    version: "4.0.0".into(),
-                    url: format!("{base_url}/rzup/components/risc0-groth16/sha256/{sha256}"),
+                    version: Some("4.0.0".into()),
+                    url: Some(format!(
+                        "{base_url}/rzup/components/risc0-groth16/sha256/{sha256}"
+                    )),
                     len: Some(download_size),
                 },
                 RzupEvent::TransferProgress {
@@ -3066,9 +3172,9 @@ mod tests {
                     incr: download_size,
                 },
                 RzupEvent::TransferCompleted {
-                    direction: TransferDirection::Upload,
+                    kind: TransferKind::Upload,
                     id: format!("risc0-groth16/{sha256}"),
-                    version: "4.0.0".into(),
+                    version: Some("4.0.0".into()),
                 },
                 RzupEvent::Print {
                     message: "Updating distribution_manifest.json for risc0-groth16 4.0.0".into(),
@@ -3357,5 +3463,62 @@ mod tests {
             err,
             RzupError::Other("release for risc0-groth16 at version 7.0.0 not found".into())
         );
+    }
+
+    #[test]
+    fn publish_create_artifact_directory() {
+        let (_server, _platform, tmp_dir, mut rzup) = publish_fixture();
+
+        // Create some test input files
+        let input_path = tmp_dir.path().join("input-path");
+        std::fs::create_dir_all(&input_path).unwrap();
+        for p in [Path::new("a.txt"), Path::new("b/c.txt")] {
+            let p = input_path.join(p);
+            if let Some(parent) = p.parent() {
+                std::fs::create_dir_all(parent).unwrap();
+            }
+            std::fs::write(p, "hello world").unwrap();
+        }
+
+        let output_path = tmp_dir.path().join("output.tar.xz");
+        rzup.publish_create_artifact(&input_path, &output_path, 6 /* compression_level */)
+            .unwrap();
+
+        let file = std::fs::File::open(output_path).unwrap();
+        let mut tar_reader = tar::Archive::new(liblzma::bufread::XzDecoder::new(
+            std::io::BufReader::new(file),
+        ));
+        let mut paths: Vec<_> = tar_reader
+            .entries()
+            .unwrap()
+            .map(|e| PathBuf::from(e.unwrap().path().unwrap()))
+            .collect();
+        paths.sort();
+        assert_eq!(paths, vec![Path::new("a.txt"), Path::new("b/c.txt")]);
+    }
+
+    #[test]
+    fn publish_create_artifact_file() {
+        let (_server, _platform, tmp_dir, mut rzup) = publish_fixture();
+
+        // Create a test input file
+        let input_path = tmp_dir.path().join("input-path.txt");
+        std::fs::write(&input_path, "hello world").unwrap();
+
+        let output_path = tmp_dir.path().join("output.tar.xz");
+        rzup.publish_create_artifact(&input_path, &output_path, 6 /* compression_level */)
+            .unwrap();
+
+        let file = std::fs::File::open(output_path).unwrap();
+        let mut tar_reader = tar::Archive::new(liblzma::bufread::XzDecoder::new(
+            std::io::BufReader::new(file),
+        ));
+        let mut paths: Vec<_> = tar_reader
+            .entries()
+            .unwrap()
+            .map(|e| PathBuf::from(e.unwrap().path().unwrap()))
+            .collect();
+        paths.sort();
+        assert_eq!(paths, vec![Path::new("input-path.txt")]);
     }
 }

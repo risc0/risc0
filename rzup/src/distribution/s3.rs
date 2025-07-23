@@ -19,7 +19,7 @@ use crate::distribution::{upload_bytes, ProgressReader};
 use crate::env::Environment;
 #[cfg(feature = "publish")]
 use crate::{AwsCredentials, Platform};
-use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferDirection};
+use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};
 
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -307,10 +307,10 @@ impl<'a> S3Bucket<'a> {
         let upload_id = format!("{component}/{sha256}");
 
         env.emit(RzupEvent::TransferStarted {
-            direction: TransferDirection::Upload,
+            kind: TransferKind::Upload,
             id: upload_id.clone(),
-            version: version.to_string(),
-            url: upload_url.clone(),
+            version: Some(version.to_string()),
+            url: Some(upload_url.clone()),
             len: Some(data_length),
         });
         let (send, recv) = std::sync::mpsc::channel();
@@ -333,9 +333,9 @@ impl<'a> S3Bucket<'a> {
         })?;
 
         env.emit(RzupEvent::TransferCompleted {
-            direction: TransferDirection::Upload,
+            kind: TransferKind::Upload,
             id: upload_id,
-            version: version.to_string(),
+            version: Some(version.to_string()),
         });
 
         Ok(())
@@ -491,10 +491,10 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
         let mut resp = download_bytes(&download_url, &None)?;
 
         env.emit(RzupEvent::TransferStarted {
-            direction: TransferDirection::Download,
+            kind: TransferKind::Download,
             id: component.to_string(),
-            version: version.to_string(),
-            url: download_url.clone(),
+            version: Some(version.to_string()),
+            url: Some(download_url.clone()),
             len: resp.content_length(),
         });
 
@@ -506,9 +506,9 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
         .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
 
         env.emit(RzupEvent::TransferCompleted {
-            direction: TransferDirection::Download,
+            kind: TransferKind::Download,
             id: component.to_string(),
-            version: version.to_string(),
+            version: Some(version.to_string()),
         });
 
         Ok(())
