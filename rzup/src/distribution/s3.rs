@@ -16,10 +16,11 @@ use crate::components::Component;
 use crate::distribution::{
     download_bytes, download_json,
     sha2::{Sha256Digest, Sha256Writer},
+    signature::{PublicKey, Signature},
     DistributionPlatform, ProgressWriter,
 };
 #[cfg(feature = "publish")]
-use crate::distribution::{upload_bytes, ProgressReader};
+use crate::distribution::{signature::PrivateKey, upload_bytes, ProgressReader};
 use crate::env::Environment;
 #[cfg(feature = "publish")]
 use crate::{AwsCredentials, Platform};
@@ -29,12 +30,12 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr};
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(feature = "publish")]
-use std::{collections::hash_map::Entry, fs::File, io::Seek as _, io::SeekFrom, path::Path};
+use std::{collections::btree_map::Entry, fs::File, io::Seek as _, io::SeekFrom, path::Path};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[serde(transparent)]
 struct TargetTriple(String);
 
@@ -53,7 +54,7 @@ struct Artifact {
 
 #[derive(Serialize, Deserialize, Default)]
 struct TargetSpecificRelease {
-    artifacts: HashMap<TargetTriple, Artifact>,
+    artifacts: BTreeMap<TargetTriple, Artifact>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -68,10 +69,54 @@ enum Release {
     TargetAgnostic(TargetAgnosticRelease),
 }
 
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 struct DistributionManifest {
-    releases: HashMap<semver::Version, Release>,
+    releases: BTreeMap<semver::Version, Release>,
     latest_version: semver::Version,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    signature: Option<Signature>,
+}
+
+impl DistributionManifest {
+    #[cfg(feature = "publish")]
+    fn new(latest_version: Version) -> Self {
+        Self {
+            latest_version,
+            releases: Default::default(),
+            signature: None,
+        }
+    }
+
+    #[cfg(feature = "install")]
+    fn verify(&mut self, public_key: &PublicKey) -> Result<()> {
+        let signature = self.signature.take().ok_or_else(|| {
+            RzupError::Other("distribution_manifest.json missing signature".into())
+        })?;
+
+        let manifest_json =
+            serde_json::to_vec(self).expect("serde_json should serialize successfully to memory");
+
+        public_key.verify(&manifest_json, &signature)?;
+
+        Ok(())
+    }
+
+    #[cfg(not(feature = "install"))]
+    fn verify(&mut self, _public_key: &PublicKey) -> Result<()> {
+        Err(RzupError::Other("install feature not enabled".into()))
+    }
+
+    #[cfg(feature = "publish")]
+    fn sign(&mut self, private_key: &PrivateKey) -> Result<()> {
+        let manifest_json =
+            serde_json::to_vec(self).expect("serde_json should serialize successfully to memory");
+
+        let signature = private_key.sign(&manifest_json);
+        self.signature = Some(signature);
+        Ok(())
+    }
 }
 
 #[cfg(feature = "publish")]
@@ -145,6 +190,13 @@ fn sign_s3_request(
     Ok(())
 }
 
+#[cfg(feature = "publish")]
+fn is_object_not_found_error(error: &RzupError) -> bool {
+    let error_str = error.to_string();
+
+    error_str.contains("<Code>AccessDenied</Code>") || error_str.contains("<Code>NoSuchKey</Code>")
+}
+
 pub struct S3Bucket<'a> {
     base_urls: &'a BaseUrls,
 }
@@ -165,7 +217,10 @@ impl<'a> S3Bucket<'a> {
 
         let base_url = &self.base_urls.s3_base_url;
         let url = format!("{base_url}/rzup/components/{component}/distribution_manifest.json");
-        download_json(&url, &None)
+        let mut manifest: DistributionManifest = download_json(&url, &None)?;
+        manifest.verify(env.public_key())?;
+
+        Ok(manifest)
     }
 
     #[cfg(feature = "publish")]
@@ -233,7 +288,7 @@ impl<'a> S3Bucket<'a> {
                         artifacts.insert(TargetTriple(platform.target_triple()), artifact);
                     }
                     (existing_release @ Release::TargetAgnostic(_), Some(platform)) => {
-                        let mut artifacts = HashMap::new();
+                        let mut artifacts = BTreeMap::new();
                         artifacts.insert(TargetTriple(platform.target_triple()), artifact);
                         *existing_release =
                             Release::TargetSpecific(TargetSpecificRelease { artifacts });
@@ -247,7 +302,7 @@ impl<'a> S3Bucket<'a> {
             }
             Entry::Vacant(entry) => {
                 entry.insert(if let Some(platform) = platform {
-                    let mut artifacts = HashMap::new();
+                    let mut artifacts = BTreeMap::new();
                     artifacts.insert(TargetTriple(platform.target_triple()), artifact);
                     Release::TargetSpecific(TargetSpecificRelease { artifacts })
                 } else {
@@ -262,10 +317,14 @@ impl<'a> S3Bucket<'a> {
         &self,
         component: &Component,
         creds: &AwsCredentials,
-        manifest: DistributionManifest,
+        private_key: &PrivateKey,
+        mut manifest: DistributionManifest,
     ) -> Result<()> {
+        manifest.sign(private_key)?;
+
         let manifest_json = serde_json::to_vec(&manifest)
             .expect("serde_json should serialize successfully to memory");
+
         let manifest_json_len = manifest_json.len() as u64;
         let base_url = &self.base_urls.s3_base_url;
         let upload_url =
@@ -344,13 +403,33 @@ impl<'a> S3Bucket<'a> {
             .get_aws_creds()
             .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
 
-        let mut manifest = self.get_distribution_manifest(env, component)?;
+        env.emit(RzupEvent::Print {
+            message: "Getting private key from AWS".into(),
+        });
+        let private_key = env.get_private_key()?;
+
+        env.emit(RzupEvent::Print {
+            message: "Reading distribution_manifest.json".into(),
+        });
+        let mut manifest = match self.get_distribution_manifest(env, component) {
+            Ok(manifest) => manifest,
+            Err(error) => {
+                if is_object_not_found_error(&error) {
+                    DistributionManifest::new(version.clone())
+                } else {
+                    return Err(error);
+                }
+            }
+        };
 
         // Check if we are going to replace something by uploading
         if !force {
             self.validate_upload(version, platform, &manifest)?;
         }
 
+        env.emit(RzupEvent::Print {
+            message: "Validating artifact".into(),
+        });
         let mut data_stream = File::open(payload)?;
         validate_tar_xz(&mut data_stream)?;
         data_stream.seek(SeekFrom::Start(0))?;
@@ -381,7 +460,7 @@ impl<'a> S3Bucket<'a> {
         env.emit(RzupEvent::Print {
             message: format!("Updating distribution_manifest.json for {component} {version}"),
         });
-        self.upload_manifest(component, &creds, manifest)?;
+        self.upload_manifest(component, &creds, &private_key, manifest)?;
 
         Ok(())
     }
@@ -396,6 +475,7 @@ impl<'a> S3Bucket<'a> {
         let creds = env
             .get_aws_creds()
             .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
+        let private_key = env.get_private_key()?;
 
         let mut manifest = self.get_distribution_manifest(env, component)?;
         if !manifest.releases.contains_key(version) {
@@ -411,7 +491,7 @@ impl<'a> S3Bucket<'a> {
                 setting latest-version to {version}"
             ),
         });
-        self.upload_manifest(component, &creds, manifest)?;
+        self.upload_manifest(component, &creds, &private_key, manifest)?;
 
         Ok(())
     }

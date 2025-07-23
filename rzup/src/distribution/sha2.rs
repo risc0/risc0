@@ -107,7 +107,7 @@ impl Sha256Digest {
 #[test]
 fn sha256_digest_display_from_str() {
     let mut hasher = sha2::Sha256::new();
-    hasher.update(&[1, 2, 3, 4]);
+    hasher.update([1, 2, 3, 4]);
     let s: Sha256Digest = hasher.finalize().into();
 
     let s_str = s.to_string();

@@ -363,7 +363,10 @@ pub fn get_latest_version(
 mod tests {
     use super::*;
     use crate::{
-        components, distribution::Platform, env::Environment, http_test_harness, BaseUrls,
+        components,
+        distribution::{signature::PublicKey, Platform},
+        env::Environment,
+        http_test_harness, BaseUrls,
     };
     use semver::Version;
     use tempfile::TempDir;
@@ -376,6 +379,8 @@ mod tests {
             tmp_dir.path().join(".cargo"),
             None,
             || None,
+            || Err(RzupError::Other("no private key".into())),
+            PublicKey::official(),
             Platform::detect().unwrap(),
             |_| {},
         )
@@ -383,7 +388,7 @@ mod tests {
         (tmp_dir, env)
     }
 
-    fn test_rust_toolchain_install(base_urls: BaseUrls) {
+    fn test_rust_toolchain_install(base_urls: BaseUrls, _public_key: PublicKey) {
         let (_tmp_dir, env) = test_env();
 
         let component = Component::RustToolchain;
@@ -399,7 +404,7 @@ mod tests {
 
     http_test_harness!(test_rust_toolchain_install);
 
-    fn test_cpp_toolchain_install(base_urls: BaseUrls) {
+    fn test_cpp_toolchain_install(base_urls: BaseUrls, _public_key: PublicKey) {
         let (_tmp_dir, env) = test_env();
         let component = Component::CppToolchain;
 
@@ -414,7 +419,7 @@ mod tests {
 
     http_test_harness!(test_cpp_toolchain_install);
 
-    fn test_cargo_risczero_install(base_urls: BaseUrls) {
+    fn test_cargo_risczero_install(base_urls: BaseUrls, _public_key: PublicKey) {
         let (_tmp_dir, env) = test_env();
         let component = Component::CargoRiscZero;
 

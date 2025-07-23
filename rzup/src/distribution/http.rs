@@ -15,12 +15,15 @@ use crate::error::{Result, RzupError};
 use reqwest::{blocking::Client, IntoUrl, Url};
 use std::time::Duration;
 
+/// 3 hour HTTP timeout, internet can be slow and components can be up to 5gb.
+const HTTP_TIMEOUT_SECS: u64 = 3 * 60 * 60;
+
 fn http_client_get(
     url: &Url,
     bearer_token: &Option<String>,
 ) -> Result<reqwest::blocking::Response> {
     let client = Client::builder()
-        .timeout(Duration::from_secs(10))
+        .timeout(Duration::from_secs(HTTP_TIMEOUT_SECS))
         .build()
         .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e}")))?;
 
@@ -116,6 +119,7 @@ pub fn upload_bytes<BodyT: std::io::Read + Send + 'static>(
         .map_err(|e| RzupError::Other(e.to_string()))?;
 
     let client = Client::builder()
+        .timeout(Duration::from_secs(HTTP_TIMEOUT_SECS))
         .build()
         .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {e:?}")))?;
 
