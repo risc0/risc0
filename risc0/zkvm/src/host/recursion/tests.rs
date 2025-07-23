@@ -233,7 +233,6 @@ fn test_recursion_lift_then_unwrap_povw() {
 #[test_log::test]
 fn test_recursion_lift_join_then_unwrap_povw() -> anyhow::Result<()> {
     // Prove the base case
-    let povw_job_id: PovwJobId = rand::random();
     let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
     let ctx = VerifierContext::default();
 
@@ -257,11 +256,11 @@ fn test_recursion_lift_join_then_unwrap_povw() -> anyhow::Result<()> {
     // Check that the work claim is as expected.
     let work = compressed_povw.claim.as_value()?.work.as_value()?.clone();
     assert_eq!(work.value, total_work);
-    assert_eq!(work.nonce_min.log, povw_job_id.log);
-    assert_eq!(work.nonce_min.job, povw_job_id.job);
+    assert_eq!(work.nonce_min.log, BUSY_LOOP_POVW_JOB_ID.log);
+    assert_eq!(work.nonce_min.job, BUSY_LOOP_POVW_JOB_ID.job);
     assert_eq!(work.nonce_min.segment, 0);
-    assert_eq!(work.nonce_max.log, povw_job_id.log);
-    assert_eq!(work.nonce_max.job, povw_job_id.job);
+    assert_eq!(work.nonce_max.log, BUSY_LOOP_POVW_JOB_ID.log);
+    assert_eq!(work.nonce_max.job, BUSY_LOOP_POVW_JOB_ID.job);
     assert_eq!(work.nonce_max.segment, (segments.len() - 1) as u32);
 
     // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
