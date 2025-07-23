@@ -19,6 +19,7 @@ pub mod s3;
     path = "erroring_http.rs"
 )]
 mod http;
+mod sha2;
 
 pub use self::http::*;
 use crate::error::{Result, RzupError};
