@@ -14,7 +14,14 @@ path = "src/bin/rzup.rs"
 [features]
 default = ["cli", "install", "publish"]
 cli = ["dep:clap", "dep:indicatif", "dep:colored", "dep:is-terminal"]
-install = ["dep:reqwest", "dep:tar", "dep:liblzma", "dep:flate2", "dep:fs2"]
+install = [
+    "dep:flate2",
+    "dep:fs2",
+    "dep:http",
+    "dep:liblzma",
+    "dep:reqwest",
+    "dep:tar",
+]
 publish = [
     "dep:aws-config",
     "dep:aws-credential-types",

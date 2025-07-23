@@ -104,6 +104,7 @@ pub fn download_bytes(
     Ok(response)
 }
 
+#[cfg_attr(not(feature = "publish"), allow(dead_code))]
 pub fn upload_bytes<BodyT: std::io::Read + Send + 'static>(
     url: impl IntoUrl,
     signer: impl FnOnce(&mut http::Request<reqwest::blocking::Body>) -> Result<()>,
