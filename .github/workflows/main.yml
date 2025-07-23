@@ -454,17 +454,19 @@ jobs:
     runs-on: [self-hosted, cluster, macOS, cpu]
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
+      # Building with docs.rs config requires the nightly toolchain.
+      # nightly-2025-05-09 corresponds to 1.88
+      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-05-09
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
         with:
-          # Building with docs.rs config requires the nightly toolchain.
-          toolchain: nightly-2024-11-26
+          toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
       - uses: ./.github/actions/sccache
-      - run: cargo +nightly-2024-11-26 doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +nightly-2024-11-26 doc -p risc0-zkp -Fprove,std --no-deps
-      - run: cargo +nightly-2024-11-26 doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +nightly-2024-11-26 doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
