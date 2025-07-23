@@ -116,7 +116,7 @@ mod tests {
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
-            None,
+            || None,
             Platform::new("x86_64", Os::Linux),
             |_| {},
         )

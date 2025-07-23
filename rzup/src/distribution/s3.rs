@@ -352,8 +352,7 @@ impl<'a> S3Bucket<'a> {
         force: bool,
     ) -> Result<()> {
         let creds = env
-            .aws_creds()
-            .as_ref()
+            .get_aws_creds()
             .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
 
         let mut manifest = self.get_distribution_manifest(env, component)?;
@@ -381,7 +380,7 @@ impl<'a> S3Bucket<'a> {
             env,
             component,
             version,
-            creds,
+            &creds,
             data_stream,
             data_length,
             &sha256,
@@ -393,7 +392,7 @@ impl<'a> S3Bucket<'a> {
         env.emit(RzupEvent::Print {
             message: format!("Updating distribution_manifest.json for {component} {version}"),
         });
-        self.upload_manifest(component, creds, manifest)?;
+        self.upload_manifest(component, &creds, manifest)?;
 
         Ok(())
     }
@@ -406,8 +405,7 @@ impl<'a> S3Bucket<'a> {
         version: &Version,
     ) -> Result<()> {
         let creds = env
-            .aws_creds()
-            .as_ref()
+            .get_aws_creds()
             .ok_or_else(|| RzupError::Other("missing AWS S3 credentials".into()))?;
 
         let mut manifest = self.get_distribution_manifest(env, component)?;
@@ -424,7 +422,7 @@ impl<'a> S3Bucket<'a> {
                 setting latest-version to {version}"
             ),
         });
-        self.upload_manifest(component, creds, manifest)?;
+        self.upload_manifest(component, &creds, manifest)?;
 
         Ok(())
     }

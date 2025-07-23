@@ -102,7 +102,7 @@ impl Rzup {
     /// * `cargo_dir` - The path to cargo's home directory (usually ~/.cargo)
     /// * `base_urls` - The base URLs used to communicate with GitHub
     /// * `github_token` - The token to use when communicating with GitHub
-    /// * `aws_creds` - Credentials for communicating with S3
+    /// * `aws_creds_factory` - Function which gets credentials for communicating with S3
     #[allow(clippy::too_many_arguments)]
     pub fn with_paths_urls_creds_platform_and_event_handler(
         risc0_dir: impl Into<PathBuf>,
@@ -110,7 +110,7 @@ impl Rzup {
         cargo_dir: impl AsRef<Path>,
         base_urls: BaseUrls,
         github_token: Option<String>,
-        aws_creds: Option<AwsCredentials>,
+        aws_creds_factory: impl Fn() -> Option<AwsCredentials> + Send + Sync + 'static,
         platform: Platform,
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
@@ -119,7 +119,7 @@ impl Rzup {
             rustup_dir,
             cargo_dir,
             github_token,
-            aws_creds,
+            aws_creds_factory,
             platform,
             event_handler,
         )?;
@@ -700,7 +700,7 @@ mod tests {
             tmp_dir.path().join(".cargo"),
             base_urls,
             github_token,
-            aws_creds,
+            move || aws_creds.clone(),
             platform,
             |_| {},
         )

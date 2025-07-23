@@ -375,7 +375,7 @@ mod tests {
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
-            None,
+            || None,
             Platform::detect().unwrap(),
             |_| {},
         )

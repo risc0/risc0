@@ -35,7 +35,7 @@ pub struct Environment {
     event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
     platform: Platform,
     github_token: Option<String>,
-    aws_creds: Option<AwsCredentials>,
+    aws_creds_factory: Box<dyn Fn() -> Option<AwsCredentials> + Send + Sync>,
 }
 
 fn get_github_token_from_hosts_yml(home_dir: &Path) -> Result<String> {
@@ -138,7 +138,7 @@ impl Environment {
         rustup_dir: impl AsRef<Path>,
         cargo_dir: impl AsRef<Path>,
         github_token: Option<String>,
-        aws_creds: Option<AwsCredentials>,
+        aws_creds_factory: impl Fn() -> Option<AwsCredentials> + Send + Sync + 'static,
         platform: Platform,
         event_handler: impl Fn(RzupEvent) + Send + Sync + 'static,
     ) -> Result<Self> {
@@ -157,7 +157,7 @@ impl Environment {
             event_handler: None,
             platform,
             github_token,
-            aws_creds,
+            aws_creds_factory: Box::new(aws_creds_factory),
         };
         env.set_event_handler(event_handler);
 
@@ -191,14 +191,14 @@ impl Environment {
             .or_else(|_| get_github_token_from_hosts_yml(&home_dir))
             .ok();
 
-        let aws_creds = get_aws_creds().ok();
+        let aws_creds_factory = || get_aws_creds().ok();
 
         let env = Self::with_paths_creds_platform_and_event_handler(
             risc0_dir,
             rustup_dir,
             cargo_dir,
             github_token,
-            aws_creds,
+            aws_creds_factory,
             platform,
             event_handler,
         )?;
@@ -246,8 +246,8 @@ impl Environment {
         &self.github_token
     }
 
-    pub fn aws_creds(&self) -> &Option<AwsCredentials> {
-        &self.aws_creds
+    pub fn get_aws_creds(&self) -> Option<AwsCredentials> {
+        (self.aws_creds_factory)()
     }
 
     #[cfg(feature = "install")]
@@ -310,7 +310,7 @@ mod tests {
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             Some("foo".into()),
-            None,
+            || None,
             Platform::new("x86_64", Os::Linux),
             |_| {},
         )
