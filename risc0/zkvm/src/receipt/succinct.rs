@@ -223,10 +223,16 @@ where
     }
 
     #[cfg(feature = "prove")]
-    pub(crate) fn to_assumption(&self) -> anyhow::Result<crate::Assumption> {
+    pub(crate) fn to_assumption(
+        &self,
+        erase_control_root: bool,
+    ) -> anyhow::Result<crate::Assumption> {
         Ok(crate::Assumption {
             claim: self.claim.digest::<sha::Impl>(),
-            control_root: self.control_root()?,
+            control_root: match erase_control_root {
+                false => self.control_root()?,
+                true => Digest::ZERO,
+            },
         })
     }
 

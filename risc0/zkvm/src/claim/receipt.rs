@@ -207,8 +207,8 @@ impl ReceiptClaim {
     ) -> anyhow::Result<Self> {
         let mut resolved_claim = self.clone();
 
-        // Open the assumptions on the output of the claim and remove the first assumption.
-        resolved_claim
+        // Open the assumptions on the output of the claim.
+        let assumptions: &mut Assumptions = resolved_claim
             .output
             .as_value_mut()
             .context("conditional receipt output is pruned")?
@@ -216,8 +216,25 @@ impl ReceiptClaim {
             .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
             .assumptions
             .as_value_mut()
-            .context("conditional receipt has pruned assumptions")?
-            .resolve(&assumption.digest::<sha::Impl>())?;
+            .context("conditional receipt has pruned assumptions")?;
+
+        // Use the control root from the head of the assumptions list to form an Assumption from
+        // the given claim. This is a simplifying assumption but connot guarantee that the claim
+        // actually resolves the assumption if it was produced with an incompatible control root.
+        let head_control_root = assumptions
+            .first()
+            .context("assumptions list is empty")?
+            .as_value()?
+            .control_root;
+
+        // Remove the head assumption.
+        assumptions.resolve(
+            &Assumption {
+                control_root: head_control_root,
+                claim: assumption.digest::<sha::Impl>(),
+            }
+            .digest::<sha::Impl>(),
+        )?;
 
         Ok(resolved_claim)
     }

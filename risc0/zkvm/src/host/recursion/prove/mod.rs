@@ -178,8 +178,10 @@ pub fn union(
     a: &SuccinctReceipt<Unknown>,
     b: &SuccinctReceipt<Unknown>,
 ) -> Result<SuccinctReceipt<UnionClaim>> {
-    let a_assumption = a.to_assumption()?.digest();
-    let b_assumption = b.to_assumption()?.digest();
+    // NOTE: This will run into issues if the assumption is made with a control root of zero. Right
+    // now, this is only used for keccak so this issue has not been hit.
+    let a_assumption = a.to_assumption(false)?.digest();
+    let b_assumption = b.to_assumption(false)?.digest();
 
     let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
         if a_assumption <= b_assumption {
