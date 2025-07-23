@@ -229,8 +229,9 @@ impl Digestible for Work {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ReceiptClaim;
+    use crate::{sha, ReceiptClaim};
     use alloc::collections::VecDeque;
+    use risc0_binfmt::{ExitCode, SystemState};
 
     #[test]
     fn test_work_seal_encoding_round_trip() {
@@ -256,8 +257,25 @@ mod tests {
     fn test_work_claim_seal_encoding_round_trip() {
         use crate::sha::Digest;
 
+        // Receipt claim needs an unpruned pre and post state to be encoded.
+        let claim = ReceiptClaim {
+            pre: SystemState {
+                pc: 0,
+                merkle_root: *sha::Impl::hash_bytes(b"pre"),
+            }
+            .into(),
+            post: SystemState {
+                pc: 0,
+                merkle_root: *sha::Impl::hash_bytes(b"pre"),
+            }
+            .into(),
+            output: MaybePruned::Pruned(Digest::ZERO),
+            input: MaybePruned::Pruned(Digest::ZERO),
+            exit_code: ExitCode::SystemSplit,
+        };
+
         let original = WorkClaim {
-            claim: ReceiptClaim::ok(Digest::from([1u8; 32]), vec![1u8, 2u8, 3u8]).into(),
+            claim: claim.into(),
             work: Work {
                 nonce_min: rand::random(),
                 nonce_max: rand::random(),
