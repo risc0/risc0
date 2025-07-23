@@ -47,6 +47,9 @@ pub enum RzupError {
 
     #[error("SHA-265 sum mismatch: expected = {expected}, actual = {actual}")]
     Sha256Mismatch { expected: String, actual: String },
+
+    #[error("Signature failed to verify: {0}")]
+    InvalidSignature(String),
 }
 
 impl From<std::io::Error> for RzupError {

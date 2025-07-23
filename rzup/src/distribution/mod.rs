@@ -13,6 +13,7 @@
 // limitations under the License.
 pub mod github;
 pub mod s3;
+pub mod signature;
 
 #[cfg_attr(
     all(not(feature = "install"), not(feature = "publish")),
