@@ -19,8 +19,8 @@
 //! well-tuned for verifying STARKs.
 //!
 //! The recursion VM runs "recursion programs", which define the
-//! functionality it will implement.  As examples, the [lift], [join],
-//! and [resolve] programs are used by the risc0 ZkVM to compress a
+//! functionality it will implement.  As examples, the `lift`, `join`,
+//! and `resolve` programs are used by the risc0 ZkVM to compress a
 //! collection of STARK receipts for a composition into a single
 //! succinct receipt.
 //!

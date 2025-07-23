@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::receipt::DEFAULT_MAX_PO2;
 
-/// Options to configure a [Prover].
+/// Options to configure a [Prover][super::Prover].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ProverOpts {
@@ -80,7 +80,7 @@ impl Default for ProverOpts {
     /// Return [ProverOpts] that are intended to work for most applications.
     ///
     /// Proof generated with these options may be linear in size with the execution length, but
-    /// can be compressed using the [Prover::compress] methods.
+    /// can be compressed using the [Prover::compress][super::Prover::compress] methods.
     fn default() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),

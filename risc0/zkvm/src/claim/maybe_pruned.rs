@@ -31,7 +31,7 @@ use crate::sha::{self, Sha256};
 /// value. One way to think of this is as a special Merkle tree of a predefined shape. Each field
 /// is a child node. Any field/node in the tree can be opened by providing the Merkle inclusion
 /// proof. When a subtree is pruned, the digest commits to the value of all contained fields.
-/// [ReceiptClaim] is the motivating example of this type of Merkle-ized struct.
+/// [ReceiptClaim][crate::ReceiptClaim] is the motivating example of this type of Merkle-ized struct.
 #[derive(Clone, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 pub enum MaybePruned<T>
 where

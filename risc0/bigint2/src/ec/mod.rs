@@ -102,7 +102,9 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     /// zero/infinity and `Some` with the coordinates otherwise.
     ///
     /// Little-endian, x coordinate before y coordinate
-    /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
+    /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per the [rust array layout] they will be laid out the same in memory and this is acceptable.
+    ///
+    /// [rust array layout]: https://doc.rust-lang.org/reference/type-layout.html#array-layout
     pub fn as_u32s(&self) -> Option<&[[u32; WIDTH]; 2]> {
         if self.identity {
             None

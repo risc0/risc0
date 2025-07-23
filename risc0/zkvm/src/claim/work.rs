@@ -29,7 +29,7 @@ use crate::{
 /// A wrapper around the underlying claim that additionally includes the amount of verifiable work
 /// completed, and the nonces used, in the process of proving the claim.
 ///
-/// This type is instantiated as [WorkClaim<ReceiptClaim>] when PoVW is used with zkVM proving.
+/// This type is instantiated as [`WorkClaim<ReceiptClaim>`] when PoVW is used with zkVM proving.
 #[derive(Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct WorkClaim<Claim>
 where
