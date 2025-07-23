@@ -14,8 +14,6 @@
 
 //! [WorkClaim] and associated types and functions.
 
-#![allow(dead_code)] // DO NOT MERGE
-
 use alloc::{boxed::Box, collections::VecDeque, vec::Vec};
 use core::fmt;
 

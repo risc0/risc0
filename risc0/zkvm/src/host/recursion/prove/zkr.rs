@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(dead_code)] // DO NOT MERGE
-
 use anyhow::{anyhow, bail, Result};
 use risc0_circuit_recursion::{
     control_id::{BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
