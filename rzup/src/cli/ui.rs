@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::{RzupEvent, TransferDirection};
+use crate::{RzupEvent, TransferKind};
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressStyle};
 
 #[derive(Clone)]
@@ -45,20 +45,18 @@ impl TerminalUi {
         while let Ok(event) = ui_recv.recv() {
             match event {
                 RzupEvent::TransferStarted {
-                    direction,
+                    kind,
                     id,
-                    version,
                     url,
+                    version,
                     len,
-                } => self.handle_transfer(direction, id, version, url, len),
+                } => self.handle_transfer(kind, id, version, url, len),
                 RzupEvent::TransferProgress { id, incr } => {
                     self.handle_transfer_progress(id, incr);
                 }
-                RzupEvent::TransferCompleted {
-                    direction,
-                    id,
-                    version,
-                } => self.handle_transfer_complete(direction, id, version),
+                RzupEvent::TransferCompleted { kind, id, version } => {
+                    self.handle_transfer_complete(kind, id, version)
+                }
                 RzupEvent::InstallationStarted { id, version } => self.handle_install(id, version),
                 RzupEvent::InstallationCompleted { id, version } => {
                     self.handle_install_complete(id, version)
@@ -99,17 +97,22 @@ impl TerminalUi {
 
     fn handle_transfer(
         &mut self,
-        direction: TransferDirection,
+        kind: TransferKind,
         id: String,
-        version: String,
-        _url: String,
+        version: Option<String>,
+        _url: Option<String>,
         len: Option<u64>,
     ) {
-        let action = match direction {
-            TransferDirection::Upload => "Uploading",
-            TransferDirection::Download => "Downloading",
+        let action = match kind {
+            TransferKind::Upload => "Uploading",
+            TransferKind::Download => "Downloading",
+            TransferKind::Compress => "Compressing",
         };
-        self.start_progress(format!("{action} {id} version {version}"));
+        let mut message = format!("{action} {id}");
+        if let Some(version) = version {
+            message += &format!(" version {version}");
+        }
+        self.start_progress(message);
         if let Some(len) = len {
             let transfer_progress = ProgressBar::new(len);
             transfer_progress.set_style(
@@ -130,23 +133,32 @@ impl TerminalUi {
 
     fn handle_transfer_complete(
         &mut self,
-        direction: TransferDirection,
+        kind: TransferKind,
         id: String,
-        version: String,
+        version: Option<String>,
     ) {
-        let action = match direction {
-            TransferDirection::Upload => "Uploaded",
-            TransferDirection::Download => "Downloaded",
+        let action = match kind {
+            TransferKind::Upload => "Uploaded",
+            TransferKind::Download => "Downloaded",
+            TransferKind::Compress => "Compressed",
         };
-        self.complete_progress(&format!("✓ {action} {id} version {version}"));
+        let mut message = format!("✓ {action} {id}");
+        if let Some(version) = &version {
+            message += &format!(" version {version}");
+        }
+        self.complete_progress(&message);
 
         if let Some(transfer_progress) = self.transfer.take() {
             transfer_progress.finish_and_clear();
             self.multi_progress.remove(&transfer_progress);
         }
 
-        if direction == TransferDirection::Download {
-            self.start_progress(format!("Installing {id} version {version}"));
+        if kind == TransferKind::Download {
+            let mut message = format!("Installing {id}");
+            if let Some(version) = &version {
+                message += &format!(" version {version}");
+            }
+            self.start_progress(message);
         }
     }
 
@@ -231,20 +243,18 @@ impl TextUi {
         while let Ok(event) = ui_recv.recv() {
             match event {
                 RzupEvent::TransferStarted {
-                    direction,
+                    kind,
                     id,
                     version,
                     url,
                     len,
-                } => self.handle_transfer(direction, id, version, url, len),
+                } => self.handle_transfer(kind, id, version, url, len),
                 RzupEvent::TransferProgress { id, incr } => {
                     self.handle_transfer_progress(id, incr);
                 }
-                RzupEvent::TransferCompleted {
-                    direction,
-                    id,
-                    version,
-                } => self.handle_transfer_complete(direction, id, version),
+                RzupEvent::TransferCompleted { kind, id, version } => {
+                    self.handle_transfer_complete(kind, id, version)
+                }
                 RzupEvent::InstallationStarted { id, version } => self.handle_install(id, version),
                 RzupEvent::InstallationCompleted { id, version } => {
                     self.handle_install_complete(id, version)
@@ -270,36 +280,50 @@ impl TextUi {
 
     fn handle_transfer(
         &mut self,
-        direction: TransferDirection,
+        kind: TransferKind,
         id: String,
-        version: String,
-        _url: String,
+        version: Option<String>,
+        _url: Option<String>,
         _len: Option<u64>,
     ) {
-        let action = match direction {
-            TransferDirection::Upload => "Uploading",
-            TransferDirection::Download => "Downloading",
+        let action = match kind {
+            TransferKind::Upload => "Uploading",
+            TransferKind::Download => "Downloading",
+            TransferKind::Compress => "Compressing",
         };
-        println!("{action} {id} version {version}");
+        print!("{action} {id}");
+        if let Some(version) = version {
+            print!(" version {version}");
+        }
+        println!();
     }
 
     fn handle_transfer_progress(&mut self, _id: String, _incr: u64) {}
 
     fn handle_transfer_complete(
         &mut self,
-        direction: TransferDirection,
+        kind: TransferKind,
         id: String,
-        version: String,
+        version: Option<String>,
     ) {
-        let action = match direction {
-            TransferDirection::Upload => "Uploaded",
-            TransferDirection::Download => "Downloaded",
+        let action = match kind {
+            TransferKind::Upload => "Uploaded",
+            TransferKind::Download => "Downloaded",
+            TransferKind::Compress => "Compressed",
         };
 
-        println!("✓ {action} {id} version {version}");
+        print!("✓ {action} {id}");
+        if let Some(version) = &version {
+            print!(" version {version}");
+        }
+        println!();
 
-        if direction == TransferDirection::Download {
-            println!("Installing {id} version {version}");
+        if kind == TransferKind::Download {
+            print!("Installing {id}");
+            if let Some(version) = &version {
+                print!(" version {version}");
+            }
+            println!();
         }
     }
 

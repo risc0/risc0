@@ -17,7 +17,7 @@ fn generate_zkr_table() {
     use std::fmt::Write as _;
     use std::path::Path;
 
-    use xz2::read::XzDecoder;
+    use liblzma::read::XzDecoder;
 
     let mut output = String::new();
 

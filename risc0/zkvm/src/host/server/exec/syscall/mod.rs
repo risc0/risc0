@@ -199,7 +199,7 @@ impl<'a> SyscallTable<'a> {
         self
     }
 
-    pub(crate) fn get_syscall(&self, name: &str) -> Option<&Rc<RefCell<(dyn Syscall + 'a)>>> {
+    pub(crate) fn get_syscall(&self, name: &str) -> Option<&Rc<RefCell<dyn Syscall + 'a>>> {
         self.inner.get(name)
     }
 }

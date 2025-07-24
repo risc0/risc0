@@ -13,18 +13,19 @@
 // limitations under the License.
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub enum TransferDirection {
+pub enum TransferKind {
     Upload,
     Download,
+    Compress,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum RzupEvent {
     TransferStarted {
-        direction: TransferDirection,
+        kind: TransferKind,
         id: String,
-        version: String,
-        url: String,
+        version: Option<String>,
+        url: Option<String>,
         len: Option<u64>,
     },
     TransferProgress {
@@ -32,9 +33,9 @@ pub enum RzupEvent {
         incr: u64,
     },
     TransferCompleted {
-        direction: TransferDirection,
+        kind: TransferKind,
         id: String,
-        version: String,
+        version: Option<String>,
     },
     InstallationStarted {
         id: String,
