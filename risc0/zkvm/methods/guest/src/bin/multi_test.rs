@@ -45,7 +45,7 @@ use risc0_zkvm_platform::{
     fileno,
     syscall::{
         bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
-        sys_poseidon2, sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
+        sys_poseidon2, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
@@ -458,24 +458,6 @@ fn main() {
                 busy_loop();
                 env::log("Done running control");
             }
-        }
-        MultiTestSpec::SysProveZkr {
-            control_id,
-            input,
-            claim_digest,
-            control_root,
-        } => {
-            unsafe {
-                sys_prove_zkr(
-                    claim_digest.as_ref(),
-                    control_id.as_ref(),
-                    control_root.as_ref(),
-                    input.as_ptr(),
-                    input.len(),
-                );
-            }
-            env::verify_assumption(claim_digest, control_root)
-                .expect("env::verify_integrity returned error");
         }
         MultiTestSpec::SysKeccak => {
             // Test vectors are from KeccakCodePackage

@@ -960,51 +960,6 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
     }
 }
 
-/// Executes a `ZKR' in the recursion circuit, specified by control
-/// ID.  The control ID must be registered in the host's index of ZKRs.
-///
-/// This only triggers the execution of the ZKR; it does not add any
-/// assumptions.  In order to prove that the ZKR executed correctly,
-/// users must calculate the claim digest and add it to the list of
-/// assumptions.
-///
-/// # Safety
-///
-/// `claim_digest` must be aligned and dereferenceable.
-/// `control_id` must be aligned and dereferenceable.
-/// `control_root` must be aligned and dereferenceable.
-/// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
-pub unsafe extern "C" fn sys_prove_zkr(
-    claim_digest: *const [u32; DIGEST_WORDS],
-    control_id: *const [u32; DIGEST_WORDS],
-    control_root: *const [u32; DIGEST_WORDS],
-    input: *const u32,
-    input_len: usize,
-) {
-    let Return(a0, _) = unsafe {
-        syscall_5(
-            nr::SYS_PROVE_ZKR,
-            null_mut(),
-            0,
-            claim_digest as u32,
-            control_id as u32,
-            control_root as u32,
-            input as u32,
-            input_len as u32,
-        )
-    };
-
-    // Check to ensure the host indicated success by returning 0.
-    // Currently, this should always be the case. This check is
-    // included for forwards-compatibility.
-    if a0 != 0 {
-        const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
-    }
-}
-
 /// Permute the keccak state on the host
 ///
 /// # Safety

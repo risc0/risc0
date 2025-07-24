@@ -64,19 +64,6 @@ impl SegmentPath {
     }
 }
 
-/// A ZKR proof request.
-#[stability::unstable]
-pub struct ProveZkrRequest {
-    /// The digest of the claim that this ZKR program is expected to produce.
-    pub claim_digest: Digest,
-
-    /// The control ID uniquely identifies the ZKR program to be proven.
-    pub control_id: Digest,
-
-    /// The input that the ZKR program should operate on.
-    pub input: Vec<u8>,
-}
-
 /// A Keccak proof request.
 #[stability::unstable]
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
@@ -98,9 +85,6 @@ pub struct ProveKeccakRequest {
 /// on-demand.
 #[stability::unstable]
 pub trait CoprocessorCallback {
-    /// Request that a ZKR proof is produced.
-    fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
-
     /// Request that a keccak proof is produced.
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 }

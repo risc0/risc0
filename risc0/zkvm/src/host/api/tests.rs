@@ -13,21 +13,16 @@
 // limitations under the License.
 
 use std::{
-    cell::RefCell,
     collections::BTreeMap,
     net::{SocketAddr, TcpListener},
     path::PathBuf,
-    rc::Rc,
     sync::{Arc, Mutex},
     thread,
 };
 
 use anyhow::Result;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
-use risc0_zkp::{
-    core::hash::{poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite},
-    digest,
-};
+use risc0_zkp::core::hash::poseidon_254::Poseidon254HashSuite;
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     MULTI_TEST_PATH,
@@ -37,10 +32,8 @@ use test_log::test;
 
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    receipt::SuccinctReceipt,
-    recursion::{prove::zkr::test_recursion_circuit, MerkleGroup},
-    register_zkr, ApiClient, ApiServer, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt,
+    receipt::SuccinctReceipt, recursion::MerkleGroup, ApiClient, ApiServer, ExecutorEnv,
+    InnerReceipt, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt,
     SessionInfo, SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
 };
 
@@ -127,13 +120,6 @@ impl TestClient {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.prove_segment(opts, segment, receipt_out)
-        })
-    }
-
-    fn prove_zkr(&self, request: ProveZkrRequest) -> SuccinctReceipt<Unknown> {
-        with_server(self.addr, || {
-            let receipt_out = AssetRequest::Path(self.get_work_path());
-            self.client.prove_zkr(request, receipt_out)
         })
     }
 
@@ -386,32 +372,6 @@ fn guest_error_forwarding() {
     TestClient::new().execute(env, binary);
 }
 
-struct Coprocessor {
-    pub(crate) receipt: Option<SuccinctReceipt<Unknown>>,
-}
-
-impl Coprocessor {
-    fn new() -> Self {
-        Self { receipt: None }
-    }
-}
-
-impl CoprocessorCallback for Coprocessor {
-    fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
-        let client = TestClient::new();
-        let receipt = client.prove_zkr(proof_request);
-        self.receipt = Some(receipt);
-        Ok(())
-    }
-
-    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
-        let client = TestClient::new();
-        let receipt = client.prove_keccak(proof_request);
-        self.receipt = Some(receipt);
-        Ok(())
-    }
-}
-
 mod keccak_po2 {
     use std::{cell::RefCell, rc::Rc};
 
@@ -422,7 +382,7 @@ mod keccak_po2 {
     use super::Asset;
     use crate::{
         host::api::tests::TestClient, receipt::SuccinctReceipt, CoprocessorCallback, ExecutorEnv,
-        ProveKeccakRequest, ProveZkrRequest, Unknown,
+        ProveKeccakRequest, Unknown,
     };
 
     pub const KECCAK_TEST_PO2: u32 = 15;
@@ -437,10 +397,6 @@ mod keccak_po2 {
     }
 
     impl CoprocessorCallback for Coprocessor {
-        fn prove_zkr(&mut self, _proof_request: ProveZkrRequest) -> Result<()> {
-            unimplemented!()
-        }
-
         fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
             assert_eq!(proof_request.po2, KECCAK_TEST_PO2 as usize);
             let client = TestClient::new();
@@ -468,70 +424,6 @@ mod keccak_po2 {
 
         let _session = client.execute(env, Asset::Inline(MULTI_TEST_ELF.into()));
     }
-}
-
-#[test]
-fn coprocessor_handler() {
-    let mut client = TestClient::new();
-
-    let suite = Poseidon2HashSuite::new_suite();
-    let (program, control_id) = test_recursion_circuit("poseidon2").unwrap();
-    register_zkr(&control_id, move || Ok(program.clone()));
-    let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
-    let control_root = control_tree.calc_root(suite.hashfn.as_ref());
-
-    let inner_claim_digest =
-        digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-    let claim_digest = digest!("a558268a11892374b41d03857a40cdc5e87e351a3bfc17aa2054f47712a17bc3");
-
-    let mut input: Vec<u32> = Vec::new();
-    input.extend(control_root.as_words());
-    input.extend(inner_claim_digest.as_words());
-
-    let spec = &MultiTestSpec::SysProveZkr {
-        control_id,
-        input,
-        claim_digest,
-        control_root,
-    };
-
-    let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
-    let env = ExecutorEnv::builder()
-        .coprocessor_callback_ref(coprocessor.clone())
-        .write(&spec)
-        .unwrap()
-        .build()
-        .unwrap();
-
-    let session = client.execute(env, Asset::Inline(MULTI_TEST_ELF.into()));
-    assert_eq!(session.segments.len(), 1);
-    assert_eq!(client.segments.len(), 1);
-
-    // Prove and lift the composition
-    let opts = ProverOpts::default();
-    let ctx = VerifierContext::default();
-    let segment_receipt = client.prove_segment(&opts, client.segments[0].clone());
-    segment_receipt.verify_integrity_with_context(&ctx).unwrap();
-    let conditional_receipt = client.lift(&opts, segment_receipt.try_into().unwrap());
-    conditional_receipt
-        .verify_integrity_with_context(&ctx)
-        .unwrap();
-
-    // Use resolve to create an unconditional succinct receipt
-    let mut coprocessor = RefCell::borrow_mut(&coprocessor);
-    let assumption_receipt = coprocessor.receipt.take().unwrap();
-    let succinct_receipt = client.resolve(
-        &opts,
-        conditional_receipt.try_into().unwrap(),
-        assumption_receipt.try_into().unwrap(),
-    );
-
-    // Wrap into a Receipt and verify
-    let receipt = Receipt::new(
-        InnerReceipt::Succinct(succinct_receipt),
-        session.journal.bytes,
-    );
-    receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
 #[test(tokio::test)]
