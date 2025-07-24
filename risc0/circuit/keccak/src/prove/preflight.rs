@@ -40,7 +40,8 @@ pub(crate) struct ForwardPreflightOrder;
 
 impl PreflightCycleOrder for ForwardPreflightOrder {
     type Key = ();
-    fn key_for_cycle(_: &ControlState) -> Self::Key {}
+    fn key_for_cycle(_: &ControlState) -> Self::Key {
+        ()
 }
 
 pub(crate) struct PreflightTrace<Order: PreflightCycleOrder = ForwardPreflightOrder> {
