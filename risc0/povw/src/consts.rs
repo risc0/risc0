@@ -530,38 +530,32 @@ pub(crate) const FULL_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
 ];
 
 #[cfg(test)]
-use crate::{join, Bitmap};
-
-#[cfg(test)]
-fn calc_empty_subtree_root(height: usize) -> Digest {
-    if height == 0 {
-        return digest!("0000000000000000000000000000000000000000000000000000000000000000");
-    }
-    let mut node = join(Bitmap::EMPTY, Bitmap::EMPTY);
-    for _ in 2..=height {
-        node = join(node, node);
-    }
-    node
-}
-
-#[cfg(test)]
-fn calc_full_subtree_root(height: usize) -> Digest {
-    if height == 0 {
-        return digest!("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    }
-    let mut node = join(Bitmap::FULL, Bitmap::FULL);
-    for _ in 2..=height {
-        node = join(node, node);
-    }
-    node
-}
-
-#[cfg(test)]
 mod tests {
-    use super::{
-        calc_empty_subtree_root, calc_full_subtree_root, WorkSet, EMPTY_SUBTREE_ROOTS,
-        FULL_SUBTREE_ROOTS,
-    };
+    use super::{WorkSet, EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS};
+    use crate::{join, Bitmap};
+    use risc0_zkvm::{digest, Digest};
+
+    fn calc_empty_subtree_root(height: usize) -> Digest {
+        if height == 0 {
+            return digest!("0000000000000000000000000000000000000000000000000000000000000000");
+        }
+        let mut node = join(Bitmap::EMPTY, Bitmap::EMPTY);
+        for _ in 2..=height {
+            node = join(node, node);
+        }
+        node
+    }
+
+    fn calc_full_subtree_root(height: usize) -> Digest {
+        if height == 0 {
+            return digest!("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        }
+        let mut node = join(Bitmap::FULL, Bitmap::FULL);
+        for _ in 2..=height {
+            node = join(node, node);
+        }
+        node
+    }
 
     #[test]
     fn empty_subtree_root_correct() {
