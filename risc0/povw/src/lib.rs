@@ -16,24 +16,22 @@ use std::{
     cmp::Ordering,
     collections::{btree_map, BTreeMap, BTreeSet},
     fmt::Debug,
-    ops::{Add, BitOr, ShrAssign, Sub},
+    ops::{BitOr, ShrAssign, Sub},
 };
 
 use anyhow::{bail, ensure};
-use hybrid_array::{sizes, typenum, typenum::ToInt, Array, ArraySize};
+use hybrid_array::{typenum, Array, ArraySize};
+use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{
     sha::{self, Sha256 as _},
     Digest,
 };
-use ruint::{
-    aliases::{U160, U256},
-    Uint,
-};
+use ruint::{aliases::U256, Uint};
 
 mod consts;
 pub mod guest;
 
-// TODO: Break up the following code into modules.
+// TODO(povw): Break up the following code into modules.
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use consts::{EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS};
@@ -105,16 +103,17 @@ impl From<Bitmap> for [u8; 32] {
 
 #[derive(Clone, Debug, Default)]
 pub struct WorkSet {
-    pub logs: BTreeMap<U160, WorkLog>,
+    pub logs: BTreeMap<PovwLogId, WorkLog>,
 }
 
 impl WorkSet {
-    pub const TREE_HEIGHT: usize = WorkLog::TREE_HEIGHT + 160;
+    /// Height of the Merkle tree that commits to all nonces in the [WorkSet].
+    pub const TREE_HEIGHT: usize = WorkLog::TREE_HEIGHT + PovwLogId::BITS;
     pub const EMPTY: Self = Self {
         logs: BTreeMap::new(),
     };
 
-    pub fn add(&mut self, id: U160, log: WorkLog) -> anyhow::Result<()> {
+    pub fn add(&mut self, id: PovwLogId, log: WorkLog) -> anyhow::Result<()> {
         match self.logs.entry(id) {
             btree_map::Entry::Vacant(entry) => entry.insert(log),
             btree_map::Entry::Occupied(_) => bail!("log id 0x{:020x} is occupied", id),
@@ -124,7 +123,7 @@ impl WorkSet {
 
     pub fn contains(&self, nonce: U256) -> bool {
         self.logs
-            .get(&nonce.wrapping_shr(96).to::<U160>())
+            .get(&nonce.wrapping_shr(96).to::<PovwLogId>())
             .map(|job| job.contains(nonce.wrapping_to::<U96>()))
             .unwrap_or_default()
     }
@@ -156,7 +155,7 @@ impl WorkSet {
             let sublog_index_bits = WorkLog::TREE_HEIGHT - height;
             let sublog_index =
                 (index & ((U256::from(1) << sublog_index_bits) - U256::from(1))).to::<U96>();
-            let log_index = (index >> sublog_index_bits).to::<U160>();
+            let log_index = (index >> sublog_index_bits).to::<PovwLogId>();
             return self
                 .logs
                 .get(&log_index)
@@ -164,13 +163,13 @@ impl WorkSet {
                 .subtree_root(height, sublog_index);
         }
 
-        // Cast index to U160. At this point it must be less than 2^160.
-        let index: U160 = index.to();
+        // Cast index to PovwLogId (i.e. U160). At this point it must be less than 2^160.
+        let index: PovwLogId = index.to();
         let height_offset = height - WorkLog::TREE_HEIGHT;
 
         // A level of the tree, holding only roots of non-empty subtrees that are decendents of the
         // desired root.
-        let mut level: BTreeMap<U160, Digest> = self
+        let mut level: BTreeMap<PovwLogId, Digest> = self
             .logs
             .iter()
             .filter(|(id, _)| id.wrapping_shr(height_offset) == index)
@@ -185,14 +184,16 @@ impl WorkSet {
         // Iterate up the levels, from the roots of the job trees to the root of the subtree.
         #[allow(clippy::needless_range_loop)]
         for i in WorkLog::TREE_HEIGHT..height {
-            let next_level_keys: BTreeSet<U160> =
+            let next_level_keys: BTreeSet<PovwLogId> =
                 level.keys().map(|idx| idx.wrapping_shr(1)).collect();
             level = next_level_keys
                 .into_iter()
                 .map(|idx| {
                     let empty = &EMPTY_SUBTREE_ROOTS[i];
                     let left = level.get(&(idx << 1)).unwrap_or(empty);
-                    let right = level.get(&((idx << 1) ^ U160::from(1))).unwrap_or(empty);
+                    let right = level
+                        .get(&((idx << 1) ^ PovwLogId::from(1)))
+                        .unwrap_or(empty);
                     (idx, join(*left, *right))
                 })
                 .collect();
@@ -205,7 +206,7 @@ impl WorkSet {
 
     fn bitmap_at(&self, index: U256) -> Bitmap {
         self.logs
-            .get(&(index >> 96usize).to::<U160>())
+            .get(&(index >> 96usize).to::<PovwLogId>())
             .unwrap_or(&WorkLog::EMPTY)
             .bitmap_at(index.wrapping_to::<U96>())
     }
@@ -217,7 +218,8 @@ pub struct WorkLog {
 }
 
 impl WorkLog {
-    pub const TREE_HEIGHT: usize = Job::TREE_HEIGHT + 64;
+    /// Height of the Merkle tree that commits to all nonces in the [WorkLog].
+    pub const TREE_HEIGHT: usize = Job::TREE_HEIGHT + u64::BITS as usize;
     pub const EMPTY: Self = Self {
         jobs: BTreeMap::new(),
     };
@@ -354,7 +356,9 @@ pub struct Job {
 }
 
 impl Job {
-    pub const TREE_HEIGHT: usize = <Self as Merkleized>::TreeHeight::INT;
+    /// Height of the Merkle tree that commits to all nonces in the [Job].
+    // NOTE: Height of the tree is 32 - log2(U256::BITS) because each leaf commits to 256 bits.
+    pub const TREE_HEIGHT: usize = u32::BITS as usize - 8;
     pub const EMPTY: Self = Self { index_max: None };
 
     pub fn new(index_max: u32) -> Self {
@@ -498,17 +502,17 @@ pub trait Merkleized: private::Sealed {
 }
 
 impl Merkleized for Job {
-    type TreeHeight = sizes::U24;
+    type TreeHeight = typenum::U<{ Self::TREE_HEIGHT }>;
     type Index = u32;
 }
 
 impl Merkleized for WorkLog {
-    type TreeHeight = <<Job as Merkleized>::TreeHeight as Add<sizes::U64>>::Output;
+    type TreeHeight = typenum::U<{ Self::TREE_HEIGHT }>;
     type Index = U96;
 }
 
 impl Merkleized for WorkSet {
-    type TreeHeight = <<WorkLog as Merkleized>::TreeHeight as Add<sizes::U160>>::Output;
+    type TreeHeight = typenum::U<{ Self::TREE_HEIGHT }>;
     type Index = U256;
 }
 
@@ -690,7 +694,8 @@ mod tests {
         strategy::{Just, Strategy},
         test_runner::{TestCaseError, TestRunner},
     };
-    use ruint::aliases::{U160, U256};
+    use risc0_binfmt::PovwLogId;
+    use ruint::aliases::U256;
 
     use super::{Bitmap, Job, WorkLog, WorkSet, U96};
 
@@ -907,10 +912,12 @@ mod tests {
                 .unwrap();
         }
 
-        work_set.add(U160::from(1), WorkLog::default()).unwrap();
+        work_set
+            .add(PovwLogId::from(1), WorkLog::default())
+            .unwrap();
         work_set
             .logs
-            .get_mut(&U160::from(1))
+            .get_mut(&PovwLogId::from(1))
             .unwrap()
             .add(1, Job::new(0))
             .unwrap();
@@ -942,8 +949,12 @@ mod tests {
 
     fn arbitrary_work_set(max_logs: usize, max_jobs: usize) -> impl Strategy<Value = WorkSet> {
         // NOTE: This only produces non-empty work logs.
-        btree_map(any::<U160>(), arbitrary_work_log(max_jobs), 1..=max_logs)
-            .prop_map(|logs| WorkSet { logs })
+        btree_map(
+            any::<PovwLogId>(),
+            arbitrary_work_log(max_jobs),
+            1..=max_logs,
+        )
+        .prop_map(|logs| WorkSet { logs })
     }
 
     fn arbitrary_work_set_index(
@@ -955,7 +966,7 @@ mod tests {
             // NOTE: This will panic if the work set is empty, due to select from empty Vec.
             let work_set_strat = Just(work_set.clone());
             let index = prop_oneof![
-                proptest::sample::select(work_set.logs.keys().copied().collect::<Vec<U160>>())
+                proptest::sample::select(work_set.logs.keys().copied().collect::<Vec<PovwLogId>>())
                     .prop_flat_map(move |log_index| {
                         let work_log = work_set.logs.get(&log_index).unwrap().clone();
                         arbitrary_work_log_index(Just(work_log)).prop_map(move |(_, index)| {
