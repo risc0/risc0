@@ -487,11 +487,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// log identifer and job number as the base for PoVW nonces assigned to each segment.
     ///
     /// ```
-    /// # use risc0_zkvm::ProverOpts;
+    /// # use risc0_zkvm::ExecutorEnv;
     /// use ruint::uint;
     ///
     /// let work_log_id = uint!(0xC2A2379b379da8C076d51520C4f6a2fc5AAE3d1e_U160);
-    /// ProverOpts::default().with_povw((work_log_id, rand::random()));
+    /// ExecutorEnv::builder().povw((work_log_id, rand::random()));
     /// ```
     pub fn povw(&mut self, povw_job_id: impl Into<PovwJobId>) -> &mut Self {
         self.inner.povw_job_id = Some(povw_job_id.into());

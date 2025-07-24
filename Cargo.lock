@@ -7045,6 +7045,7 @@ dependencies = [
  "rmp-serde",
  "rrs-lib",
  "rstest 0.25.0",
+ "ruint",
  "rustc-demangle",
  "rzup",
  "semver 1.0.26",
