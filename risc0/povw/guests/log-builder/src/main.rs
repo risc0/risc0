@@ -42,6 +42,8 @@ fn main() {
     let mut update_value = 0u64;
     for update in input.updates {
         // Verify the WorkClaim and extract the Work struct.
+        // NOTE: env::verify_assumption is used here instead of env::verify, becuase the claim type
+        // is WorkClaim<Unknown> rather than ReceiptClaim.
         env::verify_assumption(update.claim.digest(), Digest::ZERO).unwrap();
         let work = update
             .claim
