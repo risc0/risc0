@@ -40,10 +40,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    receipt_claim::Unknown,
+    claim::Unknown,
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
-    Assumption, Assumptions, MaybePruned, Output, ReceiptClaim,
+    Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 
 pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
@@ -456,6 +456,26 @@ where
     }
 }
 
+impl TryFrom<FakeReceipt<ReceiptClaim>> for Receipt {
+    type Error = PrunedValueError;
+
+    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the jounal must be
+    /// populated on the receipt claim (i.e. it cannot be pruned).
+    fn try_from(fake_receipt: FakeReceipt<ReceiptClaim>) -> Result<Self, Self::Error> {
+        // Attempt to copy the journal from the receipt claim, returning an error if pruned.
+        let journal = fake_receipt
+            .claim
+            .as_value()?
+            .output
+            .as_value()?
+            .as_ref()
+            .map(|output| Ok(output.journal.as_value()?.clone()))
+            .transpose()?
+            .unwrap_or_default();
+        Ok(Receipt::new(InnerReceipt::Fake(fake_receipt), journal))
+    }
+}
+
 /// Metadata providing context on the receipt.
 ///
 /// It contains information about the proving system, SDK versions, and other information to help
@@ -529,9 +549,19 @@ impl<Claim> From<SuccinctReceipt<Claim>> for AssumptionReceipt
 where
     Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
-    /// Create a proven assumption from a [InnerAssumptionReceipt].
+    /// Create a proven assumption from a [SuccinctReceipt].
     fn from(receipt: SuccinctReceipt<Claim>) -> Self {
         Self::Proven(InnerAssumptionReceipt::Succinct(receipt.into_unknown()))
+    }
+}
+
+impl<Claim> From<FakeReceipt<Claim>> for AssumptionReceipt
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    /// Create a fake proven assumption from a [FakeReceipt].
+    fn from(receipt: FakeReceipt<Claim>) -> Self {
+        Self::Proven(InnerAssumptionReceipt::Fake(receipt.into_unknown()))
     }
 }
 

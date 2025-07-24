@@ -98,6 +98,23 @@ where
             )
             .context("witness generation failure")?;
 
+        // Add random noise to end of the data columns
+        scope!("noise", {
+            use risc0_zkp::ZK_CYCLES;
+            let mut rng = rand::rng();
+            let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.data_size()];
+            hal.eltwise_copy_elem_slice(
+                &data,
+                &noise,
+                CIRCUIT.data_size(),      // from_rows
+                ZK_CYCLES,                // from_cols
+                0,                        // from_offset
+                ZK_CYCLES,                // from_stride
+                total_cycles - ZK_CYCLES, // into_offset
+                total_cycles,             // into_stride
+            );
+        });
+
         // Zero out 'invalid' entries in data and output.
         scope!("zeroize", {
             hal.eltwise_zeroize_elem(&data);

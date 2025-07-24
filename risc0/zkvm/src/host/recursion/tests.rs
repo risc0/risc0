@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::VecDeque;
+use std::{collections::VecDeque, sync::LazyLock};
 
 use anyhow::Result;
-use risc0_binfmt::tagged_struct;
+use risc0_binfmt::{tagged_struct, PovwJobId, PovwLogId};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
@@ -26,14 +26,17 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 
 use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
+    claim::Unknown,
     default_prover, get_prover_server,
     host::server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     mmr::MerkleMountainAccumulator,
-    receipt_claim::{MaybePruned, Unknown},
+    recursion::prove::{
+        join_povw, join_unwrap_povw, lift_povw, resolve_povw, resolve_unwrap_povw, unwrap_povw,
+    },
     sha::{self, Digestible},
-    ExecutorEnv, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, SimpleSegmentRef,
-    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
-    RECURSION_PO2,
+    ExecutorEnv, InnerReceipt, Journal, MaybePruned, ProverOpts, Receipt, ReceiptClaim,
+    SegmentReceipt, Session, SimpleSegmentRef, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+    VerifierContext, WorkClaim, ALLOWED_CONTROL_ROOT, RECURSION_PO2,
 };
 
 #[test_log::test]
@@ -130,67 +133,207 @@ fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
         .run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
 }
 
-fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
-    let segment_limit_po2 = 16; // 64k cycles
-    let cycles = 1 << segment_limit_po2;
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::BusyLoop { cycles })
-        .unwrap()
-        .segment_limit_po2(segment_limit_po2)
-        .build()
-        .unwrap();
-
-    tracing::info!("Executing rv32im");
-    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
-    let prover = get_prover_server(&opts).unwrap();
-
+fn prove_segments(session: &Session) -> Result<Vec<SegmentReceipt>> {
     tracing::info!("Proving rv32im");
+    let opts = ProverOpts::composite().with_hashfn("poseidon2".to_string());
+    let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
     let segment_receipts = session
         .segments
         .iter()
         .map(|x| x.resolve().unwrap())
         .map(|x| prover.prove_segment(&ctx, &x).unwrap())
-        .collect();
-    tracing::info!("Done proving rv32im");
+        .collect::<Vec<_>>();
 
-    (session, segment_receipts)
+    tracing::info!("Done proving rv32im: {} segments", segment_receipts.len());
+    Ok(segment_receipts)
+}
+
+/// PoVW job ID used in this test, by generate_busy_loop_segments.
+const BUSY_LOOP_POVW_JOB_ID: PovwJobId = PovwJobId {
+    log: PovwLogId::from_limbs([1, 2, 3]),
+    job: 42,
+};
+
+static BUSY_LOOP_SEGMENTS: LazyLock<(Journal, Vec<SegmentReceipt>)> =
+    LazyLock::new(generate_busy_loop_segments);
+
+fn generate_busy_loop_segments() -> (Journal, Vec<SegmentReceipt>) {
+    let segment_limit_po2 = 16; // 64k cycles
+    let cycles = 1 << segment_limit_po2;
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles })
+        .unwrap()
+        .segment_limit_po2(segment_limit_po2)
+        .povw(BUSY_LOOP_POVW_JOB_ID)
+        .build()
+        .unwrap();
+
+    tracing::info!("Executing rv32im");
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+
+    let segment_receipts = prove_segments(&session).unwrap();
+    // The tests below need at least three segments to work with.
+    assert!(segment_receipts.len() >= 3);
+
+    (session.journal.unwrap(), segment_receipts)
+}
+
+fn generate_echo_segment(
+    msg: impl AsRef<[u8]>,
+    povw_job: Option<PovwJobId>,
+) -> (Journal, SegmentReceipt) {
+    let mut env_builder = ExecutorEnv::builder();
+    env_builder
+        .write(&MultiTestSpec::Echo {
+            bytes: msg.as_ref().to_vec(),
+        })
+        .unwrap();
+    if let Some(job_id) = povw_job {
+        env_builder.povw(job_id);
+    }
+    let env = env_builder.build().unwrap();
+
+    tracing::info!("Executing rv32im for echo");
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+
+    let segment_receipts = prove_segments(&session).unwrap();
+    assert_eq!(segment_receipts.len(), 1);
+
+    (session.journal.unwrap(), segment_receipts[0].clone())
 }
 
 #[test_log::test]
-fn test_recursion_lift_join_identity_e2e() {
+fn test_recursion_lift_then_unwrap_povw() {
     // Prove the base case
-    let (session, segments) = generate_busy_loop_segments("poseidon2");
+    let (journal, segment) = generate_echo_segment(b"hello", Some(rand::random()));
+    let ctx = VerifierContext::default();
 
     // Lift and join them all (and verify)
-    let mut rollup = lift(&segments[0]).unwrap();
-    tracing::info!("Lift claim = {:?}", rollup.claim);
+    tracing::info!("Proving lift_povw");
+    let lifted: SuccinctReceipt<WorkClaim<ReceiptClaim>> = lift_povw(&segment).unwrap();
+    lifted.verify_integrity_with_context(&ctx).unwrap();
+
+    // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
+    tracing::info!("Proving unwrap_povw");
+    let unwraped: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&lifted).unwrap();
+    unwraped.verify_integrity_with_context(&ctx).unwrap();
+
+    let receipt = Receipt::new(InnerReceipt::Succinct(unwraped), journal.bytes);
+    receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test_log::test]
+fn test_recursion_lift_join_then_unwrap_povw() -> anyhow::Result<()> {
+    // Prove the base case
+    let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
+    let ctx = VerifierContext::default();
+
+    // Lift and join them all (and verify)
+    tracing::info!("Proving lift_povw");
+    let mut compressed_povw: SuccinctReceipt<WorkClaim<ReceiptClaim>> = lift_povw(&segments[0])?;
+    compressed_povw.verify_integrity_with_context(&ctx)?;
+
+    let mut total_work = compressed_povw.claim.as_value()?.work.as_value()?.value;
+    for receipt in &segments[1..] {
+        tracing::info!("Proving lift_povw");
+        let rec_receipt = lift_povw(receipt)?;
+        rec_receipt.verify_integrity_with_context(&ctx)?;
+        total_work += rec_receipt.claim.as_value()?.work.as_value()?.value;
+
+        tracing::info!("Proving join_povw");
+        compressed_povw = join_povw(&compressed_povw, &rec_receipt)?;
+        compressed_povw.verify_integrity_with_context(&ctx)?;
+    }
+
+    // Check that the work claim is as expected.
+    let work = compressed_povw.claim.as_value()?.work.as_value()?.clone();
+    assert_eq!(work.value, total_work);
+    assert_eq!(work.nonce_min.log, BUSY_LOOP_POVW_JOB_ID.log);
+    assert_eq!(work.nonce_min.job, BUSY_LOOP_POVW_JOB_ID.job);
+    assert_eq!(work.nonce_min.segment, 0);
+    assert_eq!(work.nonce_max.log, BUSY_LOOP_POVW_JOB_ID.log);
+    assert_eq!(work.nonce_max.job, BUSY_LOOP_POVW_JOB_ID.job);
+    assert_eq!(work.nonce_max.segment, (segments.len() - 1) as u32);
+
+    // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
+    tracing::info!("Proving unwrap_povw");
+    let compressed: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&compressed_povw)?;
+    compressed.verify_integrity_with_context(&ctx)?;
+
+    let compressed_receipt = Receipt::new(InnerReceipt::Succinct(compressed), journal.bytes);
+    compressed_receipt.verify(MULTI_TEST_ID)?;
+
+    Ok(())
+}
+
+#[test_log::test]
+fn test_recursion_lift_join_combined_unwrap_povw() -> anyhow::Result<()> {
+    // Prove the base case
+    let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
+    let ctx = VerifierContext::default();
+
+    // Lift and join them all (and verify)
+    tracing::info!("Proving lift_povw");
+    let mut compressed_povw: SuccinctReceipt<WorkClaim<ReceiptClaim>> = lift_povw(&segments[0])?;
+    compressed_povw.verify_integrity_with_context(&ctx)?;
+
+    for receipt in &segments[1..segments.len() - 1] {
+        tracing::info!("Proving lift_povw");
+        let rec_receipt = lift_povw(receipt)?;
+        rec_receipt.verify_integrity_with_context(&ctx)?;
+
+        tracing::info!("Proving join_povw");
+        compressed_povw = join_povw(&compressed_povw, &rec_receipt)?;
+        compressed_povw.verify_integrity_with_context(&ctx)?;
+    }
+
+    // Lift and join the last segment using the combined join_unwrap_povw function.
+    tracing::info!("Proving lift_povw");
+    let final_rec_receipt = lift_povw(&segments[segments.len() - 1])?;
+    final_rec_receipt.verify_integrity_with_context(&ctx)?;
+
+    // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
+    tracing::info!("Proving join_unwrap_povw");
+    let compressed: SuccinctReceipt<ReceiptClaim> =
+        join_unwrap_povw(&compressed_povw, &final_rec_receipt)?;
+    compressed.verify_integrity_with_context(&ctx)?;
+
+    let compressed_receipt = Receipt::new(InnerReceipt::Succinct(compressed), journal.bytes);
+    compressed_receipt.verify(MULTI_TEST_ID)?;
+
+    Ok(())
+}
+
+#[test_log::test]
+fn test_recursion_lift_join_identity_p254_e2e() {
+    // Prove the base case
+    let (journal, segments) = BUSY_LOOP_SEGMENTS.clone();
+
+    // Lift and join them all (and verify)
+    tracing::info!("Proving lift");
+    let mut compressed = lift(&segments[0]).unwrap();
     let ctx = VerifierContext::default();
     for receipt in &segments[1..] {
+        tracing::info!("Proving lift");
         let rec_receipt = lift(receipt).unwrap();
-        tracing::info!("Lift claim = {:?}", rec_receipt.claim);
         rec_receipt.verify_integrity_with_context(&ctx).unwrap();
-        rollup = join(&rollup, &rec_receipt).unwrap();
-        tracing::info!("Join claim = {:?}", rollup.claim);
-        rollup.verify_integrity_with_context(&ctx).unwrap();
+        tracing::info!("Proving join");
+        compressed = join(&compressed, &rec_receipt).unwrap();
+        compressed.verify_integrity_with_context(&ctx).unwrap();
     }
 
     // Check on stark-to-snark
     // let snark_receipt =
-    identity_p254(&rollup).expect("Running prover failed");
+    identity_p254(&compressed).expect("Running prover failed");
 
     // Uncomment to write seal...
     // let seal: Vec<u8> =
     // bytemuck::cast_slice(snark_receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    // Validate the Session rollup + journal data
-    let rollup_receipt = Receipt::new(
-        InnerReceipt::Succinct(rollup),
-        session.journal.unwrap().bytes,
-    );
-    rollup_receipt.verify(MULTI_TEST_ID).unwrap();
+    let compressed_receipt = Receipt::new(InnerReceipt::Succinct(compressed), journal.bytes);
+    compressed_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
 #[test_log::test]
@@ -322,6 +465,131 @@ fn test_recursion_lift_resolve_e2e() {
 }
 
 #[test_log::test]
+fn test_recursion_lift_resolve_then_unwrap_povw() -> Result<()> {
+    let msg = b"assume this is true";
+    let (_, assumption_segment) = generate_echo_segment(msg, None);
+
+    let povw_job_id: PovwJobId = rand::random();
+    let env = ExecutorEnv::builder()
+        .add_assumption(assumption_segment.claim.clone())
+        .write(&MultiTestSpec::SysVerify(vec![(
+            MULTI_TEST_ID.into(),
+            msg.to_vec(),
+        )]))?
+        .povw(povw_job_id)
+        .build()?;
+
+    tracing::info!("Proving: conditional");
+    let session = execute_elf(env, MULTI_TEST_ELF)?;
+    let segments = prove_segments(&session)?;
+    tracing::info!("Done proving: conditional");
+
+    // Execution should be small enough to fit into one segment.
+    assert_eq!(segments.len(), 1);
+
+    let ctx = VerifierContext::default();
+    tracing::info!("Proving lift_povw");
+    let lifted_conditional_receipt = lift_povw(&segments[segments.len() - 1])?;
+    lifted_conditional_receipt.verify_integrity_with_context(&ctx)?;
+
+    // NOTE: Assumption is lifted uses non-povw program. In a full PoVW workflow, the prover would
+    // also compress the assumption using povw programs, save the WorkClaim receipt, and unwrap the
+    // assumption before passing it in here.
+    tracing::info!("Proving lift");
+    let lifted_assumption_receipt = lift(&assumption_segment)?;
+    lifted_assumption_receipt.verify_integrity_with_context(&ctx)?;
+
+    tracing::info!("Proving resolve_povw");
+    let resolved_povw_receipt =
+        resolve_povw(&lifted_conditional_receipt, &lifted_assumption_receipt)?;
+    resolved_povw_receipt.verify_integrity_with_context(&ctx)?;
+
+    let work = resolved_povw_receipt
+        .claim
+        .as_value()?
+        .work
+        .as_value()?
+        .clone();
+    assert_eq!(
+        work.value,
+        lifted_conditional_receipt
+            .claim
+            .as_value()?
+            .work
+            .as_value()?
+            .value
+    );
+    assert_eq!(work.nonce_min.log, povw_job_id.log);
+    assert_eq!(work.nonce_min.job, povw_job_id.job);
+    assert_eq!(work.nonce_min.segment, 0);
+    assert_eq!(work.nonce_max.log, povw_job_id.log);
+    assert_eq!(work.nonce_max.job, povw_job_id.job);
+    assert_eq!(work.nonce_max.segment, 0);
+
+    // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
+    tracing::info!("Proving unwrap_povw");
+    let resolved_receipt: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&resolved_povw_receipt)?;
+    resolved_receipt.verify_integrity_with_context(&ctx)?;
+
+    let receipt = Receipt::new(
+        InnerReceipt::Succinct(resolved_receipt),
+        session.journal.unwrap().bytes,
+    );
+    receipt.verify(MULTI_TEST_ID)?;
+
+    Ok(())
+}
+
+#[test_log::test]
+fn test_recursion_lift_resolve_combined_unwrap_povw() -> Result<()> {
+    let msg = b"assume this is true";
+    let (_, assumption_segment) = generate_echo_segment(msg, None);
+
+    let povw_job_id: PovwJobId = rand::random();
+    let env = ExecutorEnv::builder()
+        .add_assumption(assumption_segment.claim.clone())
+        .write(&MultiTestSpec::SysVerify(vec![(
+            MULTI_TEST_ID.into(),
+            msg.to_vec(),
+        )]))?
+        .povw(povw_job_id)
+        .build()?;
+
+    tracing::info!("Proving: conditional");
+    let session = execute_elf(env, MULTI_TEST_ELF)?;
+    let segments = prove_segments(&session)?;
+    tracing::info!("Done proving: conditional");
+
+    // Execution should be small enough to fit into one segment.
+    assert_eq!(segments.len(), 1);
+
+    let ctx = VerifierContext::default();
+    tracing::info!("Proving lift_povw");
+    let lifted_conditional_receipt = lift_povw(&segments[segments.len() - 1])?;
+    lifted_conditional_receipt.verify_integrity_with_context(&ctx)?;
+
+    // NOTE: Assumption is lifted uses non-povw program. In a full PoVW workflow, the prover would
+    // also compress the assumption using povw programs, save the WorkClaim receipt, and unwrap the
+    // assumption before passing it in here.
+    tracing::info!("Proving lift");
+    let lifted_assumption_receipt = lift(&assumption_segment)?;
+    lifted_assumption_receipt.verify_integrity_with_context(&ctx)?;
+
+    tracing::info!("Proving resolve_unwrap_povw");
+    let resolved_receipt: SuccinctReceipt<ReceiptClaim> =
+        resolve_unwrap_povw(&lifted_conditional_receipt, &lifted_assumption_receipt)?;
+    resolved_receipt.verify_integrity_with_context(&ctx)?;
+
+    let receipt = Receipt::new(
+        InnerReceipt::Succinct(resolved_receipt),
+        session.journal.unwrap().bytes,
+    );
+    receipt.verify(MULTI_TEST_ID)?;
+
+    Ok(())
+}
+
+#[test_log::test]
 fn test_recursion_circuit() {
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
     super::test_zkr(&digest, &digest, RECURSION_PO2).unwrap();
@@ -358,7 +626,7 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("ce52bf56033842021af3cf6db8a50d1b7535c125a34f1a22c6fdcf002c5a1529")
+        digest!("e99ea75d1ada9944e96c080d31ab9b2fc3744361e1b5fd0c27848a773d53ea08")
     );
 }
 

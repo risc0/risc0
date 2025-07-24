@@ -16,7 +16,7 @@ use std::cell::Cell;
 
 use anyhow::Result;
 use derive_more::Debug;
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, PovwNonce};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -53,6 +53,8 @@ pub struct Segment {
     pub po2: u32,
 
     pub index: u64,
+
+    pub povw_nonce: Option<PovwNonce>,
 }
 
 impl Segment {
@@ -76,7 +78,7 @@ impl Segment {
         } else {
             MAX_INSN_CYCLES_LOWER_PO2
         };
-        Executor::new(self.partial_image.clone(), &handler, None, vec![]).run(
+        Executor::new(self.partial_image.clone(), &handler, None, vec![], None).run(
             self.po2 as usize,
             max_insn_cycles,
             CycleLimit::Soft(self.suspend_cycle.into()),

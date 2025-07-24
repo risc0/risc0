@@ -35,16 +35,17 @@ use risc0_zkp::{
         hash::{hash_suite_from_name, sha::Sha256},
     },
     verify::VerificationError,
+    MAX_CYCLES_PO2,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    claim::Unknown,
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         VerifierContext,
     },
-    receipt_claim::{MaybePruned, Unknown},
-    sha,
+    sha, MaybePruned,
 };
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM with a [STARK].
@@ -222,6 +223,20 @@ where
             .root(&self.control_id, hash_suite.hashfn.as_ref()))
     }
 
+    #[cfg(feature = "prove")]
+    pub(crate) fn to_assumption(
+        &self,
+        erase_control_root: bool,
+    ) -> anyhow::Result<crate::Assumption> {
+        Ok(crate::Assumption {
+            claim: self.claim.digest::<sha::Impl>(),
+            control_root: match erase_control_root {
+                false => self.control_root()?,
+                true => Digest::ZERO,
+            },
+        })
+    }
+
     /// Prunes the claim, retaining its digest, and converts into a [SuccinctReceipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
     pub fn into_unknown(self) -> SuccinctReceipt<Unknown> {
@@ -242,14 +257,23 @@ pub(crate) fn allowed_control_ids(
     po2_max: usize,
 ) -> anyhow::Result<impl Iterator<Item = Digest>> {
     // Recursion programs (ZKRs) that are to be included in the allowed set.
-    // NOTE: Although the rv32im circuit has control IDs down to po2 13, lift predicates are only
-    // generated for po2 14 and above, hence the magic 14 below.
-    let allowed_zkr_names: BTreeSet<String> =
-        ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
-            .map(str::to_string)
-            .into_iter()
-            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
-            .collect();
+    let po2_range = MIN_LIFT_PO2..=usize::min(po2_max, MAX_CYCLES_PO2);
+    let allowed_zkr_names: BTreeSet<String> = [
+        "join.zkr",
+        "join_povw.zkr",
+        "join_unwrap_povw.zkr",
+        "resolve.zkr",
+        "resolve_povw.zkr",
+        "resolve_unwrap_povw.zkr",
+        "identity.zkr",
+        "unwrap_povw.zkr",
+        "union.zkr",
+    ]
+    .map(str::to_string)
+    .into_iter()
+    .chain(po2_range.clone().map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+    .chain(po2_range.map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
+    .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
         "sha-256" => SHA256_CONTROL_IDS,
@@ -260,9 +284,12 @@ pub(crate) fn allowed_control_ids(
         ),
     };
 
-    Ok(zkr_control_ids
-        .into_iter()
-        .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)))
+    Ok(allowed_zkr_names.into_iter().map(move |name| {
+        *zkr_control_ids
+            .iter()
+            .find_map(|(zkr_name, digest)| (zkr_name == &name).then_some(digest))
+            .expect("zkr name in allowed_zkr_names not found in zkr_control_ids")
+    }))
 }
 
 /// Constructs the root for the set of allowed control IDs, given a maximum cycle count as a po2.
@@ -316,7 +343,7 @@ impl SuccinctReceiptVerifierParameters {
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
     pub fn all_po2s() -> Self {
-        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+        Self::from_max_po2(MAX_CYCLES_PO2)
     }
 }
 
@@ -364,7 +391,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("6da21180b0fb9de482aed36931a29b10feeb64fb96de49f2f2e5e119e2bb8cd8")
+            digest!("bb128f20e71162da461f402f267865d1b3a29cbfb51c501c0d54937e315044f0")
         );
     }
 

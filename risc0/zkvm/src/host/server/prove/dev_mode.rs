@@ -21,17 +21,20 @@ use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{
+    claim::{
+        receipt::{exit_code_from_terminate_state, UnionClaim},
+        Unknown,
+    },
     host::{
         prove_info::ProveInfo,
         server::{exec::executor::ExecutorImpl, session::null_callback},
     },
     mmr::{GuestPeak, MerkleMountainAccumulator},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::{exit_code_from_terminate_state, UnionClaim, Unknown},
     recursion::MerkleProof,
     Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
     PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
-    VerifierContext,
+    VerifierContext, WorkClaim,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =
@@ -88,9 +91,20 @@ pub struct DevModeDelay {
 /// It can be fully disabled at compile time, regardless of environment
 /// variables, by setting the feature flag `disable-dev-mode` on the
 /// `risc0_zkvm` crate.
+// TODO(povw): How does DevModeProver handle PoVW?
 #[non_exhaustive]
 pub struct DevModeProver {
     delay: Option<DevModeDelay>,
+}
+
+/// Utility macro to compress repeated checks that dev mode is not disabled.
+macro_rules! ensure_dev_mode_allowed {
+    () => {
+        ensure!(
+            cfg!(not(feature = "disable-dev-mode")),
+            ERR_DEV_MODE_DISABLED
+        );
+    };
 }
 
 impl DevModeProver {
@@ -124,11 +138,7 @@ impl ProverServer for DevModeProver {
         );
 
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
             session.assumptions.iter().cloned().unzip();
@@ -205,10 +215,7 @@ impl ProverServer for DevModeProver {
     }
 
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.segment_preflight);
@@ -228,10 +235,7 @@ impl ProverServer for DevModeProver {
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_segment_core);
@@ -258,10 +262,7 @@ impl ProverServer for DevModeProver {
         &self,
         _request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         if let Some(ref delay) = self.delay {
             std::thread::sleep(delay.prove_keccak);
@@ -271,16 +272,14 @@ impl ProverServer for DevModeProver {
     }
 
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        fake_recursion(self.delay.map(|d| d.lift))
+    }
 
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.lift);
-        }
-
-        Ok(fake_succinct_receipt())
+    fn lift_povw(
+        &self,
+        _receipt: &SegmentReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        fake_recursion(self.delay.map(|d| d.lift))
     }
 
     fn join(
@@ -288,16 +287,23 @@ impl ProverServer for DevModeProver {
         _a: &SuccinctReceipt<ReceiptClaim>,
         _b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        fake_recursion(self.delay.map(|d| d.join))
+    }
 
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.join);
-        }
+    fn join_povw(
+        &self,
+        _a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        fake_recursion(self.delay.map(|d| d.join))
+    }
 
-        Ok(fake_succinct_receipt())
+    fn join_unwrap_povw(
+        &self,
+        _a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        fake_recursion(self.delay.map(|d| d.join))
     }
 
     fn resolve(
@@ -305,16 +311,23 @@ impl ProverServer for DevModeProver {
         _conditional: &SuccinctReceipt<ReceiptClaim>,
         _assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        fake_recursion(self.delay.map(|d| d.resolve))
+    }
 
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.resolve);
-        }
+    fn resolve_povw(
+        &self,
+        _conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        fake_recursion(self.delay.map(|d| d.resolve))
+    }
 
-        Ok(fake_succinct_receipt())
+    fn resolve_unwrap_povw(
+        &self,
+        _conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        _assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        fake_recursion(self.delay.map(|d| d.resolve))
     }
 
     fn union(
@@ -322,36 +335,28 @@ impl ProverServer for DevModeProver {
         _a: &SuccinctReceipt<Unknown>,
         _b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        fake_recursion(self.delay.map(|d| d.union))
+    }
 
-        if let Some(ref delay) = self.delay {
-            std::thread::sleep(delay.union);
-        }
-
-        Ok(fake_succinct_receipt())
+    fn unwrap_povw(
+        &self,
+        _a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        // TODO: Apply a delay here. Should be a little smaller than a join.
+        fake_recursion(None)
     }
 
     fn identity_p254(
         &self,
         _a: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
-
-        Ok(fake_succinct_receipt())
+        // TODO: Apply a delay here.
+        fake_recursion(None)
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
-        ensure!(
-            cfg!(not(feature = "disable-dev-mode")),
-            ERR_DEV_MODE_DISABLED
-        );
+        ensure_dev_mode_allowed!();
 
         Ok(Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
@@ -360,6 +365,21 @@ impl ProverServer for DevModeProver {
             receipt.journal.bytes.clone(),
         ))
     }
+}
+
+/// Private function used to simulate the delay of a lift.
+/// Return type is generic to handle any type of output claim.
+fn fake_recursion<Claim>(delay: Option<Duration>) -> Result<SuccinctReceipt<Claim>>
+where
+    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    ensure_dev_mode_allowed!();
+
+    if let Some(delay) = delay {
+        std::thread::sleep(delay);
+    }
+
+    Ok(fake_succinct_receipt())
 }
 
 fn fake_succinct_receipt<Claim>() -> SuccinctReceipt<Claim>
