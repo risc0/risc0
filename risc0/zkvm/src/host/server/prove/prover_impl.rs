@@ -280,7 +280,6 @@ impl ProverServer for ProverImpl {
         identity_p254(a)
     }
 
-    #[cfg(feature = "unstable")]
     fn prove_keccak(
         &self,
         request: &crate::ProveKeccakRequest,

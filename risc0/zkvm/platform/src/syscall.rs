@@ -963,8 +963,7 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 /// Permute the keccak state on the host
 ///
 /// # Safety
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
@@ -993,8 +992,7 @@ pub unsafe extern "C" fn sys_keccak(
 /// `claim_digest` must be aligned and dereferenceable.
 /// `control_root` must be aligned and dereferenceable.
 /// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_prove_keccak(
     claim_digest: *const [u32; DIGEST_WORDS],
     control_root: *const [u32; DIGEST_WORDS],

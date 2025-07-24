@@ -208,7 +208,6 @@ impl Client {
     }
 
     /// Prove the specified keccak proof request.
-    #[stability::unstable]
     pub fn prove_keccak<Claim>(
         &self,
         proof_request: crate::host::client::env::ProveKeccakRequest,
