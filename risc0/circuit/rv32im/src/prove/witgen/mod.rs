@@ -308,7 +308,7 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
     global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
 
     // povw nonce
-    // Split the U256 nonce into shorts LE shorts and assign to the globals.
+    // Split the U256 nonce into LE shorts and assign to the globals.
     let nonce = segment.povw_nonce.map(|n| n.into()).unwrap_or(U256::ZERO);
     let nonce_bytes = nonce.to_le_bytes::<{ U256::BYTES }>();
     let nonce_shorts = nonce_bytes
