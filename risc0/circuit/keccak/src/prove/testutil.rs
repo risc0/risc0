@@ -47,7 +47,7 @@ pub struct EvalCheckParams {
 
 impl EvalCheckParams {
     pub fn new(po2: usize) -> Self {
-        let mut rng = rand::rng();
+        let mut rng = rand::thread_rng();
         let steps = 1 << po2;
         let domain = steps * INV_RATE;
         let code_size = TAPSET.group_size(REGISTER_GROUP_CODE);
