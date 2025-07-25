@@ -21,6 +21,10 @@ name = "datasheet"
 required-features = ["prove"]
 
 [[example]]
+name = "e2e"
+required-features = ["prove"]
+
+[[example]]
 name = "fib"
 required-features = ["prove"]
 
