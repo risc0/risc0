@@ -59,7 +59,7 @@
 //! ```
 //!
 //! Notice how [env::read] is used to load the two factors, and [env::commit] is used to make their
-//! composite product publicly available. All input an output of your guest is private except for
+//! composite product publicly available. All inputs and outputs of your guest are private except for
 //! what is written to the journal with [env::commit].
 //!
 //! By default, the guest only has the Rust `core` libraries and not `std`. A partial
