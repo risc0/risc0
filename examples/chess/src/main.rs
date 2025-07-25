@@ -60,7 +60,7 @@ fn chess(inputs: &Inputs) -> Receipt {
         .unwrap();
 
     // Obtain the default prover.
-    let prover = default_prover().unwrap();
+    let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
     prover.prove(env, CHECKMATE_ELF).unwrap().receipt

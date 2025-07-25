@@ -35,7 +35,7 @@ fn search_json(data: &str) -> Outputs {
         .unwrap();
 
     // Obtain the default prover.
-    let prover = default_prover().unwrap();
+    let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, SEARCH_JSON_ELF).unwrap().receipt;

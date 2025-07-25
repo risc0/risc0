@@ -44,7 +44,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 # use risc0_zkvm_methods::HELLO_COMMIT_ELF as METHOD_NAME_ELF;
 
 let env = ExecutorEnv::builder().build().unwrap();
-let prover = default_prover().unwrap();
+let prover = default_prover();
 let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap().receipt;
 ```
 
@@ -65,7 +65,7 @@ another party for verification, along these lines:
 # use risc0_zkvm_methods::HELLO_COMMIT_ELF as METHOD_NAME_ELF;
 # use risc0_zkvm_methods::HELLO_COMMIT_ID as METHOD_NAME_ID;
 # let env = ExecutorEnv::builder().build().unwrap();
-# let prover = default_prover().unwrap();
+# let prover = default_prover();
 # let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap().receipt;
 receipt.verify(METHOD_NAME_ID).unwrap();
 ```

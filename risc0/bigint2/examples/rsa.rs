@@ -43,7 +43,7 @@ fn main() {
     }
 
     let env = ExecutorEnv::builder().build().unwrap();
-    let prover = default_prover().unwrap();
+    let prover = default_prover();
     prover.prove(env, RSA_ELF).unwrap();
 
     if args.puffin {

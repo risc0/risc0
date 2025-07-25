@@ -86,7 +86,7 @@ fn run_guest(iters: i32) -> i32 {
         .unwrap();
 
     // Obtain the default prover.
-    let prover = default_prover().unwrap();
+    let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, WASM_INTERP_ELF).unwrap().receipt;

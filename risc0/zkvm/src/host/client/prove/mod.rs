@@ -378,15 +378,15 @@ impl ProverOpts {
 ///   variables are set unless `RISC0_DEV_MODE` is enabled.
 /// * LocalProver if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
-pub fn default_prover() -> Result<Rc<dyn Prover>> {
+pub fn default_prover() -> Rc<dyn Prover> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             #[cfg(feature = "bonsai")]
-            "bonsai" => Ok(Rc::new(BonsaiProver::new("bonsai"))),
-            "ipc" => Ok(Rc::new(ExternalProver::new("ipc", get_r0vm_path()?))),
+            "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
+            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
-            "local" => Ok(Rc::new(self::local::LocalProver::new("local"))),
+            "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported prover: {explicit}"),
         };
     }
@@ -397,16 +397,16 @@ pub fn default_prover() -> Result<Rc<dyn Prover>> {
             && std::env::var("BONSAI_API_URL").is_ok()
             && std::env::var("BONSAI_API_KEY").is_ok()
         {
-            return Ok(Rc::new(BonsaiProver::new("bonsai")));
+            return Rc::new(BonsaiProver::new("bonsai"));
         }
     }
 
     if cfg!(feature = "prove") {
         #[cfg(feature = "prove")]
-        return Ok(Rc::new(self::local::LocalProver::new("local")));
+        return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Ok(Rc::new(DefaultProver::new(get_r0vm_path()?)?))
+    Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap())
 }
 
 /// Return a default [Executor] based on environment variables and feature

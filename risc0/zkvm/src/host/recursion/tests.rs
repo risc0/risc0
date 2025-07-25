@@ -312,7 +312,7 @@ fn test_recursion_lift_resolve_e2e() {
     receipt.verify(MULTI_TEST_ID).unwrap();
 
     // These tests take a long time. Since we have the composition receipt, test the prover trait's compress function
-    let prover = default_prover().unwrap();
+    let prover = default_prover();
 
     let succinct_receipt = prover.compress(&opts, &composition_receipt).unwrap();
     let ctx = VerifierContext::default();
