@@ -4,7 +4,7 @@
 pub struct ServerRequest {
     #[prost(
         oneof = "server_request::Kind",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12"
     )]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
@@ -31,8 +31,6 @@ pub mod server_request {
         Compress(super::CompressRequest),
         #[prost(message, tag = "9")]
         Verify(super::VerifyRequest),
-        #[prost(message, tag = "10")]
-        ProveZkr(super::ProveZkrRequest),
         #[prost(message, tag = "11")]
         ProveKeccak(super::ProveKeccakRequest),
         #[prost(message, tag = "12")]
@@ -112,19 +110,6 @@ pub mod prove_segment_reply {
         #[prost(message, tag = "2")]
         Error(super::GenericError),
     }
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ProveZkrRequest {
-    #[prost(message, optional, tag = "1")]
-    pub claim_digest: ::core::option::Option<super::base::Digest>,
-    #[prost(message, optional, tag = "2")]
-    pub control_id: ::core::option::Option<super::base::Digest>,
-    #[prost(bytes = "vec", tag = "3")]
-    pub input: ::prost::alloc::vec::Vec<u8>,
-    /// This is optional in the context of a CoprocessorRequest
-    #[prost(message, optional, tag = "4")]
-    pub receipt_out: ::core::option::Option<AssetRequest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -709,7 +694,7 @@ pub mod trace_event {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CoprocessorRequest {
-    #[prost(oneof = "coprocessor_request::Kind", tags = "1, 2")]
+    #[prost(oneof = "coprocessor_request::Kind", tags = "2")]
     pub kind: ::core::option::Option<coprocessor_request::Kind>,
 }
 /// Nested message and enum types in `CoprocessorRequest`.
@@ -717,8 +702,6 @@ pub mod coprocessor_request {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
-        #[prost(message, tag = "1")]
-        ProveZkr(super::ProveZkrRequest),
         #[prost(message, tag = "2")]
         ProveKeccak(super::ProveKeccakRequest),
     }

@@ -253,7 +253,6 @@ impl ProverServer for DevModeProver {
         })
     }
 
-    #[cfg(feature = "unstable")]
     fn prove_keccak(
         &self,
         _request: &crate::ProveKeccakRequest,

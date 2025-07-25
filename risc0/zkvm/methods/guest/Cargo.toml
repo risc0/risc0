@@ -19,10 +19,11 @@ risc0-zkp = { path = "../../../zkp", default-features = false }
 risc0-zkvm = { path = "../..", default-features = false, features = [
   "getrandom",
   "std",
+  "unstable",
 ] }
 hex-literal = "0.4"
 risc0-zkvm-methods = { path = ".." }
-risc0-zkvm-platform = { path = "../../platform", features = ["unstable"] }
+risc0-zkvm-platform = { path = "../../platform" }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }
 
 [profile.release]

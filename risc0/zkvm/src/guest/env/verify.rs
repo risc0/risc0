@@ -16,9 +16,7 @@ use core::{convert::Infallible, fmt};
 
 use bytemuck::Pod;
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm_platform::syscall::sys_verify_integrity;
-#[cfg(feature = "unstable")]
-use risc0_zkvm_platform::syscall::sys_verify_integrity2;
+use risc0_zkvm_platform::syscall::{sys_verify_integrity, sys_verify_integrity2};
 
 use crate::{sha::Digestible, Assumption, MaybePruned, PrunedValueError, ReceiptClaim};
 
@@ -184,7 +182,6 @@ pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infa
 }
 
 /// TODO
-#[cfg(feature = "unstable")]
 pub fn verify_assumption2(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
     unsafe {
         sys_verify_integrity2(claim.as_ref(), control_root.as_ref());
