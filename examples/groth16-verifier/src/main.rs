@@ -55,7 +55,6 @@ fn main() {
 
     // We run the prover to generate a receipt of correct verification
     let receipt = default_prover()
-        .unwrap()
         .prove(env, GROTH16_VERIFIER_ELF)
         .unwrap()
         .receipt;
