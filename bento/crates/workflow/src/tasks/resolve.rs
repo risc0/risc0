@@ -20,7 +20,7 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
     let receipts_key = format!("{job_prefix}:{RECEIPT_PATH}");
     let root_receipt_key = format!("{job_prefix}:{RECUR_RECEIPT_PATH}:{max_idx}");
 
-    tracing::info!("Starting resolve for job_id: {job_id}, max_idx: {max_idx}");
+    tracing::debug!("Starting resolve for job_id: {job_id}, max_idx: {max_idx}");
 
     let mut conn = agent.redis_pool.get().await?;
     let receipt: Vec<u8> = conn
@@ -30,7 +30,7 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
             format!("segment data not found for root receipt key: {root_receipt_key}")
         })?;
 
-    tracing::info!("Root receipt size: {} bytes", receipt.len());
+    tracing::debug!("Root receipt size: {} bytes", receipt.len());
     let mut conditional_receipt: SuccinctReceipt<ReceiptClaim> = deserialize_obj(&receipt)?;
 
     let mut assumptions_len: Option<u64> = None;
@@ -55,7 +55,7 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
                     .context("Failed unwrap the assumptions of the guest output")?
                     .iter();
 
-                tracing::info!("Resolving {} assumption(s)", assumptions.len());
+                tracing::debug!("Resolving {} assumption(s)", assumptions.len());
                 assumptions_len = Some(
                     assumptions
                         .len()
@@ -67,7 +67,7 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
                 if let Some(idx) = request.union_max_idx {
                     let union_root_receipt_key =
                         format!("{job_prefix}:{KECCAK_RECEIPT_PATH}:{idx}");
-                    tracing::info!(
+                    tracing::debug!(
                         "Deserializing union_root_receipt_key: {union_root_receipt_key}"
                     );
                     let union_receipt: Vec<u8> = conn.get(&union_root_receipt_key).await?;
@@ -77,7 +77,7 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
                     union_claim = union_receipt.claim.digest().to_string();
 
                     // Resolve union receipt
-                    tracing::info!("Resolving union claim digest: {union_claim}");
+                    tracing::debug!("Resolving union claim digest: {union_claim}");
                     conditional_receipt = agent
                         .prover
                         .as_ref()
@@ -89,11 +89,11 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
                 for assumption in assumptions {
                     let assumption_claim = assumption.as_value()?.claim.to_string();
                     if assumption_claim.eq(&union_claim) {
-                        tracing::info!("Skipping already resolved union claim: {union_claim}");
+                        tracing::debug!("Skipping already resolved union claim: {union_claim}");
                         continue;
                     }
                     let assumption_key = format!("{receipts_key}:{assumption_claim}");
-                    tracing::info!("Deserializing assumption with key: {assumption_key}");
+                    tracing::debug!("Deserializing assumption with key: {assumption_key}");
                     let assumption_bytes: Vec<u8> = conn
                         .get(&assumption_key)
                         .await
@@ -112,17 +112,17 @@ pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Res
                         .resolve(&conditional_receipt, &assumption_receipt)
                         .context("Failed to resolve the conditional receipt")?;
                 }
-                tracing::info!("Resolve complete");
+                tracing::debug!("Resolve complete for job_id: {job_id}");
             }
         }
     }
 
     // Write out the resolved receipt
-    tracing::info!("Serializing resolved receipt");
+    tracing::debug!("Serializing resolved receipt");
     let serialized_asset =
         serialize_obj(&conditional_receipt).context("Failed to serialize resolved receipt")?;
 
-    tracing::info!("Writing resolved receipt to Redis key: {root_receipt_key}");
+    tracing::debug!("Writing resolved receipt to Redis key: {root_receipt_key}");
     redis::set_key_with_expiry(
         &mut conn,
         &root_receipt_key,

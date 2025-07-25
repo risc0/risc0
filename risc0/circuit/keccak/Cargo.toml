@@ -1,7 +1,7 @@
 [package]
 name = "risc0-circuit-keccak"
 description = "RISC Zero circuit for keccak"
-version = "3.0.0-rc.1"
+version = "4.0.0-rc.2"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -48,6 +48,7 @@ cuda = [
   "risc0-circuit-keccak-sys/cuda",
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
+  "std",
 ]
 default = ["prove"]
 # Enables ZKR registration to actually generate proofs.
@@ -59,4 +60,6 @@ prove = [
   "dep:risc0-sys",
   "dep:xz2",
   "risc0-circuit-recursion/prove",
+  "std",
 ]
+std = ["risc0-zkp/std", "risc0-binfmt/std"]

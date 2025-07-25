@@ -25,13 +25,12 @@ use crate::{
         server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     },
     mmr::MerkleMountainAccumulator,
-    prove_registered_zkr,
     receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
     recursion::prove::union,
     sha::Digestible,
     Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
-    ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -48,7 +47,7 @@ impl ProverImpl {
 
 impl ProverServer for ProverImpl {
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::default().with_dev_mode(self.opts.dev_mode());
         self.prove_with_ctx(env, &ctx, elf)
     }
 
@@ -116,20 +115,6 @@ impl ProverServer for ProverImpl {
             .digest();
 
         let mut zkr_receipts = HashMap::new();
-        for proof_request in session.pending_zkrs.iter() {
-            let allowed_control_ids = vec![proof_request.control_id];
-            let receipt = prove_registered_zkr(
-                &proof_request.control_id,
-                allowed_control_ids,
-                &proof_request.input,
-            )?;
-            let assumption = Assumption {
-                claim: receipt.claim.digest(),
-                control_root: receipt.control_root()?,
-            };
-            zkr_receipts.insert(assumption, receipt);
-        }
-
         let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
             MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
@@ -216,14 +201,28 @@ impl ProverServer for ProverImpl {
         })
     }
 
-    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+    fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
         ensure!(
             segment.po2() <= self.opts.max_segment_po2,
             "segment po2 exceeds max on ProverOpts: {} > {}",
             segment.po2(),
             self.opts.max_segment_po2
         );
+        let inner = risc0_circuit_rv32im::prove::segment_prover()?.preflight(&segment.inner)?;
 
+        Ok(PreflightResults {
+            inner,
+            terminate_state: segment.inner.claim.terminate_state,
+            output: segment.output.clone(),
+            segment_index: segment.index,
+        })
+    }
+
+    fn prove_segment_core(
+        &self,
+        ctx: &VerifierContext,
+        preflight_results: PreflightResults,
+    ) -> Result<SegmentReceipt> {
         ensure!(
             self.opts.hashfn == "poseidon2",
             "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
@@ -231,9 +230,11 @@ impl ProverServer for ProverImpl {
             &self.opts.hashfn
         );
 
-        let seal = risc0_circuit_rv32im::prove::segment_prover()?.prove(&segment.inner)?;
-        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(segment.inner.po2))?;
-        claim.output = segment.output.clone().into();
+        let po2 = preflight_results.inner.po2();
+        let seal =
+            risc0_circuit_rv32im::prove::segment_prover()?.prove_core(preflight_results.inner)?;
+        let mut claim = ReceiptClaim::decode_from_seal_v2(&seal, Some(po2))?;
+        claim.output = preflight_results.output.into();
 
         let verifier_parameters = ctx
             .segment_verifier_parameters
@@ -242,7 +243,7 @@ impl ProverServer for ProverImpl {
             .digest();
         let receipt = SegmentReceipt {
             seal,
-            index: segment.index,
+            index: preflight_results.segment_index,
             hashfn: self.opts.hashfn.clone(),
             claim,
             verifier_parameters,
@@ -279,7 +280,6 @@ impl ProverServer for ProverImpl {
         identity_p254(a)
     }
 
-    #[cfg(feature = "unstable")]
     fn prove_keccak(
         &self,
         request: &crate::ProveKeccakRequest,

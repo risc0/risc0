@@ -21,10 +21,10 @@ pub(crate) mod segment;
 pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
-use core::fmt::Debug;
 
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_more::Debug;
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{
@@ -166,10 +166,9 @@ impl Receipt {
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
         if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
-            return Err(VerificationError::VerifierParametersMismatch {
-                expected: self.inner.verifier_parameters(),
-                received: self.metadata.verifier_parameters,
-            });
+            // inner verifier_parameters do not match metadata.verifier_parameters.
+            // This is an internal inconsistency in the receipt struct.
+            return Err(VerificationError::ReceiptFormatError);
         }
 
         tracing::debug!("Receipt::verify_with_context");
@@ -210,10 +209,9 @@ impl Receipt {
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
         if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
-            return Err(VerificationError::VerifierParametersMismatch {
-                expected: self.inner.verifier_parameters(),
-                received: self.metadata.verifier_parameters,
-            });
+            // inner verifier_parameters do not match metadata.verifier_parameters.
+            // This is an internal inconsistency in the receipt struct.
+            return Err(VerificationError::ReceiptFormatError);
         }
 
         tracing::debug!("Receipt::verify_integrity_with_context");
@@ -273,6 +271,7 @@ impl Receipt {
 )]
 pub struct Journal {
     /// The raw bytes of the journal.
+    #[debug("{} bytes", bytes.len())]
     pub bytes: Vec<u8>,
 }
 
@@ -331,7 +330,7 @@ impl InnerReceipt {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
             Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Fake(inner) => inner.verify_integrity(),
+            Self::Fake(inner) => inner.verify_integrity_with_context(ctx),
         }
     }
 
@@ -408,7 +407,7 @@ impl InnerReceipt {
 #[non_exhaustive]
 pub struct FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Claim containing information about the computation that this receipt pretends to prove.
     ///
@@ -418,7 +417,7 @@ where
 
 impl<Claim> FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Create a new [FakeReceipt] for the given claim.
     pub fn new(claim: impl Into<MaybePruned<Claim>>) -> Self {
@@ -427,15 +426,25 @@ where
         }
     }
 
-    /// Pretend to verify the integrity of this receipt. If not in dev mode (i.e. the
-    /// RISC0_DEV_MODE environment variable is not set) this will always reject. When in dev mode,
-    /// this will always pass.
+    /// Old verify function, always returns [`VerificationError::InvalidProof`].
+    #[deprecated(note = "Use verify_integrity_with_context instead")]
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
-        #[cfg(all(feature = "std", not(target_os = "zkvm")))]
-        if crate::is_dev_mode() {
-            return Ok(());
-        }
         Err(VerificationError::InvalidProof)
+    }
+
+    /// Pretend to verify the integrity of this receipt. If not in dev mode (see
+    /// [`VerifierContext::with_dev_mode`], or the `RISC0_DEV_MODE` environment variable) this will
+    /// always reject. When in dev mode, this will always pass.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        if ctx.dev_mode() {
+            assert!(cfg!(not(feature = "disable-dev-mode")));
+            Ok(())
+        } else {
+            Err(VerificationError::InvalidProof)
+        }
     }
 
     /// Prunes the claim, retaining its digest, and converts into a [FakeReceipt] with an unknown
@@ -518,7 +527,7 @@ impl From<InnerAssumptionReceipt> for AssumptionReceipt {
 
 impl<Claim> From<SuccinctReceipt<Claim>> for AssumptionReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Create a proven assumption from a [InnerAssumptionReceipt].
     fn from(receipt: SuccinctReceipt<Claim>) -> Self {
@@ -592,7 +601,7 @@ impl InnerAssumptionReceipt {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
             Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Fake(inner) => inner.verify_integrity(),
+            Self::Fake(inner) => inner.verify_integrity_with_context(ctx),
         }
     }
 
@@ -687,6 +696,9 @@ pub struct VerifierContext {
 
     /// Parameters for verification of [Groth16Receipt].
     pub groth16_verifier_parameters: Option<Groth16ReceiptVerifierParameters>,
+
+    /// Whether or not dev-mode is enabled. If enabled, fake receipts will verify successfully.
+    pub(crate) dev_mode: bool,
 }
 
 impl VerifierContext {
@@ -697,6 +709,7 @@ impl VerifierContext {
             segment_verifier_parameters: None,
             succinct_verifier_parameters: None,
             groth16_verifier_parameters: None,
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 
@@ -723,6 +736,7 @@ impl VerifierContext {
             groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters::from_max_po2(
                 po2_max,
             )),
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 
@@ -766,6 +780,21 @@ impl VerifierContext {
         self
     }
 
+    /// Return [VerifierContext] with is_dev_mode enabled or disabled.
+    pub fn with_dev_mode(mut self, dev_mode: bool) -> Self {
+        if cfg!(feature = "disable-dev-mode") && dev_mode {
+            panic!("zkVM: Inconsistent settings -- please resolve. \
+                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+        }
+        self.dev_mode = dev_mode;
+        self
+    }
+
+    /// Returns `true` if dev-mode is enabled.
+    pub fn dev_mode(&self) -> bool {
+        self.dev_mode
+    }
+
     /// Parameters for verification of [CompositeReceipt].
     ///
     /// Made up of the verifier parameters for each other receipt type. Returns none if any of the
@@ -786,6 +815,7 @@ impl Default for VerifierContext {
             segment_verifier_parameters: Some(Default::default()),
             succinct_verifier_parameters: Some(Default::default()),
             groth16_verifier_parameters: Some(Default::default()),
+            dev_mode: crate::is_dev_mode_enabled_via_environment(),
         }
     }
 }
@@ -812,30 +842,21 @@ mod tests {
 
         assert_eq!(
             mangled_receipt.verify(Digest::ZERO).err().unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_with_context(&Default::default(), Digest::ZERO)
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
         assert_eq!(
             mangled_receipt
                 .verify_integrity_with_context(&Default::default())
                 .err()
                 .unwrap(),
-            VerificationError::VerifierParametersMismatch {
-                expected: Digest::ZERO,
-                received: ones_digest
-            }
+            VerificationError::ReceiptFormatError
         );
     }
 

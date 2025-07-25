@@ -442,7 +442,7 @@ pub mod module_type {
             Ok(())
         }
 
-        /// Fetchs a journal from execute_only jobs
+        /// Fetches a journal from execute_only jobs
         ///
         /// After the Execution phase of a execute_only session it is possible to fetch the journal
         /// contents from the executor
@@ -1108,7 +1108,7 @@ mod tests {
         });
 
         let put_mock = server.mock(|when, then| {
-            when.method(PUT).path(format!("/upload/{}", input_uuid));
+            when.method(PUT).path(format!("/upload/{input_uuid}"));
             then.status(200);
         });
 
@@ -1166,7 +1166,7 @@ mod tests {
         });
 
         let put_mock = server.mock(|when, then| {
-            when.method(PUT).path(format!("/upload/{}", receipt_uuid));
+            when.method(PUT).path(format!("/upload/{receipt_uuid}"));
             then.status(200);
         });
 
@@ -1194,7 +1194,7 @@ mod tests {
 
         let get_mock = server.mock(|when, then| {
             when.method(GET)
-                .path(format!("/receipts/{}", receipt_uuid))
+                .path(format!("/receipts/{receipt_uuid}"))
                 .header(API_KEY_HEADER, TEST_KEY)
                 .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)

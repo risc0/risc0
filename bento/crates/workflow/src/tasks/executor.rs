@@ -12,7 +12,7 @@ use crate::{
 use anyhow::{bail, Context, Result};
 use risc0_zkvm::{
     compute_image_id, sha::Digestible, CoprocessorCallback, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, ProveZkrRequest, Receipt, Segment,
+    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, Receipt, Segment,
 };
 use sqlx::postgres::PgPool;
 use taskdb::planner::{
@@ -262,9 +262,6 @@ impl CoprocessorCallback for Coprocessor {
         self.tx.blocking_send(SenderType::Keccak(request))?;
         Ok(())
     }
-    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> Result<()> {
-        unreachable!()
-    }
 }
 
 enum SenderType {
@@ -283,7 +280,7 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
 
     // Fetch ELF binary data
     let elf_key = format!("{ELF_BUCKET_DIR}/{}", request.image);
-    tracing::info!("Downloading - {}", elf_key);
+    tracing::debug!("Downloading - {}", elf_key);
     let elf_data = agent.s3_client.read_buf_from_s3(&elf_key).await?;
 
     // Write the image_id for pulling later
@@ -356,7 +353,7 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
     if let Some(req_exec_limit) = request.exec_limit {
         let req_exec_limit = req_exec_limit * 1024 * 1024;
         if req_exec_limit < exec_limit {
-            tracing::info!(
+            tracing::debug!(
                 "Assigning a requested lower execution limit of: {req_exec_limit} cycles"
             );
             exec_limit = req_exec_limit;
@@ -686,7 +683,7 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
         }
     }
 
-    tracing::info!("Done with all IO tasks");
+    tracing::debug!("Done with all IO tasks");
 
     let resp = ExecutorResp {
         segments: session.segment_count as u64,

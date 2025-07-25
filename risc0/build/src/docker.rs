@@ -154,14 +154,8 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")]);
-
-    #[cfg(feature = "unstable")]
-    {
-        build = build.env(&[("RISC0_FEATURE_bigint2", "")]);
-    }
-
-    build = build
+        .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[("RISC0_FEATURE_bigint2", "")])
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.risc0/cpp/bin/riscv32-unknown-elf-gcc",
@@ -268,7 +262,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "e9e1416c32eaabd1bb60d920d8789e2fc1f937526462a21d144397f0f1249cd5",
+            "4bbb21f39349d51c0c126b6ee5b40c6f7307c39bbbfdb23adff1dfeb3fff631f",
         );
     }
 }

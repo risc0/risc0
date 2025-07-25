@@ -19,7 +19,7 @@ deadpool-redis = { workspace = true }
 hex = { workspace = true }
 nix = { version = "0.29", features = ["fs"] }
 redis = { workspace = true, features = ["tokio-rustls-comp", "tokio-comp"] }
-risc0-zkvm = { workspace = true, default-features = false, features = ["prove", "unstable"] }
+risc0-zkvm = { workspace = true, default-features = false, features = ["prove"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 signal-hook = "0.3"

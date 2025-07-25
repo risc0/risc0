@@ -54,7 +54,7 @@ pub use self::{
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
-const DEFAULT_DOCKER_TAG: &str = "r0.1.85.0";
+const DEFAULT_DOCKER_TAG: &str = "r0.1.88.0";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -430,10 +430,7 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         cmd.env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
 
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
-        // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
-        // would be seamless if there was a reliable way to tell whether it is enabled in
-        // risc0-zkvm-platform, however, this problem is also temporary.
-        #[cfg(feature = "unstable")]
+        // feature is available.
         cmd.env("RISC0_FEATURE_bigint2", "");
     }
 
@@ -557,7 +554,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
         cmd.args(["--features", &(guest_pkg.to_owned() + "/" + feature)]);
     }
 
-    eprintln!("Building staticlib: {:?}", cmd);
+    eprintln!("Building staticlib: {cmd:?}");
 
     // Run the build command and extract the name of the resulting staticlib
     // artifact.
@@ -574,7 +571,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
                 }
             }
             Message::CompilerMessage(msg) => {
-                eprint!("{}", msg);
+                eprint!("{msg}");
             }
             _ => (),
         }

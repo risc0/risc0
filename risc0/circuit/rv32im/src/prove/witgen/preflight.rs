@@ -14,7 +14,7 @@
 
 use std::collections::BTreeSet;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
@@ -216,7 +216,8 @@ impl<'a> Preflight<'a> {
                 txn.prev_cycle = self.prev_cycle.get(&addr).unwrap();
             } else {
                 // Otherwise, compute cycle diff and another diff
-                let diff = txn.cycle - txn.prev_cycle;
+                ensure!(txn.cycle != txn.prev_cycle);
+                let diff = txn.cycle - 1 - txn.prev_cycle;
                 self.trace.cycles[(diff / 2) as usize].diff_count[(diff % 2) as usize] += 1;
             }
 
@@ -540,6 +541,7 @@ impl Risc0Context for Preflight<'_> {
     }
 
     // Pass memory ops to pager + record
+    #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         if op == LoadOp::Peek {
             return self.pager.peek(addr);
@@ -570,6 +572,7 @@ impl Risc0Context for Preflight<'_> {
         Ok(word)
     }
 
+    #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let cycle = (2 * self.trace.cycles.len() + 1) as u32;
         let prev_word = if addr >= MEMORY_END_ADDR {

@@ -1,6 +1,6 @@
 [package]
 name = "cargo-risczero"
-version = "3.0.0-rc.1"
+version = "3.0.0-rc.2"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -25,12 +25,13 @@ hex = "0.4"
 regex = "1.11.1"
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
-risc0-zkvm = { workspace = true, features = ["unstable"] }
+risc0-zkvm = { workspace = true }
 semver = "1"
 serde_json = "1"
 syn = "2.0.87"
 tempfile = "3"
 text_io = "0.1.12"
+tokio = { version = "1.44.2", features = ["rt-multi-thread"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "2.1", optional = true }
 
