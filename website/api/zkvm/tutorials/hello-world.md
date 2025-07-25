@@ -68,8 +68,6 @@ pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
         .unwrap()
         .build()
         .unwrap();
-    
-    ...
 }
 ```
 

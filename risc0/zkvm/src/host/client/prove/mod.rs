@@ -14,6 +14,7 @@
 
 #[cfg(feature = "bonsai")]
 pub(crate) mod bonsai;
+pub(crate) mod default;
 pub(crate) mod external;
 #[cfg(feature = "prove")]
 pub(crate) mod local;
@@ -28,7 +29,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "bonsai")]
 use self::bonsai::BonsaiProver;
 
-use self::external::ExternalProver;
+use self::{default::DefaultProver, external::ExternalProver};
 
 use crate::{
     get_version, host::prove_info::ProveInfo, receipt::DEFAULT_MAX_PO2, ExecutorEnv, Receipt,
@@ -405,7 +406,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
+    Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap())
 }
 
 /// Return a default [Executor] based on environment variables and feature

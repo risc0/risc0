@@ -41,11 +41,11 @@ pub(crate) struct ManagerActor {
     factory: ActorRef<FactoryActor>,
     jobs: HashMap<JobId, JobEntry>,
     join_set: JoinSet<()>,
-    storage_root: PathBuf,
+    storage_root: Option<PathBuf>,
 }
 
 impl ManagerActor {
-    pub fn new(factory: ActorRef<FactoryActor>, storage_root: PathBuf) -> Self {
+    pub fn new(factory: ActorRef<FactoryActor>, storage_root: Option<PathBuf>) -> Self {
         Self {
             factory,
             jobs: HashMap::new(),
@@ -102,11 +102,13 @@ impl Message<JobDone> for ManagerActor {
     async fn handle(&mut self, msg: JobDone, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
         tracing::info!("JobDone: {}", msg.job_id);
         if let JobStatus::Succeeded(ref result) = msg.info.status {
-            let encoded = bincode::serialize(result.receipt.as_ref()).unwrap();
-            let receipts_dir = self.storage_root.join("receipts");
-            std::fs::create_dir_all(&receipts_dir).unwrap();
-            let receipt_path = receipts_dir.join(msg.job_id.to_string());
-            tokio::fs::write(receipt_path, encoded).await.unwrap();
+            if let Some(ref storage_root) = self.storage_root {
+                let encoded = bincode::serialize(result.receipt.as_ref()).unwrap();
+                let receipts_dir = storage_root.join("receipts");
+                std::fs::create_dir_all(&receipts_dir).unwrap();
+                let receipt_path = receipts_dir.join(msg.job_id.to_string());
+                tokio::fs::write(receipt_path, encoded).await.unwrap();
+            }
         }
         self.jobs.insert(msg.job_id, JobEntry::Inactive(msg.info));
     }

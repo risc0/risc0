@@ -92,15 +92,15 @@ struct Cli {
     storage: Option<PathBuf>,
 
     #[arg(long)]
-    simulate: Option<PathBuf>,
-
-    #[arg(long)]
-    po2: Option<usize>,
+    po2: Option<u32>,
 }
 
 #[derive(Args)]
 #[group(required = true)]
 struct Mode {
+    #[arg(long)]
+    rpc: bool,
+
     #[arg(long)]
     port: Option<u16>,
 
@@ -123,6 +123,9 @@ struct Mode {
     /// Start a worker.
     #[arg(long, value_enum, value_delimiter(','))]
     worker: Vec<TaskKind>,
+
+    #[arg(long)]
+    config: Option<PathBuf>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -146,7 +149,7 @@ enum ReceiptKind {
 pub fn main() {
     let args = Cli::parse();
 
-    if args.mode.manager || !args.mode.worker.is_empty() {
+    if args.mode.manager || !args.mode.worker.is_empty() || args.mode.config.is_some() {
         self::actors::async_main(&args).unwrap();
         return;
     }
@@ -154,6 +157,11 @@ pub fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
+
+    if args.mode.rpc {
+        self::actors::rpc_main().unwrap();
+        return;
+    }
 
     if args.id {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
