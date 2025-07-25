@@ -266,7 +266,7 @@ fn bigint_accel() {
 
     let cases = generate_bigint_test_cases(10);
     for case in cases {
-        println!("Running BigInt circuit test case: {:x?}", case);
+        println!("Running BigInt circuit test case: {case:x?}");
         let input = MultiTestSpec::BigInt {
             count: 1,
             x: case.x,
@@ -1021,7 +1021,7 @@ fn profiler() {
         vec![
             (
                 vec![
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into()
@@ -1030,8 +1030,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func2".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func2".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1040,8 +1040,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func3".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func3".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1050,9 +1050,9 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func3".into(),
-                    "profile_test_func5".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func3".into(),
+                    "multi_test::profiler::profile_test_func5".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1061,8 +1061,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func4".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func4".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1071,8 +1071,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func5".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func5".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1102,7 +1102,10 @@ fn profiler() {
     let program = Program::load_elf(binary.user_elf, u32::MAX).unwrap();
 
     // Check that the addresses for these two functions point to the right place
-    for func_name in ["profile_test_func2", "profile_test_func3"] {
+    for func_name in [
+        "multi_test::profiler::profile_test_func2",
+        "multi_test::profiler::profile_test_func3",
+    ] {
         let test_func = test_samples
             .iter()
             .find(|sample| sample.frames[0].frame.name == func_name)

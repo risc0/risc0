@@ -20,12 +20,12 @@ use std::{collections::BTreeSet, fs, path::PathBuf};
 use anyhow::{ensure, Result};
 use enum_map::EnumMap;
 use risc0_binfmt::SystemState;
-use risc0_circuit_rv32im::execute::EcallMetric;
+use risc0_circuit_rv32im::{execute::EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{
-        client::env::{ProveKeccakRequest, ProveZkrRequest, SegmentPath},
+        client::env::{ProveKeccakRequest, SegmentPath},
         prove_info::SessionStats,
     },
     sha::Digest,
@@ -94,10 +94,6 @@ pub struct Session {
     /// The system state of the final MemoryImage at the end of execution.
     pub post_state: SystemState,
 
-    /// A list of pending ZKR proof requests.
-    // TODO: make this scalable so we don't OOM
-    pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
-
     /// A list of pending keccak proof requests.
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
@@ -137,6 +133,22 @@ impl Segment {
 
     pub(crate) fn user_cycles(&self) -> u32 {
         self.inner.suspend_cycle
+    }
+}
+
+/// The results of running preflight on a [Segment].
+pub struct PreflightResults {
+    pub(crate) inner: risc0_circuit_rv32im::prove::PreflightResults,
+
+    pub(crate) terminate_state: Option<TerminateState>,
+    pub(crate) output: Option<Output>,
+    pub(crate) segment_index: u32,
+}
+
+impl PreflightResults {
+    /// The index of the [Segment] this [PreflightResults] came from.
+    pub fn segment_index(&self) -> u32 {
+        self.segment_index
     }
 }
 

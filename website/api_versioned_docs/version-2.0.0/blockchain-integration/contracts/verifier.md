@@ -89,6 +89,17 @@ You can find detailed information in the [version management design][version-man
 
 <br />
 
+### Ethereum Hoodi (560048)
+
+| Contract                                   | Address                                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0x32Db7dc407AC886807277636a1633A1381748DD8`][router-560048-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97`][verifier-560048-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629`][estop-560048-etherscan]    |
+| TimelockController                         | [`0xE1CC216c5fd5EcAE1e951bDdcf951601554Be338`][timelock-560048-etherscan] |
+
+<br />
+
 ### Arbitrum Mainnet (42161)
 
 | Contract                                   | Address                                                                  |
@@ -223,6 +234,7 @@ You can find detailed information in the [version management design][version-man
 [estop-59144-etherscan]: https://lineascan.build/address/0x6D1A82E9B9E6F35E7201b8bE398D08762735e77d#code
 [estop-84532-etherscan]: https://sepolia.basescan.org/address/0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629#code
 [estop-421614-etherscan]: https://sepolia.arbiscan.io/address/0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629#code
+[estop-560048-etherscan]: https://hoodi.etherscan.io/address/0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629#code
 [estop-11155111-etherscan]: https://sepolia.etherscan.io/address/0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629#code
 [estop-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x8A8023bf44CABa343CEef3b06A4639fc8EBeE629#code
 [estop-src]: https://github.com/risc0/risc0-ethereum/blob/release-2.0/contracts/src/RiscZeroVerifierEmergencyStop.sol
@@ -242,6 +254,7 @@ You can find detailed information in the [version management design][version-man
 [router-59144-etherscan]: https://lineascan.build/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-84532-etherscan]: https://sepolia.basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-421614-etherscan]: https://sepolia.arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[router-560048-etherscan]: https://hoodi.etherscan.io/address/0x32Db7dc407AC886807277636a1633A1381748DD8#code
 [router-11155111-etherscan]: https://sepolia.etherscan.io/address/0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187#code
 [router-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908#code
 [router-src]: https://github.com/risc0/risc0-ethereum/blob/release-2.0/contracts/src/RiscZeroVerifierRouter.sol
@@ -262,6 +275,7 @@ You can find detailed information in the [version management design][version-man
 [timelock-59144-etherscan]: https://lineascan.build/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-84532-etherscan]: https://sepolia.basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-421614-etherscan]: https://sepolia.arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[timelock-560048-etherscan]: https://hoodi.etherscan.io/address/0xE1CC216c5fd5EcAE1e951bDdcf951601554Be338#code
 [timelock-11155111-etherscan]: https://sepolia.etherscan.io/address/0xB4E3306129208cC8e6E75157f75f62eAe0B920a0#code
 [timelock-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x2DEfEA335392bb62d01f74e338697C7B31De254C#code
 [verifier-1-etherscan]: https://etherscan.io/address/0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97#code
@@ -276,6 +290,7 @@ You can find detailed information in the [version management design][version-man
 [verifier-59144-etherscan]: https://lineascan.build/address/0x2Bde5B9308AAC6bA374C0D13b0Cf1ec6088F870A#code
 [verifier-84532-etherscan]: https://sepolia.basescan.org/address/0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97#code
 [verifier-421614-etherscan]: https://sepolia.arbiscan.io/address/0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97#code
+[verifier-560048-etherscan]: https://hoodi.etherscan.io/address/0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97#code
 [verifier-11155111-etherscan]: https://sepolia.etherscan.io/address/0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97#code
 [verifier-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x20ff7C2Cf391a5F096A2Cc181cb41916680f8E97#code
 [verifier-src]: https://github.com/risc0/risc0-ethereum/blob/release-2.0/contracts/src/groth16/RiscZeroGroth16Verifier.sol

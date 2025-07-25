@@ -27,6 +27,7 @@ required-features = ["prove"]
 [[example]]
 name = "guest_verify"
 required-features = ["prove"]
+test = true
 
 [[example]]
 name = "recursion"
@@ -75,6 +76,8 @@ bytes = { version = "1.10", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 enum-map = { version = "2.7.3", optional = true }
 gimli = { version = "0.31.1", optional = true }
+gdbstub = { version = "0.7", optional = true }
+gdbstub_arch = { version = "0.3", optional = true }
 keccak = { version = "0.1.5", optional = true }
 lazy-regex = { version = "3.3", optional = true }
 num-bigint = { version = "0.4", default-features = false, optional = true }
@@ -101,6 +104,7 @@ clap = { version = "4.5", features = ["derive"] }
 mini-redis = { version = "0.4.1", default-features = false }
 postcard = { version = "1.1", features = ["alloc"] }
 rand = "0.9.1"
+regex = "1"
 risc0-bigint2-methods = { path = "../bigint2/methods" }
 rmp-serde = "1.3"
 rstest = "0.25.0"
@@ -175,6 +179,8 @@ prove = [
   "dep:addr2line",
   "dep:bincode",
   "dep:elf",
+  "dep:gdbstub",
+  "dep:gdbstub_arch",
   "dep:gimli",
   "dep:keccak",
   "dep:lazy-regex",

@@ -135,14 +135,45 @@ struct DecodeInstLayout {
   AddrDecomposeLayout pcAddr;
   MemoryReadLayout loadInst;
 };
+using MemoryArgLayout4LayoutArray = ::cuda::std::array<MemoryArgLayout,4>;
+using CycleArgLayout2LayoutArray = ::cuda::std::array<CycleArgLayout,2>;
+struct _Arguments_ReadSourceRegsSourceRegsLayout {
+  MemoryArgLayout4LayoutArray memoryArg;
+  CycleArgLayout2LayoutArray cycleArg;
+};
 struct ReadRegLayout {
   MemoryReadLayout _super;
   NondetRegLayout addr;
 };
+struct ReadSourceRegsSourceRegsArm0_SuperLayout {
+  ReadRegLayout rboth;
+};
+struct ReadSourceRegsSourceRegsArm0Layout {
+  ReadSourceRegsSourceRegsArm0_SuperLayout _super;
+  MemoryArgLayout _extra0;
+  MemoryArgLayout _extra1;
+  CycleArgLayout _extra2;
+};
+struct ReadSourceRegsSourceRegsArm1_SuperLayout {
+  ReadRegLayout _0;
+  ReadRegLayout _1;
+};
+struct ReadSourceRegsSourceRegsLayout {
+  ReadSourceRegsSourceRegsArm0Layout arm0;
+  ReadSourceRegsSourceRegsArm1_SuperLayout arm1;
+};
+struct ReadSourceRegsLayout {
+  NondetRegLayout isSameReg;
+  _Arguments_ReadSourceRegsSourceRegsLayout _arguments_ReadSourceRegsSourceRegs;
+  ReadSourceRegsSourceRegsLayout sourceRegs;
+  NondetRegLayout rs1Low;
+  NondetRegLayout rs1High;
+  NondetRegLayout rs2Low;
+  NondetRegLayout rs2High;
+};
 struct MiscInputLayout {
   DecodeInstLayout decoded;
-  ReadRegLayout rs1;
-  ReadRegLayout rs2;
+  ReadSourceRegsLayout sourceRegs;
 };
 using ArgU16Layout5LayoutArray = ::cuda::std::array<ArgU16Layout,5>;
 struct _Arguments_Misc0MiscOutputLayout {
@@ -437,8 +468,7 @@ struct Misc2Layout {
 };
 struct MulInputLayout {
   DecodeInstLayout decoded;
-  ReadRegLayout rs1;
-  ReadRegLayout rs2;
+  ReadSourceRegsLayout sourceRegs;
 };
 using ArgU16Layout6LayoutArray = ::cuda::std::array<ArgU16Layout,6>;
 struct ArgU8Layout {
@@ -593,28 +623,12 @@ struct Mul0Layout {
 };
 struct DivInputLayout {
   DecodeInstLayout decoded;
-  ReadRegLayout rs1;
-  ReadRegLayout rs2;
+  ReadSourceRegsLayout sourceRegs;
 };
 using ArgU16Layout16LayoutArray = ::cuda::std::array<ArgU16Layout,16>;
 struct _Arguments_Div0MulOutputLayout {
   ArgU16Layout16LayoutArray argU16;
   ArgU8Layout13LayoutArray argU8;
-};
-using ArgU16Layout2LayoutArray = ::cuda::std::array<ArgU16Layout,2>;
-struct _Arguments_DoDiv__1Layout {
-  ArgU16Layout2LayoutArray argU16;
-};
-struct DoDiv__1Arm0Layout {
-  ArgU16Layout _extra0;
-  ArgU16Layout _extra1;
-};
-struct DoDiv__1Arm1_SuperLayout {
-  CmpLessThanUnsignedLayout lt;
-};
-struct DoDiv__1Layout {
-  DoDiv__1Arm0Layout arm0;
-  DoDiv__1Arm1_SuperLayout arm1;
 };
 struct DoDivLayout {
   NondetRegLayout quotLow;
@@ -623,13 +637,13 @@ struct DoDivLayout {
   NondetU16RegLayout remHigh;
   MultiplyAccumulateLayout mul;
   NondetRegLayout topBitType;
-  IsZeroLayout isZero;
   NondetRegLayout topNum;
   NondetU16RegLayout _0;
   NormalizeU32Layout denomAbs;
   NormalizeU32Layout remNormal;
-  _Arguments_DoDiv__1Layout _arguments_DoDiv__1;
-  DoDiv__1Layout _3;
+  NondetRegLayout isZero;
+  NondetRegLayout signedOverflowCase;
+  CmpLessThanUnsignedLayout lt;
 };
 struct OpSRLLayout {
   DynPo2Layout shiftMul;
@@ -812,8 +826,7 @@ struct Mem0Layout {
 };
 struct MemStoreInputLayout {
   DecodeInstLayout decoded;
-  ReadRegLayout rs1;
-  ReadRegLayout rs2;
+  ReadSourceRegsLayout sourceRegs;
   NormalizeU32Layout addrU32;
   AddrDecomposeBitsLayout addr;
   MemoryReadLayout data;
@@ -2505,6 +2518,7 @@ struct BigInt0StateArm0Layout {
   ArgU16Layout _extra32;
   ArgU16Layout _extra33;
 };
+using ArgU16Layout2LayoutArray = ::cuda::std::array<ArgU16Layout,2>;
 struct _Arguments_BigIntStepBytesLayout {
   ArgU16Layout2LayoutArray argU16;
   ArgU8Layout16LayoutArray argU8;
@@ -3074,6 +3088,14 @@ struct InstInputStruct {
 };
 struct DoCycleTableStruct {
 };
+struct SourceRegsStruct {
+  ValU32Struct rs1;
+  ValU32Struct rs2;
+};
+struct ReadSourceRegsStruct {
+  ValU32Struct rs1;
+  ValU32Struct rs2;
+};
 struct WriteRdStruct {
 };
 struct ExpandU32Struct {
@@ -3100,8 +3122,8 @@ struct MultiplyAccumulateStruct {
 struct DivInputStruct {
   InstInputStruct _super;
   DecoderStruct decoded;
-  GetDataStruct rs1;
-  GetDataStruct rs2;
+  ValU32Struct rs1;
+  ValU32Struct rs2;
 };
 struct ComponentStruct {
 };
@@ -3123,8 +3145,8 @@ struct InstOutputBaseStruct {
 struct MiscInputStruct {
   InstInputStruct _super;
   DecoderStruct decoded;
-  GetDataStruct rs1;
-  GetDataStruct rs2;
+  ValU32Struct rs1;
+  ValU32Struct rs2;
 };
 struct MiscOutputStruct {
   Val doWrite;
@@ -3134,8 +3156,8 @@ struct MiscOutputStruct {
 struct MulInputStruct {
   InstInputStruct _super;
   DecoderStruct decoded;
-  GetDataStruct rs1;
-  GetDataStruct rs2;
+  ValU32Struct rs1;
+  ValU32Struct rs2;
 };
 struct DoMulStruct {
   ValU32Struct low;
@@ -3149,7 +3171,7 @@ struct MemLoadInputStruct {
 };
 struct MemStoreInputStruct {
   DecoderStruct decoded;
-  GetDataStruct rs2;
+  ValU32Struct rs2;
   AddrDecomposeBitsStruct addr;
   GetDataStruct data;
 };

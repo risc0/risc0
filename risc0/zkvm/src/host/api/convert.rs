@@ -23,7 +23,7 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
-    host::client::env::{ProveKeccakRequest, ProveZkrRequest},
+    host::client::env::ProveKeccakRequest,
     receipt::{
         merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
         ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
@@ -292,6 +292,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .max_segment_po2
                 .try_into()
                 .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
+            dev_mode: opts.is_dev_mode,
         })
     }
 }
@@ -304,6 +305,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
             max_segment_po2: opts.max_segment_po2 as u64,
+            is_dev_mode: opts.dev_mode,
         }
     }
 }
@@ -1207,24 +1209,6 @@ impl TryFrom<pb::core::MaybePruned> for MaybePruned<Unknown> {
                 pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
             },
         )
-    }
-}
-
-impl TryFrom<pb::api::ProveZkrRequest> for ProveZkrRequest {
-    type Error = anyhow::Error;
-
-    fn try_from(value: pb::api::ProveZkrRequest) -> Result<Self> {
-        Ok(Self {
-            claim_digest: value
-                .claim_digest
-                .ok_or_else(|| malformed_err("ProveZkrRequest.claim_digest"))?
-                .try_into()?,
-            control_id: value
-                .control_id
-                .ok_or_else(|| malformed_err("ProveZkrRequest.control_id"))?
-                .try_into()?,
-            input: value.input,
-        })
     }
 }
 
