@@ -442,7 +442,7 @@ pub mod module_type {
             Ok(())
         }
 
-        /// Fetchs a journal from execute_only jobs
+        /// Fetches a journal from execute_only jobs
         ///
         /// After the Execution phase of a execute_only session it is possible to fetch the journal
         /// contents from the executor

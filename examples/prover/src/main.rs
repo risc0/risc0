@@ -26,7 +26,7 @@ use anyhow::Result;
 use risc0_zkvm::{
     sha::{Digest, Digestible},
     ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
+    ProveKeccakRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
@@ -61,14 +61,6 @@ impl<'a> Coprocessor<'a> {
 }
 
 impl CoprocessorCallback for Coprocessor<'_> {
-    fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
-        let client = ApiClient::from_env().unwrap();
-        let claim_digest = proof_request.claim_digest;
-        let receipt = client.prove_zkr(proof_request, AssetRequest::Inline)?;
-        self.receipts.insert(claim_digest, receipt);
-        Ok(())
-    }
-
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
         self.planner
             .borrow_mut()

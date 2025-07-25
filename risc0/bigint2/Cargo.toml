@@ -24,7 +24,7 @@ num-traits = "0.2.18"
 puffin = "0.19"
 puffin_http = "0.16"
 risc0-bigint2-methods = { path = "methods" }
-risc0-zkvm = { workspace = true, features = ["prove", "unstable"] }
+risc0-zkvm = { workspace = true, features = ["prove"] }
 rstest = "0.25.0"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing = "0.1"

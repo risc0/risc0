@@ -18,7 +18,7 @@ use crate::distribution::{
     Platform, ProgressWriter,
 };
 use crate::env::Environment;
-use crate::{BaseUrls, Result, RzupError, RzupEvent};
+use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferDirection};
 
 use semver::Version;
 use serde::Deserialize;
@@ -166,7 +166,8 @@ impl<'a> DistributionPlatform for GithubRelease<'a> {
         let download_url = self.download_url(component, version, platform)?;
         let mut resp = download_bytes(&download_url, env.github_token())?;
 
-        env.emit(RzupEvent::DownloadStarted {
+        env.emit(RzupEvent::TransferStarted {
+            direction: TransferDirection::Download,
             id: component.to_string(),
             version: version.to_string(),
             url: download_url.clone(),
@@ -180,7 +181,8 @@ impl<'a> DistributionPlatform for GithubRelease<'a> {
         ))
         .map_err(|e| RzupError::Other(format!("Failed to download file: {e}")))?;
 
-        env.emit(RzupEvent::DownloadCompleted {
+        env.emit(RzupEvent::TransferCompleted {
+            direction: TransferDirection::Download,
             id: component.to_string(),
             version: version.to_string(),
         });

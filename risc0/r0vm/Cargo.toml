@@ -27,7 +27,7 @@ opentelemetry-appender-tracing = "0.30.0"
 opentelemetry-otlp = "0.30.0"
 opentelemetry_sdk = "0.30.0"
 risc0-circuit-rv32im = { workspace = true }
-risc0-zkvm = { workspace = true, features = ["prove", "unstable"] }
+risc0-zkvm = { workspace = true, features = ["prove"] }
 serde = { version = "1.0.219", features = ["rc"] }
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = [

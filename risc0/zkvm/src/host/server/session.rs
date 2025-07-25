@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{
-        client::env::{ProveKeccakRequest, ProveZkrRequest, SegmentPath},
+        client::env::{ProveKeccakRequest, SegmentPath},
         prove_info::SessionStats,
     },
     sha::Digest,
@@ -93,10 +93,6 @@ pub struct Session {
 
     /// The system state of the final MemoryImage at the end of execution.
     pub post_state: SystemState,
-
-    /// A list of pending ZKR proof requests.
-    // TODO: make this scalable so we don't OOM
-    pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
 
     /// A list of pending keccak proof requests.
     // TODO: make this scalable so we don't OOM

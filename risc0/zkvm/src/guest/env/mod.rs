@@ -69,7 +69,6 @@
 //! [guest-optimization]:
 //!     https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
-#[cfg(feature = "unstable")]
 mod batcher;
 mod read;
 mod verify;
@@ -110,6 +109,9 @@ pub use self::{
 #[cfg(feature = "unstable")]
 pub use self::verify::verify_assumption2;
 
+#[cfg(not(feature = "unstable"))]
+pub(crate) use self::verify::verify_assumption2;
+
 /// This module is intended for internal testing only.
 #[doc(hidden)]
 pub mod testing {
@@ -135,7 +137,6 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
 /// Used for batching keccak proofs
-#[cfg(feature = "unstable")]
 static mut KECCAK_BATCHER: OnceCell<batcher::KeccakBatcher> = OnceCell::new();
 
 /// Initialize globals before program main
@@ -143,7 +144,6 @@ pub(crate) fn init() {
     #[allow(static_mut_refs)]
     unsafe {
         HASHER.set(Sha256::new()).unwrap();
-        #[cfg(feature = "unstable")]
         KECCAK_BATCHER.set(batcher::KeccakBatcher::new()).unwrap();
         syscall::sys_rand(
             MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
@@ -156,7 +156,6 @@ pub(crate) fn init() {
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     #[allow(static_mut_refs)]
     unsafe {
-        #[cfg(feature = "unstable")]
         KECCAK_BATCHER.take().unwrap().finalize();
 
         let hasher = HASHER.take();
@@ -503,7 +502,6 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 /// While is accesses a static mutable, this is considered safe because the zkVM
 /// is single-threaded and non-preemptive.
 #[cfg(target_os = "zkvm")]
-#[cfg(feature = "unstable")]
 #[no_mangle]
 pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
     #[allow(static_mut_refs)]
