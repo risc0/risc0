@@ -45,7 +45,7 @@ pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
     );
 
     // Report the product
-    println!("I know the factors of {}, and I can prove it!", c);
+    println!("I know the factors of {c}, and I can prove it!");
 
     (receipt, c)
 }

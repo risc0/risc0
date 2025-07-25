@@ -282,6 +282,7 @@ fn spawn_fail(path: &Path) -> String {
     format!("Could not launch \"{}\".", path.to_string_lossy())
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize)]
 enum RemoteRequest {
     GetTask(GetTask),

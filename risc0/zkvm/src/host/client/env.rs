@@ -64,21 +64,7 @@ impl SegmentPath {
     }
 }
 
-/// A ZKR proof request.
-#[stability::unstable]
-pub struct ProveZkrRequest {
-    /// The digest of the claim that this ZKR program is expected to produce.
-    pub claim_digest: Digest,
-
-    /// The control ID uniquely identifies the ZKR program to be proven.
-    pub control_id: Digest,
-
-    /// The input that the ZKR program should operate on.
-    pub input: Vec<u8>,
-}
-
 /// A Keccak proof request.
-#[stability::unstable]
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct ProveKeccakRequest {
     /// The digest of the claim that this keccak input is expected to produce.
@@ -96,11 +82,7 @@ pub struct ProveKeccakRequest {
 
 /// A trait that supports the ability to be notified of proof requests
 /// on-demand.
-#[stability::unstable]
 pub trait CoprocessorCallback {
-    /// Request that a ZKR proof is produced.
-    fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
-
     /// Request that a keccak proof is produced.
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 }
@@ -365,7 +347,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// can be more efficient than deserializing a message on-demand. On-demand
     /// deserialization can cause many syscalls, whereas a frame will only have
     /// two.
-    #[stability::unstable]
     pub fn write_frame(&mut self, payload: &[u8]) -> &mut Self {
         let len = payload.len() as u32;
         self.inner.input.extend_from_slice(&len.to_le_bytes());
@@ -467,14 +448,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a callback for coprocessor requests.
-    #[stability::unstable]
     pub fn coprocessor_callback(&mut self, callback: impl CoprocessorCallback + 'a) -> &mut Self {
         self.inner.coprocessor = Some(Rc::new(RefCell::new(callback)));
         self
     }
 
     /// Add a callback for coprocessor requests.
-    #[stability::unstable]
     pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
         self.inner.coprocessor = Some(callback);
         self

@@ -151,8 +151,7 @@ pub mod rpc {
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
-#[cfg(feature = "unstable")]
-pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
+pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest};
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {
@@ -190,19 +189,39 @@ pub fn get_version() -> Result<Version, semver::Error> {
 
 /// Returns `true` if dev mode is enabled.
 #[cfg(feature = "std")]
+#[deprecated(
+    note = "dev-mode can be enabled programatically, so this function is no longer authoritative. \
+            Use `ProverOpts::is_dev_mode` or `VerifierContext::is_dev_mode`"
+)]
 pub fn is_dev_mode() -> bool {
+    is_dev_mode_enabled_via_environment()
+}
+
+/// Returns `true` if the dev mode environment variable is enabled, the `disable-dev-mode` cfg flag
+/// is not set, and we are not being compiled as a guest inside the zkvm.
+#[cfg(all(feature = "std", not(target_os = "zkvm")))]
+fn is_dev_mode_enabled_via_environment() -> bool {
     let is_env_set = std::env::var("RISC0_DEV_MODE")
         .ok()
         .map(|x| x.to_lowercase())
         .filter(|x| x == "1" || x == "true" || x == "yes")
         .is_some();
 
-    if cfg!(feature = "disable-dev-mode") && is_env_set {
+    let dev_mode_disabled = cfg!(feature = "disable-dev-mode");
+
+    if dev_mode_disabled && is_env_set {
         panic!("zkVM: Inconsistent settings -- please resolve. \
             The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
     }
 
-    cfg!(not(feature = "disable-dev-mode")) && is_env_set
+    !dev_mode_disabled && is_env_set
+}
+
+/// Returns `true` if the dev mode environment variable is enabled, the `disable-dev-mode` cfg flag
+/// is not set, and we are not being compiled as a guest inside the zkvm.
+#[cfg(any(not(feature = "std"), target_os = "zkvm"))]
+fn is_dev_mode_enabled_via_environment() -> bool {
+    false
 }
 
 #[cfg(feature = "metal")]

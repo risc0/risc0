@@ -18,10 +18,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 jobs:

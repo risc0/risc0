@@ -30,7 +30,6 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
     host::prove_info::ProveInfo,
-    is_dev_mode,
     receipt::{
         CompositeReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
@@ -85,7 +84,6 @@ pub trait ProverServer: private::Sealed {
     ) -> Result<SegmentReceipt>;
 
     /// Prove the specified keccak request
-    #[cfg(feature = "unstable")]
     fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
         -> Result<SuccinctReceipt<Unknown>>;
 
@@ -227,7 +225,7 @@ pub trait ProverServer: private::Sealed {
             },
             InnerReceipt::Fake(_) => {
                 ensure!(
-                    is_dev_mode(),
+                    opts.dev_mode(),
                     "dev mode must be enabled to compress fake receipts"
                 );
                 Ok(receipt.clone())
@@ -259,10 +257,9 @@ impl Session {
     }
 }
 
-/// Select a [ProverServer] based on the specified [ProverOpts] and currently
-/// compiled features.
+/// Select a [ProverServer] based on the specified [ProverOpts].
 pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
-    if is_dev_mode() {
+    if opts.dev_mode() {
         eprintln!("WARNING: proving in dev mode. This will not generate valid, secure proofs.");
         return Ok(Rc::new(DevModeProver::new()));
     }

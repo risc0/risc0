@@ -105,7 +105,7 @@ fn play_rounds(server: Server, player: Player, rounds: usize) -> bool {
             println!("Good guess! Our server has calculated your results.");
             println!("You'll have 6 chances to get the word right.");
         } else {
-            println!("You have {} guesses remaining.", remaining_guesses);
+            println!("You have {remaining_guesses} guesses remaining.");
         }
 
         score.print(guess_word.as_str());

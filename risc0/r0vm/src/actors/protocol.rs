@@ -163,6 +163,7 @@ pub mod factory {
         pub job_id: JobId,
     }
 
+    #[allow(clippy::large_enum_variant)]
     #[derive(Serialize, Deserialize)]
     pub(crate) enum TaskUpdate {
         Start,

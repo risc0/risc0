@@ -314,8 +314,7 @@ fn combine_errors(errors: Vec<anyhow::Error>, message: &str) -> Result<()> {
         return Ok(());
     }
 
-    let div = std::iter::repeat("=")
-        .take(message.len() + 1)
+    let div = std::iter::repeat_n("=", message.len() + 1)
         .collect::<Vec<_>>()
         .join("");
     let mut message = format!("{div}\n{message}:\n{div}\n");

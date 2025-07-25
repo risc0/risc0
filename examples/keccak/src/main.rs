@@ -59,7 +59,7 @@ fn main() {
         .verify(KECCAK_ID)
         .expect("receipt verification failed");
 
-    println!("I provably know data whose keccak hash is {:x?}", digest);
+    println!("I provably know data whose keccak hash is {digest:x?}");
 }
 
 #[cfg(test)]

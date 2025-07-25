@@ -617,7 +617,7 @@ mod tests {
         assert!(res.is_err());
         let err = res.err().unwrap();
 
-        assert!(format!("{:?}", err).contains("violates foreign key constraint"));
+        assert!(format!("{err:?}").contains("violates foreign key constraint"));
         Ok(())
     }
 
@@ -1255,7 +1255,7 @@ mod tests {
             create_task(
                 &pool,
                 &job_id,
-                &format!("{}", i),
+                &format!("{i}"),
                 &stream_id,
                 &task_def,
                 &serde_json::json!([]),

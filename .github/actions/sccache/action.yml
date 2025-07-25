@@ -51,6 +51,5 @@ runs:
       shell: bash
 
     # stop server in case new version is installed
-    - run: sccache --stop-server
+    - run: (sccache --stop-server || true) > /dev/null 2>&1
       shell: bash
-      continue-on-error: true

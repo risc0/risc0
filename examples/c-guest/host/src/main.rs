@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
     let return_value: u32 = receipt.journal.decode()?;
 
     assert_eq!(return_value, 7u32 * 11);
-    println!("proved value is: {}", return_value);
+    println!("proved value is: {return_value}");
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.

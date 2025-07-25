@@ -265,7 +265,6 @@ impl<'a> ExecutorImpl<'a> {
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = std::mem::take(&mut *self.syscall_table.assumptions_used.lock().unwrap());
         let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
-        let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
 
         if let Some(profiler) = self.profiler.take() {
@@ -301,7 +300,6 @@ impl<'a> ExecutorImpl<'a> {
                 pc: 0,
                 merkle_root: post_digest,
             },
-            pending_zkrs,
             pending_keccaks,
             syscall_metrics,
             hooks: vec![],

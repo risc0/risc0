@@ -18,8 +18,8 @@ use anyhow::{Context, Result};
 use kameo::prelude::*;
 use risc0_zkvm::{
     get_prover_server, CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl,
-    NullSegmentRef, PreflightResults, ProveKeccakRequest, ProveZkrRequest, ProverOpts,
-    ProverServer, VerifierContext,
+    NullSegmentRef, PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer,
+    VerifierContext,
 };
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task::JoinHandle;
@@ -310,7 +310,7 @@ impl GpuProcessor {
         self.task_start(header.clone()).await?;
         let prover = Prover { delay: self.delay };
         let receipt = tokio::task::spawn_blocking(move || {
-            let ctx = VerifierContext::default();
+            let ctx = VerifierContext::default().with_dev_mode(prover.delay.is_some());
             prover
                 .get()?
                 .prove_segment_core(&ctx, *task.preflight_results)
@@ -555,10 +555,6 @@ struct Coprocessor {
 }
 
 impl CoprocessorCallback for Coprocessor {
-    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> anyhow::Result<()> {
-        unimplemented!()
-    }
-
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> anyhow::Result<()> {
         self.factory
             .tell(TaskUpdateMsg {

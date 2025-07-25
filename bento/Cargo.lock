@@ -3926,7 +3926,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3946,7 +3946,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "2.0.1"
+version = "4.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -3960,7 +3960,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3984,7 +3984,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3995,7 +3995,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
  "anyhow",
  "bit-vec",
@@ -4027,7 +4027,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "2.0.2"
+version = "4.0.0"
 dependencies = [
  "cc",
  "cust",
@@ -4171,7 +4171,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "2.0.3"
+version = "2.0.4"
 dependencies = [
  "bytemuck",
  "cfg-if",
