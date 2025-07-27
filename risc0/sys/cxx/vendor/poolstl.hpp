@@ -2111,7 +2111,7 @@ namespace std {
 
     /**
      * NOTE: Iterators are expected to be random access.
-     * See std::count_if https://en.cppreference.com/w/cpp/algorithm/count_if
+     * See std::count_if https://en.cppreference.com/w/cpp/algorithm/count.html
      */
     template <class ExecPolicy, class RandIt, class UnaryPredicate>
     poolstl::internal::enable_if_poolstl_policy<ExecPolicy, typename iterator_traits<RandIt>::difference_type>
@@ -2175,7 +2175,7 @@ namespace std {
 
     /**
      * NOTE: Iterators are expected to be random access.
-     * See std::find_if https://en.cppreference.com/w/cpp/algorithm/find_if
+     * See std::find_if https://en.cppreference.com/w/cpp/algorithm/find.html
      */
     template <class ExecPolicy, class RandIt, class UnaryPredicate>
     poolstl::internal::enable_if_poolstl_policy<ExecPolicy, RandIt>
@@ -2211,7 +2211,7 @@ namespace std {
 
     /**
      * NOTE: Iterators are expected to be random access.
-     * See std::find_if_not https://en.cppreference.com/w/cpp/algorithm/find_if_not
+     * See std::find_if_not https://en.cppreference.com/w/cpp/algorithm/find.html
      */
     template <class ExecPolicy, class RandIt, class UnaryPredicate>
     poolstl::internal::enable_if_poolstl_policy<ExecPolicy, RandIt>
