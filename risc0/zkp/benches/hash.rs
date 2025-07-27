@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use criterion::{criterion_group, criterion_main, Criterion};
-use risc0_core::field::{baby_bear::BabyBearElem, Elem};
-use risc0_zkp::core::hash::poseidon2::{poseidon2_mix, CELLS as POSEIDON2_CELLS};
-
 fn benchmark_poseidon2_mix(c: &mut Criterion) {
-    let mut rng = rand::rng();
-    let mut cells = [BabyBearElem::random(&mut rng); POSEIDON2_CELLS];
+    let mut rng = SmallRng::from_entropy();
+    let mut cells = [BabyBearElem::ZERO; POSEIDON2_CELLS];
+    for cell in cells.iter_mut() {
+        *cell = BabyBearElem::random(&mut rng);
+    }
+
     c.bench_function("poseidon2_mix", |b| b.iter(|| poseidon2_mix(&mut cells)));
 }
 
