@@ -26,10 +26,7 @@ use std::{
     error::Error as StdError,
     io::{stdin, Write},
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
-    os::{
-        fd::{AsRawFd, FromRawFd},
-        unix::net::UnixStream as StdUnixStream,
-    },
+    os::{fd::AsFd as _, unix::net::UnixStream as StdUnixStream},
     path::{Path, PathBuf},
     time::Duration,
 };
@@ -218,8 +215,8 @@ pub(crate) async fn rpc_main() -> Result<(), Box<dyn StdError>> {
         children.push(child);
     }
 
-    let stdin_fd = stdin().as_raw_fd();
-    let socket = unsafe { StdUnixStream::from_raw_fd(stdin_fd) };
+    let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
+
     socket.set_nonblocking(true)?;
     let mut socket = UnixStream::from_std(socket)?;
 
