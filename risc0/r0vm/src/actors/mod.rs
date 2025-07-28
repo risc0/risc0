@@ -127,15 +127,51 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
             segment_limit_po2: None,
         };
         app.proof_request(request).await.unwrap();
-    } else {
+    } else if is_manager {
         println!("Use Ctrl-C to stop");
         tokio::signal::ctrl_c()
             .await
             .expect("failed to listen for ctrl-c");
         println!();
+    } else {
+        app.wait_for_workers().await;
     }
 
     app.stop().await;
+
+    Ok(())
+}
+
+async fn relay_proof_request(app: &mut App) -> Result<(), Box<dyn StdError>> {
+    let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
+
+    socket.set_nonblocking(true)?;
+    let mut socket = UnixStream::from_std(socket)?;
+
+    let mut buf = vec![0u8; 4];
+    socket
+        .read_exact(&mut buf)
+        .await
+        .context("error reading RPC header")?;
+    let body_len: u32 = bincode::deserialize(&buf).context("received invalid RPC header")?;
+    let mut buf = vec![0u8; body_len as usize];
+    socket
+        .read_exact(&mut buf)
+        .await
+        .context("error reading RPC body")?;
+    let request: ProofRequest =
+        bincode::deserialize(&buf).context("error deserializing ProofRequest")?;
+
+    let job_info = app
+        .proof_request(request)
+        .await
+        .context("error running ProofRequest")?;
+
+    let mut buf = vec![0u8; 4];
+    bincode::serialize_into(&mut buf, &job_info)?;
+    let body_len = buf.len() as u32 - 4;
+    bincode::serialize_into(&mut buf[0..4], &body_len)?;
+    socket.write_all(&buf).await?;
 
     Ok(())
 }
@@ -215,37 +251,15 @@ pub(crate) async fn rpc_main() -> Result<(), Box<dyn StdError>> {
         children.push(child);
     }
 
-    let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
+    let result = relay_proof_request(&mut app).await;
 
-    socket.set_nonblocking(true)?;
-    let mut socket = UnixStream::from_std(socket)?;
+    app.stop().await;
 
-    let mut buf = vec![0u8; 4];
-    socket
-        .read_exact(&mut buf)
-        .await
-        .context("error reading RPC header")?;
-    let body_len: u32 = bincode::deserialize(&buf).context("received invalid RPC header")?;
-    let mut buf = vec![0u8; body_len as usize];
-    socket
-        .read_exact(&mut buf)
-        .await
-        .context("error reading RPC body")?;
-    let request: ProofRequest =
-        bincode::deserialize(&buf).context("error deserializing ProofRequest")?;
+    for mut child in children {
+        child.wait().await?;
+    }
 
-    let job_info = app
-        .proof_request(request)
-        .await
-        .context("error running ProofRequest")?;
-
-    let mut buf = vec![0u8; 4];
-    bincode::serialize_into(&mut buf, &job_info)?;
-    let body_len = buf.len() as u32 - 4;
-    bincode::serialize_into(&mut buf[0..4], &body_len)?;
-    socket.write_all(&buf).await?;
-
-    Ok(())
+    result
 }
 
 struct TempConfig {
@@ -379,6 +393,14 @@ impl App {
         })
     }
 
+    pub async fn wait_for_workers(&mut self) {
+        for worker in &mut self.workers {
+            if let Some(death_receiver) = worker.death_receiver.take() {
+                let _ = death_receiver.await;
+            }
+        }
+    }
+
     pub async fn stop(mut self) {
         tracing::info!("app: stop");
 
@@ -442,6 +464,7 @@ impl Server {
         let local_addr = listener.local_addr()?;
 
         self.join_handle = Some(tokio::spawn(async move {
+            let mut join_set = tokio::task::JoinSet::new();
             loop {
                 let (stream, _addr) = match listener.accept().await {
                     Ok(result) => result,
@@ -454,7 +477,7 @@ impl Server {
                 let meter = opentelemetry::global::meter("r0vm");
                 let stream = metrics::StreamWithMetrics::new(stream, meter.clone());
                 let factory = factory.clone();
-                tokio::spawn(async move {
+                join_set.spawn(async move {
                     let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
                     rpc_receiver
                         .receive_many(move |req, message_id| {
@@ -494,8 +517,9 @@ async fn handle_request(
             tokio::task::spawn(async move {
                 let pending_reply = factory.ask(msg).enqueue().await.unwrap();
                 tx.send(()).unwrap();
-                let reply = pending_reply.await.unwrap();
-                rpc_sender.respond(&reply, message_id).await.unwrap();
+                if let Ok(reply) = pending_reply.await {
+                    rpc_sender.respond(&reply, message_id).await.unwrap();
+                }
             });
 
             // wait until message has been enqueued in mailbox to preserve ordering.

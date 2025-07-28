@@ -54,10 +54,9 @@ impl DefaultProver {
     }
 
     /// TODO
-    pub fn stop(&mut self) -> Result<(), Vec<Error>> {
-        let mut errors = vec![];
-
-        let _ = self.child.kill().map_err(|err| errors.push(err));
+    pub fn stop(&mut self) -> Result<()> {
+        self.socket.shutdown(std::net::Shutdown::Both)?;
+        self.child.wait()?;
 
         Ok(())
     }
@@ -65,11 +64,9 @@ impl DefaultProver {
 
 impl Drop for DefaultProver {
     fn drop(&mut self) {
-        let _ = self.stop().inspect_err(|errors| {
-            for err in errors {
-                tracing::warn!("{err}");
-            }
-        });
+        if let Err(error) = self.stop() {
+            tracing::warn!("error stopping r0vm: {error}");
+        }
     }
 }
 

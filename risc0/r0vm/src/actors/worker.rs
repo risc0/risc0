@@ -79,6 +79,7 @@ pub(crate) struct Worker {
     task_kinds: Vec<TaskKind>,
     join_handles: Vec<JoinHandle<()>>,
     delay: Option<DevModeDelay>,
+    pub(crate) death_receiver: Option<tokio::sync::oneshot::Receiver<()>>,
 }
 
 impl Worker {
@@ -92,6 +93,7 @@ impl Worker {
             task_kinds,
             join_handles: vec![],
             delay,
+            death_receiver: None,
         }
     }
 
@@ -114,22 +116,14 @@ impl Worker {
                 permit.send(task);
             }
         }));
-
-        let processor = Processor::new(self.factory.clone(), self.delay);
+        let (death_sender, death_receiver) = tokio::sync::oneshot::channel();
+        let processor = Processor::new(self.factory.clone(), self.delay, death_sender);
         self.join_handles.push(tokio::spawn(async move {
-            loop {
-                let Some(msg) = recv.recv().await else { break };
-                let msg = match msg {
-                    Ok(msg) => msg,
-                    Err(err) => {
-                        tracing::error!("GetTask reply error: {err}");
-                        break;
-                    }
-                };
-
+            while let Some(Ok(msg)) = recv.recv().await {
                 processor.process_task(msg).await;
             }
         }));
+        self.death_receiver = Some(death_receiver);
     }
 
     pub async fn stop(mut self) {
@@ -156,10 +150,15 @@ impl Prover {
 struct Processor {
     gpu_queue: Sender<GpuTaskMsg>,
     cpu_queue: Sender<CpuTaskMsg>,
+    _death_sender: tokio::sync::oneshot::Sender<()>,
 }
 
 impl Processor {
-    fn new(factory: ActorRef<FactoryRouterActor>, delay: Option<DevModeDelay>) -> Self {
+    fn new(
+        factory: ActorRef<FactoryRouterActor>,
+        delay: Option<DevModeDelay>,
+        death_sender: tokio::sync::oneshot::Sender<()>,
+    ) -> Self {
         let (gpu_send, gpu_recv) = channel(GPU_QUEUE_DEPTH);
         let (cpu_send, cpu_recv) = channel(CPU_QUEUE_DEPTH);
 
@@ -176,6 +175,7 @@ impl Processor {
         Self {
             gpu_queue: gpu_send,
             cpu_queue: cpu_send,
+            _death_sender: death_sender,
         }
     }
 
