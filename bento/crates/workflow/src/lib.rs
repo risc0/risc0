@@ -90,6 +90,10 @@ pub struct Args {
     #[clap(env)]
     pub s3_url: String,
 
+    /// S3 region, can be anything if using minio
+    #[clap(env, default_value = "us-west-2")]
+    pub s3_region: String,
+
     /// Enables a background thread to monitor for tasks that need to be retried / timed-out
     #[clap(long, default_value_t = false)]
     monitor_requeue: bool,
@@ -172,6 +176,7 @@ impl Agent {
             &args.s3_bucket,
             &args.s3_access_key,
             &args.s3_secret_key,
+            &args.s3_region,
         )
         .await
         .context("Failed to initialize s3 client / bucket")?;
