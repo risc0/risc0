@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use std::{
-    cell::RefCell,
     io::{Read, Write},
     os::{fd::OwnedFd, unix::net::UnixStream},
     path::Path,
@@ -21,7 +20,7 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::{bail, Context as _, Error, Result};
+use anyhow::{bail, Context as _, Result};
 
 use crate::{
     rpc::{JobInfo, JobStatus, ProofRequest},
@@ -33,7 +32,7 @@ use super::{Executor, Prover, ProverOpts};
 /// TODO
 pub struct DefaultProver {
     child: Child,
-    socket: RefCell<UnixStream>,
+    socket: UnixStream,
 }
 
 /// An implementation of a [Prover] that runs proof workloads via local `r0vm` cluster.
@@ -42,7 +41,7 @@ impl DefaultProver {
     pub fn new<P: AsRef<Path>>(r0vm_path: P) -> Result<Self> {
         let r0vm_path = r0vm_path.as_ref();
 
-        let (parent_socket, child_socket) = UnixStream::pair()?;
+        let (socket, child_socket) = UnixStream::pair()?;
         let mut cmd = Command::new(r0vm_path);
         let child_fd: OwnedFd = child_socket.into();
         let child = cmd
@@ -51,10 +50,7 @@ impl DefaultProver {
             .spawn()
             .with_context(|| spawn_fail(r0vm_path))?;
 
-        Ok(Self {
-            child,
-            socket: RefCell::new(parent_socket),
-        })
+        Ok(Self { child, socket })
     }
 
     /// TODO
@@ -105,20 +101,19 @@ impl Prover for DefaultProver {
             .context("error serializing RPC header")?;
         let body_len = buf.len() as u32 - 4;
         bincode::serialize_into(&mut buf[0..4], &body_len).context("error serializing RPC body")?;
-        self.socket
-            .borrow_mut()
+        let mut socket = &self.socket;
+
+        socket
             .write_all(&buf)
             .context("error sending RPC message")?;
 
         let mut buf = vec![0u8; 4];
-        self.socket
-            .borrow_mut()
+        socket
             .read_exact(&mut buf)
             .context("error receiving RPC header")?;
         let body_len: u32 = bincode::deserialize(&buf).context("error deserializing RPC header")?;
         let mut buf = vec![0u8; body_len as usize];
-        self.socket
-            .borrow_mut()
+        socket
             .read_exact(&mut buf)
             .context("error receiving RPC body")?;
         let job_info: JobInfo =
