@@ -14,12 +14,8 @@
 
 use std::{
     cell::RefCell,
-    fs::File,
     io::{Read, Write},
-    os::{
-        fd::{FromRawFd, IntoRawFd},
-        unix::net::UnixStream,
-    },
+    os::{fd::OwnedFd, unix::net::UnixStream},
     path::Path,
     process::{Child, Command},
     sync::Arc,
@@ -48,10 +44,9 @@ impl DefaultProver {
 
         let (parent_socket, child_socket) = UnixStream::pair()?;
         let mut cmd = Command::new(r0vm_path);
-        let child_fd = child_socket.into_raw_fd();
-        let child_file = unsafe { File::from_raw_fd(child_fd) };
+        let child_fd: OwnedFd = child_socket.into();
         let child = cmd
-            .stdin(child_file)
+            .stdin(child_fd)
             .arg("--rpc")
             .spawn()
             .with_context(|| spawn_fail(r0vm_path))?;
