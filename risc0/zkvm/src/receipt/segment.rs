@@ -136,7 +136,6 @@ impl SegmentReceipt {
         core::mem::size_of_val(self.seal.as_slice())
     }
 
-    // TODO(povw) avoid using anyhow as the result type here?
     /// TODO
     pub fn povw_nonce(&self) -> anyhow::Result<PovwNonce> {
         risc0_circuit_rv32im::decode_povw_nonce(&self.seal)
