@@ -177,8 +177,8 @@ async fn relay_proof_request(app: &mut App) -> Result<(), Box<dyn StdError>> {
 }
 
 #[tokio::main]
-pub(crate) async fn rpc_main() -> Result<(), Box<dyn StdError>> {
-    let workers = cuda_devices().unwrap_or(1);
+pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdError>> {
+    let workers = num_gpus.unwrap_or_else(|| cuda_devices().unwrap_or(1));
 
     let execute_pool = PoolConfig {
         count: 1,

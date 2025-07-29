@@ -93,6 +93,10 @@ struct Cli {
 
     #[arg(long)]
     po2: Option<u32>,
+
+    /// Number of GPUs to use.
+    #[arg(long)]
+    num_gpus: Option<usize>,
 }
 
 #[derive(Args)]
@@ -159,7 +163,12 @@ pub fn main() {
         .init();
 
     if args.mode.rpc {
-        self::actors::rpc_main().unwrap();
+        self::actors::rpc_main(args.num_gpus).unwrap();
+        return;
+    }
+
+    if args.num_gpus.is_some_and(|v| v != 1) {
+        eprintln!("num_gpus > 1 or 0 for current mode unsupported.");
         return;
     }
 

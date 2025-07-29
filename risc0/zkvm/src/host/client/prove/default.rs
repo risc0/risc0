@@ -42,13 +42,13 @@ impl DefaultProver {
         let r0vm_path = r0vm_path.as_ref();
 
         let (socket, child_socket) = UnixStream::pair()?;
-        let mut cmd = Command::new(r0vm_path);
         let child_fd: OwnedFd = child_socket.into();
-        let child = cmd
-            .stdin(child_fd)
-            .arg("--rpc")
-            .spawn()
-            .with_context(|| spawn_fail(r0vm_path))?;
+        let mut cmd = Command::new(r0vm_path);
+        cmd.stdin(child_fd).arg("--rpc");
+        if let Ok(num_gpus) = std::env::var("RISC0_DEFAULT_PROVER_NUM_GPUS") {
+            cmd.arg("--num-gpus").arg(num_gpus);
+        }
+        let child = cmd.spawn().with_context(|| spawn_fail(r0vm_path))?;
 
         Ok(Self { child, socket })
     }
