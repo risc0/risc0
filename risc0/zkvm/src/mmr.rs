@@ -52,7 +52,7 @@ where
     }
 
     pub fn root(mut self) -> Result<T::Item> {
-        if self.peaks.is_empty() {
+        if self.is_empty() {
             bail!("no elements for host mmr");
         }
         if self.peaks.len() == 1 {
@@ -64,6 +64,10 @@ where
             T::merge_item(&mut item, peak.item())?;
         }
         Ok(item)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.peaks.is_empty()
     }
 }
 

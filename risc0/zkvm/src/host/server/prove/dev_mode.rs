@@ -14,9 +14,8 @@
 
 use std::time::Duration;
 
-use anyhow::{bail, ensure, Result};
+use anyhow::{ensure, Result};
 use risc0_binfmt::Digestible;
-use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -29,12 +28,10 @@ use crate::{
         prove_info::ProveInfo,
         server::{exec::executor::ExecutorImpl, session::null_callback},
     },
-    mmr::{GuestPeak, MerkleMountainAccumulator},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::MerkleProof,
-    Assumption, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, MaybePruned,
-    PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
-    VerifierContext, WorkClaim,
+    ExecutorEnv, MaybePruned, PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim,
+    Segment, Session, VerifierContext, WorkClaim,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =
@@ -140,57 +137,9 @@ impl ProverServer for DevModeProver {
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
         ensure_dev_mode_allowed!();
 
-        let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
-            session.assumptions.iter().cloned().unzip();
-
-        let mut root_keccak_assumption = None;
-
-        let mut keccak_receipts: MerkleMountainAccumulator<GuestPeak> =
-            MerkleMountainAccumulator::new();
-        for proof_request in session.pending_keccaks.iter() {
-            let claim = compute_keccak_digest(bytemuck::cast_slice(proof_request.input.as_slice()));
-            tracing::debug!("adding keccak assumption: {}", claim);
-            keccak_receipts.insert(Assumption {
-                claim,
-                control_root: KECCAK_CONTROL_ROOT,
-            })?;
-        }
-
-        if let Ok(root_assumption) = keccak_receipts.root() {
-            tracing::debug!("keccak root assumption: {:?}", root_assumption);
-            root_keccak_assumption = Some(root_assumption);
-        }
-
-        // TODO: add test case for when a single session refers to the same assumption multiple times
-        let inner_assumption_receipts: Vec<_> = session_assumption_receipts
-            .into_iter()
-            .map(|assumption_receipt| match assumption_receipt {
-                AssumptionReceipt::Proven(receipt) => Ok(receipt),
-                AssumptionReceipt::Unresolved(assumption) => {
-                    if Some(assumption.clone()) == root_keccak_assumption {
-                        Ok(InnerAssumptionReceipt::Fake(FakeReceipt {
-                            claim: MaybePruned::Pruned(assumption.claim),
-                        }))
-                    } else {
-                        bail!(
-                            "no receipt available for unresolved assumption: {:#?}",
-                            assumption
-                        )
-                    }
-                }
-            })
-            .collect::<Result<_>>()?;
-
-        let assumption_receipts: Vec<_> = inner_assumption_receipts
-            .iter()
-            .map(|inner| AssumptionReceipt::Proven(inner.clone()))
-            .collect();
-
-        let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
-
         let receipt = Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
-                claim: session_claim.into(),
+                claim: session.claim()?.into(),
             }),
             session.journal.clone().unwrap_or_default().bytes,
         );

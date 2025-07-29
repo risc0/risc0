@@ -128,6 +128,7 @@ impl ProverServer for ProverImpl {
             keccak_receipts.insert(receipt)?;
         }
 
+        // NOTE: Calling keccak_receipts.root() proves the union tree.
         if let Ok(root_receipt) = keccak_receipts.root() {
             let assumption = Assumption {
                 claim: root_receipt.claim.digest(),
@@ -152,11 +153,6 @@ impl ProverServer for ProverImpl {
             })
             .collect::<Result<_>>()?;
 
-        let assumption_receipts: Vec<_> = inner_assumption_receipts
-            .iter()
-            .map(|inner| AssumptionReceipt::Proven(inner.clone()))
-            .collect();
-
         // Use the precense or absernse of a nonce on the first segment to decide whether to use
         // PoVW. Note that if the session is not consistent about whether the PoVW nonce is set on
         // each segment, proving will fail.
@@ -173,7 +169,7 @@ impl ProverServer for ProverImpl {
             verifier_parameters,
         };
 
-        let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
+        let session_claim = session.claim()?;
 
         // Verify the receipt to catch if something is broken in the proving process.
         // NOTE: If the proof is very large, this could take > 1s, e.g. with 1000 segments.
