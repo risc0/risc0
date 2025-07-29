@@ -18,7 +18,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{receipt::GenericReceipt, Receipt, ReceiptClaim, WorkClaim};
 
-// TODO(povw): Add the povw receipt as an optional here.
 /// Information returned by the prover including receipt as well as other information useful for debugging
 #[derive(Debug, Serialize, Deserialize)]
 #[non_exhaustive]
