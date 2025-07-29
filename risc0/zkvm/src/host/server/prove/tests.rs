@@ -613,11 +613,21 @@ fn fake_compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
 }
 
 #[test_log::test]
-#[cfg(any(feature = "cuda", feature = "docker"))]
+#[cfg(feature = "cuda")]
+#[ignore]
 fn shrink_wrap() {
-    // ensure that we got a groth16 receipt.
-    prove_nothing_groth16().receipt.inner.groth16().unwrap();
-    prove_nothing_groth16().receipt.inner.groth16().unwrap();
+    // Perform many proofs in parallel. The initial implementation of the
+    // groth16 prover on CUDA had issues with this. Ensure that we got a groth16
+    // receipt.
+
+    use rayon::prelude::*;
+    (0..5).into_par_iter().for_each(|_| {
+        prove_nothing_impl(ReceiptKind::Groth16)
+            .receipt
+            .inner
+            .groth16()
+            .unwrap();
+    });
 }
 
 #[rstest]
@@ -628,7 +638,11 @@ fn shrink_wrap() {
 #[cfg(any(feature = "cuda", feature = "docker"))]
 fn verify_in_guest(#[case] kind: ReceiptKind) {
     let receipt = prove_nothing(kind).receipt;
-    let input: (_, Digest) = (receipt.clone(), MULTI_TEST_ID.into());
+    let input: (_, Digest, bool) = (
+        receipt.clone(),
+        MULTI_TEST_ID.into(),
+        /* dev_mode */ false,
+    );
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()

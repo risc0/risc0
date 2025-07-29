@@ -39,7 +39,7 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
     let witness = calc_witness(&witness_params.graph_path, &inputs)?;
 
     {
-        let _lock = risc0_zkp::hal::cuda::singleton();
+        let _lock = risc0_zkp::hal::cuda::singleton().lock();
 
         let prover_params = ProverParams::new(work_dir, witness.as_ptr())?;
         risc0_groth16_sys::prove(&prover_params, &setup_params)?;
