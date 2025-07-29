@@ -88,7 +88,6 @@ pub struct DevModeDelay {
 /// It can be fully disabled at compile time, regardless of environment
 /// variables, by setting the feature flag `disable-dev-mode` on the
 /// `risc0_zkvm` crate.
-// TODO(povw): How does DevModeProver handle PoVW?
 #[non_exhaustive]
 pub struct DevModeProver {
     delay: Option<DevModeDelay>,
