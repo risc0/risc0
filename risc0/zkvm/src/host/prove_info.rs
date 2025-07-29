@@ -29,6 +29,10 @@ pub struct ProveInfo {
     /// stats about cycle counts of the execution
     pub stats: SessionStats,
 
+    // TODO(povw): Consider introducing a new enum that acts as a Receipt minus CompositeReceipt
+    // that supports generic claims. This would allow this cocrete receipt type to be changed (e.g.
+    // if a new version of the recursion system comes into existance or a prover provides this as a
+    // Groth16 receipt) without it being a breaking API change.
     /// TODO
     pub work_receipt: Option<SuccinctReceipt<WorkClaim<ReceiptClaim>>>,
 }
