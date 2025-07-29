@@ -709,7 +709,7 @@ mod docker {
 }
 
 mod sys_verify {
-    use std::{cell::RefCell, rc::Rc, sync::OnceLock};
+    use std::sync::OnceLock;
 
     use risc0_zkp::{core::hash::poseidon2::Poseidon2HashSuite, digest};
     use risc0_zkvm_methods::{HELLO_COMMIT_ELF, HELLO_COMMIT_ID};
@@ -717,10 +717,8 @@ mod sys_verify {
     use super::*;
     use crate::{
         recursion::{prove::zkr, test_zkr, MerkleGroup},
-        register_zkr,
         sha::Digestible as _,
-        Assumption, CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest, SuccinctReceipt,
-        Unknown, RECURSION_PO2,
+        Assumption, SuccinctReceipt, Unknown, RECURSION_PO2,
     };
 
     fn prove_halt(exit_code: u8) -> Receipt {
@@ -946,116 +944,6 @@ mod sys_verify {
             .build()
             .unwrap();
         assert!(prove_elf(env, MULTI_TEST_ELF).is_err());
-    }
-
-    #[test_log::test]
-    fn sys_prove_zkr() {
-        // Random Poseidon2 "digest" to act as the "control root".
-        let suite = Poseidon2HashSuite::new_suite();
-        let (program, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
-        register_zkr(&control_id, move || Ok(program.clone()));
-        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
-        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
-
-        let inner_claim_digest =
-            digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-        let claim_digest =
-            digest!("a558268a11892374b41d03857a40cdc5e87e351a3bfc17aa2054f47712a17bc3");
-
-        let mut input: Vec<u32> = Vec::new();
-        input.extend(control_root.as_words());
-        input.extend(inner_claim_digest.as_words());
-
-        let spec = &MultiTestSpec::SysProveZkr {
-            control_id,
-            input,
-            claim_digest,
-            control_root,
-        };
-
-        // Test that we can produce a verifying Receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        let opts = ProverOpts::succinct().with_control_ids(control_tree.leaves);
-        get_prover_server(&opts)
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .receipt
-            .verify(MULTI_TEST_ID)
-            .unwrap();
-    }
-
-    struct Coprocessor {
-        pub(crate) zkr_requests: Vec<ProveZkrRequest>,
-        pub(crate) keccak_requests: Vec<ProveKeccakRequest>,
-    }
-
-    impl Coprocessor {
-        fn new() -> Self {
-            Self {
-                zkr_requests: vec![],
-                keccak_requests: vec![],
-            }
-        }
-    }
-
-    impl CoprocessorCallback for Coprocessor {
-        fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> anyhow::Result<()> {
-            self.zkr_requests.push(proof_request);
-            Ok(())
-        }
-
-        fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> anyhow::Result<()> {
-            self.keccak_requests.push(proof_request);
-            Ok(())
-        }
-    }
-
-    #[test_log::test]
-    fn sys_prove_zkr_noop() {
-        let suite = Poseidon2HashSuite::new_suite();
-        let (_, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
-        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
-        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
-
-        let inner_claim_digest =
-            digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-        let test_receipt = test_zkr(&control_root, &inner_claim_digest, RECURSION_PO2).unwrap();
-
-        let claim_digest =
-            digest!("a558268a11892374b41d03857a40cdc5e87e351a3bfc17aa2054f47712a17bc3");
-
-        let mut input: Vec<u32> = Vec::new();
-        input.extend(control_root.as_words());
-        input.extend(inner_claim_digest.as_words());
-
-        let spec = &MultiTestSpec::SysProveZkr {
-            control_id,
-            input,
-            claim_digest,
-            control_root,
-        };
-
-        let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
-
-        let env = ExecutorEnv::builder()
-            .coprocessor_callback_ref(coprocessor.clone())
-            .add_assumption(test_receipt)
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-
-        // Because we added an already proven assumption, there should be no
-        // request to invoke the coprocessor.
-        assert!(coprocessor.borrow().zkr_requests.is_empty());
-        assert!(coprocessor.borrow().keccak_requests.is_empty());
     }
 }
 

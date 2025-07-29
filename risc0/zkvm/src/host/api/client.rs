@@ -26,10 +26,7 @@ use super::{
 use crate::{
     claim::receipt::UnionClaim,
     get_version,
-    host::{
-        api::SegmentInfo,
-        client::{env::ProveZkrRequest, prove::get_r0vm_path},
-    },
+    host::{api::SegmentInfo, client::prove::get_r0vm_path},
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
     ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
@@ -210,60 +207,7 @@ impl Client {
         result
     }
 
-    /// Prove the specified ZKR proof request.
-    #[stability::unstable]
-    pub fn prove_zkr<Claim>(
-        &self,
-        proof_request: ProveZkrRequest,
-        receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt<Claim>>
-    where
-        Claim: risc0_binfmt::Digestible + std::fmt::Debug + Clone + serde::Serialize,
-        crate::MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
-    {
-        let mut conn = self.connect()?;
-
-        let request = pb::api::ServerRequest {
-            kind: Some(pb::api::server_request::Kind::ProveZkr(
-                pb::api::ProveZkrRequest {
-                    claim_digest: Some(proof_request.claim_digest.into()),
-                    control_id: Some(proof_request.control_id.into()),
-                    input: proof_request.input,
-                    receipt_out: Some(receipt_out.try_into()?),
-                },
-            )),
-        };
-
-        tracing::trace!("tx: {request:?}");
-        conn.send(request)?;
-
-        let reply: pb::api::ProveZkrReply = conn.recv()?;
-
-        let result = match reply
-            .kind
-            .ok_or_else(|| malformed_err("ProveZkrReply.kind"))?
-        {
-            pb::api::prove_zkr_reply::Kind::Ok(result) => {
-                let receipt_bytes = result
-                    .receipt
-                    .ok_or_else(|| malformed_err("ProveZkrReply.Ok.receipt"))?
-                    .as_bytes()?;
-                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
-                receipt_pb.try_into()
-            }
-            pb::api::prove_zkr_reply::Kind::Error(err) => Err(err.into()),
-        };
-
-        let code = conn.close()?;
-        if code != 0 {
-            bail!("Child finished with: {code}");
-        }
-
-        result
-    }
-
     /// Prove the specified keccak proof request.
-    #[stability::unstable]
     pub fn prove_keccak<Claim>(
         &self,
         proof_request: crate::host::client::env::ProveKeccakRequest,
@@ -975,15 +919,6 @@ impl Client {
             .kind
             .ok_or_else(|| malformed_err("OnCoprocessorRequest.kind"))?
         {
-            pb::api::coprocessor_request::Kind::ProveZkr(proof_request) => {
-                let proof_request = proof_request.try_into()?;
-                let coprocessor = env
-                    .coprocessor
-                    .clone()
-                    .ok_or_else(|| malformed_err("OnCoprocessorRequest.ProveZkr.coprocessor"))?;
-                let mut coprocessor = coprocessor.borrow_mut();
-                coprocessor.prove_zkr(proof_request)
-            }
             pb::api::coprocessor_request::Kind::ProveKeccak(proof_request) => {
                 let proof_request = proof_request.try_into()?;
                 let coprocessor = env

@@ -24,7 +24,7 @@ use serde::Serialize;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
     claim::{receipt::UnionClaim, Unknown},
-    host::client::env::{ProveKeccakRequest, ProveZkrRequest},
+    host::client::env::ProveKeccakRequest,
     receipt::{
         merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
         ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
@@ -1210,24 +1210,6 @@ impl TryFrom<pb::core::MaybePruned> for MaybePruned<Unknown> {
                 pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
             },
         )
-    }
-}
-
-impl TryFrom<pb::api::ProveZkrRequest> for ProveZkrRequest {
-    type Error = anyhow::Error;
-
-    fn try_from(value: pb::api::ProveZkrRequest) -> Result<Self> {
-        Ok(Self {
-            claim_digest: value
-                .claim_digest
-                .ok_or_else(|| malformed_err("ProveZkrRequest.claim_digest"))?
-                .try_into()?,
-            control_id: value
-                .control_id
-                .ok_or_else(|| malformed_err("ProveZkrRequest.control_id"))?
-                .try_into()?,
-            input: value.input,
-        })
     }
 }
 

@@ -27,7 +27,6 @@ use crate::{
         server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     },
     mmr::MerkleMountainAccumulator,
-    prove_registered_zkr,
     receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::prove::{
         join_povw, join_unwrap_povw, lift_povw, resolve_povw, resolve_unwrap_povw, union,
@@ -121,25 +120,6 @@ impl ProverServer for ProverImpl {
             .digest();
 
         let mut zkr_receipts = HashMap::new();
-        for proof_request in session.pending_zkrs.iter() {
-            // TODO: This could result in failures if the ZKR request does has more than one
-            // control ID under the control root. This is a problem that would require piping the
-            // control root from the sys_prove_zkr implementation to here. As currently used, this
-            // is not an issue as we only use sys_prove_zkrs with a single control in the allowed
-            // control IDs, and no use cases that break this model have emerged.
-            let allowed_control_ids = vec![proof_request.control_id];
-            let receipt = prove_registered_zkr(
-                &proof_request.control_id,
-                allowed_control_ids,
-                &proof_request.input,
-            )?;
-            let assumption = Assumption {
-                claim: receipt.claim.digest(),
-                control_root: receipt.control_root()?,
-            };
-            zkr_receipts.insert(assumption, receipt);
-        }
-
         let mut keccak_receipts: MerkleMountainAccumulator<UnionPeak> =
             MerkleMountainAccumulator::new();
         for proof_request in session.pending_keccaks.iter() {
@@ -377,7 +357,6 @@ impl ProverServer for ProverImpl {
         identity_p254(a)
     }
 
-    #[cfg(feature = "unstable")]
     fn prove_keccak(
         &self,
         request: &crate::ProveKeccakRequest,

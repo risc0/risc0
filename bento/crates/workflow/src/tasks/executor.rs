@@ -12,7 +12,7 @@ use crate::{
 use anyhow::{bail, Context, Result};
 use risc0_zkvm::{
     compute_image_id, sha::Digestible, CoprocessorCallback, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, ProveZkrRequest, Receipt, Segment,
+    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, Receipt, Segment,
 };
 use sqlx::postgres::PgPool;
 use taskdb::planner::{
@@ -261,9 +261,6 @@ impl CoprocessorCallback for Coprocessor {
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()> {
         self.tx.blocking_send(SenderType::Keccak(request))?;
         Ok(())
-    }
-    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> Result<()> {
-        unreachable!()
     }
 }
 

@@ -18,8 +18,8 @@ use anyhow::{Context, Result};
 use kameo::prelude::*;
 use risc0_zkvm::{
     get_prover_server, CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl,
-    NullSegmentRef, PreflightResults, ProveKeccakRequest, ProveZkrRequest, ProverOpts,
-    ProverServer, VerifierContext,
+    NullSegmentRef, PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer,
+    VerifierContext,
 };
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task::JoinHandle;
@@ -567,10 +567,6 @@ struct Coprocessor {
 }
 
 impl CoprocessorCallback for Coprocessor {
-    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> anyhow::Result<()> {
-        unimplemented!()
-    }
-
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> anyhow::Result<()> {
         self.factory
             .tell(TaskUpdateMsg {

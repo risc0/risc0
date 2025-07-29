@@ -85,7 +85,6 @@ pub trait ProverServer: private::Sealed {
     ) -> Result<SegmentReceipt>;
 
     /// Prove the specified keccak request
-    #[cfg(feature = "unstable")]
     fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
         -> Result<SuccinctReceipt<Unknown>>;
 
