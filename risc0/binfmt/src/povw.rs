@@ -133,6 +133,13 @@ pub struct PovwNonce {
 
 impl PovwNonce {
     /// TODO
+    pub const ZERO: Self = Self {
+        log: PovwLogId::ZERO,
+        job: 0,
+        segment: 0,
+    };
+
+    /// TODO
     pub fn to_bytes(self) -> [u8; U256::BYTES] {
         <U256 as From<Self>>::from(self).to_le_bytes()
     }

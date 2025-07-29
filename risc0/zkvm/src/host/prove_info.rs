@@ -16,8 +16,9 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::Receipt;
+use crate::{Receipt, ReceiptClaim, SuccinctReceipt, WorkClaim};
 
+// TODO(povw): Add the povw receipt as an optional here.
 /// Information returned by the prover including receipt as well as other information useful for debugging
 #[derive(Debug, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -27,6 +28,9 @@ pub struct ProveInfo {
 
     /// stats about cycle counts of the execution
     pub stats: SessionStats,
+
+    /// TODO
+    pub work_receipt: Option<SuccinctReceipt<WorkClaim<ReceiptClaim>>>,
 }
 
 /// Struct containing information about a prover's cycle count after running the guest program

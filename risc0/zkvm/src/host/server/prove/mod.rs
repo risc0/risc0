@@ -21,11 +21,12 @@ mod prover_impl;
 mod tests;
 pub(crate) mod union_peak;
 
-use std::rc::Rc;
+use std::{fmt::Debug, rc::Rc};
 
 use anyhow::{anyhow, bail, ensure, Result};
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::hal::{CircuitHal, Hal};
+use serde::Serialize;
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
@@ -182,41 +183,15 @@ pub trait ProverServer: private::Sealed {
         &self,
         receipt: &CompositeReceipt,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        // Compress all receipts in the top-level session into one succinct receipt for the session.
-        let continuation_receipt = receipt
-            .segments
-            .iter()
-            .try_fold(
-                None,
-                |left: Option<SuccinctReceipt<ReceiptClaim>>,
-                 right: &SegmentReceipt|
-                 -> Result<_> {
-                    Ok(Some(match left {
-                        Some(left) => self.join(&left, &self.lift(right)?)?,
-                        None => self.lift(right)?,
-                    }))
-                },
-            )?
-            .ok_or_else(|| {
-                anyhow!("malformed composite receipt has no continuation segment receipts")
-            })?;
+        <Self as Compress<_>>::composite_to_succinct(self, receipt)
+    }
 
-        // Compress assumptions and resolve them to get the final succinct receipt.
-        receipt.assumption_receipts.iter().try_fold(
-            continuation_receipt,
-            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerAssumptionReceipt| match assumption {
-                InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
-                InnerAssumptionReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &self.composite_to_succinct(assumption)?.into_unknown())
-                }
-                InnerAssumptionReceipt::Fake(_) => bail!(
-                    "compressing composite receipts with fake receipt assumptions is not supported"
-                ),
-                InnerAssumptionReceipt::Groth16(_) => bail!(
-                    "compressing composite receipts with Groth16 receipt assumptions is not supported"
-                )
-            },
-        )
+    /// TODO
+    fn composite_to_succinct_povw(
+        &self,
+        receipt: &CompositeReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        <Self as Compress<_>>::composite_to_succinct(self, receipt)
     }
 
     /// Compress a [SuccinctReceipt] into a [Groth16Receipt].
@@ -283,6 +258,148 @@ pub trait ProverServer: private::Sealed {
                 Ok(receipt.clone())
             }
         }
+    }
+}
+
+trait Lift<Claim>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
+    fn lift(&self, segment_receipt: &SegmentReceipt) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P: ProverServer + ?Sized> Lift<ReceiptClaim> for P {
+    fn lift(
+        &self,
+        segment_receipt: &SegmentReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<ReceiptClaim>> {
+        <Self as ProverServer>::lift(self, segment_receipt)
+    }
+}
+
+impl<P: ProverServer + ?Sized> Lift<WorkClaim<ReceiptClaim>> for P {
+    fn lift(
+        &self,
+        segment_receipt: &SegmentReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        self.lift_povw(segment_receipt)
+    }
+}
+
+trait Join<Claim>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
+    fn join(
+        &self,
+        a: &SuccinctReceipt<Claim>,
+        b: &SuccinctReceipt<Claim>,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P: ProverServer + ?Sized> Join<ReceiptClaim> for P {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+        b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> anyhow::Result<SuccinctReceipt<ReceiptClaim>> {
+        <Self as ProverServer>::join(self, a, b)
+    }
+}
+
+impl<P: ProverServer + ?Sized> Join<WorkClaim<ReceiptClaim>> for P {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> anyhow::Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        self.join_povw(a, b)
+    }
+}
+
+trait Resolve<Claim>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
+    fn resolve(
+        &self,
+        cond: &SuccinctReceipt<Claim>,
+        assum: &SuccinctReceipt<Unknown>,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P: ProverServer + ?Sized> Resolve<ReceiptClaim> for P {
+    fn resolve(
+        &self,
+        cond: &SuccinctReceipt<ReceiptClaim>,
+        assum: &SuccinctReceipt<Unknown>,
+    ) -> anyhow::Result<SuccinctReceipt<ReceiptClaim>> {
+        <Self as ProverServer>::resolve(self, cond, assum)
+    }
+}
+
+impl<P: ProverServer + ?Sized> Resolve<WorkClaim<ReceiptClaim>> for P {
+    fn resolve(
+        &self,
+        cond: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assum: &SuccinctReceipt<Unknown>,
+    ) -> anyhow::Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        self.resolve_povw(cond, assum)
+    }
+}
+
+trait Compress<Claim>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
+    fn composite_to_succinct(
+        &self,
+        composite_receipt: &CompositeReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P, Claim> Compress<Claim> for P
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    P: Lift<Claim> + Join<Claim> + Resolve<Claim> + ?Sized,
+{
+    fn composite_to_succinct(
+        &self,
+        composite_receipt: &CompositeReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>> {
+        // Compress all receipts in the top-level session into one succinct receipt for the session.
+        let continuation_receipt = composite_receipt
+            .segments
+            .iter()
+            .try_fold(
+                None,
+                |left: Option<SuccinctReceipt<Claim>>, right: &SegmentReceipt| -> Result<_> {
+                    Ok(Some(match left {
+                        Some(left) => self.join(&left, &self.lift(right)?)?,
+                        None => self.lift(right)?,
+                    }))
+                },
+            )?
+            .ok_or_else(|| {
+                anyhow!("malformed composite receipt has no continuation segment receipts")
+            })?;
+
+        // Compress assumptions and resolve them to get the final succinct receipt.
+        composite_receipt.assumption_receipts.iter().try_fold(
+            continuation_receipt,
+            |conditional: SuccinctReceipt<Claim>, assumption: &InnerAssumptionReceipt| match assumption {
+                InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
+                InnerAssumptionReceipt::Composite(assumption) => {
+                    self.resolve(&conditional, &self.composite_to_succinct(assumption)?.into_unknown())
+                }
+                InnerAssumptionReceipt::Fake(_) => bail!(
+                    "compressing composite receipts with fake receipt assumptions is not supported"
+                ),
+                InnerAssumptionReceipt::Groth16(_) => bail!(
+                    "compressing composite receipts with Groth16 receipt assumptions is not supported"
+                )
+            },
+        )
     }
 }
 

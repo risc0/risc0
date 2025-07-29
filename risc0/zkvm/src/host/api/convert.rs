@@ -383,6 +383,7 @@ impl TryFrom<pb::core::ProveInfo> for ProveInfo {
                 .receipt
                 .ok_or_else(|| malformed_err("ProveInfo.receipt"))?
                 .try_into()?,
+            work_receipt: None, // TODO(povw): Add support for client-server.
             stats: value
                 .stats
                 .ok_or_else(|| malformed_err("ProveInfo.stats"))?

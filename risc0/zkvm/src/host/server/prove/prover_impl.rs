@@ -15,6 +15,7 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
+use risc0_binfmt::PovwNonce;
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
@@ -176,6 +177,16 @@ impl ProverServer for ProverImpl {
             .map(|inner| AssumptionReceipt::Proven(inner.clone()))
             .collect();
 
+        // Use the precense or absernse of a nonce on the first segment to decide whether to use
+        // PoVW. Note that if the session is not consistent about whether the PoVW nonce is set on
+        // each segment, proving will fail.
+        let use_povw = segments
+            .first()
+            .unwrap()
+            .povw_nonce()
+            .context("failed to get PoVW nonce from first segment")?
+            != PovwNonce::ZERO;
+
         let composite_receipt = CompositeReceipt {
             segments,
             assumption_receipts: inner_assumption_receipts,
@@ -193,37 +204,59 @@ impl ProverServer for ProverImpl {
             MaybePruned::Value(composite_receipt.claim()?),
         )?;
 
-        // Compress the receipt to the requested level.
-        let receipt = match self.opts.receipt_kind {
-            ReceiptKind::Composite => Receipt::new(
+        if self.opts.receipt_kind == ReceiptKind::Composite {
+            let receipt = Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
-            ),
-            ReceiptKind::Succinct => {
-                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
-                Receipt::new(
-                    InnerReceipt::Succinct(succinct_receipt),
-                    session.journal.clone().unwrap_or_default().bytes,
-                )
+            );
+            return Ok(ProveInfo {
+                receipt,
+                work_receipt: None,
+                stats: session.stats(),
+            });
+        }
+
+        let (succinct_receipt, work_receipt) = match use_povw {
+            true => {
+                let work_receipt = self.composite_to_succinct_povw(&composite_receipt)?;
+                let unwrapped = self.unwrap_povw(&work_receipt)?;
+                (unwrapped, Some(work_receipt))
             }
-            ReceiptKind::Groth16 => {
-                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
-                let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
-                Receipt::new(
-                    InnerReceipt::Groth16(groth16_receipt),
-                    session.journal.clone().unwrap_or_default().bytes,
-                )
-            }
+            false => (self.composite_to_succinct(&composite_receipt)?, None),
         };
 
-        // Verify the receipt to catch if something is broken in the proving process.
-        receipt.verify_integrity_with_context(ctx)?;
-        check_claims(&session_claim, "receipt", receipt.claim()?)?;
+        if self.opts.receipt_kind == ReceiptKind::Succinct {
+            let receipt = Receipt::new(
+                InnerReceipt::Succinct(succinct_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            );
+            return Ok(ProveInfo {
+                receipt,
+                work_receipt,
+                stats: session.stats(),
+            });
+        }
 
-        Ok(ProveInfo {
-            receipt,
-            stats: session.stats(),
-        })
+        let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
+
+        if self.opts.receipt_kind == ReceiptKind::Groth16 {
+            let receipt = Receipt::new(
+                InnerReceipt::Groth16(groth16_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            );
+            return Ok(ProveInfo {
+                receipt,
+                work_receipt,
+                stats: session.stats(),
+            });
+        }
+
+        // As long as the checks above are exhaustive, this code is unreachable. If this statement
+        // is reached, this is an implementation error.
+        unreachable!(
+            "proving not implemented for receipt kind {:?}",
+            self.opts.receipt_kind
+        );
     }
 
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {

@@ -197,6 +197,7 @@ impl ProverServer for DevModeProver {
 
         Ok(ProveInfo {
             receipt,
+            work_receipt: None, // TODO(povw): Implement dev mode for povw
             stats: session.stats(),
         })
     }
