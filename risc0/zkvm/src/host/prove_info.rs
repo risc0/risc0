@@ -31,9 +31,9 @@ pub struct ProveInfo {
     /// Work claim receipt proving the work completed in the process of producing the proof.
     ///
     /// This receipt will be produced by provers that support Proof of Verifiable Work when a
-    /// [`PovwJobId`] is provided in the [`ExecutorEnv`][crate::ExecutorEnv]. This receipt provides
-    /// a proof of work completed for this job, and can be combined into a work log using the
-    /// [Log Builder guest][risc0-povw].
+    /// [`PovwJobId`][risc0_binfmt::PovwJobId] is provided in the [`ExecutorEnv`][crate::ExecutorEnv].
+    /// This receipt provides a proof of work completed for this job, and can be combined into a
+    /// work log using the [Log Builder guest][risc0-povw].
     pub work_receipt: Option<GenericReceipt<WorkClaim<ReceiptClaim>>>,
 }
 
