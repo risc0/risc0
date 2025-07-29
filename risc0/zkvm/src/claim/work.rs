@@ -90,8 +90,6 @@ impl WorkClaim<ReceiptClaim> {
 ///
 /// This struct contains a compact representation of the range of used nonces, along with the value
 /// of the work. It is used to represent the work within a single execution.
-// TODO(povw): Rename this to be more clear that this is just one representation of work? (in
-// particular that this is the compact range representation).
 #[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
 pub struct Work {
     /// Lowest nonce in the range, inclusive.

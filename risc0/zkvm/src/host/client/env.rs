@@ -461,7 +461,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    // TODO(povw): Explain what the work log is and whatnot.
     /// Return [ProverOpts][crate::ProverOpts] with proof of verifiable work (PoVW) enabled, and the specified work
     /// log identifer and job number as the base for PoVW nonces assigned to each segment.
     ///
@@ -472,6 +471,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// let work_log_id = uint!(0xC2A2379b379da8C076d51520C4f6a2fc5AAE3d1e_U160);
     /// ExecutorEnv::builder().povw((work_log_id, rand::random()));
     /// ```
+    ///
+    /// See also [PovwJobId]
     pub fn povw(&mut self, povw_job_id: impl Into<PovwJobId>) -> &mut Self {
         self.inner.povw_job_id = Some(povw_job_id.into());
         self

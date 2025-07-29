@@ -113,11 +113,6 @@ pub trait ProverServer: private::Sealed {
         assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
-    // TODO(povw): Should this maybe be extracted to a different prover trait that layers with this
-    // one? Or maybe there is a way to create fewer functions here. The main roadblock to having
-    // fewer functions is that each variant (e.g. join, join_povw, join_unwrap_povw) has distinct
-    // arg and return types, and generics can't be used while maintaining dyn compatibility.
-
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt] with a proof of verifiable work (PoVW) claim.
     fn lift_povw(
         &self,
