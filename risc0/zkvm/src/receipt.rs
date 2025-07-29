@@ -320,6 +320,12 @@ pub enum InnerReceipt {
 }
 
 impl InnerReceipt {
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        self.verify_integrity_with_context(&VerifierContext::default())
+    }
+
     /// Verify the integrity of this receipt, ensuring the claim is attested to by the seal.
     pub fn verify_integrity_with_context(
         &self,
@@ -389,6 +395,144 @@ impl InnerReceipt {
             Self::Groth16(receipt) => receipt.seal_size(),
             Self::Fake(_) => 0,
         }
+    }
+}
+
+impl From<CompositeReceipt> for InnerReceipt {
+    fn from(receipt: CompositeReceipt) -> Self {
+        Self::Composite(receipt)
+    }
+}
+
+impl From<SuccinctReceipt<ReceiptClaim>> for InnerReceipt {
+    fn from(receipt: SuccinctReceipt<ReceiptClaim>) -> Self {
+        Self::Succinct(receipt)
+    }
+}
+
+impl From<Groth16Receipt<ReceiptClaim>> for InnerReceipt {
+    fn from(receipt: Groth16Receipt<ReceiptClaim>) -> Self {
+        Self::Groth16(receipt)
+    }
+}
+
+impl From<FakeReceipt<ReceiptClaim>> for InnerReceipt {
+    fn from(receipt: FakeReceipt<ReceiptClaim>) -> Self {
+        Self::Fake(receipt)
+    }
+}
+
+/// TODO
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
+pub enum GenericReceipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    /// A [SuccinctReceipt], proving the claim a STARK produced by the recursion VM.
+    Succinct(SuccinctReceipt<Claim>),
+
+    /// A [Groth16Receipt], proving the claim a Groth16 SNARK.
+    Groth16(Groth16Receipt<Claim>),
+
+    /// A [FakeReceipt], with no cryptographic integrity, used only for development.
+    Fake(FakeReceipt<Claim>),
+}
+
+impl<Claim> GenericReceipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        self.verify_integrity_with_context(&VerifierContext::default())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim is attested to by the seal.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        tracing::debug!("InnerReceipt::verify_integrity_with_context");
+        match self {
+            Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
+            Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
+            Self::Fake(inner) => inner.verify_integrity_with_context(ctx),
+        }
+    }
+
+    /// Returns the [InnerReceipt::Groth16] arm.
+    pub fn groth16(&self) -> Result<&Groth16Receipt<Claim>, VerificationError> {
+        if let Self::Groth16(x) = self {
+            Ok(x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
+        }
+    }
+
+    /// Returns the [InnerReceipt::Succinct] arm.
+    pub fn succinct(&self) -> Result<&SuccinctReceipt<Claim>, VerificationError> {
+        if let Self::Succinct(x) = self {
+            Ok(x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
+        }
+    }
+
+    /// Extract the [ReceiptClaim] from this receipt.
+    pub fn claim(&self) -> MaybePruned<Claim> {
+        match self {
+            Self::Groth16(ref inner) => inner.claim.clone(),
+            Self::Succinct(ref inner) => inner.claim.clone(),
+            Self::Fake(ref inner) => inner.claim.clone(),
+        }
+    }
+
+    /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
+    pub fn verifier_parameters(&self) -> Digest {
+        match self {
+            Self::Groth16(ref inner) => inner.verifier_parameters,
+            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Fake(_) => Digest::ZERO,
+        }
+    }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        match self {
+            Self::Succinct(receipt) => receipt.seal_size(),
+            Self::Groth16(receipt) => receipt.seal_size(),
+            Self::Fake(_) => 0,
+        }
+    }
+}
+
+impl<Claim> From<SuccinctReceipt<Claim>> for GenericReceipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    fn from(receipt: SuccinctReceipt<Claim>) -> Self {
+        Self::Succinct(receipt)
+    }
+}
+
+impl<Claim> From<Groth16Receipt<Claim>> for GenericReceipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    fn from(receipt: Groth16Receipt<Claim>) -> Self {
+        Self::Groth16(receipt)
+    }
+}
+
+impl<Claim> From<FakeReceipt<Claim>> for GenericReceipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    fn from(receipt: FakeReceipt<Claim>) -> Self {
+        Self::Fake(receipt)
     }
 }
 

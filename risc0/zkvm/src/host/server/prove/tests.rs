@@ -974,7 +974,7 @@ mod sys_verify {
         // NOTE: The work claim will only contain value for the conditional receipt.
         // PoVW value for the assumption receipts is considered seperately, instead of in the take
         // WorkClaim (i.e. the same compact range representation).
-        let work_claim = work_receipt.claim.as_value()?.clone();
+        let work_claim = work_receipt.claim().as_value()?.clone();
         assert_eq!(
             work_claim.claim.digest(),
             prove_info.receipt.claim()?.digest()
@@ -1095,7 +1095,7 @@ fn povw_prove_work_receipt() -> Result<()> {
     let work_receipt = prove_info.work_receipt.unwrap();
     work_receipt.verify_integrity()?;
 
-    let work_claim = work_receipt.claim.as_value()?.clone();
+    let work_claim = work_receipt.claim().as_value()?.clone();
     assert_eq!(
         work_claim.claim.digest(),
         prove_info.receipt.claim()?.digest()

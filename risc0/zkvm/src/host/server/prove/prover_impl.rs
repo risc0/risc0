@@ -212,7 +212,7 @@ impl ProverServer for ProverImpl {
             );
             return Ok(ProveInfo {
                 receipt,
-                work_receipt,
+                work_receipt: work_receipt.map(Into::into),
                 stats: session.stats(),
             });
         }
@@ -226,7 +226,7 @@ impl ProverServer for ProverImpl {
             );
             return Ok(ProveInfo {
                 receipt,
-                work_receipt,
+                work_receipt: work_receipt.map(Into::into),
                 stats: session.stats(),
             });
         }

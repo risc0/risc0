@@ -16,7 +16,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Receipt, ReceiptClaim, SuccinctReceipt, WorkClaim};
+use crate::{receipt::GenericReceipt, Receipt, ReceiptClaim, WorkClaim};
 
 // TODO(povw): Add the povw receipt as an optional here.
 /// Information returned by the prover including receipt as well as other information useful for debugging
@@ -29,12 +29,8 @@ pub struct ProveInfo {
     /// stats about cycle counts of the execution
     pub stats: SessionStats,
 
-    // TODO(povw): Consider introducing a new enum that acts as a Receipt minus CompositeReceipt
-    // that supports generic claims. This would allow this cocrete receipt type to be changed (e.g.
-    // if a new version of the recursion system comes into existance or a prover provides this as a
-    // Groth16 receipt) without it being a breaking API change.
     /// TODO
-    pub work_receipt: Option<SuccinctReceipt<WorkClaim<ReceiptClaim>>>,
+    pub work_receipt: Option<GenericReceipt<WorkClaim<ReceiptClaim>>>,
 }
 
 /// Struct containing information about a prover's cycle count after running the guest program
