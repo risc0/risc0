@@ -12,6 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Proof of Verifiable Work (PoVW) implementation.
+//!
+//! This crate provides Merkle tree-based data structures for tracking and proving work
+//! completed during ZK proof generation. The main components include:
+//!
+//! - [`WorkSet`]: Top-level container for multiple work logs
+//! - [`WorkLog`]: Collection of jobs within a single prover's work log
+//! - [`Job`]: Representation of a range of used nonces in a job (i.e. a single continuation)
+//! - [`Bitmap`]: 256-bit bitmap for efficient nonce tracking
+//!
+//! The implementation uses Merkle trees to enable efficient proofs of inclusion and
+//! non-inclusion for nonces, supporting the PoVW system's requirement to prevent
+//! double-counting of work.
+
+#![deny(rustdoc::broken_intra_doc_links)]
+#![deny(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+
 use std::{
     cmp::Ordering,
     collections::{btree_map, BTreeMap, BTreeSet},
@@ -29,6 +47,7 @@ use risc0_zkvm::{
 use ruint::{aliases::U256, Uint};
 
 mod consts;
+/// Guest program types for PoVW work log updates.
 pub mod guest;
 
 // TODO(povw): Break up the following code into modules.
@@ -43,23 +62,32 @@ type U96 = Uint<96, 2>;
 #[derive(
     Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize,
 )]
+/// 256-bit bitmap for tracking used nonces within PoVW jobs.
+///
+/// Used as leaves in Merkle trees to efficiently represent which nonce indices
+/// have been consumed. Each bit corresponds to a nonce index within a group of 256.
 pub struct Bitmap(U256);
 
 impl Bitmap {
+    /// Empty bitmap with all bits set to false (no nonces used).
     pub const EMPTY: Self = Self(U256::ZERO);
 
+    /// Full bitmap with all bits set to true (all nonces used).
     pub const FULL: Self = Self(U256::MAX);
 
+    /// Returns whether the nonce at the given index has been used.
     pub fn bit(&self, index: usize) -> bool {
         assert!(index < U256::BITS);
         self.0.bit(index)
     }
 
+    /// Marks the nonce at the given index as used.
     pub fn set_bit(&mut self, index: usize) {
         assert!(index < U256::BITS);
         self.0.set_bit(index, true)
     }
 
+    /// Marks the nonce at the given index as unused.
     pub fn clear_bit(&mut self, index: usize) {
         assert!(index < U256::BITS);
         self.0.set_bit(index, false)
@@ -102,17 +130,26 @@ impl From<Bitmap> for [u8; 32] {
 }
 
 #[derive(Clone, Debug, Default)]
+/// Top-level container for multiple work logs in the PoVW system.
+///
+/// Organizes work logs by their 160-bit log IDs and provides Merkle tree operations
+/// for proving nonce inclusion/non-inclusion across all logs.
 pub struct WorkSet {
+    /// Map of work log IDs to their corresponding work logs.
     pub logs: BTreeMap<PovwLogId, WorkLog>,
 }
 
 impl WorkSet {
     /// Height of the Merkle tree that commits to all nonces in the [WorkSet].
     pub const TREE_HEIGHT: usize = WorkLog::TREE_HEIGHT + PovwLogId::BITS;
+    /// Empty work set with no logs.
     pub const EMPTY: Self = Self {
         logs: BTreeMap::new(),
     };
 
+    /// Adds a work log with the given ID to the work set.
+    ///
+    /// Returns an error if a log with the same ID already exists.
     pub fn add(&mut self, id: PovwLogId, log: WorkLog) -> anyhow::Result<()> {
         match self.logs.entry(id) {
             btree_map::Entry::Vacant(entry) => entry.insert(log),
@@ -121,6 +158,7 @@ impl WorkSet {
         Ok(())
     }
 
+    /// Checks if the given nonce has been used in any work log.
     pub fn contains(&self, nonce: U256) -> bool {
         self.logs
             .get(&nonce.wrapping_shr(96).to::<PovwLogId>())
@@ -128,10 +166,12 @@ impl WorkSet {
             .unwrap_or_default()
     }
 
+    /// Returns the Merkle root commitment for this work set.
     pub fn commit(&self) -> Digest {
         self.subtree_root(Self::TREE_HEIGHT, U256::ZERO)
     }
 
+    /// Generates a Merkle proof for the inclusion/non-inclusion of the given nonce.
     pub fn prove_opening(&self, nonce: U256) -> Opening<Self> {
         let mut index = nonce;
         let bitmap = self.bitmap_at(index);
@@ -213,17 +253,26 @@ impl WorkSet {
 }
 
 #[derive(Clone, Debug, Default)]
+/// Collection of jobs within a single prover's work log.
+///
+/// Organizes jobs by their 64-bit job IDs and provides Merkle tree operations
+/// for proving nonce inclusion/non-inclusion within this log.
 pub struct WorkLog {
+    /// Map of job IDs to their corresponding jobs.
     pub jobs: BTreeMap<u64, Job>,
 }
 
 impl WorkLog {
     /// Height of the Merkle tree that commits to all nonces in the [WorkLog].
     pub const TREE_HEIGHT: usize = Job::TREE_HEIGHT + u64::BITS as usize;
+    /// Empty work log with no jobs.
     pub const EMPTY: Self = Self {
         jobs: BTreeMap::new(),
     };
 
+    /// Adds a job with the given ID to the work log.
+    ///
+    /// Returns an error if a job with the same ID already exists.
     pub fn add(&mut self, id: u64, job: Job) -> anyhow::Result<()> {
         match self.jobs.entry(id) {
             btree_map::Entry::Vacant(entry) => entry.insert(job),
@@ -254,10 +303,12 @@ impl WorkLog {
             .unwrap_or_default()
     }
 
+    /// Returns the Merkle root commitment for this work log.
     pub fn commit(&self) -> Digest {
         self.subtree_root(Self::TREE_HEIGHT, U96::ZERO)
     }
 
+    /// Generates a Merkle proof for the inclusion/non-inclusion of the given sequence number.
     pub fn prove_opening(&self, seq: U96) -> Opening<Self> {
         let mut index = seq;
         let bitmap = self.bitmap_at(index);
@@ -273,6 +324,9 @@ impl WorkLog {
         Opening { bitmap, path }
     }
 
+    /// Generates a subtree opening proof for the given job ID.
+    ///
+    /// This proves that the job subtree at the given ID is empty (for non-inclusion proofs).
     pub fn prove_job_opening(&self, job_id: u64) -> SubtreeOpening<Self, { Job::TREE_HEIGHT }> {
         let mut index = job_id;
 
@@ -349,6 +403,10 @@ impl WorkLog {
 }
 
 #[derive(Clone, Debug)]
+/// Representation of a range of used nonces in a job (i.e. a single continuation).
+///
+/// Stores the maximum used nonce index as a shorthand for the range [0, index_max].
+/// When set to None, represents an empty job with no used nonces.
 pub struct Job {
     /// Only store the max used index, as a shorthand for the range [0, index_max]. When set to
     /// none, this represents an empty job.
@@ -359,22 +417,27 @@ impl Job {
     /// Height of the Merkle tree that commits to all nonces in the [Job].
     // NOTE: Height of the tree is 32 - log2(U256::BITS) because each leaf commits to 256 bits.
     pub const TREE_HEIGHT: usize = u32::BITS as usize - 8;
+    /// Empty job with no used nonces.
     pub const EMPTY: Self = Self { index_max: None };
 
+    /// Creates a new job with nonces used in the range [0, index_max].
     pub fn new(index_max: u32) -> Self {
         Self {
             index_max: Some(index_max),
         }
     }
 
+    /// Checks if the nonce at the given index has been used in this job.
     pub fn contains(&self, index: u32) -> bool {
         self.index_max.is_some_and(|max| index <= max)
     }
 
+    /// Returns the Merkle root commitment for this job.
     pub fn commit(&self) -> Digest {
         self.subtree_root(Self::TREE_HEIGHT, 0)
     }
 
+    /// Generates a Merkle proof for the inclusion/non-inclusion of the given nonce index.
     pub fn prove_opening(&self, mut index: u32) -> Opening<Self> {
         let bitmap = self.bitmap_at(index);
 
@@ -451,7 +514,11 @@ impl Job {
     }
 }
 
+/// Trait for types that can be used as indices in Merkleized data structures.
+///
+/// Provides operations needed for Merkle tree traversal and bitmap indexing.
 pub trait MerkleizedIndex: Copy + Eq + ShrAssign<usize> + Debug {
+    /// Zero value for this index type.
     const ZERO: Self;
 
     /// Lowest 8 bits of the index, which serve as an index into the leaf bitmap.
@@ -496,8 +563,13 @@ mod private {
 }
 
 #[allow(private_bounds)]
+/// Trait for data structures that can be committed to using Merkle trees.
+///
+/// Provides associated types for tree height and index type used in Merkle operations.
 pub trait Merkleized: private::Sealed {
+    /// The height of the Merkle tree for this data structure.
     type TreeHeight: ArraySize;
+    /// The index type used to access elements in this data structure.
     type Index: MerkleizedIndex;
 }
 
@@ -517,6 +589,9 @@ impl Merkleized for WorkSet {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+/// Merkle opening proof for inclusion/non-inclusion of a nonce in a Merkleized structure.
+///
+/// Contains a bitmap representing the leaf and a path of sibling hashes up to the root.
 pub struct Opening<T: Merkleized> {
     bitmap: Bitmap,
     path: Box<Array<Digest, T::TreeHeight>>,
@@ -545,6 +620,7 @@ where
 }
 
 impl<T: Merkleized> Opening<T> {
+    /// Verifies that the nonce at the given index is included (used) in the commitment.
     pub fn verify_inclusion(&self, commit: Digest, index: T::Index) -> anyhow::Result<()> {
         ensure!(
             self.bitmap.bit(index.bitmap_index()),
@@ -554,6 +630,7 @@ impl<T: Merkleized> Opening<T> {
         Ok(())
     }
 
+    /// Verifies that the nonce at the given index is not included (unused) in the commitment.
     pub fn verify_noninclusion(&self, commit: Digest, index: T::Index) -> anyhow::Result<()> {
         ensure!(
             !self.bitmap.bit(index.bitmap_index()),
@@ -588,6 +665,10 @@ impl<T: Merkleized> Opening<T> {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+/// Subtree opening proof for a specific level in a Merkleized structure.
+///
+/// Used to prove that an entire subtree at a given level is empty or full,
+/// without needing to provide the full subtree including leaves.
 pub struct SubtreeOpening<T: Merkleized, const LEVEL: usize>
 where
     typenum::Const<LEVEL>: typenum::ToUInt,
@@ -661,6 +742,7 @@ where
         Ok(())
     }
 
+    /// Computes the root hash using the given subtree root and index.
     pub fn root(&self, subtree_root: Digest, mut index: T::Index) -> Digest {
         // Drop the lowest LEVEL + 8 bits.
         index >>= LEVEL + 8;
