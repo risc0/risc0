@@ -24,6 +24,7 @@ use super::get_prover_server;
 use crate::{
     host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
+    sha::Digestible,
     ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
@@ -717,7 +718,6 @@ mod sys_verify {
     use super::*;
     use crate::{
         recursion::{prove::zkr, test_zkr, MerkleGroup},
-        sha::Digestible as _,
         Assumption, SuccinctReceipt, Unknown, RECURSION_PO2,
     };
 
@@ -1027,6 +1027,42 @@ fn povw_nonce_default_assignment() -> Result<()> {
             .unwrap();
         assert_eq!(segment.povw_nonce().unwrap(), PovwNonce::default());
     }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_prove_work_receipt() -> Result<()> {
+    let segment_limit_po2 = 16; // 64k cycles
+    let cycles = 1 << segment_limit_po2;
+    let povw_job_id: PovwJobId = rand::random();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles })
+        .unwrap()
+        .segment_limit_po2(segment_limit_po2)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+
+    let opts = ProverOpts::succinct();
+    let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
+
+    prove_info.receipt.verify(MULTI_TEST_ID)?;
+    let work_receipt = prove_info.work_receipt.unwrap();
+    work_receipt.verify_integrity()?;
+
+    let work_claim = work_receipt.claim.as_value()?.clone();
+    assert_eq!(
+        work_claim.claim.digest(),
+        prove_info.receipt.claim()?.digest()
+    );
+    let work = work_claim.work.value()?;
+    assert!(work.value >= 1 << 16);
+    assert_eq!(work.nonce_min.log, povw_job_id.log);
+    assert_eq!(work.nonce_min.job, povw_job_id.job);
+    assert_eq!(work.nonce_min.segment, 0);
+    assert_eq!(work.nonce_max.log, povw_job_id.log);
+    assert_eq!(work.nonce_max.job, povw_job_id.job);
+    assert!(work.nonce_max.segment > 0);
     Ok(())
 }
 
