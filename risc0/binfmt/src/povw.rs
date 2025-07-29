@@ -32,10 +32,18 @@ use rand::{
 
 use crate::DecodeError;
 
-/// TODO
+/// A 160-bit identifier for a PoVW work log.
+///
+/// Each prover maintains one or more work logs, with each log having a unique identifier.
+/// Each work log is guaranteed to have a distinct range of nonces, allowing the used nonces
+/// from each log to be tracked separately.
 pub type PovwLogId = U160;
 
-/// TODO
+/// Globally unique identifier for a proving job.
+///
+/// A proving job represents a single continuation (sequence of segments) being proven.
+/// The job ID combines a work log identifier with a job number to create a globally
+/// unique identifier that can generate nonces for each segment in the job.
 #[derive(
     Copy,
     Clone,
@@ -49,14 +57,14 @@ pub type PovwLogId = U160;
     Eq,
 )]
 pub struct PovwJobId {
-    /// TODO
+    /// The work log that this job belongs to.
     pub log: PovwLogId,
-    /// TODO
+    /// Job number within the work log.
     pub job: u64,
 }
 
 impl PovwJobId {
-    /// TODO
+    /// Creates a nonce for a specific segment within this job.
     pub fn nonce(self, segment_index: u32) -> PovwNonce {
         PovwNonce {
             log: self.log,
@@ -65,7 +73,7 @@ impl PovwJobId {
         }
     }
 
-    /// TODO
+    /// Serializes the job ID to a byte array in little-endian format.
     pub fn to_bytes(self) -> [u8; U160::BYTES + U64::BYTES] {
         [
             self.job.to_le_bytes().as_slice(),
@@ -76,7 +84,7 @@ impl PovwJobId {
         .unwrap()
     }
 
-    /// TODO
+    /// Deserializes a job ID from a byte array in little-endian format.
     pub fn from_bytes(bytes: [u8; U160::BYTES + U64::BYTES]) -> Self {
         Self {
             job: u64::from_le_bytes(bytes[..U64::BYTES].try_into().unwrap()),
@@ -109,7 +117,11 @@ impl Distribution<PovwJobId> for StandardUniform {
     }
 }
 
-/// TODO
+/// A 256-bit unique nonce for Proof of Verifiable Work.
+///
+/// Each nonce uniquely identifies a single segment proof and prevents double-counting
+/// of work. The nonce has a structured format combining a work log ID, job number,
+/// and segment index.
 #[derive(
     Copy,
     Clone,
@@ -123,38 +135,38 @@ impl Distribution<PovwJobId> for StandardUniform {
     Eq,
 )]
 pub struct PovwNonce {
-    /// TODO
+    /// Work log identifier.
     pub log: PovwLogId,
-    /// TODO
+    /// Job number within the work log.
     pub job: u64,
-    /// TODO
+    /// Segment index within the job.
     pub segment: u32,
 }
 
 impl PovwNonce {
-    /// TODO
+    /// A zero nonce constant.
     pub const ZERO: Self = Self {
         log: PovwLogId::ZERO,
         job: 0,
         segment: 0,
     };
 
-    /// TODO
+    /// Converts the nonce to a 256-bit byte array in little-endian format.
     pub fn to_bytes(self) -> [u8; U256::BYTES] {
         <U256 as From<Self>>::from(self).to_le_bytes()
     }
 
-    /// TODO
+    /// Creates a nonce from a 256-bit byte array in little-endian format.
     pub fn from_bytes(bytes: [u8; U256::BYTES]) -> Self {
         U256::from_le_bytes::<{ U256::BYTES }>(bytes).into()
     }
 
-    /// TODO
+    /// Converts the nonce to its U256 representation.
     pub fn to_u256(self) -> U256 {
         (self.log.to::<U256>() << 96) | (U256::from(self.job) << 32) | U256::from(self.segment)
     }
 
-    /// TODO
+    /// Converts the nonce to an array of 8 u32 values.
     pub fn to_u32s(self) -> [u32; 8] {
         let mut u32s = bytemuck::cast::<_, [u32; 8]>(self.to_bytes());
         // Bytes are little-endian, so on a big-endian machine, they need to be reversed.
@@ -164,7 +176,7 @@ impl PovwNonce {
         u32s
     }
 
-    /// TODO
+    /// Converts the nonce to an array of 16 u16 values.
     pub fn to_u16s(self) -> [u16; 16] {
         let mut u16s = bytemuck::cast::<_, [u16; 16]>(self.to_bytes());
         // Bytes are little-endian, so on a big-endian machine, they need to be reversed.
@@ -174,7 +186,7 @@ impl PovwNonce {
         u16s
     }
 
-    /// TODO
+    /// Creates a nonce from an array of 16 u16 values.
     pub fn from_u16s(mut u16s: [u16; 16]) -> Self {
         // Bytes need to be little-endian, so on a big-endian machine, they need to be reversed.
         for x in u16s.iter_mut() {
@@ -183,12 +195,12 @@ impl PovwNonce {
         Self::from_bytes(bytemuck::cast(u16s))
     }
 
-    /// TODO
+    /// Encodes the nonce to a seal buffer.
     pub fn encode_to_seal(&self, buf: &mut Vec<u32>) {
         buf.extend(self.to_u16s().into_iter().map(u32::from));
     }
 
-    /// TODO
+    /// Decodes a nonce from a seal buffer.
     pub fn decode_from_seal(buf: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
         if buf.len() < 16 {
             return Err(DecodeError::EndOfStream);

@@ -106,7 +106,7 @@ pub struct Session {
     /// syscall metrics grouped by kind.
     pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
 
-    /// TODO
+    /// Optional PoVW job identifier for tracking verifiable work.
     pub(crate) povw_job_id: Option<PovwJobId>,
 }
 
@@ -268,7 +268,7 @@ impl Session {
             .into())
     }
 
-    /// TODO
+    /// Returns the work value for this session if PoVW tracking is enabled.
     pub fn work(&self) -> Option<Work> {
         self.povw_job_id.map(|povw_job_id| Work {
             nonce_min: povw_job_id.nonce(0),

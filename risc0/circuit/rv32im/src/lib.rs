@@ -149,7 +149,7 @@ impl Rv32imV2Claim {
     }
 }
 
-/// TODO
+/// Decodes a PoVW nonce from a segment seal.
 pub fn decode_povw_nonce(segment_seal: &[u32]) -> Result<PovwNonce> {
     ensure!(
         segment_seal[0] == RV32IM_SEAL_VERSION,

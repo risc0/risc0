@@ -84,7 +84,10 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
     make_succinct_receipt(prover, receipt, claim)
 }
 
-/// TODO
+/// Run the lift program to create a succinct work claim receipt from a segment receipt.
+///
+/// Similar to [`lift`], but additionally tracks verifiable work by computing the work value
+/// from the segment proof and embedding it in the resulting work claim.
 pub fn lift_povw(
     segment_receipt: &SegmentReceipt,
 ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
@@ -130,7 +133,10 @@ pub fn join(
     make_succinct_receipt(prover, receipt, claim)
 }
 
-/// TODO
+/// Run the join program to compress two work claim receipts of the same session into one.
+///
+/// Similar to [`join`], but operates on work claim receipts and combines their work values
+/// while ensuring the consumed nonce ranges are disjoint.
 pub fn join_povw(
     a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
     b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
@@ -150,7 +156,10 @@ pub fn join_povw(
     make_succinct_receipt(prover, receipt, claim)
 }
 
-/// TODO
+/// Run the join_unwrap program to compress two work claim receipts into a regular receipt.
+///
+/// This combines the functionality of [`join_povw`] and [`unwrap_povw`] in a single recursion
+/// step, with reduced latency relative to running a separate unwrap.
 pub fn join_unwrap_povw(
     a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
     b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
@@ -242,7 +251,10 @@ where
     make_succinct_receipt(prover, receipt, claim)
 }
 
-/// TODO
+/// Run the resolve program to remove an assumption from a conditional work claim receipt.
+///
+/// Similar to [`resolve`], but operates on work claim receipts while preserving the work value
+/// from the conditional receipt.
 pub fn resolve_povw<Claim>(
     conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
     assumption: &SuccinctReceipt<Claim>,
@@ -277,7 +289,10 @@ where
     make_succinct_receipt(prover, receipt, claim)
 }
 
-/// TODO
+/// Run the resolve_unwrap program to remove an assumption from a conditional work claim receipt.
+///
+/// This combines the functionality of [`resolve_povw`] and [`unwrap_povw`] in a single recursion
+/// step, with reduced latency relative to running a separate unwrap.
 pub fn resolve_unwrap_povw<Claim>(
     conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
     assumption: &SuccinctReceipt<Claim>,
@@ -315,7 +330,10 @@ where
     make_succinct_receipt(prover, receipt, claim)
 }
 
-/// TODO
+/// Run the unwrap program to convert a work claim receipt to a regular receipt claim.
+///
+/// This removes the work tracking wrapper from a receipt, producing a standard receipt
+/// that can be sent to verifiers of the underlying claim.
 pub fn unwrap_povw(
     a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
 ) -> Result<SuccinctReceipt<ReceiptClaim>> {
@@ -587,7 +605,10 @@ impl Prover {
         Self::new_lift_inner(segment, opts, false)
     }
 
-    /// TODO
+    /// Create a prover job for the lift program that produces a work claim receipt.
+    ///
+    /// Similar to [`Self::new_lift`], but produces a work claim receipt that tracks
+    /// verifiable work by computing the work value from the segment proof.
     pub fn new_lift_povw(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
         Self::new_lift_inner(segment, opts, true)
     }
@@ -689,7 +710,11 @@ impl Prover {
         Ok(prover)
     }
 
-    /// TODO
+    /// Create a prover job for the join program that operates on work claim receipts.
+    ///
+    /// Similar to [`Self::new_join`], but operates on work claim receipts and combines their
+    /// work values while ensuring the consumed nonce ranges are disjoint. The `unwrap` parameter
+    /// determines whether the result is unwrapped to a regular receipt claim.
     pub fn new_join_povw(
         a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
         b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
@@ -797,7 +822,11 @@ impl Prover {
         Ok(prover)
     }
 
-    /// TODO
+    /// Create a prover job for the resolve program that operates on work claim receipts.
+    ///
+    /// Similar to [`Self::new_resolve`], but operates on work claim receipts while preserving
+    /// the work value from the conditional receipt. The `unwrap` parameter determines whether
+    /// the result is unwrapped to a regular receipt claim.
     pub fn new_resolve_povw<Claim>(
         cond: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
         assum: &SuccinctReceipt<Claim>,
@@ -891,7 +920,11 @@ impl Prover {
         Ok(prover)
     }
 
-    /// TODO
+    /// Create a prover job for the unwrap program that converts a work claim receipt to a
+    /// regular receipt.
+    ///
+    /// This removes the work tracking wrapper from a receipt, producing a standard receipt
+    /// that can be sent to verifiers of the underlying claim.
     pub fn new_unwrap_povw(
         a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
         opts: ProverOpts,

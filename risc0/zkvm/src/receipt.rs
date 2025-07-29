@@ -422,7 +422,7 @@ impl From<FakeReceipt<ReceiptClaim>> for InnerReceipt {
     }
 }
 
-/// TODO
+/// A receipt that can hold different types of cryptographic proofs for a given claim.
 #[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]

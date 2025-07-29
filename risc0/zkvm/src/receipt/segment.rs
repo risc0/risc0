@@ -136,7 +136,7 @@ impl SegmentReceipt {
         core::mem::size_of_val(self.seal.as_slice())
     }
 
-    /// TODO
+    /// Extracts the PoVW nonce from this segment receipt's seal.
     pub fn povw_nonce(&self) -> anyhow::Result<PovwNonce> {
         risc0_circuit_rv32im::decode_povw_nonce(&self.seal)
     }

@@ -264,7 +264,8 @@ impl MaybePruned<ReceiptClaim> {
 }
 
 impl WorkClaim<ReceiptClaim> {
-    /// TODO
+    /// Joins two work claims by combining their receipt claims and work values while ensuring
+    /// the consumed nonce ranges are disjoint.
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         Ok(Self {
             claim: self.claim.join(&other.claim)?,
@@ -272,7 +273,7 @@ impl WorkClaim<ReceiptClaim> {
         })
     }
 
-    /// TODO
+    /// Resolves assumptions in the receipt claim while preserving the work value.
     #[cfg(feature = "std")]
     pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
         &self,
@@ -286,12 +287,13 @@ impl WorkClaim<ReceiptClaim> {
 }
 
 impl MaybePruned<WorkClaim<ReceiptClaim>> {
-    /// TODO
+    /// Joins two possibly pruned work claims by combining their receipt claims and work values
+    /// while ensuring the consumed nonce ranges are disjoint.
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         Ok(self.as_value()?.join(other.as_value()?)?.into())
     }
 
-    /// TODO
+    /// Resolves assumptions in a possibly pruned work claim while preserving the work value.
     #[cfg(feature = "std")]
     pub fn resolve<Claim: risc0_binfmt::Digestible + ?Sized>(
         &self,

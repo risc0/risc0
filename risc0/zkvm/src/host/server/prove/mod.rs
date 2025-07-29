@@ -185,7 +185,7 @@ pub trait ProverServer: private::Sealed {
         <Self as Compress<_>>::composite_to_succinct(self, receipt)
     }
 
-    /// TODO
+    /// Convert a composite receipt to a succinct work claim receipt.
     fn composite_to_succinct_povw(
         &self,
         receipt: &CompositeReceipt,

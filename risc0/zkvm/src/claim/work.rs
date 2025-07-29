@@ -68,14 +68,14 @@ where
 }
 
 impl WorkClaim<ReceiptClaim> {
-    /// TODO
+    /// Encodes the work claim to a seal buffer.
     pub fn encode_to_seal(&self, buf: &mut Vec<u32>) -> Result<(), PrunedValueError> {
         self.claim.as_value()?.encode(buf)?;
         self.work.as_value()?.encode_to_seal(buf);
         Ok(())
     }
 
-    /// TODO
+    /// Decodes a work claim from a seal buffer.
     pub fn decode_from_seal(
         buf: &mut VecDeque<u32>,
     ) -> Result<Self, crate::claim::receipt::DecodeError> {
@@ -135,7 +135,8 @@ impl From<PrunedValueError> for WorkClaimError {
 impl std::error::Error for WorkClaimError {}
 
 impl Work {
-    /// TODO
+    /// Joins two work values by combining their nonce ranges and summing their values,
+    /// ensuring the nonce ranges are disjoint.
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         // Check that the two nonce ranges are contiguous. This must match the implementation of
         // the join_povw recursion program.
@@ -177,7 +178,8 @@ impl Work {
 }
 
 impl MaybePruned<Work> {
-    /// TODO
+    /// Joins two possibly pruned work values by combining their nonce ranges and summing their
+    /// values, ensuring the nonce ranges are disjoint.
     pub fn join(&self, other: &Self) -> Result<Self, WorkClaimError> {
         Ok(self.as_value()?.join(other.as_value()?)?.into())
     }
