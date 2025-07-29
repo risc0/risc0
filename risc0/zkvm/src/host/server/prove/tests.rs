@@ -18,7 +18,7 @@ use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 use rstest::rstest;
 
@@ -26,11 +26,11 @@ use super::get_prover_server;
 use crate::{
     host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
-    DevModeProver, ExecutorEnv, ExitCode, FakeReceipt, InnerReceipt, ProveInfo, ProverOpts,
-    ProverServer as _, Receipt, ReceiptKind, Session, SimpleSegmentRef,
-    SuccinctReceiptVerifierParameters, VerifierContext,
+    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
+    SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
 };
 
+#[allow(dead_code)]
 fn prove_nothing(kind: ReceiptKind) -> ProveInfo {
     match kind {
         ReceiptKind::Composite => prove_nothing_composite(),
@@ -64,6 +64,7 @@ fn prove_nothing_succinct() -> ProveInfo {
         .clone()
 }
 
+#[allow(dead_code)]
 fn prove_nothing_groth16() -> ProveInfo {
     static ONCE: OnceLock<ProveInfo> = OnceLock::new();
     ONCE.get_or_init(|| prove_nothing_impl(ReceiptKind::Groth16))
@@ -596,6 +597,8 @@ fn compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
 fn fake_compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
+    use crate::{DevModeProver, FakeReceipt};
+
     let from_receipt = prove_nothing(from).receipt;
     let opts = ProverOpts::default().with_receipt_kind(into);
     let fake = Receipt::new(
@@ -637,6 +640,8 @@ fn shrink_wrap() {
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
 fn verify_in_guest(#[case] kind: ReceiptKind) {
+    use risc0_zkvm_methods::VERIFY_ELF;
+
     let receipt = prove_nothing(kind).receipt;
     let input: (_, Digest, bool) = (
         receipt.clone(),

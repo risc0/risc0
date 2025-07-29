@@ -2,11 +2,14 @@
 name = "risc0-groth16-sys"
 description = "C++ code for groth16 proof generation"
 version = "0.1.0"
-edition.workspace = true
-license.workspace = true
-homepage.workspace = true
-repository.workspace = true
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 links = "risc0-groth16-sys"
+
+[package.metadata.release]
+release = false
 
 [build-dependencies]
 risc0-build-kernel = { workspace = true }
@@ -17,10 +20,10 @@ blst = { version = "0.3.15", optional = true }
 sppark = { workspace = true, optional = true }
 
 [dev-dependencies]
-tracing = "0.1.41"
 test-log = { version = "0.2.17", default-features = false, features = [
   "trace",
 ] }
+tracing = "0.1.41"
 
 [features]
 default = []
