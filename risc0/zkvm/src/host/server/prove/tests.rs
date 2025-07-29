@@ -597,7 +597,7 @@ fn compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
 #[test_log::test]
 #[cfg(any(feature = "cuda", feature = "docker"))]
 fn fake_compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
-    use crate::{DevModeProver, FakeReceipt};
+    use crate::{DevModeProver, FakeReceipt, ProverServer as _};
 
     let from_receipt = prove_nothing(from).receipt;
     let opts = ProverOpts::default().with_receipt_kind(into);
