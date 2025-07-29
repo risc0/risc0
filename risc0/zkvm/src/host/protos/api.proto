@@ -16,6 +16,7 @@ message ServerRequest {
     ResolveRequest resolve = 7;
     CompressRequest compress = 8;
     VerifyRequest verify = 9;
+    // obsolete: ProveZkrRequest prove_zkr = 10;
     ProveKeccakRequest prove_keccak = 11;
     UnionRequest union = 12;
   }
@@ -361,6 +362,7 @@ message TraceEvent {
 
 message CoprocessorRequest {
   oneof kind {
+    // obsolete: ProveZkrRequest prove_zkr = 1;
     ProveKeccakRequest prove_keccak = 2;
   }
 }

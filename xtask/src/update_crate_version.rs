@@ -94,7 +94,11 @@ fn run_inner(args: &UpdateCrateVersion, workspace_root: &Path) -> Result<()> {
     let mut new_workspace_versions = BTreeMap::new();
 
     for package in metadata.workspace_default_packages() {
-        if args.package.as_ref().is_some_and(|p| p != &package.name) {
+        if args
+            .package
+            .as_ref()
+            .is_some_and(|p| *p != *package.name.as_str())
+        {
             continue;
         }
 
