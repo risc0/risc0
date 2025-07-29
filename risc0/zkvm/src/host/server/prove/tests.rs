@@ -945,6 +945,51 @@ mod sys_verify {
             .unwrap();
         assert!(prove_elf(env, MULTI_TEST_ELF).is_err());
     }
+
+    #[test_log::test]
+    fn sys_verify_with_povw() -> Result<()> {
+        let spec = MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            hello_commit_receipt().journal.bytes.clone(),
+        )]);
+
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
+        let povw_job_id: PovwJobId = rand::random();
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_receipt().clone())
+            .povw(povw_job_id)
+            .build()
+            .unwrap();
+
+        let opts = ProverOpts::succinct();
+        let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
+
+        prove_info.receipt.verify(MULTI_TEST_ID)?;
+        let work_receipt = prove_info.work_receipt.unwrap();
+        work_receipt.verify_integrity()?;
+
+        // NOTE: The work claim will only contain value for the conditional receipt.
+        // PoVW value for the assumption receipts is considered seperately, instead of in the take
+        // WorkClaim (i.e. the same compact range representation).
+        let work_claim = work_receipt.claim.as_value()?.clone();
+        assert_eq!(
+            work_claim.claim.digest(),
+            prove_info.receipt.claim()?.digest()
+        );
+        let work = work_claim.work.value()?;
+        assert!(work.value > 0);
+        assert_eq!(work.nonce_min.log, povw_job_id.log);
+        assert_eq!(work.nonce_min.job, povw_job_id.job);
+        assert_eq!(work.nonce_min.segment, 0);
+        assert_eq!(work.nonce_max.log, povw_job_id.log);
+        assert_eq!(work.nonce_max.job, povw_job_id.job);
+        // We expect that the verify action only takes one segment.
+        assert_eq!(work.nonce_max.segment, 0);
+        Ok(())
+    }
 }
 
 #[ignore]

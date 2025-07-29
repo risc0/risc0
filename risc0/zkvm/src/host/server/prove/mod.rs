@@ -360,7 +360,13 @@ where
 impl<P, Claim> Compress<Claim> for P
 where
     Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-    P: Lift<Claim> + Join<Claim> + Resolve<Claim> + ?Sized,
+    P: Lift<Claim>
+        + Join<Claim>
+        + Resolve<Claim>
+        + Lift<ReceiptClaim>
+        + Join<ReceiptClaim>
+        + Resolve<ReceiptClaim>
+        + ?Sized,
 {
     fn composite_to_succinct(
         &self,
@@ -389,7 +395,7 @@ where
             |conditional: SuccinctReceipt<Claim>, assumption: &InnerAssumptionReceipt| match assumption {
                 InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
                 InnerAssumptionReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &self.composite_to_succinct(assumption)?.into_unknown())
+                    self.resolve(&conditional, &SuccinctReceipt::<ReceiptClaim>::into_unknown(self.composite_to_succinct(assumption)?))
                 }
                 InnerAssumptionReceipt::Fake(_) => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
