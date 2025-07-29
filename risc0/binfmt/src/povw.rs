@@ -14,8 +14,6 @@
 
 //! Core types for function specific to proof of verifiable work (PoVW).
 
-// TODO(povw): Rename these are just Nonce, LogId, etc and use them as `poww::Nonce`?
-
 extern crate alloc;
 
 use alloc::{collections::VecDeque, vec::Vec};
@@ -32,6 +30,7 @@ use rand::{
 
 use crate::DecodeError;
 
+// TODO(povw): Consider using an opaque byte array type instead.
 /// A 160-bit identifier for a PoVW work log.
 ///
 /// Each prover maintains one or more work logs, with each log having a unique identifier.
