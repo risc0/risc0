@@ -3,6 +3,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #ifdef __CUDA_ARCH__
 typedef uint8_t byte;
