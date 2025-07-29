@@ -15,7 +15,6 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
-use risc0_binfmt::PovwNonce;
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
@@ -153,16 +152,6 @@ impl ProverServer for ProverImpl {
             })
             .collect::<Result<_>>()?;
 
-        // Use the precense or absernse of a nonce on the first segment to decide whether to use
-        // PoVW. Note that if the session is not consistent about whether the PoVW nonce is set on
-        // each segment, proving will fail.
-        let use_povw = segments
-            .first()
-            .unwrap()
-            .povw_nonce()
-            .context("failed to get PoVW nonce from first segment")?
-            != PovwNonce::ZERO;
-
         let composite_receipt = CompositeReceipt {
             segments,
             assumption_receipts: inner_assumption_receipts,
@@ -192,7 +181,7 @@ impl ProverServer for ProverImpl {
             });
         }
 
-        let (succinct_receipt, work_receipt) = match use_povw {
+        let (succinct_receipt, work_receipt) = match session.povw_job_id.is_some() {
             true => {
                 let work_receipt = self.composite_to_succinct_povw(&composite_receipt)?;
                 let unwrapped = self.unwrap_povw(&work_receipt)?;

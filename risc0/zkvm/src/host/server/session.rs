@@ -19,7 +19,7 @@ use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use anyhow::{ensure, Context, Result};
 use enum_map::EnumMap;
-use risc0_binfmt::SystemState;
+use risc0_binfmt::{PovwJobId, SystemState};
 use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 use risc0_circuit_rv32im::{execute::EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
@@ -32,7 +32,7 @@ use crate::{
     mmr::{GuestPeak, MerkleMountainAccumulator},
     sha::Digest,
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
-    ReceiptClaim,
+    ReceiptClaim, Work,
 };
 
 use super::exec::syscall::{SyscallKind, SyscallMetric};
@@ -105,6 +105,9 @@ pub struct Session {
 
     /// syscall metrics grouped by kind.
     pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
+
+    /// TODO
+    pub(crate) povw_job_id: Option<PovwJobId>,
 }
 
 /// The execution trace of a portion of a program.
@@ -263,6 +266,15 @@ impl Session {
             })
             .collect::<Vec<_>>()
             .into())
+    }
+
+    /// TODO
+    pub fn work(&self) -> Option<Work> {
+        self.povw_job_id.map(|povw_job_id| Work {
+            nonce_min: povw_job_id.nonce(0),
+            nonce_max: povw_job_id.nonce(self.segments.len() as u32),
+            value: self.total_cycles,
+        })
     }
 
     /// Log cycle information for this [Session].

@@ -14,7 +14,7 @@
 
 use std::time::Duration;
 
-use anyhow::{ensure, Result};
+use anyhow::{ensure, Context, Result};
 use risc0_binfmt::Digestible;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -137,16 +137,24 @@ impl ProverServer for DevModeProver {
         ensure!(ctx.dev_mode(), ERR_DEV_MODE_DISABLED);
         ensure_dev_mode_allowed!();
 
+        let session_claim = session
+            .claim()
+            .context("failed to compute claim for session")?;
         let receipt = Receipt::new(
-            InnerReceipt::Fake(FakeReceipt {
-                claim: session.claim()?.into(),
-            }),
+            FakeReceipt::new(session_claim.clone()).into(),
             session.journal.clone().unwrap_or_default().bytes,
         );
+        let work_receipt = session.work().map(|work| {
+            FakeReceipt::new(WorkClaim {
+                claim: session_claim.into(),
+                work: work.into(),
+            })
+            .into()
+        });
 
         Ok(ProveInfo {
             receipt,
-            work_receipt: None, // TODO(povw): Implement dev mode for povw
+            work_receipt,
             stats: session.stats(),
         })
     }
