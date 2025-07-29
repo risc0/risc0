@@ -100,7 +100,7 @@ pub const PFLAG_CHECK_OUT: u32 = 0x4000_0000;
 #[derive(Clone, Copy, Debug, Default, Eq, FromPrimitive, PartialEq)]
 pub enum CycleState {
     #[default]
-    LoadRoot = 0, // TODO(povw): Rename this state
+    LoadRootAndNonce = 0,
     Resume = 1,
     Suspend = 4,
     StoreRoot = 5,

@@ -4419,20 +4419,21 @@ __device__ DigestRegStruct exec_DigestReg(ExecContext& ctx,
           }));
   return DigestRegStruct{.values = x2};
 }
-__device__ InstOutputBaseStruct exec_ControlLoadRoot(ExecContext& ctx,
-                                                     NondetRegStruct arg0,
-                                                     InstInputStruct arg1_0,
-                                                     BoundLayout<ControlLoadRootLayout> layout2,
-                                                     GlobalBuf global3) {
-  // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:19)
+__device__ InstOutputBaseStruct
+exec_ControlLoadRootAndNonce(ExecContext& ctx,
+                             NondetRegStruct arg0,
+                             InstInputStruct arg1_0,
+                             BoundLayout<ControlLoadRootAndNonceLayout> layout2,
+                             GlobalBuf global3) {
+  // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:19)
   BoundLayout<_globalLayout> x4 = BIND_LAYOUT(kLayoutGlobal, global3);
   // builtin Sub
-  // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:24)
+  // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:24)
   Val x5 = (Val(1) - arg0._super);
-  // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:26)
+  // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:26)
   Val8Array x6 = Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)};
   // ValU32(zirgen/circuit/rv32im/v2/dsl/u32.zir:10)
-  // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:31)
+  // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:31)
   ValU32Struct x7 = ValU32Struct{.low = Val(0), .high = Val(0)};
   // BigIntTopState(zirgen/circuit/rv32im/v2/dsl/inst.zir:107)
   // BigIntTopStateNull(zirgen/circuit/rv32im/v2/dsl/inst.zir:114)
@@ -4457,56 +4458,58 @@ __device__ InstOutputBaseStruct exec_ControlLoadRoot(ExecContext& ctx,
                                                                        Val(0)}};
   InstOutputBaseStruct x9;
   if (to_size_t(x5)) {
-    // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:26)
-    ControlLoadRoot_SuperArm0_Super__0Struct8Array x10 =
+    // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:26)
+    ControlLoadRootAndNonce_SuperArm0_Super__0Struct8Array x10 =
         map(x6,
             LAYOUT_LOOKUP(layout2, _super.arm0._1),
             ([&](Val8Array::value_type x11,
-                 BoundLayout<ControlLoadRoot_SuperArm0_Super__0_SuperLayout8LayoutArray::value_type>
+                 BoundLayout<
+                     ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout8LayoutArray::value_type>
                      x12) {
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:27)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:27)
               GetDataStruct x13 =
                   exec_MemoryPageIn(ctx, arg0, (x11 + Val(1140850688)), LAYOUT_LOOKUP(x12, mem));
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:21)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:21)
               DigestRegStruct x14 = back_DigestReg(ctx, 0, LAYOUT_LOOKUP(x4, povwNonce));
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:28)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:28)
               Val x15 = (x14.values[to_size_t(x11)].low._super - x13._super.low);
-              EQZ(x15, "ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:28)");
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:21)
+              EQZ(x15, "ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:28)");
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:21)
               DigestRegStruct x16 = back_DigestReg(ctx, 0, LAYOUT_LOOKUP(x4, povwNonce));
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:29)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:29)
               Val x17 = (x16.values[to_size_t(x11)].high._super - x13._super.high);
-              EQZ(x17, "ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:29)");
-              return ControlLoadRoot_SuperArm0_Super__0Struct{};
+              EQZ(x17, "ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:29)");
+              return ControlLoadRootAndNonce_SuperArm0_Super__0Struct{};
             }));
     x9 = InstOutputBaseStruct{.newPc = x7, .newState = Val(0), .newMode = Val(0), .topState = x8};
   } else if (to_size_t((Val(1) - x5))) {
-    // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:34)
+    // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:34)
     EQZ((arg0._super - Val(1)),
-        "ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:34)");
-    // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:35)
-    EQZ(arg1_0.state, "ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:35)");
-    // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:37)
-    ControlLoadRoot_SuperArm1_Super__0Struct8Array x18 =
+        "ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:34)");
+    // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:35)
+    EQZ(arg1_0.state, "ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:35)");
+    // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:37)
+    ControlLoadRootAndNonce_SuperArm1_Super__0Struct8Array x18 =
         map(x6,
             LAYOUT_LOOKUP(layout2, _super.arm1._1),
             ([&](Val8Array::value_type x19,
-                 BoundLayout<ControlLoadRoot_SuperArm1_Super__0_SuperLayout8LayoutArray::value_type>
+                 BoundLayout<
+                     ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout8LayoutArray::value_type>
                      x20) {
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:38)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:38)
               GetDataStruct x21 =
                   exec_MemoryPageIn(ctx, arg0, (x19 + Val(1140850680)), LAYOUT_LOOKUP(x20, mem));
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:20)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:20)
               DigestRegStruct x22 = back_DigestReg(ctx, 0, LAYOUT_LOOKUP(x4, stateIn));
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:39)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:39)
               Val x23 = (x22.values[to_size_t(x19)].low._super - x21._super.low);
-              EQZ(x23, "ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:39)");
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:20)
+              EQZ(x23, "ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:39)");
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:20)
               DigestRegStruct x24 = back_DigestReg(ctx, 0, LAYOUT_LOOKUP(x4, stateIn));
-              // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:40)
+              // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:40)
               Val x25 = (x24.values[to_size_t(x19)].high._super - x21._super.high);
-              EQZ(x25, "ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:40)");
-              return ControlLoadRoot_SuperArm1_Super__0Struct{};
+              EQZ(x25, "ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:40)");
+              return ControlLoadRootAndNonce_SuperArm1_Super__0Struct{};
             }));
     x9 = InstOutputBaseStruct{.newPc = x7, .newState = Val(16), .newMode = Val(0), .topState = x8};
   } else {
@@ -5283,7 +5286,7 @@ __device__ InstOutputBaseStruct exec_Control0(ExecContext& ctx,
   InstOutputBaseStruct x5;
   if (to_size_t(arg1_0.minorOnehot._super[0]._super)) {
     // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:191)
-    InstOutputBaseStruct x6 = exec_ControlLoadRoot(
+    InstOutputBaseStruct x6 = exec_ControlLoadRootAndNonce(
         ctx, arg0, arg1_0, LAYOUT_LOOKUP(layout2, _super.arm0._super), global3);
     // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:190)
     STORE(LAYOUT_LOOKUP(layout2, _super.arm0._extra0.count._super), Val(0));
@@ -26637,7 +26640,7 @@ __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
     // Top(zirgen/circuit/rv32im/v2/dsl/top.zir:49)
     NondetRegStruct x879 = back_Reg(ctx, 0, LAYOUT_LOOKUP(layout0, cycleRedef._super));
     // builtin Sub
-    // ControlLoadRoot(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:24)
+    // ControlLoadRootAndNonce(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:24)
     // Control0(zirgen/circuit/rv32im/v2/dsl/inst_control.zir:191)
     // Top(zirgen/circuit/rv32im/v2/dsl/top.zir:81)
     Val x880 = (Val(1) - x879._super);

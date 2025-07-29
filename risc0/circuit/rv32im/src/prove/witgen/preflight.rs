@@ -329,7 +329,13 @@ impl<'a> Preflight<'a> {
         for i in 0..DIGEST_WORDS {
             self.load_u32(LoadOp::Record, addr + i)?;
         }
-        self.add_cycle_special(CycleState::LoadRoot, CycleState::LoadRoot, 0, 0, Back::None);
+        self.add_cycle_special(
+            CycleState::LoadRootAndNonce,
+            CycleState::LoadRootAndNonce,
+            0,
+            0,
+            Back::None,
+        );
         Ok(())
     }
 
@@ -339,7 +345,7 @@ impl<'a> Preflight<'a> {
             self.load_u32(LoadOp::Record, addr + i)?;
         }
         self.add_cycle_special(
-            CycleState::LoadRoot,
+            CycleState::LoadRootAndNonce,
             CycleState::PoseidonEntry,
             0,
             0,

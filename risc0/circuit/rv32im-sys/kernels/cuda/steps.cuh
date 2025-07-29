@@ -422,11 +422,11 @@ extern __device__ DigestRegStruct exec_DigestReg(ExecContext& ctx,
                                                  ValU32Struct8Array arg0,
                                                  BoundLayout<DigestRegLayout> layout1);
 extern __device__ InstOutputBaseStruct
-exec_ControlLoadRoot(ExecContext& ctx,
-                     NondetRegStruct arg0,
-                     InstInputStruct arg1_0,
-                     BoundLayout<ControlLoadRootLayout> layout2,
-                     GlobalBuf global3);
+exec_ControlLoadRootAndNonce(ExecContext& ctx,
+                             NondetRegStruct arg0,
+                             InstInputStruct arg1_0,
+                             BoundLayout<ControlLoadRootAndNonceLayout> layout2,
+                             GlobalBuf global3);
 extern __device__ InstOutputBaseStruct exec_ControlResume(ExecContext& ctx,
                                                           NondetRegStruct arg0,
                                                           InstInputStruct arg1_0,

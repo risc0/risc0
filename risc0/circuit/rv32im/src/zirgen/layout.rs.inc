@@ -6083,8 +6083,8 @@ pub const LAYOUT__467: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__469,
 };
 pub const LAYOUT__466: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__467 };
-pub const LAYOUT__465: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__466 };
+pub const LAYOUT__465: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__466 };
 pub const LAYOUT__473: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 38 },
@@ -6124,8 +6124,8 @@ pub const LAYOUT__472: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__474,
 };
 pub const LAYOUT__471: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__472 };
-pub const LAYOUT__470: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__471 };
+pub const LAYOUT__470: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__471 };
 pub const LAYOUT__478: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 47 },
@@ -6165,8 +6165,8 @@ pub const LAYOUT__477: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__479,
 };
 pub const LAYOUT__476: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__477 };
-pub const LAYOUT__475: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__476 };
+pub const LAYOUT__475: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__476 };
 pub const LAYOUT__483: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 56 },
@@ -6206,8 +6206,8 @@ pub const LAYOUT__482: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__484,
 };
 pub const LAYOUT__481: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__482 };
-pub const LAYOUT__480: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__481 };
+pub const LAYOUT__480: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__481 };
 pub const LAYOUT__488: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 65 },
@@ -6247,8 +6247,8 @@ pub const LAYOUT__487: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__489,
 };
 pub const LAYOUT__486: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__487 };
-pub const LAYOUT__485: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__486 };
+pub const LAYOUT__485: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__486 };
 pub const LAYOUT__493: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 74 },
@@ -6288,8 +6288,8 @@ pub const LAYOUT__492: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__494,
 };
 pub const LAYOUT__491: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__492 };
-pub const LAYOUT__490: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__491 };
+pub const LAYOUT__490: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__491 };
 pub const LAYOUT__498: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 83 },
@@ -6329,8 +6329,8 @@ pub const LAYOUT__497: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__499,
 };
 pub const LAYOUT__496: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__497 };
-pub const LAYOUT__495: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__496 };
+pub const LAYOUT__495: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__496 };
 pub const LAYOUT__503: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 92 },
@@ -6370,9 +6370,9 @@ pub const LAYOUT__502: &MemoryIOLayout = &MemoryIOLayout {
     new_txn: LAYOUT__504,
 };
 pub const LAYOUT__501: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__502 };
-pub const LAYOUT__500: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__501 };
-pub const LAYOUT__464: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout8LayoutArray = &[
+pub const LAYOUT__500: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout { mem: LAYOUT__501 };
+pub const LAYOUT__464: &ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout8LayoutArray = &[
     LAYOUT__465,
     LAYOUT__470,
     LAYOUT__475,
@@ -6382,25 +6382,25 @@ pub const LAYOUT__464: &ControlLoadRoot_SuperArm0_Super__0_SuperLayout8LayoutArr
     LAYOUT__495,
     LAYOUT__500,
 ];
-pub const LAYOUT__463: &ControlLoadRoot_SuperArm0_SuperLayout =
-    &ControlLoadRoot_SuperArm0_SuperLayout { _1: LAYOUT__464 };
-pub const LAYOUT__507: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__466 };
-pub const LAYOUT__508: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__471 };
-pub const LAYOUT__509: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__476 };
-pub const LAYOUT__510: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__481 };
-pub const LAYOUT__511: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__486 };
-pub const LAYOUT__512: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__491 };
-pub const LAYOUT__513: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__496 };
-pub const LAYOUT__514: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout =
-    &ControlLoadRoot_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__501 };
-pub const LAYOUT__506: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout8LayoutArray = &[
+pub const LAYOUT__463: &ControlLoadRootAndNonce_SuperArm0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm0_SuperLayout { _1: LAYOUT__464 };
+pub const LAYOUT__507: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__466 };
+pub const LAYOUT__508: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__471 };
+pub const LAYOUT__509: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__476 };
+pub const LAYOUT__510: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__481 };
+pub const LAYOUT__511: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__486 };
+pub const LAYOUT__512: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__491 };
+pub const LAYOUT__513: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__496 };
+pub const LAYOUT__514: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout { mem: LAYOUT__501 };
+pub const LAYOUT__506: &ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout8LayoutArray = &[
     LAYOUT__507,
     LAYOUT__508,
     LAYOUT__509,
@@ -6410,12 +6410,13 @@ pub const LAYOUT__506: &ControlLoadRoot_SuperArm1_Super__0_SuperLayout8LayoutArr
     LAYOUT__513,
     LAYOUT__514,
 ];
-pub const LAYOUT__505: &ControlLoadRoot_SuperArm1_SuperLayout =
-    &ControlLoadRoot_SuperArm1_SuperLayout { _1: LAYOUT__506 };
-pub const LAYOUT__462: &ControlLoadRoot_SuperLayout = &ControlLoadRoot_SuperLayout {
-    arm0: LAYOUT__463,
-    arm1: LAYOUT__505,
-};
+pub const LAYOUT__505: &ControlLoadRootAndNonce_SuperArm1_SuperLayout =
+    &ControlLoadRootAndNonce_SuperArm1_SuperLayout { _1: LAYOUT__506 };
+pub const LAYOUT__462: &ControlLoadRootAndNonce_SuperLayout =
+    &ControlLoadRootAndNonce_SuperLayout {
+        arm0: LAYOUT__463,
+        arm1: LAYOUT__505,
+    };
 pub const LAYOUT__516: &MemoryArgLayout16LayoutArray = &[
     LAYOUT__468,
     LAYOUT__469,
@@ -6434,13 +6435,13 @@ pub const LAYOUT__516: &MemoryArgLayout16LayoutArray = &[
     LAYOUT__503,
     LAYOUT__504,
 ];
-pub const LAYOUT__515: &_Arguments_ControlLoadRoot_SuperLayout =
-    &_Arguments_ControlLoadRoot_SuperLayout {
+pub const LAYOUT__515: &_Arguments_ControlLoadRootAndNonce_SuperLayout =
+    &_Arguments_ControlLoadRootAndNonce_SuperLayout {
         memory_arg: LAYOUT__516,
     };
-pub const LAYOUT__461: &ControlLoadRootLayout = &ControlLoadRootLayout {
+pub const LAYOUT__461: &ControlLoadRootAndNonceLayout = &ControlLoadRootAndNonceLayout {
     _super: LAYOUT__462,
-    _arguments_control_load_root__super: LAYOUT__515,
+    _arguments_control_load_root_and_nonce__super: LAYOUT__515,
 };
 pub const LAYOUT__460: &Control0_SuperArm0Layout = &Control0_SuperArm0Layout {
     _super: LAYOUT__461,
