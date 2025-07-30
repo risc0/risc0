@@ -675,6 +675,16 @@ impl From<Receipt> for AssumptionReceipt {
     }
 }
 
+impl<Claim> From<GenericReceipt<Claim>> for AssumptionReceipt
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    /// Create a proven assumption from a [GenericReceipt].
+    fn from(receipt: GenericReceipt<Claim>) -> Self {
+        Self::Proven(receipt.into())
+    }
+}
+
 impl From<InnerReceipt> for AssumptionReceipt {
     /// Create a proven assumption from a [InnerReceipt].
     fn from(receipt: InnerReceipt) -> Self {
@@ -846,6 +856,19 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
             InnerReceipt::Succinct(x) => InnerAssumptionReceipt::Succinct(x.into_unknown()),
             InnerReceipt::Groth16(x) => InnerAssumptionReceipt::Groth16(x.into_unknown()),
             InnerReceipt::Fake(x) => InnerAssumptionReceipt::Fake(x.into_unknown()),
+        }
+    }
+}
+
+impl<Claim> From<GenericReceipt<Claim>> for InnerAssumptionReceipt
+where
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+{
+    fn from(value: GenericReceipt<Claim>) -> Self {
+        match value {
+            GenericReceipt::Succinct(x) => InnerAssumptionReceipt::Succinct(x.into_unknown()),
+            GenericReceipt::Groth16(x) => InnerAssumptionReceipt::Groth16(x.into_unknown()),
+            GenericReceipt::Fake(x) => InnerAssumptionReceipt::Fake(x.into_unknown()),
         }
     }
 }

@@ -237,6 +237,22 @@ impl From<U256> for PovwNonce {
     }
 }
 
+impl TryFrom<&[u8]> for PovwNonce {
+    type Error = core::array::TryFromSliceError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::from_bytes(value.try_into()?))
+    }
+}
+
+impl TryFrom<Vec<u8>> for PovwNonce {
+    type Error = core::array::TryFromSliceError;
+
+    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+        value.as_slice().try_into()
+    }
+}
+
 #[cfg(feature = "rand")]
 impl Distribution<PovwNonce> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PovwNonce {

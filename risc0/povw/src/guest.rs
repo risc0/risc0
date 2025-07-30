@@ -28,12 +28,12 @@ pub enum State {
     /// Initial execution state with the work log ID to process.
     Initial {
         /// ID of the work log being processed.
-        work_log_id: U160
+        work_log_id: U160,
     },
     /// Continuation state with journal from previous execution.
     Continuation {
         /// Journal containing the accumulated state from previous execution.
-        journal: Journal
+        journal: Journal,
     },
 }
 
