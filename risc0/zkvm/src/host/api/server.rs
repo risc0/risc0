@@ -337,7 +337,6 @@ impl Server {
                 .ok_or_else(|| malformed_err("ExecuteRequest.segments_out"))?;
             let bytes = binary.as_bytes()?;
 
-            // TODO(povw): Add PoVW here
             let session = match AssetRequest::try_from(segments_out.clone())? {
                 #[cfg(feature = "redis")]
                 AssetRequest::Redis(params) => execute_redis(conn, env, bytes, params)?,
