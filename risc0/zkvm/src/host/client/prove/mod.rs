@@ -19,6 +19,7 @@ pub(crate) mod external;
 pub(crate) mod local;
 pub(crate) mod opts;
 
+use core::ops::Deref;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{anyhow, Result};
@@ -131,6 +132,27 @@ pub trait Prover {
     /// it is already succinct or Groth16 and a succinct receipt is required) this function is a
     /// no-op. As a result, it is idempotent.
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt>;
+}
+
+// Implementation of Prover for `Rc<Prover>` which allows it to satisfy trait bounds for Prover.
+impl<P: Prover + ?Sized> Prover for Rc<P> {
+    fn get_name(&self) -> String {
+        self.deref().get_name()
+    }
+
+    fn prove_with_ctx(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        elf: &[u8],
+        opts: &ProverOpts,
+    ) -> Result<ProveInfo> {
+        self.deref().prove_with_ctx(env, ctx, elf, opts)
+    }
+
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        self.deref().compress(opts, receipt)
+    }
 }
 
 /// An Executor can execute a given ELF binary.
