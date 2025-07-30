@@ -11,6 +11,7 @@ repository = { workspace = true }
 anyhow = "1.0"
 borsh = { version = "1.5", default-features = false, features = ["derive"] }
 bytemuck = "1.22"
+derive_builder = { version = "0.20.2", optional = true }
 hybrid-array = { version = "0.3.0", features = ["serde"] }
 risc0-binfmt = { workspace = true }
 risc0-zkvm = { workspace = true }
@@ -20,3 +21,7 @@ serde = "1"
 [dev-dependencies]
 proptest = "1.6.0"
 ruint = { version = "1.15", features = ["proptest"] }
+
+[features]
+default = ["prover"]
+prover = ["risc0-zkvm/client", "dep:derive_builder"]

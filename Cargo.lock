@@ -6866,6 +6866,7 @@ dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
+ "derive_builder",
  "hybrid-array",
  "proptest",
  "risc0-binfmt",
@@ -6885,6 +6886,7 @@ dependencies = [
  "risc0-build",
  "risc0-povw",
  "risc0-zkvm",
+ "risc0-zkvm-methods",
  "ruint",
 ]
 

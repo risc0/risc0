@@ -12,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_binfmt::{PovwLogId, PovwNonce};
+use anyhow::{anyhow, Context};
+use risc0_binfmt::{PovwJobId, PovwLogId, PovwNonce};
 use risc0_povw::{
     guest::{Input, Journal, State, WorkLogUpdate},
+    prover::WorkLogUpdateProver,
     Job, WorkLog,
 };
 use risc0_povw_guests::{RISC0_POVW_LOG_BUILDER_ELF, RISC0_POVW_LOG_BUILDER_ID};
 use risc0_zkvm::{
-    default_executor, Digest, ExecutorEnv, ExitCode, FakeReceipt, MaybePruned, ReceiptClaim,
-    Unknown, Work, WorkClaim,
+    default_executor, default_prover, Digest, ExecutorEnv, ExitCode, FakeReceipt, MaybePruned,
+    ProveInfo, ProverOpts, ReceiptClaim, Unknown, Work, WorkClaim,
 };
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 use ruint::uint;
 
-// TODO: Add rejection tests
+// TODO(povw): Add rejection tests
 
 fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     let mut env_builder = ExecutorEnv::builder();
@@ -72,6 +75,23 @@ fn make_work(value: u64, work_log_id: PovwLogId, job_num: u64, job: &Job) -> Opt
 
 fn rand_claim() -> MaybePruned<Unknown> {
     MaybePruned::Pruned(Digest::new(rand::random()))
+}
+
+/// Proves the busy loop test utility, using default_prover, which is guarenteed to run for at
+/// least as many user cycles as is given in the cycles argument.
+fn prove_busy_loop(job_id: PovwJobId, cycles: u64) -> anyhow::Result<ProveInfo> {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles })
+        .unwrap()
+        .povw(job_id)
+        .build()
+        .unwrap();
+
+    // NOTE: If the compression level is not succinct or groth16, a work receipt will not be
+    // produced. A work receipt can be produced from a composite receipt.
+    default_prover()
+        .prove_with_opts(env, MULTI_TEST_ELF, &ProverOpts::succinct())
+        .context("failed to prove busy loop")
 }
 
 #[test]
@@ -229,6 +249,126 @@ fn two_batched_updates() -> anyhow::Result<()> {
         update_value: work1_value + work2_value,
         initial_commit: WorkLog::EMPTY.commit(),
         updated_commit: work_log.commit(),
+    };
+
+    assert_eq!(journal, expected_journal);
+    Ok(())
+}
+
+#[test]
+fn prove_three_sequential_updates() -> anyhow::Result<()> {
+    let work_log_id = uint!(0xdeafbee7_U160);
+
+    let work_info = prove_busy_loop(
+        PovwJobId {
+            log: work_log_id,
+            job: 230,
+        },
+        1 << 16,
+    )
+    .context("failed to prove busy loop")?;
+
+    let work_receipt = work_info
+        .work_receipt
+        .ok_or_else(|| anyhow!("no work receipt returned from the prover for busy loop"))?;
+
+    let mut prover = WorkLogUpdateProver::builder()
+        .prover(default_prover())
+        .log_id(work_log_id)
+        .log_builder_id(RISC0_POVW_LOG_BUILDER_ID)
+        .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)
+        .build()?;
+
+    let proven_log_info = prover
+        .prove_update([work_receipt.clone()])
+        .context("failed to prover work log update")?;
+
+    proven_log_info.receipt.verify(RISC0_POVW_LOG_BUILDER_ID)?;
+    let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
+
+    let first_update_commit = prover.work_log.commit();
+    let expected_journal = Journal {
+        work_log_id,
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        update_value: work_receipt.claim().as_value()?.work.as_value()?.value,
+        initial_commit: WorkLog::EMPTY.commit(),
+        updated_commit: first_update_commit,
+    };
+
+    assert_eq!(journal, expected_journal);
+
+    // Prove another update, chaining from the one before this one using the same prover struct.
+
+    let work_info = prove_busy_loop(
+        PovwJobId {
+            log: work_log_id,
+            job: 231,
+        },
+        1 << 14,
+    )
+    .context("failed to prove busy loop")?;
+
+    let work_receipt = work_info
+        .work_receipt
+        .ok_or_else(|| anyhow!("no work receipt returned from the prover for busy loop"))?;
+
+    let proven_log_info = prover
+        .prove_update([work_receipt.clone()])
+        .context("failed to prover work log update")?;
+
+    proven_log_info.receipt.verify(RISC0_POVW_LOG_BUILDER_ID)?;
+    let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
+
+    let second_update_commit = prover.work_log.commit();
+    let expected_journal = Journal {
+        work_log_id,
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        update_value: work_receipt.claim().as_value()?.work.as_value()?.value,
+        initial_commit: first_update_commit,
+        updated_commit: second_update_commit,
+    };
+
+    assert_eq!(journal, expected_journal);
+
+    // Prove another update, this time rebuilding the prover with provided work log and receipt to
+    // resume the previous state, like what might be done if the state is being deserialized from
+    // peristent storage.
+
+    let work_info = prove_busy_loop(
+        PovwJobId {
+            log: work_log_id,
+            job: 232,
+        },
+        1 << 15,
+    )
+    .context("failed to prove busy loop")?;
+
+    let mut prover = WorkLogUpdateProver::builder()
+        .prover(default_prover())
+        .log_id(work_log_id)
+        // Pass in the work log up to this point and the latest log builder receipt.
+        .work_log(prover.work_log, proven_log_info.receipt)?
+        .log_builder_id(RISC0_POVW_LOG_BUILDER_ID)
+        .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)
+        .build()?;
+
+    let work_receipt = work_info
+        .work_receipt
+        .ok_or_else(|| anyhow!("no work receipt returned from the prover for busy loop"))?;
+
+    let proven_log_info = prover
+        .prove_update([work_receipt.clone()])
+        .context("failed to prover work log update")?;
+
+    proven_log_info.receipt.verify(RISC0_POVW_LOG_BUILDER_ID)?;
+    let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
+
+    let expected_journal = Journal {
+        work_log_id,
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        update_value: work_receipt.claim().as_value()?.work.as_value()?.value,
+        initial_commit: second_update_commit,
+        updated_commit: prover.work_log.commit(),
     };
 
     assert_eq!(journal, expected_journal);

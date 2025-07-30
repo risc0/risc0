@@ -47,8 +47,11 @@ use risc0_zkvm::{
 use ruint::{aliases::U256, Uint};
 
 mod consts;
-/// Guest program types for PoVW work log updates.
+/// Log Builder guest program types, for verifying PoVW log updates.
 pub mod guest;
+/// Prover functionality, for running the work log builder.
+#[cfg(feature = "prover")]
+pub mod prover;
 
 // TODO(povw): Break up the following code into modules.
 
@@ -146,6 +149,11 @@ impl WorkSet {
     pub const EMPTY: Self = Self {
         logs: BTreeMap::new(),
     };
+
+    /// Returns true if this [WorkSet] contains no consumed nonces.
+    pub fn is_empty(&self) -> bool {
+        self.logs.values().all(|log| log.is_empty())
+    }
 
     /// Adds a work log with the given ID to the work set.
     ///
@@ -269,6 +277,11 @@ impl WorkLog {
     pub const EMPTY: Self = Self {
         jobs: BTreeMap::new(),
     };
+
+    /// Returns true if this [WorkLog] contains no consumed nonces.
+    pub fn is_empty(&self) -> bool {
+        self.jobs.values().all(|job| job.is_empty())
+    }
 
     /// Adds a job with the given ID to the work log.
     ///
@@ -419,6 +432,11 @@ impl Job {
     pub const TREE_HEIGHT: usize = u32::BITS as usize - 8;
     /// Empty job with no used nonces.
     pub const EMPTY: Self = Self { index_max: None };
+
+    /// Returns true if this [Job] contains no consumed nonces.
+    pub fn is_empty(&self) -> bool {
+        self.index_max.is_none()
+    }
 
     /// Creates a new job with nonces used in the range [0, index_max].
     pub fn new(index_max: u32) -> Self {
