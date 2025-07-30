@@ -426,10 +426,7 @@ impl From<FakeReceipt<ReceiptClaim>> for InnerReceipt {
 #[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub enum GenericReceipt<Claim>
-where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
-{
+pub enum GenericReceipt<Claim> {
     /// A [SuccinctReceipt], proving the claim a STARK produced by the recursion VM.
     Succinct(SuccinctReceipt<Claim>),
 
@@ -440,13 +437,13 @@ where
     Fake(FakeReceipt<Claim>),
 }
 
-impl<Claim> GenericReceipt<Claim>
-where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> GenericReceipt<Claim> {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
-    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+    pub fn verify_integrity(&self) -> Result<(), VerificationError>
+    where
+        Claim: risc0_binfmt::Digestible + core::fmt::Debug,
+    {
         self.verify_integrity_with_context(&VerifierContext::default())
     }
 
@@ -454,7 +451,10 @@ where
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
+    ) -> Result<(), VerificationError>
+    where
+        Claim: risc0_binfmt::Digestible + core::fmt::Debug,
+    {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
@@ -482,7 +482,10 @@ where
     }
 
     /// Extract the [ReceiptClaim] from this receipt.
-    pub fn claim(&self) -> MaybePruned<Claim> {
+    pub fn claim(&self) -> MaybePruned<Claim>
+    where
+        Claim: Clone,
+    {
         match self {
             Self::Groth16(ref inner) => inner.claim.clone(),
             Self::Succinct(ref inner) => inner.claim.clone(),
@@ -509,28 +512,19 @@ where
     }
 }
 
-impl<Claim> From<SuccinctReceipt<Claim>> for GenericReceipt<Claim>
-where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> From<SuccinctReceipt<Claim>> for GenericReceipt<Claim> {
     fn from(receipt: SuccinctReceipt<Claim>) -> Self {
         Self::Succinct(receipt)
     }
 }
 
-impl<Claim> From<Groth16Receipt<Claim>> for GenericReceipt<Claim>
-where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> From<Groth16Receipt<Claim>> for GenericReceipt<Claim> {
     fn from(receipt: Groth16Receipt<Claim>) -> Self {
         Self::Groth16(receipt)
     }
 }
 
-impl<Claim> From<FakeReceipt<Claim>> for GenericReceipt<Claim>
-where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> From<FakeReceipt<Claim>> for GenericReceipt<Claim> {
     fn from(receipt: FakeReceipt<Claim>) -> Self {
         Self::Fake(receipt)
     }
@@ -549,20 +543,14 @@ where
 #[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct FakeReceipt<Claim>
-where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
-{
+pub struct FakeReceipt<Claim> {
     /// Claim containing information about the computation that this receipt pretends to prove.
     ///
     /// The standard claim type is [ReceiptClaim], which represents a RISC-V zkVM execution.
     pub claim: MaybePruned<Claim>,
 }
 
-impl<Claim> FakeReceipt<Claim>
-where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> FakeReceipt<Claim> {
     /// Create a new [FakeReceipt] for the given claim.
     pub fn new(claim: impl Into<MaybePruned<Claim>>) -> Self {
         Self {
@@ -593,7 +581,10 @@ where
 
     /// Prunes the claim, retaining its digest, and converts into a [FakeReceipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
-    pub fn into_unknown(self) -> FakeReceipt<Unknown> {
+    pub fn into_unknown(self) -> FakeReceipt<Unknown>
+    where
+        Claim: risc0_binfmt::Digestible,
+    {
         FakeReceipt {
             claim: MaybePruned::Pruned(self.claim.digest()),
         }
@@ -677,7 +668,7 @@ impl From<Receipt> for AssumptionReceipt {
 
 impl<Claim> From<GenericReceipt<Claim>> for AssumptionReceipt
 where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible,
 {
     /// Create a proven assumption from a [GenericReceipt].
     fn from(receipt: GenericReceipt<Claim>) -> Self {
@@ -701,7 +692,7 @@ impl From<InnerAssumptionReceipt> for AssumptionReceipt {
 
 impl<Claim> From<SuccinctReceipt<Claim>> for AssumptionReceipt
 where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible,
 {
     /// Create a proven assumption from a [SuccinctReceipt].
     fn from(receipt: SuccinctReceipt<Claim>) -> Self {
@@ -711,7 +702,7 @@ where
 
 impl<Claim> From<FakeReceipt<Claim>> for AssumptionReceipt
 where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible,
 {
     /// Create a fake proven assumption from a [FakeReceipt].
     fn from(receipt: FakeReceipt<Claim>) -> Self {
@@ -862,7 +853,7 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
 
 impl<Claim> From<GenericReceipt<Claim>> for InnerAssumptionReceipt
 where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible,
 {
     fn from(value: GenericReceipt<Claim>) -> Self {
         match value {

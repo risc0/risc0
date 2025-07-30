@@ -15,7 +15,6 @@
 use std::time::Duration;
 
 use anyhow::{ensure, Context, Result};
-use risc0_binfmt::Digestible;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -325,10 +324,7 @@ impl ProverServer for DevModeProver {
 
 /// Private function used to simulate the delay of a lift.
 /// Return type is generic to handle any type of output claim.
-fn fake_recursion<Claim>(delay: Option<Duration>) -> Result<SuccinctReceipt<Claim>>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+fn fake_recursion<Claim>(delay: Option<Duration>) -> Result<SuccinctReceipt<Claim>> {
     ensure_dev_mode_allowed!();
 
     if let Some(delay) = delay {
@@ -338,10 +334,7 @@ where
     Ok(fake_succinct_receipt())
 }
 
-fn fake_succinct_receipt<Claim>() -> SuccinctReceipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+fn fake_succinct_receipt<Claim>() -> SuccinctReceipt<Claim> {
     SuccinctReceipt {
         seal: vec![],
         control_id: Digest::ZERO,

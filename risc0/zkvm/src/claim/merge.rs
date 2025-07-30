@@ -20,7 +20,6 @@ use core::fmt;
 use derive_more::Debug;
 use risc0_binfmt::Digestible;
 use risc0_zkp::core::digest::Digest;
-use serde::Serialize;
 
 use crate::{
     claim::{
@@ -88,7 +87,7 @@ impl<T: MergeLeaf> Merge for T {
 
 impl<T> Merge for MaybePruned<T>
 where
-    T: Merge + Serialize + Clone,
+    T: Merge + Clone,
 {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         let check_eq = || {
@@ -186,7 +185,7 @@ impl Merge for ReceiptClaim {
     }
 }
 
-impl<Claim: Merge + Clone + Serialize> Merge for WorkClaim<Claim> {
+impl<Claim: Merge + Clone> Merge for WorkClaim<Claim> {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         Ok(Self {
             claim: self.claim.merge(&other.claim)?,

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fmt::Debug, path::PathBuf};
+use std::path::PathBuf;
 
 use anyhow::{anyhow, bail, Context, Result};
 use prost::{Message, Name};
@@ -81,7 +81,7 @@ impl TryFrom<Asset> for pb::api::Asset {
 
 impl<Claim> TryFrom<SuccinctReceipt<Claim>> for Asset
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: Serialize,
 {
     type Error = anyhow::Error;
 
@@ -508,7 +508,6 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
 
 impl<Claim> TryFrom<SuccinctReceipt<Claim>> for pb::core::SuccinctReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -528,7 +527,6 @@ where
 
 impl<Claim> TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -598,7 +596,6 @@ impl TryFrom<pb::core::MerkleProof> for MerkleProof {
 
 impl<Claim> TryFrom<Groth16Receipt<Claim>> for pb::core::Groth16Receipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -615,7 +612,6 @@ where
 
 impl<Claim> TryFrom<pb::core::Groth16Receipt> for Groth16Receipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -739,7 +735,6 @@ impl TryFrom<pb::core::InnerReceipt> for InnerAssumptionReceipt {
 
 impl<Claim> TryFrom<GenericReceipt<Claim>> for pb::core::GenericReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -765,7 +760,6 @@ where
 
 impl<Claim> TryFrom<pb::core::GenericReceipt> for GenericReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -788,7 +782,6 @@ where
 
 impl<Claim> TryFrom<FakeReceipt<Claim>> for pb::core::FakeReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -802,7 +795,6 @@ where
 
 impl<Claim> TryFrom<pb::core::FakeReceipt> for FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -921,16 +913,12 @@ impl Name for pb::core::WorkClaim {
     const NAME: &'static str = "WorkClaim";
 }
 
-impl<Claim> AssociatedMessage for WorkClaim<Claim>
-where
-    Claim: Clone + Serialize,
-{
+impl<Claim> AssociatedMessage for WorkClaim<Claim> {
     type Message = pb::core::WorkClaim;
 }
 
 impl<Claim> TryFrom<WorkClaim<Claim>> for pb::core::WorkClaim
 where
-    Claim: Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -945,7 +933,6 @@ where
 
 impl<Claim> TryFrom<pb::core::WorkClaim> for WorkClaim<Claim>
 where
-    Claim: Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;

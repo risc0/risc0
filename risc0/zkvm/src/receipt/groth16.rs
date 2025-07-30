@@ -35,10 +35,7 @@ use crate::{
 #[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct Groth16Receipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+pub struct Groth16Receipt<Claim> {
     /// A Groth16 proof of a zkVM execution with the associated claim.
     #[debug("{} bytes", seal.len())]
     pub seal: Vec<u8>,
@@ -55,10 +52,7 @@ where
     pub verifier_parameters: Digest,
 }
 
-impl<Claim> Groth16Receipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> Groth16Receipt<Claim> {
     /// Create a [Groth16Receipt] from the given seal, claim, and verifier parameters digest.
     pub fn new(seal: Vec<u8>, claim: MaybePruned<Claim>, verifier_parameters: Digest) -> Self {
         Self {
@@ -70,7 +64,10 @@ where
 
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
-    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+    pub fn verify_integrity(&self) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
         self.verify_integrity_with_context(&VerifierContext::default())
     }
 
@@ -79,7 +76,10 @@ where
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
+    ) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
         let params = ctx
             .groth16_verifier_parameters
             .as_ref()
@@ -115,7 +115,10 @@ where
 
     /// Prunes the claim, retaining its digest, and converts into a [Groth16Receipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
-    pub fn into_unknown(self) -> Groth16Receipt<Unknown> {
+    pub fn into_unknown(self) -> Groth16Receipt<Unknown>
+    where
+        Claim: Digestible,
+    {
         Groth16Receipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
             seal: self.seal,

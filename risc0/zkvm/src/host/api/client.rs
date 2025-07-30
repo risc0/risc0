@@ -28,7 +28,7 @@ use crate::{
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path},
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, Unknown,
 };
 
 pub(crate) enum Compat {
@@ -208,15 +208,11 @@ impl Client {
     }
 
     /// Prove the specified keccak proof request.
-    pub fn prove_keccak<Claim>(
+    pub fn prove_keccak(
         &self,
         proof_request: crate::host::client::env::ProveKeccakRequest,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt<Claim>>
-    where
-        Claim: risc0_binfmt::Digestible + std::fmt::Debug + Clone + serde::Serialize,
-        crate::MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
-    {
+    ) -> Result<SuccinctReceipt<Unknown>> {
         use crate::host::api::convert::keccak_input_to_bytes;
 
         let mut conn = self.connect()?;

@@ -37,7 +37,6 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
     verify::ReadIOP,
 };
-use serde::Serialize;
 
 use crate::{
     claim::{
@@ -223,7 +222,7 @@ pub fn resolve<Claim>(
     assumption: &SuccinctReceipt<Claim>,
 ) -> Result<SuccinctReceipt<ReceiptClaim>>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + Debug,
 {
     tracing::debug!(
         "Proving resolve: conditional.claim = {:#?}",
@@ -260,7 +259,7 @@ pub fn resolve_povw<Claim>(
     assumption: &SuccinctReceipt<Claim>,
 ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + Debug,
 {
     tracing::debug!(
         "Proving resolve_povw: conditional.claim = {:#?}",
@@ -298,7 +297,7 @@ pub fn resolve_unwrap_povw<Claim>(
     assumption: &SuccinctReceipt<Claim>,
 ) -> Result<SuccinctReceipt<ReceiptClaim>>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + Debug,
 {
     tracing::debug!(
         "Proving resolve_unwrap_povw: conditional.claim = {:#?}",
@@ -467,10 +466,7 @@ fn make_succinct_receipt<Claim>(
     prover: Prover,
     receipt: RecursionReceipt,
     claim: impl Into<MaybePruned<Claim>>,
-) -> Result<SuccinctReceipt<Claim>>
-where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-{
+) -> Result<SuccinctReceipt<Claim>> {
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         hashfn: prover.opts.hashfn.clone(),
@@ -759,7 +755,7 @@ impl Prover {
         opts: ProverOpts,
     ) -> Result<Self>
     where
-        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+        Claim: risc0_binfmt::Digestible + Debug,
     {
         ensure_poseidon2!(cond);
         ensure_poseidon2!(assum);
@@ -834,7 +830,7 @@ impl Prover {
         opts: ProverOpts,
     ) -> Result<Self>
     where
-        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+        Claim: risc0_binfmt::Digestible + Debug,
     {
         ensure_poseidon2!(cond);
         ensure_poseidon2!(assum);
@@ -973,10 +969,7 @@ impl Prover {
         &mut self,
         assumption: Assumption,
         receipt: &SuccinctReceipt<Claim>,
-    ) -> Result<()>
-    where
-        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-    {
+    ) -> Result<()> {
         self.add_seal(
             &receipt.seal,
             &receipt.control_id,
@@ -1011,10 +1004,7 @@ impl Prover {
     }
 
     /// Add a receipt for a succinct receipt
-    fn add_succinct_generic_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
-    where
-        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-    {
+    fn add_succinct_generic_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         // Union program expects an additional boolean to indicate that control root is zero.
         let zero_root = BabyBearElem::new((a.control_root()? == Digest::ZERO) as u32);

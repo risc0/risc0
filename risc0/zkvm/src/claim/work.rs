@@ -31,10 +31,7 @@ use crate::{
 ///
 /// This type is instantiated as [`WorkClaim<ReceiptClaim>`] when PoVW is used with zkVM proving.
 #[derive(Clone, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
-pub struct WorkClaim<Claim>
-where
-    Claim: Clone + Serialize,
-{
+pub struct WorkClaim<Claim> {
     /// The wrapped claim (e.g. [ReceiptClaim][crate::ReceiptClaim]).
     pub claim: MaybePruned<Claim>,
     /// Work associated with proving the wrapped claim.
@@ -43,7 +40,7 @@ where
 
 impl<Claim> Digestible for WorkClaim<Claim>
 where
-    Claim: Digestible + Clone + Serialize,
+    Claim: Digestible,
 {
     /// Hash the [ReceiptClaim] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
@@ -57,7 +54,7 @@ where
 
 impl<Claim> fmt::Debug for WorkClaim<Claim>
 where
-    Claim: Clone + Serialize + Digestible + fmt::Debug,
+    Claim: Digestible + fmt::Debug,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("WorkClaim")

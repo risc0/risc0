@@ -33,10 +33,7 @@ use crate::sha::{self, Sha256};
 /// proof. When a subtree is pruned, the digest commits to the value of all contained fields.
 /// [ReceiptClaim][crate::ReceiptClaim] is the motivating example of this type of Merkle-ized struct.
 #[derive(Clone, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
-pub enum MaybePruned<T>
-where
-    T: Clone + Serialize,
-{
+pub enum MaybePruned<T> {
     /// Unpruned value.
     Value(T),
 
@@ -44,10 +41,7 @@ where
     Pruned(Digest),
 }
 
-impl<T> MaybePruned<T>
-where
-    T: Clone + Serialize,
-{
+impl<T> MaybePruned<T> {
     /// Unwrap the value, or return an error.
     pub fn value(self) -> Result<T, PrunedValueError> {
         match self {
@@ -73,10 +67,7 @@ where
     }
 }
 
-impl<T> From<T> for MaybePruned<T>
-where
-    T: Clone + Serialize,
-{
+impl<T> From<T> for MaybePruned<T> {
     fn from(value: T) -> Self {
         Self::Value(value)
     }
@@ -84,7 +75,7 @@ where
 
 impl<T> Digestible for MaybePruned<T>
 where
-    T: Digestible + Clone + Serialize,
+    T: Digestible,
 {
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
@@ -96,17 +87,14 @@ where
 
 impl<T> Default for MaybePruned<T>
 where
-    T: Digestible + Default + Clone + Serialize,
+    T: Digestible + Default,
 {
     fn default() -> Self {
         MaybePruned::Value(Default::default())
     }
 }
 
-impl<T> MaybePruned<Option<T>>
-where
-    T: Clone + Serialize,
-{
+impl<T> MaybePruned<Option<T>> {
     /// Returns true is the value is None, or the value is pruned as the zero
     /// digest.
     pub fn is_none(&self) -> bool {
@@ -127,7 +115,7 @@ where
 #[cfg(test)]
 impl<T> PartialEq for MaybePruned<T>
 where
-    T: Clone + Serialize + PartialEq,
+    T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
@@ -140,7 +128,7 @@ where
 
 impl<T> fmt::Debug for MaybePruned<T>
 where
-    T: Clone + Serialize + Digestible + fmt::Debug,
+    T: Digestible + fmt::Debug,
 {
     /// Format [MaybePruned] values are if they were a struct with value and
     /// digest fields. Digest field is always provided so that divergent

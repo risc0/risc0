@@ -58,10 +58,7 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct SuccinctReceipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+pub struct SuccinctReceipt<Claim> {
     /// The cryptographic seal of this receipt. This seal is a STARK proving an execution of the
     /// recursion circuit.
     #[debug("{} bytes", self.get_seal_bytes().len())]
@@ -91,13 +88,13 @@ where
     pub control_inclusion_proof: MerkleProof,
 }
 
-impl<Claim> SuccinctReceipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> SuccinctReceipt<Claim> {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
-    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+    pub fn verify_integrity(&self) -> Result<(), VerificationError>
+    where
+        Claim: risc0_binfmt::Digestible + core::fmt::Debug,
+    {
         self.verify_integrity_with_context(&VerifierContext::default())
     }
 
@@ -106,7 +103,10 @@ where
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
+    ) -> Result<(), VerificationError>
+    where
+        Claim: risc0_binfmt::Digestible + core::fmt::Debug,
+    {
         let params = ctx
             .succinct_verifier_parameters
             .as_ref()
@@ -227,7 +227,10 @@ where
     pub(crate) fn to_assumption(
         &self,
         erase_control_root: bool,
-    ) -> anyhow::Result<crate::Assumption> {
+    ) -> anyhow::Result<crate::Assumption>
+    where
+        Claim: risc0_binfmt::Digestible,
+    {
         Ok(crate::Assumption {
             claim: self.claim.digest::<sha::Impl>(),
             control_root: match erase_control_root {
@@ -239,7 +242,10 @@ where
 
     /// Prunes the claim, retaining its digest, and converts into a [SuccinctReceipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
-    pub fn into_unknown(self) -> SuccinctReceipt<Unknown> {
+    pub fn into_unknown(self) -> SuccinctReceipt<Unknown>
+    where
+        Claim: risc0_binfmt::Digestible,
+    {
         SuccinctReceipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
             seal: self.seal,

@@ -21,12 +21,11 @@ mod prover_impl;
 mod tests;
 pub(crate) mod union_peak;
 
-use std::{fmt::Debug, rc::Rc};
+use std::rc::Rc;
 
 use anyhow::{anyhow, bail, ensure, Result};
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::hal::{CircuitHal, Hal};
-use serde::Serialize;
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
@@ -255,10 +254,7 @@ pub trait ProverServer: private::Sealed {
     }
 }
 
-trait Lift<Claim>
-where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-{
+trait Lift<Claim> {
     fn lift(&self, segment_receipt: &SegmentReceipt) -> anyhow::Result<SuccinctReceipt<Claim>>;
 }
 
@@ -280,10 +276,7 @@ impl<P: ProverServer + ?Sized> Lift<WorkClaim<ReceiptClaim>> for P {
     }
 }
 
-trait Join<Claim>
-where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-{
+trait Join<Claim> {
     fn join(
         &self,
         a: &SuccinctReceipt<Claim>,
@@ -311,10 +304,7 @@ impl<P: ProverServer + ?Sized> Join<WorkClaim<ReceiptClaim>> for P {
     }
 }
 
-trait Resolve<Claim>
-where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-{
+trait Resolve<Claim> {
     fn resolve(
         &self,
         cond: &SuccinctReceipt<Claim>,
@@ -342,10 +332,7 @@ impl<P: ProverServer + ?Sized> Resolve<WorkClaim<ReceiptClaim>> for P {
     }
 }
 
-trait Compress<Claim>
-where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-{
+trait Compress<Claim> {
     fn composite_to_succinct(
         &self,
         composite_receipt: &CompositeReceipt,
@@ -354,7 +341,6 @@ where
 
 impl<P, Claim> Compress<Claim> for P
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     P: Lift<Claim>
         + Join<Claim>
         + Resolve<Claim>
