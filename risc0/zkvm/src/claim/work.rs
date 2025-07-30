@@ -22,8 +22,9 @@ use risc0_binfmt::{tagged_struct, DecodeError, Digestible, PovwNonce};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    sha,
     sha::{Digest, Sha256},
-    MaybePruned, PrunedValueError, ReceiptClaim,
+    MaybePruned, PrunedValueError, ReceiptClaim, Unknown,
 };
 
 /// A wrapper around the underlying claim that additionally includes the amount of verifiable work
@@ -36,6 +37,20 @@ pub struct WorkClaim<Claim> {
     pub claim: MaybePruned<Claim>,
     /// Work associated with proving the wrapped claim.
     pub work: MaybePruned<Work>,
+}
+
+impl<Claim> WorkClaim<Claim> {
+    /// Prunes the claim, retaining its digest, and converts into a [WorkClaim] with an unknown
+    /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
+    pub fn into_unknown(self) -> WorkClaim<Unknown>
+    where
+        Claim: Digestible,
+    {
+        WorkClaim {
+            claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
+            work: self.work,
+        }
+    }
 }
 
 impl<Claim> Digestible for WorkClaim<Claim>

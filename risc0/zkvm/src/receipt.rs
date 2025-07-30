@@ -510,6 +510,19 @@ impl<Claim> GenericReceipt<Claim> {
             Self::Fake(_) => 0,
         }
     }
+
+    /// Prunes the claim, retaining its digest, and converts into a [GenericReceipt] with an unknown
+    /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
+    pub fn into_unknown(self) -> GenericReceipt<Unknown>
+    where
+        Claim: risc0_binfmt::Digestible,
+    {
+        match self {
+            Self::Succinct(receipt) => receipt.into_unknown().into(),
+            Self::Groth16(receipt) => receipt.into_unknown().into(),
+            Self::Fake(receipt) => receipt.into_unknown().into(),
+        }
+    }
 }
 
 impl<Claim> From<SuccinctReceipt<Claim>> for GenericReceipt<Claim> {
