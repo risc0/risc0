@@ -382,6 +382,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
+            "actor" => Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap()),
             #[cfg(feature = "bonsai")]
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
             "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
@@ -406,7 +407,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(DefaultProver::new(get_r0vm_path().unwrap()).unwrap())
+    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
 }
 
 /// Return a default [Executor] based on environment variables and feature
