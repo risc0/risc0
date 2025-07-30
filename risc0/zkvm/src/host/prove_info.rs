@@ -34,6 +34,11 @@ pub struct ProveInfo {
     /// [`PovwJobId`][risc0_binfmt::PovwJobId] is provided in the [`ExecutorEnv`][crate::ExecutorEnv].
     /// This receipt provides a proof of work completed for this job, and can be combined into a
     /// work log using the [Log Builder guest][risc0-povw].
+    ///
+    /// Note that this receipt will not be provided if the [`ProverOpts`][crate::ProverOpts] has a
+    /// compression level of [`ReceiptKind::Composite`][crate::ReceiptKind]. A
+    /// [`CompositeReceipt`][crate::CompositeReceipt] can be used to produce a work receipt by
+    /// using [`ProverServer::composite_to_succinct_povw`][crate::ProverServer].
     pub work_receipt: Option<GenericReceipt<WorkClaim<ReceiptClaim>>>,
 }
 
