@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Context;
 use risc0_povw::{
     guest::{Input, Journal, State},
     Job, WorkLog,
@@ -47,12 +46,7 @@ fn main() {
         // NOTE: env::verify_assumption is used here instead of env::verify, becuase the claim type
         // is WorkClaim<Unknown> rather than ReceiptClaim.
         env::verify_assumption(update.claim.digest(), Digest::ZERO).unwrap();
-        let work = update
-            .claim
-            .work
-            .value()
-            .context("work value is pruned")
-            .unwrap();
+        let work = update.claim.work.value().expect("work value is pruned");
 
         // Assert that the work log ID matches the ID for the log built so far.
         assert_eq!(work.nonce_min.log, work_log_id);
