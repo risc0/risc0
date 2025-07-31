@@ -9906,6 +9906,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-core",
+ "risc0-groth16-sys",
  "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-methods",
