@@ -68,10 +68,10 @@ tracing = { version = "0.1", default-features = false, features = [
 
 # Host dependencies
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-addr2line = { version = "0.24.2", features = [
+addr2line = { version = "0.24.2", optional = true, features = [
   "rustc-demangle",
   "std",
-], optional = true }
+] }
 risc0-binfmt = { workspace = true, features = ["rand"] }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
