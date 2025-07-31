@@ -609,21 +609,27 @@ mod tests {
                 "1.0.0": {
                     "target_agnostic": {
                         "artifact": {
-                            "sha256": HELLO_WORLD_DUMMY_TAR_XZ_SHA256
+                            "sha256_blobs": [
+                                HELLO_WORLD_DUMMY_TAR_XZ_SHA256
+                            ]
                         },
                     }
                 },
                 "2.0.0": {
                     "target_agnostic": {
                         "artifact": {
-                            "sha256": HELLO_WORLD2_DUMMY_TAR_XZ_SHA256
+                            "sha256_blobs": [
+                                HELLO_WORLD2_DUMMY_TAR_XZ_SHA256
+                            ]
                         },
                     }
                 },
                 "3.0.0-badsha": {
                     "target_agnostic": {
                         "artifact": {
-                            "sha256": HELLO_WORLD3_DUMMY_TAR_XZ_SHA256
+                            "sha256_blobs": [
+                                HELLO_WORLD3_DUMMY_TAR_XZ_SHA256
+                            ]
                         },
                     }
                 },

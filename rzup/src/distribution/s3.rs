@@ -48,8 +48,8 @@ impl fmt::Display for TargetTriple {
 #[serde_as]
 #[derive(Serialize, Deserialize)]
 struct Artifact {
-    #[serde_as(as = "DisplayFromStr")]
-    sha256: Sha256Digest,
+    #[serde_as(as = "Vec<DisplayFromStr>")]
+    sha256_blobs: Vec<Sha256Digest>,
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -276,7 +276,9 @@ impl<'a> S3Bucket<'a> {
         sha256: Sha256Digest,
         manifest: &mut DistributionManifest,
     ) {
-        let artifact = Artifact { sha256 };
+        let artifact = Artifact {
+            sha256_blobs: vec![sha256],
+        };
         match manifest.releases.entry(version.clone()) {
             Entry::Occupied(mut entry) => {
                 let existing_release = entry.get_mut();
@@ -546,7 +548,15 @@ impl<'a> DistributionPlatform for S3Bucket<'a> {
         };
 
         let archive_name = component.archive_name(platform)?;
-        let artifact_sha256 = &artifact.sha256;
+        if artifact.sha256_blobs.is_empty() {
+            return Err(RzupError::Other("release contains no artifacts".into()));
+        }
+        if artifact.sha256_blobs.len() > 1 {
+            return Err(RzupError::Other(
+                "release contains multiple artifacts, update rzup".into(),
+            ));
+        }
+        let artifact_sha256 = &artifact.sha256_blobs[0];
 
         let download_path = env.tmp_dir().join(archive_name);
         let mut download_file = std::fs::OpenOptions::new()
