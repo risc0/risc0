@@ -6320,7 +6320,7 @@ checksum = "3df6368f71f205ff9c33c076d170dd56ebf68e8161c733c0caa07a7a5509ed53"
 
 [[package]]
 name = "risc0-bigint2"
-version = "1.4.6"
+version = "1.4.7"
 dependencies = [
  "anyhow",
  "clap 4.5.37",
