@@ -85,9 +85,9 @@ extern __device__ FpExt rv32im_v2_15(uint32_t idx,
 extern __device__ FpExt rv32im_v2_14(uint32_t idx,
                                      uint32_t size,
                                      FpExt arg0,
-                                     Fp* arg1,
+                                     FpExt arg1,
                                      FpExt arg2,
-                                     FpExt arg3,
+                                     Fp* arg3,
                                      FpExt arg4,
                                      FpExt arg5,
                                      FpExt arg6,
@@ -299,7 +299,7 @@ extern __device__ FpExt poly_fp(uint32_t idx,
                                 const Fp* accum);
 
 constexpr size_t INV_RATE = 4;
-constexpr size_t kNumPolyMixPows = 462;
+constexpr size_t kNumPolyMixPows = 458;
 extern __constant__ FpExt poly_mix[kNumPolyMixPows];
 
 } // namespace risc0::circuit::rv32im_v2::cuda

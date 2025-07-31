@@ -2978,95 +2978,9 @@ impl risc0_zkp::layout::Component for MemoryPageInLayout {
         Ok(())
     }
 }
-pub struct ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout {
-    pub mem: &'static MemoryPageInLayout,
-}
-impl risc0_zkp::layout::Component for ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout {
-    fn ty_name(&self) -> &'static str {
-        "ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("mem", self.mem)?;
-        Ok(())
-    }
-}
-pub type ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout8LayoutArray =
-    [&'static ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout; 8];
-pub struct ControlLoadRootAndNonce_SuperArm0_SuperLayout {
-    pub _1: &'static ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout8LayoutArray,
-}
-impl risc0_zkp::layout::Component for ControlLoadRootAndNonce_SuperArm0_SuperLayout {
-    fn ty_name(&self) -> &'static str {
-        "ControlLoadRootAndNonce_SuperArm0_SuperLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("_1", self._1)?;
-        Ok(())
-    }
-}
-pub struct ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout {
-    pub mem: &'static MemoryPageInLayout,
-}
-impl risc0_zkp::layout::Component for ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout {
-    fn ty_name(&self) -> &'static str {
-        "ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("mem", self.mem)?;
-        Ok(())
-    }
-}
-pub type ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout8LayoutArray =
-    [&'static ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout; 8];
-pub struct ControlLoadRootAndNonce_SuperArm1_SuperLayout {
-    pub _1: &'static ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout8LayoutArray,
-}
-impl risc0_zkp::layout::Component for ControlLoadRootAndNonce_SuperArm1_SuperLayout {
-    fn ty_name(&self) -> &'static str {
-        "ControlLoadRootAndNonce_SuperArm1_SuperLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("_1", self._1)?;
-        Ok(())
-    }
-}
-pub struct ControlLoadRootAndNonce_SuperLayout {
-    pub arm0: &'static ControlLoadRootAndNonce_SuperArm0_SuperLayout,
-    pub arm1: &'static ControlLoadRootAndNonce_SuperArm1_SuperLayout,
-}
-impl risc0_zkp::layout::Component for ControlLoadRootAndNonce_SuperLayout {
-    fn ty_name(&self) -> &'static str {
-        "ControlLoadRootAndNonce_SuperLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("arm0", self.arm0)?;
-        v.visit_component("arm1", self.arm1)?;
-        Ok(())
-    }
-}
-pub type MemoryArgLayout16LayoutArray = [&'static MemoryArgLayout; 16];
-pub struct _Arguments_ControlLoadRootAndNonce_SuperLayout {
-    pub memory_arg: &'static MemoryArgLayout16LayoutArray,
-}
-impl risc0_zkp::layout::Component for _Arguments_ControlLoadRootAndNonce_SuperLayout {
-    fn ty_name(&self) -> &'static str {
-        "_Arguments_ControlLoadRootAndNonce_SuperLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("memory_arg", self.memory_arg)?;
-        Ok(())
-    }
-}
+pub type MemoryPageInLayout8LayoutArray = [&'static MemoryPageInLayout; 8];
 pub struct ControlLoadRootAndNonceLayout {
-    pub _super: &'static ControlLoadRootAndNonce_SuperLayout,
-    pub _arguments_control_load_root_and_nonce__super:
-        &'static _Arguments_ControlLoadRootAndNonce_SuperLayout,
+    pub mem: &'static MemoryPageInLayout8LayoutArray,
 }
 impl risc0_zkp::layout::Component for ControlLoadRootAndNonceLayout {
     fn ty_name(&self) -> &'static str {
@@ -3074,11 +2988,7 @@ impl risc0_zkp::layout::Component for ControlLoadRootAndNonceLayout {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("_super", self._super)?;
-        v.visit_component(
-            "_arguments_control_load_root_and_nonce__super",
-            self._arguments_control_load_root_and_nonce__super,
-        )?;
+        v.visit_component("mem", self.mem)?;
         Ok(())
     }
 }
@@ -3282,6 +3192,7 @@ impl risc0_zkp::layout::Component for ControlResume_SuperLayout {
         Ok(())
     }
 }
+pub type MemoryArgLayout16LayoutArray = [&'static MemoryArgLayout; 16];
 pub type CycleArgLayout8LayoutArray = [&'static CycleArgLayout; 8];
 pub struct _Arguments_ControlResume_SuperLayout {
     pub memory_arg: &'static MemoryArgLayout16LayoutArray,
@@ -8731,18 +8642,10 @@ pub struct DigestRegStruct {
     pub values: DigestRegValues_SuperStruct8Array,
 }
 pub type ValU32Struct8Array = [ValU32Struct; 8];
-#[derive(Copy, Clone, Debug)]
-pub struct ControlLoadRootAndNonce_SuperArm0_Super__0Struct {}
-#[derive(Copy, Clone, Debug)]
-pub struct ControlLoadRootAndNonce_SuperArm1_Super__0Struct {}
-pub type ControlLoadRootAndNonce_SuperArm0_Super__0Struct8Array =
-    [ControlLoadRootAndNonce_SuperArm0_Super__0Struct; 8];
-pub type ControlLoadRootAndNonce_SuperArm1_Super__0Struct8Array =
-    [ControlLoadRootAndNonce_SuperArm1_Super__0Struct; 8];
+pub type GetDataStruct8Array = [GetDataStruct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct ControlResume_SuperArm1_Super__0Struct {}
 pub type ControlResume_SuperArm1_Super__0Struct8Array = [ControlResume_SuperArm1_Super__0Struct; 8];
-pub type GetDataStruct8Array = [GetDataStruct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct ControlTable_SuperArm0_Super__0Struct {}
 #[derive(Copy, Clone, Debug)]

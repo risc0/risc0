@@ -905,31 +905,9 @@ struct Mem1Layout {
 struct MemoryPageInLayout {
   MemoryIOLayout io;
 };
-struct ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout {
-  MemoryPageInLayout mem;
-};
-using ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout8LayoutArray = std::array<ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout, 8>;
-struct ControlLoadRootAndNonce_SuperArm0_SuperLayout {
-  ControlLoadRootAndNonce_SuperArm0_Super__0_SuperLayout8LayoutArray _1;
-};
-struct ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout {
-  MemoryPageInLayout mem;
-};
-using ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout8LayoutArray = std::array<ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout, 8>;
-struct ControlLoadRootAndNonce_SuperArm1_SuperLayout {
-  ControlLoadRootAndNonce_SuperArm1_Super__0_SuperLayout8LayoutArray _1;
-};
-struct ControlLoadRootAndNonce_SuperLayout {
-  ControlLoadRootAndNonce_SuperArm0_SuperLayout arm0;
-  ControlLoadRootAndNonce_SuperArm1_SuperLayout arm1;
-};
-using MemoryArgLayout16LayoutArray = std::array<MemoryArgLayout, 16>;
-struct _Arguments_ControlLoadRootAndNonce_SuperLayout {
-  MemoryArgLayout16LayoutArray memoryArg;
-};
+using MemoryPageInLayout8LayoutArray = std::array<MemoryPageInLayout, 8>;
 struct ControlLoadRootAndNonceLayout {
-  ControlLoadRootAndNonce_SuperLayout _super;
-  _Arguments_ControlLoadRootAndNonce_SuperLayout _arguments_ControlLoadRootAndNonce_Super;
+  MemoryPageInLayout8LayoutArray mem;
 };
 struct Control0_SuperArm0Layout {
   ControlLoadRootAndNonceLayout _super;
@@ -1010,6 +988,7 @@ struct ControlResume_SuperLayout {
   ControlResume_SuperArm0Layout arm0;
   ControlResume_SuperArm1_SuperLayout arm1;
 };
+using MemoryArgLayout16LayoutArray = std::array<MemoryArgLayout, 16>;
 using CycleArgLayout8LayoutArray = std::array<CycleArgLayout, 8>;
 struct _Arguments_ControlResume_SuperLayout {
   MemoryArgLayout16LayoutArray memoryArg;
@@ -3209,16 +3188,10 @@ struct DigestRegStruct {
   DigestRegValues_SuperStruct8Array values;
 };
 using ValU32Struct8Array = std::array<ValU32Struct, 8>;
-struct ControlLoadRootAndNonce_SuperArm0_Super__0Struct {
-};
-struct ControlLoadRootAndNonce_SuperArm1_Super__0Struct {
-};
-using ControlLoadRootAndNonce_SuperArm0_Super__0Struct8Array = std::array<ControlLoadRootAndNonce_SuperArm0_Super__0Struct, 8>;
-using ControlLoadRootAndNonce_SuperArm1_Super__0Struct8Array = std::array<ControlLoadRootAndNonce_SuperArm1_Super__0Struct, 8>;
+using GetDataStruct8Array = std::array<GetDataStruct, 8>;
 struct ControlResume_SuperArm1_Super__0Struct {
 };
 using ControlResume_SuperArm1_Super__0Struct8Array = std::array<ControlResume_SuperArm1_Super__0Struct, 8>;
-using GetDataStruct8Array = std::array<GetDataStruct, 8>;
 struct ControlTable_SuperArm0_Super__0Struct {
 };
 struct ControlTable_SuperArm1_Super__0Struct {
