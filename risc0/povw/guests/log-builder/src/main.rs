@@ -28,6 +28,8 @@ fn main() {
     let (work_log_id, initial_commit) = match input.state {
         State::Initial { work_log_id } => (work_log_id, WorkLog::EMPTY.commit()),
         State::Continuation { journal } => {
+            // NOTE: Its possible that this verification is not required, and that the merkle
+            // noninclusion proofs verified later are sufficient.
             env::verify(input.self_image_id, &borsh::to_vec(&journal).unwrap()).unwrap();
 
             // Check that the self image ID and work log ID match the input.
