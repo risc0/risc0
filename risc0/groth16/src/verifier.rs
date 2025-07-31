@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    from_u256, g1_from_bytes, g2_from_bytes, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson,
+    from_u256, from_u256_hex, g1_from_bytes, g2_from_bytes, ProofJson, PublicInputsJson, Seal,
+    VerifyingKeyJson,
 };
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
@@ -79,8 +80,10 @@ const IC5_Y: &str = "15060583660288623605191393599883223885678013570733629274538
 pub struct Verifier {
     /// prepared verifying key little endian encoded.
     encoded_pvk: Vec<u8>,
+
     /// proof little endian encoded.
     encoded_proof: Vec<u8>,
+
     /// prepared public inputs little endian encoded.
     encoded_prepared_inputs: Vec<u8>,
 }
@@ -88,6 +91,23 @@ pub struct Verifier {
 impl Verifier {
     /// Creates a new Groth16 `Verifier` instance.
     pub fn new(
+        seal: &[u8],
+        control_root: Digest,
+        claim_digest: Digest,
+        mut bn254_control_id: Digest,
+        verifying_key: &VerifyingKey,
+    ) -> Result<Self, Error> {
+        let seal = Seal::decode(seal)?;
+
+        let (a0, a1) = split_digest(control_root)?;
+        let (c0, c1) = split_digest(claim_digest)?;
+        bn254_control_id.as_mut_bytes().reverse();
+        let id_bn254_fr = fr_from_hex_string(&hex::encode(bn254_control_id))?;
+
+        Self::new_inner(&seal, &[a0, a1, c0, c1, id_bn254_fr], verifying_key)
+    }
+
+    pub(crate) fn new_inner(
         seal: &Seal,
         public_inputs: &[Fr],
         verifying_key: &VerifyingKey,
@@ -131,7 +151,7 @@ impl Verifier {
         public_inputs: PublicInputsJson,
         verifying_key: VerifyingKeyJson,
     ) -> Result<Self> {
-        Verifier::new(
+        Verifier::new_inner(
             &proof.try_into()?,
             &public_inputs.to_scalar()?,
             &verifying_key.verifying_key()?,
@@ -159,13 +179,6 @@ impl Verifier {
 /// Verifying key for Groth16 proofs.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Fr(#[serde(with = "serde_ark")] pub(crate) ark_bn254::Fr);
-
-impl Fr {
-    #[stability::unstable]
-    pub fn ark_fr(&self) -> ark_bn254::Fr {
-        self.0
-    }
-}
 
 impl Digestible for Fr {
     /// Compute a tagged hash of the [Fr] value.
@@ -196,13 +209,6 @@ fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
     x.serialize_uncompressed(&mut buffer).unwrap();
     buffer.reverse();
     *S::hash_bytes(&buffer)
-}
-
-impl VerifyingKey {
-    #[stability::unstable]
-    pub fn ark_verifying_key(&self) -> ark_groth16::VerifyingKey<Bn254> {
-        self.0.clone()
-    }
 }
 
 impl Digestible for VerifyingKey {
@@ -290,4 +296,28 @@ fn try_verifying_key() -> Result<VerifyingKey, Error> {
         delta_g2,
         gamma_abc_g1,
     }))
+}
+
+/// Splits the digest in half returning a scalar for each halve.
+fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
+    let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
+    let middle = big_endian.len() / 2;
+    let (b, a) = big_endian.split_at(middle);
+    Ok((
+        fr_from_bytes(&from_u256_hex(&hex::encode(a))?)?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(b))?)?,
+    ))
+}
+
+/// Creates an [Fr] from a hex string
+fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
+    fr_from_bytes(&from_u256_hex(val)?)
+}
+
+// Deserialize a scalar field from bytes in big-endian format
+fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
+    let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
+    ark_bn254::Fr::deserialize_uncompressed(&*scalar)
+        .map(Fr)
+        .map_err(|err| anyhow!(err))
 }
