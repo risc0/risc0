@@ -267,7 +267,6 @@ impl WorkLog {
         Ok(())
     }
 
-    // TODO: Not a very good name.
     /// Add the given [Job] to the [WorkLog] and provide a Merkle inclusion path showing that the
     /// job number previous was unoccupied in the Merkle tree.
     pub fn prove_add(
@@ -453,8 +452,7 @@ impl Job {
         assert!(index < 1 << (Self::TREE_HEIGHT - height));
 
         if height == 0 {
-            // TODO: We might want to add a tag and hash the leaf here instead.
-            return <[u8; 32]>::from(self.bitmap_at(index << 8)).into();
+            return hash_leaf(self.bitmap_at(index << 8));
         }
 
         let Some(index_max) = self.index_max else {
@@ -474,8 +472,7 @@ impl Job {
         let mut index: u32 = self.index_max.unwrap();
 
         // Get the leaf and consume the first 8 bits.
-        // TODO: We might want to add a tag and hash the leaf here instead.
-        let mut node: Digest = <[u8; 32]>::from(self.bitmap_at(index)).into();
+        let mut node = hash_leaf(self.bitmap_at(index));
         index >>= 8;
 
         // Iteratively compute the root. All leaves to the left are full, the right empty.
@@ -635,8 +632,7 @@ impl<T: Merkleized> Opening<T> {
         // Drop the lowest 8 bits, which are an index into the bitmap.
         index >>= 8;
 
-        // TODO(povw): We might want to add a tag and hash the leaf here instead.
-        let mut node = <[u8; 32]>::from(self.bitmap).into();
+        let mut node = hash_leaf(self.bitmap);
         for path_node in self.path.iter() {
             node = match index.lowest_bit() {
                 true => join(*path_node, node),
@@ -738,7 +734,6 @@ where
         // Drop the lowest LEVEL + 8 bits.
         index >>= LEVEL + 8;
 
-        // TODO(povw): We might want to add a tag and hash the leaf here instead.
         let mut node = subtree_root;
         for path_node in self.path.iter() {
             node = match index.lowest_bit() {
@@ -751,10 +746,14 @@ where
     }
 }
 
-// TODO(povw): Add a tag to the leaves, the inner nodes, or both, to improve resistance to confusion
-// issues.
 pub(crate) fn join(left: impl Into<[u8; 32]>, right: impl Into<[u8; 32]>) -> Digest {
     *sha::Impl::hash_bytes(&[left.into(), right.into()].concat())
+}
+
+pub(crate) fn hash_leaf(leaf: Bitmap) -> Digest {
+    const LEAF_TAG: &[u8] = b"POVWLEAF";
+
+    *sha::Impl::hash_bytes(&[LEAF_TAG, <[u8; 32]>::from(leaf).as_slice()].concat())
 }
 
 #[cfg(test)]
