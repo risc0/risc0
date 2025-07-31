@@ -134,6 +134,7 @@ pub use {
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
+                default::DefaultProver,
                 default_executor, default_prover,
                 external::ExternalProver,
                 opts::{ProverOpts, ReceiptKind},
@@ -143,6 +144,13 @@ pub use {
     },
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
+
+/// TODO
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+pub mod rpc {
+    pub use super::host::rpc::*;
+}
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]

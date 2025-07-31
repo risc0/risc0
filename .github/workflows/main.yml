@@ -249,6 +249,7 @@ jobs:
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
@@ -309,6 +310,7 @@ jobs:
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
@@ -373,6 +375,7 @@ jobs:
       CARGO_BUILD_JOBS: 32
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RISC0_EXECUTOR: ipc
       RISC0_PROVER: ipc

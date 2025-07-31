@@ -271,13 +271,17 @@ impl ProverServer for ProverImpl {
             claim,
             verifier_parameters,
         };
-        receipt.verify_integrity_with_context(ctx)?;
+        receipt
+            .verify_integrity_with_context(ctx)
+            .context("verify segment")?;
 
         Ok(receipt)
     }
 
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        lift(receipt)
+        let receipt = lift(receipt)?;
+        receipt.verify_integrity().context("verify lift")?;
+        Ok(receipt)
     }
 
     fn lift_povw(
@@ -292,7 +296,9 @@ impl ProverServer for ProverImpl {
         a: &SuccinctReceipt<ReceiptClaim>,
         b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        join(a, b)
+        let receipt = join(a, b)?;
+        receipt.verify_integrity().context("verify join")?;
+        Ok(receipt)
     }
 
     fn join_povw(
@@ -316,7 +322,9 @@ impl ProverServer for ProverImpl {
         conditional: &SuccinctReceipt<ReceiptClaim>,
         assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        resolve(conditional, assumption)
+        let receipt = resolve(conditional, assumption)?;
+        receipt.verify_integrity().context("verify resolve")?;
+        Ok(receipt)
     }
 
     fn resolve_povw(
@@ -339,6 +347,7 @@ impl ProverServer for ProverImpl {
         &self,
         a: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        // TODO: figure out how to verify this
         identity_p254(a)
     }
 
@@ -346,6 +355,7 @@ impl ProverServer for ProverImpl {
         &self,
         request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
+        // TODO: figure out how to verify this
         prove_keccak(request)
     }
 
@@ -354,7 +364,9 @@ impl ProverServer for ProverImpl {
         a: &SuccinctReceipt<Unknown>,
         b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        union(a, b)
+        let receipt = union(a, b)?;
+        receipt.verify_integrity().context("verify union")?;
+        Ok(receipt)
     }
 
     fn unwrap_povw(
