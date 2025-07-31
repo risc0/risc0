@@ -998,15 +998,16 @@ dependencies = [
  "anyhow",
  "ark-bn254",
  "ark-ec",
+ "ark-ff",
  "ark-groth16",
  "ark-serialize",
  "bytemuck",
  "hex",
  "num-bigint",
+ "num-traits",
  "risc0-binfmt",
  "risc0-zkp",
  "serde",
- "stability",
 ]
 
 [[package]]
