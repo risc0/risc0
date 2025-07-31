@@ -19,11 +19,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{Job, SubtreeOpening, WorkLog};
 
-#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 /// State of the PoVW guest program execution.
 ///
 /// Represents either the initial state with a work log ID or a continuation
 /// state with a journal from previous execution.
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub enum State {
     /// Initial execution state with the work log ID to process.
     Initial {
@@ -50,11 +50,11 @@ impl From<Journal> for State {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 /// Input to the PoVW guest program.
 ///
 /// Contains the execution state, work log updates to apply, and the self image ID
 /// for recursive verification.
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct Input {
     /// Optional journal from the previous execution of this guest.
     ///
@@ -67,11 +67,11 @@ pub struct Input {
     pub self_image_id: Digest,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 /// A single work log update containing a work claim and its non-inclusion proof.
 ///
 /// Used to prove that nonces consumed in this update are unused in the work log
 /// to which the update is applied.
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 pub struct WorkLogUpdate {
     /// Work claim to be added to the log.
     pub claim: WorkClaim<Unknown>,
@@ -80,10 +80,10 @@ pub struct WorkLogUpdate {
     pub noninclusion_proof: SubtreeOpening<WorkLog, { Job::TREE_HEIGHT }>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
 /// Journal output from PoVW guest program execution.
 ///
 /// Contains the work log commitment updates and accumulated work value.
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
 pub struct Journal {
     /// Work log ID that this journal corresponds to.
     pub work_log_id: U160,

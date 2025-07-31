@@ -62,13 +62,13 @@ use serde::{Deserialize, Serialize};
 type U96 = Uint<96, 2>;
 
 // NOTE: The ruint U256 type is not special here. It's just a convinient bitmap.
-#[derive(
-    Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize,
-)]
 /// 256-bit bitmap for tracking used nonces within PoVW jobs.
 ///
 /// Used as leaves in Merkle trees to efficiently represent which nonce indices
 /// have been consumed. Each bit corresponds to a nonce index within a group of 256.
+#[derive(
+    Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize,
+)]
 pub struct Bitmap(U256);
 
 impl Bitmap {
@@ -132,11 +132,11 @@ impl From<Bitmap> for [u8; 32] {
     }
 }
 
-#[derive(Clone, Debug, Default)]
 /// Top-level container for multiple work logs in the PoVW system.
 ///
 /// Organizes work logs by their 160-bit log IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion across all logs.
+#[derive(Clone, Debug, Default)]
 pub struct WorkSet {
     /// Map of work log IDs to their corresponding work logs.
     pub logs: BTreeMap<PovwLogId, WorkLog>,
@@ -260,11 +260,11 @@ impl WorkSet {
     }
 }
 
-#[derive(Clone, Debug, Default)]
 /// Collection of jobs within a single prover's work log.
 ///
 /// Organizes jobs by their 64-bit job IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion within this log.
+#[derive(Clone, Debug, Default)]
 pub struct WorkLog {
     /// Map of job IDs to their corresponding jobs.
     pub jobs: BTreeMap<u64, Job>,
@@ -415,11 +415,11 @@ impl WorkLog {
     }
 }
 
-#[derive(Clone, Debug)]
 /// Representation of a range of used nonces in a job (i.e. a single continuation).
 ///
 /// Stores the maximum used nonce index as a shorthand for the range [0, index_max].
 /// When set to None, represents an empty job with no used nonces.
+#[derive(Clone, Debug)]
 pub struct Job {
     /// Only store the max used index, as a shorthand for the range [0, index_max]. When set to
     /// none, this represents an empty job.
@@ -580,10 +580,10 @@ mod private {
     impl Sealed for WorkSet {}
 }
 
-#[allow(private_bounds)]
 /// Trait for data structures that can be committed to using Merkle trees.
 ///
 /// Provides associated types for tree height and index type used in Merkle operations.
+#[allow(private_bounds)]
 pub trait Merkleized: private::Sealed {
     /// The height of the Merkle tree for this data structure.
     type TreeHeight: ArraySize;
@@ -606,10 +606,10 @@ impl Merkleized for WorkSet {
     type Index = U256;
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
 /// Merkle opening proof for inclusion/non-inclusion of a nonce in a Merkleized structure.
 ///
 /// Contains a bitmap representing the leaf and a path of sibling hashes up to the root.
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Opening<T: Merkleized> {
     bitmap: Bitmap,
     path: Box<Array<Digest, T::TreeHeight>>,
@@ -682,11 +682,11 @@ impl<T: Merkleized> Opening<T> {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
 /// Subtree opening proof for a specific level in a Merkleized structure.
 ///
 /// Used to prove that an entire subtree at a given level is empty or full,
 /// without needing to provide the full subtree including leaves.
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SubtreeOpening<T: Merkleized, const LEVEL: usize>
 where
     typenum::Const<LEVEL>: typenum::ToUInt,
