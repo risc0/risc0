@@ -23,6 +23,10 @@ risc0-circuit-recursion = { workspace = true, features = [
   "prove",
 ], optional = true }
 risc0-core = { workspace = true }
+risc0-groth16-sys = { workspace = true, optional = true, features = [
+  "cuda",
+  "setup",
+] }
 risc0-zkp = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, features = ["prove"], optional = true }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods", optional = true }
@@ -44,7 +48,7 @@ release = false
 
 [features]
 default = ["zkvm"]
-cuda = ["risc0-zkvm/cuda"]
+setup-groth16 = ["dep:risc0-groth16-sys"]
 zkvm = [
   "dep:risc0-circuit-keccak",
   "dep:risc0-circuit-recursion",
