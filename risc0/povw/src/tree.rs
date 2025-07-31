@@ -505,7 +505,8 @@ impl Job {
 /// Trait for types that can be used as indices in Merkleized data structures.
 ///
 /// Provides operations needed for Merkle tree traversal and bitmap indexing.
-pub trait MerkleizedIndex: Copy + Eq + ShrAssign<usize> + Debug {
+#[expect(private_bounds)]
+pub trait MerkleizedIndex: private::Sealed + Copy + Eq + ShrAssign<usize> + Debug {
     /// Zero value for this index type.
     const ZERO: Self;
 
@@ -548,12 +549,14 @@ mod private {
     impl Sealed for Job {}
     impl Sealed for WorkLog {}
     impl Sealed for WorkSet {}
+    impl Sealed for u32 {}
+    impl<const BITS: usize, const LIMBS: usize> Sealed for Uint<BITS, LIMBS> {}
 }
 
 /// Trait for data structures that can be committed to using Merkle trees.
 ///
 /// Provides associated types for tree height and index type used in Merkle operations.
-#[allow(private_bounds)]
+#[expect(private_bounds)]
 pub trait Merkleized: private::Sealed {
     /// The height of the Merkle tree for this data structure.
     type TreeHeight: ArraySize;
@@ -699,8 +702,6 @@ where
     T::TreeHeight: Sub<typenum::U<LEVEL>>,
     <T::TreeHeight as Sub<typenum::U<LEVEL>>>::Output: ArraySize,
 {
-    // TODO(povw): The definition of an index here is a bit awkward and inconsistent with usage
-    // elsewhere.
     /// Verify the opening as the root of an empty subtree at the given level (i.e. every bit in
     /// the subtree indicates non-inclusion).
     ///
