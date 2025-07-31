@@ -532,7 +532,7 @@ pub(crate) const FULL_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
 #[cfg(test)]
 mod tests {
     use super::{WorkSet, EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS};
-    use crate::{join, Bitmap};
+    use crate::{tree::join, Bitmap};
     use risc0_zkvm::{digest, Digest};
 
     fn calc_empty_subtree_root(height: usize) -> Digest {
