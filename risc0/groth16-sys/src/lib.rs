@@ -92,6 +92,7 @@ pub fn setup(params: &SetupParams) -> anyhow::Result<()> {
     ffi_wrap(|| unsafe { risc0_groth16_cuda_setup(&raw_params) })
 }
 
+#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
 #[repr(C)]
 struct RawProverParams {
     pub public_path: *const c_char,
@@ -99,6 +100,7 @@ struct RawProverParams {
     pub witness: *const u8,
 }
 
+#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
 #[repr(C)]
 struct RawSetupParams {
     pub pcoeffs_path: *const c_char,
@@ -117,6 +119,7 @@ extern "C" {
     fn risc0_groth16_cuda_setup(params: *const RawSetupParams) -> *const c_char;
 }
 
+#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
 fn ffi_wrap<F>(mut inner: F) -> Result<()>
 where
     F: FnMut() -> *const c_char,
@@ -141,6 +144,7 @@ where
     }
 }
 
+#[cfg_attr(not(feature = "cuda"), allow(dead_code))]
 pub struct RawPath {
     path: PathBuf,
     c_str: CString,
