@@ -155,6 +155,8 @@ const BUSY_LOOP_POVW_JOB_ID: PovwJobId = PovwJobId {
     job: 42,
 };
 
+// TODO(povw): Implement additional cachine and combine tests to have this run faster.
+
 static BUSY_LOOP_SEGMENTS: LazyLock<(Journal, Vec<SegmentReceipt>)> =
     LazyLock::new(generate_busy_loop_segments);
 
