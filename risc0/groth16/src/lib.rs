@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@
 //! }
 //! ```
 //!
-//! ## STARK to SNARK
+//! ## Shrink Wrap (aka STARK to SNARK)
 //!
-//! It also provides the [stark_to_snark][docker::stark_to_snark] function to run a prover Groth16
+//! It also provides the [shrink_wrap][prove::shrink_wrap] function to run a prover Groth16
 //! recursion prover via Docker. After generating a RISC Zero STARK proof, this function can be
 //! used to transform it into a Groth16 proof. This function becomes available when the `prove`
 //! feature flag is enabled.
@@ -64,6 +64,11 @@
 
 extern crate alloc;
 
+#[cfg(feature = "prove")]
+pub mod prove;
+mod types;
+mod verifier;
+
 use alloc::vec::Vec;
 use core::str::FromStr;
 
@@ -71,49 +76,12 @@ use anyhow::{anyhow, Error, Result};
 use ark_bn254::{G1Affine, G2Affine};
 use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
-use risc0_zkp::core::digest::Digest;
 
-mod data_structures;
-#[cfg(feature = "prove")]
-pub mod docker;
-#[cfg(feature = "prove")]
-mod seal_format;
-#[cfg(feature = "prove")]
-mod seal_to_json;
-mod verifier;
-
-pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
-#[cfg(feature = "prove")]
-pub use seal_to_json::to_json;
+pub use types::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
 pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
 
-/// Splits the digest in half returning a scalar for each halve.
-pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
-    let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
-    let middle = big_endian.len() / 2;
-    let (b, a) = big_endian.split_at(middle);
-    Ok((
-        fr_from_bytes(&from_u256_hex(&hex::encode(a))?)?,
-        fr_from_bytes(&from_u256_hex(&hex::encode(b))?)?,
-    ))
-}
-
-/// Creates an [Fr] from a hex string
-pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
-    fr_from_bytes(&from_u256_hex(val)?)
-}
-
-// Deserialize a scalar field from bytes in big-endian format
-pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
-    let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
-    ark_bn254::Fr::deserialize_uncompressed(&*scalar)
-        .map(Fr)
-        .map_err(|err| anyhow!(err))
-}
-
 /// Deserialize an element over the G1 group from bytes in big-endian format
-#[stability::unstable]
-pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
+pub(crate) fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
     if elem.len() != 2 {
         return Err(anyhow!("Malformed G1 field element"));
     }
@@ -128,8 +96,7 @@ pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
 }
 
 /// Deserialize an element over the G2 group from bytes in big-endian format
-#[stability::unstable]
-pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
+pub(crate) fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
     if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
         return Err(anyhow!("Malformed G2 field element"));
     }
@@ -161,7 +128,7 @@ pub(crate) fn from_u256(value: &str) -> Result<Vec<u8>, Error> {
 }
 
 // Convert the U256 value to a byte array in big-endian format
-fn from_u256_hex(value: &str) -> Result<Vec<u8>, Error> {
+pub(crate) fn from_u256_hex(value: &str) -> Result<Vec<u8>, Error> {
     Ok(
         to_fixed_array(hex::decode(value).map_err(|_| anyhow!("conversion from u256 failed"))?)
             .to_vec(),

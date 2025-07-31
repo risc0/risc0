@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 use crate::Receipt;
 
 /// Information returned by the prover including receipt as well as other information useful for debugging
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ProveInfo {
     /// receipt from the computation
@@ -30,7 +30,7 @@ pub struct ProveInfo {
 }
 
 /// Struct containing information about a prover's cycle count after running the guest program
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct SessionStats {
     /// Count of segments in this proof request

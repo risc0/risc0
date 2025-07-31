@@ -177,7 +177,7 @@ pub struct ProverOpts {
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum ReceiptKind {
     /// Request that a [CompositeReceipt][crate::CompositeReceipt] be generated.
