@@ -35,7 +35,6 @@ use risc0_zkp::{
         hash::{hash_suite_from_name, sha::Sha256},
     },
     verify::VerificationError,
-    MAX_CYCLES_PO2,
 };
 use serde::{Deserialize, Serialize};
 
@@ -263,7 +262,7 @@ pub(crate) fn allowed_control_ids(
     po2_max: usize,
 ) -> anyhow::Result<impl Iterator<Item = Digest>> {
     // Recursion programs (ZKRs) that are to be included in the allowed set.
-    let po2_range = MIN_LIFT_PO2..=usize::min(po2_max, MAX_CYCLES_PO2);
+    let po2_range = MIN_LIFT_PO2..=usize::min(po2_max, risc0_zkp::MAX_CYCLES_PO2);
     let allowed_zkr_names: BTreeSet<String> = [
         "join.zkr",
         "join_povw.zkr",
@@ -349,7 +348,7 @@ impl SuccinctReceiptVerifierParameters {
     /// control ID associated with cycle counts of all supported powers of two (po2).
     #[stability::unstable]
     pub fn all_po2s() -> Self {
-        Self::from_max_po2(MAX_CYCLES_PO2)
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 }
 
