@@ -17,39 +17,45 @@ use std::{borrow::Cow, convert::Infallible};
 use anyhow::{anyhow, ensure, Context};
 use derive_builder::Builder;
 use risc0_binfmt::PovwLogId;
-use risc0_zkvm::{Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, Receipt, WorkClaim};
+use risc0_zkvm::{
+    compute_image_id, Digest, ExecutorEnv, GenericReceipt, ProveInfo, Prover, Receipt, WorkClaim,
+};
 
 use crate::{
     guest::{Input, Journal, State, WorkLogUpdate},
     Job, WorkLog,
 };
 
-/// TODO
+/// A stateful prover for work log updates which runs the Log Builder to produce a receipt for each
+/// update to the work log.
 #[derive(Clone, Debug, Builder)]
 #[non_exhaustive]
 pub struct WorkLogUpdateProver<P> {
-    /// TODO
+    /// The underlying RISC Zero zkVM [Prover].
     #[builder(setter(custom))]
     pub prover: P,
-    /// TODO
+    /// The ID for the work log that is being updated.
     #[builder(setter(into))]
     pub log_id: PovwLogId,
-    /// TODO
+    /// The state of the work log.
+    ///
+    /// This is updated each time a proven update is made. Setting an initial work log allows
+    /// continuation of updates to an existing log.
     #[builder(setter(custom), default)]
     pub work_log: WorkLog,
-    /// TODO
+    /// Log Builder journal and receipt used to continue updates to a work log.
     #[builder(setter(custom), default)]
     pub continuation: Option<(Journal, Receipt)>,
-    /// TODO
-    #[builder(setter(into))]
+    /// Image ID for the Log Builder program.
+    #[builder(setter(custom))]
     pub log_builder_id: Digest,
-    /// TODO
-    #[builder(setter(into))]
+    /// Executable for the Log Builder program.
+    #[builder(setter(custom))]
     pub log_builder_program: Cow<'static, [u8]>,
 }
 
 impl<P> WorkLogUpdateProverBuilder<P> {
-    /// TODO
+    /// Set the underlying RISC Zero zkVM [Prover].
     pub fn prover<Q>(&mut self, prover: Q) -> WorkLogUpdateProverBuilder<Q> {
         WorkLogUpdateProverBuilder {
             prover: Some(prover),
@@ -62,7 +68,7 @@ impl<P> WorkLogUpdateProverBuilder<P> {
     }
 
     // TODO(povw): Avoid using anyhow?
-    /// TODO
+    /// Set the work log, continuing proving from a prior proven state.
     pub fn work_log(
         &mut self,
         work_log: WorkLog,
@@ -85,17 +91,31 @@ impl<P> WorkLogUpdateProverBuilder<P> {
         self.continuation = Some(Some((journal, continuation_receipt)));
         Ok(self)
     }
+
+    /// Set the Log Builder program, returning error is the image ID cannot be calculated.
+    pub fn log_builder_program(
+        &mut self,
+        program: impl Into<Cow<'static, [u8]>>,
+    ) -> anyhow::Result<&mut Self> {
+        let program = program.into();
+        let image_id = compute_image_id(&program)?;
+        self.log_builder_program = Some(program);
+        self.log_builder_id = Some(image_id);
+        Ok(self)
+    }
 }
 
 impl WorkLogUpdateProver<Infallible> {
-    /// TODO
+    /// Create a new builder for [WorkLogUpdateProver].
     pub fn builder() -> WorkLogUpdateProverBuilder<Infallible> {
         Default::default()
     }
 }
 
 impl<P: Prover> WorkLogUpdateProver<P> {
-    /// TODO
+    /// Update the work log and produce a proof by running the Log Builder.
+    ///
+    /// This updates the state of the [WorkLogUpdateProver].
     pub fn prove_update<Claim>(
         &mut self,
         work_receipts: impl IntoIterator<Item = GenericReceipt<WorkClaim<Claim>>>,
