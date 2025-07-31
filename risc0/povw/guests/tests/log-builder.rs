@@ -275,8 +275,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let mut prover = WorkLogUpdateProver::builder()
         .prover(default_prover())
         .log_id(work_log_id)
-        .log_builder_id(RISC0_POVW_LOG_BUILDER_ID)
-        .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)
+        .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)?
         .build()?;
 
     let proven_log_info = prover
@@ -348,8 +347,7 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
         .log_id(work_log_id)
         // Pass in the work log up to this point and the latest log builder receipt.
         .work_log(prover.work_log, proven_log_info.receipt)?
-        .log_builder_id(RISC0_POVW_LOG_BUILDER_ID)
-        .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)
+        .log_builder_program(RISC0_POVW_LOG_BUILDER_ELF)?
         .build()?;
 
     let work_receipt = work_info
