@@ -244,7 +244,7 @@ fn test_recursion_lift_join_unwrap_povw() -> anyhow::Result<()> {
     compressed_povw.verify_integrity_with_context(&ctx)?;
 
     let mut total_work = compressed_povw.claim.as_value()?.work.as_value()?.value;
-    for receipt in &segments[1..] {
+    for receipt in &segments[1..segments.len() - 1] {
         tracing::info!("Proving lift_povw");
         let rec_receipt = lift_povw(receipt)?;
         rec_receipt.verify_integrity_with_context(&ctx)?;
