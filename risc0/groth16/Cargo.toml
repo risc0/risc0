@@ -45,9 +45,10 @@ all-features = true
 [features]
 cuda = [
   "dep:circom-witnesscalc",
+  "dep:risc0-groth16-sys",
   "dep:wtns-file",
   "prove",
-  "risc0-groth16-sys?/cuda",
+  "risc0-groth16-sys/cuda",
 ]
 default = ["std"]
 prove = [
