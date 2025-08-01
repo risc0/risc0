@@ -155,8 +155,6 @@ const BUSY_LOOP_POVW_JOB_ID: PovwJobId = PovwJobId {
     job: 42,
 };
 
-// TODO(povw): Implement additional cachine and combine tests to have this run faster.
-
 static BUSY_LOOP_SEGMENTS: LazyLock<(Journal, Vec<SegmentReceipt>)> =
     LazyLock::new(generate_busy_loop_segments);
 
@@ -181,20 +179,23 @@ fn generate_busy_loop_segments() -> (Journal, Vec<SegmentReceipt>) {
     (session.journal.unwrap(), segment_receipts)
 }
 
-fn generate_echo_segment(
-    msg: impl AsRef<[u8]>,
-    povw_job: Option<PovwJobId>,
-) -> (Journal, SegmentReceipt) {
-    let mut env_builder = ExecutorEnv::builder();
-    env_builder
+/// PoVW job ID used in this test, by generate_echo_segment.
+const ECHO_POVW_JOB_ID: PovwJobId = PovwJobId {
+    log: PovwLogId::from_limbs([1, 2, 3]),
+    job: 43,
+};
+
+static ECHO_SEGMENT: LazyLock<(Journal, SegmentReceipt)> = LazyLock::new(generate_echo_segment);
+
+fn generate_echo_segment() -> (Journal, SegmentReceipt) {
+    let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Echo {
-            bytes: msg.as_ref().to_vec(),
+            bytes: b"hello".to_vec(),
         })
+        .unwrap()
+        .povw(ECHO_POVW_JOB_ID)
+        .build()
         .unwrap();
-    if let Some(job_id) = povw_job {
-        env_builder.povw(job_id);
-    }
-    let env = env_builder.build().unwrap();
 
     tracing::info!("Executing rv32im for echo");
     let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
@@ -208,7 +209,7 @@ fn generate_echo_segment(
 #[test_log::test]
 fn test_recursion_lift_then_unwrap_povw() {
     // Prove the base case
-    let (journal, segment) = generate_echo_segment(b"hello", Some(rand::random()));
+    let (journal, segment) = ECHO_SEGMENT.clone();
     let ctx = VerifierContext::default();
 
     // Lift and join them all (and verify)
@@ -469,7 +470,7 @@ fn test_recursion_lift_resolve_e2e() {
 #[test_log::test]
 fn test_recursion_lift_resolve_then_unwrap_povw() -> Result<()> {
     let msg = b"assume this is true";
-    let (_, assumption_segment) = generate_echo_segment(msg, None);
+    let (_, assumption_segment) = ECHO_SEGMENT.clone();
 
     let povw_job_id: PovwJobId = rand::random();
     let env = ExecutorEnv::builder()
@@ -545,7 +546,7 @@ fn test_recursion_lift_resolve_then_unwrap_povw() -> Result<()> {
 #[test_log::test]
 fn test_recursion_lift_resolve_combined_unwrap_povw() -> Result<()> {
     let msg = b"assume this is true";
-    let (_, assumption_segment) = generate_echo_segment(msg, None);
+    let (_, assumption_segment) = ECHO_SEGMENT.clone();
 
     let povw_job_id: PovwJobId = rand::random();
     let env = ExecutorEnv::builder()
