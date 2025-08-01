@@ -317,6 +317,7 @@ public:
       coeff_wise_mul_and_sub<<<gpu.sm_count(), 1024, 0, gpu>>>(
           &d_a[0], &d_b[0], &d_c[0], lg_domain_size);
       CUDA_OK(cudaGetLastError());
+      gpu.sync();
       msm_g1.invoke(results.h, srs.get_h(), domain_size, d_poly_a_b_c);
 
       coeff_wise_add<<<gpu.sm_count(), 1024, 0, gpu>>>(&d_witness[0], &d_fuzz[0], witness_size);

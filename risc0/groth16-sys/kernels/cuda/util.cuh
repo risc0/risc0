@@ -54,7 +54,9 @@ __global__ __launch_bounds__(1024) void chacha_generate_random_scalars(field_t* 
     s.v[1][len - 1] &= 0x1FFFFFFFu;
 
     output[idx] = s.v[0];
-    output[idx + WARP_SZ] = s.v[1];
+    if (idx + WARP_SZ < output_block_count * 2) {
+      output[idx + WARP_SZ] = s.v[1];
+    }
   }
 }
 
