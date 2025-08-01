@@ -207,6 +207,7 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - name: "root: cargo clippy"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
       - name: "bento: cargo clippy"
@@ -261,6 +262,7 @@ jobs:
         run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - name: Login to Docker Hub
         if: >
           matrix.os == 'Linux' &&
@@ -322,6 +324,7 @@ jobs:
         run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
@@ -390,6 +393,7 @@ jobs:
         run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
@@ -643,6 +647,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
@@ -678,6 +683,7 @@ jobs:
       - uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
