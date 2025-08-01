@@ -6822,7 +6822,6 @@ dependencies = [
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
- "ruint",
  "serde",
  "smallvec",
  "tar",
