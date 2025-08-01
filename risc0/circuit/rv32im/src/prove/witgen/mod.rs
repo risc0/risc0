@@ -308,10 +308,7 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
 
     // povw nonce
     // Split the U256 nonce into LE shorts and assign to the globals.
-    let nonce = segment
-        .povw_nonce
-        .map(|n| n.into())
-        .unwrap_or(PovwNonce::ZERO);
+    let nonce = segment.povw_nonce.unwrap_or(PovwNonce::ZERO);
     for (i, short) in nonce.to_u16s().into_iter().enumerate() {
         match i % 2 {
             0 => {
