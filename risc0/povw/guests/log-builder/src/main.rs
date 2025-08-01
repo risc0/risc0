@@ -33,7 +33,10 @@ fn main() {
 
             // Check that the self image ID and work log ID match the input.
             // NOTE: initial_commit and update_value are unconstrained, as they are not needed.
-            assert_eq!(input.self_image_id, journal.self_image_id);
+            assert_eq!(
+                input.self_image_id, journal.self_image_id,
+                "self_image_id in input and in continuation state do not match"
+            );
 
             (journal.work_log_id, journal.updated_commit)
         }
@@ -49,22 +52,31 @@ fn main() {
         let work = update.claim.work.value().expect("work value is pruned");
 
         // Assert that the work log ID matches the ID for the log built so far.
-        assert_eq!(work.nonce_min.log, work_log_id);
-        assert_eq!(work.nonce_max.log, work_log_id);
+        assert_eq!(
+            work.nonce_min.log, work_log_id,
+            "nonce_min.log does not match input work_log_id"
+        );
+        assert_eq!(
+            work.nonce_max.log, work_log_id,
+            "nonce_max.log does not match input work_log_id"
+        );
         // Assert that the nonce min and nonce max are part of the same job.
         // NOTE: This is a limitation with the current implementation that could be addressed.
-        assert_eq!(work.nonce_min.job, work.nonce_max.job);
+        assert_eq!(
+            work.nonce_min.job, work.nonce_max.job,
+            "nonce_min.job does not match nonce_max.job"
+        );
         let job_number = work.nonce_min.job;
 
         // Verify that the subtree associated with the job is empty.
         update
             .noninclusion_proof
             .verify_empty(root, U96::from(job_number) << 32)
-            .unwrap();
+            .expect("noninclusion proof verification failed");
 
         // Construct the job from the work in the work claim.
         // NOTE: This is another limitation with the current implementation that could be addressed.
-        assert_eq!(work.nonce_min.segment, 0);
+        assert_eq!(work.nonce_min.segment, 0, "nonce_min.segment is not zero");
         let job = Job::new(work.nonce_max.segment);
 
         // Add the job to the incrementally constructed Merkle tree.

@@ -27,8 +27,6 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 use ruint::uint;
 
-// TODO(povw): Add rejection tests
-
 fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     let mut env_builder = ExecutorEnv::builder();
     env_builder.write_frame(&borsh::to_vec(&input)?);
@@ -371,4 +369,173 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
 
     assert_eq!(journal, expected_journal);
     Ok(())
+}
+
+#[test]
+fn reject_mismatched_work_log_id() {
+    let work_log_id = uint!(0xdeafbee7_U160);
+    let wrong_log_id = uint!(0xbadcafe_U160);
+    let job_num = 230;
+    let job = Job::new(10);
+    let work_value = 1 << 22;
+    let mut work_log = WorkLog::default();
+
+    // Create work claim with wrong log ID
+    let work_claim = WorkClaim {
+        claim: rand_claim(),
+        work: make_work(work_value, wrong_log_id, job_num, &job)
+            .unwrap()
+            .into(),
+    };
+    let input = Input {
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        state: State::initial(work_log_id),
+        updates: vec![WorkLogUpdate {
+            claim: work_claim,
+            noninclusion_proof: work_log.prove_add(job_num, job.clone()).unwrap(),
+        }],
+    };
+
+    let result = execute_guest(&input);
+    let error_msg = result.unwrap_err().to_string();
+    assert!(error_msg.contains("nonce_min.log does not match input work_log_id"));
+}
+
+#[test]
+fn reject_invalid_continuation_journal_verification() {
+    let work_log_id = uint!(0xdeafbee7_U160);
+    let work_value = 1 << 22;
+
+    let journal = Journal {
+        work_log_id,
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        update_value: work_value,
+        initial_commit: WorkLog::EMPTY.commit(),
+        updated_commit: WorkLog::EMPTY.commit(),
+    };
+
+    let input = Input {
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        state: State::from(journal),
+        updates: Vec::new(),
+    };
+
+    // Execute without adding FakeReceipt for continuation journal
+    let env = ExecutorEnv::builder()
+        .write_frame(&borsh::to_vec(&input).unwrap())
+        .build()
+        .unwrap();
+    let result = default_executor().execute(env, RISC0_POVW_LOG_BUILDER_ELF);
+
+    let error_msg = result.unwrap_err().to_string();
+    assert!(error_msg.contains("no receipt found to resolve assumption"));
+}
+
+#[test]
+fn reject_mismatched_self_image_id_in_journal() {
+    let work_log_id = uint!(0xdeafbee7_U160);
+    let work_value = 1 << 22;
+
+    // Create a journal with mismatched self_image_id
+    let journal = Journal {
+        work_log_id,
+        self_image_id: Digest::new([5, 6, 7, 8, 9, 10, 11, 12]), // Different from input.self_image_id
+        update_value: work_value,
+        initial_commit: WorkLog::EMPTY.commit(),
+        updated_commit: WorkLog::EMPTY.commit(),
+    };
+
+    let input = Input {
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        state: State::from(journal.clone()),
+        updates: Vec::new(),
+    };
+
+    let env = ExecutorEnv::builder()
+        .write_frame(&borsh::to_vec(&input).unwrap())
+        // Add the journal assumption so it passes verification
+        .add_assumption(FakeReceipt::new(ReceiptClaim::ok(
+            RISC0_POVW_LOG_BUILDER_ID,
+            borsh::to_vec(&journal).unwrap(),
+        )))
+        .build()
+        .unwrap();
+
+    let result = default_executor().execute(env, RISC0_POVW_LOG_BUILDER_ELF);
+
+    let error_msg = result.unwrap_err().to_string();
+    assert!(error_msg.contains("self_image_id in input and in continuation state do not match"));
+}
+
+#[test]
+fn reject_work_assumption_verification_fails() {
+    let work_log_id = uint!(0xdeafbee7_U160);
+    let job_num = 230;
+    let job = Job::new(10);
+    let work_value = 1 << 22;
+    let mut work_log = WorkLog::default();
+
+    let work_claim = WorkClaim {
+        claim: rand_claim(),
+        work: make_work(work_value, work_log_id, job_num, &job)
+            .unwrap()
+            .into(),
+    };
+    let input = Input {
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        state: State::initial(work_log_id),
+        updates: vec![WorkLogUpdate {
+            claim: work_claim,
+            noninclusion_proof: work_log.prove_add(job_num, job.clone()).unwrap(),
+        }],
+    };
+
+    // Execute without adding the work claim assumption
+    let env = ExecutorEnv::builder()
+        .write_frame(&borsh::to_vec(&input).unwrap())
+        .build()
+        .unwrap();
+    let result = default_executor().execute(env, RISC0_POVW_LOG_BUILDER_ELF);
+
+    let error_msg = result.unwrap_err().to_string();
+    assert!(error_msg.contains("no receipt found to resolve assumption"));
+}
+
+#[test]
+fn reject_duplicate_update() {
+    let work_log_id = uint!(0xdeafbee7_U160);
+    let job_num = 230;
+    let job = Job::new(10);
+    let work_value = 1 << 22;
+    let mut work_log = WorkLog::default();
+
+    let work_claim = WorkClaim {
+        claim: rand_claim(),
+        work: make_work(work_value, work_log_id, job_num, &job)
+            .unwrap()
+            .into(),
+    };
+
+    // Generate noninclusion proof for empty tree
+    let noninclusion_proof = work_log.prove_add(job_num, job.clone()).unwrap();
+
+    let input = Input {
+        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
+        state: State::initial(work_log_id),
+        updates: vec![
+            WorkLogUpdate {
+                claim: work_claim.clone(),
+                noninclusion_proof: noninclusion_proof.clone(),
+            },
+            WorkLogUpdate {
+                claim: work_claim.clone(),
+                // Using same proof, but tree is no longer empty after first update
+                noninclusion_proof,
+            },
+        ],
+    };
+
+    let result = execute_guest(&input);
+    let error_msg = result.unwrap_err().to_string();
+    assert!(error_msg.contains("noninclusion proof verification failed"));
 }
