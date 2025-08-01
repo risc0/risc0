@@ -14,9 +14,9 @@
 
 //! # Groth16 Prover
 
-#[cfg(feature = "cuda_experimental")]
+#[cfg(feature = "cuda")]
 mod cuda;
-#[cfg(not(feature = "cuda_experimental"))]
+#[cfg(not(feature = "cuda"))]
 mod docker;
 mod seal_format;
 mod seal_to_json;
@@ -28,7 +28,7 @@ use crate::Seal;
 /// Produce a Groth16 proof from an `identity_p254` seal.
 pub fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     cfg_if::cfg_if! {
-        if #[cfg(feature = "cuda_experimental")] {
+        if #[cfg(feature = "cuda")] {
             self::cuda::shrink_wrap(identity_p254_seal_bytes)
         } else {
             self::docker::shrink_wrap(identity_p254_seal_bytes)

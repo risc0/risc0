@@ -155,6 +155,7 @@ cuda = [
   "risc0-circuit-keccak/cuda",
   "risc0-circuit-recursion/cuda",
   "risc0-circuit-rv32im/cuda",
+  "risc0-groth16/cuda",
   "risc0-zkp/cuda",
 ]
 default = ["client", "bonsai"]

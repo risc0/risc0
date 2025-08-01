@@ -43,7 +43,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 all-features = true
 
 [features]
-cuda_experimental = [
+cuda = [
   "dep:circom-witnesscalc",
   "dep:wtns-file",
   "prove",
