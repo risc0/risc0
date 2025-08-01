@@ -259,6 +259,7 @@ fn test_recursion_lift_join_unwrap_povw() -> anyhow::Result<()> {
     tracing::info!("Proving lift_povw");
     let final_rec_receipt = lift_povw(&segments[segments.len() - 1])?;
     final_rec_receipt.verify_integrity_with_context(&ctx)?;
+    total_work += final_rec_receipt.claim.as_value()?.work.as_value()?.value;
 
     // First, test the combined join_unwrap_povw.
     {
