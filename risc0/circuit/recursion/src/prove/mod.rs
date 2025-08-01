@@ -66,6 +66,13 @@ impl RecursionReceipt {
     pub fn seal_size(&self) -> usize {
         core::mem::size_of_val(self.seal.as_slice())
     }
+
+    /// Allocates a [VecDeque] and copies the output stream into it for decoding.
+    pub fn out_stream(&self) -> VecDeque<u32> {
+        let mut vec: VecDeque<u32> = VecDeque::new();
+        vec.extend(self.output.iter());
+        vec
+    }
 }
 
 pub trait RecursionProver {

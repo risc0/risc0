@@ -299,7 +299,7 @@ pub mod responses {
     /// Snark proof request object
     #[derive(Deserialize, Serialize)]
     pub struct SnarkReq {
-        /// Existing Session ID from [super::SessionId]
+        /// Existing Session ID from `SessionId`
         pub session_id: String,
     }
 

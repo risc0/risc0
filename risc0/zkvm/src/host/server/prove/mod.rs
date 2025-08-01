@@ -29,15 +29,15 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
+    claim::{receipt::UnionClaim, Unknown},
     host::prove_info::ProveInfo,
     receipt::{
         CompositeReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::{UnionClaim, Unknown},
     sha::Digestible,
     stark_to_snark, ExecutorEnv, PreflightResults, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
-    Segment, Session, VerifierContext,
+    Segment, Session, VerifierContext, WorkClaim,
 };
 
 mod private {
@@ -112,6 +112,52 @@ pub trait ProverServer: private::Sealed {
         assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
+    /// Lift a [SegmentReceipt] into a [SuccinctReceipt] with a proof of verifiable work (PoVW) claim.
+    fn lift_povw(
+        &self,
+        receipt: &SegmentReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>;
+
+    /// Join two [SuccinctReceipt] with proof of verifiable work (PoVW) claims into a
+    /// [SuccinctReceipt] a PoVW claim.
+    fn join_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>;
+
+    /// Join two [SuccinctReceipt] with proof of verifiable work (PoVW) claims into a
+    /// [SuccinctReceipt], and unwrap the result (see [ProverServer::unwrap_povw]).
+    fn join_unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    /// Resolve an assumption from a conditional [SuccinctReceipt] with a proof of verifiable work
+    /// (PoVW) claim by providing a [SuccinctReceipt] proving the validity of the assumption.
+    fn resolve_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>;
+
+    /// Resolve an assumption from a conditional [SuccinctReceipt] with a proof of verifiable work
+    /// (PoVW) claim by providing a [SuccinctReceipt] proving the validity of the assumption, and
+    /// unwrap the result (see [ProverServer::unwrap_povw]).
+    fn resolve_unwrap_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    /// Remove the proof of verifiable work (PoVW) information from a [SuccinctReceipt] to produce
+    /// a [SuccinctReceipt] over the underlying claim.
+    fn unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
     /// Convert a [SuccinctReceipt] with a Poseidon hash function that uses a 254-bit field
     fn identity_p254(
         &self,
@@ -130,41 +176,15 @@ pub trait ProverServer: private::Sealed {
         &self,
         receipt: &CompositeReceipt,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        // Compress all receipts in the top-level session into one succinct receipt for the session.
-        let continuation_receipt = receipt
-            .segments
-            .iter()
-            .try_fold(
-                None,
-                |left: Option<SuccinctReceipt<ReceiptClaim>>,
-                 right: &SegmentReceipt|
-                 -> Result<_> {
-                    Ok(Some(match left {
-                        Some(left) => self.join(&left, &self.lift(right)?)?,
-                        None => self.lift(right)?,
-                    }))
-                },
-            )?
-            .ok_or_else(|| {
-                anyhow!("malformed composite receipt has no continuation segment receipts")
-            })?;
+        <Self as Compress<_>>::composite_to_succinct(self, receipt)
+    }
 
-        // Compress assumptions and resolve them to get the final succinct receipt.
-        receipt.assumption_receipts.iter().try_fold(
-            continuation_receipt,
-            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerAssumptionReceipt| match assumption {
-                InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
-                InnerAssumptionReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &self.composite_to_succinct(assumption)?.into_unknown())
-                }
-                InnerAssumptionReceipt::Fake(_) => bail!(
-                    "compressing composite receipts with fake receipt assumptions is not supported"
-                ),
-                InnerAssumptionReceipt::Groth16(_) => bail!(
-                    "compressing composite receipts with Groth16 receipt assumptions is not supported"
-                )
-            },
-        )
+    /// Convert a composite receipt to a succinct work claim receipt.
+    fn composite_to_succinct_povw(
+        &self,
+        receipt: &CompositeReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        <Self as Compress<_>>::composite_to_succinct(self, receipt)
     }
 
     /// Compress a [SuccinctReceipt] into a [Groth16Receipt].
@@ -231,6 +251,141 @@ pub trait ProverServer: private::Sealed {
                 Ok(receipt.clone())
             }
         }
+    }
+}
+
+trait Lift<Claim> {
+    fn lift(&self, segment_receipt: &SegmentReceipt) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P: ProverServer + ?Sized> Lift<ReceiptClaim> for P {
+    fn lift(
+        &self,
+        segment_receipt: &SegmentReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<ReceiptClaim>> {
+        <Self as ProverServer>::lift(self, segment_receipt)
+    }
+}
+
+impl<P: ProverServer + ?Sized> Lift<WorkClaim<ReceiptClaim>> for P {
+    fn lift(
+        &self,
+        segment_receipt: &SegmentReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        self.lift_povw(segment_receipt)
+    }
+}
+
+trait Join<Claim> {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<Claim>,
+        b: &SuccinctReceipt<Claim>,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P: ProverServer + ?Sized> Join<ReceiptClaim> for P {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+        b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> anyhow::Result<SuccinctReceipt<ReceiptClaim>> {
+        <Self as ProverServer>::join(self, a, b)
+    }
+}
+
+impl<P: ProverServer + ?Sized> Join<WorkClaim<ReceiptClaim>> for P {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> anyhow::Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        self.join_povw(a, b)
+    }
+}
+
+trait Resolve<Claim> {
+    fn resolve(
+        &self,
+        cond: &SuccinctReceipt<Claim>,
+        assum: &SuccinctReceipt<Unknown>,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P: ProverServer + ?Sized> Resolve<ReceiptClaim> for P {
+    fn resolve(
+        &self,
+        cond: &SuccinctReceipt<ReceiptClaim>,
+        assum: &SuccinctReceipt<Unknown>,
+    ) -> anyhow::Result<SuccinctReceipt<ReceiptClaim>> {
+        <Self as ProverServer>::resolve(self, cond, assum)
+    }
+}
+
+impl<P: ProverServer + ?Sized> Resolve<WorkClaim<ReceiptClaim>> for P {
+    fn resolve(
+        &self,
+        cond: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assum: &SuccinctReceipt<Unknown>,
+    ) -> anyhow::Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        self.resolve_povw(cond, assum)
+    }
+}
+
+trait Compress<Claim> {
+    fn composite_to_succinct(
+        &self,
+        composite_receipt: &CompositeReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>>;
+}
+
+impl<P, Claim> Compress<Claim> for P
+where
+    P: Lift<Claim>
+        + Join<Claim>
+        + Resolve<Claim>
+        + Lift<ReceiptClaim>
+        + Join<ReceiptClaim>
+        + Resolve<ReceiptClaim>
+        + ?Sized,
+{
+    fn composite_to_succinct(
+        &self,
+        composite_receipt: &CompositeReceipt,
+    ) -> anyhow::Result<SuccinctReceipt<Claim>> {
+        // Compress all receipts in the top-level session into one succinct receipt for the session.
+        let continuation_receipt = composite_receipt
+            .segments
+            .iter()
+            .try_fold(
+                None,
+                |left: Option<SuccinctReceipt<Claim>>, right: &SegmentReceipt| -> Result<_> {
+                    Ok(Some(match left {
+                        Some(left) => self.join(&left, &self.lift(right)?)?,
+                        None => self.lift(right)?,
+                    }))
+                },
+            )?
+            .ok_or_else(|| {
+                anyhow!("malformed composite receipt has no continuation segment receipts")
+            })?;
+
+        // Compress assumptions and resolve them to get the final succinct receipt.
+        composite_receipt.assumption_receipts.iter().try_fold(
+            continuation_receipt,
+            |conditional: SuccinctReceipt<Claim>, assumption: &InnerAssumptionReceipt| match assumption {
+                InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
+                InnerAssumptionReceipt::Composite(assumption) => {
+                    self.resolve(&conditional, &SuccinctReceipt::<ReceiptClaim>::into_unknown(self.composite_to_succinct(assumption)?))
+                }
+                InnerAssumptionReceipt::Fake(_) => bail!(
+                    "compressing composite receipts with fake receipt assumptions is not supported"
+                ),
+                InnerAssumptionReceipt::Groth16(_) => bail!(
+                    "compressing composite receipts with Groth16 receipt assumptions is not supported"
+                )
+            },
+        )
     }
 }
 

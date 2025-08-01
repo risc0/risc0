@@ -15,6 +15,7 @@
 use anyhow::Result;
 
 use crate::{mmr::Peak, recursion::prove::union, SuccinctReceipt, Unknown};
+
 #[derive(Debug)]
 pub struct UnionPeak {
     receipt: SuccinctReceipt<Unknown>,

@@ -72,6 +72,7 @@ addr2line = { version = "0.24.2", optional = true, features = [
   "rustc-demangle",
   "std",
 ] }
+risc0-binfmt = { workspace = true, features = ["rand"] }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.10", optional = true, features = ["serde"] }
@@ -109,6 +110,7 @@ regex = "1"
 risc0-bigint2-methods = { path = "../bigint2/methods" }
 rmp-serde = "1.3"
 rstest = "0.25.0"
+ruint = "1.15"
 tokio = { version = "1.43.0", default-features = false, features = ["macros"] }
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

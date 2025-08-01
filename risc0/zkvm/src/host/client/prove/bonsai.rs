@@ -140,6 +140,7 @@ impl Prover for BonsaiProver {
                 }
                 break ProveInfo {
                     receipt,
+                    work_receipt: None,
                     stats: SessionStats {
                         segments: stats.segments,
                         total_cycles: stats.total_cycles,
@@ -213,6 +214,7 @@ impl Prover for BonsaiProver {
         // Return the groth16 receipt, with the stats collected earlier.
         Ok(ProveInfo {
             receipt: groth16_receipt,
+            work_receipt: None,
             stats: succinct_prove_info.stats,
         })
     }

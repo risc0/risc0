@@ -16,7 +16,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::Receipt;
+use crate::{receipt::GenericReceipt, Receipt, ReceiptClaim, WorkClaim};
 
 /// Information returned by the prover including receipt as well as other information useful for debugging
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,6 +27,19 @@ pub struct ProveInfo {
 
     /// stats about cycle counts of the execution
     pub stats: SessionStats,
+
+    /// Work claim receipt proving the work completed in the process of producing the proof.
+    ///
+    /// This receipt will be produced by provers that support Proof of Verifiable Work when a
+    /// [`PovwJobId`][risc0_binfmt::PovwJobId] is provided in the [`ExecutorEnv`][crate::ExecutorEnv].
+    /// This receipt provides a proof of work completed for this job, and can be combined into a
+    /// work log using the [Log Builder guest][risc0-povw].
+    ///
+    /// Note that this receipt will not be provided if the [`ProverOpts`][crate::ProverOpts] has a
+    /// compression level of [`ReceiptKind::Composite`][crate::ReceiptKind]. A
+    /// [`CompositeReceipt`][crate::CompositeReceipt] can be used to produce a work receipt by
+    /// using [`ProverServer::composite_to_succinct_povw`][crate::ProverServer].
+    pub work_receipt: Option<GenericReceipt<WorkClaim<ReceiptClaim>>>,
 }
 
 /// Struct containing information about a prover's cycle count after running the guest program

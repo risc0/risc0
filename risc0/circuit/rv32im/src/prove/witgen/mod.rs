@@ -25,7 +25,7 @@ use std::iter::zip;
 
 use anyhow::{Context, Result};
 use preflight::PreflightTrace;
-use risc0_binfmt::WordAddr;
+use risc0_binfmt::{PovwNonce, WordAddr};
 use risc0_circuit_rv32im_sys::RawPreflightCycle;
 use risc0_core::scope;
 use risc0_zkp::{
@@ -305,6 +305,23 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
 
     // shutdown_cycle
     global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
+
+    // povw nonce
+    // Split the U256 nonce into LE shorts and assign to the globals.
+    let nonce = segment.povw_nonce.unwrap_or(PovwNonce::ZERO);
+    for (i, short) in nonce.to_u16s().into_iter().enumerate() {
+        match i % 2 {
+            0 => {
+                global[LAYOUT_GLOBAL.povw_nonce.values[i / 2].low._super.offset] =
+                    Val::from_u64(short as u64);
+            }
+            1 => {
+                global[LAYOUT_GLOBAL.povw_nonce.values[i / 2].high._super.offset] =
+                    Val::from_u64(short as u64);
+            }
+            _ => unreachable!(),
+        }
+    }
 
     global
 }

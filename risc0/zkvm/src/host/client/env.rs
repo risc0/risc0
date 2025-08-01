@@ -27,6 +27,7 @@ use std::{
 use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
+use risc0_binfmt::PovwJobId;
 use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
@@ -113,6 +114,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) pprof_out: Option<PathBuf>,
     pub(crate) input_digest: Option<Digest>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
+    pub(crate) povw_job_id: Option<PovwJobId>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -456,6 +458,23 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Add a callback for coprocessor requests.
     pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
         self.inner.coprocessor = Some(callback);
+        self
+    }
+
+    /// Return [ProverOpts][crate::ProverOpts] with proof of verifiable work (PoVW) enabled, and the specified work
+    /// log identifer and job number as the base for PoVW nonces assigned to each segment.
+    ///
+    /// ```
+    /// # use risc0_zkvm::ExecutorEnv;
+    /// use ruint::uint;
+    ///
+    /// let work_log_id = uint!(0xC2A2379b379da8C076d51520C4f6a2fc5AAE3d1e_U160);
+    /// ExecutorEnv::builder().povw((work_log_id, rand::random()));
+    /// ```
+    ///
+    /// See also [PovwJobId]
+    pub fn povw(&mut self, povw_job_id: impl Into<PovwJobId>) -> &mut Self {
+        self.inner.povw_job_id = Some(povw_job_id.into());
         self
     }
 }

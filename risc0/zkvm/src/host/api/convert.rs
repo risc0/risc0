@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fmt::Debug, path::PathBuf};
+use std::path::PathBuf;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
@@ -23,14 +23,15 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
+    claim::{receipt::UnionClaim, Unknown},
     host::client::env::ProveKeccakRequest,
     receipt::{
         merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
         ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::{UnionClaim, Unknown},
-    Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
-    ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    Assumption, Assumptions, ExitCode, GenericReceipt, Groth16Receipt, Input, Journal, MaybePruned,
+    Output, ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    Work, WorkClaim,
 };
 
 mod ver {
@@ -80,7 +81,7 @@ impl TryFrom<Asset> for pb::api::Asset {
 
 impl<Claim> TryFrom<SuccinctReceipt<Claim>> for Asset
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: Serialize,
 {
     type Error = anyhow::Error;
 
@@ -291,7 +292,7 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
             max_segment_po2: opts
                 .max_segment_po2
                 .try_into()
-                .map_err(|_| malformed_err("ProverOpts.max_segment_po2"))?,
+                .with_context(|| malformed_err("ProverOpts.max_segment_po2"))?,
             dev_mode: opts.is_dev_mode,
         })
     }
@@ -368,7 +369,12 @@ impl TryFrom<ProveInfo> for pb::core::ProveInfo {
 
     fn try_from(value: ProveInfo) -> Result<Self> {
         Ok(Self {
-            receipt: Some(value.receipt.try_into()?),
+            receipt: Some(value.receipt.try_into().context("ProveInfo.receipt")?),
+            work_receipt: value
+                .work_receipt
+                .map(|r| r.try_into())
+                .transpose()
+                .context("ProveInfo.work_receipt")?,
             stats: Some(value.stats.into()),
         })
     }
@@ -383,6 +389,11 @@ impl TryFrom<pb::core::ProveInfo> for ProveInfo {
                 .receipt
                 .ok_or_else(|| malformed_err("ProveInfo.receipt"))?
                 .try_into()?,
+            work_receipt: value
+                .work_receipt
+                .map(|r| r.try_into())
+                .transpose()
+                .context("ProveInfo.work_receipt")?,
             stats: value
                 .stats
                 .ok_or_else(|| malformed_err("ProveInfo.stats"))?
@@ -497,7 +508,6 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
 
 impl<Claim> TryFrom<SuccinctReceipt<Claim>> for pb::core::SuccinctReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -517,7 +527,6 @@ where
 
 impl<Claim> TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -587,7 +596,6 @@ impl TryFrom<pb::core::MerkleProof> for MerkleProof {
 
 impl<Claim> TryFrom<Groth16Receipt<Claim>> for pb::core::Groth16Receipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -604,7 +612,6 @@ where
 
 impl<Claim> TryFrom<pb::core::Groth16Receipt> for Groth16Receipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -726,9 +733,56 @@ impl TryFrom<pb::core::InnerReceipt> for InnerAssumptionReceipt {
     }
 }
 
+impl<Claim> TryFrom<GenericReceipt<Claim>> for pb::core::InnerReceipt
+where
+    MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
+{
+    type Error = anyhow::Error;
+
+    fn try_from(value: GenericReceipt<Claim>) -> Result<Self> {
+        Ok(Self {
+            kind: Some(match value {
+                GenericReceipt::Succinct(inner) => {
+                    pb::core::inner_receipt::Kind::Succinct(inner.try_into()?)
+                }
+                GenericReceipt::Fake(inner) => {
+                    pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {
+                        claim: Some(inner.claim.try_into()?),
+                    })
+                }
+                GenericReceipt::Groth16(inner) => {
+                    pb::core::inner_receipt::Kind::Groth16(inner.try_into()?)
+                }
+            }),
+        })
+    }
+}
+
+impl<Claim> TryFrom<pb::core::InnerReceipt> for GenericReceipt<Claim>
+where
+    MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+{
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
+        Ok(
+            match value
+                .kind
+                .ok_or_else(|| malformed_err("InnerReceipt.kind"))?
+            {
+                pb::core::inner_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
+                pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
+                pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake(inner.try_into()?),
+                pb::core::inner_receipt::Kind::Composite(_) => return Err(malformed_err(
+                    "cannot deserialize GenericReceipt from pb::InnerReceipt with composite kind",
+                )),
+            },
+        )
+    }
+}
+
 impl<Claim> TryFrom<FakeReceipt<Claim>> for pb::core::FakeReceipt
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -742,7 +796,6 @@ where
 
 impl<Claim> TryFrom<pb::core::FakeReceipt> for FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
@@ -819,13 +872,9 @@ impl TryFrom<pb::base::Digest> for Digest {
     }
 }
 
-impl Name for pb::core::ReceiptClaim {
+impl Name for pb::core::UnionClaim {
     const PACKAGE: &'static str = "risc0.protos.core";
-    const NAME: &'static str = "ReceiptClaim";
-}
-
-impl AssociatedMessage for ReceiptClaim {
-    type Message = pb::core::ReceiptClaim;
+    const NAME: &'static str = "UnionClaim";
 }
 
 impl AssociatedMessage for UnionClaim {
@@ -858,6 +907,93 @@ impl TryFrom<pb::core::UnionClaim> for UnionClaim {
                 .try_into()?,
         })
     }
+}
+
+impl Name for pb::core::WorkClaim {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "WorkClaim";
+}
+
+impl<Claim> AssociatedMessage for WorkClaim<Claim> {
+    type Message = pb::core::WorkClaim;
+}
+
+impl<Claim> TryFrom<WorkClaim<Claim>> for pb::core::WorkClaim
+where
+    MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
+{
+    type Error = anyhow::Error;
+
+    fn try_from(value: WorkClaim<Claim>) -> Result<Self> {
+        Ok(Self {
+            claim: Some(value.claim.try_into().context("WorkClaim.claim")?),
+            work: Some(value.work.try_into().context("WorkClaim.work")?),
+        })
+    }
+}
+
+impl<Claim> TryFrom<pb::core::WorkClaim> for WorkClaim<Claim>
+where
+    MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+{
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::WorkClaim) -> Result<Self> {
+        Ok(Self {
+            claim: value
+                .claim
+                .ok_or_else(|| malformed_err("WorkClaim.claim"))?
+                .try_into()
+                .context("WorkClaim.claim")?,
+            work: value
+                .work
+                .ok_or_else(|| malformed_err("WorkClaim.claim"))?
+                .try_into()
+                .context("WorkClaim.work")?,
+        })
+    }
+}
+
+impl Name for pb::core::Work {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "Work";
+}
+
+impl AssociatedMessage for Work {
+    type Message = pb::core::Work;
+}
+
+impl TryFrom<Work> for pb::core::Work {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Work) -> Result<Self> {
+        Ok(Self {
+            nonce_min: value.nonce_min.to_bytes().to_vec(),
+            nonce_max: value.nonce_max.to_bytes().to_vec(),
+            value: value.value,
+        })
+    }
+}
+
+impl TryFrom<pb::core::Work> for Work {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::Work) -> Result<Self> {
+        Ok(Self {
+            nonce_min: value.nonce_min.try_into().context("Work.nonce_min")?,
+            nonce_max: value.nonce_max.try_into().context("Work.nonce_max")?,
+            value: value.value,
+        })
+    }
+}
+
+impl Name for pb::core::ReceiptClaim {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "ReceiptClaim";
+}
+
+impl AssociatedMessage for ReceiptClaim {
+    type Message = pb::core::ReceiptClaim;
 }
 
 impl TryFrom<ReceiptClaim> for pb::core::ReceiptClaim {

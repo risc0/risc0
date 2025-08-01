@@ -417,6 +417,8 @@ pub struct ExecutorEnv {
     pub coprocessor: bool,
     #[prost(uint32, optional, tag = "14")]
     pub keccak_max_po2: ::core::option::Option<u32>,
+    #[prost(bytes = "vec", tag = "15")]
+    pub povw_job_id: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

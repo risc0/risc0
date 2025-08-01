@@ -218,6 +218,7 @@ message ExecutorEnv {
   string segment_path = 12;
   bool coprocessor = 13;
   optional uint32 keccak_max_po2 = 14;
+  bytes povw_job_id = 15;
 }
 
 message AssumptionReceipt {

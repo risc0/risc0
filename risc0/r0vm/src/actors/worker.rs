@@ -493,6 +493,7 @@ impl CpuProcessor {
                 // .session_limit(limit) // TODO
                 .build()?;
 
+            // TODO(povw): Add PoVW here
             let mut exec = ExecutorImpl::from_elf(env, &task.request.binary)?;
             let session = exec.run_with_callback(|segment| {
                 let msg = TaskUpdateMsg {
