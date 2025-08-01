@@ -31,6 +31,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 mod consts;
+mod error;
 /// Log Builder guest program types, for verifying PoVW log updates.
 pub mod guest;
 /// Prover functionality, for running the work log builder.
@@ -38,6 +39,7 @@ pub mod guest;
 pub mod prover;
 mod tree;
 
+pub use error::Error;
 pub use tree::{
     Bitmap, Job, Merkleized, MerkleizedIndex, Opening, SubtreeOpening, WorkLog, WorkSet,
 };

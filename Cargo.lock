@@ -6896,6 +6896,7 @@ dependencies = [
  "risc0-zkvm",
  "ruint",
  "serde",
+ "thiserror 1.0.69",
 ]
 
 [[package]]

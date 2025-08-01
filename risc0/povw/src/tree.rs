@@ -19,7 +19,6 @@ use std::{
     ops::{BitOr, ShrAssign, Sub},
 };
 
-use anyhow::{bail, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use hybrid_array::{typenum, Array, ArraySize};
 use risc0_binfmt::PovwLogId;
@@ -30,7 +29,7 @@ use risc0_zkvm::{
 use ruint::{aliases::U256, Uint};
 use serde::{Deserialize, Serialize};
 
-use crate::consts::{EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS};
+use crate::{consts::{EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS}, error::Error};
 
 type U96 = Uint<96, 2>;
 
@@ -131,10 +130,10 @@ impl WorkSet {
     /// Adds a work log with the given ID to the work set.
     ///
     /// Returns an error if a log with the same ID already exists.
-    pub fn add(&mut self, id: PovwLogId, log: WorkLog) -> anyhow::Result<()> {
+    pub fn add(&mut self, id: PovwLogId, log: WorkLog) -> Result<(), Error> {
         match self.logs.entry(id) {
             btree_map::Entry::Vacant(entry) => entry.insert(log),
-            btree_map::Entry::Occupied(_) => bail!("log id 0x{:020x} is occupied", id),
+            btree_map::Entry::Occupied(_) => return Err(Error::LogIdOccupied { id }),
         };
         Ok(())
     }
@@ -259,10 +258,10 @@ impl WorkLog {
     /// Adds a job with the given ID to the work log.
     ///
     /// Returns an error if a job with the same ID already exists.
-    pub fn add(&mut self, id: u64, job: Job) -> anyhow::Result<()> {
+    pub fn add(&mut self, id: u64, job: Job) -> Result<(), Error> {
         match self.jobs.entry(id) {
             btree_map::Entry::Vacant(entry) => entry.insert(job),
-            btree_map::Entry::Occupied(_) => bail!("job id 0x{:08x} is occupied", id),
+            btree_map::Entry::Occupied(_) => return Err(Error::JobIdOccupied { id }),
         };
         Ok(())
     }
@@ -273,7 +272,7 @@ impl WorkLog {
         &mut self,
         id: u64,
         job: Job,
-    ) -> anyhow::Result<SubtreeOpening<Self, { Job::TREE_HEIGHT }>> {
+    ) -> Result<SubtreeOpening<Self, { Job::TREE_HEIGHT }>, Error> {
         let noninclusion_proof = self.prove_job_opening(id);
         self.add(id, job)?;
         Ok(noninclusion_proof)
@@ -612,22 +611,24 @@ where
 
 impl<T: Merkleized> Opening<T> {
     /// Verifies that the nonce at the given index is included (used) in the commitment.
-    pub fn verify_inclusion(&self, commit: Digest, index: T::Index) -> anyhow::Result<()> {
-        ensure!(
-            self.bitmap.bit(index.bitmap_index()),
-            "bitmap indicates non-inclusion"
-        );
-        ensure!(self.root(index) == commit, "path root does not match root");
+    pub fn verify_inclusion(&self, commit: Digest, index: T::Index) -> Result<(), Error> {
+        if !self.bitmap.bit(index.bitmap_index()) {
+            return Err(Error::BitmapNonInclusion);
+        }
+        if self.root(index) != commit {
+            return Err(Error::PathRootMismatch);
+        }
         Ok(())
     }
 
     /// Verifies that the nonce at the given index is not included (unused) in the commitment.
-    pub fn verify_noninclusion(&self, commit: Digest, index: T::Index) -> anyhow::Result<()> {
-        ensure!(
-            !self.bitmap.bit(index.bitmap_index()),
-            "bitmap indicates inclusion"
-        );
-        ensure!(self.root(index) == commit, "path root does not match root");
+    pub fn verify_noninclusion(&self, commit: Digest, index: T::Index) -> Result<(), Error> {
+        if self.bitmap.bit(index.bitmap_index()) {
+            return Err(Error::BitmapInclusion);
+        }
+        if self.root(index) != commit {
+            return Err(Error::PathRootMismatch);
+        }
         Ok(())
     }
 
@@ -708,11 +709,10 @@ where
     /// The given index is the index of any bit in the subtree (e.g. for an opening at level 2. the
     /// indices 0b000, 0b001, 0b010, and 0b011 are all the same subtree. Index 0b100 would be the
     /// sibling subtree).
-    pub fn verify_empty(&self, commit: Digest, index: T::Index) -> anyhow::Result<()> {
-        ensure!(
-            self.root(EMPTY_SUBTREE_ROOTS[LEVEL], index) == commit,
-            "path root does not match root"
-        );
+    pub fn verify_empty(&self, commit: Digest, index: T::Index) -> Result<(), Error> {
+        if self.root(EMPTY_SUBTREE_ROOTS[LEVEL], index) != commit {
+            return Err(Error::PathRootMismatch);
+        }
         Ok(())
     }
 
@@ -722,11 +722,10 @@ where
     /// The given index is the index of any bit in the subtree (e.g. for an opening at level 2. the
     /// indices 0b000, 0b001, 0b010, and 0b011 are all the same subtree. Index 0b100 would be the
     /// sibling subtree).
-    pub fn verify_full(&self, commit: Digest, index: T::Index) -> anyhow::Result<()> {
-        ensure!(
-            self.root(FULL_SUBTREE_ROOTS[LEVEL], index) == commit,
-            "path root does not match root"
-        );
+    pub fn verify_full(&self, commit: Digest, index: T::Index) -> Result<(), Error> {
+        if self.root(FULL_SUBTREE_ROOTS[LEVEL], index) != commit {
+            return Err(Error::PathRootMismatch);
+        }
         Ok(())
     }
 
@@ -759,7 +758,6 @@ pub(crate) fn hash_leaf(leaf: Bitmap) -> Digest {
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Context;
     use proptest::{
         arbitrary::any,
         collection::btree_map,
@@ -771,10 +769,19 @@ mod tests {
     use ruint::aliases::U256;
 
     use super::{Bitmap, Job, WorkLog, WorkSet, U96};
+    use crate::Error;
 
     /// Utility used to map any error to Ok(()) and Ok(()) to an error.
-    fn expect_err(result: anyhow::Result<()>) -> anyhow::Result<()> {
-        result.err().map(|_| ()).context("unexpected Ok result")
+    fn expect_err(result: Result<(), Error>) -> Result<(), TestCaseError> {
+        match result {
+            Ok(_) => Err(TestCaseError::fail("unexpected Ok result")),
+            Err(_) => Ok(()),
+        }
+    }
+
+    /// Utility used to map Ok(()) to Ok(()) and any error to an error.
+    fn expect_ok(result: Result<(), Error>) -> Result<(), TestCaseError> {
+        result.map_err(|e| TestCaseError::fail(e.to_string()))
     }
 
     #[test]
@@ -863,16 +870,15 @@ mod tests {
                 let commit = job.commit();
                 if job.contains(index) {
                     Result::and(
-                        opening.verify_inclusion(commit, index),
+                        expect_ok(opening.verify_inclusion(commit, index)),
                         expect_err(opening.verify_noninclusion(commit, index)),
                     )
                 } else {
                     Result::and(
-                        opening.verify_noninclusion(commit, index),
+                        expect_ok(opening.verify_noninclusion(commit, index)),
                         expect_err(opening.verify_inclusion(commit, index)),
                     )
                 }
-                .map_err(|e| TestCaseError::fail(e.to_string()))
             })
             .unwrap();
     }
@@ -939,16 +945,15 @@ mod tests {
                     let commit = work_log.commit();
                     if work_log.contains(index) {
                         Result::and(
-                            opening.verify_inclusion(commit, index),
+                            expect_ok(opening.verify_inclusion(commit, index)),
                             expect_err(opening.verify_noninclusion(commit, index)),
                         )
                     } else {
                         Result::and(
-                            opening.verify_noninclusion(commit, index),
+                            expect_ok(opening.verify_noninclusion(commit, index)),
                             expect_err(opening.verify_inclusion(commit, index)),
                         )
                     }
-                    .map_err(|e| TestCaseError::fail(e.to_string()))
                 },
             )
             .unwrap();
@@ -967,9 +972,8 @@ mod tests {
                     if work_log.contains(U96::from(job_id) << 32) {
                         expect_err(opening.verify_empty(commit, index))
                     } else {
-                        opening.verify_empty(commit, index)
+                        expect_ok(opening.verify_empty(commit, index))
                     }
-                    .map_err(|e| TestCaseError::fail(e.to_string()))
                 },
             )
             .unwrap();
@@ -1063,16 +1067,15 @@ mod tests {
                     let commit = work_set.commit();
                     if work_set.contains(index) {
                         Result::and(
-                            opening.verify_inclusion(commit, index),
+                            expect_ok(opening.verify_inclusion(commit, index)),
                             expect_err(opening.verify_noninclusion(commit, index)),
                         )
                     } else {
                         Result::and(
-                            opening.verify_noninclusion(commit, index),
+                            expect_ok(opening.verify_noninclusion(commit, index)),
                             expect_err(opening.verify_inclusion(commit, index)),
                         )
                     }
-                    .map_err(|e| TestCaseError::fail(e.to_string()))
                 },
             )
             .unwrap();
