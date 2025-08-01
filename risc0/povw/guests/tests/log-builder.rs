@@ -53,7 +53,6 @@ fn execute_guest(input: &Input) -> anyhow::Result<Journal> {
     Ok(decoded_journal)
 }
 
-// TODO: Could be a useful thing, not just for tests.
 fn make_work(value: u64, work_log_id: PovwLogId, job_num: u64, job: &Job) -> Option<Work> {
     Work {
         nonce_min: PovwNonce {

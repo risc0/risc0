@@ -16,9 +16,6 @@ use risc0_zkvm::{digest, Digest};
 
 use crate::WorkSet;
 
-// TODO: Each of the lists contains the 0th level, whichis actaully a bitmap and not a digest, in
-// that there is no known preimage.
-
 /// List of pre-calculated subtree roots with all-empty bitmaps for leaves.
 ///
 /// Indexed by the hieght with height zero defined as the value of the leaf.

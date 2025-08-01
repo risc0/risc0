@@ -76,7 +76,6 @@ pub struct WorkLogUpdate {
     /// Work claim to be added to the log.
     pub claim: WorkClaim<Unknown>,
     /// Proof that the nonces consumed in this update are unused in the work log.
-    // TODO: Add a type-alias or something to make this less ugly.
     pub noninclusion_proof: SubtreeOpening<WorkLog, { Job::TREE_HEIGHT }>,
 }
 
