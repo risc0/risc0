@@ -67,7 +67,6 @@ impl<P> WorkLogUpdateProverBuilder<P> {
         }
     }
 
-    // TODO(povw): Avoid using anyhow?
     /// Set the work log, continuing proving from a prior proven state.
     pub fn work_log(
         &mut self,
