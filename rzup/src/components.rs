@@ -179,10 +179,10 @@ impl FromStr for Component {
 #[cfg(feature = "install")]
 fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) -> Result<()> {
     use flate2::bufread::GzDecoder;
+    use liblzma::bufread::XzDecoder;
     use std::fs::File;
     use std::io::BufReader;
     use tar::Archive;
-    use xz::bufread::XzDecoder;
 
     env.emit(RzupEvent::Debug {
         message: format!(
@@ -201,7 +201,7 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
             Archive::new(GzDecoder::new(reader)).unpack(target_dir)?;
         }
         f if f.ends_with(".tar.xz") => {
-            Archive::new(XzDecoder::new(reader)).unpack(target_dir)?;
+            Archive::new(XzDecoder::new_parallel(reader)).unpack(target_dir)?;
         }
         _ => {
             return Err(crate::RzupError::InstallationFailed(format!(
@@ -363,7 +363,10 @@ pub fn get_latest_version(
 mod tests {
     use super::*;
     use crate::{
-        components, distribution::Platform, env::Environment, http_test_harness, BaseUrls,
+        components,
+        distribution::{signature::PublicKey, Platform},
+        env::Environment,
+        http_test_harness, BaseUrls,
     };
     use semver::Version;
     use tempfile::TempDir;
@@ -376,6 +379,8 @@ mod tests {
             tmp_dir.path().join(".cargo"),
             None,
             || None,
+            || Err(RzupError::Other("no private key".into())),
+            PublicKey::official(),
             Platform::detect().unwrap(),
             |_| {},
         )
@@ -383,7 +388,7 @@ mod tests {
         (tmp_dir, env)
     }
 
-    fn test_rust_toolchain_install(base_urls: BaseUrls) {
+    fn test_rust_toolchain_install(base_urls: BaseUrls, _public_key: PublicKey) {
         let (_tmp_dir, env) = test_env();
 
         let component = Component::RustToolchain;
@@ -399,7 +404,7 @@ mod tests {
 
     http_test_harness!(test_rust_toolchain_install);
 
-    fn test_cpp_toolchain_install(base_urls: BaseUrls) {
+    fn test_cpp_toolchain_install(base_urls: BaseUrls, _public_key: PublicKey) {
         let (_tmp_dir, env) = test_env();
         let component = Component::CppToolchain;
 
@@ -414,7 +419,7 @@ mod tests {
 
     http_test_harness!(test_cpp_toolchain_install);
 
-    fn test_cargo_risczero_install(base_urls: BaseUrls) {
+    fn test_cargo_risczero_install(base_urls: BaseUrls, _public_key: PublicKey) {
         let (_tmp_dir, env) = test_env();
         let component = Component::CargoRiscZero;
 
