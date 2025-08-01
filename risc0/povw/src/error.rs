@@ -44,4 +44,3 @@ pub enum Error {
     #[error("merkle path root does not match expected root")]
     PathRootMismatch,
 }
-

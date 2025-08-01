@@ -29,7 +29,10 @@ use risc0_zkvm::{
 use ruint::{aliases::U256, Uint};
 use serde::{Deserialize, Serialize};
 
-use crate::{consts::{EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS}, error::Error};
+use crate::{
+    consts::{EMPTY_SUBTREE_ROOTS, FULL_SUBTREE_ROOTS},
+    error::Error,
+};
 
 type U96 = Uint<96, 2>;
 
@@ -1038,7 +1041,7 @@ mod tests {
         work_set: impl Strategy<Value = WorkSet>,
     ) -> impl Strategy<Value = (WorkSet, U256)> {
         work_set.prop_flat_map(|work_set| {
-            // Uniform sampling of an index would almost certainly be in the set.
+            // Uniform sampling of an index would almost certainly not be in the set.
             // Instead, sample from the list of log keys, and from the full space with even weight.
             // NOTE: This will panic if the work set is empty, due to select from empty Vec.
             let work_set_strat = Just(work_set.clone());
