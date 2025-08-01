@@ -1009,7 +1009,6 @@ dependencies = [
  "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
- "ruint",
  "serde",
  "tracing",
 ]
