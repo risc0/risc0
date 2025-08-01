@@ -25,7 +25,6 @@ paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, default-features = false }
-ruint = { version = "1", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",

@@ -25,7 +25,7 @@ use std::iter::zip;
 
 use anyhow::{Context, Result};
 use preflight::PreflightTrace;
-use risc0_binfmt::WordAddr;
+use risc0_binfmt::{PovwNonce, WordAddr};
 use risc0_circuit_rv32im_sys::RawPreflightCycle;
 use risc0_core::scope;
 use risc0_zkp::{
@@ -33,7 +33,6 @@ use risc0_zkp::{
     field::{Elem as _, ExtElem as _},
     hal::Hal,
 };
-use ruint::aliases::U256;
 
 use self::{
     bigint::BigIntState,
@@ -309,12 +308,11 @@ fn build_global_vec(segment: &Segment, trace: &PreflightTrace) -> Vec<Val> {
 
     // povw nonce
     // Split the U256 nonce into LE shorts and assign to the globals.
-    let nonce = segment.povw_nonce.map(|n| n.into()).unwrap_or(U256::ZERO);
-    let nonce_bytes = nonce.to_le_bytes::<{ U256::BYTES }>();
-    let nonce_shorts = nonce_bytes
-        .chunks_exact(2)
-        .map(|pair| u16::from_le_bytes(pair.try_into().unwrap()));
-    for (i, short) in nonce_shorts.enumerate() {
+    let nonce = segment
+        .povw_nonce
+        .map(|n| n.into())
+        .unwrap_or(PovwNonce::ZERO);
+    for (i, short) in nonce.to_u16s().into_iter().enumerate() {
         match i % 2 {
             0 => {
                 global[LAYOUT_GLOBAL.povw_nonce.values[i / 2].low._super.offset] =
