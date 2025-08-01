@@ -49,7 +49,7 @@ use crate::{
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
     sha::Digestible,
-    MaybePruned, ProverOpts, ReceiptClaim, WorkClaim,
+    Assumptions, MaybePruned, Output, ProverOpts, ReceiptClaim, WorkClaim,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -770,36 +770,9 @@ impl Prover {
         prover.add_input_digest(&cond.control_root()?, DigestKind::Poseidon2);
         prover.add_succinct_rv32im_receipt(cond)?;
 
-        let output = cond
-            .claim
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned claim")?
-            .output
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned output")?
-            .as_ref()
-            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
-            .clone();
+        let (head, tail, output) = check_resolve_assumption(&cond.claim, &assum.claim)?;
 
-        // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
-        // removing the head and leaving the tail of the list.
-        let assumptions = output
-            .assumptions
-            .value()
-            .context("cannot resolve conditional receipt with pruned assumptions")?;
-        let head: Assumption = assumptions
-            .0
-            .first()
-            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned head assumption")?
-            .clone();
-
-        // Ensure that the assumption receipt can resolve the assumption.
-        ensure!(
-            head.claim == assum.claim.digest(),
-            "assumption receipt claim does not match head of assumptions list"
-        );
+        // Ensure that the assumption receipt has the right control root.
         let expected_root = match head.control_root == Digest::ZERO {
             true => cond.control_root()?,
             false => head.control_root,
@@ -809,11 +782,8 @@ impl Prover {
             "assumption receipt control root does not match head of assumptions list"
         );
 
-        let mut assumptions_tail = assumptions;
-        assumptions_tail.resolve(&head.digest())?;
-
         prover.add_assumption_receipt(head, assum)?;
-        prover.add_input_digest(&assumptions_tail.digest(), DigestKind::Sha256);
+        prover.add_input_digest(&tail.digest(), DigestKind::Sha256);
         prover.add_input_digest(&output.journal.digest(), DigestKind::Sha256);
         Ok(prover)
     }
@@ -848,41 +818,14 @@ impl Prover {
         prover.add_input_digest(&cond.control_root()?, DigestKind::Poseidon2);
         prover.add_succinct_work_claim_rv32im_receipt(cond)?;
 
-        // TODO(povw): extract this code which is shared with new_resolve
-
-        let output = cond
+        let cond_claim = &cond
             .claim
             .as_value()
-            .context("cannot resolve conditional receipt with pruned claim")?
-            .claim
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned claim")?
-            .output
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned output")?
-            .as_ref()
-            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
-            .clone();
+            .context("cannot resolve assumption receipt with pruned work claim")?
+            .claim;
+        let (head, tail, output) = check_resolve_assumption(cond_claim, &assum.claim)?;
 
-        // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
-        // removing the head and leaving the tail of the list.
-        let assumptions = output
-            .assumptions
-            .value()
-            .context("cannot resolve conditional receipt with pruned assumptions")?;
-        let head: Assumption = assumptions
-            .0
-            .first()
-            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned head assumption")?
-            .clone();
-
-        // Ensure that the assumption receipt can resolve the assumption.
-        ensure!(
-            head.claim == assum.claim.digest(),
-            "assumption receipt claim does not match head of assumptions list"
-        );
+        // Ensure that the assumption receipt has the right control root.
         let expected_root = match head.control_root == Digest::ZERO {
             true => cond.control_root()?,
             false => head.control_root,
@@ -892,11 +835,8 @@ impl Prover {
             "assumption receipt control root does not match head of assumptions list"
         );
 
-        let mut assumptions_tail = assumptions;
-        assumptions_tail.resolve(&head.digest())?;
-
         prover.add_assumption_receipt(head, assum)?;
-        prover.add_input_digest(&assumptions_tail.digest(), DigestKind::Sha256);
+        prover.add_input_digest(&tail.digest(), DigestKind::Sha256);
         prover.add_input_digest(&output.journal.digest(), DigestKind::Sha256);
         Ok(prover)
     }
@@ -1017,4 +957,47 @@ impl Prover {
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         self.prover.run()
     }
+}
+
+fn check_resolve_assumption<Claim>(
+    cond: &MaybePruned<ReceiptClaim>,
+    assum: &MaybePruned<Claim>,
+) -> Result<(Assumption, Assumptions, Output)>
+where
+    Claim: risc0_binfmt::Digestible + Debug,
+{
+    let output = cond
+        .as_value()
+        .context("cannot resolve conditional receipt with pruned claim")?
+        .output
+        .as_value()
+        .context("cannot resolve conditional receipt with pruned output")?
+        .as_ref()
+        .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
+        .clone();
+
+    // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
+    // removing the head and leaving the tail of the list.
+    let assumptions = output
+        .assumptions
+        .clone()
+        .value()
+        .context("cannot resolve conditional receipt with pruned assumptions")?;
+    let head: Assumption = assumptions
+        .0
+        .first()
+        .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
+        .as_value()
+        .context("cannot resolve conditional receipt with pruned head assumption")?
+        .clone();
+
+    ensure!(
+        head.claim == assum.digest(),
+        "assumption receipt claim does not match head of assumptions list"
+    );
+
+    let mut assumptions_tail = assumptions;
+    assumptions_tail.resolve(&head.digest())?;
+
+    Ok((head, assumptions_tail, output))
 }
