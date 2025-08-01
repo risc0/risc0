@@ -7,7 +7,7 @@ pub struct ProveInfo {
     #[prost(message, optional, tag = "2")]
     pub stats: ::core::option::Option<SessionStats>,
     #[prost(message, optional, tag = "3")]
-    pub work_receipt: ::core::option::Option<GenericReceipt>,
+    pub work_receipt: ::core::option::Option<InnerReceipt>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -44,7 +44,8 @@ pub struct ReceiptMetadata {
 /// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
 /// In Rust, they are distinct types because Rust needs to size everything on the
 /// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
-/// have different sizes. Protobuf handles this without issue.
+/// have different sizes. Protobuf handles this without issue. GenericReceipt also
+/// uses this message type for similar reasons, but the composite kind is unused.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InnerReceipt {
@@ -58,25 +59,6 @@ pub mod inner_receipt {
     pub enum Kind {
         #[prost(message, tag = "1")]
         Composite(super::CompositeReceipt),
-        #[prost(message, tag = "2")]
-        Succinct(super::SuccinctReceipt),
-        #[prost(message, tag = "3")]
-        Fake(super::FakeReceipt),
-        #[prost(message, tag = "4")]
-        Groth16(super::Groth16Receipt),
-    }
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GenericReceipt {
-    #[prost(oneof = "generic_receipt::Kind", tags = "2, 3, 4")]
-    pub kind: ::core::option::Option<generic_receipt::Kind>,
-}
-/// Nested message and enum types in `GenericReceipt`.
-pub mod generic_receipt {
-    #[allow(clippy::derive_partial_eq_without_eq)]
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
-    pub enum Kind {
         #[prost(message, tag = "2")]
         Succinct(super::SuccinctReceipt),
         #[prost(message, tag = "3")]

@@ -733,7 +733,7 @@ impl TryFrom<pb::core::InnerReceipt> for InnerAssumptionReceipt {
     }
 }
 
-impl<Claim> TryFrom<GenericReceipt<Claim>> for pb::core::GenericReceipt
+impl<Claim> TryFrom<GenericReceipt<Claim>> for pb::core::InnerReceipt
 where
     MaybePruned<Claim>: TryInto<pb::core::MaybePruned, Error = anyhow::Error>,
 {
@@ -743,38 +743,39 @@ where
         Ok(Self {
             kind: Some(match value {
                 GenericReceipt::Succinct(inner) => {
-                    pb::core::generic_receipt::Kind::Succinct(inner.try_into()?)
+                    pb::core::inner_receipt::Kind::Succinct(inner.try_into()?)
                 }
                 GenericReceipt::Fake(inner) => {
-                    pb::core::generic_receipt::Kind::Fake(pb::core::FakeReceipt {
+                    pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {
                         claim: Some(inner.claim.try_into()?),
                     })
                 }
                 GenericReceipt::Groth16(inner) => {
-                    pb::core::generic_receipt::Kind::Groth16(inner.try_into()?)
+                    pb::core::inner_receipt::Kind::Groth16(inner.try_into()?)
                 }
             }),
         })
     }
 }
 
-impl<Claim> TryFrom<pb::core::GenericReceipt> for GenericReceipt<Claim>
+impl<Claim> TryFrom<pb::core::InnerReceipt> for GenericReceipt<Claim>
 where
     MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
 {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::GenericReceipt) -> Result<Self> {
+    fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
         Ok(
             match value
                 .kind
-                .ok_or_else(|| malformed_err("GenericReceipt.kind"))?
+                .ok_or_else(|| malformed_err("InnerReceipt.kind"))?
             {
-                pb::core::generic_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
-                pb::core::generic_receipt::Kind::Succinct(inner) => {
-                    Self::Succinct(inner.try_into()?)
-                }
-                pb::core::generic_receipt::Kind::Fake(inner) => Self::Fake(inner.try_into()?),
+                pb::core::inner_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
+                pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
+                pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake(inner.try_into()?),
+                pb::core::inner_receipt::Kind::Composite(_) => return Err(malformed_err(
+                    "cannot deserialize GenericReceipt from pb::InnerReceipt with composite kind",
+                )),
             },
         )
     }

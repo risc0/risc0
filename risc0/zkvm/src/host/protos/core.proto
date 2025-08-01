@@ -7,7 +7,7 @@ package core;
 message ProveInfo {
   Receipt receipt = 1;
   SessionStats stats = 2;
-  GenericReceipt work_receipt = 3;
+  InnerReceipt work_receipt = 3;
 }
 
 message SessionStats {
@@ -32,19 +32,11 @@ message ReceiptMetadata {
 // NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
 // In Rust, they are distinct types because Rust needs to size everything on the
 // stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
-// have different sizes. Protobuf handles this without issue.
+// have different sizes. Protobuf handles this without issue. GenericReceipt also
+// uses this message type for similar reasons, but the composite kind is unused.
 message InnerReceipt {
   oneof kind {
     CompositeReceipt composite = 1;
-    SuccinctReceipt succinct = 2;
-    FakeReceipt fake = 3;
-    Groth16Receipt groth16 = 4;
-  }
-}
-
-// TODO(povw): Remove this
-message GenericReceipt {
-  oneof kind {
     SuccinctReceipt succinct = 2;
     FakeReceipt fake = 3;
     Groth16Receipt groth16 = 4;
