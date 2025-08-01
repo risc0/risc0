@@ -42,6 +42,7 @@ message InnerReceipt {
   }
 }
 
+// TODO(povw): Remove this
 message GenericReceipt {
   oneof kind {
     SuccinctReceipt succinct = 2;
