@@ -565,13 +565,19 @@ impl Risc0Context for Preflight<'_> {
 
         // tracing::trace!("load_u32: {addr:?}");
         let cycle = (2 * self.trace.cycles.len()) as u32;
-        let word = if addr >= MERKLE_TREE_START_ADDR && addr < MERKLE_TREE_END_ADDR {
-            self.page_memory
-                .get(&addr)
-                .ok_or_else(|| anyhow!("Invalid load from page memory"))?
-        } else if addr >= POVW_NONCE_START_ADDR && addr < POVW_NONCE_END_ADDR {
-            self.segment.povw_nonce.unwrap_or_default().to_u32s()
-                [(addr - POVW_NONCE_START_ADDR).0 as usize]
+        // MERKLE_TREE_START_ADDR is the first address in a special region of memory that is
+        // outside of the user-addressible range. This region also contains the PoVW nonce.
+        let word = if addr >= MERKLE_TREE_START_ADDR {
+            if addr < MERKLE_TREE_END_ADDR {
+                self.page_memory
+                    .get(&addr)
+                    .ok_or_else(|| anyhow!("Invalid load from page memory"))?
+            } else if addr >= POVW_NONCE_START_ADDR && addr < POVW_NONCE_END_ADDR {
+                self.segment.povw_nonce.unwrap_or_default().to_u32s()
+                    [(addr - POVW_NONCE_START_ADDR).0 as usize]
+            } else {
+                bail!("invalid memory access in special region: addr = {addr:x?}")
+            }
         } else {
             self.pager.load(addr)?
         };
