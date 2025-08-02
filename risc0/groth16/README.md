@@ -24,9 +24,9 @@ fn verify() {
 }
 ```
 
-## STARK to SNARK
+## Shrink Wrap (aka STARK to SNARK)
 
-It also provides the [stark_to_snark][docker::stark_to_snark] function to run a prover Groth16
+It also provides the [shrink_wrap][prove::shrink_wrap] function to run a prover Groth16
 recursion prover via Docker. After generating a RISC Zero STARK proof, this function can be
 used to transform it into a Groth16 proof. This function becomes available when the `prove`
 feature flag is enabled.

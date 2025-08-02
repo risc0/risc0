@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_groth16::{Fr, Seal, Verifier, VerifyingKey};
-use risc0_zkvm::{guest::env, sha::Digestible};
+use risc0_zkvm as _;
 
-pub fn main() {
-    let (seal, public_inputs, verifying_key): (Seal, Vec<Fr>, VerifyingKey) = env::read();
-
-    Verifier::new(&seal, &public_inputs, &verifying_key)
-        .unwrap()
-        .verify()
-        .unwrap();
-
-    env::commit(&(verifying_key.digest(), public_inputs.digest()));
+fn main() {
+    todo!("todo make this work")
 }

@@ -19,6 +19,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
+  RISC0_GROTH16_VERSION: 0.1.0
 
 defaults:
   run:
@@ -207,6 +208,7 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - name: "root: cargo clippy"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
       - name: "bento: cargo clippy"
@@ -261,6 +263,7 @@ jobs:
         run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - name: Login to Docker Hub
         if: >
           matrix.os == 'Linux' &&
@@ -276,6 +279,7 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force gdb $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
       - name: Install gdb dependencies
         run: brew install zstd gettext lz4 mpfr gmp
         if: matrix.os == 'macOS'
@@ -322,12 +326,14 @@ jobs:
         run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
           version: "0.9.96"
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
       - name: test risc0-r0vm
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE
       - name: test risc0-r0vm (disable-dev-mode)
@@ -390,6 +396,7 @@ jobs:
         run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
@@ -467,9 +474,9 @@ jobs:
           toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
       - uses: ./.github/actions/sccache
       - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkp -p risc0-groth16 -Fprove,std --no-deps
       - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-binfmt -p risc0-core -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
@@ -643,6 +650,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
@@ -678,6 +686,7 @@ jobs:
       - uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
