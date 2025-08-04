@@ -129,7 +129,7 @@ impl TryFrom<ProofJson> for Seal {
 }
 
 /// Groth16 Proof encoded as JSON.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProofJson {
     pi_a: Vec<String>,
     pi_b: Vec<Vec<String>>,
@@ -139,7 +139,7 @@ pub struct ProofJson {
 }
 
 /// Groth16 Verifying Key encoded as JSON.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct VerifyingKeyJson {
     protocol: String,
     curve: String,
@@ -232,7 +232,7 @@ impl VerifyingKeyJson {
 }
 
 /// Groth16 Public witness encoded as JSON.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PublicInputsJson {
     /// values of the public witness
     pub values: Vec<String>,
