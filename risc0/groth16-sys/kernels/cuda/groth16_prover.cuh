@@ -309,6 +309,7 @@ public:
 
       sync_event.wait(gpu);
 
+      gpu.bzero(&d_c[0], domain_size);
       coeff_wise_mul<<<gpu.sm_count(), 1024, 0, gpu>>>(&d_c[0], &d_a[0], &d_b[0], lg_domain_size);
       CUDA_OK(cudaGetLastError());
       NTT_sequence(gpu, d_a, lg_domain_size);

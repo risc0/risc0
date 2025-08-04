@@ -69,6 +69,7 @@ gpu_ptr_t<fr_t> generate_random_scalars(const gpu_t& gpu, size_t n) {
   size_t block_count = (size_bytes + 64 - 1) / 64;
 
   gpu_ptr_t<fr_t> random_scalars((fr_t*)gpu.Dmalloc(block_count * 64));
+  gpu.bzero(&random_scalars[0], block_count * 64 / sizeof(fr_t));
   chacha_state state = initialize_chacha_state<uint32_t>(key, nonce);
 
   chacha_generate_random_scalars<8>

@@ -618,7 +618,6 @@ fn fake_compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
 
 #[test_log::test]
 #[cfg(feature = "cuda")]
-#[ignore]
 fn shrink_wrap() {
     // Perform many proofs in parallel. The initial implementation of the
     // groth16 prover on CUDA had issues with this. Ensure that we got a groth16
