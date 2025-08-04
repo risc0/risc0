@@ -10,7 +10,7 @@ ENV TZ="America/Los_Angeles"
 
 RUN apt-get -qq update && apt-get install -y -q \
     openssl libssl-dev pkg-config curl clang git \
-    build-essential openssh-client
+    build-essential openssh-client unzip
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -20,6 +20,10 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 RUN chmod -R a+w $RUSTUP_HOME $CARGO_HOME
 RUN rustup install 1.81
+
+# Install protoc
+RUN curl -o protoc.zip -L https://github.com/protocolbuffers/protobuf/releases/download/v31.1/protoc-31.1-linux-x86_64.zip
+RUN unzip protoc.zip -d /usr/local
 
 FROM rust-builder AS builder
 
