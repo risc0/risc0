@@ -141,6 +141,7 @@ services:
       S3_SECRET_KEY: ${MINIO_ROOT_PASS}
       RUST_LOG: ${RUST_LOG}
       RUST_BACKTRACE: 1
+      RISC0_HOME: /usr/local/risc0
     entrypoint: /app/agent -t prove
     ulimits:
       # Needed for stark verification

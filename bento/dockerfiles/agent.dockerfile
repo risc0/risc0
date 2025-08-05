@@ -43,6 +43,11 @@ ENV SCCACHE_SERVER_PORT=4227
 
 WORKDIR /src/
 COPY . .
+
+# Install groth16 component
+ENV RISC0_HOME=/usr/local/risc0
+RUN cargo run --package rzup -- --verbose install risc0-groth16
+
 RUN bento/dockerfiles/sccache-setup.sh "x86_64-unknown-linux-musl" "v0.8.2"
 SHELL ["/bin/bash", "-c"]
 
@@ -62,5 +67,8 @@ RUN apt-get update -q -y && apt-get install -q -y ca-certificates libssl3 && rm 
 
 # Main prover
 COPY --from=builder /src/agent /app/agent
+
+# copy rzup directory
+COPY --from=builder /usr/local/risc0 /usr/local/risc0
 
 ENTRYPOINT ["/app/agent"]
