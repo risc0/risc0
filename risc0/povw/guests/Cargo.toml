@@ -6,6 +6,10 @@ edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
+publish = false
+
+[package.metadata.release]
+release = false
 
 [dev-dependencies]
 anyhow = "1.0"
