@@ -134,7 +134,7 @@ fn one_update() -> anyhow::Result<()> {
         .state(State::initial(work_log_id))
         .updates(vec![WorkLogUpdate::new(
             work_claim,
-            work_log.prove_add(job_num, job.clone())?
+            work_log.prove_add(job_num, job.clone())?,
         )])
         .build()
         .expect("failed to build input");
@@ -187,7 +187,7 @@ fn one_continuation_update() -> anyhow::Result<()> {
         .state(State::from(initial_journal.clone()))
         .updates(vec![WorkLogUpdate::new(
             work_claim,
-            work_log.prove_add(job2_num, job2.clone())?
+            work_log.prove_add(job2_num, job2.clone())?,
         )])
         .build()
         .expect("failed to build input");
@@ -225,7 +225,7 @@ fn two_batched_updates() -> anyhow::Result<()> {
                 .unwrap()
                 .into(),
         },
-        work_log.prove_add(job1_num, job1.clone())?
+        work_log.prove_add(job1_num, job1.clone())?,
     );
 
     let update2 = WorkLogUpdate::new(
@@ -235,7 +235,7 @@ fn two_batched_updates() -> anyhow::Result<()> {
                 .unwrap()
                 .into(),
         },
-        work_log.prove_add(job2_num, job2.clone())?
+        work_log.prove_add(job2_num, job2.clone())?,
     );
 
     let input = Input::builder()
@@ -402,7 +402,7 @@ fn reject_mismatched_work_log_id() {
         .state(State::initial(work_log_id))
         .updates(vec![WorkLogUpdate::new(
             work_claim,
-            work_log.prove_add(job_num, job.clone()).unwrap()
+            work_log.prove_add(job_num, job.clone()).unwrap(),
         )])
         .build()
         .expect("failed to build input");
@@ -499,7 +499,7 @@ fn reject_work_assumption_verification_fails() {
         .state(State::initial(work_log_id))
         .updates(vec![WorkLogUpdate::new(
             work_claim,
-            work_log.prove_add(job_num, job.clone()).unwrap()
+            work_log.prove_add(job_num, job.clone()).unwrap(),
         )])
         .build()
         .expect("failed to build input");
@@ -537,14 +537,11 @@ fn reject_duplicate_update() {
         .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
         .state(State::initial(work_log_id))
         .updates(vec![
-            WorkLogUpdate::new(
-                work_claim.clone(),
-                noninclusion_proof.clone()
-            ),
+            WorkLogUpdate::new(work_claim.clone(), noninclusion_proof.clone()),
             WorkLogUpdate::new(
                 work_claim.clone(),
                 // Using same proof, but tree is no longer empty after first update
-                noninclusion_proof
+                noninclusion_proof,
             ),
         ])
         .build()
