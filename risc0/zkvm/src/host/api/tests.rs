@@ -429,10 +429,10 @@ mod keccak_po2 {
 #[test(tokio::test)]
 #[cfg(feature = "redis")]
 async fn redis_asset() {
-    let url = "127.0.0.1:6379";
-    let listener = tokio::net::TcpListener::bind(url)
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
         .await
         .expect("failed to bind to port 6379");
+    let url = listener.local_addr().unwrap().to_string();
 
     let _ = mini_redis::server::run(
         listener,
