@@ -6880,7 +6880,6 @@ name = "risc0-core"
 version = "2.0.1"
 dependencies = [
  "bytemuck",
- "bytemuck_derive",
  "nvtx",
  "puffin",
  "rand 0.9.1",
