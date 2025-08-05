@@ -112,6 +112,7 @@ impl From<Bitmap> for [u8; 32] {
 /// Organizes work logs by their 160-bit log IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion across all logs.
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub struct WorkSet {
     /// Map of work log IDs to their corresponding work logs.
     pub logs: BTreeMap<PovwLogId, WorkLog>,
@@ -240,6 +241,7 @@ impl WorkSet {
 /// Organizes jobs by their 64-bit job IDs and provides Merkle tree operations
 /// for proving nonce inclusion/non-inclusion within this log.
 #[derive(Clone, Debug, Default)]
+#[non_exhaustive]
 pub struct WorkLog {
     /// Map of job IDs to their corresponding jobs.
     pub jobs: BTreeMap<u64, Job>,
@@ -394,6 +396,7 @@ impl WorkLog {
 /// Stores the maximum used nonce index as a shorthand for the range [0, index_max].
 /// When set to None, represents an empty job with no used nonces.
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct Job {
     /// Only store the max used index, as a shorthand for the range [0, index_max]. When set to
     /// none, this represents an empty job.

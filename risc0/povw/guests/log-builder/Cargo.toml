@@ -10,6 +10,6 @@ repository = "https://github.com/risc0/risc0/"
 
 [dependencies]
 borsh = { version = "1.5", default-features = false, features = ["std"] }
-risc0-povw = { path = "../../", default-features = false }
+risc0-povw = { path = "../../", default-features = false, features = ["guest"] }
 risc0-zkvm = { path = "../../../zkvm/", default-features = false, features = ["std", "unstable"] }
 ruint = { version = "1.15" }

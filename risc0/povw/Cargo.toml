@@ -29,5 +29,6 @@ proptest = "1.6.0"
 ruint = { version = "1.15", features = ["proptest"] }
 
 [features]
-default = ["prover"]
-prover = ["risc0-zkvm/client", "dep:derive_builder", "dep:anyhow"]
+default = ["guest", "prover"]
+prover = ["guest", "risc0-zkvm/client", "dep:derive_builder", "dep:anyhow"]
+guest = ["dep:derive_builder"]

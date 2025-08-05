@@ -88,13 +88,16 @@ fn main() {
     }
 
     env::commit_slice(
-        &borsh::to_vec(&Journal {
-            work_log_id,
-            self_image_id: input.self_image_id,
-            updated_commit: root,
-            initial_commit,
-            update_value,
-        })
+        &borsh::to_vec(
+            &Journal::builder()
+                .work_log_id(work_log_id)
+                .self_image_id(input.self_image_id)
+                .updated_commit(root)
+                .initial_commit(initial_commit)
+                .update_value(update_value)
+                .build()
+                .expect("failed to build journal"),
+        )
         .unwrap(),
     );
 }

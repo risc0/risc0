@@ -94,21 +94,22 @@ fn prove_busy_loop(job_id: PovwJobId, cycles: u64) -> anyhow::Result<ProveInfo> 
 #[test]
 fn nop() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::initial(work_log_id),
-        updates: Vec::new(),
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::initial(work_log_id))
+        .build()
+        .expect("failed to build input");
 
     let journal = execute_guest(&input)?;
 
-    let expected_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: 0,
-        initial_commit: WorkLog::EMPTY.commit(),
-        updated_commit: WorkLog::EMPTY.commit(),
-    };
+    let expected_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(0)
+        .initial_commit(WorkLog::EMPTY.commit())
+        .updated_commit(WorkLog::EMPTY.commit())
+        .build()
+        .expect("failed to build journal");
 
     assert_eq!(journal, expected_journal);
     Ok(())
@@ -128,24 +129,26 @@ fn one_update() -> anyhow::Result<()> {
             .unwrap()
             .into(),
     };
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::initial(work_log_id),
-        updates: vec![WorkLogUpdate {
-            claim: work_claim,
-            noninclusion_proof: work_log.prove_add(job_num, job.clone())?,
-        }],
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::initial(work_log_id))
+        .updates(vec![WorkLogUpdate::new(
+            work_claim,
+            work_log.prove_add(job_num, job.clone())?
+        )])
+        .build()
+        .expect("failed to build input");
 
     let journal = execute_guest(&input)?;
 
-    let expected_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work_value,
-        initial_commit: WorkLog::EMPTY.commit(),
-        updated_commit: work_log.commit(),
-    };
+    let expected_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work_value)
+        .initial_commit(WorkLog::EMPTY.commit())
+        .updated_commit(work_log.commit())
+        .build()
+        .expect("failed to build journal");
 
     assert_eq!(journal, expected_journal);
     Ok(())
@@ -164,13 +167,14 @@ fn one_continuation_update() -> anyhow::Result<()> {
 
     work_log.add(job1_num, job1.clone())?;
 
-    let initial_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work1_value,
-        initial_commit: WorkLog::EMPTY.commit(),
-        updated_commit: work_log.commit(),
-    };
+    let initial_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work1_value)
+        .initial_commit(WorkLog::EMPTY.commit())
+        .updated_commit(work_log.commit())
+        .build()
+        .expect("failed to build journal");
 
     let work_claim = WorkClaim {
         claim: rand_claim(),
@@ -178,24 +182,26 @@ fn one_continuation_update() -> anyhow::Result<()> {
             .unwrap()
             .into(),
     };
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::from(initial_journal.clone()),
-        updates: vec![WorkLogUpdate {
-            claim: work_claim,
-            noninclusion_proof: work_log.prove_add(job2_num, job2.clone())?,
-        }],
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::from(initial_journal.clone()))
+        .updates(vec![WorkLogUpdate::new(
+            work_claim,
+            work_log.prove_add(job2_num, job2.clone())?
+        )])
+        .build()
+        .expect("failed to build input");
 
     let journal = execute_guest(&input)?;
 
-    let expected_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work2_value,
-        initial_commit: initial_journal.updated_commit,
-        updated_commit: work_log.commit(),
-    };
+    let expected_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work2_value)
+        .initial_commit(initial_journal.updated_commit)
+        .updated_commit(work_log.commit())
+        .build()
+        .expect("failed to build journal");
 
     assert_eq!(journal, expected_journal);
     Ok(())
@@ -212,41 +218,43 @@ fn two_batched_updates() -> anyhow::Result<()> {
     let work2_value = 1 << 24;
     let mut work_log = WorkLog::default();
 
-    let update1 = WorkLogUpdate {
-        claim: WorkClaim {
+    let update1 = WorkLogUpdate::new(
+        WorkClaim {
             claim: rand_claim(),
             work: make_work(work1_value, work_log_id, job1_num, &job1)
                 .unwrap()
                 .into(),
         },
-        noninclusion_proof: work_log.prove_add(job1_num, job1.clone())?,
-    };
+        work_log.prove_add(job1_num, job1.clone())?
+    );
 
-    let update2 = WorkLogUpdate {
-        claim: WorkClaim {
+    let update2 = WorkLogUpdate::new(
+        WorkClaim {
             claim: rand_claim(),
             work: make_work(work2_value, work_log_id, job2_num, &job2)
                 .unwrap()
                 .into(),
         },
-        noninclusion_proof: work_log.prove_add(job2_num, job2.clone())?,
-    };
+        work_log.prove_add(job2_num, job2.clone())?
+    );
 
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::initial(work_log_id),
-        updates: vec![update1, update2],
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::initial(work_log_id))
+        .updates(vec![update1, update2])
+        .build()
+        .expect("failed to build input");
 
     let journal = execute_guest(&input)?;
 
-    let expected_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work1_value + work2_value,
-        initial_commit: WorkLog::EMPTY.commit(),
-        updated_commit: work_log.commit(),
-    };
+    let expected_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work1_value + work2_value)
+        .initial_commit(WorkLog::EMPTY.commit())
+        .updated_commit(work_log.commit())
+        .build()
+        .expect("failed to build journal");
 
     assert_eq!(journal, expected_journal);
     Ok(())
@@ -283,13 +291,14 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
 
     let first_update_commit = prover.work_log.commit();
-    let expected_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work_receipt.claim().as_value()?.work.as_value()?.value,
-        initial_commit: WorkLog::EMPTY.commit(),
-        updated_commit: first_update_commit,
-    };
+    let expected_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work_receipt.claim().as_value()?.work.as_value()?.value)
+        .initial_commit(WorkLog::EMPTY.commit())
+        .updated_commit(first_update_commit)
+        .build()
+        .expect("failed to build journal");
 
     assert_eq!(journal, expected_journal);
 
@@ -316,13 +325,14 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
 
     let second_update_commit = prover.work_log.commit();
-    let expected_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work_receipt.claim().as_value()?.work.as_value()?.value,
-        initial_commit: first_update_commit,
-        updated_commit: second_update_commit,
-    };
+    let expected_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work_receipt.claim().as_value()?.work.as_value()?.value)
+        .initial_commit(first_update_commit)
+        .updated_commit(second_update_commit)
+        .build()
+        .expect("failed to build journal");
 
     assert_eq!(journal, expected_journal);
 
@@ -358,13 +368,14 @@ fn prove_three_sequential_updates() -> anyhow::Result<()> {
     proven_log_info.receipt.verify(RISC0_POVW_LOG_BUILDER_ID)?;
     let journal: Journal = borsh::from_slice(&proven_log_info.receipt.journal.bytes)?;
 
-    let expected_journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work_receipt.claim().as_value()?.work.as_value()?.value,
-        initial_commit: second_update_commit,
-        updated_commit: prover.work_log.commit(),
-    };
+    let expected_journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work_receipt.claim().as_value()?.work.as_value()?.value)
+        .initial_commit(second_update_commit)
+        .updated_commit(prover.work_log.commit())
+        .build()
+        .expect("failed to build journal");
 
     assert_eq!(journal, expected_journal);
     Ok(())
@@ -386,14 +397,15 @@ fn reject_mismatched_work_log_id() {
             .unwrap()
             .into(),
     };
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::initial(work_log_id),
-        updates: vec![WorkLogUpdate {
-            claim: work_claim,
-            noninclusion_proof: work_log.prove_add(job_num, job.clone()).unwrap(),
-        }],
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::initial(work_log_id))
+        .updates(vec![WorkLogUpdate::new(
+            work_claim,
+            work_log.prove_add(job_num, job.clone()).unwrap()
+        )])
+        .build()
+        .expect("failed to build input");
 
     let result = execute_guest(&input);
     let error_msg = result.unwrap_err().to_string();
@@ -405,19 +417,20 @@ fn reject_invalid_continuation_journal_verification() {
     let work_log_id = uint!(0xdeafbee7_U160);
     let work_value = 1 << 22;
 
-    let journal = Journal {
-        work_log_id,
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        update_value: work_value,
-        initial_commit: WorkLog::EMPTY.commit(),
-        updated_commit: WorkLog::EMPTY.commit(),
-    };
+    let journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .update_value(work_value)
+        .initial_commit(WorkLog::EMPTY.commit())
+        .updated_commit(WorkLog::EMPTY.commit())
+        .build()
+        .expect("failed to build journal");
 
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::from(journal),
-        updates: Vec::new(),
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::from(journal))
+        .build()
+        .expect("failed to build input");
 
     // Execute without adding FakeReceipt for continuation journal
     let env = ExecutorEnv::builder()
@@ -436,19 +449,20 @@ fn reject_mismatched_self_image_id_in_journal() {
     let work_value = 1 << 22;
 
     // Create a journal with mismatched self_image_id
-    let journal = Journal {
-        work_log_id,
-        self_image_id: Digest::new([5, 6, 7, 8, 9, 10, 11, 12]), // Different from input.self_image_id
-        update_value: work_value,
-        initial_commit: WorkLog::EMPTY.commit(),
-        updated_commit: WorkLog::EMPTY.commit(),
-    };
+    let journal = Journal::builder()
+        .work_log_id(work_log_id)
+        .self_image_id(Digest::new([5, 6, 7, 8, 9, 10, 11, 12])) // Different from input.self_image_id
+        .update_value(work_value)
+        .initial_commit(WorkLog::EMPTY.commit())
+        .updated_commit(WorkLog::EMPTY.commit())
+        .build()
+        .expect("failed to build journal");
 
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::from(journal.clone()),
-        updates: Vec::new(),
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::from(journal.clone()))
+        .build()
+        .expect("failed to build input");
 
     let env = ExecutorEnv::builder()
         .write_frame(&borsh::to_vec(&input).unwrap())
@@ -480,14 +494,15 @@ fn reject_work_assumption_verification_fails() {
             .unwrap()
             .into(),
     };
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::initial(work_log_id),
-        updates: vec![WorkLogUpdate {
-            claim: work_claim,
-            noninclusion_proof: work_log.prove_add(job_num, job.clone()).unwrap(),
-        }],
-    };
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::initial(work_log_id))
+        .updates(vec![WorkLogUpdate::new(
+            work_claim,
+            work_log.prove_add(job_num, job.clone()).unwrap()
+        )])
+        .build()
+        .expect("failed to build input");
 
     // Execute without adding the work claim assumption
     let env = ExecutorEnv::builder()
@@ -518,21 +533,22 @@ fn reject_duplicate_update() {
     // Generate noninclusion proof for empty tree
     let noninclusion_proof = work_log.prove_add(job_num, job.clone()).unwrap();
 
-    let input = Input {
-        self_image_id: RISC0_POVW_LOG_BUILDER_ID.into(),
-        state: State::initial(work_log_id),
-        updates: vec![
-            WorkLogUpdate {
-                claim: work_claim.clone(),
-                noninclusion_proof: noninclusion_proof.clone(),
-            },
-            WorkLogUpdate {
-                claim: work_claim.clone(),
+    let input = Input::builder()
+        .self_image_id(RISC0_POVW_LOG_BUILDER_ID)
+        .state(State::initial(work_log_id))
+        .updates(vec![
+            WorkLogUpdate::new(
+                work_claim.clone(),
+                noninclusion_proof.clone()
+            ),
+            WorkLogUpdate::new(
+                work_claim.clone(),
                 // Using same proof, but tree is no longer empty after first update
-                noninclusion_proof,
-            },
-        ],
-    };
+                noninclusion_proof
+            ),
+        ])
+        .build()
+        .expect("failed to build input");
 
     let result = execute_guest(&input);
     let error_msg = result.unwrap_err().to_string();

@@ -33,6 +33,7 @@
 mod consts;
 mod error;
 /// Log Builder guest program types, for verifying PoVW log updates.
+#[cfg(feature = "guest")]
 pub mod guest;
 /// Prover functionality, for running the work log builder.
 #[cfg(feature = "prover")]

@@ -13,6 +13,8 @@
 // limitations under the License.
 
 use borsh::{BorshDeserialize, BorshSerialize};
+use derive_builder::Builder;
+use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{Digest, Unknown, WorkClaim};
 use ruint::aliases::U160;
 use serde::{Deserialize, Serialize};
@@ -54,17 +56,28 @@ impl From<Journal> for State {
 ///
 /// Contains the execution state, work log updates to apply, and the self image ID
 /// for recursive verification.
-#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
+#[derive(Clone, Builder, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
+#[non_exhaustive]
 pub struct Input {
     /// Optional journal from the previous execution of this guest.
     ///
     /// If provided, the updated root of the journal will be used as the initial root for this
     /// update. If not provided, an empty work log root constant is used.
+    #[builder(setter(into))]
     pub state: State,
     /// Series of work log updates to apply.
+    #[builder(setter(into), default)]
     pub updates: Vec<WorkLogUpdate>,
     /// Image ID of the work log builder guest, provided to enable recursive verification.
+    #[builder(setter(into))]
     pub self_image_id: Digest,
+}
+
+impl Input {
+    /// Create an [InputBuilder] to construct an [Input].
+    pub fn builder() -> InputBuilder {
+        Default::default()
+    }
 }
 
 /// A single work log update containing a work claim and its non-inclusion proof.
@@ -72,6 +85,7 @@ pub struct Input {
 /// Used to prove that nonces consumed in this update are unused in the work log
 /// to which the update is applied.
 #[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
+#[non_exhaustive]
 pub struct WorkLogUpdate {
     /// Work claim to be added to the log.
     pub claim: WorkClaim<Unknown>,
@@ -79,23 +93,51 @@ pub struct WorkLogUpdate {
     pub noninclusion_proof: SubtreeOpening<WorkLog, { Job::TREE_HEIGHT }>,
 }
 
+impl WorkLogUpdate {
+    /// Create a new [WorkLogUpdate] from the given claim and noninclusion proof for the job in its
+    /// respective log.
+    pub fn new(
+        claim: impl Into<WorkClaim<Unknown>>,
+        noninclusion_proof: SubtreeOpening<WorkLog, { Job::TREE_HEIGHT }>,
+    ) -> Self {
+        Self {
+            claim: claim.into(),
+            noninclusion_proof,
+        }
+    }
+}
+
 /// Journal output from PoVW guest program execution.
 ///
 /// Contains the work log commitment updates and accumulated work value.
-#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
+#[derive(
+    Clone, Builder, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize, PartialEq, Eq,
+)]
+#[non_exhaustive]
 pub struct Journal {
     /// Work log ID that this journal corresponds to.
-    pub work_log_id: U160,
+    #[builder(setter(into))]
+    pub work_log_id: PovwLogId,
     /// Optional initial work log commitment.
     ///
     /// If the log is initially empty, the empty work log root constant is used.
+    #[builder(setter(into))]
     pub initial_commit: Digest,
     /// Commitment to the work log after accumulating all work claims.
+    #[builder(setter(into))]
     pub updated_commit: Digest,
     /// Sum of the values from the work claims included in this update.
     pub update_value: u64,
     /// Image ID of the work log builder guest, included to enable recursive verification.
     ///
     /// The verifier must ensure this digest is equal to the expected work log builder image ID.
+    #[builder(setter(into))]
     pub self_image_id: Digest,
+}
+
+impl Journal {
+    /// Create a [JournalBuilder] to construct a [Journal].
+    pub fn builder() -> JournalBuilder {
+        Default::default()
+    }
 }
