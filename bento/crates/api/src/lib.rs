@@ -422,16 +422,10 @@ async fn prove_stark(
     ExtractApiKey(api_key): ExtractApiKey,
     Json(start_req): Json<ProofReq>,
 ) -> Result<Json<CreateSessRes>, AppError> {
-    let (
-        _aux_stream,
-        exec_stream,
-        _gpu_prove_stream,
-        _gpu_coproc_stream,
-        _gpu_join_stream,
-        _snark_stream,
-    ) = helpers::get_or_create_streams(&state.db_pool, &api_key)
-        .await
-        .context("Failed to get / create steams")?;
+    let (_aux_stream, exec_stream, _gpu_prove_stream, _gpu_coproc_stream, _gpu_join_stream) =
+        helpers::get_or_create_streams(&state.db_pool, &api_key)
+            .await
+            .context("Failed to get / create steams")?;
 
     let task_def = serde_json::to_value(TaskType::Executor(ExecutorReq {
         image: start_req.img,
@@ -585,16 +579,10 @@ async fn prove_groth16(
     ExtractApiKey(api_key): ExtractApiKey,
     Json(start_req): Json<SnarkReq>,
 ) -> Result<Json<CreateSessRes>, AppError> {
-    let (
-        _aux_stream,
-        _exec_stream,
-        _gpu_prove_stream,
-        _gpu_coproc_stream,
-        _gpu_join_stream,
-        snark_stream,
-    ) = helpers::get_or_create_streams(&state.db_pool, &api_key)
-        .await
-        .context("Failed to get / create steams")?;
+    let (_aux_stream, _exec_stream, gpu_prove_stream, _gpu_coproc_stream, _gpu_join_stream) =
+        helpers::get_or_create_streams(&state.db_pool, &api_key)
+            .await
+            .context("Failed to get / create steams")?;
 
     let task_def = serde_json::to_value(TaskType::Snark(WorkflowSnarkReq {
         receipt: start_req.session_id,
@@ -604,7 +592,7 @@ async fn prove_groth16(
 
     let job_id = taskdb::create_job(
         &state.db_pool,
-        &snark_stream,
+        &gpu_prove_stream,
         &task_def,
         state.snark_retries,
         state.snark_timeout,
