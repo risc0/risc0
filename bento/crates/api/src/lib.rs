@@ -624,7 +624,14 @@ async fn groth16_status(
                 "http://{hostname}/receipts/groth16/receipt/{job_id}"
             )),
         ),
-        JobState::Failed => (None, None), // TODO error message
+        JobState::Failed => (
+            Some(
+                taskdb::get_job_failure(&state.db_pool, &job_id)
+                    .await
+                    .context("Failed to get job error message")?,
+            ),
+            None,
+        ),
     };
     Ok(Json(SnarkStatusRes {
         status: job_state.to_string(),
