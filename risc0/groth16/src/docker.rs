@@ -59,10 +59,23 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .stderr(Stdio::piped())
         .output()?;
     if !output.status.success() {
-        bail!(
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        
+        let mut error_msg = format!(
             "docker returned failure exit code: {:?}",
             output.status.code()
         );
+        
+        if !stderr.is_empty() {
+            error_msg.push_str(&format!("\nstderr: {}", stderr));
+        }
+        
+        if !stdout.is_empty() {
+            error_msg.push_str(&format!("\nstdout: {}", stdout));
+        }
+        
+        bail!("{}", error_msg);
     }
 
     tracing::debug!("Parsing proof");
