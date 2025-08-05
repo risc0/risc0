@@ -631,16 +631,14 @@ jobs:
     services:
       postgres:
         image: postgres:latest
-        # Assign the host-side of the port automatically, to avoid conflicts.
         ports:
-          - 0:5432
+          - 5432:5432
         env:
           POSTGRES_PASSWORD: password
     env:
       RUST_BACKTRACE: full
       RISC0_DEV_MODE: true
-      # Set the database URL to use the port assigned at runtime.
-      DATABASE_URL: postgres://postgres:password@localhost:${{ job.services.postgres.ports[5432] }}/postgres
+      DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
