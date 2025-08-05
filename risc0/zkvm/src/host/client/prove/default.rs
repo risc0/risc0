@@ -122,6 +122,7 @@ impl Prover for DefaultProver {
             JobStatus::Running(progress) => bail!("Job is still running: {progress}"),
             JobStatus::Succeeded(result) => ProveInfo {
                 receipt: Arc::into_inner(result.receipt).unwrap(),
+                work_receipt: None, // TODO(povw): implement PoVW here
                 stats: SessionStats {
                     segments: result.session.segment_count,
                     total_cycles: result.session.total_cycles,

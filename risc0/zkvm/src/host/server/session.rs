@@ -17,9 +17,10 @@
 
 use std::{collections::BTreeSet, fs, path::PathBuf};
 
-use anyhow::{ensure, Result};
+use anyhow::{ensure, Context, Result};
 use enum_map::EnumMap;
-use risc0_binfmt::SystemState;
+use risc0_binfmt::{PovwJobId, SystemState};
+use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 use risc0_circuit_rv32im::{execute::EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
 
@@ -28,9 +29,10 @@ use crate::{
         client::env::{ProveKeccakRequest, SegmentPath},
         prove_info::SessionStats,
     },
+    mmr::{GuestPeak, MerkleMountainAccumulator},
     sha::Digest,
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
-    ReceiptClaim,
+    ReceiptClaim, Work,
 };
 
 use super::exec::syscall::{SyscallKind, SyscallMetric};
@@ -103,6 +105,9 @@ pub struct Session {
 
     /// syscall metrics grouped by kind.
     pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
+
+    /// Optional PoVW job identifier for tracking verifiable work.
+    pub(crate) povw_job_id: Option<PovwJobId>,
 }
 
 /// The execution trace of a portion of a program.
@@ -186,28 +191,16 @@ impl Session {
         // Construct the Output struct for the session, checking internal consistency.
         // NOTE: The Session output is distinct from the final Segment output because in the
         // Session output any proven assumptions are not included.
-        self.claim_with_assumptions(self.assumptions.iter().map(|(_, x)| x))
-    }
-
-    pub(crate) fn claim_with_assumptions<'a>(
-        &self,
-        assumptions: impl Iterator<Item = &'a AssumptionReceipt>,
-    ) -> Result<ReceiptClaim> {
         let output = if self.exit_code.expects_output() {
             self.journal
                 .as_ref()
                 .map(|journal| -> Result<_> {
                     Ok(Output {
                         journal: journal.bytes.clone().into(),
-                        assumptions: Assumptions(
-                            assumptions
-                                .filter_map(|x| match x {
-                                    AssumptionReceipt::Proven(_) => None,
-                                    AssumptionReceipt::Unresolved(a) => Some(a.clone().into()),
-                                })
-                                .collect::<Vec<_>>(),
-                        )
-                        .into(),
+                        assumptions: self
+                            .unresolved_assumptions()
+                            .context("failed to compute unresolved_assumptions")?
+                            .into(),
                     })
                 })
                 .transpose()?
@@ -231,6 +224,56 @@ impl Session {
             exit_code: self.exit_code,
             input: MaybePruned::Pruned(self.input),
             output: output.into(),
+        })
+    }
+
+    fn keccak_root_assumption(&self) -> Result<Option<Assumption>> {
+        let mut keccak_receipts = MerkleMountainAccumulator::<GuestPeak>::new();
+        for proof_request in self.pending_keccaks.iter() {
+            let claim = compute_keccak_digest(bytemuck::cast_slice(proof_request.input.as_slice()));
+            tracing::debug!("adding keccak assumption: {}", claim);
+            keccak_receipts.insert(Assumption {
+                claim,
+                control_root: KECCAK_CONTROL_ROOT,
+            })?;
+        }
+
+        if !keccak_receipts.is_empty() {
+            let root_assumption = keccak_receipts.root()?;
+            tracing::debug!("keccak root assumption for session: {:?}", root_assumption);
+            return Ok(Some(root_assumption));
+        }
+        Ok(None)
+    }
+
+    fn unresolved_assumptions(&self) -> Result<Assumptions> {
+        let keccak_root_assumption = self
+            .keccak_root_assumption()
+            .context("failed to compute keccak root assumption")?;
+        Ok(self
+            .assumptions
+            .iter()
+            .filter_map(|(_, receipt)| match receipt {
+                AssumptionReceipt::Proven(_) => None,
+                AssumptionReceipt::Unresolved(assumption) => {
+                    if let Some(ref keccak) = keccak_root_assumption {
+                        if keccak == assumption {
+                            return None;
+                        }
+                    }
+                    Some(assumption.clone())
+                }
+            })
+            .collect::<Vec<_>>()
+            .into())
+    }
+
+    /// Returns the work value for this session if PoVW tracking is enabled.
+    pub fn work(&self) -> Option<Work> {
+        self.povw_job_id.map(|povw_job_id| Work {
+            nonce_min: povw_job_id.nonce(0),
+            nonce_max: povw_job_id.nonce(self.segments.len() as u32),
+            value: self.total_cycles,
         })
     }
 

@@ -72,12 +72,12 @@
 
 extern crate alloc;
 
+mod claim;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
 mod mmr;
 mod receipt;
-mod receipt_claim;
 pub mod serde;
 pub mod sha;
 
@@ -134,8 +134,11 @@ pub use {
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
-                default::DefaultProver, default_executor, default_prover, external::ExternalProver,
-                Executor, Prover, ProverOpts, ReceiptKind,
+                default::DefaultProver,
+                default_executor, default_prover,
+                external::ExternalProver,
+                opts::{ProverOpts, ReceiptKind},
+                Executor, Prover,
             },
         },
     },
@@ -164,15 +167,18 @@ pub use {
 };
 
 pub use self::{
+    claim::{
+        maybe_pruned::{MaybePruned, PrunedValueError},
+        receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim, UnionClaim},
+        work::{Work, WorkClaim},
+        Unknown,
+    },
     receipt::{
         AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-        Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
-        Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
-        SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
-    },
-    receipt_claim::{
-        Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
-        UnionClaim, Unknown,
+        GenericReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
+        InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
+        SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+        VerifierContext, DEFAULT_MAX_PO2,
     },
 };
 

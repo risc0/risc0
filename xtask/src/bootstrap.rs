@@ -78,12 +78,22 @@ impl Bootstrap {
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
         // enabled by using a custom VerifierContext.
-        let allowed_zkr_names: HashSet<String> =
-            ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
-                .map(str::to_string)
-                .into_iter()
-                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
-                .collect();
+        let allowed_zkr_names: HashSet<String> = [
+            "join.zkr",
+            "join_povw.zkr",
+            "join_unwrap_povw.zkr",
+            "resolve.zkr",
+            "resolve_povw.zkr",
+            "resolve_unwrap_povw.zkr",
+            "identity.zkr",
+            "unwrap_povw.zkr",
+            "union.zkr",
+        ]
+        .map(str::to_string)
+        .into_iter()
+        .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_{i}.zkr")))
+        .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_rv32im_v2_povw_{i}.zkr")))
+        .collect();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
 

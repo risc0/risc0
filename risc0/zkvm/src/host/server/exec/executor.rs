@@ -37,8 +37,8 @@ use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
+    claim::receipt::exit_code_from_terminate_state,
     host::{client::env::SegmentPath, server::session::Session},
-    receipt_claim::exit_code_from_terminate_state,
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
 
@@ -86,7 +86,6 @@ impl<'a> ExecutorImpl<'a> {
     /// work will be done in each segment. This is the execution phase:
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
-    #[allow(dead_code)]
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage) -> Result<Self> {
         Self::with_details(env, None, image, None)
     }
@@ -193,6 +192,7 @@ impl<'a> ExecutorImpl<'a> {
             self,
             self.env.input_digest,
             self.env.trace.clone(),
+            self.env.povw_job_id,
         );
 
         let max_insn_cycles = if segment_limit_po2 >= 15 {
@@ -304,6 +304,7 @@ impl<'a> ExecutorImpl<'a> {
             syscall_metrics,
             hooks: vec![],
             ecall_metrics: ecall_metrics.into(),
+            povw_job_id: self.env.povw_job_id,
         };
 
         tracing::info!("execution time: {elapsed:?}");

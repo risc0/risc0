@@ -28,7 +28,7 @@ const SECP256K1_CURVE: &WeierstrassCurve<EC_256_WIDTH_WORDS> =
 
 /// An implementation of [Curve] for secp256k1.
 ///
-/// This type should be used as a generic for [AffinePoint].
+/// This type should be used as a generic for [AffinePoint][super::AffinePoint].
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Secp256k1Curve {}
 

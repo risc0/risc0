@@ -20,10 +20,10 @@ use std::{
     thread::{self, ScopedJoinHandle},
 };
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
-use risc0_binfmt::{ByteAddr, MemoryImage, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_BYTES},
     log2_ceil,
@@ -75,6 +75,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     cycles: SessionCycles,
     ecall_metrics: EcallMetrics,
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
+    povw_job_id: Option<PovwJobId>,
 }
 
 #[non_exhaustive]
@@ -122,6 +123,7 @@ struct CreateSegmentRequest {
     segment_threshold: u32,
     po2: u32,
     index: u64,
+    povw_nonce: Option<PovwNonce>,
 
     dump_path: Option<std::ffi::OsString>,
 }
@@ -164,6 +166,7 @@ fn create_segments(
             po2: req.po2,
             index: req.index,
             segment_threshold: req.segment_threshold,
+            povw_nonce: req.povw_nonce,
         };
 
         if let Some(dump_path) = req.dump_path {
@@ -187,6 +190,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         syscall_handler: &'a S,
         input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+        povw_job_id: Option<PovwJobId>,
     ) -> Self {
         Self {
             pc: ByteAddr(0),
@@ -205,6 +209,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             cycles: SessionCycles::default(),
             ecall_metrics: EcallMetrics::default(),
             ring: AllocRingBuffer::new(10),
+            povw_job_id,
         }
     }
 
@@ -218,7 +223,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let segment_limit: u32 = 1 << segment_po2;
         assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
-        let mut segment_counter = 0;
+        let mut segment_counter = 0u32;
 
         self.reset();
 
@@ -279,14 +284,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         terminate_state: self.terminate_state,
                         segment_threshold,
                         po2: segment_po2 as u32,
-                        index: segment_counter,
+                        index: segment_counter as u64,
                         dump_path: None,
+                        povw_nonce: self.povw_nonce(segment_counter),
                     };
                     if commit_sender.send(req).is_err() {
                         return Err(segment_callback_thread.join().unwrap().unwrap_err());
                     }
 
-                    segment_counter += 1;
+                    // NOTE: There is no reasonable scenario where a session will have more than 4B
+                    // segments, but its possible.
+                    segment_counter = segment_counter
+                        .checked_add(1)
+                        .context("segment_counter overflow")?;
                     let total_cycles = 1 << segment_po2;
                     let pager_cycles = self.pager.cycles as u64;
                     let user_cycles = self.user_cycles as u64;
@@ -335,8 +345,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 terminate_state: self.terminate_state,
                 segment_threshold: 0, // meaningless for final segment
                 po2: final_po2 as u32,
-                index: segment_counter,
+                index: segment_counter as u64,
                 dump_path: None,
+                povw_nonce: self.povw_nonce(segment_counter),
             };
             if commit_sender.send(req).is_err() {
                 return Err(segment_callback_thread.join().unwrap().unwrap_err());
@@ -364,7 +375,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         };
 
         Ok(ExecutorResult {
-            segments: segment_counter + 1,
+            segments: segment_counter as u64 + 1,
             post_image,
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
@@ -391,7 +402,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         segment_callback_thread: ScopedJoinHandle<'_, Result<RetT>>,
         po2: usize,
         segment_threshold: u32,
-        index: u64,
+        index: u32,
     ) -> anyhow::Result<()> {
         if let Some(dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
             tracing::error!(
@@ -413,8 +424,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 terminate_state: self.terminate_state,
                 segment_threshold,
                 po2: po2 as u32,
-                index,
+                index: index as u64,
                 dump_path: Some(dump_path),
+                povw_nonce: self.povw_nonce(index),
             };
             let _ = commit_sender.send(req);
             let _ = segment_callback_thread.join().unwrap()?;
@@ -449,6 +461,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         if let Some(kind) = ecall {
             self.ecall_metrics.0[kind].cycles += count as u64;
         }
+    }
+
+    fn povw_nonce(&self, segment_index: u32) -> Option<PovwNonce> {
+        self.povw_job_id.map(|job| job.nonce(segment_index))
     }
 
     #[cold]

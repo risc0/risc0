@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, PovwJobId, PovwLogId, PovwNonce};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -24,6 +24,7 @@ use super::get_prover_server;
 use crate::{
     host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
+    sha::Digestible,
     ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
@@ -717,7 +718,6 @@ mod sys_verify {
     use super::*;
     use crate::{
         recursion::{prove::zkr, test_zkr, MerkleGroup},
-        sha::Digestible as _,
         Assumption, SuccinctReceipt, Unknown, RECURSION_PO2,
     };
 
@@ -945,6 +945,51 @@ mod sys_verify {
             .unwrap();
         assert!(prove_elf(env, MULTI_TEST_ELF).is_err());
     }
+
+    #[test_log::test]
+    fn sys_verify_with_povw() -> Result<()> {
+        let spec = MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            hello_commit_receipt().journal.bytes.clone(),
+        )]);
+
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
+        let povw_job_id: PovwJobId = rand::random();
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_receipt().clone())
+            .povw(povw_job_id)
+            .build()
+            .unwrap();
+
+        let opts = ProverOpts::succinct();
+        let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
+
+        prove_info.receipt.verify(MULTI_TEST_ID)?;
+        let work_receipt = prove_info.work_receipt.unwrap();
+        work_receipt.verify_integrity()?;
+
+        // NOTE: The work claim will only contain value for the conditional receipt.
+        // PoVW value for the assumption receipts is considered seperately, instead of in the take
+        // WorkClaim (i.e. the same compact range representation).
+        let work_claim = work_receipt.claim().as_value()?.clone();
+        assert_eq!(
+            work_claim.claim.digest(),
+            prove_info.receipt.claim()?.digest()
+        );
+        let work = work_claim.work.value()?;
+        assert!(work.value > 0);
+        assert_eq!(work.nonce_min.log, povw_job_id.log);
+        assert_eq!(work.nonce_min.job, povw_job_id.job);
+        assert_eq!(work.nonce_min.segment, 0);
+        assert_eq!(work.nonce_max.log, povw_job_id.log);
+        assert_eq!(work.nonce_max.job, povw_job_id.job);
+        // We expect that the verify action only takes one segment.
+        assert_eq!(work.nonce_max.segment, 0);
+        Ok(())
+    }
 }
 
 #[ignore]
@@ -980,6 +1025,89 @@ fn run_unconstrained() -> Result<()> {
             );
         }
     }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_nonce_assignment() -> Result<()> {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let povw_job_id = PovwJobId {
+        log: PovwLogId::from(0x202ce_u64),
+        job: 42,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+    let receipt = prove_session(&session).unwrap();
+    let segments = &receipt.inner.composite().unwrap().segments;
+    for (i, segment) in segments.iter().enumerate() {
+        segment
+            .verify_integrity_with_context(&VerifierContext::default())
+            .unwrap();
+        assert_eq!(segment.povw_nonce().unwrap(), povw_job_id.nonce(i as u32));
+    }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_nonce_default_assignment() -> Result<()> {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+    let receipt = prove_session(&session).unwrap();
+    let segments = &receipt.inner.composite().unwrap().segments;
+    for segment in segments.iter() {
+        segment
+            .verify_integrity_with_context(&VerifierContext::default())
+            .unwrap();
+        assert_eq!(segment.povw_nonce().unwrap(), PovwNonce::default());
+    }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_prove_work_receipt() -> Result<()> {
+    let segment_limit_po2 = 16; // 64k cycles
+    let cycles = 1 << segment_limit_po2;
+    let povw_job_id: PovwJobId = rand::random();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles })
+        .unwrap()
+        .segment_limit_po2(segment_limit_po2)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+
+    let opts = ProverOpts::succinct();
+    let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
+
+    prove_info.receipt.verify(MULTI_TEST_ID)?;
+    let work_receipt = prove_info.work_receipt.unwrap();
+    work_receipt.verify_integrity()?;
+
+    let work_claim = work_receipt.claim().as_value()?.clone();
+    assert_eq!(
+        work_claim.claim.digest(),
+        prove_info.receipt.claim()?.digest()
+    );
+    let work = work_claim.work.value()?;
+    assert!(work.value >= 1 << 16);
+    assert_eq!(work.nonce_min.log, povw_job_id.log);
+    assert_eq!(work.nonce_min.job, povw_job_id.job);
+    assert_eq!(work.nonce_min.segment, 0);
+    assert_eq!(work.nonce_max.log, povw_job_id.log);
+    assert_eq!(work.nonce_max.job, povw_job_id.job);
+    assert!(work.nonce_max.segment > 0);
     Ok(())
 }
 
