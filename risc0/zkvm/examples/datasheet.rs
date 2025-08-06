@@ -135,9 +135,9 @@ enum Command {
     Join,
     Succinct,
     Identity,
-    #[cfg(feature = "docker")]
+    #[cfg(any(feature = "docker", feature = "cuda"))]
     StarkToSnark,
-    #[cfg(feature = "docker")]
+    #[cfg(any(feature = "docker", feature = "cuda"))]
     Groth16,
     #[command(name = "bigint2")]
     BigInt2,
@@ -184,9 +184,9 @@ impl Datasheet {
             Command::Join => self.join(),
             Command::Succinct => self.succinct(),
             Command::Identity => self.identity_p254(),
-            #[cfg(feature = "docker")]
+            #[cfg(any(feature = "docker", feature = "cuda"))]
             Command::StarkToSnark => self.shrink_wrap(),
-            #[cfg(feature = "docker")]
+            #[cfg(any(feature = "docker", feature = "cuda"))]
             Command::Groth16 => self.groth16(),
             Command::BigInt2 => self.bigint2(),
             Command::ZethShapella30 => self.shapella30(),
@@ -427,7 +427,7 @@ impl Datasheet {
         });
     }
 
-    #[cfg(feature = "docker")]
+    #[cfg(any(feature = "docker", feature = "cuda"))]
     fn shrink_wrap(&mut self) {
         println!("shrink_wrap");
 
@@ -441,7 +441,7 @@ impl Datasheet {
 
         let info = prover.prove(env, &LOOP_ELF).unwrap();
         let succinct_receipt = info.receipt.inner.succinct().unwrap();
-        let receipt = risc0_zkvm::recursion::identity_p254(&succinct_receipt).unwrap();
+        let receipt = risc0_zkvm::recursion::identity_p254(succinct_receipt).unwrap();
         let seal_bytes = receipt.get_seal_bytes();
 
         let start = Instant::now();
@@ -463,7 +463,7 @@ impl Datasheet {
         });
     }
 
-    #[cfg(feature = "docker")]
+    #[cfg(any(feature = "docker", feature = "cuda"))]
     fn groth16(&mut self) {
         println!("groth16");
 
