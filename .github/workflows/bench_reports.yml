@@ -21,6 +21,7 @@ env:
   RISC0_BUILD_LOCKED: 1
   RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
+  RISC0_GROTH16_VERSION: 0.1.0
 
 jobs:
   bench:
@@ -49,9 +50,11 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
 
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
 
       - name: Save commit hash to a file
         run: |
@@ -68,9 +71,6 @@ jobs:
           path: |
             benchmarks/COMMIT_HASH.txt
             benchmarks/${{ matrix.os }}-${{ matrix.device }}.csv
-
-      - if: matrix.feature == 'cuda'
-        run: echo "EXTRA=-F docker" >> $GITHUB_ENV
 
       - name: Generate datasheet
         run: cargo run --release -F $FEATURE $EXTRA --example datasheet -- --json risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
