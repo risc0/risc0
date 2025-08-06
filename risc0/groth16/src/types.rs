@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
 extern crate alloc;
 
 use alloc::{string::String, vec, vec::Vec};
+use core::str::FromStr;
 
 use anyhow::{anyhow, Error, Result};
 use ark_bn254::Bn254;
-use core::str::FromStr;
 use serde::{Deserialize, Serialize};
 
 use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
@@ -28,8 +28,10 @@ use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
 pub struct Seal {
     /// Proof 'a' value
     pub a: Vec<Vec<u8>>,
+
     /// Proof 'b' value
     pub b: Vec<Vec<Vec<u8>>>,
+
     /// Proof 'c' value
     pub c: Vec<Vec<u8>>,
 }
@@ -64,8 +66,8 @@ impl Seal {
         result
     }
 
-    /// Method to convert back from a `Vec<u8>`
-    pub fn from_vec(data: &[u8]) -> Result<Seal, Error> {
+    /// Decode a seal from raw bytes.
+    pub fn decode(data: &[u8]) -> Result<Seal, Error> {
         if data.len() != Self::SIZE {
             return Err(anyhow!("Data length mismatch"));
         }
@@ -127,7 +129,7 @@ impl TryFrom<ProofJson> for Seal {
 }
 
 /// Groth16 Proof encoded as JSON.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProofJson {
     pi_a: Vec<String>,
     pi_b: Vec<Vec<String>>,
@@ -137,7 +139,7 @@ pub struct ProofJson {
 }
 
 /// Groth16 Verifying Key encoded as JSON.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct VerifyingKeyJson {
     protocol: String,
     curve: String,
@@ -230,7 +232,7 @@ impl VerifyingKeyJson {
 }
 
 /// Groth16 Public witness encoded as JSON.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PublicInputsJson {
     /// values of the public witness
     pub values: Vec<String>,
@@ -239,12 +241,23 @@ pub struct PublicInputsJson {
 impl PublicInputsJson {
     /// Converts public inputs to scalars over the field of the G1/G2 groups.
     pub fn to_scalar(&self) -> Result<Vec<Fr>, Error> {
+        use ark_ff::PrimeField as _;
+        use num_traits::Num as _;
         self.values
             .iter()
-            .map(|input| {
-                ark_bn254::Fr::from_str(input)
-                    .map(Fr)
-                    .map_err(|_| anyhow!("Failed to decode 'public inputs' values"))
+            .map(|str| {
+                if let Some(stripped) = str.strip_prefix("0x") {
+                    let biguint = num_bigint::BigUint::from_str_radix(stripped, 16)
+                        .map_err(|err| anyhow!(err))?;
+                    let bigint = biguint.try_into().map_err(|_| anyhow!("Invalid bigint"))?;
+                    ark_bn254::Fr::from_bigint(bigint)
+                        .map(Fr)
+                        .ok_or_else(|| anyhow!("Not a valid field element: {str}"))
+                } else {
+                    ark_bn254::Fr::from_str(str)
+                        .map(Fr)
+                        .map_err(|err| anyhow!("Failed to decode 'public inputs' values: {err:?}"))
+                }
             })
             .collect()
     }

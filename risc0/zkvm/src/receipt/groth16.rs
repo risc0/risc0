@@ -19,7 +19,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
 use risc0_binfmt::{tagged_struct, Digestible};
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
-use risc0_groth16::{fr_from_hex_string, split_digest, Seal, Verifier, VerifyingKey};
+use risc0_groth16::{Verifier, VerifyingKey};
 use risc0_zkp::core::hash::sha::Sha256;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
@@ -92,17 +92,11 @@ impl<Claim> Groth16Receipt<Claim> {
             });
         }
 
-        let (a0, a1) =
-            split_digest(params.control_root).map_err(|_| VerificationError::ReceiptFormatError)?;
-        let (c0, c1) = split_digest(self.claim.digest::<sha::Impl>())
-            .map_err(|_| VerificationError::ReceiptFormatError)?;
-        let mut id_bn554: Digest = params.bn254_control_id;
-        id_bn554.as_mut_bytes().reverse();
-        let id_bn254_fr = fr_from_hex_string(&hex::encode(id_bn554))
-            .map_err(|_| VerificationError::ReceiptFormatError)?;
         Verifier::new(
-            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,
-            &[a0, a1, c0, c1, id_bn254_fr],
+            &self.seal,
+            params.control_root,
+            self.claim.digest::<sha::Impl>(),
+            params.bn254_control_id,
             &params.verifying_key,
         )
         .map_err(|_| VerificationError::ReceiptFormatError)?

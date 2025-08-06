@@ -225,6 +225,8 @@ impl ProverServer for ProverImpl {
     }
 
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
+        tracing::debug!("segment_preflight");
+
         ensure!(
             segment.po2() <= self.opts.max_segment_po2,
             "segment po2 exceeds max on ProverOpts: {} > {}",
@@ -246,6 +248,8 @@ impl ProverServer for ProverImpl {
         ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
+        tracing::debug!("prove_segment_core");
+
         ensure!(
             self.opts.hashfn == "poseidon2",
             "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \

@@ -1035,6 +1035,7 @@ dependencies = [
  "anyhow",
  "ark-bn254",
  "ark-ec",
+ "ark-ff",
  "ark-groth16",
  "ark-serialize",
  "bytemuck",
@@ -1044,7 +1045,6 @@ dependencies = [
  "risc0-binfmt",
  "risc0-zkp",
  "serde",
- "stability",
 ]
 
 [[package]]

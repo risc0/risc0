@@ -93,29 +93,24 @@ pub use bytes::Bytes;
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
-pub use {
-    self::host::{
-        api::server::Server as ApiServer,
-        client::prove::{local::LocalProver, local_executor},
-        recursion::{
-            self,
-            prove::{prove_registered_zkr, prove_zkr, register_zkr},
-            RECURSION_PO2,
-        },
-        server::{
-            exec::executor::ExecutorImpl,
-            prove::{
-                dev_mode::{DevModeDelay, DevModeProver},
-                get_prover_server, HalPair, ProverServer,
-            },
-            session::{
-                FileSegmentRef, NullSegmentRef, PreflightResults, Segment, SegmentRef, Session,
-                SessionEvents, SimpleSegmentRef,
-            },
-        },
+pub use self::host::{
+    api::server::Server as ApiServer,
+    client::prove::{local::LocalProver, local_executor},
+    recursion::{
+        self,
+        prove::{prove_registered_zkr, prove_zkr, register_zkr},
+        RECURSION_PO2,
     },
-    risc0_groth16::{
-        docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
+    server::{
+        exec::executor::ExecutorImpl,
+        prove::{
+            dev_mode::{DevModeDelay, DevModeProver},
+            get_prover_server, HalPair, ProverServer,
+        },
+        session::{
+            FileSegmentRef, NullSegmentRef, PreflightResults, Segment, SegmentRef, Session,
+            SessionEvents, SimpleSegmentRef,
+        },
     },
 };
 
