@@ -114,7 +114,6 @@ async fn stark_workflow(
         .context("Failed to upload image")?;
 
     // input
-    std::fs::write("/tmp/input.bin", &input)?;
     let input_id = client
         .upload_input(input)
         .await

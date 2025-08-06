@@ -37,6 +37,7 @@ use bonsai_sdk::responses::{
     SnarkReq, SnarkStatusRes, UploadRes,
 };
 use kameo::actor::ActorRef;
+use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
 use risc0_zkvm::{compute_image_id, Receipt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -196,12 +197,14 @@ pub(crate) struct AppState {
     // snark_retries: usize,
     storage_root: PathBuf,
     manager: ActorRef<ManagerActor>,
+    po2: Option<u32>,
 }
 
 impl AppState {
     pub(crate) async fn new(
         storage_root: PathBuf,
         manager: ActorRef<ManagerActor>,
+        po2: Option<u32>,
     ) -> Result<Arc<Self>> {
         Ok(Arc::new(Self {
             // exec_timeout: Duration::from_secs(4 * 60 * 60),
@@ -210,6 +213,7 @@ impl AppState {
             // snark_retries: 0,
             storage_root,
             manager,
+            po2,
         }))
     }
 
@@ -393,7 +397,7 @@ async fn prove_stark(
             .context("Failed to read receipt")?;
         let receipt: Receipt =
             bincode::deserialize(&bytes).context("Failed to deserialize assumption")?;
-        assumptions.push(receipt);
+        assumptions.push(receipt.into());
     }
 
     let reply = state
@@ -403,6 +407,7 @@ async fn prove_stark(
                 binary,
                 input,
                 assumptions,
+                segment_limit_po2: state.po2,
             },
         })
         .await
@@ -633,8 +638,9 @@ pub(crate) async fn run(
     addr: SocketAddr,
     storage_root: PathBuf,
     manager: ActorRef<ManagerActor>,
+    po2: Option<u32>,
 ) -> Result<()> {
-    let app_state = AppState::new(storage_root, manager)
+    let app_state = AppState::new(storage_root, manager, po2)
         .await
         .context("Failed to initialize AppState")?;
     let listener = TcpListener::bind(addr)

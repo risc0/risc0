@@ -18,19 +18,23 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
+    claim::merge::Merge,
     host::{
-        client::prove::ReceiptKind,
+        client::prove::opts::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
         server::{exec::executor::ExecutorImpl, prove::union_peak::UnionPeak},
     },
     mmr::MerkleMountainAccumulator,
     receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    receipt_claim::{MaybePruned, Merge, UnionClaim, Unknown},
-    recursion::prove::union,
+    recursion::prove::{
+        join_povw, join_unwrap_povw, lift_povw, resolve_povw, resolve_unwrap_povw, union,
+        unwrap_povw,
+    },
     sha::Digestible,
-    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt, Output,
-    PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
+    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    UnionClaim, Unknown, VerifierContext, WorkClaim,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -123,6 +127,7 @@ impl ProverServer for ProverImpl {
             keccak_receipts.insert(receipt)?;
         }
 
+        // NOTE: Calling keccak_receipts.root() proves the union tree.
         if let Ok(root_receipt) = keccak_receipts.root() {
             let assumption = Assumption {
                 claim: root_receipt.claim.digest(),
@@ -147,20 +152,16 @@ impl ProverServer for ProverImpl {
             })
             .collect::<Result<_>>()?;
 
-        let assumption_receipts: Vec<_> = inner_assumption_receipts
-            .iter()
-            .map(|inner| AssumptionReceipt::Proven(inner.clone()))
-            .collect();
-
         let composite_receipt = CompositeReceipt {
             segments,
             assumption_receipts: inner_assumption_receipts,
             verifier_parameters,
         };
 
-        let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
+        let session_claim = session.claim()?;
 
         // Verify the receipt to catch if something is broken in the proving process.
+        // NOTE: If the proof is very large, this could take > 1s, e.g. with 1000 segments.
         composite_receipt.verify_integrity_with_context(ctx)?;
         check_claims(
             &session_claim,
@@ -168,40 +169,64 @@ impl ProverServer for ProverImpl {
             MaybePruned::Value(composite_receipt.claim()?),
         )?;
 
-        // Compress the receipt to the requested level.
-        let receipt = match self.opts.receipt_kind {
-            ReceiptKind::Composite => Receipt::new(
+        if self.opts.receipt_kind == ReceiptKind::Composite {
+            let receipt = Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
-            ),
-            ReceiptKind::Succinct => {
-                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
-                Receipt::new(
-                    InnerReceipt::Succinct(succinct_receipt),
-                    session.journal.clone().unwrap_or_default().bytes,
-                )
+            );
+            return Ok(ProveInfo {
+                receipt,
+                work_receipt: None,
+                stats: session.stats(),
+            });
+        }
+
+        let (succinct_receipt, work_receipt) = match session.povw_job_id.is_some() {
+            true => {
+                let work_receipt = self.composite_to_succinct_povw(&composite_receipt)?;
+                let unwrapped = self.unwrap_povw(&work_receipt)?;
+                (unwrapped, Some(work_receipt))
             }
-            ReceiptKind::Groth16 => {
-                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
-                let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
-                Receipt::new(
-                    InnerReceipt::Groth16(groth16_receipt),
-                    session.journal.clone().unwrap_or_default().bytes,
-                )
-            }
+            false => (self.composite_to_succinct(&composite_receipt)?, None),
         };
 
-        // Verify the receipt to catch if something is broken in the proving process.
-        receipt.verify_integrity_with_context(ctx)?;
-        check_claims(&session_claim, "receipt", receipt.claim()?)?;
+        if self.opts.receipt_kind == ReceiptKind::Succinct {
+            let receipt = Receipt::new(
+                InnerReceipt::Succinct(succinct_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            );
+            return Ok(ProveInfo {
+                receipt,
+                work_receipt: work_receipt.map(Into::into),
+                stats: session.stats(),
+            });
+        }
 
-        Ok(ProveInfo {
-            receipt,
-            stats: session.stats(),
-        })
+        let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
+
+        if self.opts.receipt_kind == ReceiptKind::Groth16 {
+            let receipt = Receipt::new(
+                InnerReceipt::Groth16(groth16_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            );
+            return Ok(ProveInfo {
+                receipt,
+                work_receipt: work_receipt.map(Into::into),
+                stats: session.stats(),
+            });
+        }
+
+        // As long as the checks above are exhaustive, this code is unreachable. If this statement
+        // is reached, this is an implementation error.
+        unreachable!(
+            "proving not implemented for receipt kind {:?}",
+            self.opts.receipt_kind
+        );
     }
 
     fn segment_preflight(&self, segment: &Segment) -> Result<PreflightResults> {
+        tracing::debug!("segment_preflight");
+
         ensure!(
             segment.po2() <= self.opts.max_segment_po2,
             "segment po2 exceeds max on ProverOpts: {} > {}",
@@ -223,6 +248,8 @@ impl ProverServer for ProverImpl {
         ctx: &VerifierContext,
         preflight_results: PreflightResults,
     ) -> Result<SegmentReceipt> {
+        tracing::debug!("prove_segment_core");
+
         ensure!(
             self.opts.hashfn == "poseidon2",
             "provided `ProverOpts` has unsupported `hashfn` value of \"{}\"; \
@@ -248,13 +275,24 @@ impl ProverServer for ProverImpl {
             claim,
             verifier_parameters,
         };
-        receipt.verify_integrity_with_context(ctx)?;
+        receipt
+            .verify_integrity_with_context(ctx)
+            .context("verify segment")?;
 
         Ok(receipt)
     }
 
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        lift(receipt)
+        let receipt = lift(receipt)?;
+        receipt.verify_integrity().context("verify lift")?;
+        Ok(receipt)
+    }
+
+    fn lift_povw(
+        &self,
+        receipt: &SegmentReceipt,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        lift_povw(receipt)
     }
 
     fn join(
@@ -262,7 +300,25 @@ impl ProverServer for ProverImpl {
         a: &SuccinctReceipt<ReceiptClaim>,
         b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        join(a, b)
+        let receipt = join(a, b)?;
+        receipt.verify_integrity().context("verify join")?;
+        Ok(receipt)
+    }
+
+    fn join_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        join_povw(a, b)
+    }
+
+    fn join_unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        join_unwrap_povw(a, b)
     }
 
     fn resolve(
@@ -270,13 +326,32 @@ impl ProverServer for ProverImpl {
         conditional: &SuccinctReceipt<ReceiptClaim>,
         assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
-        resolve(conditional, assumption)
+        let receipt = resolve(conditional, assumption)?;
+        receipt.verify_integrity().context("verify resolve")?;
+        Ok(receipt)
+    }
+
+    fn resolve_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+        resolve_povw(conditional, assumption)
+    }
+
+    fn resolve_unwrap_povw(
+        &self,
+        conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        resolve_unwrap_povw(conditional, assumption)
     }
 
     fn identity_p254(
         &self,
         a: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        // TODO: figure out how to verify this
         identity_p254(a)
     }
 
@@ -284,6 +359,7 @@ impl ProverServer for ProverImpl {
         &self,
         request: &crate::ProveKeccakRequest,
     ) -> Result<SuccinctReceipt<Unknown>> {
+        // TODO: figure out how to verify this
         prove_keccak(request)
     }
 
@@ -292,7 +368,16 @@ impl ProverServer for ProverImpl {
         a: &SuccinctReceipt<Unknown>,
         b: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<UnionClaim>> {
-        union(a, b)
+        let receipt = union(a, b)?;
+        receipt.verify_integrity().context("verify union")?;
+        Ok(receipt)
+    }
+
+    fn unwrap_povw(
+        &self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        unwrap_povw(a)
     }
 }
 

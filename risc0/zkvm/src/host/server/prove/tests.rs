@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::sync::OnceLock;
+
 use anyhow::Result;
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, PovwJobId, PovwLogId, PovwNonce};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -24,9 +26,51 @@ use super::get_prover_server;
 use crate::{
     host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, Session, SimpleSegmentRef,
-    SuccinctReceiptVerifierParameters, VerifierContext,
+    sha::Digestible,
+    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
+    SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
 };
+
+#[allow(dead_code)]
+fn prove_nothing(kind: ReceiptKind) -> ProveInfo {
+    match kind {
+        ReceiptKind::Composite => prove_nothing_composite(),
+        ReceiptKind::Succinct => prove_nothing_succinct(),
+        ReceiptKind::Groth16 => prove_nothing_groth16(),
+    }
+}
+
+fn prove_nothing_impl(kind: ReceiptKind) -> ProveInfo {
+    let opts = ProverOpts::default().with_receipt_kind(kind);
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+}
+
+fn prove_nothing_composite() -> ProveInfo {
+    static ONCE: OnceLock<ProveInfo> = OnceLock::new();
+    ONCE.get_or_init(|| prove_nothing_impl(ReceiptKind::Composite))
+        .clone()
+}
+
+fn prove_nothing_succinct() -> ProveInfo {
+    static ONCE: OnceLock<ProveInfo> = OnceLock::new();
+    ONCE.get_or_init(|| prove_nothing_impl(ReceiptKind::Succinct))
+        .clone()
+}
+
+#[allow(dead_code)]
+fn prove_nothing_groth16() -> ProveInfo {
+    static ONCE: OnceLock<ProveInfo> = OnceLock::new();
+    ONCE.get_or_init(|| prove_nothing_impl(ReceiptKind::Groth16))
+        .clone()
+}
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
     ExecutorImpl::from_elf(env, elf)
@@ -51,34 +95,6 @@ fn prove_elf_succinct(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
     Ok(get_prover_server(&opts)?.prove(env, elf)?.receipt)
 }
 
-fn prove_nothing() -> Result<ProveInfo> {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let opts = ProverOpts::composite();
-    get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
-}
-
-#[test_log::test]
-fn prove_nothing_succinct() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let opts = ProverOpts::succinct();
-    get_prover_server(&opts)
-        .unwrap()
-        .prove(env, MULTI_TEST_ELF)
-        .unwrap()
-        .receipt
-        .inner
-        .succinct()
-        .unwrap(); // ensure that we got a succinct receipt.
-}
-
 #[test_log::test]
 fn keccak_union() {
     let env = ExecutorEnv::builder()
@@ -95,23 +111,13 @@ fn keccak_union() {
 
 #[test_log::test]
 fn basic() {
-    prove_nothing().unwrap();
+    // ensure that we got a succinct receipt.
+    prove_nothing_succinct().receipt.inner.succinct().unwrap();
 }
 
 #[test_log::test]
-fn verifier_paramters_mismatch() {
-    // Proven with the default parameters.
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let opts = ProverOpts::succinct();
-    let receipt = get_prover_server(&opts)
-        .unwrap()
-        .prove(env, MULTI_TEST_ELF)
-        .unwrap()
-        .receipt;
+fn verifier_parameters_mismatch() {
+    let receipt = prove_nothing_succinct().receipt;
 
     // Construct a different set of verifier parameters. Doesn't really matter in what way it is
     // different as long as it is a different control root.
@@ -137,8 +143,7 @@ fn sha256_hashfn_fails() {
         .unwrap()
         .build()
         .unwrap();
-    let mut opts = ProverOpts::fast();
-    opts.hashfn = "sha-256".into();
+    let opts = ProverOpts::fast().with_hashfn("sha-256".into());
     let err = get_prover_server(&opts)
         .unwrap()
         .prove(env, MULTI_TEST_ELF)
@@ -150,16 +155,7 @@ fn sha256_hashfn_fails() {
         supported `hashfn` values are: \"poseidon2\"."
     );
 
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let opts = ProverOpts::composite();
-    let mut info = get_prover_server(&opts)
-        .unwrap()
-        .prove(env, MULTI_TEST_ELF)
-        .unwrap();
+    let mut info = prove_nothing_composite();
     let InnerReceipt::Composite(composite_receipt) = &mut info.receipt.inner else {
         panic!("unexpected receipt type");
     };
@@ -173,7 +169,7 @@ fn sha256_hashfn_fails() {
 
 #[test_log::test]
 fn receipt_serde() {
-    let receipt = prove_nothing().unwrap().receipt;
+    let receipt = prove_nothing_composite().receipt;
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: Receipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
@@ -183,7 +179,7 @@ fn receipt_serde() {
 
 #[test_log::test]
 fn check_image_id() {
-    let receipt = prove_nothing().unwrap().receipt;
+    let receipt = prove_nothing_composite().receipt;
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
@@ -557,155 +553,112 @@ fn sys_input() {
     prove_session(&session).unwrap();
 }
 
-#[cfg(feature = "docker")]
-mod docker {
-    use risc0_zkvm_methods::{MULTI_TEST_ID, VERIFY_ELF};
-
-    use super::*;
-    use crate::{
-        host::server::prove::dev_mode::DevModeProver, FakeReceipt, InnerReceipt, ProverServer as _,
-        ReceiptKind,
+#[rstest]
+#[case(ReceiptKind::Composite, ReceiptKind::Composite)]
+#[case(ReceiptKind::Composite, ReceiptKind::Succinct)]
+#[case(ReceiptKind::Composite, ReceiptKind::Groth16)]
+#[case(ReceiptKind::Succinct, ReceiptKind::Composite)]
+#[case(ReceiptKind::Succinct, ReceiptKind::Succinct)]
+#[case(ReceiptKind::Succinct, ReceiptKind::Groth16)]
+#[case(ReceiptKind::Groth16, ReceiptKind::Composite)]
+#[case(ReceiptKind::Groth16, ReceiptKind::Succinct)]
+#[case(ReceiptKind::Groth16, ReceiptKind::Groth16)]
+#[test_log::test]
+#[cfg(any(feature = "cuda", feature = "docker"))]
+fn compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
+    let from_receipt = prove_nothing(from).receipt;
+    let opts = ProverOpts::default().with_receipt_kind(into);
+    let prover = get_prover_server(&opts).unwrap();
+    let receipt = prover.compress(&opts, &from_receipt).unwrap();
+    match from {
+        ReceiptKind::Composite => match receipt.inner {
+            InnerReceipt::Composite(_) | InnerReceipt::Succinct(_) | InnerReceipt::Groth16(_) => {}
+            InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
+        },
+        ReceiptKind::Succinct => match receipt.inner {
+            InnerReceipt::Succinct(_) | InnerReceipt::Groth16(_) => {}
+            InnerReceipt::Composite(_) => panic!("expected receipt to be succinct or smaller"),
+            InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
+        },
+        ReceiptKind::Groth16 => match receipt.inner {
+            InnerReceipt::Groth16(_) => {}
+            InnerReceipt::Succinct(_) | InnerReceipt::Composite(_) => {
+                panic!("expected receipt to be groth16 or smaller")
+            }
+            InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
+        },
     };
+    receipt.verify(MULTI_TEST_ID).unwrap();
+}
 
-    #[test_log::test]
-    fn stark2snark() {
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::DoNothing)
-            .unwrap()
-            .build()
-            .unwrap();
-        let opts = ProverOpts::groth16();
-        get_prover_server(&opts)
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
+#[rstest]
+#[case(ReceiptKind::Groth16, ReceiptKind::Composite)]
+#[case(ReceiptKind::Groth16, ReceiptKind::Succinct)]
+#[case(ReceiptKind::Groth16, ReceiptKind::Groth16)]
+#[test_log::test]
+#[cfg(any(feature = "cuda", feature = "docker"))]
+fn fake_compress(#[case] from: ReceiptKind, #[case] into: ReceiptKind) {
+    use crate::{DevModeProver, FakeReceipt, ProverServer as _};
+
+    let from_receipt = prove_nothing(from).receipt;
+    let opts = ProverOpts::default().with_receipt_kind(into);
+    let fake = Receipt::new(
+        InnerReceipt::Fake(FakeReceipt {
+            claim: from_receipt.claim().unwrap(),
+        }),
+        from_receipt.clone().journal.bytes,
+    );
+
+    let prover = DevModeProver::new();
+    let receipt = prover.compress(&opts.with_dev_mode(true), &fake).unwrap();
+    let InnerReceipt::Fake(_) = receipt.inner else {
+        panic!("expected fake receipt");
+    };
+}
+
+#[test_log::test]
+#[cfg(feature = "cuda")]
+fn shrink_wrap() {
+    // Perform many proofs in parallel. The initial implementation of the
+    // groth16 prover on CUDA had issues with this. Ensure that we got a groth16
+    // receipt.
+
+    use rayon::prelude::*;
+    (0..5).into_par_iter().for_each(|_| {
+        prove_nothing_impl(ReceiptKind::Groth16)
             .receipt
             .inner
             .groth16()
-            .unwrap(); // ensure that we got a groth16 receipt.
-    }
-
-    fn test_compress(opts: ProverOpts, receipt: &Receipt) {
-        let prover = get_prover_server(&opts).unwrap();
-        let receipt = prover.compress(&opts, receipt).unwrap();
-        match opts.receipt_kind {
-            ReceiptKind::Composite => match receipt.inner {
-                InnerReceipt::Composite(_)
-                | InnerReceipt::Succinct(_)
-                | InnerReceipt::Groth16(_) => {}
-                InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
-            },
-            ReceiptKind::Succinct => match receipt.inner {
-                InnerReceipt::Succinct(_) | InnerReceipt::Groth16(_) => {}
-                InnerReceipt::Composite(_) => panic!("expected receipt to be succinct or smaller"),
-                InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
-            },
-            ReceiptKind::Groth16 => match receipt.inner {
-                InnerReceipt::Groth16(_) => {}
-                InnerReceipt::Succinct(_) | InnerReceipt::Composite(_) => {
-                    panic!("expected receipt to be groth16 or smaller")
-                }
-                InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
-            },
-        };
-        receipt.verify(MULTI_TEST_ID).unwrap();
-    }
-
-    fn test_fake_compress(receipt: &Receipt) {
-        fn ensure_fake(receipt: Receipt) {
-            let InnerReceipt::Fake(_) = receipt.inner else {
-                panic!("expected fake receipt");
-            };
-        }
-        let fake = Receipt::new(
-            InnerReceipt::Fake(FakeReceipt {
-                claim: receipt.claim().unwrap(),
-            }),
-            receipt.clone().journal.bytes,
-        );
-
-        let prover = DevModeProver::new();
-        let receipt = prover
-            .compress(&ProverOpts::composite().with_dev_mode(true), &fake)
             .unwrap();
-        ensure_fake(receipt);
-        let receipt = prover
-            .compress(&ProverOpts::succinct().with_dev_mode(true), &fake)
-            .unwrap();
-        ensure_fake(receipt);
-        let receipt = prover
-            .compress(&ProverOpts::groth16().with_dev_mode(true), &fake)
-            .unwrap();
-        ensure_fake(receipt);
-    }
+    });
+}
 
-    fn generate_receipt(opts: ProverOpts) -> Receipt {
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::DoNothing)
-            .unwrap()
-            .build()
-            .unwrap();
-        let prover = get_prover_server(&opts).unwrap();
-        prover.prove(env, MULTI_TEST_ELF).unwrap().receipt
-    }
+#[rstest]
+#[case(ReceiptKind::Composite)]
+#[case(ReceiptKind::Succinct)]
+#[case(ReceiptKind::Groth16)]
+#[test_log::test]
+#[cfg(any(feature = "cuda", feature = "docker"))]
+fn verify_in_guest(#[case] kind: ReceiptKind) {
+    use risc0_zkvm_methods::VERIFY_ELF;
 
-    fn exec_verify(receipt: &Receipt, dev_mode: bool) {
-        let input: (_, Digest, bool) = (receipt.clone(), MULTI_TEST_ID.into(), dev_mode);
-        let env = ExecutorEnv::builder()
-            .write(&input)
-            .unwrap()
-            .build()
-            .unwrap();
-        let session = ExecutorImpl::from_elf(env, VERIFY_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-        println!("{:?}", session.stats());
-    }
-
-    #[test_log::test]
-    fn verify_in_guest() {
-        let composite_receipt_sha256 = generate_receipt(ProverOpts::fast());
-        exec_verify(&composite_receipt_sha256, false /* dev_mode */);
-        let composite_receipt = generate_receipt(ProverOpts::composite());
-        exec_verify(&composite_receipt, false /* dev_mode */);
-        let succinct_receipt = get_prover_server(&ProverOpts::succinct())
-            .unwrap()
-            .compress(&ProverOpts::succinct(), &composite_receipt)
-            .unwrap();
-        exec_verify(&succinct_receipt, false /* dev_mode */);
-        let groth16_receipt = get_prover_server(&ProverOpts::groth16())
-            .unwrap()
-            .compress(&ProverOpts::groth16(), &succinct_receipt)
-            .unwrap();
-        exec_verify(&groth16_receipt, false /* dev_mode */);
-        groth16_receipt.inner.groth16().unwrap();
-    }
-
-    #[test_log::test]
-    fn prover_stark2snark() {
-        // composite receipts
-        let composite_receipt = &generate_receipt(ProverOpts::composite());
-        self::test_compress(ProverOpts::composite(), composite_receipt);
-        self::test_compress(ProverOpts::succinct(), composite_receipt);
-        self::test_compress(ProverOpts::groth16(), composite_receipt);
-
-        // succinct receipts
-        let succinct_receipt = &generate_receipt(ProverOpts::succinct());
-        self::test_compress(ProverOpts::composite(), succinct_receipt);
-        self::test_compress(ProverOpts::succinct(), succinct_receipt);
-        self::test_compress(ProverOpts::groth16(), succinct_receipt);
-
-        // groth16 receipts
-        let groth16_receipt = &generate_receipt(ProverOpts::groth16());
-        self::test_compress(ProverOpts::composite(), groth16_receipt);
-        self::test_compress(ProverOpts::succinct(), groth16_receipt);
-        self::test_compress(ProverOpts::groth16(), groth16_receipt);
-
-        // fake receipts
-        self::test_fake_compress(groth16_receipt);
-    }
+    let receipt = prove_nothing(kind).receipt;
+    let input: (_, Digest, bool) = (
+        receipt.clone(),
+        MULTI_TEST_ID.into(),
+        /* dev_mode */ false,
+    );
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, VERIFY_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    println!("{:?}", session.stats());
 }
 
 mod sys_verify {
@@ -717,7 +670,6 @@ mod sys_verify {
     use super::*;
     use crate::{
         recursion::{prove::zkr, test_zkr, MerkleGroup},
-        sha::Digestible as _,
         Assumption, SuccinctReceipt, Unknown, RECURSION_PO2,
     };
 
@@ -945,6 +897,51 @@ mod sys_verify {
             .unwrap();
         assert!(prove_elf(env, MULTI_TEST_ELF).is_err());
     }
+
+    #[test_log::test]
+    fn sys_verify_with_povw() -> Result<()> {
+        let spec = MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            hello_commit_receipt().journal.bytes.clone(),
+        )]);
+
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
+        let povw_job_id: PovwJobId = rand::random();
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_receipt().clone())
+            .povw(povw_job_id)
+            .build()
+            .unwrap();
+
+        let opts = ProverOpts::succinct();
+        let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
+
+        prove_info.receipt.verify(MULTI_TEST_ID)?;
+        let work_receipt = prove_info.work_receipt.unwrap();
+        work_receipt.verify_integrity()?;
+
+        // NOTE: The work claim will only contain value for the conditional receipt.
+        // PoVW value for the assumption receipts is considered seperately, instead of in the take
+        // WorkClaim (i.e. the same compact range representation).
+        let work_claim = work_receipt.claim().as_value()?.clone();
+        assert_eq!(
+            work_claim.claim.digest(),
+            prove_info.receipt.claim()?.digest()
+        );
+        let work = work_claim.work.value()?;
+        assert!(work.value > 0);
+        assert_eq!(work.nonce_min.log, povw_job_id.log);
+        assert_eq!(work.nonce_min.job, povw_job_id.job);
+        assert_eq!(work.nonce_min.segment, 0);
+        assert_eq!(work.nonce_max.log, povw_job_id.log);
+        assert_eq!(work.nonce_max.job, povw_job_id.job);
+        // We expect that the verify action only takes one segment.
+        assert_eq!(work.nonce_max.segment, 0);
+        Ok(())
+    }
 }
 
 #[ignore]
@@ -980,6 +977,89 @@ fn run_unconstrained() -> Result<()> {
             );
         }
     }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_nonce_assignment() -> Result<()> {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let povw_job_id = PovwJobId {
+        log: PovwLogId::from(0x202ce_u64),
+        job: 42,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+    let receipt = prove_session(&session).unwrap();
+    let segments = &receipt.inner.composite().unwrap().segments;
+    for (i, segment) in segments.iter().enumerate() {
+        segment
+            .verify_integrity_with_context(&VerifierContext::default())
+            .unwrap();
+        assert_eq!(segment.povw_nonce().unwrap(), povw_job_id.nonce(i as u32));
+    }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_nonce_default_assignment() -> Result<()> {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(15)
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+    let receipt = prove_session(&session).unwrap();
+    let segments = &receipt.inner.composite().unwrap().segments;
+    for segment in segments.iter() {
+        segment
+            .verify_integrity_with_context(&VerifierContext::default())
+            .unwrap();
+        assert_eq!(segment.povw_nonce().unwrap(), PovwNonce::default());
+    }
+    Ok(())
+}
+
+#[test_log::test]
+fn povw_prove_work_receipt() -> Result<()> {
+    let segment_limit_po2 = 16; // 64k cycles
+    let cycles = 1 << segment_limit_po2;
+    let povw_job_id: PovwJobId = rand::random();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles })
+        .unwrap()
+        .segment_limit_po2(segment_limit_po2)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+
+    let opts = ProverOpts::succinct();
+    let prove_info = get_prover_server(&opts)?.prove(env, MULTI_TEST_ELF)?;
+
+    prove_info.receipt.verify(MULTI_TEST_ID)?;
+    let work_receipt = prove_info.work_receipt.unwrap();
+    work_receipt.verify_integrity()?;
+
+    let work_claim = work_receipt.claim().as_value()?.clone();
+    assert_eq!(
+        work_claim.claim.digest(),
+        prove_info.receipt.claim()?.digest()
+    );
+    let work = work_claim.work.value()?;
+    assert!(work.value >= 1 << 16);
+    assert_eq!(work.nonce_min.log, povw_job_id.log);
+    assert_eq!(work.nonce_min.job, povw_job_id.job);
+    assert_eq!(work.nonce_min.segment, 0);
+    assert_eq!(work.nonce_max.log, povw_job_id.log);
+    assert_eq!(work.nonce_max.job, povw_job_id.job);
+    assert!(work.nonce_max.segment > 0);
     Ok(())
 }
 

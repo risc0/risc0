@@ -6,6 +6,8 @@ pub struct ProveInfo {
     pub receipt: ::core::option::Option<Receipt>,
     #[prost(message, optional, tag = "2")]
     pub stats: ::core::option::Option<SessionStats>,
+    #[prost(message, optional, tag = "3")]
+    pub work_receipt: ::core::option::Option<InnerReceipt>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -42,7 +44,8 @@ pub struct ReceiptMetadata {
 /// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
 /// In Rust, they are distinct types because Rust needs to size everything on the
 /// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
-/// have different sizes. Protobuf handles this without issue.
+/// have different sizes. Protobuf handles this without issue. GenericReceipt also
+/// uses this message type for similar reasons, but the composite kind is unused.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InnerReceipt {
@@ -99,7 +102,7 @@ pub struct SuccinctReceipt {
     pub seal: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
     pub control_id: ::core::option::Option<super::base::Digest>,
-    /// MaybePruned<ReceiptClaim>
+    /// MaybePruned<Claim>
     #[prost(message, optional, tag = "4")]
     pub claim: ::core::option::Option<MaybePruned>,
     #[prost(message, optional, tag = "5")]
@@ -124,7 +127,7 @@ pub struct Groth16Receipt {
     pub version: ::core::option::Option<super::base::CompatVersion>,
     #[prost(bytes = "vec", tag = "2")]
     pub seal: ::prost::alloc::vec::Vec<u8>,
-    /// MaybePruned<ReceiptClaim>
+    /// MaybePruned<Claim>
     #[prost(message, optional, tag = "3")]
     pub claim: ::core::option::Option<MaybePruned>,
     #[prost(message, optional, tag = "4")]
@@ -147,6 +150,26 @@ pub struct ReceiptClaim {
     /// Option<MaybePruned<Output>>
     #[prost(message, optional, tag = "5")]
     pub output: ::core::option::Option<MaybePruned>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Work {
+    #[prost(bytes = "vec", tag = "1")]
+    pub nonce_min: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub nonce_max: ::prost::alloc::vec::Vec<u8>,
+    #[prost(uint64, tag = "3")]
+    pub value: u64,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct WorkClaim {
+    /// MaybePruned<Claim>
+    #[prost(message, optional, tag = "1")]
+    pub claim: ::core::option::Option<MaybePruned>,
+    /// MaybePruned<Work>
+    #[prost(message, optional, tag = "2")]
+    pub work: ::core::option::Option<MaybePruned>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -213,7 +236,7 @@ pub struct Assumptions {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FakeReceipt {
-    /// MaybePruned<ReceiptClaim>
+    /// MaybePruned<Claim>
     #[prost(message, optional, tag = "1")]
     pub claim: ::core::option::Option<MaybePruned>,
 }

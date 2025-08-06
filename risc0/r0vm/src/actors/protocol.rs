@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ops::Range, sync::Arc, time::Duration};
+use std::{ops::Range, sync::Arc};
 
 use clap::ValueEnum;
 use derive_more::Debug;
 use kameo::{actor::ActorRef, Reply};
 use risc0_zkvm::{
-    AssumptionReceipt, Journal, ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt,
-    SuccinctReceipt, UnionClaim, Unknown,
+    ProveKeccakRequest, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, UnionClaim, Unknown,
 };
 use serde::{Deserialize, Serialize};
 
 use super::job::JobActor;
+
+pub use risc0_zkvm::rpc::{JobInfo, JobStatus, ProofRequest, ProofResult, Session, TaskError};
 
 pub(crate) type JobId = uuid::Uuid;
 pub(crate) type TaskId = u64;
@@ -47,43 +48,6 @@ pub(crate) struct JobStatusRequest {
 #[derive(Reply, Serialize, Deserialize)]
 pub(crate) struct JobStatusReply {
     pub info: Option<JobInfo>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) enum JobStatus {
-    Running(String),
-    Succeeded(ProofResult),
-    Failed(TaskError),
-    TimedOut,
-    Aborted,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct JobInfo {
-    pub status: JobStatus,
-    pub elapsed_time: Duration,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct ProofResult {
-    pub session: Arc<Session>,
-    pub receipt: Arc<Receipt>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub(crate) struct ProofRequest {
-    pub binary: Vec<u8>,
-    pub input: Vec<u8>,
-    pub assumptions: Vec<Receipt>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Session {
-    pub(crate) segment_count: usize,
-    pub(crate) user_cycles: u64,
-    pub(crate) total_cycles: u64,
-    pub(crate) journal: Option<Journal>,
-    pub(crate) assumptions: Vec<Arc<AssumptionReceipt>>,
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
@@ -164,11 +128,6 @@ pub(crate) struct UnionTask {
 pub(crate) struct ResolveTask {
     pub conditional: Arc<SuccinctReceipt<ReceiptClaim>>,
     pub assumption: Arc<SuccinctReceipt<Unknown>>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) enum TaskError {
-    Generic(String),
 }
 
 pub mod factory {
@@ -281,18 +240,6 @@ impl Task {
             Task::Join(_) => TaskKind::Join,
             Task::Union(_) => TaskKind::Union,
             Task::Resolve(_) => TaskKind::Resolve,
-        }
-    }
-}
-
-impl JobStatus {
-    pub fn bonsai_status(&self) -> &str {
-        match self {
-            JobStatus::Running(_) => "RUNNING",
-            JobStatus::Succeeded(_) => "SUCCEEDED",
-            JobStatus::Failed(_) => "FAILED",
-            JobStatus::TimedOut => "TIMED_OUT",
-            JobStatus::Aborted => "ABORTED",
         }
     }
 }

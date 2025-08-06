@@ -27,11 +27,12 @@ use std::{
 use anyhow::{bail, Result};
 use tempfile::tempdir;
 
-use crate::{to_json, ProofJson, Seal};
+use super::seal_to_json::to_json;
+use crate::{ProofJson, Seal};
 
 /// Groth16 a given seal of an `identity_p254` receipt into a Groth16 `Seal`.
 /// Requires running Docker on an x86 architecture.
-pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
+pub(crate) fn shrink_wrap(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     if !is_docker_installed() {
         bail!("Please install docker first.")
     }
@@ -44,8 +45,7 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     std::fs::write(work_dir.join("seal.r0"), identity_p254_seal_bytes)?;
     let seal_path = work_dir.join("input.json");
     let proof_path = work_dir.join("proof.json");
-    let mut seal_json = Vec::new();
-    to_json(identity_p254_seal_bytes, &mut seal_json)?;
+    let seal_json = to_json(identity_p254_seal_bytes)?;
     std::fs::write(seal_path, seal_json)?;
 
     tracing::debug!("risc0-groth16-prover");
