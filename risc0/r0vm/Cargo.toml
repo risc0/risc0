@@ -1,7 +1,7 @@
 [package]
 name = "risc0-r0vm"
 description = "RISC Zero zero-knowledge VM executable"
-version = "3.0.0"
+version = "3.0.0-rc.3"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
