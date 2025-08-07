@@ -516,7 +516,7 @@ jobs:
         env:
             # Pass `--update` on release branches to ensure the release-branch semver-checks are
             # always testing against the latest crates.io versions.
-            UPDATE: ${{ startsWith(github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
+            UPDATE: ${{ startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
       - run: sccache --show-stats
 
   check-template:
