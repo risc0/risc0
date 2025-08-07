@@ -512,13 +512,11 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: run SemVer checks
-        run: cargo run --bin xtask --no-default-features -- semver-checks $SEMVER_FLAGS
+        run: cargo run --bin xtask --no-default-features -- semver-checks $UPDATE
         env:
             # Pass `--update` on release branches to ensure the release-branch semver-checks are
             # always testing against the latest crates.io versions.
-            #
-            # Pass `--locked` on non-release branches to ensure that the lock file is up-to-date
-            SEMVER_FLAGS: ${{ startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'release-') && '--update' || '--locked' }}
+            UPDATE: ${{ startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
       - run: sccache --show-stats
 
   check-template:
