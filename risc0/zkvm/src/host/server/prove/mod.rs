@@ -174,9 +174,6 @@ pub trait ProverServer: private::Sealed {
         &self,
         receipt: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<Groth16Receipt<ReceiptClaim>> {
-        #[cfg(feature = "cuda")]
-        let _lock = risc0_zkp::hal::cuda::singleton().lock();
-
         let ident_receipt = self.identity_p254(receipt).unwrap();
         let seal_bytes = ident_receipt.get_seal_bytes();
         let seal = shrink_wrap(&seal_bytes)?.to_vec();
