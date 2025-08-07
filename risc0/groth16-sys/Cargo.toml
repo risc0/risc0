@@ -8,9 +8,6 @@ homepage = { workspace = true }
 repository = { workspace = true }
 links = "risc0-groth16-sys"
 
-[package.metadata.release]
-release = false
-
 [build-dependencies]
 risc0-build-kernel = { workspace = true }
 
