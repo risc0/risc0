@@ -1,7 +1,7 @@
 [package]
 name = "risc0-core"
 description = "Core types for RISC Zero crates"
-version = "2.0.1-rc.2"
+version = "2.0.1-rc.3"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -9,7 +9,6 @@ repository = { workspace = true }
 
 [dependencies]
 bytemuck = { version = "1.12", features = ["derive"] }
-bytemuck_derive = "1.9.3"
 rand_core = "0.9.3"
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]

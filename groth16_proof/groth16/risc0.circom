@@ -403,7 +403,8 @@ template inv_impl(nInputs) {
   signal input in[1];
   signal output out;
   var P = 15 * (1 << 27) + 1;
-  out <-- inverse(in[0], P);
+  var inv_res = inverse(in[0], P);
+  out <-- inv_res;
   component bits_k = to_bits_exact(31);
   bits_k.in <-- out * in[0] \ P;
   component bits = to_bits_exact(31);

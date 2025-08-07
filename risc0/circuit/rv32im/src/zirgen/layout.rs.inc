@@ -6044,7 +6044,7 @@ pub const LAYOUT__400: &Mem1Layout = &Mem1Layout {
     _1: LAYOUT__448,
     pc_add: LAYOUT__455,
 };
-pub const LAYOUT__466: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__465: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 29 },
     },
@@ -6061,7 +6061,7 @@ pub const LAYOUT__466: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 33 },
     },
 };
-pub const LAYOUT__467: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__466: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 34 },
     },
@@ -6078,14 +6078,12 @@ pub const LAYOUT__467: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 37 },
     },
 };
-pub const LAYOUT__465: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__466,
-    new_txn: LAYOUT__467,
+pub const LAYOUT__464: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__465,
+    new_txn: LAYOUT__466,
 };
-pub const LAYOUT__464: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__465 };
-pub const LAYOUT__463: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__464 };
-pub const LAYOUT__471: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__463: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__464 };
+pub const LAYOUT__469: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 38 },
     },
@@ -6102,7 +6100,7 @@ pub const LAYOUT__471: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 42 },
     },
 };
-pub const LAYOUT__472: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__470: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 43 },
     },
@@ -6119,14 +6117,12 @@ pub const LAYOUT__472: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 46 },
     },
 };
-pub const LAYOUT__470: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__471,
-    new_txn: LAYOUT__472,
+pub const LAYOUT__468: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__469,
+    new_txn: LAYOUT__470,
 };
-pub const LAYOUT__469: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__470 };
-pub const LAYOUT__468: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__469 };
-pub const LAYOUT__476: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__467: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__468 };
+pub const LAYOUT__473: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 47 },
     },
@@ -6143,7 +6139,7 @@ pub const LAYOUT__476: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 51 },
     },
 };
-pub const LAYOUT__477: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__474: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 52 },
     },
@@ -6160,14 +6156,12 @@ pub const LAYOUT__477: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 55 },
     },
 };
-pub const LAYOUT__475: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__476,
-    new_txn: LAYOUT__477,
+pub const LAYOUT__472: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__473,
+    new_txn: LAYOUT__474,
 };
-pub const LAYOUT__474: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__475 };
-pub const LAYOUT__473: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__474 };
-pub const LAYOUT__481: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__471: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__472 };
+pub const LAYOUT__477: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 56 },
     },
@@ -6184,7 +6178,7 @@ pub const LAYOUT__481: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 60 },
     },
 };
-pub const LAYOUT__482: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__478: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 61 },
     },
@@ -6201,14 +6195,12 @@ pub const LAYOUT__482: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 64 },
     },
 };
-pub const LAYOUT__480: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__481,
-    new_txn: LAYOUT__482,
+pub const LAYOUT__476: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__477,
+    new_txn: LAYOUT__478,
 };
-pub const LAYOUT__479: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__480 };
-pub const LAYOUT__478: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__479 };
-pub const LAYOUT__486: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__475: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__476 };
+pub const LAYOUT__481: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 65 },
     },
@@ -6225,7 +6217,7 @@ pub const LAYOUT__486: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 69 },
     },
 };
-pub const LAYOUT__487: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__482: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 70 },
     },
@@ -6242,14 +6234,12 @@ pub const LAYOUT__487: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 73 },
     },
 };
-pub const LAYOUT__485: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__486,
-    new_txn: LAYOUT__487,
+pub const LAYOUT__480: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__481,
+    new_txn: LAYOUT__482,
 };
-pub const LAYOUT__484: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__485 };
-pub const LAYOUT__483: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__484 };
-pub const LAYOUT__491: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__479: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__480 };
+pub const LAYOUT__485: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 74 },
     },
@@ -6266,7 +6256,7 @@ pub const LAYOUT__491: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 78 },
     },
 };
-pub const LAYOUT__492: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__486: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 79 },
     },
@@ -6283,14 +6273,12 @@ pub const LAYOUT__492: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 82 },
     },
 };
-pub const LAYOUT__490: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__491,
-    new_txn: LAYOUT__492,
+pub const LAYOUT__484: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__485,
+    new_txn: LAYOUT__486,
 };
-pub const LAYOUT__489: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__490 };
-pub const LAYOUT__488: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__489 };
-pub const LAYOUT__496: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__483: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__484 };
+pub const LAYOUT__489: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 83 },
     },
@@ -6307,7 +6295,7 @@ pub const LAYOUT__496: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 87 },
     },
 };
-pub const LAYOUT__497: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__490: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 88 },
     },
@@ -6324,14 +6312,12 @@ pub const LAYOUT__497: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 91 },
     },
 };
-pub const LAYOUT__495: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__496,
-    new_txn: LAYOUT__497,
+pub const LAYOUT__488: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__489,
+    new_txn: LAYOUT__490,
 };
-pub const LAYOUT__494: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__495 };
-pub const LAYOUT__493: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__494 };
-pub const LAYOUT__501: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__487: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__488 };
+pub const LAYOUT__493: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 92 },
     },
@@ -6348,7 +6334,7 @@ pub const LAYOUT__501: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 96 },
     },
 };
-pub const LAYOUT__502: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__494: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 97 },
     },
@@ -6365,24 +6351,23 @@ pub const LAYOUT__502: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 100 },
     },
 };
-pub const LAYOUT__500: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__501,
-    new_txn: LAYOUT__502,
+pub const LAYOUT__492: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__493,
+    new_txn: LAYOUT__494,
 };
-pub const LAYOUT__499: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__500 };
-pub const LAYOUT__498: &ControlLoadRoot__0_SuperLayout =
-    &ControlLoadRoot__0_SuperLayout { mem: LAYOUT__499 };
-pub const LAYOUT__462: &ControlLoadRoot__0_SuperLayout8LayoutArray = &[
+pub const LAYOUT__491: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__492 };
+pub const LAYOUT__462: &MemoryPageInLayout8LayoutArray = &[
     LAYOUT__463,
-    LAYOUT__468,
-    LAYOUT__473,
-    LAYOUT__478,
+    LAYOUT__467,
+    LAYOUT__471,
+    LAYOUT__475,
+    LAYOUT__479,
     LAYOUT__483,
-    LAYOUT__488,
-    LAYOUT__493,
-    LAYOUT__498,
+    LAYOUT__487,
+    LAYOUT__491,
 ];
-pub const LAYOUT__461: &ControlLoadRootLayout = &ControlLoadRootLayout { _1: LAYOUT__462 };
+pub const LAYOUT__461: &ControlLoadRootAndNonceLayout =
+    &ControlLoadRootAndNonceLayout { mem: LAYOUT__462 };
 pub const LAYOUT__460: &Control0_SuperArm0Layout = &Control0_SuperArm0Layout {
     _super: LAYOUT__461,
     _extra0: &CycleArgLayout {
@@ -6706,33 +6691,33 @@ pub const LAYOUT__460: &Control0_SuperArm0Layout = &Control0_SuperArm0Layout {
         },
     },
 };
-pub const LAYOUT__508: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__465,
+pub const LAYOUT__500: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__464,
     _0: LAYOUT__40,
 };
-pub const LAYOUT__509: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__470,
+pub const LAYOUT__501: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__468,
     _0: LAYOUT__146,
 };
-pub const LAYOUT__507: &ControlResume_SuperArm0_SuperLayout =
+pub const LAYOUT__499: &ControlResume_SuperArm0_SuperLayout =
     &ControlResume_SuperArm0_SuperLayout {
-        pc: LAYOUT__508,
-        mode: LAYOUT__509,
+        pc: LAYOUT__500,
+        mode: LAYOUT__501,
     };
-pub const LAYOUT__506: &ControlResume_SuperArm0Layout = &ControlResume_SuperArm0Layout {
-    _super: LAYOUT__507,
-    _extra0: LAYOUT__476,
-    _extra1: LAYOUT__477,
-    _extra2: LAYOUT__481,
-    _extra3: LAYOUT__482,
-    _extra4: LAYOUT__486,
-    _extra5: LAYOUT__487,
-    _extra6: LAYOUT__491,
-    _extra7: LAYOUT__492,
-    _extra8: LAYOUT__496,
-    _extra9: LAYOUT__497,
-    _extra10: LAYOUT__501,
-    _extra11: LAYOUT__502,
+pub const LAYOUT__498: &ControlResume_SuperArm0Layout = &ControlResume_SuperArm0Layout {
+    _super: LAYOUT__499,
+    _extra0: LAYOUT__473,
+    _extra1: LAYOUT__474,
+    _extra2: LAYOUT__477,
+    _extra3: LAYOUT__478,
+    _extra4: LAYOUT__481,
+    _extra5: LAYOUT__482,
+    _extra6: LAYOUT__485,
+    _extra7: LAYOUT__486,
+    _extra8: LAYOUT__489,
+    _extra9: LAYOUT__490,
+    _extra10: LAYOUT__493,
+    _extra11: LAYOUT__494,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -6782,19 +6767,19 @@ pub const LAYOUT__506: &ControlResume_SuperArm0Layout = &ControlResume_SuperArm0
         },
     },
 };
-pub const LAYOUT__513: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__465,
+pub const LAYOUT__505: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__464,
     _0: LAYOUT__40,
 };
-pub const LAYOUT__512: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__513 };
-pub const LAYOUT__515: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__470,
+pub const LAYOUT__504: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__505 };
+pub const LAYOUT__507: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__468,
     _0: LAYOUT__146,
 };
-pub const LAYOUT__514: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__515 };
-pub const LAYOUT__519: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__506: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__507 };
+pub const LAYOUT__511: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -6804,14 +6789,14 @@ pub const LAYOUT__519: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__518: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__519 };
-pub const LAYOUT__517: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__475,
-    _0: LAYOUT__518,
+pub const LAYOUT__510: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__511 };
+pub const LAYOUT__509: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__472,
+    _0: LAYOUT__510,
 };
-pub const LAYOUT__516: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__517 };
-pub const LAYOUT__523: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__508: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__509 };
+pub const LAYOUT__515: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 107 },
@@ -6821,14 +6806,14 @@ pub const LAYOUT__523: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__522: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__523 };
-pub const LAYOUT__521: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__480,
-    _0: LAYOUT__522,
+pub const LAYOUT__514: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__515 };
+pub const LAYOUT__513: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__476,
+    _0: LAYOUT__514,
 };
-pub const LAYOUT__520: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__521 };
-pub const LAYOUT__527: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__512: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__513 };
+pub const LAYOUT__519: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 109 },
@@ -6838,14 +6823,14 @@ pub const LAYOUT__527: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__526: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__527 };
-pub const LAYOUT__525: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__485,
-    _0: LAYOUT__526,
+pub const LAYOUT__518: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__519 };
+pub const LAYOUT__517: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__480,
+    _0: LAYOUT__518,
 };
-pub const LAYOUT__524: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__525 };
-pub const LAYOUT__531: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__516: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__517 };
+pub const LAYOUT__523: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 111 },
@@ -6855,14 +6840,14 @@ pub const LAYOUT__531: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__530: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__531 };
-pub const LAYOUT__529: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__490,
-    _0: LAYOUT__530,
+pub const LAYOUT__522: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__523 };
+pub const LAYOUT__521: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__484,
+    _0: LAYOUT__522,
 };
-pub const LAYOUT__528: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__529 };
-pub const LAYOUT__535: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__520: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__521 };
+pub const LAYOUT__527: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 113 },
@@ -6872,14 +6857,14 @@ pub const LAYOUT__535: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__534: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__535 };
-pub const LAYOUT__533: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__495,
-    _0: LAYOUT__534,
+pub const LAYOUT__526: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__527 };
+pub const LAYOUT__525: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__488,
+    _0: LAYOUT__526,
 };
-pub const LAYOUT__532: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__533 };
-pub const LAYOUT__539: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__524: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__525 };
+pub const LAYOUT__531: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 115 },
@@ -6889,48 +6874,48 @@ pub const LAYOUT__539: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__538: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__539 };
-pub const LAYOUT__537: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__500,
-    _0: LAYOUT__538,
+pub const LAYOUT__530: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__531 };
+pub const LAYOUT__529: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__492,
+    _0: LAYOUT__530,
 };
-pub const LAYOUT__536: &ControlResume_SuperArm1_Super__0_SuperLayout =
-    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__537 };
-pub const LAYOUT__511: &ControlResume_SuperArm1_Super__0_SuperLayout8LayoutArray = &[
+pub const LAYOUT__528: &ControlResume_SuperArm1_Super__0_SuperLayout =
+    &ControlResume_SuperArm1_Super__0_SuperLayout { _0: LAYOUT__529 };
+pub const LAYOUT__503: &ControlResume_SuperArm1_Super__0_SuperLayout8LayoutArray = &[
+    LAYOUT__504,
+    LAYOUT__506,
+    LAYOUT__508,
     LAYOUT__512,
-    LAYOUT__514,
     LAYOUT__516,
     LAYOUT__520,
     LAYOUT__524,
     LAYOUT__528,
-    LAYOUT__532,
-    LAYOUT__536,
 ];
-pub const LAYOUT__510: &ControlResume_SuperArm1_SuperLayout =
-    &ControlResume_SuperArm1_SuperLayout { _1: LAYOUT__511 };
-pub const LAYOUT__505: &ControlResume_SuperLayout = &ControlResume_SuperLayout {
-    arm0: LAYOUT__506,
-    arm1: LAYOUT__510,
+pub const LAYOUT__502: &ControlResume_SuperArm1_SuperLayout =
+    &ControlResume_SuperArm1_SuperLayout { _1: LAYOUT__503 };
+pub const LAYOUT__497: &ControlResume_SuperLayout = &ControlResume_SuperLayout {
+    arm0: LAYOUT__498,
+    arm1: LAYOUT__502,
 };
-pub const LAYOUT__541: &MemoryArgLayout16LayoutArray = &[
+pub const LAYOUT__533: &MemoryArgLayout16LayoutArray = &[
+    LAYOUT__465,
     LAYOUT__466,
-    LAYOUT__467,
-    LAYOUT__471,
-    LAYOUT__472,
-    LAYOUT__476,
+    LAYOUT__469,
+    LAYOUT__470,
+    LAYOUT__473,
+    LAYOUT__474,
     LAYOUT__477,
+    LAYOUT__478,
     LAYOUT__481,
     LAYOUT__482,
+    LAYOUT__485,
     LAYOUT__486,
-    LAYOUT__487,
-    LAYOUT__491,
-    LAYOUT__492,
-    LAYOUT__496,
-    LAYOUT__497,
-    LAYOUT__501,
-    LAYOUT__502,
+    LAYOUT__489,
+    LAYOUT__490,
+    LAYOUT__493,
+    LAYOUT__494,
 ];
-pub const LAYOUT__542: &CycleArgLayout8LayoutArray = &[
+pub const LAYOUT__534: &CycleArgLayout8LayoutArray = &[
     &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 101 },
@@ -6996,13 +6981,13 @@ pub const LAYOUT__542: &CycleArgLayout8LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__540: &_Arguments_ControlResume_SuperLayout =
+pub const LAYOUT__532: &_Arguments_ControlResume_SuperLayout =
     &_Arguments_ControlResume_SuperLayout {
-        memory_arg: LAYOUT__541,
-        cycle_arg: LAYOUT__542,
+        memory_arg: LAYOUT__533,
+        cycle_arg: LAYOUT__534,
     };
-pub const LAYOUT__504: &ControlResumeLayout = &ControlResumeLayout {
-    _super: LAYOUT__505,
+pub const LAYOUT__496: &ControlResumeLayout = &ControlResumeLayout {
+    _super: LAYOUT__497,
     pc_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 181 },
@@ -7011,10 +6996,10 @@ pub const LAYOUT__504: &ControlResumeLayout = &ControlResumeLayout {
             _super: &Reg { offset: 182 },
         },
     },
-    _arguments_control_resume__super: LAYOUT__540,
+    _arguments_control_resume__super: LAYOUT__532,
 };
-pub const LAYOUT__503: &Control0_SuperArm1Layout = &Control0_SuperArm1Layout {
-    _super: LAYOUT__504,
+pub const LAYOUT__495: &Control0_SuperArm1Layout = &Control0_SuperArm1Layout {
+    _super: LAYOUT__496,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -7272,7 +7257,7 @@ pub const LAYOUT__503: &Control0_SuperArm1Layout = &Control0_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__546: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__538: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -7282,7 +7267,7 @@ pub const LAYOUT__546: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__547: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__539: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 119 },
@@ -7292,14 +7277,14 @@ pub const LAYOUT__547: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__545: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
+pub const LAYOUT__537: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
     low0: &NondetRegLayout {
         _super: &Reg { offset: 182 },
     },
     low1: &NondetRegLayout {
         _super: &Reg { offset: 183 },
     },
-    upper_diff: LAYOUT__546,
+    upper_diff: LAYOUT__538,
     _0: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 184 },
@@ -7308,29 +7293,29 @@ pub const LAYOUT__545: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
             _super: &Reg { offset: 185 },
         },
     },
-    med14: LAYOUT__547,
+    med14: LAYOUT__539,
 };
-pub const LAYOUT__544: &ControlUserECALLLayout = &ControlUserECALLLayout {
+pub const LAYOUT__536: &ControlUserECALLLayout = &ControlUserECALLLayout {
     safe_mode: &NondetRegLayout {
         _super: &Reg { offset: 181 },
     },
-    pc_addr: LAYOUT__545,
-    load_inst: LAYOUT__508,
-    new_pc_addr: LAYOUT__509,
-    _0: LAYOUT__517,
+    pc_addr: LAYOUT__537,
+    load_inst: LAYOUT__500,
+    new_pc_addr: LAYOUT__501,
+    _0: LAYOUT__509,
 };
-pub const LAYOUT__543: &Control0_SuperArm2Layout = &Control0_SuperArm2Layout {
-    _super: LAYOUT__544,
-    _extra0: LAYOUT__481,
-    _extra1: LAYOUT__482,
-    _extra2: LAYOUT__486,
-    _extra3: LAYOUT__487,
-    _extra4: LAYOUT__491,
-    _extra5: LAYOUT__492,
-    _extra6: LAYOUT__496,
-    _extra7: LAYOUT__497,
-    _extra8: LAYOUT__501,
-    _extra9: LAYOUT__502,
+pub const LAYOUT__535: &Control0_SuperArm2Layout = &Control0_SuperArm2Layout {
+    _super: LAYOUT__536,
+    _extra0: LAYOUT__477,
+    _extra1: LAYOUT__478,
+    _extra2: LAYOUT__481,
+    _extra3: LAYOUT__482,
+    _extra4: LAYOUT__485,
+    _extra5: LAYOUT__486,
+    _extra6: LAYOUT__489,
+    _extra7: LAYOUT__490,
+    _extra8: LAYOUT__493,
+    _extra9: LAYOUT__494,
     _extra10: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 107 },
@@ -7612,7 +7597,7 @@ pub const LAYOUT__543: &Control0_SuperArm2Layout = &Control0_SuperArm2Layout {
         },
     },
 };
-pub const LAYOUT__551: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__543: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 121 },
@@ -7622,7 +7607,7 @@ pub const LAYOUT__551: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__552: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__544: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 123 },
@@ -7632,39 +7617,39 @@ pub const LAYOUT__552: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__550: &NormalizeU32Layout = &NormalizeU32Layout {
-    low16: LAYOUT__551,
+pub const LAYOUT__542: &NormalizeU32Layout = &NormalizeU32Layout {
+    low16: LAYOUT__543,
     low_carry: &NondetRegLayout {
         _super: &Reg { offset: 186 },
     },
-    high16: LAYOUT__552,
+    high16: LAYOUT__544,
     high_carry: &NondetRegLayout {
         _super: &Reg { offset: 187 },
     },
 };
-pub const LAYOUT__549: &ControlMRETLayout = &ControlMRETLayout {
+pub const LAYOUT__541: &ControlMRETLayout = &ControlMRETLayout {
     safe_mode: &NondetRegLayout {
         _super: &Reg { offset: 181 },
     },
-    pc_addr: LAYOUT__545,
-    load_inst: LAYOUT__508,
-    pc: LAYOUT__509,
-    pc_add: LAYOUT__550,
+    pc_addr: LAYOUT__537,
+    load_inst: LAYOUT__500,
+    pc: LAYOUT__501,
+    pc_add: LAYOUT__542,
 };
-pub const LAYOUT__548: &Control0_SuperArm3Layout = &Control0_SuperArm3Layout {
-    _super: LAYOUT__549,
-    _extra0: LAYOUT__476,
-    _extra1: LAYOUT__477,
-    _extra2: LAYOUT__481,
-    _extra3: LAYOUT__482,
-    _extra4: LAYOUT__486,
-    _extra5: LAYOUT__487,
-    _extra6: LAYOUT__491,
-    _extra7: LAYOUT__492,
-    _extra8: LAYOUT__496,
-    _extra9: LAYOUT__497,
-    _extra10: LAYOUT__501,
-    _extra11: LAYOUT__502,
+pub const LAYOUT__540: &Control0_SuperArm3Layout = &Control0_SuperArm3Layout {
+    _super: LAYOUT__541,
+    _extra0: LAYOUT__473,
+    _extra1: LAYOUT__474,
+    _extra2: LAYOUT__477,
+    _extra3: LAYOUT__478,
+    _extra4: LAYOUT__481,
+    _extra5: LAYOUT__482,
+    _extra6: LAYOUT__485,
+    _extra7: LAYOUT__486,
+    _extra8: LAYOUT__489,
+    _extra9: LAYOUT__490,
+    _extra10: LAYOUT__493,
+    _extra11: LAYOUT__494,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -7938,64 +7923,64 @@ pub const LAYOUT__548: &Control0_SuperArm3Layout = &Control0_SuperArm3Layout {
         },
     },
 };
-pub const LAYOUT__558: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__475,
+pub const LAYOUT__550: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__472,
+    _0: LAYOUT__510,
+};
+pub const LAYOUT__551: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__476,
+    _0: LAYOUT__514,
+};
+pub const LAYOUT__552: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__480,
     _0: LAYOUT__518,
 };
-pub const LAYOUT__559: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__480,
+pub const LAYOUT__553: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__484,
     _0: LAYOUT__522,
 };
-pub const LAYOUT__560: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__485,
+pub const LAYOUT__554: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__488,
     _0: LAYOUT__526,
 };
-pub const LAYOUT__561: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__490,
+pub const LAYOUT__555: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__492,
     _0: LAYOUT__530,
 };
-pub const LAYOUT__562: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__495,
-    _0: LAYOUT__534,
-};
-pub const LAYOUT__563: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__500,
-    _0: LAYOUT__538,
-};
-pub const LAYOUT__557: &MemoryReadLayout8LayoutArray = &[
-    LAYOUT__508,
-    LAYOUT__509,
-    LAYOUT__558,
-    LAYOUT__559,
-    LAYOUT__560,
-    LAYOUT__561,
-    LAYOUT__562,
-    LAYOUT__563,
+pub const LAYOUT__549: &MemoryReadLayout8LayoutArray = &[
+    LAYOUT__500,
+    LAYOUT__501,
+    LAYOUT__550,
+    LAYOUT__551,
+    LAYOUT__552,
+    LAYOUT__553,
+    LAYOUT__554,
+    LAYOUT__555,
 ];
-pub const LAYOUT__556: &ControlSuspend_SuperArm0_SuperLayout =
-    &ControlSuspend_SuperArm0_SuperLayout { _1: LAYOUT__557 };
-pub const LAYOUT__565: &ControlSuspend_SuperArm1_SuperLayout =
+pub const LAYOUT__548: &ControlSuspend_SuperArm0_SuperLayout =
+    &ControlSuspend_SuperArm0_SuperLayout { _1: LAYOUT__549 };
+pub const LAYOUT__557: &ControlSuspend_SuperArm1_SuperLayout =
     &ControlSuspend_SuperArm1_SuperLayout {
         state: &NondetRegLayout {
             _super: &Reg { offset: 181 },
         },
-        _0: LAYOUT__513,
-        _1: LAYOUT__515,
+        _0: LAYOUT__505,
+        _1: LAYOUT__507,
     };
-pub const LAYOUT__564: &ControlSuspend_SuperArm1Layout = &ControlSuspend_SuperArm1Layout {
-    _super: LAYOUT__565,
-    _extra0: LAYOUT__476,
-    _extra1: LAYOUT__477,
-    _extra2: LAYOUT__481,
-    _extra3: LAYOUT__482,
-    _extra4: LAYOUT__486,
-    _extra5: LAYOUT__487,
-    _extra6: LAYOUT__491,
-    _extra7: LAYOUT__492,
-    _extra8: LAYOUT__496,
-    _extra9: LAYOUT__497,
-    _extra10: LAYOUT__501,
-    _extra11: LAYOUT__502,
+pub const LAYOUT__556: &ControlSuspend_SuperArm1Layout = &ControlSuspend_SuperArm1Layout {
+    _super: LAYOUT__557,
+    _extra0: LAYOUT__473,
+    _extra1: LAYOUT__474,
+    _extra2: LAYOUT__477,
+    _extra3: LAYOUT__478,
+    _extra4: LAYOUT__481,
+    _extra5: LAYOUT__482,
+    _extra6: LAYOUT__485,
+    _extra7: LAYOUT__486,
+    _extra8: LAYOUT__489,
+    _extra9: LAYOUT__490,
+    _extra10: LAYOUT__493,
+    _extra11: LAYOUT__494,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -8045,17 +8030,17 @@ pub const LAYOUT__564: &ControlSuspend_SuperArm1Layout = &ControlSuspend_SuperAr
         },
     },
 };
-pub const LAYOUT__555: &ControlSuspend_SuperLayout = &ControlSuspend_SuperLayout {
-    arm0: LAYOUT__556,
-    arm1: LAYOUT__564,
+pub const LAYOUT__547: &ControlSuspend_SuperLayout = &ControlSuspend_SuperLayout {
+    arm0: LAYOUT__548,
+    arm1: LAYOUT__556,
 };
-pub const LAYOUT__566: &_Arguments_ControlSuspend_SuperLayout =
+pub const LAYOUT__558: &_Arguments_ControlSuspend_SuperLayout =
     &_Arguments_ControlSuspend_SuperLayout {
-        memory_arg: LAYOUT__541,
-        cycle_arg: LAYOUT__542,
+        memory_arg: LAYOUT__533,
+        cycle_arg: LAYOUT__534,
     };
-pub const LAYOUT__554: &ControlSuspendLayout = &ControlSuspendLayout {
-    _super: LAYOUT__555,
+pub const LAYOUT__546: &ControlSuspendLayout = &ControlSuspendLayout {
+    _super: LAYOUT__547,
     pc_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 182 },
@@ -8064,10 +8049,10 @@ pub const LAYOUT__554: &ControlSuspendLayout = &ControlSuspendLayout {
             _super: &Reg { offset: 183 },
         },
     },
-    _arguments_control_suspend__super: LAYOUT__566,
+    _arguments_control_suspend__super: LAYOUT__558,
 };
-pub const LAYOUT__553: &Control0_SuperArm4Layout = &Control0_SuperArm4Layout {
-    _super: LAYOUT__554,
+pub const LAYOUT__545: &Control0_SuperArm4Layout = &Control0_SuperArm4Layout {
+    _super: LAYOUT__546,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -8325,51 +8310,51 @@ pub const LAYOUT__553: &Control0_SuperArm4Layout = &Control0_SuperArm4Layout {
         },
     },
 };
-pub const LAYOUT__570: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__465,
+pub const LAYOUT__562: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__464,
     _0: LAYOUT__40,
 };
-pub const LAYOUT__571: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__470,
+pub const LAYOUT__563: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__468,
     _0: LAYOUT__146,
 };
-pub const LAYOUT__572: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__475,
+pub const LAYOUT__564: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__472,
+    _0: LAYOUT__510,
+};
+pub const LAYOUT__565: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__476,
+    _0: LAYOUT__514,
+};
+pub const LAYOUT__566: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__480,
     _0: LAYOUT__518,
 };
-pub const LAYOUT__573: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__480,
+pub const LAYOUT__567: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__484,
     _0: LAYOUT__522,
 };
-pub const LAYOUT__574: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__485,
+pub const LAYOUT__568: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__488,
     _0: LAYOUT__526,
 };
-pub const LAYOUT__575: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__490,
+pub const LAYOUT__569: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__492,
     _0: LAYOUT__530,
 };
-pub const LAYOUT__576: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__495,
-    _0: LAYOUT__534,
-};
-pub const LAYOUT__577: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__500,
-    _0: LAYOUT__538,
-};
-pub const LAYOUT__569: &MemoryPageOutLayout8LayoutArray = &[
-    LAYOUT__570,
-    LAYOUT__571,
-    LAYOUT__572,
-    LAYOUT__573,
-    LAYOUT__574,
-    LAYOUT__575,
-    LAYOUT__576,
-    LAYOUT__577,
+pub const LAYOUT__561: &MemoryPageOutLayout8LayoutArray = &[
+    LAYOUT__562,
+    LAYOUT__563,
+    LAYOUT__564,
+    LAYOUT__565,
+    LAYOUT__566,
+    LAYOUT__567,
+    LAYOUT__568,
+    LAYOUT__569,
 ];
-pub const LAYOUT__568: &ControlStoreRootLayout = &ControlStoreRootLayout { _1: LAYOUT__569 };
-pub const LAYOUT__567: &Control0_SuperArm5Layout = &Control0_SuperArm5Layout {
-    _super: LAYOUT__568,
+pub const LAYOUT__560: &ControlStoreRootLayout = &ControlStoreRootLayout { _1: LAYOUT__561 };
+pub const LAYOUT__559: &Control0_SuperArm5Layout = &Control0_SuperArm5Layout {
+    _super: LAYOUT__560,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -8627,7 +8612,7 @@ pub const LAYOUT__567: &Control0_SuperArm5Layout = &Control0_SuperArm5Layout {
         },
     },
 };
-pub const LAYOUT__584: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__576: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8638,7 +8623,7 @@ pub const LAYOUT__584: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__585: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__577: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8649,7 +8634,7 @@ pub const LAYOUT__585: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__586: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__578: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8660,7 +8645,7 @@ pub const LAYOUT__586: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__587: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__579: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8671,7 +8656,7 @@ pub const LAYOUT__587: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__588: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__580: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8682,7 +8667,7 @@ pub const LAYOUT__588: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__589: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__581: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8693,7 +8678,7 @@ pub const LAYOUT__589: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__590: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__582: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8704,7 +8689,7 @@ pub const LAYOUT__590: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__591: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__583: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8715,7 +8700,7 @@ pub const LAYOUT__591: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__592: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__584: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8726,7 +8711,7 @@ pub const LAYOUT__592: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__593: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__585: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8737,7 +8722,7 @@ pub const LAYOUT__593: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__594: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__586: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8748,7 +8733,7 @@ pub const LAYOUT__594: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__595: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__587: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8759,7 +8744,7 @@ pub const LAYOUT__595: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__596: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__588: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8770,7 +8755,7 @@ pub const LAYOUT__596: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__597: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__589: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8781,7 +8766,7 @@ pub const LAYOUT__597: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__598: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__590: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8792,7 +8777,7 @@ pub const LAYOUT__598: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__599: &ControlTable_SuperArm0_Super__0_SuperLayout =
+pub const LAYOUT__591: &ControlTable_SuperArm0_Super__0_SuperLayout =
     &ControlTable_SuperArm0_Super__0_SuperLayout {
         arg: &ArgU16Layout {
             count: &NondetRegLayout {
@@ -8803,7 +8788,15 @@ pub const LAYOUT__599: &ControlTable_SuperArm0_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__583: &ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray = &[
+pub const LAYOUT__575: &ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray = &[
+    LAYOUT__576,
+    LAYOUT__577,
+    LAYOUT__578,
+    LAYOUT__579,
+    LAYOUT__580,
+    LAYOUT__581,
+    LAYOUT__582,
+    LAYOUT__583,
     LAYOUT__584,
     LAYOUT__585,
     LAYOUT__586,
@@ -8812,17 +8805,9 @@ pub const LAYOUT__583: &ControlTable_SuperArm0_Super__0_SuperLayout16LayoutArray
     LAYOUT__589,
     LAYOUT__590,
     LAYOUT__591,
-    LAYOUT__592,
-    LAYOUT__593,
-    LAYOUT__594,
-    LAYOUT__595,
-    LAYOUT__596,
-    LAYOUT__597,
-    LAYOUT__598,
-    LAYOUT__599,
 ];
-pub const LAYOUT__582: &ControlTable_SuperArm0_SuperLayout = &ControlTable_SuperArm0_SuperLayout {
-    _1: LAYOUT__583,
+pub const LAYOUT__574: &ControlTable_SuperArm0_SuperLayout = &ControlTable_SuperArm0_SuperLayout {
+    _1: LAYOUT__575,
     done: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 181 },
@@ -8832,8 +8817,8 @@ pub const LAYOUT__582: &ControlTable_SuperArm0_SuperLayout = &ControlTable_Super
         },
     },
 };
-pub const LAYOUT__581: &ControlTable_SuperArm0Layout = &ControlTable_SuperArm0Layout {
-    _super: LAYOUT__582,
+pub const LAYOUT__573: &ControlTable_SuperArm0Layout = &ControlTable_SuperArm0Layout {
+    _super: LAYOUT__574,
     _extra0: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 149 },
@@ -8963,7 +8948,7 @@ pub const LAYOUT__581: &ControlTable_SuperArm0Layout = &ControlTable_SuperArm0La
         },
     },
 };
-pub const LAYOUT__603: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__595: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -8974,7 +8959,7 @@ pub const LAYOUT__603: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__604: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__596: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -8985,7 +8970,7 @@ pub const LAYOUT__604: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__605: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__597: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -8996,7 +8981,7 @@ pub const LAYOUT__605: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__606: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__598: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9007,7 +8992,7 @@ pub const LAYOUT__606: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__607: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__599: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9018,7 +9003,7 @@ pub const LAYOUT__607: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__608: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__600: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9029,7 +9014,7 @@ pub const LAYOUT__608: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__609: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__601: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9040,7 +9025,7 @@ pub const LAYOUT__609: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__610: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__602: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9051,7 +9036,7 @@ pub const LAYOUT__610: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__611: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__603: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9062,7 +9047,7 @@ pub const LAYOUT__611: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__612: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__604: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9073,7 +9058,7 @@ pub const LAYOUT__612: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__613: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__605: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9084,7 +9069,7 @@ pub const LAYOUT__613: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__614: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__606: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9095,7 +9080,7 @@ pub const LAYOUT__614: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__615: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__607: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9106,7 +9091,7 @@ pub const LAYOUT__615: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__616: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__608: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9117,7 +9102,7 @@ pub const LAYOUT__616: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__617: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__609: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9128,7 +9113,7 @@ pub const LAYOUT__617: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__618: &ControlTable_SuperArm1_Super__0_SuperLayout =
+pub const LAYOUT__610: &ControlTable_SuperArm1_Super__0_SuperLayout =
     &ControlTable_SuperArm1_Super__0_SuperLayout {
         arg: &ArgU8Layout {
             count: &NondetRegLayout {
@@ -9139,7 +9124,15 @@ pub const LAYOUT__618: &ControlTable_SuperArm1_Super__0_SuperLayout =
             },
         },
     };
-pub const LAYOUT__602: &ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray = &[
+pub const LAYOUT__594: &ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray = &[
+    LAYOUT__595,
+    LAYOUT__596,
+    LAYOUT__597,
+    LAYOUT__598,
+    LAYOUT__599,
+    LAYOUT__600,
+    LAYOUT__601,
+    LAYOUT__602,
     LAYOUT__603,
     LAYOUT__604,
     LAYOUT__605,
@@ -9148,17 +9141,9 @@ pub const LAYOUT__602: &ControlTable_SuperArm1_Super__0_SuperLayout16LayoutArray
     LAYOUT__608,
     LAYOUT__609,
     LAYOUT__610,
-    LAYOUT__611,
-    LAYOUT__612,
-    LAYOUT__613,
-    LAYOUT__614,
-    LAYOUT__615,
-    LAYOUT__616,
-    LAYOUT__617,
-    LAYOUT__618,
 ];
-pub const LAYOUT__601: &ControlTable_SuperArm1_SuperLayout = &ControlTable_SuperArm1_SuperLayout {
-    _1: LAYOUT__602,
+pub const LAYOUT__593: &ControlTable_SuperArm1_SuperLayout = &ControlTable_SuperArm1_SuperLayout {
+    _1: LAYOUT__594,
     done: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 181 },
@@ -9168,8 +9153,8 @@ pub const LAYOUT__601: &ControlTable_SuperArm1_SuperLayout = &ControlTable_Super
         },
     },
 };
-pub const LAYOUT__600: &ControlTable_SuperArm1Layout = &ControlTable_SuperArm1Layout {
-    _super: LAYOUT__601,
+pub const LAYOUT__592: &ControlTable_SuperArm1Layout = &ControlTable_SuperArm1Layout {
+    _super: LAYOUT__593,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -9299,11 +9284,11 @@ pub const LAYOUT__600: &ControlTable_SuperArm1Layout = &ControlTable_SuperArm1La
         },
     },
 };
-pub const LAYOUT__580: &ControlTable_SuperLayout = &ControlTable_SuperLayout {
-    arm0: LAYOUT__581,
-    arm1: LAYOUT__600,
+pub const LAYOUT__572: &ControlTable_SuperLayout = &ControlTable_SuperLayout {
+    arm0: LAYOUT__573,
+    arm1: LAYOUT__592,
 };
-pub const LAYOUT__620: &ArgU16Layout16LayoutArray = &[
+pub const LAYOUT__612: &ArgU16Layout16LayoutArray = &[
     &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -9433,7 +9418,7 @@ pub const LAYOUT__620: &ArgU16Layout16LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__621: &ArgU8Layout16LayoutArray = &[
+pub const LAYOUT__613: &ArgU8Layout16LayoutArray = &[
     &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 149 },
@@ -9563,39 +9548,39 @@ pub const LAYOUT__621: &ArgU8Layout16LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__619: &_Arguments_ControlTable_SuperLayout =
+pub const LAYOUT__611: &_Arguments_ControlTable_SuperLayout =
     &_Arguments_ControlTable_SuperLayout {
-        arg_u16: LAYOUT__620,
-        arg_u8: LAYOUT__621,
+        arg_u16: LAYOUT__612,
+        arg_u8: LAYOUT__613,
     };
-pub const LAYOUT__579: &ControlTableLayout = &ControlTableLayout {
-    _super: LAYOUT__580,
+pub const LAYOUT__571: &ControlTableLayout = &ControlTableLayout {
+    _super: LAYOUT__572,
     entry: &NondetRegLayout {
         _super: &Reg { offset: 183 },
     },
     mode: &NondetRegLayout {
         _super: &Reg { offset: 184 },
     },
-    _arguments_control_table__super: LAYOUT__619,
+    _arguments_control_table__super: LAYOUT__611,
 };
-pub const LAYOUT__578: &Control0_SuperArm6Layout = &Control0_SuperArm6Layout {
-    _super: LAYOUT__579,
-    _extra0: LAYOUT__466,
-    _extra1: LAYOUT__467,
-    _extra2: LAYOUT__471,
-    _extra3: LAYOUT__472,
-    _extra4: LAYOUT__476,
-    _extra5: LAYOUT__477,
-    _extra6: LAYOUT__481,
-    _extra7: LAYOUT__482,
-    _extra8: LAYOUT__486,
-    _extra9: LAYOUT__487,
-    _extra10: LAYOUT__491,
-    _extra11: LAYOUT__492,
-    _extra12: LAYOUT__496,
-    _extra13: LAYOUT__497,
-    _extra14: LAYOUT__501,
-    _extra15: LAYOUT__502,
+pub const LAYOUT__570: &Control0_SuperArm6Layout = &Control0_SuperArm6Layout {
+    _super: LAYOUT__571,
+    _extra0: LAYOUT__465,
+    _extra1: LAYOUT__466,
+    _extra2: LAYOUT__469,
+    _extra3: LAYOUT__470,
+    _extra4: LAYOUT__473,
+    _extra5: LAYOUT__474,
+    _extra6: LAYOUT__477,
+    _extra7: LAYOUT__478,
+    _extra8: LAYOUT__481,
+    _extra9: LAYOUT__482,
+    _extra10: LAYOUT__485,
+    _extra11: LAYOUT__486,
+    _extra12: LAYOUT__489,
+    _extra13: LAYOUT__490,
+    _extra14: LAYOUT__493,
+    _extra15: LAYOUT__494,
     _extra16: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 101 },
@@ -9661,7 +9646,7 @@ pub const LAYOUT__578: &Control0_SuperArm6Layout = &Control0_SuperArm6Layout {
         },
     },
 };
-pub const LAYOUT__624: &_Arguments_ControlDone__0Layout = &_Arguments_ControlDone__0Layout {
+pub const LAYOUT__616: &_Arguments_ControlDone__0Layout = &_Arguments_ControlDone__0Layout {
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 101 },
@@ -9671,9 +9656,9 @@ pub const LAYOUT__624: &_Arguments_ControlDone__0Layout = &_Arguments_ControlDon
         },
     }],
 };
-pub const LAYOUT__626: &ControlDone__0Arm0_SuperLayout =
+pub const LAYOUT__618: &ControlDone__0Arm0_SuperLayout =
     &ControlDone__0Arm0_SuperLayout { _0: LAYOUT__41 };
-pub const LAYOUT__627: &ControlDone__0Arm1Layout = &ControlDone__0Arm1Layout {
+pub const LAYOUT__619: &ControlDone__0Arm1Layout = &ControlDone__0Arm1Layout {
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 101 },
@@ -9683,32 +9668,32 @@ pub const LAYOUT__627: &ControlDone__0Arm1Layout = &ControlDone__0Arm1Layout {
         },
     },
 };
-pub const LAYOUT__625: &ControlDone__0Layout = &ControlDone__0Layout {
-    arm0: LAYOUT__626,
-    arm1: LAYOUT__627,
+pub const LAYOUT__617: &ControlDone__0Layout = &ControlDone__0Layout {
+    arm0: LAYOUT__618,
+    arm1: LAYOUT__619,
 };
-pub const LAYOUT__623: &ControlDoneLayout = &ControlDoneLayout {
-    _arguments_control_done__0: LAYOUT__624,
-    _2: LAYOUT__625,
+pub const LAYOUT__615: &ControlDoneLayout = &ControlDoneLayout {
+    _arguments_control_done__0: LAYOUT__616,
+    _2: LAYOUT__617,
 };
-pub const LAYOUT__622: &Control0_SuperArm7Layout = &Control0_SuperArm7Layout {
-    _super: LAYOUT__623,
-    _extra0: LAYOUT__466,
-    _extra1: LAYOUT__467,
-    _extra2: LAYOUT__471,
-    _extra3: LAYOUT__472,
-    _extra4: LAYOUT__476,
-    _extra5: LAYOUT__477,
-    _extra6: LAYOUT__481,
-    _extra7: LAYOUT__482,
-    _extra8: LAYOUT__486,
-    _extra9: LAYOUT__487,
-    _extra10: LAYOUT__491,
-    _extra11: LAYOUT__492,
-    _extra12: LAYOUT__496,
-    _extra13: LAYOUT__497,
-    _extra14: LAYOUT__501,
-    _extra15: LAYOUT__502,
+pub const LAYOUT__614: &Control0_SuperArm7Layout = &Control0_SuperArm7Layout {
+    _super: LAYOUT__615,
+    _extra0: LAYOUT__465,
+    _extra1: LAYOUT__466,
+    _extra2: LAYOUT__469,
+    _extra3: LAYOUT__470,
+    _extra4: LAYOUT__473,
+    _extra5: LAYOUT__474,
+    _extra6: LAYOUT__477,
+    _extra7: LAYOUT__478,
+    _extra8: LAYOUT__481,
+    _extra9: LAYOUT__482,
+    _extra10: LAYOUT__485,
+    _extra11: LAYOUT__486,
+    _extra12: LAYOUT__489,
+    _extra13: LAYOUT__490,
+    _extra14: LAYOUT__493,
+    _extra15: LAYOUT__494,
     _extra16: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 103 },
@@ -10024,15 +10009,15 @@ pub const LAYOUT__622: &Control0_SuperArm7Layout = &Control0_SuperArm7Layout {
 };
 pub const LAYOUT__459: &Control0_SuperLayout = &Control0_SuperLayout {
     arm0: LAYOUT__460,
-    arm1: LAYOUT__503,
-    arm2: LAYOUT__543,
-    arm3: LAYOUT__548,
-    arm4: LAYOUT__553,
-    arm5: LAYOUT__567,
-    arm6: LAYOUT__578,
-    arm7: LAYOUT__622,
+    arm1: LAYOUT__495,
+    arm2: LAYOUT__535,
+    arm3: LAYOUT__540,
+    arm4: LAYOUT__545,
+    arm5: LAYOUT__559,
+    arm6: LAYOUT__570,
+    arm7: LAYOUT__614,
 };
-pub const LAYOUT__628: &DoCycleTableLayout = &DoCycleTableLayout {
+pub const LAYOUT__620: &DoCycleTableLayout = &DoCycleTableLayout {
     arg1: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 188 },
@@ -10050,18 +10035,18 @@ pub const LAYOUT__628: &DoCycleTableLayout = &DoCycleTableLayout {
         },
     },
 };
-pub const LAYOUT__629: &_Arguments_Control0_SuperLayout = &_Arguments_Control0_SuperLayout {
-    memory_arg: LAYOUT__541,
-    cycle_arg: LAYOUT__542,
-    arg_u16: LAYOUT__620,
-    arg_u8: LAYOUT__621,
+pub const LAYOUT__621: &_Arguments_Control0_SuperLayout = &_Arguments_Control0_SuperLayout {
+    memory_arg: LAYOUT__533,
+    cycle_arg: LAYOUT__534,
+    arg_u16: LAYOUT__612,
+    arg_u8: LAYOUT__613,
 };
 pub const LAYOUT__458: &Control0Layout = &Control0Layout {
     _super: LAYOUT__459,
-    _0: LAYOUT__628,
-    _arguments_control0__super: LAYOUT__629,
+    _0: LAYOUT__620,
+    _arguments_control0__super: LAYOUT__621,
 };
-pub const LAYOUT__631: &DoCycleTableLayout = &DoCycleTableLayout {
+pub const LAYOUT__623: &DoCycleTableLayout = &DoCycleTableLayout {
     arg1: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 92 },
@@ -10079,7 +10064,7 @@ pub const LAYOUT__631: &DoCycleTableLayout = &DoCycleTableLayout {
         },
     },
 };
-pub const LAYOUT__633: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__625: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 98 },
@@ -10089,7 +10074,7 @@ pub const LAYOUT__633: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__634: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__626: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 102 },
@@ -10099,14 +10084,14 @@ pub const LAYOUT__634: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__632: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
+pub const LAYOUT__624: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
     low0: &NondetRegLayout {
         _super: &Reg { offset: 96 },
     },
     low1: &NondetRegLayout {
         _super: &Reg { offset: 97 },
     },
-    upper_diff: LAYOUT__633,
+    upper_diff: LAYOUT__625,
     _0: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 100 },
@@ -10115,19 +10100,19 @@ pub const LAYOUT__632: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
             _super: &Reg { offset: 101 },
         },
     },
-    med14: LAYOUT__634,
+    med14: LAYOUT__626,
 };
-pub const LAYOUT__636: &MemoryArgLayout8LayoutArray = &[
+pub const LAYOUT__628: &MemoryArgLayout8LayoutArray = &[
+    LAYOUT__465,
     LAYOUT__466,
-    LAYOUT__467,
-    LAYOUT__471,
-    LAYOUT__472,
-    LAYOUT__476,
+    LAYOUT__469,
+    LAYOUT__470,
+    LAYOUT__473,
+    LAYOUT__474,
     LAYOUT__477,
-    LAYOUT__481,
-    LAYOUT__482,
+    LAYOUT__478,
 ];
-pub const LAYOUT__637: &CycleArgLayout4LayoutArray = &[
+pub const LAYOUT__629: &CycleArgLayout4LayoutArray = &[
     &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 65 },
@@ -10161,7 +10146,7 @@ pub const LAYOUT__637: &CycleArgLayout4LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__638: &ArgU16Layout4LayoutArray = &[
+pub const LAYOUT__630: &ArgU16Layout4LayoutArray = &[
     &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 73 },
@@ -10195,7 +10180,7 @@ pub const LAYOUT__638: &ArgU16Layout4LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__639: &ArgU8Layout4LayoutArray = &[
+pub const LAYOUT__631: &ArgU8Layout4LayoutArray = &[
     &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 81 },
@@ -10229,13 +10214,13 @@ pub const LAYOUT__639: &ArgU8Layout4LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__635: &_Arguments_ECall0OutputLayout = &_Arguments_ECall0OutputLayout {
-    memory_arg: LAYOUT__636,
-    cycle_arg: LAYOUT__637,
-    arg_u16: LAYOUT__638,
-    arg_u8: LAYOUT__639,
+pub const LAYOUT__627: &_Arguments_ECall0OutputLayout = &_Arguments_ECall0OutputLayout {
+    memory_arg: LAYOUT__628,
+    cycle_arg: LAYOUT__629,
+    arg_u16: LAYOUT__630,
+    arg_u8: LAYOUT__631,
 };
-pub const LAYOUT__645: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__637: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 65 },
@@ -10245,12 +10230,12 @@ pub const LAYOUT__645: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__644: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__645 };
-pub const LAYOUT__643: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__465,
-    _0: LAYOUT__644,
+pub const LAYOUT__636: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__637 };
+pub const LAYOUT__635: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__464,
+    _0: LAYOUT__636,
 };
-pub const LAYOUT__648: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__640: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 67 },
@@ -10260,12 +10245,12 @@ pub const LAYOUT__648: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__647: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__648 };
-pub const LAYOUT__646: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__470,
-    _0: LAYOUT__647,
+pub const LAYOUT__639: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__640 };
+pub const LAYOUT__638: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__468,
+    _0: LAYOUT__639,
 };
-pub const LAYOUT__650: &NondetRegLayout6LayoutArray = &[
+pub const LAYOUT__642: &NondetRegLayout6LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 104 },
     },
@@ -10285,20 +10270,20 @@ pub const LAYOUT__650: &NondetRegLayout6LayoutArray = &[
         _super: &Reg { offset: 109 },
     },
 ];
-pub const LAYOUT__649: &OneHot_6_Layout = &OneHot_6_Layout {
-    _super: LAYOUT__650,
-};
-pub const LAYOUT__642: &MachineECallLayout = &MachineECallLayout {
-    load_inst: LAYOUT__643,
-    dispatch_idx: LAYOUT__646,
-    dispatch: LAYOUT__649,
-};
-pub const LAYOUT__641: &ECall0OutputArm0Layout = &ECall0OutputArm0Layout {
+pub const LAYOUT__641: &OneHot_6_Layout = &OneHot_6_Layout {
     _super: LAYOUT__642,
-    _extra0: LAYOUT__476,
-    _extra1: LAYOUT__477,
-    _extra2: LAYOUT__481,
-    _extra3: LAYOUT__482,
+};
+pub const LAYOUT__634: &MachineECallLayout = &MachineECallLayout {
+    load_inst: LAYOUT__635,
+    dispatch_idx: LAYOUT__638,
+    dispatch: LAYOUT__641,
+};
+pub const LAYOUT__633: &ECall0OutputArm0Layout = &ECall0OutputArm0Layout {
+    _super: LAYOUT__634,
+    _extra0: LAYOUT__473,
+    _extra1: LAYOUT__474,
+    _extra2: LAYOUT__477,
+    _extra3: LAYOUT__478,
     _extra4: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 69 },
@@ -10380,16 +10365,16 @@ pub const LAYOUT__641: &ECall0OutputArm0Layout = &ECall0OutputArm0Layout {
         },
     },
 };
-pub const LAYOUT__652: &ECallTerminateLayout = &ECallTerminateLayout {
-    a0: LAYOUT__643,
-    a1: LAYOUT__646,
+pub const LAYOUT__644: &ECallTerminateLayout = &ECallTerminateLayout {
+    a0: LAYOUT__635,
+    a1: LAYOUT__638,
 };
-pub const LAYOUT__651: &ECall0OutputArm1Layout = &ECall0OutputArm1Layout {
-    _super: LAYOUT__652,
-    _extra0: LAYOUT__476,
-    _extra1: LAYOUT__477,
-    _extra2: LAYOUT__481,
-    _extra3: LAYOUT__482,
+pub const LAYOUT__643: &ECall0OutputArm1Layout = &ECall0OutputArm1Layout {
+    _super: LAYOUT__644,
+    _extra0: LAYOUT__473,
+    _extra1: LAYOUT__474,
+    _extra2: LAYOUT__477,
+    _extra3: LAYOUT__478,
     _extra4: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 69 },
@@ -10471,7 +10456,7 @@ pub const LAYOUT__651: &ECall0OutputArm1Layout = &ECall0OutputArm1Layout {
         },
     },
 };
-pub const LAYOUT__657: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__649: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 69 },
@@ -10481,12 +10466,12 @@ pub const LAYOUT__657: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__656: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__657 };
-pub const LAYOUT__655: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__475,
-    _0: LAYOUT__656,
+pub const LAYOUT__648: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__649 };
+pub const LAYOUT__647: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__472,
+    _0: LAYOUT__648,
 };
-pub const LAYOUT__658: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__650: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 73 },
@@ -10496,7 +10481,7 @@ pub const LAYOUT__658: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__659: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__651: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 75 },
@@ -10506,7 +10491,7 @@ pub const LAYOUT__659: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__662: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__654: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 71 },
@@ -10516,12 +10501,12 @@ pub const LAYOUT__662: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__661: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__662 };
-pub const LAYOUT__660: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__480,
-    _0: LAYOUT__661,
+pub const LAYOUT__653: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__654 };
+pub const LAYOUT__652: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__476,
+    _0: LAYOUT__653,
 };
-pub const LAYOUT__664: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__656: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 77 },
@@ -10531,7 +10516,7 @@ pub const LAYOUT__664: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__666: &NondetRegLayout4LayoutArray = &[
+pub const LAYOUT__658: &NondetRegLayout4LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 105 },
     },
@@ -10545,15 +10530,15 @@ pub const LAYOUT__666: &NondetRegLayout4LayoutArray = &[
         _super: &Reg { offset: 108 },
     },
 ];
-pub const LAYOUT__665: &OneHot_4_Layout = &OneHot_4_Layout {
-    _super: LAYOUT__666,
+pub const LAYOUT__657: &OneHot_4_Layout = &OneHot_4_Layout {
+    _super: LAYOUT__658,
 };
-pub const LAYOUT__663: &DecomposeLow2Layout = &DecomposeLow2Layout {
-    high: LAYOUT__664,
+pub const LAYOUT__655: &DecomposeLow2Layout = &DecomposeLow2Layout {
+    high: LAYOUT__656,
     low2: &NondetRegLayout {
         _super: &Reg { offset: 104 },
     },
-    low2_hot: LAYOUT__665,
+    low2_hot: LAYOUT__657,
     high_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 109 },
@@ -10566,7 +10551,7 @@ pub const LAYOUT__663: &DecomposeLow2Layout = &DecomposeLow2Layout {
         _super: &Reg { offset: 111 },
     },
 };
-pub const LAYOUT__668: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__660: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 79 },
@@ -10576,7 +10561,7 @@ pub const LAYOUT__668: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__670: &NondetRegLayout4LayoutArray = &[
+pub const LAYOUT__662: &NondetRegLayout4LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 113 },
     },
@@ -10590,15 +10575,15 @@ pub const LAYOUT__670: &NondetRegLayout4LayoutArray = &[
         _super: &Reg { offset: 116 },
     },
 ];
-pub const LAYOUT__669: &OneHot_4_Layout = &OneHot_4_Layout {
-    _super: LAYOUT__670,
+pub const LAYOUT__661: &OneHot_4_Layout = &OneHot_4_Layout {
+    _super: LAYOUT__662,
 };
-pub const LAYOUT__667: &DecomposeLow2Layout = &DecomposeLow2Layout {
-    high: LAYOUT__668,
+pub const LAYOUT__659: &DecomposeLow2Layout = &DecomposeLow2Layout {
+    high: LAYOUT__660,
     low2: &NondetRegLayout {
         _super: &Reg { offset: 112 },
     },
-    low2_hot: LAYOUT__669,
+    low2_hot: LAYOUT__661,
     high_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -10611,15 +10596,15 @@ pub const LAYOUT__667: &DecomposeLow2Layout = &DecomposeLow2Layout {
         _super: &Reg { offset: 119 },
     },
 };
-pub const LAYOUT__654: &ECallHostReadSetupLayout = &ECallHostReadSetupLayout {
-    fd: LAYOUT__643,
-    ptr: LAYOUT__646,
-    len: LAYOUT__655,
-    new_len: LAYOUT__658,
-    diff: LAYOUT__659,
-    _0: LAYOUT__660,
-    ptr_decomp: LAYOUT__663,
-    len_decomp: LAYOUT__667,
+pub const LAYOUT__646: &ECallHostReadSetupLayout = &ECallHostReadSetupLayout {
+    fd: LAYOUT__635,
+    ptr: LAYOUT__638,
+    len: LAYOUT__647,
+    new_len: LAYOUT__650,
+    diff: LAYOUT__651,
+    _0: LAYOUT__652,
+    ptr_decomp: LAYOUT__655,
+    len_decomp: LAYOUT__659,
     len123: &NondetRegLayout {
         _super: &Reg { offset: 120 },
     },
@@ -10627,8 +10612,8 @@ pub const LAYOUT__654: &ECallHostReadSetupLayout = &ECallHostReadSetupLayout {
         _super: &Reg { offset: 121 },
     },
 };
-pub const LAYOUT__653: &ECall0OutputArm2Layout = &ECall0OutputArm2Layout {
-    _super: LAYOUT__654,
+pub const LAYOUT__645: &ECall0OutputArm2Layout = &ECall0OutputArm2Layout {
+    _super: LAYOUT__646,
     _extra0: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 81 },
@@ -10662,16 +10647,16 @@ pub const LAYOUT__653: &ECall0OutputArm2Layout = &ECall0OutputArm2Layout {
         },
     },
 };
-pub const LAYOUT__672: &ECallHostWriteLayout = &ECallHostWriteLayout {
-    fd: LAYOUT__643,
-    ptr: LAYOUT__646,
-    len: LAYOUT__655,
-    new_len: LAYOUT__658,
-    diff: LAYOUT__659,
-    _0: LAYOUT__660,
+pub const LAYOUT__664: &ECallHostWriteLayout = &ECallHostWriteLayout {
+    fd: LAYOUT__635,
+    ptr: LAYOUT__638,
+    len: LAYOUT__647,
+    new_len: LAYOUT__650,
+    diff: LAYOUT__651,
+    _0: LAYOUT__652,
 };
-pub const LAYOUT__671: &ECall0OutputArm3Layout = &ECall0OutputArm3Layout {
-    _super: LAYOUT__672,
+pub const LAYOUT__663: &ECall0OutputArm3Layout = &ECall0OutputArm3Layout {
+    _super: LAYOUT__664,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 77 },
@@ -10721,12 +10706,12 @@ pub const LAYOUT__671: &ECall0OutputArm3Layout = &ECall0OutputArm3Layout {
         },
     },
 };
-pub const LAYOUT__675: &DecomposeLow2Layout = &DecomposeLow2Layout {
-    high: LAYOUT__658,
+pub const LAYOUT__667: &DecomposeLow2Layout = &DecomposeLow2Layout {
+    high: LAYOUT__650,
     low2: &NondetRegLayout {
         _super: &Reg { offset: 104 },
     },
-    low2_hot: LAYOUT__665,
+    low2_hot: LAYOUT__657,
     high_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 109 },
@@ -10739,15 +10724,15 @@ pub const LAYOUT__675: &DecomposeLow2Layout = &DecomposeLow2Layout {
         _super: &Reg { offset: 111 },
     },
 };
-pub const LAYOUT__676: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
-    io: LAYOUT__470,
-    _0: LAYOUT__647,
+pub const LAYOUT__668: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
+    io: LAYOUT__468,
+    _0: LAYOUT__639,
 };
-pub const LAYOUT__677: &SplitWordLayout = &SplitWordLayout {
+pub const LAYOUT__669: &SplitWordLayout = &SplitWordLayout {
     byte0: LAYOUT__279,
     byte1: LAYOUT__281,
 };
-pub const LAYOUT__679: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__671: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 87 },
@@ -10757,12 +10742,12 @@ pub const LAYOUT__679: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__678: &SplitWordLayout = &SplitWordLayout {
+pub const LAYOUT__670: &SplitWordLayout = &SplitWordLayout {
     byte0: LAYOUT__284,
-    byte1: LAYOUT__679,
+    byte1: LAYOUT__671,
 };
-pub const LAYOUT__674: &ECallHostReadBytesLayout = &ECallHostReadBytesLayout {
-    len_decomp: LAYOUT__675,
+pub const LAYOUT__666: &ECallHostReadBytesLayout = &ECallHostReadBytesLayout {
+    len_decomp: LAYOUT__667,
     len123: &NondetRegLayout {
         _super: &Reg { offset: 112 },
     },
@@ -10791,17 +10776,17 @@ pub const LAYOUT__674: &ECallHostReadBytesLayout = &ECallHostReadBytesLayout {
     low1: &NondetRegLayout {
         _super: &Reg { offset: 119 },
     },
-    orig_word: LAYOUT__643,
-    _0: LAYOUT__676,
-    old_bytes: LAYOUT__677,
-    new_bytes_0: LAYOUT__678,
+    orig_word: LAYOUT__635,
+    _0: LAYOUT__668,
+    old_bytes: LAYOUT__669,
+    new_bytes_0: LAYOUT__670,
 };
-pub const LAYOUT__673: &ECall0OutputArm4Layout = &ECall0OutputArm4Layout {
-    _super: LAYOUT__674,
-    _extra0: LAYOUT__476,
-    _extra1: LAYOUT__477,
-    _extra2: LAYOUT__481,
-    _extra3: LAYOUT__482,
+pub const LAYOUT__665: &ECall0OutputArm4Layout = &ECall0OutputArm4Layout {
+    _super: LAYOUT__666,
+    _extra0: LAYOUT__473,
+    _extra1: LAYOUT__474,
+    _extra2: LAYOUT__477,
+    _extra3: LAYOUT__478,
     _extra4: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 69 },
@@ -10843,12 +10828,12 @@ pub const LAYOUT__673: &ECall0OutputArm4Layout = &ECall0OutputArm4Layout {
         },
     },
 };
-pub const LAYOUT__682: &DecomposeLow2Layout = &DecomposeLow2Layout {
-    high: LAYOUT__659,
+pub const LAYOUT__674: &DecomposeLow2Layout = &DecomposeLow2Layout {
+    high: LAYOUT__651,
     low2: &NondetRegLayout {
         _super: &Reg { offset: 112 },
     },
-    low2_hot: LAYOUT__669,
+    low2_hot: LAYOUT__661,
     high_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -10861,48 +10846,48 @@ pub const LAYOUT__682: &DecomposeLow2Layout = &DecomposeLow2Layout {
         _super: &Reg { offset: 119 },
     },
 };
-pub const LAYOUT__685: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
-    io: LAYOUT__465,
-    _0: LAYOUT__644,
+pub const LAYOUT__677: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
+    io: LAYOUT__464,
+    _0: LAYOUT__636,
 };
-pub const LAYOUT__684: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
+pub const LAYOUT__676: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
     addr: &NondetRegLayout {
         _super: &Reg { offset: 120 },
     },
-    _0: LAYOUT__685,
+    _0: LAYOUT__677,
 };
-pub const LAYOUT__686: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
+pub const LAYOUT__678: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
     addr: &NondetRegLayout {
         _super: &Reg { offset: 121 },
     },
-    _0: LAYOUT__676,
+    _0: LAYOUT__668,
 };
-pub const LAYOUT__688: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
-    io: LAYOUT__475,
-    _0: LAYOUT__656,
+pub const LAYOUT__680: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
+    io: LAYOUT__472,
+    _0: LAYOUT__648,
 };
-pub const LAYOUT__687: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
+pub const LAYOUT__679: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
     addr: &NondetRegLayout {
         _super: &Reg { offset: 122 },
     },
-    _0: LAYOUT__688,
+    _0: LAYOUT__680,
 };
-pub const LAYOUT__690: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
-    io: LAYOUT__480,
-    _0: LAYOUT__661,
+pub const LAYOUT__682: &MemoryWriteUnconstrainedLayout = &MemoryWriteUnconstrainedLayout {
+    io: LAYOUT__476,
+    _0: LAYOUT__653,
 };
-pub const LAYOUT__689: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
+pub const LAYOUT__681: &ECallHostReadWords__0_SuperLayout = &ECallHostReadWords__0_SuperLayout {
     addr: &NondetRegLayout {
         _super: &Reg { offset: 123 },
     },
-    _0: LAYOUT__690,
+    _0: LAYOUT__682,
 };
-pub const LAYOUT__683: &ECallHostReadWords__0_SuperLayout4LayoutArray =
-    &[LAYOUT__684, LAYOUT__686, LAYOUT__687, LAYOUT__689];
-pub const LAYOUT__681: &ECallHostReadWordsLayout = &ECallHostReadWordsLayout {
-    len_decomp: LAYOUT__675,
-    words_decomp: LAYOUT__682,
-    _1: LAYOUT__683,
+pub const LAYOUT__675: &ECallHostReadWords__0_SuperLayout4LayoutArray =
+    &[LAYOUT__676, LAYOUT__678, LAYOUT__679, LAYOUT__681];
+pub const LAYOUT__673: &ECallHostReadWordsLayout = &ECallHostReadWordsLayout {
+    len_decomp: LAYOUT__667,
+    words_decomp: LAYOUT__674,
+    _1: LAYOUT__675,
     new_len_high_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 124 },
@@ -10915,8 +10900,8 @@ pub const LAYOUT__681: &ECallHostReadWordsLayout = &ECallHostReadWordsLayout {
         _super: &Reg { offset: 126 },
     },
 };
-pub const LAYOUT__680: &ECall0OutputArm5Layout = &ECall0OutputArm5Layout {
-    _super: LAYOUT__681,
+pub const LAYOUT__672: &ECall0OutputArm5Layout = &ECall0OutputArm5Layout {
+    _super: LAYOUT__673,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 77 },
@@ -10966,15 +10951,15 @@ pub const LAYOUT__680: &ECall0OutputArm5Layout = &ECall0OutputArm5Layout {
         },
     },
 };
-pub const LAYOUT__691: &ECall0OutputArm6Layout = &ECall0OutputArm6Layout {
-    _extra0: LAYOUT__466,
-    _extra1: LAYOUT__467,
-    _extra2: LAYOUT__471,
-    _extra3: LAYOUT__472,
-    _extra4: LAYOUT__476,
-    _extra5: LAYOUT__477,
-    _extra6: LAYOUT__481,
-    _extra7: LAYOUT__482,
+pub const LAYOUT__683: &ECall0OutputArm6Layout = &ECall0OutputArm6Layout {
+    _extra0: LAYOUT__465,
+    _extra1: LAYOUT__466,
+    _extra2: LAYOUT__469,
+    _extra3: LAYOUT__470,
+    _extra4: LAYOUT__473,
+    _extra5: LAYOUT__474,
+    _extra6: LAYOUT__477,
+    _extra7: LAYOUT__478,
     _extra8: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 65 },
@@ -11072,15 +11057,15 @@ pub const LAYOUT__691: &ECall0OutputArm6Layout = &ECall0OutputArm6Layout {
         },
     },
 };
-pub const LAYOUT__692: &ECall0OutputArm7Layout = &ECall0OutputArm7Layout {
-    _extra0: LAYOUT__466,
-    _extra1: LAYOUT__467,
-    _extra2: LAYOUT__471,
-    _extra3: LAYOUT__472,
-    _extra4: LAYOUT__476,
-    _extra5: LAYOUT__477,
-    _extra6: LAYOUT__481,
-    _extra7: LAYOUT__482,
+pub const LAYOUT__684: &ECall0OutputArm7Layout = &ECall0OutputArm7Layout {
+    _extra0: LAYOUT__465,
+    _extra1: LAYOUT__466,
+    _extra2: LAYOUT__469,
+    _extra3: LAYOUT__470,
+    _extra4: LAYOUT__473,
+    _extra5: LAYOUT__474,
+    _extra6: LAYOUT__477,
+    _extra7: LAYOUT__478,
     _extra8: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 65 },
@@ -11178,17 +11163,17 @@ pub const LAYOUT__692: &ECall0OutputArm7Layout = &ECall0OutputArm7Layout {
         },
     },
 };
-pub const LAYOUT__640: &ECall0OutputLayout = &ECall0OutputLayout {
-    arm0: LAYOUT__641,
-    arm1: LAYOUT__651,
-    arm2: LAYOUT__653,
-    arm3: LAYOUT__671,
-    arm4: LAYOUT__673,
-    arm5: LAYOUT__680,
-    arm6: LAYOUT__691,
-    arm7: LAYOUT__692,
+pub const LAYOUT__632: &ECall0OutputLayout = &ECall0OutputLayout {
+    arm0: LAYOUT__633,
+    arm1: LAYOUT__643,
+    arm2: LAYOUT__645,
+    arm3: LAYOUT__663,
+    arm4: LAYOUT__665,
+    arm5: LAYOUT__672,
+    arm6: LAYOUT__683,
+    arm7: LAYOUT__684,
 };
-pub const LAYOUT__694: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__686: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 137 },
@@ -11198,8 +11183,8 @@ pub const LAYOUT__694: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__693: &NormalizeU32Layout = &NormalizeU32Layout {
-    low16: LAYOUT__694,
+pub const LAYOUT__685: &NormalizeU32Layout = &NormalizeU32Layout {
+    low16: LAYOUT__686,
     low_carry: &NondetRegLayout {
         _super: &Reg { offset: 139 },
     },
@@ -11208,7 +11193,7 @@ pub const LAYOUT__693: &NormalizeU32Layout = &NormalizeU32Layout {
         _super: &Reg { offset: 142 },
     },
 };
-pub const LAYOUT__630: &ECall0Layout = &ECall0Layout {
+pub const LAYOUT__622: &ECall0Layout = &ECall0Layout {
     s0: &NondetRegLayout {
         _super: &Reg { offset: 89 },
     },
@@ -11218,10 +11203,10 @@ pub const LAYOUT__630: &ECall0Layout = &ECall0Layout {
     s2: &NondetRegLayout {
         _super: &Reg { offset: 91 },
     },
-    _0: LAYOUT__631,
-    pc_addr: LAYOUT__632,
-    _arguments_e_call0_output: LAYOUT__635,
-    output: LAYOUT__640,
+    _0: LAYOUT__623,
+    pc_addr: LAYOUT__624,
+    _arguments_e_call0_output: LAYOUT__627,
+    output: LAYOUT__632,
     is_suspend: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 127 },
@@ -11262,9 +11247,9 @@ pub const LAYOUT__630: &ECall0Layout = &ECall0Layout {
             _super: &Reg { offset: 136 },
         },
     },
-    add_pc: LAYOUT__693,
+    add_pc: LAYOUT__685,
 };
-pub const LAYOUT__696: &DoCycleTableLayout = &DoCycleTableLayout {
+pub const LAYOUT__688: &DoCycleTableLayout = &DoCycleTableLayout {
     arg1: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 192 },
@@ -11282,7 +11267,7 @@ pub const LAYOUT__696: &DoCycleTableLayout = &DoCycleTableLayout {
         },
     },
 };
-pub const LAYOUT__698: &NondetRegLayout24LayoutArray = &[
+pub const LAYOUT__690: &NondetRegLayout24LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 40 },
     },
@@ -11356,7 +11341,7 @@ pub const LAYOUT__698: &NondetRegLayout24LayoutArray = &[
         _super: &Reg { offset: 63 },
     },
 ];
-pub const LAYOUT__697: &PoseidonStateLayout = &PoseidonStateLayout {
+pub const LAYOUT__689: &PoseidonStateLayout = &PoseidonStateLayout {
     has_state: &NondetRegLayout {
         _super: &Reg { offset: 29 },
     },
@@ -11390,12 +11375,12 @@ pub const LAYOUT__697: &PoseidonStateLayout = &PoseidonStateLayout {
     mode: &NondetRegLayout {
         _super: &Reg { offset: 39 },
     },
-    inner: LAYOUT__698,
+    inner: LAYOUT__690,
     zcheck: &NondetExtRegLayout {
         _super: &Reg { offset: 64 },
     },
 };
-pub const LAYOUT__701: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__693: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 68 },
     },
@@ -11412,7 +11397,7 @@ pub const LAYOUT__701: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 72 },
     },
 };
-pub const LAYOUT__702: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__694: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 73 },
     },
@@ -11429,7 +11414,7 @@ pub const LAYOUT__702: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 76 },
     },
 };
-pub const LAYOUT__703: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__695: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 77 },
     },
@@ -11446,7 +11431,7 @@ pub const LAYOUT__703: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 81 },
     },
 };
-pub const LAYOUT__704: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__696: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 82 },
     },
@@ -11463,7 +11448,7 @@ pub const LAYOUT__704: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 85 },
     },
 };
-pub const LAYOUT__705: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__697: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 86 },
     },
@@ -11480,7 +11465,7 @@ pub const LAYOUT__705: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 90 },
     },
 };
-pub const LAYOUT__706: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__698: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 91 },
     },
@@ -11497,7 +11482,7 @@ pub const LAYOUT__706: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 94 },
     },
 };
-pub const LAYOUT__707: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__699: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 95 },
     },
@@ -11514,7 +11499,7 @@ pub const LAYOUT__707: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 99 },
     },
 };
-pub const LAYOUT__708: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__700: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 100 },
     },
@@ -11531,7 +11516,7 @@ pub const LAYOUT__708: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 103 },
     },
 };
-pub const LAYOUT__709: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__701: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 104 },
     },
@@ -11548,7 +11533,7 @@ pub const LAYOUT__709: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 108 },
     },
 };
-pub const LAYOUT__710: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__702: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 109 },
     },
@@ -11565,7 +11550,7 @@ pub const LAYOUT__710: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 112 },
     },
 };
-pub const LAYOUT__711: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__703: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 113 },
     },
@@ -11582,7 +11567,7 @@ pub const LAYOUT__711: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 117 },
     },
 };
-pub const LAYOUT__712: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__704: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 118 },
     },
@@ -11599,7 +11584,7 @@ pub const LAYOUT__712: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 121 },
     },
 };
-pub const LAYOUT__713: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__705: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 122 },
     },
@@ -11616,7 +11601,7 @@ pub const LAYOUT__713: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 126 },
     },
 };
-pub const LAYOUT__714: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__706: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 127 },
     },
@@ -11633,7 +11618,7 @@ pub const LAYOUT__714: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 130 },
     },
 };
-pub const LAYOUT__715: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__707: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 131 },
     },
@@ -11650,7 +11635,7 @@ pub const LAYOUT__715: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 135 },
     },
 };
-pub const LAYOUT__716: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__708: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 136 },
     },
@@ -11667,7 +11652,15 @@ pub const LAYOUT__716: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 139 },
     },
 };
-pub const LAYOUT__700: &MemoryArgLayout16LayoutArray = &[
+pub const LAYOUT__692: &MemoryArgLayout16LayoutArray = &[
+    LAYOUT__693,
+    LAYOUT__694,
+    LAYOUT__695,
+    LAYOUT__696,
+    LAYOUT__697,
+    LAYOUT__698,
+    LAYOUT__699,
+    LAYOUT__700,
     LAYOUT__701,
     LAYOUT__702,
     LAYOUT__703,
@@ -11676,16 +11669,8 @@ pub const LAYOUT__700: &MemoryArgLayout16LayoutArray = &[
     LAYOUT__706,
     LAYOUT__707,
     LAYOUT__708,
-    LAYOUT__709,
-    LAYOUT__710,
-    LAYOUT__711,
-    LAYOUT__712,
-    LAYOUT__713,
-    LAYOUT__714,
-    LAYOUT__715,
-    LAYOUT__716,
 ];
-pub const LAYOUT__717: &CycleArgLayout8LayoutArray = &[
+pub const LAYOUT__709: &CycleArgLayout8LayoutArray = &[
     &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -11751,7 +11736,7 @@ pub const LAYOUT__717: &CycleArgLayout8LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__718: &ArgU16Layout24LayoutArray = &[
+pub const LAYOUT__710: &ArgU16Layout24LayoutArray = &[
     &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 156 },
@@ -11945,7 +11930,7 @@ pub const LAYOUT__718: &ArgU16Layout24LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__719: &ArgU8Layout2LayoutArray = &[
+pub const LAYOUT__711: &ArgU8Layout2LayoutArray = &[
     &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 188 },
@@ -11963,22 +11948,22 @@ pub const LAYOUT__719: &ArgU8Layout2LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__699: &_Arguments_Poseidon0StateLayout = &_Arguments_Poseidon0StateLayout {
-    memory_arg: LAYOUT__700,
-    cycle_arg: LAYOUT__717,
-    arg_u16: LAYOUT__718,
-    arg_u8: LAYOUT__719,
+pub const LAYOUT__691: &_Arguments_Poseidon0StateLayout = &_Arguments_Poseidon0StateLayout {
+    memory_arg: LAYOUT__692,
+    cycle_arg: LAYOUT__709,
+    arg_u16: LAYOUT__710,
+    arg_u8: LAYOUT__711,
 };
-pub const LAYOUT__724: &PoseidonEntry_SuperArm0Layout = &PoseidonEntry_SuperArm0Layout {
-    _super: LAYOUT__697,
-    _extra0: LAYOUT__701,
-    _extra1: LAYOUT__702,
-    _extra2: LAYOUT__703,
-    _extra3: LAYOUT__704,
-    _extra4: LAYOUT__705,
-    _extra5: LAYOUT__706,
-    _extra6: LAYOUT__707,
-    _extra7: LAYOUT__708,
+pub const LAYOUT__716: &PoseidonEntry_SuperArm0Layout = &PoseidonEntry_SuperArm0Layout {
+    _super: LAYOUT__689,
+    _extra0: LAYOUT__693,
+    _extra1: LAYOUT__694,
+    _extra2: LAYOUT__695,
+    _extra3: LAYOUT__696,
+    _extra4: LAYOUT__697,
+    _extra5: LAYOUT__698,
+    _extra6: LAYOUT__699,
+    _extra7: LAYOUT__700,
     _extra8: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -12012,11 +11997,11 @@ pub const LAYOUT__724: &PoseidonEntry_SuperArm0Layout = &PoseidonEntry_SuperArm0
         },
     },
 };
-pub const LAYOUT__728: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__701,
-    new_txn: LAYOUT__702,
+pub const LAYOUT__720: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__693,
+    new_txn: LAYOUT__694,
 };
-pub const LAYOUT__730: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__722: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -12026,19 +12011,19 @@ pub const LAYOUT__730: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__729: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__730 };
-pub const LAYOUT__727: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__728,
-    _0: LAYOUT__729,
+pub const LAYOUT__721: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__722 };
+pub const LAYOUT__719: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__720,
+    _0: LAYOUT__721,
 };
-pub const LAYOUT__726: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__727,
+pub const LAYOUT__718: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__719,
 };
-pub const LAYOUT__733: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__703,
-    new_txn: LAYOUT__704,
+pub const LAYOUT__725: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__695,
+    new_txn: LAYOUT__696,
 };
-pub const LAYOUT__735: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__727: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 142 },
@@ -12048,19 +12033,19 @@ pub const LAYOUT__735: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__734: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__735 };
-pub const LAYOUT__732: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__733,
-    _0: LAYOUT__734,
+pub const LAYOUT__726: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__727 };
+pub const LAYOUT__724: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__725,
+    _0: LAYOUT__726,
 };
-pub const LAYOUT__731: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__732,
+pub const LAYOUT__723: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__724,
 };
-pub const LAYOUT__738: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__705,
-    new_txn: LAYOUT__706,
+pub const LAYOUT__730: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__697,
+    new_txn: LAYOUT__698,
 };
-pub const LAYOUT__740: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__732: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 144 },
@@ -12070,19 +12055,19 @@ pub const LAYOUT__740: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__739: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__740 };
-pub const LAYOUT__737: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__738,
-    _0: LAYOUT__739,
+pub const LAYOUT__731: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__732 };
+pub const LAYOUT__729: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__730,
+    _0: LAYOUT__731,
 };
-pub const LAYOUT__736: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__737,
+pub const LAYOUT__728: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__729,
 };
-pub const LAYOUT__742: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__707,
-    new_txn: LAYOUT__708,
+pub const LAYOUT__734: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__699,
+    new_txn: LAYOUT__700,
 };
-pub const LAYOUT__744: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__736: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 146 },
@@ -12092,17 +12077,17 @@ pub const LAYOUT__744: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__743: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__744 };
-pub const LAYOUT__741: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__742,
-    _0: LAYOUT__743,
+pub const LAYOUT__735: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__736 };
+pub const LAYOUT__733: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__734,
+    _0: LAYOUT__735,
 };
-pub const LAYOUT__725: &PoseidonEcallLayout = &PoseidonEcallLayout {
-    _super: LAYOUT__697,
-    state_addr: LAYOUT__726,
-    buf_in_addr: LAYOUT__731,
-    buf_out_addr: LAYOUT__736,
-    bits_and_count: LAYOUT__741,
+pub const LAYOUT__717: &PoseidonEcallLayout = &PoseidonEcallLayout {
+    _super: LAYOUT__689,
+    state_addr: LAYOUT__718,
+    buf_in_addr: LAYOUT__723,
+    buf_out_addr: LAYOUT__728,
+    bits_and_count: LAYOUT__733,
     _0: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 196 },
@@ -12126,22 +12111,22 @@ pub const LAYOUT__725: &PoseidonEcallLayout = &PoseidonEcallLayout {
         },
     },
 };
-pub const LAYOUT__723: &PoseidonEntry_SuperLayout = &PoseidonEntry_SuperLayout {
-    _super: LAYOUT__697,
-    arm0: LAYOUT__724,
-    arm1: LAYOUT__725,
+pub const LAYOUT__715: &PoseidonEntry_SuperLayout = &PoseidonEntry_SuperLayout {
+    _super: LAYOUT__689,
+    arm0: LAYOUT__716,
+    arm1: LAYOUT__717,
 };
-pub const LAYOUT__746: &MemoryArgLayout8LayoutArray = &[
-    LAYOUT__701,
-    LAYOUT__702,
-    LAYOUT__703,
-    LAYOUT__704,
-    LAYOUT__705,
-    LAYOUT__706,
-    LAYOUT__707,
-    LAYOUT__708,
+pub const LAYOUT__738: &MemoryArgLayout8LayoutArray = &[
+    LAYOUT__693,
+    LAYOUT__694,
+    LAYOUT__695,
+    LAYOUT__696,
+    LAYOUT__697,
+    LAYOUT__698,
+    LAYOUT__699,
+    LAYOUT__700,
 ];
-pub const LAYOUT__747: &CycleArgLayout4LayoutArray = &[
+pub const LAYOUT__739: &CycleArgLayout4LayoutArray = &[
     &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -12175,13 +12160,13 @@ pub const LAYOUT__747: &CycleArgLayout4LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__745: &_Arguments_PoseidonEntry_SuperLayout =
+pub const LAYOUT__737: &_Arguments_PoseidonEntry_SuperLayout =
     &_Arguments_PoseidonEntry_SuperLayout {
-        memory_arg: LAYOUT__746,
-        cycle_arg: LAYOUT__747,
+        memory_arg: LAYOUT__738,
+        cycle_arg: LAYOUT__739,
     };
-pub const LAYOUT__722: &PoseidonEntryLayout = &PoseidonEntryLayout {
-    _super: LAYOUT__723,
+pub const LAYOUT__714: &PoseidonEntryLayout = &PoseidonEntryLayout {
+    _super: LAYOUT__715,
     pc_zero: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 202 },
@@ -12190,18 +12175,18 @@ pub const LAYOUT__722: &PoseidonEntryLayout = &PoseidonEntryLayout {
             _super: &Reg { offset: 203 },
         },
     },
-    _arguments_poseidon_entry__super: LAYOUT__745,
+    _arguments_poseidon_entry__super: LAYOUT__737,
 };
-pub const LAYOUT__721: &Poseidon0StateArm0Layout = &Poseidon0StateArm0Layout {
-    _super: LAYOUT__722,
-    _extra0: LAYOUT__709,
-    _extra1: LAYOUT__710,
-    _extra2: LAYOUT__711,
-    _extra3: LAYOUT__712,
-    _extra4: LAYOUT__713,
-    _extra5: LAYOUT__714,
-    _extra6: LAYOUT__715,
-    _extra7: LAYOUT__716,
+pub const LAYOUT__713: &Poseidon0StateArm0Layout = &Poseidon0StateArm0Layout {
+    _super: LAYOUT__714,
+    _extra0: LAYOUT__701,
+    _extra1: LAYOUT__702,
+    _extra2: LAYOUT__703,
+    _extra3: LAYOUT__704,
+    _extra4: LAYOUT__705,
+    _extra5: LAYOUT__706,
+    _extra6: LAYOUT__707,
+    _extra7: LAYOUT__708,
     _extra8: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 148 },
@@ -12443,23 +12428,23 @@ pub const LAYOUT__721: &Poseidon0StateArm0Layout = &Poseidon0StateArm0Layout {
         },
     },
 };
-pub const LAYOUT__751: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__727,
+pub const LAYOUT__743: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__719,
 };
-pub const LAYOUT__752: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__732,
+pub const LAYOUT__744: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__724,
 };
-pub const LAYOUT__753: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__737,
+pub const LAYOUT__745: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__729,
 };
-pub const LAYOUT__754: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__741,
+pub const LAYOUT__746: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__733,
 };
-pub const LAYOUT__757: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__709,
-    new_txn: LAYOUT__710,
+pub const LAYOUT__749: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__701,
+    new_txn: LAYOUT__702,
 };
-pub const LAYOUT__759: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__751: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 148 },
@@ -12469,19 +12454,19 @@ pub const LAYOUT__759: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__758: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__759 };
-pub const LAYOUT__756: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__757,
-    _0: LAYOUT__758,
+pub const LAYOUT__750: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__751 };
+pub const LAYOUT__748: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__749,
+    _0: LAYOUT__750,
 };
-pub const LAYOUT__755: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__756,
+pub const LAYOUT__747: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__748,
 };
-pub const LAYOUT__762: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__711,
-    new_txn: LAYOUT__712,
+pub const LAYOUT__754: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__703,
+    new_txn: LAYOUT__704,
 };
-pub const LAYOUT__764: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__756: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 150 },
@@ -12491,19 +12476,19 @@ pub const LAYOUT__764: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__763: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__764 };
-pub const LAYOUT__761: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__762,
-    _0: LAYOUT__763,
+pub const LAYOUT__755: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__756 };
+pub const LAYOUT__753: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__754,
+    _0: LAYOUT__755,
 };
-pub const LAYOUT__760: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__761,
+pub const LAYOUT__752: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__753,
 };
-pub const LAYOUT__767: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__713,
-    new_txn: LAYOUT__714,
+pub const LAYOUT__759: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__705,
+    new_txn: LAYOUT__706,
 };
-pub const LAYOUT__769: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__761: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 152 },
@@ -12513,19 +12498,19 @@ pub const LAYOUT__769: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__768: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__769 };
-pub const LAYOUT__766: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__767,
-    _0: LAYOUT__768,
+pub const LAYOUT__760: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__761 };
+pub const LAYOUT__758: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__759,
+    _0: LAYOUT__760,
 };
-pub const LAYOUT__765: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__766,
+pub const LAYOUT__757: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__758,
 };
-pub const LAYOUT__772: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__715,
-    new_txn: LAYOUT__716,
+pub const LAYOUT__764: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__707,
+    new_txn: LAYOUT__708,
 };
-pub const LAYOUT__774: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__766: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 154 },
@@ -12535,30 +12520,30 @@ pub const LAYOUT__774: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__773: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__774 };
-pub const LAYOUT__771: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__772,
-    _0: LAYOUT__773,
+pub const LAYOUT__765: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__766 };
+pub const LAYOUT__763: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__764,
+    _0: LAYOUT__765,
 };
-pub const LAYOUT__770: &ReadElemLayout = &ReadElemLayout {
-    elem32: LAYOUT__771,
+pub const LAYOUT__762: &ReadElemLayout = &ReadElemLayout {
+    elem32: LAYOUT__763,
 };
-pub const LAYOUT__750: &ReadElemLayout8LayoutArray = &[
-    LAYOUT__751,
+pub const LAYOUT__742: &ReadElemLayout8LayoutArray = &[
+    LAYOUT__743,
+    LAYOUT__744,
+    LAYOUT__745,
+    LAYOUT__746,
+    LAYOUT__747,
     LAYOUT__752,
-    LAYOUT__753,
-    LAYOUT__754,
-    LAYOUT__755,
-    LAYOUT__760,
-    LAYOUT__765,
-    LAYOUT__770,
+    LAYOUT__757,
+    LAYOUT__762,
 ];
-pub const LAYOUT__749: &PoseidonLoadStateLayout = &PoseidonLoadStateLayout {
-    _super: LAYOUT__697,
-    load_list: LAYOUT__750,
+pub const LAYOUT__741: &PoseidonLoadStateLayout = &PoseidonLoadStateLayout {
+    _super: LAYOUT__689,
+    load_list: LAYOUT__742,
 };
-pub const LAYOUT__748: &Poseidon0StateArm1Layout = &Poseidon0StateArm1Layout {
-    _super: LAYOUT__749,
+pub const LAYOUT__740: &Poseidon0StateArm1Layout = &Poseidon0StateArm1Layout {
+    _super: LAYOUT__741,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 156 },
@@ -12768,7 +12753,7 @@ pub const LAYOUT__748: &Poseidon0StateArm1Layout = &Poseidon0StateArm1Layout {
         },
     },
 };
-pub const LAYOUT__779: &OneHot_3_Layout = &OneHot_3_Layout {
+pub const LAYOUT__771: &OneHot_3_Layout = &OneHot_3_Layout {
     _super: &[
         &NondetRegLayout {
             _super: &Reg { offset: 196 },
@@ -12781,9 +12766,9 @@ pub const LAYOUT__779: &OneHot_3_Layout = &OneHot_3_Layout {
         },
     ],
 };
-pub const LAYOUT__784: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__728 };
-pub const LAYOUT__783: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__784,
+pub const LAYOUT__776: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__720 };
+pub const LAYOUT__775: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__776,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -12793,18 +12778,18 @@ pub const LAYOUT__783: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__785: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__728,
-    _0: LAYOUT__729,
+pub const LAYOUT__777: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__720,
+    _0: LAYOUT__721,
 };
-pub const LAYOUT__782: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__727,
-    arm1: LAYOUT__783,
-    arm2: LAYOUT__785,
+pub const LAYOUT__774: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__719,
+    arm1: LAYOUT__775,
+    arm2: LAYOUT__777,
 };
-pub const LAYOUT__787: &MemoryArgLayout2LayoutArray = &[LAYOUT__701, LAYOUT__702];
-pub const LAYOUT__786: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__787,
+pub const LAYOUT__779: &MemoryArgLayout2LayoutArray = &[LAYOUT__693, LAYOUT__694];
+pub const LAYOUT__778: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__779,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -12814,13 +12799,13 @@ pub const LAYOUT__786: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__781: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__782,
-    _arguments_memory_get__super: LAYOUT__786,
+pub const LAYOUT__773: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__774,
+    _arguments_memory_get__super: LAYOUT__778,
 };
-pub const LAYOUT__791: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__733 };
-pub const LAYOUT__790: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__791,
+pub const LAYOUT__783: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__725 };
+pub const LAYOUT__782: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__783,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 142 },
@@ -12830,18 +12815,18 @@ pub const LAYOUT__790: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__792: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__733,
-    _0: LAYOUT__734,
+pub const LAYOUT__784: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__725,
+    _0: LAYOUT__726,
 };
-pub const LAYOUT__789: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__732,
-    arm1: LAYOUT__790,
-    arm2: LAYOUT__792,
+pub const LAYOUT__781: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__724,
+    arm1: LAYOUT__782,
+    arm2: LAYOUT__784,
 };
-pub const LAYOUT__794: &MemoryArgLayout2LayoutArray = &[LAYOUT__703, LAYOUT__704];
-pub const LAYOUT__793: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__794,
+pub const LAYOUT__786: &MemoryArgLayout2LayoutArray = &[LAYOUT__695, LAYOUT__696];
+pub const LAYOUT__785: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__786,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 142 },
@@ -12851,13 +12836,13 @@ pub const LAYOUT__793: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__788: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__789,
-    _arguments_memory_get__super: LAYOUT__793,
+pub const LAYOUT__780: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__781,
+    _arguments_memory_get__super: LAYOUT__785,
 };
-pub const LAYOUT__798: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__738 };
-pub const LAYOUT__797: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__798,
+pub const LAYOUT__790: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__730 };
+pub const LAYOUT__789: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__790,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 144 },
@@ -12867,18 +12852,18 @@ pub const LAYOUT__797: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__799: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__738,
-    _0: LAYOUT__739,
+pub const LAYOUT__791: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__730,
+    _0: LAYOUT__731,
 };
-pub const LAYOUT__796: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__737,
-    arm1: LAYOUT__797,
-    arm2: LAYOUT__799,
+pub const LAYOUT__788: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__729,
+    arm1: LAYOUT__789,
+    arm2: LAYOUT__791,
 };
-pub const LAYOUT__801: &MemoryArgLayout2LayoutArray = &[LAYOUT__705, LAYOUT__706];
-pub const LAYOUT__800: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__801,
+pub const LAYOUT__793: &MemoryArgLayout2LayoutArray = &[LAYOUT__697, LAYOUT__698];
+pub const LAYOUT__792: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__793,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 144 },
@@ -12888,13 +12873,13 @@ pub const LAYOUT__800: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__795: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__796,
-    _arguments_memory_get__super: LAYOUT__800,
+pub const LAYOUT__787: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__788,
+    _arguments_memory_get__super: LAYOUT__792,
 };
-pub const LAYOUT__805: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__742 };
-pub const LAYOUT__804: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__805,
+pub const LAYOUT__797: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__734 };
+pub const LAYOUT__796: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__797,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 146 },
@@ -12904,18 +12889,18 @@ pub const LAYOUT__804: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__806: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__742,
-    _0: LAYOUT__743,
+pub const LAYOUT__798: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__734,
+    _0: LAYOUT__735,
 };
-pub const LAYOUT__803: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__741,
-    arm1: LAYOUT__804,
-    arm2: LAYOUT__806,
+pub const LAYOUT__795: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__733,
+    arm1: LAYOUT__796,
+    arm2: LAYOUT__798,
 };
-pub const LAYOUT__808: &MemoryArgLayout2LayoutArray = &[LAYOUT__707, LAYOUT__708];
-pub const LAYOUT__807: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__808,
+pub const LAYOUT__800: &MemoryArgLayout2LayoutArray = &[LAYOUT__699, LAYOUT__700];
+pub const LAYOUT__799: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__800,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 146 },
@@ -12925,13 +12910,13 @@ pub const LAYOUT__807: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__802: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__803,
-    _arguments_memory_get__super: LAYOUT__807,
+pub const LAYOUT__794: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__795,
+    _arguments_memory_get__super: LAYOUT__799,
 };
-pub const LAYOUT__812: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__757 };
-pub const LAYOUT__811: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__812,
+pub const LAYOUT__804: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__749 };
+pub const LAYOUT__803: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__804,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 148 },
@@ -12941,18 +12926,18 @@ pub const LAYOUT__811: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__813: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__757,
-    _0: LAYOUT__758,
+pub const LAYOUT__805: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__749,
+    _0: LAYOUT__750,
 };
-pub const LAYOUT__810: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__756,
-    arm1: LAYOUT__811,
-    arm2: LAYOUT__813,
+pub const LAYOUT__802: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__748,
+    arm1: LAYOUT__803,
+    arm2: LAYOUT__805,
 };
-pub const LAYOUT__815: &MemoryArgLayout2LayoutArray = &[LAYOUT__709, LAYOUT__710];
-pub const LAYOUT__814: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__815,
+pub const LAYOUT__807: &MemoryArgLayout2LayoutArray = &[LAYOUT__701, LAYOUT__702];
+pub const LAYOUT__806: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__807,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 148 },
@@ -12962,13 +12947,13 @@ pub const LAYOUT__814: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__809: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__810,
-    _arguments_memory_get__super: LAYOUT__814,
+pub const LAYOUT__801: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__802,
+    _arguments_memory_get__super: LAYOUT__806,
 };
-pub const LAYOUT__819: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__762 };
-pub const LAYOUT__818: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__819,
+pub const LAYOUT__811: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__754 };
+pub const LAYOUT__810: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__811,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 150 },
@@ -12978,18 +12963,18 @@ pub const LAYOUT__818: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__820: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__762,
-    _0: LAYOUT__763,
+pub const LAYOUT__812: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__754,
+    _0: LAYOUT__755,
 };
-pub const LAYOUT__817: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__761,
-    arm1: LAYOUT__818,
-    arm2: LAYOUT__820,
+pub const LAYOUT__809: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__753,
+    arm1: LAYOUT__810,
+    arm2: LAYOUT__812,
 };
-pub const LAYOUT__822: &MemoryArgLayout2LayoutArray = &[LAYOUT__711, LAYOUT__712];
-pub const LAYOUT__821: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__822,
+pub const LAYOUT__814: &MemoryArgLayout2LayoutArray = &[LAYOUT__703, LAYOUT__704];
+pub const LAYOUT__813: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__814,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 150 },
@@ -12999,13 +12984,13 @@ pub const LAYOUT__821: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__816: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__817,
-    _arguments_memory_get__super: LAYOUT__821,
+pub const LAYOUT__808: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__809,
+    _arguments_memory_get__super: LAYOUT__813,
 };
-pub const LAYOUT__826: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__767 };
-pub const LAYOUT__825: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__826,
+pub const LAYOUT__818: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__759 };
+pub const LAYOUT__817: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__818,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 152 },
@@ -13015,18 +13000,18 @@ pub const LAYOUT__825: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__827: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__767,
-    _0: LAYOUT__768,
+pub const LAYOUT__819: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__759,
+    _0: LAYOUT__760,
 };
-pub const LAYOUT__824: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__766,
-    arm1: LAYOUT__825,
-    arm2: LAYOUT__827,
+pub const LAYOUT__816: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__758,
+    arm1: LAYOUT__817,
+    arm2: LAYOUT__819,
 };
-pub const LAYOUT__829: &MemoryArgLayout2LayoutArray = &[LAYOUT__713, LAYOUT__714];
-pub const LAYOUT__828: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__829,
+pub const LAYOUT__821: &MemoryArgLayout2LayoutArray = &[LAYOUT__705, LAYOUT__706];
+pub const LAYOUT__820: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__821,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 152 },
@@ -13036,13 +13021,13 @@ pub const LAYOUT__828: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__823: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__824,
-    _arguments_memory_get__super: LAYOUT__828,
+pub const LAYOUT__815: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__816,
+    _arguments_memory_get__super: LAYOUT__820,
 };
-pub const LAYOUT__833: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__772 };
-pub const LAYOUT__832: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
-    _super: LAYOUT__833,
+pub const LAYOUT__825: &MemoryPageInLayout = &MemoryPageInLayout { io: LAYOUT__764 };
+pub const LAYOUT__824: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
+    _super: LAYOUT__825,
     _extra0: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 154 },
@@ -13052,18 +13037,18 @@ pub const LAYOUT__832: &MemoryGet_SuperArm1Layout = &MemoryGet_SuperArm1Layout {
         },
     },
 };
-pub const LAYOUT__834: &MemoryPageOutLayout = &MemoryPageOutLayout {
-    io: LAYOUT__772,
-    _0: LAYOUT__773,
+pub const LAYOUT__826: &MemoryPageOutLayout = &MemoryPageOutLayout {
+    io: LAYOUT__764,
+    _0: LAYOUT__765,
 };
-pub const LAYOUT__831: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
-    arm0: LAYOUT__771,
-    arm1: LAYOUT__832,
-    arm2: LAYOUT__834,
+pub const LAYOUT__823: &MemoryGet_SuperLayout = &MemoryGet_SuperLayout {
+    arm0: LAYOUT__763,
+    arm1: LAYOUT__824,
+    arm2: LAYOUT__826,
 };
-pub const LAYOUT__836: &MemoryArgLayout2LayoutArray = &[LAYOUT__715, LAYOUT__716];
-pub const LAYOUT__835: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
-    memory_arg: LAYOUT__836,
+pub const LAYOUT__828: &MemoryArgLayout2LayoutArray = &[LAYOUT__707, LAYOUT__708];
+pub const LAYOUT__827: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet_SuperLayout {
+    memory_arg: LAYOUT__828,
     cycle_arg: &[&CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 154 },
@@ -13073,42 +13058,42 @@ pub const LAYOUT__835: &_Arguments_MemoryGet_SuperLayout = &_Arguments_MemoryGet
         },
     }],
 };
-pub const LAYOUT__830: &MemoryGetLayout = &MemoryGetLayout {
-    _super: LAYOUT__831,
-    _arguments_memory_get__super: LAYOUT__835,
+pub const LAYOUT__822: &MemoryGetLayout = &MemoryGetLayout {
+    _super: LAYOUT__823,
+    _arguments_memory_get__super: LAYOUT__827,
 };
-pub const LAYOUT__780: &MemoryGetLayout8LayoutArray = &[
-    LAYOUT__781,
-    LAYOUT__788,
-    LAYOUT__795,
-    LAYOUT__802,
-    LAYOUT__809,
-    LAYOUT__816,
-    LAYOUT__823,
-    LAYOUT__830,
+pub const LAYOUT__772: &MemoryGetLayout8LayoutArray = &[
+    LAYOUT__773,
+    LAYOUT__780,
+    LAYOUT__787,
+    LAYOUT__794,
+    LAYOUT__801,
+    LAYOUT__808,
+    LAYOUT__815,
+    LAYOUT__822,
 ];
-pub const LAYOUT__778: &PoseidonLoadInShortLayout = &PoseidonLoadInShortLayout {
-    _super: LAYOUT__697,
-    tx_type: LAYOUT__779,
-    load_list: LAYOUT__780,
+pub const LAYOUT__770: &PoseidonLoadInShortLayout = &PoseidonLoadInShortLayout {
+    _super: LAYOUT__689,
+    tx_type: LAYOUT__771,
+    load_list: LAYOUT__772,
 };
-pub const LAYOUT__837: &PoseidonLoadInLowLayout = &PoseidonLoadInLowLayout {
-    _super: LAYOUT__697,
-    tx_type: LAYOUT__779,
-    load_list: LAYOUT__780,
+pub const LAYOUT__829: &PoseidonLoadInLowLayout = &PoseidonLoadInLowLayout {
+    _super: LAYOUT__689,
+    tx_type: LAYOUT__771,
+    load_list: LAYOUT__772,
 };
-pub const LAYOUT__838: &PoseidonLoadInHighLayout = &PoseidonLoadInHighLayout {
-    _super: LAYOUT__697,
-    tx_type: LAYOUT__779,
-    load_list: LAYOUT__780,
+pub const LAYOUT__830: &PoseidonLoadInHighLayout = &PoseidonLoadInHighLayout {
+    _super: LAYOUT__689,
+    tx_type: LAYOUT__771,
+    load_list: LAYOUT__772,
 };
-pub const LAYOUT__777: &PoseidonLoadIn_SuperLayout = &PoseidonLoadIn_SuperLayout {
-    _super: LAYOUT__697,
-    arm0: LAYOUT__778,
-    arm1: LAYOUT__837,
-    arm2: LAYOUT__838,
+pub const LAYOUT__769: &PoseidonLoadIn_SuperLayout = &PoseidonLoadIn_SuperLayout {
+    _super: LAYOUT__689,
+    arm0: LAYOUT__770,
+    arm1: LAYOUT__829,
+    arm2: LAYOUT__830,
 };
-pub const LAYOUT__839: &OneHot_3_Layout = &OneHot_3_Layout {
+pub const LAYOUT__831: &OneHot_3_Layout = &OneHot_3_Layout {
     _super: &[
         &NondetRegLayout {
             _super: &Reg { offset: 199 },
@@ -13121,18 +13106,18 @@ pub const LAYOUT__839: &OneHot_3_Layout = &OneHot_3_Layout {
         },
     ],
 };
-pub const LAYOUT__840: &_Arguments_PoseidonLoadIn_SuperLayout =
+pub const LAYOUT__832: &_Arguments_PoseidonLoadIn_SuperLayout =
     &_Arguments_PoseidonLoadIn_SuperLayout {
-        memory_arg: LAYOUT__700,
-        cycle_arg: LAYOUT__717,
+        memory_arg: LAYOUT__692,
+        cycle_arg: LAYOUT__709,
     };
-pub const LAYOUT__776: &PoseidonLoadInLayout = &PoseidonLoadInLayout {
-    _super: LAYOUT__777,
-    _0: LAYOUT__839,
-    _arguments_poseidon_load_in__super: LAYOUT__840,
+pub const LAYOUT__768: &PoseidonLoadInLayout = &PoseidonLoadInLayout {
+    _super: LAYOUT__769,
+    _0: LAYOUT__831,
+    _arguments_poseidon_load_in__super: LAYOUT__832,
 };
-pub const LAYOUT__775: &Poseidon0StateArm2Layout = &Poseidon0StateArm2Layout {
-    _super: LAYOUT__776,
+pub const LAYOUT__767: &Poseidon0StateArm2Layout = &Poseidon0StateArm2Layout {
+    _super: LAYOUT__768,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 156 },
@@ -13342,24 +13327,24 @@ pub const LAYOUT__775: &Poseidon0StateArm2Layout = &Poseidon0StateArm2Layout {
         },
     },
 };
-pub const LAYOUT__841: &Poseidon0StateArm3Layout = &Poseidon0StateArm3Layout {
-    _super: LAYOUT__697,
-    _extra0: LAYOUT__701,
-    _extra1: LAYOUT__702,
-    _extra2: LAYOUT__703,
-    _extra3: LAYOUT__704,
-    _extra4: LAYOUT__705,
-    _extra5: LAYOUT__706,
-    _extra6: LAYOUT__707,
-    _extra7: LAYOUT__708,
-    _extra8: LAYOUT__709,
-    _extra9: LAYOUT__710,
-    _extra10: LAYOUT__711,
-    _extra11: LAYOUT__712,
-    _extra12: LAYOUT__713,
-    _extra13: LAYOUT__714,
-    _extra14: LAYOUT__715,
-    _extra15: LAYOUT__716,
+pub const LAYOUT__833: &Poseidon0StateArm3Layout = &Poseidon0StateArm3Layout {
+    _super: LAYOUT__689,
+    _extra0: LAYOUT__693,
+    _extra1: LAYOUT__694,
+    _extra2: LAYOUT__695,
+    _extra3: LAYOUT__696,
+    _extra4: LAYOUT__697,
+    _extra5: LAYOUT__698,
+    _extra6: LAYOUT__699,
+    _extra7: LAYOUT__700,
+    _extra8: LAYOUT__701,
+    _extra9: LAYOUT__702,
+    _extra10: LAYOUT__703,
+    _extra11: LAYOUT__704,
+    _extra12: LAYOUT__705,
+    _extra13: LAYOUT__706,
+    _extra14: LAYOUT__707,
+    _extra15: LAYOUT__708,
     _extra16: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -13633,24 +13618,24 @@ pub const LAYOUT__841: &Poseidon0StateArm3Layout = &Poseidon0StateArm3Layout {
         },
     },
 };
-pub const LAYOUT__842: &Poseidon0StateArm4Layout = &Poseidon0StateArm4Layout {
-    _super: LAYOUT__697,
-    _extra0: LAYOUT__701,
-    _extra1: LAYOUT__702,
-    _extra2: LAYOUT__703,
-    _extra3: LAYOUT__704,
-    _extra4: LAYOUT__705,
-    _extra5: LAYOUT__706,
-    _extra6: LAYOUT__707,
-    _extra7: LAYOUT__708,
-    _extra8: LAYOUT__709,
-    _extra9: LAYOUT__710,
-    _extra10: LAYOUT__711,
-    _extra11: LAYOUT__712,
-    _extra12: LAYOUT__713,
-    _extra13: LAYOUT__714,
-    _extra14: LAYOUT__715,
-    _extra15: LAYOUT__716,
+pub const LAYOUT__834: &Poseidon0StateArm4Layout = &Poseidon0StateArm4Layout {
+    _super: LAYOUT__689,
+    _extra0: LAYOUT__693,
+    _extra1: LAYOUT__694,
+    _extra2: LAYOUT__695,
+    _extra3: LAYOUT__696,
+    _extra4: LAYOUT__697,
+    _extra5: LAYOUT__698,
+    _extra6: LAYOUT__699,
+    _extra7: LAYOUT__700,
+    _extra8: LAYOUT__701,
+    _extra9: LAYOUT__702,
+    _extra10: LAYOUT__703,
+    _extra11: LAYOUT__704,
+    _extra12: LAYOUT__705,
+    _extra13: LAYOUT__706,
+    _extra14: LAYOUT__707,
+    _extra15: LAYOUT__708,
     _extra16: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -13924,35 +13909,35 @@ pub const LAYOUT__842: &Poseidon0StateArm4Layout = &Poseidon0StateArm4Layout {
         },
     },
 };
-pub const LAYOUT__849: &PoseidonCheckOut__0_SuperLayout =
-    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__751 };
-pub const LAYOUT__850: &PoseidonCheckOut__0_SuperLayout =
+pub const LAYOUT__841: &PoseidonCheckOut__0_SuperLayout =
+    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__743 };
+pub const LAYOUT__842: &PoseidonCheckOut__0_SuperLayout =
+    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__744 };
+pub const LAYOUT__843: &PoseidonCheckOut__0_SuperLayout =
+    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__745 };
+pub const LAYOUT__844: &PoseidonCheckOut__0_SuperLayout =
+    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__746 };
+pub const LAYOUT__845: &PoseidonCheckOut__0_SuperLayout =
+    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__747 };
+pub const LAYOUT__846: &PoseidonCheckOut__0_SuperLayout =
     &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__752 };
-pub const LAYOUT__851: &PoseidonCheckOut__0_SuperLayout =
-    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__753 };
-pub const LAYOUT__852: &PoseidonCheckOut__0_SuperLayout =
-    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__754 };
-pub const LAYOUT__853: &PoseidonCheckOut__0_SuperLayout =
-    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__755 };
-pub const LAYOUT__854: &PoseidonCheckOut__0_SuperLayout =
-    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__760 };
-pub const LAYOUT__855: &PoseidonCheckOut__0_SuperLayout =
-    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__765 };
-pub const LAYOUT__856: &PoseidonCheckOut__0_SuperLayout =
-    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__770 };
-pub const LAYOUT__848: &PoseidonCheckOut__0_SuperLayout8LayoutArray = &[
-    LAYOUT__849,
-    LAYOUT__850,
-    LAYOUT__851,
-    LAYOUT__852,
-    LAYOUT__853,
-    LAYOUT__854,
-    LAYOUT__855,
-    LAYOUT__856,
+pub const LAYOUT__847: &PoseidonCheckOut__0_SuperLayout =
+    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__757 };
+pub const LAYOUT__848: &PoseidonCheckOut__0_SuperLayout =
+    &PoseidonCheckOut__0_SuperLayout { goal: LAYOUT__762 };
+pub const LAYOUT__840: &PoseidonCheckOut__0_SuperLayout8LayoutArray = &[
+    LAYOUT__841,
+    LAYOUT__842,
+    LAYOUT__843,
+    LAYOUT__844,
+    LAYOUT__845,
+    LAYOUT__846,
+    LAYOUT__847,
+    LAYOUT__848,
 ];
-pub const LAYOUT__847: &PoseidonCheckOutLayout = &PoseidonCheckOutLayout {
-    _super: LAYOUT__697,
-    _1: LAYOUT__848,
+pub const LAYOUT__839: &PoseidonCheckOutLayout = &PoseidonCheckOutLayout {
+    _super: LAYOUT__689,
+    _1: LAYOUT__840,
     is_normal: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 196 },
@@ -13962,8 +13947,8 @@ pub const LAYOUT__847: &PoseidonCheckOutLayout = &PoseidonCheckOutLayout {
         },
     },
 };
-pub const LAYOUT__846: &PoseidonDoOut_SuperArm0Layout = &PoseidonDoOut_SuperArm0Layout {
-    _super: LAYOUT__847,
+pub const LAYOUT__838: &PoseidonDoOut_SuperArm0Layout = &PoseidonDoOut_SuperArm0Layout {
+    _super: LAYOUT__839,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 156 },
@@ -14157,7 +14142,7 @@ pub const LAYOUT__846: &PoseidonDoOut_SuperArm0Layout = &PoseidonDoOut_SuperArm0
         },
     },
 };
-pub const LAYOUT__861: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__853: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 156 },
@@ -14167,7 +14152,7 @@ pub const LAYOUT__861: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__862: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__854: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 157 },
@@ -14177,7 +14162,7 @@ pub const LAYOUT__862: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__863: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__855: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 158 },
@@ -14187,7 +14172,7 @@ pub const LAYOUT__863: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__866: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__858: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 158 },
@@ -14197,32 +14182,32 @@ pub const LAYOUT__866: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__865: &FieldToWord__0Arm0_SuperLayout =
-    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__866 };
-pub const LAYOUT__867: &FieldToWord__0Arm1_SuperLayout =
-    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__866 };
-pub const LAYOUT__864: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__865,
-    arm1: LAYOUT__867,
+pub const LAYOUT__857: &FieldToWord__0Arm0_SuperLayout =
+    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__858 };
+pub const LAYOUT__859: &FieldToWord__0Arm1_SuperLayout =
+    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__858 };
+pub const LAYOUT__856: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__857,
+    arm1: LAYOUT__859,
 };
-pub const LAYOUT__860: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__861,
-    high: LAYOUT__862,
+pub const LAYOUT__852: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__853,
+    high: LAYOUT__854,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 196 },
     },
-    _arguments_field_to_word__0: LAYOUT__863,
-    _2: LAYOUT__864,
+    _arguments_field_to_word__0: LAYOUT__855,
+    _2: LAYOUT__856,
 };
-pub const LAYOUT__868: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__728,
-    _0: LAYOUT__729,
+pub const LAYOUT__860: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__720,
+    _0: LAYOUT__721,
 };
-pub const LAYOUT__859: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__860,
-    mw: LAYOUT__868,
+pub const LAYOUT__851: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__852,
+    mw: LAYOUT__860,
 };
-pub const LAYOUT__871: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__863: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 160 },
@@ -14232,7 +14217,7 @@ pub const LAYOUT__871: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__872: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__864: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 161 },
@@ -14242,7 +14227,7 @@ pub const LAYOUT__872: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__873: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__865: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 162 },
@@ -14252,7 +14237,7 @@ pub const LAYOUT__873: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__876: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__868: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 162 },
@@ -14262,32 +14247,32 @@ pub const LAYOUT__876: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__875: &FieldToWord__0Arm0_SuperLayout =
-    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__876 };
-pub const LAYOUT__877: &FieldToWord__0Arm1_SuperLayout =
-    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__876 };
-pub const LAYOUT__874: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__875,
-    arm1: LAYOUT__877,
+pub const LAYOUT__867: &FieldToWord__0Arm0_SuperLayout =
+    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__868 };
+pub const LAYOUT__869: &FieldToWord__0Arm1_SuperLayout =
+    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__868 };
+pub const LAYOUT__866: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__867,
+    arm1: LAYOUT__869,
 };
-pub const LAYOUT__870: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__871,
-    high: LAYOUT__872,
+pub const LAYOUT__862: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__863,
+    high: LAYOUT__864,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 197 },
     },
-    _arguments_field_to_word__0: LAYOUT__873,
-    _2: LAYOUT__874,
+    _arguments_field_to_word__0: LAYOUT__865,
+    _2: LAYOUT__866,
 };
-pub const LAYOUT__878: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__733,
-    _0: LAYOUT__734,
+pub const LAYOUT__870: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__725,
+    _0: LAYOUT__726,
 };
-pub const LAYOUT__869: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__870,
-    mw: LAYOUT__878,
+pub const LAYOUT__861: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__862,
+    mw: LAYOUT__870,
 };
-pub const LAYOUT__881: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__873: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 164 },
@@ -14297,7 +14282,7 @@ pub const LAYOUT__881: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__882: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__874: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 165 },
@@ -14307,7 +14292,7 @@ pub const LAYOUT__882: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__883: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__875: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 166 },
@@ -14317,7 +14302,7 @@ pub const LAYOUT__883: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__886: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__878: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 166 },
@@ -14327,32 +14312,32 @@ pub const LAYOUT__886: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__885: &FieldToWord__0Arm0_SuperLayout =
-    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__886 };
-pub const LAYOUT__887: &FieldToWord__0Arm1_SuperLayout =
-    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__886 };
-pub const LAYOUT__884: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__885,
-    arm1: LAYOUT__887,
+pub const LAYOUT__877: &FieldToWord__0Arm0_SuperLayout =
+    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__878 };
+pub const LAYOUT__879: &FieldToWord__0Arm1_SuperLayout =
+    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__878 };
+pub const LAYOUT__876: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__877,
+    arm1: LAYOUT__879,
 };
-pub const LAYOUT__880: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__881,
-    high: LAYOUT__882,
+pub const LAYOUT__872: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__873,
+    high: LAYOUT__874,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 198 },
     },
-    _arguments_field_to_word__0: LAYOUT__883,
-    _2: LAYOUT__884,
+    _arguments_field_to_word__0: LAYOUT__875,
+    _2: LAYOUT__876,
 };
-pub const LAYOUT__888: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__738,
-    _0: LAYOUT__739,
+pub const LAYOUT__880: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__730,
+    _0: LAYOUT__731,
 };
-pub const LAYOUT__879: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__880,
-    mw: LAYOUT__888,
+pub const LAYOUT__871: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__872,
+    mw: LAYOUT__880,
 };
-pub const LAYOUT__891: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__883: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 168 },
@@ -14362,7 +14347,7 @@ pub const LAYOUT__891: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__892: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__884: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 169 },
@@ -14372,7 +14357,7 @@ pub const LAYOUT__892: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__893: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__885: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 170 },
@@ -14382,32 +14367,32 @@ pub const LAYOUT__893: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__895: &FieldToWord__0Arm0_SuperLayout =
+pub const LAYOUT__887: &FieldToWord__0Arm0_SuperLayout =
     &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__223 };
-pub const LAYOUT__896: &FieldToWord__0Arm1_SuperLayout =
+pub const LAYOUT__888: &FieldToWord__0Arm1_SuperLayout =
     &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__223 };
-pub const LAYOUT__894: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__895,
-    arm1: LAYOUT__896,
+pub const LAYOUT__886: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__887,
+    arm1: LAYOUT__888,
 };
-pub const LAYOUT__890: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__891,
-    high: LAYOUT__892,
+pub const LAYOUT__882: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__883,
+    high: LAYOUT__884,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 199 },
     },
-    _arguments_field_to_word__0: LAYOUT__893,
-    _2: LAYOUT__894,
+    _arguments_field_to_word__0: LAYOUT__885,
+    _2: LAYOUT__886,
 };
-pub const LAYOUT__897: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__742,
-    _0: LAYOUT__743,
+pub const LAYOUT__889: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__734,
+    _0: LAYOUT__735,
 };
-pub const LAYOUT__889: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__890,
-    mw: LAYOUT__897,
+pub const LAYOUT__881: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__882,
+    mw: LAYOUT__889,
 };
-pub const LAYOUT__900: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__892: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 172 },
@@ -14417,7 +14402,7 @@ pub const LAYOUT__900: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__901: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__893: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 173 },
@@ -14427,7 +14412,7 @@ pub const LAYOUT__901: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__902: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__894: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 174 },
@@ -14437,7 +14422,7 @@ pub const LAYOUT__902: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__905: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__897: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 174 },
@@ -14447,32 +14432,32 @@ pub const LAYOUT__905: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__904: &FieldToWord__0Arm0_SuperLayout =
-    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__905 };
-pub const LAYOUT__906: &FieldToWord__0Arm1_SuperLayout =
-    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__905 };
-pub const LAYOUT__903: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__904,
-    arm1: LAYOUT__906,
+pub const LAYOUT__896: &FieldToWord__0Arm0_SuperLayout =
+    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__897 };
+pub const LAYOUT__898: &FieldToWord__0Arm1_SuperLayout =
+    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__897 };
+pub const LAYOUT__895: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__896,
+    arm1: LAYOUT__898,
 };
-pub const LAYOUT__899: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__900,
-    high: LAYOUT__901,
+pub const LAYOUT__891: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__892,
+    high: LAYOUT__893,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 200 },
     },
-    _arguments_field_to_word__0: LAYOUT__902,
-    _2: LAYOUT__903,
+    _arguments_field_to_word__0: LAYOUT__894,
+    _2: LAYOUT__895,
 };
-pub const LAYOUT__907: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__757,
-    _0: LAYOUT__758,
+pub const LAYOUT__899: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__749,
+    _0: LAYOUT__750,
 };
-pub const LAYOUT__898: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__899,
-    mw: LAYOUT__907,
+pub const LAYOUT__890: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__891,
+    mw: LAYOUT__899,
 };
-pub const LAYOUT__910: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__902: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 176 },
@@ -14482,7 +14467,7 @@ pub const LAYOUT__910: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__911: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__903: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 177 },
@@ -14492,7 +14477,7 @@ pub const LAYOUT__911: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__912: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__904: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 178 },
@@ -14502,7 +14487,7 @@ pub const LAYOUT__912: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__915: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__907: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 178 },
@@ -14512,32 +14497,32 @@ pub const LAYOUT__915: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__914: &FieldToWord__0Arm0_SuperLayout =
-    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__915 };
-pub const LAYOUT__916: &FieldToWord__0Arm1_SuperLayout =
-    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__915 };
-pub const LAYOUT__913: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__914,
-    arm1: LAYOUT__916,
+pub const LAYOUT__906: &FieldToWord__0Arm0_SuperLayout =
+    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__907 };
+pub const LAYOUT__908: &FieldToWord__0Arm1_SuperLayout =
+    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__907 };
+pub const LAYOUT__905: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__906,
+    arm1: LAYOUT__908,
 };
-pub const LAYOUT__909: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__910,
-    high: LAYOUT__911,
+pub const LAYOUT__901: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__902,
+    high: LAYOUT__903,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 201 },
     },
-    _arguments_field_to_word__0: LAYOUT__912,
-    _2: LAYOUT__913,
+    _arguments_field_to_word__0: LAYOUT__904,
+    _2: LAYOUT__905,
 };
-pub const LAYOUT__917: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__762,
-    _0: LAYOUT__763,
+pub const LAYOUT__909: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__754,
+    _0: LAYOUT__755,
 };
-pub const LAYOUT__908: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__909,
-    mw: LAYOUT__917,
+pub const LAYOUT__900: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__901,
+    mw: LAYOUT__909,
 };
-pub const LAYOUT__920: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__912: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 180 },
@@ -14547,7 +14532,7 @@ pub const LAYOUT__920: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__921: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__913: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 181 },
@@ -14557,7 +14542,7 @@ pub const LAYOUT__921: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__922: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__914: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 182 },
@@ -14567,7 +14552,7 @@ pub const LAYOUT__922: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__925: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__917: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 182 },
@@ -14577,32 +14562,32 @@ pub const LAYOUT__925: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__924: &FieldToWord__0Arm0_SuperLayout =
-    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__925 };
-pub const LAYOUT__926: &FieldToWord__0Arm1_SuperLayout =
-    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__925 };
-pub const LAYOUT__923: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__924,
-    arm1: LAYOUT__926,
+pub const LAYOUT__916: &FieldToWord__0Arm0_SuperLayout =
+    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__917 };
+pub const LAYOUT__918: &FieldToWord__0Arm1_SuperLayout =
+    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__917 };
+pub const LAYOUT__915: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__916,
+    arm1: LAYOUT__918,
 };
-pub const LAYOUT__919: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__920,
-    high: LAYOUT__921,
+pub const LAYOUT__911: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__912,
+    high: LAYOUT__913,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 202 },
     },
-    _arguments_field_to_word__0: LAYOUT__922,
-    _2: LAYOUT__923,
+    _arguments_field_to_word__0: LAYOUT__914,
+    _2: LAYOUT__915,
 };
-pub const LAYOUT__927: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__767,
-    _0: LAYOUT__768,
+pub const LAYOUT__919: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__759,
+    _0: LAYOUT__760,
 };
-pub const LAYOUT__918: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__919,
-    mw: LAYOUT__927,
+pub const LAYOUT__910: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__911,
+    mw: LAYOUT__919,
 };
-pub const LAYOUT__930: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__922: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 184 },
@@ -14612,7 +14597,7 @@ pub const LAYOUT__930: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__931: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__923: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 185 },
@@ -14622,7 +14607,7 @@ pub const LAYOUT__931: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__932: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
+pub const LAYOUT__924: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWord__0Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 186 },
@@ -14632,7 +14617,7 @@ pub const LAYOUT__932: &_Arguments_FieldToWord__0Layout = &_Arguments_FieldToWor
         },
     }],
 };
-pub const LAYOUT__935: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__927: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 186 },
@@ -14642,44 +14627,44 @@ pub const LAYOUT__935: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__934: &FieldToWord__0Arm0_SuperLayout =
-    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__935 };
-pub const LAYOUT__936: &FieldToWord__0Arm1_SuperLayout =
-    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__935 };
-pub const LAYOUT__933: &FieldToWord__0Layout = &FieldToWord__0Layout {
-    arm0: LAYOUT__934,
-    arm1: LAYOUT__936,
+pub const LAYOUT__926: &FieldToWord__0Arm0_SuperLayout =
+    &FieldToWord__0Arm0_SuperLayout { _0: LAYOUT__927 };
+pub const LAYOUT__928: &FieldToWord__0Arm1_SuperLayout =
+    &FieldToWord__0Arm1_SuperLayout { _0: LAYOUT__927 };
+pub const LAYOUT__925: &FieldToWord__0Layout = &FieldToWord__0Layout {
+    arm0: LAYOUT__926,
+    arm1: LAYOUT__928,
 };
-pub const LAYOUT__929: &FieldToWordLayout = &FieldToWordLayout {
-    low: LAYOUT__930,
-    high: LAYOUT__931,
+pub const LAYOUT__921: &FieldToWordLayout = &FieldToWordLayout {
+    low: LAYOUT__922,
+    high: LAYOUT__923,
     low_is_zero: &NondetRegLayout {
         _super: &Reg { offset: 203 },
     },
-    _arguments_field_to_word__0: LAYOUT__932,
-    _2: LAYOUT__933,
+    _arguments_field_to_word__0: LAYOUT__924,
+    _2: LAYOUT__925,
 };
-pub const LAYOUT__937: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__772,
-    _0: LAYOUT__773,
+pub const LAYOUT__929: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__764,
+    _0: LAYOUT__765,
 };
-pub const LAYOUT__928: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
-    ftw: LAYOUT__929,
-    mw: LAYOUT__937,
+pub const LAYOUT__920: &PoseidonStoreOut__0_SuperLayout = &PoseidonStoreOut__0_SuperLayout {
+    ftw: LAYOUT__921,
+    mw: LAYOUT__929,
 };
-pub const LAYOUT__858: &PoseidonStoreOut__0_SuperLayout8LayoutArray = &[
-    LAYOUT__859,
-    LAYOUT__869,
-    LAYOUT__879,
-    LAYOUT__889,
-    LAYOUT__898,
-    LAYOUT__908,
-    LAYOUT__918,
-    LAYOUT__928,
+pub const LAYOUT__850: &PoseidonStoreOut__0_SuperLayout8LayoutArray = &[
+    LAYOUT__851,
+    LAYOUT__861,
+    LAYOUT__871,
+    LAYOUT__881,
+    LAYOUT__890,
+    LAYOUT__900,
+    LAYOUT__910,
+    LAYOUT__920,
 ];
-pub const LAYOUT__857: &PoseidonStoreOutLayout = &PoseidonStoreOutLayout {
-    _super: LAYOUT__697,
-    _1: LAYOUT__858,
+pub const LAYOUT__849: &PoseidonStoreOutLayout = &PoseidonStoreOutLayout {
+    _super: LAYOUT__689,
+    _1: LAYOUT__850,
     is_normal: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 204 },
@@ -14692,23 +14677,23 @@ pub const LAYOUT__857: &PoseidonStoreOutLayout = &PoseidonStoreOutLayout {
         _super: &Reg { offset: 206 },
     },
 };
-pub const LAYOUT__845: &PoseidonDoOut_SuperLayout = &PoseidonDoOut_SuperLayout {
-    _super: LAYOUT__697,
-    arm0: LAYOUT__846,
-    arm1: LAYOUT__857,
+pub const LAYOUT__837: &PoseidonDoOut_SuperLayout = &PoseidonDoOut_SuperLayout {
+    _super: LAYOUT__689,
+    arm0: LAYOUT__838,
+    arm1: LAYOUT__849,
 };
-pub const LAYOUT__938: &_Arguments_PoseidonDoOut_SuperLayout =
+pub const LAYOUT__930: &_Arguments_PoseidonDoOut_SuperLayout =
     &_Arguments_PoseidonDoOut_SuperLayout {
-        memory_arg: LAYOUT__700,
-        cycle_arg: LAYOUT__717,
-        arg_u16: LAYOUT__718,
+        memory_arg: LAYOUT__692,
+        cycle_arg: LAYOUT__709,
+        arg_u16: LAYOUT__710,
     };
-pub const LAYOUT__844: &PoseidonDoOutLayout = &PoseidonDoOutLayout {
-    _super: LAYOUT__845,
-    _arguments_poseidon_do_out__super: LAYOUT__938,
+pub const LAYOUT__836: &PoseidonDoOutLayout = &PoseidonDoOutLayout {
+    _super: LAYOUT__837,
+    _arguments_poseidon_do_out__super: LAYOUT__930,
 };
-pub const LAYOUT__843: &Poseidon0StateArm5Layout = &Poseidon0StateArm5Layout {
-    _super: LAYOUT__844,
+pub const LAYOUT__835: &Poseidon0StateArm5Layout = &Poseidon0StateArm5Layout {
+    _super: LAYOUT__836,
     _extra0: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 188 },
@@ -14726,16 +14711,16 @@ pub const LAYOUT__843: &Poseidon0StateArm5Layout = &Poseidon0StateArm5Layout {
         },
     },
 };
-pub const LAYOUT__941: &PoseidonPaging_SuperLayout = &PoseidonPaging_SuperLayout {
-    _super: LAYOUT__697,
-    arm0: LAYOUT__697,
-    arm1: LAYOUT__697,
-    arm2: LAYOUT__697,
-    arm3: LAYOUT__697,
-    arm4: LAYOUT__697,
-    arm5: LAYOUT__697,
+pub const LAYOUT__933: &PoseidonPaging_SuperLayout = &PoseidonPaging_SuperLayout {
+    _super: LAYOUT__689,
+    arm0: LAYOUT__689,
+    arm1: LAYOUT__689,
+    arm2: LAYOUT__689,
+    arm3: LAYOUT__689,
+    arm4: LAYOUT__689,
+    arm5: LAYOUT__689,
 };
-pub const LAYOUT__943: &NondetRegLayout6LayoutArray = &[
+pub const LAYOUT__935: &NondetRegLayout6LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 198 },
     },
@@ -14755,10 +14740,10 @@ pub const LAYOUT__943: &NondetRegLayout6LayoutArray = &[
         _super: &Reg { offset: 203 },
     },
 ];
-pub const LAYOUT__942: &OneHot_6_Layout = &OneHot_6_Layout {
-    _super: LAYOUT__943,
+pub const LAYOUT__934: &OneHot_6_Layout = &OneHot_6_Layout {
+    _super: LAYOUT__935,
 };
-pub const LAYOUT__945: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__937: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 188 },
@@ -14768,11 +14753,11 @@ pub const LAYOUT__945: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__944: &IsU24Layout = &IsU24Layout {
-    low16: LAYOUT__861,
-    _0: LAYOUT__945,
+pub const LAYOUT__936: &IsU24Layout = &IsU24Layout {
+    low16: LAYOUT__853,
+    _0: LAYOUT__937,
 };
-pub const LAYOUT__946: &_Arguments_PoseidonPaging__1Layout = &_Arguments_PoseidonPaging__1Layout {
+pub const LAYOUT__938: &_Arguments_PoseidonPaging__1Layout = &_Arguments_PoseidonPaging__1Layout {
     arg_u16: &[&ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 157 },
@@ -14790,7 +14775,7 @@ pub const LAYOUT__946: &_Arguments_PoseidonPaging__1Layout = &_Arguments_Poseido
         },
     }],
 };
-pub const LAYOUT__950: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__942: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 190 },
@@ -14800,52 +14785,52 @@ pub const LAYOUT__950: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__949: &IsU24Layout = &IsU24Layout {
-    low16: LAYOUT__862,
-    _0: LAYOUT__950,
+pub const LAYOUT__941: &IsU24Layout = &IsU24Layout {
+    low16: LAYOUT__854,
+    _0: LAYOUT__942,
 };
-pub const LAYOUT__948: &PoseidonPaging__1Arm0_SuperLayout =
-    &PoseidonPaging__1Arm0_SuperLayout { _0: LAYOUT__949 };
-pub const LAYOUT__951: &PoseidonPaging__1Arm1_SuperLayout =
-    &PoseidonPaging__1Arm1_SuperLayout { _0: LAYOUT__949 };
-pub const LAYOUT__947: &PoseidonPaging__1Layout = &PoseidonPaging__1Layout {
-    arm0: LAYOUT__948,
-    arm1: LAYOUT__951,
+pub const LAYOUT__940: &PoseidonPaging__1Arm0_SuperLayout =
+    &PoseidonPaging__1Arm0_SuperLayout { _0: LAYOUT__941 };
+pub const LAYOUT__943: &PoseidonPaging__1Arm1_SuperLayout =
+    &PoseidonPaging__1Arm1_SuperLayout { _0: LAYOUT__941 };
+pub const LAYOUT__939: &PoseidonPaging__1Layout = &PoseidonPaging__1Layout {
+    arm0: LAYOUT__940,
+    arm1: LAYOUT__943,
 };
-pub const LAYOUT__940: &PoseidonPagingLayout = &PoseidonPagingLayout {
-    _super: LAYOUT__941,
+pub const LAYOUT__932: &PoseidonPagingLayout = &PoseidonPagingLayout {
+    _super: LAYOUT__933,
     cur_idx: &NondetRegLayout {
         _super: &Reg { offset: 196 },
     },
     cur_mode: &NondetRegLayout {
         _super: &Reg { offset: 197 },
     },
-    mode_split: LAYOUT__942,
-    _0: LAYOUT__944,
-    _arguments_poseidon_paging__1: LAYOUT__946,
-    _3: LAYOUT__947,
+    mode_split: LAYOUT__934,
+    _0: LAYOUT__936,
+    _arguments_poseidon_paging__1: LAYOUT__938,
+    _3: LAYOUT__939,
     _4: &NondetRegLayout {
         _super: &Reg { offset: 204 },
     },
 };
-pub const LAYOUT__939: &Poseidon0StateArm6Layout = &Poseidon0StateArm6Layout {
-    _super: LAYOUT__940,
-    _extra0: LAYOUT__701,
-    _extra1: LAYOUT__702,
-    _extra2: LAYOUT__703,
-    _extra3: LAYOUT__704,
-    _extra4: LAYOUT__705,
-    _extra5: LAYOUT__706,
-    _extra6: LAYOUT__707,
-    _extra7: LAYOUT__708,
-    _extra8: LAYOUT__709,
-    _extra9: LAYOUT__710,
-    _extra10: LAYOUT__711,
-    _extra11: LAYOUT__712,
-    _extra12: LAYOUT__713,
-    _extra13: LAYOUT__714,
-    _extra14: LAYOUT__715,
-    _extra15: LAYOUT__716,
+pub const LAYOUT__931: &Poseidon0StateArm6Layout = &Poseidon0StateArm6Layout {
+    _super: LAYOUT__932,
+    _extra0: LAYOUT__693,
+    _extra1: LAYOUT__694,
+    _extra2: LAYOUT__695,
+    _extra3: LAYOUT__696,
+    _extra4: LAYOUT__697,
+    _extra5: LAYOUT__698,
+    _extra6: LAYOUT__699,
+    _extra7: LAYOUT__700,
+    _extra8: LAYOUT__701,
+    _extra9: LAYOUT__702,
+    _extra10: LAYOUT__703,
+    _extra11: LAYOUT__704,
+    _extra12: LAYOUT__705,
+    _extra13: LAYOUT__706,
+    _extra14: LAYOUT__707,
+    _extra15: LAYOUT__708,
     _extra16: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 140 },
@@ -15087,54 +15072,54 @@ pub const LAYOUT__939: &Poseidon0StateArm6Layout = &Poseidon0StateArm6Layout {
         },
     },
 };
-pub const LAYOUT__955: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__860,
-    mw: LAYOUT__868,
+pub const LAYOUT__947: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__852,
+    mw: LAYOUT__860,
 };
-pub const LAYOUT__956: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__870,
-    mw: LAYOUT__878,
+pub const LAYOUT__948: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__862,
+    mw: LAYOUT__870,
 };
-pub const LAYOUT__957: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__880,
-    mw: LAYOUT__888,
+pub const LAYOUT__949: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__872,
+    mw: LAYOUT__880,
 };
-pub const LAYOUT__958: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__890,
-    mw: LAYOUT__897,
+pub const LAYOUT__950: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__882,
+    mw: LAYOUT__889,
 };
-pub const LAYOUT__959: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__899,
-    mw: LAYOUT__907,
+pub const LAYOUT__951: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__891,
+    mw: LAYOUT__899,
 };
-pub const LAYOUT__960: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__909,
-    mw: LAYOUT__917,
+pub const LAYOUT__952: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__901,
+    mw: LAYOUT__909,
 };
-pub const LAYOUT__961: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__919,
-    mw: LAYOUT__927,
+pub const LAYOUT__953: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__911,
+    mw: LAYOUT__919,
 };
-pub const LAYOUT__962: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
-    ftw: LAYOUT__929,
-    mw: LAYOUT__937,
+pub const LAYOUT__954: &PoseidonStoreState__0_SuperLayout = &PoseidonStoreState__0_SuperLayout {
+    ftw: LAYOUT__921,
+    mw: LAYOUT__929,
 };
-pub const LAYOUT__954: &PoseidonStoreState__0_SuperLayout8LayoutArray = &[
-    LAYOUT__955,
-    LAYOUT__956,
-    LAYOUT__957,
-    LAYOUT__958,
-    LAYOUT__959,
-    LAYOUT__960,
-    LAYOUT__961,
-    LAYOUT__962,
+pub const LAYOUT__946: &PoseidonStoreState__0_SuperLayout8LayoutArray = &[
+    LAYOUT__947,
+    LAYOUT__948,
+    LAYOUT__949,
+    LAYOUT__950,
+    LAYOUT__951,
+    LAYOUT__952,
+    LAYOUT__953,
+    LAYOUT__954,
 ];
-pub const LAYOUT__953: &PoseidonStoreStateLayout = &PoseidonStoreStateLayout {
-    _super: LAYOUT__697,
-    _1: LAYOUT__954,
+pub const LAYOUT__945: &PoseidonStoreStateLayout = &PoseidonStoreStateLayout {
+    _super: LAYOUT__689,
+    _1: LAYOUT__946,
 };
-pub const LAYOUT__952: &Poseidon0StateArm7Layout = &Poseidon0StateArm7Layout {
-    _super: LAYOUT__953,
+pub const LAYOUT__944: &Poseidon0StateArm7Layout = &Poseidon0StateArm7Layout {
+    _super: LAYOUT__945,
     _extra0: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 188 },
@@ -15152,24 +15137,24 @@ pub const LAYOUT__952: &Poseidon0StateArm7Layout = &Poseidon0StateArm7Layout {
         },
     },
 };
-pub const LAYOUT__720: &Poseidon0StateLayout = &Poseidon0StateLayout {
-    _super: LAYOUT__697,
-    arm0: LAYOUT__721,
-    arm1: LAYOUT__748,
-    arm2: LAYOUT__775,
-    arm3: LAYOUT__841,
-    arm4: LAYOUT__842,
-    arm5: LAYOUT__843,
-    arm6: LAYOUT__939,
-    arm7: LAYOUT__952,
+pub const LAYOUT__712: &Poseidon0StateLayout = &Poseidon0StateLayout {
+    _super: LAYOUT__689,
+    arm0: LAYOUT__713,
+    arm1: LAYOUT__740,
+    arm2: LAYOUT__767,
+    arm3: LAYOUT__833,
+    arm4: LAYOUT__834,
+    arm5: LAYOUT__835,
+    arm6: LAYOUT__931,
+    arm7: LAYOUT__944,
 };
-pub const LAYOUT__695: &Poseidon0Layout = &Poseidon0Layout {
-    _0: LAYOUT__696,
-    state: LAYOUT__697,
-    _arguments_poseidon0_state: LAYOUT__699,
-    state_redef: LAYOUT__720,
+pub const LAYOUT__687: &Poseidon0Layout = &Poseidon0Layout {
+    _0: LAYOUT__688,
+    state: LAYOUT__689,
+    _arguments_poseidon0_state: LAYOUT__691,
+    state_redef: LAYOUT__712,
 };
-pub const LAYOUT__964: &DoCycleTableLayout = &DoCycleTableLayout {
+pub const LAYOUT__956: &DoCycleTableLayout = &DoCycleTableLayout {
     arg1: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 68 },
@@ -15187,7 +15172,7 @@ pub const LAYOUT__964: &DoCycleTableLayout = &DoCycleTableLayout {
         },
     },
 };
-pub const LAYOUT__969: &SBoxLayout24LayoutArray = &[
+pub const LAYOUT__961: &SBoxLayout24LayoutArray = &[
     &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 78 },
@@ -15381,8 +15366,8 @@ pub const LAYOUT__969: &SBoxLayout24LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__968: &DoExtRoundLayout = &DoExtRoundLayout { _1: LAYOUT__969 };
-pub const LAYOUT__971: &NondetRegLayout8LayoutArray = &[
+pub const LAYOUT__960: &DoExtRoundLayout = &DoExtRoundLayout { _1: LAYOUT__961 };
+pub const LAYOUT__963: &NondetRegLayout8LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 126 },
     },
@@ -15408,15 +15393,15 @@ pub const LAYOUT__971: &NondetRegLayout8LayoutArray = &[
         _super: &Reg { offset: 133 },
     },
 ];
-pub const LAYOUT__970: &OneHot_8_Layout = &OneHot_8_Layout {
-    _super: LAYOUT__971,
+pub const LAYOUT__962: &OneHot_8_Layout = &OneHot_8_Layout {
+    _super: LAYOUT__963,
 };
-pub const LAYOUT__967: &DoExtRoundByIdxLayout = &DoExtRoundByIdxLayout {
-    _super: LAYOUT__968,
-    idx_hot: LAYOUT__970,
+pub const LAYOUT__959: &DoExtRoundByIdxLayout = &DoExtRoundByIdxLayout {
+    _super: LAYOUT__960,
+    idx_hot: LAYOUT__962,
 };
-pub const LAYOUT__966: &PoseidonExtRoundLayout = &PoseidonExtRoundLayout {
-    _super: LAYOUT__697,
+pub const LAYOUT__958: &PoseidonExtRoundLayout = &PoseidonExtRoundLayout {
+    _super: LAYOUT__689,
     is_round3: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 72 },
@@ -15441,9 +15426,9 @@ pub const LAYOUT__966: &PoseidonExtRoundLayout = &PoseidonExtRoundLayout {
             _super: &Reg { offset: 77 },
         },
     },
-    next_inner: LAYOUT__967,
+    next_inner: LAYOUT__959,
 };
-pub const LAYOUT__975: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__967: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 72 },
@@ -15453,7 +15438,7 @@ pub const LAYOUT__975: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__976: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__968: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 74 },
@@ -15463,7 +15448,7 @@ pub const LAYOUT__976: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__977: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__969: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 76 },
@@ -15473,7 +15458,7 @@ pub const LAYOUT__977: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__978: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__970: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 78 },
@@ -15483,7 +15468,7 @@ pub const LAYOUT__978: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__979: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__971: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 80 },
@@ -15493,7 +15478,7 @@ pub const LAYOUT__979: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__980: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__972: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 82 },
@@ -15503,7 +15488,7 @@ pub const LAYOUT__980: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__981: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__973: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 84 },
@@ -15513,7 +15498,7 @@ pub const LAYOUT__981: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__982: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__974: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 86 },
@@ -15523,7 +15508,7 @@ pub const LAYOUT__982: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__983: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__975: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 88 },
@@ -15533,7 +15518,7 @@ pub const LAYOUT__983: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__984: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__976: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 90 },
@@ -15543,7 +15528,7 @@ pub const LAYOUT__984: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__985: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__977: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 92 },
@@ -15553,7 +15538,7 @@ pub const LAYOUT__985: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__986: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__978: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 94 },
@@ -15563,7 +15548,7 @@ pub const LAYOUT__986: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__987: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__979: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 96 },
@@ -15573,7 +15558,7 @@ pub const LAYOUT__987: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__988: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__980: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 98 },
@@ -15583,7 +15568,7 @@ pub const LAYOUT__988: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__989: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__981: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 100 },
@@ -15593,7 +15578,7 @@ pub const LAYOUT__989: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__990: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__982: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 102 },
@@ -15603,7 +15588,7 @@ pub const LAYOUT__990: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__991: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__983: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 104 },
@@ -15613,7 +15598,7 @@ pub const LAYOUT__991: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__992: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__984: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 106 },
@@ -15623,7 +15608,7 @@ pub const LAYOUT__992: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__993: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__985: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 108 },
@@ -15633,7 +15618,7 @@ pub const LAYOUT__993: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__994: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__986: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 110 },
@@ -15643,7 +15628,7 @@ pub const LAYOUT__994: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__995: &DoIntRoundLayout = &DoIntRoundLayout {
+pub const LAYOUT__987: &DoIntRoundLayout = &DoIntRoundLayout {
     sbox: &SBoxLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 112 },
@@ -15653,7 +15638,15 @@ pub const LAYOUT__995: &DoIntRoundLayout = &DoIntRoundLayout {
         },
     },
 };
-pub const LAYOUT__974: &DoIntRoundLayout21LayoutArray = &[
+pub const LAYOUT__966: &DoIntRoundLayout21LayoutArray = &[
+    LAYOUT__967,
+    LAYOUT__968,
+    LAYOUT__969,
+    LAYOUT__970,
+    LAYOUT__971,
+    LAYOUT__972,
+    LAYOUT__973,
+    LAYOUT__974,
     LAYOUT__975,
     LAYOUT__976,
     LAYOUT__977,
@@ -15667,39 +15660,31 @@ pub const LAYOUT__974: &DoIntRoundLayout21LayoutArray = &[
     LAYOUT__985,
     LAYOUT__986,
     LAYOUT__987,
-    LAYOUT__988,
-    LAYOUT__989,
-    LAYOUT__990,
-    LAYOUT__991,
-    LAYOUT__992,
-    LAYOUT__993,
-    LAYOUT__994,
-    LAYOUT__995,
 ];
-pub const LAYOUT__973: &DoIntRoundsLayout = &DoIntRoundsLayout {
-    _super: LAYOUT__974,
+pub const LAYOUT__965: &DoIntRoundsLayout = &DoIntRoundsLayout {
+    _super: LAYOUT__966,
 };
-pub const LAYOUT__972: &PoseidonIntRoundsLayout = &PoseidonIntRoundsLayout {
-    _super: LAYOUT__697,
-    next_inner: LAYOUT__973,
+pub const LAYOUT__964: &PoseidonIntRoundsLayout = &PoseidonIntRoundsLayout {
+    _super: LAYOUT__689,
+    next_inner: LAYOUT__965,
 };
-pub const LAYOUT__965: &Poseidon1StateLayout = &Poseidon1StateLayout {
-    _super: LAYOUT__697,
-    arm0: LAYOUT__966,
-    arm1: LAYOUT__972,
-    arm2: LAYOUT__697,
-    arm3: LAYOUT__697,
-    arm4: LAYOUT__697,
-    arm5: LAYOUT__697,
-    arm6: LAYOUT__697,
-    arm7: LAYOUT__697,
+pub const LAYOUT__957: &Poseidon1StateLayout = &Poseidon1StateLayout {
+    _super: LAYOUT__689,
+    arm0: LAYOUT__958,
+    arm1: LAYOUT__964,
+    arm2: LAYOUT__689,
+    arm3: LAYOUT__689,
+    arm4: LAYOUT__689,
+    arm5: LAYOUT__689,
+    arm6: LAYOUT__689,
+    arm7: LAYOUT__689,
 };
-pub const LAYOUT__963: &Poseidon1Layout = &Poseidon1Layout {
-    _0: LAYOUT__964,
-    state: LAYOUT__697,
-    state_redef: LAYOUT__965,
+pub const LAYOUT__955: &Poseidon1Layout = &Poseidon1Layout {
+    _0: LAYOUT__956,
+    state: LAYOUT__689,
+    state_redef: LAYOUT__957,
 };
-pub const LAYOUT__997: &DoCycleTableLayout = &DoCycleTableLayout {
+pub const LAYOUT__989: &DoCycleTableLayout = &DoCycleTableLayout {
     arg1: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 187 },
@@ -15717,7 +15702,7 @@ pub const LAYOUT__997: &DoCycleTableLayout = &DoCycleTableLayout {
         },
     },
 };
-pub const LAYOUT__999: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__991: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 36 },
     },
@@ -15815,7 +15800,7 @@ pub const LAYOUT__999: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 67 },
     },
 ];
-pub const LAYOUT__1000: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__992: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 68 },
     },
@@ -15913,7 +15898,7 @@ pub const LAYOUT__1000: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 99 },
     },
 ];
-pub const LAYOUT__1001: &NondetRegLayout32LayoutArray = &[
+pub const LAYOUT__993: &NondetRegLayout32LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 100 },
     },
@@ -16011,7 +15996,7 @@ pub const LAYOUT__1001: &NondetRegLayout32LayoutArray = &[
         _super: &Reg { offset: 131 },
     },
 ];
-pub const LAYOUT__998: &ShaStateLayout = &ShaStateLayout {
+pub const LAYOUT__990: &ShaStateLayout = &ShaStateLayout {
     state_in_addr: &NondetRegLayout {
         _super: &Reg { offset: 29 },
     },
@@ -16033,11 +16018,11 @@ pub const LAYOUT__998: &ShaStateLayout = &ShaStateLayout {
     next_state: &NondetRegLayout {
         _super: &Reg { offset: 35 },
     },
-    a: LAYOUT__999,
-    e: LAYOUT__1000,
-    w: LAYOUT__1001,
+    a: LAYOUT__991,
+    e: LAYOUT__992,
+    w: LAYOUT__993,
 };
-pub const LAYOUT__1004: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__996: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 132 },
     },
@@ -16054,7 +16039,7 @@ pub const LAYOUT__1004: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 136 },
     },
 };
-pub const LAYOUT__1005: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__997: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 137 },
     },
@@ -16071,7 +16056,7 @@ pub const LAYOUT__1005: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 140 },
     },
 };
-pub const LAYOUT__1006: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__998: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 141 },
     },
@@ -16088,7 +16073,7 @@ pub const LAYOUT__1006: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 145 },
     },
 };
-pub const LAYOUT__1007: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__999: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 146 },
     },
@@ -16105,7 +16090,7 @@ pub const LAYOUT__1007: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 149 },
     },
 };
-pub const LAYOUT__1008: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1000: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 150 },
     },
@@ -16122,7 +16107,7 @@ pub const LAYOUT__1008: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 154 },
     },
 };
-pub const LAYOUT__1009: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1001: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 155 },
     },
@@ -16139,7 +16124,7 @@ pub const LAYOUT__1009: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 158 },
     },
 };
-pub const LAYOUT__1010: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1002: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 159 },
     },
@@ -16156,7 +16141,7 @@ pub const LAYOUT__1010: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 163 },
     },
 };
-pub const LAYOUT__1011: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1003: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 164 },
     },
@@ -16173,7 +16158,7 @@ pub const LAYOUT__1011: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 167 },
     },
 };
-pub const LAYOUT__1012: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1004: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 168 },
     },
@@ -16190,7 +16175,7 @@ pub const LAYOUT__1012: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 172 },
     },
 };
-pub const LAYOUT__1013: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1005: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 173 },
     },
@@ -16207,19 +16192,19 @@ pub const LAYOUT__1013: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 176 },
     },
 };
-pub const LAYOUT__1003: &MemoryArgLayout10LayoutArray = &[
+pub const LAYOUT__995: &MemoryArgLayout10LayoutArray = &[
+    LAYOUT__996,
+    LAYOUT__997,
+    LAYOUT__998,
+    LAYOUT__999,
+    LAYOUT__1000,
+    LAYOUT__1001,
+    LAYOUT__1002,
+    LAYOUT__1003,
     LAYOUT__1004,
     LAYOUT__1005,
-    LAYOUT__1006,
-    LAYOUT__1007,
-    LAYOUT__1008,
-    LAYOUT__1009,
-    LAYOUT__1010,
-    LAYOUT__1011,
-    LAYOUT__1012,
-    LAYOUT__1013,
 ];
-pub const LAYOUT__1014: &CycleArgLayout5LayoutArray = &[
+pub const LAYOUT__1006: &CycleArgLayout5LayoutArray = &[
     &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 177 },
@@ -16261,100 +16246,100 @@ pub const LAYOUT__1014: &CycleArgLayout5LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1002: &_Arguments_Sha0StateLayout = &_Arguments_Sha0StateLayout {
-    memory_arg: LAYOUT__1003,
-    cycle_arg: LAYOUT__1014,
+pub const LAYOUT__994: &_Arguments_Sha0StateLayout = &_Arguments_Sha0StateLayout {
+    memory_arg: LAYOUT__995,
+    cycle_arg: LAYOUT__1006,
 };
-pub const LAYOUT__1019: &MemoryIOLayout = &MemoryIOLayout {
+pub const LAYOUT__1011: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__996,
+    new_txn: LAYOUT__997,
+};
+pub const LAYOUT__1013: &IsCycleLayout = &IsCycleLayout {
+    arg: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 177 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 178 },
+        },
+    },
+};
+pub const LAYOUT__1012: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1013 };
+pub const LAYOUT__1010: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1011,
+    _0: LAYOUT__1012,
+};
+pub const LAYOUT__1009: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__1010,
+};
+pub const LAYOUT__1016: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__998,
+    new_txn: LAYOUT__999,
+};
+pub const LAYOUT__1018: &IsCycleLayout = &IsCycleLayout {
+    arg: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 179 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 180 },
+        },
+    },
+};
+pub const LAYOUT__1017: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1018 };
+pub const LAYOUT__1015: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1016,
+    _0: LAYOUT__1017,
+};
+pub const LAYOUT__1014: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__1015,
+};
+pub const LAYOUT__1021: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1000,
+    new_txn: LAYOUT__1001,
+};
+pub const LAYOUT__1023: &IsCycleLayout = &IsCycleLayout {
+    arg: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 181 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 182 },
+        },
+    },
+};
+pub const LAYOUT__1022: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1023 };
+pub const LAYOUT__1020: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1021,
+    _0: LAYOUT__1022,
+};
+pub const LAYOUT__1019: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__1020,
+};
+pub const LAYOUT__1025: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1002,
+    new_txn: LAYOUT__1003,
+};
+pub const LAYOUT__1027: &IsCycleLayout = &IsCycleLayout {
+    arg: &CycleArgLayout {
+        count: &NondetRegLayout {
+            _super: &Reg { offset: 183 },
+        },
+        cycle: &NondetRegLayout {
+            _super: &Reg { offset: 184 },
+        },
+    },
+};
+pub const LAYOUT__1026: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1027 };
+pub const LAYOUT__1024: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1025,
+    _0: LAYOUT__1026,
+};
+pub const LAYOUT__1030: &MemoryIOLayout = &MemoryIOLayout {
     old_txn: LAYOUT__1004,
     new_txn: LAYOUT__1005,
 };
-pub const LAYOUT__1021: &IsCycleLayout = &IsCycleLayout {
-    arg: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 177 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 178 },
-        },
-    },
-};
-pub const LAYOUT__1020: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1021 };
-pub const LAYOUT__1018: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1019,
-    _0: LAYOUT__1020,
-};
-pub const LAYOUT__1017: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__1018,
-};
-pub const LAYOUT__1024: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1006,
-    new_txn: LAYOUT__1007,
-};
-pub const LAYOUT__1026: &IsCycleLayout = &IsCycleLayout {
-    arg: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 179 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 180 },
-        },
-    },
-};
-pub const LAYOUT__1025: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1026 };
-pub const LAYOUT__1023: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1024,
-    _0: LAYOUT__1025,
-};
-pub const LAYOUT__1022: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__1023,
-};
-pub const LAYOUT__1029: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1008,
-    new_txn: LAYOUT__1009,
-};
-pub const LAYOUT__1031: &IsCycleLayout = &IsCycleLayout {
-    arg: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 181 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 182 },
-        },
-    },
-};
-pub const LAYOUT__1030: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1031 };
-pub const LAYOUT__1028: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1029,
-    _0: LAYOUT__1030,
-};
-pub const LAYOUT__1027: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__1028,
-};
-pub const LAYOUT__1033: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1010,
-    new_txn: LAYOUT__1011,
-};
-pub const LAYOUT__1035: &IsCycleLayout = &IsCycleLayout {
-    arg: &CycleArgLayout {
-        count: &NondetRegLayout {
-            _super: &Reg { offset: 183 },
-        },
-        cycle: &NondetRegLayout {
-            _super: &Reg { offset: 184 },
-        },
-    },
-};
-pub const LAYOUT__1034: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1035 };
-pub const LAYOUT__1032: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1033,
-    _0: LAYOUT__1034,
-};
-pub const LAYOUT__1038: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1012,
-    new_txn: LAYOUT__1013,
-};
-pub const LAYOUT__1040: &IsCycleLayout = &IsCycleLayout {
+pub const LAYOUT__1032: &IsCycleLayout = &IsCycleLayout {
     arg: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 185 },
@@ -16364,32 +16349,32 @@ pub const LAYOUT__1040: &IsCycleLayout = &IsCycleLayout {
         },
     },
 };
-pub const LAYOUT__1039: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1040 };
-pub const LAYOUT__1037: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1038,
-    _0: LAYOUT__1039,
+pub const LAYOUT__1031: &IsForwardLayout = &IsForwardLayout { _0: LAYOUT__1032 };
+pub const LAYOUT__1029: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1030,
+    _0: LAYOUT__1031,
 };
-pub const LAYOUT__1036: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__1037,
+pub const LAYOUT__1028: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__1029,
 };
-pub const LAYOUT__1016: &ShaEcallLayout = &ShaEcallLayout {
-    _super: LAYOUT__998,
-    state_in_addr: LAYOUT__1017,
-    state_out_addr: LAYOUT__1022,
-    data_addr: LAYOUT__1027,
-    _0: LAYOUT__1032,
-    k_addr: LAYOUT__1036,
+pub const LAYOUT__1008: &ShaEcallLayout = &ShaEcallLayout {
+    _super: LAYOUT__990,
+    state_in_addr: LAYOUT__1009,
+    state_out_addr: LAYOUT__1014,
+    data_addr: LAYOUT__1019,
+    _0: LAYOUT__1024,
+    k_addr: LAYOUT__1028,
 };
-pub const LAYOUT__1043: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1029,
-    _0: LAYOUT__1030,
+pub const LAYOUT__1035: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1021,
+    _0: LAYOUT__1022,
 };
-pub const LAYOUT__1044: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1033,
-    _0: LAYOUT__1034,
+pub const LAYOUT__1036: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1025,
+    _0: LAYOUT__1026,
 };
-pub const LAYOUT__1042: &ShaLoadStateLayout = &ShaLoadStateLayout {
-    _super: LAYOUT__998,
+pub const LAYOUT__1034: &ShaLoadStateLayout = &ShaLoadStateLayout {
+    _super: LAYOUT__990,
     last_round: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 191 },
@@ -16406,15 +16391,15 @@ pub const LAYOUT__1042: &ShaLoadStateLayout = &ShaLoadStateLayout {
             _super: &Reg { offset: 194 },
         },
     },
-    a32: LAYOUT__1018,
-    e32: LAYOUT__1023,
-    _0: LAYOUT__1043,
-    _1: LAYOUT__1044,
+    a32: LAYOUT__1010,
+    e32: LAYOUT__1015,
+    _0: LAYOUT__1035,
+    _1: LAYOUT__1036,
 };
-pub const LAYOUT__1041: &Sha0StateArm1Layout = &Sha0StateArm1Layout {
-    _super: LAYOUT__1042,
-    _extra0: LAYOUT__1012,
-    _extra1: LAYOUT__1013,
+pub const LAYOUT__1033: &Sha0StateArm1Layout = &Sha0StateArm1Layout {
+    _super: LAYOUT__1034,
+    _extra0: LAYOUT__1004,
+    _extra1: LAYOUT__1005,
     _extra2: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 185 },
@@ -16424,10 +16409,10 @@ pub const LAYOUT__1041: &Sha0StateArm1Layout = &Sha0StateArm1Layout {
         },
     },
 };
-pub const LAYOUT__1048: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__999,
+pub const LAYOUT__1040: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__991,
 };
-pub const LAYOUT__1049: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1041: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 193 },
     },
@@ -16438,7 +16423,7 @@ pub const LAYOUT__1049: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 195 },
     },
 };
-pub const LAYOUT__1050: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1042: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 196 },
     },
@@ -16449,15 +16434,15 @@ pub const LAYOUT__1050: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 198 },
     },
 };
-pub const LAYOUT__1047: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__1048,
-    low_carry: LAYOUT__1049,
-    high_carry: LAYOUT__1050,
+pub const LAYOUT__1039: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__1040,
+    low_carry: LAYOUT__1041,
+    high_carry: LAYOUT__1042,
 };
-pub const LAYOUT__1052: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__1000,
+pub const LAYOUT__1044: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__992,
 };
-pub const LAYOUT__1053: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1045: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 199 },
     },
@@ -16468,7 +16453,7 @@ pub const LAYOUT__1053: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 201 },
     },
 };
-pub const LAYOUT__1054: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1046: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 202 },
     },
@@ -16479,13 +16464,13 @@ pub const LAYOUT__1054: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 204 },
     },
 };
-pub const LAYOUT__1051: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__1052,
-    low_carry: LAYOUT__1053,
-    high_carry: LAYOUT__1054,
+pub const LAYOUT__1043: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__1044,
+    low_carry: LAYOUT__1045,
+    high_carry: LAYOUT__1046,
 };
-pub const LAYOUT__1046: &ShaLoadDataLayout = &ShaLoadDataLayout {
-    _super: LAYOUT__998,
+pub const LAYOUT__1038: &ShaLoadDataLayout = &ShaLoadDataLayout {
+    _super: LAYOUT__990,
     last_round: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 191 },
@@ -16494,20 +16479,20 @@ pub const LAYOUT__1046: &ShaLoadDataLayout = &ShaLoadDataLayout {
             _super: &Reg { offset: 192 },
         },
     },
-    k: LAYOUT__1018,
-    w_mem: LAYOUT__1023,
-    w_bits: LAYOUT__1001,
-    a: LAYOUT__1047,
-    e: LAYOUT__1051,
+    k: LAYOUT__1010,
+    w_mem: LAYOUT__1015,
+    w_bits: LAYOUT__993,
+    a: LAYOUT__1039,
+    e: LAYOUT__1043,
 };
-pub const LAYOUT__1045: &Sha0StateArm2Layout = &Sha0StateArm2Layout {
-    _super: LAYOUT__1046,
-    _extra0: LAYOUT__1008,
-    _extra1: LAYOUT__1009,
-    _extra2: LAYOUT__1010,
-    _extra3: LAYOUT__1011,
-    _extra4: LAYOUT__1012,
-    _extra5: LAYOUT__1013,
+pub const LAYOUT__1037: &Sha0StateArm2Layout = &Sha0StateArm2Layout {
+    _super: LAYOUT__1038,
+    _extra0: LAYOUT__1000,
+    _extra1: LAYOUT__1001,
+    _extra2: LAYOUT__1002,
+    _extra3: LAYOUT__1003,
+    _extra4: LAYOUT__1004,
+    _extra5: LAYOUT__1005,
     _extra6: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 181 },
@@ -16533,20 +16518,20 @@ pub const LAYOUT__1045: &Sha0StateArm2Layout = &Sha0StateArm2Layout {
         },
     },
 };
-pub const LAYOUT__1058: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
-    _super: LAYOUT__1001,
+pub const LAYOUT__1050: &UnpackReg_32__16_Layout = &UnpackReg_32__16_Layout {
+    _super: LAYOUT__993,
 };
-pub const LAYOUT__1057: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__1058,
-    low_carry: LAYOUT__1049,
-    high_carry: LAYOUT__1050,
+pub const LAYOUT__1049: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__1050,
+    low_carry: LAYOUT__1041,
+    high_carry: LAYOUT__1042,
 };
-pub const LAYOUT__1059: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__1048,
-    low_carry: LAYOUT__1053,
-    high_carry: LAYOUT__1054,
+pub const LAYOUT__1051: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__1040,
+    low_carry: LAYOUT__1045,
+    high_carry: LAYOUT__1046,
 };
-pub const LAYOUT__1061: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1053: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 205 },
     },
@@ -16557,7 +16542,7 @@ pub const LAYOUT__1061: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 207 },
     },
 };
-pub const LAYOUT__1062: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1054: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 208 },
     },
@@ -16568,13 +16553,13 @@ pub const LAYOUT__1062: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 210 },
     },
 };
-pub const LAYOUT__1060: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__1052,
-    low_carry: LAYOUT__1061,
-    high_carry: LAYOUT__1062,
+pub const LAYOUT__1052: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__1044,
+    low_carry: LAYOUT__1053,
+    high_carry: LAYOUT__1054,
 };
-pub const LAYOUT__1056: &ShaMixLayout = &ShaMixLayout {
-    _super: LAYOUT__998,
+pub const LAYOUT__1048: &ShaMixLayout = &ShaMixLayout {
+    _super: LAYOUT__990,
     last_round: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 191 },
@@ -16583,21 +16568,21 @@ pub const LAYOUT__1056: &ShaMixLayout = &ShaMixLayout {
             _super: &Reg { offset: 192 },
         },
     },
-    k: LAYOUT__1018,
-    w_bits: LAYOUT__1057,
-    a: LAYOUT__1059,
-    e: LAYOUT__1060,
+    k: LAYOUT__1010,
+    w_bits: LAYOUT__1049,
+    a: LAYOUT__1051,
+    e: LAYOUT__1052,
 };
-pub const LAYOUT__1055: &Sha0StateArm3Layout = &Sha0StateArm3Layout {
-    _super: LAYOUT__1056,
-    _extra0: LAYOUT__1006,
-    _extra1: LAYOUT__1007,
-    _extra2: LAYOUT__1008,
-    _extra3: LAYOUT__1009,
-    _extra4: LAYOUT__1010,
-    _extra5: LAYOUT__1011,
-    _extra6: LAYOUT__1012,
-    _extra7: LAYOUT__1013,
+pub const LAYOUT__1047: &Sha0StateArm3Layout = &Sha0StateArm3Layout {
+    _super: LAYOUT__1048,
+    _extra0: LAYOUT__998,
+    _extra1: LAYOUT__999,
+    _extra2: LAYOUT__1000,
+    _extra3: LAYOUT__1001,
+    _extra4: LAYOUT__1002,
+    _extra5: LAYOUT__1003,
+    _extra6: LAYOUT__1004,
+    _extra7: LAYOUT__1005,
     _extra8: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 179 },
@@ -16631,7 +16616,7 @@ pub const LAYOUT__1055: &Sha0StateArm3Layout = &Sha0StateArm3Layout {
         },
     },
 };
-pub const LAYOUT__1066: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1058: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 195 },
     },
@@ -16642,7 +16627,7 @@ pub const LAYOUT__1066: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 197 },
     },
 };
-pub const LAYOUT__1067: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1059: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 198 },
     },
@@ -16653,12 +16638,12 @@ pub const LAYOUT__1067: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 200 },
     },
 };
-pub const LAYOUT__1065: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__1048,
-    low_carry: LAYOUT__1066,
-    high_carry: LAYOUT__1067,
+pub const LAYOUT__1057: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__1040,
+    low_carry: LAYOUT__1058,
+    high_carry: LAYOUT__1059,
 };
-pub const LAYOUT__1069: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1061: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 201 },
     },
@@ -16669,7 +16654,7 @@ pub const LAYOUT__1069: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 203 },
     },
 };
-pub const LAYOUT__1070: &CarryExtractLayout = &CarryExtractLayout {
+pub const LAYOUT__1062: &CarryExtractLayout = &CarryExtractLayout {
     bit0: &NondetRegLayout {
         _super: &Reg { offset: 204 },
     },
@@ -16680,21 +16665,21 @@ pub const LAYOUT__1070: &CarryExtractLayout = &CarryExtractLayout {
         _super: &Reg { offset: 206 },
     },
 };
-pub const LAYOUT__1068: &CarryAndExpandLayout = &CarryAndExpandLayout {
-    _super: LAYOUT__1052,
-    low_carry: LAYOUT__1069,
-    high_carry: LAYOUT__1070,
+pub const LAYOUT__1060: &CarryAndExpandLayout = &CarryAndExpandLayout {
+    _super: LAYOUT__1044,
+    low_carry: LAYOUT__1061,
+    high_carry: LAYOUT__1062,
 };
-pub const LAYOUT__1071: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1019,
-    _0: LAYOUT__1020,
+pub const LAYOUT__1063: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1011,
+    _0: LAYOUT__1012,
 };
-pub const LAYOUT__1072: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1024,
-    _0: LAYOUT__1025,
+pub const LAYOUT__1064: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1016,
+    _0: LAYOUT__1017,
 };
-pub const LAYOUT__1064: &ShaStoreStateLayout = &ShaStoreStateLayout {
-    _super: LAYOUT__998,
+pub const LAYOUT__1056: &ShaStoreStateLayout = &ShaStoreStateLayout {
+    _super: LAYOUT__990,
     last_round: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 191 },
@@ -16711,19 +16696,19 @@ pub const LAYOUT__1064: &ShaStoreStateLayout = &ShaStoreStateLayout {
             _super: &Reg { offset: 194 },
         },
     },
-    a: LAYOUT__1065,
-    e: LAYOUT__1068,
-    _1: LAYOUT__1071,
-    _2: LAYOUT__1072,
+    a: LAYOUT__1057,
+    e: LAYOUT__1060,
+    _1: LAYOUT__1063,
+    _2: LAYOUT__1064,
 };
-pub const LAYOUT__1063: &Sha0StateArm4Layout = &Sha0StateArm4Layout {
-    _super: LAYOUT__1064,
-    _extra0: LAYOUT__1008,
-    _extra1: LAYOUT__1009,
-    _extra2: LAYOUT__1010,
-    _extra3: LAYOUT__1011,
-    _extra4: LAYOUT__1012,
-    _extra5: LAYOUT__1013,
+pub const LAYOUT__1055: &Sha0StateArm4Layout = &Sha0StateArm4Layout {
+    _super: LAYOUT__1056,
+    _extra0: LAYOUT__1000,
+    _extra1: LAYOUT__1001,
+    _extra2: LAYOUT__1002,
+    _extra3: LAYOUT__1003,
+    _extra4: LAYOUT__1004,
+    _extra5: LAYOUT__1005,
     _extra6: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 181 },
@@ -16749,18 +16734,18 @@ pub const LAYOUT__1063: &Sha0StateArm4Layout = &Sha0StateArm4Layout {
         },
     },
 };
-pub const LAYOUT__1073: &Sha0StateArm5Layout = &Sha0StateArm5Layout {
-    _super: LAYOUT__998,
-    _extra0: LAYOUT__1004,
-    _extra1: LAYOUT__1005,
-    _extra2: LAYOUT__1006,
-    _extra3: LAYOUT__1007,
-    _extra4: LAYOUT__1008,
-    _extra5: LAYOUT__1009,
-    _extra6: LAYOUT__1010,
-    _extra7: LAYOUT__1011,
-    _extra8: LAYOUT__1012,
-    _extra9: LAYOUT__1013,
+pub const LAYOUT__1065: &Sha0StateArm5Layout = &Sha0StateArm5Layout {
+    _super: LAYOUT__990,
+    _extra0: LAYOUT__996,
+    _extra1: LAYOUT__997,
+    _extra2: LAYOUT__998,
+    _extra3: LAYOUT__999,
+    _extra4: LAYOUT__1000,
+    _extra5: LAYOUT__1001,
+    _extra6: LAYOUT__1002,
+    _extra7: LAYOUT__1003,
+    _extra8: LAYOUT__1004,
+    _extra9: LAYOUT__1005,
     _extra10: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 177 },
@@ -16802,18 +16787,18 @@ pub const LAYOUT__1073: &Sha0StateArm5Layout = &Sha0StateArm5Layout {
         },
     },
 };
-pub const LAYOUT__1074: &Sha0StateArm6Layout = &Sha0StateArm6Layout {
-    _super: LAYOUT__998,
-    _extra0: LAYOUT__1004,
-    _extra1: LAYOUT__1005,
-    _extra2: LAYOUT__1006,
-    _extra3: LAYOUT__1007,
-    _extra4: LAYOUT__1008,
-    _extra5: LAYOUT__1009,
-    _extra6: LAYOUT__1010,
-    _extra7: LAYOUT__1011,
-    _extra8: LAYOUT__1012,
-    _extra9: LAYOUT__1013,
+pub const LAYOUT__1066: &Sha0StateArm6Layout = &Sha0StateArm6Layout {
+    _super: LAYOUT__990,
+    _extra0: LAYOUT__996,
+    _extra1: LAYOUT__997,
+    _extra2: LAYOUT__998,
+    _extra3: LAYOUT__999,
+    _extra4: LAYOUT__1000,
+    _extra5: LAYOUT__1001,
+    _extra6: LAYOUT__1002,
+    _extra7: LAYOUT__1003,
+    _extra8: LAYOUT__1004,
+    _extra9: LAYOUT__1005,
     _extra10: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 177 },
@@ -16855,18 +16840,18 @@ pub const LAYOUT__1074: &Sha0StateArm6Layout = &Sha0StateArm6Layout {
         },
     },
 };
-pub const LAYOUT__1075: &Sha0StateArm7Layout = &Sha0StateArm7Layout {
-    _super: LAYOUT__998,
-    _extra0: LAYOUT__1004,
-    _extra1: LAYOUT__1005,
-    _extra2: LAYOUT__1006,
-    _extra3: LAYOUT__1007,
-    _extra4: LAYOUT__1008,
-    _extra5: LAYOUT__1009,
-    _extra6: LAYOUT__1010,
-    _extra7: LAYOUT__1011,
-    _extra8: LAYOUT__1012,
-    _extra9: LAYOUT__1013,
+pub const LAYOUT__1067: &Sha0StateArm7Layout = &Sha0StateArm7Layout {
+    _super: LAYOUT__990,
+    _extra0: LAYOUT__996,
+    _extra1: LAYOUT__997,
+    _extra2: LAYOUT__998,
+    _extra3: LAYOUT__999,
+    _extra4: LAYOUT__1000,
+    _extra5: LAYOUT__1001,
+    _extra6: LAYOUT__1002,
+    _extra7: LAYOUT__1003,
+    _extra8: LAYOUT__1004,
+    _extra9: LAYOUT__1005,
     _extra10: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 177 },
@@ -16908,24 +16893,24 @@ pub const LAYOUT__1075: &Sha0StateArm7Layout = &Sha0StateArm7Layout {
         },
     },
 };
-pub const LAYOUT__1015: &Sha0StateLayout = &Sha0StateLayout {
-    _super: LAYOUT__998,
-    arm0: LAYOUT__1016,
-    arm1: LAYOUT__1041,
-    arm2: LAYOUT__1045,
-    arm3: LAYOUT__1055,
-    arm4: LAYOUT__1063,
-    arm5: LAYOUT__1073,
-    arm6: LAYOUT__1074,
-    arm7: LAYOUT__1075,
+pub const LAYOUT__1007: &Sha0StateLayout = &Sha0StateLayout {
+    _super: LAYOUT__990,
+    arm0: LAYOUT__1008,
+    arm1: LAYOUT__1033,
+    arm2: LAYOUT__1037,
+    arm3: LAYOUT__1047,
+    arm4: LAYOUT__1055,
+    arm5: LAYOUT__1065,
+    arm6: LAYOUT__1066,
+    arm7: LAYOUT__1067,
 };
-pub const LAYOUT__996: &Sha0Layout = &Sha0Layout {
-    _0: LAYOUT__997,
-    state: LAYOUT__998,
-    _arguments_sha0_state: LAYOUT__1002,
-    state_redef: LAYOUT__1015,
+pub const LAYOUT__988: &Sha0Layout = &Sha0Layout {
+    _0: LAYOUT__989,
+    state: LAYOUT__990,
+    _arguments_sha0_state: LAYOUT__994,
+    state_redef: LAYOUT__1007,
 };
-pub const LAYOUT__1077: &DoCycleTableLayout = &DoCycleTableLayout {
+pub const LAYOUT__1069: &DoCycleTableLayout = &DoCycleTableLayout {
     arg1: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 161 },
@@ -16943,7 +16928,7 @@ pub const LAYOUT__1077: &DoCycleTableLayout = &DoCycleTableLayout {
         },
     },
 };
-pub const LAYOUT__1079: &NondetRegLayout16LayoutArray = &[
+pub const LAYOUT__1071: &NondetRegLayout16LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 34 },
     },
@@ -16993,7 +16978,7 @@ pub const LAYOUT__1079: &NondetRegLayout16LayoutArray = &[
         _super: &Reg { offset: 49 },
     },
 ];
-pub const LAYOUT__1078: &BigIntStateLayout = &BigIntStateLayout {
+pub const LAYOUT__1070: &BigIntStateLayout = &BigIntStateLayout {
     is_ecall: &NondetRegLayout {
         _super: &Reg { offset: 29 },
     },
@@ -17009,12 +16994,12 @@ pub const LAYOUT__1078: &BigIntStateLayout = &BigIntStateLayout {
     coeff: &NondetRegLayout {
         _super: &Reg { offset: 33 },
     },
-    bytes: LAYOUT__1079,
+    bytes: LAYOUT__1071,
     next_state: &NondetRegLayout {
         _super: &Reg { offset: 50 },
     },
 };
-pub const LAYOUT__1082: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1074: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 51 },
     },
@@ -17031,7 +17016,7 @@ pub const LAYOUT__1082: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 55 },
     },
 };
-pub const LAYOUT__1083: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1075: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 56 },
     },
@@ -17048,7 +17033,7 @@ pub const LAYOUT__1083: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 59 },
     },
 };
-pub const LAYOUT__1084: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1076: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 60 },
     },
@@ -17065,7 +17050,7 @@ pub const LAYOUT__1084: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 64 },
     },
 };
-pub const LAYOUT__1085: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1077: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 65 },
     },
@@ -17082,7 +17067,7 @@ pub const LAYOUT__1085: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 68 },
     },
 };
-pub const LAYOUT__1086: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1078: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 69 },
     },
@@ -17099,7 +17084,7 @@ pub const LAYOUT__1086: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 73 },
     },
 };
-pub const LAYOUT__1087: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1079: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 74 },
     },
@@ -17116,7 +17101,7 @@ pub const LAYOUT__1087: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 77 },
     },
 };
-pub const LAYOUT__1088: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1080: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 78 },
     },
@@ -17133,7 +17118,7 @@ pub const LAYOUT__1088: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 82 },
     },
 };
-pub const LAYOUT__1089: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1081: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 83 },
     },
@@ -17150,7 +17135,7 @@ pub const LAYOUT__1089: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 86 },
     },
 };
-pub const LAYOUT__1090: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1082: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 87 },
     },
@@ -17167,7 +17152,7 @@ pub const LAYOUT__1090: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 91 },
     },
 };
-pub const LAYOUT__1091: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1083: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 92 },
     },
@@ -17184,7 +17169,7 @@ pub const LAYOUT__1091: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 95 },
     },
 };
-pub const LAYOUT__1092: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1084: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 96 },
     },
@@ -17201,7 +17186,7 @@ pub const LAYOUT__1092: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 100 },
     },
 };
-pub const LAYOUT__1093: &MemoryArgLayout = &MemoryArgLayout {
+pub const LAYOUT__1085: &MemoryArgLayout = &MemoryArgLayout {
     count: &NondetRegLayout {
         _super: &Reg { offset: 101 },
     },
@@ -17218,21 +17203,21 @@ pub const LAYOUT__1093: &MemoryArgLayout = &MemoryArgLayout {
         _super: &Reg { offset: 104 },
     },
 };
-pub const LAYOUT__1081: &MemoryArgLayout12LayoutArray = &[
+pub const LAYOUT__1073: &MemoryArgLayout12LayoutArray = &[
+    LAYOUT__1074,
+    LAYOUT__1075,
+    LAYOUT__1076,
+    LAYOUT__1077,
+    LAYOUT__1078,
+    LAYOUT__1079,
+    LAYOUT__1080,
+    LAYOUT__1081,
     LAYOUT__1082,
     LAYOUT__1083,
     LAYOUT__1084,
     LAYOUT__1085,
-    LAYOUT__1086,
-    LAYOUT__1087,
-    LAYOUT__1088,
-    LAYOUT__1089,
-    LAYOUT__1090,
-    LAYOUT__1091,
-    LAYOUT__1092,
-    LAYOUT__1093,
 ];
-pub const LAYOUT__1094: &CycleArgLayout6LayoutArray = &[
+pub const LAYOUT__1086: &CycleArgLayout6LayoutArray = &[
     &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -17282,7 +17267,7 @@ pub const LAYOUT__1094: &CycleArgLayout6LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1095: &ArgU8Layout18LayoutArray = &[
+pub const LAYOUT__1087: &ArgU8Layout18LayoutArray = &[
     &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -17428,7 +17413,7 @@ pub const LAYOUT__1095: &ArgU8Layout18LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1096: &ArgU16Layout4LayoutArray = &[
+pub const LAYOUT__1088: &ArgU16Layout4LayoutArray = &[
     &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 153 },
@@ -17462,46 +17447,46 @@ pub const LAYOUT__1096: &ArgU16Layout4LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1080: &_Arguments_BigInt0StateLayout = &_Arguments_BigInt0StateLayout {
-    memory_arg: LAYOUT__1081,
-    cycle_arg: LAYOUT__1094,
-    arg_u8: LAYOUT__1095,
-    arg_u16: LAYOUT__1096,
+pub const LAYOUT__1072: &_Arguments_BigInt0StateLayout = &_Arguments_BigInt0StateLayout {
+    memory_arg: LAYOUT__1073,
+    cycle_arg: LAYOUT__1086,
+    arg_u8: LAYOUT__1087,
+    arg_u16: LAYOUT__1088,
 };
-pub const LAYOUT__1101: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1082,
-    new_txn: LAYOUT__1083,
+pub const LAYOUT__1093: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1074,
+    new_txn: LAYOUT__1075,
 };
-pub const LAYOUT__1100: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1101,
-    _0: LAYOUT__518,
+pub const LAYOUT__1092: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1093,
+    _0: LAYOUT__510,
 };
-pub const LAYOUT__1104: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1084,
-    new_txn: LAYOUT__1085,
+pub const LAYOUT__1096: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1076,
+    new_txn: LAYOUT__1077,
 };
-pub const LAYOUT__1103: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1104,
-    _0: LAYOUT__522,
+pub const LAYOUT__1095: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1096,
+    _0: LAYOUT__514,
 };
-pub const LAYOUT__1102: &ReadAddrLayout = &ReadAddrLayout {
-    addr32: LAYOUT__1103,
+pub const LAYOUT__1094: &ReadAddrLayout = &ReadAddrLayout {
+    addr32: LAYOUT__1095,
 };
-pub const LAYOUT__1099: &BigIntEcallLayout = &BigIntEcallLayout {
-    _super: LAYOUT__1078,
-    mode: LAYOUT__1100,
-    pc: LAYOUT__1102,
+pub const LAYOUT__1091: &BigIntEcallLayout = &BigIntEcallLayout {
+    _super: LAYOUT__1070,
+    mode: LAYOUT__1092,
+    pc: LAYOUT__1094,
 };
-pub const LAYOUT__1098: &BigInt0StateArm0Layout = &BigInt0StateArm0Layout {
-    _super: LAYOUT__1099,
-    _extra0: LAYOUT__1086,
-    _extra1: LAYOUT__1087,
-    _extra2: LAYOUT__1088,
-    _extra3: LAYOUT__1089,
-    _extra4: LAYOUT__1090,
-    _extra5: LAYOUT__1091,
-    _extra6: LAYOUT__1092,
-    _extra7: LAYOUT__1093,
+pub const LAYOUT__1090: &BigInt0StateArm0Layout = &BigInt0StateArm0Layout {
+    _super: LAYOUT__1091,
+    _extra0: LAYOUT__1078,
+    _extra1: LAYOUT__1079,
+    _extra2: LAYOUT__1080,
+    _extra3: LAYOUT__1081,
+    _extra4: LAYOUT__1082,
+    _extra5: LAYOUT__1083,
+    _extra6: LAYOUT__1084,
+    _extra7: LAYOUT__1085,
     _extra8: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 109 },
@@ -17711,7 +17696,7 @@ pub const LAYOUT__1098: &BigInt0StateArm0Layout = &BigInt0StateArm0Layout {
         },
     },
 };
-pub const LAYOUT__1107: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1099: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 117 },
@@ -17721,7 +17706,7 @@ pub const LAYOUT__1107: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1108: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1100: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 119 },
@@ -17731,11 +17716,11 @@ pub const LAYOUT__1108: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1106: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1107,
-    byte1: LAYOUT__1108,
+pub const LAYOUT__1098: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1099,
+    byte1: LAYOUT__1100,
 };
-pub const LAYOUT__1109: &NondetRegLayout5LayoutArray = &[
+pub const LAYOUT__1101: &NondetRegLayout5LayoutArray = &[
     &NondetRegLayout {
         _super: &Reg { offset: 167 },
     },
@@ -17752,7 +17737,7 @@ pub const LAYOUT__1109: &NondetRegLayout5LayoutArray = &[
         _super: &Reg { offset: 171 },
     },
 ];
-pub const LAYOUT__1111: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__1103: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 153 },
@@ -17762,7 +17747,7 @@ pub const LAYOUT__1111: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__1112: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__1104: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 155 },
@@ -17772,17 +17757,17 @@ pub const LAYOUT__1112: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__1110: &NormalizeU32Layout = &NormalizeU32Layout {
-    low16: LAYOUT__1111,
+pub const LAYOUT__1102: &NormalizeU32Layout = &NormalizeU32Layout {
+    low16: LAYOUT__1103,
     low_carry: &NondetRegLayout {
         _super: &Reg { offset: 175 },
     },
-    high16: LAYOUT__1112,
+    high16: LAYOUT__1104,
     high_carry: &NondetRegLayout {
         _super: &Reg { offset: 176 },
     },
 };
-pub const LAYOUT__1113: &OneHot_3_Layout = &OneHot_3_Layout {
+pub const LAYOUT__1105: &OneHot_3_Layout = &OneHot_3_Layout {
     _super: &[
         &NondetRegLayout {
             _super: &Reg { offset: 177 },
@@ -17795,7 +17780,7 @@ pub const LAYOUT__1113: &OneHot_3_Layout = &OneHot_3_Layout {
         },
     ],
 };
-pub const LAYOUT__1115: &ArgU16Layout2LayoutArray = &[
+pub const LAYOUT__1107: &ArgU16Layout2LayoutArray = &[
     &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 157 },
@@ -17813,7 +17798,7 @@ pub const LAYOUT__1115: &ArgU16Layout2LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1116: &ArgU8Layout16LayoutArray = &[
+pub const LAYOUT__1108: &ArgU8Layout16LayoutArray = &[
     &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 121 },
@@ -17943,17 +17928,17 @@ pub const LAYOUT__1116: &ArgU8Layout16LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1117: &MemoryArgLayout8LayoutArray = &[
-    LAYOUT__1086,
-    LAYOUT__1087,
-    LAYOUT__1088,
-    LAYOUT__1089,
-    LAYOUT__1090,
-    LAYOUT__1091,
-    LAYOUT__1092,
-    LAYOUT__1093,
+pub const LAYOUT__1109: &MemoryArgLayout8LayoutArray = &[
+    LAYOUT__1078,
+    LAYOUT__1079,
+    LAYOUT__1080,
+    LAYOUT__1081,
+    LAYOUT__1082,
+    LAYOUT__1083,
+    LAYOUT__1084,
+    LAYOUT__1085,
 ];
-pub const LAYOUT__1118: &CycleArgLayout4LayoutArray = &[
+pub const LAYOUT__1110: &CycleArgLayout4LayoutArray = &[
     &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 109 },
@@ -17987,13 +17972,13 @@ pub const LAYOUT__1118: &CycleArgLayout4LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1114: &_Arguments_BigIntStepBytesLayout = &_Arguments_BigIntStepBytesLayout {
-    arg_u16: LAYOUT__1115,
-    arg_u8: LAYOUT__1116,
-    memory_arg: LAYOUT__1117,
-    cycle_arg: LAYOUT__1118,
+pub const LAYOUT__1106: &_Arguments_BigIntStepBytesLayout = &_Arguments_BigIntStepBytesLayout {
+    arg_u16: LAYOUT__1107,
+    arg_u8: LAYOUT__1108,
+    memory_arg: LAYOUT__1109,
+    cycle_arg: LAYOUT__1110,
 };
-pub const LAYOUT__1123: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__1115: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 157 },
@@ -18003,7 +17988,7 @@ pub const LAYOUT__1123: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__1124: &NondetU16RegLayout = &NondetU16RegLayout {
+pub const LAYOUT__1116: &NondetU16RegLayout = &NondetU16RegLayout {
     arg: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 159 },
@@ -18013,14 +17998,14 @@ pub const LAYOUT__1124: &NondetU16RegLayout = &NondetU16RegLayout {
         },
     },
 };
-pub const LAYOUT__1122: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
+pub const LAYOUT__1114: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
     low0: &NondetRegLayout {
         _super: &Reg { offset: 180 },
     },
     low1: &NondetRegLayout {
         _super: &Reg { offset: 181 },
     },
-    upper_diff: LAYOUT__1123,
+    upper_diff: LAYOUT__1115,
     _0: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 182 },
@@ -18029,10 +18014,10 @@ pub const LAYOUT__1122: &AddrDecomposeBitsLayout = &AddrDecomposeBitsLayout {
             _super: &Reg { offset: 183 },
         },
     },
-    med14: LAYOUT__1124,
+    med14: LAYOUT__1116,
 };
-pub const LAYOUT__1121: &BigIntAddrLayout = &BigIntAddrLayout {
-    _super: LAYOUT__1122,
+pub const LAYOUT__1113: &BigIntAddrLayout = &BigIntAddrLayout {
+    _super: LAYOUT__1114,
     _0: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 184 },
@@ -18042,7 +18027,7 @@ pub const LAYOUT__1121: &BigIntAddrLayout = &BigIntAddrLayout {
         },
     },
 };
-pub const LAYOUT__1129: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1121: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 121 },
@@ -18052,7 +18037,7 @@ pub const LAYOUT__1129: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1130: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1122: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 123 },
@@ -18062,11 +18047,11 @@ pub const LAYOUT__1130: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1128: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1129,
-    byte1: LAYOUT__1130,
+pub const LAYOUT__1120: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1121,
+    byte1: LAYOUT__1122,
 };
-pub const LAYOUT__1132: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1124: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 125 },
@@ -18076,7 +18061,7 @@ pub const LAYOUT__1132: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1133: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1125: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 127 },
@@ -18086,27 +18071,27 @@ pub const LAYOUT__1133: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1131: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1132,
-    byte1: LAYOUT__1133,
+pub const LAYOUT__1123: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1124,
+    byte1: LAYOUT__1125,
 };
-pub const LAYOUT__1127: &SplitU32Layout = &SplitU32Layout {
-    low: LAYOUT__1128,
-    high: LAYOUT__1131,
+pub const LAYOUT__1119: &SplitU32Layout = &SplitU32Layout {
+    low: LAYOUT__1120,
+    high: LAYOUT__1123,
 };
-pub const LAYOUT__1135: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1086,
-    new_txn: LAYOUT__1087,
+pub const LAYOUT__1127: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1078,
+    new_txn: LAYOUT__1079,
 };
-pub const LAYOUT__1134: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1135,
-    _0: LAYOUT__526,
+pub const LAYOUT__1126: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1127,
+    _0: LAYOUT__518,
 };
-pub const LAYOUT__1126: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
-    _super: LAYOUT__1127,
-    _0: LAYOUT__1134,
+pub const LAYOUT__1118: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
+    _super: LAYOUT__1119,
+    _0: LAYOUT__1126,
 };
-pub const LAYOUT__1139: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1131: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 129 },
@@ -18116,7 +18101,7 @@ pub const LAYOUT__1139: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1140: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1132: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 131 },
@@ -18126,11 +18111,11 @@ pub const LAYOUT__1140: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1138: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1139,
-    byte1: LAYOUT__1140,
+pub const LAYOUT__1130: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1131,
+    byte1: LAYOUT__1132,
 };
-pub const LAYOUT__1142: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1134: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 133 },
@@ -18140,7 +18125,7 @@ pub const LAYOUT__1142: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1143: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1135: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 135 },
@@ -18150,27 +18135,27 @@ pub const LAYOUT__1143: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1141: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1142,
-    byte1: LAYOUT__1143,
+pub const LAYOUT__1133: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1134,
+    byte1: LAYOUT__1135,
 };
-pub const LAYOUT__1137: &SplitU32Layout = &SplitU32Layout {
-    low: LAYOUT__1138,
-    high: LAYOUT__1141,
+pub const LAYOUT__1129: &SplitU32Layout = &SplitU32Layout {
+    low: LAYOUT__1130,
+    high: LAYOUT__1133,
 };
-pub const LAYOUT__1145: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1088,
-    new_txn: LAYOUT__1089,
+pub const LAYOUT__1137: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1080,
+    new_txn: LAYOUT__1081,
 };
-pub const LAYOUT__1144: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1145,
-    _0: LAYOUT__530,
+pub const LAYOUT__1136: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1137,
+    _0: LAYOUT__522,
 };
-pub const LAYOUT__1136: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
-    _super: LAYOUT__1137,
-    _0: LAYOUT__1144,
+pub const LAYOUT__1128: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
+    _super: LAYOUT__1129,
+    _0: LAYOUT__1136,
 };
-pub const LAYOUT__1149: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1141: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 137 },
@@ -18180,7 +18165,7 @@ pub const LAYOUT__1149: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1150: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1142: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 139 },
@@ -18190,11 +18175,11 @@ pub const LAYOUT__1150: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1148: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1149,
-    byte1: LAYOUT__1150,
+pub const LAYOUT__1140: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1141,
+    byte1: LAYOUT__1142,
 };
-pub const LAYOUT__1152: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1144: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 141 },
@@ -18204,7 +18189,7 @@ pub const LAYOUT__1152: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1153: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1145: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 143 },
@@ -18214,27 +18199,27 @@ pub const LAYOUT__1153: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1151: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1152,
-    byte1: LAYOUT__1153,
+pub const LAYOUT__1143: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1144,
+    byte1: LAYOUT__1145,
 };
-pub const LAYOUT__1147: &SplitU32Layout = &SplitU32Layout {
-    low: LAYOUT__1148,
-    high: LAYOUT__1151,
+pub const LAYOUT__1139: &SplitU32Layout = &SplitU32Layout {
+    low: LAYOUT__1140,
+    high: LAYOUT__1143,
 };
-pub const LAYOUT__1155: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1090,
-    new_txn: LAYOUT__1091,
+pub const LAYOUT__1147: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1082,
+    new_txn: LAYOUT__1083,
 };
-pub const LAYOUT__1154: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1155,
-    _0: LAYOUT__534,
+pub const LAYOUT__1146: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1147,
+    _0: LAYOUT__526,
 };
-pub const LAYOUT__1146: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
-    _super: LAYOUT__1147,
-    _0: LAYOUT__1154,
+pub const LAYOUT__1138: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
+    _super: LAYOUT__1139,
+    _0: LAYOUT__1146,
 };
-pub const LAYOUT__1159: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1151: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 145 },
@@ -18244,7 +18229,7 @@ pub const LAYOUT__1159: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1160: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1152: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 147 },
@@ -18254,11 +18239,11 @@ pub const LAYOUT__1160: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1158: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1159,
-    byte1: LAYOUT__1160,
+pub const LAYOUT__1150: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1151,
+    byte1: LAYOUT__1152,
 };
-pub const LAYOUT__1162: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1154: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 149 },
@@ -18268,7 +18253,7 @@ pub const LAYOUT__1162: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1163: &NondetU8RegLayout = &NondetU8RegLayout {
+pub const LAYOUT__1155: &NondetU8RegLayout = &NondetU8RegLayout {
     arg: &ArgU8Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 151 },
@@ -18278,86 +18263,86 @@ pub const LAYOUT__1163: &NondetU8RegLayout = &NondetU8RegLayout {
         },
     },
 };
-pub const LAYOUT__1161: &SplitWordLayout = &SplitWordLayout {
-    byte0: LAYOUT__1162,
-    byte1: LAYOUT__1163,
+pub const LAYOUT__1153: &SplitWordLayout = &SplitWordLayout {
+    byte0: LAYOUT__1154,
+    byte1: LAYOUT__1155,
 };
-pub const LAYOUT__1157: &SplitU32Layout = &SplitU32Layout {
-    low: LAYOUT__1158,
-    high: LAYOUT__1161,
+pub const LAYOUT__1149: &SplitU32Layout = &SplitU32Layout {
+    low: LAYOUT__1150,
+    high: LAYOUT__1153,
 };
-pub const LAYOUT__1165: &MemoryIOLayout = &MemoryIOLayout {
-    old_txn: LAYOUT__1092,
-    new_txn: LAYOUT__1093,
+pub const LAYOUT__1157: &MemoryIOLayout = &MemoryIOLayout {
+    old_txn: LAYOUT__1084,
+    new_txn: LAYOUT__1085,
 };
-pub const LAYOUT__1164: &MemoryReadLayout = &MemoryReadLayout {
-    io: LAYOUT__1165,
-    _0: LAYOUT__538,
-};
-pub const LAYOUT__1156: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
-    _super: LAYOUT__1157,
-    _0: LAYOUT__1164,
-};
-pub const LAYOUT__1125: &BigIntReadWords_SuperLayout4LayoutArray =
-    &[LAYOUT__1126, LAYOUT__1136, LAYOUT__1146, LAYOUT__1156];
-pub const LAYOUT__1120: &BigIntReadLayout = &BigIntReadLayout {
-    addr: LAYOUT__1121,
-    words: LAYOUT__1125,
-};
-pub const LAYOUT__1168: &NondetU8RegLayout16LayoutArray = &[
-    LAYOUT__1129,
-    LAYOUT__1130,
-    LAYOUT__1132,
-    LAYOUT__1133,
-    LAYOUT__1139,
-    LAYOUT__1140,
-    LAYOUT__1142,
-    LAYOUT__1143,
-    LAYOUT__1149,
-    LAYOUT__1150,
-    LAYOUT__1152,
-    LAYOUT__1153,
-    LAYOUT__1159,
-    LAYOUT__1160,
-    LAYOUT__1162,
-    LAYOUT__1163,
-];
-pub const LAYOUT__1167: &BigIntWitnessLayout = &BigIntWitnessLayout {
-    _super: LAYOUT__1168,
-};
-pub const LAYOUT__1171: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1135,
-    _0: LAYOUT__526,
-};
-pub const LAYOUT__1170: &BigIntWrite__0_SuperLayout =
-    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1171 };
-pub const LAYOUT__1173: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1145,
+pub const LAYOUT__1156: &MemoryReadLayout = &MemoryReadLayout {
+    io: LAYOUT__1157,
     _0: LAYOUT__530,
 };
-pub const LAYOUT__1172: &BigIntWrite__0_SuperLayout =
-    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1173 };
-pub const LAYOUT__1175: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1155,
-    _0: LAYOUT__534,
+pub const LAYOUT__1148: &BigIntReadWords_SuperLayout = &BigIntReadWords_SuperLayout {
+    _super: LAYOUT__1149,
+    _0: LAYOUT__1156,
 };
-pub const LAYOUT__1174: &BigIntWrite__0_SuperLayout =
-    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1175 };
-pub const LAYOUT__1177: &MemoryWriteLayout = &MemoryWriteLayout {
-    io: LAYOUT__1165,
-    _0: LAYOUT__538,
+pub const LAYOUT__1117: &BigIntReadWords_SuperLayout4LayoutArray =
+    &[LAYOUT__1118, LAYOUT__1128, LAYOUT__1138, LAYOUT__1148];
+pub const LAYOUT__1112: &BigIntReadLayout = &BigIntReadLayout {
+    addr: LAYOUT__1113,
+    words: LAYOUT__1117,
 };
-pub const LAYOUT__1176: &BigIntWrite__0_SuperLayout =
-    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1177 };
-pub const LAYOUT__1169: &BigIntWrite__0_SuperLayout4LayoutArray =
-    &[LAYOUT__1170, LAYOUT__1172, LAYOUT__1174, LAYOUT__1176];
-pub const LAYOUT__1166: &BigIntWriteLayout = &BigIntWriteLayout {
-    _super: LAYOUT__1167,
-    addr: LAYOUT__1121,
-    _1: LAYOUT__1169,
+pub const LAYOUT__1160: &NondetU8RegLayout16LayoutArray = &[
+    LAYOUT__1121,
+    LAYOUT__1122,
+    LAYOUT__1124,
+    LAYOUT__1125,
+    LAYOUT__1131,
+    LAYOUT__1132,
+    LAYOUT__1134,
+    LAYOUT__1135,
+    LAYOUT__1141,
+    LAYOUT__1142,
+    LAYOUT__1144,
+    LAYOUT__1145,
+    LAYOUT__1151,
+    LAYOUT__1152,
+    LAYOUT__1154,
+    LAYOUT__1155,
+];
+pub const LAYOUT__1159: &BigIntWitnessLayout = &BigIntWitnessLayout {
+    _super: LAYOUT__1160,
 };
-pub const LAYOUT__1178: &BigIntStepBytesArm2Layout = &BigIntStepBytesArm2Layout {
-    _super: LAYOUT__1167,
+pub const LAYOUT__1163: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1127,
+    _0: LAYOUT__518,
+};
+pub const LAYOUT__1162: &BigIntWrite__0_SuperLayout =
+    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1163 };
+pub const LAYOUT__1165: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1137,
+    _0: LAYOUT__522,
+};
+pub const LAYOUT__1164: &BigIntWrite__0_SuperLayout =
+    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1165 };
+pub const LAYOUT__1167: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1147,
+    _0: LAYOUT__526,
+};
+pub const LAYOUT__1166: &BigIntWrite__0_SuperLayout =
+    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1167 };
+pub const LAYOUT__1169: &MemoryWriteLayout = &MemoryWriteLayout {
+    io: LAYOUT__1157,
+    _0: LAYOUT__530,
+};
+pub const LAYOUT__1168: &BigIntWrite__0_SuperLayout =
+    &BigIntWrite__0_SuperLayout { _0: LAYOUT__1169 };
+pub const LAYOUT__1161: &BigIntWrite__0_SuperLayout4LayoutArray =
+    &[LAYOUT__1162, LAYOUT__1164, LAYOUT__1166, LAYOUT__1168];
+pub const LAYOUT__1158: &BigIntWriteLayout = &BigIntWriteLayout {
+    _super: LAYOUT__1159,
+    addr: LAYOUT__1113,
+    _1: LAYOUT__1161,
+};
+pub const LAYOUT__1170: &BigIntStepBytesArm2Layout = &BigIntStepBytesArm2Layout {
+    _super: LAYOUT__1159,
     _extra0: &ArgU16Layout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 157 },
@@ -18374,14 +18359,14 @@ pub const LAYOUT__1178: &BigIntStepBytesArm2Layout = &BigIntStepBytesArm2Layout 
             _super: &Reg { offset: 160 },
         },
     },
-    _extra2: LAYOUT__1086,
-    _extra3: LAYOUT__1087,
-    _extra4: LAYOUT__1088,
-    _extra5: LAYOUT__1089,
-    _extra6: LAYOUT__1090,
-    _extra7: LAYOUT__1091,
-    _extra8: LAYOUT__1092,
-    _extra9: LAYOUT__1093,
+    _extra2: LAYOUT__1078,
+    _extra3: LAYOUT__1079,
+    _extra4: LAYOUT__1080,
+    _extra5: LAYOUT__1081,
+    _extra6: LAYOUT__1082,
+    _extra7: LAYOUT__1083,
+    _extra8: LAYOUT__1084,
+    _extra9: LAYOUT__1085,
     _extra10: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 109 },
@@ -18415,22 +18400,22 @@ pub const LAYOUT__1178: &BigIntStepBytesArm2Layout = &BigIntStepBytesArm2Layout 
         },
     },
 };
-pub const LAYOUT__1119: &BigIntStepBytesLayout = &BigIntStepBytesLayout {
-    arm0: LAYOUT__1120,
-    arm1: LAYOUT__1166,
-    arm2: LAYOUT__1178,
+pub const LAYOUT__1111: &BigIntStepBytesLayout = &BigIntStepBytesLayout {
+    arm0: LAYOUT__1112,
+    arm1: LAYOUT__1158,
+    arm2: LAYOUT__1170,
 };
-pub const LAYOUT__1105: &BigIntStepLayout = &BigIntStepLayout {
-    _super: LAYOUT__1078,
-    load_inst_0: LAYOUT__1100,
-    inst_high: LAYOUT__1106,
+pub const LAYOUT__1097: &BigIntStepLayout = &BigIntStepLayout {
+    _super: LAYOUT__1070,
+    load_inst_0: LAYOUT__1092,
+    inst_high: LAYOUT__1098,
     poly_op: &NondetRegLayout {
         _super: &Reg { offset: 165 },
     },
     mem_op: &NondetRegLayout {
         _super: &Reg { offset: 166 },
     },
-    reg_bits: LAYOUT__1109,
+    reg_bits: LAYOUT__1101,
     coeff_bits: &[
         &NondetRegLayout {
             _super: &Reg { offset: 172 },
@@ -18442,11 +18427,11 @@ pub const LAYOUT__1105: &BigIntStepLayout = &BigIntStepLayout {
             _super: &Reg { offset: 174 },
         },
     ],
-    base_addr_u32: LAYOUT__1103,
-    data_addr_u32: LAYOUT__1110,
-    mem_op_one_hot: LAYOUT__1113,
-    _arguments_big_int_step_bytes: LAYOUT__1114,
-    bytes: LAYOUT__1119,
+    base_addr_u32: LAYOUT__1095,
+    data_addr_u32: LAYOUT__1102,
+    mem_op_one_hot: LAYOUT__1105,
+    _arguments_big_int_step_bytes: LAYOUT__1106,
+    bytes: LAYOUT__1111,
     _2: &IsZeroLayout {
         _super: &NondetRegLayout {
             _super: &Reg { offset: 186 },
@@ -18456,20 +18441,20 @@ pub const LAYOUT__1105: &BigIntStepLayout = &BigIntStepLayout {
         },
     },
 };
-pub const LAYOUT__1179: &BigInt0StateArm2Layout = &BigInt0StateArm2Layout {
-    _super: LAYOUT__1078,
-    _extra0: LAYOUT__1082,
-    _extra1: LAYOUT__1083,
-    _extra2: LAYOUT__1084,
-    _extra3: LAYOUT__1085,
-    _extra4: LAYOUT__1086,
-    _extra5: LAYOUT__1087,
-    _extra6: LAYOUT__1088,
-    _extra7: LAYOUT__1089,
-    _extra8: LAYOUT__1090,
-    _extra9: LAYOUT__1091,
-    _extra10: LAYOUT__1092,
-    _extra11: LAYOUT__1093,
+pub const LAYOUT__1171: &BigInt0StateArm2Layout = &BigInt0StateArm2Layout {
+    _super: LAYOUT__1070,
+    _extra0: LAYOUT__1074,
+    _extra1: LAYOUT__1075,
+    _extra2: LAYOUT__1076,
+    _extra3: LAYOUT__1077,
+    _extra4: LAYOUT__1078,
+    _extra5: LAYOUT__1079,
+    _extra6: LAYOUT__1080,
+    _extra7: LAYOUT__1081,
+    _extra8: LAYOUT__1082,
+    _extra9: LAYOUT__1083,
+    _extra10: LAYOUT__1084,
+    _extra11: LAYOUT__1085,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -18695,20 +18680,20 @@ pub const LAYOUT__1179: &BigInt0StateArm2Layout = &BigInt0StateArm2Layout {
         },
     },
 };
-pub const LAYOUT__1180: &BigInt0StateArm3Layout = &BigInt0StateArm3Layout {
-    _super: LAYOUT__1078,
-    _extra0: LAYOUT__1082,
-    _extra1: LAYOUT__1083,
-    _extra2: LAYOUT__1084,
-    _extra3: LAYOUT__1085,
-    _extra4: LAYOUT__1086,
-    _extra5: LAYOUT__1087,
-    _extra6: LAYOUT__1088,
-    _extra7: LAYOUT__1089,
-    _extra8: LAYOUT__1090,
-    _extra9: LAYOUT__1091,
-    _extra10: LAYOUT__1092,
-    _extra11: LAYOUT__1093,
+pub const LAYOUT__1172: &BigInt0StateArm3Layout = &BigInt0StateArm3Layout {
+    _super: LAYOUT__1070,
+    _extra0: LAYOUT__1074,
+    _extra1: LAYOUT__1075,
+    _extra2: LAYOUT__1076,
+    _extra3: LAYOUT__1077,
+    _extra4: LAYOUT__1078,
+    _extra5: LAYOUT__1079,
+    _extra6: LAYOUT__1080,
+    _extra7: LAYOUT__1081,
+    _extra8: LAYOUT__1082,
+    _extra9: LAYOUT__1083,
+    _extra10: LAYOUT__1084,
+    _extra11: LAYOUT__1085,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -18934,20 +18919,20 @@ pub const LAYOUT__1180: &BigInt0StateArm3Layout = &BigInt0StateArm3Layout {
         },
     },
 };
-pub const LAYOUT__1181: &BigInt0StateArm4Layout = &BigInt0StateArm4Layout {
-    _super: LAYOUT__1078,
-    _extra0: LAYOUT__1082,
-    _extra1: LAYOUT__1083,
-    _extra2: LAYOUT__1084,
-    _extra3: LAYOUT__1085,
-    _extra4: LAYOUT__1086,
-    _extra5: LAYOUT__1087,
-    _extra6: LAYOUT__1088,
-    _extra7: LAYOUT__1089,
-    _extra8: LAYOUT__1090,
-    _extra9: LAYOUT__1091,
-    _extra10: LAYOUT__1092,
-    _extra11: LAYOUT__1093,
+pub const LAYOUT__1173: &BigInt0StateArm4Layout = &BigInt0StateArm4Layout {
+    _super: LAYOUT__1070,
+    _extra0: LAYOUT__1074,
+    _extra1: LAYOUT__1075,
+    _extra2: LAYOUT__1076,
+    _extra3: LAYOUT__1077,
+    _extra4: LAYOUT__1078,
+    _extra5: LAYOUT__1079,
+    _extra6: LAYOUT__1080,
+    _extra7: LAYOUT__1081,
+    _extra8: LAYOUT__1082,
+    _extra9: LAYOUT__1083,
+    _extra10: LAYOUT__1084,
+    _extra11: LAYOUT__1085,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -19173,20 +19158,20 @@ pub const LAYOUT__1181: &BigInt0StateArm4Layout = &BigInt0StateArm4Layout {
         },
     },
 };
-pub const LAYOUT__1182: &BigInt0StateArm5Layout = &BigInt0StateArm5Layout {
-    _super: LAYOUT__1078,
-    _extra0: LAYOUT__1082,
-    _extra1: LAYOUT__1083,
-    _extra2: LAYOUT__1084,
-    _extra3: LAYOUT__1085,
-    _extra4: LAYOUT__1086,
-    _extra5: LAYOUT__1087,
-    _extra6: LAYOUT__1088,
-    _extra7: LAYOUT__1089,
-    _extra8: LAYOUT__1090,
-    _extra9: LAYOUT__1091,
-    _extra10: LAYOUT__1092,
-    _extra11: LAYOUT__1093,
+pub const LAYOUT__1174: &BigInt0StateArm5Layout = &BigInt0StateArm5Layout {
+    _super: LAYOUT__1070,
+    _extra0: LAYOUT__1074,
+    _extra1: LAYOUT__1075,
+    _extra2: LAYOUT__1076,
+    _extra3: LAYOUT__1077,
+    _extra4: LAYOUT__1078,
+    _extra5: LAYOUT__1079,
+    _extra6: LAYOUT__1080,
+    _extra7: LAYOUT__1081,
+    _extra8: LAYOUT__1082,
+    _extra9: LAYOUT__1083,
+    _extra10: LAYOUT__1084,
+    _extra11: LAYOUT__1085,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -19412,20 +19397,20 @@ pub const LAYOUT__1182: &BigInt0StateArm5Layout = &BigInt0StateArm5Layout {
         },
     },
 };
-pub const LAYOUT__1183: &BigInt0StateArm6Layout = &BigInt0StateArm6Layout {
-    _super: LAYOUT__1078,
-    _extra0: LAYOUT__1082,
-    _extra1: LAYOUT__1083,
-    _extra2: LAYOUT__1084,
-    _extra3: LAYOUT__1085,
-    _extra4: LAYOUT__1086,
-    _extra5: LAYOUT__1087,
-    _extra6: LAYOUT__1088,
-    _extra7: LAYOUT__1089,
-    _extra8: LAYOUT__1090,
-    _extra9: LAYOUT__1091,
-    _extra10: LAYOUT__1092,
-    _extra11: LAYOUT__1093,
+pub const LAYOUT__1175: &BigInt0StateArm6Layout = &BigInt0StateArm6Layout {
+    _super: LAYOUT__1070,
+    _extra0: LAYOUT__1074,
+    _extra1: LAYOUT__1075,
+    _extra2: LAYOUT__1076,
+    _extra3: LAYOUT__1077,
+    _extra4: LAYOUT__1078,
+    _extra5: LAYOUT__1079,
+    _extra6: LAYOUT__1080,
+    _extra7: LAYOUT__1081,
+    _extra8: LAYOUT__1082,
+    _extra9: LAYOUT__1083,
+    _extra10: LAYOUT__1084,
+    _extra11: LAYOUT__1085,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -19651,20 +19636,20 @@ pub const LAYOUT__1183: &BigInt0StateArm6Layout = &BigInt0StateArm6Layout {
         },
     },
 };
-pub const LAYOUT__1184: &BigInt0StateArm7Layout = &BigInt0StateArm7Layout {
-    _super: LAYOUT__1078,
-    _extra0: LAYOUT__1082,
-    _extra1: LAYOUT__1083,
-    _extra2: LAYOUT__1084,
-    _extra3: LAYOUT__1085,
-    _extra4: LAYOUT__1086,
-    _extra5: LAYOUT__1087,
-    _extra6: LAYOUT__1088,
-    _extra7: LAYOUT__1089,
-    _extra8: LAYOUT__1090,
-    _extra9: LAYOUT__1091,
-    _extra10: LAYOUT__1092,
-    _extra11: LAYOUT__1093,
+pub const LAYOUT__1176: &BigInt0StateArm7Layout = &BigInt0StateArm7Layout {
+    _super: LAYOUT__1070,
+    _extra0: LAYOUT__1074,
+    _extra1: LAYOUT__1075,
+    _extra2: LAYOUT__1076,
+    _extra3: LAYOUT__1077,
+    _extra4: LAYOUT__1078,
+    _extra5: LAYOUT__1079,
+    _extra6: LAYOUT__1080,
+    _extra7: LAYOUT__1081,
+    _extra8: LAYOUT__1082,
+    _extra9: LAYOUT__1083,
+    _extra10: LAYOUT__1084,
+    _extra11: LAYOUT__1085,
     _extra12: &CycleArgLayout {
         count: &NondetRegLayout {
             _super: &Reg { offset: 105 },
@@ -19890,22 +19875,22 @@ pub const LAYOUT__1184: &BigInt0StateArm7Layout = &BigInt0StateArm7Layout {
         },
     },
 };
-pub const LAYOUT__1097: &BigInt0StateLayout = &BigInt0StateLayout {
-    _super: LAYOUT__1078,
-    arm0: LAYOUT__1098,
-    arm1: LAYOUT__1105,
-    arm2: LAYOUT__1179,
-    arm3: LAYOUT__1180,
-    arm4: LAYOUT__1181,
-    arm5: LAYOUT__1182,
-    arm6: LAYOUT__1183,
-    arm7: LAYOUT__1184,
+pub const LAYOUT__1089: &BigInt0StateLayout = &BigInt0StateLayout {
+    _super: LAYOUT__1070,
+    arm0: LAYOUT__1090,
+    arm1: LAYOUT__1097,
+    arm2: LAYOUT__1171,
+    arm3: LAYOUT__1172,
+    arm4: LAYOUT__1173,
+    arm5: LAYOUT__1174,
+    arm6: LAYOUT__1175,
+    arm7: LAYOUT__1176,
 };
-pub const LAYOUT__1076: &BigInt0Layout = &BigInt0Layout {
-    _0: LAYOUT__1077,
-    state: LAYOUT__1078,
-    _arguments_big_int0_state: LAYOUT__1080,
-    state_redef: LAYOUT__1097,
+pub const LAYOUT__1068: &BigInt0Layout = &BigInt0Layout {
+    _0: LAYOUT__1069,
+    state: LAYOUT__1070,
+    _arguments_big_int0_state: LAYOUT__1072,
+    state_redef: LAYOUT__1089,
 };
 pub const LAYOUT__13: &TopInstResultLayout = &TopInstResultLayout {
     _selector: LAYOUT__12,
@@ -19917,11 +19902,11 @@ pub const LAYOUT__13: &TopInstResultLayout = &TopInstResultLayout {
     arm5: LAYOUT__342,
     arm6: LAYOUT__400,
     arm7: LAYOUT__458,
-    arm8: LAYOUT__630,
-    arm9: LAYOUT__695,
-    arm10: LAYOUT__963,
-    arm11: LAYOUT__996,
-    arm12: LAYOUT__1076,
+    arm8: LAYOUT__622,
+    arm9: LAYOUT__687,
+    arm10: LAYOUT__955,
+    arm11: LAYOUT__988,
+    arm12: LAYOUT__1068,
 };
 pub const LAYOUT__7: &TopLayout = &TopLayout {
     cycle: &NondetRegLayout {
@@ -19963,7 +19948,7 @@ pub const LAYOUT__7: &TopLayout = &TopLayout {
     major_onehot: LAYOUT__11,
     inst_result: LAYOUT__13,
 };
-pub const LAYOUT__1186: &DigestRegValues_SuperLayout8LayoutArray = &[
+pub const LAYOUT__1178: &DigestRegValues_SuperLayout8LayoutArray = &[
     &DigestRegValues_SuperLayout {
         low: &NondetRegLayout {
             _super: &Reg { offset: 0 },
@@ -20029,10 +20014,10 @@ pub const LAYOUT__1186: &DigestRegValues_SuperLayout8LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1185: &DigestRegLayout = &DigestRegLayout {
-    values: LAYOUT__1186,
+pub const LAYOUT__1177: &DigestRegLayout = &DigestRegLayout {
+    values: LAYOUT__1178,
 };
-pub const LAYOUT__1188: &DigestRegValues_SuperLayout8LayoutArray = &[
+pub const LAYOUT__1180: &DigestRegValues_SuperLayout8LayoutArray = &[
     &DigestRegValues_SuperLayout {
         low: &NondetRegLayout {
             _super: &Reg { offset: 17 },
@@ -20098,79 +20083,79 @@ pub const LAYOUT__1188: &DigestRegValues_SuperLayout8LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1187: &DigestRegLayout = &DigestRegLayout {
-    values: LAYOUT__1188,
+pub const LAYOUT__1179: &DigestRegLayout = &DigestRegLayout {
+    values: LAYOUT__1180,
 };
-pub const LAYOUT__1190: &DigestRegValues_SuperLayout8LayoutArray = &[
+pub const LAYOUT__1182: &DigestRegValues_SuperLayout8LayoutArray = &[
     &DigestRegValues_SuperLayout {
         low: &NondetRegLayout {
+            _super: &Reg { offset: 33 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 34 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 35 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 36 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 37 },
+        },
+        high: &NondetRegLayout {
             _super: &Reg { offset: 38 },
         },
-        high: &NondetRegLayout {
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
             _super: &Reg { offset: 39 },
         },
-    },
-    &DigestRegValues_SuperLayout {
-        low: &NondetRegLayout {
+        high: &NondetRegLayout {
             _super: &Reg { offset: 40 },
         },
-        high: &NondetRegLayout {
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
             _super: &Reg { offset: 41 },
         },
-    },
-    &DigestRegValues_SuperLayout {
-        low: &NondetRegLayout {
+        high: &NondetRegLayout {
             _super: &Reg { offset: 42 },
         },
-        high: &NondetRegLayout {
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
             _super: &Reg { offset: 43 },
         },
-    },
-    &DigestRegValues_SuperLayout {
-        low: &NondetRegLayout {
+        high: &NondetRegLayout {
             _super: &Reg { offset: 44 },
         },
-        high: &NondetRegLayout {
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
             _super: &Reg { offset: 45 },
         },
-    },
-    &DigestRegValues_SuperLayout {
-        low: &NondetRegLayout {
+        high: &NondetRegLayout {
             _super: &Reg { offset: 46 },
         },
-        high: &NondetRegLayout {
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
             _super: &Reg { offset: 47 },
         },
-    },
-    &DigestRegValues_SuperLayout {
-        low: &NondetRegLayout {
+        high: &NondetRegLayout {
             _super: &Reg { offset: 48 },
-        },
-        high: &NondetRegLayout {
-            _super: &Reg { offset: 49 },
-        },
-    },
-    &DigestRegValues_SuperLayout {
-        low: &NondetRegLayout {
-            _super: &Reg { offset: 50 },
-        },
-        high: &NondetRegLayout {
-            _super: &Reg { offset: 51 },
-        },
-    },
-    &DigestRegValues_SuperLayout {
-        low: &NondetRegLayout {
-            _super: &Reg { offset: 52 },
-        },
-        high: &NondetRegLayout {
-            _super: &Reg { offset: 53 },
         },
     },
 ];
-pub const LAYOUT__1189: &DigestRegLayout = &DigestRegLayout {
-    values: LAYOUT__1190,
+pub const LAYOUT__1181: &DigestRegLayout = &DigestRegLayout {
+    values: LAYOUT__1182,
 };
-pub const LAYOUT__1192: &DigestRegValues_SuperLayout8LayoutArray = &[
+pub const LAYOUT__1184: &DigestRegValues_SuperLayout8LayoutArray = &[
     &DigestRegValues_SuperLayout {
         low: &NondetRegLayout {
             _super: &Reg { offset: 54 },
@@ -20236,10 +20221,79 @@ pub const LAYOUT__1192: &DigestRegValues_SuperLayout8LayoutArray = &[
         },
     },
 ];
-pub const LAYOUT__1191: &DigestRegLayout = &DigestRegLayout {
-    values: LAYOUT__1192,
+pub const LAYOUT__1183: &DigestRegLayout = &DigestRegLayout {
+    values: LAYOUT__1184,
 };
-pub const LAYOUT__1193: &_accumLayout = &_accumLayout {
+pub const LAYOUT__1186: &DigestRegValues_SuperLayout8LayoutArray = &[
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 70 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 71 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 72 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 73 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 74 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 75 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 76 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 77 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 78 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 79 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 80 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 81 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 82 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 83 },
+        },
+    },
+    &DigestRegValues_SuperLayout {
+        low: &NondetRegLayout {
+            _super: &Reg { offset: 84 },
+        },
+        high: &NondetRegLayout {
+            _super: &Reg { offset: 85 },
+        },
+    },
+];
+pub const LAYOUT__1185: &DigestRegLayout = &DigestRegLayout {
+    values: LAYOUT__1186,
+};
+pub const LAYOUT__1187: &_accumLayout = &_accumLayout {
     arg_u8: &Arg_ArgU8Layout {
         val: &Reg { offset: 0 },
     },
@@ -20350,32 +20404,33 @@ pub const LAYOUT_TOP: &TopLayout = &TopLayout {
     inst_result: LAYOUT__13,
 };
 pub const LAYOUT_GLOBAL: &_globalLayout = &_globalLayout {
-    input: LAYOUT__1185,
+    input: LAYOUT__1177,
     is_terminate: &NondetRegLayout {
         _super: &Reg { offset: 16 },
     },
-    output: LAYOUT__1187,
+    output: LAYOUT__1179,
+    povw_nonce: LAYOUT__1181,
     rng: &NondetExtRegLayout {
-        _super: &Reg { offset: 33 },
+        _super: &Reg { offset: 49 },
     },
     shutdown_cycle: &NondetRegLayout {
-        _super: &Reg { offset: 37 },
+        _super: &Reg { offset: 53 },
     },
-    state_in: LAYOUT__1189,
-    state_out: LAYOUT__1191,
+    state_in: LAYOUT__1183,
+    state_out: LAYOUT__1185,
     term_a0high: &NondetRegLayout {
-        _super: &Reg { offset: 70 },
+        _super: &Reg { offset: 86 },
     },
     term_a0low: &NondetRegLayout {
-        _super: &Reg { offset: 71 },
+        _super: &Reg { offset: 87 },
     },
     term_a1high: &NondetRegLayout {
-        _super: &Reg { offset: 72 },
+        _super: &Reg { offset: 88 },
     },
     term_a1low: &NondetRegLayout {
-        _super: &Reg { offset: 73 },
+        _super: &Reg { offset: 89 },
     },
 };
 pub const LAYOUT_MIX: &_mixLayout = &_mixLayout {
-    randomness: LAYOUT__1193,
+    randomness: LAYOUT__1187,
 };

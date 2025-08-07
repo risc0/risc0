@@ -62,7 +62,7 @@ pub fn execute<S: Syscall>(
 
     let mut segments = Vec::new();
     let trace = Vec::new();
-    let result = Executor::new(image, syscall_handler, input_digest, trace).run(
+    let result = Executor::new(image, syscall_handler, input_digest, trace, None).run(
         segment_limit_po2,
         max_insn_cycles,
         max_cycles,

@@ -1,7 +1,7 @@
 [package]
 name = "risc0-sys"
 description = "Generated / Native / HAL code for RISC Zero"
-version = "1.5.0-rc.2"
+version = "1.5.0-rc.3"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }

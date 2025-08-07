@@ -37,16 +37,19 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
     verify::ReadIOP,
 };
-use serde::Serialize;
 
 use crate::{
+    claim::{
+        merge::Merge,
+        receipt::{Assumption, UnionClaim},
+        Unknown,
+    },
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{Assumption, MaybePruned, Merge, UnionClaim},
     sha::Digestible,
-    ProverOpts, ReceiptClaim, Unknown,
+    Assumptions, MaybePruned, Output, ProverOpts, ReceiptClaim, WorkClaim,
 };
 
 use risc0_circuit_recursion::prove::Program;
@@ -69,26 +72,41 @@ pub(crate) static ZKR_REGISTRY: Mutex<ZkrRegistry> = Mutex::new(BTreeMap::new())
 /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
     tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_lift(segment_receipt, opts.clone())?;
+    let mut prover = Prover::new_lift(segment_receipt, ProverOpts::succinct())?;
 
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
-    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: opts.hashfn,
-        control_id: prover.control_id,
-        control_inclusion_proof,
-        claim: claim_decoded.merge(&segment_receipt.claim)?.into(),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    let claim = claim_decoded.merge(&segment_receipt.claim)?;
+
+    make_succinct_receipt(prover, receipt, claim)
+}
+
+/// Run the lift program to create a succinct work claim receipt from a segment receipt.
+///
+/// Similar to [`lift`], but additionally tracks verifiable work by computing the work value
+/// from the segment proof and embedding it in the resulting work claim.
+pub fn lift_povw(
+    segment_receipt: &SegmentReceipt,
+) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+    tracing::debug!("Proving lift_povw: claim = {:#?}", segment_receipt.claim);
+    let mut prover = Prover::new_lift_povw(segment_receipt, ProverOpts::succinct())?;
+
+    let receipt = prover.prover.run()?;
+    let mut out_stream = receipt.out_stream();
+    tracing::debug!("Proving lift_povw finished: out = {out_stream:?}");
+    let claim_decoded = WorkClaim::<ReceiptClaim>::decode_from_seal(&mut out_stream)?;
+    tracing::debug!("Proving lift_povw finished: decoded claim = {claim_decoded:#?}");
+
+    // Merge the full claim from the segment receipt into the decoded work claim.
+    let mut claim = claim_decoded;
+    claim
+        .claim
+        .merge_with(&segment_receipt.claim.clone().into())
+        .context("failed to merge segment receipt claim into decode claim")?;
+
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Run the join program to compress two receipts of the same session into one.
@@ -102,35 +120,62 @@ pub fn join(
     tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
     tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
 
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_join(a, b, opts.clone())?;
+    let mut prover = Prover::new_join(a, b, ProverOpts::succinct())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
 
-    // Construct the expected claim that should have result from the join.
-    let ab_claim = ReceiptClaim {
-        pre: a.claim.as_value()?.pre.clone(),
-        post: b.claim.as_value()?.post.clone(),
-        exit_code: b.claim.as_value()?.exit_code,
-        input: a.claim.as_value()?.input.clone(),
-        output: b.claim.as_value()?.output.clone(),
-    };
-
-    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
     tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: opts.hashfn,
-        control_id: prover.control_id,
-        control_inclusion_proof,
-        claim: claim_decoded.merge(&ab_claim)?.into(),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    // Compute the expected claim and merge it with the decoded claim, checking that they match.
+    let claim = claim_decoded.merge(&a.claim.join(&b.claim)?.value()?)?;
+
+    make_succinct_receipt(prover, receipt, claim)
+}
+
+/// Run the join program to compress two work claim receipts of the same session into one.
+///
+/// Similar to [`join`], but operates on work claim receipts and combines their work values
+/// while ensuring the consumed nonce ranges are disjoint.
+pub fn join_povw(
+    a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>> {
+    tracing::debug!("Proving join_povw: a.claim = {:#?}", a.claim);
+    tracing::debug!("Proving join_povw: b.claim = {:#?}", b.claim);
+
+    let mut prover = Prover::new_join_povw(a, b, false, ProverOpts::succinct())?;
+    let receipt = prover.prover.run()?;
+
+    let claim_decoded = WorkClaim::<ReceiptClaim>::decode_from_seal(&mut receipt.out_stream())?;
+    tracing::debug!("Proving join_povw finished: decoded claim = {claim_decoded:#?}");
+
+    // Compute the expected claim and merge it with the decoded claim, checking that they match.
+    let claim = claim_decoded.merge(&a.claim.join(&b.claim)?.value()?)?;
+
+    make_succinct_receipt(prover, receipt, claim)
+}
+
+/// Run the join_unwrap program to compress two work claim receipts into a regular receipt.
+///
+/// This combines the functionality of [`join_povw`] and [`unwrap_povw`] in a single recursion
+/// step, with reduced latency relative to running a separate unwrap.
+pub fn join_unwrap_povw(
+    a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    tracing::debug!("Proving join_unwrap_povw: a.claim = {:#?}", a.claim);
+    tracing::debug!("Proving join_unwrap_povw: b.claim = {:#?}", b.claim);
+
+    let mut prover = Prover::new_join_povw(a, b, true, ProverOpts::succinct())?;
+    let receipt = prover.prover.run()?;
+
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
+    tracing::debug!("Proving join_unwrap_povw finished: decoded claim = {claim_decoded:#?}");
+
+    // Compute the expected claim and merge it with the decoded claim, checking that they match.
+    let claim = claim_decoded.merge(&a.claim.join(&b.claim)?.value()?.claim.value()?)?;
+
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Run the union program to compress two succinct receipts into one.
@@ -141,16 +186,10 @@ pub fn union(
     a: &SuccinctReceipt<Unknown>,
     b: &SuccinctReceipt<Unknown>,
 ) -> Result<SuccinctReceipt<UnionClaim>> {
-    let a_assumption = Assumption {
-        claim: a.claim.digest(),
-        control_root: a.control_root()?,
-    }
-    .digest();
-    let b_assumption = Assumption {
-        claim: b.claim.digest(),
-        control_root: b.control_root()?,
-    }
-    .digest();
+    // NOTE: This will run into issues if the assumption is made with a control root of zero. Right
+    // now, this is only used for keccak so this issue has not been hit.
+    let a_assumption = a.to_assumption(false)?.digest();
+    let b_assumption = b.to_assumption(false)?.digest();
 
     let ((left_assumption, left_receipt), (right_assumption, right_receipt)) =
         if a_assumption <= b_assumption {
@@ -158,11 +197,11 @@ pub fn union(
         } else {
             ((b_assumption, b), (a_assumption, a))
         };
+
     tracing::debug!("Proving union: left assumption = {:#?}", left_assumption);
     tracing::debug!("Proving union: right assumption = {:#?}", right_assumption);
 
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_union(left_receipt, right_receipt, opts.clone())?;
+    let mut prover = Prover::new_union(left_receipt, right_receipt, ProverOpts::succinct())?;
     let receipt = prover.prover.run()?;
 
     let claim = UnionClaim {
@@ -170,17 +209,7 @@ pub fn union(
         right: right_assumption,
     };
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: opts.hashfn,
-        control_id: prover.control_id,
-        control_inclusion_proof,
-        claim: MaybePruned::Value(claim),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
@@ -193,7 +222,7 @@ pub fn resolve<Claim>(
     assumption: &SuccinctReceipt<Claim>,
 ) -> Result<SuccinctReceipt<ReceiptClaim>>
 where
-    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + Debug,
 {
     tracing::debug!(
         "Proving resolve: conditional.claim = {:#?}",
@@ -204,50 +233,121 @@ where
         assumption.claim,
     );
 
-    // Construct the resolved claim by copying the conditional receipt claim and resolving
-    // the head assumption. If this fails, then so would the resolve program.
-    let mut resolved_claim = conditional
+    let mut prover = Prover::new_resolve(conditional, assumption, ProverOpts::succinct())?;
+    let receipt = prover.prover.run()?;
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
+    tracing::debug!("Proving resolve finished: decoded claim = {claim_decoded:#?}");
+
+    let claim = conditional
         .claim
         .as_value()
         .context("conditional receipt claim is pruned")?
-        .clone();
-    // Open the assumptions on the output of the claim and remove the first assumption.
-    // NOTE: Prover::new_resolve will check that the assumption can actually be resolved with the
-    // given receipts.
-    resolved_claim
-        .output
-        .as_value_mut()
-        .context("conditional receipt output is pruned")?
-        .as_mut()
-        .ok_or_else(|| anyhow!("conditional receipt has empty output and no assumptions"))?
-        .assumptions
-        .as_value_mut()
-        .context("conditional receipt assumptions are pruned")?
-        .0
-        .drain(..1)
-        .next()
-        .ok_or_else(|| anyhow!("cannot resolve assumption from receipt with no assumptions"))?;
+        .resolve(&assumption.claim)
+        .context("failed to compute resolved claim")?
+        .merge(&claim_decoded)
+        .context("failed to merge resolved and decoded claims")?;
 
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
+    make_succinct_receipt(prover, receipt, claim)
+}
+
+/// Run the resolve program to remove an assumption from a conditional work claim receipt.
+///
+/// Similar to [`resolve`], but operates on work claim receipts while preserving the work value
+/// from the conditional receipt.
+pub fn resolve_povw<Claim>(
+    conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    assumption: &SuccinctReceipt<Claim>,
+) -> Result<SuccinctReceipt<WorkClaim<ReceiptClaim>>>
+where
+    Claim: risc0_binfmt::Digestible + Debug,
+{
+    tracing::debug!(
+        "Proving resolve_povw: conditional.claim = {:#?}",
+        conditional.claim,
+    );
+    tracing::debug!(
+        "Proving resolve_povw: assumption.claim = {:#?}",
+        assumption.claim,
+    );
+
+    let mut prover =
+        Prover::new_resolve_povw(conditional, assumption, false, ProverOpts::succinct())?;
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
+    let claim_decoded = WorkClaim::<ReceiptClaim>::decode_from_seal(&mut receipt.out_stream())?;
+    tracing::debug!("Proving resolve_povw finished: decoded claim = {claim_decoded:#?}");
 
-    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
-    tracing::debug!("Proving resolve finished: decoded claim = {claim_decoded:#?}");
+    let claim = conditional
+        .claim
+        .as_value()
+        .context("conditional receipt povw claim is pruned")?
+        .resolve(&assumption.claim)
+        .context("failed to compute resolved claim")?
+        .merge(&claim_decoded)
+        .context("failed to merge resolved and decoded claims")?;
 
-    // Include an inclusion proof for control_id to allow verification against a root.
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
-    Ok(SuccinctReceipt {
-        seal: receipt.seal,
-        hashfn: opts.hashfn,
-        control_id: prover.control_id,
-        control_inclusion_proof,
-        claim: claim_decoded.merge(&resolved_claim)?.into(),
-        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    })
+    make_succinct_receipt(prover, receipt, claim)
+}
+
+/// Run the resolve_unwrap program to remove an assumption from a conditional work claim receipt.
+///
+/// This combines the functionality of [`resolve_povw`] and [`unwrap_povw`] in a single recursion
+/// step, with reduced latency relative to running a separate unwrap.
+pub fn resolve_unwrap_povw<Claim>(
+    conditional: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    assumption: &SuccinctReceipt<Claim>,
+) -> Result<SuccinctReceipt<ReceiptClaim>>
+where
+    Claim: risc0_binfmt::Digestible + Debug,
+{
+    tracing::debug!(
+        "Proving resolve_unwrap_povw: conditional.claim = {:#?}",
+        conditional.claim,
+    );
+    tracing::debug!(
+        "Proving resolve_unwrap_povw: assumption.claim = {:#?}",
+        assumption.claim,
+    );
+
+    let mut prover =
+        Prover::new_resolve_povw(conditional, assumption, true, ProverOpts::succinct())?;
+    let receipt = prover.prover.run()?;
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
+    tracing::debug!("Proving resolve_unwrap_povw finished: decoded claim = {claim_decoded:#?}");
+
+    let claim = conditional
+        .claim
+        .as_value()
+        .context("conditional receipt povw claim is pruned")?
+        .claim
+        .as_value()
+        .context("conditional receipt claim is pruned")?
+        .resolve(&assumption.claim)
+        .context("failed to compute resolved claim")?
+        .merge(&claim_decoded)
+        .context("failed to merge resolved and decoded claims")?;
+
+    make_succinct_receipt(prover, receipt, claim)
+}
+
+/// Run the unwrap program to convert a work claim receipt to a regular receipt claim.
+///
+/// This removes the work tracking wrapper from a receipt, producing a standard receipt
+/// that can be sent to verifiers of the underlying claim.
+pub fn unwrap_povw(
+    a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    tracing::debug!("Proving unwrap_povw: a.claim = {:#?}", a.claim);
+
+    let mut prover = Prover::new_unwrap_povw(a, ProverOpts::succinct())?;
+    let receipt = prover.prover.run()?;
+
+    let claim_decoded = ReceiptClaim::decode(&mut receipt.out_stream())?;
+    tracing::debug!("Proving unwrap_povw finished: decoded claim = {claim_decoded:#?}");
+
+    // Compute the expected claim and merge it with the decoded claim, checking that they match.
+    let claim = MaybePruned::Value(claim_decoded).merge(&a.claim.as_value()?.claim)?;
+
+    make_succinct_receipt(prover, receipt, claim)
 }
 
 /// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
@@ -255,31 +355,33 @@ where
 /// The identity_p254 program is used as the last step in the prover pipeline before running the
 /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
 /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
-pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceipt<ReceiptClaim>> {
+pub fn identity_p254(
+    inner: &SuccinctReceipt<ReceiptClaim>,
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    tracing::debug!("identity_p254");
+
     let opts = ProverOpts::succinct()
         .with_hashfn("poseidon_254".to_string())
         .with_control_ids(vec![BN254_IDENTITY_CONTROL_ID]);
-
-    let mut prover = Prover::new_identity(a, opts.clone())?;
+    let mut prover = Prover::new_identity(inner, opts)?;
     let receipt = prover.prover.run()?;
-    let mut out_stream: VecDeque<u32> = VecDeque::new();
-    out_stream.extend(receipt.output.iter());
-    let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&a.claim)?;
+    let claim =
+        MaybePruned::Value(ReceiptClaim::decode(&mut receipt.out_stream())?).merge(&inner.claim)?;
 
     // Include an inclusion proof for control_id to allow verification against a root.
-    let hashfn = opts.hash_suite()?.hashfn;
-    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&prover.control_id, hashfn.as_ref())?;
+    let hashfn = prover.opts.hash_suite()?.hashfn;
+    let control_inclusion_proof = prover.control_inclusion_proof()?;
     let control_root = control_inclusion_proof.root(&prover.control_id, hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
         control_root,
-        inner_control_root: Some(a.control_root()?),
+        inner_control_root: Some(inner.control_root()?),
         proof_system_info: PROOF_SYSTEM_INFO,
         circuit_info: CircuitImpl::CIRCUIT_INFO,
     };
+
     Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: opts.hashfn,
+        hashfn: prover.opts.hashfn.clone(),
         control_id: prover.control_id,
         control_inclusion_proof,
         claim,
@@ -364,6 +466,23 @@ pub fn get_registered_zkr(control_id: &Digest) -> Result<Program> {
         .unwrap_or_else(|| bail!("Control id {control_id} unregistered"))
 }
 
+/// Private utility to make a SuccinctReceipt from a RecursionReceipt, the Prover and the Claim.
+fn make_succinct_receipt<Claim>(
+    prover: Prover,
+    receipt: RecursionReceipt,
+    claim: impl Into<MaybePruned<Claim>>,
+) -> Result<SuccinctReceipt<Claim>> {
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: prover.opts.hashfn.clone(),
+        control_id: prover.control_id,
+        control_inclusion_proof: prover.control_inclusion_proof()?,
+        claim: claim.into(),
+        // TODO(victor): This should be derived from the ProverOpts instead of being default.
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
+}
+
 /// Prove the test_recursion_circuit. This is useful for testing purposes.
 ///
 /// digest1 will be passed through to the first of the output globals, as the "inner control root".
@@ -373,7 +492,7 @@ pub fn test_zkr(
     digest1: &Digest,
     digest2: &Digest,
     po2: usize,
-) -> Result<SuccinctReceipt<crate::receipt_claim::Unknown>> {
+) -> Result<SuccinctReceipt<crate::claim::Unknown>> {
     use risc0_circuit_recursion::prove::zkr::get_zkr;
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
@@ -423,6 +542,18 @@ pub fn test_zkr(
 pub struct Prover {
     prover: risc0_circuit_recursion::prove::Prover,
     control_id: Digest,
+    opts: ProverOpts,
+}
+
+/// Utility macro to compress repeated checks that a receipt uses the poseidon2 hash.
+macro_rules! ensure_poseidon2 {
+    ($receipt:expr) => {
+        ensure!(
+            $receipt.hashfn == "poseidon2",
+            "recursion programs only supports poseidon2 hashfn; received {}",
+            $receipt.hashfn
+        );
+    };
 }
 
 impl Prover {
@@ -430,12 +561,24 @@ impl Prover {
         Self {
             prover: risc0_circuit_recursion::prove::Prover::new(program, &opts.hashfn),
             control_id,
+            opts,
         }
     }
 
     /// Returns the control id of the recursion VM program being proven.
     pub fn control_id(&self) -> &Digest {
         &self.control_id
+    }
+
+    /// Returns a Merkle inclusion proof of this prover's control ID in the set of allowed IDs.
+    pub fn control_inclusion_proof(&self) -> Result<MerkleProof> {
+        let hashfn = self
+            .opts
+            .hash_suite()
+            .context("ProverOpts contains invalid hashfn")?
+            .hashfn;
+        MerkleGroup::new(self.opts.control_ids.clone())?
+            .get_proof(&self.control_id, hashfn.as_ref())
     }
 
     /// Initialize a recursion prover with the test recursion program. This program is used in
@@ -460,11 +603,21 @@ impl Prover {
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
     pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
-        ensure!(
-            segment.hashfn == "poseidon2",
-            "lift recursion program only supports poseidon2 hashfn; received {}",
-            segment.hashfn
-        );
+        Self::new_lift_inner(segment, opts, false)
+    }
+
+    /// Create a prover job for the lift program that produces a work claim receipt.
+    ///
+    /// Similar to [`Self::new_lift`], but produces a work claim receipt that tracks
+    /// verifiable work by computing the work value from the segment proof.
+    pub fn new_lift_povw(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
+        Self::new_lift_inner(segment, opts, true)
+    }
+
+    /// Instantiate a lift program, with the option of PoVW or not. Note that these programs
+    /// produce different output but have the same inputs and so share the same logic here.
+    fn new_lift_inner(segment: &SegmentReceipt, opts: ProverOpts, povw: bool) -> Result<Self> {
+        ensure_poseidon2!(segment);
 
         let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
             .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
@@ -487,7 +640,10 @@ impl Prover {
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift(po2, &opts.hashfn)?;
+        let (program, control_id) = match povw {
+            false => zkr::lift(po2, &opts.hashfn)?,
+            true => zkr::lift_povw(po2, &opts.hashfn)?,
+        };
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
@@ -506,16 +662,9 @@ impl Prover {
         b: &SuccinctReceipt<Unknown>,
         opts: ProverOpts,
     ) -> Result<Self> {
-        ensure!(
-            a.hashfn == "poseidon2",
-            "union recursion program only supports poseidon2 hashfn; received {}",
-            a.hashfn
-        );
-        ensure!(
-            b.hashfn == "poseidon2",
-            "union recursion program only supports poseidon2 hashfn; received {}",
-            b.hashfn
-        );
+        ensure_poseidon2!(a);
+        ensure_poseidon2!(b);
+
         let hash_suite = Poseidon2HashSuite::new_suite();
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
@@ -524,8 +673,8 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_succinct_receipt(a)?;
-        prover.add_succinct_receipt(b)?;
+        prover.add_succinct_generic_receipt(a)?;
+        prover.add_succinct_generic_receipt(b)?;
         Ok(prover)
     }
 
@@ -539,16 +688,8 @@ impl Prover {
         b: &SuccinctReceipt<ReceiptClaim>,
         opts: ProverOpts,
     ) -> Result<Self> {
-        ensure!(
-            a.hashfn == "poseidon2",
-            "join recursion program only supports poseidon2 hashfn; received {}",
-            a.hashfn
-        );
-        ensure!(
-            b.hashfn == "poseidon2",
-            "join recursion program only supports poseidon2 hashfn; received {}",
-            b.hashfn
-        );
+        ensure_poseidon2!(a);
+        ensure_poseidon2!(b);
 
         let (program, control_id) = zkr::join(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
@@ -565,8 +706,45 @@ impl Prover {
         );
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(a)?;
-        prover.add_segment_receipt(b)?;
+        prover.add_succinct_rv32im_receipt(a)?;
+        prover.add_succinct_rv32im_receipt(b)?;
+        Ok(prover)
+    }
+
+    /// Create a prover job for the join program that operates on work claim receipts.
+    ///
+    /// Similar to [`Self::new_join`], but operates on work claim receipts and combines their
+    /// work values while ensuring the consumed nonce ranges are disjoint. The `unwrap` parameter
+    /// determines whether the result is unwrapped to a regular receipt claim.
+    pub fn new_join_povw(
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        b: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        unwrap: bool,
+        opts: ProverOpts,
+    ) -> Result<Self> {
+        ensure_poseidon2!(a);
+        ensure_poseidon2!(b);
+
+        let (program, control_id) = match unwrap {
+            false => zkr::join_povw(&opts.hashfn)?,
+            true => zkr::join_unwrap_povw(&opts.hashfn)?,
+        };
+        let mut prover = Prover::new(program, control_id, opts);
+
+        // Determine the control root from the receipts themselves, and ensure they are equal. If
+        // the determined control root does not match what the downstream verifier expects, they
+        // will reject.
+        let merkle_root = a.control_root()?;
+        ensure!(
+            merkle_root == b.control_root()?,
+            "merkle roots for a and b do not match: {} != {}",
+            merkle_root,
+            b.control_root()?
+        );
+
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_succinct_work_claim_rv32im_receipt(a)?;
+        prover.add_succinct_work_claim_rv32im_receipt(b)?;
         Ok(prover)
     }
 
@@ -582,18 +760,10 @@ impl Prover {
         opts: ProverOpts,
     ) -> Result<Self>
     where
-        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+        Claim: risc0_binfmt::Digestible + Debug,
     {
-        ensure!(
-            cond.hashfn == "poseidon2",
-            "resolve recursion program only supports poseidon2 hashfn; received {}",
-            cond.hashfn
-        );
-        ensure!(
-            assum.hashfn == "poseidon2",
-            "resolve recursion program only supports poseidon2 hashfn; received {}",
-            assum.hashfn
-        );
+        ensure_poseidon2!(cond);
+        ensure_poseidon2!(assum);
 
         // Load the resolve predicate as a Program and construct the prover.
         let (program, control_id) = zkr::resolve(&opts.hashfn)?;
@@ -603,38 +773,11 @@ impl Prover {
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&cond.control_root()?, DigestKind::Poseidon2);
-        prover.add_segment_receipt(cond)?;
+        prover.add_succinct_rv32im_receipt(cond)?;
 
-        let output = cond
-            .claim
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned claim")?
-            .output
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned output")?
-            .as_ref()
-            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
-            .clone();
+        let (head, tail, output) = check_resolve_assumption(&cond.claim, &assum.claim)?;
 
-        // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
-        // removing the head and leaving the tail of the list.
-        let assumptions = output
-            .assumptions
-            .value()
-            .context("cannot resolve conditional receipt with pruned assumptions")?;
-        let head: Assumption = assumptions
-            .0
-            .first()
-            .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
-            .as_value()
-            .context("cannot resolve conditional receipt with pruned head assumption")?
-            .clone();
-
-        // Ensure that the assumption receipt can resolve the assumption.
-        ensure!(
-            head.claim == assum.claim.digest(),
-            "assumption receipt claim does not match head of assumptions list"
-        );
+        // Ensure that the assumption receipt has the right control root.
         let expected_root = match head.control_root == Digest::ZERO {
             true => cond.control_root()?,
             false => head.control_root,
@@ -644,11 +787,61 @@ impl Prover {
             "assumption receipt control root does not match head of assumptions list"
         );
 
-        let mut assumptions_tail = assumptions;
-        assumptions_tail.resolve(&head.digest())?;
+        prover.add_assumption_receipt(head, assum)?;
+        prover.add_input_digest(&tail.digest(), DigestKind::Sha256);
+        prover.add_input_digest(&output.journal.digest(), DigestKind::Sha256);
+        Ok(prover)
+    }
+
+    /// Create a prover job for the resolve program that operates on work claim receipts.
+    ///
+    /// Similar to [`Self::new_resolve`], but operates on work claim receipts while preserving
+    /// the work value from the conditional receipt. The `unwrap` parameter determines whether
+    /// the result is unwrapped to a regular receipt claim.
+    pub fn new_resolve_povw<Claim>(
+        cond: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        assum: &SuccinctReceipt<Claim>,
+        unwrap: bool,
+        opts: ProverOpts,
+    ) -> Result<Self>
+    where
+        Claim: risc0_binfmt::Digestible + Debug,
+    {
+        ensure_poseidon2!(cond);
+        ensure_poseidon2!(assum);
+
+        // Load the resolve predicate as a Program and construct the prover.
+        let (program, control_id) = match unwrap {
+            false => zkr::resolve_povw(&opts.hashfn)?,
+            true => zkr::resolve_unwrap_povw(&opts.hashfn)?,
+        };
+        let mut prover = Prover::new(program, control_id, opts);
+
+        // Load the input values needed by the predicate.
+        // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
+        // to compute the opening of the conditional receipt claim to the first assumption.
+        prover.add_input_digest(&cond.control_root()?, DigestKind::Poseidon2);
+        prover.add_succinct_work_claim_rv32im_receipt(cond)?;
+
+        let cond_claim = &cond
+            .claim
+            .as_value()
+            .context("cannot resolve assumption receipt with pruned work claim")?
+            .claim;
+        let (head, tail, output) = check_resolve_assumption(cond_claim, &assum.claim)?;
+
+        // Ensure that the assumption receipt has the right control root.
+        let expected_root = match head.control_root == Digest::ZERO {
+            true => cond.control_root()?,
+            false => head.control_root,
+        };
+        ensure!(
+            expected_root == assum.control_root()?,
+            "assumption receipt control root does not match head of assumptions list"
+        );
 
         prover.add_assumption_receipt(head, assum)?;
-        prover.add_input_digest(&assumptions_tail.digest(), DigestKind::Sha256);
+        prover.add_input_digest(&tail.digest(), DigestKind::Sha256);
         prover.add_input_digest(&output.journal.digest(), DigestKind::Sha256);
         Ok(prover)
     }
@@ -658,17 +851,32 @@ impl Prover {
     /// The primary use for this program is to transform the receipt itself, e.g. using a different
     /// hash function for FRI. See [identity_p254] for more information.
     pub fn new_identity(a: &SuccinctReceipt<ReceiptClaim>, opts: ProverOpts) -> Result<Self> {
-        ensure!(
-            a.hashfn == "poseidon2",
-            "identity recursion program only supports poseidon2 hashfn; received {}",
-            a.hashfn
-        );
+        ensure_poseidon2!(a);
 
         let (program, control_id) = zkr::identity(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&a.control_root()?, DigestKind::Poseidon2);
-        prover.add_segment_receipt(a)?;
+        prover.add_succinct_rv32im_receipt(a)?;
+        Ok(prover)
+    }
+
+    /// Create a prover job for the unwrap program that converts a work claim receipt to a
+    /// regular receipt.
+    ///
+    /// This removes the work tracking wrapper from a receipt, producing a standard receipt
+    /// that can be sent to verifiers of the underlying claim.
+    pub fn new_unwrap_povw(
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+        opts: ProverOpts,
+    ) -> Result<Self> {
+        ensure_poseidon2!(a);
+
+        let (program, control_id) = zkr::unwrap_povw(&opts.hashfn)?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        prover.add_input_digest(&a.control_root()?, DigestKind::Poseidon2);
+        prover.add_succinct_work_claim_rv32im_receipt(a)?;
         Ok(prover)
     }
 
@@ -706,10 +914,7 @@ impl Prover {
         &mut self,
         assumption: Assumption,
         receipt: &SuccinctReceipt<Claim>,
-    ) -> Result<()>
-    where
-        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-    {
+    ) -> Result<()> {
         self.add_seal(
             &receipt.seal,
             &receipt.control_id,
@@ -721,8 +926,20 @@ impl Prover {
         Ok(())
     }
 
+    fn add_succinct_work_claim_rv32im_receipt(
+        &mut self,
+        a: &SuccinctReceipt<WorkClaim<ReceiptClaim>>,
+    ) -> Result<()> {
+        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
+        let mut data = Vec::<u32>::new();
+        a.claim.as_value()?.encode_to_seal(&mut data)?;
+        let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
+        self.add_input(bytemuck::cast_slice(&data_fp));
+        Ok(())
+    }
+
     /// Add a receipt covering rv32im execution, and include the first level of ReceiptClaim.
-    fn add_segment_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
+    fn add_succinct_rv32im_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();
         a.claim.as_value()?.encode(&mut data)?;
@@ -732,10 +949,7 @@ impl Prover {
     }
 
     /// Add a receipt for a succinct receipt
-    fn add_succinct_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
-    where
-        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
-    {
+    fn add_succinct_generic_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         // Union program expects an additional boolean to indicate that control root is zero.
         let zero_root = BabyBearElem::new((a.control_root()? == Digest::ZERO) as u32);
@@ -748,4 +962,47 @@ impl Prover {
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         self.prover.run()
     }
+}
+
+fn check_resolve_assumption<Claim>(
+    cond: &MaybePruned<ReceiptClaim>,
+    assum: &MaybePruned<Claim>,
+) -> Result<(Assumption, Assumptions, Output)>
+where
+    Claim: risc0_binfmt::Digestible + Debug,
+{
+    let output = cond
+        .as_value()
+        .context("cannot resolve conditional receipt with pruned claim")?
+        .output
+        .as_value()
+        .context("cannot resolve conditional receipt with pruned output")?
+        .as_ref()
+        .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no output"))?
+        .clone();
+
+    // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
+    // removing the head and leaving the tail of the list.
+    let assumptions = output
+        .assumptions
+        .clone()
+        .value()
+        .context("cannot resolve conditional receipt with pruned assumptions")?;
+    let head: Assumption = assumptions
+        .0
+        .first()
+        .ok_or_else(|| anyhow!("cannot resolve conditional receipt with no assumptions"))?
+        .as_value()
+        .context("cannot resolve conditional receipt with pruned head assumption")?
+        .clone();
+
+    ensure!(
+        head.claim == assum.digest(),
+        "assumption receipt claim does not match head of assumptions list"
+    );
+
+    let mut assumptions_tail = assumptions;
+    assumptions_tail.resolve(&head.digest())?;
+
+    Ok((head, assumptions_tail, output))
 }
