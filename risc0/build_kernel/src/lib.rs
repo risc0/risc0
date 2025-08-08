@@ -206,7 +206,7 @@ impl KernelBuild {
             .flag("--display_error_number")
             .flag("-Xcompiler")
             .flag(
-                "-Wno-missing-braces,-Wno-unused-function,-Wno-unused-pragmas,-Wno-unused-paramter",
+                "-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter",
             )
             .compile(output);
     }

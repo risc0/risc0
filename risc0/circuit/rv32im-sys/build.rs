@@ -71,7 +71,7 @@ fn build_cuda_kernels() {
         .flag("-diag-suppress=2922")
         .flag("-std=c++17")
         .flag("-Xcompiler")
-        .flag("-Wno-unused-function,-Wno-unused-parameter")
+        .flag("-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter")
         .flag("-Xcompiler")
         .flag("-O3")
         .flag("-Xptxas")
