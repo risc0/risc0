@@ -305,9 +305,9 @@ impl<'a> ExecutorImpl<'a> {
             hooks: vec![],
             ecall_metrics,
             povw_job_id: self.env.povw_job_id,
+            execution_time: elapsed,
         };
 
-        tracing::info!("execution time: {elapsed:?}");
         session.log();
 
         assert_eq!(

@@ -39,6 +39,11 @@ message SyscallMetrics {
   SyscallMetric write = 6;
 }
 
+message Duration {
+    uint64 secs = 1;
+    uint32 nanos = 2;
+}
+
 message SessionStats {
   uint64 segments = 1;
   uint64 total_cycles = 2;
@@ -47,6 +52,7 @@ message SessionStats {
   uint64 reserved_cycles = 5;
   EcallMetrics ecall_metrics = 6;
   SyscallMetrics syscall_metrics = 7;
+  Duration execution_time = 8;
 }
 
 message Receipt {

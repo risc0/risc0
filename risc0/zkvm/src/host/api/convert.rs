@@ -391,6 +391,15 @@ impl From<EnumMap<SyscallKind, Option<SyscallMetric>>> for pb::core::SyscallMetr
     }
 }
 
+impl From<std::time::Duration> for pb::core::Duration {
+    fn from(v: std::time::Duration) -> Self {
+        Self {
+            secs: v.as_secs(),
+            nanos: v.subsec_nanos(),
+        }
+    }
+}
+
 impl From<SessionStats> for pb::core::SessionStats {
     fn from(value: SessionStats) -> Self {
         Self {
@@ -402,7 +411,14 @@ impl From<SessionStats> for pb::core::SessionStats {
             reserved_cycles: value.reserved_cycles,
             ecall_metrics: Some(value.ecall_metrics.into()),
             syscall_metrics: Some(value.syscall_metrics.into()),
+            execution_time: value.execution_time.map(|v| v.into()),
         }
+    }
+}
+
+impl From<pb::core::Duration> for std::time::Duration {
+    fn from(value: pb::core::Duration) -> Self {
+        Self::new(value.secs, value.nanos)
     }
 }
 
@@ -418,6 +434,7 @@ impl TryFrom<pb::core::SessionStats> for SessionStats {
             reserved_cycles: value.reserved_cycles,
             ecall_metrics: value.ecall_metrics.map(|v| v.into()).unwrap_or_default(),
             syscall_metrics: value.syscall_metrics.map(|v| v.into()).unwrap_or_default(),
+            execution_time: value.execution_time.map(|v| v.into()),
         })
     }
 }

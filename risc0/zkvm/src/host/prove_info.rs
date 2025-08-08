@@ -18,7 +18,7 @@ use enum_map::{Enum, EnumMap};
 use serde::{Deserialize, Serialize};
 
 use alloc::vec::Vec;
-use core::fmt;
+use core::{fmt, time::Duration};
 
 use crate::{receipt::GenericReceipt, Receipt, ReceiptClaim, WorkClaim};
 use risc0_circuit_rv32im::{EcallKind, EcallMetric};
@@ -89,12 +89,18 @@ pub struct SessionStats {
 
     /// syscall metrics grouped by kind.
     pub syscall_metrics: EnumMap<SyscallKind, Option<SyscallMetric>>,
+
+    /// Execution elapsed time.
+    pub execution_time: Option<Duration>,
 }
 
 impl fmt::Display for SessionStats {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
 
+        if let Some(execution_time) = self.execution_time {
+            writeln!(f, "execution time: {execution_time:?}")?;
+        }
         writeln!(f, "number of segments: {}", self.segments)?;
         writeln!(f, "{} total cycles", self.total_cycles)?;
         writeln!(

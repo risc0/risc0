@@ -55,6 +55,13 @@ pub struct SyscallMetrics {
     pub write: ::core::option::Option<SyscallMetric>,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct Duration {
+    #[prost(uint64, tag = "1")]
+    pub secs: u64,
+    #[prost(uint32, tag = "2")]
+    pub nanos: u32,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SessionStats {
     #[prost(uint64, tag = "1")]
     pub segments: u64,
@@ -70,6 +77,8 @@ pub struct SessionStats {
     pub ecall_metrics: ::core::option::Option<EcallMetrics>,
     #[prost(message, optional, tag = "7")]
     pub syscall_metrics: ::core::option::Option<SyscallMetrics>,
+    #[prost(message, optional, tag = "8")]
+    pub execution_time: ::core::option::Option<Duration>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Receipt {

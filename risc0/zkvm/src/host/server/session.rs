@@ -15,7 +15,7 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{collections::BTreeSet, fs, path::PathBuf};
+use std::{collections::BTreeSet, fs, path::PathBuf, time::Duration};
 
 use anyhow::{ensure, Context, Result};
 use enum_map::EnumMap;
@@ -106,6 +106,9 @@ pub struct Session {
 
     /// Optional PoVW job identifier for tracking verifiable work.
     pub(crate) povw_job_id: Option<PovwJobId>,
+
+    /// The elapsed execution time.
+    pub(crate) execution_time: Duration,
 }
 
 /// The execution trace of a portion of a program.
@@ -308,6 +311,7 @@ impl Session {
                 .iter()
                 .map(|(k, v)| (k, Some(v.clone())))
                 .collect(),
+            execution_time: Some(self.execution_time),
         }
     }
 }

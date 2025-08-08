@@ -150,6 +150,7 @@ impl Prover for BonsaiProver {
                         reserved_cycles: 0,
                         ecall_metrics: Default::default(),
                         syscall_metrics: Default::default(),
+                        execution_time: None,
                     },
                 };
             } else {
