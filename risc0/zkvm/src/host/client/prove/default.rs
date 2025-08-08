@@ -130,6 +130,8 @@ impl Prover for DefaultProver {
             JobStatus::Aborted => bail!("Aborted"),
         };
 
+        prove_info.stats.log_if_risc0_info_set();
+
         Ok(prove_info)
     }
 

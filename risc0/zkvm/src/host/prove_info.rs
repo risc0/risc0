@@ -94,6 +94,18 @@ pub struct SessionStats {
     pub execution_time: Option<Duration>,
 }
 
+impl SessionStats {
+    /// Logs session information at info level if `RISC0_INFO` environment variable is set.
+    #[cfg(feature = "std")]
+    pub fn log_if_risc0_info_set(&self) {
+        if std::env::var_os("RISC0_INFO").is_some() {
+            for line in self.to_string().lines() {
+                tracing::info!("{line}");
+            }
+        }
+    }
+}
+
 impl fmt::Display for SessionStats {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;

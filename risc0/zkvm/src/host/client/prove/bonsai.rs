@@ -214,6 +214,8 @@ impl Prover for BonsaiProver {
             .verify_integrity_with_context(ctx)
             .context("failed to verify Groth16Receipt returned by Bonsai")?;
 
+        succinct_prove_info.stats.log_if_risc0_info_set();
+
         // Return the groth16 receipt, with the stats collected earlier.
         Ok(ProveInfo {
             receipt: groth16_receipt,

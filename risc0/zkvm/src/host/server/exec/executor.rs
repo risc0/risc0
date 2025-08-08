@@ -308,8 +308,6 @@ impl<'a> ExecutorImpl<'a> {
             execution_time: elapsed,
         };
 
-        session.log();
-
         assert_eq!(
             session.total_cycles,
             session.user_cycles + session.paging_cycles + session.reserved_cycles
