@@ -16,7 +16,7 @@ use std::{sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{AssumptionReceipt, Journal, Receipt};
+use crate::{AssumptionReceipt, Journal, Receipt, SessionStats};
 
 /// TODO
 #[derive(Serialize, Deserialize)]
@@ -77,13 +77,7 @@ pub struct ProofResult {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
     /// TODO
-    pub segment_count: usize,
-
-    /// TODO
-    pub user_cycles: u64,
-
-    /// TODO
-    pub total_cycles: u64,
+    pub stats: SessionStats,
 
     /// TODO
     pub journal: Option<Journal>,

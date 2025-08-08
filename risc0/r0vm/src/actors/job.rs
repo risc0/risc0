@@ -420,7 +420,7 @@ impl JobActor {
 
     fn join_root(&self, session: &Arc<Session>) -> Option<Arc<SuccinctReceipt<ReceiptClaim>>> {
         if let Some((range, join_root)) = self.joins.first_key_value() {
-            if range.start == 0 && range.end == session.segment_count {
+            if range.start == 0 && range.end == session.stats.segments {
                 return Some(join_root.clone());
             }
         }

@@ -504,6 +504,7 @@ impl CpuProcessor {
                 Ok(Box::new(NullSegmentRef))
             })?;
 
+            let stats = session.stats();
             let assumptions = session
                 .assumptions
                 .into_iter()
@@ -511,9 +512,7 @@ impl CpuProcessor {
                 .collect();
 
             let session = Session {
-                segment_count: session.segments.len(),
-                user_cycles: session.user_cycles,
-                total_cycles: session.total_cycles,
+                stats,
                 journal: session.journal,
                 assumptions,
             };
