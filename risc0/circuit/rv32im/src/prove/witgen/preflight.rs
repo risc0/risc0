@@ -29,12 +29,13 @@ use crate::{
         pager::{page_idx, PageState, PagedMemory},
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
-        r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
+        r0vm::{LoadOp, Risc0Context, Risc0Machine},
         rv32im::{disasm, Emulator, InsnKind},
         segment::Segment,
         sha2::Sha2State,
     },
     zirgen::circuit::ExtVal,
+    EcallKind,
 };
 
 use super::{

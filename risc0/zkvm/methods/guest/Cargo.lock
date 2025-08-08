@@ -779,6 +779,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "enum-map"
+version = "2.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6866f3bfdf8207509a033af1a75a7b08abda06bbaaeae6669323fd5a097df2e9"
+dependencies = [
+ "enum-map-derive",
+ "serde",
+]
+
+[[package]]
+name = "enum-map-derive"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f282cfdfe92516eb26c2af8589c274c7c17681f5ecc03c18255fe741c6aa64eb"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.96",
+]
+
+[[package]]
 name = "enum-ordinalize"
 version = "4.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1596,6 +1617,7 @@ dependencies = [
  "bit-vec",
  "bytemuck",
  "derive_more",
+ "enum-map",
  "paste",
  "risc0-binfmt",
  "risc0-core",
@@ -1670,6 +1692,7 @@ dependencies = [
  "borsh",
  "bytemuck",
  "derive_more",
+ "enum-map",
  "hex",
  "risc0-binfmt",
  "risc0-circuit-keccak",

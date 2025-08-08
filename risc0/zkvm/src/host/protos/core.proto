@@ -10,12 +10,43 @@ message ProveInfo {
   InnerReceipt work_receipt = 3;
 }
 
+message EcallMetric {
+  uint64 count = 1;
+  uint64 cycles = 2;
+}
+
+message EcallMetrics {
+  EcallMetric bigint = 1;
+  EcallMetric poseidon2 = 2;
+  EcallMetric read = 3;
+  EcallMetric sha2 = 4;
+  EcallMetric terminate = 5;
+  EcallMetric user = 6;
+  EcallMetric write = 7;
+}
+
+message SyscallMetric {
+  uint64 count = 1;
+  uint64 size = 2;
+}
+
+message SyscallMetrics {
+  SyscallMetric keccak = 1;
+  SyscallMetric prove_keccak = 2;
+  SyscallMetric read = 3;
+  SyscallMetric verify_integrity = 4;
+  SyscallMetric verify_integrity2 = 5;
+  SyscallMetric write = 6;
+}
+
 message SessionStats {
   uint64 segments = 1;
   uint64 total_cycles = 2;
   uint64 user_cycles = 3;
   uint64 paging_cycles = 4;
   uint64 reserved_cycles = 5;
+  EcallMetrics ecall_metrics = 6;
+  SyscallMetrics syscall_metrics = 7;
 }
 
 message Receipt {

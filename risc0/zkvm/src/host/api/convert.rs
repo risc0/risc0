@@ -15,16 +15,21 @@
 use std::path::PathBuf;
 
 use anyhow::{anyhow, bail, Context, Result};
+use enum_map::EnumMap;
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
 use risc0_circuit_keccak::KeccakState;
+use risc0_circuit_rv32im::{EcallKind, EcallMetric};
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
     claim::{receipt::UnionClaim, Unknown},
-    host::client::env::ProveKeccakRequest,
+    host::{
+        client::env::ProveKeccakRequest,
+        prove_info::{SyscallKind, SyscallMetric},
+    },
     receipt::{
         merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
         ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
@@ -337,6 +342,55 @@ impl TryFrom<pb::base::SemanticVersion> for semver::Version {
     }
 }
 
+impl From<EcallMetric> for pb::core::EcallMetric {
+    fn from(value: EcallMetric) -> Self {
+        Self {
+            count: value.count,
+            cycles: value.cycles,
+        }
+    }
+}
+
+impl From<EnumMap<EcallKind, Option<EcallMetric>>> for pb::core::EcallMetrics {
+    fn from(value: EnumMap<EcallKind, Option<EcallMetric>>) -> Self {
+        Self {
+            bigint: value[EcallKind::BigInt].clone().map(|v| v.into()),
+            poseidon2: value[EcallKind::Poseidon2].clone().map(|v| v.into()),
+            read: value[EcallKind::Read].clone().map(|v| v.into()),
+            sha2: value[EcallKind::Sha2].clone().map(|v| v.into()),
+            terminate: value[EcallKind::Terminate].clone().map(|v| v.into()),
+            user: value[EcallKind::User].clone().map(|v| v.into()),
+            write: value[EcallKind::Write].clone().map(|v| v.into()),
+        }
+    }
+}
+
+impl From<SyscallMetric> for pb::core::SyscallMetric {
+    fn from(value: SyscallMetric) -> Self {
+        Self {
+            count: value.count,
+            size: value.size,
+        }
+    }
+}
+
+impl From<EnumMap<SyscallKind, Option<SyscallMetric>>> for pb::core::SyscallMetrics {
+    fn from(value: EnumMap<SyscallKind, Option<SyscallMetric>>) -> Self {
+        Self {
+            keccak: value[SyscallKind::Keccak].clone().map(|v| v.into()),
+            prove_keccak: value[SyscallKind::ProveKeccak].clone().map(|v| v.into()),
+            read: value[SyscallKind::Read].clone().map(|v| v.into()),
+            verify_integrity: value[SyscallKind::VerifyIntegrity]
+                .clone()
+                .map(|v| v.into()),
+            verify_integrity2: value[SyscallKind::VerifyIntegrity2]
+                .clone()
+                .map(|v| v.into()),
+            write: value[SyscallKind::Write].clone().map(|v| v.into()),
+        }
+    }
+}
+
 impl From<SessionStats> for pb::core::SessionStats {
     fn from(value: SessionStats) -> Self {
         Self {
@@ -346,6 +400,8 @@ impl From<SessionStats> for pb::core::SessionStats {
             user_cycles: value.user_cycles,
             paging_cycles: value.paging_cycles,
             reserved_cycles: value.reserved_cycles,
+            ecall_metrics: Some(value.ecall_metrics.into()),
+            syscall_metrics: Some(value.syscall_metrics.into()),
         }
     }
 }
@@ -360,7 +416,63 @@ impl TryFrom<pb::core::SessionStats> for SessionStats {
             user_cycles: value.user_cycles,
             paging_cycles: value.paging_cycles,
             reserved_cycles: value.reserved_cycles,
+            ecall_metrics: value.ecall_metrics.map(|v| v.into()).unwrap_or_default(),
+            syscall_metrics: value.syscall_metrics.map(|v| v.into()).unwrap_or_default(),
         })
+    }
+}
+
+impl From<pb::core::EcallMetric> for EcallMetric {
+    fn from(value: pb::core::EcallMetric) -> Self {
+        Self::new(value.count, value.cycles)
+    }
+}
+
+impl From<pb::core::EcallMetrics> for EnumMap<EcallKind, Option<EcallMetric>> {
+    fn from(value: pb::core::EcallMetrics) -> Self {
+        macro_rules! fill {
+            ($m:expr, $key:ident, $field:ident) => {
+                $m[EcallKind::$key] = value.$field.map(|v| v.into());
+            };
+        }
+
+        let mut m = Self::default();
+        fill!(m, BigInt, bigint);
+        fill!(m, Poseidon2, poseidon2);
+        fill!(m, Read, read);
+        fill!(m, Sha2, sha2);
+        fill!(m, Terminate, terminate);
+        fill!(m, User, user);
+        fill!(m, Write, write);
+        m
+    }
+}
+
+impl From<pb::core::SyscallMetric> for SyscallMetric {
+    fn from(value: pb::core::SyscallMetric) -> Self {
+        Self {
+            count: value.count,
+            size: value.size,
+        }
+    }
+}
+
+impl From<pb::core::SyscallMetrics> for EnumMap<SyscallKind, Option<SyscallMetric>> {
+    fn from(value: pb::core::SyscallMetrics) -> Self {
+        macro_rules! fill {
+            ($m:expr, $key:ident, $field:ident) => {
+                $m[SyscallKind::$key] = value.$field.map(|v| v.into());
+            };
+        }
+
+        let mut m = Self::default();
+        fill!(m, Keccak, keccak);
+        fill!(m, ProveKeccak, prove_keccak);
+        fill!(m, Read, read);
+        fill!(m, VerifyIntegrity, verify_integrity);
+        fill!(m, VerifyIntegrity2, verify_integrity2);
+        fill!(m, Write, write);
+        m
     }
 }
 

@@ -148,6 +148,8 @@ impl Prover for BonsaiProver {
                         // These are currently unavailable from Bonsai
                         paging_cycles: 0,
                         reserved_cycles: 0,
+                        ecall_metrics: Default::default(),
+                        syscall_metrics: Default::default(),
                     },
                 };
             } else {
