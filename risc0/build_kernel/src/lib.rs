@@ -205,7 +205,9 @@ impl KernelBuild {
             .flag("-Xcudafe")
             .flag("--display_error_number")
             .flag("-Xcompiler")
-            .flag("-Wno-missing-braces,-Wno-unused-function")
+            .flag(
+                "-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter",
+            )
             .compile(output);
     }
 
