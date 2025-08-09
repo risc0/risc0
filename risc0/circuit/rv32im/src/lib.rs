@@ -47,6 +47,34 @@ pub const MAX_INSN_CYCLES: usize = 25_000;
 /// This is a smaller number used by lower po2's < 15 which can't fit a large bigint program.
 pub const MAX_INSN_CYCLES_LOWER_PO2: usize = 2_000;
 
+#[cfg(not(target_os = "zkvm"))]
+#[derive(Clone, Copy, Debug, enum_map::Enum, Serialize, Deserialize)]
+#[non_exhaustive]
+pub enum EcallKind {
+    BigInt,
+    Poseidon2,
+    Read,
+    Sha2,
+    Terminate,
+    User,
+    Write,
+}
+
+#[cfg(not(target_os = "zkvm"))]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct EcallMetric {
+    pub count: u64,
+    pub cycles: u64,
+}
+
+#[cfg(not(target_os = "zkvm"))]
+impl EcallMetric {
+    pub fn new(count: u64, cycles: u64) -> Self {
+        Self { count, cycles }
+    }
+}
+
 pub fn verify(seal: &[u32]) -> Result<(), VerificationError> {
     tracing::debug!("verify");
 

@@ -24,7 +24,7 @@ use anyhow::{bail, Context as _, Result};
 
 use crate::{
     rpc::{JobInfo, JobStatus, ProofRequest},
-    ExecutorEnv, ProveInfo, Receipt, SessionInfo, SessionStats, VerifierContext,
+    ExecutorEnv, ProveInfo, Receipt, SessionInfo, VerifierContext,
 };
 
 use super::{Executor, Prover, ProverOpts};
@@ -123,18 +123,14 @@ impl Prover for DefaultProver {
             JobStatus::Succeeded(result) => ProveInfo {
                 receipt: Arc::into_inner(result.receipt).unwrap(),
                 work_receipt: None, // TODO(povw): implement PoVW here
-                stats: SessionStats {
-                    segments: result.session.segment_count,
-                    total_cycles: result.session.total_cycles,
-                    user_cycles: result.session.user_cycles,
-                    paging_cycles: 0,
-                    reserved_cycles: 0,
-                },
+                stats: result.session.stats.clone(),
             },
             JobStatus::Failed(err) => bail!(format!("Task error: {err:?}")),
             JobStatus::TimedOut => bail!("TimedOut"),
             JobStatus::Aborted => bail!("Aborted"),
         };
+
+        prove_info.stats.log_if_risc0_info_set();
 
         Ok(prove_info)
     }

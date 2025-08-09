@@ -15,27 +15,25 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{collections::BTreeSet, fs, path::PathBuf};
+use std::{collections::BTreeSet, fs, path::PathBuf, time::Duration};
 
 use anyhow::{ensure, Context, Result};
 use enum_map::EnumMap;
 use risc0_binfmt::{PovwJobId, SystemState};
 use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
-use risc0_circuit_rv32im::{execute::EcallMetric, TerminateState};
+use risc0_circuit_rv32im::{EcallKind, EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{
         client::env::{ProveKeccakRequest, SegmentPath},
-        prove_info::SessionStats,
+        prove_info::{SessionStats, SyscallKind, SyscallMetric},
     },
     mmr::{GuestPeak, MerkleMountainAccumulator},
     sha::Digest,
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
     ReceiptClaim, Work,
 };
-
-use super::exec::syscall::{SyscallKind, SyscallMetric};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -100,14 +98,17 @@ pub struct Session {
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
 
-    /// ecall metrics grouped by name.
-    pub(crate) ecall_metrics: Vec<(String, EcallMetric)>,
+    /// ecall metrics grouped by kind.
+    pub(crate) ecall_metrics: EnumMap<EcallKind, EcallMetric>,
 
     /// syscall metrics grouped by kind.
     pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
 
     /// Optional PoVW job identifier for tracking verifiable work.
     pub(crate) povw_job_id: Option<PovwJobId>,
+
+    /// The elapsed execution time.
+    pub(crate) execution_time: Duration,
 }
 
 /// The execution trace of a portion of a program.
@@ -285,43 +286,8 @@ impl Session {
             return;
         }
 
-        let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
-
-        tracing::info!("number of segments: {}", self.segments.len());
-        tracing::info!("{} total cycles", self.total_cycles);
-        tracing::info!(
-            "{} user cycles ({:.2}%)",
-            self.user_cycles,
-            pct(self.user_cycles)
-        );
-        tracing::info!(
-            "{} paging cycles ({:.2}%)",
-            self.paging_cycles,
-            pct(self.paging_cycles)
-        );
-        tracing::info!(
-            "{} reserved cycles ({:.2}%)",
-            self.reserved_cycles,
-            pct(self.reserved_cycles)
-        );
-
-        tracing::info!("ecalls");
-        let mut ecall_metrics = self.ecall_metrics.clone();
-        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
-        for (name, metric) in ecall_metrics.iter().rev() {
-            tracing::info!(
-                "\t{} {name} calls, {} cycles, ({:.2}%)",
-                metric.count,
-                metric.cycles,
-                pct(metric.cycles)
-            );
-        }
-
-        tracing::info!("syscalls");
-        let mut syscall_metrics: Vec<_> = self.syscall_metrics.iter().collect();
-        syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
-        for (name, metric) in syscall_metrics.iter().rev() {
-            tracing::info!("\t{} {name:?} calls", metric.count);
+        for line in self.stats().to_string().split("\n") {
+            tracing::info!("{line}");
         }
     }
 
@@ -335,6 +301,17 @@ impl Session {
             user_cycles: self.user_cycles,
             paging_cycles: self.paging_cycles,
             reserved_cycles: self.reserved_cycles,
+            ecall_metrics: self
+                .ecall_metrics
+                .iter()
+                .map(|(k, v)| (k, Some(v.clone())))
+                .collect(),
+            syscall_metrics: self
+                .syscall_metrics
+                .iter()
+                .map(|(k, v)| (k, Some(v.clone())))
+                .collect(),
+            execution_time: Some(self.execution_time),
         }
     }
 }

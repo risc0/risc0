@@ -52,6 +52,9 @@ impl Prover for ExternalProver {
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
         let prove_info = client.prove(&env, opts, binary)?;
+
+        prove_info.stats.log_if_risc0_info_set();
+
         prove_info.receipt.verify_integrity_with_context(ctx)?;
 
         Ok(prove_info)

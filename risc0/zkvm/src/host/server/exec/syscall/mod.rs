@@ -36,7 +36,7 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
-use enum_map::{Enum, EnumMap};
+use enum_map::EnumMap;
 use risc0_binfmt::ByteAddr;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
@@ -48,9 +48,12 @@ use risc0_zkvm_platform::syscall::{
 };
 
 use crate::{
-    host::client::{
-        env::{AssumptionReceipts, CoprocessorCallbackRef, ProveKeccakRequest},
-        posix_io::PosixIo,
+    host::{
+        client::{
+            env::{AssumptionReceipts, CoprocessorCallbackRef, ProveKeccakRequest},
+            posix_io::PosixIo,
+        },
+        prove_info::{SyscallKind, SyscallMetric},
     },
     Assumption, AssumptionReceipt, ExecutorEnv,
 };
@@ -115,22 +118,6 @@ pub(crate) trait SyscallContext<'a> {
 }
 
 pub(crate) type AssumptionUsage = Vec<(Assumption, AssumptionReceipt)>;
-
-#[derive(Clone, Debug, Enum)]
-pub(crate) enum SyscallKind {
-    Keccak,
-    ProveKeccak,
-    Read,
-    VerifyIntegrity,
-    VerifyIntegrity2,
-    Write,
-}
-
-#[derive(Clone, Debug, Default)]
-pub(crate) struct SyscallMetric {
-    pub count: u64,
-    pub size: u64,
-}
 
 #[derive(Clone)]
 pub(crate) struct SyscallTable<'a> {

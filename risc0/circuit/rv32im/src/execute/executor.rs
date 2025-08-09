@@ -32,7 +32,7 @@ use risc0_zkp::core::{
 use crate::{
     execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
-    Rv32imV2Claim, TerminateState,
+    EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
 };
 
 use super::{
@@ -40,23 +40,13 @@ use super::{
     pager::{compute_partial_image, PageTraceEvent, PagedMemory, WorkingImage},
     platform::*,
     poseidon2::Poseidon2State,
-    r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
+    r0vm::{LoadOp, Risc0Context, Risc0Machine},
     rv32im::{DecodedInstruction, Emulator, InsnKind},
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
     unlikely, SyscallContext,
 };
-
-#[derive(Clone, Debug, Default)]
-#[non_exhaustive]
-pub struct EcallMetric {
-    pub count: u64,
-    pub cycles: u64,
-}
-
-#[derive(Default)]
-pub struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
@@ -73,7 +63,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     output_digest: Option<Digest>,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
-    ecall_metrics: EcallMetrics,
+    ecall_metrics: EnumMap<EcallKind, EcallMetric>,
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
     povw_job_id: Option<PovwJobId>,
 }
@@ -207,7 +197,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             output_digest: None,
             trace,
             cycles: SessionCycles::default(),
-            ecall_metrics: EcallMetrics::default(),
+            ecall_metrics: Default::default(),
             ring: AllocRingBuffer::new(10),
             povw_job_id,
         }
@@ -434,7 +424,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
-    pub fn take_ecall_metrics(&mut self) -> EcallMetrics {
+    pub fn take_ecall_metrics(&mut self) -> EnumMap<EcallKind, EcallMetric> {
         std::mem::take(&mut self.ecall_metrics)
     }
 
@@ -448,7 +438,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.user_cycles = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
-        self.ecall_metrics = EcallMetrics::default();
+        self.ecall_metrics = Default::default();
     }
 
     fn segment_cycles(&self) -> u32 {
@@ -459,7 +449,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.cycles.user += count as u64;
         self.user_cycles += count as u32;
         if let Some(kind) = ecall {
-            self.ecall_metrics.0[kind].cycles += count as u64;
+            self.ecall_metrics[kind].cycles += count as u64;
         }
     }
 
@@ -567,7 +557,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         kind: EcallKind,
     ) -> Result<()> {
         if cur == CycleState::MachineEcall {
-            self.ecall_metrics.0[kind].count += 1;
+            self.ecall_metrics[kind].count += 1;
         }
         self.inc_user_cycles(1, Some(kind));
         if !self.trace.is_empty() {
@@ -699,16 +689,6 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
 
     fn get_pc(&self) -> u32 {
         self.user_pc.0
-    }
-}
-
-impl From<EcallMetrics> for Vec<(String, EcallMetric)> {
-    fn from(metrics: EcallMetrics) -> Self {
-        metrics
-            .0
-            .into_iter()
-            .map(|(kind, metric)| (format!("{kind:?}"), metric))
-            .collect()
     }
 }
 

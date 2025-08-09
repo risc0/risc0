@@ -448,9 +448,9 @@ async fn stark_status(
 
     let (stats, receipt_url) = if let JobStatus::Succeeded(ref result) = info.status {
         let stats = SessionStats {
-            segments: result.session.segment_count,
-            total_cycles: result.session.total_cycles,
-            cycles: result.session.user_cycles,
+            segments: result.session.stats.segments,
+            total_cycles: result.session.stats.total_cycles,
+            cycles: result.session.stats.user_cycles,
         };
         let receipt_url = format!("http://{hostname}/receipts/stark/receipt/{job_id}");
         (Some(stats), Some(receipt_url))
