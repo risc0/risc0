@@ -168,7 +168,7 @@ extern_readCoefficients(void* ctx, size_t cycle, const char* extra, std::array<F
   //     }
   // }
 
-  throw std::runtime_error("TODO");
+  throw std::runtime_error("extern_readCoefficients not implemented");
 }
 
 void extern_log(void* ctx, size_t cycle, const char* extra, std::vector<Fp> args) {
