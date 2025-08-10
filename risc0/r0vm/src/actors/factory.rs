@@ -56,7 +56,6 @@ pub(crate) struct FactoryActor {
     jobs: HashMap<JobId, ActorRef<JobActor>>,
     workers: MultiIndexWorkerRowMap,
     pending_tasks: MultiIndexTaskRowMap,
-    active_tasks: HashMap<GlobalId, TaskMsg>,
     reply_senders: HashMap<WorkerId, ReplySender<TaskMsg>>,
 }
 
@@ -66,7 +65,6 @@ impl FactoryActor {
             jobs: HashMap::default(),
             workers: Default::default(),
             pending_tasks: Default::default(),
-            active_tasks: HashMap::default(),
             reply_senders: HashMap::default(),
         }
     }
@@ -151,7 +149,6 @@ impl Message<GetTask> for FactoryActor {
                     task: row.task.clone(),
                 };
                 self.pending_tasks.remove_by_global_id(&row.global_id);
-                self.active_tasks.insert(row.global_id, task_msg.clone());
                 return ctx.reply(task_msg);
             }
         }
@@ -199,7 +196,6 @@ impl Message<TaskDoneMsg> for FactoryActor {
         msg: TaskDoneMsg,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        self.active_tasks.remove(&msg.header.global_id);
         if let Some(job) = self.jobs.get(&msg.header.global_id.job_id) {
             ctx.forward(job, msg).await;
         }
