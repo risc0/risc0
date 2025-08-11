@@ -46,7 +46,7 @@ use uuid::Uuid;
 
 use crate::actors::{
     manager::ManagerActor,
-    protocol::{CreateJobRequest, JobStatus, JobStatusRequest, ProofRequest, TaskError},
+    protocol::{JobInfo, JobStatus, JobStatusRequest, ProofRequest, ProofResult, TaskError},
 };
 
 // TODO: Add authn/z to get a userID
@@ -402,13 +402,11 @@ async fn prove_stark(
 
     let reply = state
         .manager
-        .ask(CreateJobRequest {
-            request: ProofRequest {
-                binary,
-                input,
-                assumptions,
-                segment_limit_po2: state.po2,
-            },
+        .ask(ProofRequest {
+            binary,
+            input,
+            assumptions,
+            segment_limit_po2: state.po2,
         })
         .await
         .context("Failed to create job")?;
@@ -424,13 +422,13 @@ async fn stark_status(
     Path(job_id): Path<Uuid>,
     ExtractApiKey(api_key): ExtractApiKey,
 ) -> Result<Json<SessionStatusRes>, AppError> {
-    let info = state
+    let info: JobInfo<ProofResult> = state
         .manager
         .ask(JobStatusRequest { job_id })
         .await
         .context("Failed to get job status")?
-        .info
-        .ok_or(AppError::InternalErr(anyhow!("Invalid job_id")))?;
+        .try_into()
+        .map_err(|_| AppError::InternalErr(anyhow!("Invalid job_id")))?;
 
     let state = if let JobStatus::Running(ref state) = info.status {
         Some(state.clone())

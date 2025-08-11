@@ -23,7 +23,7 @@ use std::{
 use anyhow::{bail, Context as _, Result};
 
 use crate::{
-    rpc::{JobInfo, JobStatus, ProofRequest},
+    rpc::{JobInfo, JobStatus, ProofRequest, ProofResult},
     ExecutorEnv, ProveInfo, Receipt, SessionInfo, VerifierContext,
 };
 
@@ -113,7 +113,7 @@ impl Prover for DefaultProver {
         socket
             .read_exact(&mut buf)
             .context("error receiving RPC body")?;
-        let job_info: JobInfo =
+        let job_info: JobInfo<ProofResult> =
             bincode::deserialize(&buf).context("error deserializing RPC body")?;
 
         tracing::info!("Elapsed time: {:?}", job_info.elapsed_time);

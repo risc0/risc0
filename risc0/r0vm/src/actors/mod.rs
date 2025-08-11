@@ -60,7 +60,7 @@ use self::{
     manager::ManagerActor,
     protocol::{
         factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
-        JobInfo, ProofRequest, TaskKind,
+        JobInfo, ProofRequest, ProofResult, ShrinkWrapRequest, ShrinkWrapResult, TaskKind,
     },
     rpc::{rpc_system, RpcMessageId, RpcSender},
     worker::Worker,
@@ -433,9 +433,21 @@ impl App {
         }
     }
 
-    pub async fn proof_request(&mut self, request: ProofRequest) -> anyhow::Result<JobInfo> {
+    pub async fn proof_request(
+        &mut self,
+        request: ProofRequest,
+    ) -> anyhow::Result<JobInfo<ProofResult>> {
         let reply = self.manager.as_ref().unwrap().ask(request).await?;
-        Ok(reply.info.unwrap())
+        Ok(reply.status.try_into().unwrap())
+    }
+
+    #[allow(dead_code)]
+    pub async fn shrink_wrap_request(
+        &mut self,
+        request: ShrinkWrapRequest,
+    ) -> anyhow::Result<JobInfo<ShrinkWrapResult>> {
+        let reply = self.manager.as_ref().unwrap().ask(request).await?;
+        Ok(reply.status.try_into().unwrap())
     }
 }
 

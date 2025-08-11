@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::net::{Ipv4Addr, SocketAddrV4};
-use std::time::Duration;
+use std::{
+    net::{Ipv4Addr, SocketAddrV4},
+    time::Duration,
+};
 
+use assert_matches::assert_matches;
 use risc0_zkvm::DevModeDelay;
 use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
-    protocol::{JobStatus, ProofRequest, TaskKind},
+    protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
     App, PoolConfig, WorkerConfig,
 };
 
@@ -31,6 +34,7 @@ const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {
     join: Duration::from_millis(250),
     union: Duration::from_millis(250),
     resolve: Duration::from_millis(250),
+    shrink_wrap_groth16: Duration::from_millis(3_760),
 };
 
 // const PROFILE_L40S: DevModeDelay = DevModeDelay {
@@ -48,6 +52,7 @@ async fn do_test(remote: bool) {
         TaskKind::ProveSegment,
         TaskKind::Lift,
         TaskKind::Join,
+        TaskKind::ShrinkWrap,
     ];
 
     let storage_root = assert_fs::TempDir::new().unwrap();
@@ -85,9 +90,18 @@ async fn do_test(remote: bool) {
 
     let info = app.proof_request(request).await.unwrap();
 
-    tracing::info!("{info:#?}");
+    tracing::info!("proof_request result = {info:#?}");
 
-    assert!(matches!(info.status, JobStatus::Succeeded(_result)));
+    let result = assert_matches!(info.status, JobStatus::Succeeded(r) => r);
+
+    let request = ShrinkWrapRequest {
+        kind: ShrinkWrapKind::Groth16,
+        receipt: (*result.receipt).clone(),
+    };
+
+    let info = app.shrink_wrap_request(request).await.unwrap();
+
+    tracing::info!("shrink_wrap_request result = {info:#?}");
 
     app.stop().await;
 }
