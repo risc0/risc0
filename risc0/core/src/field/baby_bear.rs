@@ -26,7 +26,7 @@ use core::{
 
 use bytemuck::{CheckedBitPattern, NoUninit, Zeroable};
 
-use crate::field::{self, Elem as FieldElem};
+use crate::field;
 
 /// Definition of this field for operations that operate on the baby
 /// bear field and its 4th degree extension.
@@ -749,7 +749,7 @@ impl ops::Mul<ExtElem> for Elem {
 
 // Now we get to the interesting case of multiplication. Basically,
 // multiply out the polynomial representations, and then reduce module
-// `x^4 - B`, which means powers >= 4 get shifted back 4 and
+// `x^4 + BETA` (i.e., `x^4 = -BETA`), which means powers >= 4 get shifted back 4 and
 // multiplied by `-beta`. We could write this as a double loops with
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.
