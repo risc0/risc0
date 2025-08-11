@@ -18,7 +18,7 @@ jobs:
       RUST_LOG: info
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/rustup
 
       - run: cargo install --force --path risc0/cargo-risczero --locked
