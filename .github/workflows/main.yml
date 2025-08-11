@@ -44,7 +44,7 @@ jobs:
       test-crates: ${{ steps.filter.outputs.test-crates }}
       web: ${{ steps.filter.outputs.web }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: risc0/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
         id: filter
         with:
@@ -134,7 +134,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Full history is required by license-check.py
           fetch-depth: 0
@@ -203,7 +203,7 @@ jobs:
       RISC0_SKIP_BUILD: 1
       RISC0_SKIP_BUILD_KERNELS: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
@@ -256,7 +256,7 @@ jobs:
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
@@ -319,7 +319,7 @@ jobs:
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
@@ -389,7 +389,7 @@ jobs:
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - if: matrix.feature == 'cuda'
@@ -423,10 +423,10 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: 'risc0'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: risc0/RustCrypto-crypto-bigint
           path: 'RustCrypto-crypto-bigint'
@@ -447,7 +447,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
@@ -468,7 +468,7 @@ jobs:
       # nightly-2025-05-09 corresponds to 1.88
       NIGHTLY_RUST_TOOLCHAIN: nightly-2025-05-09
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/rustup
         with:
           toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
@@ -484,7 +484,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo check
@@ -504,7 +504,7 @@ jobs:
           - os: macOS
             arch: ARM64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
@@ -532,7 +532,7 @@ jobs:
           - os: macOS
             arch: ARM64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo install --force --path risc0/cargo-risczero --locked
@@ -565,7 +565,7 @@ jobs:
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
       - uses: ./.github/actions/rustup
@@ -591,7 +591,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           lfs: true
       - run: git lfs pull
@@ -617,7 +617,7 @@ jobs:
     needs: changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: 🍞 Setup Bun
         uses: risc0/setup-bun@v1.2.1
         with:
@@ -647,7 +647,7 @@ jobs:
       RISC0_DEV_MODE: true
       DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: ./.github/actions/protoc
@@ -682,7 +682,7 @@ jobs:
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
