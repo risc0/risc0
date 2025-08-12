@@ -501,7 +501,7 @@ fn real_cargo_vendor(path: &Path) -> Result<()> {
     Ok(())
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 enum VersionOrNone {
     Version(Version),
     None,
@@ -544,7 +544,7 @@ impl fmt::Display for VersionOrNone {
 }
 
 #[serde_as]
-#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
 struct SemverBaselines {
     #[serde_as(as = "BTreeMap<_, DisplayFromStr>")]
     versions: BTreeMap<String, VersionOrNone>,
@@ -625,11 +625,13 @@ fn run_inner(
 ) -> Result<()> {
     let packages = find_publishable_packages_with_lib(workspace_root)?;
 
-    let input_baselines = (!args.update)
-        .then(|| read_semver_lock_file(workspace_root))
-        .transpose()?
-        .flatten()
-        .unwrap_or_default();
+    let semver_lock_file = read_semver_lock_file(workspace_root)?.unwrap_or_default();
+
+    let input_baselines = if !args.update {
+        semver_lock_file.clone()
+    } else {
+        Default::default()
+    };
 
     let mut skipped_packages = BTreeSet::new();
     let mut semver_output = SemverOutput::default();
@@ -653,10 +655,10 @@ fn run_inner(
                 .map(|p| (p, VersionOrNone::None)),
         );
     }
-    if args.locked && output_baselines != input_baselines {
+    if args.locked && output_baselines != semver_lock_file {
         bail!(
             "`--locked` provided and baselines don't match: \
-                output != input: {output_baselines} != {input_baselines}"
+                output != input: {output_baselines} != {semver_lock_file}"
         );
     }
 
@@ -1244,7 +1246,8 @@ mod tests {
             )
             .unwrap_err()
             .to_string(),
-            "`--locked` provided and baselines don't match: output != input: {foobar: 2.1.0} != {}"
+            "`--locked` provided and baselines don't match: output != input: \
+            {foobar: 2.1.0} != {foobar: 1.0.0}"
         );
     }
 
