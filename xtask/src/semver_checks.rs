@@ -434,12 +434,12 @@ fn check_for_major_version_bump_due_to_version_req_in_single_package(
 /// packages have a bump of a version requirement for another risc0 crate, we need to make sure
 /// that crates has also had a major version bump.
 fn check_for_major_version_bump_due_to_version_req(
-    baseline_packages_without_major_version_bump: &Vec<String>,
+    baseline_package_without_breaking_changes: &Vec<String>,
     packages: &BTreeMap<String, cargo_metadata::Package>,
     vendor_packages: &Path,
 ) -> Result<()> {
     let mut errors = vec![];
-    for package_name in baseline_packages_without_major_version_bump {
+    for package_name in baseline_package_without_breaking_changes {
         let res = check_for_major_version_bump_due_to_version_req_in_single_package(
             packages,
             package_name,
@@ -604,6 +604,13 @@ fn write_semver_lock_file(workspace_root: &Path, baselines: &SemverBaselines) ->
     Ok(())
 }
 
+fn semver_compatible(a: &semver::Version, b: &semver::Version) -> bool {
+    if !a.pre.is_empty() || !b.pre.is_empty() {
+        return false;
+    }
+    a.major == b.major
+}
+
 /// Entrypoint for the tests. See the module doc-comment about what it does.
 ///
 /// `workspace_root`         : The path to the workspace we are checking
@@ -655,11 +662,11 @@ fn run_inner(
 
     write_semver_lock_file(workspace_root, &output_baselines)?;
 
-    let baseline_packages_without_major_version_bump = semver_output
+    let baseline_package_without_breaking_changes = semver_output
         .crate_versions
         .iter()
         .filter_map(|(name, versions)| {
-            (versions.current.major <= versions.baseline.major)
+            (semver_compatible(&versions.current, &versions.baseline))
                 .then_some((name.clone(), versions.baseline.clone()))
         })
         .collect::<Vec<_>>();
@@ -668,7 +675,7 @@ fn run_inner(
     let vendored_packages = vendor_packages(
         cargo_vendor,
         &tempdir,
-        &baseline_packages_without_major_version_bump,
+        &baseline_package_without_breaking_changes,
     )?;
 
     let unbumped_packages: Vec<_> = semver_output
@@ -684,7 +691,7 @@ fn run_inner(
     }
 
     check_for_major_version_bump_due_to_version_req(
-        &baseline_packages_without_major_version_bump
+        &baseline_package_without_breaking_changes
             .into_iter()
             .map(|(p, _)| p)
             .collect(),
