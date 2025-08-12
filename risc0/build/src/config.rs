@@ -22,6 +22,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::DEFAULT_DOCKER_TAG;
 
+const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
+
 /// Options for configuring a docker build environment.
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Builder)]
 #[builder(default)]
@@ -101,14 +103,34 @@ pub struct GuestOptions {
     pub use_docker: Option<DockerOptions>,
 
     /// Override the default kernel ELF to be used for execution.
-    #[builder(setter(strip_option))]
+    #[builder(setter(into, strip_option))]
     pub kernel: Option<Vec<u8>>,
+
+    /// Use specified toolchain.
+    #[builder(setter(into, strip_option))]
+    pub toolchain: Option<String>,
+
+    /// Use specified target.
+    #[builder(setter(into, strip_option))]
+    pub target: Option<String>,
 }
 
 impl GuestOptions {
     /// Get the kernel ELF to be used for execution.
     pub fn kernel(&self) -> Vec<u8> {
         self.kernel.clone().unwrap_or_else(|| V1COMPAT_ELF.to_vec())
+    }
+
+    /// Get the toolchain to be used for building guest programs.
+    pub fn toolchain(&self) -> String {
+        self.toolchain.to_owned().unwrap_or("risc0".into())
+    }
+
+    /// Get the target to be used for building guest programs.
+    pub fn target(&self) -> String {
+        self.target
+            .to_owned()
+            .unwrap_or(RISC0_TARGET_TRIPLE.to_string())
     }
 }
 
