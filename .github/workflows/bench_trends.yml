@@ -50,7 +50,7 @@ jobs:
       FEATURE: ${{ matrix.feature }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda

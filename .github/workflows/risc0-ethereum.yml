@@ -30,7 +30,7 @@ jobs:
     outputs:
       test: ${{ steps.filter.outputs.test }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: risc0/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
         id: filter
         with:
@@ -70,7 +70,7 @@ jobs:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       # Checkout risc0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: 'risc0'
       # Determine the branch for risc0-ethereum
@@ -83,7 +83,7 @@ jobs:
           fi
       # Checkout risc0-ethereum
       - name: Checkout risc0-ethereum
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: 'risc0/risc0-ethereum'
           token: ${{ secrets.GITHUB_TOKEN }}

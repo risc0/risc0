@@ -45,7 +45,7 @@ jobs:
       EXTRA: ""
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
@@ -89,7 +89,7 @@ jobs:
 
     steps:
       - name: Checkout gh-pages repository branch ${{ github.base_ref || github.ref_name }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: risc0/ghpages
           token: ${{ secrets.BENCHMARK_TOKEN }}
