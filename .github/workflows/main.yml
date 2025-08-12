@@ -97,6 +97,7 @@ jobs:
               - compact_proof/**
               - external/**
               - risc0/**
+              - xtask/**
             test-crates:
               - *base
               - risc0/**
