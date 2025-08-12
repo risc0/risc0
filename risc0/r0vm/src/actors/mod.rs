@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod config;
 pub(crate) mod factory;
 pub(crate) mod job;
 pub(crate) mod manager;
