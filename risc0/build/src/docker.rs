@@ -1,4 +1,4 @@
-// Copyright 2025 RISC Zero, Inc.
+\// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -77,9 +77,11 @@ pub(crate) fn build_guest_package_docker(
         .root_dir()
         .canonicalize()?;
 
+    let target = guest_info.options.target();
+
     eprintln!("Docker context: {src_dir:?}");
     eprintln!(
-        "Building ELF binaries in {} for {RISC0_TARGET_TRIPLE} target...",
+        "Building ELF binaries in {} for {target} target...",
         pkg.name
     );
 
@@ -103,7 +105,7 @@ pub(crate) fn build_guest_package_docker(
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
         create_dockerfile(rel_manifest_path, temp_path, guest_info)?;
         let target_dir = target_dir.as_ref();
-        let target_dir = target_dir.join(RISC0_TARGET_TRIPLE).join("docker");
+        let target_dir = target_dir.join(target).join("docker");
         build(&src_dir, temp_path, &target_dir)?;
     }
 
@@ -115,13 +117,14 @@ pub(crate) fn build_guest_package_docker(
 /// Overwrites if a dockerfile already exists.
 fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestInfo) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
-    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata, true);
+    let encoded_rust_flags = encode_rust_flags(guest_info, true);
     let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
+    let target = guest_info.options.target();
 
     let common_args = vec![
         "--locked",
         "--target",
-        RISC0_TARGET_TRIPLE,
+        &target,
         "--manifest-path",
         "$CARGO_MANIFEST_PATH",
     ];
@@ -174,7 +177,7 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .run(&fetch_cmd)
         .run(&build_cmd);
 
-    let src_dir = format!("/src/target/{RISC0_TARGET_TRIPLE}/release");
+    let src_dir = format!("/src/target/{target}/release");
     let binary = DockerFile::new()
         .comment("export stage")
         .from_alias("export", "scratch")
