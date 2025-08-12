@@ -12,4 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(feature = "risc0-linux")]
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
