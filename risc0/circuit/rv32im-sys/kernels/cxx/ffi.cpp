@@ -206,7 +206,7 @@ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len) {
 }
 
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal) {
-  std::cout << "hostWrite\n";
+  // std::cout << "hostWrite\n";
   size_t txnIdx = ctx.preflight.cycles[ctx.cycle].txnIdx;
   return ctx.preflight.txns[txnIdx].word;
 }
