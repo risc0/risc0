@@ -20,7 +20,7 @@ constexpr size_t kFriFold = 16;
 /// Compute `ceil(log_2(in))`, i.e. find the smallest value `out` such that `2^out >= in`.
 __device__ inline constexpr size_t log2Ceil(size_t in) {
   size_t r = 0;
-  while ((1uz << r) < in) {
+  while ((static_cast<size_t>(1) << r) < in) {
     r++;
   }
   return r;
