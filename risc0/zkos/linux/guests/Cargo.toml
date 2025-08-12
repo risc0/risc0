@@ -1,0 +1,16 @@
+[package]
+name = "risc0-zkos-linux-guests"
+version = { workspace = true }
+edition = { workspace = true }
+
+[build-dependencies]
+risc0-build = { workspace = true }
+
+[package.metadata.release]
+release = false
+
+[package.metadata.risc0]
+methods = ["hello"]
+
+[features]
+risc0-linux = []
