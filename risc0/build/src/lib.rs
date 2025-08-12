@@ -28,7 +28,7 @@ use std::{
     default::Default,
     env,
     ffi::OsStr,
-    fmt::Write as _,
+    fmt::{Display, Write as _},
     fs::{self, File},
     io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
@@ -327,6 +327,7 @@ fn guest_methods<G: GuestBuilder>(
     guest_info: &GuestInfo,
     profile: &str,
 ) -> Vec<G> {
+    let target_triple = guest_info.options.target();
     pkg.targets
         .iter()
         .filter(|target| target.is_bin())
@@ -342,7 +343,7 @@ fn guest_methods<G: GuestBuilder>(
                 &target.name,
                 target_dir
                     .as_ref()
-                    .join(RISC0_TARGET_TRIPLE)
+                    .join(&target_triple)
                     .join(profile)
                     .join(&target.name)
                     .to_str()
@@ -374,18 +375,6 @@ fn cpp_toolchain() -> Option<PathBuf> {
     Some(path)
 }
 
-fn rust_toolchain() -> PathBuf {
-    let rzup = rzup::Rzup::new().unwrap();
-    let Some((version, path)) = rzup
-        .get_default_version(&rzup::Component::RustToolchain)
-        .unwrap()
-    else {
-        panic!("Risc Zero Rust toolchain not found. Try running `rzup install rust`");
-    };
-    println!("Using Rust toolchain version {version}");
-    path
-}
-
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
 #[stability::unstable]
@@ -396,11 +385,20 @@ pub fn cargo_command(subcmd: &str, rustc_flags: &[String]) -> Command {
 }
 
 pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Command {
-    let rustc = rust_toolchain().join("bin/rustc");
-    println!("Using rustc: {}", rustc.display());
+    let toolchain = guest_info.options.toolchain();
+    let target = guest_info.options.target();
+    let rustc = sanitized_cmd("rustup")
+        .arg(format!("+{toolchain}"))
+        .args(["which", "rustc"])
+        .output()
+        .expect("rustup failed to find risc0 toolchain")
+        .stdout;
+    let rustc = String::from_utf8(rustc).unwrap();
+    let rustc = rustc.trim();
+    println!("Using rustc: {rustc}");
 
     let mut cmd = sanitized_cmd("cargo");
-    let mut args = vec![subcmd, "--target", RISC0_TARGET_TRIPLE];
+    let mut args = vec![subcmd, "--target", &target];
 
     if !get_env_var("RISC0_BUILD_LOCKED").is_empty() {
         args.push("--locked");
@@ -415,7 +413,7 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
-    let encoded_rust_flags = encode_rust_flags(&guest_info.metadata, false);
+    let encoded_rust_flags = encode_rust_flags(guest_info, false);
 
     if !cpp_toolchain_override() {
         if let Some(toolchain_path) = cpp_toolchain() {
@@ -455,56 +453,88 @@ fn get_rust_toolchain_version() -> semver::Version {
     version
 }
 
+struct CompilerFlags {
+    flags: Vec<String>,
+    escape: bool,
+}
+
+impl CompilerFlags {
+    fn new(flags: Vec<String>, escape: bool) -> Self {
+        Self { flags, escape }
+    }
+
+    fn push<T: ToString>(&mut self, str: T) {
+        self.flags.push(str.to_string());
+    }
+}
+
+impl Display for CompilerFlags {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = self
+            .flags
+            .iter()
+            .map(|x| {
+                if self.escape {
+                    x.escape_default().to_string()
+                } else {
+                    x.to_string()
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("\x1f");
+        write!(f, "{str}")
+    }
+}
+
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
-pub(crate) fn encode_rust_flags(guest_meta: &GuestMetadata, escape_special_chars: bool) -> String {
+pub(crate) fn encode_rust_flags(guest_info: &GuestInfo, escape_special_chars: bool) -> String {
+    let guest_meta = &guest_info.metadata;
+    let guest_options = &guest_info.options;
+
     // llvm changed `loweratomic` to `lower-atomic`
-    let lower_atomic = if get_rust_toolchain_version() > semver::Version::new(1, 81, 0) {
+    let lower_atomic = if get_rust_toolchain_version() > semver::Version::new(1, 81, 0)
+        || guest_options.toolchain() == "risc0-linux"
+    {
         "passes=lower-atomic"
     } else {
         "passes=loweratomic"
     };
-    let rustc_flags = guest_meta.rustc_flags.clone().unwrap_or_default();
-    let rustc_flags: Vec<_> = rustc_flags.iter().map(|s| s.as_str()).collect();
-    let text_addr = if guest_meta.kernel {
-        KERNEL_START_ADDR.0
-    } else {
-        memory::TEXT_START
-    };
-    [
-        // Append other rust flags
-        rustc_flags.as_slice(),
-        &[
-            // Replace atomic ops with nonatomic versions since the guest is single threaded.
-            "-C",
-            lower_atomic,
-            // Specify where to start loading the program in
-            // memory.  The clang linker understands the same
-            // command line arguments as the GNU linker does; see
-            // https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_mono/ld.html#SEC3
-            // for details.
-            "-C",
-            &format!("link-arg=-Ttext={text_addr:#010x}"),
-            // Apparently not having an entry point is only a linker warning(!), so
-            // error out in this case.
-            "-C",
-            "link-arg=--fatal-warnings",
-            "-C",
-            "panic=abort",
-            "--cfg",
-            "getrandom_backend=\"custom\"",
-        ],
-    ]
-    .concat()
-    .iter()
-    .map(|x| {
-        if escape_special_chars {
-            x.escape_default().to_string()
+
+    let mut rustc_flags = CompilerFlags::new(
+        guest_meta.rustc_flags.clone().unwrap_or_default(),
+        escape_special_chars,
+    );
+
+    // Replace atomic ops with nonatomic versions since the guest is single threaded.
+    rustc_flags.push("-C");
+    rustc_flags.push(lower_atomic);
+
+    // Apparently not having an entry point is only a linker warning(!), so
+    // error out in this case.
+    rustc_flags.push("-C");
+    rustc_flags.push("link-arg=--fatal-warnings");
+
+    if guest_options.toolchain() != "risc0-linux" {
+        let text_addr = if guest_meta.kernel {
+            KERNEL_START_ADDR.0
         } else {
-            x.to_string()
-        }
-    })
-    .collect::<Vec<String>>()
-    .join("\x1f")
+            memory::TEXT_START
+        };
+
+        // Specify where to start loading the program in
+        // memory.  The clang linker understands the same
+        // command line arguments as the GNU linker does; see
+        // https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_mono/ld.html#SEC3
+        // for details.
+        rustc_flags.push("-C");
+        rustc_flags.push(format!("link-arg=-Ttext={text_addr:#010x}"));
+        rustc_flags.push("-C");
+        rustc_flags.push("panic=abort");
+        rustc_flags.push("--cfg");
+        rustc_flags.push("getrandom_backend=\"custom\"");
+    }
+
+    rustc_flags.to_string()
 }
 
 fn cpp_toolchain_override() -> bool {
@@ -622,6 +652,7 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
         return;
     }
 
+    let target = guest_info.options.target();
     let target_dir = target_dir.as_ref();
     fs::create_dir_all(target_dir).unwrap();
 
@@ -649,10 +680,7 @@ fn build_guest_package(pkg: &Package, target_dir: impl AsRef<Path>, guest_info: 
         .expect("cargo build failed");
     let stderr = child.stderr.take().unwrap();
 
-    tty_println(&format!(
-        "{}: Starting build for {RISC0_TARGET_TRIPLE}",
-        pkg.name
-    ));
+    tty_println(&format!("{}: Starting build for {target}", pkg.name));
 
     for line in BufReader::new(stderr).lines() {
         tty_println(&format!("{}: {}", pkg.name, line.unwrap()));
@@ -892,6 +920,7 @@ pub fn build_package(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::GuestMetadata;
 
     const RUSTC_FLAGS: &[&str] = &[
         "--cfg",
@@ -904,11 +933,14 @@ mod tests {
 
     #[test]
     fn encodes_rustc_flags() {
-        let guest_meta = GuestMetadata {
-            rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
-            ..Default::default()
+        let guest_info = GuestInfo {
+            options: GuestOptionsBuilder::default().build().unwrap(),
+            metadata: GuestMetadata {
+                rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
+                ..Default::default()
+            },
         };
-        let encoded = encode_rust_flags(&guest_meta, false);
+        let encoded = encode_rust_flags(&guest_info, false);
         let expected = [
             "--cfg",
             "foo=\"bar\"",
@@ -923,11 +955,14 @@ mod tests {
 
     #[test]
     fn escapes_strings_when_encoding_when_requested() {
-        let guest_meta = GuestMetadata {
-            rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
-            ..Default::default()
+        let guest_info = GuestInfo {
+            options: GuestOptionsBuilder::default().build().unwrap(),
+            metadata: GuestMetadata {
+                rustc_flags: Some(RUSTC_FLAGS.iter().map(ToString::to_string).collect()),
+                ..Default::default()
+            },
         };
-        let encoded = encode_rust_flags(&guest_meta, true);
+        let encoded = encode_rust_flags(&guest_info, true);
         let expected = [
             "--cfg",
             "foo=\\\"bar\\\"",
