@@ -134,7 +134,7 @@ extern ValU32Struct exec_OpSB(ExecContext& ctx,MemStoreInputStruct arg0, BoundLa
 extern InstOutputBaseStruct exec_Mem1(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<Mem1Layout> layout2)  ;
 extern DigestRegStruct back_DigestReg(ExecContext& ctx,Index distance0, BoundLayout<DigestRegLayout> layout1)  ;
 extern DigestRegStruct exec_DigestReg(ExecContext& ctx,ValU32Struct8Array arg0, BoundLayout<DigestRegLayout> layout1)  ;
-extern InstOutputBaseStruct exec_ControlLoadRoot(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlLoadRootLayout> layout2, GlobalBuf global3)  ;
+extern InstOutputBaseStruct exec_ControlLoadRootAndNonce(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlLoadRootAndNonceLayout> layout2, GlobalBuf global3)  ;
 extern InstOutputBaseStruct exec_ControlResume(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlResumeLayout> layout2, GlobalBuf global3)  ;
 extern InstOutputBaseStruct exec_ControlUserECALL(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlUserECALLLayout> layout2)  ;
 extern InstOutputBaseStruct exec_ControlMRET(ExecContext& ctx,NondetRegStruct arg0, InstInputStruct arg1_0, BoundLayout<ControlMRETLayout> layout2)  ;

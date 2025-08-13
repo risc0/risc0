@@ -299,7 +299,7 @@ pub mod responses {
     /// Snark proof request object
     #[derive(Deserialize, Serialize)]
     pub struct SnarkReq {
-        /// Existing Session ID from [super::SessionId]
+        /// Existing Session ID from `SessionId`
         pub session_id: String,
     }
 
@@ -442,7 +442,7 @@ pub mod module_type {
             Ok(())
         }
 
-        /// Fetchs a journal from execute_only jobs
+        /// Fetches a journal from execute_only jobs
         ///
         /// After the Execution phase of a execute_only session it is possible to fetch the journal
         /// contents from the executor

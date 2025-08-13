@@ -72,12 +72,12 @@
 
 extern crate alloc;
 
+mod claim;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
 mod mmr;
 mod receipt;
-mod receipt_claim;
 pub mod serde;
 pub mod sha;
 
@@ -93,29 +93,24 @@ pub use bytes::Bytes;
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
-pub use {
-    self::host::{
-        api::server::Server as ApiServer,
-        client::prove::{local::LocalProver, local_executor},
-        recursion::{
-            self,
-            prove::{prove_registered_zkr, prove_zkr, register_zkr},
-            RECURSION_PO2,
-        },
-        server::{
-            exec::executor::ExecutorImpl,
-            prove::{
-                dev_mode::{DevModeDelay, DevModeProver},
-                get_prover_server, HalPair, ProverServer,
-            },
-            session::{
-                FileSegmentRef, NullSegmentRef, PreflightResults, Segment, SegmentRef, Session,
-                SessionEvents, SimpleSegmentRef,
-            },
-        },
+pub use self::host::{
+    api::server::Server as ApiServer,
+    client::prove::{local::LocalProver, local_executor},
+    recursion::{
+        self,
+        prove::{prove_registered_zkr, prove_zkr, register_zkr},
+        RECURSION_PO2,
     },
-    risc0_groth16::{
-        docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
+    server::{
+        exec::executor::ExecutorImpl,
+        prove::{
+            dev_mode::{DevModeDelay, DevModeProver},
+            get_prover_server, HalPair, ProverServer,
+        },
+        session::{
+            FileSegmentRef, NullSegmentRef, PreflightResults, Segment, SegmentRef, Session,
+            SessionEvents, SimpleSegmentRef,
+        },
     },
 };
 
@@ -134,18 +129,27 @@ pub use {
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
-                default_executor, default_prover, external::ExternalProver, Executor, Prover,
-                ProverOpts, ReceiptKind,
+                default::DefaultProver,
+                default_executor, default_prover,
+                external::ExternalProver,
+                opts::{ProverOpts, ReceiptKind},
+                Executor, Prover,
             },
         },
     },
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 
+/// TODO
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
-#[cfg(feature = "unstable")]
-pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
+pub mod rpc {
+    pub use super::host::rpc::*;
+}
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest};
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {
@@ -158,15 +162,18 @@ pub use {
 };
 
 pub use self::{
+    claim::{
+        maybe_pruned::{MaybePruned, PrunedValueError},
+        receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim, UnionClaim},
+        work::{Work, WorkClaim},
+        Unknown,
+    },
     receipt::{
         AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-        Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt, InnerReceipt,
-        Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters,
-        SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, DEFAULT_MAX_PO2,
-    },
-    receipt_claim::{
-        Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
-        UnionClaim, Unknown,
+        GenericReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
+        InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
+        SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+        VerifierContext, DEFAULT_MAX_PO2,
     },
 };
 

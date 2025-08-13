@@ -21,6 +21,7 @@ use std::{
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_binfmt::PovwJobId;
 use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -29,14 +30,13 @@ use crate::{
     host::{
         api::convert::keccak_input_to_bytes,
         client::{
-            env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
+            env::{CoprocessorCallback, ProveKeccakRequest},
             slice_io::SliceIo,
         },
         server::{
             exec::executor::ExecutorImpl, prove::keccak::prove_keccak, session::NullSegmentRef,
         },
     },
-    prove_registered_zkr,
     recursion::identity_p254,
     AssetRequest, Assumption, ExecutorEnv, InnerAssumptionReceipt, ProverOpts, Receipt,
     ReceiptClaim, Segment, SegmentReceipt, SegmentRef, Session, SuccinctReceipt, TraceCallback,
@@ -204,36 +204,6 @@ impl CoprocessorProxy {
 }
 
 impl CoprocessorCallback for CoprocessorProxy {
-    fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
-        let request = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
-                        pb::api::CoprocessorRequest {
-                            kind: Some(pb::api::coprocessor_request::Kind::ProveZkr({
-                                pb::api::ProveZkrRequest {
-                                    claim_digest: Some(proof_request.claim_digest.into()),
-                                    control_id: Some(proof_request.control_id.into()),
-                                    input: proof_request.input,
-                                    receipt_out: None,
-                                }
-                            })),
-                        },
-                    )),
-                })),
-            })),
-        };
-        tracing::trace!("tx: {request:?}");
-        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
-
-        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
-        match kind {
-            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
-            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
-        }
-    }
-
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
         let input = keccak_input_to_bytes(&proof_request.input);
         let request = pb::api::ServerReply {
@@ -337,7 +307,6 @@ impl Server {
             }
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
             pb::api::server_request::Kind::Verify(request) => self.on_verify(conn, request),
-            pb::api::server_request::Kind::ProveZkr(request) => self.on_prove_zkr(conn, request),
             pb::api::server_request::Kind::ProveKeccak(request) => {
                 self.on_prove_keccak(conn, request)
             }
@@ -504,49 +473,6 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::ProveSegmentReply {
             kind: Some(pb::api::prove_segment_reply::Kind::Error(
-                pb::api::GenericError {
-                    reason: err.to_string(),
-                },
-            )),
-        });
-
-        tracing::trace!("tx: {msg:?}");
-        conn.send(msg)
-    }
-
-    fn on_prove_zkr(
-        &self,
-        mut conn: ConnectionWrapper,
-        request: pb::api::ProveZkrRequest,
-    ) -> Result<()> {
-        fn inner(request: pb::api::ProveZkrRequest) -> Result<pb::api::ProveZkrReply> {
-            let control_id = request
-                .control_id
-                .ok_or_else(|| malformed_err("ProveZkrRequest.control_id"))?
-                .try_into()?;
-            let receipt = prove_registered_zkr(&control_id, vec![control_id], &request.input)?;
-
-            let receipt_pb: pb::core::SuccinctReceipt = receipt.try_into()?;
-            let receipt_bytes = receipt_pb.encode_to_vec();
-            let asset = pb::api::Asset::from_bytes(
-                &request
-                    .receipt_out
-                    .ok_or_else(|| malformed_err("ProveZkrRequest.receipt_out"))?,
-                receipt_bytes.into(),
-                "receipt.zkp",
-            )?;
-
-            Ok(pb::api::ProveZkrReply {
-                kind: Some(pb::api::prove_zkr_reply::Kind::Ok(
-                    pb::api::ProveZkrResult {
-                        receipt: Some(asset),
-                    },
-                )),
-            })
-        }
-
-        let msg = inner(request).unwrap_or_else(|err| pb::api::ProveZkrReply {
-            kind: Some(pb::api::prove_zkr_reply::Kind::Error(
                 pb::api::GenericError {
                     reason: err.to_string(),
                 },
@@ -953,6 +879,16 @@ fn build_env<'a>(
     if request.coprocessor {
         let proxy = CoprocessorProxy::new(conn.clone());
         env_builder.coprocessor_callback(proxy);
+    }
+    if !request.povw_job_id.is_empty() {
+        let id = PovwJobId::from_bytes(
+            request
+                .povw_job_id
+                .as_slice()
+                .try_into()
+                .with_context(|| malformed_err("ExecutorEnv.povw_job_id"))?,
+        );
+        env_builder.povw(id);
     }
 
     for assumption in request.assumptions.iter() {

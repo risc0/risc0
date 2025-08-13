@@ -92,15 +92,19 @@ struct Cli {
     storage: Option<PathBuf>,
 
     #[arg(long)]
-    simulate: Option<PathBuf>,
+    po2: Option<u32>,
 
+    /// Number of GPUs to use.
     #[arg(long)]
-    po2: Option<usize>,
+    num_gpus: Option<usize>,
 }
 
 #[derive(Args)]
 #[group(required = true)]
 struct Mode {
+    #[arg(long)]
+    rpc: bool,
+
     #[arg(long)]
     port: Option<u16>,
 
@@ -123,6 +127,9 @@ struct Mode {
     /// Start a worker.
     #[arg(long, value_enum, value_delimiter(','))]
     worker: Vec<TaskKind>,
+
+    #[arg(long)]
+    config: Option<PathBuf>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -146,7 +153,7 @@ enum ReceiptKind {
 pub fn main() {
     let args = Cli::parse();
 
-    if args.mode.manager || !args.mode.worker.is_empty() {
+    if args.mode.manager || !args.mode.worker.is_empty() || args.mode.config.is_some() {
         self::actors::async_main(&args).unwrap();
         return;
     }
@@ -154,6 +161,16 @@ pub fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
+
+    if args.mode.rpc {
+        self::actors::rpc_main(args.num_gpus).unwrap();
+        return;
+    }
+
+    if args.num_gpus.is_some_and(|v| v != 1) {
+        eprintln!("num_gpus > 1 or 0 for current mode unsupported.");
+        return;
+    }
 
     if args.id {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
@@ -197,6 +214,7 @@ pub fn main() {
         builder.build().unwrap()
     };
 
+    // TODO(povw): Add PoVW here.
     let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = std::fs::read(elf_path).unwrap();

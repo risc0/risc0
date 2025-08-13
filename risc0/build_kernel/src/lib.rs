@@ -200,12 +200,15 @@ impl KernelBuild {
             .cudart(&cudart)
             .debug(false)
             .ccbin(env::var("NVCC_CCBIN").is_err())
+            .flag("-std=c++17")
             .flag("-diag-suppress=177")
             .flag("-diag-suppress=2922")
             .flag("-Xcudafe")
             .flag("--display_error_number")
             .flag("-Xcompiler")
-            .flag("-Wno-missing-braces,-Wno-unused-function")
+            .flag(
+                "-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter",
+            )
             .compile(output);
     }
 

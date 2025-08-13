@@ -135,9 +135,9 @@ enum Command {
     Join,
     Succinct,
     Identity,
-    #[cfg(feature = "docker")]
+    #[cfg(any(feature = "docker", feature = "cuda"))]
     StarkToSnark,
-    #[cfg(feature = "docker")]
+    #[cfg(any(feature = "docker", feature = "cuda"))]
     Groth16,
     #[command(name = "bigint2")]
     BigInt2,
@@ -184,9 +184,9 @@ impl Datasheet {
             Command::Join => self.join(),
             Command::Succinct => self.succinct(),
             Command::Identity => self.identity_p254(),
-            #[cfg(feature = "docker")]
-            Command::StarkToSnark => self.stark2snark(),
-            #[cfg(feature = "docker")]
+            #[cfg(any(feature = "docker", feature = "cuda"))]
+            Command::StarkToSnark => self.shrink_wrap(),
+            #[cfg(any(feature = "docker", feature = "cuda"))]
             Command::Groth16 => self.groth16(),
             Command::BigInt2 => self.bigint2(),
             Command::ZethShapella30 => self.shapella30(),
@@ -427,9 +427,9 @@ impl Datasheet {
         });
     }
 
-    #[cfg(feature = "docker")]
-    fn stark2snark(&mut self) {
-        println!("stark2snark");
+    #[cfg(any(feature = "docker", feature = "cuda"))]
+    fn shrink_wrap(&mut self) {
+        println!("shrink_wrap");
 
         let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
@@ -441,11 +441,11 @@ impl Datasheet {
 
         let info = prover.prove(env, &LOOP_ELF).unwrap();
         let succinct_receipt = info.receipt.inner.succinct().unwrap();
-        let receipt = risc0_zkvm::recursion::identity_p254(&succinct_receipt).unwrap();
+        let receipt = risc0_zkvm::recursion::identity_p254(succinct_receipt).unwrap();
         let seal_bytes = receipt.get_seal_bytes();
 
         let start = Instant::now();
-        let seal = black_box(risc0_zkvm::stark_to_snark(&seal_bytes).unwrap());
+        let seal = black_box(risc0_groth16::prove::shrink_wrap(&seal_bytes).unwrap());
         let duration = start.elapsed();
 
         let cycles = 1 << RECURSION_PO2;
@@ -453,7 +453,7 @@ impl Datasheet {
         let encoded = bincode::serialize(&seal).unwrap();
 
         self.results.push(PerformanceData {
-            name: "stark2snark".into(),
+            name: "shrink_wrap".into(),
             hashfn: opts.hashfn,
             cycles,
             duration,
@@ -463,7 +463,7 @@ impl Datasheet {
         });
     }
 
-    #[cfg(feature = "docker")]
+    #[cfg(any(feature = "docker", feature = "cuda"))]
     fn groth16(&mut self) {
         println!("groth16");
 

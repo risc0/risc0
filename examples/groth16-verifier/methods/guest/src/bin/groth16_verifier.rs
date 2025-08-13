@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_groth16::{Fr, Seal, Verifier, VerifyingKey};
+use risc0_groth16::{ProofJson, PublicInputsJson, Verifier, VerifyingKeyJson};
 use risc0_zkvm::{guest::env, sha::Digestible};
 
 pub fn main() {
-    let (seal, public_inputs, verifying_key): (Seal, Vec<Fr>, VerifyingKey) = env::read();
+    let (proof_json, public_inputs_json, verifying_key_json): (
+        ProofJson,
+        PublicInputsJson,
+        VerifyingKeyJson,
+    ) = env::read();
 
-    Verifier::new(&seal, &public_inputs, &verifying_key)
-        .unwrap()
-        .verify()
-        .unwrap();
+    Verifier::from_json(
+        proof_json,
+        public_inputs_json.clone(),
+        verifying_key_json.clone(),
+    )
+    .unwrap()
+    .verify()
+    .unwrap();
 
-    env::commit(&(verifying_key.digest(), public_inputs.digest()));
+    let verifying_key_digest = verifying_key_json.verifying_key().unwrap().digest();
+    let public_inputs_digest = public_inputs_json.to_scalar().unwrap().digest();
+    env::commit(&(verifying_key_digest, public_inputs_digest));
 }

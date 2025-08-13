@@ -10,7 +10,7 @@ ENV TZ="America/Los_Angeles"
 
 RUN apt-get -qq update && apt-get install -y -q \
     openssl libssl-dev pkg-config curl clang git \
-    build-essential openssh-client
+    build-essential openssh-client unzip
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -20,6 +20,10 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 RUN chmod -R a+w $RUSTUP_HOME $CARGO_HOME
 RUN rustup install 1.81
+
+# Install protoc
+RUN curl -o protoc.zip -L https://github.com/protocolbuffers/protobuf/releases/download/v31.1/protoc-31.1-linux-x86_64.zip
+RUN unzip protoc.zip -d /usr/local
 
 FROM rust-builder AS builder
 
@@ -39,6 +43,11 @@ ENV SCCACHE_SERVER_PORT=4227
 
 WORKDIR /src/
 COPY . .
+
+# Install groth16 component
+ENV RISC0_HOME=/usr/local/risc0
+RUN cargo run --package rzup -- --verbose install risc0-groth16
+
 RUN bento/dockerfiles/sccache-setup.sh "x86_64-unknown-linux-musl" "v0.8.2"
 SHELL ["/bin/bash", "-c"]
 
@@ -52,23 +61,14 @@ RUN --mount=type=secret,id=ci_cache_creds,target=/root/.aws/credentials \
     cp bento/target/release/agent /src/agent && \
     sccache --show-stats
 
-# Use risczero/risc0-groth16-prover:v2025-01-31.1 as the basis for the prover and witness generator
-FROM risczero/risc0-groth16-prover@sha256:2829419e1bee4b87a2ade42569d9dffb4a304bf593c531caa99c6a395e2558da AS binaries
-
 FROM ${CUDA_RUNTIME_IMG} AS runtime
 
 RUN apt-get update -q -y && apt-get install -q -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
 
-# Copy the witness generator and data files from the binary stage
-COPY --from=binaries /usr/local/bin/stark_verify /app/stark_verify
-COPY --from=binaries /app/stark_verify.dat /app/stark_verify.dat
-
-# Copy the prover binary and related files from previous stages
-COPY --from=binaries /usr/local/bin/prover /app/prover
-COPY --from=binaries /app/stark_verify.cs /app/stark_verify.cs
-COPY --from=binaries /app/stark_verify_final.pk.dmp /app/stark_verify_final.pk.dmp
-
 # Main prover
 COPY --from=builder /src/agent /app/agent
+
+# copy rzup directory
+COPY --from=builder /usr/local/risc0 /usr/local/risc0
 
 ENTRYPOINT ["/app/agent"]

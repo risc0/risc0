@@ -140,6 +140,7 @@ impl Prover for BonsaiProver {
                 }
                 break ProveInfo {
                     receipt,
+                    work_receipt: None,
                     stats: SessionStats {
                         segments: stats.segments,
                         total_cycles: stats.total_cycles,
@@ -147,6 +148,9 @@ impl Prover for BonsaiProver {
                         // These are currently unavailable from Bonsai
                         paging_cycles: 0,
                         reserved_cycles: 0,
+                        ecall_metrics: Default::default(),
+                        syscall_metrics: Default::default(),
+                        execution_time: None,
                     },
                 };
             } else {
@@ -210,9 +214,12 @@ impl Prover for BonsaiProver {
             .verify_integrity_with_context(ctx)
             .context("failed to verify Groth16Receipt returned by Bonsai")?;
 
+        succinct_prove_info.stats.log_if_risc0_info_set();
+
         // Return the groth16 receipt, with the stats collected earlier.
         Ok(ProveInfo {
             receipt: groth16_receipt,
+            work_receipt: None,
             stats: succinct_prove_info.stats,
         })
     }

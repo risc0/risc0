@@ -29,7 +29,7 @@ risc0-circuit-keccak-sys = { workspace = true, optional = true }
 risc0-circuit-recursion = { workspace = true, default-features = false }
 risc0-sys = { workspace = true, optional = true }
 rayon = { version = "1.10", optional = true }
-xz2 = { version = "0.1", optional = true, features = ["static"] }
+liblzma = { version = "0.4", optional = true, features = ["static"] }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
@@ -39,7 +39,7 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]
-xz2 = { version = "0.1", optional = true, features = ["static"] }
+liblzma = { version = "0.4", optional = true, features = ["static"] }
 
 [features]
 # Enables CUDA GPU support
@@ -48,6 +48,7 @@ cuda = [
   "risc0-circuit-keccak-sys/cuda",
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
+  "std",
 ]
 default = ["prove"]
 # Enables ZKR registration to actually generate proofs.
@@ -57,6 +58,8 @@ prove = [
   "dep:rayon",
   "dep:risc0-circuit-keccak-sys",
   "dep:risc0-sys",
-  "dep:xz2",
+  "dep:liblzma",
   "risc0-circuit-recursion/prove",
+  "std",
 ]
+std = ["risc0-zkp/std", "risc0-binfmt/std"]

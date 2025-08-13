@@ -12,7 +12,7 @@ use crate::{
 use anyhow::{bail, Context, Result};
 use risc0_zkvm::{
     compute_image_id, sha::Digestible, CoprocessorCallback, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, ProveZkrRequest, Receipt, Segment,
+    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, Receipt, Segment,
 };
 use sqlx::postgres::PgPool;
 use taskdb::planner::{
@@ -27,7 +27,6 @@ use workflow_common::{
     },
     CompressType, ExecutorReq, ExecutorResp, FinalizeReq, JoinReq, KeccakReq, ProveReq, ResolveReq,
     SnarkReq, UnionReq, AUX_WORK_TYPE, COPROC_WORK_TYPE, JOIN_WORK_TYPE, PROVE_WORK_TYPE,
-    SNARK_WORK_TYPE,
 };
 // use tempfile::NamedTempFile;
 use tokio::task::{JoinHandle, JoinSet};
@@ -46,7 +45,6 @@ async fn process_task(
     join_stream: &Uuid,
     union_stream: &Uuid,
     aux_stream: &Uuid,
-    snark_stream: &Uuid,
     job_id: &Uuid,
     tree_task: &Task,
     segment_index: Option<u32>,
@@ -225,7 +223,7 @@ async fn process_task(
                     pool,
                     job_id,
                     "snark",
-                    snark_stream,
+                    prove_stream,
                     &task_def,
                     &serde_json::json!([finalize_name]),
                     args.snark_retries,
@@ -261,9 +259,6 @@ impl CoprocessorCallback for Coprocessor {
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()> {
         self.tx.blocking_send(SenderType::Keccak(request))?;
         Ok(())
-    }
-    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> Result<()> {
-        unreachable!()
     }
 }
 
@@ -439,11 +434,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
         prove_stream
     };
 
-    let snark_stream = taskdb::get_stream(&agent.db_pool, &request.user_id, SNARK_WORK_TYPE)
-        .await
-        .context("Failed to get SNARK stream")?
-        .with_context(|| format!("Customer {} missing snark stream", request.user_id))?;
-
     let job_id_copy = *job_id;
     let pool_copy = agent.db_pool.clone();
     let assumptions = request.assumptions.clone();
@@ -479,7 +469,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
                             &join_stream,
                             &union_stream,
                             &aux_stream,
-                            &snark_stream,
                             &job_id_copy,
                             tree_task,
                             Some(segment_index),
@@ -520,7 +509,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
                             &join_stream,
                             &union_stream,
                             &aux_stream,
-                            &snark_stream,
                             &job_id_copy,
                             tree_task,
                             None,
@@ -549,7 +537,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
                     &join_stream,
                     &union_stream,
                     &aux_stream,
-                    &snark_stream,
                     &job_id_copy,
                     tree_task,
                     None,

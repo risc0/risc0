@@ -66,3 +66,31 @@ pub fn identity(hashfn: &str) -> Result<(Program, Digest)> {
 pub fn union(hashfn: &str) -> Result<(Program, Digest)> {
     get_zkr("union.zkr", hashfn)
 }
+
+pub fn lift_povw(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
+    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
+        get_zkr(&format!("lift_rv32im_v2_povw_{po2}.zkr"), hashfn)
+    } else {
+        bail!("No rv32im verifier available for po2={po2}")
+    }
+}
+
+pub fn join_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("join_povw.zkr", hashfn)
+}
+
+pub fn join_unwrap_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("join_unwrap_povw.zkr", hashfn)
+}
+
+pub fn resolve_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("resolve_povw.zkr", hashfn)
+}
+
+pub fn resolve_unwrap_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("resolve_unwrap_povw.zkr", hashfn)
+}
+
+pub fn unwrap_povw(hashfn: &str) -> Result<(Program, Digest)> {
+    get_zkr("unwrap_povw.zkr", hashfn)
+}
