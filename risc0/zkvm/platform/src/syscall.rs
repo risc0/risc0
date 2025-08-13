@@ -559,12 +559,17 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
         // Read unaligned bytes into "firstword".
         let Return(nread_first, firstword) =
             syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
-        debug_assert_eq!(nread_first as usize, unaligned_at_start);
+        assert!(nread_first as usize <= unaligned_at_start);
 
-        // Align up to a word boundary to do the main copy.
+        // Copy the firstword provided by the host into the unaligned start bytes.
         let main_ptr = fill_from_word(recv_ptr, firstword, unaligned_at_start);
-        if nread == unaligned_at_start {
-            // We only read part of a word, and don't have to read any full words.
+        // If the host returned less data than is required to align up to the word boundary, return
+        // early, as the main read cannot proceed.
+        if (nread_first as usize) < unaligned_at_start {
+            return nread_first as usize;
+        }
+        // If the amount read is the full amount requested, return early.
+        if nread_first as usize == nread {
             return nread;
         }
         (main_ptr, nread - unaligned_at_start, nread_first as usize)
@@ -574,7 +579,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
     let main_words = main_requested / WORD_SIZE;
     let (nread_main, lastword) =
         sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
-    debug_assert!(nread_main <= main_requested);
+    assert!(nread_main <= main_requested);
     let read_words = nread_main / WORD_SIZE;
 
     // Copy in individual bytes after the word-aligned section.

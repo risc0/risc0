@@ -536,10 +536,10 @@ fn short_read_combinations() {
 }
 
 #[test_log::test]
-fn unaligned_short_read() {
+fn unaligned_end_short_read() {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
-    let buf: Vec<u8> = vec![0; 9];
+    let buf: Vec<u8> = vec![0xff; 9];
     let readbuf: &[u8] = b"1234567";
 
     let spec = MultiTestSpec::SysRead {
@@ -558,7 +558,35 @@ fn unaligned_short_read() {
 
     let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
     let mut expected = readbuf.to_vec();
+    // NOTE: End of the expected buffer is zero, since guest requested 9 bytes. See #1557
     expected.resize(buf.len(), 0);
+    assert_eq!(actual, expected, "pos and lens: {spec:?}");
+}
+
+#[test_log::test]
+fn unaligned_start_short_read() {
+    const FD: u32 = 123;
+    // Initial buffer to read bytes on top of.
+    let buf: Vec<u8> = vec![0xff; 9];
+    let readbuf: &[u8] = b"1234567";
+
+    let spec = MultiTestSpec::SysRead {
+        fd: FD,
+        buf: buf.clone(),
+        pos_and_len: vec![(2, 7)],
+    };
+    let env = ExecutorEnv::builder()
+        .read_fd(FD, readbuf)
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+    let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+    let mut expected = vec![0xff; 9];
+    expected[2..].copy_from_slice(readbuf);
     assert_eq!(actual, expected, "pos and lens: {spec:?}");
 }
 
@@ -838,8 +866,8 @@ fn std_stdio() {
             .unwrap();
         execute_elf(env, STANDARD_LIB_ELF).unwrap();
     }
-    assert_eq!(from_utf8(&stdout).unwrap(), expected_stdout());
-    assert_eq!(from_utf8(&stderr).unwrap(), EXPECTED_STDERR);
+    assert_eq!(&stdout, expected_stdout().as_bytes());
+    assert_eq!(&stderr, EXPECTED_STDERR.as_bytes());
 }
 
 #[test_log::test]
@@ -899,6 +927,19 @@ fn std_buf_read() {
         // https://github.com/risc0/risc0/pull/1557
         .write(&9usize)
         .unwrap()
+        .write_slice(input.as_slice())
+        .build()
+        .unwrap();
+    let session = execute_elf(env, STANDARD_LIB_ELF).unwrap();
+    let output = session.journal.unwrap().bytes;
+    assert_eq!(output, input);
+}
+
+#[test_log::test]
+fn std_buf_read_to_end_5_bytes() {
+    let input = b"12345";
+    let env = ExecutorEnv::builder()
+        .env_var("TEST_MODE", "READ_TO_END")
         .write_slice(input.as_slice())
         .build()
         .unwrap();
