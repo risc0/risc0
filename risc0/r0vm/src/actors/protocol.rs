@@ -26,8 +26,8 @@ use serde::{Deserialize, Serialize};
 use super::job::JobActor;
 
 pub use risc0_zkvm::rpc::{
-    JobInfo, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind, ShrinkWrapRequest,
-    ShrinkWrapResult, TaskError,
+    JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
+    ShrinkWrapRequest, ShrinkWrapResult, TaskError,
 };
 
 pub(crate) type JobId = uuid::Uuid;

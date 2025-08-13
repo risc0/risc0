@@ -14,6 +14,7 @@
 
 use std::{sync::Arc, time::Duration};
 
+use derive_more::From;
 use serde::{Deserialize, Serialize};
 
 use crate::{AssumptionReceipt, Journal, Receipt, SessionStats};
@@ -48,6 +49,16 @@ pub struct ShrinkWrapRequest {
     pub kind: ShrinkWrapKind,
     /// TODO
     pub receipt: Receipt,
+}
+
+/// TODO
+#[allow(clippy::large_enum_variant)]
+#[derive(Serialize, Deserialize, From)]
+pub enum JobRequest {
+    /// TODO
+    Proof(ProofRequest),
+    /// TODO
+    ShrinkWrap(ShrinkWrapRequest),
 }
 
 /// TODO
