@@ -55,6 +55,7 @@ Please exercise good judgment about whether a missing or edited attestation repr
 We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony, and our ceremony was coordinated with the [PSE] team. This gave us tools that had been battle-tested by prior ceremonies, and moreover, by using tools written by an external team, we put substantial limits on our own ability to maliciously manipulate the ceremony software.
 
 [audits-readme]: https://github.com/risc0/rz-security/blob/release-2.2/audits/README.md
+[circom-v2.2.2]: https://github.com/iden3/circom/releases/tag/v2.2.2
 [DefinitelySetup]: https://github.com/privacy-scaling-explorations/DefinitelySetup
 [install-circom]: https://docs.circom.io/getting-started/installation
 [kobi-bad-ceremony-list]: https://twitter.com/kobigurk/status/1782502969453494530
