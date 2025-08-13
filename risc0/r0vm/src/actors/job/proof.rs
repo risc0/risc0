@@ -13,24 +13,18 @@
 // limitations under the License.
 
 use std::{
-    borrow::Cow,
-    collections::{BTreeMap, HashMap, VecDeque},
+    collections::{BTreeMap, VecDeque},
     sync::Arc,
 };
 
 use kameo::{error::Infallible, prelude::*};
-use opentelemetry::{
-    global::{BoxedSpan, BoxedTracer},
-    trace::{Span, SpanKind, TraceContextExt as _, Tracer},
-    KeyValue,
-};
 use risc0_zkvm::{
     sha::Digestible, AssumptionReceipt, InnerReceipt, ProveKeccakRequest, Receipt, ReceiptClaim,
     Segment, SegmentReceipt, SuccinctReceipt, Unknown,
 };
 use tokio::time::Instant;
 
-use super::JobActorNew;
+use super::{tracer::JobTracer, JobActorNew};
 use crate::actors::{
     factory::FactoryActor,
     protocol::{
@@ -40,7 +34,7 @@ use crate::actors::{
         },
         ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
         JoinTask, LiftTask, ProofRequest, ProofResult, ProveKeccakTask, ProveSegmentTask,
-        ResolveTask, SegmentRange, Session, Task, TaskError, TaskHeader, TaskId, UnionTask,
+        ResolveTask, SegmentRange, Session, Task, TaskError, TaskHeader, UnionTask,
     },
 };
 
@@ -59,9 +53,6 @@ pub(crate) struct JobActor {
     joins: BTreeMap<SegmentRange, Arc<SuccinctReceipt<ReceiptClaim>>>,
     next_task_id: u64,
     session: Option<Arc<Session>>,
-    ctx: opentelemetry::Context,
-    tracer: BoxedTracer,
-    pending_spans: HashMap<TaskId, BoxedSpan>,
     reply_sender: Option<ReplySender<JobStatusReply>>,
     start_time: Instant,
     status: JobStatus<ProofResult>,
@@ -73,6 +64,8 @@ pub(crate) struct JobActor {
     keccak_root: Option<UnknownReceipt>,
     assumptions: Option<VecDeque<UnknownReceipt>>,
     final_receipt: Option<Arc<SuccinctReceipt<ReceiptClaim>>>,
+
+    tracer: JobTracer,
 }
 
 type UnknownReceipt = Arc<SuccinctReceipt<Unknown>>;
@@ -165,11 +158,10 @@ impl Actor for JobActor {
             .await;
 
         let elapsed_time = self.start_time.elapsed();
-        let span = self.ctx.span();
 
         if let ActorStopReason::Panicked(err) = reason {
             tracing::error!("{err}");
-            span.record_error(&err);
+            self.tracer.record_error(&err);
             if let Some(reply_sender) = self.reply_sender.take() {
                 let info = JobInfo {
                     status: JobStatus::Failed(TaskError::Generic(err.to_string())),
@@ -185,7 +177,7 @@ impl Actor for JobActor {
             reply_sender.send(JobStatusReply::Proof(info));
         }
 
-        span.end();
+        self.tracer.end();
         Ok(())
     }
 }
@@ -196,13 +188,7 @@ impl JobActorNew for JobActor {
         parent_ref: WeakActorRef<super::JobActor>,
         factory: ActorRef<FactoryActor>,
     ) -> Self {
-        let tracer = opentelemetry::global::tracer("job");
-        let span = tracer
-            .span_builder("job")
-            .with_kind(SpanKind::Client)
-            .with_attributes([KeyValue::new("job_id", job_id.to_string())])
-            .start(&tracer);
-        let ctx = opentelemetry::Context::current_with_span(span);
+        let tracer = JobTracer::new("proof_job", job_id);
         Self {
             job_id,
             parent_ref,
@@ -211,9 +197,6 @@ impl JobActorNew for JobActor {
             joins: BTreeMap::new(),
             next_task_id: 0,
             session: None,
-            ctx,
-            tracer,
-            pending_spans: HashMap::new(),
             reply_sender: None,
             start_time: Instant::now(),
             status: JobStatus::Running("init".to_string()),
@@ -225,6 +208,8 @@ impl JobActorNew for JobActor {
             pending_keccak_peaks: VecDeque::new(),
             assumptions: None,
             final_receipt: None,
+
+            tracer,
         }
     }
 }
@@ -246,35 +231,13 @@ impl JobActor {
         ret
     }
 
-    fn span_start<T>(&mut self, task_id: TaskId, name: T)
-    where
-        T: Into<Cow<'static, str>>,
-    {
-        self.pending_spans
-            .insert(task_id, self.tracer.start_with_context(name, &self.ctx));
-    }
-
-    fn span_event<T>(&mut self, header: TaskHeader, name: T)
-    where
-        T: Into<Cow<'static, str>>,
-    {
-        self.pending_spans
-            .get_mut(&header.global_id.task_id)
-            .unwrap()
-            .add_event(name, vec![]);
-    }
-
-    fn span_end(&mut self, task_id: TaskId) {
-        self.pending_spans.remove(&task_id).as_mut().unwrap().end();
-    }
-
     fn task_start(&mut self, header: TaskHeader) {
         let name = format!("{:?}", header.task_kind);
-        self.span_start(header.global_id.task_id, name);
+        self.tracer.span_start(header.global_id.task_id, name);
     }
 
     async fn prove_segment(&mut self, header: TaskHeader, segment: Segment) {
-        self.span_event(header, "segment");
+        self.tracer.span_event(header, "segment");
         tracing::info!("ProveSegment: {}", segment.index);
         self.submit_task(Task::ProveSegment(Arc::new(ProveSegmentTask { segment })))
             .await;
@@ -543,7 +506,7 @@ impl Message<TaskDoneMsg> for JobActor {
                 return;
             }
         };
-        self.span_end(msg.header.global_id.task_id);
+        self.tracer.span_end(msg.header.global_id.task_id);
         match task_done {
             TaskDone::Session(session) => self.session_done(session).await,
             TaskDone::ProveSegment(receipt) => self.prove_segment_done(receipt).await,

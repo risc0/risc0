@@ -14,6 +14,7 @@
 
 mod proof;
 mod shrink_wrap;
+mod tracer;
 
 use derive_more::From;
 use kameo::{error::Infallible, prelude::*};

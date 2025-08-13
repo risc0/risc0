@@ -12,23 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{borrow::Cow, collections::HashMap, sync::Arc, time::Instant};
+use std::{sync::Arc, time::Instant};
 
 use kameo::{error::Infallible, prelude::*};
-use opentelemetry::{
-    global::{BoxedSpan, BoxedTracer},
-    trace::{Span as _, SpanKind, TraceContextExt as _, Tracer},
-    KeyValue,
-};
 use risc0_zkvm::Receipt;
 
-use super::JobActorNew;
+use super::{tracer::JobTracer, JobActorNew};
 use crate::actors::{
     factory::FactoryActor,
     protocol::{
         factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
         GlobalId, JobId, JobStatus, JobStatusReply, JobStatusRequest, ShrinkWrapRequest,
-        ShrinkWrapResult, ShrinkWrapTask, Task, TaskError, TaskHeader, TaskId,
+        ShrinkWrapResult, ShrinkWrapTask, Task, TaskError, TaskHeader,
     },
     JobInfo,
 };
@@ -39,12 +34,11 @@ pub(crate) struct JobActor {
     next_task_id: u64,
     self_ref: Option<WeakActorRef<Self>>,
     factory: ActorRef<FactoryActor>,
-    ctx: opentelemetry::Context,
-    tracer: BoxedTracer,
     start_time: Instant,
     status: JobStatus<ShrinkWrapResult>,
     reply_sender: Option<ReplySender<JobStatusReply>>,
-    pending_spans: HashMap<TaskId, BoxedSpan>,
+
+    tracer: JobTracer,
 }
 
 impl Actor for JobActor {
@@ -68,11 +62,10 @@ impl Actor for JobActor {
             .await;
 
         let elapsed_time = self.start_time.elapsed();
-        let span = self.ctx.span();
 
         if let ActorStopReason::Panicked(err) = reason {
             tracing::error!("{err}");
-            span.record_error(&err);
+            self.tracer.record_error(&err);
             if let Some(reply_sender) = self.reply_sender.take() {
                 let info = JobInfo {
                     status: JobStatus::Failed(TaskError::Generic(err.to_string())),
@@ -88,7 +81,7 @@ impl Actor for JobActor {
             reply_sender.send(JobStatusReply::ShrinkWrap(info));
         }
 
-        span.end();
+        self.tracer.end();
         Ok(())
     }
 }
@@ -99,25 +92,18 @@ impl JobActorNew for JobActor {
         parent_ref: WeakActorRef<super::JobActor>,
         factory: ActorRef<FactoryActor>,
     ) -> Self {
-        let tracer = opentelemetry::global::tracer("shrink_wrap_job");
-        let span = tracer
-            .span_builder("job")
-            .with_kind(SpanKind::Client)
-            .with_attributes([KeyValue::new("job_id", job_id.to_string())])
-            .start(&tracer);
-        let ctx = opentelemetry::Context::current_with_span(span);
+        let tracer = JobTracer::new("shrink_wrap_job", job_id);
         Self {
             job_id,
             parent_ref,
             next_task_id: 0,
             self_ref: None,
             factory,
-            ctx,
-            tracer,
             start_time: Instant::now(),
             status: JobStatus::Running("init".into()),
             reply_sender: None,
-            pending_spans: HashMap::new(),
+
+            tracer,
         }
     }
 }
@@ -155,21 +141,9 @@ impl JobActor {
         self.self_ref().stop_gracefully().await.unwrap();
     }
 
-    fn span_start<T>(&mut self, task_id: TaskId, name: T)
-    where
-        T: Into<Cow<'static, str>>,
-    {
-        self.pending_spans
-            .insert(task_id, self.tracer.start_with_context(name, &self.ctx));
-    }
-
-    fn span_end(&mut self, task_id: TaskId) {
-        self.pending_spans.remove(&task_id).as_mut().unwrap().end();
-    }
-
     fn task_start(&mut self, header: TaskHeader) {
         let name = format!("{:?}", header.task_kind);
-        self.span_start(header.global_id.task_id, name);
+        self.tracer.span_start(header.global_id.task_id, name);
     }
 }
 
@@ -224,7 +198,7 @@ impl Message<TaskDoneMsg> for JobActor {
                 return;
             }
         };
-        self.span_end(msg.header.global_id.task_id);
+        self.tracer.span_end(msg.header.global_id.task_id);
         match task_done {
             TaskDone::ShrinkWrap(receipt) => self.shrink_wrap_done(receipt).await,
             _ => {
