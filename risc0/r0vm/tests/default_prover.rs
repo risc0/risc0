@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use assert_cmd::cargo::cargo_bin;
-use risc0_zkvm::{DefaultProver, ExecutorEnv, Prover as _};
+use risc0_zkvm::{DefaultProver, ExecutorEnv, Prover as _, ProverOpts, VerifierContext};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 #[test_log::test]
@@ -28,6 +28,17 @@ fn basic_proof() {
         .build()
         .unwrap();
 
-    let receipt = prover.prove(env, FIB_ELF).unwrap().receipt;
+    let ctx = VerifierContext::default();
+
+    #[cfg(feature = "cuda")]
+    let opts = ProverOpts::groth16();
+
+    #[cfg(not(feature = "cuda"))]
+    let opts = ProverOpts::default();
+
+    let receipt = prover
+        .prove_with_ctx(env, &ctx, FIB_ELF, &opts)
+        .unwrap()
+        .receipt;
     receipt.verify(FIB_ID).unwrap();
 }
