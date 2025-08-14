@@ -26,7 +26,7 @@ The result of an earlier proof can be used as input to this method, allowing the
 
 In this example, the guest accepts as input three numbers, `n`, `e`, and `x`.
 It first uses [`env::verify`] to verify that `n` has a known factorization.
-This function call is logically equivalent to verifying a receipt of the multiply guest from the [hello world example].
+This function call is logically equivalent to verifying a receipt of the multiple guests from the [hello world example].
 It then calculates the modular exponentiation `c = x ^ e mod n` and commits to the journal `n`, `e`, and `c`.
 
 This example is analogous to verifiable encryption with RSA.
