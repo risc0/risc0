@@ -60,7 +60,7 @@ async fn spawner(shutdown: Arc<AtomicBool>, pool: PgPool, args: Args) -> Result<
         let ((cpu_stream, gpu_stream), user_id) = customers.choose(&mut r).unwrap();
         let segment_count = r.random_range(1..args.max_job_size);
         let task_def = serde_json::json!({
-            "cpu_stream": gpu_stream.to_string(),
+            "cpu_stream": cpu_stream.to_string(),
             "gpu_stream": gpu_stream.to_string(),
             "segments": segment_count,
             "user_id": user_id,
