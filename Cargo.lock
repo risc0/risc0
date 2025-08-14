@@ -7149,6 +7149,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkos-linux"
+version = "0.0.0"
+dependencies = [
+ "include_bytes_aligned",
+ "no_std_strings",
+ "rlsf",
+]
+
+[[package]]
+name = "risc0-zkos-linux-guests"
+version = "3.0.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "risc0-zkos-v1compat"
 version = "2.0.2"
 dependencies = [

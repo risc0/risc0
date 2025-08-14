@@ -38,6 +38,7 @@ fn main() {
     }
 
     let map = HashMap::from([
+        ("risc0-zkvm-methods-cpp-crates", guest_opts.build().unwrap()),
         ("risc0-zkvm-methods-guest", guest_opts.build().unwrap()),
         (
             "risc0-zkvm-methods-std",

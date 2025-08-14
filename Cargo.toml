@@ -22,6 +22,8 @@ members = [
   "risc0/r0vm",
   "risc0/sys",
   "risc0/tools",
+  "risc0/zkos/linux",
+  "risc0/zkos/linux/guests",
   "risc0/zkos/v1compat",
   "risc0/zkp",
   "risc0/zkvm",
@@ -63,6 +65,7 @@ risc0-groth16-sys = { version = "0.1.0", default-features = false, path = "risc0
 risc0-povw = { default-features = false, path = "risc0/povw" }
 risc0-r0vm = { version = "3.0.0", default-features = false, path = "risc0/r0vm" }
 risc0-sys = { version = "1.5.0", default-features = false, path = "risc0/sys" }
+risc0-zkos-linux = { version = "0.0.0", path = "risc0/zkos/linux" }
 risc0-zkos-v1compat = { version = "2.0.2", path = "risc0/zkos/v1compat" }
 risc0-zkp = { version = "3.0.0", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "3.0.0", default-features = false, path = "risc0/zkvm" }
