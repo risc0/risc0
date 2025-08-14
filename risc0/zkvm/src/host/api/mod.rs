@@ -40,6 +40,7 @@ use bytes::{Buf, BufMut, Bytes};
 use lazy_regex::regex_captures;
 use prost::Message;
 use semver::Version;
+use serde::{Deserialize, Serialize};
 
 use crate::{ExitCode, Journal, ReceiptClaim, get_version};
 
@@ -413,7 +414,7 @@ impl SessionInfo {
 }
 
 /// Provides information about a segment of execution.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
