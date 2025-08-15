@@ -586,7 +586,8 @@ fn unaligned_start_short_read() {
 
     let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
     let mut expected = vec![0xff; 4];
-    expected[1..].copy_from_slice(readbuf);
+    expected[1..3].copy_from_slice(readbuf);
+    expected[3] = 0;
     assert_eq!(actual, expected, "pos and lens: {spec:?}");
 }
 
