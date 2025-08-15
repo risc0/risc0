@@ -69,7 +69,7 @@ Refer to the [pprof docs] for more information about the web interface.
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
+    <!-- HACK: This comment prevents the list below from being interpreted as a code block -->
     - It would be cost prohibitive to do so for all but quite short program
       executions.
     - Introducing such heavy profiling would actually alter the performance

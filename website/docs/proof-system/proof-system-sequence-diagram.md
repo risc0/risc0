@@ -3,7 +3,7 @@ import ProofSystemSequenceDiagramMermaid from "@site/src/components/Mermaid/proo
 # The RISC Zero STARK Protocol
 
 _The implementation in code for the RISC Zero STARK prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
-In this document, we present an overview to the RISC Zero STARK protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper][ZKP Whitepaper] are good companions to this document._
+In this document, we present an overview of the RISC Zero STARK protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper][ZKP Whitepaper] are good companions to this document._
 
 ## Overview
 
