@@ -31,13 +31,13 @@ pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
+    INV_RATE, MAX_CYCLES_PO2, QUERIES,
     adapter::{
-        CircuitCoreDef, ProtocolInfo, PROOF_SYSTEM_INFO, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
+        CircuitCoreDef, PROOF_SYSTEM_INFO, ProtocolInfo, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
         REGISTER_GROUP_DATA,
     },
     core::{digest::Digest, hash::HashSuite, log2_ceil},
     taps::TapSet,
-    INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
 // If true, enable tracing of verifier internals.
@@ -113,21 +113,36 @@ impl fmt::Display for VerificationError {
                 write!(f, "journal digest mismatch detected")
             }
             VerificationError::ClaimDigestMismatch { expected, received } => {
-                write!(f, "claim digest does not match the expected digest {received}; expected {expected}")
+                write!(
+                    f,
+                    "claim digest does not match the expected digest {received}; expected {expected}"
+                )
             }
             VerificationError::UnexpectedExitCode => write!(f, "unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "invalid hash suite"),
             VerificationError::VerifierParametersMissing => {
-                write!(f, "verifier parameters were not found in verifier context for the given receipt type")
+                write!(
+                    f,
+                    "verifier parameters were not found in verifier context for the given receipt type"
+                )
             }
             VerificationError::VerifierParametersMismatch { expected, received } => {
-                write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
+                write!(
+                    f,
+                    "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}"
+                )
             }
             VerificationError::ProofSystemInfoMismatch { expected, received } => {
-                write!(f, "receipt was produced for a version of the verifier with proof system info {received}; expected {expected}")
+                write!(
+                    f,
+                    "receipt was produced for a version of the verifier with proof system info {received}; expected {expected}"
+                )
             }
             VerificationError::CircuitInfoMismatch { expected, received } => {
-                write!(f, "receipt was produced for a version of the verifier with circuit info {received}; expected {expected}")
+                write!(
+                    f,
+                    "receipt was produced for a version of the verifier with circuit info {received}; expected {expected}"
+                )
             }
             VerificationError::UnresolvedAssumption { digest } => {
                 write!(f, "receipt contains an unresolved assumption: {digest}")

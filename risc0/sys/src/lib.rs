@@ -17,7 +17,7 @@ pub mod cuda;
 
 use std::ffi::CStr;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 #[repr(C)]
 pub struct CppError {

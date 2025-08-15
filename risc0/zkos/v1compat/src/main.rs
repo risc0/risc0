@@ -290,7 +290,7 @@ mod zkvm {
 
     #[panic_handler]
     fn panic(info: &core::panic::PanicInfo) -> ! {
-        use no_std_strings::{str256, str_format};
+        use no_std_strings::{str_format, str256};
         let msg = str_format!(str256, "{}", info);
         unsafe { sys_panic(msg.as_ptr(), msg.len()) }
     }

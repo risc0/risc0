@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use risc0_circuit_recursion::{
     control_id::{BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
     prove::Program,
 };
-use risc0_zkp::{core::digest::Digest, MAX_CYCLES_PO2, MIN_CYCLES_PO2};
+use risc0_zkp::{MAX_CYCLES_PO2, MIN_CYCLES_PO2, core::digest::Digest};
 
 use crate::RECURSION_PO2;
 

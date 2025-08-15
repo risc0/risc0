@@ -26,7 +26,7 @@ use std::{
     vec,
 };
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;

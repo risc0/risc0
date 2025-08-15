@@ -15,9 +15,9 @@
 use std::cmp::max;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use risc0_zkp::field::Elem as _;
-use smallvec::{smallvec, SmallVec};
+use smallvec::{SmallVec, smallvec};
 
 use crate::{
     execute::bigint::BIGINT_WIDTH_BYTES,

@@ -22,8 +22,8 @@ use risc0_zkvm::DevModeDelay;
 use risc0_zkvm_methods::FIB_ELF;
 
 use super::{
-    protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
     App, PoolConfig, WorkerConfig,
+    protocol::{JobStatus, ProofRequest, ShrinkWrapKind, ShrinkWrapRequest, TaskKind},
 };
 
 const PROFILE_RTX_5090: DevModeDelay = DevModeDelay {

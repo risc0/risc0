@@ -14,7 +14,7 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::{Context as _, Result, bail};
 use cust::{
     device::DeviceAttribute,
     memory::{DeviceCopy, DevicePointer, GpuBuffer},
@@ -23,24 +23,24 @@ use cust::{
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use risc0_core::{
     field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem, ExtElem, RootsOfUnity,
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     },
     scope,
 };
 use risc0_sys::{cuda::*, ffi_wrap};
 
-use super::{tracker, Buffer, Hal};
+use super::{Buffer, Hal, tracker};
 use crate::{
+    FRI_FOLD,
     core::{
         digest::Digest,
         hash::{
-            poseidon2::Poseidon2HashSuite, poseidon_254::Poseidon254HashSuite,
-            sha::Sha256HashSuite, HashSuite,
+            HashSuite, poseidon_254::Poseidon254HashSuite, poseidon2::Poseidon2HashSuite,
+            sha::Sha256HashSuite,
         },
         log2_ceil,
     },
-    FRI_FOLD,
 };
 
 // The GPU becomes unstable as the number of concurrent provers grow.

@@ -23,7 +23,7 @@ pub(crate) mod opts;
 use core::ops::Deref;
 use std::{path::PathBuf, rc::Rc};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 #[cfg(feature = "bonsai")]
 use self::bonsai::BonsaiProver;
@@ -31,7 +31,7 @@ use self::bonsai::BonsaiProver;
 use self::{default::DefaultProver, external::ExternalProver, opts::ProverOpts};
 
 use crate::{
-    get_version, host::prove_info::ProveInfo, ExecutorEnv, Receipt, SessionInfo, VerifierContext,
+    ExecutorEnv, Receipt, SessionInfo, VerifierContext, get_version, host::prove_info::ProveInfo,
 };
 
 /// A Prover can execute a given ELF binary and produce a

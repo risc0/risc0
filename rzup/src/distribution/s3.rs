@@ -14,13 +14,12 @@
 
 use crate::components::Component;
 use crate::distribution::{
-    download_bytes, download_json,
+    DistributionPlatform, ProgressWriter, download_bytes, download_json,
     sha2::{Sha256Digest, Sha256Writer},
     signature::{PublicKey, Signature},
-    DistributionPlatform, ProgressWriter,
 };
 #[cfg(feature = "publish")]
-use crate::distribution::{signature::PrivateKey, upload_bytes, ProgressReader};
+use crate::distribution::{ProgressReader, signature::PrivateKey, upload_bytes};
 use crate::env::Environment;
 #[cfg(feature = "publish")]
 use crate::{AwsCredentials, Platform};
@@ -28,7 +27,7 @@ use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};
 
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{DisplayFromStr, serde_as};
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -145,7 +144,7 @@ fn sign_s3_request(
     creds: &AwsCredentials,
     req: &mut http::Request<reqwest::blocking::Body>,
 ) -> Result<()> {
-    use aws_sigv4::http_request::{sign, SignableBody, SignableRequest, SigningSettings};
+    use aws_sigv4::http_request::{SignableBody, SignableRequest, SigningSettings, sign};
     use aws_sigv4::sign::v4;
 
     let identity = creds.clone().into();

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{memory::GUEST_MAX_MEM, syscall::sys_panic, WORD_SIZE};
+use crate::{WORD_SIZE, memory::GUEST_MAX_MEM, syscall::sys_panic};
 use core::alloc::{GlobalAlloc, Layout};
 
 #[global_allocator]

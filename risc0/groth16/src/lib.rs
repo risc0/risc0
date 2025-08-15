@@ -72,13 +72,13 @@ mod verifier;
 use alloc::vec::Vec;
 use core::str::FromStr;
 
-use anyhow::{anyhow, Error, Result};
+use anyhow::{Error, Result, anyhow};
 use ark_bn254::{G1Affine, G2Affine};
 use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 
 pub use types::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
-pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
+pub use verifier::{Fr, Verifier, VerifyingKey, verifying_key};
 
 /// Deserialize an element over the G1 group from bytes in big-endian format
 pub(crate) fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {

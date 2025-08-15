@@ -15,9 +15,9 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use opentelemetry::{
+    KeyValue,
     global::{BoxedSpan, BoxedTracer},
     trace::{Span, SpanKind, TraceContextExt as _, Tracer},
-    KeyValue,
 };
 
 use crate::actors::protocol::{TaskHeader, TaskId};

@@ -21,8 +21,8 @@ use merkle_light::{
 use risc0_zkvm::{
     declare_syscall,
     sha::{
-        rust_crypto::{Digest as _, Sha256},
         Digest,
+        rust_crypto::{Digest as _, Sha256},
     },
 };
 use serde::{Deserialize, Serialize};

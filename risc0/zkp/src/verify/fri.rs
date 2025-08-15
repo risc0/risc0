@@ -19,13 +19,13 @@ use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use super::Verifier;
 use crate::{
+    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
     core::{
         hash::HashFn,
         log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
     },
-    verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
-    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+    verify::{VerificationError, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
 };
 
 /// VerifyRoundInfo contains the data against which the queries for a particular

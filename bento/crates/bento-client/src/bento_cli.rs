@@ -2,10 +2,10 @@
 //
 // All rights reserved.
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use bonsai_sdk::non_blocking::Client as ProvingClient;
 use clap::Parser;
-use risc0_zkvm::{compute_image_id, serde::to_vec, Receipt};
+use risc0_zkvm::{Receipt, compute_image_id, serde::to_vec};
 use sample_guest_common::IterReq;
 use sample_guest_methods::METHOD_NAME_ID;
 use std::path::PathBuf;

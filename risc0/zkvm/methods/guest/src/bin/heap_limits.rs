@@ -18,7 +18,7 @@
 extern crate alloc;
 
 use alloc::{
-    alloc::{alloc, Layout},
+    alloc::{Layout, alloc},
     string::String,
 };
 

@@ -19,7 +19,7 @@ use getrandom::Error;
 #[cfg(feature = "getrandom")]
 #[unsafe(no_mangle)]
 unsafe extern "Rust" fn __getrandom_v03_custom(dest_ptr: *mut u8, len: usize) -> Result<(), Error> {
-    use crate::{syscall::sys_rand, WORD_SIZE};
+    use crate::{WORD_SIZE, syscall::sys_rand};
 
     let dest = unsafe { core::slice::from_raw_parts_mut(dest_ptr, len) };
 

@@ -30,20 +30,20 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
-            HashSuite,
+            HashSuite, blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite,
+            sha::Sha256HashSuite,
         },
     },
     verify::VerificationError,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    claim::Unknown,
-    serde::{from_slice, Error},
-    sha::{Digestible, Sha256},
     Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    claim::Unknown,
+    serde::{Error, from_slice},
+    sha::{Digestible, Sha256},
 };
 
 pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
@@ -984,8 +984,10 @@ impl VerifierContext {
     /// Return [VerifierContext] with is_dev_mode enabled or disabled.
     pub fn with_dev_mode(mut self, dev_mode: bool) -> Self {
         if cfg!(feature = "disable-dev-mode") && dev_mode {
-            panic!("zkVM: Inconsistent settings -- please resolve. \
-                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+            panic!(
+                "zkVM: Inconsistent settings -- please resolve. \
+                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag."
+            );
         }
         self.dev_mode = dev_mode;
         self
@@ -1025,8 +1027,8 @@ impl Default for VerifierContext {
 mod tests {
     use super::{FakeReceipt, InnerReceipt, Receipt};
     use crate::{
-        sha::{Digest, DIGEST_BYTES},
         MaybePruned,
+        sha::{DIGEST_BYTES, Digest},
     };
     use risc0_zkp::verify::VerificationError;
 

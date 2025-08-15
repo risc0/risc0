@@ -13,11 +13,11 @@
 // limitations under the License.
 
 use std::{
-    ffi::{c_char, CStr, CString, NulError},
+    ffi::{CStr, CString, NulError, c_char},
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 #[cfg(feature = "cuda")]
 pub use sppark::Error as SpparkError;

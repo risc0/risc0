@@ -27,8 +27,8 @@ mod settings;
 use std::path::{Path, PathBuf};
 
 use self::distribution::{
-    signature::{PrivateKey, PublicKey},
     Platform,
+    signature::{PrivateKey, PublicKey},
 };
 use self::env::Environment;
 use self::events::{RzupEvent, TransferKind};
@@ -894,14 +894,16 @@ mod tests {
             test_private_key(),
             Platform::new("x86_64", Os::Linux),
         );
-        assert!(rzup
-            .settings()
-            .get_default_version(&Component::RustToolchain)
-            .is_none());
-        assert!(rzup
-            .settings()
-            .get_default_version(&Component::CargoRiscZero)
-            .is_none());
+        assert!(
+            rzup.settings()
+                .get_default_version(&Component::RustToolchain)
+                .is_none()
+        );
+        assert!(
+            rzup.settings()
+                .get_default_version(&Component::CargoRiscZero)
+                .is_none()
+        );
     }
 
     fn test_install_and_uninstall_end_to_end(base_urls: BaseUrls, public_key: PublicKey) {
@@ -938,9 +940,10 @@ mod tests {
             false,
         )
         .unwrap();
-        assert!(rzup
-            .version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.settings()
                 .get_default_version(&Component::CargoRiscZero)
@@ -951,16 +954,19 @@ mod tests {
             rzup.list_versions(&Component::CargoRiscZero).unwrap(),
             vec![Version::new(1, 0, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::CargoRiscZero, &cargo_risczero_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::CargoRiscZero, &cargo_risczero_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::CargoRiscZero, cargo_risczero_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::CargoRiscZero, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::CargoRiscZero).unwrap(),
             vec![]
@@ -977,9 +983,10 @@ mod tests {
             false,
         )
         .unwrap();
-        assert!(rzup
-            .version_exists(&Component::R0Vm, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::R0Vm, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.settings()
                 .get_default_version(&Component::R0Vm)
@@ -990,16 +997,19 @@ mod tests {
             rzup.list_versions(&Component::R0Vm).unwrap(),
             vec![Version::new(1, 0, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::R0Vm, &cargo_risczero_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::R0Vm, &cargo_risczero_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::R0Vm, cargo_risczero_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::R0Vm, &cargo_risczero_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::R0Vm, &cargo_risczero_version)
+                .unwrap()
+        );
         assert_eq!(rzup.list_versions(&Component::R0Vm).unwrap(), vec![]);
         assert_eq!(
             rzup.get_version_dir(&Component::R0Vm, &cargo_risczero_version),
@@ -1014,23 +1024,27 @@ mod tests {
         );
         rzup.install_component(&Component::RustToolchain, Some(rust_version.clone()), false)
             .unwrap();
-        assert!(rzup
-            .version_exists(&Component::RustToolchain, &rust_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::RustToolchain, &rust_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::RustToolchain).unwrap(),
             vec![Version::new(1, 79, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::RustToolchain, &rust_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::RustToolchain, &rust_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::RustToolchain, rust_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::RustToolchain, &rust_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::RustToolchain, &rust_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::RustToolchain).unwrap(),
             vec![]
@@ -1048,23 +1062,27 @@ mod tests {
         );
         rzup.install_component(&Component::CppToolchain, Some(cpp_version.clone()), false)
             .unwrap();
-        assert!(rzup
-            .version_exists(&Component::CppToolchain, &cpp_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::CppToolchain, &cpp_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::CppToolchain).unwrap(),
             vec![Version::new(2024, 1, 5)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::CppToolchain, &cpp_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::CppToolchain, &cpp_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::CppToolchain, cpp_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::CppToolchain, &cpp_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::CppToolchain, &cpp_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::CppToolchain).unwrap(),
             vec![]
@@ -1086,23 +1104,27 @@ mod tests {
             false,
         )
         .unwrap();
-        assert!(rzup
-            .version_exists(&Component::Risc0Groth16, &groth16_version)
-            .unwrap());
+        assert!(
+            rzup.version_exists(&Component::Risc0Groth16, &groth16_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::Risc0Groth16).unwrap(),
             vec![Version::new(1, 0, 0)]
         );
-        assert!(rzup
-            .get_version_dir(&Component::Risc0Groth16, &groth16_version)
-            .is_ok());
+        assert!(
+            rzup.get_version_dir(&Component::Risc0Groth16, &groth16_version)
+                .is_ok()
+        );
 
         // Test uninstallation
         rzup.uninstall_component(&Component::Risc0Groth16, groth16_version.clone())
             .unwrap();
-        assert!(!rzup
-            .version_exists(&Component::Risc0Groth16, &groth16_version)
-            .unwrap());
+        assert!(
+            !rzup
+                .version_exists(&Component::Risc0Groth16, &groth16_version)
+                .unwrap()
+        );
         assert_eq!(
             rzup.list_versions(&Component::Risc0Groth16).unwrap(),
             vec![]

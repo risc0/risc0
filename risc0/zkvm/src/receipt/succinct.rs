@@ -22,14 +22,14 @@ use alloc::{
 use anyhow::bail;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
+use risc0_binfmt::{Digestible, read_sha_halfs, tagged_struct};
 use risc0_circuit_recursion::{
+    CIRCUIT, CircuitImpl,
     control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
-    CircuitImpl, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{
-    adapter::{CircuitInfo, ProtocolInfo, PROOF_SYSTEM_INFO},
+    adapter::{CircuitInfo, PROOF_SYSTEM_INFO, ProtocolInfo},
     core::{
         digest::Digest,
         hash::{hash_suite_from_name, sha::Sha256},
@@ -39,12 +39,13 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    MaybePruned,
     claim::Unknown,
     receipt::{
-        merkle::{MerkleGroup, MerkleProof},
         VerifierContext,
+        merkle::{MerkleGroup, MerkleProof},
     },
-    sha, MaybePruned,
+    sha,
 };
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM with a [STARK].
@@ -384,7 +385,7 @@ impl Default for SuccinctReceiptVerifierParameters {
 
 #[cfg(test)]
 mod tests {
-    use super::{allowed_control_root, SuccinctReceiptVerifierParameters, ALLOWED_CONTROL_ROOT};
+    use super::{ALLOWED_CONTROL_ROOT, SuccinctReceiptVerifierParameters, allowed_control_root};
     use crate::{receipt::DEFAULT_MAX_PO2, sha::Digestible};
     use risc0_zkp::core::digest::digest;
 
