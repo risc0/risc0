@@ -21,7 +21,7 @@ res/ml-model and res/input-data come preloaded with a trained decision tree clas
 It is important to specify the generic types for each model so that they can be successfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import:
 `use smartcore::linalg::basic::matrix::DenseMatrix;`
 when using KNN, be sure to add the following import:
-`use smartcore::metrics::distance::euclidian::Euclidian;`
+`use smartcore::metrics::distance::euclidean::Euclidean;`
 A list of the supported models with definitions for their respective types can be found below.  Note that {float} is a placeholder for either f32 or f64:
 
 ```rust
@@ -45,7 +45,7 @@ let model: LinearRegression< {float}, {float}, DenseMatrix<{float}>, Vec<{float}
 ```
 
 ```rust
-let model: KNNClassifier< {float}, u32, DenseMatrix<{float}>, Vec<u32>, Euclidian<{float}>> = trained_model;
+let model: KNNClassifier< {float}, u32, DenseMatrix<{float}>, Vec<u32>, Euclidean<{float}>> = trained_model;
 ```
 
 ```rust
@@ -73,18 +73,18 @@ model.parameters = params;
 
 SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoid.  Kernels are selected within the `.with_kernel()` function in the `SVCParameters` or `SVRParameters`.  Specify the desired kernel as follows:
 
-- Kernel::linear()
-- Kernel::rbf()
-- Kernel::polynomial()
-- Kernel::sigmoid()
+* Kernel::linear()
+* Kernel::rbf()
+* Kernel::polynomial()
+* Kernel::sigmoid()
 
 ## SmartCore
 
-The source code for SmartCore can be found here:  [https://github.com/smartcorelib/smartcore](https://github.com/smartcorelib/smartcore)
+The source code for SmartCore can be found here:  <https://github.com/smartcorelib/smartcore>
 
-You can find other model implementations and additional SmartCore features here:  [https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks](https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks)
+You can find other model implementations and additional SmartCore features here:  <https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks>
 
 ## Jupyter notebook
 
 In order to run Rust code from a Jupyter notebook, you will need to have the Rust kernel installed.  Installation instructions for the kernel and for Jupyter can be found here:
-[https://github.com/evcxr/evcxr/blob/main/evcxr\_jupyter/README.md](https://github.com/evcxr/evcxr/blob/main/evcxr_jupyter/README.md)
+<https://github.com/evcxr/evcxr/blob/main/evcxr_jupyter/README.md>

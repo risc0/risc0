@@ -191,7 +191,7 @@ pub fn get_version() -> Result<Version, semver::Error> {
 /// Returns `true` if dev mode is enabled.
 #[cfg(feature = "std")]
 #[deprecated(
-    note = "dev-mode can be enabled programatically, so this function is no longer authoritative. \
+    note = "dev-mode can be enabled programmatically, so this function is no longer authoritative. \
             Use `ProverOpts::is_dev_mode` or `VerifierContext::is_dev_mode`"
 )]
 pub fn is_dev_mode() -> bool {

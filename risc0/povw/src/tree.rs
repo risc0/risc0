@@ -36,7 +36,7 @@ use crate::{
 
 type U96 = Uint<96, 2>;
 
-// NOTE: The ruint U256 type is not special here. It's just a convinient bitmap.
+// NOTE: The ruint U256 type is not special here. It's just a convenient bitmap.
 /// 256-bit bitmap for tracking used nonces within PoVW jobs.
 ///
 /// Used as leaves in Merkle trees to efficiently represent which nonce indices
@@ -191,7 +191,7 @@ impl WorkSet {
         let index: PovwLogId = index.to();
         let height_offset = height - WorkLog::TREE_HEIGHT;
 
-        // A level of the tree, holding only roots of non-empty subtrees that are decendents of the
+        // A level of the tree, holding only roots of non-empty subtrees that are descendants of the
         // desired root.
         let mut level: BTreeMap<PovwLogId, Digest> = self
             .logs
@@ -349,8 +349,8 @@ impl WorkLog {
         let index: u64 = index.to();
         let height_offset = height - Job::TREE_HEIGHT;
 
-        // A level of the tree, holding only roots of non-empty subtrees that are decendents of the
-        // desired root. Starts holding all decendent nodes at Job::TREE_HEIGHT + 1.
+        // A level of the tree, holding only roots of non-empty subtrees that are descendants of the
+        // desired root. Starts holding all descendent nodes at Job::TREE_HEIGHT + 1.
         let mut level: BTreeMap<u64, Digest> = self
             .jobs
             .iter()
@@ -464,7 +464,7 @@ impl Job {
             return EMPTY_SUBTREE_ROOTS[height];
         };
 
-        // Check whether the requested subtree contains the boundry.
+        // Check whether the requested subtree contains the boundary.
         let boundry_level_index = index_max.checked_shr(8 + height as u32).unwrap_or(0);
         match index.cmp(&boundry_level_index) {
             Ordering::Less => FULL_SUBTREE_ROOTS[height],

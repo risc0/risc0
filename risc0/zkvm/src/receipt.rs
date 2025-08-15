@@ -607,7 +607,7 @@ impl<Claim> FakeReceipt<Claim> {
 impl TryFrom<FakeReceipt<ReceiptClaim>> for Receipt {
     type Error = PrunedValueError;
 
-    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the jounal must be
+    /// Try to create a [Receipt] from a [FakeReceipt]. In order to succeed, the journal must be
     /// populated on the receipt claim (i.e. it cannot be pruned).
     fn try_from(fake_receipt: FakeReceipt<ReceiptClaim>) -> Result<Self, Self::Error> {
         // Attempt to copy the journal from the receipt claim, returning an error if pruned.
