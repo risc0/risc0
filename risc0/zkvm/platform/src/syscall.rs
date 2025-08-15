@@ -562,13 +562,8 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
         assert!(nread_first as usize <= unaligned_at_start);
 
         // Copy the firstword provided by the host into the unaligned start bytes.
-        // NOTE: When nread_first < unaligned_at_start, we still copy unaligned_at_start bytes.
+        // NOTE: When nread_first < unaligned_at_start, we still copy unaligned_at_start. See #1557
         let main_ptr = fill_from_word(recv_ptr, firstword, unaligned_at_start);
-        // If the host returned less data than is required to align up to the word boundary, return
-        // early, as the main read cannot proceed.
-        if (nread_first as usize) < unaligned_at_start {
-            return nread_first as usize;
-        }
         // If the amount read is the full amount requested, return early.
         if nread == unaligned_at_start {
             return nread;
