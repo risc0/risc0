@@ -73,18 +73,18 @@ model.parameters = params;
 
 SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoid.  Kernels are selected within the `.with_kernel()` function in the `SVCParameters` or `SVRParameters`.  Specify the desired kernel as follows:
 
-* Kernel::linear()
-* Kernel::rbf()
-* Kernel::polynomial()
-* Kernel::sigmoid()
+- Kernel::linear()
+- Kernel::rbf()
+- Kernel::polynomial()
+- Kernel::sigmoid()
 
 ## SmartCore
 
-The source code for SmartCore can be found here:  <https://github.com/smartcorelib/smartcore>
+The source code for SmartCore can be found here:  [https://github.com/smartcorelib/smartcore](https://github.com/smartcorelib/smartcore)
 
-You can find other model implementations and additional SmartCore features here:  <https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks>
+You can find other model implementations and additional SmartCore features here:  [https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks](https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks)
 
 ## Jupyter notebook
 
 In order to run Rust code from a Jupyter notebook, you will need to have the Rust kernel installed.  Installation instructions for the kernel and for Jupyter can be found here:
-<https://github.com/evcxr/evcxr/blob/main/evcxr_jupyter/README.md>
+[https://github.com/evcxr/evcxr/blob/main/evcxr\_jupyter/README.md](https://github.com/evcxr/evcxr/blob/main/evcxr_jupyter/README.md)
