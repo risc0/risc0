@@ -46,7 +46,10 @@ use uuid::Uuid;
 
 use crate::actors::{
     manager::ManagerActor,
-    protocol::{CreateJobRequest, JobStatus, JobStatusRequest, ProofRequest, TaskError},
+    protocol::{
+        JobInfo, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest, ProofResult,
+        ShrinkWrapKind, ShrinkWrapRequest, ShrinkWrapResult, TaskError,
+    },
 };
 
 // TODO: Add authn/z to get a userID
@@ -402,13 +405,11 @@ async fn prove_stark(
 
     let reply = state
         .manager
-        .ask(CreateJobRequest {
-            request: ProofRequest {
-                binary,
-                input,
-                assumptions,
-                segment_limit_po2: state.po2,
-            },
+        .ask(ProofRequest {
+            binary,
+            input,
+            assumptions,
+            segment_limit_po2: state.po2,
         })
         .await
         .context("Failed to create job")?;
@@ -418,19 +419,28 @@ async fn prove_stark(
     }))
 }
 
-async fn stark_status(
-    State(state): State<Arc<AppState>>,
-    Host(hostname): Host,
-    Path(job_id): Path<Uuid>,
-    ExtractApiKey(api_key): ExtractApiKey,
-) -> Result<Json<SessionStatusRes>, AppError> {
-    let info = state
+struct ApiJobStatus<ResultT> {
+    state: Option<String>,
+    status: String,
+    error_msg: Option<String>,
+    elapsed_time: Option<f64>,
+    result: Option<ResultT>,
+}
+
+async fn get_job_status<ResultT>(
+    state: &AppState,
+    job_id: &Uuid,
+) -> Result<ApiJobStatus<ResultT>, AppError>
+where
+    JobInfo<ResultT>: TryFrom<JobStatusReply>,
+{
+    let info: JobInfo<ResultT> = state
         .manager
-        .ask(JobStatusRequest { job_id })
+        .ask(JobStatusRequest { job_id: *job_id })
         .await
         .context("Failed to get job status")?
-        .info
-        .ok_or(AppError::InternalErr(anyhow!("Invalid job_id")))?;
+        .try_into()
+        .map_err(|_| AppError::InternalErr(anyhow!("Invalid job_id")))?;
 
     let state = if let JobStatus::Running(ref state) = info.status {
         Some(state.clone())
@@ -446,7 +456,33 @@ async fn stark_status(
         None
     };
 
-    let (stats, receipt_url) = if let JobStatus::Succeeded(ref result) = info.status {
+    let status = info.status.bonsai_status().to_string();
+    let elapsed_time = Some(info.elapsed_time.as_secs_f64());
+
+    let result = if let JobStatus::Succeeded(result) = info.status {
+        Some(result)
+    } else {
+        None
+    };
+
+    Ok(ApiJobStatus {
+        state,
+        error_msg,
+        status,
+        elapsed_time,
+        result,
+    })
+}
+
+async fn stark_status(
+    State(state): State<Arc<AppState>>,
+    Host(hostname): Host,
+    Path(job_id): Path<Uuid>,
+    ExtractApiKey(api_key): ExtractApiKey,
+) -> Result<Json<SessionStatusRes>, AppError> {
+    let status = get_job_status::<ProofResult>(&state, &job_id).await?;
+
+    let (stats, receipt_url) = if let Some(result) = status.result {
         let stats = SessionStats {
             segments: result.session.stats.segments,
             total_cycles: result.session.stats.total_cycles,
@@ -457,28 +493,31 @@ async fn stark_status(
     } else {
         (None, None)
     };
-
     Ok(Json(SessionStatusRes {
-        state,
+        state: status.state,
         receipt_url,
-        error_msg,
-        status: info.status.bonsai_status().to_string(),
-        elapsed_time: Some(info.elapsed_time.as_secs_f64()),
+        error_msg: status.error_msg,
+        status: status.status,
+        elapsed_time: status.elapsed_time,
         stats,
     }))
 }
 
-async fn stark_download(
-    State(state): State<Arc<AppState>>,
-    Path(job_id): Path<Uuid>,
-) -> Result<Vec<u8>, AppError> {
+fn get_receipt_path(state: &AppState, job_id: &Uuid) -> Result<PathBuf, AppError> {
     let job_id = job_id.to_string();
     let receipt_path = validate_path(&state.receipts_dir(), &job_id)
         .ok_or_else(|| AppError::InternalErr(anyhow!("Invalid job_id")))?;
     if !receipt_path.exists() {
         return Err(AppError::ReceiptMissing(job_id));
     }
+    Ok(receipt_path)
+}
 
+async fn stark_download(
+    State(state): State<Arc<AppState>>,
+    Path(job_id): Path<Uuid>,
+) -> Result<Vec<u8>, AppError> {
+    let receipt_path = get_receipt_path(&state, &job_id)?;
     let receipt = tokio::fs::read(receipt_path)
         .await
         .context("Failed to read receipt from object store")?;
@@ -491,13 +530,7 @@ async fn receipt_download(
     Path(job_id): Path<Uuid>,
     Host(hostname): Host,
 ) -> Result<Json<ReceiptDownload>, AppError> {
-    let job_id = job_id.to_string();
-    let receipt_path = validate_path(&state.receipts_dir(), &job_id)
-        .ok_or_else(|| AppError::InternalErr(anyhow!("Invalid job_id")))?;
-    if !receipt_path.exists() {
-        return Err(AppError::ReceiptMissing(job_id));
-    }
-
+    let _receipt_path = get_receipt_path(&state, &job_id)?;
     Ok(Json(ReceiptDownload {
         url: format!("http://{hostname}/receipts/stark/receipt/{job_id}"),
     }))
@@ -532,41 +565,31 @@ async fn preflight_journal(
 async fn prove_groth16(
     State(state): State<Arc<AppState>>,
     ExtractApiKey(api_key): ExtractApiKey,
-    Json(start_req): Json<SnarkReq>,
+    Json(snark_req): Json<SnarkReq>,
 ) -> Result<Json<CreateSessRes>, AppError> {
-    // let (
-    //     _aux_stream,
-    //     _exec_stream,
-    //     _gpu_prove_stream,
-    //     _gpu_coproc_stream,
-    //     _gpu_join_stream,
-    //     snark_stream,
-    // ) = helpers::get_or_create_streams(&state.db_pool, &api_key)
-    //     .await
-    //     .context("Failed to get / create steams")?;
+    let job_id = snark_req
+        .session_id
+        .parse()
+        .map_err(|_| AppError::InternalErr(anyhow!("Invalid job_id")))?;
+    let receipt_path = get_receipt_path(&state, &job_id)?;
+    let receipt_bytes = tokio::fs::read(receipt_path)
+        .await
+        .context("Failed to read receipt from object store")?;
+    let receipt: Receipt =
+        bincode::deserialize(&receipt_bytes).context("Failed to deserialize receipt")?;
 
-    // let task_def = serde_json::to_value(TaskType::Snark(WorkflowSnarkReq {
-    //     receipt: start_req.session_id,
-    //     compress_type: CompressType::Groth16,
-    // }))
-    // .context("Failed to serialize ExecutorReq")?;
+    let reply = state
+        .manager
+        .ask(ShrinkWrapRequest {
+            kind: ShrinkWrapKind::Groth16,
+            receipt,
+        })
+        .await
+        .context("Failed to create job")?;
 
-    // let job_id = taskdb::create_job(
-    //     &state.db_pool,
-    //     &snark_stream,
-    //     &task_def,
-    //     state.snark_retries,
-    //     state.snark_timeout,
-    //     &api_key,
-    // )
-    // .await
-    // .context("Failed to create exec / init task")?;
-
-    // Ok(Json(CreateSessRes {
-    //     uuid: job_id.to_string(),
-    // }))
-
-    todo!()
+    Ok(Json(CreateSessRes {
+        uuid: reply.job_id.to_string(),
+    }))
 }
 
 async fn groth16_status(
@@ -575,26 +598,17 @@ async fn groth16_status(
     Path(job_id): Path<Uuid>,
     Host(hostname): Host,
 ) -> Result<Json<SnarkStatusRes>, AppError> {
-    // let job_state = taskdb::get_job_state(&state.db_pool, &job_id, &api_key)
-    //     .await
-    //     .context("Failed to get job state")?;
-    // let (error_msg, output) = match job_state {
-    //     JobState::Running => (None, None),
-    //     JobState::Done => (
-    //         None,
-    //         Some(format!(
-    //             "http://{hostname}/receipts/groth16/receipt/{job_id}"
-    //         )),
-    //     ),
-    //     JobState::Failed => (None, None), // TODO error message
-    // };
-    // Ok(Json(SnarkStatusRes {
-    //     status: job_state.to_string(),
-    //     error_msg,
-    //     output,
-    // }))
+    let status = get_job_status::<ShrinkWrapResult>(&state, &job_id).await?;
 
-    todo!()
+    let output = status
+        .result
+        .is_some()
+        .then(|| format!("http://{hostname}/receipts/groth16/receipt/{job_id}"));
+    Ok(Json(SnarkStatusRes {
+        output,
+        error_msg: status.error_msg,
+        status: status.status,
+    }))
 }
 
 async fn groth16_download(

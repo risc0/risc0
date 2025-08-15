@@ -14,6 +14,7 @@
 
 use std::{sync::Arc, time::Duration};
 
+use derive_more::From;
 use serde::{Deserialize, Serialize};
 
 use crate::{AssumptionReceipt, Journal, Receipt, SessionStats};
@@ -35,10 +36,36 @@ pub struct ProofRequest {
 }
 
 /// TODO
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct JobInfo {
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub enum ShrinkWrapKind {
     /// TODO
-    pub status: JobStatus,
+    Groth16,
+}
+
+/// TODO
+#[derive(Serialize, Deserialize)]
+pub struct ShrinkWrapRequest {
+    /// TODO
+    pub kind: ShrinkWrapKind,
+    /// TODO
+    pub receipt: Receipt,
+}
+
+/// TODO
+#[allow(clippy::large_enum_variant)]
+#[derive(Serialize, Deserialize, From)]
+pub enum JobRequest {
+    /// TODO
+    Proof(ProofRequest),
+    /// TODO
+    ShrinkWrap(ShrinkWrapRequest),
+}
+
+/// TODO
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct JobInfo<JobResultT> {
+    /// TODO
+    pub status: JobStatus<JobResultT>,
 
     /// TODO
     pub elapsed_time: Duration,
@@ -46,12 +73,12 @@ pub struct JobInfo {
 
 /// TODO
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum JobStatus {
+pub enum JobStatus<JobResultT> {
     /// TODO
     Running(String),
 
     /// TODO
-    Succeeded(ProofResult),
+    Succeeded(JobResultT),
 
     /// TODO
     Failed(TaskError),
@@ -69,6 +96,13 @@ pub struct ProofResult {
     /// TODO
     pub session: Arc<Session>,
 
+    /// TODO
+    pub receipt: Arc<Receipt>,
+}
+
+/// TODO
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ShrinkWrapResult {
     /// TODO
     pub receipt: Arc<Receipt>,
 }
@@ -93,7 +127,7 @@ pub enum TaskError {
     Generic(String),
 }
 
-impl JobStatus {
+impl<JobResultT> JobStatus<JobResultT> {
     /// TODO
     pub fn bonsai_status(&self) -> &str {
         match self {

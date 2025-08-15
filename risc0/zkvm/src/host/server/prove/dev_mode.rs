@@ -30,7 +30,7 @@ use crate::{
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     recursion::MerkleProof,
     ExecutorEnv, MaybePruned, PreflightResults, ProverOpts, ProverServer, Receipt, ReceiptClaim,
-    Segment, Session, VerifierContext, WorkClaim,
+    ReceiptKind, Segment, Session, VerifierContext, WorkClaim,
 };
 
 const ERR_DEV_MODE_DISABLED: &str =
@@ -66,6 +66,10 @@ pub struct DevModeDelay {
     /// Delay for resolve
     #[serde(deserialize_with = "duration_secs")]
     pub resolve: Duration,
+
+    /// Delay for shrink-wrap groth16
+    #[serde(deserialize_with = "duration_secs")]
+    pub shrink_wrap_groth16: Duration,
 }
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -312,6 +316,20 @@ impl ProverServer for DevModeProver {
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         ensure!(opts.dev_mode(), ERR_DEV_MODE_DISABLED);
         ensure_dev_mode_allowed!();
+
+        if let Some(delay) = &self.delay {
+            match opts.receipt_kind {
+                ReceiptKind::Composite => {
+                    // TODO: Apply a delay here.
+                }
+                ReceiptKind::Succinct => {
+                    // TODO: Apply a delay here.
+                }
+                ReceiptKind::Groth16 => {
+                    std::thread::sleep(delay.shrink_wrap_groth16);
+                }
+            }
+        }
 
         Ok(Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
