@@ -567,13 +567,13 @@ fn unaligned_end_short_read() {
 fn unaligned_start_short_read() {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
-    let buf: Vec<u8> = vec![0xff; 9];
-    let readbuf: &[u8] = b"1234567";
+    let buf: Vec<u8> = vec![0xff; 4];
+    let readbuf: &[u8] = b"12";
 
     let spec = MultiTestSpec::SysRead {
         fd: FD,
         buf: buf.clone(),
-        pos_and_len: vec![(2, 7)],
+        pos_and_len: vec![(1, 3)],
     };
     let env = ExecutorEnv::builder()
         .read_fd(FD, readbuf)
@@ -585,8 +585,8 @@ fn unaligned_start_short_read() {
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 
     let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
-    let mut expected = vec![0xff; 9];
-    expected[2..].copy_from_slice(readbuf);
+    let mut expected = vec![0xff; 4];
+    expected[1..].copy_from_slice(readbuf);
     assert_eq!(actual, expected, "pos and lens: {spec:?}");
 }
 
@@ -925,7 +925,7 @@ fn std_buf_read() {
         .env_var("TEST_MODE", "BUF_READ")
         // Previously failed on anything > buf and not % 4 == 0
         // https://github.com/risc0/risc0/pull/1557
-        .write(&9usize)
+        .write(&9u32)
         .unwrap()
         .write_slice(input.as_slice())
         .build()
@@ -935,6 +935,7 @@ fn std_buf_read() {
     assert_eq!(output, input);
 }
 
+// This is a regression test for the issue resolved in #3323
 #[test_log::test]
 fn std_buf_read_to_end_5_bytes() {
     let input = b"12345";
