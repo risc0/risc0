@@ -82,7 +82,7 @@ impl MerkleGroup {
 
     fn calc_range_root(&self, start: u32, end: u32, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         assert!(start < end);
-        let res = if start + 1 == end {
+        if start + 1 == end {
             *self.leaf_or_empty(start)
         } else {
             let mid = (start + end) / 2;
@@ -91,8 +91,7 @@ impl MerkleGroup {
             let left = self.calc_range_root(start, mid, hashfn);
             let right = self.calc_range_root(mid, end, hashfn);
             *hashfn.hash_pair(&left, &right)
-        };
-        res
+        }
     }
 
     /// Calculate and return a [MerkleProof] for the given leaf.
