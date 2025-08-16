@@ -18,7 +18,7 @@ use super::{Executor, Prover, ProverOpts};
 use crate::{
     get_prover_server,
     host::server::{exec::executor::ExecutorImpl, session::NullSegmentRef},
-    ExecutorEnv, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext,
+    ExecutorEnv, ProveInfo, Receipt, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
@@ -62,10 +62,7 @@ impl Executor for LocalProver {
         let session = ExecutorImpl::from_elf(env, elf)
             .unwrap()
             .run_with_callback(|segment| {
-                segments.push(SegmentInfo {
-                    po2: segment.po2() as u32,
-                    cycles: segment.user_cycles(),
-                });
+                segments.push(segment.get_info());
                 Ok(Box::new(NullSegmentRef))
             })?;
 

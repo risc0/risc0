@@ -13,7 +13,9 @@
 // limitations under the License.
 
 use assert_cmd::cargo::cargo_bin;
-use risc0_zkvm::{DefaultProver, ExecutorEnv, Prover as _, ProverOpts, VerifierContext};
+use risc0_zkvm::{
+    DefaultProver, Executor as _, ExecutorEnv, ExitCode, Prover as _, ProverOpts, VerifierContext,
+};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 #[test_log::test]
@@ -41,4 +43,22 @@ fn basic_proof() {
         .unwrap()
         .receipt;
     receipt.verify(FIB_ID).unwrap();
+}
+
+#[test_log::test]
+fn basic_execute() {
+    let r0vm_path = cargo_bin("r0vm");
+    let prover = DefaultProver::new(r0vm_path).unwrap();
+
+    const ITERATIONS: u32 = 300_000;
+    let env = ExecutorEnv::builder()
+        .write(&ITERATIONS)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    let session_info = prover.execute(env, FIB_ELF).unwrap();
+    assert_eq!(session_info.exit_code, ExitCode::Halted(0));
+    assert!(session_info.segments.len() > 2);
+    assert!(session_info.receipt_claim.is_some());
 }

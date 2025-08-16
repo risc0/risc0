@@ -237,6 +237,12 @@ impl AppState {
         std::fs::create_dir_all(&dir).unwrap();
         dir
     }
+
+    fn journals_dir(&self) -> PathBuf {
+        let dir = self.storage_root.join("journals");
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
 }
 
 fn validate_path(base_path: &FsPath, requested_path: &str) -> Option<PathBuf> {
@@ -410,6 +416,7 @@ async fn prove_stark(
             input,
             assumptions,
             segment_limit_po2: state.po2,
+            execute_only: proof_req.execute_only,
         })
         .await
         .context("Failed to create job")?;
@@ -488,8 +495,11 @@ async fn stark_status(
             total_cycles: result.session.stats.total_cycles,
             cycles: result.session.stats.user_cycles,
         };
-        let receipt_url = format!("http://{hostname}/receipts/stark/receipt/{job_id}");
-        (Some(stats), Some(receipt_url))
+        let receipt_url = result
+            .receipt
+            .is_some()
+            .then(|| format!("http://{hostname}/receipts/stark/receipt/{job_id}"));
+        (Some(stats), receipt_url)
     } else {
         (None, None)
     };
@@ -511,6 +521,16 @@ fn get_receipt_path(state: &AppState, job_id: &Uuid) -> Result<PathBuf, AppError
         return Err(AppError::ReceiptMissing(job_id));
     }
     Ok(receipt_path)
+}
+
+fn get_journal_path(state: &AppState, job_id: &Uuid) -> Result<PathBuf, AppError> {
+    let job_id = job_id.to_string();
+    let journal_path = validate_path(&state.journals_dir(), &job_id)
+        .ok_or_else(|| AppError::InternalErr(anyhow!("Invalid job_id")))?;
+    if !journal_path.exists() {
+        return Err(AppError::JournalMissing(job_id));
+    }
+    Ok(journal_path)
 }
 
 async fn stark_download(
@@ -540,24 +560,13 @@ async fn preflight_journal(
     State(state): State<Arc<AppState>>,
     Path(job_id): Path<Uuid>,
 ) -> Result<Vec<u8>, AppError> {
-    // let journal_key = format!("{PREFLIGHT_JOURNALS_BUCKET_DIR}/{job_id}.bin");
-    // if !state
-    //     .s3_client
-    //     .object_exists(&journal_key)
-    //     .await
-    //     .context("Failed to check if object exists")?
-    // {
-    //     return Err(AppError::ReceiptMissing(job_id.to_string()));
-    // }
+    let journal_path = get_journal_path(&state, &job_id)?;
 
-    // let receipt = state
-    //     .s3_client
-    //     .read_buf_from_s3(&journal_key)
-    //     .await
-    //     .context("Failed to read from object store")?;
+    let journal = tokio::fs::read(journal_path)
+        .await
+        .context("Failed to read journal from object store")?;
 
-    // Ok(receipt)
-    todo!()
+    Ok(journal)
 }
 
 // Snark routes
@@ -615,12 +624,7 @@ async fn groth16_download(
     State(state): State<Arc<AppState>>,
     Path(job_id): Path<Uuid>,
 ) -> Result<Vec<u8>, AppError> {
-    let job_id = job_id.to_string();
-    let receipt_path = validate_path(&state.receipts_dir(), &job_id)
-        .ok_or_else(|| AppError::InternalErr(anyhow!("Invalid job_id")))?;
-    if !receipt_path.exists() {
-        return Err(AppError::ReceiptMissing(job_id));
-    }
+    let receipt_path = get_receipt_path(&state, &job_id)?;
 
     let receipt = tokio::fs::read(receipt_path)
         .await
