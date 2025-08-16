@@ -15,7 +15,7 @@
 // This is based on cargo-wasix: https://github.com/wasix-org/cargo-wasix
 
 use anyhow::{Context, Result};
-use bonsai_sdk::{blocking::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
+use bonsai_sdk::{API_KEY_ENVVAR, API_URL_ENVVAR, blocking::Client};
 use clap::Args;
 use risc0_zkvm::VERSION;
 

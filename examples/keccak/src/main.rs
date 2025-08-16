@@ -14,7 +14,7 @@
 
 use clap::Parser;
 use keccak_methods::{KECCAK_ELF, KECCAK_ID};
-use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover, sha::Digest};
 
 /// Hash the given bytes, returning the digest and a [Receipt] that can
 /// be used to verify that the that the hash was computed correctly (i.e. that

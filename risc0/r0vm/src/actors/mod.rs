@@ -24,7 +24,7 @@ pub(crate) mod worker;
 
 use std::{
     error::Error as StdError,
-    io::{stdin, Write},
+    io::{Write, stdin},
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
     os::{fd::AsFd as _, unix::net::UnixStream as StdUnixStream},
     path::{Path, PathBuf},
@@ -36,22 +36,22 @@ use kameo::prelude::*;
 use nvml_wrapper::Nvml;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{
+    Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
     propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
-    Resource,
 };
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
-    net::{tcp, TcpListener, UnixStream},
+    net::{TcpListener, UnixStream, tcp},
     process::Command,
     task::JoinHandle,
 };
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
+use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::Cli;
 
@@ -59,11 +59,11 @@ use self::{
     factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     manager::ManagerActor,
     protocol::{
-        factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
         JobInfo, JobRequest, ProofRequest, ProofResult, ShrinkWrapRequest, ShrinkWrapResult,
         TaskKind,
+        factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
     },
-    rpc::{rpc_system, RpcMessageId, RpcSender},
+    rpc::{RpcMessageId, RpcSender, rpc_system},
     worker::Worker,
 };
 

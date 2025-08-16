@@ -23,15 +23,20 @@ fn main() {
     use num_bigint::BigUint;
     use risc0_bigint2::ToBigInt2Buffer;
 
-    let (lhs_0, lhs_1, rhs_0, rhs_1, prime): (BigUint, BigUint, BigUint, BigUint, BigUint) = env::read();
+    let (lhs_0, lhs_1, rhs_0, rhs_1, prime): (BigUint, BigUint, BigUint, BigUint, BigUint) =
+        env::read();
     let lhs = [lhs_0.to_u32_array(), lhs_1.to_u32_array()];
     let rhs = [rhs_0.to_u32_array(), rhs_1.to_u32_array()];
     let prime = prime.to_u32_array();
 
-    let mut result = [[0u32; risc0_bigint2::field::FIELD_384_WIDTH_WORDS]; risc0_bigint2::field::EXT_DEGREE_2];
+    let mut result =
+        [[0u32; risc0_bigint2::field::FIELD_384_WIDTH_WORDS]; risc0_bigint2::field::EXT_DEGREE_2];
     risc0_bigint2::field::extfield_deg2_add_384(&lhs, &rhs, &prime, &mut result);
 
-    let result = (BigUint::from_slice(&result[0]), BigUint::from_slice(&result[1]));
+    let result = (
+        BigUint::from_slice(&result[0]),
+        BigUint::from_slice(&result[1]),
+    );
 
     env::commit(&result);
 }

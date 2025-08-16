@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ pub struct BootstrapProtos;
 
 impl BootstrapProtos {
     pub fn run(&self) {
-        std::env::set_var("PROTOC", protobuf_src::protoc());
+        unsafe {
+            std::env::set_var("PROTOC", protobuf_src::protoc());
+        }
 
         prost_build::Config::new()
             .out_dir("risc0/zkvm/src/host/server/exec")

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use substrate_bn::{Fr, G1, G2, Gt, pairing_batch};
 use risc0_zkvm::guest::env;
+use substrate_bn::{Fr, G1, G2, Gt, pairing_batch};
 
 fn main() {
     let inp: bn254_core::Inputs = env::read();
@@ -27,6 +27,6 @@ fn main() {
     pairs.push((g1 * a_factor, g2 * b_factor));
     pairs.push((g1, g2 * (-a_factor * b_factor)));
     let result = pairing_batch(&pairs);
-    
+
     env::commit(&(result == Gt::one()));
 }

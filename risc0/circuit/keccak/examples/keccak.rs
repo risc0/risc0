@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 use std::time::Instant;
 
 use clap::Parser;
-use risc0_circuit_keccak::{prove::keccak_prover, KeccakState};
+use risc0_circuit_keccak::{KeccakState, prove::keccak_prover};
 
 /// keccak prover benchmarking tool
 #[derive(Parser)]

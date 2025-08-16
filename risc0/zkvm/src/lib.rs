@@ -84,8 +84,8 @@ pub mod sha;
 pub use ::serde::de::DeserializeOwned;
 pub use anyhow::Result;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-pub use risc0_zkp::core::digest::{digest, Digest};
-pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+pub use risc0_zkp::core::digest::{Digest, digest};
+pub use risc0_zkvm_platform::{PAGE_SIZE, align_up, declare_syscall, memory::GUEST_MAX_MEM};
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
@@ -97,15 +97,15 @@ pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::{local::LocalProver, local_executor},
     recursion::{
-        self,
+        self, RECURSION_PO2,
         prove::{prove_registered_zkr, prove_zkr, register_zkr},
-        RECURSION_PO2,
     },
     server::{
         exec::executor::ExecutorImpl,
         prove::{
+            HalPair, ProverServer,
             dev_mode::{DevModeDelay, DevModeProver},
-            get_prover_server, HalPair, ProverServer,
+            get_prover_server,
         },
         session::{
             FileSegmentRef, NullSegmentRef, PreflightResults, Segment, SegmentRef, Session,
@@ -123,17 +123,17 @@ pub use self::host::client::prove::bonsai::BonsaiProver;
 pub use {
     self::host::{
         api::{
-            client::Client as ApiClient, Asset, AssetRequest, Connector, RedisParams, SegmentInfo,
-            SessionInfo,
+            Asset, AssetRequest, Connector, RedisParams, SegmentInfo, SessionInfo,
+            client::Client as ApiClient,
         },
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
+                Executor, Prover,
                 default::DefaultProver,
                 default_executor, default_prover,
                 external::ExternalProver,
                 opts::{ProverOpts, ReceiptKind},
-                Executor, Prover,
             },
         },
     },
@@ -163,17 +163,17 @@ pub use {
 
 pub use self::{
     claim::{
+        Unknown,
         maybe_pruned::{MaybePruned, PrunedValueError},
         receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim, UnionClaim},
         work::{Work, WorkClaim},
-        Unknown,
     },
     receipt::{
-        AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-        GenericReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
-        InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
+        AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, DEFAULT_MAX_PO2,
+        FakeReceipt, GenericReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters,
+        InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
         SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-        VerifierContext, DEFAULT_MAX_PO2,
+        VerifierContext,
     },
 };
 
@@ -211,8 +211,10 @@ fn is_dev_mode_enabled_via_environment() -> bool {
     let dev_mode_disabled = cfg!(feature = "disable-dev-mode");
 
     if dev_mode_disabled && is_env_set {
-        panic!("zkVM: Inconsistent settings -- please resolve. \
-            The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+        panic!(
+            "zkVM: Inconsistent settings -- please resolve. \
+            The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag."
+        );
     }
 
     !dev_mode_disabled && is_env_set

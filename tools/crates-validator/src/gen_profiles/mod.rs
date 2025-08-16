@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 pub mod args;
 
 use std::{
-    collections::{btree_map::Entry, BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashMap, HashSet, btree_map::Entry},
     fs::File,
     io::Write,
     path::{Path, PathBuf},
@@ -34,12 +34,12 @@ use tokio_stream::StreamExt;
 use tracing::{debug, info, warn};
 
 use crate::{
+    Profile, ProfileConfig, Profiles,
     parser::Parser,
     types::{
         traits::Reduce,
         version::{Version, Versions},
     },
-    Profile, ProfileConfig, Profiles,
 };
 
 pub use args::Args;

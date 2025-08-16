@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ use risc0_core::field::Field;
 pub use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use crate::core::digest::{Digest, DIGEST_BYTES, DIGEST_WORDS};
+use crate::core::digest::{DIGEST_BYTES, DIGEST_WORDS, Digest};
 
 /// The number of words in the representation of a [Block].
 ///
@@ -359,8 +359,8 @@ pub mod testutil {
     use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
     use super::{
-        rust_crypto::{self, Digest as _},
         Sha256,
+        rust_crypto::{self, Digest as _},
     };
     use crate::core::digest::Digest;
 

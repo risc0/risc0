@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use alloc::vec::Vec;
 use core::{fmt, time::Duration};
 
-use crate::{receipt::GenericReceipt, Receipt, ReceiptClaim, WorkClaim};
+use crate::{Receipt, ReceiptClaim, WorkClaim, receipt::GenericReceipt};
 use risc0_circuit_rv32im::{EcallKind, EcallMetric};
 
 #[derive(Clone, Debug, Enum, Serialize, Deserialize)]

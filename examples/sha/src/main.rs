@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover, sha::Digest};
 use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 
 /// Hash the given bytes, returning the digest and a [Receipt] that can

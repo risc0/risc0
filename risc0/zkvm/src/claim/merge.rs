@@ -22,11 +22,12 @@ use risc0_binfmt::Digestible;
 use risc0_zkp::core::digest::Digest;
 
 use crate::{
+    SystemState, Work, WorkClaim,
     claim::{
         maybe_pruned::MaybePruned,
         receipt::{Assumption, Assumptions, Input, Output, ReceiptClaim},
     },
-    sha, SystemState, Work, WorkClaim,
+    sha,
 };
 
 /// Merge two structures containing [MaybePruned] fields to produce a resulting structure with
@@ -199,8 +200,8 @@ mod tests {
     use hex::FromHex;
 
     use super::{Assumptions, MaybePruned, Merge, Output, ReceiptClaim, SystemState};
-    use crate::sha::{Digest, Digestible};
     use crate::ExitCode;
+    use crate::sha::{Digest, Digestible};
 
     /// Testing utility for randomly pruning structs.
     trait RandPrune {

@@ -14,21 +14,21 @@
 
 use std::path::Path;
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use bytes::Bytes;
 use prost::Message;
 use risc0_zkp::core::digest::Digest;
 
 use super::{
-    malformed_err, pb, Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector,
-    SessionInfo,
+    Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector, SessionInfo,
+    malformed_err, pb,
 };
 use crate::{
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, Unknown,
     claim::receipt::UnionClaim,
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path},
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, Unknown,
 };
 
 pub(crate) enum Compat {
@@ -780,10 +780,10 @@ impl Client {
                                     })
                                 }
                                 None => Err(malformed_err("ServerReply.ok.SessionDone.session")),
-                            }
+                            };
                         }
                         pb::api::client_callback::Kind::ProveDone(_) => {
-                            return Err(anyhow!("Illegal client callback"))
+                            return Err(anyhow!("Illegal client callback"));
                         }
                     }
                 }
@@ -816,15 +816,15 @@ impl Client {
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(_) => {
-                            return Err(anyhow!("Illegal client callback"))
+                            return Err(anyhow!("Illegal client callback"));
                         }
                         pb::api::client_callback::Kind::SessionDone(_) => {
-                            return Err(anyhow!("Illegal client callback"))
+                            return Err(anyhow!("Illegal client callback"));
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
                             return done.prove_info.ok_or_else(|| {
                                 malformed_err("ServerReply.Ok.ProveDone.prove_info")
-                            })
+                            });
                         }
                     }
                 }

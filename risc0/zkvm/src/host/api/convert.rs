@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use enum_map::EnumMap;
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
@@ -23,20 +23,20 @@ use risc0_circuit_rv32im::{EcallKind, EcallMetric};
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
+use super::{Asset, AssetRequest, RedisParams, malformed_err, path_to_string, pb};
 use crate::{
-    claim::{receipt::UnionClaim, Unknown},
+    Assumption, Assumptions, ExitCode, GenericReceipt, Groth16Receipt, Input, Journal, MaybePruned,
+    Output, ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    Work, WorkClaim,
+    claim::{Unknown, receipt::UnionClaim},
     host::{
         client::env::ProveKeccakRequest,
         prove_info::{SyscallKind, SyscallMetric},
     },
     receipt::{
-        merkle::MerkleProof, CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt,
-        ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
+        CompositeReceipt, FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata,
+        SegmentReceipt, SuccinctReceipt, merkle::MerkleProof,
     },
-    Assumption, Assumptions, ExitCode, GenericReceipt, Groth16Receipt, Input, Journal, MaybePruned,
-    Output, ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
-    Work, WorkClaim,
 };
 
 mod ver {
@@ -902,9 +902,11 @@ where
                 pb::core::inner_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
                 pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
                 pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake(inner.try_into()?),
-                pb::core::inner_receipt::Kind::Composite(_) => return Err(malformed_err(
-                    "cannot deserialize GenericReceipt from pb::InnerReceipt with composite kind",
-                )),
+                pb::core::inner_receipt::Kind::Composite(_) => {
+                    return Err(malformed_err(
+                        "cannot deserialize GenericReceipt from pb::InnerReceipt with composite kind",
+                    ));
+                }
             },
         )
     }

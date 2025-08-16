@@ -17,20 +17,20 @@ use std::{collections::HashMap, net::SocketAddr};
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
 use tokio::{
-    net::{tcp, TcpStream},
+    net::{TcpStream, tcp},
     task::JoinHandle,
 };
 
 use super::{
+    RemoteRequest,
     job::JobActor,
     metrics,
     protocol::{
+        GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
         factory::{DropJob, GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
-        GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
     },
-    rpc::{rpc_system, RpcSender},
-    RemoteRequest,
+    rpc::{RpcSender, rpc_system},
 };
 
 #[derive(Clone, MultiIndexMap)]

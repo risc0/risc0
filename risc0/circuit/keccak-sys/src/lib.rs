@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ pub struct RawBuffer {
     pub checked_reads: bool,
 }
 
-extern "C" {
+unsafe extern "C" {
     pub fn risc0_circuit_keccak_cpu_witgen(
         mode: u32,
         buffers: *const RawExecBuffers,
@@ -67,7 +67,7 @@ extern "C" {
 }
 
 #[cfg(feature = "cuda")]
-extern "C" {
+unsafe extern "C" {
     pub fn risc0_circuit_keccak_cuda_scatter(
         into: DevicePointer<u8>,
         infos: *const ScatterInfo,

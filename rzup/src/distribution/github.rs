@@ -14,8 +14,8 @@
 
 use crate::components::Component;
 use crate::distribution::{
-    check_for_not_found, download_bytes, download_json, parse_cpp_version, DistributionPlatform,
-    Platform, ProgressWriter,
+    DistributionPlatform, Platform, ProgressWriter, check_for_not_found, download_bytes,
+    download_json, parse_cpp_version,
 };
 use crate::env::Environment;
 use crate::{BaseUrls, Result, RzupError, RzupEvent, TransferKind};

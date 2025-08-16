@@ -16,11 +16,11 @@ use core::{hint::black_box, ops::Add};
 
 use hex_literal::hex;
 use k256::{
+    FieldElement, ProjectivePoint, Scalar,
     elliptic_curve::{
         bigint::{Encoding, U256},
         ops::{Invert, LinearCombination, Reduce},
     },
-    FieldElement, ProjectivePoint, Scalar,
 };
 use risc0_zkvm::guest::env;
 

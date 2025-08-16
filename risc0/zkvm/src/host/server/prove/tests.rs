@@ -18,17 +18,17 @@ use anyhow::Result;
 use risc0_binfmt::{MemoryImage, PovwJobId, PovwLogId, PovwNonce};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use risc0_zkvm_platform::{memory, WORD_SIZE};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
+use risc0_zkvm_platform::{WORD_SIZE, memory};
 use rstest::rstest;
 
 use super::get_prover_server;
 use crate::{
+    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
+    SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
     host::server::{exec::executor::ExecutorImpl, testutils},
     serde::{from_slice, to_vec},
     sha::Digestible,
-    ExecutorEnv, ExitCode, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
-    SimpleSegmentRef, SuccinctReceiptVerifierParameters, VerifierContext,
 };
 
 #[allow(dead_code)]
@@ -669,8 +669,8 @@ mod sys_verify {
 
     use super::*;
     use crate::{
-        recursion::{prove::zkr, test_zkr, MerkleGroup},
-        Assumption, SuccinctReceipt, Unknown, RECURSION_PO2,
+        Assumption, RECURSION_PO2, SuccinctReceipt, Unknown,
+        recursion::{MerkleGroup, prove::zkr, test_zkr},
     };
 
     fn prove_halt(exit_code: u8) -> Receipt {
@@ -1065,12 +1065,12 @@ fn povw_prove_work_receipt() -> Result<()> {
 
 mod soundness {
     // use risc0_circuit_rv32im::{prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2, CIRCUIT};
-    use risc0_circuit_rv32im::{execute::DEFAULT_SEGMENT_LIMIT_PO2, CircuitImpl};
+    use risc0_circuit_rv32im::{CircuitImpl, execute::DEFAULT_SEGMENT_LIMIT_PO2};
     use risc0_zkp::{
         adapter::TapsProvider,
         field::{
-            baby_bear::{BabyBear, BabyBearExtElem},
             ExtElem,
+            baby_bear::{BabyBear, BabyBearExtElem},
         },
         hal::cpu::CpuHal,
         prove::soundness,

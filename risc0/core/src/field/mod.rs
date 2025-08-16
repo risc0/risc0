@@ -280,7 +280,7 @@ mod tests {
         let mut cur: Option<F> = None;
 
         for &rou in F::ROU_FWD.iter().rev() {
-            if let Some(ref mut curval) = &mut cur {
+            if let Some(curval) = &mut cur {
                 *curval *= *curval;
                 assert_eq!(*curval, rou);
             } else {

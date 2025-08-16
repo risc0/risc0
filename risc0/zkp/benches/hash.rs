@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use criterion::{criterion_group, criterion_main, Criterion};
-use risc0_core::field::{baby_bear::BabyBearElem, Elem};
-use risc0_zkp::core::hash::poseidon2::{poseidon2_mix, CELLS as POSEIDON2_CELLS};
+use criterion::{Criterion, criterion_group, criterion_main};
+use risc0_core::field::{Elem, baby_bear::BabyBearElem};
+use risc0_zkp::core::hash::poseidon2::{CELLS as POSEIDON2_CELLS, poseidon2_mix};
 
 fn benchmark_poseidon2_mix(c: &mut Criterion) {
     let mut rng = rand::rng();

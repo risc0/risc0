@@ -1,7 +1,7 @@
 [package]
 name = "digital-signature-core"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 risc0-zkvm = { path = "../../../risc0/zkvm", default-features = false }

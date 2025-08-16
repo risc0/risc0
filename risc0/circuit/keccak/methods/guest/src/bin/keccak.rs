@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
+use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, KeccakState};
 use risc0_zkvm::{guest::env, sha::Digest};
 use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak};
 
@@ -25,10 +25,7 @@ fn main() {
     }
 
     unsafe {
-        sys_prove_keccak(
-            claim_digest.as_ref(),
-            KECCAK_CONTROL_ROOT.as_ref(),
-        );
+        sys_prove_keccak(claim_digest.as_ref(), KECCAK_CONTROL_ROOT.as_ref());
     }
     env::verify_assumption2(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
 }

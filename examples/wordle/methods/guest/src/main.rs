@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
-use wordle_core::{GameState, LetterFeedback, WordFeedback, WORD_LENGTH};
+use wordle_core::{GameState, LetterFeedback, WORD_LENGTH, WordFeedback};
 
 fn main() {
     let secret: String = env::read();

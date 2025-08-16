@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
 //! A Poseidon2 based CRNG used in Fiat-Shamir.
 
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearExtElem, Elem},
     ExtElem,
+    baby_bear::{BabyBear, BabyBearExtElem, Elem},
 };
 
-use super::{consts::CELLS, poseidon2_mix, CELLS_OUT, CELLS_RATE};
+use super::{CELLS_OUT, CELLS_RATE, consts::CELLS, poseidon2_mix};
 use crate::core::{digest::Digest, hash::Rng};
 
 /// A random number generator driven by Poseidon2

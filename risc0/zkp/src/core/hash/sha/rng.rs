@@ -16,10 +16,10 @@
 
 use alloc::boxed::Box;
 
-use rand_core::{impls, RngCore};
+use rand_core::{RngCore, impls};
 use risc0_core::field::{Elem, Field};
 
-use super::{Digest, Impl, Sha256, DIGEST_WORDS};
+use super::{DIGEST_WORDS, Digest, Impl, Sha256};
 use crate::core::hash::Rng;
 
 /// A random number generator driven by a [Sha256].
@@ -106,7 +106,7 @@ mod tests {
     use rand_core::RngCore;
 
     use super::ShaRng;
-    use crate::core::hash::sha::{cpu::Impl, Sha256};
+    use crate::core::hash::sha::{Sha256, cpu::Impl};
 
     // Runs conformance test on a SHA implementation to make sure it
     // properly behaves for generating pseudo-random numbers.

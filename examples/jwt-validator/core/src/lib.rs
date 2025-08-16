@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
 // limitations under the License.
 
 use jwt_compact::{
-    alg::{Rsa, RsaPrivateKey, RsaPublicKey},
-    jwk::{JsonWebKey, JwkError},
     AlgorithmExt, Claims, CreationError, Header, ParseError, Token, UntrustedToken,
     ValidationError,
+    alg::{Rsa, RsaPrivateKey, RsaPublicKey},
+    jwk::{JsonWebKey, JwkError},
 };
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;

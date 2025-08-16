@@ -19,7 +19,7 @@ use num_bigint::BigUint;
 use num_traits::Num;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::core::{
-    digest::{Digest, DIGEST_WORDS},
+    digest::{DIGEST_WORDS, Digest},
     hash::poseidon_254::digest_to_fr,
 };
 

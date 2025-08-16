@@ -19,13 +19,13 @@ use risc0_zkp::field::Elem;
 use test_log::test;
 
 use crate::{
-    execute::{
-        testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
-        DEFAULT_SEGMENT_LIMIT_PO2,
-    },
-    prove::{hal::StepMode, witgen::WitnessGenerator, PreflightResults},
-    zirgen::circuit::{ExtVal, REGCOUNT_DATA},
     MAX_INSN_CYCLES,
+    execute::{
+        DEFAULT_SEGMENT_LIMIT_PO2,
+        testutil::{self, DEFAULT_SESSION_LIMIT, NullSyscall},
+    },
+    prove::{PreflightResults, hal::StepMode, witgen::WitnessGenerator},
+    zirgen::circuit::{ExtVal, REGCOUNT_DATA},
 };
 
 fn run_preflight(program: Program) {

@@ -2,31 +2,32 @@
 //
 // All rights reserved.
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::Parser;
-use rand::{rngs::StdRng, seq::IndexedRandom as _, Rng, SeedableRng};
+use rand::{Rng, SeedableRng, rngs::StdRng, seq::IndexedRandom as _};
 use sqlx::{
+    PgPool,
     postgres::PgPoolOptions,
     types::{JsonValue, Uuid},
-    PgPool,
 };
 use std::{
     str::FromStr,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 use taskdb::{
+    JobState, ReadyTask,
     planner::{
-        task::{Command as TaskCmd, Task},
         Planner,
+        task::{Command as TaskCmd, Task},
     },
-    test_helpers, update_task_done, update_task_failed, update_task_retry, JobState, ReadyTask,
+    test_helpers, update_task_done, update_task_failed, update_task_retry,
 };
 use tokio::{
     task::JoinSet,
-    time::{sleep, Duration},
+    time::{Duration, sleep},
 };
 use tracing_subscriber::filter::EnvFilter;
 

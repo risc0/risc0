@@ -35,10 +35,10 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
+use risc0_binfmt::{KERNEL_START_ADDR, ProgramBinary};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -50,7 +50,7 @@ pub use self::{
         DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
         GuestOptionsBuilder, GuestOptionsBuilderError,
     },
-    docker::{docker_build, BuildStatus, TARGET_DIR},
+    docker::{BuildStatus, TARGET_DIR, docker_build},
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
@@ -158,7 +158,9 @@ fn compute_image_id(elf: &[u8], elf_path: &str) -> Result<Digest> {
     Ok(match r0vm_image_id(elf_path, "--id") {
         Ok(image_id) => image_id,
         Err(err) => {
-            tty_println("Falling back to slow ImageID computation. Updating to the latest r0vm will speed this up.");
+            tty_println(
+                "Falling back to slow ImageID computation. Updating to the latest r0vm will speed this up.",
+            );
             tty_println(&format!("  error: {err}"));
             risc0_binfmt::compute_image_id(elf)?
         }
@@ -745,7 +747,9 @@ fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>
 
     // If the user provided options for a package that wasn't built, abort.
     if let Some(package) = guest_opts.keys().next() {
-        panic!("Error: guest options were provided for package {package:?} but the package was not built.");
+        panic!(
+            "Error: guest options were provided for package {package:?} but the package was not built."
+        );
     }
 
     build_methods(&pkg_opts)

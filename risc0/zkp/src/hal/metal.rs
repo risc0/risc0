@@ -24,24 +24,24 @@ use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use rayon::prelude::*;
 use risc0_core::{
     field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem, ExtElem, RootsOfUnity,
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     },
     scope,
 };
 
-use super::{tracker, Buffer, Hal};
+use super::{Buffer, Hal, tracker};
 use crate::{
+    FRI_FOLD,
     core::{
         digest::Digest,
         hash::{
+            HashSuite,
             poseidon2::{self, Poseidon2HashSuite},
             sha::Sha256HashSuite,
-            HashSuite,
         },
         log2_ceil,
     },
-    FRI_FOLD,
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("ZKP_METAL_PATH"));
@@ -1005,7 +1005,7 @@ mod tests {
 
     #[test]
     fn prefix_products() {
-        use crate::hal::{cpu::CpuHal, dual::DualHal, Hal as _};
+        use crate::hal::{Hal as _, cpu::CpuHal, dual::DualHal};
         use risc0_core::field::baby_bear::BabyBearExtElem;
         use std::rc::Rc;
 

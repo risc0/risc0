@@ -17,7 +17,7 @@ mod runtime {
     use std::{env, fs, io, path::Path};
 
     use risc0_build::build_rust_runtime_with_features;
-    use zip::{write::SimpleFileOptions, CompressionMethod, ZipWriter};
+    use zip::{CompressionMethod, ZipWriter, write::SimpleFileOptions};
 
     pub(crate) fn build_and_zip_test_runtime() {
         // Build the risc0-zkvm-platform.a file and place it in a zip archive for inclusion in the

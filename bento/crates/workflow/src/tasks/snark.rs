@@ -3,11 +3,11 @@
 // All rights reserved.
 
 use crate::Agent;
-use anyhow::{bail, Context as _, Result};
+use anyhow::{Context as _, Result, bail};
 use risc0_zkvm::{InnerReceipt, ProverOpts, Receipt};
 use workflow_common::{
-    s3::{GROTH16_BUCKET_DIR, RECEIPT_BUCKET_DIR, STARK_BUCKET_DIR},
     SnarkReq, SnarkResp,
+    s3::{GROTH16_BUCKET_DIR, RECEIPT_BUCKET_DIR, STARK_BUCKET_DIR},
 };
 
 /// Converts a stark, stored in s3 to a snark

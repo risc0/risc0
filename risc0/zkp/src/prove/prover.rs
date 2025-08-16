@@ -18,11 +18,11 @@ use risc0_core::{
 };
 
 use crate::{
+    INV_RATE,
     core::poly::poly_interpolate,
     hal::{Buffer, CircuitHal, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,
-    INV_RATE,
 };
 
 /// Object to generate a zero-knowledge proof of the execution of some circuit.

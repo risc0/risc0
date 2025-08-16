@@ -14,7 +14,7 @@
 
 use std::{io::Cursor, path::Path};
 
-use anyhow::{anyhow, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow};
 use risc0_groth16_sys::{ProverParams, SetupParams, WitnessParams};
 use rzup::{Component, Rzup, Version};
 use tempfile::tempdir;

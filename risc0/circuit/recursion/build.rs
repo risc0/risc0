@@ -25,7 +25,7 @@ fn download_zkr() {
         str::FromStr,
     };
 
-    use downloader::{verify, Download, DownloadSummary, Downloader};
+    use downloader::{Download, DownloadSummary, Downloader, verify};
     use sha2::{Digest, Sha256};
 
     const FILENAME: &str = "recursion_zkr.zip";

@@ -15,14 +15,14 @@
 #![cfg(feature = "prove")]
 
 use risc0_circuit_keccak::{
-    prove::zkr::get_keccak_zkr, KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT, KECCAK_PO2_RANGE,
+    KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT, KECCAK_PO2_RANGE, prove::zkr::get_keccak_zkr,
 };
 use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
 use risc0_zkp::{
     core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
     digest,
 };
-use risc0_zkvm::{get_prover_server, recursion::MerkleGroup, ExecutorEnv, ProverOpts};
+use risc0_zkvm::{ExecutorEnv, ProverOpts, get_prover_server, recursion::MerkleGroup};
 
 fn run_test(po2: u32, claim_digest: Digest) {
     let to_guest: (Digest, u32) = (claim_digest, po2);
@@ -42,12 +42,14 @@ fn run_test(po2: u32, claim_digest: Digest) {
 
     // Make sure this receipt actually depends on the assumption;
     // otherwise this test might give a false negative.
-    assert!(!receipt
-        .inner
-        .composite()
-        .unwrap()
-        .assumption_receipts
-        .is_empty());
+    assert!(
+        !receipt
+            .inner
+            .composite()
+            .unwrap()
+            .assumption_receipts
+            .is_empty()
+    );
 
     // Make sure the receipt verifies OK
     receipt.verify(KECCAK_ID).unwrap();

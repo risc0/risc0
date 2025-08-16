@@ -17,16 +17,17 @@ use std::{collections::HashMap, rc::Rc};
 use metal::ComputePipelineDescriptor;
 use risc0_core::scope;
 use risc0_zkp::{
+    INV_RATE, ZK_CYCLES,
     core::log2_ceil,
     field::{
+        Elem as _, RootsOfUnity,
         baby_bear::{BabyBearElem, BabyBearExtElem},
-        map_pow, Elem as _, RootsOfUnity,
+        map_pow,
     },
     hal::{
-        metal::{BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHash},
         AccumPreflight, Buffer as _, CircuitHal,
+        metal::{BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHash},
     },
-    INV_RATE, ZK_CYCLES,
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RECURSION_METAL_PATH"));
@@ -167,7 +168,7 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::{cpu::CpuCircuitHal, CircuitImpl};
+    use crate::{CircuitImpl, cpu::CpuCircuitHal};
 
     // TODO: figure out a better way to test this.
     #[test]

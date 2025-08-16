@@ -11,14 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+use crate::BaseUrls;
+use crate::RzupEvent;
 use crate::distribution::{
-    github::GithubRelease, s3::S3Bucket, DistributionPlatform, Os, Platform,
+    DistributionPlatform, Os, Platform, github::GithubRelease, s3::S3Bucket,
 };
 use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::paths::Paths;
-use crate::BaseUrls;
-use crate::RzupEvent;
 use semver::Version;
 use std::fmt;
 use std::path::{Path, PathBuf};
@@ -93,7 +93,7 @@ impl Component {
                 (other, os) => {
                     return Err(RzupError::UnsupportedPlatform(format!(
                         "unknown architecture {other} for {os}"
-                    )))
+                    )));
                 }
             },
             Component::CppToolchain => match (platform.arch, platform.os) {
@@ -102,7 +102,7 @@ impl Component {
                 (other, os) => {
                     return Err(RzupError::UnsupportedPlatform(format!(
                         "unknown architecture {other} for {os}"
-                    )))
+                    )));
                 }
             },
             Component::R0Vm => (format!("r0vm-{platform}"), "tgz"),
@@ -206,7 +206,7 @@ fn extract_archive(env: &Environment, archive_path: &Path, target_dir: &Path) ->
         _ => {
             return Err(crate::RzupError::InstallationFailed(format!(
                 "Unsupported archive format: {filename}",
-            )))
+            )));
         }
     }
     Ok(())
@@ -363,10 +363,10 @@ pub fn get_latest_version(
 mod tests {
     use super::*;
     use crate::{
-        components,
-        distribution::{signature::PublicKey, Platform},
+        BaseUrls, components,
+        distribution::{Platform, signature::PublicKey},
         env::Environment,
-        http_test_harness, BaseUrls,
+        http_test_harness,
     };
     use semver::Version;
     use tempfile::TempDir;

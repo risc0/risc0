@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_zkvm::{default_executor, get_prover_server, ExecutorEnv, ExitCode, ProverOpts, Receipt};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF};
+use risc0_zkvm::{ExecutorEnv, ExitCode, ProverOpts, Receipt, default_executor, get_prover_server};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF, multi_test::MultiTestSpec};
 
 #[derive(Parser)]
 struct CliOptions {

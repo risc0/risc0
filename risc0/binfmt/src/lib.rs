@@ -30,15 +30,15 @@ mod sys_state;
 use anyhow::Result;
 use risc0_zkp::core::digest::Digest;
 
-pub use self::image::{MemoryImage, Page, KERNEL_START_ADDR};
+pub use self::image::{KERNEL_START_ADDR, MemoryImage, Page};
 
 pub use crate::{
     addr::{ByteAddr, WordAddr},
     elf::{AbiKind, Program, ProgramBinary, ProgramBinaryHeader},
     exit_code::{ExitCode, InvalidExitCodeError},
-    hash::{tagged_iter, tagged_list, tagged_list_cons, tagged_struct, Digestible},
+    hash::{Digestible, tagged_iter, tagged_list, tagged_list_cons, tagged_struct},
     povw::{PovwJobId, PovwLogId, PovwNonce},
-    sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
+    sys_state::{DecodeError, SystemState, read_sha_halfs, write_sha_halfs},
 };
 
 pub(crate) const WORD_SIZE: usize = 4;

@@ -15,7 +15,7 @@
 #![doc = include_str!("../README.md")]
 
 use hello_world_methods::MULTIPLY_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover};
 
 // This is a Hello World demo for the RISC Zero zkVM.
 // By running the demo, Alice can produce a receipt that proves that she knows

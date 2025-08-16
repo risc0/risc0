@@ -31,8 +31,8 @@ use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::digest::Digest,
     field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem as _,
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     },
     hal::{Buffer, CircuitHal, Hal},
 };
@@ -44,7 +44,7 @@ use self::{
     witgen::WitnessGenerator,
 };
 use crate::{
-    taps::TAPSET, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA, taps::TAPSET,
 };
 
 pub use self::program::Program;

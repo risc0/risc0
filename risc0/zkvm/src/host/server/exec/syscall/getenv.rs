@@ -14,12 +14,12 @@
 
 use std::{cmp::min, collections::HashMap};
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
 use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
 use risc0_zkvm_platform::{
-    syscall::reg_abi::{REG_A3, REG_A4},
     WORD_SIZE,
+    syscall::reg_abi::{REG_A3, REG_A4},
 };
 
 use super::{Syscall, SyscallContext};

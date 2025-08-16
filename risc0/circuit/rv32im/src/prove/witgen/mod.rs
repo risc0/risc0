@@ -46,8 +46,8 @@ use crate::{
         sha2::Sha2State,
     },
     zirgen::circuit::{
-        CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_ACCUM, REGCOUNT_CODE,
-        REGCOUNT_DATA, REGCOUNT_GLOBAL, REGCOUNT_MIX,
+        CircuitField, ExtVal, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_ACCUM, REGCOUNT_CODE,
+        REGCOUNT_DATA, REGCOUNT_GLOBAL, REGCOUNT_MIX, Val,
     },
 };
 

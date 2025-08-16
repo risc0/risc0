@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 

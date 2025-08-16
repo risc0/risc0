@@ -19,13 +19,13 @@ extern crate alloc;
 use alloc::{collections::VecDeque, vec::Vec};
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use ruint::aliases::{U160, U256, U64};
+use ruint::aliases::{U64, U160, U256};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "rand")]
 use rand::{
-    distr::{Distribution, StandardUniform},
     Rng,
+    distr::{Distribution, StandardUniform},
 };
 
 use crate::DecodeError;

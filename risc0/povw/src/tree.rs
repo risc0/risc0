@@ -14,19 +14,19 @@
 
 use std::{
     cmp::Ordering,
-    collections::{btree_map, BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, btree_map},
     fmt::Debug,
     ops::{BitOr, ShrAssign, Sub},
 };
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use hybrid_array::{typenum, Array, ArraySize};
+use hybrid_array::{Array, ArraySize, typenum};
 use risc0_binfmt::PovwLogId;
 use risc0_zkvm::{
-    sha::{self, Sha256 as _},
     Digest,
+    sha::{self, Sha256 as _},
 };
-use ruint::{aliases::U256, Uint};
+use ruint::{Uint, aliases::U256};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -774,7 +774,7 @@ mod tests {
     use risc0_binfmt::PovwLogId;
     use ruint::aliases::U256;
 
-    use super::{Bitmap, Job, WorkLog, WorkSet, U96};
+    use super::{Bitmap, Job, U96, WorkLog, WorkSet};
     use crate::Error;
 
     /// Utility used to map any error to Ok(()) and Ok(()) to an error.

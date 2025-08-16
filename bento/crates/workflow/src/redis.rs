@@ -4,7 +4,7 @@
 
 use anyhow::{Context, Result};
 use deadpool_redis::Connection;
-pub use deadpool_redis::{redis::AsyncCommands, Config, Pool as RedisPool, Runtime};
+pub use deadpool_redis::{Config, Pool as RedisPool, Runtime, redis::AsyncCommands};
 use redis::{RedisResult, ToRedisArgs};
 
 pub fn create_pool(redis_url: &str) -> Result<RedisPool> {

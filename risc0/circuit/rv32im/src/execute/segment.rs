@@ -20,8 +20,8 @@ use risc0_binfmt::{MemoryImage, PovwNonce};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2, Rv32imV2Claim,
     execute::{CycleLimit, Executor},
-    Rv32imV2Claim, MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
 };
 
 use super::{Syscall, SyscallContext};

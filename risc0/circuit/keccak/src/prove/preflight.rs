@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -202,7 +202,7 @@ fn compute_sha_infos(state: &mut ShaState, data: &[u32]) -> Vec<ShaInfo> {
         };
     }
 
-    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = state;
+    let &mut [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = state;
     let mut w = [0u32; 64];
     let mut ret = vec![];
     let mut cur = ShaInfo::default();

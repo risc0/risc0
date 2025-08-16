@@ -20,15 +20,15 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::{bail, ensure, Context as _, Result};
+use anyhow::{Context as _, Result, bail, ensure};
 use serde::de::DeserializeOwned;
 
 use crate::{
+    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
     rpc::{
         JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, ShrinkWrapKind,
         ShrinkWrapRequest, ShrinkWrapResult,
     },
-    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
 };
 
 use super::{Executor, Prover, ProverOpts};

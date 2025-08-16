@@ -343,7 +343,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use risc0_core::field::{baby_bear::BabyBearElem, Elem, RootsOfUnity};
+    use risc0_core::field::{Elem, RootsOfUnity, baby_bear::BabyBearElem};
 
     use crate::core::ntt::{bit_reverse, evaluate_ntt, interpolate_ntt};
 

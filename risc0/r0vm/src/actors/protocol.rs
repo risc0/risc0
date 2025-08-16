@@ -16,7 +16,7 @@ use std::{ops::Range, sync::Arc};
 
 use clap::ValueEnum;
 use derive_more::{Debug, TryInto};
-use kameo::{actor::ActorRef, Reply};
+use kameo::{Reply, actor::ActorRef};
 use risc0_zkvm::{
     ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
     UnionClaim, Unknown,

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{claim::receipt::UnionClaim, sha::Digestible, Assumption};
+use crate::{Assumption, claim::receipt::UnionClaim, sha::Digestible};
 use alloc::{boxed::Box, collections::VecDeque};
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 
 #[allow(dead_code)]

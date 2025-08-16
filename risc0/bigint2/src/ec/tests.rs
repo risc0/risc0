@@ -15,7 +15,7 @@
 use std::time::Instant;
 
 use risc0_bigint2_methods::{EC_384_ELF, EC_ADD_256_ELF, EC_DOUBLE_256_ELF, EC_MUL_256_ELF};
-use risc0_zkvm::{get_prover_server, DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts};
+use risc0_zkvm::{DeserializeOwned, ExecutorEnv, ExitCode, Journal, ProverOpts, get_prover_server};
 
 use crate::ec::secp256k1::SECP256K1_PRIME;
 

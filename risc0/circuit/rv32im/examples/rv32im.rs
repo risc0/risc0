@@ -17,9 +17,9 @@ use std::time::Instant;
 use clap::Parser;
 use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im::{
-    execute::{platform::RESERVED_CYCLES, testutil, DEFAULT_SEGMENT_LIMIT_PO2},
-    prove::segment_prover,
     MAX_INSN_CYCLES,
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, platform::RESERVED_CYCLES, testutil},
+    prove::segment_prover,
 };
 use risc0_core::scope;
 

@@ -16,7 +16,7 @@ use cust::memory::DevicePointer;
 
 pub use sppark::Error as SpparkError;
 
-extern "C" {
+unsafe extern "C" {
     pub fn sppark_init() -> sppark::Error;
 
     pub fn sppark_batch_expand(

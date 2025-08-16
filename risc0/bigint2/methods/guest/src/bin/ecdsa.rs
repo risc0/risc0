@@ -15,7 +15,7 @@
 #![no_std]
 #![no_main]
 
-use k256::ecdsa::{signature::Verifier as _, Signature, VerifyingKey};
+use k256::ecdsa::{Signature, VerifyingKey, signature::Verifier as _};
 
 include!(concat!(env!("OUT_DIR"), "/ecdsa_signatures.rs"));
 

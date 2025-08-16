@@ -80,7 +80,7 @@ pub struct RawAccumBuffers {
     pub mix: RawBuffer,
 }
 
-extern "C" {
+unsafe extern "C" {
     pub fn risc0_circuit_rv32im_cpu_witgen(
         mode: u32,
         buffers: *const RawExecBuffers,
@@ -104,7 +104,7 @@ extern "C" {
 }
 
 #[cfg(feature = "cuda")]
-extern "C" {
+unsafe extern "C" {
     pub fn risc0_circuit_rv32im_cuda_witgen(
         mode: u32,
         buffers: *const RawExecBuffers,

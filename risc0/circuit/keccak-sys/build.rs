@@ -56,7 +56,7 @@ fn build_cuda_kernels() {
         return;
     }
 
-    env::set_var("SCCACHE_IDLE_TIMEOUT", "0");
+    unsafe { env::set_var("SCCACHE_IDLE_TIMEOUT", "0") };
 
     let mut build = cc::Build::new();
     build

@@ -15,12 +15,12 @@
 use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
-use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use image::{GenericImageView, io::Reader as ImageReader};
+use risc0_zkvm::{ExecutorEnv, default_prover};
 use waldo_core::{
-    image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
-    merkle::SYS_VECTOR_ORACLE,
     PrivateInput,
+    image::{IMAGE_CHUNK_SIZE, ImageMask, ImageMerkleTree},
+    merkle::SYS_VECTOR_ORACLE,
 };
 use waldo_methods::IMAGE_CROP_ELF;
 

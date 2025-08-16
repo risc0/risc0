@@ -1,7 +1,7 @@
 [package]
 name = "password-checker"
 version = "0.12.0"
-edition = "2021"
+edition = { workspace = true }
 
 [dependencies]
 password-checker-core = { path = "core" }

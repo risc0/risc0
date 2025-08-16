@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use crate::distribution::{
-    signature::{PrivateKey, PublicKey},
     Platform,
+    signature::{PrivateKey, PublicKey},
 };
 use crate::error::Result;
 use crate::{AwsCredentials, RzupError, RzupEvent};
@@ -327,7 +327,7 @@ pub struct LockFile {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::distribution::{signature::PublicKey, Os};
+    use crate::distribution::{Os, signature::PublicKey};
 
     fn no_env(_: &str) -> VarResult<String> {
         Err(std::env::VarError::NotPresent)

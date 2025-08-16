@@ -18,9 +18,9 @@ use byteorder::{LittleEndian, ReadBytesExt as _};
 use std::collections::HashMap;
 
 use crate::execute::{
+    WORD_SIZE,
     bibc::{OpCode, Program},
     pager::{NODE_CYCLES, PAGE_CYCLES},
-    WORD_SIZE,
 };
 
 const PAGE_SIZE: u32 = 1024;

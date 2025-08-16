@@ -14,19 +14,18 @@
 
 use std::collections::VecDeque;
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_keccak::{
-    get_control_id,
+    KECCAK_CONTROL_IDS, get_control_id,
     prove::{keccak_prover, zkr::get_keccak_zkr},
-    KECCAK_CONTROL_IDS,
 };
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zkp::core::digest::{Digest, DIGEST_SHORTS};
+use risc0_zkp::core::digest::{DIGEST_SHORTS, Digest};
 
 use crate::{
-    host::client::env::ProveKeccakRequest, host::recursion::prove::prove_zkr,
-    receipt::SuccinctReceipt, Unknown,
+    Unknown, host::client::env::ProveKeccakRequest, host::recursion::prove::prove_zkr,
+    receipt::SuccinctReceipt,
 };
 
 /// Generate a keccak proof that has been lifted.

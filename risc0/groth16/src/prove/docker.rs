@@ -24,7 +24,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use tempfile::tempdir;
 
 use super::seal_to_json::to_json;

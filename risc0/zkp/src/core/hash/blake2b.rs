@@ -17,13 +17,13 @@ use alloc::{boxed::Box, rc::Rc, vec::Vec};
 use core::marker::PhantomData;
 
 use blake2::{
-    digest::{Update, VariableOutput},
     Blake2bVar,
+    digest::{Update, VariableOutput},
 };
-use rand_core::{impls, RngCore};
+use rand_core::{RngCore, impls};
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
 };
 
 use super::{HashFn, HashSuite, Rng, RngFactory};

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 use std::path::Path;
 
 use assert_cmd::Command;
-use assert_fs::{fixture::PathChild, TempDir};
+use assert_fs::{TempDir, fixture::PathChild};
 use risc0_zkvm::Receipt;
 use risc0_zkvm_methods::STANDARD_LIB_ID;
 

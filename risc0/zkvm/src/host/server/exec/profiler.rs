@@ -35,12 +35,12 @@ use std::{
 };
 
 use addr2line::{
+    Context, LookupResult,
     fallible_iterator::FallibleIterator,
     gimli::{self, EndianRcSlice, RunTimeEndian},
-    Context, LookupResult,
 };
-use anyhow::{anyhow, Result};
-use elf::{abi::STT_FUNC, endian::LittleEndian, ElfBytes};
+use anyhow::{Result, anyhow};
+use elf::{ElfBytes, abi::STT_FUNC, endian::LittleEndian};
 use object::{Object as _, ObjectSegment as _};
 use prost::Message;
 use risc0_binfmt::ProgramBinary;

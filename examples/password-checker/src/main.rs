@@ -15,7 +15,7 @@
 use password_checker_core::PasswordRequest;
 use password_checker_methods::PW_CHECKER_ELF;
 use rand::RngCore as _;
-use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_prover, sha::Digest};
 
 fn main() {
     let mut rng = rand::rng();

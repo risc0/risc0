@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde, ExecutorEnv, ExecutorImpl, ReceiptClaim};
-use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF, BENCH_ID};
+use risc0_zkvm::{ExecutorEnv, ExecutorImpl, ReceiptClaim, serde};
+use risc0_zkvm_methods::{BENCH_ELF, BENCH_ID, bench::BenchmarkSpec};
 
 fn run_guest(msg: &str, spec: BenchmarkSpec) {
     let env = ExecutorEnv::builder()

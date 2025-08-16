@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 
 use std::{fs::File, io::BufReader, path::PathBuf};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::Parser;
 use colored::Colorize;
-use risc0_crates_validator::{types::repo::Repo, ProfileConfig, RunStatus, ValidatorBuilder};
+use risc0_crates_validator::{ProfileConfig, RunStatus, ValidatorBuilder, types::repo::Repo};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 

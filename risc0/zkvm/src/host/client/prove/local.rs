@@ -16,9 +16,8 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server,
+    ExecutorEnv, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext, get_prover_server,
     host::server::{exec::executor::ExecutorImpl, session::NullSegmentRef},
-    ExecutorEnv, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling

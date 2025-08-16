@@ -15,7 +15,7 @@
 use anyhow::Result;
 use assert_cmd::cargo::cargo_bin;
 use risc0_zkvm::{ExecutorEnv, ExternalProver, Prover, ProverOpts, Receipt};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID, multi_test::MultiTestSpec};
 
 fn prove_nothing(opt: &ProverOpts) -> Result<Receipt> {
     let env = ExecutorEnv::builder()

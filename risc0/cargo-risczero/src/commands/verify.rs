@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ use anyhow::Result;
 use bonsai_sdk::blocking::SessionId;
 use clap::Parser;
 use hex::FromHex;
-use risc0_zkvm::{sha::Digest, Receipt};
+use risc0_zkvm::{Receipt, sha::Digest};
 
 /// `cargo risczero verify`
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]

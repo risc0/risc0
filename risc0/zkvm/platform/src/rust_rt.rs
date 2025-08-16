@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,13 +38,13 @@ pub fn panic_fault(panic_info: &PanicInfo) -> ! {
 mod entrypoint {
     use crate::syscall::sys_halt;
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     unsafe extern "C" fn __start() -> ! {
         // This definition of __start differs from risc0_zkvm::guest in that it does not initialize the
         // journal and will halt with empty output. It also assumes main follows the standard C
         // convention, and uses the returned i32 value as the user exit code for halt.
         let exit_code = {
-            extern "C" {
+            unsafe extern "C" {
                 fn main(argc: i32, argv: *const *const u8) -> i32;
             }
 

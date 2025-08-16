@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern "C" {
+unsafe extern "C" {
     pub fn sys_bigint2_1(blob_ptr: *const u8, a1: *const u32);
 
     pub fn sys_bigint2_2(blob_ptr: *const u8, a1: *const u32, a2: *const u32);

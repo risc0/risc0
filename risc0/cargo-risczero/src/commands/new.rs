@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use clap::Parser;
 use const_format::concatcp;
 use regex::Regex;
@@ -264,7 +264,7 @@ mod tests {
         path::Path,
     };
 
-    use tempfile::{tempdir, TempDir};
+    use tempfile::{TempDir, tempdir};
 
     use super::*;
 

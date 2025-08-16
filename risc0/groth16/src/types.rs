@@ -17,11 +17,11 @@ extern crate alloc;
 use alloc::{string::String, vec, vec::Vec};
 use core::str::FromStr;
 
-use anyhow::{anyhow, Error, Result};
+use anyhow::{Error, Result, anyhow};
 use ark_bn254::Bn254;
 use serde::{Deserialize, Serialize};
 
-use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
+use crate::{Fr, VerifyingKey, from_u256, g1_from_bytes, g2_from_bytes};
 
 /// Groth16 seal object encoded in big endian.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]

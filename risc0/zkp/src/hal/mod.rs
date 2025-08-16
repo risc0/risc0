@@ -32,8 +32,8 @@ use risc0_core::{
 };
 
 use crate::{
-    core::{digest::Digest, hash::HashSuite, poly::poly_divide},
     INV_RATE,
+    core::{digest::Digest, hash::HashSuite, poly::poly_divide},
 };
 
 pub trait Buffer<T>: Clone {
@@ -323,15 +323,15 @@ mod testutil {
 
     use rand::RngCore;
     use risc0_core::field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
         Elem, ExtElem,
+        baby_bear::{BabyBearElem, BabyBearExtElem},
     };
 
-    use super::{dual::DualHal, Hal};
+    use super::{Hal, dual::DualHal};
     use crate::{
-        core::digest::Digest,
-        hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
+        core::digest::Digest,
+        hal::{Buffer, cpu::CpuHal},
     };
 
     const COUNTS: [usize; 7] = [1, 9, 12, 1001, 1024, 1025, 1024 * 1024];

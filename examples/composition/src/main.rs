@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 use composition_example_methods::{EXPONENTIATE_ELF, EXPONENTIATE_ID};
 use hello_world::multiply;
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_prover};
 
 fn main() {
     // Some party "Alice" picks two numbers and multiplies them, producing a receipt that attests

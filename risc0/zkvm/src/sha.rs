@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@
 //! ```
 
 pub use risc0_zkp::core::{
-    digest::{Digest, DIGEST_BYTES, DIGEST_SHORTS, DIGEST_WORDS},
-    hash::sha::{Block, Sha256, BLOCK_BYTES, BLOCK_WORDS, SHA256_INIT, WORD_SIZE},
+    digest::{DIGEST_BYTES, DIGEST_SHORTS, DIGEST_WORDS, Digest},
+    hash::sha::{BLOCK_BYTES, BLOCK_WORDS, Block, SHA256_INIT, Sha256, WORD_SIZE},
 };
 
 // This Impl selects the appropriate implementation of SHA-256 depending on whether we are

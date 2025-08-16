@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 use chess_core::Inputs;
 use risc0_zkvm::guest::env;
-use shakmaty::{fen::Fen, san::San, CastlingMode, Chess, FromSetup, Move, Position, Setup};
+use shakmaty::{CastlingMode, Chess, FromSetup, Move, Position, Setup, fen::Fen, san::San};
 
 fn main() {
     let inputs: Inputs = env::read();

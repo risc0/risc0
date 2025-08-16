@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{digest, Digest};
+use risc0_zkvm::{Digest, digest};
 
 use crate::WorkSet;
 
@@ -528,11 +528,11 @@ pub(crate) const FULL_SUBTREE_ROOTS: [Digest; WorkSet::TREE_HEIGHT + 1] = [
 
 #[cfg(test)]
 mod tests {
-    use super::{WorkSet, FULL_SUBTREE_ROOTS};
+    use super::{FULL_SUBTREE_ROOTS, WorkSet};
     use crate::{
+        Bitmap,
         consts::EMPTY_SUBTREE_ROOTS,
         tree::{hash_leaf, join},
-        Bitmap,
     };
     use risc0_zkvm::Digest;
 

@@ -14,7 +14,7 @@
 
 //! Updates all the `Cargo.lock` files in the repository.
 
-use anyhow::{anyhow, bail, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow, bail};
 use clap::Parser;
 
 use std::path::Path;
@@ -158,25 +158,31 @@ mod tests {
         }
 
         for (root, _, _) in inputs {
-            assert!(Command::new("cargo")
-                .args(["update"])
-                .current_dir(root)
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .status()
-                .unwrap()
-                .success());
+            assert!(
+                Command::new("cargo")
+                    .args(["update"])
+                    .current_dir(root)
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .status()
+                    .unwrap()
+                    .success()
+            );
         }
 
         // sanity check, foo depends on bar
-        assert!(std::fs::read_to_string(foo_root.join("Cargo.lock"))
-            .unwrap()
-            .contains("name = \"bar\"\nversion = \"1.0.0\""));
+        assert!(
+            std::fs::read_to_string(foo_root.join("Cargo.lock"))
+                .unwrap()
+                .contains("name = \"bar\"\nversion = \"1.0.0\"")
+        );
 
         // sanity check, baz depends on bar
-        assert!(std::fs::read_to_string(baz_root.join("Cargo.lock"))
-            .unwrap()
-            .contains("name = \"bar\"\nversion = \"1.0.0\""));
+        assert!(
+            std::fs::read_to_string(baz_root.join("Cargo.lock"))
+                .unwrap()
+                .contains("name = \"bar\"\nversion = \"1.0.0\"")
+        );
 
         // Update bar's version, this should require foo and baz's lock files to update
         write_cargo_toml(&bar_root, "bar", &Version::new(2, 0, 0), "");
@@ -185,13 +191,17 @@ mod tests {
         run_inner(tempdir.path()).unwrap();
 
         // foo should be updated
-        assert!(std::fs::read_to_string(foo_root.join("Cargo.lock"))
-            .unwrap()
-            .contains("name = \"bar\"\nversion = \"2.0.0\""));
+        assert!(
+            std::fs::read_to_string(foo_root.join("Cargo.lock"))
+                .unwrap()
+                .contains("name = \"bar\"\nversion = \"2.0.0\"")
+        );
 
         // baz should have remained the same
-        assert!(std::fs::read_to_string(baz_root.join("Cargo.lock"))
-            .unwrap()
-            .contains("name = \"bar\"\nversion = \"1.0.0\""));
+        assert!(
+            std::fs::read_to_string(baz_root.join("Cargo.lock"))
+                .unwrap()
+                .contains("name = \"bar\"\nversion = \"1.0.0\"")
+        );
     }
 }

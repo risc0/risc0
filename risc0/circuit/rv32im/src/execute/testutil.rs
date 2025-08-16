@@ -14,17 +14,17 @@
 
 use std::collections::BTreeMap;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_core::scope;
 use risc0_zkp::{
-    core::{digest::Digest, log2_ceil},
     MAX_CYCLES_PO2,
+    core::{digest::Digest, log2_ceil},
 };
 
 use super::{
-    executor::CycleLimit, pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor,
-    SimpleSession, SyscallContext,
+    Executor, SimpleSession, SyscallContext, executor::CycleLimit, pager::RESERVED_PAGING_CYCLES,
+    platform::*, syscall::Syscall,
 };
 
 pub const DEFAULT_SESSION_LIMIT: CycleLimit = CycleLimit::Hard(1 << 24);

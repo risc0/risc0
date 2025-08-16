@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
 use risc0_core::scope_with;
 
 use crate::{
+    INV_RATE, QUERIES,
     core::log2_ceil,
     hal::{Buffer, Hal},
     prove::merkle::MerkleTreeProver,
-    INV_RATE, QUERIES,
 };
 
 /// A PolyGroup represents a group of polynomials, all of the same maximum

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ pub mod cuda;
 
 use std::ffi::CStr;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 #[repr(C)]
 pub struct CppError {
@@ -26,7 +26,7 @@ pub struct CppError {
 
 impl Drop for CppError {
     fn drop(&mut self) {
-        extern "C" {
+        unsafe extern "C" {
             fn free(str: *const std::os::raw::c_char);
         }
         unsafe { free(self.msg) };
@@ -54,7 +54,7 @@ pub fn ffi_wrap<F>(mut inner: F) -> Result<()>
 where
     F: FnMut() -> *const std::os::raw::c_char,
 {
-    extern "C" {
+    unsafe extern "C" {
         fn free(str: *const std::os::raw::c_char);
     }
 

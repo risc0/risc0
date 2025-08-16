@@ -17,8 +17,8 @@ use test_log::test;
 
 use super::segment_prover;
 use crate::{
-    execute::{testutil, DEFAULT_SEGMENT_LIMIT_PO2},
     MAX_INSN_CYCLES,
+    execute::{DEFAULT_SEGMENT_LIMIT_PO2, testutil},
 };
 
 fn run_program(program: Program) {

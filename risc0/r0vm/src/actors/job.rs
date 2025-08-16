@@ -21,9 +21,9 @@ use kameo::{error::Infallible, prelude::*};
 use tokio::task::JoinSet;
 
 use super::{
+    TaskDoneMsg, TaskUpdateMsg,
     factory::FactoryActor,
     protocol::{JobId, JobStatusReply, JobStatusRequest, ProofRequest, ShrinkWrapRequest},
-    TaskDoneMsg, TaskUpdateMsg,
 };
 
 pub(crate) struct JobActor {

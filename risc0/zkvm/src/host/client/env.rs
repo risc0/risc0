@@ -24,23 +24,23 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use bytemuck::Pod;
 use bytes::Bytes;
 use risc0_binfmt::PovwJobId;
-use risc0_circuit_keccak::{KeccakState, KECCAK_PO2_RANGE};
+use risc0_circuit_keccak::{KECCAK_PO2_RANGE, KeccakState};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
 use crate::{
+    AssumptionReceipt, TraceCallback,
     host::client::{
         posix_io::PosixIo,
-        slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
+        slice_io::{SliceIo, SliceIoTable, slice_io_from_fn},
     },
     serde::to_vec,
-    AssumptionReceipt, TraceCallback,
 };
 
 /// A builder pattern used to construct an [ExecutorEnv].

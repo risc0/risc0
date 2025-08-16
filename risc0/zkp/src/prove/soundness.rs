@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@
 //! Running the calculator results in a terminal printout for scenarios (1) and (3) in the list above.
 //! The calculator also includes code for scenarios (2) and (4).
 
-use risc0_core::field::{baby_bear, ExtElem};
+use risc0_core::field::{ExtElem, baby_bear};
 
 use crate::{
+    FRI_FOLD, FRI_MIN_DEGREE, INV_RATE,
     adapter::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     hal::Hal,
     taps::TapSet,
-    FRI_FOLD, FRI_MIN_DEGREE, INV_RATE,
 };
 
 /// Johnson parameter. See https://eprint.iacr.org/2022/1216

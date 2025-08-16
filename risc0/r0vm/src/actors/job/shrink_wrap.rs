@@ -17,15 +17,15 @@ use std::{sync::Arc, time::Instant};
 use kameo::{error::Infallible, prelude::*};
 use risc0_zkvm::Receipt;
 
-use super::{tracer::JobTracer, JobActorNew};
+use super::{JobActorNew, tracer::JobTracer};
 use crate::actors::{
+    JobInfo,
     factory::FactoryActor,
     protocol::{
-        factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
         GlobalId, JobId, JobStatus, JobStatusReply, JobStatusRequest, ShrinkWrapRequest,
         ShrinkWrapResult, ShrinkWrapTask, Task, TaskError, TaskHeader,
+        factory::{DropJob, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg},
     },
-    JobInfo,
 };
 
 pub(crate) struct JobActor {

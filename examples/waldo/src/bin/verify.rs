@@ -15,11 +15,11 @@
 use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
-use image::{io::Reader as ImageReader, GenericImageView, RgbImage};
+use image::{GenericImageView, RgbImage, io::Reader as ImageReader};
 use risc0_zkvm::Receipt;
 use waldo_core::{
-    image::{ImageMerkleTree, IMAGE_CHUNK_SIZE},
     Journal,
+    image::{IMAGE_CHUNK_SIZE, ImageMerkleTree},
 };
 use waldo_methods::IMAGE_CROP_ID;
 

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use k256::{
-    ecdsa::{signature::Verifier, Signature, VerifyingKey},
     EncodedPoint,
+    ecdsa::{Signature, VerifyingKey, signature::Verifier},
 };
 use risc0_zkvm::guest::env;
 

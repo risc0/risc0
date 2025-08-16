@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 #![no_main]
 
 use k256::{
-    ecdsa::{signature::Verifier, Signature, VerifyingKey},
     EncodedPoint,
+    ecdsa::{Signature, VerifyingKey, signature::Verifier},
 };
 use risc0_zkvm::guest::env;
 

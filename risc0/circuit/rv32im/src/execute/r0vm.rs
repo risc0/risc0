@@ -14,7 +14,7 @@
 
 use std::{cmp::min, fmt::Write as _};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
