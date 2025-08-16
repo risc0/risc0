@@ -225,10 +225,10 @@ fn test_recursion_lift_then_unwrap_povw() {
 
     // Unwrap the receipt over WorkClaim<ReceiptClaim> into a receipt over ReceiptClaim
     tracing::info!("Proving unwrap_povw");
-    let unwraped: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&lifted).unwrap();
-    unwraped.verify_integrity_with_context(&ctx).unwrap();
+    let unwrapped: SuccinctReceipt<ReceiptClaim> = unwrap_povw(&lifted).unwrap();
+    unwrapped.verify_integrity_with_context(&ctx).unwrap();
 
-    let receipt = Receipt::new(InnerReceipt::Succinct(unwraped), journal.bytes);
+    let receipt = Receipt::new(InnerReceipt::Succinct(unwrapped), journal.bytes);
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
