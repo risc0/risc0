@@ -35,6 +35,7 @@ uuid = { version = "1.16", features = ["v4"] }
 [features]
 default = []
 non_blocking = ["dep:tokio"]
+shrink_bitvm2 = []
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
