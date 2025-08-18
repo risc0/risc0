@@ -1,0 +1,4 @@
+# r0vm --worker prove-segment,lift,join --addr 100.66.221.121:9000
+[worker]
+
+[storage]

@@ -21,23 +21,32 @@ use crate::actors::protocol::TaskKind;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AppConfig {
-    manager: Option<ManagerConfig>,
-    worker: Option<WorkerConfig>,
-    storage: Option<StorageConfig>,
+    pub api: Option<ApiConfig>,
+    pub manager: Option<ManagerConfig>,
+    pub worker: Option<WorkerConfig>,
+    pub storage: Option<StorageConfig>,
+    pub telemetry: Option<TelemetryConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct ApiConfig {
+    pub bind: SocketAddr,
+    pub manager: SocketAddr,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct StorageConfig {
-    path: PathBuf,
+    pub path: PathBuf,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct ManagerConfig {
-    bind: Option<SocketAddr>,
+    pub bind: Option<SocketAddr>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct WorkerConfig {
+    pub manager: SocketAddr,
     pub pools: Vec<PoolConfig>,
 }
 
@@ -47,3 +56,6 @@ pub(crate) struct PoolConfig {
     pub profile: Option<DevModeDelay>,
     pub task_kinds: Vec<TaskKind>,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct TelemetryConfig {}

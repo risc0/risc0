@@ -1,0 +1,5 @@
+# r0vm --manager --addr 100.66.221.121:9000
+[manager]
+bind = "0.0.0.0:9000"
+
+[storage]
