@@ -304,6 +304,10 @@ impl Assembler {
     pub fn die(&mut self) {
         self.text.push(fence());
     }
+
+    pub fn fence(&mut self) {
+        self.text.push(fence());
+    }
 }
 
 // 31        25 | 24  20 | 19  15 | 14  12 | 11        7 | 6    0 |

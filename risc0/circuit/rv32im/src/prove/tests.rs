@@ -108,6 +108,7 @@ mod riscv {
     test_case!(bne);
     test_case!(div);
     test_case!(divu);
+    test_case!(fence);
     test_case!(jal);
     test_case!(jalr);
     test_case!(lb);

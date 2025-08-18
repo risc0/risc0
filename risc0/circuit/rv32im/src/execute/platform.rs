@@ -165,6 +165,7 @@ pub mod major {
 pub mod control_minor {
     pub const RESUME: u8 = 1;
     pub const USER_ECALL: u8 = 2;
+    pub const FENCE: u8 = 2;  // Shares position with USER_ECALL
     pub const MRET: u8 = 3;
 }
 

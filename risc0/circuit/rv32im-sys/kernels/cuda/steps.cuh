@@ -432,11 +432,6 @@ extern __device__ InstOutputBaseStruct exec_ControlResume(ExecContext& ctx,
                                                           InstInputStruct arg1_0,
                                                           BoundLayout<ControlResumeLayout> layout2,
                                                           GlobalBuf global3);
-extern __device__ InstOutputBaseStruct
-exec_ControlUserECALL(ExecContext& ctx,
-                      NondetRegStruct arg0,
-                      InstInputStruct arg1_0,
-                      BoundLayout<ControlUserECALLLayout> layout2);
 extern __device__ InstOutputBaseStruct exec_ControlMRET(ExecContext& ctx,
                                                         NondetRegStruct arg0,
                                                         InstInputStruct arg1_0,
@@ -462,6 +457,11 @@ extern __device__ InstOutputBaseStruct exec_ControlDone(ExecContext& ctx,
                                                         InstInputStruct arg1_0,
                                                         BoundLayout<ControlDoneLayout> layout2,
                                                         GlobalBuf global3);
+extern __device__ InstOutputBaseStruct
+exec_ControlUserEcallOrFence(ExecContext& ctx,
+                             NondetRegStruct arg0,
+                             InstInputStruct arg1_0,
+                             BoundLayout<ControlUserEcallOrFenceLayout> layout2);
 extern __device__ InstOutputBaseStruct exec_Control0(ExecContext& ctx,
                                                      NondetRegStruct arg0,
                                                      InstInputStruct arg1_0,
