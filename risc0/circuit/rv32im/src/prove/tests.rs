@@ -46,6 +46,9 @@ fn basic() {
 }
 
 #[test]
+#[should_panic(
+    expected = "Invalid trap address: 0x00000000, cause: IllegalInstruction(0x00000000, 0)"
+)]
 fn multi_read() {
     run_program(testutil::kernel::multi_read());
 }

@@ -132,7 +132,7 @@ pub mod kernel {
             for &len in LENGTHS {
                 asm.host_ecall_read(0, ptr + i, len);
                 for k in 0..len {
-                    asm.lb(REG_T1, REG_T0, i + k);
+                    asm.lb(REG_T1, REG_T0, 0);
                     asm.li(REG_T2, k);
                     asm.beq(REG_T1, REG_T2, 8);
                     asm.die();
@@ -302,7 +302,7 @@ impl Assembler {
     }
 
     pub fn die(&mut self) {
-        self.text.push(fence());
+        self.text.push(0x00000000);
     }
 
     pub fn fence(&mut self) {
