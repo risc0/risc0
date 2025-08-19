@@ -1,7 +1,5 @@
 "use client";
 
-import type { Version } from "@/types/version";
-import { VERSIONS } from "@/versions";
 import { useIsMounted } from "@risc0/ui/hooks/use-is-mounted";
 import {
   Select,
@@ -15,6 +13,8 @@ import {
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { startTransition, useEffect } from "react";
 import { useProgressBar } from "shared/client/providers/progress-bar-provider";
+import type { Version } from "@/types/version";
+import { VERSIONS } from "@/versions";
 import { useVersion } from "../_hooks/use-version";
 
 export function VersionSelect() {

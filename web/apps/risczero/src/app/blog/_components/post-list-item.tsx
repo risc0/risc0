@@ -1,10 +1,10 @@
+import { Card, CardContent } from "@risc0/ui/card";
+import Image from "next/image";
 import { TagItem } from "@/app/blog/_components/tag-item";
 import type { Post } from "@/app/blog/_types";
 import { ProgressBarLink } from "@/components/progress-bar-link";
 import { Shimmer } from "@/components/shimmer";
 import { toBase64 } from "@/utils/to-base-64";
-import { Card, CardContent } from "@risc0/ui/card";
-import Image from "next/image";
 
 type PostListItemProps = {
   post: Post;

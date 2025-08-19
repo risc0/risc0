@@ -1,5 +1,5 @@
-import type { Version } from "@/types/version";
 import { all } from "radash";
+import type { Version } from "@/types/version";
 import { fetchDatasheet } from "../_actions/fetch-datasheet";
 import { DATASHEET_FILENAMES_TO_TITLES } from "../_utils/constants";
 import { DatasheetTable } from "./datasheet-table";

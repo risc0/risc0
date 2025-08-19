@@ -1,7 +1,7 @@
-import type { Version } from "@/types/version";
-import { VERSIONS } from "@/versions";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import type { Version } from "@/types/version";
+import { VERSIONS } from "@/versions";
 import { DATASHEET_DESCRIPTION } from "../../_utils/constants";
 import { DatasheetContent } from "./_components/datasheet-content";
 import { DatasheetSkeleton } from "./_components/datasheet-skeleton";

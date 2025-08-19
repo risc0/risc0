@@ -621,7 +621,7 @@ jobs:
       - name: 🍞 Setup Bun
         uses: risc0/setup-bun@v1.2.1
         with:
-          bun-version: 1.1.34
+          bun-version: 1.2.20
       - run: bun install
         working-directory: web
       - run: bun run ci

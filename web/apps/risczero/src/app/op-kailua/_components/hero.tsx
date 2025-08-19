@@ -1,9 +1,9 @@
-import { Title } from "@/app/_components/title";
-import { BoxReveal } from "@/components/box-reveal";
 import { Button } from "@risc0/ui/button";
 import { ArrowUpRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Title } from "@/app/_components/title";
+import { BoxReveal } from "@/components/box-reveal";
 import { OpKailua3dCard } from "./op-kailua-3d-card";
 
 export function Hero() {

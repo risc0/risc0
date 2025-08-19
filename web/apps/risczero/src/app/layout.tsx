@@ -1,11 +1,11 @@
 import "../styles/globals.css";
 
-import { Providers } from "@/components/providers/providers";
 import { cn } from "@risc0/ui/cn";
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import type { PropsWithChildren } from "react";
+import { Providers } from "@/components/providers/providers";
 import { Announcement } from "./_components/announcement";
 import { Footer } from "./_components/footer";
 import { Header } from "./_components/header";

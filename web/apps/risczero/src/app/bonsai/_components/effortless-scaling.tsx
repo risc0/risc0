@@ -1,6 +1,6 @@
+import Image from "next/image";
 import { Subtitle } from "@/app/_components/subtitle";
 import { Title } from "@/app/_components/title";
-import Image from "next/image";
 
 const FEATURES = [
   {

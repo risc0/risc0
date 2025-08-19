@@ -1,5 +1,5 @@
-import { getAllPosts } from "@/libs/notion/get-all-posts";
 import type { MetadataRoute } from "next";
+import { getAllPosts } from "@/libs/notion/get-all-posts";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getAllPosts();

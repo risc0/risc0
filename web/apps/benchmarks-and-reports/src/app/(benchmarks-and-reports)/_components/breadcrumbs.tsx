@@ -1,6 +1,5 @@
 "use client";
 
-import type { Version } from "@/types/version";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,6 +14,7 @@ import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { Fragment } from "react";
+import type { Version } from "@/types/version";
 import { useVersion } from "../_hooks/use-version";
 
 // Routes you don't want to show up in the breadcrumb
@@ -33,7 +33,7 @@ export function Breadcrumbs() {
 
   if (pathname === "/" || paths.length === 0) {
     // non-breaking space to keep alignment
-    return <>&nbsp;</>;
+    return "&nbsp;";
   }
 
   return (

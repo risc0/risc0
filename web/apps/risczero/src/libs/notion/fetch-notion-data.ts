@@ -1,5 +1,5 @@
-import type { Investor, Leadership, Post, Project } from "@/app/blog/_types";
 import { idToUuid } from "notion-utils";
+import type { Investor, Leadership, Post, Project } from "@/app/blog/_types";
 import { getPage } from "./api";
 import { filterPublished } from "./filter-published";
 import { getAllPageIds } from "./get-all-page-ids";

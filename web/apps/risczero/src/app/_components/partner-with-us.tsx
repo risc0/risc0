@@ -1,8 +1,8 @@
+import { Button } from "@risc0/ui/button";
+import Link from "next/link";
 import { Subtitle } from "@/app/_components/subtitle";
 import { Title } from "@/app/_components/title";
 import { FlickeringGrid } from "@/components/flickering-grid";
-import { Button } from "@risc0/ui/button";
-import Link from "next/link";
 
 export function PartnerWithUs({
   title,

@@ -1,7 +1,7 @@
 "use client";
 
-import { useMousePosition } from "@/app/_hooks/use-mouse-position";
 import { useEffect, useRef } from "react";
+import { useMousePosition } from "@/app/_hooks/use-mouse-position";
 
 type Circle = {
   x: number;

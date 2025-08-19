@@ -1,7 +1,7 @@
-import type { Version } from "@/types/version";
 import { Separator } from "@risc0/ui/separator";
 import { type PropsWithChildren, type ReactNode, Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
+import type { Version } from "@/types/version";
 import { FooterAscii } from "../../_components/footer-ascii";
 import { redirectIfWrongVersion } from "../../_utils/redirect-if-wrong-version";
 import { ApplicationsBenchmarksCommitHashButton } from "./_components/applications-benchmarks-commit-hash-button";

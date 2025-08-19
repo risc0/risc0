@@ -1,10 +1,10 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Subtitle } from "@/app/_components/subtitle";
 import { Title } from "@/app/_components/title";
 import { OG_BASE } from "@/app/_constants/og";
 import { getAllPosts } from "@/libs/notion/get-all-posts";
 import { getTagsAndCountsFromPosts } from "@/libs/notion/get-all-tags-from-post";
-import type { Metadata } from "next";
-import { Suspense } from "react";
 import { BlogPageContent } from "../../_components/page-content";
 import { BlogPageSkeleton } from "../../_components/page-skeleton";
 import { BLOG_DESCRIPTION } from "../../page";

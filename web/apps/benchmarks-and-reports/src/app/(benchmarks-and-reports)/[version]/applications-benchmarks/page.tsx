@@ -1,5 +1,5 @@
-import type { Version } from "@/types/version";
 import { redirect } from "next/navigation";
+import type { Version } from "@/types/version";
 import { getFirstApplicationBenchmark } from "./_utils/get-first-application-benchmark";
 
 export default async function ApplicationsBenchmarksPage(props: {

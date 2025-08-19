@@ -1,9 +1,9 @@
-import { TagItem } from "@/app/blog/_components/tag-item";
-import type { Project } from "@/app/blog/_types";
 import { Card, CardContent, CardFooter, CardHeader } from "@risc0/ui/card";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { TagItem } from "@/app/blog/_components/tag-item";
+import type { Project } from "@/app/blog/_types";
 
 type ProjectListItemProps = {
   project: Project;

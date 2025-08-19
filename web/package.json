@@ -1,7 +1,10 @@
 {
   "name": "web",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo build",
     "check": "bunx @biomejs/biome check --write --unsafe .",
@@ -26,6 +29,7 @@
     "zustand": "5.0.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.0",
     "@testing-library/jest-dom": "6.6.3",
     "@types/jest": "29.5.14",
     "@types/lodash-es": "4.17.12",

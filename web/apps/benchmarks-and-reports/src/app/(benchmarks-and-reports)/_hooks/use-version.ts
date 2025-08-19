@@ -1,6 +1,6 @@
-import type { Version } from "@/types/version";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Version } from "@/types/version";
 
 type VersionStore = {
   version: Version | undefined;

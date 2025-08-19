@@ -5,7 +5,9 @@ import type { CratesIoValidationTableSchema } from "../_components/crates-io-val
 
 export async function fetchCratesValidationResults({
   hash,
-}: { hash: string }): Promise<CratesIoValidationTableSchema[]> {
+}: {
+  hash: string;
+}): Promise<CratesIoValidationTableSchema[]> {
   const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,

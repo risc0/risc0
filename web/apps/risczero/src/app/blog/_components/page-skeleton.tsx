@@ -1,5 +1,5 @@
-import { rand } from "@/utils/rand";
 import { Skeleton } from "@risc0/ui/skeleton";
+import { rand } from "@/utils/rand";
 
 export function BlogPageSkeleton() {
   const tags = [0, 1, 2, 3] as const;

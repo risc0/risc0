@@ -1,11 +1,11 @@
-import { Subtitle } from "@/app/_components/subtitle";
-import { Title } from "@/app/_components/title";
 import { Button } from "@risc0/ui/button";
 import { Skeleton } from "@risc0/ui/skeleton";
 import { list } from "@vercel/blob";
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Subtitle } from "@/app/_components/subtitle";
+import { Title } from "@/app/_components/title";
 
 async function VerifyAnywhereVideo() {
   const { blobs } = await list({

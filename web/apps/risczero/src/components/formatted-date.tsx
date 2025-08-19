@@ -1,5 +1,5 @@
-import { formatDate } from "@/utils/date";
 import { cn } from "@risc0/ui/cn";
+import { formatDate } from "@/utils/date";
 
 type FormattedDateProps = {
   date: number | string | Date;

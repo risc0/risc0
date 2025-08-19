@@ -1,6 +1,6 @@
-import type { Version } from "@/types/version";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import type { Version } from "@/types/version";
 
 export const DATASHEET_FILENAMES_TO_TITLES: {
   [K in Version]: {

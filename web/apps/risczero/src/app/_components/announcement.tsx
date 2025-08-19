@@ -1,8 +1,8 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { Marquee } from "@/components/marquee";
 import { ProgressBarLink } from "@/components/progress-bar-link";
-import { usePathname } from "next/navigation";
 
 export function Announcement() {
   const pathname = usePathname();

@@ -1,9 +1,9 @@
-import type { Version } from "@/types/version";
-import { VERSIONS } from "@/versions";
 import { Tabs, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import Link from "next/link";
 import { pick } from "radash";
 import { Suspense } from "react";
+import type { Version } from "@/types/version";
+import { VERSIONS } from "@/versions";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../../_utils/constants";
 import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";

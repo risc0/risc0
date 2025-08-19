@@ -1,8 +1,8 @@
-import { AsciiArt } from "@/components/ascii-art";
-import { ProgressBarLink } from "@/components/progress-bar-link";
 import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import type { Metadata } from "next";
+import { AsciiArt } from "@/components/ascii-art";
+import { ProgressBarLink } from "@/components/progress-bar-link";
 import { Subtitle } from "./_components/subtitle";
 import { Title } from "./_components/title";
 

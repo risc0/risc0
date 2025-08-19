@@ -1,4 +1,3 @@
-import type { Version } from "@/types/version";
 import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@risc0/ui/popover";
@@ -7,6 +6,7 @@ import { InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
+import type { Version } from "@/types/version";
 import { FooterAscii } from "../../_components/footer-ascii";
 import { redirectIfWrongVersion } from "../../_utils/redirect-if-wrong-version";
 import { DatasheetCommitHashButton } from "./_components/datasheet-commit-hash-button";

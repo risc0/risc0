@@ -1,8 +1,8 @@
-import { Dock, DockIcon } from "@/components/dock";
 import { buttonVariants } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@risc0/ui/tooltip";
 import Link from "next/link";
+import { Dock, DockIcon } from "@/components/dock";
 
 const ITEMS = [
   { href: "https://github.com/risc0/demos/tree/main/zk-kyc", icon: <span>zkKYC</span>, label: "zkKYC" },

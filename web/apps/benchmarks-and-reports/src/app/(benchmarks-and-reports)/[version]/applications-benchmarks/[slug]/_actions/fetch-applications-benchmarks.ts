@@ -1,7 +1,7 @@
 import "server-only";
 
-import type { Version } from "@/types/version";
 import { tryit } from "radash";
+import type { Version } from "@/types/version";
 
 export async function fetchApplicationsBenchmarks({ url, version }: { url: string; version: Version }) {
   const tryFetch = tryit(fetch);

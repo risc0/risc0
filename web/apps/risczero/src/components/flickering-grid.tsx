@@ -125,7 +125,6 @@ export function FlickeringGrid({
     [memoizedColor, squareSize, gridGap],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: ignore
   useEffect(() => {
     const canvas = canvasRef.current;
 

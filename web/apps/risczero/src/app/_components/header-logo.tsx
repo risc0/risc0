@@ -1,6 +1,6 @@
-import { ProgressBarLink } from "@/components/progress-bar-link";
 import { cn } from "@risc0/ui/cn";
 import Image, { type ImageProps } from "next/image";
+import { ProgressBarLink } from "@/components/progress-bar-link";
 
 export function HeaderLogo({ className, ...rest }: Omit<ImageProps, "src" | "alt">) {
   return (

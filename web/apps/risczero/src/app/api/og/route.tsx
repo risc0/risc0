@@ -62,7 +62,6 @@ export async function GET(request: Request) {
         <div tw="text-[32px] tracking-wider text-neutral-700 max-w-[65%]" style={{ fontFamily: "EuropaNormal" }}>
           {description}
         </div>
-        {/** biome-ignore lint/performance/noImgElement: img is ok here */}
         <img
           style={{ position: "absolute", right: -42, top: 0, zIndex: -1 }}
           width="404"

@@ -1,6 +1,6 @@
-import { Particles } from "@/components/particles";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Particles } from "@/components/particles";
 import { Advantages } from "./_components/advantages";
 import { BuiltForEveryUseCase } from "./_components/built-for-every-use-case";
 import { Hero } from "./_components/hero";

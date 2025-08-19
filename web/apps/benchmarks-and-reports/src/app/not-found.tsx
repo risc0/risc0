@@ -29,7 +29,6 @@ export default function NotFoundPage() {
       </div>
 
       <AsciiArt
-        label="404"
         withWrapper
         className="text-sm"
         code={`// Code

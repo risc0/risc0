@@ -1,8 +1,8 @@
-import type { Version } from "@/types/version";
-import { VERSIONS } from "@/versions";
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
 import Image from "next/image";
 import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
+import type { Version } from "@/types/version";
+import { VERSIONS } from "@/versions";
 import {
   APPLICATIONS_BENCHMARKS_DESCRIPTION,
   BENCHMARKS_DESCRIPTION,

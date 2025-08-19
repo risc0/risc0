@@ -1,9 +1,9 @@
 "use client";
 
-import { GlareCard } from "@/components/glare-card";
-import { ShineBorder } from "@/components/shine-border";
 import { Card } from "@risc0/ui/card";
 import Image from "next/image";
+import { GlareCard } from "@/components/glare-card";
+import { ShineBorder } from "@/components/shine-border";
 
 export function Zeth3dCard() {
   return (

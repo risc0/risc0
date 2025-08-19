@@ -20,7 +20,7 @@ export function getAllPageIds(collectionQuery: ExtendedRecordMap["collection_que
   }
 
   const pageSet = Object.values(views).reduce((set, view) => {
-    // biome-ignore lint/complexity/noForEach: ignore
+    // biome-ignore lint/suspicious/useIterableCallbackReturn: ignore
     view.collection_group_results?.blockIds.forEach((id) => set.add(id));
 
     return set;

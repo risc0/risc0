@@ -1,13 +1,13 @@
+import { Button } from "@risc0/ui/button";
+import { ArrowLeftIcon } from "lucide-react";
+import Image from "next/image";
+import type { ExtendedRecordMap } from "notion-types";
 import type { Post as IPost } from "@/app/blog/_types";
 import { FormattedDate } from "@/components/formatted-date";
 import { NotionRendererFull } from "@/components/notion/notion-render-full";
 import { ProgressBarLink } from "@/components/progress-bar-link";
 import { Shimmer } from "@/components/shimmer";
 import { toBase64 } from "@/utils/to-base-64";
-import { Button } from "@risc0/ui/button";
-import { ArrowLeftIcon } from "lucide-react";
-import Image from "next/image";
-import type { ExtendedRecordMap } from "notion-types";
 
 type PostProps = {
   post: IPost;

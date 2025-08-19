@@ -1,5 +1,5 @@
-import type { Post } from "@/app/blog/_types";
 import { unstable_cache } from "next/cache";
+import type { Post } from "@/app/blog/_types";
 import { fetchNotionData } from "./fetch-notion-data";
 
 const PAGE_ID = "a16a202acb3645f4b0d9a4ec9a0ec95f";

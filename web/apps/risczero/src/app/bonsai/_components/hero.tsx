@@ -1,8 +1,8 @@
-import { Title } from "@/app/_components/title";
-import { BoxReveal } from "@/components/box-reveal";
 import { Button } from "@risc0/ui/button";
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
+import { Title } from "@/app/_components/title";
+import { BoxReveal } from "@/components/box-reveal";
 import { Bonsai3dCard } from "./bonsai-3d-card";
 
 export function Hero() {

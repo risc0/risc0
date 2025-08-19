@@ -4,17 +4,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
   getSortedRowModel,
+  type SortingState,
   useReactTable,
+  type VisibilityState,
 } from "@tanstack/react-table";
-import { Children, type ReactNode, isValidElement, useState } from "react";
+import { Children, isValidElement, type ReactNode, useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
 

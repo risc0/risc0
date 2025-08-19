@@ -1,11 +1,11 @@
-import { Title } from "@/app/_components/title";
-import { FlickeringGrid } from "@/components/flickering-grid";
-import { getAllInvestors } from "@/libs/notion/get-all-investors";
 import { shuffle } from "es-toolkit";
 import { ExternalLinkIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Title } from "@/app/_components/title";
+import { FlickeringGrid } from "@/components/flickering-grid";
+import { getAllInvestors } from "@/libs/notion/get-all-investors";
 
 async function InvestorsContent() {
   const investors = await getAllInvestors();

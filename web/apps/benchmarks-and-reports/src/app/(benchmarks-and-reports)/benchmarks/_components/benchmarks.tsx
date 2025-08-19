@@ -4,7 +4,7 @@ import { Separator } from "@risc0/ui/separator";
 import Script from "next/script";
 import { useEffect, useState } from "react";
 import { FooterAscii } from "../../_components/footer-ascii";
-import { type FormattedDataSetEntry, collectBenchesPerTestCase } from "../_utils/collect-benches-per-test-case";
+import { collectBenchesPerTestCase, type FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 import { BenchmarksContent } from "./benchmarks-content";
 import { BenchmarksHeader } from "./benchmarks-header";
 

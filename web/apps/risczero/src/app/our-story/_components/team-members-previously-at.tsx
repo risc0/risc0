@@ -1,5 +1,5 @@
-import { Title } from "@/app/_components/title";
 import { Card, CardHeader, CardTitle } from "@risc0/ui/card";
+import { Title } from "@/app/_components/title";
 
 export function TeamMembersPreviouslyAt() {
   return (

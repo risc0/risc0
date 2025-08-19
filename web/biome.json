@@ -1,3 +1,111 @@
 {
-  "extends": ["./node_modules/@risc0/ui/config/biome.base.jsonc"]
+  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "root": true,
+  "files": {
+    "includes": ["**", "!**/.next", "!**/.vercel", "!**/build", "!**/dist", "!**/node_modules", "!**/*.css"],
+    "ignoreUnknown": true
+  },
+  "css": {
+    "formatter": {
+      "enabled": false
+    },
+    "linter": {
+      "enabled": false
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useSemanticElements": "info",
+        "useFocusableInteractive": "info"
+      },
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedVariables": "warn",
+        "noUnusedImports": "off",
+        "useHookAtTopLevel": "error",
+        "noSwitchDeclarations": "error"
+      },
+      "complexity": {
+        "noUselessTernary": "warn",
+        "noUselessLoneBlockStatements": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn",
+        "useAwait": "warn",
+        "noExplicitAny": "off",
+        "noImplicitAnyLet": "off",
+        "noEmptyBlockStatements": "warn",
+        "noConsole": "off"
+      },
+      "performance": {
+        "noBarrelFile": "warn",
+        "noReExportAll": "warn"
+      },
+      "style": {
+        "useNodejsImportProtocol": "error",
+        "noNonNullAssertion": "warn",
+        "noNegationElse": "warn",
+        "useBlockStatements": "error",
+        "useCollapsedElseIf": "error",
+        "useFragmentSyntax": "error",
+        "useConsistentArrayType": "warn",
+        "useExportType": "error",
+        "useNumberNamespace": "error",
+        "useFilenamingConvention": {
+          "level": "info",
+          "options": {
+            "strictCase": true,
+            "requireAscii": true,
+            "filenameCases": ["kebab-case"]
+          }
+        },
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "info",
+          "options": {
+            "attributes": ["classList"],
+            "functions": ["clsx", "cva", "tw", "cn"]
+          }
+        }
+      }
+    }
+  },
+  "formatter": {
+    "indentWidth": 2,
+    "indentStyle": "space",
+    "enabled": true,
+    "lineWidth": 120
+  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "always",
+      "jsxQuoteStyle": "double",
+      "quoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "lineWidth": 120
+    }
+  },
+  "json": {
+    "parser": {
+      "allowComments": true
+    }
+  }
 }

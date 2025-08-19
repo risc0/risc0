@@ -1,6 +1,6 @@
-import type { Version } from "@/types/version";
 import { pick } from "radash";
 import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
+import type { Version } from "@/types/version";
 import { fetchApplicationsBenchmarks } from "../_actions/fetch-applications-benchmarks";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "../_utils/constants";
 import { ApplicationsBenchmarksTable } from "./applications-benchmarks-table";

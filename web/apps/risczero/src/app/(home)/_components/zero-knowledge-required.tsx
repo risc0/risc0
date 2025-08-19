@@ -1,9 +1,9 @@
-import { Subtitle } from "@/app/_components/subtitle";
-import { Title } from "@/app/_components/title";
-import { DotPattern } from "@/components/dot-pattern";
 import { Button } from "@risc0/ui/button";
 import { ArrowUpRightIcon, SquircleIcon } from "lucide-react";
 import Link from "next/link";
+import { Subtitle } from "@/app/_components/subtitle";
+import { Title } from "@/app/_components/title";
+import { DotPattern } from "@/components/dot-pattern";
 import { RecursionScaling } from "./recursion-scaling";
 import { RecursionSpeed } from "./recursion-speed";
 import { SnarkBenchmark } from "./snark-benchmark";

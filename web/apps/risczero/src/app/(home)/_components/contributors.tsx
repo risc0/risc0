@@ -1,8 +1,8 @@
-import { Marquee } from "@/components/marquee";
 import { Avatar, AvatarFallback } from "@risc0/ui/avatar";
 import { shuffle } from "es-toolkit";
 import Image from "next/image";
 import Link from "next/link";
+import { Marquee } from "@/components/marquee";
 import { getContributors } from "../_actions/get-contributors";
 
 export async function Contributors() {

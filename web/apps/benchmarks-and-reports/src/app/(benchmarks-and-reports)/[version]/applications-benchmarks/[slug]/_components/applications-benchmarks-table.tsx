@@ -1,23 +1,23 @@
 "use client";
 
-import type { Version } from "@/types/version";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@risc0/ui/table";
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
   getSortedRowModel,
+  type SortingState,
   useReactTable,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
+import type { Version } from "@/types/version";
 
 export function ApplicationsBenchmarksTable<TData, TValue>({
   title,
