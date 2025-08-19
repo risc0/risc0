@@ -41,7 +41,7 @@ crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
 
 # Publishing the rzup Component
 The groth16 proving on GPU requires a special rzup component be installed. Publishing this
-omponent can be done with the following commands
+component can be done with the following commands:
 
 ```bash
 export VERSION=0.1.0
