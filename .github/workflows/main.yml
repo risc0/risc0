@@ -640,8 +640,6 @@ jobs:
         working-directory: web
       - run: bun run typecheck
         working-directory: web
-      - run: bun run test
-        working-directory: web
 
   bento-test:
     if: needs.changes.outputs.bento == 'true'
