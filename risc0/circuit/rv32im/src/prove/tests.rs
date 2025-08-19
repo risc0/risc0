@@ -83,7 +83,9 @@ mod riscv {
 
             let program = Program::load_elf(&elf, u32::MAX).unwrap();
             run_program(program);
+            return;
         }
+        panic!("No matching test_name");
     }
 
     macro_rules! test_case {
