@@ -1,7 +1,7 @@
 # Shrink-Wrapping Proofs
 
 The default proving options will result in the final proof being a composite receipt. This receipt
-can be quite large and grows linearly with respect to execution length. So instead a smaller receipt
+can be quite large. So instead a smaller receipt
 may be desired for posting on-chain. We call the process of creating this smaller receipt
 "shrink-wrapping".
 
