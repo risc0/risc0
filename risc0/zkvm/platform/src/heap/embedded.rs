@@ -37,7 +37,7 @@ unsafe impl critical_section::Impl for CriticalSection {
 ///
 /// This function must be called exactly once.
 pub unsafe fn init() {
-    extern "C" {
+    unsafe extern "C" {
         static _end: u8;
     }
     let heap_pos: usize = unsafe { (&_end) as *const u8 as usize };

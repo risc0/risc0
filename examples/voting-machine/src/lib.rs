@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt, Result};
+use risc0_zkvm::{ExecutorEnv, Receipt, Result, default_prover, serde::from_slice};
 use voting_machine_core::{
     Ballot, FreezeVotingMachineCommit, FreezeVotingMachineParams, FreezeVotingMachineResult,
     InitializeVotingMachineCommit, SubmitBallotCommit, SubmitBallotParams, VotingMachineState,

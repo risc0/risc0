@@ -75,13 +75,13 @@ impl CircuitCoreDef<BabyBear> for CircuitImpl {}
 pub mod testutil {
     use rand::Rng;
     use risc0_zkp::{
+        INV_RATE,
         adapter::{CircuitInfo, TapsProvider},
         field::{
-            baby_bear::{BabyBearElem, BabyBearExtElem},
             Elem, ExtElem,
+            baby_bear::{BabyBearElem, BabyBearExtElem},
         },
         hal::{Buffer, CircuitHal, Hal},
-        INV_RATE,
     };
 
     use crate::{CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};

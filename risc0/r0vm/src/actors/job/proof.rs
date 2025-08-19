@@ -19,22 +19,22 @@ use std::{
 
 use kameo::{error::Infallible, prelude::*};
 use risc0_zkvm::{
-    sha::Digestible, AssumptionReceipt, InnerReceipt, ProveKeccakRequest, Receipt, ReceiptClaim,
-    Segment, SegmentReceipt, SuccinctReceipt, Unknown,
+    AssumptionReceipt, InnerReceipt, ProveKeccakRequest, Receipt, ReceiptClaim, Segment,
+    SegmentReceipt, SuccinctReceipt, Unknown, sha::Digestible,
 };
 use tokio::time::Instant;
 
-use super::{tracer::JobTracer, JobActorNew};
+use super::{JobActorNew, tracer::JobTracer};
 use crate::actors::{
     factory::FactoryActor,
     protocol::{
+        ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
+        JoinTask, LiftTask, ProofRequest, ProofResult, ProveKeccakTask, ProveSegmentTask,
+        ResolveTask, SegmentRange, Session, Task, TaskError, TaskHeader, UnionTask,
         factory::{
             DropJob, JoinNode, ProveKeccakDone, SubmitTaskMsg, TaskDone, TaskDoneMsg, TaskUpdate,
             TaskUpdateMsg, UnionDone,
         },
-        ExecuteTask, GlobalId, JobId, JobInfo, JobStatus, JobStatusReply, JobStatusRequest,
-        JoinTask, LiftTask, ProofRequest, ProofResult, ProveKeccakTask, ProveSegmentTask,
-        ResolveTask, SegmentRange, Session, Task, TaskError, TaskHeader, UnionTask,
     },
 };
 

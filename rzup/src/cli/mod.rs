@@ -14,9 +14,9 @@
 pub(crate) mod commands;
 pub(crate) mod ui;
 
+use crate::Rzup;
 use crate::error::Result;
 use crate::events::RzupEvent;
-use crate::Rzup;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;

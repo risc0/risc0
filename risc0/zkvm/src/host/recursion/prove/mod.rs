@@ -20,18 +20,18 @@ use std::{
     sync::Mutex,
 };
 
-use anyhow::{anyhow, bail, ensure, Context, Result};
+use anyhow::{Context, Result, anyhow, bail, ensure};
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
+    CircuitImpl,
     control_id::BN254_IDENTITY_CONTROL_ID,
     prove::{DigestKind, RecursionReceipt},
-    CircuitImpl,
 };
 use risc0_circuit_rv32im::RV32IM_SEAL_VERSION;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
-        digest::{Digest, DIGEST_SHORTS},
+        digest::{DIGEST_SHORTS, Digest},
         hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
     field::baby_bear::BabyBearElem,
@@ -39,17 +39,17 @@ use risc0_zkp::{
 };
 
 use crate::{
+    Assumptions, MaybePruned, Output, ProverOpts, ReceiptClaim, WorkClaim,
     claim::{
+        Unknown,
         merge::Merge,
         receipt::{Assumption, UnionClaim},
-        Unknown,
     },
     receipt::{
-        merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+        merkle::{MerkleGroup, MerkleProof},
     },
     sha::Digestible,
-    Assumptions, MaybePruned, Output, ProverOpts, ReceiptClaim, WorkClaim,
 };
 
 use risc0_circuit_recursion::prove::Program;

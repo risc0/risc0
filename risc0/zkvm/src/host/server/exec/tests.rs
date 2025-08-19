@@ -26,19 +26,19 @@ use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND2_ELF, RAND_ELF,
+    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, RAND2_ELF,
     SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
 };
 use risc0_zkvm_platform::{
-    fileno,
+    WORD_SIZE, fileno,
     syscall::{bigint, nr::SYS_RANDOM},
-    WORD_SIZE,
 };
 use rstest::rstest;
 use sha2::{Digest as _, Sha256};
 
 use crate::{
+    ExecutorEnv, Session, SimpleSegmentRef,
     host::server::exec::{
         executor::ExecutorImpl,
         profiler::Profiler,
@@ -46,7 +46,6 @@ use crate::{
     },
     serde::to_vec,
     sha::{Digest, Digestible},
-    ExecutorEnv, Session, SimpleSegmentRef,
 };
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
@@ -796,9 +795,10 @@ mod sys_verify {
         let err = execute_elf(env, MULTI_TEST_ELF).map(|_| ()).unwrap_err();
 
         tracing::debug!("err: {err}");
-        assert!(err
-            .to_string()
-            .contains("env::verify_integrity returned error"));
+        assert!(
+            err.to_string()
+                .contains("env::verify_integrity returned error")
+        );
     }
 }
 
@@ -1157,18 +1157,22 @@ fn memory_access() {
         Ok(session.exit_code)
     };
 
-    assert!(access_memory(0x0000_0000)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("StoreAccessFault"));
+    assert!(
+        access_memory(0x0000_0000)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("StoreAccessFault")
+    );
 
     let addr = 0xC000_0000;
-    assert!(access_memory(addr)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("StoreAccessFault"));
+    assert!(
+        access_memory(addr)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("StoreAccessFault")
+    );
 
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
@@ -1348,23 +1352,28 @@ mod docker {
         let occurrences = events
             .windows(4)
             .filter_map(|window| {
-                if let &[TraceEvent::InstructionStart {
-                    // li x5, 1337
-                    cycle: cycle1,
-                    pc: pc1,
-                    ..
-                }, TraceEvent::RegisterSet {
-                    idx: 5,
-                    value: 1337,
-                }, TraceEvent::InstructionStart {
-                    // sw x5, 548(zero)
-                    cycle: cycle2,
-                    pc: pc2,
-                    ..
-                }, TraceEvent::RegisterSet {
-                    idx: 6,
-                    value: 0x08000000,
-                }] = window
+                if let &[
+                    TraceEvent::InstructionStart {
+                        // li x5, 1337
+                        cycle: cycle1,
+                        pc: pc1,
+                        ..
+                    },
+                    TraceEvent::RegisterSet {
+                        idx: 5,
+                        value: 1337,
+                    },
+                    TraceEvent::InstructionStart {
+                        // sw x5, 548(zero)
+                        cycle: cycle2,
+                        pc: pc2,
+                        ..
+                    },
+                    TraceEvent::RegisterSet {
+                        idx: 6,
+                        value: 0x08000000,
+                    },
+                ] = window
                 {
                     // Note: it's possible that these instructions could lie between page
                     // boundaries. If that is the case, it means that the difference between cycle2

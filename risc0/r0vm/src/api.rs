@@ -22,14 +22,14 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{anyhow, Context, Error as AnyhowErr, Result};
+use anyhow::{Context, Error as AnyhowErr, Result, anyhow};
 use axum::{
-    body::{to_bytes, Body},
+    Json, Router,
+    body::{Body, to_bytes},
     extract::{FromRequestParts, Path, State},
-    http::{request::Parts, StatusCode},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::{get, post, put},
-    Json, Router,
 };
 use axum_extra::extract::Host;
 use bonsai_sdk::responses::{
@@ -38,7 +38,7 @@ use bonsai_sdk::responses::{
 };
 use kameo::actor::ActorRef;
 use risc0_circuit_rv32im::execute::DEFAULT_SEGMENT_LIMIT_PO2;
-use risc0_zkvm::{compute_image_id, Receipt};
+use risc0_zkvm::{Receipt, compute_image_id};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::net::TcpListener;

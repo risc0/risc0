@@ -18,12 +18,12 @@
 //! to what `crates.io` has for the baseline. If changes are detected, we require a bump in the
 //! patch version of the crate.
 
-use anyhow::{anyhow, bail, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow, bail};
 use cargo_semver_checks::{Check, GlobalConfig, Rustdoc};
 use clap::Parser;
 use semver::{Version, VersionReq};
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{DisplayFromStr, serde_as};
 use tempfile::tempdir;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -817,20 +817,22 @@ mod tests {
     ) {
         // Create a published version of the baseline like what would exist on `crates.io` and save
         // it so we can move it into place in our test version of `cargo vendor`
-        assert!(Command::new("cargo")
-            .args([
-                "publish",
-                "--allow-dirty",
-                "--dry-run",
-                "--package",
-                crate_name
-            ])
-            .current_dir(tempdir.path().join(baseline_name))
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .unwrap()
-            .success());
+        assert!(
+            Command::new("cargo")
+                .args([
+                    "publish",
+                    "--allow-dirty",
+                    "--dry-run",
+                    "--package",
+                    crate_name
+                ])
+                .current_dir(tempdir.path().join(baseline_name))
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .unwrap()
+                .success()
+        );
 
         // Locally published crates have this directory, but not ones on `crates.io`
         let published_crate = tempdir

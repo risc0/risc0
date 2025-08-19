@@ -3,15 +3,15 @@
 // All rights reserved.
 
 use crate::{
-    redis::{self, AsyncCommands},
-    tasks::{deserialize_obj, serialize_obj, RECEIPT_PATH, RECUR_RECEIPT_PATH},
     Agent,
+    redis::{self, AsyncCommands},
+    tasks::{RECEIPT_PATH, RECUR_RECEIPT_PATH, deserialize_obj, serialize_obj},
 };
 use anyhow::{Context, Result};
 use risc0_zkvm::sha::Digestible;
 use risc0_zkvm::{ReceiptClaim, SuccinctReceipt, Unknown};
 use uuid::Uuid;
-use workflow_common::{ResolveReq, KECCAK_RECEIPT_PATH};
+use workflow_common::{KECCAK_RECEIPT_PATH, ResolveReq};
 
 /// Run the resolve operation
 pub async fn resolver(agent: &Agent, job_id: &Uuid, request: &ResolveReq) -> Result<Option<u64>> {

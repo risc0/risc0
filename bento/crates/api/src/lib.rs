@@ -4,13 +4,12 @@
 
 use anyhow::{Context, Error as AnyhowErr, Result};
 use axum::{
-    async_trait,
-    body::{to_bytes, Body},
+    Json, Router, async_trait,
+    body::{Body, to_bytes},
     extract::{FromRequestParts, Host, Path, State},
-    http::{request::Parts, StatusCode},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::{get, post, put},
-    Json, Router,
 };
 use bonsai_sdk::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, ReceiptDownload, SessionStats, SessionStatusRes,
@@ -19,17 +18,17 @@ use bonsai_sdk::responses::{
 use clap::Parser;
 use risc0_zkvm::compute_image_id;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{PgPool, postgres::PgPoolOptions};
 use std::sync::Arc;
 use taskdb::{JobState, TaskDbErr};
 use thiserror::Error;
 use uuid::Uuid;
 use workflow_common::{
-    s3::{
-        S3Client, ELF_BUCKET_DIR, GROTH16_BUCKET_DIR, INPUT_BUCKET_DIR,
-        PREFLIGHT_JOURNALS_BUCKET_DIR, RECEIPT_BUCKET_DIR, STARK_BUCKET_DIR,
-    },
     CompressType, ExecutorReq, SnarkReq as WorkflowSnarkReq, TaskType,
+    s3::{
+        ELF_BUCKET_DIR, GROTH16_BUCKET_DIR, INPUT_BUCKET_DIR, PREFLIGHT_JOURNALS_BUCKET_DIR,
+        RECEIPT_BUCKET_DIR, S3Client, STARK_BUCKET_DIR,
+    },
 };
 
 mod helpers;
