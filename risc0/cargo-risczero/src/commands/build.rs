@@ -40,9 +40,14 @@ pub struct BuildCommand {
     #[command(flatten)]
     features: clap_cargo::Features,
 
-    /// Run compilation using a Docker container for reproducible builds.
+    // NOTE: Default is set to use Docker to maintain behavior from prior versions.
+    /// Do not run compilation using a Docker container for reproducible builds.
+    ///
+    /// Skipping use of Docker will run faster, and avoids requiring Docker as a dependency.
+    /// Builds outside of Docker will not be reproducible across machines, due to Rust's injection
+    /// of machine-specific metadata into the binary.
     #[arg(long)]
-    docker: bool,
+    no_docker: bool,
 
     /// Copy the built guest program artifacts from the `target` directory to `./elfs` relative to
     /// the package maifest.
@@ -64,7 +69,7 @@ impl BuildCommand {
 
         // Construct the guest building options, including whether Docker should be used.
         let mut guest_opts = GuestOptionsBuilder::default();
-        if self.docker {
+        if !self.no_docker {
             guest_opts.use_docker(
                 DockerOptionsBuilder::default()
                     .root_dir(meta.workspace_root.clone())
