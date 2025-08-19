@@ -178,6 +178,11 @@ export default {
           label: "Verifier Contracts",
           id: "blockchain-integration/contracts/verifier",
         },
+        {
+          type: "doc",
+          label: "Shrink-Wrapping",
+          id: "blockchain-integration/shrink-wrapping",
+        },
       ],
     },
     {
