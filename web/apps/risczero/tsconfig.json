@@ -1,0 +1,12 @@
+{
+  "extends": "@risc0/ui/config/tsconfig.base.json",
+  "compilerOptions": {
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [".next/types/**/*.ts", "**/*.ts", "**/*.tsx", "next-env.d.ts", "next.config.ts"],
+  "exclude": ["node_modules"]
+}

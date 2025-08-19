@@ -1,0 +1,202 @@
+@import "react-notion-x/src/styles.css"; /* base notion styles */
+
+:root {
+  --notion-font: var(--font-europa-sans);
+}
+
+.notion {
+  @apply text-neutral-800 dark:text-neutral-100 [font-size:1.2rem];
+}
+
+.notion .medium-zoom-image {
+  @apply rounded-lg;
+}
+
+.notion.notion-page {
+  @apply w-auto px-0;
+}
+
+.notion .notion-h-title {
+  @apply block;
+}
+
+/* properties */
+.notion .notion-collection-page-properties {
+  @apply hidden;
+}
+
+/* caption */
+.notion .notion-asset-caption {
+  @apply text-center text-neutral-500 dark:text-neutral-400;
+}
+
+/* quote */
+.notion .notion-quote {
+  @apply [font-size:inherit];
+}
+
+/* links */
+.notion .notion-link {
+  @apply text-muted-foreground dark:text-primary hover:underline hover:text-primary underline-offset-4 opacity-100;
+}
+
+/* list */
+.notion > .notion-list {
+  @apply py-0;
+}
+
+.notion .notion-list {
+  @apply max-w-full;
+}
+
+.notion .notion-list li {
+  @apply py-1;
+}
+
+.notion .notion-list:not(:has(> li)) {
+  @apply p-0;
+}
+
+.notion li + .notion-list-disc.first {
+  @apply list-[circle];
+}
+
+.notion .notion-list-disc.second {
+  @apply list-[square];
+}
+
+.notion .notion-list-disc.third {
+  @apply list-disc;
+}
+
+.notion li + .notion-list-numbered.first {
+  @apply list-[lower-alpha];
+}
+
+.notion .notion-list-numbered.second {
+  @apply list-[lower-roman];
+}
+
+.notion .notion-list-numbered.third {
+  @apply list-decimal;
+}
+
+/* callout */
+.notion .notion-callout {
+  @apply rounded-md border-0;
+}
+
+.notion .notion-gray_background_co {
+  @apply bg-code-light dark:bg-code-dark;
+}
+
+/* hr */
+.notion .notion-hr {
+  @apply border-t border-solid border-border;
+}
+
+/* collection */
+.notion .notion-collection {
+  @apply max-w-full;
+}
+
+.notion .notion-table {
+  @apply !w-full !max-w-full;
+}
+
+.notion .notion-collection-view-type-title,
+.notion .notion-page-link {
+  @apply text-inherit;
+}
+
+.notion svg.notion-page-icon {
+  @apply hidden;
+}
+
+.notion .notion-page-title-text {
+  @apply border-b-0;
+}
+
+.notion .notion-collection-header {
+  @apply px-0;
+}
+
+.notion .notion-table-view {
+  @apply !px-0;
+}
+
+.notion .notion-board,
+.notion .notion-collection-view-tabs-row {
+  @apply w-full;
+}
+
+/* h */
+.notion .notion-h {
+  @apply w-full;
+}
+
+.notion-toggle .notion-h {
+  @apply w-fit;
+}
+
+/* hash link */
+.notion .notion-hash-link {
+  @apply absolute left-0 top-1/2 float-none -translate-y-1/2 pr-0;
+}
+
+/* embeds */
+.notion .notion-asset-wrapper iframe {
+  @apply bg-background;
+}
+
+.notion .notion-asset-wrapper {
+  max-width: calc(100vw - 15px);
+}
+
+/* external links */
+.notion-external-title,
+.notion-external {
+  @apply dark:!text-primary;
+}
+
+.notion-external-image {
+  @apply dark:invert;
+}
+
+/* bookmarks */
+.notion .notion-bookmark {
+  @apply rounded-lg bg-white border-border dark:bg-neutral-700;
+}
+
+.notion .notion-bookmark > div:first-child,
+.notion .notion-bookmark-link-text,
+.notion .notion-bookmark {
+  @apply dark:text-default-dark border-border;
+}
+
+/* code */
+.notion .notion-code {
+  @apply overflow-visible rounded bg-transparent p-0 my-4;
+}
+
+.notion-inline-code {
+  @apply rounded bg-code-light dark:bg-code-dark dark:text-[bisque];
+}
+
+.notion .notion-code-copy {
+  @apply font-sans em:right-2 em:top-2;
+}
+
+.notion .notion-code pre[class*="language-"] {
+  @apply m-0 bg-[rgba(255,255,255,0.6)] dark:bg-code-dark;
+}
+
+.notion .notion-code code[class*="language-"],
+.notion .notion-code pre[class*="language-"] {
+  @apply selection:bg-[var(--select-color-1)];
+  text-shadow: none !important;
+}
+
+.notion .notion-code :not(pre) > code[class*="language-"] {
+  @apply whitespace-pre rounded-none bg-inherit p-0;
+}

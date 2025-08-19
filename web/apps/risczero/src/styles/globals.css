@@ -1,0 +1,80 @@
+@import "@risc0/ui/styles/globals.css";
+
+@font-face {
+  /* includes font-weights 900 */
+  font-family: "Europa";
+  src: url("/fonts/EuropaGroteskSH-Bold.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: fallback;
+}
+
+@font-face {
+  /* includes font-weights from 600-800 */
+  font-family: "Europa";
+  src: url("/fonts/EuropaGroteskSH-Med.otf") format("opentype");
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: fallback;
+}
+
+@font-face {
+  /* includes font-weights from 100-500 */
+  font-family: "Europa";
+  src: url("/fonts/EuropaGroteskSH-Reg.otf") format("opentype");
+  font-weight: 100 500;
+  font-style: normal;
+  font-display: fallback;
+}
+
+:root {
+  /* define custom css var for the Europa font */
+  --font-europa-sans: "Europa", sans-serif;
+  --removed-body-scroll-bar-size: 0px;
+
+  /* tailwind/shadcn overrides */
+  --background: 45 28.57% 91.76%;
+}
+
+/* tailwind/shadcn dark mode overrides */
+.dark {
+  --background: 0 0% 11.76%;
+}
+
+* {
+  /* apply letter-spacing to all html elements */
+  @apply tracking-wide;
+}
+
+html {
+  @apply scroll-smooth;
+}
+
+code {
+  @apply !font-mono;
+}
+
+table {
+  width: 100%;
+}
+
+a {
+  @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+}
+
+.font-mono {
+  /* reset the `tracking-wide` on the monospace font */
+  letter-spacing: initial;
+}
+
+.lucide {
+  stroke-width: 1.5px!important;
+}
+
+@media (min-width: 1024px) {
+
+  .container {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}

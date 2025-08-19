@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/internal-refresh-blog-posts",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
