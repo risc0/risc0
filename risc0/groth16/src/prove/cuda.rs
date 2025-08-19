@@ -29,7 +29,11 @@ pub(crate) fn shrink_wrap(seal_bytes: &[u8]) -> Result<Seal> {
     let root_dir = Rzup::new()
         .context("failed to initialize rzup")?
         .get_version_dir(&Component::Risc0Groth16, &Version::new(0, 1, 0))
-        .context("failed to get groth16 rzup component")?;
+        .context(
+            "Missing required `risc0-groth16` rzup component. \
+            To install it, ensure that your `rzup` version is >= 0.5.0, \
+            and then run `rzup install risc0-groth16`.",
+        )?;
     let tmp_dir = tempdir().context("failed to create temporary directory")?;
     let work_dir = std::env::var("RISC0_WORK_DIR");
     let work_dir = work_dir.as_ref().map(Path::new).unwrap_or(tmp_dir.path());
