@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { Title } from "@/app/_components/title";
 import { ProgressBarLink } from "@/components/progress-bar-link";
 import { getAllPosts } from "@/libs/notion/get-all-posts";
+import Image from "next/image";
 
 export async function RecentNews() {
   const posts = await getAllPosts();

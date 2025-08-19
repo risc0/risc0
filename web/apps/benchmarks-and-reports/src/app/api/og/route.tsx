@@ -36,6 +36,7 @@ export async function GET(request: Request) {
           paddingLeft: 48,
         }}
       >
+        {/* biome-ignore lint/a11y/noSvgWithoutTitle: ignore */}
         <svg
           // @ts-expect-error `tw` is valid
           tw="absolute top-12 left-12 w-[128px] h-[93px]"
@@ -82,8 +83,8 @@ export async function GET(request: Request) {
         ],
       },
     );
-  } catch (error: any) {
-    console.error(`${error.message}`);
+  } catch (error) {
+    console.error(`${(error as Error)?.message}`);
 
     return new Response("Failed to generate the image", {
       status: 500,

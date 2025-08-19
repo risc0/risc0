@@ -1,8 +1,8 @@
-import Image from "next/image";
 import type { Post } from "@/app/blog/_types";
 import { ProgressBarLink } from "@/components/progress-bar-link";
 import { Shimmer } from "@/components/shimmer";
 import { toBase64 } from "@/utils/to-base-64";
+import Image from "next/image";
 
 type PrevNextPostProps = {
   posts: Post[];

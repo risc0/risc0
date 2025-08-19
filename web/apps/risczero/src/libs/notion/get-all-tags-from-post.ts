@@ -9,6 +9,7 @@ export function getTagsAndCountsFromPosts(posts: Post[]): [string[], Record<stri
 
   const tagCounts = allTags.reduce<Record<string, number>>((tagObj, { tag }) => {
     if (tag in tagObj) {
+      // biome-ignore lint/style/noNonNullAssertion: ignore
       tagObj[tag]!++;
     } else {
       tagObj[tag] = 1;
@@ -17,7 +18,10 @@ export function getTagsAndCountsFromPosts(posts: Post[]): [string[], Record<stri
     return tagObj;
   }, {});
 
-  const tags = Object.keys(tagCounts || {}).sort((a, b) => tagCounts[b]! - tagCounts[a]!);
+  const tags = Object.keys(tagCounts || {}).sort(
+    // biome-ignore lint/style/noNonNullAssertion: ignore
+    (a, b) => tagCounts[b]! - tagCounts[a]!,
+  );
 
   return [tags, tagCounts] as const;
 }

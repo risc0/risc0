@@ -1,38 +1,38 @@
 {
-	"name": "web",
-	"private": true,
-	"workspaces": ["apps/*", "packages/*"],
-	"scripts": {
-		"build": "turbo build",
-		"check": "bunx @biomejs/biome check --write --unsafe .",
-		"ci": "bunx @biomejs/biome ci .",
-		"dev": "turbo dev",
-		"test": "turbo test",
-		"typecheck": "turbo typecheck"
-	},
-	"dependencies": {
-		"@joshdavenport/tailwindcss-filter-order": "0.2.0",
-		"@risc0/ui": "0.0.275",
-		"@vercel/analytics": "1.5.0",
-		"@vercel/speed-insights": "1.2.0",
-		"lodash-es": "4.17.21",
-		"motion": "12.23.12",
-		"next": "15.1.6",
-		"prism-react-renderer": "2.4.1",
-		"radash": "12.1.1",
-		"react": "19",
-		"react-dom": "19",
-		"react-rainbow-ascii": "1.0.3",
-		"zustand": "5.0.7"
-	},
-	"devDependencies": {
-		"@testing-library/jest-dom": "6.6.3",
-		"@types/jest": "29.5.14",
-		"@types/lodash-es": "4.17.12",
-		"@types/node": "22.13.13",
-		"@vitejs/plugin-react-swc": "3.8.1",
-		"happy-dom": "16.6.0",
-		"vitest": "2.1.9"
-	},
-	"packageManager": "bun@1.2.20"
+  "name": "web",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "turbo build",
+    "check": "bunx @biomejs/biome check --write --unsafe .",
+    "ci": "bunx @biomejs/biome ci .",
+    "dev": "turbo dev",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck"
+  },
+  "dependencies": {
+    "@joshdavenport/tailwindcss-filter-order": "0.2.0",
+    "@risc0/ui": "0.0.275",
+    "@vercel/analytics": "1.5.0",
+    "@vercel/speed-insights": "1.2.0",
+    "lodash-es": "4.17.21",
+    "motion": "12.23.12",
+    "next": "15.1.6",
+    "prism-react-renderer": "2.4.1",
+    "radash": "12.1.1",
+    "react": "19",
+    "react-dom": "19",
+    "react-rainbow-ascii": "1.0.3",
+    "zustand": "5.0.7"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.6.3",
+    "@types/jest": "29.5.14",
+    "@types/lodash-es": "4.17.12",
+    "@types/node": "22.13.13",
+    "@vitejs/plugin-react-swc": "3.8.1",
+    "happy-dom": "16.6.0",
+    "vitest": "2.1.9"
+  },
+  "packageManager": "bun@1.2.20"
 }

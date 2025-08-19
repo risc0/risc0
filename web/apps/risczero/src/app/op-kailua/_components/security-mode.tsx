@@ -1,3 +1,4 @@
+import { Title } from "@/app/_components/title";
 import { Button } from "@risc0/ui/button";
 import {
   ArrowLeftRightIcon,
@@ -16,7 +17,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
-import { Title } from "@/app/_components/title";
 
 type SecurityFeature = {
   label: string;

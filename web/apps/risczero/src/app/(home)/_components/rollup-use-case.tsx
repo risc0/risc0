@@ -1,9 +1,9 @@
 "use client";
 
+import { AnimatedBeam } from "@/components/animated-beam";
 import { cn } from "@risc0/ui/cn";
 import Image from "next/image";
 import { useRef } from "react";
-import { AnimatedBeam } from "@/components/animated-beam";
 
 export function RollupUseCase({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);

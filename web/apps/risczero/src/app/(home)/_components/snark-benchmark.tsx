@@ -1,11 +1,11 @@
 "use client";
 
+import { Subtitle } from "@/app/_components/subtitle";
 import { Badge } from "@risc0/ui/badge";
 import { cn } from "@risc0/ui/cn";
 import { CheckIcon, SquareIcon } from "lucide-react";
 import { useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { Subtitle } from "@/app/_components/subtitle";
 import { SnarkExamples } from "./snark-examples";
 
 const SNARK_GENERATION_TIME_SECONDS = 12;

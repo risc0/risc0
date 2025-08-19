@@ -1,12 +1,12 @@
 "use client";
 
+import { Subtitle } from "@/app/_components/subtitle";
+import { isAtTop } from "@/utils/is-at-top";
 import { Card, CardContent, CardDescription, CardHeader } from "@risc0/ui/card";
 import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent } from "@risc0/ui/chart";
 import { useTheme } from "next-themes";
 import { useEffect } from "react";
 import { Bar, BarChart, XAxis } from "recharts";
-import { Subtitle } from "@/app/_components/subtitle";
-import { isAtTop } from "@/utils/is-at-top";
 
 const chartData = [
   { batchSize: "2", risc: 262144, other: 406552 },

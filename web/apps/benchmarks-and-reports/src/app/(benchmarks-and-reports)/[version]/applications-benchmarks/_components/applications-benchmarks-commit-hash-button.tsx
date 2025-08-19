@@ -4,16 +4,16 @@ import { CopyButton } from "shared/client/components/copy-button";
 import { fetchApplicationsBenchmarksCommitHash } from "../[slug]/_actions/fetch-applications-benchmarks-commit-hash";
 
 export async function ApplicationsBenchmarksCommitHashButton({
-	version,
+  version,
 }: {
-	version: Version;
+  version: Version;
 }) {
-	const commitHash = await fetchApplicationsBenchmarksCommitHash({ version });
+  const commitHash = await fetchApplicationsBenchmarksCommitHash({ version });
 
-	return (
-		<CopyButton size="sm" variant="ghost" value={commitHash}>
-			Commit Hash
-			<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
-		</CopyButton>
-	);
+  return (
+    <CopyButton size="sm" variant="ghost" value={commitHash}>
+      Commit Hash
+      <span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
+    </CopyButton>
+  );
 }

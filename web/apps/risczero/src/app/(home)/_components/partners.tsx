@@ -1,10 +1,10 @@
-import { cn } from "@risc0/ui/cn";
-import Image from "next/image";
-import { Suspense } from "react";
 import type { Project } from "@/app/blog/_types";
 import { Marquee } from "@/components/marquee";
 import { ProgressBarLink } from "@/components/progress-bar-link";
 import { getAllProjects } from "@/libs/notion/get-all-projects";
+import { cn } from "@risc0/ui/cn";
+import Image from "next/image";
+import { Suspense } from "react";
 
 function PartnerCard({ title, pageCover }: Project) {
   return (

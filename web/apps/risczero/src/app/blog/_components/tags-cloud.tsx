@@ -1,7 +1,7 @@
+import type { Post } from "@/app/blog/_types";
 import { Badge } from "@risc0/ui/badge";
 import { cn } from "@risc0/ui/cn";
 import Link from "next/link";
-import type { Post } from "@/app/blog/_types";
 
 type TagsCloudItemProps = {
   tag?: string;

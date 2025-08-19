@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
 import { getPage, getUsers } from "@/libs/notion/api";
 import { getAllPosts } from "@/libs/notion/get-all-posts";
+import { notFound, redirect } from "next/navigation";
 import { Post } from "./post";
 import { PrevNextPost } from "./prev-next-post";
 

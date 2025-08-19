@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
 import { OG_BASE } from "@/app/_constants/og";
 import { getUsers } from "@/libs/notion/api";
 import { getAllPosts } from "@/libs/notion/get-all-posts";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PostPageContent } from "./_components/page-content";
 import { PostPageSkeleton } from "./_components/page-skeleton";
 

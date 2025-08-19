@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { NotionRenderer } from "@/components/notion/notion-renderer";
 import { getPage } from "@/libs/notion/api";
+import type { Metadata } from "next";
 import { OG_BASE } from "../_constants/og";
 
 const TITLE = "Privacy Policy";

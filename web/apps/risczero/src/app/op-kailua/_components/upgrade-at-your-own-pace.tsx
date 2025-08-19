@@ -1,8 +1,8 @@
+import { Subtitle } from "@/app/_components/subtitle";
+import { Title } from "@/app/_components/title";
 import { Button } from "@risc0/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@risc0/ui/card";
 import Link from "next/link";
-import { Subtitle } from "@/app/_components/subtitle";
-import { Title } from "@/app/_components/title";
 
 export function UpgradeAtYourOwnPace() {
   return (

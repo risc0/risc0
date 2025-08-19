@@ -1,10 +1,10 @@
-import { CardContent, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
-import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 import { Subtitle } from "@/app/_components/subtitle";
 import { Title } from "@/app/_components/title";
 import { MagicCard } from "@/components/magic-card";
 import { ProgressBarLink } from "@/components/progress-bar-link";
+import { CardContent, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { RollupUseCase } from "./rollup-use-case";
 
 export function BuiltForEveryUseCase() {

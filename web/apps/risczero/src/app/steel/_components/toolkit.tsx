@@ -1,8 +1,8 @@
+import { Subtitle } from "@/app/_components/subtitle";
+import { Title } from "@/app/_components/title";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
-import { Subtitle } from "@/app/_components/subtitle";
-import { Title } from "@/app/_components/title";
 
 const TOOLKIT = [
   {

@@ -1,9 +1,9 @@
+import { Subtitle } from "@/app/_components/subtitle";
+import { Title } from "@/app/_components/title";
 import { Button } from "@risc0/ui/button";
 import { ArrowUpRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Subtitle } from "@/app/_components/subtitle";
-import { Title } from "@/app/_components/title";
 
 const KEY_POINTS = [
   {

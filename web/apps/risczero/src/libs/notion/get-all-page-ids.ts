@@ -11,7 +11,8 @@ export function getAllPageIds(collectionQuery: ExtendedRecordMap["collection_que
   if (viewId) {
     const vId = idToUuid(viewId);
 
-    return views![vId]!.blockIds;
+    // @ts-expect-error - ignore
+    return views?.[vId]?.blockIds;
   }
 
   if (!views) {
@@ -19,7 +20,7 @@ export function getAllPageIds(collectionQuery: ExtendedRecordMap["collection_que
   }
 
   const pageSet = Object.values(views).reduce((set, view) => {
-    // biome-ignore lint/suspicious/useIterableCallbackReturn: ignore
+    // biome-ignore lint/complexity/noForEach: ignore
     view.collection_group_results?.blockIds.forEach((id) => set.add(id));
 
     return set;

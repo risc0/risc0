@@ -1,5 +1,5 @@
-import { shuffle } from "es-toolkit";
 import { getAllProjects } from "@/libs/notion/get-all-projects";
+import { shuffle } from "es-toolkit";
 import { ProjectListItem } from "./project-list-item";
 
 export async function EcosystemPageContent() {

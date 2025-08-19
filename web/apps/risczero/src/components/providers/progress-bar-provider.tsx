@@ -1,8 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionTemplate } from "motion/react";
-import { createContext, type PropsWithChildren, use } from "react";
 import { useProgress } from "@/app/_hooks/use-progress";
+import { AnimatePresence, motion, useMotionTemplate } from "motion/react";
+import { type PropsWithChildren, createContext, use } from "react";
 
 const ProgressBarContext = createContext<ReturnType<typeof useProgress> | null>(null);
 

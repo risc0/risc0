@@ -125,6 +125,7 @@ export function FlickeringGrid({
     [memoizedColor, squareSize, gridGap],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: ignore
   useEffect(() => {
     const canvas = canvasRef.current;
 
@@ -162,7 +163,8 @@ export function FlickeringGrid({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry!.isIntersecting);
+        // @ts-expect-error - ignore
+        setIsInView(entry?.isIntersecting);
       },
       { threshold: 0 },
     );

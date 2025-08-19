@@ -1,8 +1,8 @@
 "use client";
 
+import { rand } from "@/utils/rand";
 import { useSpring } from "motion/react";
 import { useEffect, useState } from "react";
-import { rand } from "@/utils/rand";
 import { useInterval } from "./use-interval";
 
 export function useProgress() {

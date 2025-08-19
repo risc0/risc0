@@ -1,5 +1,7 @@
 "use client";
 
+import { ProgressBarLink } from "@/components/progress-bar-link";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@risc0/ui/badge";
 import { buttonVariants } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
@@ -14,10 +16,8 @@ import {
 } from "@risc0/ui/navigation-menu";
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
-import { type ElementRef, forwardRef, type PropsWithChildren, type ReactNode } from "react";
+import { type ElementRef, type PropsWithChildren, type ReactNode, forwardRef } from "react";
 import { RiDiscordLine, RiGithubLine, RiTwitterXLine, RiYoutubeLine } from "react-icons/ri";
-import { ProgressBarLink } from "@/components/progress-bar-link";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { HeaderLogo } from "./header-logo";
 import { MobileMenu } from "./mobile-menu";
 

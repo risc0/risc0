@@ -1,9 +1,9 @@
 import "server-only";
 
+import env from "@/env";
 import { unstable_cache } from "next/cache";
 import { NotionAPI } from "notion-client";
 import type { ExtendedRecordMap, RecordValues, User } from "notion-types";
-import env from "@/env";
 
 const client = new NotionAPI({
   authToken: env.NOTION_TOKEN,

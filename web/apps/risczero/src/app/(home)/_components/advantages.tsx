@@ -1,12 +1,12 @@
+import { Title } from "@/app/_components/title";
+import { MagicCard } from "@/components/magic-card";
+import { ProgressBarLink } from "@/components/progress-bar-link";
 import { Button } from "@risc0/ui/button";
 import { CardContent, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
 import { ArrowUpRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Title } from "@/app/_components/title";
-import { MagicCard } from "@/components/magic-card";
-import { ProgressBarLink } from "@/components/progress-bar-link";
 import { Contributors } from "./contributors";
 
 export function Advantages() {

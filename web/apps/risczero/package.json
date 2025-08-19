@@ -1,11 +1,11 @@
 {
-	"name": "risczero-website",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"build": "next build",
-		"dev": "next dev --turbopack",
-		"lint": "bunx @biomejs/biome lint .",
-		"start": "next start"
-	}
+  "name": "risczero-website",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --turbopack",
+    "lint": "bunx @biomejs/biome lint .",
+    "start": "next start"
+  }
 }

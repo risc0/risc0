@@ -1,10 +1,10 @@
-import Image from "next/image";
-import Link from "next/link";
-import { RiLinkedinFill, RiTwitterXLine } from "react-icons/ri";
 import { Title } from "@/app/_components/title";
 import { Shimmer } from "@/components/shimmer";
 import { getAllLeadership } from "@/libs/notion/get-all-leadership";
 import { toBase64 } from "@/utils/to-base-64";
+import Image from "next/image";
+import Link from "next/link";
+import { RiLinkedinFill, RiTwitterXLine } from "react-icons/ri";
 
 export async function Leadership() {
   const leadership = await getAllLeadership();

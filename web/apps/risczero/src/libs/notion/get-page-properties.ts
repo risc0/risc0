@@ -1,6 +1,6 @@
+import type { DefaultNotionProperties } from "@/app/blog/_types";
 import type { Collection, ExtendedRecordMap } from "notion-types";
 import { getDateValue, getTextContent } from "notion-utils";
-import type { DefaultNotionProperties } from "@/app/blog/_types";
 
 type SelectKeys = "type" | "tags" | "status";
 type DateKey = "date";
