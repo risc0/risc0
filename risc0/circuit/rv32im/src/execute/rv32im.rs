@@ -158,8 +158,8 @@ pub enum InsnKind {
     Sh = 49, // major: 6, minor: 1
     Sw = 50, // major: 6, minor: 2
 
-    Eany = 56, // major: 7, minor: 0
-    Mret = 57, // major: 7, minor: 1
+    Eany = 56,  // major: 7, minor: 0
+    Mret = 57,  // major: 7, minor: 1
     Fence = 58, // major: 7, minor: 2
 
     Invalid = 255,
@@ -572,10 +572,9 @@ impl Emulator {
             },
             InsnKind::Mret => ctx.mret(),
             InsnKind::Fence => {
-                // No-op implementation - just advance PC
                 ctx.set_pc(ctx.get_pc() + WORD_SIZE);
                 Ok(true)
-            },
+            }
             _ => unreachable!(),
         }?
         .then_some(kind))
