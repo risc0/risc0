@@ -21,8 +21,9 @@ tar -xzf ../risc0/circuit/rv32im/src/prove/testdata/riscv-tests.tgz
 # Add fence to archive
 cp fence riscv-tests/
 
-# Create new archive
+# Replace archives
 tar -czf ../risc0/circuit/rv32im/src/prove/testdata/riscv-tests.tgz riscv-tests/
+cp ../risc0/circuit/rv32im/src/prove/testdata/riscv-tests.tgz ../risc0/zkvm/src/host/server/testdata/riscv-tests.tgz
 
 # Clean up
 rm -rf fence riscv-tests/

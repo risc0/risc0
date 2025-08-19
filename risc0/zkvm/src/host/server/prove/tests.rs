@@ -352,6 +352,8 @@ fn session_events() {
 // https://github.com/riscv-software-src/riscv-tests
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
+// The exception is the test of fence, which was built with
+// https://archlinux.org/packages/extra/x86_64/riscv64-elf-gcc/ v14.0.1-1
 mod riscv {
     use super::*;
     use crate::ExecutorEnv;
