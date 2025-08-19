@@ -1,16 +1,11 @@
 {
-  "name": "risczero-website",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev --turbopack",
-    "lint": "bunx @biomejs/biome lint .",
-    "start": "next start"
-  },
-  "dependencies": {
-    "@risc0/ui": "0.0.275",
-    "motion": "^12.23.12",
-    "tailwindcss": "3.4.17"
-  }
+	"name": "risczero-website",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"build": "next build",
+		"dev": "next dev --turbopack",
+		"lint": "bunx @biomejs/biome lint .",
+		"start": "next start"
+	}
 }

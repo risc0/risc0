@@ -16,6 +16,7 @@
 		"@vercel/analytics": "1.5.0",
 		"@vercel/speed-insights": "1.2.0",
 		"lodash-es": "4.17.21",
+		"motion": "12.23.12",
 		"prism-react-renderer": "2.4.1",
 		"radash": "12.1.1",
 		"react": "19",
