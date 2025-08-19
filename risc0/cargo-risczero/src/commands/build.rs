@@ -72,7 +72,10 @@ impl BuildCommand {
         if !self.no_docker {
             guest_opts.use_docker(
                 DockerOptionsBuilder::default()
-                    .root_dir(meta.workspace_root.clone())
+                    // TODO(victor): It is somewhat fragile to use CWD as the context, which is
+                    // what default does. I would like to use the worworkspace root, but then the
+                    // Docker build fails. I need to investigate why.
+                    //.root_dir(meta.workspace_root.clone())
                     .build()
                     .context("failed to build docker options")?,
             );
