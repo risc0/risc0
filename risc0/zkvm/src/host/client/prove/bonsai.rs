@@ -14,13 +14,13 @@
 
 use std::time::Duration;
 
-use anyhow::{anyhow, bail, ensure, Context, Result};
+use anyhow::{Context, Result, anyhow, bail, ensure};
 use bonsai_sdk::blocking::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, InnerReceipt,
-    ProveInfo, ProverOpts, Receipt, ReceiptKind, SessionStats, VerifierContext, VERSION,
+    AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt, InnerReceipt, ProveInfo, ProverOpts,
+    Receipt, ReceiptKind, SessionStats, VERSION, VerifierContext, compute_image_id,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.

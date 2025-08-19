@@ -73,7 +73,7 @@ impl Platform {
             other => {
                 return Err(RzupError::UnsupportedPlatform(format!(
                     "unknown OS: {other}"
-                )))
+                )));
             }
         };
 

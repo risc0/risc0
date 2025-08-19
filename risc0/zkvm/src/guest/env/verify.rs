@@ -18,7 +18,7 @@ use bytemuck::Pod;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{sys_verify_integrity, sys_verify_integrity2};
 
-use crate::{sha::Digestible, Assumption, MaybePruned, PrunedValueError, ReceiptClaim};
+use crate::{Assumption, MaybePruned, PrunedValueError, ReceiptClaim, sha::Digestible};
 
 use super::ASSUMPTIONS_DIGEST;
 

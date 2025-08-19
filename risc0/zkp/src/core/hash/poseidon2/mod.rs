@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,15 +22,15 @@ mod rng;
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
 };
 
 use super::{HashFn, HashSuite, Rng, RngFactory};
-use crate::core::digest::{Digest, DIGEST_WORDS};
+use crate::core::digest::{DIGEST_WORDS, Digest};
 
 pub use self::{
-    consts::{CELLS, M_INT_DIAG_HZN, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS},
+    consts::{CELLS, M_INT_DIAG_HZN, ROUND_CONSTANTS, ROUNDS_HALF_FULL, ROUNDS_PARTIAL},
     rng::Poseidon2Rng,
 };
 

@@ -18,13 +18,12 @@ use alloc::{boxed::Box, collections::VecDeque, vec::Vec};
 use core::fmt;
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use risc0_binfmt::{tagged_struct, DecodeError, Digestible, PovwNonce};
+use risc0_binfmt::{DecodeError, Digestible, PovwNonce, tagged_struct};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha,
+    MaybePruned, PrunedValueError, ReceiptClaim, Unknown, sha,
     sha::{Digest, Sha256},
-    MaybePruned, PrunedValueError, ReceiptClaim, Unknown,
 };
 
 /// A wrapper around the underlying claim that additionally includes the amount of verifiable work
@@ -241,7 +240,7 @@ impl Digestible for Work {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{sha, ReceiptClaim};
+    use crate::{ReceiptClaim, sha};
     use alloc::collections::VecDeque;
     use risc0_binfmt::{ExitCode, SystemState};
 

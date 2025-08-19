@@ -14,12 +14,12 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, ApiClient, Asset, ExecutorEnv, InnerReceipt, ProveInfo, Receipt,
-    ReceiptKind, SessionInfo, VerifierContext,
+    ApiClient, Asset, ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo,
+    VerifierContext, host::api::AssetRequest,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +43,9 @@
 use alloc::{format, vec::Vec};
 use core::fmt::{Debug, Formatter};
 
+pub use digest::{Digest, Output};
 use digest::{
+    HashMarker, InvalidOutputSize,
     block_buffer::Eager,
     const_oid::{AssociatedOid, ObjectIdentifier},
     core_api::{
@@ -51,9 +53,7 @@ use digest::{
         CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
     },
     typenum::{U32, U64},
-    HashMarker, InvalidOutputSize,
 };
-pub use digest::{Digest, Output};
 
 use super::{BLOCK_BYTES, SHA256_INIT};
 

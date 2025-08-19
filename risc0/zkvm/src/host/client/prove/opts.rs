@@ -213,8 +213,10 @@ impl ProverOpts {
     /// Return [ProverOpts] with dev_mode enabled or disabled.
     pub fn with_dev_mode(self, dev_mode: bool) -> Self {
         if cfg!(feature = "disable-dev-mode") && dev_mode {
-            panic!("zkVM: Inconsistent settings -- please resolve. \
-                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+            panic!(
+                "zkVM: Inconsistent settings -- please resolve. \
+                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag."
+            );
         }
         Self { dev_mode, ..self }
     }

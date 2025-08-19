@@ -200,6 +200,7 @@ impl KernelBuild {
             .cudart(&cudart)
             .debug(false)
             .ccbin(env::var("NVCC_CCBIN").is_err())
+            .flag("-std=c++17")
             .flag("-diag-suppress=177")
             .flag("-diag-suppress=2922")
             .flag("-Xcudafe")

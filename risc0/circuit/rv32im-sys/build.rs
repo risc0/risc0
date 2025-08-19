@@ -46,7 +46,7 @@ fn build_cuda_kernels() {
     println!("cargo:rerun-if-env-changed=SCCACHE_RECACHE");
     rerun_if_changed("kernels/cuda");
 
-    env::set_var("SCCACHE_IDLE_TIMEOUT", "0");
+    unsafe { env::set_var("SCCACHE_IDLE_TIMEOUT", "0") };
 
     if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
