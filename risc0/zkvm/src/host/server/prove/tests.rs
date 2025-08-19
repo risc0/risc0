@@ -387,7 +387,9 @@ mod riscv {
 
             let env = ExecutorEnv::default();
             prove_elf(env, &elf).unwrap();
+            return;
         }
+        panic!("No filename matching '{}'", test_name);
     }
 
     macro_rules! test_case {
@@ -412,6 +414,7 @@ mod riscv {
     test_case!(bne);
     test_case!(div);
     test_case!(divu);
+    test_case!(fence);
     test_case!(jal);
     test_case!(jalr);
     test_case!(lb);

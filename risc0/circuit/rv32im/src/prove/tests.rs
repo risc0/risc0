@@ -85,7 +85,7 @@ mod riscv {
             run_program(program);
             return;
         }
-        panic!("No matching test_name");
+        panic!("No filename matching '{}'", test_name);
     }
 
     macro_rules! test_case {
