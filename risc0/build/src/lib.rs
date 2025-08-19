@@ -134,7 +134,9 @@ pub struct GuestListEntry {
     /// The image id of the guest program.
     pub image_id: Digest,
 
-    /// The path to the ELF binary
+    /// The path to the guest binary.
+    ///
+    /// The contents of the file at this path will be equal to the [`Self::elf`].
     pub path: Cow<'static, str>,
 }
 
