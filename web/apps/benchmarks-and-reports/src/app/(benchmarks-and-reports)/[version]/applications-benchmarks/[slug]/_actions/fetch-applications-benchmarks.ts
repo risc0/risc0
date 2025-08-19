@@ -1,23 +1,26 @@
 import "server-only";
 
+import type { Version } from "@/types/version";
 import { tryit } from "radash";
-import type { Version } from "~/types/version";
 
-export async function fetchApplicationsBenchmarks({ url, version }: { url: string; version: Version }) {
-  const tryFetch = tryit(fetch);
-  const [error, response] = await tryFetch(
-    `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/${url}`,
-    {
-      next: {
-        revalidate: 60,
-      },
-    },
-  );
+export async function fetchApplicationsBenchmarks({
+	url,
+	version,
+}: { url: string; version: Version }) {
+	const tryFetch = tryit(fetch);
+	const [error, response] = await tryFetch(
+		`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/${url}`,
+		{
+			next: {
+				revalidate: 60,
+			},
+		},
+	);
 
-  // error handling
-  if (error || !response.ok) {
-    throw error || new Error("Failed to fetch");
-  }
+	// error handling
+	if (error || !response.ok) {
+		throw error || new Error("Failed to fetch");
+	}
 
-  return await response.text();
+	return await response.text();
 }
