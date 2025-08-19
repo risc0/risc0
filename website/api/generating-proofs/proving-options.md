@@ -12,6 +12,7 @@ We recommend option 1 during development, option 2 for applications involving pr
 
 :::tip
 [`prove_with_opts`] allows users to choose between [composite, succinct or groth16 receipts].
+See the [Shrink-Wrapping] page for more details about groth16 receipts.
 :::
 
 [`prove_with_opts`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
@@ -20,3 +21,4 @@ We recommend option 1 during development, option 2 for applications involving pr
 [dev-mode]: ./dev-mode.md
 [Local Proving]: ./local-proving.md
 [Remote Proving]: ./remote-proving.md
+[Shrink-Wrapping]: ../blockchain-integration/shrink-wrapping.md
