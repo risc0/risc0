@@ -32,7 +32,6 @@ pub use self::{
     bigint::analyze::analyze as bigint_analyze,
     executor::{CycleLimit, Executor, ExecutorResult, SimpleSession},
     platform::*,
-    rv32im::{Emulator, EmuContext, Exception, InsnKind, DecodedInstruction},
     segment::Segment,
     syscall::{Syscall, SyscallContext},
 };
