@@ -17,23 +17,23 @@ use std::{rc::Rc, sync::Arc};
 use anyhow::{Context, Result};
 use kameo::prelude::*;
 use risc0_zkvm::{
-    get_prover_server, CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl,
-    NullSegmentRef, PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer,
-    VerifierContext,
+    CoprocessorCallback, DevModeDelay, DevModeProver, ExecutorEnv, ExecutorImpl, NullSegmentRef,
+    PreflightResults, ProveKeccakRequest, ProverOpts, ProverServer, VerifierContext,
+    get_prover_server,
 };
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio::task::JoinHandle;
 
 use super::{
     factory::FactoryRouterActor,
     protocol::{
+        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
+        ShrinkWrapKind, ShrinkWrapTask, Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
         factory::{
             GetTask, JoinNode, ProveKeccakDone, TaskDone, TaskDoneMsg, TaskUpdate, TaskUpdateMsg,
             UnionDone,
         },
         worker::TaskMsg,
-        ExecuteTask, JoinTask, LiftTask, ProveKeccakTask, ProveSegmentTask, ResolveTask, Session,
-        Task, TaskError, TaskHeader, TaskKind, UnionTask, WorkerId,
     },
 };
 
@@ -48,6 +48,7 @@ enum GpuTask {
     Join(Arc<JoinTask>),
     Union(Arc<UnionTask>),
     Resolve(Arc<ResolveTask>),
+    ShrinkWrap(Arc<ShrinkWrapTask>),
 }
 
 struct GpuTaskMsg {
@@ -244,6 +245,15 @@ impl Processor {
                     .await
                     .unwrap();
             }
+            Task::ShrinkWrap(task) => {
+                self.gpu_queue
+                    .send(GpuTaskMsg {
+                        header: msg.header,
+                        task: GpuTask::ShrinkWrap(task),
+                    })
+                    .await
+                    .unwrap();
+            }
         }
     }
 }
@@ -290,6 +300,7 @@ impl GpuProcessor {
             GpuTask::Join(task) => self.join(msg.header, task).await,
             GpuTask::Union(task) => self.union(msg.header, task).await,
             GpuTask::Resolve(task) => self.resolve(msg.header, task).await,
+            GpuTask::ShrinkWrap(task) => self.shrink_wrap(msg.header, task).await,
         };
 
         let result = self.send_done(header, result).await;
@@ -398,6 +409,29 @@ impl GpuProcessor {
         .await
         .context("JoinHandle error: resolve task")??;
         Ok(TaskDone::Resolve(Arc::new(receipt)))
+    }
+
+    async fn shrink_wrap(
+        &self,
+        header: TaskHeader,
+        task: Arc<ShrinkWrapTask>,
+    ) -> Result<TaskDone, TaskError> {
+        tracing::info!(
+            "ShrinkWrap({:?}): {:?}",
+            task.kind,
+            header.global_id.task_id
+        );
+        self.task_start(header.clone()).await?;
+        let prover = Prover { delay: self.delay };
+        let task_kind = task.kind;
+        let opts = match task_kind {
+            ShrinkWrapKind::Groth16 => ProverOpts::groth16(),
+        };
+        let receipt =
+            tokio::task::spawn_blocking(move || prover.get()?.compress(&opts, &task.receipt))
+                .await
+                .with_context(|| format!("JoinHandle error: shrink_wrap({task_kind:?}) task"))??;
+        Ok(TaskDone::ShrinkWrap(Arc::new(receipt)))
     }
 }
 

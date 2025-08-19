@@ -97,6 +97,7 @@ jobs:
               - compact_proof/**
               - external/**
               - risc0/**
+              - xtask/**
             test-crates:
               - *base
               - risc0/**
@@ -523,18 +524,25 @@ jobs:
     if: needs.changes.outputs.check-template == 'true'
     needs: changes
     runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    env:
+      RUST_TOOLCHAIN_VERSION: 1.88.0
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
+            sed_bin: sed
           - os: macOS
             arch: ARM64
+            sed_bin: gsed
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - name: Install gsed
+        run: brew install gnu-sed
+        if: matrix.os == 'macOS'
       - run: cargo install --force --path risc0/cargo-risczero --locked
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
@@ -545,6 +553,8 @@ jobs:
             --guest-name test_method \
             template-test
         shell: bash
+      - run: ${{ matrix.sed_bin }} -i 's/stable/${{ env.RUST_TOOLCHAIN_VERSION }}/g' ${{ runner.temp }}/template-test/rust-toolchain.toml
+        shell: bash
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
       - run: |
@@ -554,6 +564,8 @@ jobs:
             --guest-name test_method \
             --no-std \
             template-test-no-std
+        shell: bash
+      - run: ${{ matrix.sed_bin }} -i 's/stable/${{ env.RUST_TOOLCHAIN_VERSION }}/g' ${{ runner.temp }}/template-test-no-std/rust-toolchain.toml
         shell: bash
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
       - run: sccache --show-stats

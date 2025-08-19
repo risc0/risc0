@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_binfmt::WordAddr;
 use risc0_zkp::core::hash::sha::BLOCK_WORDS;
 
 use crate::execute::{
     platform::*,
-    r0vm::{guest_addr, LoadOp, Risc0Context},
+    r0vm::{LoadOp, Risc0Context, guest_addr},
 };
 
 const SHA2_LOAD_STATE_CYCLES: u32 = 4;

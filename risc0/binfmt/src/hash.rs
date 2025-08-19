@@ -18,7 +18,7 @@ use alloc::vec::Vec;
 use core::{borrow::Borrow, mem::size_of};
 
 use risc0_zkp::core::{
-    digest::{Digest, DIGEST_BYTES},
+    digest::{DIGEST_BYTES, Digest},
     hash::sha::Sha256,
 };
 
@@ -136,7 +136,7 @@ pub fn tagged_list_cons<S: Sha256>(tag: &str, head: &Digest, tail: &Digest) -> D
 mod tests {
     use risc0_zkp::core::hash::sha::cpu;
 
-    use super::{tagged_struct, Digest};
+    use super::{Digest, tagged_struct};
 
     #[test]
     fn test_tagged_struct() {

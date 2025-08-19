@@ -4,7 +4,7 @@
 
 use std::time::Instant;
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use serde_json::Value;
 use sqlx::postgres::PgPoolOptions;
 use taskdb::INIT_TASK;

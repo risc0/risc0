@@ -18,12 +18,12 @@
 //! to what `crates.io` has for the baseline. If changes are detected, we require a bump in the
 //! patch version of the crate.
 
-use anyhow::{anyhow, bail, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow, bail};
 use cargo_semver_checks::{Check, GlobalConfig, Rustdoc};
 use clap::Parser;
 use semver::{Version, VersionReq};
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{DisplayFromStr, serde_as};
 use tempfile::tempdir;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -434,12 +434,12 @@ fn check_for_major_version_bump_due_to_version_req_in_single_package(
 /// packages have a bump of a version requirement for another risc0 crate, we need to make sure
 /// that crates has also had a major version bump.
 fn check_for_major_version_bump_due_to_version_req(
-    baseline_packages_without_major_version_bump: &Vec<String>,
+    baseline_package_without_breaking_changes: &Vec<String>,
     packages: &BTreeMap<String, cargo_metadata::Package>,
     vendor_packages: &Path,
 ) -> Result<()> {
     let mut errors = vec![];
-    for package_name in baseline_packages_without_major_version_bump {
+    for package_name in baseline_package_without_breaking_changes {
         let res = check_for_major_version_bump_due_to_version_req_in_single_package(
             packages,
             package_name,
@@ -501,7 +501,7 @@ fn real_cargo_vendor(path: &Path) -> Result<()> {
     Ok(())
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 enum VersionOrNone {
     Version(Version),
     None,
@@ -544,7 +544,7 @@ impl fmt::Display for VersionOrNone {
 }
 
 #[serde_as]
-#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
 struct SemverBaselines {
     #[serde_as(as = "BTreeMap<_, DisplayFromStr>")]
     versions: BTreeMap<String, VersionOrNone>,
@@ -604,6 +604,13 @@ fn write_semver_lock_file(workspace_root: &Path, baselines: &SemverBaselines) ->
     Ok(())
 }
 
+fn semver_compatible(a: &semver::Version, b: &semver::Version) -> bool {
+    if !a.pre.is_empty() || !b.pre.is_empty() {
+        return false;
+    }
+    a.major == b.major
+}
+
 /// Entrypoint for the tests. See the module doc-comment about what it does.
 ///
 /// `workspace_root`         : The path to the workspace we are checking
@@ -618,11 +625,13 @@ fn run_inner(
 ) -> Result<()> {
     let packages = find_publishable_packages_with_lib(workspace_root)?;
 
-    let input_baselines = (!args.update)
-        .then(|| read_semver_lock_file(workspace_root))
-        .transpose()?
-        .flatten()
-        .unwrap_or_default();
+    let semver_lock_file = read_semver_lock_file(workspace_root)?.unwrap_or_default();
+
+    let input_baselines = if !args.update {
+        semver_lock_file.clone()
+    } else {
+        Default::default()
+    };
 
     let mut skipped_packages = BTreeSet::new();
     let mut semver_output = SemverOutput::default();
@@ -646,20 +655,20 @@ fn run_inner(
                 .map(|p| (p, VersionOrNone::None)),
         );
     }
-    if args.locked && output_baselines != input_baselines {
+    if args.locked && output_baselines != semver_lock_file {
         bail!(
             "`--locked` provided and baselines don't match: \
-                output != input: {output_baselines} != {input_baselines}"
+                output != input: {output_baselines} != {semver_lock_file}"
         );
     }
 
     write_semver_lock_file(workspace_root, &output_baselines)?;
 
-    let baseline_packages_without_major_version_bump = semver_output
+    let baseline_package_without_breaking_changes = semver_output
         .crate_versions
         .iter()
         .filter_map(|(name, versions)| {
-            (versions.current.major <= versions.baseline.major)
+            (semver_compatible(&versions.current, &versions.baseline))
                 .then_some((name.clone(), versions.baseline.clone()))
         })
         .collect::<Vec<_>>();
@@ -668,7 +677,7 @@ fn run_inner(
     let vendored_packages = vendor_packages(
         cargo_vendor,
         &tempdir,
-        &baseline_packages_without_major_version_bump,
+        &baseline_package_without_breaking_changes,
     )?;
 
     let unbumped_packages: Vec<_> = semver_output
@@ -684,7 +693,7 @@ fn run_inner(
     }
 
     check_for_major_version_bump_due_to_version_req(
-        &baseline_packages_without_major_version_bump
+        &baseline_package_without_breaking_changes
             .into_iter()
             .map(|(p, _)| p)
             .collect(),
@@ -808,20 +817,22 @@ mod tests {
     ) {
         // Create a published version of the baseline like what would exist on `crates.io` and save
         // it so we can move it into place in our test version of `cargo vendor`
-        assert!(Command::new("cargo")
-            .args([
-                "publish",
-                "--allow-dirty",
-                "--dry-run",
-                "--package",
-                crate_name
-            ])
-            .current_dir(tempdir.path().join(baseline_name))
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .unwrap()
-            .success());
+        assert!(
+            Command::new("cargo")
+                .args([
+                    "publish",
+                    "--allow-dirty",
+                    "--dry-run",
+                    "--package",
+                    crate_name
+                ])
+                .current_dir(tempdir.path().join(baseline_name))
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .unwrap()
+                .success()
+        );
 
         // Locally published crates have this directory, but not ones on `crates.io`
         let published_crate = tempdir
@@ -1237,7 +1248,8 @@ mod tests {
             )
             .unwrap_err()
             .to_string(),
-            "`--locked` provided and baselines don't match: output != input: {foobar: 2.1.0} != {}"
+            "`--locked` provided and baselines don't match: output != input: \
+            {foobar: 2.1.0} != {foobar: 1.0.0}"
         );
     }
 

@@ -5,28 +5,28 @@
 use std::sync::Arc;
 
 use crate::{
-    redis::{self},
-    tasks::{read_image_id, serialize_obj, COPROC_CB_PATH, RECEIPT_PATH, SEGMENTS_PATH},
     Agent, Args, TaskType,
+    redis::{self},
+    tasks::{COPROC_CB_PATH, RECEIPT_PATH, SEGMENTS_PATH, read_image_id, serialize_obj},
 };
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use risc0_zkvm::{
-    compute_image_id, sha::Digestible, CoprocessorCallback, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, Receipt, Segment,
+    CoprocessorCallback, ExecutorEnv, ExecutorImpl, InnerReceipt, Journal, NullSegmentRef,
+    ProveKeccakRequest, Receipt, Segment, compute_image_id, sha::Digestible,
 };
 use sqlx::postgres::PgPool;
 use taskdb::planner::{
-    task::{Command as TaskCmd, Task},
     Planner,
+    task::{Command as TaskCmd, Task},
 };
 use tempfile::NamedTempFile;
 use workflow_common::{
+    AUX_WORK_TYPE, COPROC_WORK_TYPE, CompressType, ExecutorReq, ExecutorResp, FinalizeReq,
+    JOIN_WORK_TYPE, JoinReq, KeccakReq, PROVE_WORK_TYPE, ProveReq, ResolveReq, SnarkReq, UnionReq,
     s3::{
         ELF_BUCKET_DIR, EXEC_LOGS_BUCKET_DIR, INPUT_BUCKET_DIR, PREFLIGHT_JOURNALS_BUCKET_DIR,
         RECEIPT_BUCKET_DIR, STARK_BUCKET_DIR,
     },
-    CompressType, ExecutorReq, ExecutorResp, FinalizeReq, JoinReq, KeccakReq, ProveReq, ResolveReq,
-    SnarkReq, UnionReq, AUX_WORK_TYPE, COPROC_WORK_TYPE, JOIN_WORK_TYPE, PROVE_WORK_TYPE,
 };
 // use tempfile::NamedTempFile;
 use tokio::task::{JoinHandle, JoinSet};

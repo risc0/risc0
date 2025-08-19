@@ -19,17 +19,17 @@ use std::{
     time::Instant,
 };
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::{Context as _, Result, bail};
 use risc0_binfmt::{
     AbiKind, ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, ProgramBinaryHeader,
     SystemState,
 };
 use risc0_circuit_rv32im::{
-    execute::{
-        platform::WORD_SIZE, CycleLimit, Executor, Syscall as CircuitSyscall,
-        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
-    },
     MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
+    execute::{
+        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
+    },
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
@@ -37,15 +37,15 @@ use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
+    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
     claim::receipt::exit_code_from_terminate_state,
     host::{client::env::SegmentPath, server::session::Session},
-    Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
 };
 
 use super::{
+    Journal,
     profiler::{self, Profiler},
     syscall::{SyscallContext, SyscallTable},
-    Journal,
 };
 
 // The Executor provides an implementation for the execution phase.
