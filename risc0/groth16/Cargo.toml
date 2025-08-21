@@ -1,7 +1,7 @@
 [package]
 name = "risc0-groth16"
 description = "RISC Zero Groth16"
-version = "3.0.0"
+version = "3.0.1"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
