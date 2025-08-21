@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
 use crate::{
-    sha::{Digest, DIGEST_BYTES},
     Assumption, AssumptionReceipt,
+    sha::{DIGEST_BYTES, Digest},
 };
 
 use super::{Syscall, SyscallContext, SyscallKind};
@@ -47,7 +47,7 @@ impl Syscall for SysVerify2 {
             .try_into()
             .map_err(|vec| anyhow!("invalid digest: {vec:?}"))?;
 
-        tracing::info!(
+        tracing::debug!(
             "SYS_VERIFY_INTEGRITY2: ({}, {})",
             claim_digest,
             control_root

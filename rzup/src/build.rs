@@ -16,7 +16,6 @@ use crate::components::Component;
 use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::events::RzupEvent;
-use crate::paths::Paths;
 
 use semver::Version;
 use std::io::{BufRead, BufReader};
@@ -147,7 +146,7 @@ pub fn git_short_rev_parse(path: &Path, tag: &str) -> Result<String> {
     )
 }
 
-fn find_build_directories(build_dir: &Path) -> Result<(PathBuf, PathBuf)> {
+fn find_build_directories(build_dir: &Path) -> Result<(PathBuf, PathBuf, PathBuf)> {
     if !build_dir.exists() {
         return Err(RzupError::Other(
             "failed to find Rust toolchain build directory".into(),
@@ -156,14 +155,15 @@ fn find_build_directories(build_dir: &Path) -> Result<(PathBuf, PathBuf)> {
 
     for entry in std::fs::read_dir(build_dir)? {
         let entry = entry?;
-        let dir1 = entry.path().join("stage2");
-        let dir2 = entry.path().join("stage2-tools-bin");
-        if dir1.is_dir() && dir2.is_dir() && dir1.join("bin").is_dir() {
-            return Ok((dir1, dir2));
+        let stage2 = entry.path().join("stage2");
+        let stage2_tools_bin = entry.path().join("stage2-tools-bin");
+        let stage3 = entry.path().join("stage3");
+        if stage2.is_dir() && stage2_tools_bin.is_dir() && stage3.is_dir() {
+            return Ok((stage2, stage2_tools_bin, stage3));
         }
     }
     Err(RzupError::Other(
-        "failed to find Rust toolchain stage2 build directories".into(),
+        "failed to find Rust toolchain stage2/stage3 build directories".into(),
     ))
 }
 
@@ -206,7 +206,7 @@ pub fn build_rust_toolchain(
     let mut version = Version::parse(version_str.trim())?;
     version.build = semver::BuildMetadata::new(&commit).unwrap();
 
-    let dest_dir = Paths::get_version_dir(env, &Component::RustToolchain, &version);
+    let dest_dir = Component::RustToolchain.get_version_dir(env, &version);
     if dest_dir.exists() {
         return Err(RzupError::Other(format!(
             "Rust toolchain version {version} already installed"
@@ -215,10 +215,6 @@ pub fn build_rust_toolchain(
 
     std::fs::write(repo_dir.join("config.toml"), CONFIG_TOML)?;
 
-    env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "./x build".into(),
-    });
-
     let req = semver::VersionReq::parse(">=1.82.0")?;
     let lower_atomic = if req.matches(&version) {
         "-Cpasses=lower-atomic"
@@ -226,41 +222,37 @@ pub fn build_rust_toolchain(
         "-Cpasses=loweratomic"
     };
 
-    run_command_and_stream_output(
-        "./x",
-        &["build"],
-        Some(&repo_dir),
-        &[(
-            "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            lower_atomic,
-        )],
-        |line| {
-            env.emit(RzupEvent::BuildingRustToolchainUpdate {
-                message: line.into(),
-            });
-        },
-    )
-    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain build: {e}")))?;
+    for stage in [None, Some(2), Some(3)] {
+        let mut args = vec!["build".into()];
+        if let Some(stage) = stage {
+            args.push("--stage".into());
+            args.push(stage.to_string());
+        }
 
-    env.emit(RzupEvent::BuildingRustToolchainUpdate {
-        message: "./x build --stage 2".into(),
-    });
+        env.emit(RzupEvent::BuildingRustToolchainUpdate {
+            message: format!("./x {}", args.join(" ")),
+        });
 
-    run_command_and_stream_output(
-        "./x",
-        &["build", "--stage", "2"],
-        Some(&repo_dir),
-        &[(
-            "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
-            lower_atomic,
-        )],
-        |line| {
-            env.emit(RzupEvent::BuildingRustToolchainUpdate {
-                message: line.into(),
-            });
-        },
-    )
-    .map_err(|e| RzupError::Other(format!("failed to run Rust toolchain build --stage 2: {e}")))?;
+        run_command_and_stream_output(
+            "./x",
+            &args.iter().map(|a| a.as_ref()).collect::<Vec<_>>(),
+            Some(&repo_dir),
+            &[(
+                "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
+                lower_atomic,
+            )],
+            |line| {
+                env.emit(RzupEvent::BuildingRustToolchainUpdate {
+                    message: line.into(),
+                });
+            },
+        )
+        .map_err(|e| {
+            RzupError::Other(format!(
+                "failed to run Rust toolchain build stage={stage:?}: {e}"
+            ))
+        })?;
+    }
 
     env.emit(RzupEvent::BuildingRustToolchainUpdate {
         message: "installing".into(),
@@ -270,8 +262,17 @@ pub fn build_rust_toolchain(
         std::fs::create_dir_all(parent)?;
     }
 
-    let (stage2, stage2_tools) = find_build_directories(&repo_dir.join("build"))?;
+    let (stage2, stage2_tools, stage3) = find_build_directories(&repo_dir.join("build"))?;
     std::fs::rename(stage2, &dest_dir)?;
+
+    let riscv_libs = "lib/rustlib/riscv32im-risc0-zkvm-elf";
+
+    let riscv_libs_dest = dest_dir.join(riscv_libs);
+    if let Some(parent) = riscv_libs_dest.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    std::fs::rename(stage3.join(riscv_libs), riscv_libs_dest)?;
 
     for tool in std::fs::read_dir(stage2_tools)? {
         let tool = tool?;

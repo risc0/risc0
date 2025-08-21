@@ -11,21 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub enum TransferKind {
+    Upload,
+    Download,
+    Compress,
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum RzupEvent {
-    DownloadStarted {
+    TransferStarted {
+        kind: TransferKind,
         id: String,
-        version: String,
-        url: String,
+        version: Option<String>,
+        url: Option<String>,
         len: Option<u64>,
     },
-    DownloadProgress {
+    TransferProgress {
         id: String,
         incr: u64,
     },
-    DownloadCompleted {
+    TransferCompleted {
+        kind: TransferKind,
         id: String,
-        version: String,
+        version: Option<String>,
     },
     InstallationStarted {
         id: String,

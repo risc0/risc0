@@ -1,7 +1,7 @@
 [package]
 name = "waldo"
 version = "0.1.0"
-edition = "2021"
+edition = { workspace = true }
 
 [dependencies]
 bincode = "1.3"
@@ -12,6 +12,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 viuer = "0.6"
 waldo-core = { path = "core" }
 waldo-methods = { path = "methods" }
+
+[dev-dependencies]
+assert_cmd = "2.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

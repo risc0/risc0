@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use crate::host::client::env::ProveKeccakRequest;
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_binfmt::ByteAddr;
-use risc0_circuit_keccak::{max_keccak_inputs, KeccakState, KECCAK_DEFAULT_PO2};
+use risc0_circuit_keccak::{KECCAK_DEFAULT_PO2, KeccakState, max_keccak_inputs};
 use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
 use risc0_zkvm_platform::syscall::{
     keccak_mode::{KECCAK_PERMUTE, KECCAK_PROVE},
