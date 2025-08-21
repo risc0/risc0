@@ -1,5 +1,15 @@
-# r0vm --manager --addr 100.66.221.121:9000
+# r0vm --manager --addr 0.0.0.0:9000 --worker executor
+
+version = 1
+
 [manager]
-bind = "0.0.0.0:9000"
+listen = "0.0.0.0:9000"
+
+[worker]
+
+[[worker.pools]]
+count = 4
+subscribe = ["Execute"]
 
 [storage]
+path = "/mnt/storage/risc0"

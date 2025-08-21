@@ -1,4 +1,29 @@
-# r0vm --worker prove-segment,lift,join --addr 100.66.221.121:9000
-[worker]
+# r0vm --worker prove-segment,lift,join --addr 1.2.3.4:9000 --num-gpus 8
 
-[storage]
+version = 1
+
+[worker]
+manager = "1.2.3.4:9000"
+subscribe = [
+  "prove-segment",
+  "prove-keccak",
+  "lift",
+  "join",
+  "union",
+  "resolve",
+]
+
+[[worker.pools]]
+count = 8
+subscribe = [
+  "prove-segment",
+  "prove-keccak",
+  "lift",
+  "join",
+  "union",
+  "resolve",
+]
+
+[[worker.pools]]
+count = 8
+subscribe = ["lift", "join", "union", "resolve"]

@@ -30,24 +30,24 @@ pub(crate) struct AppConfig {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct ApiConfig {
-    pub bind: SocketAddr,
+    pub listen: Option<SocketAddr>,
     pub manager: SocketAddr,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct ManagerConfig {
+    pub listen: Option<SocketAddr>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct WorkerConfig {
+    pub manager: Option<SocketAddr>,
+    pub pools: Vec<PoolConfig>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct StorageConfig {
     pub path: PathBuf,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct ManagerConfig {
-    pub bind: Option<SocketAddr>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct WorkerConfig {
-    pub manager: SocketAddr,
-    pub pools: Vec<PoolConfig>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -58,4 +58,6 @@ pub(crate) struct PoolConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct TelemetryConfig {}
+pub(crate) struct TelemetryConfig {
+    // TODO
+}
