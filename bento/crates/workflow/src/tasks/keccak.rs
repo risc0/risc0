@@ -3,14 +3,14 @@
 // All rights reserved.
 
 use crate::{
-    redis::{self, AsyncCommands},
-    tasks::{serialize_obj, COPROC_CB_PATH},
     Agent,
+    redis::{self, AsyncCommands},
+    tasks::{COPROC_CB_PATH, serialize_obj},
 };
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use risc0_zkvm::ProveKeccakRequest;
 use uuid::Uuid;
-use workflow_common::{KeccakReq, KECCAK_RECEIPT_PATH};
+use workflow_common::{KECCAK_RECEIPT_PATH, KeccakReq};
 
 fn try_keccak_bytes_to_input(input: &[u8]) -> Result<Vec<[u64; 25]>> {
     let chunks = input.chunks_exact(std::mem::size_of::<[u64; 25]>());
@@ -51,7 +51,7 @@ pub async fn keccak(
         );
     }
 
-    tracing::info!("Keccak proving {}", request.claim_digest);
+    tracing::debug!("Keccak proving {}", request.claim_digest);
 
     let keccak_receipt = agent
         .prover
@@ -74,7 +74,7 @@ pub async fn keccak(
     .await
     .context("Failed to write keccak receipt to redis")?;
 
-    tracing::info!("Completed keccak proving {}", request.claim_digest);
+    tracing::debug!("Completed keccak proving {}", request.claim_digest);
 
     Ok(())
 }

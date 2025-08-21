@@ -17,16 +17,16 @@ use alloc::{collections::BTreeSet, string::String, vec::Vec};
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_iter, tagged_struct, Digestible};
+use risc0_binfmt::{Digestible, PovwNonce, tagged_iter, tagged_struct};
 use risc0_zkp::{
-    adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
+    adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO, ProtocolInfo},
     core::{digest::Digest, hash::sha::Sha256},
     verify::VerificationError,
 };
 use serde::{Deserialize, Serialize};
 
 use super::VerifierContext;
-use crate::{sha, ReceiptClaim};
+use crate::{ReceiptClaim, sha};
 
 /// A receipt attesting to the execution of a Segment.
 ///
@@ -74,6 +74,13 @@ impl SegmentReceipt {
             .segment_verifier_parameters
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
+
+        // NOTE: We do not check the verifier_parameters digest here, which is used to detect
+        // version mismatches and display a friendlier error than "invalid proof", because there
+        // exist multiple versions of the verifier context that can verify a given receipt. This is
+        // because the segment receipt verifier context contains a set of control IDs,
+        // and will verify as long as the control ID found in is the set. Many sets can contain the
+        // same control ID.
 
         // Check that the proof system and circuit info strings match what is implemented by this
         // function. Info strings are used a version identifiers, and this verify implementation
@@ -127,6 +134,11 @@ impl SegmentReceipt {
     /// Number of bytes used by the seal for this receipt.
     pub fn seal_size(&self) -> usize {
         core::mem::size_of_val(self.seal.as_slice())
+    }
+
+    /// Extracts the PoVW nonce from this segment receipt's seal.
+    pub fn povw_nonce(&self) -> anyhow::Result<PovwNonce> {
+        risc0_circuit_rv32im::decode_povw_nonce(&self.seal)
     }
 }
 
@@ -183,7 +195,7 @@ mod tests {
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SegmentReceiptVerifierParameters::default().digest(),
-            digest!("5a123dc5ac0a4ed69a91f746cca8453a3af36dc0803ccf36bcc5b63eb4f5e621")
+            digest!("e7300130165ebe00f68f9301530de9d068d6f6c06f1c17817a5f7d64ce6c635d")
         );
     }
 }

@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-
 #[cfg(feature = "execute")]
-pub fn main() -> Result<()> {
+pub fn main() -> anyhow::Result<()> {
     let path = std::env::args()
         .nth(1)
         .expect("expected path to bigint program");

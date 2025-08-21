@@ -107,7 +107,7 @@ impl ProtocolInfo {
 impl fmt::Display for ProtocolInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match from_utf8(&self.0) {
-            Ok(s) => write!(f, "{}", s),
+            Ok(s) => write!(f, "{s}"),
             Err(_) => write!(f, "0x{}", hex::encode(self.0)),
         }
     }

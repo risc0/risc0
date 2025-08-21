@@ -25,20 +25,20 @@ use lazy_static::lazy_static;
 #[cfg(feature = "std")]
 use std::sync::Arc;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use derive_more::Debug;
 use risc0_zkp::{
     core::{
-        digest::{Digest, DIGEST_WORDS},
-        hash::poseidon2::{poseidon2_mix, CELLS},
+        digest::{DIGEST_WORDS, Digest},
+        hash::poseidon2::{CELLS, poseidon2_mix},
     },
-    field::{baby_bear::BabyBearElem, Elem as _},
+    field::{Elem as _, baby_bear::BabyBearElem},
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    PAGE_BYTES, PAGE_WORDS, Program, WORD_SIZE,
     addr::{ByteAddr, WordAddr},
-    Program, PAGE_BYTES, PAGE_WORDS, WORD_SIZE,
 };
 
 const MEMORY_BYTES: u64 = 1 << 32;
@@ -100,7 +100,7 @@ pub struct Page(Vec<u8>);
 
 /// A memory image
 ///
-/// A full memory image of a zkVM guest. Includes functio∑nality for accessing
+/// A full memory image of a zkVM guest. Includes functionality for accessing
 /// memory and associated digests, and for initializing the memory state for a
 /// [Program].
 #[derive(Clone, Debug, Serialize, Deserialize)]

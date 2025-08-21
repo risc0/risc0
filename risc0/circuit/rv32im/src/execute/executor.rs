@@ -16,47 +16,37 @@ use std::{
     cell::RefCell,
     collections::BTreeSet,
     rc::Rc,
-    sync::mpsc::{sync_channel, SyncSender},
+    sync::mpsc::{SyncSender, sync_channel},
     thread::{self, ScopedJoinHandle},
 };
 
-use anyhow::{bail, Result};
+use anyhow::{Context, Result, bail};
 use enum_map::EnumMap;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
-use risc0_binfmt::{ByteAddr, MemoryImage, WordAddr};
+use risc0_binfmt::{ByteAddr, MemoryImage, PovwJobId, PovwNonce, WordAddr};
 use risc0_zkp::core::{
-    digest::{Digest, DIGEST_BYTES},
+    digest::{DIGEST_BYTES, Digest},
     log2_ceil,
 };
 
 use crate::{
+    EcallKind, EcallMetric, Rv32imV2Claim, TerminateState,
     execute::rv32im::disasm,
     trace::{TraceCallback, TraceEvent},
-    Rv32imV2Claim, TerminateState,
 };
 
 use super::{
-    bigint,
-    pager::{compute_partial_image, PageTraceEvent, PagedMemory, WorkingImage},
+    SyscallContext, bigint,
+    pager::{PageTraceEvent, PagedMemory, WorkingImage, compute_partial_image},
     platform::*,
     poseidon2::Poseidon2State,
-    r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
+    r0vm::{LoadOp, Risc0Context, Risc0Machine},
     rv32im::{DecodedInstruction, Emulator, InsnKind},
     segment::Segment,
     sha2::Sha2State,
     syscall::Syscall,
-    unlikely, SyscallContext,
+    unlikely,
 };
-
-#[derive(Clone, Debug, Default)]
-#[non_exhaustive]
-pub struct EcallMetric {
-    pub count: u64,
-    pub cycles: u64,
-}
-
-#[derive(Default)]
-pub struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
@@ -73,8 +63,9 @@ pub struct Executor<'a, 'b, S: Syscall> {
     output_digest: Option<Digest>,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
-    ecall_metrics: EcallMetrics,
+    ecall_metrics: EnumMap<EcallKind, EcallMetric>,
     ring: AllocRingBuffer<(ByteAddr, InsnKind, DecodedInstruction)>,
+    povw_job_id: Option<PovwJobId>,
 }
 
 #[non_exhaustive]
@@ -122,6 +113,7 @@ struct CreateSegmentRequest {
     segment_threshold: u32,
     po2: u32,
     index: u64,
+    povw_nonce: Option<PovwNonce>,
 
     dump_path: Option<std::ffi::OsString>,
 }
@@ -164,6 +156,7 @@ fn create_segments(
             po2: req.po2,
             index: req.index,
             segment_threshold: req.segment_threshold,
+            povw_nonce: req.povw_nonce,
         };
 
         if let Some(dump_path) = req.dump_path {
@@ -187,6 +180,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         syscall_handler: &'a S,
         input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+        povw_job_id: Option<PovwJobId>,
     ) -> Self {
         Self {
             pc: ByteAddr(0),
@@ -203,8 +197,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             output_digest: None,
             trace,
             cycles: SessionCycles::default(),
-            ecall_metrics: EcallMetrics::default(),
+            ecall_metrics: Default::default(),
             ring: AllocRingBuffer::new(10),
+            povw_job_id,
         }
     }
 
@@ -218,7 +213,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let segment_limit: u32 = 1 << segment_po2;
         assert!(max_insn_cycles < segment_limit as usize);
         let segment_threshold = segment_limit - max_insn_cycles as u32;
-        let mut segment_counter = 0;
+        let mut segment_counter = 0u32;
 
         self.reset();
 
@@ -279,14 +274,19 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                         terminate_state: self.terminate_state,
                         segment_threshold,
                         po2: segment_po2 as u32,
-                        index: segment_counter,
+                        index: segment_counter as u64,
                         dump_path: None,
+                        povw_nonce: self.povw_nonce(segment_counter),
                     };
                     if commit_sender.send(req).is_err() {
                         return Err(segment_callback_thread.join().unwrap().unwrap_err());
                     }
 
-                    segment_counter += 1;
+                    // NOTE: There is no reasonable scenario where a session will have more than 4B
+                    // segments, but its possible.
+                    segment_counter = segment_counter
+                        .checked_add(1)
+                        .context("segment_counter overflow")?;
                     let total_cycles = 1 << segment_po2;
                     let pager_cycles = self.pager.cycles as u64;
                     let user_cycles = self.user_cycles as u64;
@@ -335,8 +335,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 terminate_state: self.terminate_state,
                 segment_threshold: 0, // meaningless for final segment
                 po2: final_po2 as u32,
-                index: segment_counter,
+                index: segment_counter as u64,
                 dump_path: None,
+                povw_nonce: self.povw_nonce(segment_counter),
             };
             if commit_sender.send(req).is_err() {
                 return Err(segment_callback_thread.join().unwrap().unwrap_err());
@@ -364,7 +365,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         };
 
         Ok(ExecutorResult {
-            segments: segment_counter + 1,
+            segments: segment_counter as u64 + 1,
             post_image,
             user_cycles: self.cycles.user,
             total_cycles: self.cycles.total,
@@ -372,6 +373,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             reserved_cycles: self.cycles.reserved,
             claim: session_claim,
         })
+    }
+
+    pub(crate) fn terminate_state(&self) -> Option<&TerminateState> {
+        self.terminate_state.as_ref()
     }
 
     fn dump(&self) {
@@ -387,7 +392,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         segment_callback_thread: ScopedJoinHandle<'_, Result<RetT>>,
         po2: usize,
         segment_threshold: u32,
-        index: u64,
+        index: u32,
     ) -> anyhow::Result<()> {
         if let Some(dump_path) = std::env::var_os("RISC0_DUMP_PATH") {
             tracing::error!(
@@ -409,8 +414,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 terminate_state: self.terminate_state,
                 segment_threshold,
                 po2: po2 as u32,
-                index,
+                index: index as u64,
                 dump_path: Some(dump_path),
+                povw_nonce: self.povw_nonce(index),
             };
             let _ = commit_sender.send(req);
             let _ = segment_callback_thread.join().unwrap()?;
@@ -418,7 +424,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(())
     }
 
-    pub fn take_ecall_metrics(&mut self) -> EcallMetrics {
+    pub fn take_ecall_metrics(&mut self) -> EnumMap<EcallKind, EcallMetric> {
         std::mem::take(&mut self.ecall_metrics)
     }
 
@@ -432,7 +438,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.user_cycles = 0;
         self.cycles = SessionCycles::default();
         self.pc = ByteAddr(0);
-        self.ecall_metrics = EcallMetrics::default();
+        self.ecall_metrics = Default::default();
     }
 
     fn segment_cycles(&self) -> u32 {
@@ -443,8 +449,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.cycles.user += count as u64;
         self.user_cycles += count as u32;
         if let Some(kind) = ecall {
-            self.ecall_metrics.0[kind].cycles += count as u64;
+            self.ecall_metrics[kind].cycles += count as u64;
         }
+    }
+
+    fn povw_nonce(&self, segment_index: u32) -> Option<PovwNonce> {
+        self.povw_job_id.map(|job| job.nonce(segment_index))
     }
 
     #[cold]
@@ -547,7 +557,7 @@ impl<S: Syscall> Risc0Context for Executor<'_, '_, S> {
         kind: EcallKind,
     ) -> Result<()> {
         if cur == CycleState::MachineEcall {
-            self.ecall_metrics.0[kind].count += 1;
+            self.ecall_metrics[kind].count += 1;
         }
         self.inc_user_cycles(1, Some(kind));
         if !self.trace.is_empty() {
@@ -679,16 +689,6 @@ impl<S: Syscall> SyscallContext for Executor<'_, '_, S> {
 
     fn get_pc(&self) -> u32 {
         self.user_pc.0
-    }
-}
-
-impl From<EcallMetrics> for Vec<(String, EcallMetric)> {
-    fn from(metrics: EcallMetrics) -> Self {
-        metrics
-            .0
-            .into_iter()
-            .map(|(kind, metric)| (format!("{kind:?}"), metric))
-            .collect()
     }
 }
 
