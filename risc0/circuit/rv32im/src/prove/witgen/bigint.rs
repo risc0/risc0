@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{Result, anyhow, bail, ensure};
 use derive_more::Debug;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive as _;
@@ -20,9 +20,9 @@ use risc0_binfmt::WordAddr;
 
 use crate::{
     execute::{
-        bigint::{BigIntBytes, BigIntWitness, BIGINT_WIDTH_BYTES, BIGINT_WIDTH_WORDS},
-        r0vm::{LoadOp, Risc0Context},
         CycleState, WORD_SIZE,
+        bigint::{BIGINT_WIDTH_BYTES, BIGINT_WIDTH_WORDS, BigIntBytes, BigIntWitness},
+        r0vm::{LoadOp, Risc0Context},
     },
     zirgen::circuit::{BigIntStateLayout, LAYOUT_TOP},
 };
@@ -119,7 +119,9 @@ impl BigInt {
                 let mut carry = 0;
 
                 // Do carry propagation
-                for coeff in self.program.total_carry.coeffs.iter_mut() {
+                for i in 0..self.program.total_carry.len() {
+                    let coeff = self.program.total_carry.get_mut(i);
+
                     *coeff += carry;
                     ensure!(*coeff % 256 == 0, "bad carry");
                     *coeff /= 256;
@@ -131,7 +133,10 @@ impl BigInt {
             let base_point = 128 * 256 * 64;
             for (i, ret) in self.state.bytes.iter_mut().enumerate() {
                 let offset = insn.offset as usize;
-                let coeff = self.program.total_carry.coeffs[offset * BIGINT_WIDTH_BYTES + i] as u32;
+                let coeff = *self
+                    .program
+                    .total_carry
+                    .get(offset * BIGINT_WIDTH_BYTES + i) as u32;
                 let value = coeff.wrapping_add(base_point);
                 match insn.poly_op {
                     PolyOp::Carry1 => *ret = ((value >> 14) & 0xff) as u8,

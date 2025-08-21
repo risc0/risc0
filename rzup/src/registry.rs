@@ -86,7 +86,7 @@ impl Registry {
             return Self::list_component_versions(env, &parent_id);
         }
 
-        let component_dir = Paths::get_component_dir(env, component);
+        let component_dir = component.get_dir(env);
         env.emit(RzupEvent::Debug {
             message: format!("Scanning directory: {}", component_dir.display()),
         });
@@ -228,7 +228,7 @@ impl Registry {
     }
 
     pub fn install_all_components(&mut self, env: &Environment, force: bool) -> Result<()> {
-        for component in Component::iter() {
+        for component in Component::iter().filter(|c| c.install_by_default()) {
             self.install_component(env, &component, None, force)?;
         }
         Ok(())

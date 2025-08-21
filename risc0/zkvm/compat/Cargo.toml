@@ -1,7 +1,7 @@
 [package]
 name = "risc0-zkvm-compat-tests"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [package.metadata.release]
 release = false
@@ -14,6 +14,7 @@ risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["client", "r0vm-ver-compat"] }
 risc0-zkvm-methods = { path = "../methods", features = ["std"] }
 semver = "1.0.25"
+tokio = { version = "1.44.2", features = ["rt-multi-thread"] }
 
 [dev-dependencies]
 rstest = "0.24.0"

@@ -149,3 +149,49 @@ rzup stores its installations in:
 When communicating with GitHub, it tries using authentication. This can be useful to get around
 rate-limiting. It attempts to get a token from the `GITHUB_TOKEN` environment variable, then from
 ~/.config/gh/hosts.yml.
+
+### publish
+
+rzup currently downloads components from both GitHub and S3. We are in the process of transitioning
+where components live from GitHub to S3. The publish command is for uploading new components to S3.
+
+It stores the components in s3://risc0-artifacts/rzup/components/<component-name>/
+
+#### create-artifact
+
+To publish an artifact as a component, first an artifact must be created. A valid artifact is just a
+.tar.xz file.
+
+To create an artifact, `publish create-artifact` can be used like
+```bash
+rzup publish create-artifact --input <directory-path> --output <output>.tar.xz
+```
+
+This command creates a .tar.xz file but uses parallel compression and displays a progress bar. This
+command doesn't have to be used, but is provided for convenience.
+
+#### upload
+
+To upload an artifact to S3 as a component, `publish upload` can be used like
+```bash
+rzup publish upload (--target-agnostic|--target <target-triple>) <component-name> <version> <artifact>.tar.xz
+```
+
+This command must be run in an environment with AWS credentials available. It will publish the
+artifact as a component with the given name and version.
+
+If `--target-agnostic` flag is given, the artifact will be used for all targets, otherwise `--target
+<target-triple>` must be used to mark which target the artifact should be used for (e.g.
+aarch64-apple-darwin, or x86_64-unknown-linux-gnu)
+
+Uploads are signed with a private key that is stored in AWS secrets manager, the key is obtained at
+publish time using aforementioned AWS credentials.
+
+#### set-latest
+The published component metadata includes information about what component version is the latest
+version. (This is the version that rzup will download by default.) To update what this version is,
+the `set-latest` command can be used.
+
+```bash
+rzup publish set-latest <component> 1.2.3
+```

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ mod deserializer;
 mod err;
 mod serializer;
 
-pub use deserializer::{from_slice, Deserializer, WordRead};
+pub use deserializer::{Deserializer, WordRead, from_slice};
 pub use err::{Error, Result};
-pub use serializer::{to_vec, to_vec_with_capacity, Serializer, WordWrite};
+pub use serializer::{Serializer, WordWrite, to_vec, to_vec_with_capacity};
 
 #[cfg(test)]
 mod tests {

@@ -1,5 +1,5 @@
-#include <ff/baby_bear.hpp>
-#include <ntt/ntt.cuh>
+#include "ff/baby_bear.hpp"
+#include "ntt/ntt.cuh"
 
 extern "C" RustError::by_value sppark_init() {
   uint32_t lg_domain_size = 1;

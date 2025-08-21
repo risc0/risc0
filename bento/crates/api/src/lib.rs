@@ -4,13 +4,12 @@
 
 use anyhow::{Context, Error as AnyhowErr, Result};
 use axum::{
-    async_trait,
-    body::{to_bytes, Body},
+    Json, Router, async_trait,
+    body::{Body, to_bytes},
     extract::{FromRequestParts, Host, Path, State},
-    http::{request::Parts, StatusCode},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::{get, post, put},
-    Json, Router,
 };
 use bonsai_sdk::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, ReceiptDownload, SessionStats, SessionStatusRes,
@@ -19,17 +18,17 @@ use bonsai_sdk::responses::{
 use clap::Parser;
 use risc0_zkvm::compute_image_id;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{PgPool, postgres::PgPoolOptions};
 use std::sync::Arc;
 use taskdb::{JobState, TaskDbErr};
 use thiserror::Error;
 use uuid::Uuid;
 use workflow_common::{
-    s3::{
-        S3Client, ELF_BUCKET_DIR, GROTH16_BUCKET_DIR, INPUT_BUCKET_DIR,
-        PREFLIGHT_JOURNALS_BUCKET_DIR, RECEIPT_BUCKET_DIR, STARK_BUCKET_DIR,
-    },
     CompressType, ExecutorReq, SnarkReq as WorkflowSnarkReq, TaskType,
+    s3::{
+        ELF_BUCKET_DIR, GROTH16_BUCKET_DIR, INPUT_BUCKET_DIR, PREFLIGHT_JOURNALS_BUCKET_DIR,
+        RECEIPT_BUCKET_DIR, S3Client, STARK_BUCKET_DIR,
+    },
 };
 
 mod helpers;
@@ -191,6 +190,10 @@ pub struct Args {
     #[clap(env)]
     s3_url: String,
 
+    /// S3 region, can be anything if using minio
+    #[clap(env, default_value = "us-west-2")]
+    s3_region: String,
+
     /// Executor timeout in seconds
     #[clap(long, default_value_t = 4 * 60 * 60)]
     exec_timeout: i32,
@@ -230,6 +233,7 @@ impl AppState {
             &args.s3_bucket,
             &args.s3_access_key,
             &args.s3_secret_key,
+            &args.s3_region,
         )
         .await
         .context("Failed to initialize s3 client / bucket")?;
@@ -247,7 +251,8 @@ impl AppState {
 
 // TODO: Add authn/z to get a userID
 const USER_ID: &str = "default_user";
-const MAX_UPLOAD_SIZE: usize = 250 * 1024 * 1024; // 250 mb
+// No limit on upload size given API is trusted.
+const MAX_UPLOAD_SIZE: usize = usize::MAX;
 
 const IMAGE_UPLOAD_PATH: &str = "/images/upload/:image_id";
 async fn image_upload(
@@ -416,16 +421,10 @@ async fn prove_stark(
     ExtractApiKey(api_key): ExtractApiKey,
     Json(start_req): Json<ProofReq>,
 ) -> Result<Json<CreateSessRes>, AppError> {
-    let (
-        _aux_stream,
-        exec_stream,
-        _gpu_prove_stream,
-        _gpu_coproc_stream,
-        _gpu_join_stream,
-        _snark_stream,
-    ) = helpers::get_or_create_streams(&state.db_pool, &api_key)
-        .await
-        .context("Failed to get / create steams")?;
+    let (_aux_stream, exec_stream, _gpu_prove_stream, _gpu_coproc_stream, _gpu_join_stream) =
+        helpers::get_or_create_streams(&state.db_pool, &api_key)
+            .await
+            .context("Failed to get / create steams")?;
 
     let task_def = serde_json::to_value(TaskType::Executor(ExecutorReq {
         image: start_req.img,
@@ -579,16 +578,10 @@ async fn prove_groth16(
     ExtractApiKey(api_key): ExtractApiKey,
     Json(start_req): Json<SnarkReq>,
 ) -> Result<Json<CreateSessRes>, AppError> {
-    let (
-        _aux_stream,
-        _exec_stream,
-        _gpu_prove_stream,
-        _gpu_coproc_stream,
-        _gpu_join_stream,
-        snark_stream,
-    ) = helpers::get_or_create_streams(&state.db_pool, &api_key)
-        .await
-        .context("Failed to get / create steams")?;
+    let (_aux_stream, _exec_stream, gpu_prove_stream, _gpu_coproc_stream, _gpu_join_stream) =
+        helpers::get_or_create_streams(&state.db_pool, &api_key)
+            .await
+            .context("Failed to get / create steams")?;
 
     let task_def = serde_json::to_value(TaskType::Snark(WorkflowSnarkReq {
         receipt: start_req.session_id,
@@ -598,7 +591,7 @@ async fn prove_groth16(
 
     let job_id = taskdb::create_job(
         &state.db_pool,
-        &snark_stream,
+        &gpu_prove_stream,
         &task_def,
         state.snark_retries,
         state.snark_timeout,
@@ -630,7 +623,14 @@ async fn groth16_status(
                 "http://{hostname}/receipts/groth16/receipt/{job_id}"
             )),
         ),
-        JobState::Failed => (None, None), // TODO error message
+        JobState::Failed => (
+            Some(
+                taskdb::get_job_failure(&state.db_pool, &job_id)
+                    .await
+                    .context("Failed to get job error message")?,
+            ),
+            None,
+        ),
     };
     Ok(Json(SnarkStatusRes {
         status: job_state.to_string(),

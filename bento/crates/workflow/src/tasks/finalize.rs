@@ -3,11 +3,11 @@
 // All rights reserved.
 
 use crate::{
-    redis::{self, AsyncCommands},
-    tasks::{deserialize_obj, read_image_id, RECUR_RECEIPT_PATH},
     Agent,
+    redis::{self, AsyncCommands},
+    tasks::{RECUR_RECEIPT_PATH, deserialize_obj, read_image_id},
 };
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use workflow_common::FinalizeReq;
 // use aws_sdk_s3::primitives::ByteStream;
 use risc0_zkvm::{InnerReceipt, Receipt, ReceiptClaim, SuccinctReceipt};
@@ -60,7 +60,7 @@ pub async fn finalize(agent: &Agent, job_id: &Uuid, request: &FinalizeReq) -> Re
     }
 
     let key = &format!("{RECEIPT_BUCKET_DIR}/{STARK_BUCKET_DIR}/{job_id}.bincode");
-    tracing::info!("Uploading rollup receipt to S3: {}", key);
+    tracing::debug!("Uploading rollup receipt to S3: {}", key);
     agent
         .s3_client
         .write_to_s3(key, rollup_receipt)

@@ -25,9 +25,6 @@ pub const KECCAK_RECEIPT_PATH: &str = "keccak_receipts";
 /// join worker stream identifier
 pub const JOIN_WORK_TYPE: &str = "join";
 
-/// SNARK worker stream identifier
-pub const SNARK_WORK_TYPE: &str = "snark";
-
 pub const SNARK_RETRIES: i32 = 0;
 pub const SNARK_TIMEOUT: i32 = 60 * 2;
 

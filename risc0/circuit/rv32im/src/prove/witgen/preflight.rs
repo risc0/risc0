@@ -14,7 +14,7 @@
 
 use std::collections::BTreeSet;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail, ensure};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
 use risc0_binfmt::{ByteAddr, WordAddr};
@@ -23,14 +23,15 @@ use risc0_core::scope;
 use risc0_zkp::core::digest::DIGEST_WORDS;
 
 use crate::{
+    EcallKind,
     execute::{
         bigint::BigIntBytes,
         node_idx,
-        pager::{page_idx, PageState, PagedMemory},
+        pager::{PageState, PagedMemory, page_idx},
         platform::*,
         poseidon2::{Poseidon2, Poseidon2State},
-        r0vm::{EcallKind, LoadOp, Risc0Context, Risc0Machine},
-        rv32im::{disasm, Emulator, InsnKind},
+        r0vm::{LoadOp, Risc0Context, Risc0Machine},
+        rv32im::{Emulator, InsnKind, disasm},
         segment::Segment,
         sha2::Sha2State,
     },
@@ -92,6 +93,7 @@ impl Segment {
         tracing::debug!("preflight: {self:#?}");
 
         let mut preflight = Preflight::new(self, rand_z);
+        preflight.read_povw_nonce()?;
         preflight.read_pages()?;
         preflight.body()?;
         preflight.write_pages()?;
@@ -216,7 +218,8 @@ impl<'a> Preflight<'a> {
                 txn.prev_cycle = self.prev_cycle.get(&addr).unwrap();
             } else {
                 // Otherwise, compute cycle diff and another diff
-                let diff = txn.cycle - txn.prev_cycle;
+                ensure!(txn.cycle != txn.prev_cycle);
+                let diff = txn.cycle - 1 - txn.prev_cycle;
                 self.trace.cycles[(diff / 2) as usize].diff_count[(diff % 2) as usize] += 1;
             }
 
@@ -322,13 +325,28 @@ impl<'a> Preflight<'a> {
         Ok(())
     }
 
+    fn read_povw_nonce(&mut self) -> Result<()> {
+        let addr = POVW_NONCE_START_ADDR;
+        for i in 0..DIGEST_WORDS {
+            self.load_u32(LoadOp::Record, addr + i)?;
+        }
+        self.add_cycle_special(
+            CycleState::LoadRootAndNonce,
+            CycleState::LoadRootAndNonce,
+            0,
+            0,
+            Back::None,
+        );
+        Ok(())
+    }
+
     fn read_root(&mut self) -> Result<()> {
         let addr = get_digest_addr(1);
         for i in 0..DIGEST_WORDS {
             self.load_u32(LoadOp::Record, addr + i)?;
         }
         self.add_cycle_special(
-            CycleState::LoadRoot,
+            CycleState::LoadRootAndNonce,
             CycleState::PoseidonEntry,
             0,
             0,
@@ -540,6 +558,7 @@ impl Risc0Context for Preflight<'_> {
     }
 
     // Pass memory ops to pager + record
+    #[inline(always)]
     fn load_u32(&mut self, op: LoadOp, addr: WordAddr) -> Result<u32> {
         if op == LoadOp::Peek {
             return self.pager.peek(addr);
@@ -547,10 +566,19 @@ impl Risc0Context for Preflight<'_> {
 
         // tracing::trace!("load_u32: {addr:?}");
         let cycle = (2 * self.trace.cycles.len()) as u32;
+        // MERKLE_TREE_START_ADDR is the first address in a special region of memory that is
+        // outside of the user-addressible range. This region also contains the PoVW nonce.
         let word = if addr >= MERKLE_TREE_START_ADDR {
-            self.page_memory
-                .get(&addr)
-                .ok_or_else(|| anyhow!("Invalid load from page memory"))?
+            if addr < MERKLE_TREE_END_ADDR {
+                self.page_memory
+                    .get(&addr)
+                    .ok_or_else(|| anyhow!("Invalid load from page memory"))?
+            } else if addr >= POVW_NONCE_START_ADDR && addr < POVW_NONCE_END_ADDR {
+                self.segment.povw_nonce.unwrap_or_default().to_u32s()
+                    [(addr - POVW_NONCE_START_ADDR).0 as usize]
+            } else {
+                bail!("invalid memory access in special region: addr = {addr:x?}")
+            }
         } else {
             self.pager.load(addr)?
         };
@@ -570,6 +598,7 @@ impl Risc0Context for Preflight<'_> {
         Ok(word)
     }
 
+    #[inline(always)]
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let cycle = (2 * self.trace.cycles.len() + 1) as u32;
         let prev_word = if addr >= MEMORY_END_ADDR {

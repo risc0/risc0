@@ -14,9 +14,9 @@
 
 use std::io::Read as _;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
+use liblzma::read::XzDecoder;
 use risc0_circuit_recursion::prove::Program;
-use xz2::read::XzDecoder;
 
 use crate::{KECCAK_PO2_RANGE, RECURSION_PO2};
 
