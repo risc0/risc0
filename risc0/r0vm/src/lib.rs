@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, io, path::PathBuf, rc::Rc};
+mod actors;
+mod api;
+
+use std::{io, net::SocketAddr, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
-    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
-    ProverServer, VerifierContext,
+    ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
+    compute_image_id, get_prover_server,
 };
+
+use self::actors::protocol::TaskKind;
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -75,11 +80,31 @@ struct Cli {
 
     #[arg(long)]
     with_debugger: bool,
+
+    /// The address to connect to or listen on.
+    #[arg(long)]
+    addr: Option<SocketAddr>,
+
+    #[arg(long)]
+    api: Option<SocketAddr>,
+
+    #[arg(long)]
+    storage: Option<PathBuf>,
+
+    #[arg(long)]
+    po2: Option<u32>,
+
+    /// Number of GPUs to use.
+    #[arg(long)]
+    num_gpus: Option<usize>,
 }
 
 #[derive(Args)]
-#[group(required = true, multiple = false)]
+#[group(required = true)]
 struct Mode {
+    #[arg(long)]
+    rpc: bool,
+
     #[arg(long)]
     port: Option<u16>,
 
@@ -91,8 +116,20 @@ struct Mode {
     #[arg(long)]
     image: Option<PathBuf>,
 
+    /// Prove a pre-recorded segment.
     #[arg(long)]
     segment: Option<PathBuf>,
+
+    /// Start the manager.
+    #[arg(long)]
+    manager: bool,
+
+    /// Start a worker.
+    #[arg(long, value_enum, value_delimiter(','))]
+    worker: Vec<TaskKind>,
+
+    #[arg(long)]
+    config: Option<PathBuf>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -114,14 +151,29 @@ enum ReceiptKind {
 }
 
 pub fn main() {
+    let args = Cli::parse();
+
+    if args.mode.manager || !args.mode.worker.is_empty() || args.mode.config.is_some() {
+        self::actors::async_main(&args).unwrap();
+        return;
+    }
+
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
-    let args = Cli::parse();
+    if args.mode.rpc {
+        self::actors::rpc_main(args.num_gpus).unwrap();
+        return;
+    }
+
+    if args.num_gpus.is_some_and(|v| v != 1) {
+        eprintln!("num_gpus > 1 or 0 for current mode unsupported.");
+        return;
+    }
 
     if args.id {
-        let blob = fs::read(args.mode.elf.unwrap()).unwrap();
+        let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
         println!("{image_id}");
         return;
@@ -150,7 +202,7 @@ pub fn main() {
         }
 
         if let Some(input) = args.initial_input.as_ref() {
-            builder.stdin(fs::File::open(input).unwrap());
+            builder.stdin(std::fs::File::open(input).unwrap());
         } else {
             builder.stdin(io::stdin());
         }
@@ -162,12 +214,13 @@ pub fn main() {
         builder.build().unwrap()
     };
 
+    // TODO(povw): Add PoVW here.
     let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
-            let elf_contents = fs::read(elf_path).unwrap();
+            let elf_contents = std::fs::read(elf_path).unwrap();
             ExecutorImpl::from_elf(env, &elf_contents).unwrap()
         } else if let Some(ref image_path) = args.mode.image {
-            let image_contents = fs::read(image_path).unwrap();
+            let image_contents = std::fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
             ExecutorImpl::new(env, image).unwrap()
         } else {
@@ -188,7 +241,7 @@ pub fn main() {
     let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);
     if let Some(receipt_file) = args.receipt.as_ref() {
-        fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");
+        std::fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");
         if args.verbose > 0 {
             eprintln!(
                 "Wrote {} bytes of receipt to {}",

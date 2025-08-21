@@ -3,9 +3,9 @@
 // All rights reserved.
 
 use crate::{
-    redis::{self, AsyncCommands},
-    tasks::{deserialize_obj, serialize_obj, RECUR_RECEIPT_PATH, SEGMENTS_PATH},
     Agent,
+    redis::{self, AsyncCommands},
+    tasks::{RECUR_RECEIPT_PATH, SEGMENTS_PATH, deserialize_obj, serialize_obj},
 };
 use anyhow::{Context, Result};
 use uuid::Uuid;
@@ -18,7 +18,7 @@ pub async fn prover(agent: &Agent, job_id: &Uuid, task_id: &str, request: &Prove
     let job_prefix = format!("job:{job_id}");
     let segment_key = format!("{job_prefix}:{SEGMENTS_PATH}:{index}");
 
-    tracing::info!("Starting proof of idx: {job_id} - {index}");
+    tracing::debug!("Starting proof of idx: {job_id} - {index}");
     let segment_vec: Vec<u8> = conn
         .get::<_, Vec<u8>>(&segment_key)
         .await
@@ -33,9 +33,9 @@ pub async fn prover(agent: &Agent, job_id: &Uuid, task_id: &str, request: &Prove
         .prove_segment(&agent.verifier_ctx, &segment)
         .context("Failed to prove segment")?;
 
-    tracing::info!("Completed proof: {job_id} - {index}");
+    tracing::debug!("Completed proof: {job_id} - {index}");
 
-    tracing::info!("lifting {job_id} - {index}");
+    tracing::debug!("lifting {job_id} - {index}");
     let lift_receipt = agent
         .prover
         .as_ref()
@@ -43,7 +43,7 @@ pub async fn prover(agent: &Agent, job_id: &Uuid, task_id: &str, request: &Prove
         .lift(&segment_receipt)
         .with_context(|| format!("Failed to lift segment {index}"))?;
 
-    tracing::info!("lifting complete {job_id} - {index}");
+    tracing::debug!("lifting complete {job_id} - {index}");
 
     let output_key = format!("{job_prefix}:{RECUR_RECEIPT_PATH}:{task_id}");
     // Write out lifted receipt

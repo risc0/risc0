@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 use std::fs;
 
-use risc0_zkvm::{compute_image_id, default_prover, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, compute_image_id, default_prover};
 
 fn main() -> anyhow::Result<()> {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
     let return_value: u32 = receipt.journal.decode()?;
 
     assert_eq!(return_value, 7u32 * 11);
-    println!("proved value is: {}", return_value);
+    println!("proved value is: {return_value}");
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.

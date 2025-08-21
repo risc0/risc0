@@ -26,12 +26,12 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 jobs:
   bench:
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
@@ -39,16 +39,8 @@ jobs:
         include:
           - os: Linux
             arch: X64
-            feature: prove
-            device: cpu
-          - os: Linux
-            arch: X64
             feature: cuda
-            device: nvidia_rtx_3090_ti
-          - os: Linux
-            arch: X64
-            feature: cuda
-            device: g6.xlarge
+            device: nvidia_rtx_4090
           - os: macOS
             arch: ARM64
             feature: prove
@@ -56,7 +48,6 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
-      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -65,9 +56,6 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
-          disable_s3: ${{ env.DISABLE_S3 }}
 
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION

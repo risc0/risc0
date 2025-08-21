@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ macro_rules! entry {
         // Include generated main in a module so we don't conflict
         // with any other definitions of "main" in this file.
         mod zkvm_generated_main {
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             fn main() {
                 super::ZKVM_ENTRY()
             }
@@ -147,16 +147,18 @@ macro_rules! entry {
 }
 
 #[cfg(target_os = "zkvm")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn __start() -> ! {
-    risc0_zkvm_platform::heap::init();
+    unsafe {
+        risc0_zkvm_platform::heap::init();
+    }
     env::init();
 
     {
-        extern "C" {
+        unsafe extern "C" {
             fn main();
         }
-        main()
+        unsafe { main() }
     }
 
     env::finalize(true, 0);

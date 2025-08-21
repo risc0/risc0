@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::RzupEvent;
+use crate::{RzupEvent, TransferKind};
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressStyle};
 
 #[derive(Clone)]
@@ -19,7 +19,7 @@ pub(super) struct TerminalUi {
     verbose: bool,
     multi_progress: MultiProgress,
     status: ProgressBar,
-    download: Option<ProgressBar>,
+    transfer: Option<ProgressBar>,
 }
 
 impl TerminalUi {
@@ -37,24 +37,25 @@ impl TerminalUi {
             verbose,
             multi_progress,
             status,
-            download: None,
+            transfer: None,
         }
     }
 
     pub fn run(mut self, ui_recv: std::sync::mpsc::Receiver<RzupEvent>) {
         while let Ok(event) = ui_recv.recv() {
             match event {
-                RzupEvent::DownloadStarted {
+                RzupEvent::TransferStarted {
+                    kind,
                     id,
-                    version,
                     url,
+                    version,
                     len,
-                } => self.handle_download(id, version, url, len),
-                RzupEvent::DownloadProgress { id, incr } => {
-                    self.handle_download_progress(id, incr);
+                } => self.handle_transfer(kind, id, version, url, len),
+                RzupEvent::TransferProgress { id, incr } => {
+                    self.handle_transfer_progress(id, incr);
                 }
-                RzupEvent::DownloadCompleted { id, version } => {
-                    self.handle_download_complete(id, version)
+                RzupEvent::TransferCompleted { kind, id, version } => {
+                    self.handle_transfer_complete(kind, id, version)
                 }
                 RzupEvent::InstallationStarted { id, version } => self.handle_install(id, version),
                 RzupEvent::InstallationCompleted { id, version } => {
@@ -94,35 +95,71 @@ impl TerminalUi {
         self.status.reset(); // Reset for next operation
     }
 
-    fn handle_download(&mut self, id: String, version: String, _url: String, len: Option<u64>) {
-        self.start_progress(format!("Downloading {id} version {version}"));
+    fn handle_transfer(
+        &mut self,
+        kind: TransferKind,
+        id: String,
+        version: Option<String>,
+        _url: Option<String>,
+        len: Option<u64>,
+    ) {
+        let action = match kind {
+            TransferKind::Upload => "Uploading",
+            TransferKind::Download => "Downloading",
+            TransferKind::Compress => "Compressing",
+        };
+        let mut message = format!("{action} {id}");
+        if let Some(version) = version {
+            message += &format!(" version {version}");
+        }
+        self.start_progress(message);
         if let Some(len) = len {
-            let download_progress = ProgressBar::new(len);
-            download_progress.set_style(
+            let transfer_progress = ProgressBar::new(len);
+            transfer_progress.set_style(
                 ProgressStyle::with_template("  [{bar}] {bytes}/{total_bytes}")
                     .unwrap()
                     .progress_chars("=> "),
             );
-            self.download = Some(download_progress.clone());
-            self.multi_progress.add(download_progress);
+            self.transfer = Some(transfer_progress.clone());
+            self.multi_progress.add(transfer_progress);
         }
     }
 
-    fn handle_download_progress(&mut self, _id: String, incr: u64) {
-        if let Some(download_progress) = &self.download {
-            download_progress.inc(incr);
+    fn handle_transfer_progress(&mut self, _id: String, incr: u64) {
+        if let Some(transfer_progress) = &self.transfer {
+            transfer_progress.inc(incr);
         }
     }
 
-    fn handle_download_complete(&mut self, id: String, version: String) {
-        self.complete_progress(&format!("✓ Downloaded {id} version {version}"));
+    fn handle_transfer_complete(
+        &mut self,
+        kind: TransferKind,
+        id: String,
+        version: Option<String>,
+    ) {
+        let action = match kind {
+            TransferKind::Upload => "Uploaded",
+            TransferKind::Download => "Downloaded",
+            TransferKind::Compress => "Compressed",
+        };
+        let mut message = format!("✓ {action} {id}");
+        if let Some(version) = &version {
+            message += &format!(" version {version}");
+        }
+        self.complete_progress(&message);
 
-        if let Some(download_progress) = self.download.take() {
-            download_progress.finish_and_clear();
-            self.multi_progress.remove(&download_progress);
+        if let Some(transfer_progress) = self.transfer.take() {
+            transfer_progress.finish_and_clear();
+            self.multi_progress.remove(&transfer_progress);
         }
 
-        self.start_progress(format!("Installing {id} version {version}"));
+        if kind == TransferKind::Download {
+            let mut message = format!("Installing {id}");
+            if let Some(version) = &version {
+                message += &format!(" version {version}");
+            }
+            self.start_progress(message);
+        }
     }
 
     fn handle_building_rust_toolchain(&mut self) {
@@ -205,17 +242,18 @@ impl TextUi {
     pub fn run(mut self, ui_recv: std::sync::mpsc::Receiver<RzupEvent>) {
         while let Ok(event) = ui_recv.recv() {
             match event {
-                RzupEvent::DownloadStarted {
+                RzupEvent::TransferStarted {
+                    kind,
                     id,
                     version,
                     url,
                     len,
-                } => self.handle_download(id, version, url, len),
-                RzupEvent::DownloadProgress { id, incr } => {
-                    self.handle_download_progress(id, incr);
+                } => self.handle_transfer(kind, id, version, url, len),
+                RzupEvent::TransferProgress { id, incr } => {
+                    self.handle_transfer_progress(id, incr);
                 }
-                RzupEvent::DownloadCompleted { id, version } => {
-                    self.handle_download_complete(id, version)
+                RzupEvent::TransferCompleted { kind, id, version } => {
+                    self.handle_transfer_complete(kind, id, version)
                 }
                 RzupEvent::InstallationStarted { id, version } => self.handle_install(id, version),
                 RzupEvent::InstallationCompleted { id, version } => {
@@ -240,15 +278,53 @@ impl TextUi {
         }
     }
 
-    fn handle_download(&mut self, id: String, version: String, _url: String, _len: Option<u64>) {
-        println!("Downloading {id} version {version}");
+    fn handle_transfer(
+        &mut self,
+        kind: TransferKind,
+        id: String,
+        version: Option<String>,
+        _url: Option<String>,
+        _len: Option<u64>,
+    ) {
+        let action = match kind {
+            TransferKind::Upload => "Uploading",
+            TransferKind::Download => "Downloading",
+            TransferKind::Compress => "Compressing",
+        };
+        print!("{action} {id}");
+        if let Some(version) = version {
+            print!(" version {version}");
+        }
+        println!();
     }
 
-    fn handle_download_progress(&mut self, _id: String, _incr: u64) {}
+    fn handle_transfer_progress(&mut self, _id: String, _incr: u64) {}
 
-    fn handle_download_complete(&mut self, id: String, version: String) {
-        println!("✓ Downloaded {id} version {version}");
-        println!("Installing {id} version {version}");
+    fn handle_transfer_complete(
+        &mut self,
+        kind: TransferKind,
+        id: String,
+        version: Option<String>,
+    ) {
+        let action = match kind {
+            TransferKind::Upload => "Uploaded",
+            TransferKind::Download => "Downloaded",
+            TransferKind::Compress => "Compressed",
+        };
+
+        print!("✓ {action} {id}");
+        if let Some(version) = &version {
+            print!(" version {version}");
+        }
+        println!();
+
+        if kind == TransferKind::Download {
+            print!("Installing {id}");
+            if let Some(version) = &version {
+                print!(" version {version}");
+            }
+            println!();
+        }
     }
 
     fn handle_building_rust_toolchain(&mut self) {

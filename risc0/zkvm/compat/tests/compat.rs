@@ -17,17 +17,17 @@ use std::{path::PathBuf, str::FromStr};
 use anyhow::{Context, Result};
 use risc0_binfmt::ProgramBinary;
 use risc0_zkvm::{
-    digest, ApiClient, Asset, AssetRequest, Digest, ExecutorEnv, Groth16ReceiptVerifierParameters,
-    ProverOpts, SuccinctReceiptVerifierParameters, VerifierContext,
+    ApiClient, Asset, AssetRequest, Digest, ExecutorEnv, Groth16ReceiptVerifierParameters,
+    ProverOpts, SuccinctReceiptVerifierParameters, VerifierContext, digest,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
 use rstest::rstest;
 
 const OUT_DIR: &str = env!("OUT_DIR");
 
 // https://github.com/risc0/risc0/blob/release-1.1/risc0/circuit/recursion/src/control_id.rs
 mod control_ids_1_1_3 {
-    use super::{digest, Digest};
+    use super::{Digest, digest};
 
     pub const ALLOWED_CONTROL_ROOT: Digest =
         digest!("8b6dcf11d463ac455361b41fb3ed053febb817491bdea00fdb340e45013b852e");
@@ -38,7 +38,7 @@ mod control_ids_1_1_3 {
 
 // https://github.com/risc0/risc0/blob/release-1.2/risc0/circuit/recursion/src/control_id.rs
 mod control_ids_1_2_2 {
-    use super::{digest, Digest};
+    use super::{Digest, digest};
 
     pub const ALLOWED_CONTROL_ROOT: Digest =
         digest!("8cdad9242664be3112aba377c5425a4df735eb1c6966472b561d2855932c0469");
@@ -113,7 +113,7 @@ fn target_dir() -> PathBuf {
 }
 
 fn cargo_bin_str(name: &str) -> PathBuf {
-    let env_var = format!("CARGO_BIN_EXE_{}", name);
+    let env_var = format!("CARGO_BIN_EXE_{name}");
     std::env::var_os(env_var)
         .map(|p| p.into())
         .unwrap_or_else(|| target_dir().join(format!("{}{}", name, std::env::consts::EXE_SUFFIX)))

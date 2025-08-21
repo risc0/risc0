@@ -465,6 +465,23 @@ impl risc0_zkp::layout::Component for DecodeInstLayout {
         Ok(())
     }
 }
+pub type MemoryArgLayout4LayoutArray = [&'static MemoryArgLayout; 4];
+pub type CycleArgLayout2LayoutArray = [&'static CycleArgLayout; 2];
+pub struct _Arguments_ReadSourceRegsSourceRegsLayout {
+    pub memory_arg: &'static MemoryArgLayout4LayoutArray,
+    pub cycle_arg: &'static CycleArgLayout2LayoutArray,
+}
+impl risc0_zkp::layout::Component for _Arguments_ReadSourceRegsSourceRegsLayout {
+    fn ty_name(&self) -> &'static str {
+        "_Arguments_ReadSourceRegsSourceRegsLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("memory_arg", self.memory_arg)?;
+        v.visit_component("cycle_arg", self.cycle_arg)?;
+        Ok(())
+    }
+}
 pub struct ReadRegLayout {
     pub _super: &'static MemoryReadLayout,
     pub addr: &'static NondetRegLayout,
@@ -480,10 +497,99 @@ impl risc0_zkp::layout::Component for ReadRegLayout {
         Ok(())
     }
 }
+pub struct ReadSourceRegsSourceRegsArm0_SuperLayout {
+    pub rboth: &'static ReadRegLayout,
+}
+impl risc0_zkp::layout::Component for ReadSourceRegsSourceRegsArm0_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ReadSourceRegsSourceRegsArm0_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("rboth", self.rboth)?;
+        Ok(())
+    }
+}
+pub struct ReadSourceRegsSourceRegsArm0Layout {
+    pub _super: &'static ReadSourceRegsSourceRegsArm0_SuperLayout,
+    pub _extra0: &'static MemoryArgLayout,
+    pub _extra1: &'static MemoryArgLayout,
+    pub _extra2: &'static CycleArgLayout,
+}
+impl risc0_zkp::layout::Component for ReadSourceRegsSourceRegsArm0Layout {
+    fn ty_name(&self) -> &'static str {
+        "ReadSourceRegsSourceRegsArm0Layout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("_extra0", self._extra0)?;
+        v.visit_component("_extra1", self._extra1)?;
+        v.visit_component("_extra2", self._extra2)?;
+        Ok(())
+    }
+}
+pub struct ReadSourceRegsSourceRegsArm1_SuperLayout {
+    pub _0: &'static ReadRegLayout,
+    pub _1: &'static ReadRegLayout,
+}
+impl risc0_zkp::layout::Component for ReadSourceRegsSourceRegsArm1_SuperLayout {
+    fn ty_name(&self) -> &'static str {
+        "ReadSourceRegsSourceRegsArm1_SuperLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_0", self._0)?;
+        v.visit_component("_1", self._1)?;
+        Ok(())
+    }
+}
+pub struct ReadSourceRegsSourceRegsLayout {
+    pub arm0: &'static ReadSourceRegsSourceRegsArm0Layout,
+    pub arm1: &'static ReadSourceRegsSourceRegsArm1_SuperLayout,
+}
+impl risc0_zkp::layout::Component for ReadSourceRegsSourceRegsLayout {
+    fn ty_name(&self) -> &'static str {
+        "ReadSourceRegsSourceRegsLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("arm0", self.arm0)?;
+        v.visit_component("arm1", self.arm1)?;
+        Ok(())
+    }
+}
+pub struct ReadSourceRegsLayout {
+    pub is_same_reg: &'static NondetRegLayout,
+    pub _arguments_read_source_regs_source_regs: &'static _Arguments_ReadSourceRegsSourceRegsLayout,
+    pub source_regs: &'static ReadSourceRegsSourceRegsLayout,
+    pub rs1_low: &'static NondetRegLayout,
+    pub rs1_high: &'static NondetRegLayout,
+    pub rs2_low: &'static NondetRegLayout,
+    pub rs2_high: &'static NondetRegLayout,
+}
+impl risc0_zkp::layout::Component for ReadSourceRegsLayout {
+    fn ty_name(&self) -> &'static str {
+        "ReadSourceRegsLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("is_same_reg", self.is_same_reg)?;
+        v.visit_component(
+            "_arguments_read_source_regs_source_regs",
+            self._arguments_read_source_regs_source_regs,
+        )?;
+        v.visit_component("source_regs", self.source_regs)?;
+        v.visit_component("rs1_low", self.rs1_low)?;
+        v.visit_component("rs1_high", self.rs1_high)?;
+        v.visit_component("rs2_low", self.rs2_low)?;
+        v.visit_component("rs2_high", self.rs2_high)?;
+        Ok(())
+    }
+}
 pub struct MiscInputLayout {
     pub decoded: &'static DecodeInstLayout,
-    pub rs1: &'static ReadRegLayout,
-    pub rs2: &'static ReadRegLayout,
+    pub source_regs: &'static ReadSourceRegsLayout,
 }
 impl risc0_zkp::layout::Component for MiscInputLayout {
     fn ty_name(&self) -> &'static str {
@@ -492,8 +598,7 @@ impl risc0_zkp::layout::Component for MiscInputLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("decoded", self.decoded)?;
-        v.visit_component("rs1", self.rs1)?;
-        v.visit_component("rs2", self.rs2)?;
+        v.visit_component("source_regs", self.source_regs)?;
         Ok(())
     }
 }
@@ -1466,8 +1571,7 @@ impl risc0_zkp::layout::Component for Misc2Layout {
 }
 pub struct MulInputLayout {
     pub decoded: &'static DecodeInstLayout,
-    pub rs1: &'static ReadRegLayout,
-    pub rs2: &'static ReadRegLayout,
+    pub source_regs: &'static ReadSourceRegsLayout,
 }
 impl risc0_zkp::layout::Component for MulInputLayout {
     fn ty_name(&self) -> &'static str {
@@ -1476,8 +1580,7 @@ impl risc0_zkp::layout::Component for MulInputLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("decoded", self.decoded)?;
-        v.visit_component("rs1", self.rs1)?;
-        v.visit_component("rs2", self.rs2)?;
+        v.visit_component("source_regs", self.source_regs)?;
         Ok(())
     }
 }
@@ -1953,8 +2056,7 @@ impl risc0_zkp::layout::Component for Mul0Layout {
 }
 pub struct DivInputLayout {
     pub decoded: &'static DecodeInstLayout,
-    pub rs1: &'static ReadRegLayout,
-    pub rs2: &'static ReadRegLayout,
+    pub source_regs: &'static ReadSourceRegsLayout,
 }
 impl risc0_zkp::layout::Component for DivInputLayout {
     fn ty_name(&self) -> &'static str {
@@ -1963,8 +2065,7 @@ impl risc0_zkp::layout::Component for DivInputLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("decoded", self.decoded)?;
-        v.visit_component("rs1", self.rs1)?;
-        v.visit_component("rs2", self.rs2)?;
+        v.visit_component("source_regs", self.source_regs)?;
         Ok(())
     }
 }
@@ -1984,63 +2085,6 @@ impl risc0_zkp::layout::Component for _Arguments_Div0MulOutputLayout {
         Ok(())
     }
 }
-pub type ArgU16Layout2LayoutArray = [&'static ArgU16Layout; 2];
-pub struct _Arguments_DoDiv__1Layout {
-    pub arg_u16: &'static ArgU16Layout2LayoutArray,
-}
-impl risc0_zkp::layout::Component for _Arguments_DoDiv__1Layout {
-    fn ty_name(&self) -> &'static str {
-        "_Arguments_DoDiv__1Layout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("arg_u16", self.arg_u16)?;
-        Ok(())
-    }
-}
-pub struct DoDiv__1Arm0Layout {
-    pub _extra0: &'static ArgU16Layout,
-    pub _extra1: &'static ArgU16Layout,
-}
-impl risc0_zkp::layout::Component for DoDiv__1Arm0Layout {
-    fn ty_name(&self) -> &'static str {
-        "DoDiv__1Arm0Layout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("_extra0", self._extra0)?;
-        v.visit_component("_extra1", self._extra1)?;
-        Ok(())
-    }
-}
-pub struct DoDiv__1Arm1_SuperLayout {
-    pub lt: &'static CmpLessThanUnsignedLayout,
-}
-impl risc0_zkp::layout::Component for DoDiv__1Arm1_SuperLayout {
-    fn ty_name(&self) -> &'static str {
-        "DoDiv__1Arm1_SuperLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("lt", self.lt)?;
-        Ok(())
-    }
-}
-pub struct DoDiv__1Layout {
-    pub arm0: &'static DoDiv__1Arm0Layout,
-    pub arm1: &'static DoDiv__1Arm1_SuperLayout,
-}
-impl risc0_zkp::layout::Component for DoDiv__1Layout {
-    fn ty_name(&self) -> &'static str {
-        "DoDiv__1Layout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("arm0", self.arm0)?;
-        v.visit_component("arm1", self.arm1)?;
-        Ok(())
-    }
-}
 pub struct DoDivLayout {
     pub quot_low: &'static NondetRegLayout,
     pub quot_high: &'static NondetRegLayout,
@@ -2048,13 +2092,13 @@ pub struct DoDivLayout {
     pub rem_high: &'static NondetU16RegLayout,
     pub mul: &'static MultiplyAccumulateLayout,
     pub top_bit_type: &'static NondetRegLayout,
-    pub is_zero: &'static IsZeroLayout,
     pub top_num: &'static NondetRegLayout,
     pub _0: &'static NondetU16RegLayout,
     pub denom_abs: &'static NormalizeU32Layout,
     pub rem_normal: &'static NormalizeU32Layout,
-    pub _arguments_do_div__1: &'static _Arguments_DoDiv__1Layout,
-    pub _3: &'static DoDiv__1Layout,
+    pub is_zero: &'static NondetRegLayout,
+    pub signed_overflow_case: &'static NondetRegLayout,
+    pub lt: &'static CmpLessThanUnsignedLayout,
 }
 impl risc0_zkp::layout::Component for DoDivLayout {
     fn ty_name(&self) -> &'static str {
@@ -2068,13 +2112,13 @@ impl risc0_zkp::layout::Component for DoDivLayout {
         v.visit_component("rem_high", self.rem_high)?;
         v.visit_component("mul", self.mul)?;
         v.visit_component("top_bit_type", self.top_bit_type)?;
-        v.visit_component("is_zero", self.is_zero)?;
         v.visit_component("top_num", self.top_num)?;
         v.visit_component("_0", self._0)?;
         v.visit_component("denom_abs", self.denom_abs)?;
         v.visit_component("rem_normal", self.rem_normal)?;
-        v.visit_component("_arguments_do_div__1", self._arguments_do_div__1)?;
-        v.visit_component("_3", self._3)?;
+        v.visit_component("is_zero", self.is_zero)?;
+        v.visit_component("signed_overflow_case", self.signed_overflow_case)?;
+        v.visit_component("lt", self.lt)?;
         Ok(())
     }
 }
@@ -2677,8 +2721,7 @@ impl risc0_zkp::layout::Component for Mem0Layout {
 }
 pub struct MemStoreInputLayout {
     pub decoded: &'static DecodeInstLayout,
-    pub rs1: &'static ReadRegLayout,
-    pub rs2: &'static ReadRegLayout,
+    pub source_regs: &'static ReadSourceRegsLayout,
     pub addr_u32: &'static NormalizeU32Layout,
     pub addr: &'static AddrDecomposeBitsLayout,
     pub data_0: &'static MemoryReadLayout,
@@ -2690,8 +2733,7 @@ impl risc0_zkp::layout::Component for MemStoreInputLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("decoded", self.decoded)?;
-        v.visit_component("rs1", self.rs1)?;
-        v.visit_component("rs2", self.rs2)?;
+        v.visit_component("source_regs", self.source_regs)?;
         v.visit_component("addr_u32", self.addr_u32)?;
         v.visit_component("addr", self.addr)?;
         v.visit_component("data_0", self.data_0)?;
@@ -2936,12 +2978,13 @@ impl risc0_zkp::layout::Component for MemoryPageInLayout {
         Ok(())
     }
 }
-pub struct ControlLoadRoot__0_SuperLayout {
-    pub mem: &'static MemoryPageInLayout,
+pub type MemoryPageInLayout8LayoutArray = [&'static MemoryPageInLayout; 8];
+pub struct ControlLoadRootAndNonceLayout {
+    pub mem: &'static MemoryPageInLayout8LayoutArray,
 }
-impl risc0_zkp::layout::Component for ControlLoadRoot__0_SuperLayout {
+impl risc0_zkp::layout::Component for ControlLoadRootAndNonceLayout {
     fn ty_name(&self) -> &'static str {
-        "ControlLoadRoot__0_SuperLayout"
+        "ControlLoadRootAndNonceLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -2949,22 +2992,8 @@ impl risc0_zkp::layout::Component for ControlLoadRoot__0_SuperLayout {
         Ok(())
     }
 }
-pub type ControlLoadRoot__0_SuperLayout8LayoutArray = [&'static ControlLoadRoot__0_SuperLayout; 8];
-pub struct ControlLoadRootLayout {
-    pub _1: &'static ControlLoadRoot__0_SuperLayout8LayoutArray,
-}
-impl risc0_zkp::layout::Component for ControlLoadRootLayout {
-    fn ty_name(&self) -> &'static str {
-        "ControlLoadRootLayout"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("_1", self._1)?;
-        Ok(())
-    }
-}
 pub struct Control0_SuperArm0Layout {
-    pub _super: &'static ControlLoadRootLayout,
+    pub _super: &'static ControlLoadRootAndNonceLayout,
     pub _extra0: &'static CycleArgLayout,
     pub _extra1: &'static CycleArgLayout,
     pub _extra2: &'static CycleArgLayout,
@@ -7227,6 +7256,7 @@ impl risc0_zkp::layout::Component for BigInt0StateArm0Layout {
         Ok(())
     }
 }
+pub type ArgU16Layout2LayoutArray = [&'static ArgU16Layout; 2];
 pub struct _Arguments_BigIntStepBytesLayout {
     pub arg_u16: &'static ArgU16Layout2LayoutArray,
     pub arg_u8: &'static ArgU8Layout16LayoutArray,
@@ -8291,6 +8321,7 @@ pub struct _globalLayout {
     pub input: &'static DigestRegLayout,
     pub is_terminate: &'static NondetRegLayout,
     pub output: &'static DigestRegLayout,
+    pub povw_nonce: &'static DigestRegLayout,
     pub rng: &'static NondetExtRegLayout,
     pub shutdown_cycle: &'static NondetRegLayout,
     pub state_in: &'static DigestRegLayout,
@@ -8309,6 +8340,7 @@ impl risc0_zkp::layout::Component for _globalLayout {
         v.visit_component("input", self.input)?;
         v.visit_component("is_terminate", self.is_terminate)?;
         v.visit_component("output", self.output)?;
+        v.visit_component("povw_nonce", self.povw_nonce)?;
         v.visit_component("rng", self.rng)?;
         v.visit_component("shutdown_cycle", self.shutdown_cycle)?;
         v.visit_component("state_in", self.state_in)?;
@@ -8490,6 +8522,16 @@ pub struct InstInputStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct DoCycleTableStruct {}
 #[derive(Copy, Clone, Debug)]
+pub struct SourceRegsStruct {
+    pub rs1: ValU32Struct,
+    pub rs2: ValU32Struct,
+}
+#[derive(Copy, Clone, Debug)]
+pub struct ReadSourceRegsStruct {
+    pub rs1: ValU32Struct,
+    pub rs2: ValU32Struct,
+}
+#[derive(Copy, Clone, Debug)]
 pub struct WriteRdStruct {}
 #[derive(Copy, Clone, Debug)]
 pub struct ExpandU32Struct {
@@ -8520,8 +8562,8 @@ pub struct MultiplyAccumulateStruct {
 pub struct DivInputStruct {
     pub _super: InstInputStruct,
     pub decoded: DecoderStruct,
-    pub rs1: GetDataStruct,
-    pub rs2: GetDataStruct,
+    pub rs1: ValU32Struct,
+    pub rs2: ValU32Struct,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct ComponentStruct {}
@@ -8547,8 +8589,8 @@ pub struct InstOutputBaseStruct {
 pub struct MiscInputStruct {
     pub _super: InstInputStruct,
     pub decoded: DecoderStruct,
-    pub rs1: GetDataStruct,
-    pub rs2: GetDataStruct,
+    pub rs1: ValU32Struct,
+    pub rs2: ValU32Struct,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct MiscOutputStruct {
@@ -8560,8 +8602,8 @@ pub struct MiscOutputStruct {
 pub struct MulInputStruct {
     pub _super: InstInputStruct,
     pub decoded: DecoderStruct,
-    pub rs1: GetDataStruct,
-    pub rs2: GetDataStruct,
+    pub rs1: ValU32Struct,
+    pub rs2: ValU32Struct,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct DoMulStruct {
@@ -8578,7 +8620,7 @@ pub struct MemLoadInputStruct {
 #[derive(Copy, Clone, Debug)]
 pub struct MemStoreInputStruct {
     pub decoded: DecoderStruct,
-    pub rs2: GetDataStruct,
+    pub rs2: ValU32Struct,
     pub addr: AddrDecomposeBitsStruct,
     pub data_0: GetDataStruct,
 }
@@ -8600,13 +8642,10 @@ pub struct DigestRegStruct {
     pub values: DigestRegValues_SuperStruct8Array,
 }
 pub type ValU32Struct8Array = [ValU32Struct; 8];
-#[derive(Copy, Clone, Debug)]
-pub struct ControlLoadRoot__0Struct {}
-pub type ControlLoadRoot__0Struct8Array = [ControlLoadRoot__0Struct; 8];
+pub type GetDataStruct8Array = [GetDataStruct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct ControlResume_SuperArm1_Super__0Struct {}
 pub type ControlResume_SuperArm1_Super__0Struct8Array = [ControlResume_SuperArm1_Super__0Struct; 8];
-pub type GetDataStruct8Array = [GetDataStruct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct ControlTable_SuperArm0_Super__0Struct {}
 #[derive(Copy, Clone, Debug)]
