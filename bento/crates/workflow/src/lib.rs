@@ -9,24 +9,24 @@
 use crate::redis::RedisPool;
 use anyhow::{Context, Result};
 use clap::Parser;
-use risc0_zkvm::{get_prover_server, ProverOpts, ProverServer, VerifierContext};
+use risc0_zkvm::{ProverOpts, ProverServer, VerifierContext, get_prover_server};
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::{
     rc::Rc,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 use taskdb::ReadyTask;
 use tokio::time;
-use workflow_common::{TaskType, COPROC_WORK_TYPE};
+use workflow_common::{COPROC_WORK_TYPE, TaskType};
 
 mod redis;
 mod tasks;
 
 pub use workflow_common::{
-    s3::S3Client, AUX_WORK_TYPE, EXEC_WORK_TYPE, JOIN_WORK_TYPE, PROVE_WORK_TYPE,
+    AUX_WORK_TYPE, EXEC_WORK_TYPE, JOIN_WORK_TYPE, PROVE_WORK_TYPE, s3::S3Client,
 };
 
 /// Workflow agent

@@ -14,7 +14,7 @@
 
 use num_bigint::BigUint;
 use risc0_bigint2_methods::RSA_ELF;
-use risc0_zkvm::{get_prover_server, ExecutorEnv, ExitCode, ProverOpts};
+use risc0_zkvm::{ExecutorEnv, ExitCode, ProverOpts, get_prover_server};
 use rstest::rstest;
 
 use crate::BigUintWrap;

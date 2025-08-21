@@ -14,10 +14,13 @@
 
 use std::collections::HashMap;
 
-use anyhow::{anyhow, bail, ensure, Context, Result};
+use anyhow::{Context, Result, anyhow, bail, ensure};
 
-use super::{keccak::prove_keccak, ProverServer};
+use super::{ProverServer, keccak::prove_keccak};
 use crate::{
+    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
+    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
+    UnionClaim, Unknown, VerifierContext, WorkClaim,
     claim::merge::Merge,
     host::{
         client::prove::opts::ReceiptKind,
@@ -32,9 +35,6 @@ use crate::{
         unwrap_povw,
     },
     sha::Digestible,
-    Assumption, AssumptionReceipt, CompositeReceipt, ExecutorEnv, InnerAssumptionReceipt,
-    MaybePruned, Output, PreflightResults, ProverOpts, Receipt, ReceiptClaim, Segment, Session,
-    UnionClaim, Unknown, VerifierContext, WorkClaim,
 };
 
 /// An implementation of a Prover that runs locally.

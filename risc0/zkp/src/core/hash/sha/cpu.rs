@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ use alloc::{boxed::Box, vec::Vec};
 use core::slice;
 
 use sha2::{
-    digest::generic_array::{typenum::U64, GenericArray},
     Digest as _,
+    digest::generic_array::{GenericArray, typenum::U64},
 };
 
-use super::{Block, Sha256, SHA256_INIT};
-use crate::core::digest::{Digest, DIGEST_WORDS};
+use super::{Block, SHA256_INIT, Sha256};
+use crate::core::digest::{DIGEST_WORDS, Digest};
 
 /// A CPU-based [Sha256] implementation.
 #[derive(Default, Clone)]

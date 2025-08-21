@@ -23,7 +23,7 @@ mod zirgen;
 
 use core::num::TryFromIntError;
 
-use anyhow::{anyhow, ensure, Result};
+use anyhow::{Result, anyhow, ensure};
 use derive_more::Debug;
 use risc0_binfmt::PovwNonce;
 use risc0_zkp::{
@@ -34,7 +34,7 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
-use self::zirgen::circuit::{Val, LAYOUT_GLOBAL};
+use self::zirgen::circuit::{LAYOUT_GLOBAL, Val};
 
 pub use self::zirgen::CircuitImpl;
 

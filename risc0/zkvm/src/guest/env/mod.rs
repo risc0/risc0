@@ -75,7 +75,7 @@ mod verify;
 mod write;
 
 use alloc::{
-    alloc::{alloc, Layout},
+    alloc::{Layout, alloc},
     vec,
 };
 use core::cell::OnceCell;
@@ -83,26 +83,25 @@ use core::cell::OnceCell;
 use anyhow::Result;
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
-    align_up, fileno,
+    WORD_SIZE, align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
-        syscall_2, SyscallName,
+        self, SyscallName, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log,
+        sys_pause, syscall_2,
     },
-    WORD_SIZE,
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
-    sha::{
-        rust_crypto::{Digest as _, Sha256},
-        Digest, Digestible,
-    },
     Assumptions, MaybePruned, Output,
+    sha::{
+        Digest, Digestible,
+        rust_crypto::{Digest as _, Sha256},
+    },
 };
 
 pub use self::{
     read::{FdReader, Read},
-    verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
+    verify::{VerifyIntegrityError, verify, verify_assumption, verify_integrity},
     write::{FdWriter, Write},
 };
 
@@ -502,7 +501,7 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 /// While is accesses a static mutable, this is considered safe because the zkVM
 /// is single-threaded and non-preemptive.
 #[cfg(target_os = "zkvm")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
     #[allow(static_mut_refs)]
     unsafe {

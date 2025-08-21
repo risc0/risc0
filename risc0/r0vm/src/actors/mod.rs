@@ -25,7 +25,7 @@ pub(crate) mod worker;
 
 use std::{
     error::Error as StdError,
-    io::{stdin, Write},
+    io::{Write, stdin},
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
     os::{fd::AsFd as _, unix::net::UnixStream as StdUnixStream},
     path::{Path, PathBuf},
@@ -37,22 +37,22 @@ use kameo::prelude::*;
 use nvml_wrapper::Nvml;
 use opentelemetry_otlp::WithExportConfig as _;
 use opentelemetry_sdk::{
+    Resource,
     logs::SdkLoggerProvider,
     metrics::{PeriodicReader, SdkMeterProvider},
     propagation::TraceContextPropagator,
     trace::SdkTracerProvider,
-    Resource,
 };
 use risc0_zkvm::DevModeDelay;
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
-    net::{tcp, TcpListener, UnixStream},
+    net::{TcpListener, UnixStream, tcp},
     process::Command,
     task::JoinHandle,
 };
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
+use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::Cli;
 
@@ -60,10 +60,11 @@ use self::{
     factory::{FactoryActor, FactoryRouterActor, RemoteFactoryActor},
     manager::ManagerActor,
     protocol::{
+        JobInfo, JobRequest, ProofRequest, ProofResult, ShrinkWrapRequest, ShrinkWrapResult,
+        TaskKind,
         factory::{GetTask, TaskDoneMsg, TaskUpdateMsg},
-        JobInfo, ProofRequest, TaskKind,
     },
-    rpc::{rpc_system, RpcMessageId, RpcSender},
+    rpc::{RpcMessageId, RpcSender, rpc_system},
     worker::Worker,
 };
 
@@ -143,38 +144,69 @@ pub(crate) async fn async_main(args: &Cli) -> Result<(), Box<dyn StdError>> {
     Ok(())
 }
 
-async fn relay_proof_request(app: &mut App) -> Result<(), Box<dyn StdError>> {
-    let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
+async fn read_or_eof(socket: &mut UnixStream, buf: &mut [u8]) -> Result<bool, Box<dyn StdError>> {
+    assert!(!buf.is_empty());
 
-    socket.set_nonblocking(true)?;
-    let mut socket = UnixStream::from_std(socket)?;
+    let mut i = 0;
+    while i < buf.len() {
+        let num_read = socket
+            .read(&mut buf[i..])
+            .await
+            .context("reading RPC header")?;
+        if num_read == 0 {
+            if i > 0 {
+                Err(std::io::Error::from(std::io::ErrorKind::UnexpectedEof))
+                    .context("reading RPC header")?
+            }
+            return Ok(false);
+        }
+        i += num_read;
+    }
+    Ok(true)
+}
 
+async fn relay_job_request(
+    app: &mut App,
+    socket: &mut UnixStream,
+) -> Result<bool, Box<dyn StdError>> {
     let mut buf = vec![0u8; 4];
-    socket
-        .read_exact(&mut buf)
-        .await
-        .context("error reading RPC header")?;
+    if !read_or_eof(socket, &mut buf[..]).await? {
+        return Ok(false);
+    }
+
     let body_len: u32 = bincode::deserialize(&buf).context("received invalid RPC header")?;
     let mut buf = vec![0u8; body_len as usize];
     socket
         .read_exact(&mut buf)
         .await
         .context("error reading RPC body")?;
-    let request: ProofRequest =
-        bincode::deserialize(&buf).context("error deserializing ProofRequest")?;
+    let request: JobRequest =
+        bincode::deserialize(&buf).context("error deserializing JobRequest")?;
 
-    let job_info = app
-        .proof_request(request)
-        .await
-        .context("error running ProofRequest")?;
+    let mut response_buf = vec![0u8; 4];
 
-    let mut buf = vec![0u8; 4];
-    bincode::serialize_into(&mut buf, &job_info)?;
-    let body_len = buf.len() as u32 - 4;
-    bincode::serialize_into(&mut buf[0..4], &body_len)?;
-    socket.write_all(&buf).await?;
+    match request {
+        JobRequest::Proof(request) => {
+            let job_info = app
+                .proof_request(request)
+                .await
+                .context("error running ProofRequest")?;
+            bincode::serialize_into(&mut response_buf, &job_info)?;
+        }
+        JobRequest::ShrinkWrap(request) => {
+            let job_info = app
+                .shrink_wrap_request(request)
+                .await
+                .context("error running ShrinkWrapRequest")?;
+            bincode::serialize_into(&mut response_buf, &job_info)?;
+        }
+    }
 
-    Ok(())
+    let body_len = response_buf.len() as u32 - 4;
+    bincode::serialize_into(&mut response_buf[0..4], &body_len)?;
+    socket.write_all(&response_buf).await?;
+
+    Ok(true)
 }
 
 #[tokio::main]
@@ -201,6 +233,7 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
             TaskKind::Join,
             TaskKind::Union,
             TaskKind::Resolve,
+            TaskKind::ShrinkWrap,
         ],
     };
 
@@ -252,7 +285,18 @@ pub(crate) async fn rpc_main(num_gpus: Option<usize>) -> Result<(), Box<dyn StdE
         children.push(child);
     }
 
-    let result = relay_proof_request(&mut app).await;
+    let socket: StdUnixStream = stdin().as_fd().try_clone_to_owned()?.into();
+
+    socket.set_nonblocking(true)?;
+    let mut socket = UnixStream::from_std(socket)?;
+
+    let result = loop {
+        match relay_job_request(&mut app, &mut socket).await {
+            Ok(true) => continue,
+            Ok(false) => break Ok(()),
+            Err(error) => break Err(error),
+        }
+    };
 
     app.stop().await;
 
@@ -434,9 +478,20 @@ impl App {
         }
     }
 
-    pub async fn proof_request(&mut self, request: ProofRequest) -> anyhow::Result<JobInfo> {
+    pub async fn proof_request(
+        &mut self,
+        request: ProofRequest,
+    ) -> anyhow::Result<JobInfo<ProofResult>> {
         let reply = self.manager.as_ref().unwrap().ask(request).await?;
-        Ok(reply.info.unwrap())
+        Ok(reply.status.try_into().unwrap())
+    }
+
+    pub async fn shrink_wrap_request(
+        &mut self,
+        request: ShrinkWrapRequest,
+    ) -> anyhow::Result<JobInfo<ShrinkWrapResult>> {
+        let reply = self.manager.as_ref().unwrap().ask(request).await?;
+        Ok(reply.status.try_into().unwrap())
     }
 }
 
