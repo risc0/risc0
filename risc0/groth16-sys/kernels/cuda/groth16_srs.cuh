@@ -115,7 +115,6 @@ private:
     *point = *(const affine_fp2_t*)srs_ptr;
     return p2_affine_size;
   }
-  std::string srs_path;
 
   verifying_key vk;
 
@@ -135,7 +134,7 @@ private:
   void operator=(SRS const&) = delete;
 
 public:
-  SRS(size_t gpu_id, const char* srs_path) : gpu(select_gpu(gpu_id)), srs_path(srs_path) {
+  SRS(size_t gpu_id, const byte *srs_ptr, size_t srs_len) : gpu(select_gpu(gpu_id)) {
     struct {
       struct {
         uint32_t size;
@@ -143,30 +142,9 @@ public:
       } coeffs, a, b_g1, b_g2, c, h;
     } data;
 
-    int srs_file = open(srs_path, O_RDONLY);
-
-    if (srs_file < 0) {
-      throw sppark_error{errno, "open(\"%s\") failed: ", srs_path};
-    }
-
-    struct stat st;
-    fstat(srs_file, &st);
-    size_t srs_file_size = st.st_size;
-
-    const byte* srs_ptr =
-        (const byte*)mmap(NULL, srs_file_size, PROT_READ, MAP_PRIVATE, srs_file, 0);
-
-    {
-      int err = errno;
-      close(srs_file);
-      if (srs_ptr == MAP_FAILED) {
-        throw sppark_error{err, "mmap(\"%s\") failed: ", srs_file};
-      }
-    }
-
     try {
       if (memcmp(srs_ptr, "zkey", 4) != 0) {
-        throw sppark_error{EINVAL, "srs file's (\"%s\") type is not \"zkey\": ", srs_file};
+        throw sppark_error{EINVAL, "srs type is not \"zkey\": "};
       }
 
       size_t cursor = 4;
@@ -177,9 +155,8 @@ public:
       uint32_t num_sections = read_u32(srs_ptr, cursor);
       if (num_sections != 10) {
         throw sppark_error{EINVAL,
-                           "srs file (\"%s\") does not have the expected number of sections of 10; "
+                           "srs does not have the expected number of sections of 10; "
                            "it has %u sections: ",
-                           srs_file,
                            num_sections};
       }
 
@@ -187,16 +164,16 @@ public:
 
       // Section 1: Protocol id
       check_section_id(srs_ptr, cursor, 1);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       uint32_t protocol = read_u32(srs_ptr, cursor);
       if (protocol != 1) {
-        throw sppark_error{EINVAL, "srs file's (\"%s\") protocol is not groth16: ", srs_file};
+        throw sppark_error{EINVAL, "srs protocol is not groth16: "};
       }
 
       // Section 2: Metadata and verification key
       check_section_id(srs_ptr, cursor, 2);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       uint32_t q_bytes = read_u32(srs_ptr, cursor);
       cursor += q_bytes;
@@ -216,13 +193,13 @@ public:
 
       // Section 3: Skipped
       check_section_id(srs_ptr, cursor, 3);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       cursor += section_size;
 
       // Section 4: Coeffs
       check_section_id(srs_ptr, cursor, 4);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       data.coeffs.size = section_size / sizeof(coeff_file_t);
       data.coeffs.off = cursor + 4; // padded up to 8 bytes
@@ -230,7 +207,7 @@ public:
 
       // Section 5: Points A
       check_section_id(srs_ptr, cursor, 5);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       data.a.size = section_size / p1_affine_size;
       data.a.off = cursor;
@@ -238,7 +215,7 @@ public:
 
       // Section 6: Points B (G1)
       check_section_id(srs_ptr, cursor, 6);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       data.b_g1.size = section_size / p1_affine_size;
       data.b_g1.off = cursor;
@@ -246,7 +223,7 @@ public:
 
       // Section 7: Points B (G2)
       check_section_id(srs_ptr, cursor, 7);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       data.b_g2.size = section_size / p2_affine_size;
       data.b_g2.off = cursor;
@@ -254,7 +231,7 @@ public:
 
       // Section 8: Points C
       check_section_id(srs_ptr, cursor, 8);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       data.c.size = section_size / p1_affine_size;
       data.c.off = cursor;
@@ -262,7 +239,7 @@ public:
 
       // Section 9: Points H
       check_section_id(srs_ptr, cursor, 9);
-      section_size = read_section_size(srs_ptr, srs_file_size, cursor);
+      section_size = read_section_size(srs_ptr, srs_len, cursor);
 
       data.h.size = section_size / p1_affine_size;
       data.h.off = cursor;
@@ -292,10 +269,8 @@ public:
 #endif
 
       gpu.sync();
-      munmap(const_cast<byte*>(srs_ptr), srs_file_size);
     } catch (const sppark_error& e) {
       gpu.sync();
-      munmap(const_cast<byte*>(srs_ptr), srs_file_size);
 
       throw;
     }
