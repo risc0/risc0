@@ -608,7 +608,65 @@ fn semver_compatible(a: &semver::Version, b: &semver::Version) -> bool {
     if !a.pre.is_empty() || !b.pre.is_empty() {
         return false;
     }
-    a.major == b.major
+    if a.major == 0 && b.major == 0 {
+        a.minor == b.minor
+    } else {
+        a.major == b.major
+    }
+}
+
+#[test]
+fn semver_compatible_test() {
+    assert!(semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(1, 2, 3)
+    ));
+    assert!(semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(1, 3, 3)
+    ));
+    assert!(semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(1, 2, 4)
+    ));
+    assert!(semver_compatible(
+        &semver::Version::new(0, 1, 0),
+        &semver::Version::new(0, 1, 1)
+    ));
+
+    assert!(!semver_compatible(
+        &"1.2.3-rc.1".parse().unwrap(),
+        &"1.2.3-rc.1".parse().unwrap()
+    ));
+    assert!(!semver_compatible(
+        &"1.2.3-rc.1".parse().unwrap(),
+        &"1.2.3-rc.2".parse().unwrap()
+    ));
+    assert!(!semver_compatible(
+        &"1.2.3-rc.1".parse().unwrap(),
+        &semver::Version::new(1, 2, 3)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &"1.2.3-rc.1".parse().unwrap()
+    ));
+
+    assert!(!semver_compatible(
+        &semver::Version::new(1, 2, 3),
+        &semver::Version::new(2, 0, 0)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(2, 0, 0),
+        &semver::Version::new(1, 2, 3)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(0, 1, 0),
+        &semver::Version::new(0, 2, 0)
+    ));
+    assert!(!semver_compatible(
+        &semver::Version::new(0, 2, 0),
+        &semver::Version::new(0, 1, 0)
+    ));
 }
 
 /// Entrypoint for the tests. See the module doc-comment about what it does.
