@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ use std::rc::Rc;
 
 use ff::{Field, PrimeField};
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
 };
 
-use self::consts::{Fr, FrRepr, CELLS, ROUNDS_HALF_FULL, ROUNDS_PARTIAL};
+use self::consts::{CELLS, Fr, FrRepr, ROUNDS_HALF_FULL, ROUNDS_PARTIAL};
 
 use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::Digest;

@@ -14,11 +14,11 @@
 
 use std::{io::Read, ops::Rem};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use byteorder::{LittleEndian, ReadBytesExt};
 use malachite::{
-    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
     Integer, Natural,
+    num::{arithmetic::traits::ModInverse, basic::traits::Zero},
 };
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;

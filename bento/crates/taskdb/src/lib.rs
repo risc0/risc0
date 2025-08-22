@@ -2,11 +2,11 @@
 //
 // All rights reserved.
 
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 pub use sqlx::Error as SqlxError;
 use sqlx::{
-    types::{JsonValue, Uuid},
     FromRow, PgPool,
+    types::{JsonValue, Uuid},
 };
 use thiserror::Error;
 
@@ -555,7 +555,7 @@ pub mod test_helpers {
 #[cfg(test)]
 mod tests {
     use super::{
-        test_helpers::{get_job, get_task, get_tasks, Task},
+        test_helpers::{Task, get_job, get_task, get_tasks},
         *,
     };
 
@@ -617,7 +617,7 @@ mod tests {
         assert!(res.is_err());
         let err = res.err().unwrap();
 
-        assert!(format!("{:?}", err).contains("violates foreign key constraint"));
+        assert!(format!("{err:?}").contains("violates foreign key constraint"));
         Ok(())
     }
 
@@ -718,9 +718,11 @@ mod tests {
 
         let output_res_value = "SUCCESS";
         let output_res = serde_json::json!({"result": output_res_value});
-        assert!(update_task_done(&pool, &job_id, &init.task_id, output_res)
-            .await
-            .unwrap());
+        assert!(
+            update_task_done(&pool, &job_id, &init.task_id, output_res)
+                .await
+                .unwrap()
+        );
 
         let tasks = get_tasks(&pool).await.unwrap();
 
@@ -771,9 +773,11 @@ mod tests {
         let retry_task_id = task.task_id.clone();
 
         // Requeue the work
-        assert!(update_task_retry(&pool, &task.job_id, &task.task_id)
-            .await
-            .unwrap());
+        assert!(
+            update_task_retry(&pool, &task.job_id, &task.task_id)
+                .await
+                .unwrap()
+        );
 
         let task = request_work(&pool, worker_type).await.unwrap().unwrap();
         let task_raw = get_task(&pool, &task.job_id, &task.task_id).await.unwrap();
@@ -792,9 +796,11 @@ mod tests {
         assert_eq!(job.state.unwrap(), JobState::Running);
 
         // Attempt to retry over max_retries and fail the job
-        assert!(!update_task_retry(&pool, &task.job_id, &task.task_id)
-            .await
-            .unwrap());
+        assert!(
+            !update_task_retry(&pool, &task.job_id, &task.task_id)
+                .await
+                .unwrap()
+        );
 
         assert!(request_work(&pool, worker_type).await.unwrap().is_none());
         let task_raw = get_task(&pool, &task.job_id, &task.task_id).await.unwrap();
@@ -838,9 +844,11 @@ mod tests {
         );
 
         // Validate you can't fail a 'done' task
-        assert!(!update_task_failed(&pool, &task.job_id, &task.task_id, "")
-            .await
-            .unwrap());
+        assert!(
+            !update_task_failed(&pool, &task.job_id, &task.task_id, "")
+                .await
+                .unwrap()
+        );
         // Validate you can't update progress on a 'done' task
         assert!(
             !update_task_progress(&pool, &task.job_id, &task.task_id, 0.5)
@@ -1255,7 +1263,7 @@ mod tests {
             create_task(
                 &pool,
                 &job_id,
-                &format!("{}", i),
+                &format!("{i}"),
                 &stream_id,
                 &task_def,
                 &serde_json::json!([]),

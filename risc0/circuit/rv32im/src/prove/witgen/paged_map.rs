@@ -106,7 +106,7 @@ impl PagedMap {
     ///
     /// If the map did have this key present, the value is updated, and the old value is returned.
     pub fn insert(&mut self, addr: &WordAddr, word: u32) -> Option<u32> {
-        std::mem::replace(self.get_mut(addr), Some(word))
+        self.get_mut(addr).replace(word)
     }
 
     pub fn insert_default(&mut self, addr: &WordAddr, word: u32, default: u32) -> u32 {

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use bytemuck::Pod;
-use risc0_zkvm_platform::{syscall::sys_write, WORD_SIZE};
+use risc0_zkvm_platform::{WORD_SIZE, syscall::sys_write};
 use serde::Serialize;
 
 use crate::serde::{Serializer, WordWrite};

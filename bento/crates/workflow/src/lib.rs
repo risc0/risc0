@@ -9,24 +9,24 @@
 use crate::redis::RedisPool;
 use anyhow::{Context, Result};
 use clap::Parser;
-use risc0_zkvm::{get_prover_server, ProverOpts, ProverServer, VerifierContext};
+use risc0_zkvm::{ProverOpts, ProverServer, VerifierContext, get_prover_server};
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::{
     rc::Rc,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 use taskdb::ReadyTask;
 use tokio::time;
-use workflow_common::{TaskType, COPROC_WORK_TYPE};
+use workflow_common::{COPROC_WORK_TYPE, TaskType};
 
 mod redis;
 mod tasks;
 
 pub use workflow_common::{
-    s3::S3Client, AUX_WORK_TYPE, EXEC_WORK_TYPE, JOIN_WORK_TYPE, PROVE_WORK_TYPE, SNARK_WORK_TYPE,
+    AUX_WORK_TYPE, EXEC_WORK_TYPE, JOIN_WORK_TYPE, PROVE_WORK_TYPE, s3::S3Client,
 };
 
 /// Workflow agent
@@ -89,6 +89,10 @@ pub struct Args {
     /// S3 / Minio url
     #[clap(env)]
     pub s3_url: String,
+
+    /// S3 region, can be anything if using minio
+    #[clap(env, default_value = "us-west-2")]
+    pub s3_region: String,
 
     /// Enables a background thread to monitor for tasks that need to be retried / timed-out
     #[clap(long, default_value_t = false)]
@@ -172,6 +176,7 @@ impl Agent {
             &args.s3_bucket,
             &args.s3_access_key,
             &args.s3_secret_key,
+            &args.s3_region,
         )
         .await
         .context("Failed to initialize s3 client / bucket")?;

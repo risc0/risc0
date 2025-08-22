@@ -5,29 +5,28 @@
 use std::sync::Arc;
 
 use crate::{
-    redis::{self},
-    tasks::{read_image_id, serialize_obj, COPROC_CB_PATH, RECEIPT_PATH, SEGMENTS_PATH},
     Agent, Args, TaskType,
+    redis::{self},
+    tasks::{COPROC_CB_PATH, RECEIPT_PATH, SEGMENTS_PATH, read_image_id, serialize_obj},
 };
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use risc0_zkvm::{
-    compute_image_id, sha::Digestible, CoprocessorCallback, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, Journal, NullSegmentRef, ProveKeccakRequest, ProveZkrRequest, Receipt, Segment,
+    CoprocessorCallback, ExecutorEnv, ExecutorImpl, InnerReceipt, Journal, NullSegmentRef,
+    ProveKeccakRequest, Receipt, Segment, compute_image_id, sha::Digestible,
 };
 use sqlx::postgres::PgPool;
 use taskdb::planner::{
-    task::{Command as TaskCmd, Task},
     Planner,
+    task::{Command as TaskCmd, Task},
 };
 use tempfile::NamedTempFile;
 use workflow_common::{
+    AUX_WORK_TYPE, COPROC_WORK_TYPE, CompressType, ExecutorReq, ExecutorResp, FinalizeReq,
+    JOIN_WORK_TYPE, JoinReq, KeccakReq, PROVE_WORK_TYPE, ProveReq, ResolveReq, SnarkReq, UnionReq,
     s3::{
         ELF_BUCKET_DIR, EXEC_LOGS_BUCKET_DIR, INPUT_BUCKET_DIR, PREFLIGHT_JOURNALS_BUCKET_DIR,
         RECEIPT_BUCKET_DIR, STARK_BUCKET_DIR,
     },
-    CompressType, ExecutorReq, ExecutorResp, FinalizeReq, JoinReq, KeccakReq, ProveReq, ResolveReq,
-    SnarkReq, UnionReq, AUX_WORK_TYPE, COPROC_WORK_TYPE, JOIN_WORK_TYPE, PROVE_WORK_TYPE,
-    SNARK_WORK_TYPE,
 };
 // use tempfile::NamedTempFile;
 use tokio::task::{JoinHandle, JoinSet};
@@ -46,7 +45,6 @@ async fn process_task(
     join_stream: &Uuid,
     union_stream: &Uuid,
     aux_stream: &Uuid,
-    snark_stream: &Uuid,
     job_id: &Uuid,
     tree_task: &Task,
     segment_index: Option<u32>,
@@ -225,7 +223,7 @@ async fn process_task(
                     pool,
                     job_id,
                     "snark",
-                    snark_stream,
+                    prove_stream,
                     &task_def,
                     &serde_json::json!([finalize_name]),
                     args.snark_retries,
@@ -262,9 +260,6 @@ impl CoprocessorCallback for Coprocessor {
         self.tx.blocking_send(SenderType::Keccak(request))?;
         Ok(())
     }
-    fn prove_zkr(&mut self, _request: ProveZkrRequest) -> Result<()> {
-        unreachable!()
-    }
 }
 
 enum SenderType {
@@ -283,7 +278,7 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
 
     // Fetch ELF binary data
     let elf_key = format!("{ELF_BUCKET_DIR}/{}", request.image);
-    tracing::info!("Downloading - {}", elf_key);
+    tracing::debug!("Downloading - {}", elf_key);
     let elf_data = agent.s3_client.read_buf_from_s3(&elf_key).await?;
 
     // Write the image_id for pulling later
@@ -356,7 +351,7 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
     if let Some(req_exec_limit) = request.exec_limit {
         let req_exec_limit = req_exec_limit * 1024 * 1024;
         if req_exec_limit < exec_limit {
-            tracing::info!(
+            tracing::debug!(
                 "Assigning a requested lower execution limit of: {req_exec_limit} cycles"
             );
             exec_limit = req_exec_limit;
@@ -439,11 +434,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
         prove_stream
     };
 
-    let snark_stream = taskdb::get_stream(&agent.db_pool, &request.user_id, SNARK_WORK_TYPE)
-        .await
-        .context("Failed to get SNARK stream")?
-        .with_context(|| format!("Customer {} missing snark stream", request.user_id))?;
-
     let job_id_copy = *job_id;
     let pool_copy = agent.db_pool.clone();
     let assumptions = request.assumptions.clone();
@@ -479,7 +469,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
                             &join_stream,
                             &union_stream,
                             &aux_stream,
-                            &snark_stream,
                             &job_id_copy,
                             tree_task,
                             Some(segment_index),
@@ -520,7 +509,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
                             &join_stream,
                             &union_stream,
                             &aux_stream,
-                            &snark_stream,
                             &job_id_copy,
                             tree_task,
                             None,
@@ -549,7 +537,6 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
                     &join_stream,
                     &union_stream,
                     &aux_stream,
-                    &snark_stream,
                     &job_id_copy,
                     tree_task,
                     None,
@@ -686,7 +673,7 @@ pub async fn executor(agent: &Agent, job_id: &Uuid, request: &ExecutorReq) -> Re
         }
     }
 
-    tracing::info!("Done with all IO tasks");
+    tracing::debug!("Done with all IO tasks");
 
     let resp = ExecutorResp {
         segments: session.segment_count as u64,

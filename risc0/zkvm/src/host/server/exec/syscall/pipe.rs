@@ -19,7 +19,7 @@ use std::{
     rc::Rc,
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 
 use crate::host::client::posix_io::PosixIo;
 

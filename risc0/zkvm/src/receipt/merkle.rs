@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 use alloc::vec::Vec;
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
@@ -82,7 +82,7 @@ impl MerkleGroup {
 
     fn calc_range_root(&self, start: u32, end: u32, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         assert!(start < end);
-        let res = if start + 1 == end {
+        if start + 1 == end {
             *self.leaf_or_empty(start)
         } else {
             let mid = (start + end) / 2;
@@ -91,8 +91,7 @@ impl MerkleGroup {
             let left = self.calc_range_root(start, mid, hashfn);
             let right = self.calc_range_root(mid, end, hashfn);
             *hashfn.hash_pair(&left, &right)
-        };
-        res
+        }
     }
 
     /// Calculate and return a [MerkleProof] for the given leaf.

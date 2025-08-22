@@ -3,9 +3,9 @@
 // All rights reserved.
 
 use crate::{
-    redis::{self, AsyncCommands},
-    tasks::{deserialize_obj, serialize_obj, RECUR_RECEIPT_PATH},
     Agent,
+    redis::{self, AsyncCommands},
+    tasks::{RECUR_RECEIPT_PATH, deserialize_obj, serialize_obj},
 };
 use anyhow::{Context, Result};
 use uuid::Uuid;
@@ -35,7 +35,7 @@ pub async fn join(agent: &Agent, job_id: &Uuid, request: &JoinReq) -> Result<()>
     let right_receipt =
         deserialize_obj(&right_receipt).context("Failed to deserialize right receipt")?;
 
-    tracing::info!(
+    tracing::trace!(
         "Joining {job_id} - {} + {} -> {}",
         request.left,
         request.right,
@@ -57,7 +57,7 @@ pub async fn join(agent: &Agent, job_id: &Uuid, request: &JoinReq) -> Result<()>
     )
     .await?;
 
-    tracing::info!("Join Complete {job_id} - {}", request.left);
+    tracing::debug!("Join Complete {job_id} - {}", request.left);
 
     Ok(())
 }

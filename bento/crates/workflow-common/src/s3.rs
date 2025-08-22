@@ -2,13 +2,13 @@
 //
 // All rights reserved.
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use aws_sdk_s3::{
+    Client,
     config::{Builder, Credentials, Region},
     operation::{create_bucket::CreateBucketError, head_object::HeadObjectError},
     primitives::ByteStream,
     types::CreateBucketConfiguration,
-    Client,
 };
 use std::path::Path;
 
@@ -33,8 +33,6 @@ pub const STARK_BUCKET_DIR: &str = "stark";
 /// Object store receipts groth15 dir
 pub const GROTH16_BUCKET_DIR: &str = "groth16";
 
-const MOCK_REGION: &str = "us-west-2";
-
 /// S3 client object
 pub struct S3Client {
     bucket: String,
@@ -48,6 +46,7 @@ impl S3Client {
         bucket: &str,
         access_key: &str,
         secret_key: &str,
+        region: &str,
     ) -> Result<Self> {
         let cred = Credentials::new(access_key, secret_key, None, None, "loaded-from-custom-env");
 
@@ -55,14 +54,16 @@ impl S3Client {
             .endpoint_url(url)
             .credentials_provider(cred)
             .behavior_version_latest()
-            .region(Region::new(MOCK_REGION))
+            .region(Region::new(region.to_string()))
             .force_path_style(true)
             .build();
 
         let client = aws_sdk_s3::Client::from_conf(s3_config);
 
         // Attempt to provision the bucket if it does not exist
-        let cfg = CreateBucketConfiguration::builder().build();
+        let cfg = CreateBucketConfiguration::builder()
+            .location_constraint(region.into())
+            .build();
         let res = client
             .create_bucket()
             .create_bucket_configuration(cfg)

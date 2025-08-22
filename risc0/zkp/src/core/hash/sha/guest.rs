@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@ use alloc::vec::Vec;
 
 use crate::core::{
     digest::Digest,
-    hash::sha::{Block, BLOCK_WORDS, SHA256_INIT},
+    hash::sha::{BLOCK_WORDS, Block, SHA256_INIT},
 };
 use risc0_zkvm_platform::{
-    align_up,
+    WORD_SIZE, align_up,
     syscall::{sys_sha_buffer, sys_sha_compress},
-    WORD_SIZE,
 };
 
 // FIP 180-4 specifies that the bit-string being hashed should have a `1`

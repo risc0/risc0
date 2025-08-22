@@ -14,8 +14,7 @@
 
 use std::{cmp::min, fmt::Write as _};
 
-use anyhow::{anyhow, bail, Result};
-use enum_map::Enum;
+use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::{ByteAddr, WordAddr};
 
 use super::{
@@ -24,23 +23,13 @@ use super::{
     rv32im::{EmuContext, Emulator, Exception, InsnKind},
     sha2::{self, Sha2State},
 };
+use crate::EcallKind;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub(crate) enum LoadOp {
     Peek,
     Load,
     Record,
-}
-
-#[derive(Clone, Copy, Debug, Enum)]
-pub enum EcallKind {
-    BigInt,
-    Poseidon2,
-    Read,
-    Sha2,
-    Terminate,
-    User,
-    Write,
 }
 
 pub(crate) trait Risc0Context {
@@ -491,7 +480,7 @@ impl<'a, C: Risc0Context> Risc0Machine<'a, C> {
                     rlen -= WORD_SIZE as u32;
                 } else {
                     // tracing::trace!("store: {:#010x} -> null", 0);
-                    self.store_memory(SAFE_WRITE_ADDR.waddr(), 0)?;
+                    self.store_memory(SAFE_WRITE_ADDR.waddr() + j, 0)?;
                 }
             }
 

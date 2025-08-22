@@ -103,17 +103,6 @@ pub enum MultiTestSpec {
     SysInput(Digest),
     SysKeccak,
     SysLogInvalidAddr,
-    SysProveZkr {
-        // Control id of ZKR to execute
-        control_id: Digest,
-        // Input to provide to ZKR execution
-        input: Vec<u32>,
-        // Claim digest and control root to provide to
-        // verify_assumption to make sure that the proof from the ZKR
-        // gets added to our assumptions.
-        claim_digest: Digest,
-        control_root: Digest,
-    },
     SysRead {
         // Buffer to read to
         buf: Vec<u8>,

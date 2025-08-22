@@ -17,17 +17,18 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_struct, Digestible};
+use risc0_binfmt::{Digestible, tagged_struct};
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
-use risc0_groth16::{fr_from_hex_string, split_digest, Seal, Verifier, VerifyingKey};
+use risc0_groth16::{Verifier, VerifyingKey};
 use risc0_zkp::core::hash::sha::Sha256;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    receipt::{succinct::allowed_control_root, VerifierContext},
-    receipt_claim::{MaybePruned, Unknown},
+    MaybePruned,
+    claim::Unknown,
+    receipt::{VerifierContext, succinct::allowed_control_root},
     sha,
 };
 
@@ -35,10 +36,7 @@ use crate::{
 #[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct Groth16Receipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+pub struct Groth16Receipt<Claim> {
     /// A Groth16 proof of a zkVM execution with the associated claim.
     #[debug("{} bytes", seal.len())]
     pub seal: Vec<u8>,
@@ -55,10 +53,7 @@ where
     pub verifier_parameters: Digest,
 }
 
-impl<Claim> Groth16Receipt<Claim>
-where
-    Claim: Digestible + core::fmt::Debug + Clone + Serialize,
-{
+impl<Claim> Groth16Receipt<Claim> {
     /// Create a [Groth16Receipt] from the given seal, claim, and verifier parameters digest.
     pub fn new(seal: Vec<u8>, claim: MaybePruned<Claim>, verifier_parameters: Digest) -> Self {
         Self {
@@ -70,7 +65,10 @@ where
 
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
-    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+    pub fn verify_integrity(&self) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
         self.verify_integrity_with_context(&VerifierContext::default())
     }
 
@@ -79,23 +77,27 @@ where
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
+    ) -> Result<(), VerificationError>
+    where
+        Claim: Digestible + core::fmt::Debug,
+    {
         let params = ctx
             .groth16_verifier_parameters
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
 
-        let (a0, a1) =
-            split_digest(params.control_root).map_err(|_| VerificationError::ReceiptFormatError)?;
-        let (c0, c1) = split_digest(self.claim.digest::<sha::Impl>())
-            .map_err(|_| VerificationError::ReceiptFormatError)?;
-        let mut id_bn554: Digest = params.bn254_control_id;
-        id_bn554.as_mut_bytes().reverse();
-        let id_bn254_fr = fr_from_hex_string(&hex::encode(id_bn554))
-            .map_err(|_| VerificationError::ReceiptFormatError)?;
+        if params.digest::<sha::Impl>() != self.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: params.digest::<sha::Impl>(),
+                received: self.verifier_parameters,
+            });
+        }
+
         Verifier::new(
-            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,
-            &[a0, a1, c0, c1, id_bn254_fr],
+            &self.seal,
+            params.control_root,
+            self.claim.digest::<sha::Impl>(),
+            params.bn254_control_id,
             &params.verifying_key,
         )
         .map_err(|_| VerificationError::ReceiptFormatError)?
@@ -108,7 +110,10 @@ where
 
     /// Prunes the claim, retaining its digest, and converts into a [Groth16Receipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
-    pub fn into_unknown(self) -> Groth16Receipt<Unknown> {
+    pub fn into_unknown(self) -> Groth16Receipt<Unknown>
+    where
+        Claim: Digestible,
+    {
         Groth16Receipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
             seal: self.seal,
@@ -195,7 +200,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("9f39696cb3ae9d6038d6b7a55c09017f0cf35e226ad7582b82dbabb0dae53385")
+            digest!("73c457ba541936f0d907daf0c7253a39a9c5c427c225ba7709e44702d3c6eedc")
         );
     }
 }

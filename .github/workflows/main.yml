@@ -17,8 +17,9 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
+  RISC0_GROTH16_VERSION: 0.1.0
 
 defaults:
   run:
@@ -36,7 +37,6 @@ jobs:
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
-      crates-validation: ${{ steps.filter.outputs.crates-validation }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       risc0: ${{ steps.filter.outputs.risc0 }}
@@ -80,10 +80,6 @@ jobs:
               - *base
               - risc0/**
               - templates/**
-            crates-validation:
-              - *base
-              - risc0/**
-              - tools/crates-validator/**
             doc:
               - *base
               - bonsai/sdk/**
@@ -101,6 +97,7 @@ jobs:
               - groth16_proof/**
               - external/**
               - risc0/**
+              - xtask/**
             test-crates:
               - *base
               - risc0/**
@@ -111,21 +108,21 @@ jobs:
   main-status-check:
     if: always()
     needs:
-      - bento-run
+      # - bento-run
       - bento-test
       - browser
       - check
       - check-external
+      - check-semver
       - check-template
       - clippy
-      - crates-validation
       - doc
       - docs-rs
       - examples
+      - extra
       - docker
-      - test_workspace
-      - build_extra_cargo_check_benchmark
       # - test-crates
+      - test
       - web
     runs-on: ubuntu-latest
     steps:
@@ -144,12 +141,12 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
       - name: Install cargo-sort
-        uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+        uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-sort
           version: "1.0"
       - name: Install cargo-rdme
-        uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+        uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-rdme
           version: "1.4.3"
@@ -161,11 +158,11 @@ jobs:
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
-      - run: cargo sort --workspace --check
-      - run: cargo sort --workspace --check bento
-      - run: cargo sort --workspace --check benchmarks
-      - run: cargo sort --workspace --check examples
-      - run: cargo sort --workspace --check tools/crates-validator
+      - run: cargo sort --workspace --grouped --check
+      - run: cargo sort --workspace --grouped --check bento
+      - run: cargo sort --workspace --grouped --check benchmarks
+      - run: cargo sort --workspace --grouped --check examples
+      - run: cargo sort --workspace --grouped --check tools/crates-validator
       - name: cargo rdme in bonsai/sdk
         run: cargo rdme -c
         working-directory: bonsai/sdk
@@ -188,7 +185,7 @@ jobs:
   clippy:
     if: needs.changes.outputs.risc0 == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -212,8 +209,7 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - uses: ./.github/actions/protoc
       - name: "root: cargo clippy"
         run: cargo clippy -F $FEATURE -F unstable --all-targets
       - name: "bento: cargo clippy"
@@ -226,30 +222,19 @@ jobs:
         run: cargo clippy -F $FEATURE --all-targets
         working-directory: examples
 
-  test_workspace:
+  test:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run --partition hash:1/2
-            partition: 1
-          - os: Linux
-            arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run --partition hash:2/2
-            partition: 2
-          - os: Linux
-            arch: X64
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
             test_command: cargo test
             partition: 1
           - os: macOS
@@ -266,6 +251,8 @@ jobs:
             partition: 2
     env:
       FEATURE: ${{ matrix.feature }}
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
@@ -273,10 +260,11 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
+      - if: matrix.feature == 'cuda'
+        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - uses: ./.github/actions/protoc
       - name: Login to Docker Hub
         if: >
           matrix.os == 'Linux' &&
@@ -285,20 +273,17 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_CI_USER }}
           password: ${{ secrets.DOCKERHUB_CI_PAT }}
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
+      - uses: baptiste0928/cargo-install@v3
         with:
-          crate: cargo-binstall
-          version: "1.10.16"
-      - name: Install cargo-nextest
-        run: cargo binstall cargo-nextest
+          crate: cargo-nextest
+          version: "0.9.96"
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force gdb $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
       - name: Install gdb dependencies
         run: brew install zstd gettext lz4 mpfr gmp
         if: matrix.os == 'macOS'
-      - name: build workspace
-        run: cargo test --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --no-run --exclude doc-test
       - name: test workspace
         run: ${{ matrix.test_command }} --release -F $FEATURE -F prove -F redis -F unstable --workspace --timings --exclude doc-test
       - uses: actions/upload-artifact@v4
@@ -308,23 +293,19 @@ jobs:
           retention-days: 5
       - run: sccache --show-stats
 
-  build_extra_cargo_check_benchmark:
+  extra:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run
-          - os: Linux
-            arch: X64
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
             test_command: cargo test
           - os: macOS
             arch: ARM64
@@ -333,6 +314,8 @@ jobs:
             test_command: cargo nextest run
     env:
       FEATURE: ${{ matrix.feature }}
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
       # SCCACHE_RECACHE: 1
@@ -340,26 +323,21 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
+      - if: matrix.feature == 'cuda'
+        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+      - uses: baptiste0928/cargo-install@v3
         with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
-        with:
-          crate: cargo-binstall
-          version: "1.10.16"
-      - name: Install cargo-nextest
-        run: cargo binstall cargo-nextest
-      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - name: build risc0-r0vm
-        run: cargo test --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
-      - name: build risc0-zkvm tests without the prove feature
-        run: cargo test --release -p risc0-zkvm -F $FEATURE --no-run
-      - name: build risc0-zkvm tests with the metal feature
-        if: matrix.os == 'macOS'
-        run: cargo test -p risc0-zkvm -F metal --no-run
+          crate: cargo-nextest
+          version: "0.9.96"
+      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install --force risc0-groth16 $RISC0_GROTH16_VERSION
       - name: test risc0-r0vm
+        run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE
+      - name: test risc0-r0vm (disable-dev-mode)
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: ${{ matrix.test_command }} --release -p cargo-risczero -F experimental
       - name: run fibonacci benchmark
@@ -384,20 +362,16 @@ jobs:
   examples:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, cluster, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
-            feature: default
-            device: cpu
-            test_command: cargo nextest run
-          - os: Linux
-            arch: X64
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_4000_ada
+            nvcc_arch: sm_89
             test_command: cargo test
           - os: macOS
             arch: ARM64
@@ -405,7 +379,10 @@ jobs:
             device: apple_m2_pro
             test_command: cargo nextest run
     env:
+      CARGO_BUILD_JOBS: 32
       FEATURE: ${{ matrix.feature }}
+      NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
+      RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RISC0_EXECUTOR: ipc
       RISC0_PROVER: ipc
@@ -416,22 +393,18 @@ jobs:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
+      - if: matrix.feature == 'cuda'
+        run: nvidia-smi
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+      - uses: baptiste0928/cargo-install@v3
         with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
-        with:
-          crate: cargo-binstall
-          version: "1.10.16"
-      - name: Install cargo-nextest
-        run: cargo binstall cargo-nextest
+          crate: cargo-nextest
+          version: "0.9.96"
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
-      - name: build
-        run: cargo test --release --locked -F $FEATURE --no-run
-        working-directory: examples
       - name: test in dev mode
         run: RISC0_DEV_MODE=1 ${{ matrix.test_command }} --release --locked -F $FEATURE --workspace --exclude prover-example
         working-directory: examples
@@ -444,44 +417,40 @@ jobs:
         working-directory: examples/profiling
       - run: sccache --show-stats
 
-  # test-crates:
-  #   if: needs.changes.outputs.test-crates == 'true'
-  #   needs: changes
-  #   runs-on: [self-hosted, prod, Linux, cpu]
-  #   strategy:
-  #     fail-fast: false
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         path: 'risc0'
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         repository: risc0/RustCrypto-crypto-bigint
-  #         path: 'RustCrypto-crypto-bigint'
-  #     - uses: ./risc0/.github/actions/rustup
-  #     - uses: ./risc0/.github/actions/sccache
-  #       with:
-  #         key: Linux-default
-  #     - name: Install risczero toolchain
-  #       run: |
-  #         cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-  #         cargo install --force --path risc0/cargo-risczero -F experimental
-  #       working-directory: risc0
-  #     - name: run cargo risczero test
-  #       working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
-  #       run: cargo risczero test
-  #     - run: sccache --show-stats
+  test-crates:
+    if: false # needs.changes.outputs.test-crates == 'true'
+    needs: changes
+    runs-on: [self-hosted, cluster, Linux, cpu]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'risc0'
+      - uses: actions/checkout@v4
+        with:
+          repository: risc0/RustCrypto-crypto-bigint
+          path: 'RustCrypto-crypto-bigint'
+      - uses: ./risc0/.github/actions/rustup
+      - uses: ./risc0/.github/actions/sccache
+      - name: Install risczero toolchain
+        run: |
+          cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+          cargo install --force --path risc0/cargo-risczero -F experimental
+        working-directory: risc0
+      - name: run cargo risczero test
+        working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
+        run: cargo risczero test
+      - run: sccache --show-stats
 
   doc:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: macOS-default
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
@@ -493,34 +462,32 @@ jobs:
   docs-rs:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, cluster, macOS, cpu]
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
+      # Building with docs.rs config requires the nightly toolchain.
+      # nightly-2025-05-09 corresponds to 1.88
+      NIGHTLY_RUST_TOOLCHAIN: nightly-2025-05-09
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
         with:
-          # Building with docs.rs config requires the nightly toolchain.
-          toolchain: nightly-2024-11-26
+          toolchain: ${{ env.NIGHTLY_RUST_TOOLCHAIN }}
       - uses: ./.github/actions/sccache
-        with:
-          key: macOS-nightly
-      - run: cargo +nightly-2024-11-26 doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +nightly-2024-11-26 doc -p risc0-zkp -Fprove,std --no-deps
-      - run: cargo +nightly-2024-11-26 doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +nightly-2024-11-26 doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-zkp -p risc0-groth16 -Fprove,std --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +${{ env.NIGHTLY_RUST_TOOLCHAIN }} doc -p risc0-binfmt -p risc0-core -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
     if: needs.changes.outputs.check-external == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, cluster, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: macOS-default
       - run: cargo check
         working-directory: external/substrate
       - run: sccache --show-stats
@@ -528,7 +495,7 @@ jobs:
   check-semver:
     if: needs.changes.outputs.check-semver == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -543,8 +510,6 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-default
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: run SemVer checks
@@ -552,27 +517,32 @@ jobs:
         env:
             # Pass `--update` on release branches to ensure the release-branch semver-checks are
             # always testing against the latest crates.io versions.
-            UPDATE: ${{ startsWith(github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
+            UPDATE: ${{ startsWith(github.event.pull_request.base.ref || github.head_ref || github.ref_name, 'release-') && '--update' || '' }}
       - run: sccache --show-stats
 
   check-template:
     if: needs.changes.outputs.check-template == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, cluster, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    env:
+      RUST_TOOLCHAIN_VERSION: 1.88.0
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
             arch: X64
+            sed_bin: sed
           - os: macOS
             arch: ARM64
+            sed_bin: gsed
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-default
+      - name: Install gsed
+        run: brew install gnu-sed
+        if: matrix.os == 'macOS'
       - run: cargo install --force --path risc0/cargo-risczero --locked
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
@@ -582,6 +552,8 @@ jobs:
             --dest ${{ runner.temp }} \
             --guest-name test_method \
             template-test
+        shell: bash
+      - run: ${{ matrix.sed_bin }} -i 's/stable/${{ env.RUST_TOOLCHAIN_VERSION }}/g' ${{ runner.temp }}/template-test/rust-toolchain.toml
         shell: bash
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
@@ -593,48 +565,15 @@ jobs:
             --no-std \
             template-test-no-std
         shell: bash
-      - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
-      - run: sccache --show-stats
-
-  crates-validation:
-    if: needs.changes.outputs.crates-validation == 'true'
-    needs: changes
-    runs-on: [self-hosted, prod, Linux, X64, cpu]
-    env:
-      RUST_BACKTRACE: full
-      RUST_LOG: info
-      TOP_N_CRATES: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-      - run: cargo install --force --path risc0/cargo-risczero --locked
-      - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test
-        working-directory: tools/crates-validator/
-      - run: cargo build --release
-        working-directory: tools/crates-validator/
-      - name: Create working directory
-        run: mkdir -p ${{ runner.temp }}/crate-validation/
-      - name: Validate profiles
-        run: |
-          target/release/main \
-          -p ${{ github.workspace }} \
-          -P profiles/profiles-10.yaml \
-          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+      - run: ${{ matrix.sed_bin }} -i 's/stable/${{ env.RUST_TOOLCHAIN_VERSION }}/g' ${{ runner.temp }}/template-test-no-std/rust-toolchain.toml
         shell: bash
-        working-directory: tools/crates-validator/
-      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
-        if: always()
+      - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
       - run: sccache --show-stats
 
   browser:
     if: needs.changes.outputs.browser == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, X64, cpu]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
@@ -646,11 +585,12 @@ jobs:
         with:
           node-version: 20
       - uses: ./.github/actions/sccache
+      - uses: baptiste0928/cargo-install@v3
         with:
-          key: Linux-default
+          crate: wasm-pack
+          version: "0.13.1"
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo run --bin xtask -- install
       - run: cargo run --bin xtask -- gen-receipt
       - run: |
           npm install
@@ -661,7 +601,7 @@ jobs:
   docker:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, X64, cpu, docker]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu, docker]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -669,8 +609,6 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-        with:
-          key: Linux-default
       - name: Login to Docker Hub
         if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         uses: docker/login-action@v3
@@ -708,7 +646,7 @@ jobs:
   bento-test:
     if: needs.changes.outputs.bento == 'true'
     needs: changes
-    runs-on: [ self-hosted, prod, Linux, X64, cpu ]
+    runs-on: [ self-hosted, cluster, Linux, X64, cpu ]
     services:
       postgres:
         image: postgres:latest
@@ -724,17 +662,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+      - uses: baptiste0928/cargo-install@v3
         with:
+          crate: cargo-nextest
+          version: "0.9.96"
           key: Linux-cpu
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
-        with:
-          crate: cargo-binstall
-          version: "1.10.16"
-      - run: cargo binstall cargo-nextest
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: Install sqlx-cli
-        uses: baptiste0928/cargo-install@904927dbe77864e0f2281519fe9d5bd097a220b3
+        uses: baptiste0928/cargo-install@v3
         with:
           crate: sqlx-cli
           version: '=0.8.2'
@@ -746,9 +683,9 @@ jobs:
       - run: sccache --show-stats
 
   bento-run:
-    if: needs.changes.outputs.bento == 'true'
+    if: false # needs.changes.outputs.bento == 'true'
     needs: changes
-    runs-on: [ self-hosted, prod, Linux, X64, cuda, g6e.xlarge, bench ]
+    runs-on: [ self-hosted, cluster, Linux, X64, cuda, g6e.xlarge, bench ]
     env:
       FEATURE: cuda
       RISC0_BUILD_LOCKED: 1
@@ -761,14 +698,11 @@ jobs:
       - uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/protoc
+      - uses: baptiste0928/cargo-install@v3
         with:
-          key: Linux-cuda
-      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
-        with:
-          crate: cargo-binstall
-          version: "1.10.16"
-      - name: Install cargo-nextest
-        run: cargo binstall cargo-nextest
+          crate: cargo-nextest
+          version: "0.9.96"
       - run: cargo run --bin rzup -- --verbose install --force rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install --force cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE

@@ -15,11 +15,11 @@
 use std::{
     cell::RefCell,
     collections::BTreeMap,
-    io::{stderr, stdout, Cursor, Read, Write},
+    io::{Cursor, Read, Write, stderr, stdout},
     rc::Rc,
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 use risc0_zkvm_platform::fileno;
 

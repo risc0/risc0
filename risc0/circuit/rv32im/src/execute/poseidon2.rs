@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_binfmt::WordAddr;
 use risc0_zkp::{
     core::{
         digest::DIGEST_WORDS,
         hash::poseidon2::{
-            CELLS, M_INT_DIAG_HZN, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS,
+            CELLS, M_INT_DIAG_HZN, ROUND_CONSTANTS, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
         },
     },
     field::baby_bear::{self},
