@@ -209,6 +209,12 @@ extern __device__ GetDataStruct exec_ReadReg(ExecContext& ctx,
                                              InstInputStruct arg1_0,
                                              Val arg2_0,
                                              BoundLayout<ReadRegLayout> layout3);
+extern __device__ ReadSourceRegsStruct
+exec_ReadSourceRegs(ExecContext& ctx,
+                    NondetRegStruct arg0,
+                    InstInputStruct arg1_0,
+                    DecoderStruct arg2_0,
+                    BoundLayout<ReadSourceRegsLayout> layout3);
 extern __device__ WriteRdStruct exec_WriteRd(ExecContext& ctx,
                                              NondetRegStruct arg0,
                                              InstInputStruct arg1_0,
@@ -416,11 +422,11 @@ extern __device__ DigestRegStruct exec_DigestReg(ExecContext& ctx,
                                                  ValU32Struct8Array arg0,
                                                  BoundLayout<DigestRegLayout> layout1);
 extern __device__ InstOutputBaseStruct
-exec_ControlLoadRoot(ExecContext& ctx,
-                     NondetRegStruct arg0,
-                     InstInputStruct arg1_0,
-                     BoundLayout<ControlLoadRootLayout> layout2,
-                     GlobalBuf global3);
+exec_ControlLoadRootAndNonce(ExecContext& ctx,
+                             NondetRegStruct arg0,
+                             InstInputStruct arg1_0,
+                             BoundLayout<ControlLoadRootAndNonceLayout> layout2,
+                             GlobalBuf global3);
 extern __device__ InstOutputBaseStruct exec_ControlResume(ExecContext& ctx,
                                                           NondetRegStruct arg0,
                                                           InstInputStruct arg1_0,
@@ -813,7 +819,7 @@ extern __device__ AccumStruct exec_Accum(ExecContext& ctx,
                                          ExtVal1Array arg1_0,
                                          BoundLayout<AccumLayout> layout2);
 extern __device__ BigIntTopStateStruct exec_TopExtract(ExecContext& ctx,
-                                                       BoundLayout<TopLayout> arg0,
+                                                       BoundLayout<TopLayout> layout0,
                                                        GlobalBuf global1);
 extern __device__ AccumStruct execUser_Accum(ExecContext& ctx,
                                              BoundLayout<TopLayout> arg0,

@@ -19,7 +19,7 @@ use addr2line::{
     demangle_auto,
     gimli::{self, Reader as _},
 };
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 
 use super::Frame;
 

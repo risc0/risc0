@@ -35,10 +35,10 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use config::GuestMetadata;
-use risc0_binfmt::{ProgramBinary, KERNEL_START_ADDR};
+use risc0_binfmt::{KERNEL_START_ADDR, ProgramBinary};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
@@ -50,11 +50,11 @@ pub use self::{
         DockerOptions, DockerOptionsBuilder, DockerOptionsBuilderError, GuestOptions,
         GuestOptionsBuilder, GuestOptionsBuilderError,
     },
-    docker::{docker_build, BuildStatus, TARGET_DIR},
+    docker::{BuildStatus, TARGET_DIR, docker_build},
 };
 
 const RISC0_TARGET_TRIPLE: &str = "riscv32im-risc0-zkvm-elf";
-const DEFAULT_DOCKER_TAG: &str = "r0.1.85.0";
+const DEFAULT_DOCKER_TAG: &str = "r0.1.88.0";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -158,7 +158,9 @@ fn compute_image_id(elf: &[u8], elf_path: &str) -> Result<Digest> {
     Ok(match r0vm_image_id(elf_path, "--id") {
         Ok(image_id) => image_id,
         Err(err) => {
-            tty_println("Falling back to slow ImageID computation. Updating to the latest r0vm will speed this up.");
+            tty_println(
+                "Falling back to slow ImageID computation. Updating to the latest r0vm will speed this up.",
+            );
             tty_println(&format!("  error: {err}"));
             risc0_binfmt::compute_image_id(elf)?
         }
@@ -430,10 +432,7 @@ pub(crate) fn cargo_command_internal(subcmd: &str, guest_info: &GuestInfo) -> Co
         cmd.env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
 
         // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
-        // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
-        // would be seamless if there was a reliable way to tell whether it is enabled in
-        // risc0-zkvm-platform, however, this problem is also temporary.
-        #[cfg(feature = "unstable")]
+        // feature is available.
         cmd.env("RISC0_FEATURE_bigint2", "");
     }
 
@@ -557,7 +556,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
         cmd.args(["--features", &(guest_pkg.to_owned() + "/" + feature)]);
     }
 
-    eprintln!("Building staticlib: {:?}", cmd);
+    eprintln!("Building staticlib: {cmd:?}");
 
     // Run the build command and extract the name of the resulting staticlib
     // artifact.
@@ -574,7 +573,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
                 }
             }
             Message::CompilerMessage(msg) => {
-                eprint!("{}", msg);
+                eprint!("{msg}");
             }
             _ => (),
         }
@@ -748,7 +747,9 @@ fn do_embed_methods<G: GuestBuilder>(mut guest_opts: HashMap<&str, GuestOptions>
 
     // If the user provided options for a package that wasn't built, abort.
     if let Some(package) = guest_opts.keys().next() {
-        panic!("Error: guest options were provided for package {package:?} but the package was not built.");
+        panic!(
+            "Error: guest options were provided for package {package:?} but the package was not built."
+        );
     }
 
     build_methods(&pkg_opts)

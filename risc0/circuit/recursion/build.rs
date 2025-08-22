@@ -25,12 +25,14 @@ fn download_zkr() {
         str::FromStr,
     };
 
-    use downloader::{verify, Download, DownloadSummary, Downloader};
+    use downloader::{Download, DownloadSummary, Downloader, verify};
     use sha2::{Digest, Sha256};
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "5f1762201f5c4afb5d92df4a5b8e5bf5c87b67785991592ba79ce4033719b030";
+    // NOTE: This can be calculated with:
+    // shasum -a256 risc0/circuit/recursion/src/recursion_zkr.zip
+    const SHA256_HASH: &str = "744b999f0a35b3c86753311c7efb2a0054be21727095cf105af6ee7d3f4d8849";
 
     fn check_sha2(path: &Path) -> bool {
         let data = fs::read(path).unwrap();

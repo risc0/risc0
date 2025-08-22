@@ -27,21 +27,21 @@ use std::{
     path::{Path, PathBuf},
     process::{Child, Command},
     sync::{
+        Arc, Mutex,
         atomic::{AtomicBool, Ordering},
         mpsc::channel,
-        Arc, Mutex,
     },
     thread,
     time::Duration,
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use bytes::{Buf, BufMut, Bytes};
 use lazy_regex::regex_captures;
 use prost::Message;
 use semver::Version;
 
-use crate::{get_version, ExitCode, Journal, ReceiptClaim};
+use crate::{ExitCode, Journal, ReceiptClaim, get_version};
 
 mod pb {
     pub(crate) mod api {
@@ -178,11 +178,13 @@ impl ParentProcessConnector {
                     client_version.major, client_version.minor
                 )
             } else {
-                format!("1. Your risc0 dependencies are using a pre-released version {client_version}.\n   \
+                format!(
+                    "1. Your risc0 dependencies are using a pre-released version {client_version}.\n   \
                     If you encounter this error message when running code on the risc0 codebase, you must\n   \
                     either run the command `git checkout origin/release-{}.{}` to checkout the version of the\n   \
                     risc0 code that is compatible with your server or build the r0vm server from source\n   \
-                    https://github.com/risc0/risc0/blob/main/CONTRIBUTING.md\n", server_version.major, server_version.minor
+                    https://github.com/risc0/risc0/blob/main/CONTRIBUTING.md\n",
+                    server_version.major, server_version.minor
                 )
             };
             let msg = format!(
@@ -191,7 +193,8 @@ impl ParentProcessConnector {
                 {server_suggestion}\
                 2. Change the risc0-zkvm and risc0-build dependencies in your project to {}.{}\n\n\
                 risc0-zkvm version: {client_version}\n\
-                r0vm server version: {server_version}", server_version.major, server_version.minor
+                r0vm server version: {server_version}",
+                server_version.major, server_version.minor
             );
             tracing::warn!("{msg}");
             bail!(msg);

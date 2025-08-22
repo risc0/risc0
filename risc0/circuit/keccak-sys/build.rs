@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ fn build_cuda_kernels() {
         return;
     }
 
-    env::set_var("SCCACHE_IDLE_TIMEOUT", "0");
+    unsafe { env::set_var("SCCACHE_IDLE_TIMEOUT", "0") };
 
     let mut build = cc::Build::new();
     build
@@ -68,7 +68,7 @@ fn build_cuda_kernels() {
         .flag("-diag-suppress=2922")
         .flag("-std=c++17")
         .flag("-Xcompiler")
-        .flag("-Wno-unused-function,-Wno-unused-parameter")
+        .flag("-Wno-missing-braces,-Wno-unused-function,-Wno-unknown-pragmas,-Wno-unused-parameter")
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap());
     if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {

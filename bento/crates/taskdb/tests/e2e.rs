@@ -4,15 +4,16 @@
 
 use anyhow::Result;
 use sqlx::{
-    types::{JsonValue, Uuid},
     PgPool,
+    types::{JsonValue, Uuid},
 };
 use taskdb::{
+    ReadyTask, TaskState,
     planner::{
-        task::{Command as TaskCmd, Task},
         Planner,
+        task::{Command as TaskCmd, Task},
     },
-    test_helpers, ReadyTask, TaskState,
+    test_helpers,
 };
 
 #[sqlx::test()]
@@ -250,14 +251,16 @@ async fn e2e(pool: PgPool) -> Result<()> {
             .unwrap();
     }
 
-    assert!(taskdb::update_task_done(
-        &pool,
-        &exec_task.job_id,
-        &exec_task.task_id,
-        JsonValue::default(),
-    )
-    .await
-    .unwrap());
+    assert!(
+        taskdb::update_task_done(
+            &pool,
+            &exec_task.job_id,
+            &exec_task.task_id,
+            JsonValue::default(),
+        )
+        .await
+        .unwrap()
+    );
 
     // Validate we have a terminal (finalize) node and its stats are correct:
     let finalize = test_helpers::get_task(&pool, &task.job_id, "finalize")
@@ -279,7 +282,7 @@ async fn e2e(pool: PgPool) -> Result<()> {
     // Mock GPU workers consuming the work items
     let mut idx = 0;
     while let Some(task) = taskdb::request_work(&pool, gpu_worker_type).await.unwrap() {
-        let idx_str = format!("{}", idx);
+        let idx_str = idx.to_string();
         assert_eq!(task.task_id, idx_str);
         match idx {
             // Prove Segments
@@ -311,7 +314,7 @@ async fn e2e(pool: PgPool) -> Result<()> {
                 assert_eq!(join_obj.get("index").unwrap().as_u64().unwrap(), 4);
             }
             // Finalize
-            _ => panic!("idx: {}", idx),
+            _ => panic!("idx: {idx}"),
         }
         // Mark the task as done.
         assert!(
@@ -329,14 +332,16 @@ async fn e2e(pool: PgPool) -> Result<()> {
         .unwrap()
         .unwrap();
     assert_eq!(final_task.task_id, "finalize");
-    assert!(taskdb::update_task_done(
-        &pool,
-        &final_task.job_id,
-        &final_task.task_id,
-        JsonValue::default(),
-    )
-    .await
-    .unwrap());
+    assert!(
+        taskdb::update_task_done(
+            &pool,
+            &final_task.job_id,
+            &final_task.task_id,
+            JsonValue::default(),
+        )
+        .await
+        .unwrap()
+    );
 
     for task in test_helpers::get_tasks(&pool).await.unwrap() {
         // println!("{:?}", task);
