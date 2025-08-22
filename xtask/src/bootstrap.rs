@@ -68,7 +68,7 @@ impl Bootstrap {
         Command::new("rustfmt")
             .arg(path)
             .status()
-            .expect(&format!("failed to format {path}"));
+            .unwrap_or_else(|_| panic!("failed to format {path}"));
     }
 
     fn generate_recursion_control_ids() {

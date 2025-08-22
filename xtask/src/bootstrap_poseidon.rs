@@ -70,8 +70,7 @@ fn to_elems(input_string: &str) -> Vec<Elem> {
             .chars()
             .filter(|c| "0123456789abcdef".contains(*c))
             .collect();
-        let num = u32::from_str_radix(&tidy_part, 16)
-            .expect("failed to parse hex number into u32");
+        let num = u32::from_str_radix(&tidy_part, 16).expect("failed to parse hex number into u32");
         assert!(num < (FIELD as u32));
         out.push(Elem::new(num));
     }
@@ -146,7 +145,8 @@ fn run_sage() -> String {
         .arg(SECURITY.to_string()) // Desired security level
         .arg(format!("{FIELD:x}")) // P in hex i.e. 15*2^27 + 1
         .stdout(Stdio::piped()) // Pipe output
-        .spawn().expect("Failed to spawn Sage process. Is Sage installed?");
+        .spawn()
+        .expect("Failed to spawn Sage process. Is Sage installed?");
 
     // Convert the output to a bunch of lines
     let sage_output = sage_child.wait_with_output().unwrap();
