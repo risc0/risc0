@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import os
 import re
 from pathlib import Path
 import subprocess
@@ -10,21 +9,17 @@ import argparse
 PUBLIC_HEADER = """
 // Copyright {YEAR} RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// This project is dual-licensed under either:
+// - Apache License, Version 2.0 (LICENSE-APACHE or https://www.apache.org/licenses/LICENSE-2.0)
+// - MIT License (LICENSE-MIT or https://opensource.org/licenses/MIT)
+// at your option.
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 """.strip()
 
 PUBLIC_HEADER_RE = re.compile(
-    "^" + PUBLIC_HEADER.replace("(", "\\(").replace(")", "\\)").replace("{YEAR}", "(?P<year>[0-9]+)"),
+    r"^// Copyright (?P<year>[0-9]+) RISC Zero, Inc\.\n//\n// This project is dual-licensed under either:\n// - Apache License, Version 2\.0 \(LICENSE-APACHE or https://www\.apache\.org/licenses/LICENSE-2\.0\)\n// - MIT License \(LICENSE-MIT or https://opensource\.org/licenses/MIT\)\n// at your option\.\n//\n// SPDX-License-Identifier: Apache-2\.0 OR MIT",
+    re.MULTILINE
 )
 
 EXTENSIONS = [
@@ -65,7 +60,7 @@ def check_file(root, file, fix):
                 print(f"license has wrong year {actual_year}, expected {expected_year}")
                 if fix:
                     print(f"fixing {rel_path}")
-                    start, end = match.span(1)
+                    start, end = match.span("year")
                     fix_file(file_obj, file_contents, start, end, expected_year)
                 else:
                     return 1
