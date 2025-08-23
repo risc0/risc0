@@ -196,7 +196,7 @@ impl GuestCommand {
             .wait()
             .with_context(|| "couldn't get cargo's exit status")?;
         if !output.success() {
-            bail!("failed to build crate")
+            bail!("failed to build crate");
         }
 
         // If we are running `cargo risczero test`, load each test binary into the
