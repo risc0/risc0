@@ -148,7 +148,7 @@ mod zkvm {
 
     #[inline(always)]
     unsafe fn illegal_instruction() -> ! {
-        asm!("fence", options(noreturn));
+        asm!(".word 0x00000000", options(noreturn));
     }
 
     #[inline(always)]

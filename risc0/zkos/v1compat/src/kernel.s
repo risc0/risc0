@@ -43,6 +43,10 @@
 .equ USER_MODE, 0
 .equ MACHINE_MODE, 1
 
+.macro illegal_insn
+    .word 0x00000000
+.endm
+
 .section .text
 .global _start
 _start:
@@ -83,7 +87,7 @@ _ecall_table:
     j _ecall_software
     j _ecall_sha
     j _ecall_bigint
-    fence # user
+    illegal_insn
     j _ecall_bigint2
     j _ecall_poseidon2
 
@@ -99,7 +103,7 @@ _ecall_dispatch:
     # jump into dispatch table
     jr a1
 1:
-    fence # panic
+    illegal_insn # panic
 
 _ecall_halt:
     # copy output digest from pointer in a1 to GLOBAL_OUTPUT_ADDR
@@ -143,7 +147,7 @@ _ecall_halt:
     mret
 
 1:
-    fence
+    illegal_insn # panic after halt
 
 # return a word of the input digest to the user
 _ecall_input:
@@ -165,7 +169,7 @@ _ecall_input:
     mret
 
 1:
-    fence # panic
+    illegal_insn # panic
 
 _ecall_software:
     # prepare a software ecall
