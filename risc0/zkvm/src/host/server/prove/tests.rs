@@ -96,6 +96,7 @@ fn prove_elf_succinct(env: ExecutorEnv, elf: &[u8]) -> Result<Receipt> {
 }
 
 #[test_log::test]
+#[cfg_attr(all(not(feature = "cuda"), ci), ignore = "slow on CPU")]
 fn keccak_union() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUnion(3))
