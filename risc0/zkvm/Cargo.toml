@@ -223,5 +223,5 @@ witgen_debug = ["risc0-circuit-rv32im/witgen_debug"]
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [
   "cfg(ci)",
-  "cfg(ci, values('fast', 'medium' slow')",
+  "cfg(ci, values('fast', 'medium', 'slow')",
 ] }

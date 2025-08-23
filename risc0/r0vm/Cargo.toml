@@ -70,5 +70,5 @@ r0vm-ver-compat = ["risc0-zkvm/r0vm-ver-compat"]
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [
   "cfg(ci)",
-  "cfg(ci, values('fast', 'medium' slow')",
+  "cfg(ci, values('fast', 'medium', 'slow')",
 ] }
