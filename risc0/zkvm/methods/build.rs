@@ -14,7 +14,7 @@
 
 use std::{collections::HashMap, env};
 
-use risc0_build::{embed_methods_with_options, DockerOptionsBuilder, GuestOptionsBuilder};
+use risc0_build::{DockerOptionsBuilder, GuestOptionsBuilder, embed_methods_with_options};
 
 fn main() {
     tracing_subscriber::fmt()
@@ -48,6 +48,10 @@ fn main() {
                 ])
                 .build()
                 .unwrap(),
+        ),
+        (
+            "risc0-zkvm-methods-std-ext",
+            GuestOptionsBuilder::default().build().unwrap(),
         ),
         ("risc0-zkvm-methods-cpp-crates", guest_opts.build().unwrap()),
     ]);

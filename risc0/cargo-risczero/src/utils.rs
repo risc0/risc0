@@ -15,7 +15,7 @@
 // This is based on cargo-wasix: https://github.com/wasix-org/cargo-wasix
 
 use anyhow::{Context, Result};
-use bonsai_sdk::{blocking::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
+use bonsai_sdk::{API_KEY_ENVVAR, API_URL_ENVVAR, blocking::Client};
 use clap::Args;
 use risc0_zkvm::VERSION;
 
@@ -42,8 +42,7 @@ pub(crate) fn get_client_envs(client_envs: &ClientEnvs) -> Result<(String, Strin
         api_url.to_string()
     } else {
         std::env::var(API_URL_ENVVAR).context(format!(
-            "Either `--api-url` or `{}` env var must be set",
-            API_URL_ENVVAR
+            "Either `--api-url` or `{API_URL_ENVVAR}` env var must be set",
         ))?
     };
 
@@ -51,8 +50,7 @@ pub(crate) fn get_client_envs(client_envs: &ClientEnvs) -> Result<(String, Strin
         api_key.to_string()
     } else {
         std::env::var(API_KEY_ENVVAR).context(format!(
-            "Either `--api-key` or `{}` env var must be set",
-            API_KEY_ENVVAR
+            "Either `--api-key` or `{API_KEY_ENVVAR}` env var must be set",
         ))?
     };
 

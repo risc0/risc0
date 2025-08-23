@@ -14,14 +14,14 @@
 
 use std::{fs, path::Path, process::Command};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use cargo_metadata::Package;
 use docker_generate::DockerFile;
 use tempfile::tempdir;
 
 use crate::{
-    config::GuestInfo, encode_rust_flags, get_env_var, get_package, GuestOptions,
-    RISC0_TARGET_TRIPLE,
+    GuestOptions, RISC0_TARGET_TRIPLE, config::GuestInfo, encode_rust_flags, get_env_var,
+    get_package,
 };
 
 const DOCKER_IGNORE: &str = r#"
@@ -154,14 +154,8 @@ fn create_dockerfile(manifest_path: &Path, temp_dir: &Path, guest_info: &GuestIn
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")]);
-
-    #[cfg(feature = "unstable")]
-    {
-        build = build.env(&[("RISC0_FEATURE_bigint2", "")]);
-    }
-
-    build = build
+        .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[("RISC0_FEATURE_bigint2", "")])
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.risc0/cpp/bin/riscv32-unknown-elf-gcc",
@@ -228,7 +222,7 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
+    use crate::{DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder, build_package};
 
     use super::*;
 
@@ -268,7 +262,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "badd81f80a6cc33001695f901b46e3473182a5a68a9847c50720f722ceaa27b7",
+            "91d654f4e393d80f1771f70e7996e47e346bdfe011a0925279871fd25adab260",
         );
     }
 }

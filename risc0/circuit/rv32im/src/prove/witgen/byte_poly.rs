@@ -15,9 +15,9 @@
 use std::cmp::max;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use risc0_zkp::field::Elem as _;
-use smallvec::{smallvec, SmallVec};
+use smallvec::{SmallVec, smallvec};
 
 use crate::{
     execute::bigint::BIGINT_WIDTH_BYTES,
@@ -177,7 +177,7 @@ impl BytePolynomial {
     pub(crate) unsafe fn get_unchecked(&self, idx: usize) -> &i32 {
         let i = idx / BytePolyChunk::LANES as usize;
         let j = idx % BytePolyChunk::LANES as usize;
-        self.coeffs.get_unchecked(i).as_array_ref().get_unchecked(j)
+        unsafe { self.coeffs.get_unchecked(i).as_array_ref().get_unchecked(j) }
     }
 
     #[inline(always)]
@@ -190,10 +190,12 @@ impl BytePolynomial {
     pub(crate) unsafe fn get_unchecked_mut(&mut self, idx: usize) -> &mut i32 {
         let i = idx / BytePolyChunk::LANES as usize;
         let j = idx % BytePolyChunk::LANES as usize;
-        self.coeffs
-            .get_unchecked_mut(i)
-            .as_array_mut()
-            .get_unchecked_mut(j)
+        unsafe {
+            self.coeffs
+                .get_unchecked_mut(i)
+                .as_array_mut()
+                .get_unchecked_mut(j)
+        }
     }
 }
 

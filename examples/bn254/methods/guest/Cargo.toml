@@ -1,13 +1,13 @@
 [package]
 name = "bn254-inner"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 
 [dependencies]
 bn254-core = { path = "../../core" }
-risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 substrate-bn = "=0.6.0"
 
 [patch.crates-io]

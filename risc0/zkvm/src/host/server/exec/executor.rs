@@ -19,17 +19,17 @@ use std::{
     time::Instant,
 };
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::{Context as _, Result, bail};
 use risc0_binfmt::{
     AbiKind, ByteAddr, ExitCode, MemoryImage, Program, ProgramBinary, ProgramBinaryHeader,
     SystemState,
 };
 use risc0_circuit_rv32im::{
-    execute::{
-        platform::WORD_SIZE, CycleLimit, Executor, Syscall as CircuitSyscall,
-        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2,
-    },
     MAX_INSN_CYCLES, MAX_INSN_CYCLES_LOWER_PO2,
+    execute::{
+        CycleLimit, DEFAULT_SEGMENT_LIMIT_PO2, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, platform::WORD_SIZE,
+    },
 };
 use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
@@ -37,15 +37,15 @@ use risc0_zkvm_platform::{align_up, fileno};
 use tempfile::tempdir;
 
 use crate::{
-    host::{client::env::SegmentPath, server::session::Session},
-    receipt_claim::exit_code_from_terminate_state,
     Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
+    claim::receipt::exit_code_from_terminate_state,
+    host::{client::env::SegmentPath, server::session::Session},
 };
 
 use super::{
+    Journal,
     profiler::{self, Profiler},
     syscall::{SyscallContext, SyscallTable},
-    Journal,
 };
 
 // The Executor provides an implementation for the execution phase.
@@ -86,7 +86,6 @@ impl<'a> ExecutorImpl<'a> {
     /// work will be done in each segment. This is the execution phase:
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
-    #[allow(dead_code)]
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage) -> Result<Self> {
         Self::with_details(env, None, image, None)
     }
@@ -193,6 +192,7 @@ impl<'a> ExecutorImpl<'a> {
             self,
             self.env.input_digest,
             self.env.trace.clone(),
+            self.env.povw_job_id,
         );
 
         let max_insn_cycles = if segment_limit_po2 >= 15 {
@@ -265,7 +265,6 @@ impl<'a> ExecutorImpl<'a> {
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = std::mem::take(&mut *self.syscall_table.assumptions_used.lock().unwrap());
         let mmr_assumptions = self.syscall_table.mmr_assumptions.take();
-        let pending_zkrs = self.syscall_table.pending_zkrs.take();
         let pending_keccaks = self.syscall_table.pending_keccaks.take();
 
         if let Some(profiler) = self.profiler.take() {
@@ -301,15 +300,13 @@ impl<'a> ExecutorImpl<'a> {
                 pc: 0,
                 merkle_root: post_digest,
             },
-            pending_zkrs,
             pending_keccaks,
             syscall_metrics,
             hooks: vec![],
-            ecall_metrics: ecall_metrics.into(),
+            ecall_metrics,
+            povw_job_id: self.env.povw_job_id,
+            execution_time: elapsed,
         };
-
-        tracing::info!("execution time: {elapsed:?}");
-        session.log();
 
         assert_eq!(
             session.total_cycles,

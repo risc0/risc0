@@ -17,11 +17,11 @@ use std::net::{SocketAddr, TcpListener};
 use std::path::Path;
 
 use super::executor::ExecutorImpl;
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use gdbstub::{conn::ConnectionExt, stub::GdbStub};
 use risc0_circuit_rv32im::execute::{
-    gdb::Debugger as CircuitDebugger, Executor as CircuitExecutor,
+    Executor as CircuitExecutor, gdb::Debugger as CircuitDebugger,
 };
 use tempfile::NamedTempFile;
 
@@ -55,6 +55,8 @@ impl<'a, 'b, 'c> GdbExecutor<'a, 'b, 'c> {
             exec,
             exec.env.input_digest,
             exec.env.trace.clone(),
+            // NOTE: PoVW nonce has no effect on execution.
+            None,
         );
         Ok(Self {
             elf,
@@ -93,7 +95,7 @@ impl<'a, 'b, 'c> GdbExecutor<'a, 'b, 'c> {
 mod tests {
     use super::*;
     use crate::ExecutorEnv;
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use risc0_zkvm_methods::{MULTI_TEST_ELF, multi_test::MultiTestSpec};
 
     #[test]
     fn end_to_end() {

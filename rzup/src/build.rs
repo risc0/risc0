@@ -16,7 +16,6 @@ use crate::components::Component;
 use crate::env::Environment;
 use crate::error::{Result, RzupError};
 use crate::events::RzupEvent;
-use crate::paths::Paths;
 
 use semver::Version;
 use std::io::{BufRead, BufReader};
@@ -207,7 +206,7 @@ pub fn build_rust_toolchain(
     let mut version = Version::parse(version_str.trim())?;
     version.build = semver::BuildMetadata::new(&commit).unwrap();
 
-    let dest_dir = Paths::get_version_dir(env, &Component::RustToolchain, &version);
+    let dest_dir = Component::RustToolchain.get_version_dir(env, &version);
     if dest_dir.exists() {
         return Err(RzupError::Other(format!(
             "Rust toolchain version {version} already installed"
