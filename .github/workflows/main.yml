@@ -224,24 +224,28 @@ jobs:
             nvcc_arch: sm_89
             test_command: cargo test
             partition: 1
+            ci_profile: slow
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run --partition hash:1/2
             partition: 1
+            ci_profile: fast
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run --partition hash:2/2
             partition: 2
+            ci_profile: fast
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      RUSTFLAGS: --cfg=ci=\"${{ matrix.ci_profile }}\"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
@@ -294,17 +298,20 @@ jobs:
             device: nvidia_rtx_4000_ada
             nvcc_arch: sm_89
             test_command: cargo test
+            ci_profile: slow
           - os: macOS
             arch: ARM64
             feature: default
             device: apple_m2_pro
             test_command: cargo nextest run
+            ci_profile: fast
     env:
       FEATURE: ${{ matrix.feature }}
       NVCC_APPEND_FLAGS: -arch=${{ matrix.nvcc_arch }}
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      RUSTFLAGS: --cfg=ci=\"${{ matrix.ci_profile }}\"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
@@ -325,7 +332,7 @@ jobs:
       - name: test risc0-r0vm
         run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE
       - name: test risc0-r0vm (disable-dev-mode)
-        run: ${{ matrix.test_command }} -p risc0-r0vm -F $FEATURE -F disable-dev-mode
+        run: ${{ matrix.test_command }} --release -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: ${{ matrix.test_command }} -p cargo-risczero -F experimental
       - name: run datasheet generator (smoke test)
         run: cargo run --locked -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
