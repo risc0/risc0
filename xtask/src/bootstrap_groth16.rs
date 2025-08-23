@@ -116,7 +116,7 @@ fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
     Command::new("rustfmt")
         .arg(RUST_VERIFIER_PATH)
         .status()
-        .expect("failed to format {RUST_GROTH16_VERIFIER_PATH}");
+        .unwrap_or_else(|_| panic!("failed to format {RUST_VERIFIER_PATH}"));
 }
 
 fn bootstrap_control_id(risc0_ethereum_path: &Path) {
