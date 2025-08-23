@@ -23,7 +23,7 @@ Because the validity-checking and hashing functionality runs on the zkVM, it gen
 
 The main program that calls a method in the guest zkVM is in [src/main.rs](src/main.rs).
 The code that runs inside the zkVM is in [`methods/guest/src/main.rs`](methods/guest/src/main.rs).
-The rest of the project is build support.
+The rest of the project is built on support.
 
 For the main RISC Zero project, see [here](https://github.com/risc0/risc0).
 
