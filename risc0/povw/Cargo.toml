@@ -33,6 +33,6 @@ guest = ["dep:derive_builder"]
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [
-  "cfg(ci)",
-  "cfg(ci, values('fast', 'medium', 'slow')",
+  'cfg(ci)',
+  'cfg(ci, values("fast", "medium", "slow")',
 ] }
