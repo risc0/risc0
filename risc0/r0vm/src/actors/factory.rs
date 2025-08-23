@@ -17,20 +17,20 @@ use std::{collections::HashMap, net::SocketAddr};
 use kameo::{error::Infallible, prelude::*};
 use multi_index_map::MultiIndexMap;
 use tokio::{
-    net::{tcp, TcpStream},
+    net::{TcpStream, tcp},
     task::JoinHandle,
 };
 
 use super::{
+    RemoteRequest,
     job::JobActor,
     metrics,
     protocol::{
+        GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
         factory::{DropJob, GetTask, SubmitTaskMsg, TaskDoneMsg, TaskUpdateMsg},
         worker::TaskMsg,
-        GlobalId, JobId, Task, TaskHeader, TaskKind, WorkerId,
     },
-    rpc::{rpc_system, RpcSender},
-    RemoteRequest,
+    rpc::{RpcSender, rpc_system},
 };
 
 #[derive(Clone, MultiIndexMap)]
@@ -258,6 +258,7 @@ type WriteStream = metrics::OwnedWriteHalfWithMetrics<tcp::OwnedWriteHalf>;
 pub(crate) struct RemoteFactoryActor {
     rpc_sender: RpcSender<WriteStream>,
     rpc_receiver_handle: JoinHandle<()>,
+    rpc_death_recv: Option<tokio::sync::oneshot::Receiver<()>>,
 }
 
 impl RemoteFactoryActor {
@@ -267,17 +268,20 @@ impl RemoteFactoryActor {
             metrics::StreamWithMetrics::new(TcpStream::connect(addr).await?, meter.clone());
         let (rpc_sender, mut rpc_receiver) = rpc_system(stream, meter);
 
+        let (rpc_death_send, rpc_death_recv) = tokio::sync::oneshot::channel();
         let rpc_receiver_handle = tokio::task::spawn(async move {
             rpc_receiver
                 .receive_many(|_: (), _| async {
                     tracing::error!("received unexpected unsolicited RPC message");
                 })
-                .await
+                .await;
+            let _ = rpc_death_send.send(());
         });
 
         Ok(Self {
             rpc_sender,
             rpc_receiver_handle,
+            rpc_death_recv: Some(rpc_death_recv),
         })
     }
 }
@@ -285,7 +289,12 @@ impl RemoteFactoryActor {
 impl Actor for RemoteFactoryActor {
     type Error = anyhow::Error;
 
-    async fn on_start(&mut self, _actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+    async fn on_start(&mut self, actor_ref: ActorRef<Self>) -> Result<(), Self::Error> {
+        let rpc_death_recv = self.rpc_death_recv.take().unwrap();
+        tokio::task::spawn(async move {
+            let _ = rpc_death_recv.await;
+            actor_ref.kill();
+        });
         Ok(())
     }
 

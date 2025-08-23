@@ -16,16 +16,16 @@ use anyhow::Result;
 use gdbstub::{
     common::Signal,
     conn::ConnectionExt,
-    stub::{run_blocking, SingleThreadStopReason},
+    stub::{SingleThreadStopReason, run_blocking},
     target::{
+        Target,
         ext::{
             base::{
-                singlethread::{SingleThreadBase, SingleThreadResume},
                 BaseOps,
+                singlethread::{SingleThreadBase, SingleThreadResume},
             },
             breakpoints::{Breakpoints, SwBreakpoint},
         },
-        Target,
     },
 };
 use risc0_binfmt::ByteAddr;
@@ -33,11 +33,11 @@ use risc0_binfmt::ByteAddr;
 use crate::TerminateState;
 
 use super::{
+    Syscall,
     executor::Executor,
     platform::*,
     r0vm::{LoadOp, Risc0Context as _, Risc0Machine},
     rv32im::Emulator,
-    Syscall,
 };
 
 pub enum ExecState {
@@ -147,7 +147,7 @@ impl<S: Syscall> SwBreakpoint for Debugger<'_, '_, S> {
         addr: <Self::Arch as gdbstub::arch::Arch>::Usize,
         _kind: <Self::Arch as gdbstub::arch::Arch>::BreakpointKind,
     ) -> gdbstub::target::TargetResult<bool, Self> {
-        eprintln!("setting breakpoint at {:X}", addr);
+        eprintln!("setting breakpoint at {addr:X}");
         self.breakpoints.push(addr);
         Ok(true)
     }

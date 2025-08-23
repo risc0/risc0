@@ -14,28 +14,27 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-use anyhow::{anyhow, bail, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow, bail};
 use risc0_binfmt::ByteAddr;
 // use risc0_circuit_rv32im::prove::emu::{
 //     addr::{ByteAddr, WordAddr},
 //     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
 // };
 use risc0_circuit_rv32im::{
-    execute::{
-        platform::WORD_SIZE, Executor, Syscall as CircuitSyscall,
-        SyscallContext as CircuitSyscallContext, DEFAULT_SEGMENT_LIMIT_PO2, USER_END_ADDR,
-    },
     MAX_INSN_CYCLES,
+    execute::{
+        DEFAULT_SEGMENT_LIMIT_PO2, Executor, Syscall as CircuitSyscall,
+        SyscallContext as CircuitSyscallContext, USER_END_ADDR, platform::WORD_SIZE,
+    },
 };
 use risc0_zkvm_platform::{
-    fileno,
+    PAGE_SIZE, WORD_SIZE, fileno,
     memory::is_guest_memory,
     syscall::{
         ecall,
         nr::{SYS_EXIT, SYS_FORK},
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_MAX, REG_T0},
     },
-    PAGE_SIZE, WORD_SIZE,
 };
 
 use super::{Syscall, SyscallContext, SyscallTable};

@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
+use risc0_zkvm::{ExecutorEnv, ProverOpts, get_prover_server};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 #[derive(Parser)]

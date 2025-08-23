@@ -55,7 +55,7 @@ pub enum StepMode {
     SeqReverse,
 }
 
-extern "C" {
+unsafe extern "C" {
     pub fn risc0_circuit_recursion_cpu_witgen(
         mode: StepMode,
         buffers: *const RawExecBuffers,
@@ -80,7 +80,7 @@ extern "C" {
 }
 
 #[cfg(feature = "cuda")]
-extern "C" {
+unsafe extern "C" {
     pub fn risc0_circuit_recursion_cuda_witgen(
         mode: StepMode,
         buffers: *const RawExecBuffers,

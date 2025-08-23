@@ -23,31 +23,30 @@ mod profiler;
 extern crate alloc;
 
 use alloc::{
-    alloc::{alloc_zeroed, Layout},
+    alloc::{Layout, alloc_zeroed},
     format, vec,
     vec::Vec,
 };
 use core::{arch::asm, ptr::null_mut};
 
 use getrandom::fill;
-use risc0_circuit_keccak::{KeccakState, KECCAK_DEFAULT_PO2};
+use risc0_circuit_keccak::{KECCAK_DEFAULT_PO2, KeccakState};
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
+    Assumption, GUEST_MAX_MEM, ReceiptClaim,
     guest::{
-        env::{self, testing::sha_single_keccak, FdReader, FdWriter, Read as _, Write as _},
+        env::{self, FdReader, FdWriter, Read as _, Write as _, testing::sha_single_keccak},
         memory_barrier, sha,
     },
-    sha::{Digest, Sha256, SHA256_INIT},
-    Assumption, ReceiptClaim, GUEST_MAX_MEM,
+    sha::{Digest, SHA256_INIT, Sha256},
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
 use risc0_zkvm_platform::{
-    fileno,
+    PAGE_SIZE, fileno,
     syscall::{
-        bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
-        sys_poseidon2, sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_WORDS,
+        DIGEST_WORDS, bigint, ecall, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        sys_poseidon2, sys_read, sys_read_words, sys_write,
     },
-    PAGE_SIZE,
 };
 
 risc0_zkvm::entry!(main);
@@ -314,7 +313,7 @@ fn main() {
             // This test comes from: https://github.com/RustCrypto/RSA/blob/master/tests/pkcs1v15.rs
             use risc0_zkvm::sha::rust_crypto::Sha256;
             use rsa::{
-                pkcs1v15::SigningKey, pkcs8::DecodePrivateKey, signature::Signer, RsaPrivateKey,
+                RsaPrivateKey, pkcs1v15::SigningKey, pkcs8::DecodePrivateKey, signature::Signer,
             };
 
             let pem = include_str!("rsa2048-priv.pem");
@@ -458,24 +457,6 @@ fn main() {
                 busy_loop();
                 env::log("Done running control");
             }
-        }
-        MultiTestSpec::SysProveZkr {
-            control_id,
-            input,
-            claim_digest,
-            control_root,
-        } => {
-            unsafe {
-                sys_prove_zkr(
-                    claim_digest.as_ref(),
-                    control_id.as_ref(),
-                    control_root.as_ref(),
-                    input.as_ptr(),
-                    input.len(),
-                );
-            }
-            env::verify_assumption(claim_digest, control_root)
-                .expect("env::verify_integrity returned error");
         }
         MultiTestSpec::SysKeccak => {
             // Test vectors are from KeccakCodePackage
