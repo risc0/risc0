@@ -245,7 +245,7 @@ jobs:
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
-      RUSTFLAGS: --cfg=ci=\"${{ matrix.ci_profile }}\"
+      RUSTFLAGS: --cfg ci="${{ matrix.ci_profile }}"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
@@ -311,7 +311,7 @@ jobs:
       RISC0_DEFAULT_PROVER_NUM_GPUS: 1
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
-      RUSTFLAGS: --cfg=ci=\"${{ matrix.ci_profile }}\"
+      RUSTFLAGS: --cfg ci="${{ matrix.ci_profile }}"
       # SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
