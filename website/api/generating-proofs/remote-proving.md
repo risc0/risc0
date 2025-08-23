@@ -57,7 +57,7 @@ Boundless is highly decentralized, offering high reliability and reducing the im
 [external-boundless-quick-start]: https://docs.beboundless.xyz/developers/quick-start
 [external-boundless-request-tutorial]: https://docs.beboundless.xyz/developers/tutorials/request
 [external-default-prover-fn]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/fn.default_prover.html
-[external-governance-showcase]: https://github.com/risc0/risc0-ethereum/tree/main/examples/governance#readme
+[external-governance-showcase]: https://github.com/risc0/risc0-ethereum/tree/release-1.2/examples/governance#readme
 [external-zeth]: https://www.risczero.com/blog/zeth-release
 [external-zkcoprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [term-cycles]: /terminology#clock-cycles
