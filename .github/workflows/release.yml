@@ -14,10 +14,10 @@ permissions:
   contents: write
 
 env:
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
-  TAG: v1.1.0
-  VERSION: "1.1.0"
+  TAG: v4.0.0
+  VERSION: 4.0.0
 
 jobs:
   release:

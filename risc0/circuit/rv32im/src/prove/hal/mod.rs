@@ -28,20 +28,20 @@ use risc0_zkp::{
 };
 
 use super::{
-    witgen::{preflight::PreflightTrace, PreflightResults, WitnessGenerator},
     Seal, SegmentProver,
+    witgen::{PreflightResults, WitnessGenerator, preflight::PreflightTrace},
 };
 use crate::{
+    RV32IM_SEAL_VERSION,
     execute::segment::Segment,
     zirgen::{
+        CircuitImpl,
         circuit::{
-            CircuitField, ExtVal, Val, REGCOUNT_MIX, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
-            REGISTER_GROUP_DATA,
+            CircuitField, ExtVal, REGCOUNT_MIX, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
+            REGISTER_GROUP_DATA, Val,
         },
         taps::TAPSET,
-        CircuitImpl,
     },
-    RV32IM_SEAL_VERSION,
 };
 
 pub(crate) struct MetaBuffer<H: Hal> {

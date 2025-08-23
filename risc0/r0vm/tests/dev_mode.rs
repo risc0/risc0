@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use assert_cmd::Command;
-use assert_fs::{fixture::PathChild, TempDir};
-use risc0_zkvm::{serde::to_vec, Receipt};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_PATH};
+use assert_fs::{TempDir, fixture::PathChild};
+use risc0_zkvm::{Receipt, serde::to_vec};
+use risc0_zkvm_methods::{MULTI_TEST_PATH, multi_test::MultiTestSpec};
 
 fn run_dev_mode() -> Receipt {
     let temp = TempDir::new().unwrap();
@@ -38,7 +38,7 @@ fn run_dev_mode() -> Receipt {
 
 #[test]
 #[cfg(not(feature = "disable-dev-mode"))]
-fn dev_mode() {
+fn dev_mode_env_var() {
     let receipt = run_dev_mode();
     temp_env::with_var("RISC0_DEV_MODE", Some("1"), || {
         receipt.verify(risc0_zkvm_methods::MULTI_TEST_ID).unwrap();
@@ -51,13 +51,46 @@ fn dev_mode() {
 
 #[test]
 #[cfg(not(feature = "disable-dev-mode"))]
-fn dev_mode_verify_fail() {
+fn dev_mode_verify_fail_env_var() {
     let receipt = run_dev_mode();
     temp_env::with_var("RISC0_DEV_MODE", None::<&str>, || {
         receipt
             .verify(risc0_zkvm_methods::MULTI_TEST_ID)
             .expect_err("Expecting error");
     });
+}
+
+#[test]
+#[cfg(not(feature = "disable-dev-mode"))]
+fn dev_mode_programatic() {
+    use risc0_zkvm::VerifierContext;
+
+    let receipt = run_dev_mode();
+    receipt
+        .verify_with_context(
+            &VerifierContext::default().with_dev_mode(true),
+            risc0_zkvm_methods::MULTI_TEST_ID,
+        )
+        .unwrap();
+
+    match receipt.inner {
+        risc0_zkvm::InnerReceipt::Fake { .. } => {}
+        _ => panic!("expected a fake receipt"),
+    }
+}
+
+#[test]
+#[cfg(not(feature = "disable-dev-mode"))]
+fn dev_mode_verify_fail_programatic() {
+    use risc0_zkvm::VerifierContext;
+
+    let receipt = run_dev_mode();
+    receipt
+        .verify_with_context(
+            &VerifierContext::default().with_dev_mode(false),
+            risc0_zkvm_methods::MULTI_TEST_ID,
+        )
+        .expect_err("Expecting error");
 }
 
 #[test]

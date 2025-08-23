@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ mod wordlist;
 
 use std::io;
 
-use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
-use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover, sha::Digest};
+use wordle_core::{GameState, WORD_LENGTH, WordFeedback};
 use wordle_methods::{WORDLE_GUEST_ELF, WORDLE_GUEST_ID};
 
 // The "server" is an agent in the Wordle game that checks the player's guesses.
@@ -105,7 +105,7 @@ fn play_rounds(server: Server, player: Player, rounds: usize) -> bool {
             println!("Good guess! Our server has calculated your results.");
             println!("You'll have 6 chances to get the word right.");
         } else {
-            println!("You have {} guesses remaining.", remaining_guesses);
+            println!("You have {remaining_guesses} guesses remaining.");
         }
 
         score.print(guess_word.as_str());

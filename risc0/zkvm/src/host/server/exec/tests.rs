@@ -21,24 +21,24 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_binfmt::{ExitCode, MemoryImage, Program, ProgramBinary};
+use risc0_binfmt::{ExitCode, MemoryImage, PovwJobId, PovwLogId, Program, ProgramBinary};
 use risc0_circuit_rv32im::TerminateState;
 use risc0_zkos_v1compat::V1COMPAT_ELF;
 use risc0_zkp::digest;
 use risc0_zkvm_methods::{
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND2_ELF, RAND_ELF,
+    BLST_ELF, HEAP_ELF, HEAP_LIMITS_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, RAND2_ELF,
     SLICE_IO_ELF, STANDARD_LIB_ELF, SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
 };
 use risc0_zkvm_platform::{
-    fileno,
+    WORD_SIZE, fileno,
     syscall::{bigint, nr::SYS_RANDOM},
-    WORD_SIZE,
 };
 use rstest::rstest;
 use sha2::{Digest as _, Sha256};
 
 use crate::{
+    ExecutorEnv, Session, SimpleSegmentRef,
     host::server::exec::{
         executor::ExecutorImpl,
         profiler::Profiler,
@@ -46,7 +46,6 @@ use crate::{
     },
     serde::to_vec,
     sha::{Digest, Digestible},
-    ExecutorEnv, Session, SimpleSegmentRef,
 };
 
 fn execute_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Session> {
@@ -266,7 +265,7 @@ fn bigint_accel() {
 
     let cases = generate_bigint_test_cases(10);
     for case in cases {
-        println!("Running BigInt circuit test case: {:x?}", case);
+        println!("Running BigInt circuit test case: {case:x?}");
         let input = MultiTestSpec::BigInt {
             count: 1,
             x: case.x,
@@ -796,9 +795,10 @@ mod sys_verify {
         let err = execute_elf(env, MULTI_TEST_ELF).map(|_| ()).unwrap_err();
 
         tracing::debug!("err: {err}");
-        assert!(err
-            .to_string()
-            .contains("env::verify_integrity returned error"));
+        assert!(
+            err.to_string()
+                .contains("env::verify_integrity returned error")
+        );
     }
 }
 
@@ -1021,7 +1021,7 @@ fn profiler() {
         vec![
             (
                 vec![
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into()
@@ -1030,8 +1030,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func2".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func2".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1040,8 +1040,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func3".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func3".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1050,9 +1050,9 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func3".into(),
-                    "profile_test_func5".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func3".into(),
+                    "multi_test::profiler::profile_test_func5".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1061,8 +1061,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func4".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func4".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1071,8 +1071,8 @@ fn profiler() {
             ),
             (
                 vec![
-                    "profile_test_func5".into(),
-                    "profile_test_func1".into(),
+                    "multi_test::profiler::profile_test_func5".into(),
+                    "multi_test::profiler::profile_test_func1".into(),
                     "multi_test::main".into(),
                     "main".into(),
                     "__start".into(),
@@ -1102,7 +1102,10 @@ fn profiler() {
     let program = Program::load_elf(binary.user_elf, u32::MAX).unwrap();
 
     // Check that the addresses for these two functions point to the right place
-    for func_name in ["profile_test_func2", "profile_test_func3"] {
+    for func_name in [
+        "multi_test::profiler::profile_test_func2",
+        "multi_test::profiler::profile_test_func3",
+    ] {
         let test_func = test_samples
             .iter()
             .find(|sample| sample.frames[0].frame.name == func_name)
@@ -1154,18 +1157,22 @@ fn memory_access() {
         Ok(session.exit_code)
     };
 
-    assert!(access_memory(0x0000_0000)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("StoreAccessFault"));
+    assert!(
+        access_memory(0x0000_0000)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("StoreAccessFault")
+    );
 
     let addr = 0xC000_0000;
-    assert!(access_memory(addr)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("StoreAccessFault"));
+    assert!(
+        access_memory(addr)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("StoreAccessFault")
+    );
 
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
@@ -1345,23 +1352,28 @@ mod docker {
         let occurrences = events
             .windows(4)
             .filter_map(|window| {
-                if let &[TraceEvent::InstructionStart {
-                    // li x5, 1337
-                    cycle: cycle1,
-                    pc: pc1,
-                    ..
-                }, TraceEvent::RegisterSet {
-                    idx: 5,
-                    value: 1337,
-                }, TraceEvent::InstructionStart {
-                    // sw x5, 548(zero)
-                    cycle: cycle2,
-                    pc: pc2,
-                    ..
-                }, TraceEvent::RegisterSet {
-                    idx: 6,
-                    value: 0x08000000,
-                }] = window
+                if let &[
+                    TraceEvent::InstructionStart {
+                        // li x5, 1337
+                        cycle: cycle1,
+                        pc: pc1,
+                        ..
+                    },
+                    TraceEvent::RegisterSet {
+                        idx: 5,
+                        value: 1337,
+                    },
+                    TraceEvent::InstructionStart {
+                        // sw x5, 548(zero)
+                        cycle: cycle2,
+                        pc: pc2,
+                        ..
+                    },
+                    TraceEvent::RegisterSet {
+                        idx: 6,
+                        value: 0x08000000,
+                    },
+                ] = window
                 {
                     // Note: it's possible that these instructions could lie between page
                     // boundaries. If that is the case, it means that the difference between cycle2
@@ -1425,4 +1437,42 @@ fn session_limit(
         .build()
         .unwrap();
     execute_elf(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test_log::test]
+fn povw_nonce_assignment() {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
+    let povw_job_id = PovwJobId {
+        log: PovwLogId::from(0x202ce_u64),
+        job: 42,
+    };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(17)
+        .povw(povw_job_id)
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    for (i, segment_ref) in session.segments.into_iter().enumerate() {
+        let segment = segment_ref.resolve().unwrap();
+        assert_eq!(segment.inner.povw_nonce, Some(povw_job_id.nonce(i as u32)));
+    }
+}
+
+#[test_log::test]
+fn povw_nonce_default_assignment() {
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .segment_limit_po2(17)
+        .build()
+        .unwrap();
+    let session = execute_elf(env, MULTI_TEST_ELF).unwrap();
+    // If no PoVW work information is set in the ExecutorEnv, the povw_nonce should be None.
+    for segment_ref in session.segments.into_iter() {
+        let segment = segment_ref.resolve().unwrap();
+        assert_eq!(segment.inner.povw_nonce, None);
+    }
 }

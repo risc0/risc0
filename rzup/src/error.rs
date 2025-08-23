@@ -41,6 +41,15 @@ pub enum RzupError {
 
     #[error("Unsupported platform: {0}")]
     UnsupportedPlatform(String),
+
+    #[error("Unsupported distribution platform: {0}")]
+    UnsupportedDistributionPlatform(String),
+
+    #[error("SHA-265 sum mismatch: expected = {expected}, actual = {actual}")]
+    Sha256Mismatch { expected: String, actual: String },
+
+    #[error("Signature failed to verify: {0}")]
+    InvalidSignature(String),
 }
 
 impl From<std::io::Error> for RzupError {
