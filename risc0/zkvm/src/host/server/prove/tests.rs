@@ -982,7 +982,7 @@ fn run_unconstrained() -> Result<()> {
 
 #[test_log::test]
 fn povw_nonce_assignment() -> Result<()> {
-    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
     let povw_job_id = PovwJobId {
         log: PovwLogId::from(0x202ce_u64),
         job: 42,
@@ -990,7 +990,7 @@ fn povw_nonce_assignment() -> Result<()> {
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()
-        .segment_limit_po2(15)
+        .segment_limit_po2(17)
         .povw(povw_job_id)
         .build()
         .unwrap();
@@ -1008,11 +1008,11 @@ fn povw_nonce_assignment() -> Result<()> {
 
 #[test_log::test]
 fn povw_nonce_default_assignment() -> Result<()> {
-    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 17 };
+    let spec = MultiTestSpec::BusyLoop { cycles: 1 << 18 };
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()
-        .segment_limit_po2(15)
+        .segment_limit_po2(17)
         .build()
         .unwrap();
     let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
