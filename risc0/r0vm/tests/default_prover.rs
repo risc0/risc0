@@ -17,7 +17,6 @@ use risc0_zkvm::{DefaultProver, ExecutorEnv, Prover as _, ProverOpts, VerifierCo
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 #[test_log::test]
-#[cfg_attr(all(not(feature = "cuda"), ci), ignore = "slow on CPU")]
 fn basic_proof() {
     let r0vm_path = cargo_bin("r0vm");
     let prover = DefaultProver::new(r0vm_path).unwrap();
