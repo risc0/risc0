@@ -630,21 +630,6 @@ struct _Arguments_Div0MulOutputLayout {
   ArgU16Layout16LayoutArray argU16;
   ArgU8Layout13LayoutArray argU8;
 };
-using ArgU16Layout2LayoutArray = ::cuda::std::array<ArgU16Layout,2>;
-struct _Arguments_DoDiv__1Layout {
-  ArgU16Layout2LayoutArray argU16;
-};
-struct DoDiv__1Arm0Layout {
-  ArgU16Layout _extra0;
-  ArgU16Layout _extra1;
-};
-struct DoDiv__1Arm1_SuperLayout {
-  CmpLessThanUnsignedLayout lt;
-};
-struct DoDiv__1Layout {
-  DoDiv__1Arm0Layout arm0;
-  DoDiv__1Arm1_SuperLayout arm1;
-};
 struct DoDivLayout {
   NondetRegLayout quotLow;
   NondetRegLayout quotHigh;
@@ -652,13 +637,13 @@ struct DoDivLayout {
   NondetU16RegLayout remHigh;
   MultiplyAccumulateLayout mul;
   NondetRegLayout topBitType;
-  IsZeroLayout isZero;
   NondetRegLayout topNum;
   NondetU16RegLayout _0;
   NormalizeU32Layout denomAbs;
   NormalizeU32Layout remNormal;
-  _Arguments_DoDiv__1Layout _arguments_DoDiv__1;
-  DoDiv__1Layout _3;
+  NondetRegLayout isZero;
+  NondetRegLayout signedOverflowCase;
+  CmpLessThanUnsignedLayout lt;
 };
 struct OpSRLLayout {
   DynPo2Layout shiftMul;
@@ -920,15 +905,12 @@ struct Mem1Layout {
 struct MemoryPageInLayout {
   MemoryIOLayout io;
 };
-struct ControlLoadRoot__0_SuperLayout {
-  MemoryPageInLayout mem;
-};
-using ControlLoadRoot__0_SuperLayout8LayoutArray = ::cuda::std::array<ControlLoadRoot__0_SuperLayout,8>;
-struct ControlLoadRootLayout {
-  ControlLoadRoot__0_SuperLayout8LayoutArray _1;
+using MemoryPageInLayout8LayoutArray = ::cuda::std::array<MemoryPageInLayout,8>;
+struct ControlLoadRootAndNonceLayout {
+  MemoryPageInLayout8LayoutArray mem;
 };
 struct Control0_SuperArm0Layout {
-  ControlLoadRootLayout _super;
+  ControlLoadRootAndNonceLayout _super;
   CycleArgLayout _extra0;
   CycleArgLayout _extra1;
   CycleArgLayout _extra2;
@@ -2533,6 +2515,7 @@ struct BigInt0StateArm0Layout {
   ArgU16Layout _extra32;
   ArgU16Layout _extra33;
 };
+using ArgU16Layout2LayoutArray = ::cuda::std::array<ArgU16Layout,2>;
 struct _Arguments_BigIntStepBytesLayout {
   ArgU16Layout2LayoutArray argU16;
   ArgU8Layout16LayoutArray argU8;
@@ -2960,6 +2943,7 @@ struct _globalLayout {
   DigestRegLayout input;
   NondetRegLayout isTerminate;
   DigestRegLayout output;
+  DigestRegLayout povwNonce;
   NondetExtRegLayout rng;
   NondetRegLayout shutdownCycle;
   DigestRegLayout stateIn;
@@ -3204,13 +3188,10 @@ struct DigestRegStruct {
   DigestRegValues_SuperStruct8Array values;
 };
 using ValU32Struct8Array = ::cuda::std::array<ValU32Struct,8>;
-struct ControlLoadRoot__0Struct {
-};
-using ControlLoadRoot__0Struct8Array = ::cuda::std::array<ControlLoadRoot__0Struct,8>;
+using GetDataStruct8Array = ::cuda::std::array<GetDataStruct,8>;
 struct ControlResume_SuperArm1_Super__0Struct {
 };
 using ControlResume_SuperArm1_Super__0Struct8Array = ::cuda::std::array<ControlResume_SuperArm1_Super__0Struct,8>;
-using GetDataStruct8Array = ::cuda::std::array<GetDataStruct,8>;
 struct ControlTable_SuperArm0_Super__0Struct {
 };
 struct ControlTable_SuperArm1_Super__0Struct {

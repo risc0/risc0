@@ -17,7 +17,7 @@ use alloc::{vec, vec::Vec};
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use derive_more::Debug;
-use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
+use risc0_binfmt::{Digestible, ExitCode, tagged_struct};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
@@ -32,7 +32,7 @@ use super::{
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{
-    sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim, sha,
 };
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
@@ -317,7 +317,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("50ffbc35d194e6c9f5fc8adb030d077f3bf5393d5e9cedc6f303a9f1eede3a32")
+            digest!("4bce006e0858edf3a3726987c0b1b6258224c000971e451bc9c05cfec086a84b")
         );
     }
 }

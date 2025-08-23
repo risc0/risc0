@@ -17,7 +17,7 @@ use std::{
     sync::OnceLock,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use bit_vec::BitVec;
 use derive_more::Debug;
 use risc0_binfmt::{MemoryImage, Page, WordAddr};
