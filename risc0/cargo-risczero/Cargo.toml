@@ -32,6 +32,7 @@ syn = "2.0.87"
 tempfile = "3"
 text_io = "0.1.12"
 tokio = { version = "1.44.2", features = ["rt-multi-thread"] }
+tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "2.1", optional = true, default-features = false }
 
