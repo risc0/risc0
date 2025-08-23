@@ -137,13 +137,13 @@ fn serde() {
     run_guest_framed(
         "read_framed",
         BenchmarkSpec::ReadFramed,
-        bytemuck::cast_slice(&encoded),
+        &encoded,
     );
 
     run_guest_framed(
         "read_buffered",
         BenchmarkSpec::ReadBuffered,
-        bytemuck::cast_slice(&encoded),
+        &encoded,
     );
 }
 
