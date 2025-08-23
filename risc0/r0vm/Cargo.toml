@@ -1,7 +1,7 @@
 [package]
 name = "risc0-r0vm"
 description = "RISC Zero zero-knowledge VM executable"
-version = "3.0.0"
+version = "4.0.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -17,26 +17,32 @@ bytemuck = "1.12"
 clap = { version = "4.5", features = ["derive", "env"] }
 derive_more = { version = "2.0.1", default-features = false, features = [
   "debug",
+  "from",
+  "try_into",
 ] }
 dirs = "6.0.0"
 futures = "0.3.31"
 kameo = "0.16"
-multi_index_map = "0.13.0"
-opentelemetry = "0.29.1"
-opentelemetry-otlp = "0.29.0"
-opentelemetry_sdk = "0.29.0"
+multi_index_map = "0.15.0"
+nvml-wrapper = "0.11.0"
+opentelemetry = "0.30.0"
+opentelemetry-appender-tracing = "0.30.0"
+opentelemetry-otlp = "0.30.0"
+opentelemetry_sdk = "0.30.0"
 risc0-circuit-rv32im = { workspace = true }
-risc0-zkvm = { workspace = true, features = ["prove", "unstable"] }
+risc0-zkvm = { workspace = true, features = ["prove"] }
 serde = { version = "1.0.219", features = ["rc"] }
-serde_json = "1.0.140"
+tempfile = "3.20.0"
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = [
   "macros",
   "io-util",
+  "process",
   "rt-multi-thread",
   "signal",
 ] }
 tokio-util = { version = "0.7.15", features = ["codec"] }
+toml = "0.8.22"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1.16.0", features = ["serde", "v4"] }
@@ -45,6 +51,8 @@ uuid = { version = "1.16.0", features = ["serde", "v4"] }
 anyhow = "1.0"
 assert_cmd = "2.0"
 assert_fs = "1.0"
+assert_matches = "1.5"
+opentelemetry_sdk = { version = "0.30.0", features = ["testing"] }
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 temp-env = "0.3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }

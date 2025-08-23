@@ -31,8 +31,8 @@ use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::digest::Digest,
     field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem as _,
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     },
     hal::{Buffer, CircuitHal, Hal},
 };
@@ -44,7 +44,7 @@ use self::{
     witgen::WitnessGenerator,
 };
 use crate::{
-    taps::TAPSET, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA, taps::TAPSET,
 };
 
 pub use self::program::Program;
@@ -65,6 +65,13 @@ impl RecursionReceipt {
     /// Total number of bytes used by the seal of this receipt.
     pub fn seal_size(&self) -> usize {
         core::mem::size_of_val(self.seal.as_slice())
+    }
+
+    /// Allocates a [VecDeque] and copies the output stream into it for decoding.
+    pub fn out_stream(&self) -> VecDeque<u32> {
+        let mut vec: VecDeque<u32> = VecDeque::new();
+        vec.extend(self.output.iter());
+        vec
     }
 }
 

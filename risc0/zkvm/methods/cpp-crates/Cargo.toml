@@ -9,7 +9,7 @@ resolver = "2"
 [package]
 name = "risc0-zkvm-methods-cpp-crates"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 blst = { version = "0.3.11", features = ["no-threads"] }

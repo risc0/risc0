@@ -48,9 +48,9 @@ pub fn free() -> usize {
 pub unsafe fn init() {
     cfg_if::cfg_if! {
         if #[cfg(feature = "heap-embedded-alloc")] {
-            embedded::init();
+            unsafe { embedded::init(); }
         } else {
-            bump::init();
+            unsafe { bump::init(); }
         }
     }
 }

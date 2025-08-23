@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ fn main() {
     let kzg_settings = KzgSettings::load_trusted_setup_file(kzg_trusted_setup).unwrap();
     let kzg_setup_data = kzg_settings.to_bytes().to_vec();
     std::fs::write(&kzg_raw_path, kzg_setup_data).unwrap();
-    env::set_var("KZG_FILE_PATH", kzg_raw_path.to_string_lossy().to_string());
+    unsafe {
+        env::set_var("KZG_FILE_PATH", kzg_raw_path.to_string_lossy().to_string());
+    }
 
     risc0_build::embed_methods();
 }

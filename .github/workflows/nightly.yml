@@ -7,12 +7,12 @@ on:
 
 env:
   RISC0_BUILD_LOCKED: 1
-  RISC0_RUST_TOOLCHAIN_VERSION: 1.85.0
+  RISC0_RUST_TOOLCHAIN_VERSION: 1.88.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 jobs:
   crates_validate:
-    runs-on: [self-hosted, prod, Linux, X64, cpu]
+    runs-on: [self-hosted, cluster, Linux, X64, cpu]
     env:
       RUST_BACKTRACE: full
       RUST_LOG: info

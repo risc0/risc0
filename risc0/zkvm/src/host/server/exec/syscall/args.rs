@@ -14,14 +14,14 @@
 
 use std::cmp::min;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use risc0_circuit_rv32im::execute::MAX_IO_BYTES;
 use risc0_zkvm_platform::{
+    WORD_SIZE,
     syscall::{
         nr::{SYS_ARGC, SYS_ARGV},
         reg_abi::REG_A3,
     },
-    WORD_SIZE,
 };
 
 use super::{Syscall, SyscallContext};

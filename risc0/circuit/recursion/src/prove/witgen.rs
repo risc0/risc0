@@ -18,15 +18,15 @@ use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo as _, TapsProvider as _},
     field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem as _,
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     },
     hal::Hal,
 };
 
-use crate::{CircuitImpl, CIRCUIT};
+use crate::{CIRCUIT, CircuitImpl};
 
-use super::{preflight::Preflight, CircuitAccumulator, CircuitWitnessGenerator, Program};
+use super::{CircuitAccumulator, CircuitWitnessGenerator, Program, preflight::Preflight};
 
 pub(crate) struct WitnessGenerator<H: Hal> {
     work_cycles: u32,
@@ -97,6 +97,23 @@ where
                 &global,
             )
             .context("witness generation failure")?;
+
+        // Add random noise to end of the data columns
+        scope!("noise", {
+            use risc0_zkp::ZK_CYCLES;
+            let mut rng = rand::rng();
+            let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.data_size()];
+            hal.eltwise_copy_elem_slice(
+                &data,
+                &noise,
+                CIRCUIT.data_size(),      // from_rows
+                ZK_CYCLES,                // from_cols
+                0,                        // from_offset
+                ZK_CYCLES,                // from_stride
+                total_cycles - ZK_CYCLES, // into_offset
+                total_cycles,             // into_stride
+            );
+        });
 
         // Zero out 'invalid' entries in data and output.
         scope!("zeroize", {
