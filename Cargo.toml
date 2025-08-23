@@ -25,7 +25,6 @@ members = [
   "risc0/zkos/v1compat",
   "risc0/zkp",
   "risc0/zkvm",
-  "risc0/zkvm/compat",
   "risc0/zkvm/methods",
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
