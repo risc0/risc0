@@ -25,7 +25,7 @@ use tokio::net::{TcpStream, UnixStream, tcp, unix};
 use tokio::sync::Mutex as TokioMutex;
 
 /// Create a pair of RPC sender and receiver. The sender is used to send messages to the remote
-/// side, the recevier is used to get responses and remote requests.
+/// side, the receiver is used to get responses and remote requests.
 pub fn rpc_system<StreamT: RpcStream>(
     stream: StreamT,
     meter: Meter,
@@ -543,7 +543,7 @@ mod tests {
             Ok(())
         }
 
-        fn tx_and_rx_mesages_metrics(&self) -> (u64, u64) {
+        fn tx_and_rx_messages_metrics(&self) -> (u64, u64) {
             self.meter_provider.force_flush().unwrap();
             let finished_metrics = self.exporter.get_finished_metrics().unwrap();
             (
@@ -579,7 +579,7 @@ mod tests {
             }
         );
 
-        assert_eq!(fix.tx_and_rx_mesages_metrics(), (2, 2));
+        assert_eq!(fix.tx_and_rx_messages_metrics(), (2, 2));
     }
 
     #[tokio::test]
@@ -592,7 +592,7 @@ mod tests {
         assert_eq!(req, Request::A);
         assert!(message_id.is_none());
 
-        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
+        assert_eq!(fix.tx_and_rx_messages_metrics(), (1, 1));
     }
 
     #[tokio::test]
@@ -613,7 +613,7 @@ mod tests {
             "received response RPC which didn't have matching request"
         );
 
-        assert_eq!(fix.tx_and_rx_mesages_metrics(), (1, 1));
+        assert_eq!(fix.tx_and_rx_messages_metrics(), (1, 1));
     }
 
     #[tokio::test]

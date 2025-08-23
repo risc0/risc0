@@ -567,7 +567,7 @@ impl Risc0Context for Preflight<'_> {
         // tracing::trace!("load_u32: {addr:?}");
         let cycle = (2 * self.trace.cycles.len()) as u32;
         // MERKLE_TREE_START_ADDR is the first address in a special region of memory that is
-        // outside of the user-addressible range. This region also contains the PoVW nonce.
+        // outside of the user-addressable range. This region also contains the PoVW nonce.
         let word = if addr >= MERKLE_TREE_START_ADDR {
             if addr < MERKLE_TREE_END_ADDR {
                 self.page_memory
