@@ -86,7 +86,7 @@ incremental = true
 [profile.release]
 lto = true
 
-[lints.rust]
+[workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = [
   'cfg(ci)',
   'cfg(ci, values("fast", "medium", "slow"))',
