@@ -1,7 +1,13 @@
 import { rankItem } from "@tanstack/match-sorter-utils";
 import type { FilterFn } from "@tanstack/react-table";
 
-export const tableFuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+// Generic type for table data rows
+export const tableFuzzyFilter = <TData extends Record<string, unknown>>(
+  row: { getValue: (columnId: string) => unknown },
+  columnId: string,
+  value: string,
+  addMeta: (meta: { itemRank: number }) => void
+): boolean => {
   // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
 
