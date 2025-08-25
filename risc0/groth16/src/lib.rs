@@ -56,6 +56,25 @@
 //! crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
 //!
 //! [risc0-zkvm]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/
+//!
+//! # Publishing the rzup Component
+//! The groth16 proving on GPU requires a special rzup component be installed. Publishing this
+//! component can be done with the following commands:
+//!
+//! ```bash
+//! export VERSION=0.1.0
+//! cargo xtask-groth16 -- ~/groth16-tmp
+//! cargo run --bin rzup -- \
+//!     publish create-artifact \
+//!     --input ~/groth16-tmp/v$VERSION-risc0-groth16 \
+//!     --output ~/groth16-component.tar.xz
+//! aws-vault exec ci -- \
+//! cargo run --bin rzup -- \
+//!     publish upload \
+//!     --target-agnostic \
+//!     risc0-groth16 $VERSION \
+//!     ~/groth16-component.tar.xz
+//! ```
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(missing_docs)]
