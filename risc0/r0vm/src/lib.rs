@@ -279,7 +279,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
         let work_receipt_bytes =
             bincode::serialize(&work_receipt).context("Failed to serialize work receipt")?;
         std::fs::write(work_receipt_path, &work_receipt_bytes)
-            .context("Unable to write receipt file")?;
+            .context("Unable to write work receipt file")?;
         if args.verbose > 0 {
             eprintln!(
                 "Wrote {} bytes of work receipt to {}",
