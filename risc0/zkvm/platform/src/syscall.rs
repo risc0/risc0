@@ -16,6 +16,8 @@
 use core::arch::asm;
 use core::{cmp::min, ffi::CStr, ptr::null_mut, slice, str::Utf8Error};
 
+use num_enum::{FromPrimitive, IntoPrimitive};
+
 use crate::WORD_SIZE;
 
 pub mod ecall {
@@ -149,13 +151,34 @@ pub mod nr {
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
-    declare_syscall!(pub SYS_PROVE_KECCAK);
-    declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY2);
     declare_syscall!(pub SYS_WRITE);
+}
+
+#[repr(usize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, IntoPrimitive, FromPrimitive)]
+pub enum Syscall {
+    #[num_enum(catch_all)]
+    Unknown(usize),
+    Argc,
+    Argv,
+    CycleCount,
+    Exit,
+    Fork,
+    Getenv,
+    Keccak,
+    Log,
+    Panic,
+    Pipe,
+    Random,
+    Read,
+    User,
+    VerifyIntegrity,
+    VerifyIntegrity2,
+    Write,
 }
 
 impl SyscallName {
@@ -217,30 +240,33 @@ macro_rules! impl_syscall {
         ///
         /// `from_host` must be aligned and dereferenceable.
         #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
-        pub unsafe extern "C" fn $func_name(syscall: SyscallName,
-                                 from_host: *mut u32,
-                                 from_host_words: usize
-                                 $(,$a0: u32
-                                   $(,$a1: u32
-                                     $(,$a2: u32
-                                       $(,$a3: u32
-                                         $(,$a4: u32
-                                         )?
-                                       )?
-                                     )?
-                                   )?
-                                 )?
+        pub unsafe extern "C" fn $func_name(
+            syscall: Syscall,
+            syscall_name: SyscallName,
+            from_host: *mut u32,
+            from_host_words: usize
+            $(,$a0: u32
+                $(,$a1: u32
+                    $(,$a2: u32
+                        $(,$a3: u32
+                            $(,$a4: u32)?
+                        )?
+                    )?
+                )?
+            )?
         ) -> Return {
             #[cfg(target_os = "zkvm")] {
+                let syscall: usize = syscall.into();
                 let a0: u32;
                 let a1: u32;
                 unsafe {
                     ::core::arch::asm!(
                         "ecall",
                         in("t0") $crate::syscall::ecall::SOFTWARE,
+                        in("t6") syscall,
                         inlateout("a0") from_host => a0,
                         inlateout("a1") from_host_words => a1,
-                        in("a2") syscall.as_ptr()
+                        in("a2") syscall_name.as_ptr()
                             $(,in("a3") $a0
                               $(,in("a4") $a1
                                 $(,in("a5") $a2
@@ -495,7 +521,7 @@ pub unsafe extern "C" fn sys_bigint(
 /// `recv_buf` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
-    unsafe { syscall_0(nr::SYS_RANDOM, recv_buf, words) };
+    unsafe { syscall_0(Syscall::Random, nr::SYS_RANDOM, recv_buf, words) };
 }
 
 /// # Safety
@@ -503,7 +529,16 @@ pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
 /// `msg_ptr` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
-    unsafe { syscall_2(nr::SYS_PANIC, null_mut(), 0, msg_ptr as u32, len as u32) };
+    unsafe {
+        syscall_2(
+            Syscall::Panic,
+            nr::SYS_PANIC,
+            null_mut(),
+            0,
+            msg_ptr as u32,
+            len as u32,
+        )
+    };
 
     // As a fallback for non-compliant hosts, issue an illegal instruction.
     #[cfg(target_os = "zkvm")]
@@ -518,13 +553,31 @@ pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
 /// `msg_ptr` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
-    unsafe { syscall_2(nr::SYS_LOG, null_mut(), 0, msg_ptr as u32, len as u32) };
+    unsafe {
+        syscall_2(
+            Syscall::Log,
+            nr::SYS_LOG,
+            null_mut(),
+            0,
+            msg_ptr as u32,
+            len as u32,
+        )
+    };
 }
 
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub extern "C" fn sys_cycle_count() -> u64 {
-    let Return(hi, lo) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
+    let Return(hi, lo) =
+        unsafe { syscall_0(Syscall::CycleCount, nr::SYS_CYCLE_COUNT, null_mut(), 0) };
     ((hi as u64) << 32) + lo as u64
+}
+
+#[allow(dead_code)]
+fn print(msg: &str) {
+    let msg = msg.as_bytes();
+    unsafe {
+        sys_log(msg.as_ptr(), msg.len());
+    }
 }
 
 /// Reads the given number of bytes into the given buffer, posix-style.  Returns
@@ -540,72 +593,19 @@ pub extern "C" fn sys_cycle_count() -> u64 {
 ///
 /// `recv_ptr` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
-pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> usize {
-    // The SYS_READ system call can do a given number of word-aligned reads
-    // efficiently. The semantics of the system call are:
-    //
-    //   (nread, word) = syscall_2(nr::SYS_READ, outbuf,
-    //                             num_words_in_outbuf, fd, nbytes);
-    //
-    // This reads exactly nbytes from the file descriptor, and fills the words
-    // in outbuf, followed by up to 4 bytes returned in "word", and fills
-    // the rest with NULs.  It returns the number of bytes read.
-    //
-    // sys_read exposes this as a byte-aligned read by:
-    //   * Copies any unaligned bytes at the start or end of the region.
-
-    // Fills 0-3 bytes from a u32 into memory, returning the pointer afterwards.
-    unsafe fn fill_from_word(mut ptr: *mut u8, mut word: u32, nfill: usize) -> *mut u8 {
-        debug_assert!(nfill < 4, "nfill={nfill}");
-        for _ in 0..nfill {
-            unsafe { *ptr = (word & 0xFF) as u8 };
-            word >>= 8;
-            ptr = unsafe { ptr.add(1) };
-        }
-        ptr
-    }
-
-    // Determine how many bytes at the beginning of the buffer we have
-    // to read in order to become word-aligned.
-    let ptr_offset = (recv_ptr as usize) & (WORD_SIZE - 1);
-    let (main_ptr, main_requested, nread_first) = if ptr_offset == 0 {
-        (recv_ptr, nread, 0)
-    } else {
-        let unaligned_at_start = min(nread, WORD_SIZE - ptr_offset);
-        // Read unaligned bytes into "firstword".
-        let Return(nread_first, firstword) =
-            unsafe { syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32) };
-        debug_assert_eq!(nread_first as usize, unaligned_at_start);
-
-        // Align up to a word boundary to do the main copy.
-        let main_ptr = unsafe { fill_from_word(recv_ptr, firstword, unaligned_at_start) };
-        if nread == unaligned_at_start {
-            // We only read part of a word, and don't have to read any full words.
-            return nread;
-        }
-        (main_ptr, nread - unaligned_at_start, nread_first as usize)
-    };
-
-    // Copy in all of the word-aligned data
-    let main_words = main_requested / WORD_SIZE;
-    let (nread_main, lastword) =
-        unsafe { sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested) };
-    debug_assert!(nread_main <= main_requested);
-    let read_words = nread_main / WORD_SIZE;
-
-    // Copy in individual bytes after the word-aligned section.
-    let unaligned_at_end = main_requested % WORD_SIZE;
-
-    // The last 0-3 bytes are returned in lastword. Write those to complete the _requested_ read amount.
-    unsafe {
-        fill_from_word(
-            main_ptr.add(main_words * WORD_SIZE),
-            lastword,
-            unaligned_at_end,
+pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nbytes: usize) -> usize {
+    let Return(nbytes_read, final_word) = unsafe {
+        syscall_2(
+            Syscall::Read,
+            nr::SYS_READ,
+            recv_ptr as *mut u32,
+            nbytes,
+            fd,
+            nbytes as u32,
         )
     };
 
-    nread_first + nread_main
+    nbytes_read as usize
 }
 
 /// Reads up to the given number of words into the buffer [recv_buf,
@@ -628,48 +628,18 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
 /// `nwords' size.
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_read_words(fd: u32, recv_ptr: *mut u32, nwords: usize) -> usize {
-    unsafe { sys_read_internal(fd, recv_ptr, nwords, nwords * WORD_SIZE).0 }
-}
-
-unsafe fn sys_read_internal(
-    fd: u32,
-    recv_ptr: *mut u32,
-    nwords: usize,
-    nbytes: usize,
-) -> (usize, u32) {
-    let mut nwords_remain = nwords;
-    let mut nbytes_remain = nbytes;
-    let mut nread_total_bytes = 0;
-    let mut recv_ptr = recv_ptr;
-    let mut final_word = 0;
-    while nbytes_remain > 0 {
-        debug_assert!(
-            final_word == 0,
-            "host returned non-zero final word on a fully aligned read"
-        );
-        let chunk_len = min(nbytes_remain, MAX_BUF_BYTES) as u32;
-        let Return(nread_bytes, last_word) = unsafe {
-            syscall_2(
-                nr::SYS_READ,
-                recv_ptr,
-                min(nwords_remain, MAX_BUF_WORDS),
-                fd,
-                chunk_len,
-            )
-        };
-        let nread_bytes = nread_bytes as usize;
-        let nread_words = nread_bytes / WORD_SIZE;
-        recv_ptr = unsafe { recv_ptr.add(nread_words) };
-        final_word = last_word;
-        nwords_remain -= nread_words;
-        nread_total_bytes += nread_bytes;
-        nbytes_remain -= nread_bytes;
-        if nread_bytes < chunk_len as usize {
-            // We've reached EOF, and the host has returned a partial word.
-            break;
-        }
-    }
-    (nread_total_bytes, final_word)
+    let nbytes = nwords * WORD_SIZE;
+    let Return(nbytes_read, final_word) = unsafe {
+        syscall_2(
+            Syscall::Read,
+            nr::SYS_READ,
+            recv_ptr,
+            nbytes,
+            fd,
+            nbytes as u32,
+        )
+    };
+    nbytes_read as usize
 }
 
 /// # Safety
@@ -677,23 +647,17 @@ unsafe fn sys_read_internal(
 /// `write_ptr` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", unsafe(no_mangle))]
 pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize) {
-    let mut nbytes_remain = nbytes;
-    let mut write_ptr = write_ptr;
-    while nbytes_remain > 0 {
-        let nbytes = min(nbytes_remain, MAX_BUF_BYTES);
-        unsafe {
-            syscall_3(
-                nr::SYS_WRITE,
-                null_mut(),
-                0,
-                fd,
-                write_ptr as u32,
-                nbytes as u32,
-            )
-        };
-        write_ptr = unsafe { write_ptr.add(nbytes) };
-        nbytes_remain -= nbytes;
-    }
+    unsafe {
+        syscall_3(
+            Syscall::Write,
+            nr::SYS_WRITE,
+            null_mut(),
+            0,
+            fd,
+            write_ptr as u32,
+            nbytes as u32,
+        )
+    };
 }
 
 // Some environment variable names are considered safe by default to use in the guest, provided by
@@ -748,6 +712,7 @@ pub unsafe extern "C" fn sys_getenv(
     }
     let Return(a0, _) = unsafe {
         syscall_2(
+            Syscall::Getenv,
             nr::SYS_GETENV,
             out_words,
             out_nwords,
@@ -772,7 +737,7 @@ pub extern "C" fn sys_argc() -> usize {
         const MSG: &[u8] = "sys_argc is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_ARGC, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0(Syscall::Argc, nr::SYS_ARGC, null_mut(), 0) };
     a0 as usize
 }
 
@@ -803,7 +768,15 @@ pub unsafe extern "C" fn sys_argv(
         const MSG: &[u8] = "sys_argv is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
-    let Return(a0, _) = unsafe { syscall_1(nr::SYS_ARGV, out_words, out_nwords, arg_index as u32) };
+    let Return(a0, _) = unsafe {
+        syscall_1(
+            Syscall::Argv,
+            nr::SYS_ARGV,
+            out_words,
+            out_nwords,
+            arg_index as u32,
+        )
+    };
     a0 as usize
 }
 
@@ -873,9 +846,10 @@ pub unsafe extern "C" fn sys_verify_integrity(
     to_host[..DIGEST_WORDS].copy_from_slice(unsafe { claim_digest.as_ref().unwrap_unchecked() });
     to_host[DIGEST_WORDS..].copy_from_slice(unsafe { control_root.as_ref().unwrap_unchecked() });
 
+    // Send the claim_digest to the host via software ecall.
     let Return(a0, _) = unsafe {
-        // Send the claim_digest to the host via software ecall.
         syscall_2(
+            Syscall::VerifyIntegrity,
             nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
@@ -909,9 +883,10 @@ pub unsafe extern "C" fn sys_verify_integrity2(
     to_host[..DIGEST_WORDS].copy_from_slice(unsafe { claim_digest.as_ref().unwrap_unchecked() });
     to_host[DIGEST_WORDS..].copy_from_slice(unsafe { control_root.as_ref().unwrap_unchecked() });
 
+    // Send the claim_digest to the host via software ecall.
     let Return(a0, _) = unsafe {
-        // Send the claim_digest to the host via software ecall.
         syscall_2(
+            Syscall::VerifyIntegrity2,
             nr::SYS_VERIFY_INTEGRITY2,
             null_mut(),
             0,
@@ -949,7 +924,7 @@ unsafe extern "C" {
 #[cfg(feature = "export-syscalls")]
 #[unsafe(no_mangle)]
 pub extern "C" fn sys_fork() -> i32 {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_FORK, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0(Syscall::Fork, nr::SYS_FORK, null_mut(), 0) };
     a0 as i32
 }
 
@@ -972,7 +947,7 @@ pub extern "C" fn sys_fork() -> i32 {
 #[cfg(feature = "export-syscalls")]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_PIPE, pipefd, 2) };
+    let Return(a0, _) = unsafe { syscall_0(Syscall::Pipe, nr::SYS_PIPE, pipefd, 2) };
     a0 as i32
 }
 
@@ -982,7 +957,7 @@ pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
 #[cfg(feature = "export-syscalls")]
 #[unsafe(no_mangle)]
 pub extern "C" fn sys_exit(status: i32) -> ! {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_EXIT, null_mut(), 0) };
+    let Return(a0, _) = unsafe { syscall_0(Syscall::Exit, nr::SYS_EXIT, null_mut(), 0) };
     #[allow(clippy::empty_loop)]
     loop {
         // prevent dishonest provers from relying on the ability to prove the
@@ -1000,6 +975,7 @@ pub unsafe extern "C" fn sys_keccak(
 ) -> i32 {
     let Return(a0, _) = unsafe {
         syscall_3(
+            Syscall::Keccak,
             nr::SYS_KECCAK,
             out_state as *mut u32,
             KECCACK_STATE_WORDS,
@@ -1031,6 +1007,7 @@ pub unsafe extern "C" fn sys_prove_keccak(
 ) {
     let Return(a0, _) = unsafe {
         syscall_3(
+            Syscall::Keccak,
             nr::SYS_KECCAK,
             null_mut(),
             0,
