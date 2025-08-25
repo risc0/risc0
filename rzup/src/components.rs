@@ -252,22 +252,29 @@ pub fn install(
         version: version.to_string(),
     });
 
-    let downloaded_file = env
-        .tmp_dir()
-        .join(component_to_install.archive_name(env.platform())?);
-
     if force {
         Paths::cleanup_version(env, &component_to_install, version)?;
     }
+
+    let archive_name = component_to_install.archive_name(env.platform())?;
 
     // Download and extract
     distribution.download_version(env, &component_to_install, version)?;
     let version_dir = component_to_install.get_version_dir(env, version);
 
-    if let Err(e) = extract_archive(env, &downloaded_file, &version_dir) {
-        Paths::cleanup_version(env, &component_to_install, version)?;
-        return Err(e);
+    let mut extraction_dir = tempfile::TempDir::with_prefix_in(
+        format!("{component_to_install}-{version}"),
+        env.tmp_dir(),
+    )?;
+
+    let downloaded_file = env.tmp_dir().join(archive_name);
+    extract_archive(env, &downloaded_file, extraction_dir.path())?;
+
+    if let Some(parent) = version_dir.parent() {
+        std::fs::create_dir_all(parent)?;
     }
+    std::fs::rename(extraction_dir.path(), &version_dir)?;
+    extraction_dir.disable_cleanup(true);
 
     if let Err(e) = std::fs::remove_file(&downloaded_file) {
         env.emit(RzupEvent::Debug {
