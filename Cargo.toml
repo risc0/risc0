@@ -76,5 +76,18 @@ lto = true
 [profile.dev]
 opt-level = 3
 
+[profile.test]
+opt-level = 0
+codegen-units = 256
+debug = 1
+lto = "off"
+incremental = true
+
 [profile.release]
 lto = true
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+  'cfg(ci)',
+  'cfg(ci, values("fast", "medium", "slow"))',
+] }
