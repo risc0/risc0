@@ -47,6 +47,7 @@ std = [
   "derive_more/std",
   "elf/std",
   "risc0-zkp/std",
+  "ruint/std",
   "serde/std",
   "tracing/log",
   "tracing/std",

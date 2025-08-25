@@ -17,11 +17,13 @@ mod api;
 
 use std::{io, net::SocketAddr, path::PathBuf, rc::Rc};
 
+use anyhow::Context;
 use clap::{Args, Parser, ValueEnum};
+use risc0_binfmt::PovwLogId;
 use risc0_circuit_rv32im::execute::Segment;
 use risc0_zkvm::{
-    ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
-    compute_image_id, get_prover_server,
+    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
+    ProverServer, VerifierContext,
 };
 
 use self::actors::protocol::TaskKind;
@@ -73,6 +75,16 @@ struct Cli {
     /// The receipt kind produced by the r0vm prover
     #[arg(long, value_enum, default_value_t = ReceiptKind::Composite)]
     receipt_kind: ReceiptKind,
+
+    // TODO(povw): Provide a more detailed explanation of what this does.
+    /// Proof of verifiable work (PoVW) log ID to use for the proofs produced.
+    #[arg(long)]
+    povw_log_id: Option<PovwLogId>,
+
+    /// Output path to write the encoded work receipt, produced by PoVW.
+    /// Requires --povw-log-id.
+    #[arg(long, requires = "povw_log_id")]
+    work_receipt: Option<PathBuf>,
 
     /// Compute the image_id for the specified ELF
     #[arg(long)]
@@ -150,10 +162,17 @@ enum ReceiptKind {
     Groth16,
 }
 
-pub fn main() {
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
 
+    if args.work_receipt.is_some() && args.receipt_kind == ReceiptKind::Composite {
+        return Err("A work receipt will not be produced when receipt-kind is composite. Set receipt-kind to succinct or groth16 to enable work receipts.".into());
+    }
+
     if args.mode.manager || !args.mode.worker.is_empty() || args.mode.config.is_some() {
+        if args.povw_log_id.is_some() {
+            return Err("povw-log-id option is not implemented for the actor system".into());
+        }
         return self::actors::async_main(&args);
     }
 
@@ -208,10 +227,14 @@ pub fn main() {
             builder.enable_profiler(pprof_out);
         }
 
+        if let Some(povw_log_id) = args.povw_log_id {
+            // Use the provided log ID and pick a random job ID.
+            builder.povw((povw_log_id, rand::random()));
+        }
+
         builder.build().unwrap()
     };
 
-    // TODO(povw): Add PoVW here.
     let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = std::fs::read(elf_path).unwrap();
@@ -233,17 +256,35 @@ pub fn main() {
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
+    let prove_info = prover
+        .prove_session(&ctx, &session)
+        .context("Proving failed")?;
 
-    let receipt_data = bincode::serialize(&receipt).unwrap();
-    let receipt_bytes = bytemuck::cast_slice(&receipt_data);
-    if let Some(receipt_file) = args.receipt.as_ref() {
-        std::fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");
+    if let Some(receipt_path) = args.receipt.as_ref() {
+        let receipt_bytes =
+            bincode::serialize(&prove_info.receipt).context("Failed to serialize receipt")?;
+        std::fs::write(receipt_path, &receipt_bytes).context("Unable to write receipt file")?;
         if args.verbose > 0 {
             eprintln!(
                 "Wrote {} bytes of receipt to {}",
-                receipt_data.len(),
-                receipt_file.display()
+                receipt_bytes.len(),
+                receipt_path.display()
+            );
+        }
+    }
+    if let Some(work_receipt_path) = args.work_receipt.as_ref() {
+        let work_receipt = prove_info
+            .work_receipt
+            .context("Prover did not produce a work receipt")?;
+        let work_receipt_bytes =
+            bincode::serialize(&work_receipt).context("Failed to serialize work receipt")?;
+        std::fs::write(work_receipt_path, &work_receipt_bytes)
+            .context("Unable to write receipt file")?;
+        if args.verbose > 0 {
+            eprintln!(
+                "Wrote {} bytes of work receipt to {}",
+                work_receipt_bytes.len(),
+                work_receipt_path.display()
             );
         }
     }
