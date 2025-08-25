@@ -16,8 +16,9 @@ use std::{collections::HashMap, path::PathBuf};
 
 use derive_more::From;
 use kameo::prelude::*;
-use risc0_zkvm::Receipt;
+use risc0_zkvm::{Journal, Receipt};
 use tokio::task::JoinSet;
+use uuid::Uuid;
 
 use super::{
     factory::FactoryActor,
@@ -80,7 +81,8 @@ impl ManagerActor {
     where
         JobActor: Message<RequestT, Reply = DelegatedReply<JobStatusReply>>,
         RequestT: Send + 'static,
-        ResultT: HasReceipt + Send + 'static,
+        ResultT: Send + 'static,
+        ManagerActor: Message<JobDone<ResultT>>,
         JobInfo<ResultT>: TryFrom<JobStatusReply>,
         <JobInfo<ResultT> as TryFrom<JobStatusReply>>::Error: std::fmt::Debug,
         InactiveJobEntry: From<JobInfo<ResultT>>,
@@ -107,6 +109,34 @@ impl ManagerActor {
             }
         });
         job_id
+    }
+
+    async fn write_receipt(&self, job_id: &Uuid, receipt: &Receipt) -> anyhow::Result<()> {
+        let Some(storage_root) = &self.storage_root else {
+            return Ok(());
+        };
+
+        let encoded = bincode::serialize(receipt)?;
+        let receipts_dir = storage_root.join("receipts");
+        std::fs::create_dir_all(&receipts_dir)?;
+        let receipt_path = receipts_dir.join(job_id.to_string());
+        tokio::fs::write(receipt_path, encoded).await?;
+
+        Ok(())
+    }
+
+    async fn write_journal(&self, job_id: &Uuid, journal: &Journal) -> anyhow::Result<()> {
+        let Some(storage_root) = &self.storage_root else {
+            return Ok(());
+        };
+
+        let encoded = bincode::serialize(journal)?;
+        let journal_dir = storage_root.join("journals");
+        std::fs::create_dir_all(&journal_dir)?;
+        let journal_path = journal_dir.join(job_id.to_string());
+        tokio::fs::write(journal_path, encoded).await?;
+
+        Ok(())
     }
 }
 
@@ -140,42 +170,39 @@ impl Message<ShrinkWrapRequest> for ManagerActor {
     }
 }
 
-trait HasReceipt {
-    fn receipt(&self) -> &Receipt;
-}
-
-impl HasReceipt for ProofResult {
-    fn receipt(&self) -> &Receipt {
-        self.receipt.as_ref()
-    }
-}
-
-impl HasReceipt for ShrinkWrapResult {
-    fn receipt(&self) -> &Receipt {
-        self.receipt.as_ref()
-    }
-}
-
-impl<ResultT> Message<JobDone<ResultT>> for ManagerActor
-where
-    InactiveJobEntry: From<JobInfo<ResultT>>,
-    ResultT: HasReceipt + Send + 'static,
-{
+impl Message<JobDone<ShrinkWrapResult>> for ManagerActor {
     type Reply = ();
 
     async fn handle(
         &mut self,
-        msg: JobDone<ResultT>,
+        msg: JobDone<ShrinkWrapResult>,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        tracing::info!("JobDone: {}", msg.job_id);
+        if let JobStatus::Succeeded(result) = &msg.info.status {
+            self.write_receipt(&msg.job_id, &result.receipt)
+                .await
+                .unwrap();
+        }
+        self.jobs
+            .insert(msg.job_id, JobEntry::Inactive(msg.info.into()));
+    }
+}
+
+impl Message<JobDone<ProofResult>> for ManagerActor {
+    type Reply = ();
+
+    async fn handle(
+        &mut self,
+        msg: JobDone<ProofResult>,
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         tracing::info!("JobDone: {}", msg.job_id);
         if let JobStatus::Succeeded(ref result) = msg.info.status {
-            if let Some(ref storage_root) = self.storage_root {
-                let encoded = bincode::serialize(result.receipt()).unwrap();
-                let receipts_dir = storage_root.join("receipts");
-                std::fs::create_dir_all(&receipts_dir).unwrap();
-                let receipt_path = receipts_dir.join(msg.job_id.to_string());
-                tokio::fs::write(receipt_path, encoded).await.unwrap();
+            if let Some(receipt) = &result.receipt {
+                self.write_receipt(&msg.job_id, receipt).await.unwrap();
+            } else if let Some(journal) = &result.session.journal {
+                self.write_journal(&msg.job_id, journal).await.unwrap();
             }
         }
         self.jobs
