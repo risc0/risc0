@@ -26,3 +26,6 @@ risc0-build = { workspace = true }
 
 [package.metadata.risc0]
 methods = ["log-builder"]
+
+[lints]
+workspace = true
