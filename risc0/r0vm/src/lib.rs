@@ -154,8 +154,7 @@ pub fn main() {
     let args = Cli::parse();
 
     if args.mode.manager || !args.mode.worker.is_empty() || args.mode.config.is_some() {
-        self::actors::async_main(&args).unwrap();
-        return;
+        return self::actors::async_main(&args);
     }
 
     tracing_subscriber::fmt()
@@ -163,32 +162,30 @@ pub fn main() {
         .init();
 
     if args.mode.rpc {
-        self::actors::rpc_main(args.num_gpus).unwrap();
-        return;
+        return self::actors::rpc_main(args.num_gpus);
     }
 
     if args.num_gpus.is_some_and(|v| v != 1) {
-        eprintln!("num_gpus > 1 or 0 for current mode unsupported.");
-        return;
+        return Err("num_gpus > 1 or 0 for current mode unsupported".into());
     }
 
     if args.id {
         let blob = std::fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&blob).unwrap();
         println!("{image_id}");
-        return;
+        return Ok(());
     }
 
     if let Some(port) = args.mode.port {
         run_server(port);
-        return;
+        return Ok(());
     }
 
     if let Some(path) = args.mode.segment {
         let bytes = std::fs::read(path).unwrap();
         let segment = Segment::decode(&bytes).unwrap();
         segment.execute().unwrap();
-        return;
+        return Ok(());
     }
 
     let env = {
@@ -228,7 +225,7 @@ pub fn main() {
         };
         if args.with_debugger {
             exec.run_with_debugger().unwrap();
-            return;
+            return Ok(());
         } else {
             exec.run().unwrap()
         }
@@ -250,6 +247,7 @@ pub fn main() {
             );
         }
     }
+    Ok(())
 }
 
 impl Cli {
