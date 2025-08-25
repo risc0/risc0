@@ -12,6 +12,7 @@ keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 [[bin]]
 name = "r0vm"
 doc = false
+required-features = ["r0vm"]
 
 [dependencies]
 anyhow = { version = "1.0", features = ["backtrace"] }

@@ -13,7 +13,5 @@
 // limitations under the License.
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(feature = "r0vm")]
-    risc0_r0vm::main()?;
-    Ok(())
+    risc0_r0vm::main()
 }
