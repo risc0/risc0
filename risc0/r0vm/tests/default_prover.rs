@@ -17,7 +17,7 @@ use risc0_zkvm::{DefaultProver, ExecutorEnv, Prover as _, ProverOpts, VerifierCo
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 #[test_log::test]
-#[cfg_attr(not(ci = "slow"), ignore = "slow test")]
+#[cfg_attr(all(ci, not(ci = "slow")), ignore = "slow test")]
 fn basic_proof() {
     let r0vm_path = cargo_bin("r0vm");
     let prover = DefaultProver::new(r0vm_path).unwrap();

@@ -261,7 +261,7 @@ fn two_batched_updates() -> anyhow::Result<()> {
 }
 
 #[test]
-#[cfg_attr(not(ci = "slow"), ignore = "slow test")]
+#[cfg_attr(all(ci, not(ci = "slow")), ignore = "slow test")]
 fn prove_three_sequential_updates() -> anyhow::Result<()> {
     let work_log_id = uint!(0xdeafbee7_U160);
 
