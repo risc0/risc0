@@ -383,7 +383,7 @@ impl JobActor {
                 );
                 let result = ProofResult {
                     session: session.clone(),
-                    receipt: Arc::new(receipt),
+                    receipt: Some(Arc::new(receipt)),
                 };
                 self.status = JobStatus::Succeeded(result);
                 self.self_ref().stop_gracefully().await.unwrap();
