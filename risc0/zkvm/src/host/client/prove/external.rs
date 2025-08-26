@@ -14,12 +14,12 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, ApiClient, Asset, ExecutorEnv, InnerReceipt, ProveInfo, Receipt,
-    ReceiptKind, SessionInfo, VerifierContext,
+    ApiClient, Asset, ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo,
+    VerifierContext, host::api::AssetRequest,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -52,6 +52,9 @@ impl Prover for ExternalProver {
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
         let prove_info = client.prove(&env, opts, binary)?;
+
+        prove_info.stats.log_if_risc0_info_set();
+
         prove_info.receipt.verify_integrity_with_context(ctx)?;
 
         Ok(prove_info)

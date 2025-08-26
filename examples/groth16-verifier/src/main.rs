@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,13 +13,10 @@
 // limitations under the License.
 
 use groth16_verifier_methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
-use risc0_groth16::{
-    Fr, ProofJson, PublicInputsJson, Seal, Verifier, VerifyingKey, VerifyingKeyJson,
-};
+use risc0_groth16::{ProofJson, PublicInputsJson, Verifier, VerifyingKeyJson};
 use risc0_zkvm::{
-    default_prover,
+    ExecutorEnv, default_prover,
     sha::{Digest, Digestible},
-    ExecutorEnv,
 };
 
 const PROOF: &str = include_str!("data/proof.json");
@@ -35,20 +32,19 @@ fn main() {
     };
     let verifying_key_json: VerifyingKeyJson = serde_json::from_str(VERIFICATION_KEY).unwrap();
 
-    // Convert from the JSON data structure, with string encoded values.
-    let seal: Seal = proof_json.try_into().unwrap();
-    let public_inputs: Vec<Fr> = public_inputs_json.to_scalar().unwrap();
-    let verifying_key: VerifyingKey = verifying_key_json.verifying_key().unwrap();
-
     // groth16 proof verification on the host, to check that it is indeed a verifying proof.
-    Verifier::new(&seal, &public_inputs, &verifying_key)
-        .unwrap()
-        .verify()
-        .unwrap();
+    Verifier::from_json(
+        proof_json.clone(),
+        public_inputs_json.clone(),
+        verifying_key_json.clone(),
+    )
+    .unwrap()
+    .verify()
+    .unwrap();
 
     // We configure an ExecutorEnv with the groth16 verifier
     let env = ExecutorEnv::builder()
-        .write(&(&seal, &public_inputs, &verifying_key))
+        .write(&(&proof_json, &public_inputs_json, &verifying_key_json))
         .unwrap()
         .build()
         .unwrap();
@@ -66,8 +62,11 @@ fn main() {
     let (committed_vk_digest, committed_input_digest): (Digest, Digest) =
         receipt.journal.decode().unwrap();
 
-    assert_eq!(committed_vk_digest, verifying_key.digest());
-    assert_eq!(committed_input_digest, public_inputs.digest());
+    let verifying_key_digest = verifying_key_json.verifying_key().unwrap().digest();
+    let public_inputs_digest = public_inputs_json.to_scalar().unwrap().digest();
+
+    assert_eq!(committed_vk_digest, verifying_key_digest);
+    assert_eq!(committed_input_digest, public_inputs_digest);
 
     println!("Verification: OK!");
 }

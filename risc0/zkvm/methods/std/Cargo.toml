@@ -9,12 +9,13 @@ resolver = "2"
 [package]
 name = "risc0-zkvm-methods-std"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 risc0-zkvm = { path = "../..", default-features = false, features = [
-  "std",
   "getrandom",
+  "std",
+  "unstable",
 ] }
 risc0-zkvm-methods = { path = "..", features = ["std"] }
 risc0-zkvm-platform = { path = "../../platform", default-features = false }

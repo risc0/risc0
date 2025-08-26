@@ -13,12 +13,12 @@
 // limitations under the License.
 
 use k256::{
-    ecdsa::{signature::Signer, Signature, SigningKey, VerifyingKey},
     EncodedPoint,
+    ecdsa::{Signature, SigningKey, VerifyingKey, signature::Signer},
 };
 use k256_methods::{K256_VERIFY_ELF, K256_VERIFY_ID};
 use rand_core::OsRng;
-use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
+use risc0_zkvm::{ExecutorEnv, Receipt, default_prover};
 
 /// Given an secp256k1 verifier key (i.e. public key), message and signature,
 /// runs the ECDSA verifier inside the zkVM and returns a receipt, including a

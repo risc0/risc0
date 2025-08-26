@@ -128,17 +128,23 @@ impl Paths {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::distribution::{Os, Platform};
+    use crate::{
+        RzupError,
+        distribution::{Os, Platform, signature::PublicKey},
+    };
     use semver::Version;
     use tempfile::TempDir;
 
     fn setup_test_env() -> (TempDir, Environment) {
         let tmp_dir = TempDir::new().unwrap();
-        let env = Environment::with_paths_token_platform_and_event_handler(
+        let env = Environment::with_paths_creds_platform_and_event_handler(
             tmp_dir.path().join(".risc0"),
             tmp_dir.path().join(".rustup"),
             tmp_dir.path().join(".cargo"),
             None,
+            || None,
+            || Err(RzupError::Other("no private key".into())),
+            PublicKey::official(),
             Platform::new("x86_64", Os::Linux),
             |_| {},
         )
@@ -244,14 +250,18 @@ mod tests {
 
         let version_dir = component.get_version_dir(&env, &version);
         std::fs::create_dir_all(&version_dir).unwrap();
-        assert!(Paths::find_version_dir(&env, &component, &version)
-            .unwrap()
-            .is_some());
+        assert!(
+            Paths::find_version_dir(&env, &component, &version)
+                .unwrap()
+                .is_some()
+        );
 
         // Test directory cleanup
         Paths::cleanup_version(&env, &component, &version).unwrap();
-        assert!(Paths::find_version_dir(&env, &component, &version)
-            .unwrap()
-            .is_none());
+        assert!(
+            Paths::find_version_dir(&env, &component, &version)
+                .unwrap()
+                .is_none()
+        );
     }
 }

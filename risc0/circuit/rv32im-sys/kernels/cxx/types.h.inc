@@ -905,15 +905,12 @@ struct Mem1Layout {
 struct MemoryPageInLayout {
   MemoryIOLayout io;
 };
-struct ControlLoadRoot__0_SuperLayout {
-  MemoryPageInLayout mem;
-};
-using ControlLoadRoot__0_SuperLayout8LayoutArray = std::array<ControlLoadRoot__0_SuperLayout, 8>;
-struct ControlLoadRootLayout {
-  ControlLoadRoot__0_SuperLayout8LayoutArray _1;
+using MemoryPageInLayout8LayoutArray = std::array<MemoryPageInLayout, 8>;
+struct ControlLoadRootAndNonceLayout {
+  MemoryPageInLayout8LayoutArray mem;
 };
 struct Control0_SuperArm0Layout {
-  ControlLoadRootLayout _super;
+  ControlLoadRootAndNonceLayout _super;
   CycleArgLayout _extra0;
   CycleArgLayout _extra1;
   CycleArgLayout _extra2;
@@ -2946,6 +2943,7 @@ struct _globalLayout {
   DigestRegLayout input;
   NondetRegLayout isTerminate;
   DigestRegLayout output;
+  DigestRegLayout povwNonce;
   NondetExtRegLayout rng;
   NondetRegLayout shutdownCycle;
   DigestRegLayout stateIn;
@@ -3190,13 +3188,10 @@ struct DigestRegStruct {
   DigestRegValues_SuperStruct8Array values;
 };
 using ValU32Struct8Array = std::array<ValU32Struct, 8>;
-struct ControlLoadRoot__0Struct {
-};
-using ControlLoadRoot__0Struct8Array = std::array<ControlLoadRoot__0Struct, 8>;
+using GetDataStruct8Array = std::array<GetDataStruct, 8>;
 struct ControlResume_SuperArm1_Super__0Struct {
 };
 using ControlResume_SuperArm1_Super__0Struct8Array = std::array<ControlResume_SuperArm1_Super__0Struct, 8>;
-using GetDataStruct8Array = std::array<GetDataStruct, 8>;
 struct ControlTable_SuperArm0_Super__0Struct {
 };
 struct ControlTable_SuperArm1_Super__0Struct {

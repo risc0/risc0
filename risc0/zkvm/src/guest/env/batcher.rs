@@ -14,14 +14,14 @@
 
 use core::ptr::addr_of;
 
-use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
+use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, KeccakState};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
-use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
+use risc0_zkvm_platform::syscall::{DIGEST_WORDS, sys_keccak, sys_prove_keccak, sys_sha_compress};
 
 use crate::{
-    mmr::{GuestPeak, MerkleMountainAccumulator},
     Assumption,
+    mmr::{GuestPeak, MerkleMountainAccumulator},
 };
 
 /// This struct implements the batching of calls to the keccak accelerator.

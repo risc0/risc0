@@ -39,7 +39,9 @@ pub trait Curve<const WIDTH: usize> {
 
 /// An elliptic curve over a prime field
 ///
-/// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH` of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so the maximum bitwidth will be `32 * WIDTH`)
+/// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH`
+/// of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so
+/// the maximum bitwidth will be `32 * WIDTH`)
 #[derive(Debug, Eq, PartialEq)]
 pub struct WeierstrassCurve<const WIDTH: usize> {
     // buffer[0] is the prime, buffer[1] is a, buffer[2] is b
@@ -102,7 +104,11 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     /// zero/infinity and `Some` with the coordinates otherwise.
     ///
     /// Little-endian, x coordinate before y coordinate
-    /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
+    /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a
+    /// [u32; WIDTH * 2]. Per the [rust array layout] they will be laid out the same in memory and
+    /// this is acceptable.
+    ///
+    /// [rust array layout]: https://doc.rust-lang.org/reference/type-layout.html#array-layout
     pub fn as_u32s(&self) -> Option<&[[u32; WIDTH]; 2]> {
         if self.identity {
             None
