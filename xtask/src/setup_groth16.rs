@@ -16,8 +16,8 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use risc0_groth16_sys::{SetupParams, WitnessParams};
-use rlimit::{setrlimit, Resource, INFINITY};
-use xshell::{cmd, Shell};
+use rlimit::{INFINITY, Resource, setrlimit};
+use xshell::{Shell, cmd};
 
 #[derive(Debug, Parser)]
 pub struct SetupGroth16 {

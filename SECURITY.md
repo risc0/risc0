@@ -12,7 +12,7 @@ Security advisories will be published using the GitHub Security Advisory feature
 
 ## Vulnerability Reporting
 
-Vulnerability reports should be submitted against the RISC Zero Bug Bounty Program on the Hackenproof platform [here](https://hackenproof.com/risc-zero/risc-zero-zkvm).
+Vulnerability reports should be submitted against the RISC Zero Bug Bounty Program on the Hackenproof platform [here](https://hackenproof.com/programs/risc-zero-zkvm).
 
 _**Only report vulnerabilities that are present in the latest release.**_
 

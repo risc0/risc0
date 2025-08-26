@@ -14,26 +14,44 @@
 
 use std::{collections::HashMap, path::PathBuf};
 
+use derive_more::From;
 use kameo::prelude::*;
+use risc0_zkvm::{Journal, Receipt};
 use tokio::task::JoinSet;
+use uuid::Uuid;
 
 use super::{
     factory::FactoryActor,
     job::JobActor,
     protocol::{
-        CreateJobReply, CreateJobRequest, JobId, JobInfo, JobStatus, JobStatusReply,
-        JobStatusRequest, ProofRequest,
+        JobId, JobInfo, JobRequestReply, JobStatus, JobStatusReply, JobStatusRequest, ProofRequest,
+        ProofResult, ShrinkWrapRequest, ShrinkWrapResult,
     },
 };
 
-enum JobEntry {
-    Active(ActorRef<JobActor>),
-    Inactive(JobInfo),
+#[derive(Clone, From)]
+enum InactiveJobEntry {
+    Proof(JobInfo<ProofResult>),
+    ShrinkWrap(JobInfo<ShrinkWrapResult>),
 }
 
-struct JobDone {
+impl From<InactiveJobEntry> for JobStatusReply {
+    fn from(e: InactiveJobEntry) -> Self {
+        match e {
+            InactiveJobEntry::Proof(info) => JobStatusReply::Proof(info),
+            InactiveJobEntry::ShrinkWrap(info) => JobStatusReply::ShrinkWrap(info),
+        }
+    }
+}
+
+enum JobEntry {
+    Active(ActorRef<JobActor>),
+    Inactive(InactiveJobEntry),
+}
+
+struct JobDone<ResultT> {
     pub job_id: JobId,
-    pub info: JobInfo,
+    pub info: JobInfo<ResultT>,
 }
 
 #[derive(Actor)]
@@ -54,12 +72,21 @@ impl ManagerActor {
         }
     }
 
-    async fn proof_request(
+    async fn job_request<RequestT, ResultT>(
         &mut self,
-        request: ProofRequest,
+        request: RequestT,
         actor_ref: ActorRef<ManagerActor>,
-        reply_sender: Option<ReplySender<JobStatusReply>>,
-    ) -> JobId {
+        reply_sender: Option<ReplySender<JobRequestReply>>,
+    ) -> JobId
+    where
+        JobActor: Message<RequestT, Reply = DelegatedReply<JobStatusReply>>,
+        RequestT: Send + 'static,
+        ResultT: Send + 'static,
+        ManagerActor: Message<JobDone<ResultT>>,
+        JobInfo<ResultT>: TryFrom<JobStatusReply>,
+        <JobInfo<ResultT> as TryFrom<JobStatusReply>>::Error: std::fmt::Debug,
+        InactiveJobEntry: From<JobInfo<ResultT>>,
+    {
         let job_id = JobId::new_v4();
         let actor_ref = actor_ref.clone();
         let job = kameo::spawn(JobActor::new(job_id, self.factory.clone()));
@@ -67,23 +94,54 @@ impl ManagerActor {
         self.join_set.spawn(async move {
             let reply = job.ask(request).await.unwrap();
             actor_ref
-                .tell(JobDone {
+                .tell(JobDone::<ResultT> {
                     job_id,
-                    info: reply.info.clone().unwrap(),
+                    info: reply.clone().try_into().unwrap(),
                 })
                 .await
                 .unwrap();
             job.wait_for_stop().await;
             if let Some(reply_sender) = reply_sender {
-                reply_sender.send(JobStatusReply { info: reply.info });
+                reply_sender.send(JobRequestReply {
+                    job_id,
+                    status: reply,
+                });
             }
         });
         job_id
     }
+
+    async fn write_receipt(&self, job_id: &Uuid, receipt: &Receipt) -> anyhow::Result<()> {
+        let Some(storage_root) = &self.storage_root else {
+            return Ok(());
+        };
+
+        let encoded = bincode::serialize(receipt)?;
+        let receipts_dir = storage_root.join("receipts");
+        std::fs::create_dir_all(&receipts_dir)?;
+        let receipt_path = receipts_dir.join(job_id.to_string());
+        tokio::fs::write(receipt_path, encoded).await?;
+
+        Ok(())
+    }
+
+    async fn write_journal(&self, job_id: &Uuid, journal: &Journal) -> anyhow::Result<()> {
+        let Some(storage_root) = &self.storage_root else {
+            return Ok(());
+        };
+
+        let encoded = bincode::serialize(journal)?;
+        let journal_dir = storage_root.join("journals");
+        std::fs::create_dir_all(&journal_dir)?;
+        let journal_path = journal_dir.join(job_id.to_string());
+        tokio::fs::write(journal_path, encoded).await?;
+
+        Ok(())
+    }
 }
 
 impl Message<ProofRequest> for ManagerActor {
-    type Reply = DelegatedReply<JobStatusReply>;
+    type Reply = DelegatedReply<JobRequestReply>;
 
     async fn handle(
         &mut self,
@@ -91,39 +149,64 @@ impl Message<ProofRequest> for ManagerActor {
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         let (delegated_reply, reply_sender) = ctx.reply_sender();
-        self.proof_request(msg, ctx.actor_ref(), reply_sender).await;
+        self.job_request::<_, ProofResult>(msg, ctx.actor_ref(), reply_sender)
+            .await;
         delegated_reply
     }
 }
 
-impl Message<JobDone> for ManagerActor {
-    type Reply = ();
-
-    async fn handle(&mut self, msg: JobDone, _ctx: &mut Context<Self, Self::Reply>) -> Self::Reply {
-        tracing::info!("JobDone: {}", msg.job_id);
-        if let JobStatus::Succeeded(ref result) = msg.info.status {
-            if let Some(ref storage_root) = self.storage_root {
-                let encoded = bincode::serialize(result.receipt.as_ref()).unwrap();
-                let receipts_dir = storage_root.join("receipts");
-                std::fs::create_dir_all(&receipts_dir).unwrap();
-                let receipt_path = receipts_dir.join(msg.job_id.to_string());
-                tokio::fs::write(receipt_path, encoded).await.unwrap();
-            }
-        }
-        self.jobs.insert(msg.job_id, JobEntry::Inactive(msg.info));
-    }
-}
-
-impl Message<CreateJobRequest> for ManagerActor {
-    type Reply = CreateJobReply;
+impl Message<ShrinkWrapRequest> for ManagerActor {
+    type Reply = DelegatedReply<JobRequestReply>;
 
     async fn handle(
         &mut self,
-        msg: CreateJobRequest,
+        msg: ShrinkWrapRequest,
         ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
-        let job_id = self.proof_request(msg.request, ctx.actor_ref(), None).await;
-        CreateJobReply { job_id }
+        let (delegated_reply, reply_sender) = ctx.reply_sender();
+        self.job_request::<_, ShrinkWrapResult>(msg, ctx.actor_ref(), reply_sender)
+            .await;
+        delegated_reply
+    }
+}
+
+impl Message<JobDone<ShrinkWrapResult>> for ManagerActor {
+    type Reply = ();
+
+    async fn handle(
+        &mut self,
+        msg: JobDone<ShrinkWrapResult>,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        tracing::info!("JobDone: {}", msg.job_id);
+        if let JobStatus::Succeeded(result) = &msg.info.status {
+            self.write_receipt(&msg.job_id, &result.receipt)
+                .await
+                .unwrap();
+        }
+        self.jobs
+            .insert(msg.job_id, JobEntry::Inactive(msg.info.into()));
+    }
+}
+
+impl Message<JobDone<ProofResult>> for ManagerActor {
+    type Reply = ();
+
+    async fn handle(
+        &mut self,
+        msg: JobDone<ProofResult>,
+        _ctx: &mut Context<Self, Self::Reply>,
+    ) -> Self::Reply {
+        tracing::info!("JobDone: {}", msg.job_id);
+        if let JobStatus::Succeeded(ref result) = msg.info.status {
+            if let Some(receipt) = &result.receipt {
+                self.write_receipt(&msg.job_id, receipt).await.unwrap();
+            } else if let Some(journal) = &result.session.journal {
+                self.write_journal(&msg.job_id, journal).await.unwrap();
+            }
+        }
+        self.jobs
+            .insert(msg.job_id, JobEntry::Inactive(msg.info.into()));
     }
 }
 
@@ -136,16 +219,12 @@ impl Message<JobStatusRequest> for ManagerActor {
         _ctx: &mut Context<Self, Self::Reply>,
     ) -> Self::Reply {
         match self.jobs.get(&msg.job_id) {
-            Some(job) => match job {
-                JobEntry::Active(job) => job
-                    .ask(JobStatusRequest { job_id: msg.job_id })
-                    .await
-                    .unwrap(),
-                JobEntry::Inactive(info) => JobStatusReply {
-                    info: Some(info.clone()),
-                },
-            },
-            None => JobStatusReply { info: None },
+            Some(JobEntry::Active(job)) => job
+                .ask(JobStatusRequest { job_id: msg.job_id })
+                .await
+                .unwrap(),
+            Some(JobEntry::Inactive(inactive)) => inactive.clone().into(),
+            None => JobStatusReply::NotFound,
         }
     }
 }

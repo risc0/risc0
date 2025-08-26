@@ -17,22 +17,22 @@
 
 use std::{collections::BTreeSet, fs, path::PathBuf, time::Duration};
 
-use anyhow::{ensure, Context, Result};
+use anyhow::{Context, Result, ensure};
 use enum_map::EnumMap;
 use risc0_binfmt::{PovwJobId, SystemState};
-use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
+use risc0_circuit_keccak::{KECCAK_CONTROL_ROOT, compute_keccak_digest};
 use risc0_circuit_rv32im::{EcallKind, EcallMetric, TerminateState};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
+    ReceiptClaim, SegmentInfo, Work,
     host::{
         client::env::{ProveKeccakRequest, SegmentPath},
         prove_info::{SessionStats, SyscallKind, SyscallMetric},
     },
     mmr::{GuestPeak, MerkleMountainAccumulator},
     sha::Digest,
-    Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
-    ReceiptClaim, Work,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -139,6 +139,14 @@ impl Segment {
 
     pub(crate) fn user_cycles(&self) -> u32 {
         self.inner.suspend_cycle
+    }
+
+    /// Construct a `SegmentInfo` containing information about this segment.
+    pub fn get_info(&self) -> SegmentInfo {
+        SegmentInfo {
+            po2: self.po2() as u32,
+            cycles: self.user_cycles(),
+        }
     }
 }
 

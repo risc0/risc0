@@ -19,13 +19,13 @@ use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use super::Verifier;
 use crate::{
+    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
     core::{
         hash::HashFn,
         log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
     },
-    verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
-    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+    verify::{VerificationError, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
 };
 
 /// VerifyRoundInfo contains the data against which the queries for a particular
@@ -126,7 +126,7 @@ where
         let final_digest = hashfn.hash_elem_slice(final_coeffs);
         self.iop().commit(&final_digest);
         // Get the generator for the final polynomial evaluations
-        let gen = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
+        let gen_ = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
         // Do queries
         let mut poly_buf: Vec<F::ExtElem> = Vec::with_capacity(degree);
         for _ in 0..QUERIES {
@@ -138,7 +138,7 @@ where
                 self.verify_query(round, &mut pos, &mut goal)?;
             }
             // Do final verification
-            let x = gen.pow(pos);
+            let x = gen_.pow(pos);
 
             poly_buf.clear();
             poly_buf.extend((0..degree).map(|i| {

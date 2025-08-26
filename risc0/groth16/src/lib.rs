@@ -56,6 +56,25 @@
 //! crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
 //!
 //! [risc0-zkvm]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/
+//!
+//! # Publishing the rzup Component
+//! The groth16 proving on GPU requires a special rzup component be installed. Publishing this
+//! component can be done with the following commands:
+//!
+//! ```bash
+//! export VERSION=0.1.0
+//! cargo xtask-groth16 -- ~/groth16-tmp
+//! cargo run --bin rzup -- \
+//!     publish create-artifact \
+//!     --input ~/groth16-tmp/v$VERSION-risc0-groth16 \
+//!     --output ~/groth16-component.tar.xz
+//! aws-vault exec ci -- \
+//! cargo run --bin rzup -- \
+//!     publish upload \
+//!     --target-agnostic \
+//!     risc0-groth16 $VERSION \
+//!     ~/groth16-component.tar.xz
+//! ```
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(missing_docs)]
@@ -72,13 +91,13 @@ mod verifier;
 use alloc::vec::Vec;
 use core::str::FromStr;
 
-use anyhow::{anyhow, Error, Result};
+use anyhow::{Error, Result, anyhow};
 use ark_bn254::{G1Affine, G2Affine};
 use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 
 pub use types::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
-pub use verifier::{verifying_key, Fr, Verifier, VerifyingKey};
+pub use verifier::{Fr, Verifier, VerifyingKey, verifying_key};
 
 /// Deserialize an element over the G1 group from bytes in big-endian format
 pub(crate) fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {

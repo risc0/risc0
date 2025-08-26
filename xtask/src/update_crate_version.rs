@@ -14,7 +14,7 @@
 
 //! Sets the version of a crate or many crates.
 
-use anyhow::{anyhow, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow};
 use camino::Utf8Path;
 use clap::Parser;
 

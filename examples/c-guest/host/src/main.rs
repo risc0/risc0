@@ -14,7 +14,7 @@
 
 use std::fs;
 
-use risc0_zkvm::{compute_image_id, default_prover, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, compute_image_id, default_prover};
 
 fn main() -> anyhow::Result<()> {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`

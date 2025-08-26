@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use risc0_binfmt::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
-use crate::sha::{Digest, DIGEST_BYTES};
+use crate::sha::{DIGEST_BYTES, Digest};
 
 use super::{Syscall, SyscallContext, SyscallKind};
 
@@ -24,7 +24,9 @@ use super::{Syscall, SyscallContext, SyscallKind};
 pub(crate) struct SysVerify;
 
 fn not_found_err(claim_digest: &Digest, control_root: &Digest) -> anyhow::Error {
-    anyhow!("sys_verify_integrity: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}")
+    anyhow!(
+        "sys_verify_integrity: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}"
+    )
 }
 
 impl Syscall for SysVerify {
