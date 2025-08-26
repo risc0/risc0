@@ -22,7 +22,7 @@ RISC Zero is a zero-knowledge verifiable general computing platform based on
 
 A [zero knowledge proof][zk-proof] allows one party (the prover) to convince
 another party (the verifier) that something is true without revealing all the
-details. In the case of RISC Zero, the prover can show they correctly executed
+details. In the case of RISC Zero, the prover can show that they correctly executed
 some code (known to both parties), while only revealing to the verifier the
 output of the code, not any of its inputs or any state during execution.
 

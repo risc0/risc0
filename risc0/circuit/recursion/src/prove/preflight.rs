@@ -14,14 +14,14 @@
 
 use std::collections::{BTreeMap, VecDeque};
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use risc0_circuit_recursion_sys::RawPreflightCycle;
 use risc0_core::field::baby_bear::{BabyBearElem as Fp, BabyBearExtElem as FpExt};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_SHORTS, DIGEST_WORDS, WORD_SIZE},
         hash::{
-            poseidon2::{poseidon2_mix, CELLS},
+            poseidon2::{CELLS, poseidon2_mix},
             sha::SHA256_INIT,
         },
     },
@@ -30,7 +30,7 @@ use risc0_zkp::{
 };
 use sha2::digest::generic_array::GenericArray;
 
-use crate::layout::{RecursionMicroInstLayout, CODE_LAYOUT};
+use crate::layout::{CODE_LAYOUT, RecursionMicroInstLayout};
 
 const CHECKED_COEFFS_PER_POLY: usize = 16;
 const BABY_BEAR_TO_MONTGOMERY: u32 = 0xFFFFFFE;
@@ -225,7 +225,9 @@ impl Preflight {
         }
 
         let eval_pt_addr = self.get(code, inst.eval_point);
-        tracing::trace!("Checked bytes: eval_pt={eval_pt_addr:?} prep_full = {prep_full} keep_coeffs = {keep_coeffs} keep_upper_state = {keep_upper_state}");
+        tracing::trace!(
+            "Checked bytes: eval_pt={eval_pt_addr:?} prep_full = {prep_full} keep_coeffs = {keep_coeffs} keep_upper_state = {keep_upper_state}"
+        );
 
         let write_addr = self.get(code, CODE_LAYOUT.code.write_addr);
         let mut evaluated = FpExt::ZERO;

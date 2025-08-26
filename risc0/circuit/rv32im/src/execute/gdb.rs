@@ -16,16 +16,16 @@ use anyhow::Result;
 use gdbstub::{
     common::Signal,
     conn::ConnectionExt,
-    stub::{run_blocking, SingleThreadStopReason},
+    stub::{SingleThreadStopReason, run_blocking},
     target::{
+        Target,
         ext::{
             base::{
-                singlethread::{SingleThreadBase, SingleThreadResume},
                 BaseOps,
+                singlethread::{SingleThreadBase, SingleThreadResume},
             },
             breakpoints::{Breakpoints, SwBreakpoint},
         },
-        Target,
     },
 };
 use risc0_binfmt::ByteAddr;
@@ -33,11 +33,11 @@ use risc0_binfmt::ByteAddr;
 use crate::TerminateState;
 
 use super::{
+    Syscall,
     executor::Executor,
     platform::*,
     r0vm::{LoadOp, Risc0Context as _, Risc0Machine},
     rv32im::Emulator,
-    Syscall,
 };
 
 pub enum ExecState {

@@ -23,11 +23,11 @@ use std::{
 
 use human_repr::{HumanCount, HumanDuration, HumanThroughput};
 use risc0_zkvm::{
-    get_prover_server, sha::Digest, ExecutorEnv, ExecutorImpl, ProverOpts, Session, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Session, VerifierContext, get_prover_server, sha::Digest,
 };
 use serde::Serialize;
-use serde_with::{serde_as, DurationNanoSeconds};
-use tabled::{settings::Style, Table, Tabled};
+use serde_with::{DurationNanoSeconds, serde_as};
+use tabled::{Table, Tabled, settings::Style};
 
 #[serde_as]
 #[derive(Serialize, Tabled)]

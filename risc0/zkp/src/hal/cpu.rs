@@ -23,15 +23,15 @@ use parking_lot::{
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use super::{tracker, Buffer, Hal};
+use super::{Buffer, Hal, tracker};
 use crate::{
+    FRI_FOLD,
     core::{
         digest::Digest,
         hash::HashSuite,
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
     },
-    FRI_FOLD,
 };
 
 pub struct CpuHal<F: Field> {

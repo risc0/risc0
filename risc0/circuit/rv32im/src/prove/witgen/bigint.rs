@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{Result, anyhow, bail, ensure};
 use derive_more::Debug;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive as _;
@@ -20,9 +20,9 @@ use risc0_binfmt::WordAddr;
 
 use crate::{
     execute::{
-        bigint::{BigIntBytes, BigIntWitness, BIGINT_WIDTH_BYTES, BIGINT_WIDTH_WORDS},
-        r0vm::{LoadOp, Risc0Context},
         CycleState, WORD_SIZE,
+        bigint::{BIGINT_WIDTH_BYTES, BIGINT_WIDTH_WORDS, BigIntBytes, BigIntWitness},
+        r0vm::{LoadOp, Risc0Context},
     },
     zirgen::circuit::{BigIntStateLayout, LAYOUT_TOP},
 };

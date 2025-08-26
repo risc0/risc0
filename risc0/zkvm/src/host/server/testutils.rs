@@ -15,7 +15,7 @@
 use core::mem;
 
 use crypto_bigint::{
-    rand_core::CryptoRngCore, CheckedMul, Encoding, NonZero, Random, RandomMod, U256, U512,
+    CheckedMul, Encoding, NonZero, Random, RandomMod, U256, U512, rand_core::CryptoRngCore,
 };
 use risc0_zkvm_platform::syscall::bigint;
 
