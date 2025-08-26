@@ -15,11 +15,11 @@
 use anyhow::Result;
 
 use risc0_zkp::{
+    ZK_CYCLES,
     core::{digest::Digest, hash::HashSuite},
     field::baby_bear::{BabyBear, BabyBearElem},
     hal::{self, Hal},
     prove::poly_group::PolyGroup,
-    ZK_CYCLES,
 };
 
 use super::RECURSION_CODE_SIZE;
@@ -54,7 +54,7 @@ impl Program {
             po2,
         };
         assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
-        assert!(prog.code.len() <= (RECURSION_CODE_SIZE * (1 << po2) - ZK_CYCLES));
+        assert!(prog.code.len() <= (RECURSION_CODE_SIZE * ((1 << po2) - ZK_CYCLES)));
         prog
     }
 

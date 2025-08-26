@@ -16,13 +16,13 @@ extern crate alloc;
 
 use alloc::{collections::BTreeMap, vec, vec::Vec};
 
-use anyhow::{anyhow, bail, ensure, Context, Result};
-use elf::{endian::LittleEndian, file::Class, ElfBytes};
+use anyhow::{Context, Result, anyhow, bail, ensure};
+use elf::{ElfBytes, endian::LittleEndian, file::Class};
 use risc0_zkp::core::{digest::Digest, hash::sha::Impl};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use crate::{Digestible as _, MemoryImage, SystemState, KERNEL_START_ADDR};
+use crate::{Digestible as _, KERNEL_START_ADDR, MemoryImage, SystemState};
 
 /// A RISC Zero program
 pub struct Program {
@@ -91,7 +91,9 @@ impl Program {
             for i in (0..mem_size).step_by(WORD_SIZE) {
                 let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
                 if addr >= max_mem {
-                    bail!("Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]");
+                    bail!(
+                        "Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]"
+                    );
                 }
                 if i >= file_size {
                     // Past the file size, all zeros.

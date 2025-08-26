@@ -208,6 +208,17 @@ You can find detailed information in the [version management design][version-man
 
 <br />
 
+### Polygon Mainnet (137)
+
+| Contract                                   | Address                                                                |
+| ------------------------------------------ | ---------------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][router-src]       | [`0xdBAD523786971B75A7b1c1CFdCfECDeb59A764B9`][router-137-etherscan]   |
+| [RiscZeroGroth16Verifier][verifier-src]    | [`0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9`][verifier-137-etherscan] |
+| [RiscZeroVerifierEmergencyStop][estop-src] | [`0x1efDd13f831ceeEa14940806705A53D3211CD698`][estop-137-etherscan]    |
+| TimelockController                         | [`0x15249b0ee8eCabC8AB5753763501D4AcD0B7ABAB`][timelock-137-etherscan] |
+
+<br />
+
 ### Polygon zkEVM Mainnet (1101)
 
 | Contract                                   | Address                                                                 |
@@ -221,6 +232,7 @@ You can find detailed information in the [version management design][version-man
 
 [estop-1-etherscan]: https://etherscan.io/address/0x1efDd13f831ceeEa14940806705A53D3211CD698#code
 [estop-10-etherscan]: https://optimistic.etherscan.io/address/0x1efDd13f831ceeEa14940806705A53D3211CD698#code
+[estop-137-etherscan]: https://polygonscan.com/address/0x1efDd13f831ceeEa14940806705A53D3211CD698#code
 [estop-1101-etherscan]: https://zkevm.polygonscan.com/address/0x57880e43BA126a29d81851F3410dF23a2008bF2E#code
 [estop-8453-etherscan]: https://basescan.org/address/0x1efDd13f831ceeEa14940806705A53D3211CD698#code
 [estop-17000-etherscan]: https://holesky.etherscan.io/address/0x7BE0Ca3734bB4B0aC66dD05714D25476bd658a9F#code
@@ -241,6 +253,7 @@ You can find detailed information in the [version management design][version-man
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/release-2.3/contracts/src/IRiscZeroVerifier.sol
 [router-1-etherscan]: https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
 [router-10-etherscan]: https://optimistic.etherscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
+[router-137-etherscan]: https://polygonscan.com/address/0xdBAD523786971B75A7b1c1CFdCfECDeb59A764B9#code
 [router-1101-etherscan]: https://zkevm.polygonscan.com/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-8453-etherscan]: https://basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code
 [router-17000-etherscan]: https://holesky.etherscan.io/address/0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C#code
@@ -262,6 +275,7 @@ You can find detailed information in the [version management design][version-man
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
 [timelock-1-etherscan]: https://etherscan.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code
 [timelock-10-etherscan]: https://optimistic.etherscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
+[timelock-137-etherscan]: https://polygonscan.com/address/0x15249b0ee8eCabC8AB5753763501D4AcD0B7ABAB#code
 [timelock-1101-etherscan]: https://zkevm.polygonscan.com/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-8453-etherscan]: https://basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code
 [timelock-17000-etherscan]: https://holesky.etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
@@ -277,6 +291,7 @@ You can find detailed information in the [version management design][version-man
 [timelock-11155420-etherscan]: https://sepolia-optimism.etherscan.io/address/0x2DEfEA335392bb62d01f74e338697C7B31De254C#code
 [verifier-1-etherscan]: https://etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
 [verifier-10-etherscan]: https://optimistic.etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
+[verifier-137-etherscan]: https://polygonscan.com/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
 [verifier-1101-etherscan]: https://zkevm.polygonscan.com/address/0x65e8db061e4b967D901EcbA7D99Baa1d2E5e2de9#code
 [verifier-8453-etherscan]: https://basescan.org/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code
 [verifier-17000-etherscan]: https://holesky.etherscan.io/address/0xafB31f5b70623CDF4b20Ada3f7230916A5A79df9#code

@@ -14,13 +14,13 @@
 
 use rand::Rng;
 use risc0_zkp::{
+    INV_RATE,
     adapter::CircuitInfo as _,
     field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
         Elem, ExtElem,
+        baby_bear::{BabyBearElem, BabyBearExtElem},
     },
     hal::{Buffer, CircuitHal, Hal},
-    INV_RATE,
 };
 
 use crate::{

@@ -24,9 +24,9 @@ fn verify() {
 }
 ```
 
-## STARK to SNARK
+## Shrink Wrap (aka STARK to SNARK)
 
-It also provides the [stark_to_snark][docker::stark_to_snark] function to run a prover Groth16
+It also provides the [shrink_wrap][prove::shrink_wrap] function to run a prover Groth16
 recursion prover via Docker. After generating a RISC Zero STARK proof, this function can be
 used to transform it into a Groth16 proof. This function becomes available when the `prove`
 feature flag is enabled.
@@ -38,5 +38,24 @@ The recommended way to get a Groth16 proof is to use the `Prover` trait in the [
 crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
 
 [risc0-zkvm]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/
+
+# Publishing the rzup Component
+The groth16 proving on GPU requires a special rzup component be installed. Publishing this
+component can be done with the following commands:
+
+```bash
+export VERSION=0.1.0
+cargo xtask-groth16 -- ~/groth16-tmp
+cargo run --bin rzup -- \
+    publish create-artifact \
+    --input ~/groth16-tmp/v$VERSION-risc0-groth16 \
+    --output ~/groth16-component.tar.xz
+aws-vault exec ci -- \
+cargo run --bin rzup -- \
+    publish upload \
+    --target-agnostic \
+    risc0-groth16 $VERSION \
+    ~/groth16-component.tar.xz
+```
 
 <!-- cargo-rdme end -->

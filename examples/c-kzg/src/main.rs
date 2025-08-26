@@ -1,4 +1,4 @@
-// Copyright 2024 RISC Zero, Inc.
+// Copyright 2025 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 use c_kzg_methods::KZG_ELF;
 use hex_literal::hex;
-use risc0_zkvm::{default_executor, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_executor};
 
 fn main() {
     let proof = c_kzg_core::Proof {

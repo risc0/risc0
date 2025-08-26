@@ -12,78 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ops::Range, sync::Arc, time::Duration};
+use std::{ops::Range, sync::Arc};
 
 use clap::ValueEnum;
-use derive_more::Debug;
-use kameo::{actor::ActorRef, Reply};
+use derive_more::{Debug, TryInto};
+use kameo::{Reply, actor::ActorRef};
 use risc0_zkvm::{
-    AssumptionReceipt, Journal, ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt,
-    SuccinctReceipt, UnionClaim, Unknown,
+    ProveKeccakRequest, Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt,
+    UnionClaim, Unknown,
 };
 use serde::{Deserialize, Serialize};
 
 use super::job::JobActor;
+
+pub use risc0_zkvm::rpc::{
+    JobInfo, JobRequest, JobStatus, ProofRequest, ProofResult, Session, ShrinkWrapKind,
+    ShrinkWrapRequest, ShrinkWrapResult, TaskError,
+};
 
 pub(crate) type JobId = uuid::Uuid;
 pub(crate) type TaskId = u64;
 pub(crate) type WorkerId = uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct CreateJobRequest {
-    pub request: ProofRequest,
-}
-
-#[derive(Reply, Serialize, Deserialize)]
-pub(crate) struct CreateJobReply {
-    pub job_id: JobId,
-}
-
-#[derive(Serialize, Deserialize)]
 pub(crate) struct JobStatusRequest {
     pub job_id: JobId,
 }
 
-#[derive(Reply, Serialize, Deserialize)]
-pub(crate) struct JobStatusReply {
-    pub info: Option<JobInfo>,
+#[derive(Reply, Serialize, Deserialize, Debug, Clone)]
+pub(crate) struct JobRequestReply {
+    pub job_id: JobId,
+    pub status: JobStatusReply,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) enum JobStatus {
-    Running(String),
-    Succeeded(ProofResult),
-    Failed(TaskError),
-    TimedOut,
-    Aborted,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct JobInfo {
-    pub status: JobStatus,
-    pub elapsed_time: Duration,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct ProofResult {
-    pub session: Arc<Session>,
-    pub receipt: Arc<Receipt>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub(crate) struct ProofRequest {
-    pub binary: Vec<u8>,
-    pub input: Vec<u8>,
-    pub assumptions: Vec<Receipt>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Session {
-    pub(crate) segment_count: usize,
-    pub(crate) user_cycles: u64,
-    pub(crate) total_cycles: u64,
-    pub(crate) journal: Option<Journal>,
-    pub(crate) assumptions: Vec<Arc<AssumptionReceipt>>,
+#[derive(Reply, Serialize, Deserialize, TryInto, Debug, Clone)]
+pub(crate) enum JobStatusReply {
+    Proof(JobInfo<ProofResult>),
+    ShrinkWrap(JobInfo<ShrinkWrapResult>),
+    #[try_into(ignore)]
+    NotFound,
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
@@ -95,6 +62,7 @@ pub(crate) enum TaskKind {
     Join,
     Union,
     Resolve,
+    ShrinkWrap,
 }
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize)]
@@ -118,6 +86,7 @@ pub(crate) enum Task {
     Join(Arc<JoinTask>),
     Union(Arc<UnionTask>),
     Resolve(Arc<ResolveTask>),
+    ShrinkWrap(Arc<ShrinkWrapTask>),
 }
 
 #[derive(Reply, Serialize, Deserialize)]
@@ -166,9 +135,10 @@ pub(crate) struct ResolveTask {
     pub assumption: Arc<SuccinctReceipt<Unknown>>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) enum TaskError {
-    Generic(String),
+#[derive(Reply, Serialize, Deserialize)]
+pub(crate) struct ShrinkWrapTask {
+    pub kind: ShrinkWrapKind,
+    pub receipt: Arc<Receipt>,
 }
 
 pub mod factory {
@@ -221,6 +191,7 @@ pub mod factory {
         Join(Box<JoinNode>),
         Union(Arc<UnionDone>),
         Resolve(Arc<SuccinctReceipt<ReceiptClaim>>),
+        ShrinkWrap(Arc<Receipt>),
     }
 
     #[derive(Serialize, Deserialize)]
@@ -281,18 +252,7 @@ impl Task {
             Task::Join(_) => TaskKind::Join,
             Task::Union(_) => TaskKind::Union,
             Task::Resolve(_) => TaskKind::Resolve,
-        }
-    }
-}
-
-impl JobStatus {
-    pub fn bonsai_status(&self) -> &str {
-        match self {
-            JobStatus::Running(_) => "RUNNING",
-            JobStatus::Succeeded(_) => "SUCCEEDED",
-            JobStatus::Failed(_) => "FAILED",
-            JobStatus::TimedOut => "TIMED_OUT",
-            JobStatus::Aborted => "ABORTED",
+            Task::ShrinkWrap(_) => TaskKind::ShrinkWrap,
         }
     }
 }

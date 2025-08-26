@@ -14,14 +14,14 @@
 
 use std::{fs, path::Path, process::Command};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use cargo_metadata::Package;
 use docker_generate::DockerFile;
 use tempfile::tempdir;
 
 use crate::{
-    config::GuestInfo, encode_rust_flags, get_env_var, get_package, GuestOptions,
-    RISC0_TARGET_TRIPLE,
+    GuestOptions, RISC0_TARGET_TRIPLE, config::GuestInfo, encode_rust_flags, get_env_var,
+    get_package,
 };
 
 const DOCKER_IGNORE: &str = r#"
@@ -222,7 +222,7 @@ fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use crate::{build_package, DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder};
+    use crate::{DockerOptionsBuilder, GuestListEntry, GuestOptionsBuilder, build_package};
 
     use super::*;
 
@@ -262,7 +262,7 @@ mod test {
         compare_image_id(
             &guest_list,
             "hello_commit",
-            "f2a5d8931f1633812a73fa9d96c7b5bed17de23c59ff7644dc7dec347938da84",
+            "4e201003c21c0bc0b60844ff589cb17dfaafdd77146cc49c1c3cc4a21cff91d3",
         );
     }
 }
