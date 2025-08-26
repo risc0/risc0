@@ -29,6 +29,7 @@ pub mod ecall {
     pub const BIGINT: u32 = 4;
     pub const USER: u32 = 5;
     pub const BIGINT2: u32 = 6;
+    pub const POSEIDON2: u32 = 7;
 }
 
 pub mod halt {
@@ -438,6 +439,21 @@ pub unsafe extern "C" fn sys_sha_buffer(
         ptr = ptr.add(2 * DIGEST_BYTES * count as usize);
         in_state = out_state;
     }
+}
+
+/// # Safety
+///
+/// `state_addr`, `in_buf_addr`, and `out_buf_addr` must be word-aligned and
+/// dereferenceable.
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[cfg_attr(not(feature = "export-syscalls"), inline(always))]
+pub unsafe extern "C" fn sys_poseidon2(
+    _state_addr: *mut [u32; DIGEST_WORDS],
+    _in_buf_addr: *const u8,
+    _out_buf_addr: *mut [u32; DIGEST_WORDS],
+    _bits_count: u32,
+) {
+    unimplemented!()
 }
 
 /// # Safety
@@ -961,8 +977,7 @@ pub unsafe extern "C" fn sys_prove_zkr(
 /// Permute the keccak state on the host
 ///
 /// # Safety
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
@@ -994,8 +1009,7 @@ pub unsafe extern "C" fn sys_keccak(
 /// `claim_digest` must be aligned and dereferenceable.
 /// `control_root` must be aligned and dereferenceable.
 /// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_prove_keccak(
     claim_digest: *const [u32; DIGEST_WORDS],
     control_root: *const [u32; DIGEST_WORDS],
@@ -1046,8 +1060,7 @@ macro_rules! impl_sys_bigint2 {
         /// # Safety
         ///
         /// `blob_ptr` and all arguments must be aligned and dereferenceable.
-        #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-        #[stability::unstable]
+        #[cfg_attr(feature = "export-syscalls", no_mangle)]
         pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
             $(, $a2: *const u32
                 $(, $a3: *const u32
